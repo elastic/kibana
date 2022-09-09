@@ -32,6 +32,7 @@
         ],
         "path": "packages/analytics/shippers/elastic_v3/server/src/server_shipper.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
@@ -43,7 +44,8 @@
               "Shipper's unique name"
             ],
             "path": "packages/analytics/shippers/elastic_v3/server/src/server_shipper.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
@@ -61,7 +63,8 @@
               ">"
             ],
             "path": "packages/analytics/shippers/elastic_v3/server/src/server_shipper.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
@@ -77,6 +80,7 @@
             ],
             "path": "packages/analytics/shippers/elastic_v3/server/src/server_shipper.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
@@ -92,6 +96,7 @@
                 ],
                 "path": "packages/analytics/shippers/elastic_v3/server/src/server_shipper.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -108,6 +113,7 @@
                 ],
                 "path": "packages/analytics/shippers/elastic_v3/server/src/server_shipper.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -129,6 +135,7 @@
             ],
             "path": "packages/analytics/shippers/elastic_v3/server/src/server_shipper.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
@@ -144,6 +151,7 @@
                 ],
                 "path": "packages/analytics/shippers/elastic_v3/server/src/server_shipper.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -163,6 +171,7 @@
             ],
             "path": "packages/analytics/shippers/elastic_v3/server/src/server_shipper.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
@@ -178,6 +187,7 @@
                 ],
                 "path": "packages/analytics/shippers/elastic_v3/server/src/server_shipper.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -199,6 +209,7 @@
             ],
             "path": "packages/analytics/shippers/elastic_v3/server/src/server_shipper.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
@@ -215,6 +226,7 @@
                 ],
                 "path": "packages/analytics/shippers/elastic_v3/server/src/server_shipper.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -234,6 +246,7 @@
             ],
             "path": "packages/analytics/shippers/elastic_v3/server/src/server_shipper.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -257,6 +270,7 @@
         ],
         "path": "node_modules/@types/kbn__analytics-shippers-elastic-v3-common/index.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
@@ -268,7 +282,8 @@
               "\nThe name of the channel to stream all the events to."
             ],
             "path": "node_modules/@types/kbn__analytics-shippers-elastic-v3-common/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
@@ -280,7 +295,8 @@
               "\nThe product's version."
             ],
             "path": "node_modules/@types/kbn__analytics-shippers-elastic-v3-common/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
@@ -295,7 +311,8 @@
               "\"staging\" | \"production\" | undefined"
             ],
             "path": "node_modules/@types/kbn__analytics-shippers-elastic-v3-common/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
@@ -310,7 +327,8 @@
               "boolean | undefined"
             ],
             "path": "node_modules/@types/kbn__analytics-shippers-elastic-v3-common/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

@@ -55,6 +55,7 @@
         ],
         "path": "packages/kbn-server-route-repository/src/create_server_route_factory.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -73,6 +74,7 @@
         ],
         "path": "packages/kbn-server-route-repository/src/decode_request_params.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/server-route-repository",
@@ -86,6 +88,7 @@
             ],
             "path": "packages/kbn-server-route-repository/src/decode_request_params.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -100,6 +103,7 @@
             ],
             "path": "packages/kbn-server-route-repository/src/decode_request_params.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -118,6 +122,7 @@
         ],
         "path": "packages/kbn-server-route-repository/src/format_request.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/server-route-repository",
@@ -131,6 +136,7 @@
             ],
             "path": "packages/kbn-server-route-repository/src/format_request.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -145,6 +151,7 @@
             ],
             "path": "packages/kbn-server-route-repository/src/format_request.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -163,6 +170,7 @@
         ],
         "path": "packages/kbn-server-route-repository/src/parse_endpoint.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/server-route-repository",
@@ -176,6 +184,7 @@
             ],
             "path": "packages/kbn-server-route-repository/src/parse_endpoint.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -193,6 +202,7 @@
         "description": [],
         "path": "packages/kbn-server-route-repository/src/typings.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/server-route-repository",
@@ -205,7 +215,8 @@
               "[endpoint: string]:  any"
             ],
             "path": "packages/kbn-server-route-repository/src/typings.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -243,6 +254,7 @@
         ],
         "path": "packages/kbn-server-route-repository/src/typings.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -275,6 +287,7 @@
         ],
         "path": "packages/kbn-server-route-repository/src/typings.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -289,6 +302,7 @@
         ],
         "path": "packages/kbn-server-route-repository/src/typings.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -313,6 +327,7 @@
         ],
         "path": "packages/kbn-server-route-repository/src/typings.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -333,6 +348,7 @@
         ],
         "path": "packages/kbn-server-route-repository/src/typings.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -363,6 +379,7 @@
         ],
         "path": "packages/kbn-server-route-repository/src/typings.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -376,7 +393,8 @@
               "TEndpoint"
             ],
             "path": "packages/kbn-server-route-repository/src/typings.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/server-route-repository",
@@ -414,7 +432,8 @@
               "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions]"
             ],
             "path": "packages/kbn-server-route-repository/src/typings.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -439,6 +458,7 @@
         ],
         "path": "packages/kbn-server-route-repository/src/typings.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -469,6 +489,7 @@
         ],
         "path": "packages/kbn-server-route-repository/src/typings.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -482,6 +503,7 @@
         "description": [],
         "path": "packages/kbn-server-route-repository/src/route_validation_object.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/server-route-repository",
@@ -497,7 +519,8 @@
               "<Readonly<{} & {}> | null>"
             ],
             "path": "packages/kbn-server-route-repository/src/route_validation_object.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/server-route-repository",
@@ -511,7 +534,8 @@
               "<{}>"
             ],
             "path": "packages/kbn-server-route-repository/src/route_validation_object.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/server-route-repository",
@@ -525,7 +549,8 @@
               "<{}>"
             ],
             "path": "packages/kbn-server-route-repository/src/route_validation_object.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

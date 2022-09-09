@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiPageContent, EuiLink } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageContent_Deprecated as EuiPageContent, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useAppContext } from '../app_context';
 
