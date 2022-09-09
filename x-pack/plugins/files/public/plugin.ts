@@ -6,6 +6,11 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import {
+  getFileKindsRegistry,
+  setFileKindsRegistry,
+  FileKindsRegistryImpl,
+} from '../common/file_kinds_registry';
 import type { FilesClientFactory } from './types';
 import { createFilesClient } from './files_client';
 
