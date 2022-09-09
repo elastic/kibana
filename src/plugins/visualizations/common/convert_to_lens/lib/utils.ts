@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { DataViewFieldBase } from '@kbn/es-query';
@@ -143,7 +143,11 @@ export const getCutomBucketsFromSiblingAggs = (metrics: SchemaConfig[]) => {
       isSiblingPipeline(metric) &&
       metric.aggParams?.customBucket &&
       acc.every(
-        (bucket) => !isEqual(metric.aggParams?.customBucket?.serialize(), bucket.serialize())
+        (bucket) =>
+          !isEqual(
+            omit(metric.aggParams?.customBucket?.serialize(), ['id']),
+            omit(bucket.serialize(), ['id'])
+          )
       )
     ) {
       acc.push(metric.aggParams.customBucket);

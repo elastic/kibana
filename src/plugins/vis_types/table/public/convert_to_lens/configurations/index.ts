@@ -9,11 +9,18 @@
 import { Column, PagingState, TableVisConfiguration } from '@kbn/visualizations-plugin/common';
 import { TableVisParams } from '../../../common';
 
-const getColumns = (params: TableVisParams, metrics: string[], columns: Column[]) => {
+const getColumns = (
+  params: TableVisParams,
+  metrics: string[],
+  buckets: string[],
+  columns: Column[],
+  bucketCollapseFn?: string
+) => {
   const { showTotal, totalFunc } = params;
   return columns.map(({ columnId }) => ({
     columnId,
     ...(showTotal && metrics.includes(columnId) ? { summaryRow: totalFunc } : {}),
+    ...(bucketCollapseFn && buckets.includes(columnId) ? { collapseFn: bucketCollapseFn } : {}),
   }));
 };
 
@@ -37,12 +44,17 @@ const getRowHeight = (
 export const getConfiguration = (
   layerId: string,
   params: TableVisParams,
-  { metrics, columns }: { metrics: string[]; columns: Column[] }
+  {
+    metrics,
+    buckets,
+    columns,
+    bucketCollapseFn,
+  }: { metrics: string[]; buckets: string[]; columns: Column[]; bucketCollapseFn?: string }
 ): TableVisConfiguration => {
   return {
     layerId,
     layerType: 'data',
-    columns: getColumns(params, metrics, columns),
+    columns: getColumns(params, metrics, buckets, columns, bucketCollapseFn),
     paging: getPagination(params),
     ...getRowHeight(params),
   };

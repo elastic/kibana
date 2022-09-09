@@ -18,6 +18,10 @@ import {
 import { Vis } from '../types';
 import { getVisSchemas, Schemas } from '../vis_schemas';
 
+const getBucketCollapseFn = (visSchemas: Schemas) => {
+  return visSchemas.metric.find((m) => isSiblingPipeline(m))?.aggType.split('_')[0];
+};
+
 const getBucketColumns = (
   visSchemas: Schemas,
   keys: Array<keyof Schemas>,
@@ -43,10 +47,15 @@ const getBucketColumns = (
 
 const isValidVis = (visSchemas: Schemas, splits: Array<keyof Schemas>) => {
   const { metric } = visSchemas;
-  const sibblingPipelineAggs = metric.filter((m) => isSiblingPipeline(m));
+  const siblingPipelineAggs = metric.filter((m) => isSiblingPipeline(m));
 
-  if (!sibblingPipelineAggs.length) {
+  if (!siblingPipelineAggs.length) {
     return true;
+  }
+
+  // doesn't support mixed sibling pipeline aggregations
+  if (siblingPipelineAggs.some((agg) => agg.aggType !== siblingPipelineAggs[0].aggType)) {
+    return false;
   }
 
   const splitAggs = splits.flatMap((split) => visSchemas[split]).filter(Boolean);
@@ -131,5 +140,12 @@ export const getColumnsFromVis = <T>(
   }
 
   const columns = [...metrics, ...bucketColumns, ...splitBucketColumns, ...customBucketColumns];
-  return { metrics: metrics.map(({ columnId }) => columnId), columns };
+  return {
+    metrics: metrics.map(({ columnId }) => columnId),
+    buckets: [...bucketColumns, ...splitBucketColumns, ...customBucketColumns].map(
+      ({ columnId }) => columnId
+    ),
+    bucketCollapseFn: getBucketCollapseFn(visSchemas),
+    columns,
+  };
 };

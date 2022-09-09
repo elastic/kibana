@@ -156,6 +156,7 @@ export interface PagingState {
 export interface ColumnState {
   columnId: string;
   summaryRow?: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max';
+  collapseFn?: string;
 }
 
 export interface TableVisConfiguration {
