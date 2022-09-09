@@ -538,3 +538,39 @@ The API returns the following:
   "connector_id":"b3aad810-edbe-11ec-82d1-11348ecbf4a6"
 }
 --------------------------------------------------
+
+Retrieve the list of choices for a {sn-itom} connector:
+
+[source,sh]
+--------------------------------------------------
+POST api/actions/connector/9d9be270-2fd2-11ed-b0e0-87533c532698/_execute
+{
+  "params": {
+    "subAction": "getChoices",
+    "subActionParams": {
+      "fields": [ "severity","urgency" ]
+    }
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+The API returns the severity and urgency choices, for example:
+
+[source,sh]
+--------------------------------------------------
+{
+  "status": "ok",
+  "data":[
+    {"dependent_value":"","label":"Critical","value":"1","element":"severity"},
+    {"dependent_value":"","label":"Major","value":"2","element":"severity"},
+    {"dependent_value":"","label":"Minor","value":"3","element":"severity"},
+    {"dependent_value":"","label":"Warning","value":"4","element":"severity"},
+    {"dependent_value":"","label":"OK","value":"5","element":"severity"},
+    {"dependent_value":"","label":"Clear","value":"0","element":"severity"},
+    {"dependent_value":"","label":"1 - High","value":"1","element":"urgency"},
+    {"dependent_value":"","label":"2 - Medium","value":"2","element":"urgency"},
+    {"dependent_value":"","label":"3 - Low","value":"3","element":"urgency"}],
+  "connector_id":"9d9be270-2fd2-11ed-b0e0-87533c532698"
+}
+--------------------------------------------------
