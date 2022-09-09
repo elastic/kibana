@@ -25701,7 +25701,6 @@
     "xpack.securitySolution.responder.header.lastSeen": "Vu en dernier le {date}",
     "xpack.securitySolution.responder.hostOffline.callout.body": "L'hôte {name} est hors connexion, donc ses réponses peuvent avoir du retard. Les commandes en attente seront exécutées quand l'hôte se reconnectera.",
     "xpack.securitySolution.responseActionsList.flyout.title": "Log d'action : {hostname}",
-    "xpack.securitySolution.responseActionsList.list.item.command": "{command}",
     "xpack.securitySolution.responseActionsList.list.item.hasExpired": "Échec de {command} : action expirée",
     "xpack.securitySolution.responseActionsList.list.item.hasFailed": "Échec de {command}",
     "xpack.securitySolution.responseActionsList.list.item.isPending": "{command} est en attente",

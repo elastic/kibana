@@ -44,8 +44,18 @@ const emptyValue = getEmptyValue();
 
 const getCommand = (
   command: ActionDetails['command']
-): Exclude<ActionDetails['command'], 'unisolate'> | 'release' =>
-  command === 'unisolate' ? 'release' : command;
+):
+  | Exclude<ActionDetails['command'], 'unisolate' | 'running-processes'>
+  | 'release'
+  | 'processes' => {
+  if (command === 'unisolate') {
+    return 'release';
+  } else if (command === 'running-processes') {
+    return 'processes';
+  } else {
+    return command;
+  }
+};
 
 // Truncated usernames
 const StyledFacetButton = euiStyled(EuiFacetButton)`
@@ -276,11 +286,13 @@ export const ResponseActionsList = memo<
           const command = getCommand(_command);
           return (
             <EuiToolTip content={command} anchorClassName="eui-textTruncate">
-              <FormattedMessage
-                id="xpack.securitySolution.responseActionsList.list.item.command"
-                defaultMessage="{command}"
-                values={{ command }}
-              />
+              <EuiText
+                size="s"
+                className="eui-textTruncate eui-fullWidth"
+                data-test-subj={getTestId('column-command')}
+              >
+                {command}
+              </EuiText>
             </EuiToolTip>
           );
         },
