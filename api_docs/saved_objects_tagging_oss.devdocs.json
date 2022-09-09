@@ -54,6 +54,38 @@
       },
       {
         "parentPluginId": "savedObjectsTaggingOss",
+        "id": "def-public.GetTableColumnDefinitionOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetTableColumnDefinitionOptions",
+        "description": [
+          "\nOptions for the {@link SavedObjectsTaggingApiUi.getTableColumnDefinition | getTableColumnDefinition api}\n"
+        ],
+        "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjectsTaggingOss",
+            "id": "def-public.GetTableColumnDefinitionOptions.serverPaging",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "serverPaging",
+            "description": [
+              "\nBy default, the `tags` column definition will be automatically sortable\nby tag name.\n\nHowever, when paging is performed on the server, we need to remove the sorting\ncapability from the column to avoid unexpected behavior by triggering fetch request\nwhen sorting by column.\n\nShould be set to `true` when generating the definition for a table that performs\nserver-side paging.\n\nDefaults to false."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjectsTaggingOss",
         "id": "def-public.ITagsCache",
         "type": "Interface",
         "tags": [],
@@ -535,7 +567,15 @@
               "\nReturn the column definition to be used to display the tags in a EUI table.\nThe table's items must be of the `SavedObject` type (or at least have their references available\nvia the `references` field)\n"
             ],
             "signature": [
-              "() => ",
+              "(options?: ",
+              {
+                "pluginId": "savedObjectsTaggingOss",
+                "scope": "public",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
+                "section": "def-public.GetTableColumnDefinitionOptions",
+                "text": "GetTableColumnDefinitionOptions"
+              },
+              " | undefined) => ",
               "EuiTableFieldDataColumnType",
               "<",
               "SavedObject",
@@ -544,7 +584,30 @@
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-public.SavedObjectsTaggingApiUi.getTableColumnDefinition.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "savedObjectsTaggingOss",
+                    "scope": "public",
+                    "docId": "kibSavedObjectsTaggingOssPluginApi",
+                    "section": "def-public.GetTableColumnDefinitionOptions",
+                    "text": "GetTableColumnDefinitionOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {

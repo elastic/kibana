@@ -8914,14 +8914,14 @@
           {
             "parentPluginId": "fleet",
             "id": "def-common.FleetServerAgent.upgraded_at",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "upgraded_at",
             "description": [
               "\nDate/time the Elastic Agent was last upgraded"
             ],
             "signature": [
-              "string | null | undefined"
+              "string | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
             "deprecated": false,
@@ -8938,6 +8938,22 @@
             ],
             "signature": [
               "string | null | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.FleetServerAgent.upgrade_status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "upgrade_status",
+            "description": [
+              "\nUpgrade status"
+            ],
+            "signature": [
+              "\"completed\" | \"started\" | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
             "deprecated": false,
@@ -9111,7 +9127,7 @@
             "tags": [],
             "label": "last_checkin_status",
             "description": [
-              "\nLst checkin status"
+              "\nLast checkin status"
             ],
             "signature": [
               "\"error\" | \"online\" | \"updating\" | \"degraded\" | undefined"
