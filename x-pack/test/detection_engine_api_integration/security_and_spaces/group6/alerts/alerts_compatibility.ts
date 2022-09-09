@@ -355,6 +355,7 @@ export default ({ getService }: FtrProviderContext) => {
             query: '*:*',
             related_integrations: [],
             required_fields: [],
+            response_actions: [],
             setup: '',
           },
           'kibana.alert.rule.actions': [],

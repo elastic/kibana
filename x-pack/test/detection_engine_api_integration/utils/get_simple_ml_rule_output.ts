@@ -10,7 +10,7 @@ import { getSimpleRuleOutput } from './get_simple_rule_output';
 
 export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => {
   const rule = getSimpleRuleOutput(ruleId);
-  const { query, language, index, ...rest } = rule;
+  const { query, language, index, response_actions: responseActions, ...rest } = rule;
 
   return {
     ...rest,
