@@ -23,7 +23,7 @@ import {
   TiledSingleLayerVectorSourceDescriptor,
   VectorLayerDescriptor,
 } from '../../../../../common/descriptor_types';
-import { SOURCE_TYPES } from '../../../../../common/constants';
+import { LAYER_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
 import { MvtVectorLayer } from './mvt_vector_layer';
 
 const defaultConfig = {
@@ -62,6 +62,11 @@ function createLayer(
   const layerDescriptor = MvtVectorLayer.createDescriptor(defaultLayerOptions);
   return new MvtVectorLayer({ layerDescriptor, source: mvtSource, customIcons: [] });
 }
+
+test('should have type MVT_VECTOR_LAYER', () => {
+  const layer: MvtVectorLayer = createLayer({}, {});
+  expect(layer.getType()).toEqual(LAYER_TYPE.MVT_VECTOR);
+});
 
 describe('visiblity', () => {
   it('should get minzoom from source', async () => {
