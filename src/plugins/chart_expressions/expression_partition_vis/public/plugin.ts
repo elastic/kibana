@@ -16,6 +16,7 @@ import {
   waffleVisFunction,
 } from '../common';
 import { getPartitionVisRenderer } from './expression_renderers';
+import { setFormatService } from './services/format_service';
 import {
   ExpressionPartitionVisPluginSetup,
   ExpressionPartitionVisPluginStart,
@@ -44,7 +45,9 @@ export class ExpressionPartitionVisPlugin {
     expressions.registerRenderer(getPartitionVisRenderer({ getStartDeps }));
   }
 
-  public start(core: CoreStart, deps: StartDeps): ExpressionPartitionVisPluginStart {}
+  public start(core: CoreStart, deps: StartDeps): ExpressionPartitionVisPluginStart {
+    setFormatService(deps.fieldFormats);
+  }
 
   public stop() {}
 }

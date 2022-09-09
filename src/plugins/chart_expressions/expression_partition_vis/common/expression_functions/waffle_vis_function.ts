@@ -18,7 +18,6 @@ import {
   WAFFLE_VIS_EXPRESSION_NAME,
 } from '../constants';
 import { errors, strings } from './i18n';
-import { collapseMetricColumns } from '../utils';
 
 export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
   name: WAFFLE_VIS_EXPRESSION_NAME,
@@ -125,12 +124,7 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
       args.splitRow.forEach((splitRow) => validateAccessor(splitRow, context.columns));
     }
 
-    const { table, metricAccessor, bucketAccessors } = collapseMetricColumns(
-      context,
-      args.bucket ? [args.bucket] : [],
-      args.metrics
-    );
-
+    const buckets = args.bucket ? [args.bucket] : [];
     const visConfig: PartitionVisParams = {
       ...args,
       ariaLabel:
@@ -139,8 +133,8 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
         handlers.getExecutionContext?.()?.description,
       palette: args.palette,
       dimensions: {
-        metric: metricAccessor,
-        buckets: bucketAccessors,
+        metrics: args.metrics,
+        buckets,
         splitColumn: args.splitColumn,
         splitRow: args.splitRow,
       },
@@ -151,10 +145,10 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
       handlers.inspectorAdapters.tables.allowCsvExport = true;
 
       const logTable = prepareLogTable(
-        table,
+        context,
         [
-          [[metricAccessor], strings.getSliceSizeHelp()],
-          [bucketAccessors, strings.getSliceHelp()],
+          [args.metrics, strings.getSliceSizeHelp()],
+          [buckets, strings.getSliceHelp()],
           [args.splitColumn, strings.getColumnSplitHelp()],
           [args.splitRow, strings.getRowSplitHelp()],
         ],
@@ -167,7 +161,7 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
       type: 'render',
       as: PARTITION_VIS_RENDERER_NAME,
       value: {
-        visData: table,
+        visData: context,
         visConfig,
         syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
         visType: ChartTypes.WAFFLE,

@@ -18,7 +18,6 @@ import {
   TREEMAP_VIS_EXPRESSION_NAME,
 } from '../constants';
 import { errors, strings } from './i18n';
-import { collapseMetricColumns } from '../utils';
 
 export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => ({
   name: TREEMAP_VIS_EXPRESSION_NAME,
@@ -131,12 +130,6 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
       args.splitRow.forEach((splitRow) => validateAccessor(splitRow, context.columns));
     }
 
-    const { table, metricAccessor, bucketAccessors } = collapseMetricColumns(
-      context,
-      args.buckets,
-      args.metrics
-    );
-
     const visConfig: PartitionVisParams = {
       ...args,
       ariaLabel:
@@ -145,8 +138,8 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
         handlers.getExecutionContext?.()?.description,
       palette: args.palette,
       dimensions: {
-        metric: metricAccessor,
-        buckets: bucketAccessors,
+        metrics: args.metrics,
+        buckets: args.buckets,
         splitColumn: args.splitColumn,
         splitRow: args.splitRow,
       },
@@ -157,10 +150,10 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
       handlers.inspectorAdapters.tables.allowCsvExport = true;
 
       const logTable = prepareLogTable(
-        table,
+        context,
         [
-          [[metricAccessor], strings.getSliceSizeHelp()],
-          [bucketAccessors, strings.getSliceHelp()],
+          [args.metrics, strings.getSliceSizeHelp()],
+          [args.buckets, strings.getSliceHelp()],
           [args.splitColumn, strings.getColumnSplitHelp()],
           [args.splitRow, strings.getRowSplitHelp()],
         ],
@@ -173,7 +166,7 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
       type: 'render',
       as: PARTITION_VIS_RENDERER_NAME,
       value: {
-        visData: table,
+        visData: context,
         visConfig,
         syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
         visType: ChartTypes.TREEMAP,

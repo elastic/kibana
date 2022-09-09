@@ -18,7 +18,6 @@ import {
   PARTITION_VIS_RENDERER_NAME,
 } from '../constants';
 import { errors, strings } from './i18n';
-import { collapseMetricColumns } from '../utils';
 
 export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
   name: PIE_VIS_EXPRESSION_NAME,
@@ -150,12 +149,6 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       args.splitRow.forEach((splitRow) => validateAccessor(splitRow, context.columns));
     }
 
-    const { table, metricAccessor, bucketAccessors } = collapseMetricColumns(
-      context,
-      args.buckets,
-      args.metrics
-    );
-
     const visConfig: PartitionVisParams = {
       ...args,
       ariaLabel:
@@ -164,8 +157,8 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
         handlers.getExecutionContext?.()?.description,
       palette: args.palette,
       dimensions: {
-        metric: metricAccessor,
-        buckets: bucketAccessors,
+        metrics: args.metrics,
+        buckets: args.buckets,
         splitColumn: args.splitColumn,
         splitRow: args.splitRow,
       },
@@ -176,10 +169,10 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       handlers.inspectorAdapters.tables.allowCsvExport = true;
 
       const logTable = prepareLogTable(
-        table,
+        context,
         [
-          [[metricAccessor], strings.getSliceSizeHelp()],
-          [bucketAccessors, strings.getSliceHelp()],
+          [args.metrics, strings.getSliceSizeHelp()],
+          [args.buckets, strings.getSliceHelp()],
           [args.splitColumn, strings.getColumnSplitHelp()],
           [args.splitRow, strings.getRowSplitHelp()],
         ],
@@ -192,7 +185,7 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       type: 'render',
       as: PARTITION_VIS_RENDERER_NAME,
       value: {
-        visData: table,
+        visData: context,
         visConfig,
         syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
         visType: args.isDonut ? ChartTypes.DONUT : ChartTypes.PIE,

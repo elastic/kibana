@@ -7,13 +7,15 @@
  */
 
 import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
-import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 export const collapseMetricColumns = (
   table: Datatable,
   bucketAccessors: Array<string | ExpressionValueVisDimension> = [],
-  metricAccessors: Array<string | ExpressionValueVisDimension>
+  metricAccessors: Array<string | ExpressionValueVisDimension>,
+  formatService: FieldFormatsStart
 ): {
   table: Datatable;
   metricAccessor: string | ExpressionValueVisDimension;
@@ -42,6 +44,12 @@ export const collapseMetricColumns = (
     bucketColumns[bucketColumns.length - 1],
   ];
 
+  const finalBucketFormatter = finalBucketColumn
+    ? formatService
+        .deserialize(getFormatByAccessor(finalBucketColumn.id, table.columns))
+        .getConverterFor('text')
+    : undefined;
+
   const nameColumnId = 'metric-name';
   const valueColumnId = 'value';
 
@@ -54,7 +62,7 @@ export const collapseMetricColumns = (
       });
 
       newRow[nameColumnId] = finalBucketColumn
-        ? `${row[finalBucketColumn.id]} - ${metricCol.name}`
+        ? `${finalBucketFormatter!(row[finalBucketColumn.id])} - ${metricCol.name}`
         : metricCol.name;
       newRow[valueColumnId] = row[metricCol.id];
 

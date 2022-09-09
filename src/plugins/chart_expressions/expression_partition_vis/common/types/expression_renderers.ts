@@ -29,7 +29,7 @@ export interface Dimension {
 }
 
 export interface Dimensions {
-  metric?: ExpressionValueVisDimension | string;
+  metrics: Array<ExpressionValueVisDimension | string>;
   buckets?: Array<ExpressionValueVisDimension | string>;
   splitRow?: Array<ExpressionValueVisDimension | string>;
   splitColumn?: Array<ExpressionValueVisDimension | string>;
