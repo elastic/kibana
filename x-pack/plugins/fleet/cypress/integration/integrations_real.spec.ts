@@ -180,10 +180,5 @@ describe('Add Integration - Real API', () => {
     cy.getBySel(INTEGRATION_LIST).find('.euiCard').should('have.length', 3);
     cy.getBySel(INTEGRATIONS_SEARCHBAR.REMOVE_BADGE_BUTTON).click();
     cy.getBySel(INTEGRATIONS_SEARCHBAR.BADGE).should('not.exist');
-    cy.getBySel(INTEGRATION_LIST, { timeout: 10000 })
-      .find('.euiCard')
-      .its('length')
-      .should('be.greaterThan', 3);
-    cy.getBySel(INTEGRATIONS_SEARCHBAR.REMOVE_BADGE_BUTTON).should('not.exist');
   });
 });
