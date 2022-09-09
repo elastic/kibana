@@ -85,7 +85,8 @@ describe('addConnector lib function', () => {
     });
     expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
       index: 'index_name',
-      settings: textAnalysisSettings('fr'),
+      mappings: {},
+      settings: { ...textAnalysisSettings('fr'), auto_expand_replicas: '0-3', number_of_shards: 2 },
     });
   });
 
@@ -202,7 +203,12 @@ describe('addConnector lib function', () => {
     });
     expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
       index: 'index_name',
-      settings: textAnalysisSettings(undefined),
+      mappings: {},
+      settings: {
+        ...textAnalysisSettings(undefined),
+        auto_expand_replicas: '0-3',
+        number_of_shards: 2,
+      },
     });
   });
 
@@ -241,7 +247,8 @@ describe('addConnector lib function', () => {
     });
     expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
       index: 'search-index_name',
-      settings: textAnalysisSettings('en'),
+      mappings: {},
+      settings: { ...textAnalysisSettings('en'), auto_expand_replicas: '0-3', number_of_shards: 2 },
     });
   });
 });

@@ -23,5 +23,9 @@ export const settingsServiceFactory: SettingsServiceFactory = ({ coreStart }) =>
     getTimezone: () => {
       return coreStart.uiSettings.get('dateFormat:tz', 'Browser');
     },
+    getDefaultTimeRange: () => {
+      const defaultTimeRange = coreStart.uiSettings.get('timepicker:timeDefaults');
+      return defaultTimeRange ? defaultTimeRange : { from: 'now-15m', to: 'now' };
+    },
   };
 };

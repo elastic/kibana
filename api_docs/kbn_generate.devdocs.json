@@ -25,6 +25,7 @@
         ],
         "path": "packages/kbn-generate/src/cli.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false

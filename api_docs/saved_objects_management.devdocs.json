@@ -11,6 +11,7 @@
         "description": [],
         "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -24,6 +25,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -35,7 +37,8 @@
             "label": "id",
             "description": [],
             "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -80,7 +83,8 @@
               ") => any) | undefined; }"
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -93,7 +97,8 @@
               "(() => { type: string; id: string; }[]) | undefined"
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -106,7 +111,8 @@
               "ActionContext | null"
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -126,7 +132,8 @@
               " | null"
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -140,6 +147,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "savedObjectsManagement",
@@ -153,6 +161,7 @@
                 ],
                 "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -170,6 +179,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "savedObjectsManagement",
@@ -183,6 +193,7 @@
                 ],
                 "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -208,6 +219,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "savedObjectsManagement",
@@ -227,6 +239,7 @@
                 ],
                 "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -244,6 +257,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -259,6 +273,7 @@
         "description": [],
         "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -268,7 +283,8 @@
             "label": "id",
             "description": [],
             "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -321,7 +337,8 @@
               ") => React.ReactNode) | undefined; }) | undefined; }"
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -334,7 +351,8 @@
               "(() => { type: string; id: string; }[]) | undefined"
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -347,7 +365,8 @@
               "ColumnContext | null"
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -361,6 +380,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "savedObjectsManagement",
@@ -374,6 +394,7 @@
                 ],
                 "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -391,6 +412,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "savedObjectsManagement",
@@ -404,6 +426,7 @@
                 ],
                 "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -421,6 +444,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -450,6 +474,7 @@
         ],
         "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -463,6 +488,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -480,6 +506,7 @@
         "description": [],
         "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -492,7 +519,8 @@
               "{ type: string; id: string; meta: { title?: string | undefined; icon?: string | undefined; }; overwrite?: boolean | undefined; }"
             ],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -513,7 +541,8 @@
               "SavedObjectsImportUnknownError"
             ],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -527,6 +556,7 @@
         "description": [],
         "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -546,7 +576,8 @@
               "[]"
             ],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -560,7 +591,8 @@
               "[]"
             ],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -573,7 +605,8 @@
               "UnmatchedReference[]"
             ],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -586,7 +619,8 @@
               "\"success\" | \"idle\""
             ],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -596,7 +630,8 @@
             "label": "importCount",
             "description": [],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -610,7 +645,8 @@
               "[]"
             ],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -624,6 +660,7 @@
         "description": [],
         "path": "src/plugins/saved_objects_management/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -633,7 +670,8 @@
             "label": "name",
             "description": [],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -646,7 +684,8 @@
               "\"single\" | \"multiple\" | \"multiple-isolated\" | \"agnostic\""
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -656,7 +695,8 @@
             "label": "hidden",
             "description": [],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -666,7 +706,8 @@
             "label": "displayName",
             "description": [],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -682,6 +723,7 @@
         ],
         "path": "src/plugins/saved_objects_management/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -694,7 +736,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -707,7 +750,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -720,7 +764,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -733,7 +778,8 @@
               "{ path: string; uiCapabilitiesPath: string; } | undefined"
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -747,7 +793,8 @@
               " | undefined"
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -760,7 +807,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -776,6 +824,7 @@
         ],
         "path": "src/plugins/saved_objects_management/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -785,7 +834,8 @@
             "label": "id",
             "description": [],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -795,7 +845,8 @@
             "label": "type",
             "description": [],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -808,7 +859,8 @@
               "\"parent\" | \"child\""
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -827,7 +879,8 @@
               }
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -841,6 +894,7 @@
         "description": [],
         "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -864,6 +918,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "savedObjectsManagement",
@@ -883,6 +938,7 @@
                 ],
                 "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -900,6 +956,7 @@
         "description": [],
         "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -915,6 +972,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "savedObjectsManagement",
@@ -928,6 +986,7 @@
                 ],
                 "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -955,6 +1014,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -970,6 +1030,7 @@
         "description": [],
         "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -993,6 +1054,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "savedObjectsManagement",
@@ -1012,6 +1074,7 @@
                 ],
                 "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1029,6 +1092,7 @@
         "description": [],
         "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1052,6 +1116,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -1067,6 +1132,7 @@
         "description": [],
         "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1076,7 +1142,8 @@
             "label": "type",
             "description": [],
             "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1086,7 +1153,8 @@
             "label": "id",
             "description": [],
             "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1101,7 +1169,8 @@
               "; hiddenType: boolean; }"
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1115,7 +1184,8 @@
               "[]"
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1128,7 +1198,8 @@
               "string[] | undefined"
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1159,6 +1230,7 @@
         ],
         "path": "src/plugins/saved_objects_management/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1172,6 +1244,7 @@
       "description": [],
       "path": "src/plugins/saved_objects_management/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "savedObjectsManagement",
@@ -1190,7 +1263,8 @@
             }
           ],
           "path": "src/plugins/saved_objects_management/public/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "savedObjectsManagement",
@@ -1209,7 +1283,8 @@
             }
           ],
           "path": "src/plugins/saved_objects_management/public/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -1224,6 +1299,7 @@
       "description": [],
       "path": "src/plugins/saved_objects_management/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "savedObjectsManagement",
@@ -1242,7 +1318,8 @@
             }
           ],
           "path": "src/plugins/saved_objects_management/public/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "savedObjectsManagement",
@@ -1261,7 +1338,8 @@
             }
           ],
           "path": "src/plugins/saved_objects_management/public/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "savedObjectsManagement",
@@ -1283,6 +1361,7 @@
           ],
           "path": "src/plugins/saved_objects_management/public/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [],
           "returnComment": []
         },
@@ -1306,6 +1385,7 @@
           ],
           "path": "src/plugins/saved_objects_management/public/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "savedObjectsManagement",
@@ -1319,6 +1399,7 @@
               ],
               "path": "src/plugins/saved_objects_management/public/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -1333,6 +1414,7 @@
               ],
               "path": "src/plugins/saved_objects_management/public/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -1347,6 +1429,7 @@
               ],
               "path": "src/plugins/saved_objects_management/public/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -1372,6 +1455,7 @@
           ],
           "path": "src/plugins/saved_objects_management/public/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "returnComment": [],
           "children": [
             {
@@ -1382,7 +1466,8 @@
               "label": "type",
               "description": [],
               "path": "src/plugins/saved_objects_management/public/lib/get_saved_object_label.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             },
             {
               "parentPluginId": "savedObjectsManagement",
@@ -1402,7 +1487,8 @@
                 "[]"
               ],
               "path": "src/plugins/saved_objects_management/public/lib/get_saved_object_label.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             }
           ]
         },
@@ -1418,6 +1504,7 @@
           ],
           "path": "src/plugins/saved_objects_management/public/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "returnComment": [],
           "children": [
             {
@@ -1431,7 +1518,8 @@
                 "{ id: string; type: string; }"
               ],
               "path": "src/plugins/saved_objects_management/public/lib/get_default_title.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             }
           ]
         },
@@ -1457,6 +1545,7 @@
           ],
           "path": "src/plugins/saved_objects_management/public/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "returnComment": [],
           "children": [
             {
@@ -1470,7 +1559,8 @@
                 "Query"
               ],
               "path": "src/plugins/saved_objects_management/public/lib/parse_query.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             },
             {
               "parentPluginId": "savedObjectsManagement",
@@ -1490,7 +1580,8 @@
                 "[]"
               ],
               "path": "src/plugins/saved_objects_management/public/lib/parse_query.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             }
           ]
         },
@@ -1516,6 +1607,7 @@
           ],
           "path": "src/plugins/saved_objects_management/public/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "returnComment": [],
           "children": [
             {
@@ -1537,7 +1629,8 @@
                 " | undefined; }"
               ],
               "path": "src/plugins/saved_objects_management/public/lib/get_tag_references.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             }
           ]
         }
@@ -1561,6 +1654,7 @@
         ],
         "path": "src/plugins/saved_objects_management/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1573,7 +1667,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1586,7 +1681,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1599,7 +1695,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1612,7 +1709,8 @@
               "{ path: string; uiCapabilitiesPath: string; } | undefined"
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1626,7 +1724,8 @@
               " | undefined"
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1639,7 +1738,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1670,6 +1770,7 @@
         ],
         "path": "src/plugins/saved_objects_management/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1683,6 +1784,7 @@
       "description": [],
       "path": "src/plugins/saved_objects_management/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -1696,6 +1798,7 @@
       "description": [],
       "path": "src/plugins/saved_objects_management/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
@@ -1714,6 +1817,7 @@
         "description": [],
         "path": "src/plugins/saved_objects_management/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1733,7 +1837,8 @@
               "[]"
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1753,7 +1858,8 @@
               "[]"
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1767,6 +1873,7 @@
         "description": [],
         "path": "src/plugins/saved_objects_management/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1776,7 +1883,8 @@
             "label": "id",
             "description": [],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1786,7 +1894,8 @@
             "label": "type",
             "description": [],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1799,7 +1908,8 @@
               "\"parent\" | \"child\""
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1809,7 +1919,8 @@
             "label": "error",
             "description": [],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1823,6 +1934,7 @@
         "description": [],
         "path": "src/plugins/saved_objects_management/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1832,7 +1944,8 @@
             "label": "name",
             "description": [],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1845,7 +1958,8 @@
               "\"single\" | \"multiple\" | \"multiple-isolated\" | \"agnostic\""
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1855,7 +1969,8 @@
             "label": "hidden",
             "description": [],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1865,7 +1980,8 @@
             "label": "displayName",
             "description": [],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1881,6 +1997,7 @@
         ],
         "path": "src/plugins/saved_objects_management/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1893,7 +2010,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1906,7 +2024,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1919,7 +2038,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1932,7 +2052,8 @@
               "{ path: string; uiCapabilitiesPath: string; } | undefined"
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1946,7 +2067,8 @@
               " | undefined"
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1959,7 +2081,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1975,6 +2098,7 @@
         ],
         "path": "src/plugins/saved_objects_management/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1984,7 +2108,8 @@
             "label": "id",
             "description": [],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1994,7 +2119,8 @@
             "label": "type",
             "description": [],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -2007,7 +2133,8 @@
               "\"parent\" | \"child\""
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -2026,7 +2153,8 @@
               }
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2046,6 +2174,7 @@
         ],
         "path": "src/plugins/saved_objects_management/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2071,6 +2200,7 @@
         ],
         "path": "src/plugins/saved_objects_management/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
