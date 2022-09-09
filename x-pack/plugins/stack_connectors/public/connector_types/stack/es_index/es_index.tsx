@@ -8,28 +8,22 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  ActionTypeModel,
+  ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
   ALERT_HISTORY_PREFIX,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { EsIndexConfig, IndexActionParams } from '../../types';
 
-export function getActionType(): ActionTypeModel<EsIndexConfig, unknown, IndexActionParams> {
+export function getConnectorType(): ConnectorTypeModel<EsIndexConfig, unknown, IndexActionParams> {
   return {
     id: '.index',
     iconClass: 'indexOpen',
-    selectMessage: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.selectMessageText',
-      {
-        defaultMessage: 'Index data into Elasticsearch.',
-      }
-    ),
-    actionTypeTitle: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.actionTypeTitle',
-      {
-        defaultMessage: 'Index data',
-      }
-    ),
+    selectMessage: i18n.translate('xpack.stackConnectors.components.index.selectMessageText', {
+      defaultMessage: 'Index data into Elasticsearch.',
+    }),
+    actionTypeTitle: i18n.translate('xpack.stackConnectors.components.index.connectorTypeTitle', {
+      defaultMessage: 'Index data',
+    }),
     actionConnectorFields: lazy(() => import('./es_index_connector')),
     actionParamsFields: lazy(() => import('./es_index_params')),
     validateParams: async (
@@ -47,13 +41,10 @@ export function getActionType(): ActionTypeModel<EsIndexConfig, unknown, IndexAc
       if (actionParams.indexOverride) {
         if (!actionParams.indexOverride.startsWith(ALERT_HISTORY_PREFIX)) {
           errors.indexOverride.push(
-            i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.error.badIndexOverrideValue',
-              {
-                defaultMessage: 'Alert history index must begin with "{alertHistoryPrefix}".',
-                values: { alertHistoryPrefix: ALERT_HISTORY_PREFIX },
-              }
-            )
+            i18n.translate('xpack.stackConnectors.components.index.error.badIndexOverrideValue', {
+              defaultMessage: 'Alert history index must begin with "{alertHistoryPrefix}".',
+              values: { alertHistoryPrefix: ALERT_HISTORY_PREFIX },
+            })
           );
         }
 

@@ -7,32 +7,32 @@
 
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 import { registerConnectorTypes } from '../..';
-import { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { registrationServicesMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 
-const ACTION_TYPE_ID = '.index';
-let actionTypeModel: ActionTypeModel;
+const CONNECTOR_TYPE_ID = '.index';
+let connectorTypeModel: ConnectorTypeModel;
 
 beforeAll(() => {
-  const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-  registerConnectorTypes({ actionTypeRegistry, services: registrationServicesMock });
-  const getResult = actionTypeRegistry.get(ACTION_TYPE_ID);
+  const connectorTypeRegistry = new TypeRegistry<ConnectorTypeModel>();
+  registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
+  const getResult = connectorTypeRegistry.get(CONNECTOR_TYPE_ID);
   if (getResult !== null) {
-    actionTypeModel = getResult;
+    connectorTypeModel = getResult;
   }
 });
 
-describe('actionTypeRegistry.get() works', () => {
-  test('action type .index is registered', () => {
-    expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
-    expect(actionTypeModel.iconClass).toEqual('indexOpen');
+describe('connectorTypeRegistry.get() works', () => {
+  test('connector type .index is registered', () => {
+    expect(connectorTypeModel.id).toEqual(CONNECTOR_TYPE_ID);
+    expect(connectorTypeModel.iconClass).toEqual('indexOpen');
   });
 });
 
 describe('action params validation', () => {
   test('action params validation succeeds when action params are valid', async () => {
     expect(
-      await actionTypeModel.validateParams({
+      await connectorTypeModel.validateParams({
         documents: [{ test: 1234 }],
       })
     ).toEqual({
@@ -43,7 +43,7 @@ describe('action params validation', () => {
     });
 
     expect(
-      await actionTypeModel.validateParams({
+      await connectorTypeModel.validateParams({
         documents: [{ test: 1234 }],
         indexOverride: 'kibana-alert-history-anything',
       })
@@ -56,7 +56,7 @@ describe('action params validation', () => {
   });
 
   test('action params validation fails when action params are invalid', async () => {
-    expect(await actionTypeModel.validateParams({})).toEqual({
+    expect(await connectorTypeModel.validateParams({})).toEqual({
       errors: {
         documents: ['Document is required and should be a valid JSON object.'],
         indexOverride: [],
@@ -64,7 +64,7 @@ describe('action params validation', () => {
     });
 
     expect(
-      await actionTypeModel.validateParams({
+      await connectorTypeModel.validateParams({
         documents: [{}],
       })
     ).toEqual({
@@ -75,7 +75,7 @@ describe('action params validation', () => {
     });
 
     expect(
-      await actionTypeModel.validateParams({
+      await connectorTypeModel.validateParams({
         documents: [{}],
         indexOverride: 'kibana-alert-history-',
       })
@@ -87,7 +87,7 @@ describe('action params validation', () => {
     });
 
     expect(
-      await actionTypeModel.validateParams({
+      await connectorTypeModel.validateParams({
         documents: [{}],
         indexOverride: 'this.is-a_string',
       })

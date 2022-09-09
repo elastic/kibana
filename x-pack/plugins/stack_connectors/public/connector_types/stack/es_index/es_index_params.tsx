@@ -90,7 +90,7 @@ export const IndexParamsFields = ({
   };
 
   const documentsFieldLabel = i18n.translate(
-    'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.documentsFieldLabel',
+    'xpack.stackConnectors.components.index.documentsFieldLabel',
     {
       defaultMessage: 'Document to index',
     }
@@ -108,7 +108,7 @@ export const IndexParamsFields = ({
         >
           <EuiIcon type="refresh" />
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.rulesList.resetDefaultIndexLabel"
+            id="xpack.stackConnectors.components.index.resetDefaultIndexLabel"
             defaultMessage="Reset default index"
           />
         </EuiLink>
@@ -127,17 +127,14 @@ export const IndexParamsFields = ({
           (errors.indexOverride as string[]) &&
           errors.indexOverride.length > 0
         }
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.preconfiguredIndex',
-          {
-            defaultMessage: 'Elasticsearch index',
-          }
-        )}
+        label={i18n.translate('xpack.stackConnectors.components.index.preconfiguredIndex', {
+          defaultMessage: 'Elasticsearch index',
+        })}
         labelAppend={resetDefaultIndex}
         helpText={
           <>
             <FormattedMessage
-              id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.preconfiguredIndexHelpText"
+              id="xpack.stackConnectors.components.index.preconfiguredIndexHelpText"
               defaultMessage="Documents are indexed into the {alertHistoryIndex} index. "
               values={{ alertHistoryIndex: `${ALERT_HISTORY_PREFIX}${alertHistoryIndexSuffix}` }}
             />
@@ -146,7 +143,7 @@ export const IndexParamsFields = ({
               target="_blank"
             >
               <FormattedMessage
-                id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.preconfiguredIndexDocLink"
+                id="xpack.stackConnectors.components.index.preconfiguredIndexDocLink"
                 defaultMessage="View docs."
               />
             </EuiLink>
@@ -189,18 +186,15 @@ export const IndexParamsFields = ({
           : documentToIndex
       }
       label={documentsFieldLabel}
-      aria-label={i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.jsonDocAriaLabel',
-        {
-          defaultMessage: 'Code editor',
-        }
-      )}
+      aria-label={i18n.translate('xpack.stackConnectors.components.index.jsonDocAriaLabel', {
+        defaultMessage: 'Code editor',
+      })}
       errors={errors.documents as string[]}
       onDocumentsChange={onDocumentsChange}
       helpText={
         <EuiLink href={docLinks.links.alerting.indexAction} target="_blank">
           <FormattedMessage
-            id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.indexDocumentHelpLabel"
+            id="xpack.stackConnectors.components.index.indexDocumentHelpLabel"
             defaultMessage="Index document example."
           />
         </EuiLink>

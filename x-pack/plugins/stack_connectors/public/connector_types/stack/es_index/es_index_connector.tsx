@@ -51,13 +51,13 @@ const getIndexConfig = (docLinks: DocLinksStart): FieldConfig => ({
   helpText: (
     <>
       <FormattedMessage
-        id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.howToBroadenSearchQueryDescription"
+        id="xpack.stackConnectors.components.index.howToBroadenSearchQueryDescription"
         defaultMessage="Use * to broaden your query."
       />
       <EuiSpacer size="s" />
       <EuiLink href={docLinks.links.alerting.indexAction} target="_blank">
         <FormattedMessage
-          id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.configureIndexHelpLabel"
+          id="xpack.stackConnectors.components.index.configureIndexHelpLabel"
           defaultMessage="Configuring index connector."
         />
       </EuiLink>
@@ -127,7 +127,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
         <h5>
           <FormattedMessage
             defaultMessage="Write to index"
-            id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.connectorSectionTitle"
+            id="xpack.stackConnectors.components.index.connectorSectionTitle"
           />
         </h5>
       </EuiTitle>
@@ -163,7 +163,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               fullWidth
               label={
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.indicesToQueryLabel"
+                  id="xpack.stackConnectors.components.index.indicesToQueryLabel"
                   defaultMessage="Index"
                 />
               }
@@ -172,13 +172,13 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               helpText={
                 <>
                   <FormattedMessage
-                    id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.howToBroadenSearchQueryDescription"
+                    id="xpack.stackConnectors.components.index.howToBroadenSearchQueryDescription"
                     defaultMessage="Use * to broaden your query."
                   />
                   <EuiSpacer size="s" />
                   <EuiLink href={docLinks.links.alerting.indexAction} target="_blank">
                     <FormattedMessage
-                      id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.configureIndexHelpLabel"
+                      id="xpack.stackConnectors.components.index.configureIndexHelpLabel"
                       defaultMessage="Configuring index connector."
                     />
                   </EuiLink>
@@ -225,7 +225,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
             label: (
               <>
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.refreshLabel"
+                  id="xpack.stackConnectors.components.index.refreshLabel"
                   defaultMessage="Refresh index"
                 />{' '}
                 <EuiIconTip
@@ -251,7 +251,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               label: (
                 <>
                   <FormattedMessage
-                    id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.defineTimeFieldLabel"
+                    id="xpack.stackConnectors.components.index.defineTimeFieldLabel"
                     defaultMessage="Define time field for each document"
                   />
                   <EuiIconTip

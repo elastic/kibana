@@ -12,7 +12,7 @@ import ParamsFields from './es_index_params';
 import { AlertHistoryEsIndexConnectorId } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 
-const kibanaReactPath = '../../../../../../../../src/plugins/kibana_react/public';
+const kibanaReactPath = '../../../../../../../src/plugins/kibana_react/public';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
@@ -26,7 +26,7 @@ jest.mock(kibanaReactPath, () => {
   };
 });
 
-const actionConnector = {
+const connector = {
   actionTypeId: '.index',
   config: {
     index: 'test-index',
@@ -38,7 +38,7 @@ const actionConnector = {
   secrets: {},
 };
 
-const preconfiguredActionConnector = {
+const preconfiguredConnector = {
   actionTypeId: '.index',
   config: {
     index: 'kibana-alert-history-default',
@@ -61,7 +61,7 @@ describe('IndexParamsFields renders', () => {
         errors={{ index: [] }}
         editAction={() => {}}
         index={0}
-        actionConnector={actionConnector}
+        actionConnector={connector}
         messageVariables={[
           {
             name: 'myVar',
@@ -88,7 +88,7 @@ describe('IndexParamsFields renders', () => {
         errors={{ index: [] }}
         editAction={() => {}}
         index={0}
-        actionConnector={actionConnector}
+        actionConnector={connector}
         messageVariables={[
           {
             name: 'myVar',
@@ -116,7 +116,7 @@ describe('IndexParamsFields renders', () => {
         errors={{ index: [] }}
         editAction={() => {}}
         index={0}
-        actionConnector={preconfiguredActionConnector}
+        actionConnector={preconfiguredConnector}
         messageVariables={[
           {
             name: 'myVar',
@@ -146,7 +146,7 @@ describe('IndexParamsFields renders', () => {
         errors={{ index: [] }}
         editAction={() => {}}
         index={0}
-        actionConnector={preconfiguredActionConnector}
+        actionConnector={preconfiguredConnector}
         messageVariables={[
           {
             name: 'myVar',

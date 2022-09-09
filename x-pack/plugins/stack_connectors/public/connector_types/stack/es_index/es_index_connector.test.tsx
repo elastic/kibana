@@ -55,9 +55,9 @@ const { getFields } = jest.requireMock(
   '@kbn/triggers-actions-ui-plugin/public/common/index_controls'
 );
 
-async function setup(actionConnector: any) {
+async function setup(connector: any) {
   const wrapper = mountWithIntl(
-    <ConnectorFormTestProvider connector={actionConnector}>
+    <ConnectorFormTestProvider connector={connector}>
       <IndexActionConnectorFields
         readOnly={false}
         isEdit={false}
@@ -348,7 +348,7 @@ describe('IndexActionConnectorFields', () => {
     });
 
     test('connector validation succeeds when connector config is valid', async () => {
-      const actionConnector = {
+      const connector = {
         secrets: {},
         id: 'test',
         actionTypeId: '.index',
@@ -362,7 +362,7 @@ describe('IndexActionConnectorFields', () => {
       };
 
       const { getByTestId } = appMockRenderer.render(
-        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <IndexActionConnectorFields
             readOnly={false}
             isEdit={false}
@@ -395,7 +395,7 @@ describe('IndexActionConnectorFields', () => {
     });
 
     test('connector validation succeeds when connector config is valid with minimal config', async () => {
-      const actionConnector = {
+      const connector = {
         secrets: {},
         id: 'test',
         actionTypeId: '.index',
@@ -407,7 +407,7 @@ describe('IndexActionConnectorFields', () => {
       };
 
       const { getByTestId } = appMockRenderer.render(
-        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <IndexActionConnectorFields
             readOnly={false}
             isEdit={false}
@@ -436,7 +436,7 @@ describe('IndexActionConnectorFields', () => {
     });
 
     test('connector validation fails when index is empty', async () => {
-      const actionConnector = {
+      const connector = {
         secrets: {},
         id: 'test',
         actionTypeId: '.index',
@@ -448,7 +448,7 @@ describe('IndexActionConnectorFields', () => {
       };
 
       const { getByTestId } = appMockRenderer.render(
-        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <IndexActionConnectorFields
             readOnly={false}
             isEdit={false}
