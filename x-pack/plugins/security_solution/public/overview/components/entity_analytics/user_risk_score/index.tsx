@@ -6,12 +6,14 @@
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  EuiButton,
+  EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  EuiLink,
   EuiPanel,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
@@ -38,6 +40,13 @@ import { RISKY_USERS_DOC_LINK } from '../../../../users/components/constants';
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+
+import type { inputsModel } from '../../../../common/store';
+import { useCheckSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_check_signal_index';
+import { useEnableRiskScoreViaDevTools } from '../../../../common/hooks/use_enable_risk_score_via_dev_tools';
+import { RiskyScoreRestartButton } from '../common/risky_score_restart_button';
+import { RiskScoreModuleName } from '../common/utils';
+import { RiskyScoreEnableButton } from '../common/risky_score_enable_button';
 
 const TABLE_QUERY_ID = 'userRiskDashboardTable';
 
@@ -125,7 +134,7 @@ export const EntityAnalyticsUserRiskScores = () => {
   }
 
   if (!isModuleEnabled && !isTableLoading) {
-    return <EntityAnalyticsUserRiskScoresDisable />;
+    return <EntityAnalyticsUserRiskScoresDisable refetch={refetch} />;
   }
 
   return (
@@ -135,14 +144,10 @@ export const EntityAnalyticsUserRiskScores = () => {
           title={headerTitle}
           titleSize="s"
           subtitle={
-            <LastUpdatedAt isUpdating={isTableLoading || isKpiLoading} updatedAt={updatedAt} />
-          }
-          headerFilters={
-            <SeverityFilterGroup
-              selectedSeverities={selectedSeverity}
-              severityCount={severityCount}
-              title={i18n.USER_RISK}
-              onSelect={setSelectedSeverity}
+            <LastUpdatedAt
+              isUpdating={isTableLoading || isKpiLoading}
+              updatedAt={updatedAt}
+              refresh={refetch}
             />
           }
           id={TABLE_QUERY_ID}
@@ -150,7 +155,23 @@ export const EntityAnalyticsUserRiskScores = () => {
           toggleQuery={setToggleStatus}
         >
           {toggleStatus && (
-            <EuiFlexGroup alignItems="center" gutterSize="none">
+            <EuiFlexGroup alignItems="center" gutterSize="m">
+              <EuiFlexItem>
+                <RiskyScoreRestartButton refetch={refetch} moduleName={RiskScoreModuleName.User} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiButtonEmpty href={RISKY_USERS_DOC_LINK} target="_blank">
+                  {i18n.LEARN_MORE}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <SeverityFilterGroup
+                  selectedSeverities={selectedSeverity}
+                  severityCount={severityCount}
+                  title={i18n.USER_RISK}
+                  onSelect={setSelectedSeverity}
+                />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <LinkButton
                   data-test-subj="view-all-button"
@@ -188,22 +209,48 @@ export const EntityAnalyticsUserRiskScores = () => {
   );
 };
 
-const EntityAnalyticsUserRiskScoresDisable = () => (
-  <EuiPanel hasBorder>
-    <HeaderSection title={<h2>{i18n.USER_RISK_TITLE}</h2>} titleSize="s" />
-    <EuiEmptyPrompt
-      title={<h2>{i18n.ENABLE_USER_RISK_SCORE}</h2>}
-      body={i18n.ENABLE_USER_RISK_SCORE_DESCRIPTION}
-      actions={
-        <EuiButton
-          color="primary"
-          fill
-          href={RISKY_USERS_DOC_LINK}
-          data-test-subj="enable_user_risk_score"
-        >
-          {i18n.ENABLE_USER_RISK_SCORE}
-        </EuiButton>
-      }
-    />
-  </EuiPanel>
-);
+const EntityAnalyticsUserRiskScoresDisable = ({ refetch }: { refetch: inputsModel.Refetch }) => {
+  const { signalIndexExists } = useCheckSignalIndex();
+  const enableViaDevToolsUrl = useEnableRiskScoreViaDevTools(RiskScoreModuleName.User);
+
+  return (
+    <EuiPanel hasBorder>
+      <HeaderSection title={<h2>{i18n.USER_RISK_TITLE}</h2>} titleSize="s" />
+      <EuiEmptyPrompt
+        title={<h2>{i18n.ENABLE_USER_RISK_SCORE}</h2>}
+        body={
+          <>
+            {i18n.ENABLE_USER_RISK_SCORE_DESCRIPTION}{' '}
+            <EuiLink href={RISKY_USERS_DOC_LINK} target="_blank" external>
+              {i18n.LEARN_MORE}
+            </EuiLink>
+          </>
+        }
+        actions={
+          <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={!signalIndexExists ? i18n.ENABLE_RISK_SCORE_POPOVER : null}>
+                <EuiButtonEmpty
+                  href={enableViaDevToolsUrl}
+                  isDisabled={!signalIndexExists}
+                  data-test-subj="enable_user_risk_score_via_devtools"
+                >
+                  {i18n.ENABLE_VIA_DEV_TOOLS}
+                </EuiButtonEmpty>
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={!signalIndexExists ? i18n.ENABLE_RISK_SCORE_POPOVER : null}>
+                <RiskyScoreEnableButton
+                  refetch={refetch}
+                  moduleName={RiskScoreModuleName.User}
+                  disabled={!signalIndexExists}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      />
+    </EuiPanel>
+  );
+};

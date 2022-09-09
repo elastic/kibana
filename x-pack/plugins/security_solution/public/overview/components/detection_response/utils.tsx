@@ -7,10 +7,12 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 
 import * as i18n from './translations';
+import type { inputsModel } from '../../../common/store';
+import { REFRESH } from '../../../detections/pages/detection_engine/rules/translations';
 
 export const SEVERITY_COLOR = {
   critical: '#E7664C',
@@ -25,10 +27,11 @@ const MAX_ALLOWED_RESULTS = 100;
 export interface LastUpdatedAtProps {
   updatedAt: number;
   isUpdating: boolean;
+  refresh?: inputsModel.Refetch;
 }
 
-export const LastUpdatedAt: React.FC<LastUpdatedAtProps> = ({ isUpdating, updatedAt }) => (
-  <EuiFlexGroup>
+export const LastUpdatedAt: React.FC<LastUpdatedAtProps> = ({ isUpdating, updatedAt, refresh }) => (
+  <EuiFlexGroup gutterSize="none" justifyContent="center" alignItems="center">
     {isUpdating ? (
       <EuiFlexItem grow={false}>{i18n.UPDATING}</EuiFlexItem>
     ) : (
@@ -39,6 +42,11 @@ export const LastUpdatedAt: React.FC<LastUpdatedAtProps> = ({ isUpdating, update
           key={`formattedRelative-${Date.now()}`}
           value={new Date(updatedAt)}
         />
+      </EuiFlexItem>
+    )}
+    {refresh && !isUpdating && (
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon onClick={refresh} iconType="refresh" aria-label={REFRESH} />
       </EuiFlexItem>
     )}
   </EuiFlexGroup>

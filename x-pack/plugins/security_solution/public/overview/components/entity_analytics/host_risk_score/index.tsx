@@ -6,11 +6,12 @@
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  EuiButton,
+  EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  EuiLink,
   EuiPanel,
   EuiToolTip,
 } from '@elastic/eui';
@@ -39,11 +40,17 @@ import { hostsActions } from '../../../../hosts/store';
 import { useCheckSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_check_signal_index';
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
-import { useEnableHostRiskFromUrl } from '../../../../common/hooks/use_enable_host_risk_from_url';
+import { useEnableRiskScoreViaDevTools } from '../../../../common/hooks/use_enable_risk_score_via_dev_tools';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
-const TABLE_QUERY_ID = 'hostRiskDashboardTable';
+import type { inputsModel } from '../../../../common/store';
+import { RiskyScoreRestartButton } from '../common/risky_score_restart_button';
+import { RiskScoreModuleName } from '../common/utils';
+import { RiskyScoreEnableButton } from '../common/risky_score_enable_button';
 
+const TABLE_QUERY_ID = 'hostRiskDashboardTable';
+const RISKY_HOSTS_DOC_LINK =
+  'https://www.github.com/elastic/detection-rules/blob/main/docs/experimental-machine-learning/host-risk-score.md';
 const IconWrapper = styled.span`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
 `;
@@ -129,7 +136,7 @@ export const EntityAnalyticsHostRiskScores = () => {
   }
 
   if (!isModuleEnabled && !isTableLoading) {
-    return <EntityAnalyticsHostRiskScoresDisable />;
+    return <EntityAnalyticsHostRiskScoresDisable refetch={refetch} />;
   }
 
   return (
@@ -139,14 +146,10 @@ export const EntityAnalyticsHostRiskScores = () => {
           title={headerTitle}
           titleSize="s"
           subtitle={
-            <LastUpdatedAt isUpdating={isTableLoading || isKpiLoading} updatedAt={updatedAt} />
-          }
-          headerFilters={
-            <SeverityFilterGroup
-              selectedSeverities={selectedSeverity}
-              severityCount={severityCount}
-              title={i18n.HOST_RISK}
-              onSelect={setSelectedSeverity}
+            <LastUpdatedAt
+              isUpdating={isTableLoading || isKpiLoading}
+              updatedAt={updatedAt}
+              refresh={refetch}
             />
           }
           id={TABLE_QUERY_ID}
@@ -154,7 +157,23 @@ export const EntityAnalyticsHostRiskScores = () => {
           toggleQuery={setToggleStatus}
         >
           {toggleStatus && (
-            <EuiFlexGroup alignItems="center" gutterSize="none">
+            <EuiFlexGroup alignItems="center" gutterSize="m">
+              <EuiFlexItem>
+                <RiskyScoreRestartButton refetch={refetch} moduleName={RiskScoreModuleName.Host} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiButtonEmpty href={RISKY_HOSTS_DOC_LINK} target="_blank">
+                  {i18n.LEARN_MORE}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <SeverityFilterGroup
+                  selectedSeverities={selectedSeverity}
+                  severityCount={severityCount}
+                  title={i18n.HOST_RISK}
+                  onSelect={setSelectedSeverity}
+                />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <LinkButton
                   data-test-subj="view-all-button"
@@ -192,28 +211,46 @@ export const EntityAnalyticsHostRiskScores = () => {
   );
 };
 
-const EntityAnalyticsHostRiskScoresDisable = () => {
-  const loadFromUrl = useEnableHostRiskFromUrl();
+const EntityAnalyticsHostRiskScoresDisable = ({ refetch }: { refetch: inputsModel.Refetch }) => {
   const { signalIndexExists } = useCheckSignalIndex();
+  const enableViaDevToolsUrl = useEnableRiskScoreViaDevTools(RiskScoreModuleName.Host);
 
   return (
     <EuiPanel hasBorder>
       <HeaderSection title={<h2>{i18n.HOST_RISK_TITLE}</h2>} titleSize="s" />
       <EuiEmptyPrompt
         title={<h2>{i18n.ENABLE_HOST_RISK_SCORE}</h2>}
-        body={i18n.ENABLE_HOST_RISK_SCORE_DESCRIPTION}
+        body={
+          <>
+            {i18n.ENABLE_HOST_RISK_SCORE_DESCRIPTION}{' '}
+            <EuiLink href={RISKY_HOSTS_DOC_LINK} target="_blank" external>
+              {i18n.LEARN_MORE}
+            </EuiLink>
+          </>
+        }
         actions={
-          <EuiToolTip content={!signalIndexExists ? i18n.ENABLE_RISK_SCORE_POPOVER : null}>
-            <EuiButton
-              color="primary"
-              fill
-              href={loadFromUrl}
-              isDisabled={!signalIndexExists}
-              data-test-subj="enable_host_risk_score"
-            >
-              {i18n.ENABLE_HOST_RISK_SCORE}
-            </EuiButton>
-          </EuiToolTip>
+          <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={!signalIndexExists ? i18n.ENABLE_RISK_SCORE_POPOVER : null}>
+                <EuiButtonEmpty
+                  href={enableViaDevToolsUrl}
+                  isDisabled={!signalIndexExists}
+                  data-test-subj="enable_host_risk_score_via_devtools"
+                >
+                  {i18n.ENABLE_VIA_DEV_TOOLS}
+                </EuiButtonEmpty>
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={!signalIndexExists ? i18n.ENABLE_RISK_SCORE_POPOVER : null}>
+                <RiskyScoreEnableButton
+                  refetch={refetch}
+                  moduleName={RiskScoreModuleName.Host}
+                  disabled={!signalIndexExists}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         }
       />
     </EuiPanel>

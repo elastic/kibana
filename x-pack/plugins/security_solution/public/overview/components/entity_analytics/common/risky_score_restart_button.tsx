@@ -18,25 +18,38 @@ import { useKibana } from '../../../../common/lib/kibana';
 const RiskyScoreRestartButtonComponent = ({
   refetch,
   moduleName,
+  disabled = false,
 }: {
   refetch: inputsModel.Refetch;
   moduleName: RiskScoreModuleName;
+  disabled?: boolean;
 }) => {
   const [restartState, setRestartState] = useState<RestartState>();
   const { http, notifications } = useKibana().services;
   const spaceId = useSpaceId();
+  const updateButtonState = useCallback((state: RestartState) => {
+    setRestartState(state);
+  }, []);
+
   const onBoardingHostRiskScore = useCallback(async () => {
     setRestartState(RestartState.Started);
-    await restartRiskScoreTransforms({ http, notifications, spaceId, moduleName });
+    await restartRiskScoreTransforms({
+      http,
+      notifications,
+      spaceId,
+      moduleName,
+      callback: updateButtonState,
+    });
     setRestartState(RestartState.Done);
     refetch();
-  }, [http, moduleName, notifications, refetch, spaceId]);
+  }, [http, moduleName, notifications, refetch, spaceId, updateButtonState]);
 
   return (
     <EuiButtonEmpty
       onClick={onBoardingHostRiskScore}
       isLoading={restartState === RestartState.Started}
       data-test-subj="risk-score-restart"
+      disabled={disabled}
     >
       {restartState === RestartState.Started ? (
         <FormattedMessage

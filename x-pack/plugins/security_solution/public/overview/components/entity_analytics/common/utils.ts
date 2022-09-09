@@ -13,6 +13,7 @@ import {
   deleteTransforms,
   deleteIngestPipelines,
   restartTransforms,
+  stopTransforms,
 } from './api';
 import {
   INGEST_PIPELINE_DELETION_ERROR_MESSAGE,
@@ -656,19 +657,37 @@ export const restartRiskScoreTransforms = async ({
   http,
   notifications,
   spaceId,
+  callback,
   moduleName,
 }: {
   http: HttpSetup;
   notifications?: NotificationsStart;
   spaceId?: string;
+  callback: () => void;
   moduleName: RiskScoreModuleName;
 }) => {
-  await restartTransforms({
+  const transformIds = [
+    getRiskScorePivotTransformId(moduleName, spaceId),
+    getRiskScoreLatestTransformId(moduleName, spaceId),
+  ];
+
+  await stopTransforms({
     http,
     notifications,
-    transformIds: [
-      getRiskScorePivotTransformId(moduleName, spaceId),
-      getRiskScoreLatestTransformId(moduleName, spaceId),
-    ],
+    transformIds,
+    callback: () => {
+      console.log(' transforms stopped');
+    },
   });
+
+  const res = await startTransforms({
+    http,
+    notifications,
+    transformIds,
+    callback: () => {
+      console.log(' transforms started');
+    },
+  });
+
+  return res;
 };

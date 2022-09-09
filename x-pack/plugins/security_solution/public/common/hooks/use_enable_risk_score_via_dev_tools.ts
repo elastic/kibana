@@ -6,19 +6,20 @@
  */
 import { useMemo } from 'react';
 import { devToolPrebuiltContentUrl } from '../../../common/constants';
+import type { RiskScoreModuleName } from '../../overview/components/overview_risky_host_links/utils';
 import { useSpaceId } from './use_space_id';
 
-export const useEnableHostRiskFromUrl = () => {
+export const useEnableRiskScoreViaDevTools = (moduleName: RiskScoreModuleName) => {
   const spaceId = useSpaceId();
-  const hostRiskScoreConsoleId = 'enable_host_risk_score';
+  const riskScoreConsoleId = `enable_${moduleName}_risk_score`;
   const loadFromUrl = useMemo(() => {
     const protocol = window.location.protocol;
     const hostname = window.location.hostname;
     const port = window.location.port;
     return `/s/${spaceId}/app/dev_tools#/console?load_from=${protocol}//${hostname}:${port}${devToolPrebuiltContentUrl(
       spaceId ?? 'default',
-      hostRiskScoreConsoleId
+      riskScoreConsoleId
     )}`;
-  }, [spaceId]);
+  }, [riskScoreConsoleId, spaceId]);
   return loadFromUrl;
 };

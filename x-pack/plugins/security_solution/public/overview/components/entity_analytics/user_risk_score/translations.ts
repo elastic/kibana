@@ -72,10 +72,31 @@ export const ENABLE_USER_RISK_SCORE_DESCRIPTION = i18n.translate(
   }
 );
 
+export const ENABLE_RISK_SCORE_POPOVER = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.usersRiskDashboard.enableRiskScorePopoverTitle',
+  {
+    defaultMessage: 'Alerts need to be available before enabling module',
+  }
+);
+
 export const USER_RISK_TABLE_TOOLTIP = i18n.translate(
   'xpack.securitySolution.entityAnalytics.usersRiskDashboard.usersTableTooltip',
   {
     defaultMessage:
       'The user risk table is not affected by the time range. This table shows the latest recorded risk score for each user.',
+  }
+);
+
+export const LEARN_MORE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.usersRiskDashboard.learnMore',
+  {
+    defaultMessage: 'Learn more',
+  }
+);
+
+export const ENABLE_VIA_DEV_TOOLS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.usersRiskDashboard.enableViaDevToolsButtonTitle',
+  {
+    defaultMessage: 'Enable via Dev Tools',
   }
 );

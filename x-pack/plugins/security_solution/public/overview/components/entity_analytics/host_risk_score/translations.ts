@@ -86,3 +86,17 @@ export const HOST_RISK_TABLE_TOOLTIP = i18n.translate(
       'The host risk table is not affected by the time range. This table shows the latest recorded risk score for each host.',
   }
 );
+
+export const LEARN_MORE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.learnMore',
+  {
+    defaultMessage: 'Learn more',
+  }
+);
+
+export const ENABLE_VIA_DEV_TOOLS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.enableViaDevToolsButtonTitle',
+  {
+    defaultMessage: 'Enable via Dev Tools',
+  }
+);

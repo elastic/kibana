@@ -6,13 +6,13 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { useEnableHostRiskFromUrl } from './use_enable_host_risk_from_url';
+import { useEnableRiskScoreViaDevTools } from './use_enable_risk_score_via_dev_tools';
 
 jest.mock('./use_space_id', () => {
   return { useSpaceId: () => 'myspace' };
 });
 
-describe('useEnableHostRiskFromUrl', () => {
+describe('useEnableRiskScoreViaDevTools', () => {
   beforeAll(() => {
     Object.defineProperty(window, 'location', {
       value: {
@@ -24,7 +24,7 @@ describe('useEnableHostRiskFromUrl', () => {
   });
 
   it('renders the correct path', () => {
-    const { result } = renderHook(() => useEnableHostRiskFromUrl());
+    const { result } = renderHook(() => useEnableRiskScoreViaDevTools());
     expect(result.current).toEqual(
       '/s/myspace/app/dev_tools#/console?load_from=testProtocol//testhostname:testPort/s/myspace/internal/prebuilt_content/dev_tool/enable_host_risk_score'
     );
