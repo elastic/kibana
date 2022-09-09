@@ -31,7 +31,7 @@ export const AuthenticationPanelDeleteConfirmationModal: React.FC = () => {
       title={i18n.translate(
         'xpack.enterpriseSearch.crawler.authenticationPanel.deleteConfirmationModal.title',
         {
-          defaultMessage: 'Are you sure you want to delete {authType} credentials??',
+          defaultMessage: 'Are you sure you want to delete {authType} credentials?',
           values: {
             authType: currentAuth ? AUTHENTICATION_LABELS[currentAuth?.type] : '',
           },
@@ -53,6 +53,7 @@ export const AuthenticationPanelDeleteConfirmationModal: React.FC = () => {
         }
       )}
       defaultFocusedButton="confirm"
+      buttonColor="danger"
     >
       {i18n.translate(
         'xpack.enterpriseSearch.crawler.authenticationPanel.deleteConfirmationModal.description',

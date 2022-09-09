@@ -260,6 +260,16 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/domains/{domainId}',
       validate: {
         body: schema.object({
+          auth: schema.maybe(
+            schema.nullable(
+              schema.object({
+                header: schema.maybe(schema.string()),
+                password: schema.maybe(schema.string()),
+                type: schema.string(),
+                username: schema.maybe(schema.string()),
+              })
+            )
+          ),
           crawl_rules: schema.maybe(
             schema.arrayOf(
               schema.object({
@@ -270,16 +280,6 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
           ),
           deduplication_enabled: schema.maybe(schema.boolean()),
           deduplication_fields: schema.maybe(schema.arrayOf(schema.string())),
-          auth: schema.maybe(
-            schema.nullable(
-              schema.object({
-                type: schema.string(),
-                username: schema.maybe(schema.string()),
-                password: schema.maybe(schema.string()),
-                value: schema.maybe(schema.string()),
-              })
-            )
-          ),
         }),
         params: schema.object({
           domainId: schema.string(),
