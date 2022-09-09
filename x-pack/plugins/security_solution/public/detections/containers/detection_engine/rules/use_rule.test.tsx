@@ -70,6 +70,7 @@ describe('useRule', () => {
           references: [],
           related_integrations: [],
           required_fields: [],
+          response_actions: [],
           risk_score: 75,
           risk_score_mapping: [],
           rule_id: 'bbd3106e-b4b5-4d7c-a1a2-47531d6a2baf',
