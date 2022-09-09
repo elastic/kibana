@@ -24,7 +24,8 @@ const getPackagePolicies = sendGetEndpointSpecificPackagePolicies as jest.Mock;
 
 const mockedSendBulkGetAgentPolicies = sendBulkGetAgentPolicyList as jest.Mock;
 
-describe('When on the policy list page', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/140153
+describe.skip('When on the policy list page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
@@ -63,7 +64,7 @@ describe('When on the policy list page', () => {
     it('should show instruction text and a button to add the Endpoint Security integration', async () => {
       expect(
         renderResult.findByText(
-          'From this page, you’ll be able to view and manage the Endpoint and Cloud Security Integration policies in your environment running Endpoint and Cloud Security.'
+          'From this page, you’ll be able to view and manage the Elastic Defend Integration policies in your environment running Elastic Defend.'
         )
       ).toBeTruthy();
       await waitFor(() => {
