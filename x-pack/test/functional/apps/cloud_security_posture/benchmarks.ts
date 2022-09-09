@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '@kbn/cloud-security-posture-plugin/common/constants';
 import {
   type PackageInfo,
@@ -16,6 +15,7 @@ import {
   epmRouteService,
 } from '@kbn/fleet-plugin/common';
 import { packageToPackagePolicy } from '@kbn/fleet-plugin/common/services/package_to_package_policy';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');

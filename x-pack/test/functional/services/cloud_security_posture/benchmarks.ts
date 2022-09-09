@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
 import expect from '@kbn/expect';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function BenchmarksProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
