@@ -65,7 +65,7 @@ export interface DashboardPanelState<
 /**
  * A saved dashboard panel parsed directly from the Dashboard Attributes panels JSON
  */
-export type SavedDashboardPanel = {
+export interface SavedDashboardPanel {
   embeddableConfig: { [key: string]: Serializable }; // parsed into the panel's explicitInput
   id?: string; // the saved object id for by reference panels
   type: string; // the embeddable type
@@ -74,7 +74,7 @@ export type SavedDashboardPanel = {
   panelIndex: string;
   version: string;
   title?: string;
-};
+}
 
 /**
  * Grid type for React Grid Layout

@@ -28,10 +28,7 @@ import { getSampleDashboardInput, makeDefaultServices } from '../test_helpers';
 import { DataView } from '../../services/data_views';
 import type { Filter } from '@kbn/es-query';
 
-import type {
-  LoadDashboardFromSavedObjectProps,
-  LoadDashboardFromSavedObjectReturn,
-} from '../../dashboard_saved_object/load_dashboard_state_from_saved_object';
+import type { LoadDashboardFromSavedObjectReturn } from '../../dashboard_saved_object/load_dashboard_state_from_saved_object';
 import * as loadDashboardSavedObjectModule from '../../dashboard_saved_object/load_dashboard_state_from_saved_object';
 
 interface SetupEmbeddableFactoryReturn {
