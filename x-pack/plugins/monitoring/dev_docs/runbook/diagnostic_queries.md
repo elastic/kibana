@@ -16,6 +16,7 @@ POST .monitoring-*,*:.monitoring-*,metrics-*,*:metrics-*/_search
     "clusters": {
       "terms": {
         "field": "cluster_uuid",
+        "missing": "__standalone_cluster__",
         "size": 100
       },
       "aggs": {
