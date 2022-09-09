@@ -23,6 +23,11 @@ export const standaloneClusterFilter = {
                 field: 'cluster_uuid',
               },
             },
+            {
+              exists: {
+                field: 'error',
+              },
+            },
           ],
         },
       },

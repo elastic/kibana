@@ -141,7 +141,7 @@ describe('rule_error_log', () => {
   it('renders correctly', async () => {
     const nowMock = jest.spyOn(Date, 'now').mockReturnValue(0);
     const wrapper = mountWithIntl(
-      <RuleErrorLog rule={mockRule} loadActionErrorLog={loadActionErrorLogMock} />
+      <RuleErrorLog ruleId={mockRule.id} loadActionErrorLog={loadActionErrorLogMock} />
     );
 
     // No data initially
@@ -184,7 +184,7 @@ describe('rule_error_log', () => {
     const nowMock = jest.spyOn(Date, 'now').mockReturnValue(0);
 
     const wrapper = mountWithIntl(
-      <RuleErrorLog rule={mockRule} loadActionErrorLog={loadActionErrorLogMock} />
+      <RuleErrorLog ruleId={mockRule.id} loadActionErrorLog={loadActionErrorLogMock} />
     );
 
     await act(async () => {
@@ -233,7 +233,7 @@ describe('rule_error_log', () => {
     });
 
     const wrapper = mountWithIntl(
-      <RuleErrorLog rule={mockRule} loadActionErrorLog={loadActionErrorLogMock} />
+      <RuleErrorLog ruleId={mockRule.id} loadActionErrorLog={loadActionErrorLogMock} />
     );
 
     await act(async () => {
@@ -280,7 +280,7 @@ describe('rule_error_log', () => {
     const nowMock = jest.spyOn(Date, 'now').mockReturnValue(0);
 
     const wrapper = mountWithIntl(
-      <RuleErrorLog rule={mockRule} loadActionErrorLog={loadActionErrorLogMock} />
+      <RuleErrorLog ruleId={mockRule.id} loadActionErrorLog={loadActionErrorLogMock} />
     );
 
     await act(async () => {
@@ -328,7 +328,7 @@ describe('rule_error_log', () => {
 
   it('does not show the refine search prompt normally', async () => {
     const wrapper = mountWithIntl(
-      <RuleErrorLog rule={mockRule} loadActionErrorLog={loadActionErrorLogMock} />
+      <RuleErrorLog ruleId={mockRule.id} loadActionErrorLog={loadActionErrorLogMock} />
     );
 
     await act(async () => {
@@ -346,7 +346,7 @@ describe('rule_error_log', () => {
     });
 
     const wrapper = mountWithIntl(
-      <RuleErrorLog rule={mockRule} loadActionErrorLog={loadActionErrorLogMock} />
+      <RuleErrorLog ruleId={mockRule.id} loadActionErrorLog={loadActionErrorLogMock} />
     );
 
     await act(async () => {

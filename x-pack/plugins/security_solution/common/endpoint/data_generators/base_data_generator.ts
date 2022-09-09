@@ -167,7 +167,9 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
   }
 
   protected randomVersion(): string {
-    return [7, ...this.randomNGenerator(20, 2)].map((x) => x.toString()).join('.');
+    // the `major` is sometimes (30%) 7 and most of the time (70%) 8
+    const major = this.randomBoolean(0.4) ? 7 : 8;
+    return [major, ...this.randomNGenerator(20, 2)].map((x) => x.toString()).join('.');
   }
 
   protected randomChoice<T>(choices: T[] | readonly T[]): T {
