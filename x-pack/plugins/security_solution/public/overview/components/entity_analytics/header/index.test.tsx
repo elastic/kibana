@@ -84,7 +84,7 @@ describe('RiskScoreDonutChart', () => {
 
     expect(mockDispatch).toHaveBeenCalledWith(
       usersActions.updateTableSorting({
-        sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+        sort: { field: RiskScoreFields.userRiskScore, direction: Direction.desc },
         tableType: UsersTableType.risk,
       })
     );
@@ -110,7 +110,7 @@ describe('RiskScoreDonutChart', () => {
 
     expect(mockDispatch).toHaveBeenCalledWith(
       hostsActions.updateHostRiskScoreSort({
-        sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+        sort: { field: RiskScoreFields.hostRiskScore, direction: Direction.desc },
         hostsType: HostsType.page,
       })
     );

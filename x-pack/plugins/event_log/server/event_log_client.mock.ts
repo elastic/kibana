@@ -11,6 +11,7 @@ const createEventLogClientMock = () => {
   const mock: jest.Mocked<IEventLogClient> = {
     findEventsBySavedObjectIds: jest.fn(),
     aggregateEventsBySavedObjectIds: jest.fn(),
+    aggregateEventsWithAuthFilter: jest.fn(),
   };
   return mock;
 };
