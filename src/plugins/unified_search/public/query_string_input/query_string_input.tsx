@@ -378,7 +378,9 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
           }
           break;
         case KEY_CODES.ESC:
-          event.preventDefault();
+          if (isSuggestionsVisible) {
+            event.preventDefault();
+          }
           this.setState({ isSuggestionsVisible: false, index: null });
           break;
         case KEY_CODES.TAB:
