@@ -10,21 +10,26 @@ import type {
   KeyboardEvent,
   MutableRefObject,
   PropsWithChildren,
+  ClipboardEventHandler,
 } from 'react';
 import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { pick } from 'lodash';
+import styled from 'styled-components';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
 
-const getEventDetails = (
-  ev: KeyboardEvent
-): Pick<
-  KeyboardEvent<HTMLDivElement>,
-  'key' | 'altKey' | 'ctrlKey' | 'keyCode' | 'metaKey' | 'repeat' | 'shiftKey'
-> => {
-  return pick(ev, ['key', 'altKey', 'ctrlKey', 'keyCode', 'metaKey', 'repeat', 'shiftKey']);
-};
+const InputCaptureContainer = styled.div`
+  .invisible-input {
+    // Tried to find a way to not use '!important', but cant seem to figure
+    // out right combination of pseudo selectors
+    outline: none !important;
+  }
+`;
 
+/**
+ * Interface exposed by the `InputCapture` component that allows for interaction
+ * with the component's focus/blur states.
+ */
 interface InputFocusInterface {
   focus: (force?: boolean) => void;
   blur: () => void;
@@ -47,7 +52,8 @@ export type InputCaptureProps = PropsWithChildren<{
 }>;
 
 /**
- * Component that will capture keyboard and other user input (ex. paste) for the area that it wraps (children)
+ * Component that will capture keyboard and other user input (ex. paste) that
+ * occur within this component
  */
 export const InputCapture = memo<InputCaptureProps>(({ onCapture, focusRef, children }) => {
   const getTestId = useTestIdGenerator(useDataTestSubj());
@@ -78,22 +84,60 @@ export const InputCapture = memo<InputCaptureProps>(({ onCapture, focusRef, chil
     return '';
   }, []);
 
-  const handleOnKeyDown = useCallback<KeyboardEventHandler<HTMLDivElement>>(
+  const handleOnKeyDown = useCallback<KeyboardEventHandler>(
     (ev) => {
-      // FIXME:PT implement
+      // allows for clipboard events to be captured via onPaste event handler
+      if (ev.metaKey || ev.ctrlKey) {
+        return;
+      }
+
+      // checking to ensure that the key is not a control character. Control character's `.key`
+      // are at least two characters long and because we are handling `onKeyDown` we know that
+      // a printible `.key` will always be just one character long.
+      const newValue = /^[\w\d]{2}/.test(ev.key) ? '' : ev.key;
+
+      const eventDetails = pick(ev, [
+        'key',
+        'altKey',
+        'ctrlKey',
+        'keyCode',
+        'metaKey',
+        'repeat',
+        'shiftKey',
+      ]);
 
       onCapture({
-        value: ev.key,
+        value: newValue,
         selection: getTextSelection(),
-        eventDetails: getEventDetails(ev),
+        eventDetails,
       });
     },
     [getTextSelection, onCapture]
   );
 
-  const handleOnPaste = useCallback(() => {
-    // FIXME:PT implement from candice PR
-  }, []);
+  const handleOnPaste = useCallback<ClipboardEventHandler>(
+    (ev) => {
+      const value = ev.clipboardData.getData('text');
+
+      // hard-coded for use in onCapture and future keyboard functions
+      const eventDetails = {
+        altKey: false,
+        ctrlKey: false,
+        key: 'Meta',
+        keyCode: 91,
+        metaKey: true,
+        repeat: false,
+        shiftKey: false,
+      };
+
+      onCapture({
+        value,
+        selection: getTextSelection(),
+        eventDetails,
+      });
+    },
+    [getTextSelection, onCapture]
+  );
 
   const focusInterface = useMemo<InputFocusInterface>(() => {
     return {
@@ -123,15 +167,20 @@ export const InputCapture = memo<InputCaptureProps>(({ onCapture, focusRef, chil
   }
 
   return (
-    <div
+    <InputCaptureContainer
       data-test-subj={getTestId('inputCapture')}
       onKeyDown={handleOnKeyDown}
       onPaste={handleOnPaste}
     >
-      <div tabIndex={0} ref={focusEleRef}>
+      <div
+        tabIndex={0}
+        ref={focusEleRef}
+        className="invisible-input"
+        data-test-subj={getTestId('keyCapture-input')}
+      >
         {children}
       </div>
-    </div>
+    </InputCaptureContainer>
   );
 });
 InputCapture.displayName = 'InputCapture';

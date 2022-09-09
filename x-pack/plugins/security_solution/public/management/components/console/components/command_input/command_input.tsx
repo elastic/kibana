@@ -105,6 +105,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
   const cursorClassName = useMemo(() => {
     return classNames({
       cursor: true,
+      // FIXME:PT Is this still needed?
       inactive: !isKeyInputBeingCaptured,
     });
   }, [isKeyInputBeingCaptured]);
@@ -112,6 +113,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
   const inputContainerClassname = useMemo(() => {
     return classNames({
       cmdInput: true,
+      // FIXME:PT is this still needed?
       active: isKeyInputBeingCaptured,
       error: visibleState === 'error',
     });
@@ -133,12 +135,13 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
     [dispatch, textEntered, rightOfCursor.text]
   );
 
-  const handleKeyCaptureOnStateChange = useCallback<NonNullable<KeyCaptureProps['onStateChange']>>(
-    (isCapturing) => {
-      setIsKeyInputBeingCaptured(isCapturing);
-    },
-    []
-  );
+  // FIXME:PT Delete this?
+  // const handleKeyCaptureOnStateChange = useCallback<NonNullable<KeyCaptureProps['onStateChange']>>(
+  //   (isCapturing) => {
+  //     setIsKeyInputBeingCaptured(isCapturing);
+  //   },
+  //   []
+  // );
 
   const handleTypingAreaClick = useCallback<MouseEventHandler>(
     (ev) => {
