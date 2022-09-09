@@ -13,7 +13,11 @@ import type { LicenseService } from '../../../common/license/license';
 import { isAtLeast } from '../../../common/license/license';
 import { ProtectionModes } from '../../../common/endpoint/types';
 import type { PolicyConfig } from '../../../common/endpoint/types';
-import type { Config, CloudConfig, EndpointConfig } from '../types';
+import type {
+  AnyPolicyCreateConfig,
+  PolicyCreateCloudConfig,
+  PolicyCreateEndpointConfig,
+} from '../types';
 import { ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL, ENDPOINT_CONFIG_PRESET_NGAV } from '../constants';
 
 /**
@@ -21,7 +25,7 @@ import { ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL, ENDPOINT_CONFIG_PRESET_NGAV } fro
  */
 export const createDefaultPolicy = (
   licenseService: LicenseService,
-  config: Config | undefined
+  config: AnyPolicyCreateConfig | undefined
 ): PolicyConfig => {
   const policy = isAtLeast(licenseService.getLicenseInformation(), 'platinum')
     ? policyConfigFactory()
@@ -37,10 +41,10 @@ export const createDefaultPolicy = (
 /**
  * Set all keys of the given object to false
  */
-const falsyObjectKeys = (obj: Record<string, boolean>) => {
+const falsyObjectKeys = <T extends Record<string, boolean>>(obj: T): T => {
   return Object.keys(obj).reduce((accumulator, key) => {
     return { ...accumulator, [key]: false };
-  }, {});
+  }, {} as T);
 };
 
 /**
@@ -48,7 +52,7 @@ const falsyObjectKeys = (obj: Record<string, boolean>) => {
  */
 const getEndpointPolicyWithIntegrationConfig = (
   policy: PolicyConfig,
-  config: EndpointConfig | undefined
+  config: PolicyCreateEndpointConfig | undefined
 ): PolicyConfig => {
   const isEDREssential = config?.endpointConfig?.preset === ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL;
 
@@ -64,21 +68,21 @@ const getEndpointPolicyWithIntegrationConfig = (
       linux: {
         ...policy.linux,
         events: {
-          ...(falsyObjectKeys(policy.linux.events) as PolicyConfig['linux']['events']),
+          ...falsyObjectKeys(policy.linux.events),
           ...events,
         },
       },
       windows: {
         ...policy.windows,
         events: {
-          ...(falsyObjectKeys(policy.windows.events) as PolicyConfig['windows']['events']),
+          ...falsyObjectKeys(policy.windows.events),
           ...events,
         },
       },
       mac: {
         ...policy.mac,
         events: {
-          ...(falsyObjectKeys(policy.mac.events) as PolicyConfig['mac']['events']),
+          ...falsyObjectKeys(policy.mac.events),
           ...events,
         },
       },
@@ -93,7 +97,7 @@ const getEndpointPolicyWithIntegrationConfig = (
  */
 const getCloudPolicyWithIntegrationConfig = (
   policy: PolicyConfig,
-  config: CloudConfig
+  config: PolicyCreateCloudConfig
 ): PolicyConfig => {
   /**
    * Check if the protection is supported, then retrieve Behavior Protection mode based on cloud settings

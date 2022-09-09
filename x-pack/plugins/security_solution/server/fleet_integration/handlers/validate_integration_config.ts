@@ -11,18 +11,25 @@ import {
   ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL,
   ENDPOINT_CONFIG_PRESET_NGAV,
 } from '../constants';
-import type { Config, CloudConfig, EndpointConfig } from '../types';
+import type {
+  AnyPolicyCreateConfig,
+  PolicyCreateCloudConfig,
+  PolicyCreateEndpointConfig,
+} from '../types';
 
 // The `statusCode` is used by Fleet API handler to ensure that the proper HTTP code is used in the API response
 type THROW_ERROR = Error & { statusCode?: number };
 
-const throwError = (message: string): void => {
+const throwError = (message: string): never => {
   const error: THROW_ERROR = new Error(message);
   error.statusCode = 403;
   throw error;
 };
 
-const validateEndpointIntegrationConfig = (config: EndpointConfig, logger: Logger): void => {
+const validateEndpointIntegrationConfig = (
+  config: PolicyCreateEndpointConfig,
+  logger: Logger
+): void => {
   if (!config?.endpointConfig?.preset) {
     logger.warn('missing endpointConfig preset');
     throwError('invalid endpointConfig preset');
@@ -38,7 +45,7 @@ const validateEndpointIntegrationConfig = (config: EndpointConfig, logger: Logge
     throwError('invalid endpointConfig preset');
   }
 };
-const validateCloudIntegrationConfig = (config: CloudConfig, logger: Logger): void => {
+const validateCloudIntegrationConfig = (config: PolicyCreateCloudConfig, logger: Logger): void => {
   if (!config?.cloudConfig?.preventions) {
     logger.warn(
       'missing cloudConfig preventions: {preventions : malware: true / false, behavior_protection: true / false}'
@@ -71,7 +78,7 @@ const validateCloudIntegrationConfig = (config: CloudConfig, logger: Logger): vo
   }
 };
 
-export const validateIntegrationConfig = (config: Config, logger: Logger): void => {
+export const validateIntegrationConfig = (config: AnyPolicyCreateConfig, logger: Logger): void => {
   if (config.type === 'endpoint') {
     validateEndpointIntegrationConfig(config, logger);
   } else if (config.type === 'cloud') {
