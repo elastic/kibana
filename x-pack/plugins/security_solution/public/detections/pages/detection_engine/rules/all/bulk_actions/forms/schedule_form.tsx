@@ -59,9 +59,7 @@ export const ScheduleForm = ({ rulesCount, onClose, onConfirm }: ScheduleFormCom
       type: BulkActionEditType.set_schedule,
       value: {
         interval: data.interval,
-        meta: {
-          from: data.lookback,
-        },
+        lookback: data.lookback,
       },
     });
   }, [form, onConfirm]);
