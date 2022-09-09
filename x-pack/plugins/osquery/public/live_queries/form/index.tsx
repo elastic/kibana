@@ -23,7 +23,7 @@ import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 
 import { isEmpty, map, find, pickBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
+import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER } from '@kbn/cases-plugin/common';
 import type { AddToTimelinePayload } from '../../timelines/use_add_to_timeline';
 import { useGetUserCasesPermissions } from '../../cases/use_get_cases_permissions';
 import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
@@ -524,7 +524,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     }
   }, [queryType, cleanupLiveQuery, resetField, setValue, clearErrors, defaultValue]);
 
-  const casesOwner = useMemo(() => [SECURITY_SOLUTION_OWNER], []);
+  const casesOwner = useMemo(() => [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER], []);
 
   return (
     <>

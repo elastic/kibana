@@ -8,7 +8,6 @@
 import React, { useCallback } from 'react';
 import {
   CommentType,
-  SECURITY_SOLUTION_OWNER,
   ExternalReferenceStorageType,
 } from '@kbn/cases-plugin/common';
 import { EuiButtonEmpty, EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
@@ -66,7 +65,6 @@ export const AddToCaseButton: React.FC<IProps> = ({
         },
         externalReferenceAttachmentTypeId: 'osquery',
         externalReferenceMetadata: { actionId, agentIds, queryId } as { [x: string]: JsonValue },
-        owner: SECURITY_SOLUTION_OWNER,
       },
     ];
     if (!hasWritePermissions) {
