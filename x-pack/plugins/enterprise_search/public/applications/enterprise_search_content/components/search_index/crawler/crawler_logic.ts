@@ -22,6 +22,17 @@ import {
 } from '../../../api/crawler/types';
 import { IndexNameLogic } from '../index_name_logic';
 
+import { StartSyncApiLogic, StartSyncArgs } from '../../../api/connector/start_sync_api_logic';
+
+import {
+  FetchIndexApiLogic,
+  FetchIndexApiParams,
+  FetchIndexApiResponse,
+} from '../../../api/index/fetch_index_api_logic';
+
+import { ElasticsearchIndexWithIngestion } from '../../../../../../common/types/indices';
+import { isCrawlerIndex } from '../../../utils/indices';
+
 export interface CrawlRequestOverrides {
   domain_allowlist?: string[];
   max_crawl_depth?: number;
@@ -38,7 +49,12 @@ export interface CrawlerValues {
   mostRecentCrawlRequest: CrawlRequest | null;
   mostRecentCrawlRequestStatus: CrawlerStatus | null;
   timeoutId: NodeJS.Timeout | null;
+  connectorId: string | null;
+  indexData?: ElasticsearchIndexWithIngestion;
 }
+
+type FetchIndexApiValues = Actions<FetchIndexApiParams, FetchIndexApiResponse>;
+type StartSyncApiValues = Actions<StartSyncArgs, {}>;
 
 export type CrawlerActions = Pick<
   Actions<GetCrawlerArgs, CrawlerData>,
@@ -50,6 +66,8 @@ export type CrawlerActions = Pick<
   reApplyCrawlRules(domain?: CrawlerDomain): { domain?: CrawlerDomain };
   startCrawl(overrides?: CrawlRequestOverrides): { overrides?: CrawlRequestOverrides };
   stopCrawl(): void;
+  makeStartSyncRequest: StartSyncApiValues['makeRequest'];
+  makeFetchIndexRequest: FetchIndexApiValues['makeRequest'];
 };
 
 export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
@@ -58,12 +76,19 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
     reApplyCrawlRules: (domain) => ({ domain }),
     startCrawl: (overrides) => ({ overrides }),
     stopCrawl: () => null,
+    fetchIndex: true,
   },
   connect: {
-    actions: [GetCrawlerApiLogic, ['apiError', 'apiSuccess']],
-    values: [GetCrawlerApiLogic, ['status', 'data']],
+    actions: [GetCrawlerApiLogic, ['apiError', 'apiSuccess'], StartSyncApiLogic, ['makeRequest as makeStartSyncRequest'],  FetchIndexApiLogic,
+    [
+      'apiError as fetchIndexApiError',
+      'apiReset as resetFetchIndexApi',
+      'apiSuccess as fetchIndexApiSuccess',
+      'makeRequest as makeFetchIndexRequest',
+    ],],
+    values: [GetCrawlerApiLogic, ['status', 'data'], FetchIndexApiLogic, ['data as indexData']],
   },
-  listeners: ({ actions }) => ({
+  listeners: ({ actions, values }) => ({
     apiError: (error) => {
       flashAPIErrors(error);
     },
@@ -71,6 +96,10 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
       const { indexName } = IndexNameLogic.values;
 
       GetCrawlerApiLogic.actions.makeRequest({ indexName });
+    },
+    fetchIndex: () => {
+      const { indexName } = IndexNameLogic.values;
+      actions.makeFetchIndexRequest({ indexName });
     },
     reApplyCrawlRules: async ({ domain }) => {
       const { indexName } = IndexNameLogic.values;
@@ -105,9 +134,15 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
       const { http } = HttpLogic.values;
 
       try {
-        await http.post(`/internal/enterprise_search/indices/${indexName}/crawler/crawl_requests`, {
-          body: JSON.stringify({ overrides }),
-        });
+        if (isCrawlerIndex(values.indexData)) {
+          actions.makeStartSyncRequest({ connectorId: values.indexData.connector.id, nextSyncConfig: JSON.stringify(overrides)});
+        } else {
+          // TODO show an alert
+        }
+
+        // await http.post(`/internal/enterprise_search/indices/${indexName}/crawler/crawl_requests`, {
+        //   body: JSON.stringify({ overrides }),
+        // });
         actions.fetchCrawlerData();
       } catch (e) {
         flashAPIErrors(e);
@@ -147,6 +182,6 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
     mostRecentCrawlRequestStatus: [
       () => [selectors.mostRecentCrawlRequest],
       (crawlRequest: CrawlerValues['mostRecentCrawlRequest']) => crawlRequest?.status ?? null,
-    ],
+    ]
   }),
 });

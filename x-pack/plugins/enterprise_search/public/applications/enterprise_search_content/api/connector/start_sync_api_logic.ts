@@ -10,11 +10,14 @@ import { HttpLogic } from '../../../shared/http';
 
 export interface StartSyncArgs {
   connectorId: string;
+  nextSyncConfig?: string;
 }
 
-export const startSync = async ({ connectorId }: StartSyncArgs) => {
+export const startSync = async ({ connectorId, nextSyncConfig }: StartSyncArgs) => {
   const route = `/internal/enterprise_search/connectors/${connectorId}/start_sync`;
-  return await HttpLogic.values.http.post(route);
+  return await HttpLogic.values.http.post(route, {
+    body: JSON.stringify( { nextSyncConfig: nextSyncConfig } )
+  });
 };
 
 export const StartSyncApiLogic = createApiLogic(['start_sync_api_logic'], startSync);
