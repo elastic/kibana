@@ -59,7 +59,7 @@ export async function generateData({
               .transaction({ transactionName: transaction.name })
               .errors(
                 serviceGoProdInstance
-                  .error('Error 1', transaction.name, 'Error test')
+                  .error({ message: 'Error 1', type: transaction.name, groupingName: 'Error test' })
                   .timestamp(timestamp)
               )
               .duration(1000)

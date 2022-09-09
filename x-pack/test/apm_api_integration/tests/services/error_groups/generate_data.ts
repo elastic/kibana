@@ -60,7 +60,9 @@ export async function generateData({
       .generator((timestamp) =>
         serviceGoProdInstance
           .transaction({ transactionName: transactionNameProductList })
-          .errors(serviceGoProdInstance.error(ERROR_NAME_1, 'foo').timestamp(timestamp))
+          .errors(
+            serviceGoProdInstance.error({ message: ERROR_NAME_1, type: 'foo' }).timestamp(timestamp)
+          )
           .duration(1000)
           .timestamp(timestamp)
           .failure()
@@ -81,7 +83,9 @@ export async function generateData({
       .generator((timestamp) =>
         serviceGoProdInstance
           .transaction({ transactionName: transactionNameProductId })
-          .errors(serviceGoProdInstance.error(ERROR_NAME_2, 'bar').timestamp(timestamp))
+          .errors(
+            serviceGoProdInstance.error({ message: ERROR_NAME_2, type: 'bar' }).timestamp(timestamp)
+          )
           .duration(1000)
           .timestamp(timestamp)
           .failure()

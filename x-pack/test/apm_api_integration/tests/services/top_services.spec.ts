@@ -140,7 +140,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ),
           errorInterval
             .rate(1)
-            .generator((timestamp) => errorOnlyInstance.error('Foo').timestamp(timestamp)),
+            .generator((timestamp) =>
+              errorOnlyInstance.error({ message: 'Foo' }).timestamp(timestamp)
+            ),
         ]);
       });
 

@@ -59,10 +59,10 @@ export async function generateData({
               .transaction({ transactionName: transaction.name })
               .errors(
                 serviceGoProdInstance
-                  .error(`Error 1 transaction ${transaction.name}`)
+                  .error({ message: `Error 1 transaction ${transaction.name}` })
                   .timestamp(timestamp),
                 serviceGoProdInstance
-                  .error(`Error 2 transaction ${transaction.name}`)
+                  .error({ message: `Error 2 transaction ${transaction.name}` })
                   .timestamp(timestamp)
               )
               .duration(1000)

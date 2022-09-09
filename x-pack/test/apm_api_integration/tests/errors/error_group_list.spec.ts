@@ -89,7 +89,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .generator((timestamp) =>
               serviceInstance
                 .transaction({ transactionName: appleTransaction.name })
-                .errors(serviceInstance.error('error 1', 'foo').timestamp(timestamp))
+                .errors(
+                  serviceInstance.error({ message: 'error 1', type: 'foo' }).timestamp(timestamp)
+                )
                 .duration(1000)
                 .timestamp(timestamp)
                 .failure()
@@ -110,7 +112,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .generator((timestamp) =>
               serviceInstance
                 .transaction({ transactionName: bananaTransaction.name })
-                .errors(serviceInstance.error('error 2', 'bar').timestamp(timestamp))
+                .errors(
+                  serviceInstance.error({ message: 'error 2', type: 'bar' }).timestamp(timestamp)
+                )
                 .duration(1000)
                 .timestamp(timestamp)
                 .failure()

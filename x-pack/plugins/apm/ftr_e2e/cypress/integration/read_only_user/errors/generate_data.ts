@@ -37,7 +37,7 @@ export function generateData({ from, to }: { from: number; to: number }) {
         .success()
         .errors(
           opbeansJava
-            .error(`Error ${index}`, `exception ${index}`)
+            .error({ message: `Error ${index}`, type: `exception ${index}` })
             .timestamp(timestamp)
         ),
       opbeansNode
@@ -82,7 +82,7 @@ export function generateErrors({
             .fill(0)
             .map((_, idx) => {
               return opbeansJava
-                .error(`Error ${idx}`, `exception ${idx}`)
+                .error({ message: `Error ${idx}`, type: `exception ${idx}` })
                 .timestamp(timestamp);
             })
         ),
