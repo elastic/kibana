@@ -107,21 +107,21 @@ on the `subAction` value. This object is not required when `subAction` is
 .Properties when `subAction` is `pushToService`
 [%collapsible%open]
 ======
-comments:::
+`comments`:::
 (Optional, array of objects) Additional information that is sent to Jira.
 +
 .Properties of `comments`
 [%collapsible%open]
 =======
-comment::::
+`comment`::::
 (string) A comment related to the incident. For example, describe how to
 troubleshoot the issue.
 
-commentId::::
+`commentId`::::
 (integer) A unique identifier for the comment.
 =======
 
-incident:::
+`incident`:::
 (Required, object) Information necessary to create or update a Jira incident.
 +
 .Properties of `incident`
@@ -248,21 +248,26 @@ on the `subAction` value. This object is not required when `subAction` is
 .Properties when `subAction` is `pushToService`
 [%collapsible%open]
 ======
-comments:::
+`comments`:::
 (Optional, array of objects) Additional information that is sent to {sn-sir}.
 +
 .Properties of `comments`
 [%collapsible%open]
 =======
-comment::::
+`comment`::::
 (string) A comment related to the incident. For example, describe how to
 troubleshoot the issue.
 
-commentId::::
+`commentId`::::
 (integer) A unique identifier for the comment.
+
+////
+version::::
+(string) TBD
+////
 =======
 
-incident:::
+`incident`:::
 (Required, object) Information necessary to create or update a {sn-sir} incident.
 +
 .Properties of `incident`
@@ -344,21 +349,26 @@ on the `subAction` value. This object is not required when `subAction` is
 .Properties when `subAction` is `pushToService`
 [%collapsible%open]
 ======
-comments:::
+`comments`:::
 (Optional, array of objects) Additional information that is sent to {sn-sir}.
 +
 .Properties of `comments`
 [%collapsible%open]
 =======
-comment::::
+`comment`::::
 (string) A comment related to the incident. For example, describe how to
 troubleshoot the issue.
 
-commentId::::
+`commentId`::::
 (integer) A unique identifier for the comment.
+
+////
+`version`::::
+(string) TBD
+////
 =======
 
-incident:::
+`incident`:::
 (Required, object) Information necessary to create or update a {sn-sir} incident.
 +
 .Properties of `incident`
