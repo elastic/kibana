@@ -210,6 +210,7 @@ export const getPieVisualization = ({
       const originalSecondaryOrder = getSortedGroups(datasource, layer, 'secondaryGroups');
       const accessors = originalSecondaryOrder.map((accessor) => ({
         columnId: accessor,
+        triggerIcon: isCollapsed(accessor, layer) ? ('aggregate' as const) : undefined,
       }));
 
       const secondaryGroupConfigBaseProps = {

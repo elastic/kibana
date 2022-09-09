@@ -183,6 +183,50 @@ describe('pie_visualization', () => {
           },
         ]
       `);
+
+      const mosaicState = getExampleState();
+      mosaicState.shape = 'mosaic';
+      mosaicState.layers[0].primaryGroups = colIds.slice(0, 2);
+      mosaicState.layers[0].secondaryGroups = colIds.slice(2);
+      mosaicState.layers[0].collapseFns = {
+        '1': 'sum',
+        '3': 'max',
+      };
+      const mosaicConfiguration = pieVisualization.getConfiguration({
+        state: mosaicState,
+        frame,
+        layerId: mosaicState.layers[0].layerId,
+      });
+
+      expect(mosaicConfiguration.groups.map(({ accessors }) => accessors)).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "columnId": "1",
+              "triggerIcon": "aggregate",
+            },
+            Object {
+              "columnId": "2",
+              "palette": Array [
+                "red",
+                "black",
+              ],
+              "triggerIcon": "colorBy",
+            },
+          ],
+          Array [
+            Object {
+              "columnId": "3",
+              "triggerIcon": "aggregate",
+            },
+            Object {
+              "columnId": "4",
+              "triggerIcon": undefined,
+            },
+          ],
+          Array [],
+        ]
+      `);
     });
 
     it("doesn't count collapsed columns toward the dimension limits", () => {
