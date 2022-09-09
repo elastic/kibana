@@ -194,7 +194,7 @@ describe('When using processes action from response actions console', () => {
       });
     });
 
-    it('should display completion output if done (no additional API calls)', async () => {
+    it.skip('should display completion output if done (no additional API calls)', async () => {
       await render();
 
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
