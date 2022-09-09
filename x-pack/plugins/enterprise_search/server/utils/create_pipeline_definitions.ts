@@ -231,6 +231,14 @@ export const createIndexPipelineDefinitions = (
   return { created: [indexName, `${indexName}@custom`, `${indexName}@ml-inference`] };
 };
 
+/**
+ * Format the body of an ML inference pipeline for a specified model.
+ * Does not create the pipeline, only returns JSON for the user to preview.
+ * @param modelId modelId selected by user.
+ * @param sourceField The document field that model will read.
+ * @param destinationField The document field that the model will write to.
+ * @param esClient the Elasticsearch Client to use when retrieving model details.
+ */
 export const formatMlPipelineBody = async (
   modelId: string,
   sourceField: string,
