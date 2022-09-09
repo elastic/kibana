@@ -239,7 +239,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
                 helpText={
                   <EuiLink href={docLinks.links.alerting.serviceNowSIRAction} target="_blank">
                     <FormattedMessage
-                      id="xpack.triggersActionsUI.components.builtinActionTypes.serviceNowSIRAction.correlationIDHelpLabel"
+                      id="xpack.stackConnectors.components.serviceNowSIR.correlationIDHelpLabel"
                       defaultMessage="Identifier for updating incidents"
                     />
                   </EuiLink>

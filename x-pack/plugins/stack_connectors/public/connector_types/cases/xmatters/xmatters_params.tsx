@@ -17,7 +17,7 @@ const severityOptions = [
   {
     value: 'critical',
     text: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.severitySelectCriticalOptionLabel',
+      'xpack.stackConnectors.components.xmatters.severitySelectCriticalOptionLabel',
       {
         defaultMessage: 'Critical',
       }
@@ -26,7 +26,7 @@ const severityOptions = [
   {
     value: 'high',
     text: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.severitySelectHighOptionLabel',
+      'xpack.stackConnectors.components.xmatters.severitySelectHighOptionLabel',
       {
         defaultMessage: 'High',
       }
@@ -35,7 +35,7 @@ const severityOptions = [
   {
     value: 'medium',
     text: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.severitySelectMediumOptionLabel',
+      'xpack.stackConnectors.components.xmatters.severitySelectMediumOptionLabel',
       {
         defaultMessage: 'Medium',
       }
@@ -43,17 +43,14 @@ const severityOptions = [
   },
   {
     value: 'low',
-    text: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.severitySelectLowOptionLabel',
-      {
-        defaultMessage: 'Low',
-      }
-    ),
+    text: i18n.translate('xpack.stackConnectors.components.xmatters.severitySelectLowOptionLabel', {
+      defaultMessage: 'Low',
+    }),
   },
   {
     value: 'minimal',
     text: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.severitySelectMinimalOptionLabel',
+      'xpack.stackConnectors.components.xmatters.severitySelectMinimalOptionLabel',
       {
         defaultMessage: 'Minimal',
       }
@@ -91,12 +88,9 @@ const XmattersParamsFields: React.FunctionComponent<ActionParamsProps<XmattersAc
           <EuiFormRow
             id="xmattersSeverity"
             fullWidth
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.severity',
-              {
-                defaultMessage: 'Severity',
-              }
-            )}
+            label={i18n.translate('xpack.stackConnectors.components.xmatters.severity', {
+              defaultMessage: 'Severity',
+            })}
           >
             <EuiSelect
               fullWidth
@@ -116,12 +110,9 @@ const XmattersParamsFields: React.FunctionComponent<ActionParamsProps<XmattersAc
           <EuiFormRow
             id="xmattersTags"
             fullWidth
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.tags',
-              {
-                defaultMessage: 'Tags',
-              }
-            )}
+            label={i18n.translate('xpack.stackConnectors.components.xmatters.tags', {
+              defaultMessage: 'Tags',
+            })}
           >
             <TextFieldWithMessageVariables
               index={index}

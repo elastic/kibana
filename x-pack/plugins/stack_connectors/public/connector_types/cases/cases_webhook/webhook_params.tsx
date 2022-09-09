@@ -14,14 +14,14 @@ import { TextFieldWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/p
 import { CasesWebhookActionConnector, CasesWebhookActionParams } from './types';
 
 const CREATE_COMMENT_WARNING_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.textAreaWithMessageVariable.createCommentWarningTitle',
+  'xpack.stackConnectors.components.casesWebhook.createCommentWarningTitle',
   {
     defaultMessage: 'Unable to share case comments',
   }
 );
 
 const CREATE_COMMENT_WARNING_DESC = i18n.translate(
-  'xpack.triggersActionsUI.components.textAreaWithMessageVariable.createCommentWarningDesc',
+  'xpack.stackConnectors.components.casesWebhook.createCommentWarningDesc',
   {
     defaultMessage:
       'Configure the Create Comment URL and Create Comment Objects fields for the connector to share comments externally.',
@@ -108,12 +108,9 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
           errors['subActionParams.incident.title'].length > 0 &&
           incident.title !== undefined
         }
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhook.titleFieldLabel',
-          {
-            defaultMessage: 'Summary (required)',
-          }
-        )}
+        label={i18n.translate('xpack.stackConnectors.components.casesWebhook.titleFieldLabel', {
+          defaultMessage: 'Summary (required)',
+        })}
       >
         <TextFieldWithMessageVariables
           index={index}
@@ -131,7 +128,7 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
         paramsProperty={'description'}
         inputTargetValue={incident.description ?? undefined}
         label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhook.descriptionTextAreaFieldLabel',
+          'xpack.stackConnectors.components.casesWebhook.descriptionTextAreaFieldLabel',
           {
             defaultMessage: 'Description',
           }
@@ -139,12 +136,9 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
       />
       <EuiFormRow
         fullWidth
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhook.tagsFieldLabel',
-          {
-            defaultMessage: 'Tags',
-          }
-        )}
+        label={i18n.translate('xpack.stackConnectors.components.casesWebhook.tagsFieldLabel', {
+          defaultMessage: 'Tags',
+        })}
         error={errors['subActionParams.incident.tags'] as string[]}
       >
         <EuiComboBox
@@ -182,7 +176,7 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
           paramsProperty={'comments'}
           inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
           label={i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhook.commentsTextAreaFieldLabel',
+            'xpack.stackConnectors.components.casesWebhook.commentsTextAreaFieldLabel',
             {
               defaultMessage: 'Additional comments',
             }

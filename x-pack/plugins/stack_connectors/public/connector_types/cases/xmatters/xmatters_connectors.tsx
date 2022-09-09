@@ -53,7 +53,7 @@ const XmattersUrlField: React.FC<{ path: string; readOnly: boolean }> = ({ path,
         label: i18n.URL_LABEL,
         helpText: (
           <FormattedMessage
-            id="xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.initiationUrlHelpText"
+            id="xpack.stackConnectors.components.xmatters.initiationUrlHelpText"
             defaultMessage="Include the full xMatters url."
           />
         ),
@@ -99,7 +99,7 @@ const XmattersActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
       <EuiTitle size="xxs">
         <h4>
           <FormattedMessage
-            id="xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.authenticationLabel"
+            id="xpack.stackConnectors.components.xmatters.authenticationLabel"
             defaultMessage="Authentication"
           />
         </h4>
@@ -133,7 +133,7 @@ const XmattersActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
             <h4>
               <FormattedMessage
                 data-test-subj="userCredsLabel"
-                id="xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.userCredsLabel"
+                id="xpack.stackConnectors.components.xmatters.userCredsLabel"
                 defaultMessage="User credentials"
               />
             </h4>

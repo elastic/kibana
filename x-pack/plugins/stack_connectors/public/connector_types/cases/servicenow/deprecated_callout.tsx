@@ -32,7 +32,7 @@ const DeprecatedCalloutComponent: React.FC<Props> = ({ onMigrate }) => {
         data-test-subj="snDeprecatedCallout"
         color="warning"
         title={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.deprecatedCalloutTitle',
+          'xpack.stackConnectors.components.serviceNow.deprecatedCalloutTitle',
           {
             defaultMessage: 'This connector type is deprecated',
           }
@@ -40,13 +40,13 @@ const DeprecatedCalloutComponent: React.FC<Props> = ({ onMigrate }) => {
       >
         <FormattedMessage
           defaultMessage="{update} {create} "
-          id="xpack.triggersActionsUI.components.builtinActionTypes.servicenow.appInstallationInfo"
+          id="xpack.stackConnectors.components.serviceNow.appInstallationInfo"
           values={{
             update,
             create: (
               <span>
                 {i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.deprecatedCalloutCreate',
+                  'xpack.stackConnectors.components.serviceNow.deprecatedCalloutCreate',
                   {
                     defaultMessage: 'or create a new one.',
                   }
@@ -64,7 +64,7 @@ const DeprecatedCalloutComponent: React.FC<Props> = ({ onMigrate }) => {
 export const DeprecatedCallout = memo(DeprecatedCalloutComponent);
 
 const updateThisConnectorMessage = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.deprecatedCalloutMigrate',
+  'xpack.stackConnectors.components.serviceNow.deprecatedCalloutMigrate',
   {
     defaultMessage: 'Update this connector,',
   }

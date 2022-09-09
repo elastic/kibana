@@ -73,7 +73,7 @@ const SwimlaneConnectionComponent: React.FunctionComponent<Props> = ({ readOnly 
             target="_blank"
           >
             <FormattedMessage
-              id="xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.apiTokenNameHelpLabel"
+              id="xpack.stackConnectors.components.swimlane.apiTokenNameHelpLabel"
               defaultMessage="Provide a Swimlane API Token"
             />
           </EuiLink>

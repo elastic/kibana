@@ -169,7 +169,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
       <EuiFormRow
         fullWidth
         label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.resilient.urgencySelectFieldLabel',
+          'xpack.stackConnectors.components.resilient.urgencySelectFieldLabel',
           { defaultMessage: 'Incident Type' }
         )}
       >
@@ -188,10 +188,9 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
       <EuiSpacer size="m" />
       <EuiFormRow
         fullWidth
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.resilient.severity',
-          { defaultMessage: 'Severity' }
-        )}
+        label={i18n.translate('xpack.stackConnectors.components.resilient.severity', {
+          defaultMessage: 'Severity',
+        })}
       >
         <EuiSelect
           data-test-subj="severitySelect"
@@ -213,10 +212,9 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           errors['subActionParams.incident.name'].length > 0 &&
           incident.name !== undefined
         }
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.resilient.nameFieldLabel',
-          { defaultMessage: 'Name (required)' }
-        )}
+        label={i18n.translate('xpack.stackConnectors.components.resilient.nameFieldLabel', {
+          defaultMessage: 'Name (required)',
+        })}
       >
         <TextFieldWithMessageVariables
           index={index}
@@ -234,7 +232,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
         paramsProperty={'description'}
         inputTargetValue={incident.description ?? undefined}
         label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.resilient.descriptionTextAreaFieldLabel',
+          'xpack.stackConnectors.components.resilient.descriptionTextAreaFieldLabel',
           { defaultMessage: 'Description' }
         )}
       />
@@ -245,7 +243,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
         paramsProperty={'comments'}
         inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
         label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.resilient.commentsTextAreaFieldLabel',
+          'xpack.stackConnectors.components.resilient.commentsTextAreaFieldLabel',
           { defaultMessage: 'Additional comments' }
         )}
       />

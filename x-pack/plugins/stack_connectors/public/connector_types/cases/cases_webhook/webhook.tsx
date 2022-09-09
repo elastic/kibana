@@ -8,12 +8,12 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  ActionTypeModel,
+  ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesWebhookActionParams, CasesWebhookConfig, CasesWebhookSecrets } from './types';
 
-export function getActionType(): ActionTypeModel<
+export function getConnectorType(): ConnectorTypeModel<
   CasesWebhookConfig,
   CasesWebhookSecrets,
   CasesWebhookActionParams
@@ -22,14 +22,14 @@ export function getActionType(): ActionTypeModel<
     id: '.cases-webhook',
     iconClass: 'logoWebhook',
     selectMessage: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.selectMessageText',
+      'xpack.stackConnectors.components.casesWebhook.selectMessageText',
       {
         defaultMessage: 'Send a request to a Case Management web service.',
       }
     ),
     isExperimental: true,
     actionTypeTitle: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.actionTypeTitle',
+      'xpack.stackConnectors.components.casesWebhookxpack.stackConnectors.components.casesWebhook.connectorTypeTitle',
       {
         defaultMessage: 'Webhook - Case Management data',
       }

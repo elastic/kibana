@@ -11,14 +11,14 @@ import { i18n } from '@kbn/i18n';
 import { SNStoreButton } from './sn_store_button';
 
 const content = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.applicationRequiredCallout.content',
+  'xpack.stackConnectors.components.serviceNow.applicationRequiredCallout.content',
   {
     defaultMessage: 'Please go to the ServiceNow app store and install the application',
   }
 );
 
 const ERROR_MESSAGE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.applicationRequiredCallout.errorMessage',
+  'xpack.stackConnectors.components.serviceNow.applicationRequiredCallout.errorMessage',
   {
     defaultMessage: 'Error message',
   }
@@ -39,7 +39,7 @@ const ApplicationRequiredCalloutComponent: React.FC<Props> = ({ appId, message }
         data-test-subj="snApplicationCallout"
         color="danger"
         title={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.applicationRequiredCallout',
+          'xpack.stackConnectors.components.serviceNow.applicationRequiredCallout',
           {
             defaultMessage: 'Elastic ServiceNow App not installed',
           }

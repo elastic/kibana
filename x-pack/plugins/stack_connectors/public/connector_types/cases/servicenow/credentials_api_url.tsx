@@ -31,7 +31,7 @@ const CredentialsApiUrlComponent: React.FC<Props> = ({ isLoading, readOnly, path
       <EuiFormRow fullWidth>
         <p>
           <FormattedMessage
-            id="xpack.triggersActionsUI.components.builtinActionTypes.serviceNowAction.apiUrlHelpLabel"
+            id="xpack.stackConnectors.components.serviceNow.apiUrlHelpLabel"
             defaultMessage="Provide the full URL to the desired ServiceNow instance. If you don't have one, {instance}."
             values={{
               instance: (

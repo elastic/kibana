@@ -22,7 +22,7 @@ import {
   MappingConfigurationKeys,
   SwimlaneConnectorType,
   SwimlaneFieldMappingConfig,
-} from '../../../types';
+} from '../types';
 import { isRequiredField, isValidFieldForConnector } from '../helpers';
 
 const SINGLE_SELECTION = { asPlainText: true };

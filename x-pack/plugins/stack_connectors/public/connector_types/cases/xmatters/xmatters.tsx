@@ -8,12 +8,12 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  ActionTypeModel,
+  ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { XmattersActionParams, XmattersConfig, XmattersSecrets } from '../../types';
 
-export function getActionType(): ActionTypeModel<
+export function getConnectorType(): ConnectorTypeModel<
   XmattersConfig,
   XmattersSecrets,
   XmattersActionParams
@@ -21,14 +21,11 @@ export function getActionType(): ActionTypeModel<
   return {
     id: '.xmatters',
     iconClass: lazy(() => import('./logo')),
-    selectMessage: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.selectMessageText',
-      {
-        defaultMessage: 'Trigger an xMatters workflow.',
-      }
-    ),
+    selectMessage: i18n.translate('xpack.stackConnectors.components.xmatters.selectMessageText', {
+      defaultMessage: 'Trigger an xMatters workflow.',
+    }),
     actionTypeTitle: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.actionTypeTitle',
+      'xpack.stackConnectors.components.xmatters.connectorTypeTitle',
       {
         defaultMessage: 'xMatters data',
       }

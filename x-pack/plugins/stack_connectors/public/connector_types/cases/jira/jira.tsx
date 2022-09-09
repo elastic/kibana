@@ -9,25 +9,22 @@ import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   GenericValidationResult,
-  ActionTypeModel,
+  ActionTypeModel as ConnectorTypeModel,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { JiraConfig, JiraSecrets, JiraActionParams } from './types';
 
-export const JIRA_DESC = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.selectMessageText',
-  {
-    defaultMessage: 'Create an incident in Jira.',
-  }
-);
+export const JIRA_DESC = i18n.translate('xpack.stackConnectors.components.jira.selectMessageText', {
+  defaultMessage: 'Create an incident in Jira.',
+});
 
 export const JIRA_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.actionTypeTitle',
+  'xpack.stackConnectors.components.jira.connectorTypeTitle',
   {
     defaultMessage: 'Jira',
   }
 );
 
-export function getActionType(): ActionTypeModel<JiraConfig, JiraSecrets, JiraActionParams> {
+export function getConnectorType(): ConnectorTypeModel<JiraConfig, JiraSecrets, JiraActionParams> {
   return {
     id: '.jira',
     iconClass: lazy(() => import('./logo')),

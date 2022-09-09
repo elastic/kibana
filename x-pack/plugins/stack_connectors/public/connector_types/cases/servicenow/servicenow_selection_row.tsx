@@ -32,7 +32,7 @@ export function ServiceNowSelectableRowIcon({
 }
 
 const deprecatedTooltipTitle = i18n.translate(
-  'xpack.triggersActionsUI.sections.actionForm.deprecatedTooltipTitle',
+  'xpack.stackConnectors.components.serviceNow.deprecatedTooltipTitle',
   {
     defaultMessage: 'Deprecated connector',
   }

@@ -9,25 +9,22 @@ import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   GenericValidationResult,
-  ActionTypeModel,
+  ActionTypeModel as ConnectorTypeModel,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { ResilientConfig, ResilientSecrets, ResilientActionParams } from './types';
 
-export const DESC = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.resilient.selectMessageText',
-  {
-    defaultMessage: 'Create an incident in IBM Resilient.',
-  }
-);
+export const DESC = i18n.translate('xpack.stackConnectors.components.resilient.selectMessageText', {
+  defaultMessage: 'Create an incident in IBM Resilient.',
+});
 
 export const TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.resilient.actionTypeTitle',
+  'xpack.stackConnectors.components.resilient.connectorTypeTitle',
   {
     defaultMessage: 'Resilient',
   }
 );
 
-export function getActionType(): ActionTypeModel<
+export function getConnectorType(): ConnectorTypeModel<
   ResilientConfig,
   ResilientSecrets,
   ResilientActionParams

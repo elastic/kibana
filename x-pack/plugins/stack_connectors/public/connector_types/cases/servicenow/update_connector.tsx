@@ -29,50 +29,47 @@ import { SNStoreLink } from './sn_store_button';
 import { ApplicationRequiredCallout } from './application_required_callout';
 import { ServiceNowConfig, ServiceNowSecrets } from './types';
 
-const title = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.updateFormTitle',
-  {
-    defaultMessage: 'Update ServiceNow connector',
-  }
-);
+const title = i18n.translate('xpack.stackConnectors.components.serviceNow.updateFormTitle', {
+  defaultMessage: 'Update ServiceNow connector',
+});
 
 const step1InstallTitle = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.updateFormInstallTitle',
+  'xpack.stackConnectors.components.serviceNow.updateFormInstallTitle',
   {
     defaultMessage: 'Install the Elastic ServiceNow app',
   }
 );
 
 const step2InstanceUrlTitle = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.updateFormUrlTitle',
+  'xpack.stackConnectors.components.serviceNow.updateFormUrlTitle',
   {
     defaultMessage: 'Enter your ServiceNow instance URL',
   }
 );
 
 const step3CredentialsTitle = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.updateFormCredentialsTitle',
+  'xpack.stackConnectors.components.serviceNow.updateFormCredentialsTitle',
   {
     defaultMessage: 'Provide authentication credentials',
   }
 );
 
 const cancelButtonText = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.cancelButtonText',
+  'xpack.stackConnectors.components.serviceNow.cancelButtonText',
   {
     defaultMessage: 'Cancel',
   }
 );
 
 const confirmButtonText = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.confirmButtonText',
+  'xpack.stackConnectors.components.serviceNow.confirmButtonText',
   {
     defaultMessage: 'Update',
   }
 );
 
 const warningMessage = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.warningMessage',
+  'xpack.stackConnectors.components.serviceNow.warningMessage',
   {
     defaultMessage: 'This updates all instances of this connector and cannot be reversed.',
   }
@@ -144,7 +141,7 @@ const UpdateConnectorComponent: React.FC<Props> = ({
                   title: step1InstallTitle,
                   children: (
                     <FormattedMessage
-                      id="xpack.triggersActionsUI.components.builtinActionTypes.serviceNowAction.serviceNowAppRunning"
+                      id="xpack.stackConnectors.components.serviceNow.appRunning"
                       defaultMessage="The Elastic App from the ServiceNow app store must be installed prior to running the update. {visitLink} to install the app"
                       values={{
                         visitLink: (

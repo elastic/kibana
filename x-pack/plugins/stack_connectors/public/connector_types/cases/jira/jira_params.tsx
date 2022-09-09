@@ -199,12 +199,9 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
       <>
         <EuiFormRow
           fullWidth
-          label={i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.jira.urgencySelectFieldLabel',
-            {
-              defaultMessage: 'Issue type',
-            }
-          )}
+          label={i18n.translate('xpack.stackConnectors.components.jira.urgencySelectFieldLabel', {
+            defaultMessage: 'Issue type',
+          })}
         >
           <EuiSelect
             fullWidth
@@ -224,7 +221,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                 <EuiFormRow
                   fullWidth
                   label={i18n.translate(
-                    'xpack.triggersActionsUI.components.builtinActionTypes.jira.parentIssueSearchLabel',
+                    'xpack.stackConnectors.components.jira.parentIssueSearchLabel',
                     {
                       defaultMessage: 'Parent issue',
                     }
@@ -254,7 +251,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                   <EuiFormRow
                     fullWidth
                     label={i18n.translate(
-                      'xpack.triggersActionsUI.components.builtinActionTypes.jira.severitySelectFieldLabel',
+                      'xpack.stackConnectors.components.jira.severitySelectFieldLabel',
                       {
                         defaultMessage: 'Priority',
                       }
@@ -286,12 +283,9 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
               errors['subActionParams.incident.summary'].length > 0 &&
               incident.summary !== undefined
             }
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.jira.summaryFieldLabel',
-              {
-                defaultMessage: 'Summary (required)',
-              }
-            )}
+            label={i18n.translate('xpack.stackConnectors.components.jira.summaryFieldLabel', {
+              defaultMessage: 'Summary (required)',
+            })}
           >
             <TextFieldWithMessageVariables
               index={index}
@@ -310,7 +304,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                   <EuiFormRow
                     fullWidth
                     label={i18n.translate(
-                      'xpack.triggersActionsUI.components.builtinActionTypes.jira.impactSelectFieldLabel',
+                      'xpack.stackConnectors.components.jira.impactSelectFieldLabel',
                       {
                         defaultMessage: 'Labels',
                       }
@@ -360,7 +354,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
               paramsProperty={'description'}
               inputTargetValue={incident.description ?? undefined}
               label={i18n.translate(
-                'xpack.triggersActionsUI.components.builtinActionTypes.jira.descriptionTextAreaFieldLabel',
+                'xpack.stackConnectors.components.jira.descriptionTextAreaFieldLabel',
                 {
                   defaultMessage: 'Description',
                 }
@@ -374,7 +368,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
             paramsProperty={'comments'}
             inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
             label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.jira.commentsTextAreaFieldLabel',
+              'xpack.stackConnectors.components.jira.commentsTextAreaFieldLabel',
               {
                 defaultMessage: 'Additional comments',
               }

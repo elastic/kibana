@@ -8,7 +8,7 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  ActionTypeModel,
+  ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import {
@@ -21,48 +21,48 @@ import {
 import { getConnectorDescriptiveTitle, getSelectedConnectorIcon } from './helpers';
 
 export const SERVICENOW_ITOM_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITOM.actionTypeTitle',
+  'xpack.stackConnectors.components.serviceNowITOM.connectorTypeTitle',
   {
     defaultMessage: 'ServiceNow ITOM',
   }
 );
 
 export const SERVICENOW_ITOM_DESC = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITOM.selectMessageText',
+  'xpack.stackConnectors.components.serviceNowITOM.selectMessageText',
   {
     defaultMessage: 'Create an event in ServiceNow ITOM.',
   }
 );
 
 export const SERVICENOW_ITSM_DESC = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITSM.selectMessageText',
+  'xpack.stackConnectors.components.serviceNowITSM.selectMessageText',
   {
     defaultMessage: 'Create an incident in ServiceNow ITSM.',
   }
 );
 
 export const SERVICENOW_SIR_DESC = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowSIR.selectMessageText',
+  'xpack.stackConnectors.components.serviceNowSIR.selectMessageText',
   {
     defaultMessage: 'Create an incident in ServiceNow SecOps.',
   }
 );
 
 export const SERVICENOW_ITSM_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITSM.actionTypeTitle',
+  'xpack.stackConnectors.components.serviceNowITSM.connectorTypeTitle',
   {
     defaultMessage: 'ServiceNow ITSM',
   }
 );
 
 export const SERVICENOW_SIR_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowSIR.actionTypeTitle',
+  'xpack.stackConnectors.components.serviceNowSIR.connectorTypeTitle',
   {
     defaultMessage: 'ServiceNow SecOps',
   }
 );
 
-export function getServiceNowITSMActionType(): ActionTypeModel<
+export function getServiceNowITSMConnectorType(): ConnectorTypeModel<
   ServiceNowConfig,
   ServiceNowSecrets,
   ServiceNowITSMActionParams
@@ -100,7 +100,7 @@ export function getServiceNowITSMActionType(): ActionTypeModel<
   };
 }
 
-export function getServiceNowSIRActionType(): ActionTypeModel<
+export function getServiceNowSIRConnectorType(): ConnectorTypeModel<
   ServiceNowConfig,
   ServiceNowSecrets,
   ServiceNowSIRActionParams
@@ -138,7 +138,7 @@ export function getServiceNowSIRActionType(): ActionTypeModel<
   };
 }
 
-export function getServiceNowITOMActionType(): ActionTypeModel<
+export function getServiceNowITOMConnectorType(): ConnectorTypeModel<
   ServiceNowConfig,
   ServiceNowSecrets,
   ServiceNowITOMActionParams

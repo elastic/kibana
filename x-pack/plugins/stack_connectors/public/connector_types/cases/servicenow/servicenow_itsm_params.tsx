@@ -252,7 +252,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
                 helpText={
                   <EuiLink href={docLinks.links.alerting.serviceNowAction} target="_blank">
                     <FormattedMessage
-                      id="xpack.triggersActionsUI.components.builtinActionTypes.serviceNowAction.correlationIDHelpLabel"
+                      id="xpack.stackConnectors.components.serviceNow.correlationIDHelpLabel"
                       defaultMessage="Identifier for updating incidents"
                     />
                   </EuiLink>

@@ -7,52 +7,52 @@
 
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 import { registerConnectorTypes } from '../..';
-import { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { registrationServicesMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 
-const SERVICENOW_ITSM_ACTION_TYPE_ID = '.servicenow';
-const SERVICENOW_SIR_ACTION_TYPE_ID = '.servicenow-sir';
-const SERVICENOW_ITOM_ACTION_TYPE_ID = '.servicenow-itom';
-let actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+const SERVICENOW_ITSM_CONNECTOR_TYPE_ID = '.servicenow';
+const SERVICENOW_SIR_CONNECTOR_TYPE_ID = '.servicenow-sir';
+const SERVICENOW_ITOM_CONNECTOR_TYPE_ID = '.servicenow-itom';
+let connectorTypeRegistry: TypeRegistry<ConnectorTypeModel>;
 
 beforeAll(() => {
-  actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-  registerConnectorTypes({ actionTypeRegistry, services: registrationServicesMock });
+  connectorTypeRegistry = new TypeRegistry<ConnectorTypeModel>();
+  registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
 });
 
-describe('actionTypeRegistry.get() works', () => {
+describe('connectorTypeRegistry.get() works', () => {
   [
-    SERVICENOW_ITSM_ACTION_TYPE_ID,
-    SERVICENOW_SIR_ACTION_TYPE_ID,
-    SERVICENOW_ITOM_ACTION_TYPE_ID,
+    SERVICENOW_ITSM_CONNECTOR_TYPE_ID,
+    SERVICENOW_SIR_CONNECTOR_TYPE_ID,
+    SERVICENOW_ITOM_CONNECTOR_TYPE_ID,
   ].forEach((id) => {
-    test(`${id}: action type static data is as expected`, () => {
-      const actionTypeModel = actionTypeRegistry.get(id);
-      expect(actionTypeModel.id).toEqual(id);
+    test(`${id}: connector type static data is as expected`, () => {
+      const connectorTypeModel = connectorTypeRegistry.get(id);
+      expect(connectorTypeModel.id).toEqual(id);
     });
   });
 });
 
 describe('servicenow action params validation', () => {
-  [SERVICENOW_ITSM_ACTION_TYPE_ID, SERVICENOW_SIR_ACTION_TYPE_ID].forEach((id) => {
+  [SERVICENOW_ITSM_CONNECTOR_TYPE_ID, SERVICENOW_SIR_CONNECTOR_TYPE_ID].forEach((id) => {
     test(`${id}: action params validation succeeds when action params is valid`, async () => {
-      const actionTypeModel = actionTypeRegistry.get(id);
+      const connectorTypeModel = connectorTypeRegistry.get(id);
       const actionParams = {
         subActionParams: { incident: { short_description: 'some title {{test}}' }, comments: [] },
       };
 
-      expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+      expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
         errors: { ['subActionParams.incident.short_description']: [] },
       });
     });
 
     test(`${id}: params validation fails when short_description is not valid`, async () => {
-      const actionTypeModel = actionTypeRegistry.get(id);
+      const connectorTypeModel = connectorTypeRegistry.get(id);
       const actionParams = {
         subActionParams: { incident: { short_description: '' }, comments: [] },
       };
 
-      expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+      expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
         errors: {
           ['subActionParams.incident.short_description']: ['Short description is required.'],
         },
@@ -60,20 +60,20 @@ describe('servicenow action params validation', () => {
     });
   });
 
-  test(`${SERVICENOW_ITOM_ACTION_TYPE_ID}: action params validation succeeds when action params is valid`, async () => {
-    const actionTypeModel = actionTypeRegistry.get(SERVICENOW_ITOM_ACTION_TYPE_ID);
+  test(`${SERVICENOW_ITOM_CONNECTOR_TYPE_ID}: action params validation succeeds when action params is valid`, async () => {
+    const connectorTypeModel = connectorTypeRegistry.get(SERVICENOW_ITOM_CONNECTOR_TYPE_ID);
     const actionParams = { subActionParams: { severity: 'Critical' } };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
       errors: { ['severity']: [] },
     });
   });
 
-  test(`${SERVICENOW_ITOM_ACTION_TYPE_ID}: params validation fails when severity is not valid`, async () => {
-    const actionTypeModel = actionTypeRegistry.get(SERVICENOW_ITOM_ACTION_TYPE_ID);
+  test(`${SERVICENOW_ITOM_CONNECTOR_TYPE_ID}: params validation fails when severity is not valid`, async () => {
+    const connectorTypeModel = connectorTypeRegistry.get(SERVICENOW_ITOM_CONNECTOR_TYPE_ID);
     const actionParams = { subActionParams: { severity: null } };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
       errors: { ['severity']: ['Severity is required.'] },
     });
   });

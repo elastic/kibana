@@ -8,26 +8,26 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  ActionTypeModel,
+  ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { SwimlaneConfig, SwimlaneSecrets, SwimlaneActionParams } from './types';
 
 export const SW_SELECT_MESSAGE_TEXT = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.selectMessageText',
+  'xpack.stackConnectors.components.swimlane.selectMessageText',
   {
     defaultMessage: 'Create record in Swimlane',
   }
 );
 
 export const SW_ACTION_TYPE_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.actionTypeTitle',
+  'xpack.stackConnectors.components.swimlane.connectorTypeTitle',
   {
     defaultMessage: 'Create Swimlane Record',
   }
 );
 
-export function getActionType(): ActionTypeModel<
+export function getConnectorType(): ConnectorTypeModel<
   SwimlaneConfig,
   SwimlaneSecrets,
   SwimlaneActionParams

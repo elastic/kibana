@@ -6,7 +6,7 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import { BASE_ACTION_API_PATH } from '../../../constants';
+import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 import {
   ConnectorExecutorResult,
   rewriteResponseToCamelCase,
