@@ -24,7 +24,8 @@ export default ({ getService }: FtrProviderContext) => {
     expectedStatusCode: number = 200
   ) => {
     const resp = await supertestWithoutAuth
-      .get(`${TEST_URL}?featureIds=${featureIds.toString()}`)
+      .get(`${TEST_URL}`)
+      .query({ featureIds })
       .auth(user.username, user.password)
       .set('kbn-xsrf', 'true')
       .expect(expectedStatusCode);
@@ -54,7 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
           'logs',
           'uptime',
         ]);
-        expect(Object.keys(browserFields)).to.eql(['base', 'kibana', 'message']);
+        expect(Object.keys(browserFields)).to.eql(['base']);
       });
 
       it(`${secOnlyRead.username} should not have access to o11y featureIds`, async () => {
