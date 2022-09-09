@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 import { LazyField } from '@kbn/advanced-settings-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { apmExperimentalFeaturesSettings } from '@kbn/observability-plugin/common';
 import React, { useState } from 'react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmEditableSettings } from '../../../hooks/use_apm_editable_settings';
@@ -28,7 +27,7 @@ import { useApmEditableSettings } from '../../../hooks/use_apm_editable_settings
 export function LabsSettingsFlyout() {
   const [isOpen, setIsOpen] = useState(false);
   const { docLinks, notifications } = useApmPluginContext().core;
-  const experimentalFeatureKeys = Object.keys(apmExperimentalFeaturesSettings);
+  const experimentalFeatureKeys = Object.keys({});
   const {
     handleFieldChange,
     settingsEditableConfig,
