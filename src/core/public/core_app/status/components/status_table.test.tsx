@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { ServiceStatus } from '../../../../types/status';
+import type { StatusInfoServiceStatus as ServiceStatus } from '@kbn/core-status-common-internal';
 import { StatusTable } from './status_table';
 
 const state = {

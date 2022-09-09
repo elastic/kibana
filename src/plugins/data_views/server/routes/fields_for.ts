@@ -118,5 +118,6 @@ export const registerFieldForWildcard = (
   >
 ) => {
   router.put({ path, validate }, handler);
+  router.post({ path, validate }, handler);
   router.get({ path, validate }, handler);
 };

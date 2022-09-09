@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { SYNTHETICS_STEP_NAME } from '../constants/field_names/synthetics';
 import { ConfigProps, SeriesConfig } from '../../types';
 import { FieldLabels, FORMULA_COLUMN } from '../constants';
@@ -62,6 +63,16 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
               maxSteps: 5,
             },
           },
+          titlePosition: 'bottom',
+        },
+      },
+      {
+        id: 'monitor_duration',
+        field: 'monitor.duration.us',
+        label: i18n.translate('xpack.observability.expView.avgDuration', {
+          defaultMessage: 'Avg. Duration',
+        }),
+        metricStateOptions: {
           titlePosition: 'bottom',
         },
       },
