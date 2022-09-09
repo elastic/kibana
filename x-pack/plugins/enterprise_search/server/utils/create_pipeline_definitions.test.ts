@@ -72,12 +72,14 @@ describe('formatMlPipelineBody util function', () => {
       {
         append: {
           field: '_source._ingest.processors',
-          value: {
-            type: modelType,
-            model_id: modelId,
-            model_version: modelVersion,
-            processed_timestamp: '{{{_ingest.timestamp}}}',
-          },
+          value: [
+            {
+              type: modelType,
+              model_id: modelId,
+              model_version: modelVersion,
+              processed_timestamp: '{{{_ingest.timestamp}}}',
+            },
+          ],
         },
       },
     ],
@@ -88,14 +90,17 @@ describe('formatMlPipelineBody util function', () => {
   });
 
   it('should return the pipeline body', () => {
-    const mockResponse = [
-      {
-        model_id: modelId,
-        version: modelVersion,
-        model_type: modelType,
-        input: { field_names: [modelInputField] },
-      },
-    ];
+    const mockResponse = {
+      count: 1,
+      trained_model_configs: [
+        {
+          model_id: modelId,
+          version: modelVersion,
+          model_type: modelType,
+          input: { field_names: [modelInputField] },
+        },
+      ],
+    };
     mockClient.ml.getTrainedModels.mockImplementation(() => Promise.resolve(mockResponse));
     formatMlPipelineBody(
       modelId,
