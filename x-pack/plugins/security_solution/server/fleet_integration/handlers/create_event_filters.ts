@@ -51,7 +51,7 @@ export const createEventFilters = async (
     // Ignoring error 409 (Conflict)
     if (!SavedObjectsErrorHelpers.isConflictError(err)) {
       logger.error(`Error creating Event Filter List: ${wrapErrorIfNeeded(err)}`);
-      throw err;
+      return;
     }
   }
 
