@@ -81,19 +81,23 @@ describe('enrichEvents', () => {
       .mockReturnValueOnce([
         {
           _source: {
-            host: { name: 'host name 1' },
-            risk: 'Low',
-            risk_stats: {
-              risk_score: 20,
+            host: {
+              name: 'host name 1',
+              risk: {
+                calculated_level: 'Low',
+                calculated_score_norm: 20,
+              },
             },
           },
         },
         {
           _source: {
-            host: { name: 'host name 3' },
-            risk: 'Critical',
-            risk_stats: {
-              risk_score: 90,
+            host: {
+              name: 'host name 3',
+              risk: {
+                calculated_level: 'Critical',
+                calculated_score_norm: 90,
+              },
             },
           },
         },
@@ -101,19 +105,23 @@ describe('enrichEvents', () => {
       .mockReturnValueOnce([
         {
           _source: {
-            user: { name: 'user name 1' },
-            risk: 'Moderate',
-            risk_stats: {
-              risk_score: 50,
+            user: {
+              name: 'user name 1',
+              risk: {
+                calculated_level: 'Moderate',
+                calculated_score_norm: 50,
+              },
             },
           },
         },
         {
           _source: {
-            user: { name: 'user name 2' },
-            risk: 'Critical',
-            risk_stats: {
-              risk_score: 90,
+            user: {
+              name: 'user name 2',
+              risk: {
+                calculated_level: 'Critical',
+                calculated_score_norm: 90,
+              },
             },
           },
         },
@@ -171,19 +179,23 @@ describe('enrichEvents', () => {
       .mockImplementationOnce(() => [
         {
           _source: {
-            user: { name: 'user name 1' },
-            risk: 'Moderate',
-            risk_stats: {
-              risk_score: 50,
+            user: {
+              name: 'user name 1',
+              risk: {
+                calculated_level: 'Moderate',
+                calculated_score_norm: 50,
+              },
             },
           },
         },
         {
           _source: {
-            user: { name: 'user name 2' },
-            risk: 'Critical',
-            risk_stats: {
-              risk_score: 90,
+            user: {
+              name: 'user name 2',
+              risk: {
+                calculated_level: 'Critical',
+                calculated_score_norm: 90,
+              },
             },
           },
         },

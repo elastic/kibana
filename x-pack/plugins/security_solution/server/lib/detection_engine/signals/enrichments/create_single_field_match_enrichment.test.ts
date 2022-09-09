@@ -168,4 +168,33 @@ describe('createSingleFieldMatchEnrichment', () => {
 
     expect(mockSearchEnrichments).not.toHaveBeenCalled();
   });
+
+  it('make several request to enrichment index, if there more than 1000 values to search', async () => {
+    mockSearchEnrichments.mockImplementation(() =>
+      [...Array(3000).keys()].map((item) => ({
+        _source: { host: { name: `host name ${item}` } },
+      }))
+    );
+
+    const events = [...Array(3000).keys()].map((item) =>
+      createAlert(item, { host: { name: `host name ${item}` } })
+    );
+    const enrichFunction: EnrichmentFunction = (a) => a;
+
+    const enrichmentResult = await createSingleFieldMatchEnrichment({
+      name: 'host',
+      index: ['host-enrichment'],
+      events,
+      logger: ruleExecutionLogger,
+      services: alertServices,
+      mappingField: {
+        eventField: 'host.name',
+        enrichmentField: 'host.name',
+      },
+      createEnrichmentFunction: () => enrichFunction,
+    });
+
+    expect(mockSearchEnrichments.mock.calls.length).toEqual(3);
+    expect(Object.keys(enrichmentResult).length).toEqual(3000);
+  });
 });

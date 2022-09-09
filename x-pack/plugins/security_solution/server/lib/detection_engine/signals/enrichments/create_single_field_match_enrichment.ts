@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import { get, flatten, chunk } from 'lodash';
 import { searchEnrichments } from './search_enrichments';
 import { makeSingleFieldMathQuery } from './utils/requests';
 import { getEventValue } from './utils/events';
-import type { CreateFieldsMatchEnrichment, EventsMapByEnrichments } from './types';
+import type { CreateFieldsMatchEnrichment, EventsMapByEnrichments, EnrichmentType } from './types';
+
+const MAX_CLAUSES = 1000;
 
 export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = async ({
   index,
@@ -34,22 +36,29 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
 
       return acc;
     }, {} as { [key: string]: typeof events });
-    const queryResult = makeSingleFieldMathQuery(
-      Object.keys(eventsMapByFieldValue),
-      mappingField.enrichmentField
-    );
-    logger.debug(`Enrichment ${name}: ${JSON.stringify(events)}`);
-    if (queryResult.query?.bool?.should?.length === 0) {
-      logger.debug(`Enrichment ${name}: events doesn't have any field to enrich`);
-      return {};
-    }
 
-    const enrichments = await searchEnrichments({
-      index,
-      services,
-      logger,
-      query: queryResult,
-    });
+    const uniqueEventsValuesToSearchBy = Object.keys(eventsMapByFieldValue);
+    const chunksUniqueEventsValuesToSearchBy = chunk(uniqueEventsValuesToSearchBy, MAX_CLAUSES);
+
+    const getAllEnrichment = chunksUniqueEventsValuesToSearchBy
+      .map((enirhcmentValuesChunk) =>
+        makeSingleFieldMathQuery(enirhcmentValuesChunk, mappingField.enrichmentField)
+      )
+      .filter((query) => query.query?.bool?.should?.length > 0)
+      .map((query) =>
+        searchEnrichments({
+          index,
+          services,
+          logger,
+          query,
+        })
+      );
+
+    const enrichmentsResults = (await Promise.allSettled(getAllEnrichment))
+      .filter((result) => result.status === 'fulfilled')
+      .map((result) => (result as PromiseFulfilledResult<EnrichmentType[]>)?.value);
+
+    const enrichments = flatten(enrichmentsResults);
 
     if (enrichments.length === 0) {
       logger.debug(`Enrichment ${name}: no enrichment found`);
