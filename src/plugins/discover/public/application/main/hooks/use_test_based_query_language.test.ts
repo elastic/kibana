@@ -10,33 +10,54 @@ import { renderHook } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
-import { GetStateReturn } from '../services/discover_state';
+import { AppState, GetStateReturn } from '../services/discover_state';
 import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../types';
 import { DataDocuments$, RecordRawType } from './use_saved_search';
 import { DataTableRecord } from '../../../types';
+import { AggregateQuery, Query } from '@kbn/es-query';
+
+function getHookProps(
+  replaceUrlAppState: (newState: Partial<AppState>) => Promise<void>,
+  query: AggregateQuery | Query | undefined
+) {
+  const stateContainer = {
+    replaceUrlAppState,
+  } as unknown as GetStateReturn;
+
+  const msgLoading = {
+    recordRawType: RecordRawType.PLAIN,
+    fetchStatus: FetchStatus.LOADING,
+    query,
+  };
+
+  const documents$ = new BehaviorSubject(msgLoading) as DataDocuments$;
+
+  return {
+    documents$,
+    dataViews: discoverServiceMock.dataViews,
+    stateContainer,
+  };
+}
+const query = { sql: 'SELECT * from the-data-view-title' };
+const msgComplete = {
+  recordRawType: RecordRawType.PLAIN,
+  fetchStatus: FetchStatus.COMPLETE,
+  result: [
+    {
+      id: '1',
+      raw: { field1: 1, field2: 2 },
+      flattened: { field1: 1, field2: 2 },
+    } as DataTableRecord,
+  ],
+  query,
+};
 
 describe('useTextBasedQueryLanguage', () => {
-  test('state is replaced correctly depending on request', async () => {
+  test('a text based query should change state when loading and finished', async () => {
     const replaceUrlAppState = jest.fn();
-    const stateContainer = {
-      replaceUrlAppState,
-    } as unknown as GetStateReturn;
-    const query = { sql: 'SELECT * from the-data-view-title' };
-
-    const msgLoading = {
-      recordRawType: RecordRawType.PLAIN,
-      fetchStatus: FetchStatus.LOADING,
-      query,
-    };
-
-    const documents$ = new BehaviorSubject(msgLoading) as DataDocuments$;
-
-    const props = {
-      documents$,
-      dataViews: discoverServiceMock.dataViews,
-      stateContainer,
-    };
+    const props = getHookProps(replaceUrlAppState, query);
+    const { documents$ } = props;
 
     renderHook(() => useTextBasedQueryLanguage(props));
 
@@ -44,20 +65,9 @@ describe('useTextBasedQueryLanguage', () => {
     expect(replaceUrlAppState).toHaveBeenCalledWith({ index: 'the-data-view-id' });
 
     replaceUrlAppState.mockReset();
-    const msgComplete = {
-      recordRawType: RecordRawType.PLAIN,
-      fetchStatus: FetchStatus.COMPLETE,
-      result: [
-        {
-          id: '1',
-          raw: { field1: 1, field2: 2 },
-          flattened: { field1: 1, field2: 2 },
-        } as DataTableRecord,
-      ],
-      query,
-    };
+
     documents$.next(msgComplete);
-    await waitFor(() => expect(stateContainer.replaceUrlAppState).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(1));
 
     await waitFor(() => {
       expect(replaceUrlAppState).toHaveBeenCalledWith({
@@ -65,9 +75,20 @@ describe('useTextBasedQueryLanguage', () => {
         columns: ['field1', 'field2'],
       });
     });
+  });
+  test('changing a text based query with different result columns should change state', async () => {
+    const replaceUrlAppState = jest.fn();
+    const props = getHookProps(replaceUrlAppState, query);
+    const { documents$ } = props;
+
+    renderHook(() => useTextBasedQueryLanguage(props));
+
+    documents$.next(msgComplete);
+    await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(2));
 
     replaceUrlAppState.mockReset();
-    const msgCompleteV2 = {
+
+    documents$.next({
       recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.COMPLETE,
       result: [
@@ -78,9 +99,8 @@ describe('useTextBasedQueryLanguage', () => {
         } as DataTableRecord,
       ],
       query: { sql: 'SELECT field1 from the-data-view-title' },
-    };
-    documents$.next(msgCompleteV2);
-    await waitFor(() => expect(stateContainer.replaceUrlAppState).toHaveBeenCalledTimes(1));
+    });
+    await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(1));
 
     await waitFor(() => {
       expect(replaceUrlAppState).toHaveBeenCalledWith({
