@@ -31,7 +31,7 @@ import { ApplicationStart } from '@kbn/core-application-browser';
 import { HttpStart } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { guidesConfig } from '../constants';
-import type { GuideConfig, StepStatus, GuidedOnboardingState } from '../types';
+import type {GuideConfig, StepStatus, GuidedOnboardingState, StepConfig} from '../types';
 import type { ApiService } from '../services/api';
 
 interface Props {
@@ -41,33 +41,37 @@ interface Props {
 }
 
 const getConfig = (state?: GuidedOnboardingState): GuideConfig | undefined => {
-  if (state?.active_guide) {
+  if (state?.active_guide && state.active_guide !== 'unset' ) {
     return guidesConfig[state.active_guide];
   }
 
   return undefined;
 };
 
-const getStepLabel = (state?: GuidedOnboardingState): string => {
-  if (state?.active_step && Number(state.active_step) > 0) {
-    return `: Step ${state.active_step}`;
+const getStepLabel = (steps?: StepConfig[], state?: GuidedOnboardingState): string => {
+  if (steps && state?.active_step) {
+    const activeStepIndex = steps.findIndex((step: StepConfig) => step.id === state.active_step);
+    if (activeStepIndex > -1) {
+      return `: Step ${activeStepIndex + 1}`;
+    }
   }
   return '';
 };
 
-const getStepStatus = (stepIndex: number, activeStep?: string): StepStatus => {
-  if (isNaN(Number(activeStep))) {
+const getStepStatus = (steps: StepConfig[], stepIndex: number, activeStep?: string): StepStatus => {
+
+  const activeStepIndex = steps.findIndex((step: StepConfig) => step.id === activeStep);
+  if (activeStepIndex < stepIndex) {
     return 'incomplete';
   }
-  if (Number(activeStep) === stepIndex + 1 || (Number(activeStep) < 1 && stepIndex === 0)) {
+  if (activeStepIndex === stepIndex) {
     return 'in_progress';
   }
-  return Number(activeStep) > stepIndex + 1 ? 'complete' : 'incomplete';
+  return 'complete';
 };
 
 export const GuidedOnboardingButton = ({ api, application, http }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [showStartButton, setShowStartButton] = useState(true);
 
   const [guidedOnboardingState, setGuidedOnboardingState] = useState<
     GuidedOnboardingState | undefined
@@ -115,15 +119,12 @@ export const GuidedOnboardingButton = ({ api, application, http }: Props) => {
   `;
 
   const guideConfig = getConfig(guidedOnboardingState);
-  const stepLabel = getStepLabel(guidedOnboardingState);
+  const stepLabel = getStepLabel(guideConfig?.steps, guidedOnboardingState);
 
-  const startGuide = () => {
-    const activeStep = Number(guidedOnboardingState?.active_step) + 1;
-    const activeStepConfig = guideConfig?.steps[activeStep];
-    const basePath = http.basePath.get();
-    if (activeStepConfig) {
-      setShowStartButton(false);
-      application.navigateToUrl(`${basePath}${activeStepConfig.url}`);
+  const navigateToStep = (step: StepConfig) => {
+    setIsPopoverOpen(false);
+    if (step.location) {
+      application.navigateToApp(step.location.appID, {path: step.location.path});
     }
   };
 
@@ -171,10 +172,10 @@ export const GuidedOnboardingButton = ({ api, application, http }: Props) => {
         <EuiHorizontalRule />
         <EuiProgress label="Progress" value={40} max={100} size="l" valueText />
         <EuiSpacer size="xl" />
-        {guideConfig?.steps.map((step, index) => {
+        {guideConfig?.steps.map((step, index, steps) => {
           const accordionId = htmlIdGenerator(`accordion${index}`)();
 
-          const stepStatus = getStepStatus(index, guidedOnboardingState?.active_step);
+          const stepStatus = getStepStatus(steps, index, guidedOnboardingState?.active_step);
           const buttonContent = (
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={false}>
@@ -199,10 +200,10 @@ export const GuidedOnboardingButton = ({ api, application, http }: Props) => {
                   <EuiSpacer size="s" />
                   <EuiText size="s">{step.description}</EuiText>
                   <EuiSpacer />
-                  {showStartButton && (
+                  {stepStatus === 'in_progress' && (
                     <EuiFlexGroup justifyContent="flexEnd">
                       <EuiFlexItem grow={false}>
-                        <EuiButton onClick={startGuide} fill>
+                        <EuiButton onClick={() => navigateToStep(step)} fill>
                           {/* TODO: Support for conditional "Continue" button label if user revists a step  */}
                           {i18n.translate(
                             'xpack.guidedOnboarding.dropdownPanel.startStepButtonLabel',

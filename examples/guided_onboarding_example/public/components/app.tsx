@@ -8,85 +8,60 @@
 
 import React from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { Router, Switch, Route } from 'react-router-dom';
 
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageHeader,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageContent_Deprecated as EuiPageContent, EuiPageHeader, EuiTitle } from '@elastic/eui';
 
-import { CoreStart } from '@kbn/core/public';
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { CoreStart, ScopedHistory } from '@kbn/core/public';
 
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
-import { PLUGIN_ID, PLUGIN_NAME } from '../../common';
-import { StepOne } from './step_one';
 import { StepTwo } from './step_two';
+import { StepOne } from './step_one';
+import { Main } from './main';
 
 interface GuidedOnboardingExampleAppDeps {
-  basename: string;
   notifications: CoreStart['notifications'];
-  http: CoreStart['http'];
-  navigation: NavigationPublicPluginStart;
   guidedOnboarding: GuidedOnboardingPluginStart;
+  history: ScopedHistory;
 }
 
 export const GuidedOnboardingExampleApp = (props: GuidedOnboardingExampleAppDeps) => {
-  const { basename, navigation } = props;
+  const { notifications, guidedOnboarding, history } = props;
 
   return (
-    <Router basename={basename}>
       <I18nProvider>
-        <>
-          <navigation.ui.TopNavMenu
-            appName={PLUGIN_ID}
-            showSearchBar={true}
-            useDefaultBehaviors={true}
-          />
           <EuiPage restrictWidth="1000px">
             <EuiPageBody>
               <EuiPageHeader>
                 <EuiTitle size="l">
                   <h1>
                     <FormattedMessage
-                      id="guidedOnboardingExample.pluginName"
-                      defaultMessage="{name}"
-                      values={{ name: PLUGIN_NAME }}
+                      id="guidedOnboardingExample.title"
+                      defaultMessage="Guided onboarding examples"
                     />
                   </h1>
                 </EuiTitle>
               </EuiPageHeader>
               <EuiPageContent>
-                <EuiPageContentHeader>
-                  <EuiTitle>
-                    <h2>
-                      <FormattedMessage
-                        id="guidedOnboardingExample.title"
-                        defaultMessage="Saved objects POC"
-                      />
-                    </h2>
-                  </EuiTitle>
-                </EuiPageContentHeader>
-                <EuiPageContentBody>
-                  <Switch>
-                    <Route exact path="/">
-                      <StepOne {...props} />
-                    </Route>
-                    <Route exact path="/stepTwo">
-                      <StepTwo {...props} />
-                    </Route>
-                  </Switch>
-                </EuiPageContentBody>
+                <Router history={history}>
+                <Switch>
+                  <Route exact path="/">
+                    <Main
+                      notifications={notifications}
+                      guidedOnboarding={guidedOnboarding}
+                    />
+                  </Route>
+                  <Route exact path="/stepOne">
+                    <StepOne guidedOnboarding={guidedOnboarding} />
+                  </Route>
+                  <Route exact path="/stepTwo">
+                    <StepTwo guidedOnboarding={guidedOnboarding} />
+                  </Route>
+                </Switch>
+                </Router>
               </EuiPageContent>
             </EuiPageBody>
           </EuiPage>
-        </>
       </I18nProvider>
-    </Router>
   );
 };

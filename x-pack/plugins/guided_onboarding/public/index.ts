@@ -15,4 +15,5 @@ export type {
   GuidedOnboardingPluginSetup,
   GuidedOnboardingPluginStart,
   GuidedOnboardingState,
+  UseCase,
 } from './types';

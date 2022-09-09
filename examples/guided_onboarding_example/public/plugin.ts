@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import {
   GuidedOnboardingExamplePluginSetup,
@@ -33,17 +32,7 @@ export class GuidedOnboardingExamplePlugin
       },
     });
 
-    // Return methods that should be available to other plugins
-    return {
-      getGreeting() {
-        return i18n.translate('guidedOnboardingExample.greetingText', {
-          defaultMessage: 'Hello from {name}!',
-          values: {
-            name: PLUGIN_NAME,
-          },
-        });
-      },
-    };
+    return {};
   }
 
   public start(core: CoreStart): GuidedOnboardingExamplePluginStart {

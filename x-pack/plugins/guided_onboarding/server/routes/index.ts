@@ -38,10 +38,11 @@ export function defineRoutes(router: IRouter) {
         return response.ok({
           body: { state: guidedSetupSO.attributes },
         });
+      } else {
+        return response.ok({
+          body: { state: guidedSetupDefaultState },
+        });
       }
-      return response.ok({
-        body: { state: guidedSetupDefaultState },
-      });
     }
   );
 
@@ -51,7 +52,7 @@ export function defineRoutes(router: IRouter) {
       validate: {
         body: schema.object({
           active_guide: schema.maybe(schema.string()),
-          active_step: schema.maybe(schema.number()),
+          active_step: schema.maybe(schema.string()),
         }),
       },
     },
@@ -61,9 +62,8 @@ export function defineRoutes(router: IRouter) {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       const active_step = request.body.active_step;
       const attributes = {
-        ...guidedSetupDefaultState,
-        active_guide,
-        active_step,
+        active_guide: active_guide ?? 'unset',
+        active_step: active_step ?? 'unset',
       };
       const coreContext = await context.core;
       const soClient = coreContext.savedObjects.client as SavedObjectsClient;
@@ -79,17 +79,20 @@ export function defineRoutes(router: IRouter) {
         return response.ok({
           body: { state: updatedGuidedSetupSO.attributes },
         });
+      } else {
+        const guidedSetupSO = await soClient.create(guidedSetupSavedObjectsType, {
+          ...guidedSetupDefaultState,
+          ...attributes,
+        }, {
+          id: guidedSetupSavedObjectsId,
+        });
+
+        return response.ok({
+          body: {
+            state: guidedSetupSO.attributes,
+          },
+        });
       }
-
-      const guidedSetupSO = await soClient.create(guidedSetupSavedObjectsType, attributes, {
-        id: guidedSetupSavedObjectsId,
-      });
-
-      return response.ok({
-        body: {
-          state: guidedSetupSO.attributes,
-        },
-      });
     }
   );
 }

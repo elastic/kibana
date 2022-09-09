@@ -6,143 +6,66 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, {useEffect, useState} from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-
 import {
   EuiButton,
-  EuiSpacer,
   EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiFieldNumber,
-  EuiSelect,
-  EuiHorizontalRule,
-  EuiTourStep,
+  EuiTourStep, EuiTitle,
+  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
+  EuiPageContentBody_Deprecated as EuiPageContentBody, EuiSpacer,
 } from '@elastic/eui';
 
-import { CoreStart } from '@kbn/core/public';
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
-import {
-  GuidedOnboardingPluginStart,
-  GuidedOnboardingState,
-  UseCase,
+import {GuidedOnboardingPluginStart,
 } from '@kbn/guided-onboarding-plugin/public/types';
 
+
 interface GuidedOnboardingExampleAppDeps {
-  basename: string;
-  notifications: CoreStart['notifications'];
-  http: CoreStart['http'];
-  navigation: NavigationPublicPluginStart;
   guidedOnboarding: GuidedOnboardingPluginStart;
 }
 
 export const StepOne = ({
-  notifications,
-  http,
-  guidedOnboarding,
+  guidedOnboarding
 }: GuidedOnboardingExampleAppDeps) => {
   const { guidedOnboardingApi } = guidedOnboarding;
 
-  const [selectedGuide, setSelectedGuide] = useState<UseCase | undefined>(undefined);
-  const [selectedStep, setSelectedStep] = useState<string | undefined>(undefined);
-  const [isTourStepOpen, setIsTourStepOpen] = useState(true);
+  const [isTourStepOpen, setIsTourStepOpen] = useState<boolean>(false);
+  useEffect(() => {
+    const subscription = guidedOnboardingApi?.fetchGuideState$().subscribe((newState) => {
+      const {active_guide: guide, active_step: step} = newState;
 
-  const getDataRequest = () => {
-    http.get<{ state: GuidedOnboardingState }>('/api/guided_onboarding/state').then((res) => {
-      notifications.toasts.addSuccess(
-        i18n.translate('guidedOnboarding.dataUpdated', {
-          defaultMessage: 'Data loaded',
-        })
-      );
-      setSelectedGuide(res.state.active_guide);
-      setSelectedStep(res.state.active_step);
+      if (guide === 'search' && step === 'add_data') {
+        setIsTourStepOpen(true);
+      }
     });
-  };
-
-  const sendUpdateRequest = async () => {
-    const response = await guidedOnboardingApi?.updateGuideState({
-      active_guide: selectedGuide,
-      active_step: selectedStep,
-    });
-
-    if (response) {
-      notifications.toasts.addSuccess(
-        i18n.translate('guidedOnboardingExample.dataUpdated', {
-          defaultMessage: 'Data updated',
-        })
-      );
-    }
-  };
+    return () => subscription?.unsubscribe();
+  }, [guidedOnboardingApi]);
 
   return (
     <>
-      <EuiText>
-        <p>
-          <FormattedMessage
-            id="guidedOnboardingExample.timestampText"
-            defaultMessage="State: {state}"
-            values={{
-              state: `guide: ${selectedGuide}, step: ${selectedStep}` ?? 'Unknown',
-            }}
-          />
-        </p>
-      </EuiText>
-      <EuiSpacer />
-      <EuiButton type="primary" size="s" onClick={getDataRequest}>
-        <FormattedMessage id="guidedOnboardingExample.buttonText" defaultMessage="Get data" />
-      </EuiButton>
-      <EuiSpacer />
-      <EuiFlexGroup style={{ maxWidth: 600 }}>
-        <EuiFlexItem>
-          <EuiFormRow label="Guide" helpText="Select a guide">
-            <EuiSelect
-              id={'guideSelect'}
-              options={[
-                { value: 'observability', text: 'observability' },
-                { value: 'security', text: 'security' },
-                { value: 'search', text: 'search' },
-                { value: '', text: 'unset' },
-              ]}
-              value={selectedGuide}
-              onChange={(e) => {
-                const value = e.target.value as UseCase;
-                const shouldResetState = value.trim().length === 0;
-                if (shouldResetState) {
-                  setSelectedGuide(undefined);
-                  setSelectedStep(undefined);
-                } else {
-                  setSelectedGuide(value);
-                }
-              }}
+      <EuiPageContentHeader>
+        <EuiTitle>
+          <h2>
+            <FormattedMessage
+              id="guidedOnboardingExample.stepOne.title"
+              defaultMessage="Example step Add data"
             />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow label="Step">
-            <EuiFieldNumber
-              value={selectedStep}
-              onChange={(e) => setSelectedStep(e.target.value)}
+          </h2>
+        </EuiTitle>
+      </EuiPageContentHeader>
+      <EuiPageContentBody>
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="guidedOnboardingExample.guidesSelection.stepOne.explanation"
+              defaultMessage="The code on this page is listening to the guided setup state. If the state is set to
+              Search guide, step Add data, a EUI tour will be displayed, pointing to the button below. Alternatively,
+              the tour can be displayed via a localStorage value or a url param (see step 2)."
             />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFormRow hasEmptyLabelSpace>
-            <EuiButton onClick={sendUpdateRequest}>Save</EuiButton>
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      {/* Sample step */}
-      <EuiHorizontalRule />
-      <EuiText>
-        <p>Sample step</p>
-      </EuiText>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
+          </p>
+        </EuiText>
+        <EuiSpacer />
           <EuiTourStep
             content={
               <EuiText>
@@ -154,22 +77,21 @@ export const StepOne = ({
             onFinish={() => setIsTourStepOpen(false)}
             step={1}
             stepsTotal={1}
-            title="Step 1"
+            title="Step Add data"
             anchorPosition="rightUp"
           >
             <EuiButton
               onClick={async () => {
                 await guidedOnboardingApi?.updateGuideState({
                   active_guide: 'search',
-                  active_step: '2',
+                  active_step: 'search_experience',
                 });
               }}
             >
               Complete step 1
             </EuiButton>
           </EuiTourStep>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      </EuiPageContentBody>
     </>
   );
 };

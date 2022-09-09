@@ -17,31 +17,26 @@ export const securityConfig: GuideConfig = {
       title: 'Add and view your data',
       description:
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-      url: '/app/integrations/browse',
     },
     {
       id: 'rules',
       title: 'Turn on rules',
       description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-      url: '/app/security/rules',
     },
     {
       id: 'alerts',
       title: 'View Alerts',
       description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-      url: '/app/security/rules',
     },
     {
       id: 'cases',
       title: 'Cases and investigations',
       description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-      url: '/app/security/rules',
     },
     {
       id: 'do_more',
       title: 'Do more with Elastic Security',
       description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-      url: '/app/security/rules',
     },
   ],
 };

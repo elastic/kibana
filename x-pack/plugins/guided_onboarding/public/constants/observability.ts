@@ -21,42 +21,36 @@ export const observabilityConfig: GuideConfig = {
       title: 'Add data',
       description:
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-      url: '/app/integrations/browse',
     },
     {
       id: 'rules',
       title: 'Customize your alerting rules',
       description:
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-      url: '/app/observability/alerts',
     },
     {
       id: 'infrastructure',
       title: 'View infrastructure details',
       description:
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-      url: '/app/observability/alerts',
     },
     {
       id: 'explore',
       title: 'Explore Discover and Dashboards',
       description:
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-      url: '/app/observability/alerts',
     },
     {
       id: 'tour',
       title: 'Tour Observability',
       description:
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-      url: '/app/observability/alerts',
     },
     {
       id: 'do_more',
       title: 'Do more with Observability',
       description:
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-      url: '/app/observability/alerts',
     },
   ],
 };

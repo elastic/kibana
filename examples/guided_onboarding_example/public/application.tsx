@@ -13,17 +13,15 @@ import { AppPluginStartDependencies } from './types';
 import { GuidedOnboardingExampleApp } from './components/app';
 
 export const renderApp = (
-  { notifications, http }: CoreStart,
-  { navigation, guidedOnboarding }: AppPluginStartDependencies,
-  { appBasePath, element }: AppMountParameters
+  { notifications }: CoreStart,
+  { guidedOnboarding }: AppPluginStartDependencies,
+  { element, history }: AppMountParameters
 ) => {
   ReactDOM.render(
     <GuidedOnboardingExampleApp
-      basename={appBasePath}
       notifications={notifications}
-      http={http}
-      navigation={navigation}
       guidedOnboarding={guidedOnboarding}
+      history={history}
     />,
     element
   );

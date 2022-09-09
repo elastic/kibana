@@ -20,28 +20,34 @@ export const searchConfig: GuideConfig = {
       title: 'Add data',
       description:
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-      url: '/app/guidedOnboardingExample',
+      location:
+        {
+          appID: 'guidedOnboardingExample',
+          path: 'stepOne'
+        },
     },
     {
       id: 'search_experience',
       title: 'Build a search experience',
       description:
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-      url: '/app/guidedOnboardingExample/stepTwo',
+      location:
+        {
+          appID: 'guidedOnboardingExample',
+          path: 'stepTwo?showTour=true'
+        },
     },
     {
       id: 'optimize',
       title: 'Optimize your search relevance',
       description:
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-      url: '',
     },
     {
       id: 'review',
       title: 'Review your search analytics',
       description:
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-      url: '',
     },
   ],
 };

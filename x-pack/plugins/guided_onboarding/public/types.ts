@@ -26,7 +26,10 @@ export interface StepConfig {
   id: string;
   title: string;
   description: string;
-  url: string;
+  location?: {
+    appID: string,
+    path: string,
+  };
   status?: StepStatus;
 }
 
@@ -41,8 +44,8 @@ export interface GuideConfig {
 }
 
 export interface GuidedOnboardingState {
-  active_guide: UseCase | undefined;
-  active_step: string | undefined;
+  active_guide: UseCase | 'unset';
+  active_step: string | 'unset';
 }
 
 export interface ClientConfigType {

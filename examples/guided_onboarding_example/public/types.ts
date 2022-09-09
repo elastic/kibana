@@ -9,9 +9,9 @@
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
 
-export interface GuidedOnboardingExamplePluginSetup {
-  getGreeting: () => string;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GuidedOnboardingExamplePluginSetup {}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GuidedOnboardingExamplePluginStart {}
 

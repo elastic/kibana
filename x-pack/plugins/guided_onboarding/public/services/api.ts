@@ -49,6 +49,7 @@ export class ApiService {
       return response;
     } catch (error) {
       // TODO handle error
+      console.error(error);
     }
   }
 }
