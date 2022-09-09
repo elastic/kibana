@@ -12,7 +12,7 @@ import type {
   ElasticsearchServiceStart,
   ElasticsearchServiceSetup,
 } from '@kbn/core-elasticsearch-server';
-import type { ServiceStatus } from '@kbn/core-base-common';
+import type { ServiceStatus } from '@kbn/core-status-common';
 import type { NodesVersionCompatibility, NodeInfo } from './version_check/ensure_es_version';
 import type { ClusterInfo } from './get_cluster_info';
 

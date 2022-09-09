@@ -14,7 +14,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ServerVersion } from '../../../../types/status';
+import type { ServerVersion } from '@kbn/core-status-common-internal';
 
 interface VersionHeaderProps {
   version: ServerVersion;

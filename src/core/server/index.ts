@@ -66,12 +66,12 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import type { DeprecationsServiceSetup } from '@kbn/core-deprecations-server';
 import type { CoreUsageDataStart, CoreUsageDataSetup } from '@kbn/core-usage-data-server';
+import type { I18nServiceSetup } from '@kbn/core-i18n-server';
+import type { StatusServiceSetup } from '@kbn/core-status-server';
 
-import { I18nServiceSetup } from '@kbn/core-i18n-server';
 import { HttpResources } from './http_resources';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
-import { StatusServiceSetup } from './status';
 import type { CoreRequestHandlerContext } from './core_route_handler_context';
 import type { PrebootCoreRequestHandlerContext } from './preboot_core_route_handler_context';
 
@@ -433,8 +433,9 @@ export type { DeprecationsDetails } from '@kbn/core-deprecations-common';
 export type { AppCategory } from '@kbn/core-application-common';
 export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '@kbn/core-application-common';
 
-export { ServiceStatusLevels } from './status';
-export type { CoreStatus, ServiceStatus, ServiceStatusLevel, StatusServiceSetup } from './status';
+export { ServiceStatusLevels } from '@kbn/core-status-common';
+export type { CoreStatus, ServiceStatus, ServiceStatusLevel } from '@kbn/core-status-common';
+export type { StatusServiceSetup } from '@kbn/core-status-server';
 
 export type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 
