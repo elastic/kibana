@@ -129,7 +129,7 @@ jest.doMock('@kbn/core-integrations-browser-internal', () => ({
 export const MockCoreApp = coreAppsMock.create();
 export const CoreAppConstructor = jest.fn().mockImplementation(() => MockCoreApp);
 jest.doMock('@kbn/core-apps-browser-internal', () => ({
-  CoreApp: CoreAppConstructor,
+  CoreAppsService: CoreAppConstructor,
 }));
 
 export const MockThemeService = themeServiceMock.create();
