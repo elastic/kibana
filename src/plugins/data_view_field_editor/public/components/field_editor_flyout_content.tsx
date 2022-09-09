@@ -143,7 +143,11 @@ const FieldEditorFlyoutContentComponent = ({
           fieldName={fieldToEdit?.name!}
           onConfirm={async () => {
             const { data: updatedField } = await submit();
-            onSave(updatedField);
+            if (updatedField.type === 'composite') {
+              onSave({ ...updatedField, fields: subfields$.getValue() });
+            } else {
+              onSave(updatedField);
+            }
           }}
           onCancel={() => {
             setModalVisibility(defaultModalVisibility);

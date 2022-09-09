@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
@@ -158,11 +158,11 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
 
   const isValueVisible = get(formData, '__meta__.isValueVisible');
 
-  const lastPreview$ = useMemo(() => {
+  const lastPreview$ = useCallback(() => {
     const replaySubj = new BehaviorSubject<FieldPreview[]>([]);
     fieldPreview$.subscribe(replaySubj);
     return replaySubj;
-  }, [fieldPreview$]);
+  }, [fieldPreview$])();
 
   const resetTypes = useCallback(() => {
     const lastVal = lastPreview$.getValue();

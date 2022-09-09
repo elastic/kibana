@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   EuiNotificationBadge,
   EuiFlexGroup,
@@ -19,6 +19,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ScriptField } from './form_fields';
 import { useFieldEditorContext } from '../field_editor_context';
@@ -32,19 +33,7 @@ export interface CompositeEditorProps {
 
 export const CompositeEditor = ({ onReset }: CompositeEditorProps) => {
   const { links, existingConcreteFields, subfields$ } = useFieldEditorContext();
-  const value = subfields$.getValue() || {};
-
-  // Tie observable to react state
-  const [subfields, setSubfields] = useState(value || {});
-
-  useEffect(() => {
-    const sub = subfields$.subscribe((newFields) => {
-      setSubfields(newFields || {});
-    });
-
-    return () => sub.unsubscribe();
-  }, [subfields$]);
-  //
+  const subfields = useObservable(subfields$) || {};
 
   return (
     <div data-test-subj="compositeEditor">
