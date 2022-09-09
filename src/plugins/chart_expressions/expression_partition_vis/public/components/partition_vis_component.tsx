@@ -69,7 +69,6 @@ import {
 import { ChartTypes } from '../../common/types';
 import { filterOutConfig } from '../utils/filter_out_config';
 import { FilterEvent, StartDeps } from '../types';
-import { getFormatService } from '../services/format_service';
 
 declare global {
   interface Window {
@@ -114,9 +113,14 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
         originalVisData,
         visParams.dimensions.buckets,
         visParams.dimensions.metrics,
-        getFormatService()
+        services.fieldFormats
       ),
-    [originalVisData, visParams.dimensions.buckets, visParams.dimensions.metrics]
+    [
+      originalVisData,
+      services.fieldFormats,
+      visParams.dimensions.buckets,
+      visParams.dimensions.metrics,
+    ]
   );
 
   const { bucketColumns, metricColumn } = useMemo(
