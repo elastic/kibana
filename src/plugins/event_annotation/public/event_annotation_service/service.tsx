@@ -111,7 +111,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
               textField: textVisibility && textField ? [textField] : [],
               filter: filter ? [queryToAst(filter)] : [],
               extraFields: extraFields || [],
-              ignoreGlobalFilters: ignoreGlobalFilters ? [ignoreGlobalFilters] : [],
+              ignoreGlobalFilters: [Boolean(ignoreGlobalFilters)],
             },
           },
         ],
