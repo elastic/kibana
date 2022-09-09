@@ -294,7 +294,6 @@ describe('searchAfterAndBulkCreate', () => {
       },
     ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      //   completeRule: queryCompleteRule,
       tuple,
       listClient,
       exceptionsList: [exceptionItem],
@@ -736,7 +735,6 @@ describe('searchAfterAndBulkCreate', () => {
       listClient,
       exceptionsList: [exceptionItem],
       tuple,
-
       services: mockService,
       ruleExecutionLogger,
       eventsTelemetry: undefined,
@@ -782,7 +780,6 @@ describe('searchAfterAndBulkCreate', () => {
       listClient,
       exceptionsList: [exceptionItem],
       tuple,
-
       services: mockService,
       ruleExecutionLogger,
       eventsTelemetry: undefined,
@@ -993,7 +990,6 @@ describe('searchAfterAndBulkCreate', () => {
     const mockEnrichment = jest.fn((a) => a);
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       enrichment: mockEnrichment,
-
       tuple,
       listClient,
       exceptionsList: [],
