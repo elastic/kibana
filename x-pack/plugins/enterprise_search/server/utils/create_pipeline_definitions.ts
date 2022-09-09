@@ -252,14 +252,9 @@ export const formatMlPipelineBody = async (
   }
   const model = models.trained_model_configs[0];
   // if model returned no input field, insert a placeholder
-  let modelInputField = 'MODEL_INPUT_FIELD';
-  if (
-    model.input !== undefined &&
-    model.input.field_names !== undefined &&
-    model.input.field_names.length > 0
-  ) {
-    modelInputField = model.input.field_names[0];
-  }
+  const modelInputField = model.input?.field_names?.length > 0
+    ? model.input.field_names[0]
+    : 'MODEL_INPUT_FIELD';
   const modelType = model.model_type;
   const modelVersion = model.version;
   return {
@@ -274,7 +269,7 @@ export const formatMlPipelineBody = async (
       },
       {
         inference: {
-          model_id: `${modelId}`,
+          model_id: modelId,
           target_field: `ml.inference.${destinationField}`,
           field_map: {
             sourceField: modelInputField,
