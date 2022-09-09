@@ -29,7 +29,7 @@ import type { WindowParameters } from '@kbn/aiops-utils';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 
-import { useAiOpsKibana } from '../../../kibana_context';
+import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 
 import { BrushBadge } from './brush_badge';
 
@@ -103,9 +103,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   changePoint,
   isBrushCleared,
 }) => {
-  const {
-    services: { data, uiSettings, fieldFormats, charts },
-  } = useAiOpsKibana();
+  const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
 
   const chartTheme = charts.theme.useChartsTheme();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
