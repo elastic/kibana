@@ -1,5 +1,80 @@
 {
   "properties": {
+    "index-patterns": {
+      "properties": {
+        "indexPatternsCount": {
+          "type": "long"
+        },
+        "indexPatternsWithScriptedFieldCount": {
+          "type": "long"
+        },
+        "indexPatternsWithRuntimeFieldCount": {
+          "type": "long"
+        },
+        "scriptedFieldCount": {
+          "type": "long"
+        },
+        "runtimeFieldCount": {
+          "type": "long"
+        },
+        "perIndexPattern": {
+          "properties": {
+            "scriptedFieldCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "runtimeFieldCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "scriptedFieldLineCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "runtimeFieldLineCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "dashboard": {
       "properties": {
         "panels": {
@@ -114,81 +189,6 @@
         }
       }
     },
-    "index-patterns": {
-      "properties": {
-        "indexPatternsCount": {
-          "type": "long"
-        },
-        "indexPatternsWithScriptedFieldCount": {
-          "type": "long"
-        },
-        "indexPatternsWithRuntimeFieldCount": {
-          "type": "long"
-        },
-        "scriptedFieldCount": {
-          "type": "long"
-        },
-        "runtimeFieldCount": {
-          "type": "long"
-        },
-        "perIndexPattern": {
-          "properties": {
-            "scriptedFieldCount": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            },
-            "runtimeFieldCount": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            },
-            "scriptedFieldLineCount": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            },
-            "runtimeFieldLineCount": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "kql": {
       "properties": {
         "optInCount": {
@@ -199,60 +199,6 @@
         },
         "defaultQueryLanguage": {
           "type": "keyword"
-        }
-      }
-    },
-    "search-session": {
-      "properties": {
-        "transientCount": {
-          "type": "long"
-        },
-        "persistedCount": {
-          "type": "long"
-        },
-        "totalCount": {
-          "type": "long"
-        }
-      }
-    },
-    "search": {
-      "properties": {
-        "successCount": {
-          "type": "long"
-        },
-        "errorCount": {
-          "type": "long"
-        },
-        "averageDuration": {
-          "type": "float"
-        }
-      }
-    },
-    "sample-data": {
-      "properties": {
-        "installed": {
-          "type": "array",
-          "items": {
-            "type": "keyword"
-          }
-        },
-        "last_install_date": {
-          "type": "date"
-        },
-        "last_install_set": {
-          "type": "keyword"
-        },
-        "last_uninstall_date": {
-          "type": "date"
-        },
-        "last_uninstall_set": {
-          "type": "keyword"
-        },
-        "uninstalled": {
-          "type": "array",
-          "items": {
-            "type": "keyword"
-          }
         }
       }
     },
@@ -2224,6 +2170,137 @@
           }
         },
         "enterpriseSearchContent": {
+          "properties": {
+            "appId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "The application being tracked"
+              }
+            },
+            "viewId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "Always `main`"
+              }
+            },
+            "clicks_total": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application since we started counting them"
+              }
+            },
+            "clicks_7_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 7 days"
+              }
+            },
+            "clicks_30_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 30 days"
+              }
+            },
+            "clicks_90_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 90 days"
+              }
+            },
+            "minutes_on_screen_total": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen since we started counting them."
+              }
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 7 days"
+              }
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 30 days"
+              }
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 90 days"
+              }
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application being tracked"
+                    }
+                  },
+                  "viewId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application view being tracked"
+                    }
+                  },
+                  "clicks_total": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the application sub view since we started counting them"
+                    }
+                  },
+                  "clicks_7_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 7 days"
+                    }
+                  },
+                  "clicks_30_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 30 days"
+                    }
+                  },
+                  "clicks_90_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 90 days"
+                    }
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application sub view is active and on-screen since we started counting them."
+                    }
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 7 days"
+                    }
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 30 days"
+                    }
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 90 days"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "enterpriseSearchAnalytics": {
           "properties": {
             "appId": {
               "type": "keyword",
@@ -8449,6 +8526,12 @@
           "_meta": {
             "description": "Non-default value of setting."
           }
+        },
+        "enterpriseSearch:enableIndexTransformsTab": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
         }
       }
     },
@@ -9978,6 +10061,60 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "search": {
+      "properties": {
+        "successCount": {
+          "type": "long"
+        },
+        "errorCount": {
+          "type": "long"
+        },
+        "averageDuration": {
+          "type": "float"
+        }
+      }
+    },
+    "search-session": {
+      "properties": {
+        "transientCount": {
+          "type": "long"
+        },
+        "persistedCount": {
+          "type": "long"
+        },
+        "totalCount": {
+          "type": "long"
+        }
+      }
+    },
+    "sample-data": {
+      "properties": {
+        "installed": {
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
+        },
+        "last_install_date": {
+          "type": "date"
+        },
+        "last_install_set": {
+          "type": "keyword"
+        },
+        "last_uninstall_date": {
+          "type": "date"
+        },
+        "last_uninstall_set": {
+          "type": "keyword"
+        },
+        "uninstalled": {
+          "type": "array",
+          "items": {
+            "type": "keyword"
           }
         }
       }

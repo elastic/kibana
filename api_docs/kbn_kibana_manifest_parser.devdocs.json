@@ -32,6 +32,7 @@
         ],
         "path": "packages/kbn-kibana-manifest-parser/src/parse_kibana_manifest.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/kibana-manifest-parser",
@@ -45,6 +46,7 @@
             ],
             "path": "packages/kbn-kibana-manifest-parser/src/parse_kibana_manifest.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -72,6 +74,7 @@
         ],
         "path": "packages/kbn-kibana-manifest-parser/src/parse_kibana_manifest.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/kibana-manifest-parser",
@@ -85,6 +88,7 @@
             ],
             "path": "packages/kbn-kibana-manifest-parser/src/parse_kibana_manifest.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -112,6 +116,7 @@
         ],
         "path": "packages/kbn-kibana-manifest-parser/src/parse_kibana_manifest.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/kibana-manifest-parser",
@@ -125,6 +130,7 @@
             ],
             "path": "packages/kbn-kibana-manifest-parser/src/parse_kibana_manifest.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -151,6 +157,7 @@
         ],
         "path": "packages/kbn-kibana-manifest-parser/src/kibana_manifest.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

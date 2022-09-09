@@ -54,6 +54,8 @@ import {
   escapeDoubleQuotes,
   OverallSwimlaneData,
   AppStateSelectedCells,
+  getSourceIndicesWithGeoFields,
+  SourceIndicesWithGeoFields,
 } from './explorer_utils';
 import { AnomalyTimeline } from './anomaly_timeline';
 import { FILTER_ACTION, FilterAction } from './explorer_constants';
@@ -73,6 +75,7 @@ import type { ExplorerState } from './reducers';
 import type { TimeBuckets } from '../util/time_buckets';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { useMlKibana, useMlLocator } from '../contexts/kibana';
+import { useMlContext } from '../contexts/ml';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import {
   AnomalyExplorerPanelsState,
@@ -205,6 +208,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
         }, 0);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       collapseFn.current,
       panelsInitialized,
@@ -225,6 +229,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
         },
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [anomalyExplorerPanelState]
   );
 
@@ -253,6 +258,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
         isCollapsed: !isCurrentlyCollapsed,
       },
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [anomalyExplorerPanelState]);
 
   const { displayWarningToast, displayDangerToast } = useToastNotificationService();
@@ -262,6 +268,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
   const htmlIdGen = useMemo(() => htmlIdGenerator(), []);
 
   const [language, updateLanguage] = useState<string>(DEFAULT_QUERY_LANG);
+  const [sourceIndicesWithGeoFields, setSourceIndicesWithGeoFields] =
+    useState<SourceIndicesWithGeoFields>({});
 
   const filterSettings = useObservable(
     anomalyExplorerCommonStateService.getFilterSettings$(),
@@ -328,6 +336,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
         );
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [explorerState, language, filterSettings]
   );
 
@@ -343,6 +352,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
         })
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const {
@@ -350,6 +360,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
   } = useMlKibana();
   const { euiTheme } = useEuiTheme();
   const mlLocator = useMlLocator();
+  const context = useMlContext();
+  const dataViewsService = context.dataViewsContract;
 
   const {
     annotations,
@@ -418,6 +430,18 @@ export const Explorer: FC<ExplorerUIProps> = ({
     tableData.anomalies?.length > 0;
 
   const hasActiveFilter = isDefined(swimLaneSeverity);
+  const selectedJobIds = Array.isArray(selectedJobs) ? selectedJobs.map((job) => job.id) : [];
+
+  useEffect(() => {
+    if (!noJobsSelected) {
+      getSourceIndicesWithGeoFields(selectedJobs, dataViewsService)
+        .then((sourceIndicesWithGeoFieldsMap) =>
+          setSourceIndicesWithGeoFields(sourceIndicesWithGeoFieldsMap)
+        )
+        .catch(console.error); // eslint-disable-line no-console
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(selectedJobIds)]);
 
   if (noJobsSelected && !loading) {
     return (
@@ -436,7 +460,6 @@ export const Explorer: FC<ExplorerUIProps> = ({
   }
 
   const bounds = timefilter.getActiveBounds();
-  const selectedJobIds = Array.isArray(selectedJobs) ? selectedJobs.map((job) => job.id) : [];
 
   const mainPanelContent = (
     <div>
@@ -582,7 +605,12 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
           <EuiSpacer size="m" />
 
-          <AnomaliesTable bounds={bounds} tableData={tableData} influencerFilter={applyFilter} />
+          <AnomaliesTable
+            bounds={bounds}
+            tableData={tableData}
+            influencerFilter={applyFilter}
+            sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
+          />
         </EuiPanel>
       )}
     </div>

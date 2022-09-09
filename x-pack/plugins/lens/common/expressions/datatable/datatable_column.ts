@@ -30,6 +30,7 @@ export interface ColumnState {
   columnId: string;
   width?: number;
   hidden?: boolean;
+  oneClickFilter?: boolean;
   isTransposed?: boolean;
   // These flags are necessary to transpose columns and map them back later
   // They are set automatically and are not user-editable
@@ -63,6 +64,7 @@ export const datatableColumn: ExpressionFunctionDefinition<
     alignment: { types: ['string'], help: '' },
     sortingHint: { types: ['string'], help: '' },
     hidden: { types: ['boolean'], help: '' },
+    oneClickFilter: { types: ['boolean'], help: '' },
     width: { types: ['number'], help: '' },
     isTransposed: { types: ['boolean'], help: '' },
     transposable: { types: ['boolean'], help: '' },

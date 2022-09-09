@@ -35,10 +35,12 @@ const columnSortOrder = {
   ip: 3,
   boolean: 4,
   number: 5,
-  histogram: 6,
-  geo_point: 7,
-  geo_shape: 8,
-  murmur3: 9,
+  gauge: 6,
+  counter: 7,
+  histogram: 8,
+  geo_point: 9,
+  geo_shape: 10,
+  murmur3: 11,
 };
 
 /**
@@ -554,6 +556,7 @@ function buildSuggestion({
     yTitle: currentState?.yTitle,
     yRightTitle: currentState?.yRightTitle,
     hideEndzones: currentState?.hideEndzones,
+    showCurrentTimeMarker: currentState?.showCurrentTimeMarker,
     valuesInLegend: currentState?.valuesInLegend,
     yLeftExtent: currentState?.yLeftExtent,
     yRightExtent: currentState?.yRightExtent,

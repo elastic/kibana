@@ -62,6 +62,7 @@ export const useOutlierData = (
     }
 
     return newColumns;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobConfig, indexPattern]);
 
   const dataGrid = useExplorationDataGrid(
@@ -77,6 +78,7 @@ export const useOutlierData = (
     if (jobConfig !== undefined) {
       dataGrid.setSortingColumns([{ id: getOutlierScoreFieldName(jobConfig), direction: 'desc' }]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobConfig && jobConfig.id]);
 
   // The pattern using `didCancel` allows us to abort out of date remote request.
@@ -89,6 +91,7 @@ export const useOutlierData = (
       options.didCancel = true;
     };
     // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
 
   const dataLoader = useMemo(
@@ -123,12 +126,14 @@ export const useOutlierData = (
       fetchColumnChartsData();
     }
     // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     dataGrid.chartsVisible,
     jobConfig?.dest.index,
     // Only trigger when search or the visible columns changes.
     // We're only interested in the visible columns but not their order, that's
     // why we sort for comparison (and copying it via spread to avoid sort in place).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify([searchQuery, [...dataGrid.visibleColumns].sort()]),
   ]);
 

@@ -10,10 +10,10 @@ import {
   AGENT_BINARY_SOURCES_TABLE_ACTIONS,
   AGENT_BINARY_SOURCES_FLYOUT,
   AGENT_POLICY_FORM,
-  CONFIRM_MODAL_CONFIRM_BUTTON,
 } from '../screens/fleet';
 import { cleanupDownloadSources } from '../tasks/cleanup';
 import { FLEET, navigateTo } from '../tasks/navigation';
+import { CONFIRM_MODAL } from '../screens/navigation';
 
 describe('Agent binary download source section', () => {
   beforeEach(() => {
@@ -35,7 +35,7 @@ describe('Agent binary download source section', () => {
       .clear()
       .type('https://edited-default-host.co');
     cy.getBySel(AGENT_BINARY_SOURCES_FLYOUT.SUBMIT_BUTTON).click();
-    cy.getBySel(CONFIRM_MODAL_CONFIRM_BUTTON).click();
+    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
 
     cy.intercept('api/fleet/agent_download_sources/fleet-default-download-source', {
       host: 'https://edited-default-host.co',

@@ -22,7 +22,7 @@ export const NotFound: React.FC<Props> = ({ isOrganization = true, pageChrome = 
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
 
   return (
-    <Layout pageChrome={[...pageChrome, '404']} template="centeredContent">
+    <Layout pageChrome={[...pageChrome, '404']} customPageSections>
       <SendWorkplaceSearchTelemetry action="error" metric="not_found" />
       <NotFoundPrompt
         backToLink={!isOrganization ? PRIVATE_SOURCES_PATH : '/'}

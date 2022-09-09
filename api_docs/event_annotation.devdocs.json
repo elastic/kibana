@@ -5,10 +5,65 @@
     "functions": [
       {
         "parentPluginId": "eventAnnotation",
-        "id": "def-public.isRangeAnnotation",
+        "id": "def-public.isManualPointAnnotationConfig",
         "type": "Function",
         "tags": [],
-        "label": "isRangeAnnotation",
+        "label": "isManualPointAnnotationConfig",
+        "description": [],
+        "signature": [
+          "(annotation?: ",
+          {
+            "pluginId": "eventAnnotation",
+            "scope": "common",
+            "docId": "kibEventAnnotationPluginApi",
+            "section": "def-common.EventAnnotationConfig",
+            "text": "EventAnnotationConfig"
+          },
+          " | undefined) => annotation is ",
+          {
+            "pluginId": "eventAnnotation",
+            "scope": "common",
+            "docId": "kibEventAnnotationPluginApi",
+            "section": "def-common.PointInTimeEventAnnotationConfig",
+            "text": "PointInTimeEventAnnotationConfig"
+          }
+        ],
+        "path": "src/plugins/event_annotation/public/event_annotation_service/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "eventAnnotation",
+            "id": "def-public.isManualPointAnnotationConfig.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "annotation",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "eventAnnotation",
+                "scope": "common",
+                "docId": "kibEventAnnotationPluginApi",
+                "section": "def-common.EventAnnotationConfig",
+                "text": "EventAnnotationConfig"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/event_annotation/public/event_annotation_service/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventAnnotation",
+        "id": "def-public.isRangeAnnotationConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "isRangeAnnotationConfig",
         "description": [],
         "signature": [
           "(annotation?: ",
@@ -30,10 +85,11 @@
         ],
         "path": "src/plugins/event_annotation/public/event_annotation_service/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "eventAnnotation",
-            "id": "def-public.isRangeAnnotation.$1",
+            "id": "def-public.isRangeAnnotationConfig.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "annotation",
@@ -50,6 +106,7 @@
             ],
             "path": "src/plugins/event_annotation/public/event_annotation_service/helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -67,6 +124,7 @@
         "description": [],
         "path": "src/plugins/event_annotation/public/event_annotation_service/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "eventAnnotation",
@@ -95,6 +153,7 @@
             ],
             "path": "src/plugins/event_annotation/public/event_annotation_service/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "eventAnnotation",
@@ -114,6 +173,7 @@
                 ],
                 "path": "src/plugins/event_annotation/public/event_annotation_service/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -134,6 +194,7 @@
         "description": [],
         "path": "src/plugins/event_annotation/public/event_annotation_service/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -148,6 +209,7 @@
         ],
         "path": "src/plugins/event_annotation/public/event_annotation_service/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -161,6 +223,7 @@
       "description": [],
       "path": "src/plugins/event_annotation/public/event_annotation_service/index.tsx",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "eventAnnotation",
@@ -182,6 +245,7 @@
           ],
           "path": "src/plugins/event_annotation/public/event_annotation_service/index.tsx",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [],
           "returnComment": []
         }
@@ -249,23 +313,7 @@
         ],
         "path": "src/plugins/event_annotation/common/event_annotation_group/index.ts",
         "deprecated": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "eventAnnotation",
-        "id": "def-common.fetchEventAnnotations",
-        "type": "Function",
-        "tags": [],
-        "label": "fetchEventAnnotations",
-        "description": [],
-        "signature": [
-          "() => ",
-          "FetchEventAnnotationsExpressionFunctionDefinition"
-        ],
-        "path": "src/plugins/event_annotation/common/fetch_event_annotations/index.ts",
-        "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -281,6 +329,7 @@
         "description": [],
         "path": "src/plugins/event_annotation/common/event_annotation_group/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "eventAnnotation",
@@ -300,14 +349,15 @@
               "[]"
             ],
             "path": "src/plugins/event_annotation/common/event_annotation_group/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "eventAnnotation",
-            "id": "def-common.EventAnnotationGroupArgs.index",
+            "id": "def-common.EventAnnotationGroupArgs.dataView",
             "type": "Object",
             "tags": [],
-            "label": "index",
+            "label": "dataView",
             "description": [],
             "signature": [
               {
@@ -316,11 +366,11 @@
                 "docId": "kibDataViewsPluginApi",
                 "section": "def-common.IndexPatternExpressionType",
                 "text": "IndexPatternExpressionType"
-              },
-              " | undefined"
+              }
             ],
             "path": "src/plugins/event_annotation/common/event_annotation_group/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -332,22 +382,24 @@
         "tags": [],
         "label": "FetchEventAnnotationsArgs",
         "description": [],
-        "path": "src/plugins/event_annotation/common/fetch_event_annotations/index.ts",
+        "path": "src/plugins/event_annotation/common/fetch_event_annotations/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "eventAnnotation",
-            "id": "def-common.FetchEventAnnotationsArgs.group",
+            "id": "def-common.FetchEventAnnotationsArgs.groups",
             "type": "Array",
             "tags": [],
-            "label": "group",
+            "label": "groups",
             "description": [],
             "signature": [
               "EventAnnotationGroupOutput",
               "[]"
             ],
-            "path": "src/plugins/event_annotation/common/fetch_event_annotations/index.ts",
-            "deprecated": false
+            "path": "src/plugins/event_annotation/common/fetch_event_annotations/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "eventAnnotation",
@@ -356,8 +408,9 @@
             "tags": [],
             "label": "interval",
             "description": [],
-            "path": "src/plugins/event_annotation/common/fetch_event_annotations/index.ts",
-            "deprecated": false
+            "path": "src/plugins/event_annotation/common/fetch_event_annotations/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -377,6 +430,7 @@
         ],
         "path": "src/plugins/event_annotation/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -401,10 +455,19 @@
             "docId": "kibEventAnnotationPluginApi",
             "section": "def-common.ManualRangeEventAnnotationArgs",
             "text": "ManualRangeEventAnnotationArgs"
+          },
+          " | ",
+          {
+            "pluginId": "eventAnnotation",
+            "scope": "common",
+            "docId": "kibEventAnnotationPluginApi",
+            "section": "def-common.QueryPointEventAnnotationArgs",
+            "text": "QueryPointEventAnnotationArgs"
           }
         ],
-        "path": "src/plugins/event_annotation/common/manual_event_annotation/types.ts",
+        "path": "src/plugins/event_annotation/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -415,7 +478,13 @@
         "label": "EventAnnotationConfig",
         "description": [],
         "signature": [
-          "PointInTimeEventAnnotationConfig",
+          {
+            "pluginId": "eventAnnotation",
+            "scope": "common",
+            "docId": "kibEventAnnotationPluginApi",
+            "section": "def-common.PointInTimeEventAnnotationConfig",
+            "text": "PointInTimeEventAnnotationConfig"
+          },
           " | ",
           {
             "pluginId": "eventAnnotation",
@@ -423,10 +492,19 @@
             "docId": "kibEventAnnotationPluginApi",
             "section": "def-common.RangeEventAnnotationConfig",
             "text": "RangeEventAnnotationConfig"
+          },
+          " | ",
+          {
+            "pluginId": "eventAnnotation",
+            "scope": "common",
+            "docId": "kibEventAnnotationPluginApi",
+            "section": "def-common.QueryPointEventAnnotationConfig",
+            "text": "QueryPointEventAnnotationConfig"
           }
         ],
         "path": "src/plugins/event_annotation/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -437,24 +515,19 @@
         "label": "EventAnnotationOutput",
         "description": [],
         "signature": [
-          {
-            "pluginId": "eventAnnotation",
-            "scope": "common",
-            "docId": "kibEventAnnotationPluginApi",
-            "section": "def-common.ManualPointEventAnnotationOutput",
-            "text": "ManualPointEventAnnotationOutput"
-          },
+          "ManualEventAnnotationOutput",
           " | ",
           {
             "pluginId": "eventAnnotation",
             "scope": "common",
             "docId": "kibEventAnnotationPluginApi",
-            "section": "def-common.ManualRangeEventAnnotationOutput",
-            "text": "ManualRangeEventAnnotationOutput"
+            "section": "def-common.QueryPointEventAnnotationOutput",
+            "text": "QueryPointEventAnnotationOutput"
           }
         ],
-        "path": "src/plugins/event_annotation/common/manual_event_annotation/types.ts",
+        "path": "src/plugins/event_annotation/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -465,11 +538,12 @@
         "label": "ManualPointEventAnnotationArgs",
         "description": [],
         "signature": [
-          "{ time: string; } & ",
+          "{ id: string; time: string; } & ",
           "PointStyleProps"
         ],
         "path": "src/plugins/event_annotation/common/manual_event_annotation/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -480,12 +554,29 @@
         "label": "ManualPointEventAnnotationOutput",
         "description": [],
         "signature": [
-          "{ time: string; } & ",
+          "{ id: string; time: string; } & ",
           "PointStyleProps",
           " & { type: \"manual_point_event_annotation\"; }"
         ],
         "path": "src/plugins/event_annotation/common/manual_event_annotation/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventAnnotation",
+        "id": "def-common.ManualPointEventAnnotationRow",
+        "type": "Type",
+        "tags": [],
+        "label": "ManualPointEventAnnotationRow",
+        "description": [],
+        "signature": [
+          "{ id: string; time: string; type: \"point\"; timebucket: string; skippedCount?: string | undefined; } & ",
+          "PointStyleProps"
+        ],
+        "path": "src/plugins/event_annotation/common/manual_event_annotation/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -496,11 +587,12 @@
         "label": "ManualRangeEventAnnotationArgs",
         "description": [],
         "signature": [
-          "{ time: string; endTime: string; } & ",
+          "{ id: string; time: string; endTime: string; } & ",
           "RangeStyleProps"
         ],
         "path": "src/plugins/event_annotation/common/manual_event_annotation/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -511,12 +603,118 @@
         "label": "ManualRangeEventAnnotationOutput",
         "description": [],
         "signature": [
-          "{ time: string; endTime: string; } & ",
+          "{ id: string; time: string; endTime: string; } & ",
           "RangeStyleProps",
           " & { type: \"manual_range_event_annotation\"; }"
         ],
         "path": "src/plugins/event_annotation/common/manual_event_annotation/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventAnnotation",
+        "id": "def-common.ManualRangeEventAnnotationRow",
+        "type": "Type",
+        "tags": [],
+        "label": "ManualRangeEventAnnotationRow",
+        "description": [],
+        "signature": [
+          "{ id: string; time: string; endTime: string; type: \"range\"; } & ",
+          "RangeStyleProps"
+        ],
+        "path": "src/plugins/event_annotation/common/manual_event_annotation/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventAnnotation",
+        "id": "def-common.PointInTimeEventAnnotationConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "PointInTimeEventAnnotationConfig",
+        "description": [],
+        "signature": [
+          "{ id: string; key: { type: \"point_in_time\"; timestamp: string; }; } & ",
+          "PointStyleProps"
+        ],
+        "path": "src/plugins/event_annotation/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventAnnotation",
+        "id": "def-common.QueryPointEventAnnotationArgs",
+        "type": "Type",
+        "tags": [],
+        "label": "QueryPointEventAnnotationArgs",
+        "description": [],
+        "signature": [
+          "{ id: string; filter: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.KibanaQueryOutput",
+            "text": "KibanaQueryOutput"
+          },
+          "; timeField: string; extraFields?: string[] | undefined; textField?: string | undefined; } & ",
+          "PointStyleProps"
+        ],
+        "path": "src/plugins/event_annotation/common/query_point_event_annotation/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventAnnotation",
+        "id": "def-common.QueryPointEventAnnotationConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "QueryPointEventAnnotationConfig",
+        "description": [],
+        "signature": [
+          "{ id: string; filter: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.KibanaQueryOutput",
+            "text": "KibanaQueryOutput"
+          },
+          "; timeField: string; textField: string; extraFields?: string[] | undefined; key: { type: \"point_in_time\"; }; } & ",
+          "PointStyleProps"
+        ],
+        "path": "src/plugins/event_annotation/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventAnnotation",
+        "id": "def-common.QueryPointEventAnnotationOutput",
+        "type": "Type",
+        "tags": [],
+        "label": "QueryPointEventAnnotationOutput",
+        "description": [],
+        "signature": [
+          "{ id: string; filter: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.KibanaQueryOutput",
+            "text": "KibanaQueryOutput"
+          },
+          "; timeField: string; extraFields?: string[] | undefined; textField?: string | undefined; } & ",
+          "PointStyleProps",
+          " & { type: \"query_point_event_annotation\"; }"
+        ],
+        "path": "src/plugins/event_annotation/common/query_point_event_annotation/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -532,6 +730,7 @@
         ],
         "path": "src/plugins/event_annotation/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -545,6 +744,7 @@
         "description": [],
         "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "eventAnnotation",
@@ -557,7 +757,8 @@
               "\"manual_point_event_annotation\""
             ],
             "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "eventAnnotation",
@@ -570,7 +771,8 @@
               "never[]"
             ],
             "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "eventAnnotation",
@@ -583,7 +785,8 @@
               "\"manual_point_event_annotation\""
             ],
             "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "eventAnnotation",
@@ -593,7 +796,8 @@
             "label": "help",
             "description": [],
             "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "eventAnnotation",
@@ -606,7 +810,8 @@
               "\"null\"[]"
             ],
             "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "eventAnnotation",
@@ -617,7 +822,60 @@
             "description": [],
             "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
+              {
+                "parentPluginId": "eventAnnotation",
+                "id": "def-common.manualPointEventAnnotation.args.id",
+                "type": "Object",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.manualPointEventAnnotation.args.id.required",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "required",
+                    "description": [],
+                    "signature": [
+                      "true"
+                    ],
+                    "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.manualPointEventAnnotation.args.id.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"string\"[]"
+                    ],
+                    "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.manualPointEventAnnotation.args.id.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
               {
                 "parentPluginId": "eventAnnotation",
                 "id": "def-common.manualPointEventAnnotation.args.time",
@@ -627,6 +885,7 @@
                 "description": [],
                 "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "eventAnnotation",
@@ -639,7 +898,8 @@
                       "\"string\"[]"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "eventAnnotation",
@@ -649,7 +909,8 @@
                     "label": "help",
                     "description": [],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -662,6 +923,7 @@
                 "description": [],
                 "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "eventAnnotation",
@@ -674,7 +936,8 @@
                       "\"string\"[]"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "eventAnnotation",
@@ -684,7 +947,8 @@
                     "label": "help",
                     "description": [],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -697,6 +961,7 @@
                 "description": [],
                 "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "eventAnnotation",
@@ -709,7 +974,8 @@
                       "\"string\"[]"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "eventAnnotation",
@@ -719,7 +985,8 @@
                     "label": "help",
                     "description": [],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -732,6 +999,7 @@
                 "description": [],
                 "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "eventAnnotation",
@@ -744,7 +1012,8 @@
                       "\"string\"[]"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "eventAnnotation",
@@ -757,7 +1026,8 @@
                       "(\"solid\" | \"dashed\" | \"dotted\")[]"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "eventAnnotation",
@@ -767,7 +1037,8 @@
                     "label": "help",
                     "description": [],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -780,6 +1051,7 @@
                 "description": [],
                 "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "eventAnnotation",
@@ -792,7 +1064,8 @@
                       "\"number\"[]"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "eventAnnotation",
@@ -802,7 +1075,8 @@
                     "label": "help",
                     "description": [],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -815,6 +1089,7 @@
                 "description": [],
                 "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "eventAnnotation",
@@ -827,7 +1102,8 @@
                       "\"string\"[]"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "eventAnnotation",
@@ -837,7 +1113,8 @@
                     "label": "help",
                     "description": [],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "eventAnnotation",
@@ -850,7 +1127,8 @@
                       "(\"circle\" | \"asterisk\" | \"alert\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"tag\" | \"triangle\")[]"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "eventAnnotation",
@@ -863,7 +1141,8 @@
                       "true"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -876,6 +1155,7 @@
                 "description": [],
                 "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "eventAnnotation",
@@ -888,7 +1168,8 @@
                       "\"boolean\"[]"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "eventAnnotation",
@@ -898,7 +1179,8 @@
                     "label": "help",
                     "description": [],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -911,6 +1193,7 @@
                 "description": [],
                 "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "eventAnnotation",
@@ -923,7 +1206,8 @@
                       "\"boolean\"[]"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "eventAnnotation",
@@ -933,7 +1217,8 @@
                     "label": "help",
                     "description": [],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -955,7 +1240,7 @@
                 "section": "def-common.ManualPointEventAnnotationArgs",
                 "text": "ManualPointEventAnnotationArgs"
               },
-              ") => { time: string; label: string; color?: string | undefined; icon?: ",
+              ") => { id: string; time: string; label: string; color?: string | undefined; icon?: ",
               {
                 "pluginId": "eventAnnotation",
                 "scope": "common",
@@ -969,6 +1254,7 @@
             ],
             "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -982,7 +1268,8 @@
                   "unknown"
                 ],
                 "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "eventAnnotation",
@@ -992,11 +1279,12 @@
                 "label": "args",
                 "description": [],
                 "signature": [
-                  "{ time: string; } & ",
+                  "{ id: string; time: string; } & ",
                   "PointStyleProps"
                 ],
                 "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -1012,6 +1300,7 @@
         "description": [],
         "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "eventAnnotation",
@@ -1024,7 +1313,8 @@
               "\"manual_range_event_annotation\""
             ],
             "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "eventAnnotation",
@@ -1037,7 +1327,8 @@
               "never[]"
             ],
             "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "eventAnnotation",
@@ -1050,7 +1341,8 @@
               "\"manual_range_event_annotation\""
             ],
             "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "eventAnnotation",
@@ -1060,7 +1352,8 @@
             "label": "help",
             "description": [],
             "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "eventAnnotation",
@@ -1073,7 +1366,8 @@
               "\"null\"[]"
             ],
             "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "eventAnnotation",
@@ -1084,7 +1378,60 @@
             "description": [],
             "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
+              {
+                "parentPluginId": "eventAnnotation",
+                "id": "def-common.manualRangeEventAnnotation.args.id",
+                "type": "Object",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.manualRangeEventAnnotation.args.id.required",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "required",
+                    "description": [],
+                    "signature": [
+                      "true"
+                    ],
+                    "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.manualRangeEventAnnotation.args.id.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"string\"[]"
+                    ],
+                    "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.manualRangeEventAnnotation.args.id.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
               {
                 "parentPluginId": "eventAnnotation",
                 "id": "def-common.manualRangeEventAnnotation.args.time",
@@ -1094,6 +1441,7 @@
                 "description": [],
                 "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "eventAnnotation",
@@ -1106,7 +1454,8 @@
                       "\"string\"[]"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "eventAnnotation",
@@ -1116,7 +1465,8 @@
                     "label": "help",
                     "description": [],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -1129,6 +1479,7 @@
                 "description": [],
                 "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "eventAnnotation",
@@ -1141,7 +1492,8 @@
                       "\"string\"[]"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "eventAnnotation",
@@ -1151,7 +1503,8 @@
                     "label": "help",
                     "description": [],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "eventAnnotation",
@@ -1164,7 +1517,8 @@
                       "false"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -1177,6 +1531,7 @@
                 "description": [],
                 "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "eventAnnotation",
@@ -1189,7 +1544,8 @@
                       "\"boolean\"[]"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "eventAnnotation",
@@ -1199,7 +1555,8 @@
                     "label": "help",
                     "description": [],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "eventAnnotation",
@@ -1212,7 +1569,8 @@
                       "false"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -1225,6 +1583,7 @@
                 "description": [],
                 "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "eventAnnotation",
@@ -1237,7 +1596,8 @@
                       "\"string\"[]"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "eventAnnotation",
@@ -1247,7 +1607,8 @@
                     "label": "help",
                     "description": [],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -1260,6 +1621,7 @@
                 "description": [],
                 "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "eventAnnotation",
@@ -1272,7 +1634,8 @@
                       "\"string\"[]"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "eventAnnotation",
@@ -1282,7 +1645,8 @@
                     "label": "help",
                     "description": [],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -1295,6 +1659,7 @@
                 "description": [],
                 "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "eventAnnotation",
@@ -1307,7 +1672,8 @@
                       "\"boolean\"[]"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "eventAnnotation",
@@ -1317,7 +1683,8 @@
                     "label": "help",
                     "description": [],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -1339,10 +1706,11 @@
                 "section": "def-common.ManualRangeEventAnnotationArgs",
                 "text": "ManualRangeEventAnnotationArgs"
               },
-              ") => { time: string; endTime: string; label: string; color?: string | undefined; outside?: boolean | undefined; isHidden?: boolean | undefined; type: \"manual_range_event_annotation\"; }"
+              ") => { id: string; time: string; endTime: string; label: string; color?: string | undefined; outside?: boolean | undefined; isHidden?: boolean | undefined; type: \"manual_range_event_annotation\"; }"
             ],
             "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -1356,7 +1724,8 @@
                   "unknown"
                 ],
                 "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "eventAnnotation",
@@ -1366,11 +1735,740 @@
                 "label": "args",
                 "description": [],
                 "signature": [
-                  "{ time: string; endTime: string; } & ",
+                  "{ id: string; time: string; endTime: string; } & ",
                   "RangeStyleProps"
                 ],
                 "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventAnnotation",
+        "id": "def-common.queryPointEventAnnotation",
+        "type": "Object",
+        "tags": [],
+        "label": "queryPointEventAnnotation",
+        "description": [],
+        "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "eventAnnotation",
+            "id": "def-common.queryPointEventAnnotation.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "\"query_point_event_annotation\""
+            ],
+            "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "eventAnnotation",
+            "id": "def-common.queryPointEventAnnotation.aliases",
+            "type": "Array",
+            "tags": [],
+            "label": "aliases",
+            "description": [],
+            "signature": [
+              "never[]"
+            ],
+            "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "eventAnnotation",
+            "id": "def-common.queryPointEventAnnotation.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"query_point_event_annotation\""
+            ],
+            "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "eventAnnotation",
+            "id": "def-common.queryPointEventAnnotation.help",
+            "type": "string",
+            "tags": [],
+            "label": "help",
+            "description": [],
+            "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "eventAnnotation",
+            "id": "def-common.queryPointEventAnnotation.inputTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "inputTypes",
+            "description": [],
+            "signature": [
+              "\"null\"[]"
+            ],
+            "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "eventAnnotation",
+            "id": "def-common.queryPointEventAnnotation.args",
+            "type": "Object",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "eventAnnotation",
+                "id": "def-common.queryPointEventAnnotation.args.id",
+                "type": "Object",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.id.required",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "required",
+                    "description": [],
+                    "signature": [
+                      "true"
+                    ],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.id.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"string\"[]"
+                    ],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.id.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "eventAnnotation",
+                "id": "def-common.queryPointEventAnnotation.args.filter",
+                "type": "Object",
+                "tags": [],
+                "label": "filter",
+                "description": [],
+                "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.filter.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"kibana_query\"[]"
+                    ],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.filter.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.filter.required",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "required",
+                    "description": [],
+                    "signature": [
+                      "true"
+                    ],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "eventAnnotation",
+                "id": "def-common.queryPointEventAnnotation.args.extraFields",
+                "type": "Object",
+                "tags": [],
+                "label": "extraFields",
+                "description": [],
+                "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.extraFields.multi",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "multi",
+                    "description": [],
+                    "signature": [
+                      "true"
+                    ],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.extraFields.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"string\"[]"
+                    ],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.extraFields.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "eventAnnotation",
+                "id": "def-common.queryPointEventAnnotation.args.timeField",
+                "type": "Object",
+                "tags": [],
+                "label": "timeField",
+                "description": [],
+                "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.timeField.required",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "required",
+                    "description": [],
+                    "signature": [
+                      "true"
+                    ],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.timeField.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"string\"[]"
+                    ],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.timeField.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "eventAnnotation",
+                "id": "def-common.queryPointEventAnnotation.args.label",
+                "type": "Object",
+                "tags": [],
+                "label": "label",
+                "description": [],
+                "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.label.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"string\"[]"
+                    ],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.label.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "eventAnnotation",
+                "id": "def-common.queryPointEventAnnotation.args.color",
+                "type": "Object",
+                "tags": [],
+                "label": "color",
+                "description": [],
+                "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.color.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"string\"[]"
+                    ],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.color.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "eventAnnotation",
+                "id": "def-common.queryPointEventAnnotation.args.lineStyle",
+                "type": "Object",
+                "tags": [],
+                "label": "lineStyle",
+                "description": [],
+                "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.lineStyle.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"string\"[]"
+                    ],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.lineStyle.options",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "options",
+                    "description": [],
+                    "signature": [
+                      "(\"solid\" | \"dashed\" | \"dotted\")[]"
+                    ],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.lineStyle.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "eventAnnotation",
+                "id": "def-common.queryPointEventAnnotation.args.lineWidth",
+                "type": "Object",
+                "tags": [],
+                "label": "lineWidth",
+                "description": [],
+                "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.lineWidth.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"number\"[]"
+                    ],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.lineWidth.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "eventAnnotation",
+                "id": "def-common.queryPointEventAnnotation.args.icon",
+                "type": "Object",
+                "tags": [],
+                "label": "icon",
+                "description": [],
+                "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.icon.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"string\"[]"
+                    ],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.icon.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.icon.options",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "options",
+                    "description": [],
+                    "signature": [
+                      "(\"circle\" | \"asterisk\" | \"alert\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"tag\" | \"triangle\")[]"
+                    ],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.icon.strict",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "strict",
+                    "description": [],
+                    "signature": [
+                      "true"
+                    ],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "eventAnnotation",
+                "id": "def-common.queryPointEventAnnotation.args.textVisibility",
+                "type": "Object",
+                "tags": [],
+                "label": "textVisibility",
+                "description": [],
+                "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.textVisibility.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"boolean\"[]"
+                    ],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.textVisibility.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "eventAnnotation",
+                "id": "def-common.queryPointEventAnnotation.args.textField",
+                "type": "Object",
+                "tags": [],
+                "label": "textField",
+                "description": [],
+                "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.textField.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"string\"[]"
+                    ],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.textField.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "eventAnnotation",
+                "id": "def-common.queryPointEventAnnotation.args.isHidden",
+                "type": "Object",
+                "tags": [],
+                "label": "isHidden",
+                "description": [],
+                "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.isHidden.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"boolean\"[]"
+                    ],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "eventAnnotation",
+                    "id": "def-common.queryPointEventAnnotation.args.isHidden.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "parentPluginId": "eventAnnotation",
+            "id": "def-common.queryPointEventAnnotation.fn",
+            "type": "Function",
+            "tags": [],
+            "label": "fn",
+            "description": [],
+            "signature": [
+              "(input: unknown, args: ",
+              {
+                "pluginId": "eventAnnotation",
+                "scope": "common",
+                "docId": "kibEventAnnotationPluginApi",
+                "section": "def-common.QueryPointEventAnnotationArgs",
+                "text": "QueryPointEventAnnotationArgs"
+              },
+              ") => { id: string; filter: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.KibanaQueryOutput",
+                "text": "KibanaQueryOutput"
+              },
+              "; timeField: string; extraFields?: string[] | undefined; textField?: string | undefined; label: string; color?: string | undefined; icon?: ",
+              {
+                "pluginId": "eventAnnotation",
+                "scope": "common",
+                "docId": "kibEventAnnotationPluginApi",
+                "section": "def-common.AvailableAnnotationIcon",
+                "text": "AvailableAnnotationIcon"
+              },
+              " | undefined; lineWidth?: number | undefined; lineStyle?: ",
+              "LineStyle",
+              " | undefined; textVisibility?: boolean | undefined; isHidden?: boolean | undefined; type: \"query_point_event_annotation\"; }"
+            ],
+            "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "eventAnnotation",
+                "id": "def-common.queryPointEventAnnotation.fn.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "eventAnnotation",
+                "id": "def-common.queryPointEventAnnotation.fn.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "{ id: string; filter: ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.KibanaQueryOutput",
+                    "text": "KibanaQueryOutput"
+                  },
+                  "; timeField: string; extraFields?: string[] | undefined; textField?: string | undefined; } & ",
+                  "PointStyleProps"
+                ],
+                "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }

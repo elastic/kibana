@@ -16,7 +16,14 @@ import { DashboardOptions, DashboardState } from '../../types';
 import { IEmbeddable } from '../../services/embeddable';
 import { DashboardPanelMap } from '../embeddable';
 
-const stateKeystoIgnore = ['expandedPanelId', 'fullScreenMode', 'savedQuery', 'viewMode', 'tags'];
+const stateKeystoIgnore = [
+  'expandedPanelId',
+  'fullScreenMode',
+  'savedQuery',
+  'viewMode',
+  'tags',
+  'timeslice',
+];
 type DashboardStateToCompare = Omit<DashboardState, typeof stateKeystoIgnore[number]>;
 
 const inputKeystoIgnore = ['searchSessionId', 'lastReloadRequestTime', 'executionContext'] as const;
