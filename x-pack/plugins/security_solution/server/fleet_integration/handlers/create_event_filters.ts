@@ -6,36 +6,56 @@
  */
 import uuid from 'uuid';
 import { i18n } from '@kbn/i18n';
-import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import {
+  ENDPOINT_EVENT_FILTERS_LIST_ID,
+  ENDPOINT_EVENT_FILTERS_LIST_NAME,
+  ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION,
+} from '@kbn/securitysolution-list-constants';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import type { EventFilters } from '../types';
+import { wrapErrorIfNeeded } from '../../endpoint/utils';
+import type { PolicyCreateEventFilters } from '../types';
 
 const PROCESS_INTERACTIVE_ECS_FIELD = 'process.entry_leader.interactive';
 
 /**
- * Check if Event Filter list exists and Create Event Filters for the Elastic Defend integration.
+ * Create the Event Filter list if not exists and Create Event Filters for the Elastic Defend integration.
  */
 export const createEventFilters = async (
   logger: Logger,
   exceptionsClient: ExceptionListClient,
-  eventFilters: EventFilters,
+  eventFilters: PolicyCreateEventFilters,
   packagePolicy: PackagePolicy
-) => {
-  const exceptionList = await exceptionsClient.getExceptionList({
-    id: undefined,
-    listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
-    namespaceType: 'agnostic',
-  });
-
-  if (exceptionList == null) {
-    logger.error(
-      `Error: Exception List not found: ${ENDPOINT_EVENT_FILTERS_LIST_ID}. Event Filter not created.`
-    );
-  } else if (eventFilters.nonInteractiveSession) {
-    createNonInteractiveSessionEventFilter(logger, exceptionsClient, packagePolicy);
+): Promise<void> => {
+  if (!eventFilters?.nonInteractiveSession) {
+    return;
   }
+  try {
+    // Attempt to Create the Event Filter List. It won't create the list if it already exists.
+    // So we can skip the validation and ignore the conflict error
+    await exceptionsClient.createExceptionList({
+      name: ENDPOINT_EVENT_FILTERS_LIST_NAME,
+      namespaceType: 'agnostic',
+      description: ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION,
+      listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
+      type: ExceptionListTypeEnum.ENDPOINT_EVENTS,
+      immutable: false,
+      meta: undefined,
+      tags: [],
+      version: 1,
+    });
+  } catch (err) {
+    // Ignoring error 409 (Conflict)
+    if (!SavedObjectsErrorHelpers.isConflictError(err)) {
+      logger.error(`Error creating Event Filter List: ${wrapErrorIfNeeded(err)}`);
+      throw err;
+    }
+  }
+
+  createNonInteractiveSessionEventFilter(logger, exceptionsClient, packagePolicy);
 };
 
 /**
@@ -45,7 +65,7 @@ export const createNonInteractiveSessionEventFilter = (
   logger: Logger,
   exceptionsClient: ExceptionListClient,
   packagePolicy: PackagePolicy
-) => {
+): void => {
   try {
     exceptionsClient.createExceptionListItem({
       listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
@@ -79,6 +99,6 @@ export const createNonInteractiveSessionEventFilter = (
       comments: [],
     });
   } catch (err) {
-    logger.error(`Error: ${err.message}`);
+    logger.error(`Error creating Event Filter: ${wrapErrorIfNeeded(err)}`);
   }
 };
