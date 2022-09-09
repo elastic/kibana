@@ -110,7 +110,7 @@ export function useDiscoverState({
     documents$: data$.documents$,
     dataViews,
     stateContainer,
-    dataViewList
+    dataViewList,
   });
 
   /**

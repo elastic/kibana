@@ -7,7 +7,7 @@
  */
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { DataViewListItem } from "@kbn/data-views-plugin/public";
+import { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { DiscoverMainApp } from './discover_main_app';
 import { DiscoverTopNav } from './components/top_nav/discover_topnav';
@@ -17,7 +17,6 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-
 
 setHeaderActionMenuMounter(jest.fn());
 

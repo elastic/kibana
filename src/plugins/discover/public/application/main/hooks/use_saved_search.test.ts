@@ -15,7 +15,7 @@ import { getState, AppState } from '../services/discover_state';
 import { uiSettingsMock } from '../../../__mocks__/ui_settings';
 import { useDiscoverState } from './use_discover_state';
 import { FetchStatus } from '../../types';
-import { dataViewMock } from '@kbn/discover-plugin/public/__mocks__/data_view';
+import { dataViewMock } from '../../../__mocks__/data_view';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 
 describe('test useSavedSearch', () => {

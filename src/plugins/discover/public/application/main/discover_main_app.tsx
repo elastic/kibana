@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { DiscoverLayout } from './components/layout';
 import { setBreadcrumbsTitle } from '../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
@@ -16,7 +17,6 @@ import { useUrl } from './hooks/use_url';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DataTableRecord } from '../../types';
 import { useSavedSearchAliasMatchRedirect } from '../../hooks/saved_search_alias_match_redirect';
-import {DataViewListItem} from "@kbn/data-views-plugin/public";
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -63,7 +63,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     history: usedHistory,
     savedSearch,
     setExpandedDoc,
-    dataViewList
+    dataViewList,
   });
 
   /**
