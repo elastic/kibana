@@ -767,6 +767,11 @@ packages/core/saved-objects/core-saved-objects-server @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-server-internal @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-server-mocks @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-utils-server @elastic/kibana-core
+packages/core/status/core-status-common @elastic/kibana-core
+packages/core/status/core-status-common-internal @elastic/kibana-core
+packages/core/status/core-status-server @elastic/kibana-core
+packages/core/status/core-status-server-internal @elastic/kibana-core
+packages/core/status/core-status-server-mocks @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-deprecations-getters @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-http-setup-browser @elastic/kibana-core
 packages/core/theme/core-theme-browser @elastic/kibana-core
