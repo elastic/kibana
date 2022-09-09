@@ -21,7 +21,7 @@ import { i18nTexts } from './i18n_texts';
 import './file_upload.scss';
 
 export interface Props
-  extends Omit<EuiFilePickerProps, 'multiple' | 'onChange' | 'value' | 'initialPromptText'> {
+  extends Omit<EuiFilePickerProps, 'onChange' | 'value' | 'initialPromptText'> {
   onChange: (files: File[]) => void;
   onDone: () => void;
   onUpload: () => void;
