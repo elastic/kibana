@@ -131,7 +131,7 @@ describe('UploadState', () => {
       } as File;
       uploadState.setFiles([file]);
       expectObservable(uploadState.files$).toBe('a', {
-        a: [{ file, status: 'idle', error: new Error('File too large') }],
+        a: [{ file, status: 'idle', error: new Error('File is too large') }],
       });
     });
   });

@@ -25,6 +25,7 @@ import {
 } from 'rxjs';
 import type { FileKind, FileJSON } from '../../../common/types';
 import type { FilesClient } from '../../types';
+import { i18nTexts } from './i18n_texts';
 
 import { createStateSubject, type SimpleStateSubject } from './simple_state_subject';
 
@@ -58,7 +59,7 @@ export class UploadState {
       this.fileKind.maxSizeBytes != null &&
       files.some((file) => file.size > this.fileKind.maxSizeBytes!)
     ) {
-      return 'File too large';
+      return i18nTexts.fileTooLarge;
     }
     return;
   }
