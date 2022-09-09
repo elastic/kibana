@@ -240,7 +240,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
         {sampledDocuments && sampledDocuments < totalDocuments ? (
           <FormattedMessage
             id="unifiedFieldList.fieldStats.calculatedFromSampleRecordsLabel"
-            defaultMessage="Calculated from sample of {sampledDocumentsFormatted} {sampledDocuments, plural, one {record} other {records}}"
+            defaultMessage="Calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
             values={{
               sampledDocuments,
               sampledDocumentsFormatted: (
@@ -255,7 +255,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
         ) : (
           <FormattedMessage
             id="unifiedFieldList.fieldStats.calculatedFromTotalRecordsLabel"
-            defaultMessage="Calculated from {totalDocumentsFormatted} {totalDocuments, plural, one {record} other {records}}"
+            defaultMessage="Calculated from {totalDocumentsFormatted} {totalDocuments, plural, one {record} other {records}}."
             values={{
               totalDocuments,
               totalDocumentsFormatted: (
