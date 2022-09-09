@@ -104,6 +104,54 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async selectOptionFromComboBox(testTargetId: string, name: string) {
+      const target = await testSubjects.find(testTargetId, 1000);
+      await comboBox.openOptionsList(target);
+      await comboBox.setElement(target, name);
+    },
+
+    async configureQueryAnnotation(opts: {
+      queryString: string;
+      timeField: string;
+      textDecoration?: { type: 'none' | 'name' | 'field'; textField?: string };
+      extraFields?: string[];
+    }) {
+      // type * in the query editor
+      const queryInput = await testSubjects.find('lnsXY-annotation-query-based-query-input');
+      await queryInput.type(opts.queryString);
+      await this.selectOptionFromComboBox(
+        'lnsXY-annotation-query-based-field-picker',
+        opts.timeField
+      );
+      if (opts.textDecoration) {
+        await testSubjects.click(`lnsXY_textVisibility_${opts.textDecoration.type}`);
+        if (opts.textDecoration.textField) {
+          await this.selectOptionFromComboBox(
+            'lnsXY-annotation-query-based-text-decoration-field-picker',
+            opts.textDecoration.textField
+          );
+        }
+      }
+      if (opts.extraFields) {
+        for (const field of opts.extraFields) {
+          await this.addFieldToTooltip(field);
+        }
+      }
+    },
+
+    async addFieldToTooltip(fieldName: string) {
+      const lastIndex = (
+        await find.allByCssSelector('[data-test-subj^="lnsXY-annotation-tooltip-field-picker"]')
+      ).length;
+      await retry.try(async () => {
+        await testSubjects.click('lnsXY-annotation-tooltip-add_field');
+        await this.selectOptionFromComboBox(
+          `lnsXY-annotation-tooltip-field-picker--${lastIndex}`,
+          fieldName
+        );
+      });
+    },
+
     /**
      * Changes the specified dimension to the specified operation and (optinally) field.
      *
@@ -150,9 +198,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         });
       }
       if (opts.field) {
-        const target = await testSubjects.find('indexPattern-dimension-field');
-        await comboBox.openOptionsList(target);
-        await comboBox.setElement(target, opts.field);
+        await this.selectOptionFromComboBox('indexPattern-dimension-field', opts.field);
       }
 
       if (opts.formula) {
@@ -188,15 +234,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       isPreviousIncompatible?: boolean;
     }) {
       if (opts.operation) {
-        const target = await testSubjects.find('indexPattern-subFunction-selection-row');
-        await comboBox.openOptionsList(target);
-        await comboBox.setElement(target, opts.operation);
+        await this.selectOptionFromComboBox(
+          'indexPattern-subFunction-selection-row',
+          opts.operation
+        );
       }
 
       if (opts.field) {
-        const target = await testSubjects.find('indexPattern-reference-field-selection-row');
-        await comboBox.openOptionsList(target);
-        await comboBox.setElement(target, opts.field);
+        await this.selectOptionFromComboBox(
+          'indexPattern-reference-field-selection-row',
+          opts.field
+        );
       }
     },
 
@@ -588,10 +636,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       ).length;
       await retry.try(async () => {
         await testSubjects.click('indexPattern-terms-add-field');
-        // count the number of defined terms
-        const target = await testSubjects.find(`indexPattern-dimension-field-${lastIndex}`, 1000);
-        await comboBox.openOptionsList(target);
-        await comboBox.setElement(target, field);
+        await this.selectOptionFromComboBox(`indexPattern-dimension-field-${lastIndex}`, field);
       });
     },
 
@@ -608,7 +653,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
       // count the number of defined terms
       const target = await testSubjects.find(`indexPattern-dimension-field-${lastIndex}`);
-      // await comboBox.openOptionsList(target);
       for (const field of fields) {
         await comboBox.setCustom(`indexPattern-dimension-field-${lastIndex}`, field);
         await comboBox.openOptionsList(target);
@@ -661,9 +705,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.setValue('column-label-edit', label, { clearWithKeyboard: true });
     },
     async editDimensionFormat(format: string) {
-      const formatInput = await testSubjects.find('indexPattern-dimension-format');
-      await comboBox.openOptionsList(formatInput);
-      await comboBox.setElement(formatInput, format);
+      await this.selectOptionFromComboBox('indexPattern-dimension-format', format);
     },
     async editDimensionColor(color: string) {
       const colorPickerInput = await testSubjects.find('~indexPattern-dimension-colorPicker');
@@ -1257,9 +1299,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /** resets visualization/layer or removes a layer */
-    async removeLayer() {
+    async removeLayer(index?: number) {
       await retry.try(async () => {
-        await testSubjects.click('lnsLayerRemove');
+        await testSubjects.click(index == null ? 'lnsLayerRemove' : `lnsLayerRemove-${index}`);
         if (await testSubjects.exists('lnsLayerRemoveModal')) {
           await testSubjects.exists('lnsLayerRemoveConfirmButton');
           await testSubjects.click('lnsLayerRemoveConfirmButton');
