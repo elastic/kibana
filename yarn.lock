@@ -24689,10 +24689,10 @@ sass-graph@^4.0.1:
     scss-tokenizer "^0.4.3"
     yargs "^17.2.1"
 
-sass-loader@^10.2.0:
-  version "10.2.0"
-  resolved "https://registry.yarnpkg.com/sass-loader/-/sass-loader-10.2.0.tgz#3d64c1590f911013b3fa48a0b22a83d5e1494716"
-  integrity sha512-kUceLzC1gIHz0zNJPpqRsJyisWatGYNFRmv2CKZK2/ngMJgLqxTbXwe/hJ85luyvZkgqU3VlJ33UVF2T/0g6mw==
+sass-loader@^10.3.1:
+  version "10.3.1"
+  resolved "https://registry.yarnpkg.com/sass-loader/-/sass-loader-10.3.1.tgz#a45f0d1dd7ea90de7eb099239a18c83dea6e6341"
+  integrity sha512-y2aBdtYkbqorVavkC3fcJIUDGIegzDWPn3/LAFhsf3G+MzPKTJx37sROf5pXtUeggSVbNbmfj8TgRaSLMelXRA==
   dependencies:
     klona "^2.0.4"
     loader-utils "^2.0.0"
