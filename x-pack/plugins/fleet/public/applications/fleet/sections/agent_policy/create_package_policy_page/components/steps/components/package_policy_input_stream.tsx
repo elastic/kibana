@@ -117,7 +117,7 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
           <EuiFlexGroup gutterSize="none" alignItems="flexStart">
             <EuiFlexItem grow={1} />
             <EuiFlexItem grow={5}>
-              {packageInfo.type === 'integration' && (
+              {packageInfo.type !== 'input' && (
                 <EuiSwitch
                   label={packageInputStream.title}
                   disabled={packagePolicyInputStream.keep_enabled}
@@ -130,7 +130,7 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                   }}
                 />
               )}
-              {packageInfo.type === 'integration' && packageInputStream.description ? (
+              {packageInfo.type !== 'input' && packageInputStream.description ? (
                 <Fragment>
                   <EuiSpacer size="s" />
                   <EuiText size="s" color="subdued">
