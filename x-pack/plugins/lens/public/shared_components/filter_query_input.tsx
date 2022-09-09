@@ -38,9 +38,9 @@ export function FilterQueryInput({
   label = filterByLabel,
 }: {
   inputFilter: Query | undefined;
-  onChange: (query?: Query) => void;
+  onChange: (query: Query) => void;
   indexPattern: IndexPattern;
-  helpMessage: string | null;
+  helpMessage?: string | null;
   label?: string;
 }) {
   const [filterPopoverOpen, setFilterPopoverOpen] = useState(false);
