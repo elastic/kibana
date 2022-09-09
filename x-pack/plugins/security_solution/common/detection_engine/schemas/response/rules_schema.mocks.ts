@@ -44,6 +44,7 @@ export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchem
   exceptions_list: getListArrayMock(),
   related_integrations: [],
   required_fields: [],
+  response_actions: [],
   setup: '',
 });
 

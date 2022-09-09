@@ -81,6 +81,7 @@ import {
   RelatedIntegrationArray,
   RequiredFieldArray,
   SetupGuide,
+  response_actions,
 } from '../common';
 
 import type { TypeAndTimelineOnly } from './type_timeline_only_schema';
@@ -121,6 +122,7 @@ export const requiredRulesSchema = t.type({
   exceptions_list: DefaultListArray,
   related_integrations: RelatedIntegrationArray,
   required_fields: RequiredFieldArray,
+  response_actions,
   setup: SetupGuide,
 });
 

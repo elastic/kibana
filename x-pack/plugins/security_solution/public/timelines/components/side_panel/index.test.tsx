@@ -104,14 +104,6 @@ describe('Details Panel Component', () => {
   describe('DetailsPanel: rendering', () => {
     beforeEach(() => {
       store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-      //   timelines: {
-      //             getHoverActions: jest.fn().mockReturnValue({
-      //               getAddToTimelineButton: jest.fn(),
-      //             }),
-      //           },
-      //           osquery: {
-      //             OsqueryResults: jest.fn().mockReturnValue(null),
-      //           },
     });
 
     test('it should not render the DetailsPanel if no expanded detail has been set in the reducer', () => {

@@ -66,6 +66,7 @@ export const ruleOutput = (): RulesSchema => ({
   timeline_id: 'some-timeline-id',
   related_integrations: [],
   required_fields: [],
+  response_actions: [],
   setup: '',
 });
 
