@@ -246,8 +246,20 @@ export const formatMlPipelineBody = async (
   esClient: ElasticsearchClient
 ): Promise<ESPipeline> => {
   const models = await esClient.ml.getTrainedModels({ model_id: modelId });
+  // if we didn't find this model, we can't return anything useful
+  if (models.trained_model_configs === undefined || models.trained_model_configs.length === 0) {
+    throw new Error(`Couldn't find any trained models with id [${modelId}]`);
+  }
   const model = models.trained_model_configs[0];
-  const modelInputField = model.input.field_names[0];
+  // if model returned no input field, insert a placeholder
+  let modelInputField = 'MODEL_INPUT_FIELD';
+  if (
+    model.input !== undefined &&
+    model.input.field_names !== undefined &&
+    model.input.field_names.length > 0
+  ) {
+    modelInputField = model.input.field_names[0];
+  }
   const modelType = model.model_type;
   const modelVersion = model.version;
   return {
