@@ -29,6 +29,7 @@
         "description": [],
         "path": "packages/core/i18n/core-i18n-server/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-i18n-server",
@@ -44,6 +45,7 @@
             ],
             "path": "packages/core/i18n/core-i18n-server/src/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -61,6 +63,7 @@
             ],
             "path": "packages/core/i18n/core-i18n-server/src/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
