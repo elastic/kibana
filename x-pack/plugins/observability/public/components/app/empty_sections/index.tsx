@@ -12,7 +12,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityAppServices } from '../../../application/types';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useHasData } from '../../../hooks/use_has_data';
-import { getEmptySections } from '../../../pages/overview/empty_section';
+import { getEmptySections } from '../../../pages/overview';
 import { EmptySection } from './empty_section';
 
 export function EmptySections() {

@@ -17,7 +17,7 @@ import {
   ElasticsearchResponseHit,
 } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getNewIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
 import { Globals } from '../../static_globals';
 
 /**
@@ -136,7 +136,7 @@ export async function getLastRecovery(req: LegacyRequest, size: number) {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
         type: dataset,
-        dsDataset: `${moduleType}.${dataset}`,
+        dsDataset: getElasticsearchDataset(dataset),
         metricset: dataset,
         start,
         end,
