@@ -47,13 +47,13 @@ export type Action =
       state: ViewerState;
     }
   | {
-    type: 'setIsReadOnly';
-    readOnly: boolean;
-  }
+      type: 'setIsReadOnly';
+      readOnly: boolean;
+    }
   | {
-    type: 'setLastUpdateTime';
-    lastUpdate: string | number;
-  };
+      type: 'setLastUpdateTime';
+      lastUpdate: string | number;
+    };
 
 export const allExceptionItemsReducer =
   () =>

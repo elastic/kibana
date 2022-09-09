@@ -53,12 +53,11 @@ export const closeExceptionBuilderFlyout = () => {
   cy.get(CANCEL_BTN).click();
 };
 
-export const editException = (updatedField: string, itemIndex = 0,
-  fieldIndex = 0) => {
-    addExceptionEntryFieldValueOfItemX(`${updatedField}{downarrow}{enter}`, itemIndex, fieldIndex);
-    addExceptionEntryFieldValueValue('foo', itemIndex);
+export const editException = (updatedField: string, itemIndex = 0, fieldIndex = 0) => {
+  addExceptionEntryFieldValueOfItemX(`${updatedField}{downarrow}{enter}`, itemIndex, fieldIndex);
+  addExceptionEntryFieldValueValue('foo', itemIndex);
 
-    cy.get(EXCEPTION_EDIT_FLYOUT_SAVE_BTN).click();
-    cy.get(EXCEPTION_EDIT_FLYOUT_SAVE_BTN).should('have.attr', 'disabled');
-    cy.get(EXCEPTION_EDIT_FLYOUT_SAVE_BTN).should('not.exist');
+  cy.get(EXCEPTION_EDIT_FLYOUT_SAVE_BTN).click();
+  cy.get(EXCEPTION_EDIT_FLYOUT_SAVE_BTN).should('have.attr', 'disabled');
+  cy.get(EXCEPTION_EDIT_FLYOUT_SAVE_BTN).should('not.exist');
 };

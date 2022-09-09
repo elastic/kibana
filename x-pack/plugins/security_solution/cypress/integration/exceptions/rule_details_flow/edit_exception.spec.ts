@@ -37,9 +37,7 @@ import {
   deleteExceptionList,
 } from '../../../tasks/api_calls/exceptions';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import {
-  editException,
-} from '../../../tasks/exceptions';
+import { editException } from '../../../tasks/exceptions';
 import { ALERTS_COUNT, NUMBER_OF_ALERTS } from '../../../screens/alerts';
 
 describe('Edit exception from rule details', () => {
@@ -117,11 +115,7 @@ describe('Edit exception from rule details', () => {
     openEditException();
 
     // check that the existing item's field is being populated
-    cy.get(EXCEPTION_ITEM_CONTAINER)
-      .eq(0)
-      .find(FIELD_INPUT)
-      .eq(0)
-      .should('have.text', ITEM_FIELD);
+    cy.get(EXCEPTION_ITEM_CONTAINER).eq(0).find(FIELD_INPUT).eq(0).should('have.text', ITEM_FIELD);
 
     // check that you can select a different field
     editException(FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD, 0, 0);
