@@ -336,6 +336,7 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
   const version = outcomeAndMessage ? outcomeAndMessage?.kibana?.version ?? '' : '';
 
   const ruleId = outcomeAndMessage ? outcomeAndMessage?.rule?.id ?? '' : '';
+  const ruleName = outcomeAndMessage ? outcomeAndMessage?.rule?.name ?? '' : '';
   return {
     id: bucket?.key ?? '',
     timestamp: bucket?.ruleExecution?.executeStartTime.value_as_string ?? '',
@@ -355,6 +356,7 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     schedule_delay_ms: scheduleDelayUs / Millis2Nanos,
     timed_out: timedOut,
     rule_id: ruleId,
+    rule_name: ruleName,
   };
 }
 
