@@ -34,7 +34,7 @@ import {
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { collapseMetricColumns } from '../../common/utils';
+import { consolidateMetricColumns } from '../../common/utils';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common/constants';
 import {
   PartitionVisParams,
@@ -109,7 +109,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     bucketAccessors,
   } = useMemo(
     () =>
-      collapseMetricColumns(
+      consolidateMetricColumns(
         originalVisData,
         visParams.dimensions.buckets,
         visParams.dimensions.metrics,

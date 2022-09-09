@@ -864,6 +864,10 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
               "format": undefined,
               "id": "metric-name",
               "meta": Object {
+                "sourceParams": Object {
+                  "combinedWithBucketColumn": true,
+                  "consolidatedMetricsColumn": true,
+                },
                 "type": "string",
               },
               "name": "metric-name",

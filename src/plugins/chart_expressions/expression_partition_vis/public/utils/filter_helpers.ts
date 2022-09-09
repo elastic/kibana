@@ -59,7 +59,7 @@ export const getFilterClickData = (
           (col) => col.id === bucketColumns[index].id
         );
 
-        const originalColumnIndexes = currentColumn!.meta?.sourceParams?.collapsedMetricsColumn
+        const originalColumnIndexes = currentColumn!.meta?.sourceParams?.consolidatedMetricsColumn
           ? // if this is the special combined column, expand it into both original columns
             currentColumn!.meta.sourceParams.combinedWithBucketColumn
             ? [currentColumnIndex + 1 + (rowIndex % numOriginalMetrics), currentColumnIndex]

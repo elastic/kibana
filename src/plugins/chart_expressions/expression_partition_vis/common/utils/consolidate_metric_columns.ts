@@ -11,14 +11,14 @@ import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-pl
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
-export const collapseMetricColumns = (
+export const consolidateMetricColumns = (
   table: Datatable,
   bucketAccessors: Array<string | ExpressionValueVisDimension> = [],
   metricAccessors: Array<string | ExpressionValueVisDimension>,
   formatService: FieldFormatsStart
 ): {
   table: Datatable;
-  metricAccessor: string | ExpressionValueVisDimension;
+  metricAccessor: string | ExpressionValueVisDimension | undefined;
   bucketAccessors: Array<string | ExpressionValueVisDimension>;
 } => {
   if (metricAccessors.length < 2) {
@@ -78,7 +78,7 @@ export const collapseMetricColumns = (
       meta: {
         type: 'string',
         sourceParams: {
-          collapsedMetricsColumn: true,
+          consolidatedMetricsColumn: true,
           combinedWithBucketColumn: Boolean(finalBucketColumn),
         },
       },

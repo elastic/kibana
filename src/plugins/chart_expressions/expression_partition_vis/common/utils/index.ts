@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './collapse_metric_columns';
+export * from './consolidate_metric_columns';

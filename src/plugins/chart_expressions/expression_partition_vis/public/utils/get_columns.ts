@@ -20,7 +20,7 @@ const getMetricColumn = (
 
 export const getColumns = (
   dimensions: {
-    metric: string | ExpressionValueVisDimension;
+    metric: string | ExpressionValueVisDimension | undefined;
     buckets: Array<string | ExpressionValueVisDimension>;
   },
   visData: Datatable
@@ -29,7 +29,7 @@ export const getColumns = (
   bucketColumns: Array<Partial<BucketColumns>>;
 } => {
   const { metric, buckets } = dimensions;
-  if (buckets && buckets.length > 0) {
+  if (buckets.length > 0) {
     const bucketColumns: Array<Partial<BucketColumns>> = buckets.map((bucket) => {
       const column = getColumnByAccessor(bucket, visData.columns);
       return {

@@ -8,9 +8,9 @@
 
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { collapseMetricColumns } from './collapse_metric_columns';
+import { consolidateMetricColumns } from './consolidate_metric_columns';
 
-describe('collapseMetricColumns', () => {
+describe('consolidateMetricColumns', () => {
   const formatServiceMock = {
     deserialize: () => ({
       getConverterFor: () => (str: string) => `<formatted>${str}</formatted>`,
@@ -58,7 +58,7 @@ describe('collapseMetricColumns', () => {
       ],
     };
 
-    const result = collapseMetricColumns(table, ['1', '2'], ['3', '4'], formatServiceMock);
+    const result = consolidateMetricColumns(table, ['1', '2'], ['3', '4'], formatServiceMock);
     expect(result.bucketAccessors).toEqual(['1', 'metric-name']);
     expect(result.metricAccessor).toEqual('value');
     expect(result.table).toMatchInlineSnapshot(`
@@ -75,8 +75,8 @@ describe('collapseMetricColumns', () => {
             "id": "metric-name",
             "meta": Object {
               "sourceParams": Object {
-                "collapsedMetricsColumn": true,
                 "combinedWithBucketColumn": true,
+                "consolidatedMetricsColumn": true,
               },
               "type": "string",
             },
@@ -173,7 +173,7 @@ describe('collapseMetricColumns', () => {
 
     const bucketAccessors = ['1', '2'];
     const metricAccessors = ['3'];
-    const result = collapseMetricColumns(
+    const result = consolidateMetricColumns(
       table,
       bucketAccessors,
       metricAccessors,
@@ -212,7 +212,7 @@ describe('collapseMetricColumns', () => {
       ],
     };
 
-    const result = collapseMetricColumns(table, undefined, ['3', '4'], formatServiceMock);
+    const result = consolidateMetricColumns(table, undefined, ['3', '4'], formatServiceMock);
     expect(result.bucketAccessors).toEqual(['metric-name']);
     expect(result.metricAccessor).toEqual('value');
     expect(result.table).toMatchInlineSnapshot(`
@@ -222,8 +222,8 @@ describe('collapseMetricColumns', () => {
             "id": "metric-name",
             "meta": Object {
               "sourceParams": Object {
-                "collapsedMetricsColumn": true,
                 "combinedWithBucketColumn": false,
+                "consolidatedMetricsColumn": true,
               },
               "type": "string",
             },
