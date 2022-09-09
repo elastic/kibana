@@ -9,28 +9,10 @@ import { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { of, delay, merge, mergeMap, tap } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import type { FileKind, FileJSON } from '../../../common';
+import { createMockFilesClient } from '../../mocks';
 import type { FilesClient } from '../../types';
 
 import { UploadState } from './upload_state';
-
-// TODO: Remove this once we have access to the shared file client mock
-const getMockClient = (): DeeplyMockedKeys<FilesClient> => ({
-  create: jest.fn(),
-  delete: jest.fn(),
-  download: jest.fn(),
-  find: jest.fn(),
-  getById: jest.fn(),
-  getDownloadHref: jest.fn(),
-  getMetrics: jest.fn(),
-  getShare: jest.fn(),
-  list: jest.fn(),
-  listShares: jest.fn(),
-  publicDownload: jest.fn(),
-  share: jest.fn(),
-  unshare: jest.fn(),
-  update: jest.fn(),
-  upload: jest.fn(),
-});
 
 const getTestScheduler = () =>
   new TestScheduler((actual, expected) => expect(actual).toEqual(expected));
@@ -41,7 +23,7 @@ describe('UploadState', () => {
   let testScheduler: TestScheduler;
 
   beforeEach(() => {
-    filesClient = getMockClient();
+    filesClient = createMockFilesClient();
     uploadState = new UploadState({ id: 'test' } as FileKind, filesClient);
     testScheduler = getTestScheduler();
   });

@@ -7,46 +7,56 @@
 
 import { EuiFilePicker } from '@elastic/eui';
 import React, { type FunctionComponent, useState, useRef } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { getFileKindsRegistry } from '../../../common/file_kinds_registry';
 import { FilesClient } from '../../types';
 
-import { useObservable } from '../use_observable';
+import { useBehaviorSubject } from '../use_behavior_subject';
 
 import { UploadFileUI } from './upload_file_ui';
 import { createUploadState } from './upload_state';
 
-interface Props<Kind extends string = string> {
+export interface Props<Kind extends string = string> {
+  kind: Kind;
   client: FilesClient;
-  fileKind: Kind;
   onDone: () => void;
 }
 
-export const UploadFile: FunctionComponent<Props> = ({ client, fileKind }) => {
+export const UploadFile: FunctionComponent<Props> = ({ client, kind, onDone }) => {
   const [uploadState] = useState(() =>
     createUploadState({
       client,
-      fileKind: getFileKindsRegistry().get(fileKind),
+      fileKind: getFileKindsRegistry().get(kind),
     })
   );
 
   const ref = useRef<null | EuiFilePicker>(null);
 
-  const uploading = useObservable(uploadState.uploading$);
-
-  const files = useObservable(uploadState.files$);
-  const errors = files.map((f) => f.error);
+  const uploading = useBehaviorSubject(uploadState.uploading$);
+  const files = useObservable(uploadState.files$, []);
+  const [done, setDone] = useState(false);
+  const errors = files.filter((f) => Boolean(f.error));
 
   return (
     <UploadFileUI
       ref={ref}
       onCancel={uploadState.abort}
       onChange={uploadState.setFiles}
+      ready={Boolean(files.length)}
       onClear={() => {
         ref.current?.removeFiles();
         uploadState.setFiles([]);
       }}
+      done={done}
       isInvalid={Boolean(errors.length)}
-      onUpload={uploadState.upload}
+      onUpload={() =>
+        uploadState.upload().subscribe({
+          complete: () => {
+            onDone();
+            setDone(true);
+          },
+        })
+      }
       uploading={uploading}
     />
   );

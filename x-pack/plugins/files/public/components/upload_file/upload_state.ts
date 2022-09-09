@@ -39,9 +39,7 @@ export class UploadState {
   private readonly abort$ = new Subject<void>();
   private readonly files$$ = prop$<Array<SimpleStateSubject<FileState>>>([]);
 
-  public readonly files$ = this.files$$.pipe(
-    switchMap((files$) => zip(...files$))
-  ) as BehaviorSubject<FileState[]>;
+  public readonly files$ = this.files$$.pipe(switchMap((files$) => zip(...files$)));
 
   public readonly uploading$ = prop$(false);
 

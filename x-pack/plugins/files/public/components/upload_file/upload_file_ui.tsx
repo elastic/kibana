@@ -21,11 +21,13 @@ import { i18nTexts } from './i18n_texts';
 import './upload_file.scss';
 
 export interface Props
-  extends Omit<EuiFilePickerProps, 'onChange' | 'value' | 'initialPromptText'> {
+  extends Omit<EuiFilePickerProps, 'onChange' | 'value' | 'initialPromptText' | 'disabled'> {
   onChange: (files: File[]) => void;
   onUpload: () => void;
   onClear: () => void;
   onCancel: () => void;
+  done?: boolean;
+  ready?: boolean;
   uploading?: boolean;
   retry?: boolean;
   immediate?: boolean;
@@ -45,6 +47,8 @@ export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
     className,
     style,
     retry,
+    ready,
+    done,
     ...rest
   } = props;
 
@@ -60,7 +64,7 @@ export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
         multiple={false}
         initialPromptText={initialFilePromptText}
         isLoading={uploading}
-        disabled={uploading}
+        disabled={done || uploading}
       />
 
       <EuiSpacer size="s" />
@@ -68,12 +72,17 @@ export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
       <EuiFlexGroup justifyContent="flexStart" direction="rowReverse" gutterSize="m">
         <EuiFlexItem grow={false}>
           {!immediate && !showRetryButton && (
-            <EuiButton disabled={uploading} onClick={onUpload} size="s">
+            <EuiButton
+              color={done ? 'success' : 'primary'}
+              disabled={done || uploading || !ready}
+              onClick={onUpload}
+              size="s"
+            >
               {i18nTexts.upload}
             </EuiButton>
           )}
           {showRetryButton && (
-            <EuiButton disabled={uploading} onClick={onUpload} size="s">
+            <EuiButton disabled={done || uploading} onClick={onUpload} size="s">
               {i18nTexts.retry}
             </EuiButton>
           )}
@@ -84,7 +93,7 @@ export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
               {i18nTexts.cancel}
             </EuiButtonEmpty>
           ) : (
-            <EuiButtonEmpty onClick={onClear} size="s">
+            <EuiButtonEmpty disabled={done} onClick={onClear} size="s">
               {i18nTexts.clear}
             </EuiButtonEmpty>
           )}
