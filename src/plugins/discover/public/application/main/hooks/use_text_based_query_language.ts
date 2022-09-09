@@ -74,7 +74,7 @@ export function useTextBasedQueryLanguage({
         prev.current = {
           columns: [],
           query: undefined,
-        }
+        };
       }
     });
     return () => subscription.unsubscribe();
