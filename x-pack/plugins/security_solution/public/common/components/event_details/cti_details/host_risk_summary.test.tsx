@@ -9,9 +9,9 @@ import React from 'react';
 
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../mock';
-import { NO_HOST_RISK_DATA_DESCRIPTION } from './translations';
 import { HostRiskSummary } from './host_risk_summary';
 import { RiskSeverity } from '../../../../../common/search_strategy';
+import { getEmptyValue } from '../../empty_value';
 
 describe('HostRiskSummary', () => {
   it('renders host risk data', () => {
@@ -60,36 +60,7 @@ describe('HostRiskSummary', () => {
     expect(getByTestId('loading')).toBeInTheDocument();
   });
 
-  it('renders no host data message when module is diabled', () => {
-    const hostRisk = {
-      loading: false,
-      isModuleEnabled: false,
-      result: [
-        {
-          '@timestamp': '1641902530',
-          host: {
-            name: 'test-host-name',
-            risk: {
-              multipliers: [],
-              calculated_score_norm: 9999,
-              calculated_level: RiskSeverity.low,
-              rule_risks: [],
-            },
-          },
-        },
-      ],
-    };
-
-    const { getByText } = render(
-      <TestProviders>
-        <HostRiskSummary hostRisk={hostRisk} />
-      </TestProviders>
-    );
-
-    expect(getByText(NO_HOST_RISK_DATA_DESCRIPTION)).toBeInTheDocument();
-  });
-
-  it('renders no host data message when there is no host data', () => {
+  it('renders empty value when there is no host data', () => {
     const hostRisk = {
       loading: false,
       isModuleEnabled: true,
@@ -102,6 +73,6 @@ describe('HostRiskSummary', () => {
       </TestProviders>
     );
 
-    expect(getByText(NO_HOST_RISK_DATA_DESCRIPTION)).toBeInTheDocument();
+    expect(getByText(getEmptyValue())).toBeInTheDocument();
   });
 });
