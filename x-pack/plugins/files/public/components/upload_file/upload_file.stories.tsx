@@ -14,6 +14,7 @@ import {
   getFileKindsRegistry,
 } from '../../../common/file_kinds_registry';
 import { FilesClient } from '../../types';
+import { FilesContext } from '../context';
 import { UploadFile, Props } from './upload_file';
 
 const kind = 'test';
@@ -41,7 +42,11 @@ export default {
   args: defaultArgs,
 };
 
-const Template: ComponentStory<typeof UploadFile> = (props: Props) => <UploadFile {...props} />;
+const Template: ComponentStory<typeof UploadFile> = (props: Props) => (
+  <FilesContext>
+    <UploadFile {...props} />
+  </FilesContext>
+);
 
 export const UX = Template.bind({});
 

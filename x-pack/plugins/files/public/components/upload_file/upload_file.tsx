@@ -8,9 +8,9 @@
 import { EuiFilePicker } from '@elastic/eui';
 import React, { type FunctionComponent, useState, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { getFileKindsRegistry } from '../../../common/file_kinds_registry';
 import { FilesClient } from '../../types';
 
+import { useFilesContext } from '../context';
 import { useBehaviorSubject } from '../use_behavior_subject';
 
 import { UploadFileUI } from './upload_file_ui';
@@ -26,10 +26,11 @@ export interface Props<Kind extends string = string> {
  * In order to use this component you must register your file kind with {@link FileKindsRegistry}
  */
 export const UploadFile: FunctionComponent<Props> = ({ client, kind, onDone }) => {
+  const { registry } = useFilesContext();
   const [uploadState] = useState(() =>
     createUploadState({
       client,
-      fileKind: getFileKindsRegistry().get(kind),
+      fileKind: registry.get(kind),
     })
   );
 
