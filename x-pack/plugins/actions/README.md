@@ -504,6 +504,8 @@ No parameters for the `severity` subaction. Provide an empty object `{}`.
 ---
 ## Swimlane
 
+Refer to the [Run connector API documentation](https://www.elastic.co/guide/en/kibana/master/execute-connector-api.html#execute-connector-api-request-body)
+for the full list of properties.
 
 ### `params`
 
