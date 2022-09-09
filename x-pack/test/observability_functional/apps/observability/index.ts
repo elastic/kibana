@@ -8,8 +8,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  // FAILING: https://github.com/elastic/kibana/issues/140437
-  describe.skip('ObservabilityApp', function () {
+  describe('ObservabilityApp', function () {
     loadTestFile(require.resolve('./pages/alerts'));
     loadTestFile(require.resolve('./pages/cases/case_details'));
     loadTestFile(require.resolve('./pages/alerts/add_to_case'));
