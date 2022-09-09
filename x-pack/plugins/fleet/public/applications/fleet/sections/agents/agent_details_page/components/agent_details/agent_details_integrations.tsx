@@ -134,10 +134,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
     return packageErrorUnits;
   }, [agent.components, packagePolicy]);
 
-  const showNeedsAttentionBadge = useMemo(
-    () => isAttentionBadgeNeededForPolicyResponse || packageErrors.length,
-    [isAttentionBadgeNeededForPolicyResponse, packageErrors.length]
-  );
+  const showNeedsAttentionBadge = isAttentionBadgeNeededForPolicyResponse || packageErrors.length;
 
   const genericErrorsListExtensionViewWrapper = useMemo(() => {
     return (

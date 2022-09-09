@@ -32,15 +32,15 @@ export const PackageActionItemError = memo(({ actionFormatter }: PackageActionIt
       title={actionFormatter.title}
       color="danger"
       iconType="alert"
-      data-test-subj="packcageItemErrorCallOut"
+      data-test-subj="packageItemErrorCallOut"
     >
-      <StyledEuiText size="s" data-test-subj="packcageItemErrorMessage">
+      <StyledEuiText size="s" data-test-subj="packageItemErrorCallOutMessage">
         {actionFormatter.description}
         {actionFormatter.linkText && actionFormatter.linkUrl && (
           <EuiLink
             target="_blank"
             href={actionFormatter.linkUrl}
-            data-test-subj="packcageItemCallOutLink"
+            data-test-subj="packageItemErrorCallOutLink"
           >
             {actionFormatter.linkText}
           </EuiLink>
