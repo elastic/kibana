@@ -3219,6 +3219,26 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-status-common-internal@link:bazel-bin/packages/core/status/core-status-common-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-status-common@link:bazel-bin/packages/core/status/core-status-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-status-server-internal@link:bazel-bin/packages/core/status/core-status-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-status-server-mocks@link:bazel-bin/packages/core/status/core-status-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-status-server@link:bazel-bin/packages/core/status/core-status-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-test-helpers-deprecations-getters@link:bazel-bin/packages/core/test-helpers/core-test-helpers-deprecations-getters":
   version "0.0.0"
   uid ""
@@ -7310,6 +7330,26 @@
   uid ""
 
 "@types/kbn__core-server-internal-base@link:bazel-bin/packages/core/server/internal-base/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-status-common-internal@link:bazel-bin/packages/core/status/core-status-common-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-status-common@link:bazel-bin/packages/core/status/core-status-common/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-status-server-internal@link:bazel-bin/packages/core/status/core-status-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-status-server-mocks@link:bazel-bin/packages/core/status/core-status-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-status-server@link:bazel-bin/packages/core/status/core-status-server/npm_module_types":
   version "0.0.0"
   uid ""
 
