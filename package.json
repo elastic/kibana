@@ -1313,7 +1313,7 @@
     "ms-chromium-edge-driver": "^0.5.1",
     "mutation-observer": "^1.0.3",
     "nock": "12.0.3",
-    "node-sass": "7.0.1",
+    "node-sass": "^7.0.3",
     "null-loader": "^3.0.0",
     "nyc": "^15.1.0",
     "oboe": "^2.1.4",
