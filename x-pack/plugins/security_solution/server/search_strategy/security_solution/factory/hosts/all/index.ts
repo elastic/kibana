@@ -18,7 +18,7 @@ import type {
   HostsEdges,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 
-import type { HostsRiskScore } from '../../../../../../common/search_strategy';
+import type { HostRiskScore } from '../../../../../../common/search_strategy';
 import { getHostRiskIndex, buildHostNamesFilter } from '../../../../../../common/search_strategy';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
@@ -92,7 +92,7 @@ async function enhanceEdges(
   const hostsRiskByHostName: Record<string, string> | undefined = hostRiskData?.hits.hits.reduce(
     (acc, hit) => ({
       ...acc,
-      [hit._source?.host.name ?? '']: hit._source?.risk,
+      [hit._source?.host.name ?? '']: hit._source?.host.risk.calculated_level,
     }),
     {}
   );
@@ -114,7 +114,7 @@ async function getHostRiskData(
   hostNames: string[]
 ) {
   try {
-    const hostRiskResponse = await esClient.asCurrentUser.search<HostsRiskScore>(
+    const hostRiskResponse = await esClient.asCurrentUser.search<HostRiskScore>(
       buildRiskScoreQuery({
         defaultIndex: [getHostRiskIndex(spaceId)],
         filterQuery: buildHostNamesFilter(hostNames),
