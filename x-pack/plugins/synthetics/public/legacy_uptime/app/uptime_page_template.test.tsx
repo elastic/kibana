@@ -11,14 +11,6 @@ import 'jest-styled-components';
 import { render } from '../lib/helper/rtl_helpers';
 import { UptimePageTemplateComponent } from './uptime_page_template';
 import { OVERVIEW_ROUTE } from '../../../common/constants';
-import { useBreakpoints } from '../../hooks/use_breakpoints';
-
-jest.mock('../../hooks/use_breakpoints', () => {
-  const down = jest.fn().mockReturnValue(false);
-  return {
-    useBreakpoints: () => ({ down }),
-  };
-});
 
 describe('UptimePageTemplateComponent', () => {
   describe('styling', () => {
@@ -34,7 +26,7 @@ describe('UptimePageTemplateComponent', () => {
     });
 
     it('applies the header centering on mobile', () => {
-      (useBreakpoints().down as jest.Mock).mockReturnValue(true);
+      window.innerWidth = 600;
       const { container } = render(<UptimePageTemplateComponent path={OVERVIEW_ROUTE} />);
       expect(container.firstChild).toMatchSnapshot();
     });

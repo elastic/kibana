@@ -13,6 +13,7 @@ import {
   EuiPanel,
   EuiSpacer,
   useEuiTheme,
+  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ListFilters } from '../list_filters/list_filters';
@@ -25,7 +26,6 @@ import {
   EncryptedSyntheticsSavedMonitor,
 } from '../../../../../../../common/runtime_types';
 import { SyntheticsSettingsContext } from '../../../../contexts/synthetics_settings_context';
-import { useBreakpoints } from '../../../../hooks';
 import { getMonitorListColumns } from './columns';
 import * as labels from './labels';
 
@@ -51,7 +51,7 @@ export const MonitorList = ({
   errorSummaries,
 }: Props) => {
   const { basePath } = useContext(SyntheticsSettingsContext);
-  const isXl = useBreakpoints().up('xl');
+  const isXl = useIsWithinMinBreakpoint('xxl');
   const canEditSynthetics = useCanEditSynthetics();
   const { euiTheme } = useEuiTheme();
 
