@@ -67,7 +67,6 @@ export type SearchEnrichments = (params: {
   services: RuleServices;
   logger: IRuleExecutionLogForExecutors;
   query: Filter;
-  name: string;
 }) => Promise<EnrichmentType[]>;
 
 export type GetIsRiskScoreAvailable = (params: {
