@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { getRuleExecutionLogRoute } from './get_rule_execution_log';
+import { getGlobalExecutionLogRoute } from './get_global_execution_logs';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { rulesClientMock } from '../rules_client.mock';
 import { IExecutionLogResult } from '../../common';
 
@@ -72,24 +71,21 @@ describe('getRuleExecutionLogRoute', () => {
     ],
   };
 
-  it('gets rule execution log', async () => {
+  it('gets global execution logs', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getRuleExecutionLogRoute(router, licenseState);
+    getGlobalExecutionLogRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/_execution_log"`);
+    expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/_global_execution_logs"`);
 
-    rulesClient.getExecutionLogForRule.mockResolvedValue(mockedExecutionLog);
+    rulesClient.getGlobalExecutionLogWithAuth.mockResolvedValue(mockedExecutionLog);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
       {
-        params: {
-          id: '1',
-        },
         query: {
           date_start: dateString,
           per_page: 10,
@@ -102,11 +98,10 @@ describe('getRuleExecutionLogRoute', () => {
 
     await handler(context, req, res);
 
-    expect(rulesClient.getExecutionLogForRule).toHaveBeenCalledTimes(1);
-    expect(rulesClient.getExecutionLogForRule.mock.calls[0]).toEqual([
+    expect(rulesClient.getGlobalExecutionLogWithAuth).toHaveBeenCalledTimes(1);
+    expect(rulesClient.getGlobalExecutionLogWithAuth.mock.calls[0]).toEqual([
       {
         dateStart: dateString,
-        id: '1',
         page: 1,
         perPage: 10,
         sort: [{ timestamp: { order: 'desc' } }],
@@ -114,33 +109,5 @@ describe('getRuleExecutionLogRoute', () => {
     ]);
 
     expect(res.ok).toHaveBeenCalled();
-  });
-
-  it('returns NOT-FOUND when rule is not found', async () => {
-    const licenseState = licenseStateMock.create();
-    const router = httpServiceMock.createRouter();
-
-    getRuleExecutionLogRoute(router, licenseState);
-
-    const [, handler] = router.get.mock.calls[0];
-
-    rulesClient.getExecutionLogForRule = jest
-      .fn()
-      .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('alert', '1'));
-
-    const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
-      {
-        params: {
-          id: '1',
-        },
-        query: {},
-      },
-      ['notFound']
-    );
-
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(
-      `[Error: Saved object [alert/1] not found]`
-    );
   });
 });

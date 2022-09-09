@@ -15,7 +15,10 @@ import { EuiSuperDatePicker, EuiDataGrid } from '@elastic/eui';
 import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filter';
 import { RuleEventLogList } from './rule_event_log_list';
 import { RefineSearchPrompt } from '../refine_search_prompt';
-import { RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS } from '../../../constants';
+import {
+  RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
+  GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
+} from '../../../constants';
 import { mockRule, mockRuleType, mockRuleSummary } from './test_helpers';
 import { RuleType } from '../../../../types';
 import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
@@ -161,7 +164,7 @@ describe.skip('rule_event_log_list', () => {
   it('renders correctly', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -207,7 +210,7 @@ describe.skip('rule_event_log_list', () => {
   it('can sort by single and/or multiple column(s)', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -312,7 +315,7 @@ describe.skip('rule_event_log_list', () => {
   it('can filter by execution log outcome status', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -375,7 +378,7 @@ describe.skip('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -435,7 +438,7 @@ describe.skip('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -492,7 +495,7 @@ describe.skip('rule_event_log_list', () => {
   it('can save display columns to localStorage', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -510,7 +513,7 @@ describe.skip('rule_event_log_list', () => {
       JSON.parse(
         localStorage.getItem('xpack.triggersActionsUI.ruleEventLogList.initialColumns') ?? 'null'
       )
-    ).toEqual(RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS);
+    ).toEqual(GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS);
 
     wrapper.find('[data-test-subj="dataGridColumnSelectorButton"] button').simulate('click');
 
@@ -535,7 +538,7 @@ describe.skip('rule_event_log_list', () => {
   it('does not show the refine search prompt normally', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -560,7 +563,7 @@ describe.skip('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -610,7 +613,7 @@ describe.skip('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -637,7 +640,7 @@ describe.skip('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -664,7 +667,7 @@ describe.skip('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -732,7 +735,7 @@ describe.skip('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -765,7 +768,7 @@ describe.skip('rule_event_log_list', () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
         fetchRuleSummary={false}
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -804,7 +807,7 @@ describe.skip('rule_event_log_list', () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
         fetchRuleSummary={false}
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleTypeCustom}
         ruleSummary={ruleSummary}
         numberOfExecutions={60}
@@ -842,7 +845,7 @@ describe.skip('rule_event_log_list', () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
         fetchRuleSummary={false}
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleTypeCustom}
         ruleSummary={ruleSummary}
         numberOfExecutions={60}

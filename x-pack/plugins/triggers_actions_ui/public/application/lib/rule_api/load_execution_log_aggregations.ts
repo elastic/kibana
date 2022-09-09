@@ -74,6 +74,8 @@ export interface LoadExecutionLogAggregationsProps {
   sort?: SortField[];
 }
 
+export type LoadGlobalExecutionLogAggregationsProps = Omit<LoadExecutionLogAggregationsProps, 'id'>;
+
 export const loadExecutionLogAggregations = async ({
   id,
   http,
@@ -90,6 +92,38 @@ export const loadExecutionLogAggregations = async ({
 
   const result = await http.get<AsApiContract<IExecutionLogResult>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${id}/_execution_log`,
+    {
+      query: {
+        date_start: dateStart,
+        date_end: dateEnd,
+        filter: filter.length ? filter.join(' and ') : undefined,
+        per_page: perPage,
+        // Need to add the + 1 for pages because APIs are 1 indexed,
+        // whereas data grid sorts are 0 indexed.
+        page: page + 1,
+        sort: sortField.length ? JSON.stringify(sortField) : undefined,
+      },
+    }
+  );
+
+  return rewriteBodyRes(result);
+};
+
+export const loadGlobalExecutionLogAggregations = async ({
+  http,
+  dateStart,
+  dateEnd,
+  outcomeFilter,
+  message,
+  perPage = 10,
+  page = 0,
+  sort = [],
+}: LoadGlobalExecutionLogAggregationsProps & { http: HttpSetup }) => {
+  const sortField: any[] = sort;
+  const filter = getFilter({ outcomeFilter, message });
+
+  const result = await http.get<AsApiContract<IExecutionLogResult>>(
+    `${INTERNAL_BASE_ALERTING_API_PATH}/_global_execution_logs`,
     {
       query: {
         date_start: dateStart,

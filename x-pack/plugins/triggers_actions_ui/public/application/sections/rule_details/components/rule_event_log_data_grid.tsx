@@ -59,6 +59,7 @@ export interface RuleEventLogDataGrid {
   dateFormat: string;
   pageSizeOptions?: number[];
   selectedRunLog?: IExecutionLog;
+  showRuleNameAndIdColumns?: boolean;
   onChangeItemsPerPage: (pageSize: number) => void;
   onChangePage: (pageIndex: number) => void;
   onFilterChange: (filter: string[]) => void;
@@ -160,6 +161,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
     dateFormat,
     visibleColumns,
     selectedRunLog,
+    showRuleNameAndIdColumns = false,
     setVisibleColumns,
     setSortingColumns,
     onChangeItemsPerPage,
@@ -180,6 +182,39 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
 
   const columns: EuiDataGridColumn[] = useMemo(
     () => [
+      ...(showRuleNameAndIdColumns
+        ? [
+            {
+              id: 'rule_id',
+              displayAsText: i18n.translate(
+                'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.ruleId',
+                {
+                  defaultMessage: 'Rule Id',
+                }
+              ),
+              isSortable: getIsColumnSortable('rule_id'),
+              actions: {
+                showSortAsc: false,
+                showSortDesc: false,
+              },
+            },
+            {
+              id: 'rule_name',
+              displayAsText: i18n.translate(
+                'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.ruleName',
+                {
+                  defaultMessage: 'Rule',
+                }
+              ),
+              isSortable: getIsColumnSortable('rule_name'),
+              actions: {
+                showSortAsc: false,
+                showSortDesc: false,
+                showHide: false,
+              },
+            },
+          ]
+        : []),
       {
         id: 'id',
         displayAsText: i18n.translate(
@@ -394,7 +429,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
         isSortable: getIsColumnSortable('timed_out'),
       },
     ],
-    [getPaginatedRowIndex, onFlyoutOpen, onFilterChange, logs]
+    [getPaginatedRowIndex, onFlyoutOpen, onFilterChange, showRuleNameAndIdColumns, logs]
   );
 
   const columnVisibilityProps = useMemo(
@@ -524,6 +559,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
     const value = logs[pagedRowIndex]?.[columnId as keyof IExecutionLog] as string;
     const actionErrors = logs[pagedRowIndex]?.num_errored_actions || (0 as number);
     const version = logs?.[pagedRowIndex]?.version;
+    const ruleId = runLog?.rule_id;
 
     if (columnId === 'num_errored_actions' && runLog) {
       return (
@@ -555,6 +591,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
             value={value}
             version={version}
             dateFormat={dateFormat}
+            ruleId={ruleId}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

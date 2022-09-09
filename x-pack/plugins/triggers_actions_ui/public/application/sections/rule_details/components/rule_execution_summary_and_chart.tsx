@@ -8,7 +8,7 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPanel, EuiStat, EuiFlexItem, EuiFlexGroup, EuiIconTip } from '@elastic/eui';
-import { Rule, RuleSummary, RuleType } from '../../../../types';
+import { RuleSummary, RuleType } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
@@ -24,7 +24,7 @@ import {
 export const DEFAULT_NUMBER_OF_EXECUTIONS = 60;
 
 type RuleExecutionSummaryAndChartProps = {
-  rule: Rule;
+  ruleId: string;
   ruleType: RuleType;
   ruleSummary?: RuleSummary;
   numberOfExecutions?: number;
@@ -37,7 +37,7 @@ type RuleExecutionSummaryAndChartProps = {
 
 export const RuleExecutionSummaryAndChart = (props: RuleExecutionSummaryAndChartProps) => {
   const {
-    rule,
+    ruleId,
     ruleType,
     ruleSummary,
     refreshToken,
@@ -103,7 +103,7 @@ export const RuleExecutionSummaryAndChart = (props: RuleExecutionSummaryAndChart
     }
     setInternalIsLoadingRuleSummary(true);
     try {
-      const loadedSummary = await loadRuleSummary(rule.id, computedNumberOfExecutions);
+      const loadedSummary = await loadRuleSummary(ruleId, computedNumberOfExecutions);
       setInternalRuleSummary(loadedSummary);
     } catch (e) {
       toasts.addDanger({
@@ -124,7 +124,7 @@ export const RuleExecutionSummaryAndChart = (props: RuleExecutionSummaryAndChart
   useEffect(() => {
     getRuleSummary();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rule, computedNumberOfExecutions]);
+  }, [ruleId, computedNumberOfExecutions]);
 
   useEffect(() => {
     if (isInitialized.current) {
