@@ -96,7 +96,6 @@ export const sampleAttribute = {
                 params: {
                   emptyAsNull: false,
                 },
-                timeScalingMode: 'optional',
                 scale: 'ratio',
                 sourceField: RECORDS_FIELD,
                 timeScale: undefined,
@@ -116,7 +115,6 @@ export const sampleAttribute = {
                 params: {
                   emptyAsNull: false,
                 },
-                timeScalingMode: 'optional',
                 scale: 'ratio',
                 sourceField: RECORDS_FIELD,
                 timeScale: undefined,

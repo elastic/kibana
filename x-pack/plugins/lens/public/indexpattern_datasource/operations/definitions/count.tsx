@@ -128,7 +128,6 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       isBucketed: false,
       scale: 'ratio',
       sourceField: field.name,
-      timeScalingMode: 'optional',
       timeScale: previousColumn?.timeScale,
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,

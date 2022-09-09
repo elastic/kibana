@@ -572,7 +572,6 @@ describe('Lens Attribute', () => {
             params: {
               emptyAsNull: false,
             },
-            timeScalingMode: 'optional',
             scale: 'ratio',
             sourceField: RECORDS_FIELD,
           },
@@ -590,7 +589,6 @@ describe('Lens Attribute', () => {
             params: {
               emptyAsNull: false,
             },
-            timeScalingMode: 'optional',
             scale: 'ratio',
             sourceField: RECORDS_FIELD,
           },
