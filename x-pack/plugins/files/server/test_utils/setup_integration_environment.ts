@@ -13,7 +13,7 @@ import {
 } from '@kbn/core/test_helpers/kbn_server';
 import pRetry from 'p-retry';
 import { FileJSON } from '../../common';
-import { getFileKindsRegistry } from '../file_kinds_registry';
+import { getFileKindsRegistry } from '../../common/file_kinds_registry';
 
 export type TestEnvironmentUtils = Awaited<ReturnType<typeof setupIntegrationEnvironment>>;
 

@@ -46,17 +46,18 @@ describe('UploadState', () => {
     testScheduler = getTestScheduler();
   });
 
-  it('uploads all provided files', async () => {
+  it('uploads all provided files and reports errors', async () => {
     testScheduler.run(({ expectObservable, cold, flush }) => {
       filesClient.create.mockReturnValue(of({ file: { id: 'test' } as FileJSON }) as any);
-      filesClient.upload.mockReturnValue(of(undefined) as any);
+      filesClient.upload.mockReturnValueOnce(of(undefined) as any);
+      filesClient.upload.mockImplementationOnce(() => {
+        throw new Error('oops');
+      });
 
       const file1 = { name: 'test' } as File;
       const file2 = { name: 'test 2' } as File;
 
       uploadState.setFiles([file1, file2]);
-
-      const [file1$, file2$] = uploadState.files$.getValue();
 
       // Simulate upload being triggered async
       const upload$ = cold('--a|').pipe(mergeMap(uploadState.upload));
@@ -69,27 +70,30 @@ describe('UploadState', () => {
         c: false,
       });
 
-      expectObservable(file1$).toBe('a-(bc)', {
-        a: { file: file1, status: 'idle' },
-        b: { file: file1, status: 'uploading' },
-        c: { file: file1, status: 'uploaded' },
-      });
-
-      expectObservable(file2$).toBe('a-(bc)', {
-        a: { file: file2, status: 'idle' },
-        b: { file: file2, status: 'uploading' },
-        c: { file: file2, status: 'uploaded' },
+      expectObservable(uploadState.files$).toBe('a-(bc)', {
+        a: [
+          { file: file1, status: 'idle' },
+          { file: file2, status: 'idle' },
+        ],
+        b: [
+          { file: file1, status: 'uploading' },
+          { file: file2, status: 'uploading' },
+        ],
+        c: [
+          { file: file1, status: 'uploaded' },
+          { file: file2, status: 'idle', error: new Error('oops') },
+        ],
       });
 
       flush();
 
       expect(filesClient.create).toHaveBeenCalledTimes(2);
       expect(filesClient.upload).toHaveBeenCalledTimes(2);
-      expect(filesClient.delete).not.toHaveBeenCalled();
+      expect(filesClient.delete).toHaveBeenCalledTimes(1);
     });
   });
 
-  it('attempts to clean up files when aborting', async () => {
+  it('attempts to clean up all files when aborting', async () => {
     testScheduler.run(({ expectObservable, cold, flush }) => {
       filesClient.create.mockReturnValue(
         of({ file: { id: 'test' } as FileJSON }).pipe(delay(2)) as any
@@ -101,8 +105,6 @@ describe('UploadState', () => {
       const file2 = { name: 'test 2' } as File;
 
       uploadState.setFiles([file1, file2]);
-
-      const [file1$, file2$] = uploadState.files$.getValue();
 
       // Simulate upload being triggered async
       const upload$ = cold('-0|').pipe(mergeMap(uploadState.upload));
@@ -116,16 +118,19 @@ describe('UploadState', () => {
         c: false,
       });
 
-      expectObservable(file1$).toBe('ab-c', {
-        a: { file: file1, status: 'idle' },
-        b: { file: file1, status: 'uploading' },
-        c: { file: file1, error: new Error('Abort!'), status: 'idle' },
-      });
-
-      expectObservable(file2$).toBe('ab-c', {
-        a: { file: file2, status: 'idle' },
-        b: { file: file2, status: 'uploading' },
-        c: { file: file2, error: new Error('Abort!'), status: 'idle' },
+      expectObservable(uploadState.files$).toBe('ab-c', {
+        a: [
+          { file: file1, status: 'idle' },
+          { file: file2, status: 'idle' },
+        ],
+        b: [
+          { file: file1, status: 'uploading' },
+          { file: file2, status: 'uploading' },
+        ],
+        c: [
+          { file: file1, status: 'idle', error: new Error('Abort!') },
+          { file: file2, status: 'idle', error: new Error('Abort!') },
+        ],
       });
 
       flush();

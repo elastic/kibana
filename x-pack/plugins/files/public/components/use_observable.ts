@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent } from 'react';
+import { BehaviorSubject } from 'rxjs';
+import _useObservable from 'react-use/lib/useObservable';
 
-interface Props {}
-
-export const UploadFile: FunctionComponent<Props> = ({}) => {};
+export function useObservable<T>(o$: BehaviorSubject<T>) {
+  return _useObservable(o$, o$.getValue());
+}

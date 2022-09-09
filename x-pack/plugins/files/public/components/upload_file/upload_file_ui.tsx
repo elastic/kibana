@@ -23,7 +23,6 @@ import './upload_file.scss';
 export interface Props
   extends Omit<EuiFilePickerProps, 'onChange' | 'value' | 'initialPromptText'> {
   onChange: (files: File[]) => void;
-  onDone: () => void;
   onUpload: () => void;
   onClear: () => void;
   onCancel: () => void;

@@ -12,7 +12,6 @@ import { UploadFileUI, Props } from './upload_file_ui';
 
 const defaultArgs: Props = {
   onChange: action('onChange'),
-  onDone: action('onDone'),
   onClear: action('onClear'),
   onUpload: action('onUpload'),
   onCancel: action('onCancel'),

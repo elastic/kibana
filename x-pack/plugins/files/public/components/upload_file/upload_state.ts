@@ -8,6 +8,7 @@
 import {
   of,
   map,
+  zip,
   from,
   race,
   take,
@@ -36,9 +37,12 @@ interface FileState {
 
 export class UploadState {
   private readonly abort$ = new Subject<void>();
-  private readonly error$ = prop$<undefined | Error>(undefined);
+  private readonly files$$ = prop$<Array<SimpleStateSubject<FileState>>>([]);
 
-  public readonly files$ = prop$<Array<SimpleStateSubject<FileState>>>([]);
+  public readonly files$ = this.files$$.pipe(
+    switchMap((files$) => zip(...files$))
+  ) as BehaviorSubject<FileState[]>;
+
   public readonly uploading$ = prop$(false);
 
   constructor(private readonly fileKind: FileKind, private readonly client: FilesClient) {}
@@ -51,8 +55,7 @@ export class UploadState {
     if (this.isUploading()) {
       throw new Error('Cannot update files while uploading');
     }
-    this.files$.next(files.map((file) => createStateSubject<FileState>({ file, status: 'idle' })));
-    this.error$.next(undefined);
+    this.files$$.next(files.map((file) => createStateSubject<FileState>({ file, status: 'idle' })));
   };
 
   public abort = (): void => {
@@ -80,7 +83,7 @@ export class UploadState {
     let uploadTarget: undefined | FileJSON;
     let erroredOrAborted = false;
 
-    file$.setState({ status: 'uploading' });
+    file$.setState({ status: 'uploading', error: undefined });
 
     return from(
       this.client.create({
@@ -126,10 +129,10 @@ export class UploadState {
     this.uploading$.next(true);
     const abort$ = new ReplaySubject<void>(1);
     const sub = this.abort$.subscribe(abort$);
-    return this.files$.pipe(
+    return this.files$$.pipe(
       take(1),
-      switchMap((files) => {
-        return forkJoin(files.map((file) => this.uploadFile(file, abort$)));
+      switchMap((files$) => {
+        return forkJoin(files$.map((file$) => this.uploadFile(file$, abort$)));
       }),
       map(() => {}),
       finalize(() => {
@@ -139,3 +142,13 @@ export class UploadState {
     );
   };
 }
+
+export const createUploadState = ({
+  fileKind,
+  client,
+}: {
+  fileKind: FileKind;
+  client: FilesClient;
+}) => {
+  return new UploadState(fileKind, client);
+};
