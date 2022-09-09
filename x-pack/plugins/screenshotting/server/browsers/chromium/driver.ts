@@ -12,7 +12,7 @@ import {
 } from '@kbn/screenshot-mode-plugin/server';
 import { truncate } from 'lodash';
 import open from 'opn';
-import puppeteer, { ElementHandle, Page, EvaluateFunc, CDPSession } from 'puppeteer';
+import puppeteer, { ElementHandle, Page, EvaluateFunc } from 'puppeteer';
 import { Subject } from 'rxjs';
 import { parse as parseUrl } from 'url';
 import { getDisallowedOutgoingUrlError } from '.';
@@ -22,6 +22,16 @@ import { getPrintLayoutSelectors } from '../../layouts/print_layout';
 import { allowRequest } from '../network_policy';
 import { stripUnsafeHeaders } from './strip_unsafe_headers';
 import { getFooterTemplate, getHeaderTemplate } from './templates';
+
+declare module 'puppeteer' {
+  interface Page {
+    _client(): CDPSession;
+  }
+
+  interface Target {
+    _targetId: string;
+  }
+}
 
 export type Context = Record<string, unknown>;
 
@@ -345,7 +355,7 @@ export class HeadlessChromiumDriver {
       return;
     }
 
-    const client = (this.page as unknown as { _client(): CDPSession })._client();
+    const client = this.page._client();
 
     // We have to reach into the Chrome Devtools Protocol to apply headers as using
     // puppeteer's API will cause map tile requests to hang indefinitely:
@@ -436,9 +446,9 @@ export class HeadlessChromiumDriver {
     // In order to get the inspector running, we have to know the page's internal ID (again, private)
     // in order to construct the final debugging URL.
 
-    const client = (this.page as unknown as { _client(): CDPSession })._client();
+    const client = this.page._client();
     const target = this.page.target();
-    const targetId = (target as unknown as { _targetId: string })._targetId;
+    const targetId = target._targetId;
 
     await client.send('Debugger.enable');
     await client.send('Debugger.pause');
