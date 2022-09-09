@@ -31,7 +31,7 @@ import { deleteTransforms } from './remove';
 import { getAsset } from './common';
 
 interface TransformModuleBase {
-  transformModuleId: string;
+  transformModuleId?: string;
 }
 interface DestinationIndexTemplateInstallation extends TransformModuleBase {
   installationName: string;
@@ -43,6 +43,97 @@ interface TransformInstallation extends TransformModuleBase {
   content: any;
 }
 
+export const installLegacyTransform = async (
+  installablePackage: InstallablePackage,
+  paths: string[],
+  esClient: ElasticsearchClient,
+  savedObjectsClient: SavedObjectsClientContract,
+  logger: Logger,
+  esReferences?: EsAssetReference[]
+) => {
+  const installation = await getInstallation({
+    savedObjectsClient,
+    pkgName: installablePackage.name,
+  });
+  esReferences = esReferences ?? installation?.installed_es ?? [];
+  let previousInstalledTransformEsAssets: EsAssetReference[] = [];
+  if (installation) {
+    previousInstalledTransformEsAssets = installation.installed_es.filter(
+      ({ type, id }) => type === ElasticsearchAssetType.transform
+    );
+    if (previousInstalledTransformEsAssets.length) {
+      logger.info(
+        `Found previous transform references:\n ${JSON.stringify(
+          previousInstalledTransformEsAssets
+        )}`
+      );
+    }
+  }
+
+  // delete all previous transform
+  await deleteTransforms(
+    esClient,
+    previousInstalledTransformEsAssets.map((asset) => asset.id)
+  );
+
+  const installNameSuffix = `${installablePackage.version}`;
+  const transformPaths = paths.filter((path) => isTransform(path));
+  let installedTransforms: EsAssetReference[] = [];
+  if (transformPaths.length > 0) {
+    const transformRefs = transformPaths.reduce<EsAssetReference[]>((acc, path) => {
+      acc.push({
+        id: getTransformNameForInstallation(installablePackage, path, installNameSuffix),
+        type: ElasticsearchAssetType.transform,
+      });
+
+      return acc;
+    }, []);
+
+    // get and save transform refs before installing transforms
+    esReferences = await updateEsAssetReferences(
+      savedObjectsClient,
+      installablePackage.name,
+      esReferences,
+      {
+        assetsToAdd: transformRefs,
+      }
+    );
+
+    const transforms: TransformInstallation[] = transformPaths.map((path: string) => {
+      const content = JSON.parse(getAsset(path).toString('utf-8'));
+      content._meta = getESAssetMetadata({ packageName: installablePackage.name });
+
+      return {
+        installationName: getLegacyTransformNameForInstallation(
+          installablePackage,
+          path,
+          installNameSuffix
+        ),
+        content,
+      };
+    });
+
+    const installationPromises = transforms.map(async (transform) => {
+      return handleTransformInstall({ esClient, logger, transform });
+    });
+
+    installedTransforms = await Promise.all(installationPromises).then((results) => results.flat());
+  }
+
+  if (previousInstalledTransformEsAssets.length > 0) {
+    esReferences = await updateEsAssetReferences(
+      savedObjectsClient,
+      installablePackage.name,
+      esReferences,
+      {
+        assetsToRemove: previousInstalledTransformEsAssets,
+      }
+    );
+  }
+
+  return { installedTransforms, esReferences };
+};
+
 export const installTransforms = async (
   installablePackage: InstallablePackage,
   paths: string[],
@@ -51,6 +142,21 @@ export const installTransforms = async (
   logger: Logger,
   esReferences?: EsAssetReference[]
 ) => {
+  const transformPaths = paths.filter((path) => isTransform(path));
+  // @TODO: MOVE this down to remove redundant code
+  // If package contains legacy transform specifications (i.e. with json instead of yml)
+  if (transformPaths.some((p) => p.endsWith('.json'))) {
+    return await installLegacyTransform(
+      installablePackage,
+      paths,
+      esClient,
+      savedObjectsClient,
+      logger,
+      esReferences
+    );
+  }
+
+  // Assuming the package will only contain .yml specifications
   const installation = await getInstallation({
     savedObjectsClient,
     pkgName: installablePackage.name,
@@ -79,7 +185,6 @@ export const installTransforms = async (
   );
 
   const installNameSuffix = `${installablePackage.version}`;
-  const transformPaths = paths.filter((path) => isTransform(path));
   let installedTransforms: EsAssetReference[] = [];
   if (transformPaths.length > 0) {
     const transformsSpecifications = new Map();
@@ -138,17 +243,6 @@ export const installTransforms = async (
         ) {
           const destinationIndexTemplate =
             (content.destination_index_template as Record<string, unknown>) ?? {};
-          // const mergedDestinationIndexTemplateInstallationWithMappings = {
-          //   ...destinationIndexTemplate,
-          //   mappings: {
-          //     ...(destinationIndexTemplate.mappings !== null &&
-          //     typeof destinationIndexTemplate.mappings === 'object'
-          //       ? destinationIndexTemplate.mappings
-          //       : {}),
-          //     ...packageAssets.get('mappings'),
-          //   },
-          // } as IndexTemplate['template'];
-
           destinationIndexTemplates.push({
             transformModuleId,
             _meta: getESAssetMetadata({ packageName: installablePackage.name }),
@@ -301,6 +395,17 @@ async function handleTransformInstall({
 
   return { id: transform.installationName, type: ElasticsearchAssetType.transform };
 }
+
+const getLegacyTransformNameForInstallation = (
+  installablePackage: InstallablePackage,
+  path: string,
+  suffix: string
+) => {
+  const pathPaths = path.split('/');
+  const filename = pathPaths?.pop()?.split('.')[0];
+  const folderName = pathPaths?.pop();
+  return `${installablePackage.name}.${folderName}-${filename}-${suffix}`;
+};
 
 const getTransformNameForInstallation = (
   installablePackage: InstallablePackage,
