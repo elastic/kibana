@@ -9,8 +9,8 @@ import {
   serverMock,
   requestContextMock,
   requestMock,
-} from '../../detection_engine/routes/__mocks__';
-import { DEV_TOOL_PREBUILT_CONTENT } from '../../../../common/constants';
+} from '../../../detection_engine/routes/__mocks__';
+import { DEV_TOOL_PREBUILT_CONTENT } from '../../../../../common/constants';
 import { readPrebuiltDevToolContentRoute } from './read_prebuilt_dev_tool_content_route';
 
 const readPrebuiltDevToolContentRequest = (consoleId: string) =>

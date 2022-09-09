@@ -5,14 +5,14 @@
  * 2.0.
  */
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { PREBUILT_SAVED_OBJECTS_BULK_CREATE } from '../../../../common/constants';
+import { PREBUILT_SAVED_OBJECTS_BULK_CREATE } from '../../../../../common/constants';
 import {
   serverMock,
   requestContextMock,
   mockGetCurrentUser,
   requestMock,
-} from '../../detection_engine/routes/__mocks__';
-import { getEmptySavedObjectsResponse } from '../../detection_engine/routes/__mocks__/request_responses';
+} from '../../../detection_engine/routes/__mocks__';
+import { getEmptySavedObjectsResponse } from '../../../detection_engine/routes/__mocks__/request_responses';
 import { createPrebuiltSavedObjectsRoute } from './create_prebuilt_saved_objects';
 
 const createPrebuiltSavedObjectsRequest = (savedObjectTemplate: string) =>
