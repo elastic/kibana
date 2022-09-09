@@ -27,8 +27,8 @@ export interface StepConfig {
   title: string;
   description: string;
   location?: {
-    appID: string,
-    path: string,
+    appID: string;
+    path: string;
   };
   status?: StepStatus;
 }

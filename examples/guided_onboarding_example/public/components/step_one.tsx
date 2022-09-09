@@ -6,34 +6,31 @@
  * Side Public License, v 1.
  */
 
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiText,
-  EuiTourStep, EuiTitle,
+  EuiTourStep,
+  EuiTitle,
   EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentBody_Deprecated as EuiPageContentBody, EuiSpacer,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiSpacer,
 } from '@elastic/eui';
 
-
-import {GuidedOnboardingPluginStart,
-} from '@kbn/guided-onboarding-plugin/public/types';
-
+import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
 
 interface GuidedOnboardingExampleAppDeps {
   guidedOnboarding: GuidedOnboardingPluginStart;
 }
 
-export const StepOne = ({
-  guidedOnboarding
-}: GuidedOnboardingExampleAppDeps) => {
+export const StepOne = ({ guidedOnboarding }: GuidedOnboardingExampleAppDeps) => {
   const { guidedOnboardingApi } = guidedOnboarding;
 
   const [isTourStepOpen, setIsTourStepOpen] = useState<boolean>(false);
   useEffect(() => {
     const subscription = guidedOnboardingApi?.fetchGuideState$().subscribe((newState) => {
-      const {active_guide: guide, active_step: step} = newState;
+      const { active_guide: guide, active_step: step } = newState;
 
       if (guide === 'search' && step === 'add_data') {
         setIsTourStepOpen(true);
@@ -66,31 +63,31 @@ export const StepOne = ({
           </p>
         </EuiText>
         <EuiSpacer />
-          <EuiTourStep
-            content={
-              <EuiText>
-                <p>Click this button to complete step 1.</p>
-              </EuiText>
-            }
-            isStepOpen={isTourStepOpen}
-            minWidth={300}
-            onFinish={() => setIsTourStepOpen(false)}
-            step={1}
-            stepsTotal={1}
-            title="Step Add data"
-            anchorPosition="rightUp"
+        <EuiTourStep
+          content={
+            <EuiText>
+              <p>Click this button to complete step 1.</p>
+            </EuiText>
+          }
+          isStepOpen={isTourStepOpen}
+          minWidth={300}
+          onFinish={() => setIsTourStepOpen(false)}
+          step={1}
+          stepsTotal={1}
+          title="Step Add data"
+          anchorPosition="rightUp"
+        >
+          <EuiButton
+            onClick={async () => {
+              await guidedOnboardingApi?.updateGuideState({
+                active_guide: 'search',
+                active_step: 'search_experience',
+              });
+            }}
           >
-            <EuiButton
-              onClick={async () => {
-                await guidedOnboardingApi?.updateGuideState({
-                  active_guide: 'search',
-                  active_step: 'search_experience',
-                });
-              }}
-            >
-              Complete step 1
-            </EuiButton>
-          </EuiTourStep>
+            Complete step 1
+          </EuiButton>
+        </EuiTourStep>
       </EuiPageContentBody>
     </>
   );

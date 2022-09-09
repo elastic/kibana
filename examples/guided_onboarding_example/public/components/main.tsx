@@ -15,7 +15,8 @@ import {
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow, EuiHorizontalRule,
+  EuiFormRow,
+  EuiHorizontalRule,
   EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageContentHeader_Deprecated as EuiPageContentHeader,
   EuiSelect,
@@ -30,7 +31,7 @@ import {
 } from '@kbn/guided-onboarding-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 
-type MainProps = {
+interface MainProps {
   guidedOnboarding: GuidedOnboardingPluginStart;
   notifications: CoreStart['notifications'];
 }
@@ -42,8 +43,12 @@ export const Main = (props: MainProps) => {
   const history = useHistory();
   const [guideState, setGuideState] = useState<GuidedOnboardingState | undefined>(undefined);
 
-  const [selectedGuide, setSelectedGuide] = useState<GuidedOnboardingState['active_guide'] | undefined>(undefined);
-  const [selectedStep, setSelectedStep] = useState<GuidedOnboardingState['active_step'] | undefined>(undefined);
+  const [selectedGuide, setSelectedGuide] = useState<
+    GuidedOnboardingState['active_guide'] | undefined
+  >(undefined);
+  const [selectedStep, setSelectedStep] = useState<
+    GuidedOnboardingState['active_step'] | undefined
+  >(undefined);
 
   useEffect(() => {
     const subscription = guidedOnboardingApi?.fetchGuideState$().subscribe((newState) => {

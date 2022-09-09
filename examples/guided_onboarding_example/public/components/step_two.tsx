@@ -6,25 +6,26 @@
  * Side Public License, v 1.
  */
 
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 
-import {EuiButton, EuiSpacer, EuiText, EuiTitle, EuiTourStep} from '@elastic/eui';
-
+import { EuiButton, EuiSpacer, EuiText, EuiTitle, EuiTourStep } from '@elastic/eui';
 
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
-import {useHistory, useLocation} from "react-router-dom";
+import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPageContentHeader_Deprecated as EuiPageContentHeader,
   EuiPageContentBody_Deprecated as EuiPageContentBody,
-} from "@elastic/eui";
+} from '@elastic/eui';
 
-type StepTwoProps = {
+interface StepTwoProps {
   guidedOnboarding: GuidedOnboardingPluginStart;
 }
 
 export const StepTwo = (props: StepTwoProps) => {
-  const {guidedOnboarding: { guidedOnboardingApi}} = props;
+  const {
+    guidedOnboarding: { guidedOnboardingApi },
+  } = props;
   const { search } = useLocation();
   const history = useHistory();
 
@@ -35,9 +36,7 @@ export const StepTwo = (props: StepTwoProps) => {
     }
   }, [query]);
 
-
   const [isTourStepOpen, setIsTourStepOpen] = useState<boolean>(false);
-
 
   return (
     <>
@@ -70,10 +69,10 @@ export const StepTwo = (props: StepTwoProps) => {
           isStepOpen={isTourStepOpen}
           minWidth={300}
           onFinish={() => {
-            history.push('/stepTwo')
+            history.push('/stepTwo');
             query.set('showTour', 'false');
-            setIsTourStepOpen(false)}
-        }
+            setIsTourStepOpen(false);
+          }}
           step={1}
           stepsTotal={1}
           title="Step Add data"

@@ -20,22 +20,20 @@ export const searchConfig: GuideConfig = {
       title: 'Add data',
       description:
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-      location:
-        {
-          appID: 'guidedOnboardingExample',
-          path: 'stepOne'
-        },
+      location: {
+        appID: 'guidedOnboardingExample',
+        path: 'stepOne',
+      },
     },
     {
       id: 'search_experience',
       title: 'Build a search experience',
       description:
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-      location:
-        {
-          appID: 'guidedOnboardingExample',
-          path: 'stepTwo?showTour=true'
-        },
+      location: {
+        appID: 'guidedOnboardingExample',
+        path: 'stepTwo?showTour=true',
+      },
     },
     {
       id: 'optimize',

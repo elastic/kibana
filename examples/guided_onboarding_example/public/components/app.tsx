@@ -10,7 +10,13 @@ import React from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { Router, Switch, Route } from 'react-router-dom';
 
-import { EuiPage, EuiPageBody, EuiPageContent_Deprecated as EuiPageContent, EuiPageHeader, EuiTitle } from '@elastic/eui';
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageHeader,
+  EuiTitle,
+} from '@elastic/eui';
 
 import { CoreStart, ScopedHistory } from '@kbn/core/public';
 
@@ -29,39 +35,36 @@ export const GuidedOnboardingExampleApp = (props: GuidedOnboardingExampleAppDeps
   const { notifications, guidedOnboarding, history } = props;
 
   return (
-      <I18nProvider>
-          <EuiPage restrictWidth="1000px">
-            <EuiPageBody>
-              <EuiPageHeader>
-                <EuiTitle size="l">
-                  <h1>
-                    <FormattedMessage
-                      id="guidedOnboardingExample.title"
-                      defaultMessage="Guided onboarding examples"
-                    />
-                  </h1>
-                </EuiTitle>
-              </EuiPageHeader>
-              <EuiPageContent>
-                <Router history={history}>
-                <Switch>
-                  <Route exact path="/">
-                    <Main
-                      notifications={notifications}
-                      guidedOnboarding={guidedOnboarding}
-                    />
-                  </Route>
-                  <Route exact path="/stepOne">
-                    <StepOne guidedOnboarding={guidedOnboarding} />
-                  </Route>
-                  <Route exact path="/stepTwo">
-                    <StepTwo guidedOnboarding={guidedOnboarding} />
-                  </Route>
-                </Switch>
-                </Router>
-              </EuiPageContent>
-            </EuiPageBody>
-          </EuiPage>
-      </I18nProvider>
+    <I18nProvider>
+      <EuiPage restrictWidth="1000px">
+        <EuiPageBody>
+          <EuiPageHeader>
+            <EuiTitle size="l">
+              <h1>
+                <FormattedMessage
+                  id="guidedOnboardingExample.title"
+                  defaultMessage="Guided onboarding examples"
+                />
+              </h1>
+            </EuiTitle>
+          </EuiPageHeader>
+          <EuiPageContent>
+            <Router history={history}>
+              <Switch>
+                <Route exact path="/">
+                  <Main notifications={notifications} guidedOnboarding={guidedOnboarding} />
+                </Route>
+                <Route exact path="/stepOne">
+                  <StepOne guidedOnboarding={guidedOnboarding} />
+                </Route>
+                <Route exact path="/stepTwo">
+                  <StepTwo guidedOnboarding={guidedOnboarding} />
+                </Route>
+              </Switch>
+            </Router>
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
+    </I18nProvider>
   );
 };

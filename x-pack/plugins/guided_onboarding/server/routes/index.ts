@@ -80,12 +80,16 @@ export function defineRoutes(router: IRouter) {
           body: { state: updatedGuidedSetupSO.attributes },
         });
       } else {
-        const guidedSetupSO = await soClient.create(guidedSetupSavedObjectsType, {
-          ...guidedSetupDefaultState,
-          ...attributes,
-        }, {
-          id: guidedSetupSavedObjectsId,
-        });
+        const guidedSetupSO = await soClient.create(
+          guidedSetupSavedObjectsType,
+          {
+            ...guidedSetupDefaultState,
+            ...attributes,
+          },
+          {
+            id: guidedSetupSavedObjectsId,
+          }
+        );
 
         return response.ok({
           body: {

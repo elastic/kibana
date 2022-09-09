@@ -31,7 +31,7 @@ import { ApplicationStart } from '@kbn/core-application-browser';
 import { HttpStart } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { guidesConfig } from '../constants';
-import type {GuideConfig, StepStatus, GuidedOnboardingState, StepConfig} from '../types';
+import type { GuideConfig, StepStatus, GuidedOnboardingState, StepConfig } from '../types';
 import type { ApiService } from '../services/api';
 
 interface Props {
@@ -41,7 +41,7 @@ interface Props {
 }
 
 const getConfig = (state?: GuidedOnboardingState): GuideConfig | undefined => {
-  if (state?.active_guide && state.active_guide !== 'unset' ) {
+  if (state?.active_guide && state.active_guide !== 'unset') {
     return guidesConfig[state.active_guide];
   }
 
@@ -59,7 +59,6 @@ const getStepLabel = (steps?: StepConfig[], state?: GuidedOnboardingState): stri
 };
 
 const getStepStatus = (steps: StepConfig[], stepIndex: number, activeStep?: string): StepStatus => {
-
   const activeStepIndex = steps.findIndex((step: StepConfig) => step.id === activeStep);
   if (activeStepIndex < stepIndex) {
     return 'incomplete';
@@ -124,7 +123,7 @@ export const GuidedOnboardingButton = ({ api, application, http }: Props) => {
   const navigateToStep = (step: StepConfig) => {
     setIsPopoverOpen(false);
     if (step.location) {
-      application.navigateToApp(step.location.appID, {path: step.location.path});
+      application.navigateToApp(step.location.appID, { path: step.location.path });
     }
   };
 
