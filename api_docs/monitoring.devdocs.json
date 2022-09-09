@@ -21,6 +21,7 @@
         "description": [],
         "path": "x-pack/plugins/monitoring/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "monitoring",
@@ -34,6 +35,7 @@
             ],
             "path": "x-pack/plugins/monitoring/server/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -49,6 +51,7 @@
             ],
             "path": "x-pack/plugins/monitoring/server/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -66,6 +69,7 @@
             ],
             "path": "x-pack/plugins/monitoring/server/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "monitoring",
@@ -79,6 +83,7 @@
                 ],
                 "path": "x-pack/plugins/monitoring/server/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -96,6 +101,7 @@
             ],
             "path": "x-pack/plugins/monitoring/server/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -123,6 +129,7 @@
         ],
         "path": "x-pack/plugins/monitoring/server/config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "monitoring",
@@ -137,7 +144,8 @@
               "MonitoringConfigTypeOverriddenUIElasticsearch"
             ],
             "path": "x-pack/plugins/monitoring/server/config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -165,6 +173,7 @@
         ],
         "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/get_settings_collector.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -178,6 +187,7 @@
       "description": [],
       "path": "x-pack/plugins/monitoring/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "monitoring",
@@ -191,6 +201,7 @@
           ],
           "path": "x-pack/plugins/monitoring/server/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "returnComment": [],
           "children": []
         }

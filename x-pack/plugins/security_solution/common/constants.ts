@@ -113,7 +113,7 @@ export enum SecurityPageName {
   noPage = '',
   overview = 'overview',
   policies = 'policy',
-  responseActions = 'response_actions',
+  actionHistory = 'action_history',
   rules = 'rules',
   rulesCreate = 'rules-create',
   sessions = 'sessions',
@@ -159,7 +159,7 @@ export const EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/event_filters` as const;
 export const HOST_ISOLATION_EXCEPTIONS_PATH =
   `${MANAGEMENT_PATH}/host_isolation_exceptions` as const;
 export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
-export const RESPONSE_ACTIONS_PATH = `${MANAGEMENT_PATH}/response_actions` as const;
+export const ACTION_HISTORY_PATH = `${MANAGEMENT_PATH}/action_history` as const;
 export const ENTITY_ANALYTICS_PATH = '/entity_analytics' as const;
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
 export const APP_LANDING_PATH = `${APP_PATH}${LANDING_PATH}` as const;
@@ -183,7 +183,7 @@ export const APP_EVENT_FILTERS_PATH = `${APP_PATH}${EVENT_FILTERS_PATH}` as cons
 export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
   `${APP_PATH}${HOST_ISOLATION_EXCEPTIONS_PATH}` as const;
 export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
-export const APP_RESPONSE_ACTIONS_PATH = `${APP_PATH}${RESPONSE_ACTIONS_PATH}` as const;
+export const APP_ACTION_HISTORY_PATH = `${APP_PATH}${ACTION_HISTORY_PATH}` as const;
 export const APP_ENTITY_ANALYTICS_PATH = `${APP_PATH}${ENTITY_ANALYTICS_PATH}` as const;
 
 // cloud logs to exclude from default index pattern
@@ -290,10 +290,13 @@ export const prebuiltSavedObjectsBulkCreateUrl = (templateName: string) =>
  * Internal detection engine routes
  */
 export const INTERNAL_DETECTION_ENGINE_URL = '/internal/detection_engine' as const;
+export const INTERNAL_DETECTION_ENGINE_RULES_URL = '/internal/detection_engine/rules' as const;
 export const DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/fleet/integrations/installed` as const;
 export const DETECTION_ENGINE_ALERTS_INDEX_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/signal/index` as const;
+export const DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL =
+  `${INTERNAL_DETECTION_ENGINE_RULES_URL}/exceptions/_find_references` as const;
 /**
  * Telemetry detection endpoint for any previews requested of what data we are
  * providing through UI/UX and for e2e tests.
@@ -455,3 +458,6 @@ export enum BulkActionsDryRunErrCode {
   MACHINE_LEARNING_AUTH = 'MACHINE_LEARNING_AUTH',
   MACHINE_LEARNING_INDEX_PATTERN = 'MACHINE_LEARNING_INDEX_PATTERN',
 }
+
+export const RISKY_HOSTS_DOC_LINK =
+  'https://www.github.com/elastic/detection-rules/blob/main/docs/experimental-machine-learning/host-risk-score.md';

@@ -21,6 +21,7 @@
         "description": [],
         "path": "packages/core/deprecations/core-deprecations-server-internal/src/deprecations_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-server-internal",
@@ -41,6 +42,7 @@
             ],
             "path": "packages/core/deprecations/core-deprecations-server-internal/src/deprecations_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-deprecations-server-internal",
@@ -54,6 +56,7 @@
                 ],
                 "path": "packages/core/deprecations/core-deprecations-server-internal/src/deprecations_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -68,6 +71,7 @@
                 ],
                 "path": "packages/core/deprecations/core-deprecations-server-internal/src/deprecations_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],

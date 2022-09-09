@@ -31,6 +31,7 @@
         ],
         "path": "packages/core/i18n/core-i18n-browser/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-i18n-browser",
@@ -46,6 +47,7 @@
             ],
             "path": "packages/core/i18n/core-i18n-browser/src/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-i18n-browser",
@@ -56,6 +58,7 @@
                 "description": [],
                 "path": "packages/core/i18n/core-i18n-browser/src/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/core-i18n-browser",
@@ -68,7 +71,8 @@
                       "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
                     ],
                     "path": "packages/core/i18n/core-i18n-browser/src/types.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }

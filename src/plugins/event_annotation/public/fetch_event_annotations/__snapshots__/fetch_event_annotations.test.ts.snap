@@ -38,6 +38,13 @@ Array [
     "type": "point",
   },
   Object {
+    "id": "mann5",
+    "isHidden": true,
+    "time": "2022-07-05T05:55:00Z",
+    "timebucket": "2022-07-05T05:30:00.000Z",
+    "type": "point",
+  },
+  Object {
     "id": "mann1",
     "time": "2022-07-05T11:12:00Z",
     "timebucket": "2022-07-05T11:00:00.000Z",
