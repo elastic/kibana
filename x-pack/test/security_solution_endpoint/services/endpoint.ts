@@ -31,14 +31,16 @@ import { STARTED_TRANSFORM_STATES } from '@kbn/security-solution-plugin/common/c
 import { DeepPartial } from 'utility-types';
 import { HostInfo, HostMetadata } from '@kbn/security-solution-plugin/common/endpoint/types';
 import { EndpointDocGenerator } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import { EndpointMetadataGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/endpoint_metadata_generator';
 import { merge } from 'lodash';
 import { kibanaPackageJson } from '@kbn/utils';
+import seedrandom from 'seedrandom';
 import { FtrService } from '../../functional/ftr_provider_context';
 
 // Document Generator override that uses a custom Endpoint Metadata generator and sets the
 // `agent.version` to the current version
 const CurrentKibanaVersionDocGenerator = class extends EndpointDocGenerator {
-  constructor(seedValue) {
+  constructor(seedValue: string | seedrandom.prng) {
     const MetadataGenerator = class extends EndpointMetadataGenerator {
       protected randomVersion(): string {
         return kibanaPackageJson.version;
