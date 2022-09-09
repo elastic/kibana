@@ -17,12 +17,12 @@ import { DashboardCoreContextService } from './core_context/types';
 import { DashboardCapabilitiesService } from './dashboard_capabilities/types';
 import { DashboardSessionStorageServiceType } from './dashboard_session_storage/types';
 import { DashboardDataService } from './data/types';
+import { DashboardDataViewEditorService } from './data_view_editor/types';
 import { DashboardDocumentationLinksService } from './documentation_links/types';
 import { DashboardEmbeddableService } from './embeddable/types';
 import { DashboardHTTPService } from './http/types';
 import { DashboardInitializerContextService } from './initializer_context/types';
 import { DashboardNavigationService } from './navigation/types';
-import { DashboardNoDataPageContextService } from './no_data_page_context/types';
 import { DashboardNotificationsService } from './notifications/types';
 import { DashboardOverlaysService } from './overlays/types';
 import { DashboardSavedObjectsService } from './saved_objects/types';
@@ -46,12 +46,12 @@ export interface DashboardServices {
   dashboardCapabilities: DashboardCapabilitiesService;
   dashboardSessionStorage: DashboardSessionStorageServiceType;
   data: DashboardDataService;
+  dataViewEditor: DashboardDataViewEditorService; // this service is used only for the no data state
   documentationLinks: DashboardDocumentationLinksService;
   embeddable: DashboardEmbeddableService;
   http: DashboardHTTPService;
   initializerContext: DashboardInitializerContextService;
   navigation: DashboardNavigationService;
-  noDataPageContext: DashboardNoDataPageContextService; // these services are used only for the no data state
   notifications: DashboardNotificationsService;
   overlays: DashboardOverlaysService;
   savedObjects: DashboardSavedObjectsService;

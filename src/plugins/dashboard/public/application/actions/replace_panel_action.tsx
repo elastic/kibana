@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import { type IEmbeddable, ViewMode, type EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { type IEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { DASHBOARD_CONTAINER_TYPE, type DashboardContainer } from '../embeddable';
 import { openReplacePanelFlyout } from './open_replace_panel_flyout';
@@ -28,12 +27,7 @@ export class ReplacePanelAction implements Action<ReplacePanelActionContext> {
   public readonly id = ACTION_REPLACE_PANEL;
   public order = 3;
 
-  constructor(
-    private core: CoreStart,
-    private savedobjectfinder: React.ComponentType<any>,
-    private notifications: CoreStart['notifications'],
-    private getEmbeddableFactories: EmbeddableStart['getEmbeddableFactories']
-  ) {}
+  constructor(private savedobjectfinder: React.ComponentType<any>) {}
 
   public getDisplayName({ embeddable }: ReplacePanelActionContext) {
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
@@ -68,11 +62,8 @@ export class ReplacePanelAction implements Action<ReplacePanelActionContext> {
     const dash = embeddable.parent;
     openReplacePanelFlyout({
       embeddable: dash,
-      core: this.core,
       savedObjectFinder: this.savedobjectfinder,
-      notifications: this.notifications,
       panelToRemove: view,
-      getEmbeddableFactories: this.getEmbeddableFactories,
     });
   }
 }

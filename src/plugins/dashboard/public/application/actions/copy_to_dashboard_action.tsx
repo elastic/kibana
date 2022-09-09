@@ -9,14 +9,14 @@
 import React from 'react';
 
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart, OverlayStart } from '@kbn/core/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import type { EmbeddableStateTransfer, IEmbeddable } from '@kbn/embeddable-plugin/public';
+import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 
 import { dashboardCopyToDashboardAction } from '../../dashboard_strings';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
 import { CopyToDashboardModal } from './copy_to_dashboard_modal';
+import { pluginServices } from '../../services/plugin_services';
 
 export const ACTION_COPY_TO_DASHBOARD = 'copyToDashboard';
 
@@ -38,13 +38,7 @@ export class CopyToDashboardAction implements Action<CopyToDashboardActionContex
   public readonly id = ACTION_COPY_TO_DASHBOARD;
   public order = 1;
 
-  constructor(
-    private theme: CoreStart['theme'],
-    private overlays: OverlayStart,
-    private stateTransfer: EmbeddableStateTransfer,
-    private capabilities: DashboardCopyToCapabilities,
-    private PresentationUtilContext: PresentationUtilPluginStart['ContextProvider']
-  ) {}
+  constructor(private PresentationUtilContext: PresentationUtilPluginStart['ContextProvider']) {}
 
   public getDisplayName({ embeddable }: CopyToDashboardActionContext) {
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
@@ -62,10 +56,12 @@ export class CopyToDashboardAction implements Action<CopyToDashboardActionContex
   }
 
   public async isCompatible({ embeddable }: CopyToDashboardActionContext) {
+    const {
+      dashboardCapabilities: { createNew: canCreateNew, showWriteControls: canEditExisting },
+    } = pluginServices.getServices();
+
     return Boolean(
-      embeddable.parent &&
-        isDashboard(embeddable.parent) &&
-        (this.capabilities.canCreateNew || this.capabilities.canEditExisting)
+      embeddable.parent && isDashboard(embeddable.parent) && (canCreateNew || canEditExisting)
     );
   }
 
@@ -73,17 +69,23 @@ export class CopyToDashboardAction implements Action<CopyToDashboardActionContex
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
       throw new IncompatibleActionError();
     }
-    const session = this.overlays.openModal(
+
+    const {
+      overlays: { openModal },
+      settings: {
+        theme: { theme$ },
+      },
+    } = pluginServices.getServices();
+
+    const session = openModal(
       toMountPoint(
         <CopyToDashboardModal
           PresentationUtilContext={this.PresentationUtilContext}
           closeModal={() => session.close()}
-          stateTransfer={this.stateTransfer}
-          capabilities={this.capabilities}
           dashboardId={(embeddable.parent as DashboardContainer).getInput().id}
           embeddable={embeddable}
         />,
-        { theme$: this.theme.theme$ }
+        { theme$ }
       ),
       {
         maxWidth: 400,

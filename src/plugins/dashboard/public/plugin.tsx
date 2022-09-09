@@ -305,78 +305,49 @@ export class DashboardPlugin
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
-    const { notifications, overlays, application, theme, uiSettings } = core;
-    const { uiActions, data, share, presentationUtil, embeddable } = plugins;
-    this.startDashboardKibanaServices(core, plugins, this.initializerContext);
+    const { uiSettings } = core;
+    const { uiActions, share, presentationUtil } = plugins;
+    this.startDashboardKibanaServices(core, plugins, this.initializerContext).then(() => {
+      const clonePanelAction = new ClonePanelAction(core.savedObjects);
+      uiActions.registerAction(clonePanelAction);
+      uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
 
-    const dashboardCapabilities = application.capabilities.dashboard;
+      const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, uiSettings);
+      const changeViewAction = new ReplacePanelAction(SavedObjectFinder);
+      uiActions.registerAction(changeViewAction);
+      uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction.id);
 
-    const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, uiSettings);
+      const panelLevelFiltersNotification = new FiltersNotificationBadge();
+      uiActions.registerAction(panelLevelFiltersNotification);
+      uiActions.attachAction(PANEL_BADGE_TRIGGER, panelLevelFiltersNotification.id);
 
-    const expandPanelAction = new ExpandPanelAction();
+      if (share) {
+        const ExportCSVPlugin = new ExportCSVAction();
+        uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, ExportCSVPlugin);
+      }
+
+      if (this.dashboardFeatureFlagConfig?.allowByValueEmbeddables) {
+        const addToLibraryAction = new AddToLibraryAction();
+        uiActions.registerAction(addToLibraryAction);
+        uiActions.attachAction(CONTEXT_MENU_TRIGGER, addToLibraryAction.id);
+
+        const unlinkFromLibraryAction = new UnlinkFromLibraryAction();
+        uiActions.registerAction(unlinkFromLibraryAction);
+        uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkFromLibraryAction.id);
+
+        const libraryNotificationAction = new LibraryNotificationAction(unlinkFromLibraryAction);
+        uiActions.registerAction(libraryNotificationAction);
+        uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, libraryNotificationAction.id);
+
+        const copyToDashboardAction = new CopyToDashboardAction(presentationUtil.ContextProvider);
+        uiActions.registerAction(copyToDashboardAction);
+        uiActions.attachAction(CONTEXT_MENU_TRIGGER, copyToDashboardAction.id);
+      }
+    });
+
+    const expandPanelAction = new ExpandPanelAction(); // this action does't rely on any services
     uiActions.registerAction(expandPanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
-
-    const changeViewAction = new ReplacePanelAction(
-      core,
-      SavedObjectFinder,
-      notifications,
-      plugins.embeddable.getEmbeddableFactories
-    );
-    uiActions.registerAction(changeViewAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction.id);
-
-    const clonePanelAction = new ClonePanelAction(core);
-    uiActions.registerAction(clonePanelAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
-
-    const panelLevelFiltersNotification = new FiltersNotificationBadge(
-      application,
-      embeddable,
-      overlays,
-      theme,
-      uiSettings
-    );
-    uiActions.registerAction(panelLevelFiltersNotification);
-    uiActions.attachAction(PANEL_BADGE_TRIGGER, panelLevelFiltersNotification.id);
-
-    if (share) {
-      const ExportCSVPlugin = new ExportCSVAction({ core, data });
-      uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, ExportCSVPlugin);
-    }
-
-    if (this.dashboardFeatureFlagConfig?.allowByValueEmbeddables) {
-      const addToLibraryAction = new AddToLibraryAction({
-        toasts: notifications.toasts,
-        capabilities: application.capabilities,
-      });
-      uiActions.registerAction(addToLibraryAction);
-      uiActions.attachAction(CONTEXT_MENU_TRIGGER, addToLibraryAction.id);
-
-      const unlinkFromLibraryAction = new UnlinkFromLibraryAction({ toasts: notifications.toasts });
-      uiActions.registerAction(unlinkFromLibraryAction);
-      uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkFromLibraryAction.id);
-
-      const libraryNotificationAction = new LibraryNotificationAction(
-        theme,
-        unlinkFromLibraryAction
-      );
-      uiActions.registerAction(libraryNotificationAction);
-      uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, libraryNotificationAction.id);
-
-      const copyToDashboardAction = new CopyToDashboardAction(
-        theme,
-        overlays,
-        embeddable.getStateTransfer(),
-        {
-          canCreateNew: Boolean(dashboardCapabilities.createNew),
-          canEditExisting: Boolean(dashboardCapabilities.showWriteControls),
-        },
-        presentationUtil.ContextProvider
-      );
-      uiActions.registerAction(copyToDashboardAction);
-      uiActions.attachAction(CONTEXT_MENU_TRIGGER, copyToDashboardAction.id);
-    }
 
     const savedDashboardLoader = createSavedDashboardLoader({
       savedObjectsClient: core.savedObjects.client,

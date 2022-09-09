@@ -20,8 +20,6 @@ import {
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import { coreMock } from '@kbn/core/public/mocks';
 import { ExportCSVAction } from './export_csv_action';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public/types';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { LINE_FEED_CHARACTER } from '@kbn/data-plugin/common/exports/export_csv';
 import { pluginServices } from '../../services/plugin_services';
 
@@ -29,7 +27,6 @@ describe('Export CSV action', () => {
   let container: DashboardContainer;
   let embeddable: ContactCardEmbeddable;
   let coreStart: CoreStart;
-  let dataMock: jest.Mocked<DataPublicPluginStart>;
 
   const mockEmbeddableFactory = new ContactCardExportableEmbeddableFactory(
     (() => null) as any,
@@ -57,7 +54,6 @@ describe('Export CSV action', () => {
       },
     });
     container = new DashboardContainer(input);
-    dataMock = dataPluginMock.createStartContract();
 
     const contactCardEmbeddable = await container.addNewEmbeddable<
       ContactCardEmbeddableInput,
@@ -75,7 +71,7 @@ describe('Export CSV action', () => {
   });
 
   test('Download is incompatible with embeddables without getInspectorAdapters implementation', async () => {
-    const action = new ExportCSVAction({ core: coreStart, data: dataMock });
+    const action = new ExportCSVAction();
     const errorEmbeddable = new ErrorEmbeddable(
       'Wow what an awful error',
       { id: ' 404' },
@@ -85,7 +81,7 @@ describe('Export CSV action', () => {
   });
 
   test('Should download a compatible Embeddable', async () => {
-    const action = new ExportCSVAction({ core: coreStart, data: dataMock });
+    const action = new ExportCSVAction();
     const result = (await action.execute({ embeddable, asString: true })) as unknown as
       | undefined
       | Record<string, { content: string; type: string }>;
@@ -98,7 +94,7 @@ describe('Export CSV action', () => {
   });
 
   test('Should not download incompatible Embeddable', async () => {
-    const action = new ExportCSVAction({ core: coreStart, data: dataMock });
+    const action = new ExportCSVAction();
     const errorEmbeddable = new ErrorEmbeddable(
       'Wow what an awful error',
       { id: ' 404' },

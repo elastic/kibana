@@ -9,8 +9,6 @@
 import { getSampleDashboardInput } from '../test_helpers';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { CoreStart } from '@kbn/core/public';
 import { LibraryNotificationAction, UnlinkFromLibraryAction } from '.';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import {
@@ -36,12 +34,9 @@ pluginServices.getServices().embeddable.getEmbeddableFactory = jest
 
 let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable & ReferenceOrValueEmbeddable;
-let coreStart: CoreStart;
 let unlinkAction: UnlinkFromLibraryAction;
 
 beforeEach(async () => {
-  coreStart = coreMock.createStart();
-
   unlinkAction = {
     getDisplayName: () => 'unlink from dat library',
     execute: jest.fn(),
@@ -71,7 +66,7 @@ beforeEach(async () => {
 });
 
 test('Notification is incompatible with Error Embeddables', async () => {
-  const action = new LibraryNotificationAction(coreStart.theme, unlinkAction);
+  const action = new LibraryNotificationAction(unlinkAction);
   const errorEmbeddable = new ErrorEmbeddable(
     'Wow what an awful error',
     { id: ' 404' },
@@ -81,19 +76,19 @@ test('Notification is incompatible with Error Embeddables', async () => {
 });
 
 test('Notification is shown when embeddable on dashboard has reference type input', async () => {
-  const action = new LibraryNotificationAction(coreStart.theme, unlinkAction);
+  const action = new LibraryNotificationAction(unlinkAction);
   embeddable.updateInput(await embeddable.getInputAsRefType());
   expect(await action.isCompatible({ embeddable })).toBe(true);
 });
 
 test('Notification is not shown when embeddable input is by value', async () => {
-  const action = new LibraryNotificationAction(coreStart.theme, unlinkAction);
+  const action = new LibraryNotificationAction(unlinkAction);
   embeddable.updateInput(await embeddable.getInputAsValueType());
   expect(await action.isCompatible({ embeddable })).toBe(false);
 });
 
 test('Notification is not shown when view mode is set to view', async () => {
-  const action = new LibraryNotificationAction(coreStart.theme, unlinkAction);
+  const action = new LibraryNotificationAction(unlinkAction);
   embeddable.updateInput(await embeddable.getInputAsRefType());
   embeddable.updateInput({ viewMode: ViewMode.VIEW });
   expect(await action.isCompatible({ embeddable })).toBe(false);

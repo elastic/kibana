@@ -87,7 +87,7 @@ beforeEach(async () => {
 });
 
 test('Clone is incompatible with Error Embeddables', async () => {
-  const action = new ClonePanelAction(coreStart);
+  const action = new ClonePanelAction(coreStart.savedObjects);
   const errorEmbeddable = new ErrorEmbeddable(
     'Wow what an awful error',
     { id: ' 404' },
@@ -100,7 +100,7 @@ test('Clone adds a new embeddable', async () => {
   const dashboard = byRefOrValEmbeddable.getRoot() as IContainer;
   const originalPanelCount = Object.keys(dashboard.getInput().panels).length;
   const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
-  const action = new ClonePanelAction(coreStart);
+  const action = new ClonePanelAction(coreStart.savedObjects);
   await action.execute({ embeddable: byRefOrValEmbeddable });
   expect(Object.keys(container.getInput().panels).length).toEqual(originalPanelCount + 1);
   const newPanelId = Object.keys(container.getInput().panels).find(
@@ -120,7 +120,7 @@ test('Clone adds a new embeddable', async () => {
 test('Clones a RefOrVal embeddable by value', async () => {
   const dashboard = byRefOrValEmbeddable.getRoot() as IContainer;
   const panel = dashboard.getInput().panels[byRefOrValEmbeddable.id] as DashboardPanelState;
-  const action = new ClonePanelAction(coreStart);
+  const action = new ClonePanelAction(coreStart.savedObjects);
   // @ts-ignore
   const newPanel = await action.cloneEmbeddable(panel, byRefOrValEmbeddable);
   expect(coreStart.savedObjects.client.get).toHaveBeenCalledTimes(0);
@@ -132,7 +132,7 @@ test('Clones a RefOrVal embeddable by value', async () => {
 test('Clones a non-RefOrVal embeddable by value if the panel does not have a savedObjectId', async () => {
   const dashboard = genericEmbeddable.getRoot() as IContainer;
   const panel = dashboard.getInput().panels[genericEmbeddable.id] as DashboardPanelState;
-  const action = new ClonePanelAction(coreStart);
+  const action = new ClonePanelAction(coreStart.savedObjects);
   // @ts-ignore
   const newPanelWithoutId = await action.cloneEmbeddable(panel, genericEmbeddable);
   expect(coreStart.savedObjects.client.get).toHaveBeenCalledTimes(0);
@@ -145,7 +145,7 @@ test('Clones a non-RefOrVal embeddable by reference if the panel has a savedObje
   const dashboard = genericEmbeddable.getRoot() as IContainer;
   const panel = dashboard.getInput().panels[genericEmbeddable.id] as DashboardPanelState;
   panel.explicitInput.savedObjectId = 'holySavedObjectBatman';
-  const action = new ClonePanelAction(coreStart);
+  const action = new ClonePanelAction(coreStart.savedObjects);
   // @ts-ignore
   const newPanel = await action.cloneEmbeddable(panel, genericEmbeddable);
   expect(coreStart.savedObjects.client.get).toHaveBeenCalledTimes(1);
@@ -194,7 +194,7 @@ test('Gets a unique title from the saved objects library', async () => {
     }
   });
 
-  const action = new ClonePanelAction(coreStart);
+  const action = new ClonePanelAction(coreStart.savedObjects);
   // @ts-ignore
   expect(await action.getCloneTitle(genericEmbeddable, 'testFirstClone')).toEqual(
     'testFirstClone (copy)'
@@ -227,7 +227,7 @@ test('Gets a unique title from the saved objects library', async () => {
 
 test('Gets a unique title from the dashboard', async () => {
   const dashboard = genericEmbeddable.getRoot() as DashboardContainer;
-  const action = new ClonePanelAction(coreStart);
+  const action = new ClonePanelAction(coreStart.savedObjects);
 
   // @ts-ignore
   expect(await action.getCloneTitle(byRefOrValEmbeddable, '')).toEqual('');

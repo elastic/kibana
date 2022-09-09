@@ -21,11 +21,9 @@ export const DashboardAppNoDataPage = ({
   onDataViewCreated: () => void;
 }) => {
   const {
+    application,
     data: { dataViews },
-    noDataPageContext: {
-      coreStart: { application },
-      dataViewEditor,
-    },
+    dataViewEditor,
     http: { basePath },
     documentationLinks: { kibanaGuideDocLink },
   } = pluginServices.getServices();

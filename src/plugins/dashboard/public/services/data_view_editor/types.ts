@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-
-export interface DashboardDataService {
-  dataViews: DataPublicPluginStart['dataViews'];
-  fieldFormats: DataPublicPluginStart['fieldFormats'];
-  query: DataPublicPluginStart['query'];
-  search: DataPublicPluginStart['search'];
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+export interface DashboardDataViewEditorService {
+  openEditor: DataViewEditorStart['openEditor'];
+  userPermissions: DataViewEditorStart['userPermissions'];
 }

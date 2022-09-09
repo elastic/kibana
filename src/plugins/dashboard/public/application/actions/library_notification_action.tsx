@@ -8,7 +8,6 @@
 
 import React from 'react';
 
-import { CoreStart } from '@kbn/core/public';
 import {
   ViewMode,
   type IEmbeddable,
@@ -21,6 +20,7 @@ import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { UnlinkFromLibraryAction } from '.';
 import { LibraryNotificationPopover } from './library_notification_popover';
 import { dashboardLibraryNotification } from '../../dashboard_strings';
+import { pluginServices } from '../../services/plugin_services';
 
 export const ACTION_LIBRARY_NOTIFICATION = 'ACTION_LIBRARY_NOTIFICATION';
 
@@ -33,7 +33,7 @@ export class LibraryNotificationAction implements Action<LibraryNotificationActi
   public readonly type = ACTION_LIBRARY_NOTIFICATION;
   public readonly order = 1;
 
-  constructor(private theme: CoreStart['theme'], private unlinkAction: UnlinkFromLibraryAction) {}
+  constructor(private unlinkAction: UnlinkFromLibraryAction) {}
 
   private displayName = dashboardLibraryNotification.getDisplayName();
 
@@ -45,8 +45,14 @@ export class LibraryNotificationAction implements Action<LibraryNotificationActi
     context: LibraryNotificationActionContext;
   }) => {
     const { embeddable } = context;
+    const {
+      settings: {
+        theme: { theme$ },
+      },
+    } = pluginServices.getServices();
+
     return (
-      <KibanaThemeProvider theme$={this.theme.theme$}>
+      <KibanaThemeProvider theme$={theme$}>
         <LibraryNotificationPopover
           unlinkAction={this.unlinkAction}
           displayName={this.displayName}

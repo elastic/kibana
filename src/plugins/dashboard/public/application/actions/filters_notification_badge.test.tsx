@@ -9,8 +9,6 @@
 import { getSampleDashboardInput } from '../test_helpers';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { CoreStart } from '@kbn/core/public';
 import { FiltersNotificationBadge } from '.';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { type Query, type AggregateQuery, Filter } from '@kbn/es-query';
@@ -40,7 +38,6 @@ let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable & FilterableEmbeddable;
 const mockGetFilters = jest.fn(async () => [] as Filter[]);
 const mockGetQuery = jest.fn(async () => undefined as Query | AggregateQuery | undefined);
-let coreStart: CoreStart;
 
 const getMockPhraseFilter = (key: string, value: string) => {
   return {
@@ -63,8 +60,6 @@ const getMockPhraseFilter = (key: string, value: string) => {
 };
 
 beforeEach(async () => {
-  coreStart = coreMock.createStart();
-
   container = new DashboardContainer(getSampleDashboardInput());
 
   const contactCardEmbeddable = await container.addNewEmbeddable<
@@ -78,13 +73,7 @@ beforeEach(async () => {
     throw new Error('Failed to create embeddable');
   }
 
-  action = new FiltersNotificationBadge(
-    coreStart.application,
-    embeddablePluginMock.createStartContract(),
-    coreStart.overlays,
-    coreStart.theme,
-    coreStart.uiSettings
-  );
+  action = new FiltersNotificationBadge();
   embeddable = embeddablePluginMock.mockFilterableEmbeddable(contactCardEmbeddable, {
     getFilters: () => mockGetFilters(),
     getQuery: () => mockGetQuery(),

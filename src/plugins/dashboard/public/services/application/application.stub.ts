@@ -16,10 +16,15 @@ export const applicationServiceFactory: ApplicationServiceFactory = () => {
   const pluginMock = applicationServiceMock.createStartContract();
 
   return {
+    currentAppId$: pluginMock.currentAppId$,
     navigateToApp: pluginMock.navigateToApp,
+    navigateToUrl: pluginMock.navigateToUrl,
     getUrlForApp: pluginMock.getUrlForApp,
     capabilities: {
       advancedSettings: pluginMock.capabilities.advancedSettings,
+      maps: pluginMock.capabilities.maps,
+      navLinks: pluginMock.capabilities.navLinks,
+      visualize: pluginMock.capabilities.visualize,
     },
   };
 };

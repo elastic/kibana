@@ -9,9 +9,14 @@
 import type { CoreStart } from '@kbn/core/public';
 
 export interface DashboardApplicationService {
+  currentAppId$: CoreStart['application']['currentAppId$'];
   navigateToApp: CoreStart['application']['navigateToApp'];
+  navigateToUrl: CoreStart['application']['navigateToUrl'];
   getUrlForApp: CoreStart['application']['getUrlForApp'];
   capabilities: {
     advancedSettings: CoreStart['application']['capabilities']['advancedSettings'];
+    maps: CoreStart['application']['capabilities']['maps']; // only used in `add_to_library_action`
+    navLinks: CoreStart['application']['capabilities']['navLinks'];
+    visualize: CoreStart['application']['capabilities']['visualize']; // only used in `add_to_library_action`
   };
 }

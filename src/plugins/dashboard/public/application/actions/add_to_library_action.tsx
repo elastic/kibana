@@ -15,11 +15,11 @@ import {
   isErrorEmbeddable,
   isReferenceOrValueEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import type { ApplicationStart, NotificationsStart } from '@kbn/core/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { dashboardAddToLibraryAction } from '../../dashboard_strings';
 import { type DashboardPanelState, DASHBOARD_CONTAINER_TYPE, type DashboardContainer } from '..';
+import { pluginServices } from '../../services/plugin_services';
 
 export const ACTION_ADD_TO_LIBRARY = 'saveToLibrary';
 
@@ -32,12 +32,7 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
   public readonly id = ACTION_ADD_TO_LIBRARY;
   public order = 15;
 
-  constructor(
-    private deps: {
-      toasts: NotificationsStart['toasts'];
-      capabilities: ApplicationStart['capabilities'];
-    }
-  ) {}
+  constructor() {}
 
   public getDisplayName({ embeddable }: AddToLibraryActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
@@ -54,11 +49,14 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
   }
 
   public async isCompatible({ embeddable }: AddToLibraryActionContext) {
+    const {
+      application: {
+        capabilities: { maps, visualize },
+      },
+    } = pluginServices.getServices();
+
     // TODO: Fix this, potentially by adding a 'canSave' function to embeddable interface
-    const canSave =
-      embeddable.type === 'map'
-        ? this.deps.capabilities.maps?.save
-        : this.deps.capabilities.visualize.save;
+    const canSave = embeddable.type === 'map' ? maps.save : visualize.save;
 
     return Boolean(
       canSave &&
@@ -76,6 +74,10 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
     if (!isReferenceOrValueEmbeddable(embeddable)) {
       throw new IncompatibleActionError();
     }
+
+    const {
+      notifications: { toasts },
+    } = pluginServices.getServices();
 
     const newInput = await embeddable.getInputAsRefType();
 
@@ -96,7 +98,7 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
     const title = dashboardAddToLibraryAction.getSuccessMessage(
       embeddable.getTitle() ? `'${embeddable.getTitle()}'` : ''
     );
-    this.deps.toasts.addSuccess({
+    toasts.addSuccess({
       title,
       'data-test-subj': 'addPanelToLibrarySuccess',
     });

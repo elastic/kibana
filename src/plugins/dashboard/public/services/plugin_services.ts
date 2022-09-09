@@ -21,12 +21,12 @@ import { coreContextServiceFactory } from './core_context/core_context_service';
 import { dashboardCapabilitiesServiceFactory } from './dashboard_capabilities/dashboard_capabilities_service';
 import { dashboardSessionStorageServiceFactory } from './dashboard_session_storage/dashboard_session_storage_service';
 import { dataServiceFactory } from './data/data_service';
+import { dataViewEditorServiceFactory } from './data_view_editor/data_view_editor_service';
 import { documentationLinksServiceFactory } from './documentation_links/documentation_links_service';
 import { embeddableServiceFactory } from './embeddable/embeddable_service';
 import { httpServiceFactory } from './http/http_service';
 import { initializerContextServiceFactory } from './initializer_context/initializer_context_service';
 import { navigationServiceFactory } from './navigation/navigation_service';
-import { noDataPageContextServiceFactory } from './no_data_page_context/no_data_page_context_service';
 import { notificationsServiceFactory } from './notifications/notifications_service';
 import { overlaysServiceFactory } from './overlays/overlays_service';
 import { screenshotModeServiceFactory } from './screenshot_mode/screenshot_mode_service';
@@ -51,12 +51,12 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
     'spaces',
   ]),
   data: new PluginServiceProvider(dataServiceFactory),
+  dataViewEditor: new PluginServiceProvider(dataViewEditorServiceFactory),
   documentationLinks: new PluginServiceProvider(documentationLinksServiceFactory),
   embeddable: new PluginServiceProvider(embeddableServiceFactory),
   http: new PluginServiceProvider(httpServiceFactory),
   initializerContext: new PluginServiceProvider(initializerContextServiceFactory),
   navigation: new PluginServiceProvider(navigationServiceFactory),
-  noDataPageContext: new PluginServiceProvider(noDataPageContextServiceFactory),
   notifications: new PluginServiceProvider(notificationsServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   savedObjects: new PluginServiceProvider(savedObjectsServiceFactory),

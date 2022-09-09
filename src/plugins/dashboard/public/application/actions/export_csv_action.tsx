@@ -6,23 +6,17 @@
  * Side Public License, v 1.
  */
 
-import type { CoreStart } from '@kbn/core/public';
 import { exporters } from '@kbn/data-plugin/public';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { downloadMultipleAs } from '@kbn/share-plugin/public';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public/types';
 import type { Adapters, IEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import { dashboardExportCsvAction } from '../../dashboard_strings';
+import { pluginServices } from '../../services/plugin_services';
 
 export const ACTION_EXPORT_CSV = 'ACTION_EXPORT_CSV';
-
-export interface Params {
-  core: CoreStart;
-  data: DataPublicPluginStart;
-}
 
 export interface ExportContext {
   embeddable?: IEmbeddable;
@@ -41,7 +35,7 @@ export class ExportCSVAction implements Action<ExportContext> {
 
   public readonly order = 5;
 
-  constructor(protected readonly params: Params) {}
+  constructor() {}
 
   public getIconType() {
     return 'exportAction';
@@ -59,8 +53,12 @@ export class ExportCSVAction implements Action<ExportContext> {
   };
 
   private getFormatter = (): FormatFactory | undefined => {
-    if (this.params.data) {
-      return this.params.data.fieldFormats.deserialize;
+    const {
+      data: { fieldFormats },
+    } = pluginServices.getServices();
+
+    if (fieldFormats) {
+      return fieldFormats.deserialize;
     }
   };
 
@@ -77,6 +75,11 @@ export class ExportCSVAction implements Action<ExportContext> {
     if (!formatFactory) {
       return;
     }
+
+    const {
+      settings: { uiSettings },
+    } = pluginServices.getServices();
+
     const tableAdapters = this.getDataTableContent(
       context?.embeddable?.getInspectorAdapters()
     ) as Record<string, Datatable>;
@@ -92,8 +95,8 @@ export class ExportCSVAction implements Action<ExportContext> {
 
             memo[`${context!.embeddable!.getTitle() || untitledFilename}${postFix}.csv`] = {
               content: exporters.datatableToCSV(datatable, {
-                csvSeparator: this.params.core.uiSettings.get('csv:separator', ','),
-                quoteValues: this.params.core.uiSettings.get('csv:quoteValues', true),
+                csvSeparator: uiSettings.get('csv:separator', ','),
+                quoteValues: uiSettings.get('csv:quoteValues', true),
                 formatFactory,
                 escapeFormulaValues: false,
               }),

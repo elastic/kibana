@@ -8,38 +8,20 @@
 
 import type { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import type { DashboardStartDependencies } from '../../plugin';
-import type { DashboardNoDataPageContextService } from './types';
+import type { DashboardDataViewEditorService } from './types';
 
-export type NoDataPageContextServiceFactory = KibanaPluginServiceFactory<
-  DashboardNoDataPageContextService,
+export type DataViewEditorServiceFactory = KibanaPluginServiceFactory<
+  DashboardDataViewEditorService,
   DashboardStartDependencies
 >;
 
-export const noDataPageContextServiceFactory: NoDataPageContextServiceFactory = ({
-  coreStart,
-  startPlugins,
-}) => {
-  const {
-    application: {
-      currentAppId$,
-      navigateToUrl,
-      capabilities: { navLinks },
-    },
-  } = coreStart;
+export const dataViewEditorServiceFactory: DataViewEditorServiceFactory = ({ startPlugins }) => {
   const {
     dataViewEditor: { openEditor, userPermissions },
   } = startPlugins;
 
   return {
-    coreStart: {
-      application: {
-        currentAppId$,
-        navigateToUrl,
-        capabilities: {
-          navLinks,
-        },
-      },
-    },
-    dataViewEditor: { openEditor, userPermissions },
+    openEditor,
+    userPermissions,
   };
 };

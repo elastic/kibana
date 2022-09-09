@@ -10,9 +10,6 @@ import { ReplacePanelAction } from './replace_panel_action';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { CoreStart } from '@kbn/core/public';
-import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import {
   ContactCardEmbeddable,
@@ -21,10 +18,8 @@ import {
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
-import { pluginServices } from '../../services/plugin_services';
 
-const { doStart } = embeddablePluginMock.createInstance();
-const start = doStart();
+import { pluginServices } from '../../services/plugin_services';
 
 const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
 pluginServices.getServices().embeddable.getEmbeddableFactory = jest
@@ -33,9 +28,7 @@ pluginServices.getServices().embeddable.getEmbeddableFactory = jest
 
 let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable;
-let coreStart: CoreStart;
 beforeEach(async () => {
-  coreStart = coreMock.createStart();
   const input = getSampleDashboardInput({
     panels: {
       '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
@@ -63,25 +56,13 @@ beforeEach(async () => {
 
 test('Executes the replace panel action', async () => {
   let SavedObjectFinder: any;
-  let notifications: any;
-  const action = new ReplacePanelAction(
-    coreStart,
-    SavedObjectFinder,
-    notifications,
-    start.getEmbeddableFactories
-  );
+  const action = new ReplacePanelAction(SavedObjectFinder);
   action.execute({ embeddable });
 });
 
 test('Is not compatible when embeddable is not in a dashboard container', async () => {
   let SavedObjectFinder: any;
-  let notifications: any;
-  const action = new ReplacePanelAction(
-    coreStart,
-    SavedObjectFinder,
-    notifications,
-    start.getEmbeddableFactories
-  );
+  const action = new ReplacePanelAction(SavedObjectFinder);
   expect(
     await action.isCompatible({
       embeddable: new ContactCardEmbeddable(
@@ -94,13 +75,7 @@ test('Is not compatible when embeddable is not in a dashboard container', async 
 
 test('Execute throws an error when called with an embeddable not in a parent', async () => {
   let SavedObjectFinder: any;
-  let notifications: any;
-  const action = new ReplacePanelAction(
-    coreStart,
-    SavedObjectFinder,
-    notifications,
-    start.getEmbeddableFactories
-  );
+  const action = new ReplacePanelAction(SavedObjectFinder);
   async function check() {
     await action.execute({ embeddable: container });
   }
@@ -109,24 +84,12 @@ test('Execute throws an error when called with an embeddable not in a parent', a
 
 test('Returns title', async () => {
   let SavedObjectFinder: any;
-  let notifications: any;
-  const action = new ReplacePanelAction(
-    coreStart,
-    SavedObjectFinder,
-    notifications,
-    start.getEmbeddableFactories
-  );
+  const action = new ReplacePanelAction(SavedObjectFinder);
   expect(action.getDisplayName({ embeddable })).toBeDefined();
 });
 
 test('Returns an icon', async () => {
   let SavedObjectFinder: any;
-  let notifications: any;
-  const action = new ReplacePanelAction(
-    coreStart,
-    SavedObjectFinder,
-    notifications,
-    start.getEmbeddableFactories
-  );
+  const action = new ReplacePanelAction(SavedObjectFinder);
   expect(action.getIconType({ embeddable })).toBeDefined();
 });

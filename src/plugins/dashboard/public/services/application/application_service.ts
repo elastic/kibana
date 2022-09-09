@@ -18,17 +18,24 @@ export type ApplicationServiceFactory = KibanaPluginServiceFactory<
 export const applicationServiceFactory: ApplicationServiceFactory = ({ coreStart }) => {
   const {
     application: {
+      currentAppId$,
       navigateToApp,
+      navigateToUrl,
       getUrlForApp,
-      capabilities: { advancedSettings },
+      capabilities: { advancedSettings, maps, navLinks, visualize },
     },
   } = coreStart;
 
   return {
+    currentAppId$,
     navigateToApp,
+    navigateToUrl,
     getUrlForApp,
     capabilities: {
       advancedSettings,
+      maps,
+      navLinks,
+      visualize,
     },
   };
 };

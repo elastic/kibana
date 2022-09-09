@@ -26,9 +26,23 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
       Object {
         "capabilities": Object {
           "advancedSettings": undefined,
+          "maps": undefined,
+          "navLinks": Object {},
+          "visualize": undefined,
+        },
+        "currentAppId$": Observable {
+          "source": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
         },
         "getUrlForApp": [MockFunction],
         "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
       }
     }
     createItem={[Function]}
@@ -153,9 +167,23 @@ exports[`after fetch initialFilter 1`] = `
       Object {
         "capabilities": Object {
           "advancedSettings": undefined,
+          "maps": undefined,
+          "navLinks": Object {},
+          "visualize": undefined,
+        },
+        "currentAppId$": Observable {
+          "source": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
         },
         "getUrlForApp": [MockFunction],
         "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
       }
     }
     createItem={[Function]}
@@ -279,9 +307,23 @@ exports[`after fetch renders all table rows 1`] = `
       Object {
         "capabilities": Object {
           "advancedSettings": undefined,
+          "maps": undefined,
+          "navLinks": Object {},
+          "visualize": undefined,
+        },
+        "currentAppId$": Observable {
+          "source": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
         },
         "getUrlForApp": [MockFunction],
         "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
       }
     }
     createItem={[Function]}
@@ -405,9 +447,23 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
       Object {
         "capabilities": Object {
           "advancedSettings": undefined,
+          "maps": undefined,
+          "navLinks": Object {},
+          "visualize": undefined,
+        },
+        "currentAppId$": Observable {
+          "source": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
         },
         "getUrlForApp": [MockFunction],
         "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
       }
     }
     createItem={[Function]}
@@ -531,9 +587,23 @@ exports[`after fetch renders call to action with continue when no dashboards exi
       Object {
         "capabilities": Object {
           "advancedSettings": undefined,
+          "maps": undefined,
+          "navLinks": Object {},
+          "visualize": undefined,
+        },
+        "currentAppId$": Observable {
+          "source": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
         },
         "getUrlForApp": [MockFunction],
         "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
       }
     }
     createItem={[Function]}
@@ -668,9 +738,23 @@ exports[`after fetch showWriteControls 1`] = `
       Object {
         "capabilities": Object {
           "advancedSettings": undefined,
+          "maps": undefined,
+          "navLinks": Object {},
+          "visualize": undefined,
+        },
+        "currentAppId$": Observable {
+          "source": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
         },
         "getUrlForApp": [MockFunction],
         "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
       }
     }
     emptyPrompt={
