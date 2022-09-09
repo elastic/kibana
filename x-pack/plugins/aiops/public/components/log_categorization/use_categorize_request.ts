@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash';
 import { useRef, useCallback } from 'react';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/public';
 
-import { useAiOpsKibana } from '../../kibana_context';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 const CATEGORY_LIMIT = 1000;
 const EXAMPLE_LIMIT = 1;
@@ -44,9 +44,7 @@ export type EventRate = Array<{
 export type SparkLinesPerCategory = Record<string, Record<number, number>>;
 
 export function useCategorizeRequest() {
-  const {
-    services: { data },
-  } = useAiOpsKibana();
+  const { data } = useAiopsAppContext();
 
   const abortController = useRef(new AbortController());
 

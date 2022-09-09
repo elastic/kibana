@@ -31,7 +31,7 @@ import type {
   SearchQueryLanguage,
   SavedSearchSavedObject,
 } from '../../application/utils/search_utils';
-import { useUrlState /* , usePageUrlState, AppStateKey*/ } from '../../hooks/url_state';
+import { useUrlState /* , usePageUrlState, AppStateKey*/ } from '../../hooks/use_url_state';
 import { restorableDefaults } from '../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
 import { useCategorizeRequest } from './use_categorize_request';
 import type { EventRate, Category, SparkLinesPerCategory } from './use_categorize_request';

@@ -9,17 +9,15 @@ import rison from 'rison-node';
 import moment from 'moment';
 
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
-import { useAiOpsKibana } from '../../kibana_context';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import type { Category } from './use_categorize_request';
 import type { QueryMode } from './category_table';
 import type { AiOpsIndexBasedAppState } from '../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
 
 export function useDiscoverLinks() {
   const {
-    services: {
-      http: { basePath },
-    },
-  } = useAiOpsKibana();
+    http: { basePath },
+  } = useAiopsAppContext();
 
   const openInDiscoverWithFilter = (
     index: string,
