@@ -9,5 +9,3 @@
 export type { PluginOpaqueId, PluginName, DiscoveredPlugin } from './src/plugins';
 export { PluginType } from './src/plugins';
 export { EUI_STYLES_GLOBAL } from './src/eui';
-export { ServiceStatusLevels } from './src/service_status';
-export type { ServiceStatus, ServiceStatusLevel } from './src/service_status';

@@ -18,7 +18,7 @@ import { docLinks } from '../../../../shared/doc_links';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { LicensingLogic } from '../../../../shared/licensing';
 import { CreateCrawlerIndexApiLogic } from '../../../api/crawler/create_crawler_index_api_logic';
-import { LicensingCallout } from '../licensing_callout';
+import { LicensingCallout, LICENSING_FEATURE } from '../licensing_callout';
 import { CREATE_ELASTICSEARCH_INDEX_STEP, BUILD_SEARCH_EXPERIENCE_STEP } from '../method_steps';
 import { NewSearchIndexTemplate } from '../new_search_index_template';
 
@@ -30,13 +30,15 @@ export const MethodCrawler: React.FC = () => {
   const { isCloud } = useValues(KibanaLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
+  const isGated = !isCloud && !hasPlatinumLicense;
+
   MethodCrawlerLogic.mount();
 
   return (
     <EuiFlexGroup direction="column">
-      {!isCloud && !hasPlatinumLicense && (
+      {isGated && (
         <EuiFlexItem>
-          <LicensingCallout />
+          <LicensingCallout feature={LICENSING_FEATURE.CRAWLER} />
         </EuiFlexItem>
       )}
       <EuiFlexItem>
@@ -49,6 +51,7 @@ export const MethodCrawler: React.FC = () => {
           )}
           type="crawler"
           onSubmit={(indexName, language) => makeRequest({ indexName, language })}
+          disabled={isGated}
           buttonLoading={status === Status.LOADING}
           docsUrl={docLinks.crawlerOverview}
         >

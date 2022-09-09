@@ -290,10 +290,13 @@ export const prebuiltSavedObjectsBulkCreateUrl = (templateName: string) =>
  * Internal detection engine routes
  */
 export const INTERNAL_DETECTION_ENGINE_URL = '/internal/detection_engine' as const;
+export const INTERNAL_DETECTION_ENGINE_RULES_URL = '/internal/detection_engine/rules' as const;
 export const DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/fleet/integrations/installed` as const;
 export const DETECTION_ENGINE_ALERTS_INDEX_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/signal/index` as const;
+export const DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL =
+  `${INTERNAL_DETECTION_ENGINE_RULES_URL}/exceptions/_find_references` as const;
 /**
  * Telemetry detection endpoint for any previews requested of what data we are
  * providing through UI/UX and for e2e tests.
