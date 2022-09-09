@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-export interface EventFilters {
-  nonInteractiveSession?: boolean;
-}
-
-export interface EndpointConfig {
+export interface PolicyCreateEndpointConfig {
   type: 'endpoint';
   endpointConfig: {
     preset: 'NGAV' | 'EDREssential' | 'EDRComplete';
   };
 }
 
-export interface CloudConfig {
+export interface PolicyCreateEventFilters {
+  nonInteractiveSession?: boolean;
+}
+
+export interface PolicyCreateCloudConfig {
   type: 'cloud';
   cloudConfig: {
     preventions: {
@@ -24,7 +24,7 @@ export interface CloudConfig {
       behavior_protection: boolean;
     };
   };
-  eventFilters?: EventFilters;
+  eventFilters?: PolicyCreateEventFilters;
 }
 
-export type Config = EndpointConfig | CloudConfig;
+export type AnyPolicyCreateConfig = PolicyCreateEndpointConfig | PolicyCreateCloudConfig;
