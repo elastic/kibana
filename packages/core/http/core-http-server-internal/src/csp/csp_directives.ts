@@ -26,7 +26,7 @@ export type CspDirectiveName =
  */
 export const defaultRules: Partial<Record<CspDirectiveName, string[]>> = {
   'script-src': [`'self'`],
-  'worker-src': [`blob:`, `'self'`],
+  'worker-src': [`'self'`],
   'style-src': [`'unsafe-inline'`, `'self'`],
 };
 

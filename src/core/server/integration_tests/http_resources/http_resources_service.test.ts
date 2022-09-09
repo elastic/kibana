@@ -20,8 +20,8 @@ function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
   describe(`with disableUnsafeEval=${disableUnsafeEval}`, () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     const defaultCspRules = disableUnsafeEval
-      ? `script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
-      : `script-src 'self' 'unsafe-eval'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`;
+      ? `script-src 'self'; worker-src 'self'; style-src 'unsafe-inline' 'self'`
+      : `script-src 'self' 'unsafe-eval'; worker-src 'self'; style-src 'unsafe-inline' 'self'`;
     beforeEach(async () => {
       root = kbnTestServer.createRoot({
         csp: { disableUnsafeEval },

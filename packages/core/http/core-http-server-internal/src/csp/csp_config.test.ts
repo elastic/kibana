@@ -34,7 +34,7 @@ describe('CspConfig', () => {
     expect(CspConfig.DEFAULT).toMatchInlineSnapshot(`
       CspConfig {
         "disableEmbedding": false,
-        "header": "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+        "header": "script-src 'self'; worker-src 'self'; style-src 'unsafe-inline' 'self'",
         "strict": true,
         "warnLegacyBrowsers": true,
       }
@@ -65,7 +65,7 @@ describe('CspConfig', () => {
         worker_src: ['foo', 'bar'],
       });
       expect(config.header).toEqual(
-        `script-src 'self'; worker-src blob: 'self' foo bar; style-src 'unsafe-inline' 'self'`
+        `script-src 'self'; worker-src 'self' foo bar; style-src 'unsafe-inline' 'self'`
       );
     });
 
@@ -76,7 +76,7 @@ describe('CspConfig', () => {
       });
 
       expect(config.header).toEqual(
-        `script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self' foo bar`
+        `script-src 'self'; worker-src 'self'; style-src 'unsafe-inline' 'self' foo bar`
       );
     });
 
@@ -87,7 +87,7 @@ describe('CspConfig', () => {
       });
 
       expect(config.header).toEqual(
-        `script-src 'self' foo bar; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+        `script-src 'self' foo bar; worker-src 'self'; style-src 'unsafe-inline' 'self'`
       );
     });
 
@@ -99,7 +99,7 @@ describe('CspConfig', () => {
         style_src: ['style', 'dolly'],
       });
       expect(config.header).toEqual(
-        `script-src 'self' script foo; worker-src blob: 'self' worker bar; style-src 'unsafe-inline' 'self' style dolly`
+        `script-src 'self' script foo; worker-src 'self' worker bar; style-src 'unsafe-inline' 'self' style dolly`
       );
     });
 
@@ -111,7 +111,7 @@ describe('CspConfig', () => {
         style_src: ['style'],
       });
       expect(config.header).toEqual(
-        `script-src 'self' script; worker-src blob: 'self' worker; style-src 'unsafe-inline' 'self' style`
+        `script-src 'self' script; worker-src 'self' worker; style-src 'unsafe-inline' 'self' style`
       );
     });
 
@@ -124,7 +124,7 @@ describe('CspConfig', () => {
         });
 
         expect(config.header).toEqual(
-          `script-src 'self' foo bar; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+          `script-src 'self' foo bar; worker-src 'self'; style-src 'unsafe-inline' 'self'`
         );
       });
 
@@ -136,7 +136,7 @@ describe('CspConfig', () => {
         });
 
         expect(config.header).toEqual(
-          `script-src 'self' 'unsafe-eval' foo bar; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+          `script-src 'self' 'unsafe-eval' foo bar; worker-src 'self'; style-src 'unsafe-inline' 'self'`
         );
       });
 
@@ -150,7 +150,7 @@ describe('CspConfig', () => {
         });
 
         expect(config.header).toEqual(
-          `script-src 'self' 'unsafe-eval' foo bar; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+          `script-src 'self' 'unsafe-eval' foo bar; worker-src 'self'; style-src 'unsafe-inline' 'self'`
         );
 
         mockConfig.reset();
@@ -166,7 +166,7 @@ describe('CspConfig', () => {
         });
 
         expect(config.header).toEqual(
-          `script-src 'self' foo bar; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+          `script-src 'self' foo bar; worker-src 'self'; style-src 'unsafe-inline' 'self'`
         );
 
         mockConfig.reset();
@@ -181,7 +181,7 @@ describe('CspConfig', () => {
         expect(config.disableEmbedding).toEqual(disableEmbedding);
         expect(config.disableEmbedding).not.toEqual(CspConfig.DEFAULT.disableEmbedding);
         expect(config.header).toMatchInlineSnapshot(
-          `"script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self'"`
+          `"script-src 'self'; worker-src 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self'"`
         );
       });
 
@@ -194,7 +194,7 @@ describe('CspConfig', () => {
         expect(config.disableEmbedding).toEqual(disableEmbedding);
         expect(config.disableEmbedding).not.toEqual(CspConfig.DEFAULT.disableEmbedding);
         expect(config.header).toMatchInlineSnapshot(
-          `"script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self'"`
+          `"script-src 'self'; worker-src 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self'"`
         );
       });
     });
