@@ -16,7 +16,7 @@ interface Usage {
 
 export function registerUsageCollector(
   usageCollection: UsageCollectionSetup,
-  getLaunchDarklyEntities: () => { launchDarklyUser?: LDUser; launchDarklyClient: LDClient }
+  getLaunchDarklyEntities: () => { launchDarklyUser?: LDUser; launchDarklyClient?: LDClient }
 ) {
   usageCollection.registerCollector(
     usageCollection.makeUsageCollector<Usage>({
@@ -49,7 +49,8 @@ export function registerUsageCollector(
       },
       fetch: async () => {
         const { launchDarklyUser, launchDarklyClient } = getLaunchDarklyEntities();
-        if (!launchDarklyUser) return { initialized: false, flagNames: [], flags: {} };
+        if (!launchDarklyUser || !launchDarklyClient)
+          return { initialized: false, flagNames: [], flags: {} };
         // According to the docs, this method does not send analytics back to LaunchDarkly, so it does not provide false results
         const flagsState = await launchDarklyClient.allFlagsState(launchDarklyUser);
         const flags = flagsState.allValues();

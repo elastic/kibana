@@ -36,12 +36,7 @@ const configSchema = schema.object({
     ),
     schema.maybe(launchDarklySchema)
   ),
-  flag_overrides: schema.conditional(
-    schema.contextRef('dev'),
-    schema.literal(true), // to ease development, `flag_overrides` is allowed when running on dev mode.
-    schema.maybe(schema.recordOf(schema.string(), schema.any())),
-    schema.never()
-  ),
+  flag_overrides: schema.maybe(schema.recordOf(schema.string(), schema.any())),
 });
 
 export type CloudExperimentsConfigType = TypeOf<typeof configSchema>;

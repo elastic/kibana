@@ -10,7 +10,7 @@ import { FEATURE_FLAG_NAMES, METRIC_NAMES } from './constants';
 /**
  * The contract of the setup lifecycle method.
  */
-export interface CloudExperimentsPluginSetup extends CloudExperimentsPluginStart {
+export interface CloudExperimentsPluginSetup {
   /**
    * Identifies the user in the A/B testing service.
    * For now, we only rely on the user ID. In the future, we may request further details for more targeted experiments.
@@ -21,6 +21,16 @@ export interface CloudExperimentsPluginSetup extends CloudExperimentsPluginStart
     userId: string,
     userMetadata?: Record<string, string | boolean | number | Array<string | boolean | number>>
   ) => void;
+
+  /**
+   * Fetch the configuration assigned to variation `configKey`. If nothing is found, fallback to `defaultValue`.
+   * @param featureFlagName The name of the key to find the config variation. {@link CloudExperimentsFeatureFlagNames}.
+   * @param defaultValue The fallback value in case no variation is found.
+   */
+  getVariation: <Data>(
+    featureFlagName: CloudExperimentsFeatureFlagNames,
+    defaultValue: Data
+  ) => Promise<Data>;
 }
 
 /**

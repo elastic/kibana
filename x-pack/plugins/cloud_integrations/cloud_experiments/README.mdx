@@ -73,25 +73,39 @@ Since the `getVariation` API returns a promise, when using it in a React compone
 
 ```tsx
 import React, { useEffect, useState } from 'react';
-import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
+import type { 
+  CloudExperimentsFeatureFlagNames,
+  CloudExperimentsPluginStart
+} from '@kbn/cloud-experiments-plugin/common';
 
 interface Props {
   cloudExperiments?: CloudExperimentsPluginStart;
 }
 
-export const MyReactComponent: React.FC<Props> = ({ cloudExperiments }: Props) => {
-  const [myConfig, setMyConfig] = useState('default config');
+const useVariation = <Data>(
+  cloudExperiments: CloudExperimentsPluginStart | undefined,
+  featureFlagName: CloudExperimentsFeatureFlagNames,
+  defaultValue: Data,
+  setter: (value: Data) => void
+) => {
   useEffect(() => {
     (async function loadVariation() {
-      const variationConfig = await cloudExperiments?.getVariation(
-        'my-plugin.my-feature-flag', // The key 'my-plugin.my-feature-flag' should exist in FEATURE_FLAG_NAMES
-        'default config'
-      );
-      if (variationConfig) {
-        setMyConfig(variationConfig);
+      const variationUrl = await cloudExperiments?.getVariation(featureFlagName, defaultValue);
+      if (variationUrl) {
+        setter(variationUrl);
       }
     })();
-  }, [cloudExperiments]);
+  }, [cloudExperiments, featureFlagName, defaultValue, setter]);
+};
+
+export const MyReactComponent: React.FC<Props> = ({ cloudExperiments }: Props) => {
+  const [myConfig, setMyConfig] = useState('default config');
+  useVariation(
+    cloudExperiments,
+    'my-plugin.my-feature-flag', // The key 'my-plugin.my-feature-flag' should exist in FEATURE_FLAG_NAMES
+    'default config',
+    setMyConfig
+  );
   
   // use myConfig in the component...
 }
@@ -149,9 +163,6 @@ xpack.cloud_integrations.experiments.enabled: true
 xpack.cloud_integrations.experiments.flag_overrides:
   "my-plugin.my-feature-flag": "my custom value"
 ```
-
-NOTE: This is only valid when running Kibana in dev mode and will fail in production. Bear in mind that this service won't hit the A/B provider for **any** feature flag if this setting is set (even if it does not include the requested feature flag).
-
 
 ### How is my user identified?
 

@@ -12,7 +12,7 @@ import type {
   Plugin,
   Logger,
 } from '@kbn/core/server';
-import { get } from 'lodash';
+import { get, has } from 'lodash';
 import LaunchDarkly, { type LDClient, type LDUser } from 'launchdarkly-node-server-sdk';
 import type { LogMeta } from '@kbn/logging';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -49,13 +49,16 @@ export class CloudExperimentsPlugin
     const config = initializerContext.config.get<CloudExperimentsConfigType>();
     if (config.flag_overrides) {
       this.flagOverrides = config.flag_overrides;
-    } else {
-      const ldConfig = config.launch_darkly; // If the plugin is enabled and no flag_overrides are provided (dev mode only), launch_darkly must exist
-      if (!ldConfig) {
-        throw new Error(
-          'xpack.cloud_integrations.experiments.launch_darkly configuration should exist'
-        );
-      }
+    }
+    const ldConfig = config.launch_darkly; // If the plugin is enabled and no flag_overrides are provided (dev mode only), launch_darkly must exist
+    if (!ldConfig && !initializerContext.env.mode.dev) {
+      // If the plugin is enabled, and it's in prod mode, launch_darkly must exist
+      // (config-schema should enforce it, but just in case).
+      throw new Error(
+        'xpack.cloud_integrations.experiments.launch_darkly configuration should exist'
+      );
+    }
+    if (ldConfig) {
       this.launchDarklyClient = LaunchDarkly.init(ldConfig.sdk_key, {
         application: { id: `kibana-server`, version: initializerContext.env.packageInfo.version },
         logger: LaunchDarkly.basicLogger({ level: ldConfig.client_log_level }),
@@ -77,9 +80,9 @@ export class CloudExperimentsPlugin
   ): CloudExperimentsPluginSetup {
     this.logger.debug('cloudExperiments: Setup');
 
-    if (deps.usageCollection && this.launchDarklyClient) {
+    if (deps.usageCollection) {
       registerUsageCollector(deps.usageCollection, () => ({
-        launchDarklyClient: this.launchDarklyClient!,
+        launchDarklyClient: this.launchDarklyClient,
         launchDarklyUser: this.launchDarklyUser,
       }));
     }
@@ -90,7 +93,6 @@ export class CloudExperimentsPlugin
         this.launchDarklyClient?.identify(this.launchDarklyUser!);
       },
       getVariation: this.getVariation,
-      reportMetric: this.reportMetric,
     };
   }
 
@@ -111,8 +113,8 @@ export class CloudExperimentsPlugin
     defaultValue: Data
   ): Promise<Data> => {
     const configKey = FEATURE_FLAG_NAMES[featureFlagName];
-    if (this.flagOverrides) {
-      // Only to help dev testing. This setting will fail if provided when in production.
+    // Apply overrides if they exist without asking LaunchDarkly.
+    if (this.flagOverrides && has(this.flagOverrides, configKey)) {
       return get(this.flagOverrides, configKey, defaultValue) as Data;
     }
     if (!this.launchDarklyUser) return defaultValue; // Skip any action if no LD User is defined

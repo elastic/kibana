@@ -7,7 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import LaunchDarkly, { type LDClient } from 'launchdarkly-js-client-sdk';
-import { get } from 'lodash';
+import { get, has } from 'lodash';
 import {
   FEATURE_FLAG_NAMES,
   METRIC_NAMES,
@@ -29,24 +29,25 @@ export class CloudExperimentsPlugin
   private readonly flagOverrides?: Record<string, unknown>;
 
   /** Constructor of the plugin **/
-  constructor(core: PluginInitializerContext) {
-    this.kibanaVersion = core.env.packageInfo.version;
-    const config = core.config.get<{
+  constructor(initializerContext: PluginInitializerContext) {
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
+    const config = initializerContext.config.get<{
       launch_darkly?: { client_id: string };
       flag_overrides?: Record<string, unknown>;
     }>();
     if (config.flag_overrides) {
       this.flagOverrides = config.flag_overrides;
-    } else {
-      const ldConfig = config.launch_darkly; // If the plugin is enabled and no flag_overrides are provided (dev mode only), launch_darkly must exist
-      if (!ldConfig) {
-        throw new Error(
-          'xpack.cloud_integrations.experiments.launch_darkly configuration should exist'
-        );
-      }
-      if (ldConfig) {
-        this.clientId = ldConfig.client_id;
-      }
+    }
+    const ldConfig = config.launch_darkly;
+    if (!ldConfig && !initializerContext.env.mode.dev) {
+      // If the plugin is enabled, and it's in prod mode, launch_darkly must exist
+      // (config-schema should enforce it, but just in case).
+      throw new Error(
+        'xpack.cloud_integrations.experiments.launch_darkly configuration should exist'
+      );
+    }
+    if (ldConfig) {
+      this.clientId = ldConfig.client_id;
     }
   }
 
@@ -75,7 +76,6 @@ export class CloudExperimentsPlugin
         }
       },
       getVariation: this.getVariation,
-      reportMetric: this.reportMetric,
     };
   }
 
@@ -102,8 +102,8 @@ export class CloudExperimentsPlugin
     defaultValue: Data
   ): Promise<Data> => {
     const configKey = FEATURE_FLAG_NAMES[featureFlagName];
-    if (this.flagOverrides) {
-      // Only to help dev testing. This setting will fail if provided when in production.
+    // Apply overrides if they exist without asking LaunchDarkly.
+    if (this.flagOverrides && has(this.flagOverrides, configKey)) {
       return get(this.flagOverrides, configKey, defaultValue) as Data;
     }
     if (!this.launchDarklyClient) return defaultValue; // Skip any action if no LD User is defined
