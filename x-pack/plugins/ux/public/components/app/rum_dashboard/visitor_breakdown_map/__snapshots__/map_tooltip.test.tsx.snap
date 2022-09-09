@@ -19,7 +19,7 @@ Array [
     style="width:300px"
   >
     <dt
-      class="euiDescriptionList__title c0 eui-textNoWrap emotion-euiDescriptionList__title-column-reverse"
+      class="euiDescriptionList__title c0 eui-textNoWrap emotion-euiDescriptionList__title-column-compressed"
     >
       Average page load duration
     </dt>
