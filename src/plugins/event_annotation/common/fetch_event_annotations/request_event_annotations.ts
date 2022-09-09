@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { defer, firstValueFrom } from 'rxjs';
+import { defer, lastValueFrom } from 'rxjs';
 import { partition } from 'lodash';
 import {
   AggsStart,
@@ -120,7 +120,7 @@ export const requestEventAnnotations = (
       timeFields: string[];
       ignoreGlobalFilters: boolean;
     }) =>
-      firstValueFrom(
+      lastValueFrom(
         handleRequest({
           aggs: aggConfigs,
           indexPattern: dataView,
