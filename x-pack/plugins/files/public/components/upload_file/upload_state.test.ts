@@ -31,10 +31,7 @@ describe('UploadState', () => {
   it('uploads all provided files and reports errors', async () => {
     testScheduler.run(({ expectObservable, cold, flush }) => {
       filesClient.create.mockReturnValue(of({ file: { id: 'test' } as FileJSON }) as any);
-      filesClient.upload.mockReturnValueOnce(of(undefined) as any);
-      filesClient.upload.mockImplementationOnce(() => {
-        throw new Error('oops');
-      });
+      filesClient.upload.mockReturnValue(of(undefined) as any);
 
       const file1 = { name: 'test' } as File;
       const file2 = { name: 'test 2' } as File;
@@ -62,8 +59,8 @@ describe('UploadState', () => {
           { file: file2, status: 'uploading' },
         ],
         c: [
-          { file: file1, status: 'uploaded' },
-          { file: file2, status: 'idle', error: new Error('oops') },
+          { file: file1, status: 'uploaded', id: 'test' },
+          { file: file2, status: 'uploaded', id: 'test' },
         ],
       });
 
@@ -71,7 +68,7 @@ describe('UploadState', () => {
 
       expect(filesClient.create).toHaveBeenCalledTimes(2);
       expect(filesClient.upload).toHaveBeenCalledTimes(2);
-      expect(filesClient.delete).toHaveBeenCalledTimes(1);
+      expect(filesClient.delete).not.toHaveBeenCalled();
     });
   });
 
@@ -92,7 +89,7 @@ describe('UploadState', () => {
       const upload$ = cold('-0|').pipe(mergeMap(uploadState.upload));
       const abort$ = cold(' --1|').pipe(tap(uploadState.abort));
 
-      expectObservable(merge(upload$, abort$)).toBe('--0(1|)', ['1', undefined]);
+      expectObservable(merge(upload$, abort$)).toBe('--0#', ['1'], new Error('Abort!'));
 
       expectObservable(uploadState.uploading$).toBe('ab-c', {
         a: false,

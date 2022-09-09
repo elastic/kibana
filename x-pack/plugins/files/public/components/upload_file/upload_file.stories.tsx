@@ -30,6 +30,7 @@ const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
 const defaultArgs: Props = {
   kind,
   onDone: action('onDone'),
+  onError: action('onError'),
   client: {
     create: async () => ({ file: { id: 'test' } }),
     upload: () => sleep(1000),

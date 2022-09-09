@@ -20,12 +20,13 @@ export interface Props<Kind extends string = string> {
   kind: Kind;
   client: FilesClient;
   onDone: () => void;
+  onError?: (errors: Error[]) => void;
 }
 
 /**
  * In order to use this component you must register your file kind with {@link FileKindsRegistry}
  */
-export const UploadFile: FunctionComponent<Props> = ({ client, kind, onDone }) => {
+export const UploadFile: FunctionComponent<Props> = ({ client, kind, onDone, onError }) => {
   const { registry } = useFilesContext();
   const [uploadState] = useState(() =>
     createUploadState({
@@ -55,7 +56,12 @@ export const UploadFile: FunctionComponent<Props> = ({ client, kind, onDone }) =
       onClear={clearFiles}
       done={done}
       isInvalid={Boolean(errors.length)}
-      onUpload={() => uploadState.upload().subscribe()}
+      onUpload={() =>
+        uploadState.upload().subscribe({
+          complete: onDone,
+          error: onError,
+        })
+      }
       uploading={uploading}
     />
   );

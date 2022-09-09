@@ -73,7 +73,7 @@ export class UploadState {
   private uploadFile = (
     file$: SimpleStateSubject<FileState>,
     abort$: Observable<void>
-  ): Observable<void> => {
+  ): Observable<void | Error> => {
     const abortController = new AbortController();
     const abortSignal = abortController.signal;
     const { file, status } = file$.getValue();
@@ -109,11 +109,13 @@ export class UploadState {
           })
         );
       }),
-      map(() => file$.setState({ status: 'uploaded', id: uploadTarget?.id })),
+      map(() => {
+        file$.setState({ status: 'uploaded', id: uploadTarget?.id });
+      }),
       catchError((e) => {
         erroredOrAborted = true;
         file$.setState({ status: 'idle', error: e });
-        return of(undefined);
+        return of(e);
       }),
       finalize(() => {
         if (erroredOrAborted && uploadTarget) {
@@ -135,7 +137,12 @@ export class UploadState {
       switchMap((files$) => {
         return forkJoin(files$.map((file$) => this.uploadFile(file$, abort$)));
       }),
-      map(() => {}),
+      map((results) => {
+        const errors = results.filter(Boolean);
+        if (errors.length) {
+          throw errors[0];
+        }
+      }),
       finalize(() => {
         this.uploading$.next(false);
         sub.unsubscribe();
