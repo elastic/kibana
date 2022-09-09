@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/interpreter",
+  "owner": "@elastic/kibana-app-services",
+  "runtimeDeps": [],
+  "typeDeps": []
+}
