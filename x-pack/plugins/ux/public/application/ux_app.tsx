@@ -142,7 +142,15 @@ export function UXAppRoot({
           lens,
         }}
       >
-        <KibanaThemeProvider theme$={appMountParameters.theme$}>
+        <KibanaThemeProvider
+          theme$={appMountParameters.theme$}
+          modify={{
+            breakpoint: {
+              xxl: 1600,
+              xxxl: 2000,
+            },
+          }}
+        >
           <i18nCore.Context>
             <RouterProvider history={history} router={uxRouter}>
               <DatePickerContextProvider>
