@@ -20,7 +20,8 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const find = getService('find');
 
-  describe('Observability alerts', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/140248
+  describe.skip('Observability alerts', function () {
     this.tags('includeFirefox');
 
     const testSubjects = getService('testSubjects');
