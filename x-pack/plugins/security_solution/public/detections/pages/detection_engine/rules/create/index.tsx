@@ -181,11 +181,8 @@ const CreateRulePageComponent: React.FC = () => {
     getStepScheduleDefaultValue(defineRuleData.ruleType)
   );
 
-  const isThreatMatchRuleValue = useMemo(
-    () => isThreatMatchRule(defineRuleData.ruleType),
-    [defineRuleData.ruleType]
-  );
   useEffect(() => {
+    const isThreatMatchRuleValue = isThreatMatchRule(defineRuleData.ruleType);
     if (isThreatMatchRuleValue) {
       setAboutRuleData({
         ...stepAboutDefaultValue,
@@ -194,7 +191,8 @@ const CreateRulePageComponent: React.FC = () => {
     } else {
       setAboutRuleData(stepAboutDefaultValue);
     }
-  }, [isThreatMatchRuleValue]);
+    setScheduleRuleData(getStepScheduleDefaultValue(defineRuleData.ruleType));
+  }, [defineRuleData.ruleType]);
 
   const updateCurrentDataState = useCallback(
     <K extends keyof RuleStepsData>(data: RuleStepsData[K]) => {
@@ -389,6 +387,7 @@ const CreateRulePageComponent: React.FC = () => {
               title={i18n.PAGE_TITLE}
             >
               <EuiButton
+                data-test-subj="preview-flyout"
                 iconType="visBarVerticalStacked"
                 onClick={() => setIsRulePreviewVisible((isVisible) => !isVisible)}
               >
