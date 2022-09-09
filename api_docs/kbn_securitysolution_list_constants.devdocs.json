@@ -365,6 +365,32 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.INTERNAL_EXCEPTION_LIST_URL",
+        "type": "string",
+        "tags": [],
+        "label": "INTERNAL_EXCEPTION_LIST_URL",
+        "description": [
+          "\nInternal exception list routes"
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL",
+        "type": "string",
+        "tags": [],
+        "label": "INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL",
+        "description": [],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
         "id": "def-common.LIST_INDEX",
         "type": "string",
         "tags": [],
