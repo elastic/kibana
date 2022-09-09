@@ -101,8 +101,9 @@ export const expectedCompleteUnitedIndexQuery = {
                                                       bool: {
                                                         should: [
                                                           {
-                                                            exists: {
-                                                              field: 'united.agent.upgraded_at',
+                                                            match: {
+                                                              'united.agent.upgrade_status':
+                                                                'completed',
                                                             },
                                                           },
                                                         ],
@@ -192,7 +193,11 @@ export const expectedCompleteUnitedIndexQuery = {
                                           must_not: {
                                             bool: {
                                               should: [
-                                                { exists: { field: 'united.agent.upgraded_at' } },
+                                                {
+                                                  match: {
+                                                    'united.agent.upgrade_status': 'completed',
+                                                  },
+                                                },
                                               ],
                                               minimum_should_match: 1,
                                             },
@@ -296,7 +301,11 @@ export const expectedCompleteUnitedIndexQuery = {
                                           must_not: {
                                             bool: {
                                               should: [
-                                                { exists: { field: 'united.agent.upgraded_at' } },
+                                                {
+                                                  match: {
+                                                    'united.agent.upgrade_status': 'completed',
+                                                  },
+                                                },
                                               ],
                                               minimum_should_match: 1,
                                             },
@@ -367,7 +376,13 @@ export const expectedCompleteUnitedIndexQuery = {
                               bool: {
                                 must_not: {
                                   bool: {
-                                    should: [{ exists: { field: 'united.agent.upgraded_at' } }],
+                                    should: [
+                                      {
+                                        match: {
+                                          'united.agent.upgrade_status': 'completed',
+                                        },
+                                      },
+                                    ],
                                     minimum_should_match: 1,
                                   },
                                 },
