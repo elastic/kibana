@@ -175,14 +175,14 @@ describe('fieldExamplesCalculator', function () {
 
   describe('getFieldValues', function () {
     it('Should return an array of values for _source fields', function () {
-      const extensions = getFieldValues(hits, dataView.fields.getByName('extension')!, dataView);
-      expect(extensions).toBeInstanceOf(Array);
+      const values = getFieldValues(hits, dataView.fields.getByName('extension')!, dataView);
+      expect(values).toBeInstanceOf(Array);
       expect(
-        filter(extensions, function (v) {
+        filter(values, function (v) {
           return v.includes('html');
         }).length
       ).toBe(8);
-      expect(uniq(flatten(clone(extensions))).sort()).toEqual(['gif', 'html', 'php', 'png']);
+      expect(uniq(flatten(clone(values))).sort()).toEqual(['gif', 'html', 'php', 'png']);
     });
 
     it('Should return an array of values for core meta fields', function () {
@@ -204,35 +204,31 @@ describe('fieldExamplesCalculator', function () {
     });
 
     it('counts the top 3 values', function () {
-      const extensions = getFieldExampleBuckets(params);
-      expect(extensions).toBeInstanceOf(Object);
-      expect(extensions.buckets).toBeInstanceOf(Array);
-      expect(extensions.buckets.length).toBe(3);
-      expect(map(extensions.buckets, 'key')).toEqual(['html', 'php', 'gif']);
+      const result = getFieldExampleBuckets(params);
+      expect(result).toBeInstanceOf(Object);
+      expect(result.buckets).toBeInstanceOf(Array);
+      expect(result.buckets.length).toBe(3);
+      expect(map(result.buckets, 'key')).toEqual(['html', 'php', 'gif']);
     });
 
     it('fails to analyze geo and attachment types', function () {
       params.field = dataView.fields.getByName('point');
-      expect(() => getFieldExampleBuckets(params)).toThrowError(
-        'Analysis is not available this field type'
-      );
+      expect(() => getFieldExampleBuckets(params)).toThrowError();
 
       params.field = dataView.fields.getByName('area');
-      expect(() => getFieldExampleBuckets(params)).toThrowError(
-        'Analysis is not available this field type'
-      );
+      expect(() => getFieldExampleBuckets(params)).toThrowError();
 
       params.field = dataView.fields.getByName('request_body');
-      expect(() => getFieldExampleBuckets(params)).toThrowError(
-        'Analysis is not available this field type'
-      );
+      expect(() => getFieldExampleBuckets(params)).toThrowError();
+
+      params.field = dataView.fields.getByName('_score');
+      expect(() => getFieldExampleBuckets(params)).toThrowError();
     });
 
     it('fails to analyze fields that are in the mapping, but not the hits', function () {
-      params.field = dataView.fields.getByName('ip');
-      expect(() => getFieldExampleBuckets(params)).toThrowError(
-        'No data for this field in the first found records'
-      );
+      params.field = dataView.fields.getByName('machine.os');
+      expect(getFieldExampleBuckets(params).buckets).toHaveLength(0);
+      expect(getFieldExampleBuckets(params).sampledValues).toBe(0);
     });
 
     it('counts the total hits', function () {

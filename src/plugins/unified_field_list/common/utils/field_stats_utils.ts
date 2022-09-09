@@ -11,7 +11,7 @@ import DateMath from '@kbn/datemath';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { ESSearchResponse } from '@kbn/core/types/elasticsearch';
 import type { FieldStatsResponse } from '../types';
-import { getFieldExampleBuckets, canFetchFieldExamples } from './field_examples_calculator';
+import { getFieldExampleBuckets, canProvideExamplesForField } from './field_examples_calculator';
 
 export type SearchHandler = ({
   aggs,
@@ -104,10 +104,12 @@ export async function fetchAndCalculateFieldStats({
   size?: number;
 }) {
   if (!field.aggregatable) {
-    return await getSimpleExamples(searchHandler, field, dataView);
+    return canProvideExamplesForField(field)
+      ? await getSimpleExamples(searchHandler, field, dataView)
+      : {};
   }
 
-  if (!canProvideStatsForField(field)) {
+  if (!canProvideAggregatedStatsForField(field)) {
     return {};
   }
 
@@ -126,7 +128,7 @@ export async function fetchAndCalculateFieldStats({
   return await getStringSamples(searchHandler, field, size);
 }
 
-export function canProvideStatsForField(field: DataViewField): boolean {
+function canProvideAggregatedStatsForField(field: DataViewField): boolean {
   return !(
     field.type === 'document' ||
     field.type.includes('range') ||
@@ -134,6 +136,13 @@ export function canProvideStatsForField(field: DataViewField): boolean {
     field.type === 'geo_shape' ||
     field.type === 'murmur3' ||
     field.type === 'attachment'
+  );
+}
+
+export function canProvideStatsForField(field: DataViewField): boolean {
+  return (
+    (field.aggregatable && canProvideAggregatedStatsForField(field)) ||
+    (!field.aggregatable && canProvideExamplesForField(field))
   );
 }
 
@@ -339,10 +348,6 @@ export async function getSimpleExamples(
   dataView: DataView
 ): Promise<FieldStatsResponse<string | number>> {
   try {
-    if (!canFetchFieldExamples(field)) {
-      return {};
-    }
-
     const fieldRef = getFieldRef(field);
 
     const simpleExamplesBody = {

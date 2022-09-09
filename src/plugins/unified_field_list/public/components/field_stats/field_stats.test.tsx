@@ -226,7 +226,9 @@ describe('UnifiedFieldList <FieldStats />', () => {
 
     expect(loadFieldStats).toHaveBeenCalled();
 
-    expect(wrapper.text()).toBe('Analysis is not available for this field.');
+    expect(wrapper.text()).toBe(
+      "This field is not available for visualizations because it doesn't have any data."
+    );
   });
 
   it('should render Top Values field stats correctly for a keyword field', async () => {

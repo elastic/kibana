@@ -293,16 +293,34 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
     );
   }
 
+  if (!canProvideStatsForField(field)) {
+    const messageNoAnalysis = (
+      <FieldSummaryMessage
+        message={i18n.translate('unifiedFieldList.fieldStats.notAvailableForThisFieldDescription', {
+          defaultMessage: 'Analysis is not available for this field.',
+        })}
+      />
+    );
+
+    return overrideMissingContent
+      ? overrideMissingContent({
+          noDataFound: false,
+          element: messageNoAnalysis,
+        })
+      : messageNoAnalysis;
+  }
+
   if (
     (!histogram || histogram.buckets.length === 0) &&
     (!topValues || topValues.buckets.length === 0)
   ) {
-    const message = (
+    const messageNoData = (
       <FieldSummaryMessage
         message={i18n.translate(
           'unifiedFieldList.fieldStats.notAvailableForThisFieldWithoutDataDescription',
           {
-            defaultMessage: `Analysis is not available for this field.`,
+            defaultMessage:
+              "This field is not available for visualizations because it doesn't have any data.",
           }
         )}
       />
@@ -310,10 +328,10 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
     return overrideMissingContent
       ? overrideMissingContent({
-          noDataFound: canProvideStatsForField(field), // TODO: should we have different messaging?
-          element: message,
+          noDataFound: true,
+          element: messageNoData,
         })
-      : message;
+      : messageNoData;
   }
 
   if (histogram && histogram.buckets.length && topValues && topValues.buckets.length) {

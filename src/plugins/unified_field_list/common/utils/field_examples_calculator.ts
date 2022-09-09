@@ -22,13 +22,8 @@ interface FieldValueCountsParams {
   count?: number;
 }
 
-export const canFetchFieldExamples = (field: DataViewField): boolean => {
-  return !(
-    field.type === 'geo_point' ||
-    field.type === 'geo_shape' ||
-    field.type === 'attachment' ||
-    field.type === 'unknown'
-  );
+export const canProvideExamplesForField = (field: DataViewField): boolean => {
+  return ['string', 'text', 'keyword', 'version', 'ip', 'number'].includes(field.type);
 };
 
 export function getFieldExampleBuckets(params: FieldValueCountsParams) {
@@ -36,8 +31,10 @@ export function getFieldExampleBuckets(params: FieldValueCountsParams) {
     count: 5,
   });
 
-  if (!canFetchFieldExamples(params.field)) {
-    throw new Error('Analysis is not available this field type');
+  if (!canProvideExamplesForField(params.field)) {
+    throw new Error(
+      `Analysis is not available this field type: "${params.field.type}". Field name: "${params.field.name}"`
+    );
   }
 
   const records = getFieldValues(params.hits, params.field, params.dataView);
@@ -46,10 +43,6 @@ export function getFieldExampleBuckets(params: FieldValueCountsParams) {
     .reverse()
     .slice(0, params.count)
     .map((bucket) => pick(bucket, ['key', 'count']));
-
-  if (!sampledValues) {
-    throw new Error('No data for this field in the first found records');
-  }
 
   return {
     buckets,
