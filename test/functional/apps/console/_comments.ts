@@ -46,8 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       }
 
-      // FLAKY: https://github.com/elastic/kibana/issues/138160
-      describe.skip('with single line comments', async () => {
+      describe('with single line comments', async () => {
         await runTests(
           [
             {
@@ -128,6 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               body: '{\n "query": \'\'', // E.g. using single quotes
             },
           ],
+
           async () => {
             expect(await PageObjects.console.hasInvalidSyntax()).to.be(true);
           }
