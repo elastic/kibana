@@ -5,5 +5,11 @@
  * 2.0.
  */
 
-export const enterpriseSearchFeatureId = 'enterpriseSearch';
-export const enableIndexPipelinesTab = 'enterpriseSearch:enableIndexTransformsTab';
+import { i18n } from '@kbn/i18n';
+
+export const LEARN_MORE = i18n.translate(
+  'xpack.securitySolution.overview.linkPanelLearnMoreButton',
+  {
+    defaultMessage: 'Learn More',
+  }
+);
