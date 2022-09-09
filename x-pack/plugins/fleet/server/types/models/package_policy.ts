@@ -32,6 +32,9 @@ const PackagePolicyStreamsSchema = {
   id: schema.maybe(schema.string()), // BWC < 7.11
   enabled: schema.boolean(),
   keep_enabled: schema.maybe(schema.boolean()),
+  release: schema.maybe(
+    schema.oneOf([schema.literal('ga'), schema.literal('beta'), schema.literal('experimental')])
+  ),
   data_stream: schema.object({
     dataset: schema.string(),
     type: schema.string(),
