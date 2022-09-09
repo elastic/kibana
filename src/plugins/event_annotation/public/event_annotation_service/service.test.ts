@@ -228,7 +228,6 @@ describe('Event Annotation Service', () => {
                 lineStyle: ['solid'],
                 icon: ['triangle'],
                 textVisibility: [false],
-                ignoreGlobalFilters: [false],
               },
             },
           ],
@@ -266,6 +265,7 @@ describe('Event Annotation Service', () => {
                 icon: ['triangle'],
                 textVisibility: [false],
                 textField: [],
+                ignoreGlobalFilters: [false],
                 filter: [
                   {
                     chain: [
