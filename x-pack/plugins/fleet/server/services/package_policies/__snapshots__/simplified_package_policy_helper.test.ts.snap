@@ -1,0 +1,239 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`toPackagePolicy With nginx package should work 1`] = `
+Object {
+  "description": "Test description",
+  "enabled": true,
+  "inputs": Array [
+    Object {
+      "enabled": true,
+      "policy_template": "nginx",
+      "streams": Array [
+        Object {
+          "data_stream": Object {
+            "dataset": "nginx.access",
+            "type": "logs",
+          },
+          "enabled": true,
+          "vars": Object {
+            "ignore_older": Object {
+              "type": "text",
+              "value": "72h",
+            },
+            "paths": Object {
+              "type": "text",
+              "value": Array [
+                "/var/log/nginx/access.log*",
+              ],
+            },
+            "preserve_original_event": Object {
+              "type": "bool",
+              "value": false,
+            },
+            "processors": Object {
+              "type": "yaml",
+              "value": undefined,
+            },
+            "tags": Object {
+              "type": "text",
+              "value": Array [
+                "nginx-access",
+              ],
+            },
+          },
+        },
+        Object {
+          "data_stream": Object {
+            "dataset": "nginx.error",
+            "type": "logs",
+          },
+          "enabled": true,
+          "vars": Object {
+            "ignore_older": Object {
+              "type": "text",
+              "value": "72h",
+            },
+            "paths": Object {
+              "type": "text",
+              "value": Array [
+                "/var/log/nginx/error.log*",
+              ],
+            },
+            "preserve_original_event": Object {
+              "type": "bool",
+              "value": false,
+            },
+            "processors": Object {
+              "type": "yaml",
+              "value": undefined,
+            },
+            "tags": Object {
+              "type": "text",
+              "value": Array [
+                "test",
+                "nginx-error",
+              ],
+            },
+          },
+        },
+      ],
+      "type": "logfile",
+    },
+    Object {
+      "enabled": false,
+      "policy_template": "nginx",
+      "streams": Array [
+        Object {
+          "data_stream": Object {
+            "dataset": "nginx.access",
+            "type": "logs",
+          },
+          "enabled": false,
+          "vars": Object {
+            "interval": Object {
+              "type": "text",
+              "value": "10s",
+            },
+            "preserve_original_event": Object {
+              "type": "bool",
+              "value": false,
+            },
+            "processors": Object {
+              "type": "yaml",
+              "value": undefined,
+            },
+            "search": Object {
+              "type": "text",
+              "value": "search sourcetype=nginx:plus:access",
+            },
+            "tags": Object {
+              "type": "text",
+              "value": Array [
+                "forwarded",
+                "nginx-access",
+              ],
+            },
+          },
+        },
+        Object {
+          "data_stream": Object {
+            "dataset": "nginx.error",
+            "type": "logs",
+          },
+          "enabled": false,
+          "vars": Object {
+            "interval": Object {
+              "type": "text",
+              "value": "10s",
+            },
+            "preserve_original_event": Object {
+              "type": "bool",
+              "value": false,
+            },
+            "processors": Object {
+              "type": "yaml",
+              "value": undefined,
+            },
+            "search": Object {
+              "type": "text",
+              "value": "search sourcetype=nginx:plus:error",
+            },
+            "tags": Object {
+              "type": "text",
+              "value": Array [
+                "forwarded",
+                "nginx-error",
+              ],
+            },
+          },
+        },
+      ],
+      "type": "httpjson",
+      "vars": Object {
+        "password": Object {
+          "type": "password",
+          "value": undefined,
+        },
+        "ssl": Object {
+          "type": "yaml",
+          "value": "#certificate_authorities:
+#  - |
+#    -----BEGIN CERTIFICATE-----
+#    MIIDCjCCAfKgAwIBAgITJ706Mu2wJlKckpIvkWxEHvEyijANBgkqhkiG9w0BAQsF
+#    ADAUMRIwEAYDVQQDDAlsb2NhbGhvc3QwIBcNMTkwNzIyMTkyOTA0WhgPMjExOTA2
+#    MjgxOTI5MDRaMBQxEjAQBgNVBAMMCWxvY2FsaG9zdDCCASIwDQYJKoZIhvcNAQEB
+#    BQADggEPADCCAQoCggEBANce58Y/JykI58iyOXpxGfw0/gMvF0hUQAcUrSMxEO6n
+#    fZRA49b4OV4SwWmA3395uL2eB2NB8y8qdQ9muXUdPBWE4l9rMZ6gmfu90N5B5uEl
+#    94NcfBfYOKi1fJQ9i7WKhTjlRkMCgBkWPkUokvBZFRt8RtF7zI77BSEorHGQCk9t
+#    /D7BS0GJyfVEhftbWcFEAG3VRcoMhF7kUzYwp+qESoriFRYLeDWv68ZOvG7eoWnP
+#    PsvZStEVEimjvK5NSESEQa9xWyJOmlOKXhkdymtcUd/nXnx6UTCFgnkgzSdTWV41
+#    CI6B6aJ9svCTI2QuoIq2HxX/ix7OvW1huVmcyHVxyUECAwEAAaNTMFEwHQYDVR0O
+#    BBYEFPwN1OceFGm9v6ux8G+DZ3TUDYxqMB8GA1UdIwQYMBaAFPwN1OceFGm9v6ux
+#    8G+DZ3TUDYxqMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAG5D
+#    874A4YI7YUwOVsVAdbWtgp1d0zKcPRR+r2OdSbTAV5/gcS3jgBJ3i1BN34JuDVFw
+#    3DeJSYT3nxy2Y56lLnxDeF8CUTUtVQx3CuGkRg1ouGAHpO/6OqOhwLLorEmxi7tA
+#    H2O8mtT0poX5AnOAhzVy7QW0D/k4WaoLyckM5hUa6RtvgvLxOwA0U+VGurCDoctu
+#    8F4QOgTAWyh8EZIwaKCliFRSynDpv3JTUwtfZkxo6K6nce1RhCWFAsMvDZL8Dgc0
+#    yvgJ38BRsFOtkRuAGSf6ZUwTO8JJRRIFnpUzXflAnGivK9M13D5GEQMmIl6U9Pvk
+#    sxSmbIUfc2SGJGCJD4I=
+#    -----END CERTIFICATE-----
+",
+        },
+        "token": Object {
+          "type": "password",
+          "value": undefined,
+        },
+        "url": Object {
+          "type": "text",
+          "value": "https://server.example.com:8089",
+        },
+        "username": Object {
+          "type": "text",
+          "value": undefined,
+        },
+      },
+    },
+    Object {
+      "enabled": true,
+      "policy_template": "nginx",
+      "streams": Array [
+        Object {
+          "data_stream": Object {
+            "dataset": "nginx.stubstatus",
+            "type": "metrics",
+          },
+          "enabled": true,
+          "vars": Object {
+            "period": Object {
+              "type": "text",
+              "value": "10s",
+            },
+            "server_status_path": Object {
+              "type": "text",
+              "value": "/nginx_status",
+            },
+          },
+        },
+      ],
+      "type": "nginx/metrics",
+      "vars": Object {
+        "hosts": Object {
+          "type": "text",
+          "value": Array [
+            "http://127.0.0.1:80",
+          ],
+        },
+      },
+    },
+  ],
+  "name": "nginx-1",
+  "namespace": "default",
+  "package": Object {
+    "name": "nginx",
+    "title": "Nginx",
+    "version": "1.5.0",
+  },
+  "policy_id": "policy123",
+  "vars": undefined,
+}
+`;

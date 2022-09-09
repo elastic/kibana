@@ -7,7 +7,11 @@
 
 import React, { useContext, useState } from 'react';
 
-import { EuiPageHeader, EuiSpacer, EuiPageContentBody } from '@elastic/eui';
+import {
+  EuiPageHeader,
+  EuiSpacer,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ExecuteDetails } from '../../../../models/execute_details';
 import { getActionType } from '../../../../../../common/lib/get_action_type';

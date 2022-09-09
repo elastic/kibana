@@ -43,7 +43,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the insights module for related alerts by process ancestry
    */
-  insightsRelatedAlertsByProcessAncestry: false,
+  insightsRelatedAlertsByProcessAncestry: true,
 
   /**
    * Enables extended rule execution logging to Event Log. When this setting is enabled:

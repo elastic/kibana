@@ -13,6 +13,7 @@ import { ObservabilityAppServices } from '../../application/types';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { paths } from '../../config/paths';
+import PageNotFound from '../404';
 
 // import { useParams } from 'react-router';
 // import { AlertDetailsPathParams } from './types';
@@ -20,7 +21,7 @@ import { paths } from '../../config/paths';
 export function AlertDetailsPage() {
   const { http } = useKibana<ObservabilityAppServices>().services;
 
-  const { ObservabilityPageTemplate } = usePluginContext();
+  const { ObservabilityPageTemplate, config } = usePluginContext();
   // const { alertId } = useParams<AlertDetailsPathParams>();
   const alert = {};
 
@@ -32,6 +33,11 @@ export function AlertDetailsPage() {
       }),
     },
   ]);
+
+  // Redirect to the the 404 page when the user hit the page url directly in the browser while the feature flag is off.
+  if (!config.unsafe.alertDetails.enabled) {
+    return <PageNotFound />;
+  }
 
   return (
     <ObservabilityPageTemplate data-test-subj="alertDetails">

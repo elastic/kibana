@@ -100,7 +100,7 @@ const visConfig: PieVisualizationState = {
   layers: [
     {
       layerId: 'layer1',
-      groups: ['col1'],
+      primaryGroups: ['col1'],
       metric: 'col2',
       categoryDisplay: 'default',
       legendDisplay: 'hide',

@@ -129,9 +129,9 @@ const HostRiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => voi
         <EuiSpacer size="l" />
         <FormattedMessage
           id="xpack.securitySolution.hosts.hostRiskInformation.learnMore"
-          defaultMessage="You can learn more about host risk {hostsRiskScoreDocumentationLink}"
+          defaultMessage="You can learn more about host risk {HostRiskScoreDocumentationLink}"
           values={{
-            hostsRiskScoreDocumentationLink: (
+            HostRiskScoreDocumentationLink: (
               <EuiLink href={RISKY_HOSTS_DOC_LINK} target="_blank">
                 <FormattedMessage
                   id="xpack.securitySolution.hosts.hostRiskInformation.link"
