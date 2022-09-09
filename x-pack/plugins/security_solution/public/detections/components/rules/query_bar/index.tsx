@@ -46,12 +46,27 @@ export interface QueryBarDefineRuleProps {
   onValidityChange?: (arg: boolean) => void;
   isDisabled?: boolean;
   /**
-   * if saved query selected, reset to it's value
+   * if saved query selected, reset values of query and filters to its value
    */
-  resetSavedQuery?: boolean;
+  resetToSavedQuery?: boolean;
 }
 
 const actionTimelineToHide: ActionTimelineToShow[] = ['duplicate', 'createFrom'];
+
+const getFieldValueFromEmptySavedQuery = () => ({
+  filters: [],
+  query: {
+    query: '',
+    language: 'kuery',
+  },
+  saved_id: null,
+});
+
+const savedQueryToFieldValue = (savedQuery: SavedQuery): FieldValueQueryBar => ({
+  filters: savedQuery.attributes.filters ?? [],
+  query: savedQuery.attributes.query,
+  saved_id: savedQuery.id,
+});
 
 const StyledEuiFormRow = styled(EuiFormRow)``;
 
@@ -67,7 +82,7 @@ export const QueryBarDefineRule = ({
   resizeParentContainer,
   onValidityChange,
   isDisabled,
-  resetSavedQuery,
+  resetToSavedQuery,
 }: QueryBarDefineRuleProps) => {
   const { value: fieldValue, setValue: setFieldValue } = field as FieldHook<FieldValueQueryBar>;
   const [originalHeight, setOriginalHeight] = useState(-1);
@@ -133,14 +148,7 @@ export const QueryBarDefineRule = ({
           }
         } catch (err) {
           setSavedQuery(undefined);
-          setFieldValue({
-            filters: [],
-            query: {
-              query: '',
-              language: 'kuery',
-            },
-            saved_id: null,
-          });
+          setFieldValue(getFieldValueFromEmptySavedQuery());
         }
       } else if (savedId == null && savedQuery != null) {
         setSavedQuery(undefined);
@@ -153,14 +161,11 @@ export const QueryBarDefineRule = ({
   }, [fieldValue, filterManager, savedQuery, savedQueryServices, setFieldValue]);
 
   useEffect(() => {
-    if (resetSavedQuery && savedQuery) {
-      setFieldValue({
-        filters: savedQuery.attributes.filters ?? [],
-        query: savedQuery.attributes.query,
-        saved_id: savedQuery.id,
-      });
+    if (resetToSavedQuery && savedQuery) {
+      const newFiledValue = savedQueryToFieldValue(savedQuery);
+      setFieldValue(newFiledValue);
     }
-  }, [resetSavedQuery, savedQuery, setFieldValue]);
+  }, [resetToSavedQuery, savedQuery, setFieldValue]);
 
   const onSubmitQuery = useCallback(
     (newQuery: Query) => {
@@ -186,23 +191,12 @@ export const QueryBarDefineRule = ({
     (newSavedQuery: SavedQuery | undefined) => {
       if (newSavedQuery != null) {
         const { saved_id: savedId } = fieldValue;
+        setSavedQuery(newSavedQuery);
         if (newSavedQuery.id !== savedId) {
-          setSavedQuery(newSavedQuery);
-          setFieldValue({
-            filters: newSavedQuery.attributes.filters ?? [],
-            query: newSavedQuery.attributes.query,
-            saved_id: newSavedQuery.id,
-          });
+          const newFiledValue = savedQueryToFieldValue(newSavedQuery);
+          setFieldValue(newFiledValue);
         } else {
-          setSavedQuery(newSavedQuery);
-          setFieldValue({
-            filters: [],
-            query: {
-              query: '',
-              language: 'kuery',
-            },
-            saved_id: null,
-          });
+          setFieldValue(getFieldValueFromEmptySavedQuery());
         }
       }
     },

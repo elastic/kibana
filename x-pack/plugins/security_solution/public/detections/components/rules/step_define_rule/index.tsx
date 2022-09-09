@@ -625,7 +625,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             idAria: 'detectionEngineStepDefineRuleQueryBar',
             indexPattern,
             isDisabled: isLoading || formShouldLoadQueryDynamically,
-            resetSavedQuery: formShouldLoadQueryDynamically,
+            resetToSavedQuery: formShouldLoadQueryDynamically,
             isLoading: isIndexPatternLoading,
             dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
             openTimelineSearch,
