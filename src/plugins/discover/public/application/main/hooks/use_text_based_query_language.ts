@@ -70,6 +70,11 @@ export function useTextBasedQueryLanguage({
           };
           stateContainer.replaceUrlAppState(nextState);
         }
+      } else {
+        prev.current = {
+          columns: [],
+          query: undefined,
+        }
       }
     });
     return () => subscription.unsubscribe();

@@ -48,7 +48,7 @@ const msgComplete = {
       id: '1',
       raw: { field1: 1, field2: 2 },
       flattened: { field1: 1, field2: 2 },
-    } as DataTableRecord,
+    } as unknown as DataTableRecord,
   ],
   query,
 };
@@ -76,7 +76,7 @@ describe('useTextBasedQueryLanguage', () => {
       });
     });
   });
-  test('changing a text based query with different result columns should change state', async () => {
+  test('changing a text based query with different result columns should change state when loading and finished', async () => {
     const replaceUrlAppState = jest.fn();
     const props = getHookProps(replaceUrlAppState, query);
     const { documents$ } = props;
@@ -85,7 +85,6 @@ describe('useTextBasedQueryLanguage', () => {
 
     documents$.next(msgComplete);
     await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(2));
-
     replaceUrlAppState.mockReset();
 
     documents$.next({
@@ -96,11 +95,99 @@ describe('useTextBasedQueryLanguage', () => {
           id: '1',
           raw: { field1: 1 },
           flattened: { field1: 1 },
-        } as DataTableRecord,
+        } as unknown as DataTableRecord,
       ],
       query: { sql: 'SELECT field1 from the-data-view-title' },
     });
     await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(1));
+
+    await waitFor(() => {
+      expect(replaceUrlAppState).toHaveBeenCalledWith({
+        index: 'the-data-view-id',
+        columns: ['field1'],
+      });
+    });
+  });
+  test('only changing a text based query with same result columns should not change columns', async () => {
+    const replaceUrlAppState = jest.fn();
+    const props = getHookProps(replaceUrlAppState, query);
+    const { documents$ } = props;
+
+    renderHook(() => useTextBasedQueryLanguage(props));
+
+    documents$.next(msgComplete);
+    await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(2));
+    replaceUrlAppState.mockReset();
+
+    documents$.next({
+      recordRawType: RecordRawType.PLAIN,
+      fetchStatus: FetchStatus.COMPLETE,
+      result: [
+        {
+          id: '1',
+          raw: { field1: 1 },
+          flattened: { field1: 1 },
+        } as unknown as DataTableRecord,
+      ],
+      query: { sql: 'SELECT field1 from the-data-view-title' },
+    });
+    await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(1));
+    replaceUrlAppState.mockReset();
+
+    documents$.next({
+      recordRawType: RecordRawType.PLAIN,
+      fetchStatus: FetchStatus.COMPLETE,
+      result: [
+        {
+          id: '1',
+          raw: { field1: 1 },
+          flattened: { field1: 1 },
+        } as unknown as DataTableRecord,
+      ],
+      query: { sql: 'SELECT field1 from the-data-view-title WHERE field1=1' },
+    });
+
+    await waitFor(() => {
+      expect(replaceUrlAppState).toHaveBeenCalledWith({
+        index: 'the-data-view-id',
+      });
+    });
+  });
+  test('if its not a text based query coming along, it should be ignored', async () => {
+    const replaceUrlAppState = jest.fn();
+    const props = getHookProps(replaceUrlAppState, query);
+    const { documents$ } = props;
+
+    renderHook(() => useTextBasedQueryLanguage(props));
+
+    documents$.next(msgComplete);
+    await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(2));
+    replaceUrlAppState.mockReset();
+
+    documents$.next({
+      recordRawType: RecordRawType.DOCUMENT,
+      fetchStatus: FetchStatus.COMPLETE,
+      result: [
+        {
+          id: '1',
+          raw: { field1: 1 },
+          flattened: { field1: 1 },
+        } as unknown as DataTableRecord,
+      ],
+    });
+
+    documents$.next({
+      recordRawType: RecordRawType.PLAIN,
+      fetchStatus: FetchStatus.COMPLETE,
+      result: [
+        {
+          id: '1',
+          raw: { field1: 1 },
+          flattened: { field1: 1 },
+        } as unknown as DataTableRecord,
+      ],
+      query: { sql: 'SELECT field1 from the-data-view-title WHERE field1=1' },
+    });
 
     await waitFor(() => {
       expect(replaceUrlAppState).toHaveBeenCalledWith({
