@@ -22,6 +22,9 @@ export interface Props<Kind extends string = string> {
   onDone: () => void;
 }
 
+/**
+ * In order to use this component you must register your file kind with {@link FileKindsRegistry}
+ */
 export const UploadFile: FunctionComponent<Props> = ({ client, kind, onDone }) => {
   const [uploadState] = useState(() =>
     createUploadState({
