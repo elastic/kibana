@@ -10,11 +10,7 @@ import {
   MappingRuntimeFieldType,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import {
-  SLO_INDEX_TEMPLATE_NAME,
-  SLO_INGEST_PIPELINE_NAME,
-  SLO_RESOURCES_VERSION,
-} from '../../../assets/constants';
+import { getSLODestinationIndexName, SLO_INGEST_PIPELINE_NAME } from '../../../assets/constants';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import {
   SLO,
@@ -108,7 +104,7 @@ export class ApmTransactionDurationTransformGenerator implements TransformGenera
     if (slo.settings.destination_index === undefined) {
       return {
         pipeline: SLO_INGEST_PIPELINE_NAME,
-        index: `${SLO_INDEX_TEMPLATE_NAME}-v${SLO_RESOURCES_VERSION}-${spaceId}`,
+        index: getSLODestinationIndexName(spaceId),
       };
     }
 
