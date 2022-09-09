@@ -1,0 +1,242 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  termQuery,
+  kqlQuery,
+  rangeQuery,
+} from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ApmPluginRequestHandlerContext } from '../typings';
+import { Setup } from '../../lib/helpers/setup_request';
+import {
+  IndexLifecyclePhaseSelectOption,
+  indexLifeCyclePhaseToDataTier,
+} from '../../../common/storage_explorer_types';
+import { getTotalTransactionsPerService } from './get_total_transactions_per_service';
+import {
+  PROCESSOR_EVENT,
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+  TIER,
+  TRANSACTION_SAMPLED,
+  AGENT_NAME,
+  INDEX,
+} from '../../../common/elasticsearch_fieldnames';
+import { environmentQuery } from '../../../common/utils/environment_query';
+import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
+import {
+  getTotalIndicesStats,
+  getEstimatedSizeForDocumentsInIndex,
+} from './indices_stats_helpers';
+import { RandomSampler } from '../../lib/helpers/get_random_sampler';
+
+async function getMainServiceStatistics({
+  setup,
+  context,
+  indexLifecyclePhase,
+  randomSampler,
+  start,
+  end,
+  environment,
+  kuery,
+}: {
+  setup: Setup;
+  context: ApmPluginRequestHandlerContext;
+  indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
+  randomSampler: RandomSampler;
+  start: number;
+  end: number;
+  environment: string;
+  kuery: string;
+}) {
+  const { apmEventClient } = setup;
+
+  const [{ indices: allIndicesStats }, response] = await Promise.all([
+    getTotalIndicesStats({ context, setup }),
+    apmEventClient.search('get_main_service_statistics', {
+      apm: {
+        events: [
+          ProcessorEvent.span,
+          ProcessorEvent.transaction,
+          ProcessorEvent.error,
+          ProcessorEvent.metric,
+        ],
+      },
+      body: {
+        size: 0,
+        track_total_hits: false,
+        query: {
+          bool: {
+            filter: [
+              ...environmentQuery(environment),
+              ...kqlQuery(kuery),
+              ...rangeQuery(start, end),
+              ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
+                ? termQuery(
+                    TIER,
+                    indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
+                  )
+                : []),
+            ] as QueryDslQueryContainer[],
+          },
+        },
+        aggs: {
+          sample: {
+            random_sampler: randomSampler,
+            aggs: {
+              services: {
+                terms: {
+                  field: SERVICE_NAME,
+                  size: 500,
+                },
+                aggs: {
+                  sample: {
+                    top_metrics: {
+                      size: 1,
+                      metrics: { field: AGENT_NAME },
+                      sort: {
+                        '@timestamp': 'desc',
+                      },
+                    },
+                  },
+                  indices: {
+                    terms: {
+                      field: INDEX,
+                      size: 500,
+                    },
+                    aggs: {
+                      number_of_metric_docs: {
+                        value_count: {
+                          field: INDEX,
+                        },
+                      },
+                    },
+                  },
+                  environments: {
+                    terms: {
+                      field: SERVICE_ENVIRONMENT,
+                    },
+                  },
+                  transactions: {
+                    filter: {
+                      term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction },
+                    },
+                    aggs: {
+                      sampled_transactions: {
+                        terms: {
+                          field: TRANSACTION_SAMPLED,
+                          size: 10,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    }),
+  ]);
+
+  const serviceStats = response.aggregations?.sample.services.buckets.map(
+    (bucket) => {
+      const estimatedSize = allIndicesStats
+        ? bucket.indices.buckets.reduce((prev, curr) => {
+            return (
+              prev +
+              getEstimatedSizeForDocumentsInIndex({
+                allIndicesStats,
+                indexName: curr.key as string,
+                numberOfDocs: curr.number_of_metric_docs.value,
+              })
+            );
+          }, 0)
+        : 0;
+
+      return {
+        serviceName: bucket.key as string,
+        environments: bucket.environments.buckets.map(
+          ({ key }) => key as string
+        ),
+        sampledTransactionDocs:
+          bucket.transactions.sampled_transactions.buckets[0]?.doc_count,
+        size: estimatedSize,
+        agentName: bucket.sample.top[0]?.metrics[AGENT_NAME] as AgentName,
+      };
+    }
+  );
+
+  return serviceStats ?? [];
+}
+
+export async function getServiceStatistics({
+  setup,
+  context,
+  indexLifecyclePhase,
+  randomSampler,
+  start,
+  end,
+  environment,
+  kuery,
+  searchAggregatedTransactions,
+}: {
+  setup: Setup;
+  context: ApmPluginRequestHandlerContext;
+  indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
+  randomSampler: RandomSampler;
+  start: number;
+  end: number;
+  environment: string;
+  kuery: string;
+  searchAggregatedTransactions: boolean;
+}) {
+  const [docCountPerProcessorEvent, totalTransactionsPerService] =
+    await Promise.all([
+      getMainServiceStatistics({
+        setup,
+        context,
+        indexLifecyclePhase,
+        randomSampler,
+        environment,
+        kuery,
+        start,
+        end,
+      }),
+      getTotalTransactionsPerService({
+        setup,
+        searchAggregatedTransactions,
+        indexLifecyclePhase,
+        randomSampler,
+        environment,
+        kuery,
+        start,
+        end,
+      }),
+    ]);
+
+  const serviceStatistics = docCountPerProcessorEvent.map(
+    ({ serviceName, sampledTransactionDocs, ...rest }) => {
+      const sampling =
+        sampledTransactionDocs && totalTransactionsPerService[serviceName]
+          ? Math.min(
+              sampledTransactionDocs / totalTransactionsPerService[serviceName],
+              1
+            )
+          : 0;
+
+      return {
+        ...rest,
+        serviceName,
+        sampling,
+      };
+    }
+  );
+
+  return serviceStatistics;
+}

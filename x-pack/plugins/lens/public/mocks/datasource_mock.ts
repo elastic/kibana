@@ -61,6 +61,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     isValidColumn: jest.fn(),
     isEqual: jest.fn(),
     getUsedDataView: jest.fn(),
+    getUsedDataViews: jest.fn(),
     onRefreshIndexPattern: jest.fn(),
   };
 }
