@@ -23,6 +23,7 @@ import {
   EuiTablePagination,
   EuiSelectableMessage,
   EuiI18n,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -108,6 +109,8 @@ export const DocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
+  const showActionsInsideTableCell = useIsWithinBreakpoints(['xl'], true);
+
   const { storage, uiSettings, fieldFormats } = useDiscoverServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
@@ -266,7 +269,11 @@ export const DocViewerTable = ({
 
   const headers = [
     !isSingleDocView && (
-      <EuiTableHeaderCell align="left" width={62} isSorted={false}>
+      <EuiTableHeaderCell
+        align="left"
+        width={showActionsInsideTableCell ? 150 : 62}
+        isSorted={false}
+      >
         <EuiText size="xs">
           <strong>
             <FormattedMessage
@@ -306,13 +313,14 @@ export const DocViewerTable = ({
               {!isSingleDocView && (
                 <EuiTableRowCell
                   key={field + '-actions'}
-                  align="center"
-                  width={62}
+                  align={showActionsInsideTableCell ? 'left' : 'center'}
+                  width={showActionsInsideTableCell ? undefined : 62}
                   className="kbnDocViewer__tableActionsCell"
                   textOnly={false}
                   mobileOptions={MOBILE_OPTIONS}
                 >
                   <TableActions
+                    mode={showActionsInsideTableCell ? 'inline' : 'as_popover'}
                     field={field}
                     pinned={pinned}
                     fieldMapping={fieldMapping}
@@ -358,7 +366,7 @@ export const DocViewerTable = ({
         }
       );
     },
-    [onToggleColumn, onTogglePinned, isSingleDocView]
+    [onToggleColumn, onTogglePinned, isSingleDocView, showActionsInsideTableCell]
   );
 
   const rowElements = [

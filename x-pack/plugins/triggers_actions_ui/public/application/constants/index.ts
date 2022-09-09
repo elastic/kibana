@@ -14,11 +14,12 @@ export {
 export { BASE_ACTION_API_PATH, INTERNAL_BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 export { INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '@kbn/stack-connectors-plugin/common';
 
-export type Section = 'connectors' | 'rules' | 'alerts';
+export type Section = 'connectors' | 'rules' | 'alerts' | 'logs';
 
 export const routeToHome = `/`;
 export const routeToConnectors = `/connectors`;
 export const routeToRules = `/rules`;
+export const routeToLogs = `/logs`;
 export const routeToRuleDetails = `/rule/:ruleId`;
 export const routeToInternalAlerts = `/alerts`;
 export const legacyRouteToRules = `/alerts`;
@@ -42,6 +43,8 @@ export const DEFAULT_SEARCH_PAGE_SIZE: number = 10;
 export const DEFAULT_RULE_INTERVAL = '1m';
 
 export const RULE_EXECUTION_LOG_COLUMN_IDS = [
+  'rule_id',
+  'rule_name',
   'id',
   'timestamp',
   'execution_duration',
@@ -74,6 +77,7 @@ export const RULE_EXECUTION_LOG_ALERT_COUNT_COLUMNS = [
 ];
 
 export const LOCKED_COLUMNS = [
+  'rule_name',
   'timestamp',
   'execution_duration',
   'status',
@@ -82,4 +86,5 @@ export const LOCKED_COLUMNS = [
   'num_errored_actions',
 ];
 
-export const RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [...LOCKED_COLUMNS];
+export const RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [...LOCKED_COLUMNS.slice(1)];
+export const GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = ['rule_name', ...LOCKED_COLUMNS];

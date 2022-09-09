@@ -35,7 +35,7 @@ function getExampleState(): PieVisualizationState {
       {
         layerId: LAYER_ID,
         layerType: layerTypes.DATA,
-        groups: [],
+        primaryGroups: [],
         metric: undefined,
         numberDisplay: NumberDisplay.PERCENT,
         categoryDisplay: CategoryDisplay.DEFAULT,
@@ -84,7 +84,7 @@ describe('pie_visualization', () => {
       const prevState: PieVisualizationState = {
         layers: [
           {
-            groups: ['a'],
+            primaryGroups: ['a'],
             layerId: LAYER_ID,
             layerType: layerTypes.DATA,
             numberDisplay: NumberDisplay.PERCENT,
