@@ -6,9 +6,9 @@
  */
 import { APP_UI_ID } from '../../../../common/constants';
 
-export const QUERY_NAMES = {
+export const REQUEST_NAMES = {
   SECURITY_DASHBOARDS: `${APP_UI_ID} fetch security dashboards`,
   ANOMALIES_TABLE: `${APP_UI_ID} fetch anomalies table data`,
 } as const;
 
-export type QueryName = typeof QUERY_NAMES[keyof typeof QUERY_NAMES];
+export type RequestName = typeof REQUEST_NAMES[keyof typeof REQUEST_NAMES];

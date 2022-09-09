@@ -14,7 +14,7 @@ import type { InfluencerInput, Anomalies, CriteriaFields } from '../types';
 import * as i18n from './translations';
 import { useTimeZone, useUiSetting$ } from '../../../lib/kibana';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
-import { QUERY_NAMES, useQuery } from '../../../hooks/use_query';
+import { useFetch, REQUEST_NAMES } from '../../../hooks/use_fetch';
 import { useMlCapabilities } from '../hooks/use_ml_capabilities';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 
@@ -75,11 +75,11 @@ export const useAnomaliesTableData = ({
   const endDateMs = useMemo(() => new Date(endDate).getTime(), [endDate]);
 
   const {
-    query,
+    fetch,
     data = null,
     isLoading,
     error,
-  } = useQuery(QUERY_NAMES.ANOMALIES_TABLE, anomaliesTableData, { disabled: skip });
+  } = useFetch(REQUEST_NAMES.ANOMALIES_TABLE, anomaliesTableData, { disabled: skip });
 
   useEffect(() => {
     if (error) {
@@ -89,7 +89,7 @@ export const useAnomaliesTableData = ({
 
   useEffect(() => {
     if (isMlUser && jobIds.length > 0) {
-      query({
+      fetch({
         jobIds,
         criteriaFields,
         influencersFilterQuery: filterQuery,

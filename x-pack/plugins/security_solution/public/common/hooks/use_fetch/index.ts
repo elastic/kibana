@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { useQuery } from './use_query';
-export { QUERY_NAMES } from './query_names';
+export { useFetch } from './use_fetch';
+export { REQUEST_NAMES } from './request_names';
