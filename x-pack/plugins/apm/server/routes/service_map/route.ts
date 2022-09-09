@@ -125,10 +125,7 @@ const serviceMapRoute = createApmServerRoute({
       uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
     ]);
 
-    const serviceNames = [
-      ...(serviceName ? [serviceName] : []),
-      ...(serviceGroup?.serviceNames ?? []),
-    ];
+    const serviceNames = [...(serviceName ? [serviceName] : [])];
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
@@ -146,6 +143,7 @@ const serviceMapRoute = createApmServerRoute({
       start,
       end,
       maxNumberOfServices,
+      serviceGroup,
     });
   },
 });

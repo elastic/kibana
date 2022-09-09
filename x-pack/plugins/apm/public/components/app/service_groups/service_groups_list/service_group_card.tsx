@@ -27,6 +27,7 @@ interface Props {
   onClick?: () => void;
   href?: string;
   withTour?: boolean;
+  servicesCount?: number;
 }
 
 export function ServiceGroupsCard({
@@ -35,6 +36,7 @@ export function ServiceGroupsCard({
   onClick,
   href,
   withTour,
+  servicesCount,
 }: Props) {
   const { tourEnabled, dismissTour } = useServiceGroupsTour('serviceGroupCard');
 
@@ -67,7 +69,7 @@ export function ServiceGroupsCard({
                 {
                   defaultMessage:
                     '{servicesCount} {servicesCount, plural, one {service} other {services}}',
-                  values: { servicesCount: serviceGroup.serviceNames.length },
+                  values: { servicesCount },
                 }
               )}
             </EuiText>

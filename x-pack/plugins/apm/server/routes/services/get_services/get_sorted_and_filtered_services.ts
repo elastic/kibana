@@ -86,5 +86,6 @@ export async function getSortedAndFilteredServices({
 }
 
 async function getServiceNamesFromServiceGroup(serviceGroup: ServiceGroup) {
-  return serviceGroup.serviceNames;
+  // Todo
+  return [];
 }
