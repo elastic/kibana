@@ -194,6 +194,7 @@ describe('When using processes action from response actions console', () => {
       });
     });
 
+    // FLAKY: https://github.com/elastic/kibana/issues/139707
     it.skip('should display completion output if done (no additional API calls)', async () => {
       await render();
 
