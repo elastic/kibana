@@ -17,10 +17,12 @@ export async function generateData({
   end: number;
 }) {
   const serviceRunsInContainerInstance = apm
-    .service('synth-go', 'production', 'go')
+    .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
     .instance('instance-a');
 
-  const serviceInstance = apm.service('synth-java', 'production', 'java').instance('instance-b');
+  const serviceInstance = apm
+    .service({ name: 'synth-java', environment: 'production', agentName: 'java' })
+    .instance('instance-b');
 
   await synthtraceEsClient.index(
     timerange(start, end)

@@ -53,11 +53,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   // FLAKY: https://github.com/elastic/kibana/issues/127939
   registry.when.skip('Sorted and filtered services', { config: 'trial', archives: [] }, () => {
     before(async () => {
-      const serviceA = apm.service(SERVICE_NAME_PREFIX + 'a', 'production', 'java').instance('a');
+      const serviceA = apm
+        .service({ name: SERVICE_NAME_PREFIX + 'a', environment: 'production', agentName: 'java' })
+        .instance('a');
 
-      const serviceB = apm.service(SERVICE_NAME_PREFIX + 'b', 'development', 'go').instance('b');
+      const serviceB = apm
+        .service({ name: SERVICE_NAME_PREFIX + 'b', environment: 'development', agentName: 'go' })
+        .instance('b');
 
-      const serviceC = apm.service(SERVICE_NAME_PREFIX + 'c', 'development', 'go').instance('c');
+      const serviceC = apm
+        .service({ name: SERVICE_NAME_PREFIX + 'c', environment: 'development', agentName: 'go' })
+        .instance('c');
 
       const spikeStart = new Date('2021-01-07T12:00:00.000Z').getTime();
       const spikeEnd = new Date('2021-01-07T14:00:00.000Z').getTime();

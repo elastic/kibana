@@ -10,7 +10,11 @@ import { SpanLink } from '../../../../../typings/es_schemas/raw/fields/span_link
 
 function getProducerInternalOnly() {
   const producerInternalOnlyInstance = apm
-    .service('producer-internal-only', 'production', 'go')
+    .service({
+      name: 'producer-internal-only',
+      environment: 'production',
+      agentName: 'go',
+    })
     .instance('instance a');
 
   const events = timerange(
@@ -61,7 +65,11 @@ function getProducerInternalOnly() {
 
 function getProducerExternalOnly() {
   const producerExternalOnlyInstance = apm
-    .service('producer-external-only', 'production', 'java')
+    .service({
+      name: 'producer-external-only',
+      environment: 'production',
+      agentName: 'java',
+    })
     .instance('instance b');
 
   const events = timerange(
@@ -132,7 +140,11 @@ function getProducerConsumer({
   producerInternalOnlySpanASpanLink?: SpanLink;
 }) {
   const producerConsumerInstance = apm
-    .service('producer-consumer', 'production', 'ruby')
+    .service({
+      name: 'producer-consumer',
+      environment: 'production',
+      agentName: 'ruby',
+    })
     .instance('instance c');
 
   const events = timerange(
@@ -209,7 +221,11 @@ function getConsumerMultiple({
   producerConsumerTransactionCSpanLink?: SpanLink;
 }) {
   const consumerMultipleInstance = apm
-    .service('consumer-multiple', 'production', 'nodejs')
+    .service({
+      name: 'consumer-multiple',
+      environment: 'production',
+      agentName: 'nodejs',
+    })
     .instance('instance d');
 
   const events = timerange(

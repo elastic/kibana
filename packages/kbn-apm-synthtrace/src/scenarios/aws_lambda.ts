@@ -23,7 +23,9 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
       const range = timerange(from, to);
       const timestamps = range.ratePerMinute(180);
 
-      const instance = apm.service('lambda-python', ENVIRONMENT, 'python').instance('instance');
+      const instance = apm
+        .service({ name: 'lambda-python', environment: ENVIRONMENT, agentName: 'python' })
+        .instance('instance');
 
       const traceEventsSetups = [
         { functionName: 'lambda-python-1', coldStart: true },

@@ -70,9 +70,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Top dependency spans when data is loaded',
     { config: 'basic', archives: [] },
     () => {
-      const javaInstance = apm.service('java', 'production', 'java').instance('instance-a');
+      const javaInstance = apm
+        .service({ name: 'java', environment: 'production', agentName: 'java' })
+        .instance('instance-a');
 
-      const goInstance = apm.service('go', 'development', 'go').instance('instance-a');
+      const goInstance = apm
+        .service({ name: 'go', environment: 'development', agentName: 'go' })
+        .instance('instance-a');
 
       before(async () => {
         await synthtraceEsClient.index([

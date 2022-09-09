@@ -65,7 +65,9 @@ export async function generateData({
   const { name: serviceRunTimeName, version: serviceRunTimeVersion } = runtime;
   const { name: agentName, version: agentVersion } = agent;
 
-  const instance = apm.service(serviceName, 'production', agentName).instance('instance-a');
+  const instance = apm
+    .service({ name: serviceName, environment: 'production', agentName })
+    .instance('instance-a');
 
   const traceEvents = [
     timerange(start, end)

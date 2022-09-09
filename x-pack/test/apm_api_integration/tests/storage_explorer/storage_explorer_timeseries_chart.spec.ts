@@ -56,8 +56,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let status: number;
 
       before(async () => {
-        const serviceGo1 = apm.service('synth-go-1', 'production', 'go').instance('instance');
-        const serviceGo2 = apm.service('synth-go-2', 'production', 'go').instance('instance');
+        const serviceGo1 = apm
+          .service({ name: 'synth-go-1', environment: 'production', agentName: 'go' })
+          .instance('instance');
+        const serviceGo2 = apm
+          .service({ name: 'synth-go-2', environment: 'production', agentName: 'go' })
+          .instance('instance');
 
         await synthtraceEsClient.index([
           timerange(start, end)

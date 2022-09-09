@@ -19,7 +19,11 @@ export function generateMultipleServicesData({
     .fill(0)
     .map((_, idx) =>
       apm
-        .service(`${idx}`, 'production', 'nodejs')
+        .service({
+          name: `${idx}`,
+          environment: 'production',
+          agentName: 'nodejs',
+        })
         .instance('opbeans-node-prod-1')
     );
 

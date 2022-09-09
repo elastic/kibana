@@ -33,7 +33,9 @@ export async function generateData({
   warmStartRate: number;
 }) {
   const { coldStartTransaction, warmStartTransaction, serviceName } = dataConfig;
-  const instance = apm.service(serviceName, 'production', 'go').instance('instance-a');
+  const instance = apm
+    .service({ name: serviceName, environment: 'production', agentName: 'go' })
+    .instance('instance-a');
 
   const traceEvents = [
     timerange(start, end)

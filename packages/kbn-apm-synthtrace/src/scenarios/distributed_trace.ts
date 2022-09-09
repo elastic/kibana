@@ -23,11 +23,15 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
       const transactionName = '240rpm/75% 1000ms';
       const successfulTimestamps = range.interval('1s').rate(3);
 
-      const opbeansRum = apm.service('opbeans-rum', ENVIRONMENT, 'rum-js').instance('my-instance');
-      const opbeansNode = apm
-        .service('opbeans-node', ENVIRONMENT, 'nodejs')
+      const opbeansRum = apm
+        .service({ name: 'opbeans-rum', environment: ENVIRONMENT, agentName: 'rum-js' })
         .instance('my-instance');
-      const opbeansGo = apm.service('opbeans-go', ENVIRONMENT, 'go').instance('my-instance');
+      const opbeansNode = apm
+        .service({ name: 'opbeans-node', environment: ENVIRONMENT, agentName: 'nodejs' })
+        .instance('my-instance');
+      const opbeansGo = apm
+        .service({ name: 'opbeans-go', environment: ENVIRONMENT, agentName: 'go' })
+        .instance('my-instance');
 
       const traces = successfulTimestamps.generator((timestamp) => {
         // opbeans-rum

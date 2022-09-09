@@ -19,7 +19,11 @@ describe('DSL invocations', () => {
     new Date('2021-01-01T00:00:00.000Z'),
     new Date('2021-01-01T00:15:00.000Z')
   );
-  const javaService = apm.service('opbeans-java', 'production', 'java');
+  const javaService = apm.service({
+    name: 'opbeans-java',
+    environment: 'production',
+    agentName: 'java',
+  });
   const javaInstance = javaService.instance('instance-1');
   let globalSeq = 0;
 

@@ -122,7 +122,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const GO_PROD_ID_ERROR_RATE = 50;
       before(async () => {
         const serviceGoProdInstance = apm
-          .service(serviceName, 'production', 'go')
+          .service({ name: serviceName, environment: 'production', agentName: 'go' })
           .instance('instance-a');
 
         const transactionNameProductList = 'GET /api/product/list';

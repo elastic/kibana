@@ -31,7 +31,9 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
       const failedTimestamps = range.ratePerMinute(180);
 
       const instances = [...Array(numServices).keys()].map((index) =>
-        apm.service(`opbeans-go-${index}`, ENVIRONMENT, 'go').instance('instance')
+        apm
+          .service({ name: `opbeans-go-${index}`, environment: ENVIRONMENT, agentName: 'go' })
+          .instance('instance')
       );
       const instanceSpans = (instance: Instance) => {
         const successfulTraceEvents = successfulTimestamps.generator((timestamp) =>

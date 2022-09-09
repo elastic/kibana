@@ -20,7 +20,15 @@ export class Service extends Entity<ApmFields> {
   }
 }
 
-export function service(name: string, environment: string, agentName: string) {
+export function service({
+  name,
+  environment,
+  agentName,
+}: {
+  name: string;
+  environment: string;
+  agentName: string;
+}) {
   return new Service({
     'service.name': name,
     'service.environment': environment,

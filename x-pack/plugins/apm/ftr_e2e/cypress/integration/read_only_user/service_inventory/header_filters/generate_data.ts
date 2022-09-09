@@ -18,12 +18,20 @@ export function generateData({
   const range = timerange(from, to);
 
   const service1 = apm
-    .service(specialServiceName, 'production', 'java')
+    .service({
+      name: specialServiceName,
+      environment: 'production',
+      agentName: 'java',
+    })
     .instance('service-1-prod-1')
     .podId('service-1-prod-1-pod');
 
   const opbeansNode = apm
-    .service('opbeans-node', 'production', 'nodejs')
+    .service({
+      name: 'opbeans-node',
+      environment: 'production',
+      agentName: 'nodejs',
+    })
     .instance('opbeans-node-prod-1');
 
   return range

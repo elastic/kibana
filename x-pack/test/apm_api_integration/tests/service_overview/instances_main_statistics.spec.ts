@@ -296,8 +296,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const rangeEnd = new Date('2021-01-01T12:15:00.000Z').getTime() - 1;
 
         before(async () => {
-          const goService = apm.service('opbeans-go', 'production', 'go');
-          const javaService = apm.service('opbeans-java', 'production', 'java');
+          const goService = apm.service({
+            name: 'opbeans-go',
+            environment: 'production',
+            agentName: 'go',
+          });
+          const javaService = apm.service({
+            name: 'opbeans-java',
+            environment: 'production',
+            agentName: 'java',
+          });
 
           const goInstanceA = goService.instance('go-instance-a');
           const goInstanceB = goService.instance('go-instance-b');

@@ -31,7 +31,9 @@ export async function generateData({
   start: number;
   end: number;
 }) {
-  const serviceGoProdInstance = apm.service(serviceName, 'production', 'go').instance('instance-a');
+  const serviceGoProdInstance = apm
+    .service({ name: serviceName, environment: 'production', agentName: 'go' })
+    .instance('instance-a');
 
   const interval = '1m';
 

@@ -38,7 +38,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let ruleId: string | undefined;
 
       before(async () => {
-        const serviceA = apm.service('a', 'production', 'java').instance('a');
+        const serviceA = apm
+          .service({ name: 'a', environment: 'production', agentName: 'java' })
+          .instance('a');
 
         const events = timerange(new Date(start).getTime(), new Date(end).getTime())
           .interval('1m')

@@ -55,7 +55,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when('Trace exists', { config: 'basic', archives: [] }, () => {
     let serviceATraceId: string;
     before(async () => {
-      const instanceJava = apm.service('synth-apple', 'production', 'java').instance('instance-b');
+      const instanceJava = apm
+        .service({ name: 'synth-apple', environment: 'production', agentName: 'java' })
+        .instance('instance-b');
       const events = timerange(start, end)
         .interval('1m')
         .rate(1)

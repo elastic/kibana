@@ -97,11 +97,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('Find traces when traces exist', { config: 'basic', archives: [] }, () => {
     before(() => {
-      const java = apm.service('java', 'production', 'java').instance('java');
+      const java = apm
+        .service({ name: 'java', environment: 'production', agentName: 'java' })
+        .instance('java');
 
-      const node = apm.service('node', 'development', 'nodejs').instance('node');
+      const node = apm
+        .service({ name: 'node', environment: 'development', agentName: 'nodejs' })
+        .instance('node');
 
-      const python = apm.service('python', 'production', 'python').instance('python');
+      const python = apm
+        .service({ name: 'python', environment: 'production', agentName: 'python' })
+        .instance('python');
 
       function generateTrace(timestamp: number, order: Instance[], db?: 'elasticsearch' | 'redis') {
         return order

@@ -9,15 +9,23 @@ import { apm, timerange } from '@kbn/apm-synthtrace';
 export function generateData({ from, to }: { from: number; to: number }) {
   const range = timerange(from, to);
   const serviceRunsInContainerInstance = apm
-    .service('synth-go', 'production', 'go')
+    .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
     .instance('instance-a');
 
   const serviceInstance = apm
-    .service('synth-java', 'production', 'java')
+    .service({
+      name: 'synth-java',
+      environment: 'production',
+      agentName: 'java',
+    })
     .instance('instance-b');
 
   const serviceNoInfraDataInstance = apm
-    .service('synth-node', 'production', 'node')
+    .service({
+      name: 'synth-node',
+      environment: 'production',
+      agentName: 'node',
+    })
     .instance('instance-b');
 
   return range.interval('1m').generator((timestamp) => {

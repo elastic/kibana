@@ -136,7 +136,9 @@ function generateApmData(synthtrace: ApmSynthtraceEsClient) {
     new Date('2021-10-01T00:01:00.000Z').getTime()
   );
 
-  const instance = apm.service('multiple-env-service', 'production', 'go').instance('my-instance');
+  const instance = apm
+    .service({ name: 'multiple-env-service', environment: 'production', agentName: 'go' })
+    .instance('my-instance');
 
   return synthtrace.index([
     range

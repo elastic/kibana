@@ -32,11 +32,13 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
 
       const instances = services.map((service, index) =>
         apm
-          .service(
-            `${services[index % services.length]}-${languages[index % languages.length]}-${index}`,
-            ENVIRONMENT,
-            languages[index % languages.length]
-          )
+          .service({
+            name: `${services[index % services.length]}-${
+              languages[index % languages.length]
+            }-${index}`,
+            environment: ENVIRONMENT,
+            agentName: languages[index % languages.length],
+          })
           .instance(`instance-${index}`)
       );
 

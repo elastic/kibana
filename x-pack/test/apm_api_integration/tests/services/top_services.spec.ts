@@ -71,19 +71,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const errorInterval = range.interval('5s');
 
       const multipleEnvServiceProdInstance = apm
-        .service('multiple-env-service', 'production', 'go')
+        .service({ name: 'multiple-env-service', environment: 'production', agentName: 'go' })
         .instance('multiple-env-service-production');
 
       const multipleEnvServiceDevInstance = apm
-        .service('multiple-env-service', 'development', 'go')
+        .service({ name: 'multiple-env-service', environment: 'development', agentName: 'go' })
         .instance('multiple-env-service-development');
 
       const metricOnlyInstance = apm
-        .service('metric-only-service', 'production', 'java')
+        .service({ name: 'metric-only-service', environment: 'production', agentName: 'java' })
         .instance('metric-only-production');
 
       const errorOnlyInstance = apm
-        .service('error-only-service', 'production', 'java')
+        .service({ name: 'error-only-service', environment: 'production', agentName: 'java' })
         .instance('error-only-production');
 
       const config = {

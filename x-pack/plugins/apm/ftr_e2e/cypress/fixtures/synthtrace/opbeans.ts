@@ -10,12 +10,20 @@ export function opbeans({ from, to }: { from: number; to: number }) {
   const range = timerange(from, to);
 
   const opbeansJava = apm
-    .service('opbeans-java', 'production', 'java')
+    .service({
+      name: 'opbeans-java',
+      environment: 'production',
+      agentName: 'java',
+    })
     .instance('opbeans-java-prod-1')
     .podId('opbeans-java-prod-1-pod');
 
   const opbeansNode = apm
-    .service('opbeans-node', 'production', 'nodejs')
+    .service({
+      name: 'opbeans-node',
+      environment: 'production',
+      agentName: 'nodejs',
+    })
     .instance('opbeans-node-prod-1');
 
   const opbeansRum = apm.browser(

@@ -19,7 +19,11 @@ describe('rate per minute calculations', () => {
   let events: Array<Record<string, any>>;
 
   beforeEach(() => {
-    const javaService = apm.service('opbeans-java', 'production', 'java');
+    const javaService = apm.service({
+      name: 'opbeans-java',
+      environment: 'production',
+      agentName: 'java',
+    });
     const javaInstance = javaService.instance('instance-1');
 
     iterable = range

@@ -22,7 +22,11 @@ describe('breakdown metrics', () => {
   const INTERVALS = 6;
 
   beforeEach(() => {
-    const javaService = apm.service('opbeans-java', 'production', 'java');
+    const javaService = apm.service({
+      name: 'opbeans-java',
+      environment: 'production',
+      agentName: 'java',
+    });
     const javaInstance = javaService.instance('instance-1');
 
     const start = new Date('2021-01-01T00:00:00.000Z');

@@ -27,8 +27,12 @@ export async function generateOperationData({
   end: number;
   synthtraceEsClient: ApmSynthtraceEsClient;
 }) {
-  const synthGoInstance = apm.service('synth-go', 'production', 'go').instance('instance-a');
-  const synthJavaInstance = apm.service('synth-java', 'development', 'java').instance('instance-a');
+  const synthGoInstance = apm
+    .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
+    .instance('instance-a');
+  const synthJavaInstance = apm
+    .service({ name: 'synth-java', environment: 'development', agentName: 'java' })
+    .instance('instance-a');
 
   const interval = timerange(start, end).interval('1m');
 

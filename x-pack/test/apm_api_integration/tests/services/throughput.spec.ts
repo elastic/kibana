@@ -71,14 +71,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       before(async () => {
         const serviceGoProdInstance = apm
-          .service(serviceName, 'production', 'go')
+          .service({ name: serviceName, environment: 'production', agentName: 'go' })
           .instance('instance-a');
         const serviceGoDevInstance = apm
-          .service(serviceName, 'development', 'go')
+          .service({ name: serviceName, environment: 'development', agentName: 'go' })
           .instance('instance-b');
 
         const serviceJavaInstance = apm
-          .service('synth-java', 'development', 'java')
+          .service({ name: 'synth-java', environment: 'development', agentName: 'java' })
           .instance('instance-c');
 
         await synthtraceEsClient.index([
