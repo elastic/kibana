@@ -213,7 +213,7 @@ describe('When on the policy list page', () => {
     });
 
     //FLAKY: https://github.com/elastic/kibana/issues/139207
-    it('should call the api with the initial pagination values taken from the url', async () => {
+    it.skip('should call the api with the initial pagination values taken from the url', async () => {
       act(() => {
         history.push('/administration/policies?page=3&pageSize=50');
       });
