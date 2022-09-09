@@ -9,6 +9,8 @@ import { render } from '@testing-library/react';
 import { noop } from 'lodash';
 import React from 'react';
 import { UserRiskScoreTable } from '.';
+import type { UserRiskScore } from '../../../../common/search_strategy';
+import { RiskSeverity } from '../../../../common/search_strategy';
 import { TestProviders } from '../../../common/mock';
 import { UsersType } from '../../store/model';
 
@@ -18,16 +20,17 @@ describe('UserRiskScoreTable', () => {
     data: [
       {
         '@timestamp': '1641902481',
-        risk: 'High',
-        risk_stats: {
-          rule_risks: [],
-          risk_score: 71,
-        },
         user: {
           name: username,
+          risk: {
+            rule_risks: [],
+            calculated_score_norm: 71,
+            calculated_level: RiskSeverity.high,
+            multipliers: [],
+          },
         },
       },
-    ],
+    ] as UserRiskScore[],
     id: 'test_id',
     isInspect: false,
     loading: false,
