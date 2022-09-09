@@ -2222,6 +2222,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   scale: 'interval',
                   isStaticValue: false,
                   hasTimeShift: false,
+                  interval: 'auto',
                 },
               },
               {
@@ -2233,6 +2234,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   scale: 'ratio',
                   isStaticValue: false,
                   hasTimeShift: false,
+                  interval: undefined,
                 },
               },
             ],
@@ -2297,6 +2299,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   scale: 'ordinal',
                   isStaticValue: false,
                   hasTimeShift: false,
+                  interval: undefined,
                 },
               },
               {
@@ -2308,6 +2311,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   scale: 'interval',
                   isStaticValue: false,
                   hasTimeShift: false,
+                  interval: 'auto',
                 },
               },
               {
@@ -2319,6 +2323,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   scale: 'ratio',
                   isStaticValue: false,
                   hasTimeShift: false,
+                  interval: undefined,
                 },
               },
             ],
@@ -2404,6 +2409,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   scale: 'ordinal',
                   isStaticValue: false,
                   hasTimeShift: false,
+                  interval: undefined,
                 },
               },
               {
@@ -2415,6 +2421,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   scale: 'interval',
                   isStaticValue: false,
                   hasTimeShift: false,
+                  interval: 'auto',
                 },
               },
               {
@@ -2426,6 +2433,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   scale: 'ratio',
                   isStaticValue: false,
                   hasTimeShift: false,
+                  interval: undefined,
                 },
               },
             ],
@@ -2534,6 +2542,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   scale: 'ordinal',
                   isStaticValue: false,
                   hasTimeShift: false,
+                  interval: undefined,
                 },
               },
               {
@@ -2545,6 +2554,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   scale: 'interval',
                   isStaticValue: false,
                   hasTimeShift: false,
+                  interval: 'auto',
                 },
               },
               {
@@ -2556,6 +2566,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   scale: undefined,
                   isStaticValue: false,
                   hasTimeShift: false,
+                  interval: undefined,
                 },
               },
             ],
@@ -3140,6 +3151,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     scale: 'interval',
                     isStaticValue: false,
                     hasTimeShift: false,
+                    interval: 'auto',
                   },
                 },
                 {
@@ -3151,6 +3163,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     scale: undefined,
                     isStaticValue: false,
                     hasTimeShift: false,
+                    interval: undefined,
                   },
                 },
                 {
@@ -3162,6 +3175,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     scale: undefined,
                     isStaticValue: false,
                     hasTimeShift: false,
+                    interval: undefined,
                   },
                 },
               ],
@@ -3227,6 +3241,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     scale: undefined,
                     isStaticValue: false,
                     hasTimeShift: false,
+                    interval: 'auto',
                   },
                 },
                 {
@@ -3238,6 +3253,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     scale: undefined,
                     isStaticValue: false,
                     hasTimeShift: false,
+                    interval: undefined,
                   },
                 },
                 {
@@ -3249,6 +3265,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     scale: undefined,
                     isStaticValue: false,
                     hasTimeShift: false,
+                    interval: undefined,
                   },
                 },
               ],

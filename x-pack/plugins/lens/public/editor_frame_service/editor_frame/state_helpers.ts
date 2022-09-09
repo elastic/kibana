@@ -37,9 +37,9 @@ import {
   getMissingVisualizationTypeError,
   getUnknownVisualizationTypeError,
 } from '../error_helper';
-import type { DatasourceStates, DataViewsState } from '../../state_management';
+import type { DatasourceStates, DataViewsState, VisualizationState } from '../../state_management';
 import { readFromStorage } from '../../settings_storage';
-import { loadIndexPatternRefs, loadIndexPatterns } from '../../indexpattern_service/loader';
+import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
 
 function getIndexPatterns(
   references?: SavedObjectReference[],
@@ -159,6 +159,8 @@ export async function initializeSources(
   {
     dataViews,
     datasourceMap,
+    visualizationMap,
+    visualizationState,
     datasourceStates,
     storage,
     defaultIndexPatternId,
@@ -168,6 +170,8 @@ export async function initializeSources(
   }: {
     dataViews: DataViewsContract;
     datasourceMap: DatasourceMap;
+    visualizationMap: VisualizationMap;
+    visualizationState: VisualizationState;
     datasourceStates: DatasourceStates;
     defaultIndexPatternId: string;
     storage: IStorageWrapper;
@@ -193,7 +197,7 @@ export async function initializeSources(
   return {
     indexPatterns,
     indexPatternRefs,
-    states: initializeDatasources({
+    datasourceStates: initializeDatasources({
       datasourceMap,
       datasourceStates,
       initialContext,
@@ -201,7 +205,32 @@ export async function initializeSources(
       indexPatterns,
       references,
     }),
+    visualizationState: initializeVisualization({
+      visualizationMap,
+      visualizationState,
+      references,
+    }),
   };
+}
+
+export function initializeVisualization({
+  visualizationMap,
+  visualizationState,
+  references,
+}: {
+  visualizationState: VisualizationState;
+  visualizationMap: VisualizationMap;
+  references?: SavedObjectReference[];
+}) {
+  if (visualizationState?.activeId) {
+    return (
+      visualizationMap[visualizationState.activeId]?.fromPersistableState?.(
+        visualizationState.state,
+        references
+      ) ?? visualizationState.state
+    );
+  }
+  return visualizationState.state;
 }
 
 export function initializeDatasources({
@@ -272,7 +301,7 @@ export async function persistedStateToExpression(
 ): Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }> {
   const {
     state: {
-      visualization: visualizationState,
+      visualization: persistedVisualizationState,
       datasourceStates: persistedDatasourceStates,
       adHocDataViews,
       internalReferences,
@@ -295,6 +324,14 @@ export async function persistedStateToExpression(
     };
   }
   const visualization = visualizations[visualizationType!];
+  const visualizationState = initializeVisualization({
+    visualizationMap: visualizations,
+    visualizationState: {
+      state: persistedVisualizationState,
+      activeId: visualizationType,
+    },
+    references: [...references, ...(internalReferences || [])],
+  });
   const datasourceStatesFromSO = Object.fromEntries(
     Object.entries(persistedDatasourceStates).map(([id, state]) => [
       id,
@@ -405,15 +442,15 @@ export const validateDatasourceAndVisualization = (
   currentDatasourceState: unknown | null,
   currentVisualization: Visualization | null,
   currentVisualizationState: unknown | undefined,
-  { datasourceLayers, dataViews }: Pick<FramePublicAPI, 'datasourceLayers' | 'dataViews'>
+  frame: Pick<FramePublicAPI, 'datasourceLayers' | 'dataViews'>
 ): ErrorMessage[] | undefined => {
   try {
     const datasourceValidationErrors = currentDatasourceState
-      ? currentDataSource?.getErrorMessages(currentDatasourceState, dataViews.indexPatterns)
+      ? currentDataSource?.getErrorMessages(currentDatasourceState, frame.dataViews.indexPatterns)
       : undefined;
 
     const visualizationValidationErrors = currentVisualizationState
-      ? currentVisualization?.getErrorMessages(currentVisualizationState, datasourceLayers)
+      ? currentVisualization?.getErrorMessages(currentVisualizationState, frame)
       : undefined;
 
     if (datasourceValidationErrors?.length || visualizationValidationErrors?.length) {
