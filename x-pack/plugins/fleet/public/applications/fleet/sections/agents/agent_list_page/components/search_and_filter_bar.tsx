@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFilterSelectItem,
@@ -91,6 +92,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   onClickAddAgent: () => void;
   onClickAddFleetServer: () => void;
   visibleAgents: Agent[];
+  onClickAgentActivity: () => void;
 }> = ({
   agentPolicies,
   draftKuery,
@@ -114,6 +116,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   onClickAddAgent,
   onClickAddFleetServer,
   visibleAgents,
+  onClickAgentActivity,
 }) => {
   // Policies state for filtering
   const [isAgentPoliciesFilterOpen, setIsAgentPoliciesFilterOpen] = useState<boolean>(false);
@@ -344,6 +347,18 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                       />
                     </EuiButton>
                   </EuiToolTip>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButtonEmpty
+                    onClick={onClickAgentActivity}
+                    data-test-subj="agentActivityButton"
+                    iconType="clock"
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.agentList.agentActivityButton"
+                      defaultMessage="Agent activity"
+                    />
+                  </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiToolTip
