@@ -7,8 +7,8 @@
 
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { EuiFormRow, EuiSpacer, EuiTitle, EuiSelect } from '@elastic/eui';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  ActionParamsProps,
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
   useKibana,

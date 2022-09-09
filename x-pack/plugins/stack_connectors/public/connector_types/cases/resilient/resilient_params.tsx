@@ -16,9 +16,8 @@ import {
   EuiSelectOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  ActionParamsProps,
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
   useKibana,

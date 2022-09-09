@@ -16,8 +16,8 @@ import {
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  ActionConnectorFieldsProps,
   ButtonGroupField,
   HiddenField,
   PasswordField,

@@ -17,8 +17,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  ActionParamsProps,
   AlertHistoryEsIndexConnectorId,
   AlertHistoryDocumentTemplate,
   AlertHistoryDefaultIndexName,

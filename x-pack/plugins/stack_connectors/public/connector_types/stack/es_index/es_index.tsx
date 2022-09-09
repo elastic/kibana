@@ -7,11 +7,11 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
-  ALERT_HISTORY_PREFIX,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { ALERT_HISTORY_PREFIX } from '@kbn/triggers-actions-ui-plugin/public';
 import { EsIndexConfig, IndexActionParams } from '../../types';
 
 export function getConnectorType(): ConnectorTypeModel<EsIndexConfig, unknown, IndexActionParams> {

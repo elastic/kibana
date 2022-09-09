@@ -16,9 +16,8 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  ActionParamsProps,
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
   useKibana,

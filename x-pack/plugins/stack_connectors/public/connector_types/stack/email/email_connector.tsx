@@ -25,11 +25,11 @@ import {
   TextField,
   ToggleField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  ActionConnectorFieldsProps,
   PasswordField,
   useConnectorContext,
+  useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { AdditionalEmailServices } from '../../../../common';
 import { getEmailServices } from './email';

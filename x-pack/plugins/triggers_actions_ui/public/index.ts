@@ -43,15 +43,18 @@ export type {
   RulesListVisibleColumns,
 } from './types';
 
-export {
+export type {
   ActionConnectorFieldsProps,
   ActionParamsProps,
   ActionTypeModel,
+  GenericValidationResult,
+} from './types';
+
+export {
   AlertHistoryDefaultIndexName,
+  ALERT_HISTORY_PREFIX,
   AlertHistoryDocumentTemplate,
   AlertHistoryEsIndexConnectorId,
-  ALERT_HISTORY_PREFIX,
-  GenericValidationResult,
 } from './types';
 
 export { useConnectorContext } from './application/context/use_connector_context';
@@ -64,15 +67,15 @@ export {
 
 export type { ConnectorFormSchema } from './application/sections/action_connector_form';
 
+export type { ConfigFieldSchema, SecretsFieldSchema } from './application/components';
+
 export {
   ButtonGroupField,
-  ConfigFieldSchema,
   HiddenField,
   JsonEditorWithMessageVariables,
   JsonFieldWrapper,
   MustacheTextFieldWrapper,
   PasswordField,
-  SecretsFieldSchema,
   SimpleConnectorForm,
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,

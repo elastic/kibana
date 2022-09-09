@@ -9,8 +9,8 @@ import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiComboBox, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  ActionParamsProps,
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';

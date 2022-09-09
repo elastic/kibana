@@ -15,7 +15,8 @@ import {
   EuiStepStatus,
 } from '@elastic/eui';
 import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { ActionConnectorFieldsProps, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { SwimlaneFieldMappingConfig } from './types';
 import { SwimlaneConnection, SwimlaneFields } from './steps';
 import { useGetApplication } from './use_get_application';

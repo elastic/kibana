@@ -9,9 +9,8 @@ import React, { useCallback, useEffect, useState, useMemo } from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
 import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-
+import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  ActionConnectorFieldsProps,
   HiddenField,
   updateActionConnector,
   useKibana,

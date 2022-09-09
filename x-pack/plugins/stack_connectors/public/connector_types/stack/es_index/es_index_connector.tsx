@@ -29,8 +29,8 @@ import { ToggleField, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/
 import { DocLinksStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  ActionConnectorFieldsProps,
   firstFieldOption,
   getFields,
   getIndexOptions,

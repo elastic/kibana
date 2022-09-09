@@ -7,8 +7,8 @@
 
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 import { registerConnectorTypes } from '../..';
-import { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { registrationServicesMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
+import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { registrationServicesMock } from '../../../mocks';
 
 const CONNECTOR_TYPE_ID = '.jira';
 let connectorTypeModel: ConnectorTypeModel;

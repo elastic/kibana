@@ -12,8 +12,7 @@ import { FieldConfig, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hoo
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { DocLinksStart } from '@kbn/core/public';
-
-import { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import * as i18n from './translations';
 

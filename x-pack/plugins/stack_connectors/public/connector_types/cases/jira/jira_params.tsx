@@ -18,9 +18,8 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  ActionParamsProps,
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
   useKibana,

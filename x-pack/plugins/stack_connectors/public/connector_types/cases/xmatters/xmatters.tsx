@@ -7,11 +7,11 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  AlertProvidedActionVariables,
+import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { AlertProvidedActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { XmattersActionParams, XmattersConfig, XmattersSecrets } from '../../types';
 
 export function getConnectorType(): ConnectorTypeModel<

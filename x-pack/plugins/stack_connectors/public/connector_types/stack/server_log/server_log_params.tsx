@@ -8,10 +8,8 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSelect, EuiFormRow } from '@elastic/eui';
-import {
-  ActionParamsProps,
-  TextAreaWithMessageVariables,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { ServerLogActionParams } from '../../types';
 
 export const ServerLogParamsFields: React.FunctionComponent<

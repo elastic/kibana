@@ -7,7 +7,7 @@
 
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 import { registerConnectorTypes } from '../..';
-import { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { getEmailServices } from './email';
 import {
   ValidatedEmail,

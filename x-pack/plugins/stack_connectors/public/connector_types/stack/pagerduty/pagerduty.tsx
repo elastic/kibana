@@ -8,10 +8,12 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import {
+import type {
   ActionTypeModel as ConnectorTypeModel,
-  AlertProvidedActionVariables,
   GenericValidationResult,
+} from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  AlertProvidedActionVariables,
   hasMustacheTokens,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import {

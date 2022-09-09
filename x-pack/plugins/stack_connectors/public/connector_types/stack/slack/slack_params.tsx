@@ -7,10 +7,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  ActionParamsProps,
-  TextAreaWithMessageVariables,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { SlackActionParams } from '../../types';
 
 const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackActionParams>> = ({

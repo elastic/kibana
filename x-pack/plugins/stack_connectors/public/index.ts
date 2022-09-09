@@ -8,4 +8,4 @@
 import { PluginInitializerContext } from '@kbn/core/public';
 import { StackConnectorsPublicPlugin } from './plugin';
 
-export const plugin = (ctx: PluginInitializerContext) => new StackConnectorsPublicPlugin(ctx);
+export const plugin = (ctx: PluginInitializerContext) => new StackConnectorsPublicPlugin();
