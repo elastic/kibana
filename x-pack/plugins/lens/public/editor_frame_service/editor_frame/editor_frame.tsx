@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useMemo } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { DatasourceMap, FramePublicAPI, VisualizationMap, Suggestion } from '../../types';
 import { DataPanelWrapper } from './data_panel_wrapper';
+import { BannerWrapper } from './banner_wrapper';
 import { ConfigPanelWrapper } from './config_panel';
 import { FrameLayout } from './frame_layout';
 import { SuggestionPanelWrapper } from './suggestion_panel';
@@ -29,7 +30,7 @@ import {
 } from '../../state_management';
 import type { LensInspector } from '../../lens_inspector_service';
 import { ErrorBoundary, showMemoizedErrorNotification } from '../../lens_ui_errors';
-import { IndexPatternServiceAPI } from '../../indexpattern_service/service';
+import { IndexPatternServiceAPI } from '../../data_views_service/service';
 
 export interface EditorFrameProps {
   datasourceMap: DatasourceMap;
@@ -57,6 +58,7 @@ export function EditorFrame(props: EditorFrameProps) {
   const framePublicAPI: FramePublicAPI = useLensSelector((state) =>
     selectFramePublicAPI(state, datasourceMap)
   );
+
   // Using a ref to prevent rerenders in the child components while keeping the latest state
   const getSuggestionForField = useRef<(field: DragDropIdentifier) => Suggestion | undefined>();
   getSuggestionForField.current = (field: DragDropIdentifier) => {
@@ -94,15 +96,31 @@ export function EditorFrame(props: EditorFrameProps) {
     showMemoizedErrorNotification(error);
   }, []);
 
+  const bannerMessages: React.ReactNode[] | undefined = useMemo(() => {
+    if (activeDatasourceId) {
+      return datasourceMap[activeDatasourceId].getDeprecationMessages?.(
+        datasourceStates[activeDatasourceId].state
+      );
+    }
+  }, [activeDatasourceId, datasourceMap, datasourceStates]);
+
   return (
     <RootDragDropProvider>
       <FrameLayout
+        bannerMessages={
+          bannerMessages ? (
+            <ErrorBoundary onError={onError}>
+              <BannerWrapper nodes={bannerMessages} />
+            </ErrorBoundary>
+          ) : undefined
+        }
         dataPanel={
           <ErrorBoundary onError={onError}>
             <DataPanelWrapper
               core={props.core}
               plugins={props.plugins}
               datasourceMap={datasourceMap}
+              visualizationMap={visualizationMap}
               showNoDataPopover={props.showNoDataPopover}
               dropOntoWorkspace={dropOntoWorkspace}
               hasSuggestionForField={hasSuggestionForField}
