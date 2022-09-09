@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSelectable, EuiPopoverTitle } from '@elastic/eui';
 import { ActionsLogFilterPopover } from './actions_log_filter_popover';
 import { type FilterItems, type FilterName, useActionsLogFilter } from './hooks';
@@ -16,14 +16,16 @@ import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 export const ActionsLogFilter = memo(
   ({
     filterName,
-    onChangeCommandsFilter,
+    onChangeFilterOptions,
   }: {
     filterName: FilterName;
-    onChangeCommandsFilter: (selectedCommands: string[]) => void;
+    onChangeFilterOptions: (selectedOptions: string[]) => void;
   }) => {
     const getTestId = useTestIdGenerator('response-actions-list');
     const { items, setItems, hasActiveFilters, numActiveFilters, numFilters } =
-      useActionsLogFilter();
+      useActionsLogFilter(filterName);
+
+    const isSearchable = useMemo(() => filterName !== 'statuses', [filterName]);
 
     const onChange = useCallback(
       (newOptions: FilterItems) => {
@@ -38,9 +40,9 @@ export const ActionsLogFilter = memo(
         }, []);
 
         // update query state
-        onChangeCommandsFilter(selectedItems);
+        onChangeFilterOptions(selectedItems);
       },
-      [onChangeCommandsFilter, setItems]
+      [setItems, onChangeFilterOptions]
     );
 
     // clear all selected options
@@ -51,8 +53,8 @@ export const ActionsLogFilter = memo(
           return e;
         })
       );
-      onChangeCommandsFilter([]);
-    }, [items, setItems, onChangeCommandsFilter]);
+      onChangeFilterOptions([]);
+    }, [items, setItems, onChangeFilterOptions]);
 
     return (
       <ActionsLogFilterPopover
@@ -65,35 +67,39 @@ export const ActionsLogFilter = memo(
           aria-label={`${filterName}`}
           onChange={onChange}
           options={items}
-          searchable
+          searchable={isSearchable ? true : undefined}
           searchProps={{
             placeholder: UX_MESSAGES.filterSearchPlaceholder(filterName),
             compressed: true,
           }}
         >
-          {(list, search) => (
-            <div
-              style={{ width: 300 }}
-              data-test-subj={getTestId(`${filterName}-filter-popoverList`)}
-            >
-              <EuiPopoverTitle
-                data-test-subj={getTestId(`${filterName}-filter-search`)}
-                paddingSize="s"
+          {(list, search) => {
+            return (
+              <div
+                style={{ width: 300 }}
+                data-test-subj={getTestId(`${filterName}-filter-popoverList`)}
               >
-                {search}
-              </EuiPopoverTitle>
-              {list}
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <ClearAllButton
-                    data-test-subj={getTestId(`${filterName}-filter-clearAllButton`)}
-                    isDisabled={!hasActiveFilters}
-                    onClick={onClearAll}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </div>
-          )}
+                {isSearchable && (
+                  <EuiPopoverTitle
+                    data-test-subj={getTestId(`${filterName}-filter-search`)}
+                    paddingSize="s"
+                  >
+                    {search}
+                  </EuiPopoverTitle>
+                )}
+                {list}
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <ClearAllButton
+                      data-test-subj={getTestId(`${filterName}-filter-clearAllButton`)}
+                      isDisabled={!hasActiveFilters}
+                      onClick={onClearAll}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </div>
+            );
+          }}
         </EuiSelectable>
       </ActionsLogFilterPopover>
     );

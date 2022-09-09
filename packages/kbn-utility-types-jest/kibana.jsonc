@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/utility-types-jest",
+  "owner": "@elastic/kibana-operations",
+  "runtimeDeps": [],
+  "typeDeps": []
+}
