@@ -35,7 +35,7 @@ export const visualizeAggBasedVisAction = (application: ApplicationStart) =>
           type: ACTION_CONVERT_TO_LENS,
           payload,
           originatingApp: i18n.translate('xpack.lens.AggBasedLabel', {
-            defaultMessage: 'Agg based visualization',
+            defaultMessage: 'Aggregation based visualization',
           }),
         },
       });
