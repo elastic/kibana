@@ -33,10 +33,9 @@ interface OsqueryResponseActionsParamsFormProps {
 }
 
 interface ResponseActionValidatorRef {
-  validation?: (
-    actions: unknown
-  ) => Promise<{ [key: number]: { errors: Record<string, unknown> } }>;
-  actions?: unknown;
+  validation: {
+    [key: string]: () => Promise<boolean>;
+  };
 }
 
 interface OsqueryResponseActionsParamsFormFields {
@@ -58,6 +57,7 @@ const OsqueryResponseActionParamsFormComponent: React.ForwardRefExoticComponent<
       id: uniqueId,
     },
   });
+  //
   const { watch, setValue, register, clearErrors, formState, handleSubmit } = hooksForm;
   const { errors, isValid } = formState;
   const context = useFormContext();
@@ -78,15 +78,10 @@ const OsqueryResponseActionParamsFormComponent: React.ForwardRefExoticComponent<
     // @ts-expect-error update types
     if (ref && ref.current) {
       // @ts-expect-error update types
-      ref.current.validation = async (actions: Record<number, { isValid: boolean }>) => {
+      ref.current.validation[item.id] = async () => {
         await handleSubmit(onSubmit)();
 
-        return {
-          ...actions,
-          [item.id]: {
-            errors,
-          },
-        };
+        return isEmpty(errors);
       };
     }
   }, [errors, handleSubmit, isValid, item.id, onSubmit, ref, watchedValues]);

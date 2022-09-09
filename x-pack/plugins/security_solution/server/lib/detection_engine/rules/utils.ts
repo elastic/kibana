@@ -106,7 +106,7 @@ export const transformFromAlertThrottle = (
     if (
       rule.muteAll ||
       (rule.actions.length === 0 &&
-        rule.params.type === 'query' &&
+        rule.params?.type === 'query' &&
         rule.params?.responseActions?.length === 0)
     ) {
       return NOTIFICATION_THROTTLE_NO_ACTIONS;

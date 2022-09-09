@@ -15,7 +15,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { findIndex } from 'lodash/fp';
-import { some, isEmpty } from 'lodash';
+import { isEmpty, map, some } from 'lodash';
 import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 
@@ -108,7 +108,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     watch: ['throttle'],
   });
   const throttle = formThrottle || initialState.throttle;
-  const responseActionsValidationRef = useRef<ResponseActionValidatorRef>({});
+  const responseActionsValidationRef = useRef<ResponseActionValidatorRef>({ validation: {} });
 
   const handleSubmit = useCallback(
     (enabled: boolean) => {
@@ -121,15 +121,14 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   );
 
   const validateResponseActions = async () => {
-    if (responseActionsValidationRef.current?.validation) {
-      const actionsMap = await responseActionsValidationRef.current?.validation(
-        responseActionsValidationRef.current?.actions
+    if (!isEmpty(responseActionsValidationRef.current?.validation)) {
+      const response = await Promise.all(
+        map(responseActionsValidationRef.current?.validation, async (validation) => {
+          return validation();
+        })
       );
 
-      // eslint-disable-next-line require-atomic-updates
-      responseActionsValidationRef.current.actions = actionsMap;
-
-      return some(actionsMap, (item) => !isEmpty(item.errors));
+      return some(response, (val) => !val);
     }
   };
 
