@@ -91,11 +91,13 @@ const TotalIntegrationsCount = ({
 }: Record<'pageCount' | 'totalCount', number>) => (
   <EuiText size="xs" style={{ marginLeft: 8 }}>
     <EuiTextColor color="subdued">
-      <FormattedMessage
-        id="xpack.csp.benchmarks.totalIntegrationsCountMessage"
-        defaultMessage="Showing {pageCount} of {totalCount, plural, one {# integration} other {# integrations}}"
-        values={{ pageCount, totalCount }}
-      />
+      <div data-test-subj="benchmark-integrations-count">
+        <FormattedMessage
+          id="xpack.csp.benchmarks.totalIntegrationsCountMessage"
+          defaultMessage="Showing {pageCount} of {totalCount, plural, one {# integration} other {# integrations}}"
+          values={{ pageCount, totalCount }}
+        />
+      </div>
     </EuiTextColor>
   </EuiText>
 );
@@ -119,6 +121,7 @@ const BenchmarkSearchField = ({
             { defaultMessage: 'e.g. benchmark name' }
           )}
           incremental
+          data-test-subj="benchmark-search-field"
         />
       </EuiFlexItem>
     </EuiFlexGroup>
