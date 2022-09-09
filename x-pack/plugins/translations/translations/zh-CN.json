@@ -25709,7 +25709,6 @@
     "xpack.securitySolution.responder.header.lastSeen": "最后看到时间 {date}",
     "xpack.securitySolution.responder.hostOffline.callout.body": "主机 {name} 脱机，因此其响应可能会延迟。主机重新建立连接后将执行待处理的命令。",
     "xpack.securitySolution.responseActionsList.flyout.title": "操作日志：{hostname}",
-    "xpack.securitySolution.responseActionsList.list.item.command": "{command}",
     "xpack.securitySolution.responseActionsList.list.item.hasExpired": "{command} 失败：操作已过期",
     "xpack.securitySolution.responseActionsList.list.item.hasFailed": "{command} 失败",
     "xpack.securitySolution.responseActionsList.list.item.isPending": "{command} 待处理",

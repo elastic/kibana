@@ -25678,7 +25678,6 @@
     "xpack.securitySolution.responder.header.lastSeen": "前回表示日時 {date}",
     "xpack.securitySolution.responder.hostOffline.callout.body": "ホスト{name}はオフラインであるため、応答が遅延する可能性があります。保留中のコマンドは、ホストが再接続されたときに実行されます。",
     "xpack.securitySolution.responseActionsList.flyout.title": "アクションログ：{hostname}",
-    "xpack.securitySolution.responseActionsList.list.item.command": "{command}",
     "xpack.securitySolution.responseActionsList.list.item.hasExpired": "{command}が失敗しました：アクションの有効期限が切れました",
     "xpack.securitySolution.responseActionsList.list.item.hasFailed": "{command}が失敗しました",
     "xpack.securitySolution.responseActionsList.list.item.isPending": "{command}は保留中です",
