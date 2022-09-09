@@ -166,7 +166,7 @@ export function ServiceOverviewInstancesTable({
         >
           <EuiBasicTable
             noItemsMessage={
-              isLoading
+              status === FETCH_STATUS.LOADING
                 ? i18n.translate('xpack.apm.serviceOverview.loadingText', {
                     defaultMessage: 'Loading…',
                   })

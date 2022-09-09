@@ -37,6 +37,7 @@
         ],
         "path": "packages/kbn-type-summarizer/src/summarize_package.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/type-summarizer",
@@ -50,6 +51,7 @@
             ],
             "path": "packages/kbn-type-summarizer/src/summarize_package.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -70,6 +72,7 @@
             ],
             "path": "packages/kbn-type-summarizer/src/summarize_package.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -89,6 +92,7 @@
         ],
         "path": "packages/kbn-type-summarizer/src/summarize_package.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/type-summarizer",
@@ -100,7 +104,8 @@
               "\nAbsolute path to the directory containing the .d.ts files produced by `tsc`. Maps to the\n`declarationDir` compiler option."
             ],
             "path": "packages/kbn-type-summarizer/src/summarize_package.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/type-summarizer",
@@ -112,7 +117,8 @@
               "\nAbsolute path to the tsconfig.json file for the project we are summarizing"
             ],
             "path": "packages/kbn-type-summarizer/src/summarize_package.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/type-summarizer",
@@ -124,7 +130,8 @@
               "\nArray of absolute paths to the .d.ts files which will be summarized. Each file in this\narray will cause an output .d.ts summary file to be created containing all the AST nodes\nwhich are exported or referenced by those exports."
             ],
             "path": "packages/kbn-type-summarizer/src/summarize_package.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/type-summarizer",
@@ -136,7 +143,8 @@
               "\nRepo-relative path to the package source, for example `packages/kbn-type-summarizer-core` for\nthis package. This is used to provide the correct `sourceRoot` path in the resulting source\nmap files."
             ],
             "path": "packages/kbn-type-summarizer/src/summarize_package.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

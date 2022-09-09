@@ -13,7 +13,8 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { ResponseActionsLog } from './response_actions_log';
-import type { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
+import type { ActionListApiResponse } from '../../../../common/endpoint/types';
+import type { ResponseActionStatus } from '../../../../common/endpoint/service/response_actions/constants';
 import { MANAGEMENT_PATH } from '../../../../common/constants';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 
@@ -178,7 +179,7 @@ describe('Response Actions Log', () => {
     });
 
     it('should show expected column names on the table', async () => {
-      render();
+      render({ agentIds: 'agent-a' });
 
       expect(
         Array.from(
@@ -186,7 +187,86 @@ describe('Response Actions Log', () => {
         )
           .slice(0, 6)
           .map((col) => col.textContent)
-      ).toEqual(['Time', 'Command', 'User', 'Host', 'Comments', 'Status']);
+      ).toEqual(['Time', 'Command', 'User', 'Comments', 'Status', 'Expand rows']);
+    });
+
+    it('should show `Hosts` column when `showHostNames` is TRUE', async () => {
+      render({ showHostNames: true });
+
+      expect(
+        Array.from(
+          renderResult.getByTestId(`${testPrefix}-table-view`).querySelectorAll('thead th')
+        )
+          .slice(0, 7)
+          .map((col) => col.textContent)
+      ).toEqual(['Time', 'Command', 'User', 'Hosts', 'Comments', 'Status', 'Expand rows']);
+    });
+
+    it('should show multiple hostnames correctly', async () => {
+      const data = await getActionListMock({ actionCount: 1 });
+      data.data[0] = {
+        ...data.data[0],
+        hosts: {
+          ...data.data[0].hosts,
+          'agent-b': { name: 'Host-agent-b' },
+          'agent-c': { name: '' },
+          'agent-d': { name: 'Host-agent-d' },
+        },
+      };
+
+      mockUseGetEndpointActionList = {
+        ...baseMockedActionList,
+        data,
+      };
+      render({ showHostNames: true });
+
+      expect(renderResult.getByTestId(`${testPrefix}-column-hostname`)).toHaveTextContent(
+        'Host-agent-a, Host-agent-b, Host-agent-d'
+      );
+    });
+
+    it('should show display host is unenrolled for a single agent action when metadata host name is empty', async () => {
+      const data = await getActionListMock({ actionCount: 1 });
+      data.data[0] = {
+        ...data.data[0],
+        hosts: {
+          ...data.data[0].hosts,
+          'agent-a': { name: '' },
+        },
+      };
+
+      mockUseGetEndpointActionList = {
+        ...baseMockedActionList,
+        data,
+      };
+      render({ showHostNames: true });
+
+      expect(renderResult.getByTestId(`${testPrefix}-column-hostname`)).toHaveTextContent(
+        'Host unenrolled'
+      );
+    });
+
+    it('should show display host is unenrolled for a single agent action when metadata host names are empty', async () => {
+      const data = await getActionListMock({ actionCount: 1 });
+      data.data[0] = {
+        ...data.data[0],
+        hosts: {
+          ...data.data[0].hosts,
+          'agent-a': { name: '' },
+          'agent-b': { name: '' },
+          'agent-c': { name: '' },
+        },
+      };
+
+      mockUseGetEndpointActionList = {
+        ...baseMockedActionList,
+        data,
+      };
+      render({ showHostNames: true });
+
+      expect(renderResult.getByTestId(`${testPrefix}-column-hostname`)).toHaveTextContent(
+        'Hosts unenrolled'
+      );
     });
 
     it('should paginate table when there is data', async () => {
@@ -316,7 +396,7 @@ describe('Response Actions Log', () => {
       return outputs;
     };
 
-    it('Shows completed status badge for successfully completed actions', async () => {
+    it('shows completed status badge for successfully completed actions', async () => {
       mockUseGetEndpointActionList = {
         ...baseMockedActionList,
         data: await getActionListMock({ actionCount: 2 }),
@@ -330,13 +410,13 @@ describe('Response Actions Log', () => {
       ]);
       expect(
         renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
-      ).toEqual(['Completed', 'Completed']);
+      ).toEqual(['Successful', 'Successful']);
     });
 
     it('shows Failed status badge for failed actions', async () => {
       mockUseGetEndpointActionList = {
         ...baseMockedActionList,
-        data: await getActionListMock({ actionCount: 2, wasSuccessful: false }),
+        data: await getActionListMock({ actionCount: 2, wasSuccessful: false, status: 'failed' }),
       };
       render();
 
@@ -350,7 +430,12 @@ describe('Response Actions Log', () => {
     it('shows Failed status badge for expired actions', async () => {
       mockUseGetEndpointActionList = {
         ...baseMockedActionList,
-        data: await getActionListMock({ actionCount: 2, isCompleted: false, isExpired: true }),
+        data: await getActionListMock({
+          actionCount: 2,
+          isCompleted: false,
+          isExpired: true,
+          status: 'failed',
+        }),
       };
       render();
 
@@ -367,7 +452,7 @@ describe('Response Actions Log', () => {
     it('shows Pending status badge for pending actions', async () => {
       mockUseGetEndpointActionList = {
         ...baseMockedActionList,
-        data: await getActionListMock({ actionCount: 2, isCompleted: false }),
+        data: await getActionListMock({ actionCount: 2, isCompleted: false, status: 'pending' }),
       };
       render();
 
@@ -379,42 +464,6 @@ describe('Response Actions Log', () => {
       expect(
         renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
       ).toEqual(['Pending', 'Pending']);
-    });
-  });
-
-  describe('With agentIds filter', () => {
-    it('should NOT show a host column when a single agentId', async () => {
-      const agentIds = uuid.v4();
-      mockUseGetEndpointActionList = {
-        ...baseMockedActionList,
-        data: await getActionListMock({ actionCount: 2, agentIds: [agentIds] }),
-      };
-      render({ agentIds });
-
-      expect(
-        Array.from(
-          renderResult.getByTestId(`${testPrefix}-table-view`).querySelectorAll('thead th')
-        )
-          .slice(0, 5)
-          .map((col) => col.textContent)
-      ).toEqual(['Time', 'Command', 'User', 'Comments', 'Status']);
-    });
-
-    it('should show a host column when multiple agentIds', async () => {
-      const agentIds = [uuid.v4(), uuid.v4()];
-      mockUseGetEndpointActionList = {
-        ...baseMockedActionList,
-        data: await getActionListMock({ actionCount: 2, agentIds }),
-      };
-      render({ agentIds });
-
-      expect(
-        Array.from(
-          renderResult.getByTestId(`${testPrefix}-table-view`).querySelectorAll('thead th')
-        )
-          .slice(0, 6)
-          .map((col) => col.textContent)
-      ).toEqual(['Time', 'Command', 'User', 'Host', 'Comments', 'Status']);
     });
   });
 
@@ -466,6 +515,7 @@ const getActionListMock = async ({
   isCompleted = true,
   isExpired = false,
   wasSuccessful = true,
+  status = 'successful',
 }: {
   agentIds?: string[];
   commands?: string[];
@@ -478,23 +528,25 @@ const getActionListMock = async ({
   isCompleted?: boolean;
   isExpired?: boolean;
   wasSuccessful?: boolean;
+  status?: ResponseActionStatus;
 }): Promise<ActionListApiResponse> => {
   const endpointActionGenerator = new EndpointActionGenerator('seed');
 
   const agentIds = _agentIds ?? [uuid.v4()];
 
-  const data: ActionDetails[] = agentIds.map((id) => {
+  const data: ActionListApiResponse['data'] = agentIds.map((id) => {
     const actionIds = Array(actionCount)
       .fill(1)
       .map(() => uuid.v4());
 
-    const actionDetails: ActionDetails[] = actionIds.map((actionId) => {
+    const actionDetails: ActionListApiResponse['data'] = actionIds.map((actionId) => {
       return endpointActionGenerator.generateActionDetails({
         agents: [id],
         id: actionId,
         isCompleted,
         isExpired,
         wasSuccessful,
+        status,
         completedAt: isExpired ? undefined : new Date().toISOString(),
       });
     });
@@ -510,6 +562,7 @@ const getActionListMock = async ({
     commands,
     data,
     userIds,
+    statuses: undefined,
     total: data.length ?? 0,
   };
 };

@@ -13,7 +13,7 @@ import { Router } from 'react-router-dom';
 import {
   EuiFieldText,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageHeader,
   EuiText,
   EuiTitle,

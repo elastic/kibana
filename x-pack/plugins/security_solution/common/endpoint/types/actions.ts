@@ -12,6 +12,7 @@ import type {
   ResponseActionBodySchema,
   KillOrSuspendProcessRequestSchema,
 } from '../schema/actions';
+import type { ResponseActionStatus, ResponseActions } from '../service/response_actions/constants';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
@@ -45,16 +46,6 @@ export interface KillProcessActionOutputContent {
   pid?: number;
   entity_id?: string;
 }
-
-export const RESPONSE_ACTION_COMMANDS = [
-  'isolate',
-  'unisolate',
-  'kill-process',
-  'suspend-process',
-  'running-processes',
-] as const;
-
-export type ResponseActions = typeof RESPONSE_ACTION_COMMANDS[number];
 
 export const ActivityLogItemTypes = {
   ACTION: 'action' as const,
@@ -262,7 +253,6 @@ export interface PendingActionsResponse {
 }
 
 export type PendingActionsRequestQuery = TypeOf<typeof ActionStatusRequestSchema.query>;
-
 export interface ActionDetails<TOutputContent extends object = object> {
   /** The action id */
   id: string;
@@ -271,6 +261,11 @@ export interface ActionDetails<TOutputContent extends object = object> {
    * This is an Array because the action could have been sent to multiple endpoints.
    */
   agents: string[];
+  /**
+   * A map of `Agent ID`'s to which the action was sent whose value contains more
+   * information about the host (currently the host name only).
+   */
+  hosts: Record<string, { name: string }>;
   /**
    * The Endpoint type of action (ex. `isolate`, `release`) that is being requested to be
    * performed on the endpoint
@@ -306,6 +301,8 @@ export interface ActionDetails<TOutputContent extends object = object> {
       completedAt: string | undefined;
     }
   >;
+  /**  action status */
+  status: ResponseActionStatus;
   /** user that created the action */
   createdBy: string;
   /** comment submitted with action */
@@ -331,5 +328,6 @@ export interface ActionListApiResponse {
    * multiple agents
    */
   data: Array<Omit<ActionDetails, 'outputs'>>;
+  statuses: ResponseActionStatus[] | undefined;
   total: number;
 }

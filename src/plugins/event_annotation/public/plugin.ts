@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
+import { Plugin, CoreSetup, CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EventAnnotationService } from './event_annotation_service';
@@ -20,6 +20,7 @@ import { getFetchEventAnnotations } from './fetch_event_annotations';
 
 export interface EventAnnotationStartDependencies {
   data: DataPublicPluginStart;
+  uiSettings: IUiSettingsClient;
 }
 
 interface SetupDependencies {

@@ -7,11 +7,14 @@
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { Installation } from '@kbn/fleet-plugin/common';
+import uuid from 'uuid/v4';
+
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
+
   const es: Client = getService('es');
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
@@ -20,12 +23,7 @@ export default function (providerContext: FtrProviderContext) {
     const { body } = await supertest.get(`/api/fleet/package_policies/${id}`);
     return body;
   };
-  // use function () {} and not () => {} here
-  // because `this` has to point to the Mocha context
-  // see https://mochajs.org/#arrow-functions
-
-  // FLAKY: https://github.com/elastic/kibana/issues/139336
-  describe.skip('Package Policy - create', async function () {
+  describe('Package Policy - create', () => {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
     before(async () => {
@@ -46,9 +44,10 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'Test policy',
+          name: `Test policy ${uuid()}`,
           namespace: 'default',
-        });
+        })
+        .expect(200);
       agentPolicyId = agentPolicyResponse.item.id;
     });
 
@@ -70,7 +69,8 @@ export default function (providerContext: FtrProviderContext) {
           name: `Hosted policy from ${Date.now()}`,
           namespace: 'default',
           is_managed: true,
-        });
+        })
+        .expect(200);
 
       // try to add an integration to the hosted policy
       const { body: responseWithoutForce } = await supertest
@@ -145,8 +145,8 @@ export default function (providerContext: FtrProviderContext) {
       const { body } = await supertest
         .get(`/internal/saved_objects_tagging/tags/_find?page=1&perPage=10000`)
         .expect(200);
-      expect(body.tags.find((tag: any) => tag.name === 'Managed').relationCount).to.be(6);
-      expect(body.tags.find((tag: any) => tag.name === 'For File Tests').relationCount).to.be(6);
+      expect(body.tags.find((tag: any) => tag.name === 'Managed').relationCount).to.be(9);
+      expect(body.tags.find((tag: any) => tag.name === 'For File Tests').relationCount).to.be(9);
     });
 
     it('should return a 400 with an empty namespace', async function () {
@@ -287,7 +287,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'Test policy 2',
+          name: `Test policy ${uuid()}`,
           namespace: 'default',
         });
       const otherAgentPolicyId = agentPolicyResponse.item.id;
@@ -445,6 +445,111 @@ export default function (providerContext: FtrProviderContext) {
 
       expect(policy.name).to.equal(nameWithWhitespace.trim());
     });
+
+    describe('Simplified package policy', () => {
+      it('should work with valid values', async () => {
+        await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `create-simplified-package-policy-required-variables-${Date.now()}`,
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            inputs: {
+              'with_required_variables-test_input': {
+                streams: {
+                  'with_required_variables.log': {
+                    vars: { test_var_required: 'I am required' },
+                  },
+                },
+              },
+            },
+            package: {
+              name: 'with_required_variables',
+              version: '0.1.0',
+            },
+          })
+          .expect(200);
+      });
+
+      it('should throw with invalid variables', async () => {
+        const { body } = await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `create-simplified-package-policy-required-variables-${Date.now()}`,
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            inputs: {
+              'with_required_variables-test_input': {
+                streams: {
+                  'with_required_variables.log': {
+                    vars: { var_id_do_exists: 'I do not exists' },
+                  },
+                },
+              },
+            },
+            package: {
+              name: 'with_required_variables',
+              version: '0.1.0',
+            },
+          })
+          .expect(400);
+
+        expect(body.message).eql(
+          'Variable with_required_variables-test_input with_required_variables.log:var_id_do_exists not found'
+        );
+      });
+
+      it('should throw with invalid inputs', async () => {
+        await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `create-simplified-package-policy-required-variables-${Date.now()}`,
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            inputs: {
+              'i-do-not-exists-input': {},
+            },
+            package: {
+              name: 'with_required_variables',
+              version: '0.1.0',
+            },
+          })
+          .expect(400);
+      });
+
+      it('should throw with invalid streams', async () => {
+        await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `create-simplified-package-policy-required-variables-${Date.now()}`,
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            inputs: {
+              'with_required_variables-test_input': {
+                streams: {
+                  'iamnotexisting.log': {
+                    vars: { test_var_required: 'I am required' },
+                  },
+                },
+              },
+            },
+            package: {
+              name: 'with_required_variables',
+              version: '0.1.0',
+            },
+          })
+          .expect(400);
+      });
+    });
+
     describe('Package verification', () => {
       const uninstallPackage = async (pkg: string, version: string) => {
         await supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
