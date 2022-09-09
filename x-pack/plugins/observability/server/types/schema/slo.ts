@@ -7,10 +7,12 @@
 
 import * as t from 'io-ts';
 
-const allOrAnyString = t.union([t.literal('ALL'), t.string]);
+export const ALL_VALUE = 'ALL';
+const allOrAnyString = t.union([t.literal(ALL_VALUE), t.string]);
 
-const apmTransactionDurationIndicatorSchema = t.type({
-  type: t.literal('slo.apm.transaction_duration'),
+const apmTransactionDurationIndicatorTypeSchema = t.literal('slo.apm.transaction_duration');
+export const apmTransactionDurationIndicatorSchema = t.type({
+  type: apmTransactionDurationIndicatorTypeSchema,
   params: t.type({
     environment: allOrAnyString,
     service: allOrAnyString,
@@ -20,8 +22,9 @@ const apmTransactionDurationIndicatorSchema = t.type({
   }),
 });
 
-const apmTransactionErrorRateIndicatorSchema = t.type({
-  type: t.literal('slo.apm.transaction_error_rate'),
+const apmTransactionErrorRateIndicatorTypeSchema = t.literal('slo.apm.transaction_error_rate');
+export const apmTransactionErrorRateIndicatorSchema = t.type({
+  type: apmTransactionErrorRateIndicatorTypeSchema,
   params: t.intersection([
     t.type({
       environment: allOrAnyString,
@@ -41,6 +44,11 @@ export const rollingTimeWindowSchema = t.type({
   duration: t.string,
   is_rolling: t.literal(true),
 });
+
+export const indicatorTypesSchema = t.union([
+  apmTransactionDurationIndicatorTypeSchema,
+  apmTransactionErrorRateIndicatorTypeSchema,
+]);
 
 export const indicatorSchema = t.union([
   apmTransactionDurationIndicatorSchema,

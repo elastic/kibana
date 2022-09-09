@@ -1,0 +1,139 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`APM Transaction Duration Transform Generator does not include the query filter when params are 'ALL' 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "match": Object {
+          "transaction.root": true,
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`APM Transaction Duration Transform Generator returns the correct transform params with every specified indicator params 1`] = `
+Object {
+  "_meta": Object {
+    "version": 1,
+  },
+  "dest": Object {
+    "index": "some-index",
+  },
+  "frequency": "1m",
+  "pivot": Object {
+    "aggregations": Object {
+      "_numerator": Object {
+        "range": Object {
+          "field": "transaction.duration.histogram",
+          "ranges": Array [
+            Object {
+              "to": 500000,
+            },
+          ],
+        },
+      },
+      "slo.denominator": Object {
+        "value_count": Object {
+          "field": "transaction.duration.histogram",
+        },
+      },
+      "slo.numerator": Object {
+        "bucket_script": Object {
+          "buckets_path": Object {
+            "numerator": "_numerator['*-500000.0']>_count",
+          },
+          "script": "params.numerator",
+        },
+      },
+    },
+    "group_by": Object {
+      "@timestamp": Object {
+        "date_histogram": Object {
+          "calendar_interval": "1m",
+          "field": "@timestamp",
+        },
+      },
+      "slo.context.service.environment": Object {
+        "terms": Object {
+          "field": "service.environment",
+        },
+      },
+      "slo.context.service.name": Object {
+        "terms": Object {
+          "field": "service.name",
+        },
+      },
+      "slo.context.transaction.name": Object {
+        "terms": Object {
+          "field": "transaction.name",
+        },
+      },
+      "slo.context.transaction.type": Object {
+        "terms": Object {
+          "field": "transaction.type",
+        },
+      },
+      "slo.id": Object {
+        "terms": Object {
+          "field": "slo.id",
+        },
+      },
+    },
+  },
+  "settings": Object {
+    "deduce_mappings": false,
+  },
+  "source": Object {
+    "index": "metrics-apm*",
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "match": Object {
+              "transaction.root": true,
+            },
+          },
+          Object {
+            "match": Object {
+              "service.name": "irrelevant",
+            },
+          },
+          Object {
+            "match": Object {
+              "service.environment": "irrelevant",
+            },
+          },
+          Object {
+            "match": Object {
+              "transaction.name": "irrelevant",
+            },
+          },
+          Object {
+            "match": Object {
+              "transaction.type": "irrelevant",
+            },
+          },
+        ],
+      },
+    },
+    "runtime_mappings": Object {
+      "slo.id": Object {
+        "script": Object {
+          "source": Any<String>,
+        },
+        "type": "keyword",
+      },
+    },
+  },
+  "sync": Object {
+    "time": Object {
+      "delay": "60s",
+      "field": "@timestamp",
+    },
+  },
+  "transform_id": Any<String>,
+}
+`;

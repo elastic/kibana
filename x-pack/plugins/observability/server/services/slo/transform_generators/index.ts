@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export * from './resource_installer';
-export * from './slo_repository';
-export * from './transform_installer';
+export * from './transform_generator';
+export * from './apm_transaction_error_rate';
+export * from './apm_transaction_duration';

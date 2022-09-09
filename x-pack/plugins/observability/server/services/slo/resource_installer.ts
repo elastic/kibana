@@ -67,7 +67,9 @@ export class ResourceInstaller {
   }
 
   private getPipelinePrefix(version: number, spaceId: string): string {
-    return `${SLO_INDEX_TEMPLATE_NAME}-version-${version}-${spaceId}-`;
+    // Following https://www.elastic.co/blog/an-introduction-to-the-elastic-data-stream-naming-scheme
+    // slo-observability.sli-<version>-<namespace>.<index-date>
+    return `${SLO_INDEX_TEMPLATE_NAME}-v${version}-${spaceId}.`;
   }
 
   private async areResourcesAlreadyInstalled(): Promise<boolean> {
