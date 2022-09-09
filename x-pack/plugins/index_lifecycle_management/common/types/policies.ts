@@ -95,8 +95,7 @@ export interface SerializedHotPhase extends SerializedPhase {
     forcemerge?: ForcemergeAction;
     readonly?: {};
     shrink?: ShrinkAction;
-    // TODO: rename the key to "downsample" when renamed in es
-    rollup?: DownsampleAction;
+    downsample?: DownsampleAction;
 
     set_priority?: {
       priority: number | null;
@@ -115,7 +114,7 @@ export interface SerializedWarmPhase extends SerializedPhase {
     forcemerge?: ForcemergeAction;
     readonly?: {};
     // TODO: rename the key to "downsample" when renamed in es
-    rollup?: DownsampleAction;
+    downsample?: DownsampleAction;
     set_priority?: {
       priority: number | null;
     };
@@ -128,7 +127,7 @@ export interface SerializedColdPhase extends SerializedPhase {
     freeze?: {};
     readonly?: {};
     // TODO: rename the key to "downsample" when renamed in es
-    rollup?: DownsampleAction;
+    downsample?: DownsampleAction;
     allocate?: AllocateAction;
     set_priority?: {
       priority: number | null;

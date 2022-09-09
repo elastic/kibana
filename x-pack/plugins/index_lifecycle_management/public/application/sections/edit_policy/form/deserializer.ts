@@ -41,7 +41,7 @@ export const createDeserializer =
         readonlyEnabled: Boolean(hot?.actions?.readonly),
         shrink: { isUsingShardSize: Boolean(hot?.actions.shrink?.max_primary_shard_size) },
         downsample: {
-          enabled: Boolean(hot?.actions?.rollup),
+          enabled: Boolean(hot?.actions?.downsample),
         },
       },
       warm: {
@@ -53,7 +53,7 @@ export const createDeserializer =
         minAgeToMilliSeconds: -1,
         shrink: { isUsingShardSize: Boolean(warm?.actions.shrink?.max_primary_shard_size) },
         downsample: {
-          enabled: Boolean(warm?.actions?.rollup),
+          enabled: Boolean(warm?.actions?.downsample),
         },
       },
       cold: {
@@ -62,7 +62,7 @@ export const createDeserializer =
         readonlyEnabled: Boolean(cold?.actions?.readonly),
         minAgeToMilliSeconds: -1,
         downsample: {
-          enabled: Boolean(cold?.actions?.rollup),
+          enabled: Boolean(cold?.actions?.downsample),
         },
       },
       frozen: {
@@ -114,9 +114,9 @@ export const createDeserializer =
           draft._meta.hot.shrink.maxPrimaryShardSizeUnits = primaryShardSize.units;
         }
 
-        if (draft.phases.hot?.actions.rollup?.fixed_interval) {
+        if (draft.phases.hot?.actions.downsample?.fixed_interval) {
           const downsampleInterval = splitSizeAndUnits(
-            draft.phases.hot.actions.rollup.fixed_interval
+            draft.phases.hot.actions.downsample.fixed_interval
           );
           draft._meta.hot.downsample.fixedIntervalUnits = downsampleInterval.units;
           draft._meta.hot.downsample.fixedIntervalSize = downsampleInterval.size;
@@ -143,9 +143,9 @@ export const createDeserializer =
             draft._meta.warm.shrink.maxPrimaryShardSizeUnits = primaryShardSize.units;
           }
 
-          if (draft.phases.warm?.actions.rollup?.fixed_interval) {
+          if (draft.phases.warm?.actions.downsample?.fixed_interval) {
             const downsampleInterval = splitSizeAndUnits(
-              draft.phases.warm.actions.rollup.fixed_interval
+              draft.phases.warm.actions.downsample.fixed_interval
             );
             draft._meta.warm.downsample.fixedIntervalUnits = downsampleInterval.units;
             draft._meta.warm.downsample.fixedIntervalSize = downsampleInterval.size;
@@ -165,9 +165,9 @@ export const createDeserializer =
             draft._meta.cold.minAgeUnit = minAge.units;
           }
 
-          if (draft.phases.cold?.actions.rollup?.fixed_interval) {
+          if (draft.phases.cold?.actions.downsample?.fixed_interval) {
             const downsampleInterval = splitSizeAndUnits(
-              draft.phases.cold.actions.rollup.fixed_interval
+              draft.phases.cold.actions.downsample.fixed_interval
             );
             draft._meta.cold.downsample.fixedIntervalUnits = downsampleInterval.units;
             draft._meta.cold.downsample.fixedIntervalSize = downsampleInterval.size;

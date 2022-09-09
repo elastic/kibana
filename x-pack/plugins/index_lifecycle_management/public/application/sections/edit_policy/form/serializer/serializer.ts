@@ -126,16 +126,16 @@ export const createSerializer =
             }
 
             /**
-             * HOT PHASE ROLLUP
+             * HOT PHASE DOWNSAMPLE
              */
             if (_meta.hot?.downsample?.enabled) {
-              hotPhaseActions.rollup = {
-                ...hotPhaseActions.rollup,
+              hotPhaseActions.downsample = {
+                ...hotPhaseActions.downsample,
                 fixed_interval: `${_meta.hot.downsample.fixedIntervalSize!}${_meta.hot.downsample
                   .fixedIntervalUnits!}`,
               };
             } else {
-              delete hotPhaseActions.rollup;
+              delete hotPhaseActions.downsample;
             }
           } else {
             delete hotPhaseActions.rollover;
@@ -229,16 +229,16 @@ export const createSerializer =
         }
 
         /**
-         * WARM PHASE ROLLUP
+         * WARM PHASE DOWNSAMPLE
          */
         if (_meta.warm?.downsample?.enabled) {
-          warmPhase.actions.rollup = {
-            ...warmPhase.actions.rollup,
+          warmPhase.actions.downsample = {
+            ...warmPhase.actions.downsample,
             fixed_interval: `${_meta.warm.downsample.fixedIntervalSize!}${_meta.warm.downsample
               .fixedIntervalUnits!}`,
           };
         } else {
-          delete warmPhase.actions.rollup;
+          delete warmPhase.actions.downsample;
         }
       } else {
         delete draft.phases.warm;
@@ -306,16 +306,16 @@ export const createSerializer =
         }
 
         /**
-         * COLD PHASE ROLLUP
+         * COLD PHASE DOWNSAMPLE
          */
         if (_meta.cold?.downsample?.enabled) {
-          coldPhase.actions.rollup = {
-            ...coldPhase.actions.rollup,
+          coldPhase.actions.downsample = {
+            ...coldPhase.actions.downsample,
             fixed_interval: `${_meta.cold.downsample.fixedIntervalSize!}${_meta.cold.downsample
               .fixedIntervalUnits!}`,
           };
         } else {
-          delete coldPhase.actions.rollup;
+          delete coldPhase.actions.downsample;
         }
       } else {
         delete draft.phases.cold;
