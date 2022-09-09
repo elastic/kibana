@@ -252,7 +252,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
             query: '',
             language: savedQuery.attributes.query.language,
           },
-          resetToSavedQuery: true,
+          resetSavedQuery: true,
           savedQuery: undefined,
           filterManager,
           setTablesActivePageToZero,
@@ -368,7 +368,7 @@ interface UpdateReduxSearchBar extends OnTimeChangeProps {
   filterManager: FilterManager;
   query?: Query;
   savedQuery?: SavedQuery;
-  resetToSavedQuery?: boolean;
+  resetSavedQuery?: boolean;
   timelineId?: string;
   updateTime: boolean;
   setTablesActivePageToZero: () => void;
@@ -382,7 +382,7 @@ export const dispatchUpdateSearch =
     id,
     isQuickSelection,
     query,
-    resetToSavedQuery,
+    resetSavedQuery,
     savedQuery,
     start,
     timelineId,
@@ -447,7 +447,7 @@ export const dispatchUpdateSearch =
       filterManager.setFilters(filters);
     }
 
-    if (savedQuery != null || resetToSavedQuery) {
+    if (savedQuery != null || resetSavedQuery) {
       dispatch(inputsActions.setSavedQuery({ id, savedQuery }));
     }
 
