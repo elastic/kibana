@@ -395,6 +395,33 @@ describe('perform_bulk_action_schema', () => {
         expect(message.schema).toEqual({});
       });
 
+      test('invalid request: wrong type of payload data', () => {
+        const payload = {
+          query: 'name: test',
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
+            {
+              type: BulkActionEditType.set_schedule,
+              value: {
+                interval: '-10m',
+                lookback: '1m',
+              },
+            },
+          ],
+        } as PerformBulkActionSchema;
+
+        const message = retrieveValidationMessage(payload);
+
+        expect(getPaths(left(message.errors))).toEqual(
+          expect.arrayContaining([
+            'Invalid value "edit" supplied to "action"',
+            'Invalid value "{"interval":"-10m","lookback":"1m"}" supplied to "edit,value"',
+            'Invalid value "-10m" supplied to "edit,value,interval"',
+          ])
+        );
+        expect(message.schema).toEqual({});
+      });
+
       test('invalid request: missing interval', () => {
         const payload = {
           query: 'name: test',
@@ -414,7 +441,7 @@ describe('perform_bulk_action_schema', () => {
         expect(getPaths(left(message.errors))).toEqual(
           expect.arrayContaining([
             'Invalid value "edit" supplied to "action"',
-            'Invalid value "{"meta":{"from":"1m"}}" supplied to "edit,value"',
+            'Invalid value "{"lookback":"1m"}" supplied to "edit,value"',
             'Invalid value "undefined" supplied to "edit,value,interval"',
           ])
         );
@@ -441,7 +468,7 @@ describe('perform_bulk_action_schema', () => {
           expect.arrayContaining([
             'Invalid value "edit" supplied to "action"',
             'Invalid value "{"interval":"1m"}" supplied to "edit,value"',
-            'Invalid value "undefined" supplied to "edit,value,meta"',
+            'Invalid value "undefined" supplied to "edit,value,lookback"',
           ])
         );
         expect(message.schema).toEqual({});

@@ -10,11 +10,12 @@ import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
 /**
- * Types the TimeLength as:
- *   - A string that is not empty
+ * Types the TimeDuration as:
+ *   - A string that is not empty, and composed of a positive integer followed by a unit of time
+ *   - in the format {safe_integer}{timeUnit}, e.g. "30s", "1m", "2h"
  */
-export const TimeLength = new t.Type<string, string, unknown>(
-  'TimeLength',
+export const TimeDuration = new t.Type<string, string, unknown>(
+  'TimeDuration',
   t.string.is,
   (input, context): Either<t.Errors, string> => {
     if (typeof input === 'string' && input.trim() !== '') {
@@ -22,7 +23,11 @@ export const TimeLength = new t.Type<string, string, unknown>(
         const inputLength = input.length;
         const time = parseInt(input.trim().substring(0, inputLength - 1), 10);
         const unit = input.trim().at(-1);
-        if (Number.isSafeInteger(time) && (unit === 's' || unit === 'm' || unit === 'h')) {
+        if (
+          time >= 0 &&
+          Number.isSafeInteger(time) &&
+          (unit === 's' || unit === 'm' || unit === 'h')
+        ) {
           return t.success(input);
         } else {
           return t.failure(input, context);
@@ -37,4 +42,4 @@ export const TimeLength = new t.Type<string, string, unknown>(
   t.identity
 );
 
-export type TimeLengthC = typeof TimeLength;
+export type TimeDurationC = typeof TimeDuration;
