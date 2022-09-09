@@ -6,6 +6,7 @@
  */
 
 import React, { FC } from 'react';
+import { pick } from 'lodash';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -20,9 +21,7 @@ import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { MlPageHeader } from '../components/page_header';
 
 export const LogCategorizationPage: FC = () => {
-  const {
-    services: { docLinks },
-  } = useMlKibana();
+  const { services } = useMlKibana();
 
   const context = useMlContext();
   const dataView = context.currentDataView;
@@ -43,8 +42,25 @@ export const LogCategorizationPage: FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
-      {dataView && <LogCategorization dataView={dataView} savedSearch={savedSearch} />}
-      <HelpMenu docLink={docLinks.links.ml.guide} />
+      {dataView && (
+        <LogCategorization
+          dataView={dataView}
+          savedSearch={savedSearch}
+          appDependencies={pick(services, [
+            'application',
+            'data',
+            'charts',
+            'fieldFormats',
+            'http',
+            'notifications',
+            'share',
+            'storage',
+            'uiSettings',
+            'unifiedSearch',
+          ])}
+        />
+      )}
+      <HelpMenu docLink={services.docLinks.links.ml.guide} />
     </>
   );
 };
