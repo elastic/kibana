@@ -31,6 +31,10 @@ describe('Home page', () => {
         to: new Date(end).getTime(),
       })
     );
+
+    cy.updateAdvancedSettings({
+      'observability:enableComparisonByDefault': true,
+    });
   });
 
   after(() => {
