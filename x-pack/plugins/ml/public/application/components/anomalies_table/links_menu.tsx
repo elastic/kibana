@@ -8,7 +8,6 @@
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import rison, { RisonValue } from 'rison-node';
-import { escapeKuery } from '@kbn/es-query';
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
 import {
@@ -32,7 +31,7 @@ import {
 } from '../../../../common/util/date_utils';
 import { parseInterval } from '../../../../common/util/parse_interval';
 import { ml } from '../../services/ml_api_service';
-import { replaceStringTokens } from '../../util/string_utils';
+import { escapeKueryForFieldValuePair, replaceStringTokens } from '../../util/string_utils';
 import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
@@ -101,7 +100,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         ? {
             query: {
               language: SEARCH_QUERY_LANGUAGE.KUERY,
-              query: `${escapeKuery(anomaly.entityName)}:${escapeKuery(anomaly.entityValue)}`,
+              query: escapeKueryForFieldValuePair(anomaly.entityName, anomaly.entityValue),
             },
           }
         : {}),
@@ -147,7 +146,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         ? {
             query: {
               language: SEARCH_QUERY_LANGUAGE.KUERY,
-              query: `${escapeKuery(anomaly.entityName)}:${escapeKuery(anomaly.entityValue)}${
+              query: `${escapeKueryForFieldValuePair(anomaly.entityName, anomaly.entityValue)}${
                 influencersQueryString !== '' ? ` and (${influencersQueryString})` : ''
               }`,
             },

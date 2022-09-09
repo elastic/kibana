@@ -11,6 +11,7 @@
 import d3 from 'd3';
 import he from 'he';
 
+import { escapeKuery } from '@kbn/es-query';
 import { CustomUrlAnomalyRecordDoc } from '../../../common/types/custom_urls';
 import { Detector } from '../../../common/types/anomaly_detection_jobs';
 
@@ -127,6 +128,10 @@ export function escapeForElasticsearchQuery(str: string): string {
   // + - = && || > < ! ( ) { } [ ] ^ " ~ * ? : \ /
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#_reserved_characters
   return String(str).replace(/[-[\]{}()+!<>=?:\/\\^"~*&|\s]/g, '\\$&');
+}
+
+export function escapeKueryForFieldValuePair(name: any, value: any): string {
+  return `${escapeKuery(name)}:${escapeKuery(value)}`;
 }
 
 export function calculateTextWidth(txt: string | number, isNumber: boolean) {

@@ -6,19 +6,18 @@
  */
 import React, { FC, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFieldNumber, EuiFormRow, formatDate, htmlIdGenerator } from '@elastic/eui';
-import { TimeRange } from '@kbn/data-plugin/common/query';
+import { EuiFieldNumber, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
 import { Query } from '@kbn/es-query';
+import { escapeKueryForFieldValuePair } from '../../util/string_utils';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 import { useDashboardTable } from './use_dashboards_table';
 import { AddToDashboardControl } from './add_to_dashboard_controls';
 import { useAddToDashboardActions } from './use_add_to_dashboard_actions';
-import { AppStateSelectedCells, getSelectionTimeRange } from '../explorer_utils';
+import { AppStateSelectedCells, getSelectionInfluencers } from '../explorer_utils';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../../services/anomaly_explorer_charts_service';
 import { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../../../embeddables';
 import { getDefaultExplorerChartsPanelTitle } from '../../../embeddables/anomaly_charts/anomaly_charts_embeddable';
-import { TimeRangeBounds } from '../../util/time_buckets';
 import { useTableSeverity } from '../../components/controls/select_severity';
 import { MAX_ANOMALY_CHARTS_ALLOWED } from '../../../embeddables/anomaly_charts/anomaly_charts_initializer';
 
@@ -32,8 +31,6 @@ function getDefaultEmbeddablePanelConfig(jobIds: JobId[], queryString?: string) 
 export interface AddToDashboardControlProps {
   jobIds: string[];
   selectedCells?: AppStateSelectedCells | null;
-  bounds?: TimeRangeBounds;
-  interval?: number;
   onClose: (callback?: () => Promise<void>) => void;
   queryString?: string;
 }
@@ -45,37 +42,43 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
   onClose,
   jobIds,
   selectedCells,
-  bounds,
-  interval,
   queryString,
 }) => {
   const [severity] = useTableSeverity();
   const [maxSeriesToPlot, setMaxSeriesToPlot] = useState(DEFAULT_MAX_SERIES_TO_PLOT);
 
   const getEmbeddableInput = useCallback(() => {
-    let timeRange: TimeRange | undefined;
-    if (!!selectedCells && interval !== undefined && bounds !== undefined) {
-      const { earliestMs, latestMs } = getSelectionTimeRange(selectedCells, bounds);
-      timeRange = {
-        from: formatDate(earliestMs, 'MMM D, YYYY @ HH:mm:ss.SSS'),
-        to: formatDate(latestMs, 'MMM D, YYYY @ HH:mm:ss.SSS'),
-        mode: 'absolute',
-      };
-    }
+    // Respect the query and the influencers selected
+    // If no query or filter set, filter out to the lanes the selected cells
+    // And if no selected cells, show everything
+    let queryFromSelectedCells = queryString ?? '';
 
     const config = getDefaultEmbeddablePanelConfig(jobIds, queryString);
+    const selectionInfluencers = getSelectionInfluencers(
+      selectedCells,
+      selectedCells?.viewByFieldName!
+    );
+    queryFromSelectedCells = selectionInfluencers
+      .map((s) => escapeKueryForFieldValuePair(s.fieldName, s.fieldValue))
+      .join(' or ');
 
+    // When adding anomaly charts to Dashboard, we want to respect the Dashboard's time range
+    // so we are not passing the time range here
     return {
       ...config,
       jobIds,
       maxSeriesToPlot: maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT,
       severityThreshold: severity.val,
-      ...(timeRange ? { timeRange } : {}),
-      ...(queryString !== undefined
-        ? { query: { query: queryString, language: SEARCH_QUERY_LANGUAGE.KUERY } as Query }
+      ...(queryString !== undefined && queryFromSelectedCells !== ''
+        ? {
+            query: {
+              query: queryString === '' ? queryFromSelectedCells : queryString,
+              language: SEARCH_QUERY_LANGUAGE.KUERY,
+            } as Query,
+          }
         : {}),
     };
-  }, [selectedCells, interval, bounds, jobIds, maxSeriesToPlot, severity, queryString]);
+  }, [jobIds, maxSeriesToPlot, severity, queryString, selectedCells]);
 
   const { dashboardItems, isLoading, search } = useDashboardTable();
   const { addToDashboardAndEditCallback } = useAddToDashboardActions(

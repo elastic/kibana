@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { escapeKueryForFieldValuePair } from '../util/string_utils';
 import { SEARCH_QUERY_LANGUAGE } from '../../../common/constants/search';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../services/anomaly_explorer_charts_service';
@@ -25,6 +26,7 @@ import { useMlKibana } from '../contexts/kibana';
 import type { AppStateSelectedCells, ExplorerJob } from './explorer_utils';
 import { TimeRangeBounds } from '../util/time_buckets';
 import { AddAnomalyChartsToDashboardControl } from './dashboard_controls/add_anomaly_charts_to_dashboard_controls';
+import { getSelectionInfluencers } from './explorer_utils';
 
 interface AnomalyContextMenuProps {
   selectedJobs: ExplorerJob[];
@@ -83,6 +85,17 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
     }
 
     if (!!casesPrivileges?.create || !!casesPrivileges?.update) {
+      let queryFromSelectedCells: string = queryString ?? '';
+      if (!!selectedCells && interval !== undefined && bounds !== undefined) {
+        const selectionInfluencers = getSelectionInfluencers(
+          selectedCells,
+          selectedCells.viewByFieldName!
+        );
+        queryFromSelectedCells = selectionInfluencers
+          .map((s) => escapeKueryForFieldValuePair(s.fieldName, s.fieldValue))
+          .join(' or ');
+      }
+
       items.push(
         <EuiContextMenuItem
           key="attachToCase"
@@ -92,7 +105,10 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
               jobIds: selectedJobs?.map((v) => v.id),
               timeRange: globalTimeRange,
               maxSeriesToPlot: DEFAULT_MAX_SERIES_TO_PLOT,
-              query: { query: queryString, language: SEARCH_QUERY_LANGUAGE.KUERY },
+              query: {
+                query: queryString === '' ? queryFromSelectedCells : queryString,
+                language: SEARCH_QUERY_LANGUAGE.KUERY,
+              },
             })
           )}
           data-test-subj="mlAnomalyAttachChartsToCasesButton"
@@ -103,7 +119,15 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
     }
     return items;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canEditDashboards, globalTimeRange, closePopoverOnAction, selectedJobs, queryString]);
+  }, [
+    canEditDashboards,
+    globalTimeRange,
+    closePopoverOnAction,
+    selectedJobs,
+    queryString,
+    selectedCells,
+    interval,
+  ]);
 
   const jobIds = selectedJobs.map(({ id }) => id);
 
@@ -145,8 +169,6 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
             setIsAddDashboardActive(false);
           }}
           selectedCells={selectedCells}
-          bounds={bounds}
-          interval={interval}
           jobIds={jobIds}
           queryString={queryString}
         />
