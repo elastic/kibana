@@ -6,7 +6,6 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { estypes } from '@elastic/elasticsearch';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import {
   CONTAINER,
@@ -29,7 +28,7 @@ export interface ContainerMetadata {
   container?: Container;
 }
 
-export interface ResponseHitSource {
+interface ResponseHitSource {
   [key: string]: {
     pod: {
       name: string;
@@ -41,16 +40,12 @@ export interface ResponseHitSource {
     id: string;
   };
 }
-
-export interface ResponseHit {
-  _source: ResponseHitSource;
-}
-
-interface Aggs extends estypes.AggregationsMultiBucketAggregateBase {
-  buckets: Array<{
-    key: string;
-    key_as_string?: string;
-  }>;
+interface ResponseAggregations {
+  [key: string]: {
+    buckets: Array<{
+      key: string;
+    }>;
+  };
 }
 
 export const getServiceContainerMetadata = async ({
@@ -81,10 +76,7 @@ export const getServiceContainerMetadata = async ({
     { exists: { field: KUBERNETES_DEPLOYMENT_NAME } },
   ];
 
-  const response = await esClient.search<
-    unknown,
-    { deployment: Aggs; namespace: Aggs; replicaset: Aggs; labels: Aggs }
-  >({
+  const response = await esClient.search<unknown, ResponseAggregations>({
     index: [indexName],
     _source: [KUBERNETES, CONTAINER],
     query: {
