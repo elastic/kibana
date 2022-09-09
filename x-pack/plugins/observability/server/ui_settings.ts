@@ -30,10 +30,12 @@ const technicalPreviewLabel = i18n.translate(
   }
 );
 
+type UiSettings = UiSettingsParams<boolean | number | string> & { showInLabs?: boolean };
+
 /**
  * uiSettings definitions for Observability.
  */
-export const uiSettings: Record<string, UiSettingsParams<boolean | number | string>> = {
+export const uiSettings: Record<string, UiSettings> = {
   [enableNewSyntheticsView]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.enableNewSyntheticsViewExperimentName', {
@@ -160,6 +162,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     }),
     schema: schema.boolean(),
     requiresPageReload: true,
+    showInLabs: true,
   },
   [apmServiceInventoryOptimizedSorting]: {
     category: [observabilityFeatureId],
@@ -178,6 +181,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     value: false,
     requiresPageReload: false,
     type: 'boolean',
+    showInLabs: true,
   },
   [apmServiceGroupMaxNumberOfServices]: {
     category: [observabilityFeatureId],
@@ -204,6 +208,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     value: false,
     requiresPageReload: true,
     type: 'boolean',
+    showInLabs: true,
   },
   [apmOperationsTab]: {
     category: [observabilityFeatureId],
@@ -219,5 +224,6 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     value: false,
     requiresPageReload: true,
     type: 'boolean',
+    showInLabs: true,
   },
 };

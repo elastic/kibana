@@ -16,18 +16,29 @@ import {
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiIcon,
+  EuiLoadingContent,
   EuiTitle,
 } from '@elastic/eui';
 import { LazyField } from '@kbn/advanced-settings-plugin/public';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useApmEditableSettings } from '../../../hooks/use_apm_editable_settings';
+import React from 'react';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useApmEditableSettings } from '../../../../hooks/use_apm_editable_settings';
+import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
-export function LabsSettingsFlyout() {
-  const [isOpen, setIsOpen] = useState(false);
+interface Props {
+  onClose: () => void;
+}
+
+export function LabsFlyout({ onClose }: Props) {
   const { docLinks, notifications } = useApmPluginContext().core;
-  const experimentalFeatureKeys = Object.keys({});
+
+  const { data, status } = useFetcher(
+    (callApmApi) => callApmApi('GET /internal/apm/settings/labs'),
+    []
+  );
+  const experimentalFeatureKeys = data?.labsItems || [];
+
   const {
     handleFieldChange,
     settingsEditableConfig,
@@ -36,10 +47,6 @@ export function LabsSettingsFlyout() {
     isSaving,
     cleanUnsavedChanges,
   } = useApmEditableSettings(experimentalFeatureKeys);
-
-  function toggleFlyoutVisibility() {
-    setIsOpen((state) => !state);
-  }
 
   async function handleSave() {
     const reloadPage = Object.keys(unsavedChanges).some((key) => {
@@ -51,38 +58,41 @@ export function LabsSettingsFlyout() {
     if (reloadPage) {
       window.location.reload();
     } else {
-      setIsOpen(false);
+      onClose();
     }
   }
 
   function handelCancel() {
     cleanUnsavedChanges();
-    toggleFlyoutVisibility();
+    onClose();
   }
 
+  const isLoading =
+    status === FETCH_STATUS.NOT_INITIATED || status === FETCH_STATUS.LOADING;
+
   return (
-    <>
-      <EuiButtonEmpty color="text" onClick={toggleFlyoutVisibility}>
-        {i18n.translate('xpack.apm.labs', { defaultMessage: 'Labs' })}
-      </EuiButtonEmpty>
-      {isOpen && (
-        <EuiFlyout onClose={toggleFlyoutVisibility}>
-          <EuiFlyoutHeader hasBorder>
-            <EuiFlexGroup gutterSize="m">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="beaker" size="xl" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiTitle>
-                  <h2>
-                    {i18n.translate('xpack.apm.labs', {
-                      defaultMessage: 'Labs',
-                    })}
-                  </h2>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutHeader>
+    <EuiFlyout onClose={onClose}>
+      <EuiFlyoutHeader hasBorder>
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="beaker" size="xl" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <h2>
+                {i18n.translate('xpack.apm.labs', {
+                  defaultMessage: 'Labs',
+                })}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutHeader>
+
+      {isLoading ? (
+        <EuiLoadingContent lines={3} />
+      ) : (
+        <>
           <EuiFlyoutBody>
             {experimentalFeatureKeys.map((settingKey, i) => {
               const editableConfig = settingsEditableConfig[settingKey];
@@ -120,8 +130,8 @@ export function LabsSettingsFlyout() {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutFooter>
-        </EuiFlyout>
+        </>
       )}
-    </>
+    </EuiFlyout>
   );
 }

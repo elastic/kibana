@@ -16,7 +16,7 @@ import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
 import { useServiceName } from '../../../hooks/use_service_name';
 import { InspectorHeaderLink } from './inspector_header_link';
-import { LabsSettingsFlyout } from './labs_settings_flyout';
+import { Labs } from './labs';
 
 export function ApmHeaderActionMenu() {
   const { core, plugins } = useApmPluginContext();
@@ -49,7 +49,7 @@ export function ApmHeaderActionMenu() {
 
   return (
     <EuiHeaderLinks gutterSize="xs">
-      {isLabsButtonEnabled && <LabsSettingsFlyout />}
+      {isLabsButtonEnabled && <Labs />}
       <EuiHeaderLink
         color="text"
         href={apmHref('/storage-explorer')}
