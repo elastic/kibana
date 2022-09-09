@@ -18,6 +18,13 @@ import {
 import { Vis } from '../types';
 import { getVisSchemas, Schemas } from '../vis_schemas';
 
+export function isReferenced(columns: Column[], columnId: string) {
+  const allReferences = Object.values(columns).flatMap((col) =>
+    'references' in col ? col.references : []
+  );
+  return allReferences.includes(columnId);
+}
+
 const getBucketCollapseFn = (visSchemas: Schemas) => {
   return visSchemas.metric.find((m) => isSiblingPipeline(m))?.aggType.split('_')[0];
 };
@@ -140,12 +147,16 @@ export const getColumnsFromVis = <T>(
   }
 
   const columns = [...metrics, ...bucketColumns, ...splitBucketColumns, ...customBucketColumns];
+  const columnsWithoutReferenced = columns.filter(
+    ({ columnId }) => !isReferenced(columns, columnId)
+  );
   return {
     metrics: metrics.map(({ columnId }) => columnId),
     buckets: [...bucketColumns, ...splitBucketColumns, ...customBucketColumns].map(
       ({ columnId }) => columnId
     ),
     bucketCollapseFn: getBucketCollapseFn(visSchemas),
+    columnsWithoutReferenced,
     columns,
   };
 };

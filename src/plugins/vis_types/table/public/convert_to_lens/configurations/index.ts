@@ -47,14 +47,19 @@ export const getConfiguration = (
   {
     metrics,
     buckets,
-    columns,
+    columnsWithoutReferenced,
     bucketCollapseFn,
-  }: { metrics: string[]; buckets: string[]; columns: Column[]; bucketCollapseFn?: string }
+  }: {
+    metrics: string[];
+    buckets: string[];
+    columnsWithoutReferenced: Column[];
+    bucketCollapseFn?: string;
+  }
 ): TableVisConfiguration => {
   return {
     layerId,
     layerType: 'data',
-    columns: getColumns(params, metrics, buckets, columns, bucketCollapseFn),
+    columns: getColumns(params, metrics, buckets, columnsWithoutReferenced, bucketCollapseFn),
     paging: getPagination(params),
     ...getRowHeight(params),
   };
