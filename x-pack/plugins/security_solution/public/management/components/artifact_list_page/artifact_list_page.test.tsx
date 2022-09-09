@@ -16,8 +16,7 @@ import { getDeferred } from '../mocks';
 
 jest.mock('../../../common/components/user_privileges');
 
-// FLAKY: https://github.com/elastic/kibana/issues/129837
-describe.skip('When using the ArtifactListPage component', () => {
+describe('When using the ArtifactListPage component', () => {
   let render: (
     props?: Partial<ArtifactListPageProps>
   ) => ReturnType<AppContextTestRender['render']>;
@@ -156,7 +155,8 @@ describe.skip('When using the ArtifactListPage component', () => {
         expect(getByTestId('testPage-flyout')).toBeTruthy();
       });
 
-      it('should display the Delete modal when delete action is clicked', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/129837
+      it.skip('should display the Delete modal when delete action is clicked', async () => {
         const { getByTestId } = await renderWithListData();
         await clickCardAction('delete');
 
