@@ -37,7 +37,7 @@ export function LabsFlyout({ onClose }: Props) {
     (callApmApi) => callApmApi('GET /internal/apm/settings/labs'),
     []
   );
-  const experimentalFeatureKeys = data?.labsItems || [];
+  const labsItems = data?.labsItems || [];
 
   const {
     handleFieldChange,
@@ -46,7 +46,7 @@ export function LabsFlyout({ onClose }: Props) {
     saveAll,
     isSaving,
     cleanUnsavedChanges,
-  } = useApmEditableSettings(experimentalFeatureKeys);
+  } = useApmEditableSettings(labsItems);
 
   async function handleSave() {
     const reloadPage = Object.keys(unsavedChanges).some((key) => {
@@ -94,7 +94,7 @@ export function LabsFlyout({ onClose }: Props) {
       ) : (
         <>
           <EuiFlyoutBody>
-            {experimentalFeatureKeys.map((settingKey, i) => {
+            {labsItems.map((settingKey, i) => {
               const editableConfig = settingsEditableConfig[settingKey];
               return (
                 <>
