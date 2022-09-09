@@ -20,6 +20,7 @@ import {
   fetchTags,
   getPrePackagedRulesStatus,
   previewRule,
+  findRuleExceptionReferences,
 } from './api';
 import { getRulesSchemaMock } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import {
@@ -28,6 +29,8 @@ import {
 } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { getPatchRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema.mock';
 import { rulesMock } from './mock';
+import type { FindRulesReferencedByExceptionsListProp } from './types';
+import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../../common/constants';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -662,6 +665,38 @@ describe('Detections Rules API', () => {
     test('happy path', async () => {
       const resp = await getPrePackagedRulesStatus({ signal: abortCtrl.signal });
       expect(resp).toEqual(prePackagedRulesStatus);
+    });
+  });
+
+  describe('findRuleExceptionReferences', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(getRulesSchemaMock());
+    });
+
+    test('GETs exception references', async () => {
+      const payload: FindRulesReferencedByExceptionsListProp[] = [
+        {
+          id: '123',
+          listId: 'list_id_1',
+          namespaceType: 'single',
+        },
+        {
+          id: '456',
+          listId: 'list_id_2',
+          namespaceType: 'single',
+        },
+      ];
+      await findRuleExceptionReferences({ lists: payload, signal: abortCtrl.signal });
+      expect(fetchMock).toHaveBeenCalledWith(DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL, {
+        query: {
+          ids: '123,456',
+          list_ids: 'list_id_1,list_id_2',
+          namespace_types: 'single,single',
+        },
+        method: 'GET',
+        signal: abortCtrl.signal,
+      });
     });
   });
 });

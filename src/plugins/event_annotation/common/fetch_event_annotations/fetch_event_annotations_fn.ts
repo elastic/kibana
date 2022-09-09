@@ -23,7 +23,6 @@ export const getFetchEventAnnotationsMeta: () => Omit<
   }),
   args: {
     groups: {
-      required: true,
       types: ['event_annotation_group'],
       help: i18n.translate('eventAnnotation.fetchEventAnnotations.args.annotationConfigs', {
         defaultMessage: 'Annotation configs',

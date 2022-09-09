@@ -61,7 +61,12 @@ import {
   getDatasourceSuggestionsForVisualizeCharts,
 } from './indexpattern_suggestions';
 
-import { getFiltersInLayer, getVisualDefaultsForLayer, isColumnInvalid } from './utils';
+import {
+  getFiltersInLayer,
+  getTSDBRollupWarningMessages,
+  getVisualDefaultsForLayer,
+  isColumnInvalid,
+} from './utils';
 import { normalizeOperationDataType, isDraggedField } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import {
@@ -105,6 +110,9 @@ export function columnToOperation(
         ? 'version'
         : undefined,
     hasTimeShift: Boolean(timeShift),
+    interval: isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column)
+      ? column.params.interval
+      : undefined,
   };
 }
 
@@ -653,7 +661,7 @@ export function getIndexPatternDatasource({
       });
       return messages.length ? messages : undefined;
     },
-    getWarningMessages: (state, frame, setState) => {
+    getWarningMessages: (state, frame, adapters, setState) => {
       return [
         ...(getStateTimeShiftWarningMessages(data.datatableUtilities, state, frame) || []),
         ...getPrecisionErrorWarningMessages(
@@ -664,6 +672,9 @@ export function getIndexPatternDatasource({
           setState
         ),
       ];
+    },
+    getSearchWarningMessages: (state, warning) => {
+      return [...getTSDBRollupWarningMessages(state, warning)];
     },
     getDeprecationMessages: () => {
       const deprecatedMessages: React.ReactNode[] = [];
@@ -742,6 +753,9 @@ export function getIndexPatternDatasource({
       ),
     getUsedDataView: (state: IndexPatternPrivateState, layerId: string) => {
       return state.layers[layerId].indexPatternId;
+    },
+    getUsedDataViews: (state) => {
+      return Object.values(state.layers).map(({ indexPatternId }) => indexPatternId);
     },
   };
 
