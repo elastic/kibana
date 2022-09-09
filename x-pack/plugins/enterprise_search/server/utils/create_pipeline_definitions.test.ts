@@ -77,7 +77,7 @@ describe('formatMlPipelineBody util function', () => {
               type: modelType,
               model_id: modelId,
               model_version: modelVersion,
-              processed_timestamp: '{{{_ingest.timestamp}}}',
+              processed_timestamp: '{{{ _ingest.timestamp }}}',
             },
           ],
         },
