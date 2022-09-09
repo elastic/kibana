@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { LayerTypes, EXTENDED_ANNOTATION_LAYER } from '../constants';
 import { ExtendedAnnotationLayerConfigResult, ExtendedAnnotationLayerArgs } from '../types';
 import { strings } from '../i18n';
 
 export function extendedAnnotationLayerFunction(): ExpressionFunctionDefinition<
   typeof EXTENDED_ANNOTATION_LAYER,
-  Datatable,
+  null,
   ExtendedAnnotationLayerArgs,
   ExtendedAnnotationLayerConfigResult
 > {
@@ -21,7 +21,7 @@ export function extendedAnnotationLayerFunction(): ExpressionFunctionDefinition<
     name: EXTENDED_ANNOTATION_LAYER,
     aliases: [],
     type: EXTENDED_ANNOTATION_LAYER,
-    inputTypes: ['datatable'],
+    inputTypes: ['null'],
     help: strings.getAnnotationLayerFnHelp(),
     args: {
       simpleView: {

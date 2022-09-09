@@ -29,6 +29,7 @@
         "description": [],
         "path": "src/plugins/interactive_setup/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "interactiveSetup",
@@ -41,7 +42,8 @@
               "{ C?: string | undefined; ST?: string | undefined; L?: string | undefined; O?: string | undefined; OU?: string | undefined; CN?: string | undefined; }"
             ],
             "path": "src/plugins/interactive_setup/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "interactiveSetup",
@@ -51,7 +53,8 @@
             "label": "valid_from",
             "description": [],
             "path": "src/plugins/interactive_setup/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "interactiveSetup",
@@ -61,7 +64,8 @@
             "label": "valid_to",
             "description": [],
             "path": "src/plugins/interactive_setup/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "interactiveSetup",
@@ -74,7 +78,8 @@
               "{ C?: string | undefined; ST?: string | undefined; L?: string | undefined; O?: string | undefined; OU?: string | undefined; CN?: string | undefined; }"
             ],
             "path": "src/plugins/interactive_setup/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "interactiveSetup",
@@ -84,7 +89,8 @@
             "label": "fingerprint256",
             "description": [],
             "path": "src/plugins/interactive_setup/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "interactiveSetup",
@@ -94,7 +100,8 @@
             "label": "raw",
             "description": [],
             "path": "src/plugins/interactive_setup/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -110,6 +117,7 @@
         ],
         "path": "src/plugins/interactive_setup/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "interactiveSetup",
@@ -121,7 +129,8 @@
               "\nThe version of the Elasticsearch node that generated this enrollment token."
             ],
             "path": "src/plugins/interactive_setup/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "interactiveSetup",
@@ -136,7 +145,8 @@
               "readonly string[]"
             ],
             "path": "src/plugins/interactive_setup/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "interactiveSetup",
@@ -148,7 +158,8 @@
               "\nThe SHA-256 fingerprint of the CA certificate that is used to sign the certificate that the Elasticsearch node presents for HTTP over TLS connections."
             ],
             "path": "src/plugins/interactive_setup/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "interactiveSetup",
@@ -160,7 +171,8 @@
               "\nAn Elasticsearch API key (not encoded) that can be used as credentials authorized to call the enrollment related APIs in Elasticsearch."
             ],
             "path": "src/plugins/interactive_setup/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -174,6 +186,7 @@
         "description": [],
         "path": "src/plugins/interactive_setup/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "interactiveSetup",
@@ -185,7 +198,8 @@
               "\nIndicates whether the cluster requires authentication."
             ],
             "path": "src/plugins/interactive_setup/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "interactiveSetup",
@@ -207,7 +221,8 @@
               "[] | undefined"
             ],
             "path": "src/plugins/interactive_setup/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -221,6 +236,7 @@
         "description": [],
         "path": "src/plugins/interactive_setup/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "interactiveSetup",
@@ -241,7 +257,8 @@
               }
             ],
             "path": "src/plugins/interactive_setup/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "interactiveSetup",
@@ -253,7 +270,8 @@
               "\nIndicates whether Kibana is currently on hold and cannot proceed to `setup` yet."
             ],
             "path": "src/plugins/interactive_setup/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -271,6 +289,7 @@
         ],
         "path": "src/plugins/interactive_setup/common/elasticsearch_connection_status.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -287,6 +306,7 @@
         ],
         "path": "src/plugins/interactive_setup/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -301,6 +321,7 @@
         ],
         "path": "src/plugins/interactive_setup/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -315,6 +336,7 @@
         ],
         "path": "src/plugins/interactive_setup/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -329,6 +351,7 @@
         ],
         "path": "src/plugins/interactive_setup/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -343,6 +366,7 @@
         ],
         "path": "src/plugins/interactive_setup/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -357,6 +381,7 @@
         ],
         "path": "src/plugins/interactive_setup/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -371,6 +396,7 @@
         ],
         "path": "src/plugins/interactive_setup/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -385,6 +411,7 @@
         ],
         "path": "src/plugins/interactive_setup/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -399,6 +426,7 @@
         ],
         "path": "src/plugins/interactive_setup/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
