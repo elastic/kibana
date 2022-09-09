@@ -36,9 +36,11 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
         const alertsClient = await racContext.getAlertsClient();
         const { featureIds = [] } = request.query;
 
-
-        const indices = await alertsClient.getAuthorizedAlertsIndices(Array.isArray(featureIds) ? featureIds : [featureIds]);
-        const o11yIndices = indices?.filter((index) => index.startsWith('.alerts-observability')) ?? [];
+        const indices = await alertsClient.getAuthorizedAlertsIndices(
+          Array.isArray(featureIds) ? featureIds : [featureIds]
+        );
+        const o11yIndices =
+          indices?.filter((index) => index.startsWith('.alerts-observability')) ?? [];
         if (o11yIndices.length === 0) {
           return response.notFound({
             body: {
