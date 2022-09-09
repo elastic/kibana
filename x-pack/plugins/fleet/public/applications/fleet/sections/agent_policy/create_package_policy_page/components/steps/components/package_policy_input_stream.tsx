@@ -17,7 +17,6 @@ import {
   EuiText,
   EuiSpacer,
   EuiButtonEmpty,
-  EuiLink,
   EuiTitle,
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
@@ -272,7 +271,7 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                             <EuiText color="subdued" size="xs">
                               <FormattedMessage
                                 id="xpack.fleet.createPackagePolicy.stepConfigure.experimentalFeaturesDescription"
-                                defaultMessage="Select data streams to configure indexing options. This is an {experimentalFeature} and may have effects on other properties. {reviewDocsLink} for more information."
+                                defaultMessage="Select data streams to configure indexing options. This is an {experimentalFeature} and may have effects on other properties."
                                 values={{
                                   experimentalFeature: (
                                     <strong>
@@ -281,14 +280,6 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                                         defaultMessage="experimental feature"
                                       />
                                     </strong>
-                                  ),
-                                  reviewDocsLink: (
-                                    <EuiLink external>
-                                      <FormattedMessage
-                                        id="xpack.fleet.createdPackagePolicy.experimentalFeaturesDocsLink"
-                                        defaultMessage="Review our documentation"
-                                      />
-                                    </EuiLink>
                                   ),
                                 }}
                               />
