@@ -23,7 +23,7 @@ import {
   AlertHistoryDocumentTemplate,
   AlertHistoryDefaultIndexName,
   ALERT_HISTORY_PREFIX,
-} from '@kbn/triggers-actions-ui-plugin/public/types';
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
 import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public/application/components/json_editor_with_message_variables';
 import { IndexActionParams } from '../../types';

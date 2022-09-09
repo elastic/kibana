@@ -10,7 +10,6 @@ import { of } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiButton } from '@elastic/eui';
 import { Form, useForm, FormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { act } from 'react-dom/test-utils';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -18,8 +17,6 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ConnectorServices } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { TriggersAndActionsUiServices } from '@kbn/triggers-actions-ui-plugin/public';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
-import { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/types';
-import { ConnectorFormFieldsGlobal } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/connector_form_fields_global';
 import { ConnectorProvider } from '@kbn/triggers-actions-ui-plugin/public/application/context/connector_context';
 
 interface FormTestProviderProps {
@@ -28,31 +25,6 @@ interface FormTestProviderProps {
   onSubmit?: ({ data, isValid }: { data: FormData; isValid: boolean }) => Promise<void>;
   connectorServices?: ConnectorServices;
 }
-
-type ConnectorFormTestProviderProps = Omit<FormTestProviderProps, 'defaultValue'> & {
-  connector: ConnectorFormSchema;
-};
-
-const ConnectorFormTestProviderComponent: React.FC<ConnectorFormTestProviderProps> = ({
-  children,
-  connector,
-  onSubmit,
-  connectorServices,
-}) => {
-  return (
-    <FormTestProviderComponent
-      defaultValue={connector}
-      onSubmit={onSubmit}
-      connectorServices={connectorServices}
-    >
-      <ConnectorFormFieldsGlobal canSave={true} />
-      {children}
-    </FormTestProviderComponent>
-  );
-};
-
-ConnectorFormTestProviderComponent.displayName = 'ConnectorFormTestProvider';
-export const ConnectorFormTestProvider = React.memo(ConnectorFormTestProviderComponent);
 
 const FormTestProviderComponent: React.FC<FormTestProviderProps> = ({
   children,
@@ -80,10 +52,8 @@ const FormTestProviderComponent: React.FC<FormTestProviderProps> = ({
   );
 };
 
-export const waitForComponentToUpdate = async () =>
-  await act(async () => {
-    return Promise.resolve();
-  });
+FormTestProviderComponent.displayName = 'FormTestProvider';
+export const FormTestProvider = React.memo(FormTestProviderComponent);
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 export interface AppMockRenderer {

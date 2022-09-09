@@ -14,7 +14,7 @@ import { act } from '@testing-library/react';
 import {
   AppMockRenderer,
   createAppMockRenderer,
-} from '../../../components/builtin_action_types/test_utils';
+} from '../../../components/test_utils';
 import EditConnectorFlyout from '.';
 import { ActionConnector, EditConnectorTabs, GenericValidationResult } from '../../../../types';
 import { betaBadgeProps } from '../beta_badge_props';

@@ -21,6 +21,7 @@ export {
   builtInAggregationTypes,
   builtInGroupByTypes,
 } from './constants';
+export { deprecatedMessage } from './connectors_selection';
 export type { IOption } from './index_controls';
 export { getFields, getIndexOptions, firstFieldOption } from './index_controls';
 export { getTimeFieldOptions } from './lib';

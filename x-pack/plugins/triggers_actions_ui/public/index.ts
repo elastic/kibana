@@ -44,6 +44,14 @@ export type {
 } from './types';
 
 export {
+  ActionParamsProps,
+  AlertHistoryEsIndexConnectorId,
+  AlertHistoryDocumentTemplate,
+  AlertHistoryDefaultIndexName,
+  ALERT_HISTORY_PREFIX,
+} from './types';
+
+export {
   ActionForm,
   CreateConnectorFlyout,
   EditConnectorFlyout,

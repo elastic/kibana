@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { FormTestProvider } from '../../components/builtin_action_types/test_utils';
+import { FormTestProvider } from '../../components/test_utils';
 import { EncryptedFieldsCallout } from './encrypted_fields_callout';
 import { render, RenderResult } from '@testing-library/react';
 
