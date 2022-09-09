@@ -20,7 +20,6 @@ describe('ConfigSchema', () => {
           },
         },
         "capture": Object {
-          "loadDelay": "PT3S",
           "timeouts": Object {
             "openUrl": "PT1M",
             "renderComplete": "PT30S",
@@ -81,7 +80,6 @@ describe('ConfigSchema', () => {
           },
         },
         "capture": Object {
-          "loadDelay": "PT3S",
           "timeouts": Object {
             "openUrl": "PT1M",
             "renderComplete": "PT30S",

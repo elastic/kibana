@@ -124,7 +124,6 @@ const getTimeouts = (captureConfig: ConfigType['capture']) => ({
     configValue: `xpack.screenshotting.capture.timeouts.renderComplete`,
     label: 'render complete',
   },
-  loadDelay: toNumber(captureConfig.loadDelay),
 });
 
 export class ScreenshotObservableHandler {
@@ -132,7 +131,7 @@ export class ScreenshotObservableHandler {
 
   constructor(
     private readonly driver: HeadlessChromiumDriver,
-    private readonly config: ConfigType,
+    config: ConfigType,
     private readonly eventLogger: EventLogger,
     private readonly layout: Layout,
     private options: ScreenshotObservableOptions
@@ -222,12 +221,7 @@ export class ScreenshotObservableHandler {
         throw error;
       }
 
-      await waitForRenderComplete(
-        driver,
-        eventLogger,
-        toNumber(this.config.capture.loadDelay),
-        layout
-      );
+      await waitForRenderComplete(driver, eventLogger, layout);
     }).pipe(
       mergeMap(() =>
         forkJoin({
