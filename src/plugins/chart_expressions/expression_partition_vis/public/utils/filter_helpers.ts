@@ -29,11 +29,13 @@ export const getFilterClickData = (
   clickedLayers: LayerValue[],
   bucketColumns: Array<Partial<BucketColumns>>,
   visData: Datatable,
+  originalVisData: Datatable, // before multiple metrics are consolidated with collapseMetricColumns
+  numOriginalMetrics: number,
   splitChartDimension?: DatatableColumn,
   splitChartFormatter?: FieldFormat
 ): ValueClickContext['data']['data'] => {
   const data: ValueClickContext['data']['data'] = [];
-  const matchingIndex = visData.rows.findIndex((row) =>
+  const rowIndex = visData.rows.findIndex((row) =>
     clickedLayers.every((layer, index) => {
       const columnId = bucketColumns[index].id;
       if (!columnId) return;
@@ -47,20 +49,38 @@ export const getFilterClickData = (
     })
   );
 
+  const originalRowIndex = Math.floor(rowIndex / numOriginalMetrics);
+
   data.push(
-    ...clickedLayers.map((clickedLayer, index) => ({
-      column: visData.columns.findIndex((col) => col.id === bucketColumns[index].id),
-      row: matchingIndex,
-      value: clickedLayer.groupByRollup,
-      table: visData,
-    }))
+    ...clickedLayers
+      .map((clickedLayer, index) => {
+        const currentColumn = visData.columns.find((col) => col.id === bucketColumns[index].id);
+        const currentColumnIndex = visData.columns.findIndex(
+          (col) => col.id === bucketColumns[index].id
+        );
+
+        const originalColumnIndexes = currentColumn!.meta?.sourceParams?.collapsedMetricsColumn
+          ? // if this is the special combined column, expand it into both original columns
+            currentColumn!.meta.sourceParams.combinedWithBucketColumn
+            ? [currentColumnIndex + 1 + (rowIndex % numOriginalMetrics), currentColumnIndex]
+            : [currentColumnIndex + (rowIndex % numOriginalMetrics)]
+          : [currentColumnIndex];
+
+        return originalColumnIndexes.map((colIdx) => ({
+          column: colIdx,
+          row: originalRowIndex,
+          value: clickedLayer.groupByRollup,
+          table: originalVisData,
+        }));
+      })
+      .flat()
   );
 
   // Allows filtering with the small multiples value
   if (splitChartDimension) {
     data.push({
       column: visData.columns.findIndex((col) => col.id === splitChartDimension.id),
-      row: matchingIndex,
+      row: rowIndex,
       table: visData,
       value: clickedLayers[0].smAccessorValue,
     });

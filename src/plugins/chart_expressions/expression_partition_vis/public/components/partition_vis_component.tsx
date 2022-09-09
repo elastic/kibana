@@ -183,12 +183,14 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
         clickedLayers,
         buckets,
         vData,
+        originalVisData,
+        visParams.dimensions.metrics.length,
         splitChartDimension,
         splitChartFormatter
       );
       props.fireEvent({ name: 'filter', data: { data } });
     },
-    [props]
+    [originalVisData, props, visParams.dimensions.metrics.length]
   );
 
   // handles legend action event data

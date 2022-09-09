@@ -77,6 +77,10 @@ export const collapseMetricColumns = (
       name: nameColumnId,
       meta: {
         type: 'string',
+        sourceParams: {
+          collapsedMetricsColumn: true,
+          combinedWithBucketColumn: Boolean(finalBucketColumn),
+        },
       },
     },
     {

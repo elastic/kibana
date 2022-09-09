@@ -74,6 +74,10 @@ describe('collapseMetricColumns', () => {
           Object {
             "id": "metric-name",
             "meta": Object {
+              "sourceParams": Object {
+                "collapsedMetricsColumn": true,
+                "combinedWithBucketColumn": true,
+              },
               "type": "string",
             },
             "name": "metric-name",
@@ -217,6 +221,10 @@ describe('collapseMetricColumns', () => {
           Object {
             "id": "metric-name",
             "meta": Object {
+              "sourceParams": Object {
+                "collapsedMetricsColumn": true,
+                "combinedWithBucketColumn": false,
+              },
               "type": "string",
             },
             "name": "metric-name",

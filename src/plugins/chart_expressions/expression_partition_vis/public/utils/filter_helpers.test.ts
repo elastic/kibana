@@ -24,7 +24,7 @@ describe('getFilterClickData', () => {
         smAccessorValue: '',
       },
     ];
-    const data = getFilterClickData(clickedLayers, bucketColumns, visData);
+    const data = getFilterClickData(clickedLayers, bucketColumns, visData, visData, 1);
     expect(data.length).toEqual(clickedLayers.length);
     expect(data[0].value).toEqual('Logstash Airways');
     expect(data[0].row).toEqual(0);
@@ -42,7 +42,7 @@ describe('getFilterClickData', () => {
         smAccessorValue: '',
       },
     ];
-    const data = getFilterClickData(clickedLayers, bucketColumns, visData);
+    const data = getFilterClickData(clickedLayers, bucketColumns, visData, visData, 1);
     expect(data.length).toEqual(clickedLayers.length);
     expect(data[0].value).toEqual('ES-Air');
     expect(data[0].row).toEqual(4);
@@ -64,7 +64,14 @@ describe('getFilterClickData', () => {
       id: 'col-2-3',
       name: 'Cancelled: Descending',
     } as DatatableColumn;
-    const data = getFilterClickData(clickedLayers, bucketColumns, visData, splitDimension);
+    const data = getFilterClickData(
+      clickedLayers,
+      bucketColumns,
+      visData,
+      visData,
+      1,
+      splitDimension
+    );
     expect(data.length).toEqual(2);
     expect(data[0].value).toEqual('ES-Air');
     expect(data[0].row).toEqual(5);
