@@ -854,8 +854,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Returns the number of layers visible in the chart configuration
      */
     async getLayerCount() {
-      const elements = await testSubjects.findAll('lnsLayerRemove');
-      return elements.length;
+      return (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length;
     },
 
     /**
@@ -1299,9 +1298,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /** resets visualization/layer or removes a layer */
-    async removeLayer(index?: number) {
+    async removeLayer(index: number = 0) {
       await retry.try(async () => {
-        await testSubjects.click(index == null ? 'lnsLayerRemove' : `lnsLayerRemove-${index}`);
+        await testSubjects.click(`lnsLayerRemove--${index}`);
         if (await testSubjects.exists('lnsLayerRemoveModal')) {
           await testSubjects.exists('lnsLayerRemoveConfirmButton');
           await testSubjects.click('lnsLayerRemoveConfirmButton');

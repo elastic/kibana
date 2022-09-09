@@ -152,16 +152,13 @@ export function RemoveLayerButton({
     onRemoveLayer();
   };
 
-  // no index is case of single layer
-  const dataTestSubj = isOnlyLayer ? 'lnsLayerRemove' : `lnsLayerRemove-${layerIndex}`;
-
   return (
     <>
       <EuiButtonIcon
         size="xs"
         iconType={isOnlyLayer ? 'eraser' : 'trash'}
         color="danger"
-        data-test-subj={dataTestSubj}
+        data-test-subj={`lnsLayerRemove--${layerIndex}`}
         aria-label={ariaLabel}
         title={ariaLabel}
         onClick={() => {
