@@ -23,7 +23,10 @@ import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
 import type { ApiExplainLogRateSpikes } from '../../../common/api';
 
-import { SpikeAnalysisTable } from '../spike_analysis_table';
+import { SpikeAnalysisGroupsTable } from '../spike_analysis_table';
+// import { SpikeAnalysisTable } from '../spike_analysis_table';
+// TODO: remove once api is in place
+import { mockData } from './mock_data';
 
 /**
  * ExplainLogRateSpikes props require a data view.
@@ -102,6 +105,55 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const groupTableItems = useMemo(() => {
+    // Loop through to create map of field value counts e.g. { log.logger.keyword: { request: 3, publisher_pipeline_output: 1 }, http.request.method.keyword: { POST: 1 } }...
+    // Loop through again to remove duplicate values and create table items like { id: 1, group: {...}, doc_count }
+    const groupFieldValuesCountMap = mockData.reduce((countMap, current) => {
+      // If field name/key exists, increase count else create it and set count to 1
+      Object.keys(current).forEach((fieldName) => {
+        const fieldNameCountMap = countMap[fieldName];
+        // @ts-ignore // TODO: remove once we have real data
+        const fieldValue = current[fieldName];
+        if (fieldNameCountMap === undefined) {
+          countMap[fieldName] = { [fieldValue]: 1 }
+        }  else if (fieldNameCountMap[fieldValue] === undefined) {
+          fieldNameCountMap[fieldValue] = 1;
+        } else {
+          fieldNameCountMap[fieldValue] += 1;
+        }
+      });
+
+      return countMap;
+    }, {} as Record<string, Record<string, number>>);
+
+    const tableItems = mockData.map((group, index) => {
+      const dedupedGroup = {};
+      const repeatedValues = {};
+      
+      for(const fieldName in group) {
+        if (fieldName === 'doc_count') continue;
+        // @ts-ignore // TODO: remove once we have real data
+        const fieldValue = group[fieldName];
+        if (groupFieldValuesCountMap[fieldName][fieldValue] <= 2) {
+          // @ts-ignore // TODO: remove once we have real data
+          dedupedGroup[fieldName] = fieldValue;
+        } else {
+           // @ts-ignore // TODO: remove once we have real data
+          repeatedValues[fieldName] = fieldValue;
+        }
+      }
+
+      return {
+        id: index,
+        docCount: group.doc_count,
+        group: dedupedGroup,
+        repeatedValues,
+      }
+    });
+
+    return tableItems;
+  }, []);
+
   const shouldRerunAnalysis = useMemo(
     () =>
       currentAnalysisWindowParameters !== undefined &&
@@ -172,8 +224,9 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         </>
       )}
       {showSpikeAnalysisTable && (
-        <SpikeAnalysisTable
+        <SpikeAnalysisGroupsTable
           changePoints={data.changePoints}
+          groupTableItems={groupTableItems}
           loading={isRunning}
           onPinnedChangePoint={onPinnedChangePoint}
           onSelectedChangePoint={onSelectedChangePoint}
