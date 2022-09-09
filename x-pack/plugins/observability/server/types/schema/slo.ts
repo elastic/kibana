@@ -75,6 +75,8 @@ const createSLOBodySchema = t.intersection([
   sloOptionalSettingsSchema,
 ]);
 
+export type CreateSLOParams = t.TypeOf<typeof createSLOBodySchema>;
+
 export const createSLOParamsSchema = t.type({
   body: createSLOBodySchema,
 });
