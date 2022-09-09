@@ -19,6 +19,7 @@ import {
   convertToStdDeviationFormulaColumns,
   SiblingPipelineMetric,
   ParentPipelineMetric,
+  convertToLastValueColumn,
 } from '../convert';
 import { SUPPORTED_METRICS } from '../convert/supported_metrics';
 import { Column } from '../../types';
@@ -70,8 +71,13 @@ export const convertMetricToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
       return getValidColumns(columns);
     }
     case METRIC_TYPES.TOP_HITS:
-    case METRIC_TYPES.TOP_METRICS:
-      return null; // TODO: add support of those metrics;
+    case METRIC_TYPES.TOP_METRICS: {
+      const columns = convertToLastValueColumn({
+        agg: agg as SchemaConfig<METRIC_TYPES.TOP_HITS> | SchemaConfig<METRIC_TYPES.TOP_METRICS>,
+        dataView,
+      });
+      return getValidColumns(columns);
+    }
     case METRIC_TYPES.CUMULATIVE_SUM:
     case METRIC_TYPES.DERIVATIVE:
     case METRIC_TYPES.MOVING_FN: {

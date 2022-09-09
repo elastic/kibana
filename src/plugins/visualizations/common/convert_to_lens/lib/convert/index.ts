@@ -18,3 +18,4 @@ export * from './sibling_pipeline';
 export * from './std_deviation';
 export * from './terms';
 export * from './types';
+export * from './last_value';

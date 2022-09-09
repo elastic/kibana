@@ -47,6 +47,7 @@ interface LocalSupportedMetrics {
   [METRIC_TYPES.PERCENTILES]: Metric<typeof Operations.PERCENTILE>;
   [METRIC_TYPES.PERCENTILE_RANKS]: Metric<typeof Operations.PERCENTILE_RANK>;
   [METRIC_TYPES.TOP_HITS]: Metric<typeof Operations.LAST_VALUE>;
+  [METRIC_TYPES.TOP_METRICS]: Metric<typeof Operations.LAST_VALUE>;
   [METRIC_TYPES.MOVING_FN]: Metric<typeof Operations.MOVING_AVERAGE>;
 }
 
@@ -143,6 +144,11 @@ export const SUPPORTED_METRICS: SupportedMetrics = {
     isFieldRequired: true,
   },
   top_hits: {
+    name: 'last_value',
+    isFullReference: false,
+    isFieldRequired: true,
+  },
+  top_metrics: {
     name: 'last_value',
     isFullReference: false,
     isFieldRequired: true,

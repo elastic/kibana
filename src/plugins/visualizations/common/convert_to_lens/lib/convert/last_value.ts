@@ -1,0 +1,61 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import { SchemaConfig } from '../../..';
+import { LastValueColumn, LastValueParams } from '../../types';
+import { getFieldNameFromField } from '../utils';
+import { createColumn, getFormat } from './column';
+import { CommonColumnConverterArgs } from './types';
+
+const convertToLastValueParams = (
+  agg: SchemaConfig<METRIC_TYPES.TOP_HITS | METRIC_TYPES.TOP_METRICS>
+): LastValueParams => {
+  return {
+    sortField: agg.aggParams!.sortField!.name,
+    showArrayValues: agg.aggType === METRIC_TYPES.TOP_HITS ? true : false,
+  };
+};
+
+export const convertToLastValueColumn = (
+  { agg, dataView }: CommonColumnConverterArgs<METRIC_TYPES.TOP_HITS | METRIC_TYPES.TOP_METRICS>,
+  reducedTimeRange?: string
+): LastValueColumn | null => {
+  const { aggParams, format } = agg;
+
+  if (
+    (aggParams?.size && Number(aggParams?.size) !== 1) ||
+    aggParams?.sortOrder?.value !== 'desc'
+  ) {
+    return null;
+  }
+
+  const fieldName = getFieldNameFromField(agg.aggParams!.field);
+  if (!fieldName) {
+    return null;
+  }
+
+  const field = dataView.getFieldByName(fieldName);
+  if (!field) {
+    return null;
+  }
+
+  if (!agg.aggParams?.sortField) {
+    return null;
+  }
+
+  return {
+    operationType: 'last_value',
+    sourceField: field.name ?? 'document',
+    ...createColumn(agg, field, { reducedTimeRange }),
+    params: {
+      ...convertToLastValueParams(agg),
+      ...getFormat(format),
+    },
+  };
+};

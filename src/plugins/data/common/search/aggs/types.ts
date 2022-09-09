@@ -79,6 +79,8 @@ import {
   AggParamsMultiTermsSerialized,
   AggParamsRareTerms,
   AggParamsTopHit,
+  AggParamsTopMetrics,
+  AggParamsTopMetricsSerialized,
   aggPercentileRanks,
   aggPercentiles,
   aggRange,
@@ -101,19 +103,17 @@ import {
   aggSinglePercentile,
   aggSinglePercentileRank,
   AggConfigsOptions,
-} from '.';
-import { AggParamsSampler } from './buckets/sampler';
-import { AggParamsDiversifiedSampler } from './buckets/diversified_sampler';
-import { AggParamsSignificantText } from './buckets/significant_text';
-import { AggParamsTopMetrics } from './metrics/top_metrics';
-import { aggTopMetrics } from './metrics/top_metrics_fn';
-import {
   AggParamsCount,
   AggParamsDerivativeSerialized,
   AggParamsFilteredMetricSerialized,
   AggParamsMovingAvgSerialized,
   AggParamsSerialDiffSerialized,
-} from './metrics';
+  AggParamsTopHitSerialized,
+} from '.';
+import { AggParamsSampler } from './buckets/sampler';
+import { AggParamsDiversifiedSampler } from './buckets/diversified_sampler';
+import { AggParamsSignificantText } from './buckets/significant_text';
+import { aggTopMetrics } from './metrics/top_metrics_fn';
 
 export type { IAggConfig, AggConfigSerialized } from './agg_config';
 export type { CreateAggConfigParams, IAggConfigs, AggConfigsOptions } from './agg_configs';
@@ -210,8 +210,8 @@ export interface SerializedAggParamsMapping {
   [METRIC_TYPES.PERCENTILE_RANKS]: AggParamsPercentileRanks;
   [METRIC_TYPES.PERCENTILES]: AggParamsPercentiles;
   [METRIC_TYPES.SERIAL_DIFF]: AggParamsSerialDiffSerialized;
-  [METRIC_TYPES.TOP_HITS]: AggParamsTopHit;
-  [METRIC_TYPES.TOP_METRICS]: AggParamsTopMetrics;
+  [METRIC_TYPES.TOP_HITS]: AggParamsTopHitSerialized;
+  [METRIC_TYPES.TOP_METRICS]: AggParamsTopMetricsSerialized;
 }
 export interface AggParamsMapping {
   [BUCKET_TYPES.RANGE]: AggParamsRange;
