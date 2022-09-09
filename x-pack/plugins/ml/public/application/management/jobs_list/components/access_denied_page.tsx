@@ -9,7 +9,7 @@ import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiEmptyPrompt, EuiPageContent } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
 
 export const AccessDeniedPage = () => (
   <>

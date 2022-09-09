@@ -25,7 +25,7 @@ export function isAgentUpgradeable(agent: Agent, kibanaVersion: string, versionT
     return false;
   }
   // check that the agent is not already in the process of updating
-  if (agent.upgrade_started_at && !agent.upgraded_at) {
+  if (agent.upgrade_started_at && agent.upgrade_status !== 'completed') {
     return false;
   }
   if (versionToUpgrade !== undefined) {

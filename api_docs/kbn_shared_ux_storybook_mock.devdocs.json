@@ -39,6 +39,7 @@
         ],
         "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-storybook-mock",
@@ -55,7 +56,8 @@
               "; }"
             ],
             "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/shared-ux-storybook-mock",
@@ -72,7 +74,8 @@
               "; }"
             ],
             "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/shared-ux-storybook-mock",
@@ -96,7 +99,8 @@
               ", Partial<Services>, {}, {}>[]"
             ],
             "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/shared-ux-storybook-mock",
@@ -114,6 +118,7 @@
             ],
             "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -137,6 +142,7 @@
             ],
             "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -162,6 +168,7 @@
             ],
             "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -181,6 +188,7 @@
             ],
             "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-storybook-mock",
@@ -194,6 +202,7 @@
                 ],
                 "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -209,6 +218,7 @@
                 ],
                 "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -230,6 +240,7 @@
             ],
             "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-storybook-mock",
@@ -244,6 +255,7 @@
                 ],
                 "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -265,6 +277,7 @@
             ],
             "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-storybook-mock",
@@ -279,6 +292,7 @@
                 ],
                 "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
