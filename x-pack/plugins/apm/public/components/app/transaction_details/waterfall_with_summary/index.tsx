@@ -91,12 +91,14 @@ export function WaterfallWithSummary({
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiPagination
-            pageCount={traceSamples?.length ?? 0}
-            activePage={sampleActivePage}
-            onPageClick={goToSample}
-            compressed
-          />
+          {traceSamples.length > 0 && (
+            <EuiPagination
+              pageCount={traceSamples.length}
+              activePage={sampleActivePage}
+              onPageClick={goToSample}
+              compressed
+            />
+          )}
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="flexEnd">
