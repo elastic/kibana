@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { NonEmptyArray, TimeLength, enumeration } from '@kbn/securitysolution-io-ts-types';
+import { NonEmptyArray, NonEmptyString, enumeration } from '@kbn/securitysolution-io-ts-types';
 
 import {
   throttle,
@@ -106,8 +106,8 @@ export type BulkActionEditPayloadRuleActions = t.TypeOf<typeof bulkActionEditPay
 const bulkActionEditPayloadSchedule = t.type({
   type: t.literal(BulkActionEditType.set_schedule),
   value: t.type({
-    interval: TimeLength,
-    lookback: TimeLength,
+    interval: NonEmptyString,
+    lookback: NonEmptyString,
   }),
 });
 export type BulkActionEditPayloadSchedule = t.TypeOf<typeof bulkActionEditPayloadSchedule>;

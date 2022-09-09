@@ -403,13 +403,11 @@ describe('perform_bulk_action_schema', () => {
             {
               type: BulkActionEditType.set_schedule,
               value: {
-                meta: {
-                  from: '1m',
-                },
+                lookback: '1m',
               },
             },
           ],
-        };
+        } as PerformBulkActionSchema;
 
         const message = retrieveValidationMessage(payload);
 
@@ -435,7 +433,7 @@ describe('perform_bulk_action_schema', () => {
               },
             },
           ],
-        };
+        } as PerformBulkActionSchema;
 
         const message = retrieveValidationMessage(payload);
 
@@ -462,7 +460,7 @@ describe('perform_bulk_action_schema', () => {
               },
             },
           ],
-        };
+        } as PerformBulkActionSchema;
 
         const message = retrieveValidationMessage(payload);
 
