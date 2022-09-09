@@ -35,7 +35,7 @@ const StyledCondition = styled.span`
 interface ExceptionsViewerUtilityProps {
   pagination: ExceptionsPagination;
   // Corresponds to last time exception items were fetched
-  lastUpdated: string | number | null;
+  lastUpdated: string | number;
 }
 
 /**
