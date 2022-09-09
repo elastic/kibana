@@ -14,7 +14,6 @@ import { discoverBazelPackages } from '@kbn/bazel-packages';
 
 import { TEMPLATE_DIR } from '../paths';
 import { GenerateCommand } from '../generate_command';
-import { validateFile } from '../lib/validate_file';
 
 const USAGE = `node scripts/generate packages_build_manifest`;
 
@@ -22,15 +21,7 @@ export const PackagesBuildManifestCommand: GenerateCommand = {
   name: 'packages_build_manifest',
   usage: USAGE,
   description: 'Generate the packages/BUILD.bazel file',
-  flags: {
-    boolean: ['validate'],
-    help: `
-      --validate         Rather than writing the generated output to disk, validate that the content on disk is in sync with the
-    `,
-  },
-  async run({ log, render, flags }) {
-    const validate = !!flags.validate;
-
+  async run({ log, render }) {
     const packages = await discoverBazelPackages(REPO_ROOT);
     const dest = Path.resolve(REPO_ROOT, 'packages/BUILD.bazel');
     const relDest = Path.relative(process.cwd(), dest);
@@ -38,17 +29,22 @@ export const PackagesBuildManifestCommand: GenerateCommand = {
     const content = await render.toString(
       Path.join(TEMPLATE_DIR, 'packages_BUILD.bazel.ejs'),
       dest,
-      {
-        packages,
-      }
+      { packages }
     );
 
-    if (validate) {
-      await validateFile(log, USAGE, dest, content);
+    let existing;
+    try {
+      existing = await Fsp.readFile(dest, 'utf8');
+    } catch {
+      // noop
+    }
+
+    if (existing === content) {
+      log.success(relDest, 'is already updated');
       return;
     }
 
     await Fsp.writeFile(dest, content);
-    log.success('Wrote', relDest);
+    log.info(relDest, 'updated');
   },
 };
