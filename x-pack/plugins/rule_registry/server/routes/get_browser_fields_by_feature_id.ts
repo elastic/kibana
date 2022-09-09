@@ -7,19 +7,24 @@
 
 import { IRouter } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { schema } from '@kbn/config-schema';
+import * as t from 'io-ts';
 
 import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
+import { buildRouteValidation } from './utils/route_validation';
 
 export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerContext>) => {
   router.get(
     {
       path: `${BASE_RAC_ALERTS_API_PATH}/browser_fields`,
       validate: {
-        query: schema.object({
-          featureIds: schema.string({ minLength: 1 }),
-        }),
+        query: buildRouteValidation(
+          t.exact(
+            t.type({
+              featureIds: t.array(t.string),
+            })
+          )
+        ),
       },
       options: {
         tags: ['access:rac'],
@@ -29,22 +34,11 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
       try {
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
-
         const { featureIds } = request.query;
-        const indices = await alertsClient.getAuthorizedAlertsIndices(featureIds.split(','));
 
-        if (!indices || indices.length === 0) {
-          return response.notFound({
-            body: {
-              message: `No indices found for featureIds [${featureIds}]`,
-              attributes: { success: false },
-            },
-          });
-        }
-
-        const o11yIndices = indices.filter((index) => index.startsWith('.alerts-observability'));
-
-        if (o11yIndices.length === 0) {
+        const indices = await alertsClient.getAuthorizedAlertsIndices(featureIds);
+        const o11yIndices = indices?.filter((index) => index.startsWith('.alerts-observability'));
+        if (!o11yIndices || o11yIndices.length === 0) {
           return response.notFound({
             body: {
               message: `No alerts-observability indices found for featureIds [${featureIds}]`,
