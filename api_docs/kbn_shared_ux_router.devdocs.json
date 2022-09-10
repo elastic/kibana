@@ -1,0 +1,65 @@
+{
+  "id": "@kbn/shared-ux-router",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-router",
+        "id": "def-common.Route",
+        "type": "Function",
+        "tags": [],
+        "label": "Route",
+        "description": [
+          "\nThis is a wrapper around the react-router-dom Route component that inserts\nMatchPropagator in every application route. It helps track all route changes\nand send them to the execution context, later used to enrich APM\n'route-change' transactions."
+        ],
+        "signature": [
+          "({ children, component: Component, render, ...rest }: ",
+          "RouteProps",
+          ") => JSX.Element"
+        ],
+        "path": "packages/shared-ux/router/impl/router.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-router",
+            "id": "def-common.Route.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children, component: Component, render, ...rest }",
+            "description": [],
+            "signature": [
+              "RouteProps"
+            ],
+            "path": "packages/shared-ux/router/impl/router.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

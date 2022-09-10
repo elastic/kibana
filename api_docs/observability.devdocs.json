@@ -7760,7 +7760,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { success: boolean; }, ",
+          ", { id: string; name: string; description: string; time_window: { duration: string; is_rolling: true; }; indicator: { type: \"slo.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"slo.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; }; budgeting_method: \"occurrences\"; objective: { target: number; }; settings: { destination_index?: string | undefined; }; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7948,7 +7948,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { success: boolean; }, ",
+          ", { id: string; name: string; description: string; time_window: { duration: string; is_rolling: true; }; indicator: { type: \"slo.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"slo.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; }; budgeting_method: \"occurrences\"; objective: { target: number; }; settings: { destination_index?: string | undefined; }; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
