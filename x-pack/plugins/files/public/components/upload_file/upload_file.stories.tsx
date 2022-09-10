@@ -17,9 +17,27 @@ import { FilesClient } from '../../types';
 import { FilesContext } from '../context';
 import { UploadFile, Props } from './upload_file';
 
+const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
+const kind = 'test';
+
+const defaultArgs: Props = {
+  kind,
+  onDone: action('onDone'),
+  onError: action('onError'),
+  client: {
+    create: async () => ({ file: { id: 'test' } }),
+    upload: () => sleep(1000),
+  } as unknown as FilesClient,
+};
+
+export default {
+  title: 'stateful/UploadFile',
+  component: UploadFile,
+  args: defaultArgs,
+};
+
 setFileKindsRegistry(new FileKindsRegistryImpl());
 
-const kind = 'test';
 getFileKindsRegistry().register({
   id: kind,
   http: {},
@@ -40,24 +58,6 @@ getFileKindsRegistry().register({
   http: {},
   allowedMimeTypes: ['application/zip'],
 });
-
-const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
-
-const defaultArgs: Props = {
-  kind,
-  onDone: action('onDone'),
-  onError: action('onError'),
-  client: {
-    create: async () => ({ file: { id: 'test' } }),
-    upload: () => sleep(1000),
-  } as unknown as FilesClient,
-};
-
-export default {
-  title: 'stateful/UploadFiles',
-  component: UploadFile,
-  args: defaultArgs,
-};
 
 const Template: ComponentStory<typeof UploadFile> = (props: Props) => (
   <FilesContext>
