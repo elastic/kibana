@@ -193,7 +193,6 @@ const ExceptionsViewerComponent = ({
         setViewerState('loading');
 
         const { pageIndex, itemsPerPage, total, data } = await handleFetchItems(options);
-        console.log({ data });
         setViewerState(total > 0 ? null : 'empty');
 
         setExceptions({

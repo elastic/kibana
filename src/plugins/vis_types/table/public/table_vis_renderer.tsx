@@ -35,7 +35,7 @@ const extractContainerType = (context?: KibanaExecutionContext): string | undefi
 
 export const getTableVisRenderer: (
   core: CoreStart,
-  usageCollection?: UsageCollectionStart
+  usageCollection: UsageCollectionStart
 ) => ExpressionRenderDefinition<TableVisRenderValue> = (core, usageCollection) => ({
   name: 'table_vis',
   reuseDomNode: true,
@@ -51,7 +51,7 @@ export const getTableVisRenderer: (
       const containerType = extractContainerType(handlers.getExecutionContext());
       const visualizationType = 'agg_based';
 
-      if (usageCollection && containerType) {
+      if (containerType) {
         const counterEvents = [
           `render_${visualizationType}_table`,
           !visData.table ? `render_${visualizationType}_table_split` : undefined,

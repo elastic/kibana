@@ -102,7 +102,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
                 iconType="list"
                 data-test-subj={`${dataTestSubj}-affectedRulesButton`}
               >
-                {i18n.AFFECTED_RULES(references.length)}
+                {i18n.AFFECTED_RULES(references?.length ?? 0)}
               </EuiButtonEmpty>
             }
             panelPaddingSize="none"
