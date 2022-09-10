@@ -110,8 +110,8 @@ describe('UploadState', () => {
           { file: file2, status: 'uploading' },
         ],
         c: [
-          { file: file1, status: 'idle', error: undefined },
-          { file: file2, status: 'idle', error: undefined },
+          { file: file1, status: 'upload_failed' },
+          { file: file2, status: 'upload_failed' },
         ],
       });
 

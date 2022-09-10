@@ -17,12 +17,28 @@ import { FilesClient } from '../../types';
 import { FilesContext } from '../context';
 import { UploadFile, Props } from './upload_file';
 
-const kind = 'test';
 setFileKindsRegistry(new FileKindsRegistryImpl());
+
+const kind = 'test';
 getFileKindsRegistry().register({
   id: kind,
   http: {},
-  allowedMimeTypes: ['applciation/pdf'],
+  allowedMimeTypes: ['*'],
+});
+
+const miniFile = 'miniFile';
+getFileKindsRegistry().register({
+  id: miniFile,
+  http: {},
+  maxSizeBytes: 1,
+  allowedMimeTypes: ['*'],
+});
+
+const zipOnly = 'zipOnly';
+getFileKindsRegistry().register({
+  id: zipOnly,
+  http: {},
+  allowedMimeTypes: ['application/zip'],
 });
 
 const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
@@ -72,4 +88,14 @@ UXAbort.args = {
     },
     delete: async () => {},
   } as unknown as FilesClient,
+};
+
+export const UXMaxSize = Template.bind({});
+UXMaxSize.args = {
+  kind: miniFile,
+};
+
+export const UXZipOnly = Template.bind({});
+UXZipOnly.args = {
+  kind: zipOnly,
 };

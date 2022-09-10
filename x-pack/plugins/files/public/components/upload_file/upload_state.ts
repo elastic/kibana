@@ -33,7 +33,7 @@ const prop$ = <T = unknown>(initialValue: T) => new BehaviorSubject<T>(initialVa
 
 interface FileState {
   file: File;
-  status: 'idle' | 'uploading' | 'uploaded';
+  status: 'idle' | 'uploading' | 'uploaded' | 'upload_failed';
   id?: string;
   error?: Error;
 }
@@ -100,7 +100,7 @@ export class UploadState {
     const abortController = new AbortController();
     const abortSignal = abortController.signal;
     const { file, status } = file$.getValue();
-    if (status !== 'idle') {
+    if (!['idle', 'upload_failed'].includes(status)) {
       return of(undefined);
     }
 
@@ -137,7 +137,7 @@ export class UploadState {
       }),
       catchError((e) => {
         erroredOrAborted = true;
-        file$.setState({ status: 'idle', error: e.message === 'Abort!' ? undefined : e });
+        file$.setState({ status: 'upload_failed', error: e.message === 'Abort!' ? undefined : e });
         return of(e);
       }),
       finalize(() => {

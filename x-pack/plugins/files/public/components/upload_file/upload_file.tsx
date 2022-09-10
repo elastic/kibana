@@ -8,6 +8,7 @@
 import { EuiFilePicker } from '@elastic/eui';
 import React, { type FunctionComponent, useState, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { FileKind } from '../../../common';
 import { FilesClient } from '../../types';
 
 import { useFilesContext } from '../context';
@@ -28,14 +29,16 @@ export interface Props<Kind extends string = string> {
  */
 export const UploadFile: FunctionComponent<Props> = ({ client, kind, onDone, onError }) => {
   const { registry } = useFilesContext();
+
+  const ref = useRef<null | EuiFilePicker>(null);
+  const kindRef = useRef<FileKind>(registry.get(kind));
+
   const [uploadState] = useState(() =>
     createUploadState({
       client,
-      fileKind: registry.get(kind),
+      fileKind: kindRef.current,
     })
   );
-
-  const ref = useRef<null | EuiFilePicker>(null);
 
   const clearFiles = () => {
     ref.current?.removeFiles();
@@ -46,6 +49,7 @@ export const UploadFile: FunctionComponent<Props> = ({ client, kind, onDone, onE
   const files = useObservable(uploadState.files$, []);
   const errors = files.filter((f) => Boolean(f.error));
   const done = Boolean(files.length && files.every((f) => f.status === 'uploaded'));
+  const retry = Boolean(files.some((f) => f.status === 'upload_failed'));
 
   return (
     <UploadFileUI
@@ -55,6 +59,8 @@ export const UploadFile: FunctionComponent<Props> = ({ client, kind, onDone, onE
       ready={Boolean(files.length)}
       onClear={clearFiles}
       done={done}
+      retry={retry}
+      accept={kindRef.current.allowedMimeTypes?.join(',')}
       isInvalid={Boolean(errors.length)}
       onUpload={() =>
         uploadState.upload().subscribe({
