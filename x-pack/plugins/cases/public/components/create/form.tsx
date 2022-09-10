@@ -75,7 +75,7 @@ const empty: ActionConnector[] = [];
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
   ({ connectors, isLoadingConnectors, withSteps }) => {
     const { isSubmitting } = useFormContext();
-    const { isSyncAlertsEnabled } = useCasesFeatures();
+    const { isSyncAlertsEnabled, isAssignEnabled } = useCasesFeatures();
 
     const { owner } = useCasesContext();
     const availableOwners = useAvailableCasesOwners();
@@ -87,9 +87,11 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
         children: (
           <>
             <Title isLoading={isSubmitting} />
-            <Container>
-              <Assignees isLoading={isSubmitting} />
-            </Container>
+            {isAssignEnabled ? (
+              <Container>
+                <Assignees isLoading={isSubmitting} />
+              </Container>
+            ) : null}
             <Container>
               <Tags isLoading={isSubmitting} />
             </Container>
@@ -111,7 +113,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
           </>
         ),
       }),
-      [isSubmitting, canShowCaseSolutionSelection, availableOwners]
+      [isSubmitting, isAssignEnabled, canShowCaseSolutionSelection, availableOwners]
     );
 
     const secondStep = useMemo(
