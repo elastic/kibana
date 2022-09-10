@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
+import { CasesContextFeatures } from '../../common/ui';
 import { useCasesFeatures, UseCasesFeatures } from './use_cases_features';
-import { TestProviders } from '../../common/mock';
-import { CasesContextFeatures } from '../../containers/types';
+import { TestProviders } from './mock/test_providers';
 
 describe('useCasesFeatures', () => {
   // isAlertsEnabled, isSyncAlertsEnabled, alerts

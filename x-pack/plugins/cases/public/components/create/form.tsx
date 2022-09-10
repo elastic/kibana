@@ -30,7 +30,7 @@ import { InsertTimeline } from '../insert_timeline';
 import { UseCreateAttachments } from '../../containers/use_create_attachments';
 import { SubmitCaseButton } from './submit_button';
 import { FormContext } from './form_context';
-import { useCasesFeatures } from '../cases_context/use_cases_features';
+import { useCasesFeatures } from '../../common/use_cases_features';
 import { CreateCaseOwnerSelector } from './owner_selector';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
