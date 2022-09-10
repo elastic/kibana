@@ -20,7 +20,7 @@ import { createUploadState } from './upload_state';
 export interface Props<Kind extends string = string> {
   kind: Kind;
   client: FilesClient;
-  onDone: () => void;
+  onDone: (files: Array<{ id: string; kind: string }>) => void;
   /**
    * Allow users to clear a file after uploading.
    *
@@ -74,14 +74,14 @@ export const UploadFile: FunctionComponent<Props> = ({
 
   const hasErrors = Boolean(errors.length);
 
-  const upload = useCallback(
-    () =>
-      uploadState.upload().subscribe({
-        complete: onDone,
-        error: onError,
-      }),
-    [onDone, onError, uploadState]
-  );
+  const upload = useCallback(() => {
+    uploadState.upload().subscribe({
+      complete: () => {
+        onDone(files.map(({ id }) => ({ id: id!, kind })));
+      },
+      error: onError,
+    });
+  }, [onDone, onError, uploadState, files, kind]);
 
   useEffect(() => {
     if (immediate && files.length && !uploading && !hasErrors) {
