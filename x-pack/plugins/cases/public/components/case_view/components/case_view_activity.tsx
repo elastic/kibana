@@ -50,7 +50,7 @@ export const CaseViewActivity = ({
 }) => {
   const { permissions } = useCasesContext();
   const { getCaseViewUrl } = useCaseViewNavigation();
-  const { isAssignActive, isPushToServiceActive } = useCasesFeatures();
+  const { isAssignEnabled, isPushToServiceEnabled } = useCasesFeatures();
 
   const { data: userActionsData, isLoading: isLoadingUserActions } = useGetCaseUserActions(
     caseData.id,
@@ -190,7 +190,7 @@ export const CaseViewActivity = ({
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
-        {isAssignActive ? (
+        {isAssignEnabled ? (
           <SidebarSection>
             <AssignUsers
               caseAssignees={caseData.assignees}
@@ -227,7 +227,7 @@ export const CaseViewActivity = ({
           onSubmit={onSubmitTags}
           isLoading={isLoading && loadingKey === 'tags'}
         />
-        {isPushToServiceActive && userActionsData ? (
+        {isPushToServiceEnabled && userActionsData ? (
           <EditConnector
             caseData={caseData}
             caseServices={userActionsData.caseServices}

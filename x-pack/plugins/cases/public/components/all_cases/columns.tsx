@@ -132,7 +132,7 @@ export const useCasesColumns = ({
     isLoading: isDeleting,
   } = useDeleteCases();
 
-  const { isAlertsEnabled, isAssignActive } = useCasesFeatures();
+  const { isAlertsEnabled, isAssignEnabled } = useCasesFeatures();
   const { permissions } = useCasesContext();
 
   const [deleteThisCase, setDeleteThisCase] = useState<DeleteCase>({
@@ -218,7 +218,7 @@ export const useCasesColumns = ({
         return getEmptyTagValue();
       },
     },
-    ...(isAssignActive
+    ...(isAssignEnabled
       ? [
           {
             field: 'assignees',

@@ -13,8 +13,8 @@ import { useLicense } from './use_license';
 export interface UseCasesFeatures {
   isAlertsEnabled: boolean;
   isSyncAlertsEnabled: boolean;
-  isAssignActive: boolean;
-  isPushToServiceActive: boolean;
+  isAssignEnabled: boolean;
+  isPushToServiceEnabled: boolean;
   metricsFeatures: SingleCaseMetricsFeature[];
 }
 
@@ -35,8 +35,8 @@ export const useCasesFeatures = (): UseCasesFeatures => {
        */
       isSyncAlertsEnabled: !features.alerts.enabled ? false : features.alerts.sync,
       metricsFeatures: features.metrics,
-      isAssignActive: isAtLeastPlatinum(),
-      isPushToServiceActive: isAtLeastPlatinum(),
+      isAssignEnabled: isAtLeastPlatinum(),
+      isPushToServiceEnabled: isAtLeastPlatinum(),
     }),
     [features.alerts.enabled, features.alerts.sync, features.metrics, isAtLeastPlatinum]
   );
