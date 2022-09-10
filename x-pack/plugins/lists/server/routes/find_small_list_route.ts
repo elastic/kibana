@@ -85,6 +85,15 @@ export const findSmallListRoute = (router: ListsPluginRouter): void => {
                 sortOrder: undefined,
               });
 
+              // Currently the only list types we support for exceptions
+              if (
+                valueList.type !== 'ip_range' &&
+                valueList.type !== 'ip' &&
+                valueList.type !== 'keyword'
+              ) {
+                return false;
+              }
+
               if (
                 valueList.type === 'ip_range' &&
                 list &&
