@@ -37,7 +37,7 @@ export const find = async (
   clientArgs: CasesClientArgs
 ): Promise<CasesFindResponse> => {
   const {
-    services: { caseService },
+    services: { caseService, licensingService },
     authorization,
     logger,
   } = clientArgs;
@@ -52,6 +52,20 @@ export const find = async (
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.findCases);
+
+    /**
+     * Assign users to a case is only available to Platinum+
+     */
+
+    if (queryParams.assignees) {
+      const hasPlatinumLicense = await licensingService.isAtLeastPlatinum();
+
+      if (!hasPlatinumLicense) {
+        throw Boom.forbidden(
+          'In order to filter cases by assignees, you must be subscribed to an Elastic Platinum license'
+        );
+      }
+    }
 
     const queryArgs: ConstructQueryParams = {
       tags: queryParams.tags,
