@@ -74,6 +74,15 @@ export const findSmallListRoute = (router: ListsPluginRouter): void => {
 
           const listBooleans = await Promise.all(
             valueLists.data.map(async (valueList) => {
+              // Currently the only list types we support for exceptions
+              if (
+                valueList.type !== 'ip_range' &&
+                valueList.type !== 'ip' &&
+                valueList.type !== 'keyword'
+              ) {
+                return false;
+              }
+
               const list = await listClient.findListItem({
                 currentIndexPosition: 0,
                 filter: '',
@@ -84,15 +93,6 @@ export const findSmallListRoute = (router: ListsPluginRouter): void => {
                 sortField: undefined,
                 sortOrder: undefined,
               });
-
-              // Currently the only list types we support for exceptions
-              if (
-                valueList.type !== 'ip_range' &&
-                valueList.type !== 'ip' &&
-                valueList.type !== 'keyword'
-              ) {
-                return false;
-              }
 
               if (
                 valueList.type === 'ip_range' &&
