@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { ServiceStatusLevel } from '../../../../types/status';
+import type { ServiceStatusLevelId } from '@kbn/core-status-common';
 import { FormattedStatus, StatusState, STATUS_LEVEL_UI_ATTRS } from './load_status';
 
-export const orderedLevels: ServiceStatusLevel[] = [
+export const orderedLevels: ServiceStatusLevelId[] = [
   'critical',
   'unavailable',
   'degraded',
@@ -21,7 +21,7 @@ export const groupByLevel = (statuses: FormattedStatus[]) => {
     const existing = map.get(status.state.id) ?? [];
     map.set(status.state.id, [...existing, status]);
     return map;
-  }, new Map<ServiceStatusLevel, FormattedStatus[]>());
+  }, new Map<ServiceStatusLevelId, FormattedStatus[]>());
 };
 
 export const getHighestStatus = (statuses: FormattedStatus[]): Omit<StatusState, 'message'> => {

@@ -59,6 +59,7 @@ export function mockDataPlugin(
         getSessionId: jest.fn(() => currentSessionId),
         getSession$: jest.fn(() => sessionIdSubject.asObservable()),
       },
+      showWarnings: jest.fn(),
     };
   }
 
