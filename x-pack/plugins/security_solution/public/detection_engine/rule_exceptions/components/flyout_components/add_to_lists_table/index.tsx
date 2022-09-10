@@ -43,12 +43,14 @@ const ExceptionsAddToListsComponent: React.FC<ExceptionsAddToListsComponentProps
   const handleFetchExceptionLists = useCallback(async () => {
     const abortCtrl = new AbortController();
 
+    if (!sharedExceptionLists.length) return;
+
     setMessage(<EuiLoadingContent lines={4} data-test-subj="exceptionItemListsTableLoading" />);
 
     try {
       const filters = sharedExceptionLists
         .map((list) => `exception-list.attributes.list_id:${list.list_id}`)
-        .join(' AND ');
+        .join(' OR ');
 
       const { data } = await fetchExceptionLists({
         filters,
@@ -72,10 +74,10 @@ const ExceptionsAddToListsComponent: React.FC<ExceptionsAddToListsComponentProps
   }, [sharedExceptionLists, http, ruleReferences]);
 
   useEffect(() => {
-    if (sharedExceptionLists.length && !isLoadingReferences) {
+    if (!isLoadingReferences && ruleReferences != null) {
       handleFetchExceptionLists();
     }
-  }, [sharedExceptionLists, handleFetchExceptionLists, isLoadingReferences]);
+  }, [handleFetchExceptionLists, ruleReferences, isLoadingReferences]);
 
   const selectionValue = {
     onSelectionChange: (selection: TableListInterface[]) => {

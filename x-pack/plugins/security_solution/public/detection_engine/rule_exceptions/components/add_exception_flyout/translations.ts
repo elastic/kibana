@@ -105,3 +105,10 @@ export const SEARCH_PLACEHOLDER = i18n.translate(
     defaultMessage: 'Search exception lists',
   }
 );
+
+export const SUBMIT_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.exceptions.createExceptionItem.submitError.title',
+  {
+    defaultMessage: 'Error adding exception item',
+  }
+);

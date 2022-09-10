@@ -6,7 +6,7 @@
  */
 
 export const CLOSE_ALERTS_CHECKBOX =
-  '[data-test-subj="bulk-close-alert-on-add-add-exception-checkbox"]';
+  '[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]';
 
 export const CONFIRM_BTN = '[data-test-subj="add-exception-confirm-button"]';
 
@@ -82,3 +82,11 @@ export const NO_EXCEPTIONS_SEARCH_RESULTS_PROMPT =
   '[data-test-subj="exceptionItemViewerEmptyPrompts-emptySearch"]';
 
 export const EXCEPTION_ITEM_VIEWER_SEARCH = 'input[data-test-subj="exceptionsViewerSearchBar"]';
+
+// Exception flyout components
+export const EXCEPTION_ITEM_NAME_INPUT = 'input[data-test-subj="exceptionFlyoutNameInput"]';
+
+export const ADD_TO_SHARED_LIST_RADIO_LABEL = '[data-test-subj="addToListsRadioOption"] label';
+
+export const SHARED_LIST_CHECKBOX = '.euiTableRow .euiCheckbox__input';
+

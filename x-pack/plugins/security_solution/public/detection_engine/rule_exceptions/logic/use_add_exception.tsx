@@ -82,6 +82,7 @@ export const useAddOrUpdateException = (): ReturnUseAddOrUpdateException => {
         if (isSubscribed) {
           setIsLoading(false);
           const sharedListNames = itemsAdded.map((item) => item.name);
+          console.log('SUCCESS!')
           addSuccess({
             title: i18n.ADD_EXCEPTION_SUCCESS,
             text: i18n.ADD_EXCEPTION_SUCCESS_DETAILS(sharedListNames.join(',')),

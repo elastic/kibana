@@ -7,6 +7,8 @@
 
 import React, { memo, useEffect, useCallback, useMemo, useReducer } from 'react';
 import styled, { css } from 'styled-components';
+import { isEmpty } from 'lodash/fp';
+
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -24,7 +26,7 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { OsTypeArray, ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { isEmpty } from 'lodash/fp';
+
 import {
   isEqlRule,
   isNewTermsRule,
@@ -35,7 +37,6 @@ import * as i18n from './translations';
 import * as sharedI18n from '../../utils/translations';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useAddOrUpdateException } from '../../logic/use_add_exception';
 import {
   defaultEndpointExceptionItems,
   retrieveAlertOsTypes,
@@ -50,9 +51,8 @@ import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
 import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
 import { ExceptionsFlyoutComments } from '../flyout_components/item_comments';
 import { ExceptionItemsFlyoutAlertsActions } from '../flyout_components/alerts_actions';
-import { useAddRuleException } from '../../logic/use_add_rule_exception';
-import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
 import { ExceptionsAddToRulesOrLists } from '../flyout_components/add_exception_to_rule_or_list';
+import { useAddNewExceptionItems } from './use_add_new_exceptions';
 import { entrichNewExceptionItems } from './utils';
 
 export interface AddExceptionFlyoutProps {
@@ -69,9 +69,8 @@ export interface AddExceptionFlyoutProps {
    */
   isAlertDataLoading?: boolean;
   alertStatus?: Status;
-  onCancel: () => void;
-  onConfirm: (didCloseAlert: boolean, didBulkCloseAlert: boolean) => void;
-  onRuleChange?: () => void;
+  onCancel: (didRuleChange: boolean) => void;
+  onConfirm: (didRuleChange: boolean, didCloseAlert: boolean, didBulkCloseAlert: boolean) => void;
 }
 
 const FlyoutBodySection = styled(EuiFlyoutBody)`
@@ -104,15 +103,12 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   alertStatus,
   onCancel,
   onConfirm,
-  onRuleChange,
 }: AddExceptionFlyoutProps) {
   const { http } = useKibana().services;
   const { addError, addSuccess } = useAppToasts();
 
   const { isLoading, indexPatterns } = useFetchIndexPatterns(rules);
-  const [isAddRuleExceptionLoading, addRuleExceptions] = useAddRuleException();
-  const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
-  const [isAddingExceptions, addSharedExceptions] = useAddOrUpdateException();
+  const [isSubmitting, submitNewExceptionItems] = useAddNewExceptionItems();
 
   const allowLargeValueLists = useMemo((): boolean => {
     if (rules != null && rules.length === 1) {
@@ -140,7 +136,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       bulkCloseAlerts,
       closeSingleAlert,
       bulkCloseIndex,
-      listsOptionsRadioSelection,
+      addExceptionToRadioSelection,
       selectedRulesToAddTo,
       exceptionListsToAddTo,
       newComment,
@@ -149,7 +145,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
     ...initialState,
-    listsOptionsRadioSelection: isBulkAction
+    addExceptionToRadioSelection: isBulkAction
       ? 'add_to_rules'
       : rules !== null && rules.length === 1
       ? 'add_to_rule'
@@ -286,41 +282,25 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   );
 
   useEffect((): void => {
-    if (listType === ExceptionListTypeEnum.ENDPOINT && hasAlertData) {
+    if (listType === ExceptionListTypeEnum.ENDPOINT && alertData != null) {
       setExceptionItemsToAdd(
         defaultEndpointExceptionItems(ENDPOINT_LIST_ID, exceptionItemName, alertData)
       );
     }
-  }, [listType, exceptionItemName, hasAlertData, alertData, setExceptionItemsToAdd]);
-
-  const handleRuleChange = useCallback(
-    (ruleChanged: boolean): void => {
-      if (ruleChanged && onRuleChange) {
-        onRuleChange();
-      }
-    },
-    [onRuleChange]
-  );
-
-  const onError = useCallback((): void => {
-    onCancel();
-  }, [onCancel]);
-
-  const onSuccess = useCallback((): void => {
-    handleRuleChange(true);
-    onConfirm(closeSingleAlert, bulkCloseAlerts);
-  }, [onConfirm, bulkCloseAlerts, closeSingleAlert, handleRuleChange]);
+  }, [listType, exceptionItemName, alertData, setExceptionItemsToAdd]);
 
   const osTypesSelection = useMemo((): OsTypeArray => {
     return hasAlertData ? retrieveAlertOsTypes(alertData) : selectedOs ? [...selectedOs] : [];
   }, [hasAlertData, alertData, selectedOs]);
 
   const handleOnSubmit = useCallback(async (): Promise<void> => {
-    const ruleDefaultOptions = ['add_to_rule', 'add_to_rules', 'select_rules_to_add_to'];
-    const addToRules = ruleDefaultOptions.includes(listsOptionsRadioSelection);
-    const addToSharedLists = listsOptionsRadioSelection === 'add_to_lists';
+    if (submitNewExceptionItems == null) return;
 
     try {
+      const ruleDefaultOptions = ['add_to_rule', 'add_to_rules', 'select_rules_to_add_to'];
+      const addToRules = ruleDefaultOptions.includes(addExceptionToRadioSelection);
+      const addToSharedLists = addExceptionToRadioSelection === 'add_to_lists';
+
       const items = entrichNewExceptionItems({
         itemName: exceptionItemName,
         commentToAdd: newComment,
@@ -332,94 +312,78 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         items: exceptionItems,
       });
 
-      if (addToRules && !isEmpty(selectedRulesToAddTo) && addRuleExceptions != null) {
-        // TODO: Update once bulk route is added
-        await Promise.all(
-          selectedRulesToAddTo.map(async (rule) => {
-            await addRuleExceptions(items, rule.id, rule.name);
-          })
-        );
+      await submitNewExceptionItems({
+        rules,
+        itemsToAdd: items,
+        selectedRulesToAddTo,
+        listType,
+        bulkCloseAlerts,
+        closeSingleAlert,
+        alertData,
+        bulkCloseIndex,
+        addToRules: addToRules && !isEmpty(selectedRulesToAddTo),
+        addToSharedLists: addToRules && !isEmpty(exceptionListsToAddTo),
+      });
 
-        if (closeAlerts != null && (bulkCloseAlerts || closeSingleAlert)) {
-          const alertIdToClose = closeSingleAlert && alertData ? alertData._id : undefined;
-          await Promise.all(
-            selectedRulesToAddTo.map(async (rule) =>
-              closeAlerts(rule.rule_id, items, alertIdToClose, bulkCloseIndex)
-            )
-          );
-        }
-      } else if (addToSharedLists && addSharedExceptions != null) {
-        await addSharedExceptions(items);
-
-        if (
-          rules != null &&
-          rules.length > 0 &&
-          closeAlerts != null &&
-          (bulkCloseAlerts || closeSingleAlert)
-        ) {
-          const alertIdToClose = closeSingleAlert && alertData ? alertData._id : undefined;
-          await Promise.all(
-            rules.map(async (rule) =>
-              closeAlerts(rule.rule_id, items, alertIdToClose, bulkCloseIndex)
-            )
-          );
-        }
-      }
-    } catch {
-      onError();
+      onConfirm(true, closeSingleAlert, bulkCloseAlerts);
+    } catch (e) {
+      onCancel(false);
     }
   }, [
-    addRuleExceptions,
-    addSharedExceptions,
-    alertData,
-    bulkCloseAlerts,
-    bulkCloseIndex,
-    closeAlerts,
-    closeSingleAlert,
-    exceptionItemName,
-    exceptionItems,
-    exceptionListsToAddTo,
-    listType,
-    listsOptionsRadioSelection,
-    newComment,
-    onError,
-    osTypesSelection,
+    submitNewExceptionItems,
     rules,
+    addExceptionToRadioSelection,
+    exceptionItems,
+    exceptionItemName,
+    newComment,
+    exceptionListsToAddTo,
     selectedRulesToAddTo,
+    osTypesSelection,
+    listType,
+    bulkCloseAlerts,
+    closeSingleAlert,
+    alertData,
+    bulkCloseIndex,
+    onConfirm,
+    onCancel,
   ]);
 
   const isSubmitButtonDisabled = useMemo(
     (): boolean =>
-      isAddRuleExceptionLoading ||
-      isAddingExceptions ||
+      isSubmitting ||
       exceptionItemName.trim() === '' ||
       exceptionItems.every((item) => item.entries.length === 0) ||
-      itemConditionValidationErrorExists,
+      itemConditionValidationErrorExists ||
+      (addExceptionToRadioSelection === 'add_to_lists' && isEmpty(exceptionListsToAddTo)),
     [
-      isAddRuleExceptionLoading,
-      isAddingExceptions,
+      isSubmitting,
       exceptionItemName,
       exceptionItems,
       itemConditionValidationErrorExists,
+      addExceptionToRadioSelection,
+      exceptionListsToAddTo,
     ]
   );
 
   const handleDissasociationSuccess = useCallback(
     (id: string): void => {
-      handleRuleChange(true);
       addSuccess(sharedI18n.DISSASOCIATE_LIST_SUCCESS(id));
-      onCancel();
+      onCancel(true);
     },
-    [handleRuleChange, addSuccess, onCancel]
+    [addSuccess, onCancel]
   );
 
   const handleDissasociationError = useCallback(
     (error: Error): void => {
       addError(error, { title: sharedI18n.DISSASOCIATE_EXCEPTION_LIST_ERROR });
-      onCancel();
+      onCancel(false);
     },
     [addError, onCancel]
   );
+
+  const handleCloseFlyout = useCallback((): void => {
+    onCancel(false);
+  }, [onCancel]);
 
   const addExceptionMessage = useMemo(() => {
     return listType === ExceptionListTypeEnum.ENDPOINT
@@ -432,7 +396,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       ownFocus
       maskProps={{ style: 'z-index: 5000' }} // For an edge case to display above the timeline flyout
       size="l"
-      onClose={onCancel}
+      onClose={handleCloseFlyout}
       data-test-subj="addExceptionFlyout"
     >
       <FlyoutHeader>
@@ -472,7 +436,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
               <ExceptionsAddToRulesOrLists
                 rules={rules}
                 isBulkAction={isBulkAction}
-                selectedRadioOption={listsOptionsRadioSelection}
+                selectedRadioOption={addExceptionToRadioSelection}
                 onListSelectionChange={setListsToAddExceptionTo}
                 onRuleSelectionChange={setSelectedRules}
                 onRadioChange={setRadioOption}
@@ -507,7 +471,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
           http={http}
           errorInfo={errorsExist}
           rule={rules}
-          onCancel={onCancel}
+          onCancel={handleCloseFlyout}
           onSuccess={handleDissasociationSuccess}
           onError={handleDissasociationError}
           data-test-subj="addExceptionFlyoutErrorCallout"
@@ -515,14 +479,13 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       )}
       <EuiFlyoutFooter>
         <FlyoutFooterGroup justifyContent="spaceBetween">
-          <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={onCancel}>
+          <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={handleCloseFlyout}>
             {i18n.CANCEL}
           </EuiButtonEmpty>
 
           <EuiButton
             data-test-subj="add-exception-confirm-button"
             onClick={handleOnSubmit}
-            isLoading={isAddRuleExceptionLoading || isClosingAlerts || isAddingExceptions}
             isDisabled={isSubmitButtonDisabled}
             fill
           >

@@ -193,7 +193,7 @@ const ExceptionsViewerComponent = ({
         setViewerState('loading');
 
         const { pageIndex, itemsPerPage, total, data } = await handleFetchItems(options);
-
+        console.log({ data });
         setViewerState(total > 0 ? null : 'empty');
 
         setExceptions({
@@ -258,15 +258,27 @@ const ExceptionsViewerComponent = ({
     [setFlyoutType]
   );
 
-  const handleCancelExceptionItemFlyout = useCallback((): void => {
-    setFlyoutType(null);
-    handleGetExceptionListItems();
-  }, [setFlyoutType, handleGetExceptionListItems]);
+  const handleCancelExceptionItemFlyout = useCallback(
+    (didRuleChange: boolean): void => {
+      setFlyoutType(null);
+      if (didRuleChange && onRuleChange != null) {
+        onRuleChange();
+      }
+      handleGetExceptionListItems();
+    },
+    [onRuleChange, setFlyoutType, handleGetExceptionListItems]
+  );
 
-  const handleConfirmExceptionFlyout = useCallback((): void => {
-    setFlyoutType(null);
-    handleGetExceptionListItems();
-  }, [setFlyoutType, handleGetExceptionListItems]);
+  const handleConfirmExceptionFlyout = useCallback(
+    (didRuleChange: boolean): void => {
+      setFlyoutType(null);
+      if (didRuleChange && onRuleChange != null) {
+        onRuleChange();
+      }
+      handleGetExceptionListItems();
+    },
+    [setFlyoutType, handleGetExceptionListItems, onRuleChange]
+  );
 
   const handleDeleteException = useCallback(
     async ({ id: itemId, name, namespaceType }: ExceptionListItemIdentifiers) => {
@@ -324,7 +336,6 @@ const ExceptionsViewerComponent = ({
           exceptionItem={exceptionToEdit}
           onCancel={handleCancelExceptionItemFlyout}
           onConfirm={handleConfirmExceptionFlyout}
-          onRuleChange={onRuleChange}
           data-test-subj="editExceptionItemFlyout"
         />
       )}
@@ -336,7 +347,6 @@ const ExceptionsViewerComponent = ({
           exceptionListType={listType}
           onCancel={handleCancelExceptionItemFlyout}
           onConfirm={handleConfirmExceptionFlyout}
-          onRuleChange={onRuleChange}
           showAlertCloseOptions
           data-test-subj="addExceptionItemFlyout"
         />

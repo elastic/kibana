@@ -19,12 +19,15 @@ import {
 } from '../../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
-  addExceptionFromRuleDetails,
+  addExceptionConditions,
+  addExceptionFlyoutFromViewerHeader,
+  addExceptionFlyoutItemName,
   addFirstExceptionFromRuleDetails,
   goToAlertsTab,
   goToExceptionsTab,
   removeException,
   searchForExceptionItem,
+  selectSharedListToAddExceptionTo,
   waitForTheRuleToBeExecuted,
 } from '../../../tasks/rule_details';
 
@@ -34,6 +37,8 @@ import {
   NO_EXCEPTIONS_EXIST_PROMPT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
   NO_EXCEPTIONS_SEARCH_RESULTS_PROMPT,
+  CLOSE_ALERTS_CHECKBOX,
+  CONFIRM_BTN,
 } from '../../../screens/exceptions';
 import {
   createExceptionList,
@@ -55,7 +60,7 @@ describe('Add exception from rule details', () => {
     esArchiverUnload('exceptions');
   });
 
-  describe('rule with existing exceptions', () => {
+  describe('rule with existing shared exceptions', () => {
     const exceptionList = getExceptionList();
     beforeEach(() => {
       deleteAlertsAndRules();
@@ -119,20 +124,36 @@ describe('Add exception from rule details', () => {
       goToExceptionsTab();
     });
 
-    it('Creates an exception item', () => {
+    it.only('Creates an exception item to add to shared list', () => {
       // displays existing exception items
-      cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
       cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 2);
+      cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
 
-      // clicks prompt button to add a new exception item
-      addExceptionFromRuleDetails(getException());
+      // open add exception modal
+      addExceptionFlyoutFromViewerHeader();
+
+      // add exception item conditions
+      addExceptionConditions(getException());
+
+      // Name is required so want to check that submit is still disabled
+      cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
+
+      // add exception item name
+      addExceptionFlyoutItemName('My item name');
+
+      // select to add exception item to a shared list
+      selectSharedListToAddExceptionTo(1);
+
+      // not testing close alert functionality here, just ensuring that the options appear as expected
+      cy.get(CLOSE_ALERTS_CHECKBOX).should('exist');
+      cy.get(CLOSE_ALERTS_CHECKBOX).should('not.have.attr', 'disabled');
 
       // new exception item displays
-      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 3);
+      // cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 3);
     });
 
     // Trying to figure out with EUI why the search won't trigger
-    it.skip('Can search for items', () => {
+    it('Can search for items', () => {
       // displays existing exception items
       cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
       cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 2);

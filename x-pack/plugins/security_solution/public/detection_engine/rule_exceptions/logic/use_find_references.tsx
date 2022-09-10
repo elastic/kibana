@@ -28,7 +28,7 @@ export const useFindExceptionListReferences = (
   ruleExceptionLists: ListArray
 ): ReturnUseFindExceptionListReferences => {
   const toasts = useToasts();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [references, setReferences] = useState<RuleReferences | null>(null);
   const listRefs = useMemo((): FindRulesReferencedByExceptionsListProp[] => {
     return ruleExceptionLists.map((list) => {

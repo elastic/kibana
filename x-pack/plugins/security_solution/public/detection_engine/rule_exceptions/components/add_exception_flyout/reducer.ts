@@ -16,7 +16,7 @@ export interface State {
   listType: ExceptionListTypeEnum;
   exceptionItems: ExceptionsBuilderReturnExceptionItem[];
   newComment: string;
-  listsOptionsRadioSelection: string;
+  addExceptionToRadioSelection: string;
   itemConditionValidationErrorExists: boolean;
   closeSingleAlert: boolean;
   bulkCloseAlerts: boolean;
@@ -38,7 +38,7 @@ export const initialState: State = {
   bulkCloseIndex: undefined,
   selectedOs: undefined,
   exceptionListsToAddTo: [],
-  listsOptionsRadioSelection: 'add_to_rule',
+  addExceptionToRadioSelection: 'add_to_rule',
   selectedRulesToAddTo: [],
   listType: ExceptionListTypeEnum.RULE_DEFAULT,
 };
@@ -181,7 +181,7 @@ export const createExceptionItemsReducer =
 
         return {
           ...state,
-          listsOptionsRadioSelection: option,
+          addExceptionToRadioSelection: option,
           listType:
             option === 'add_to_lists'
               ? ExceptionListTypeEnum.DETECTION

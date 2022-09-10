@@ -85,7 +85,7 @@ const ExceptionsViewerSearchBarComponent = ({
         <EuiSearchBar
           box={{
             placeholder: 'Search on the fields below: e.g. name:"my list"',
-            incremental: false,
+            incremental: true,
             schema: ITEMS_SCHEMA,
             'data-test-subj': 'exceptionsViewerSearchBar',
           }}

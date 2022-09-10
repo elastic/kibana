@@ -10,12 +10,15 @@ import { RULE_STATUS } from '../screens/create_new_rule';
 import {
   ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN,
   ADD_EXCEPTIONS_BTN_FROM_VIEWER_HEADER,
+  ADD_TO_SHARED_LIST_RADIO_LABEL,
   CLOSE_ALERTS_CHECKBOX,
   CONFIRM_BTN,
+  EXCEPTION_ITEM_NAME_INPUT,
   EXCEPTION_ITEM_VIEWER_SEARCH,
   FIELD_INPUT,
   LOADING_SPINNER,
   OPERATOR_INPUT,
+  SHARED_LIST_CHECKBOX,
   VALUES_INPUT,
 } from '../screens/exceptions';
 import {
@@ -94,14 +97,26 @@ export const addExceptionFlyoutFromViewerHeader = () => {
     .should('be.visible');
 };
 
-export const addExceptionFromRuleDetails = (exception: Exception) => {
-  addExceptionFlyoutFromViewerHeader();
+export const addExceptionFlyoutItemName = (name: string) => {
+  cy.get(EXCEPTION_ITEM_NAME_INPUT).type(`${name}{enter}`);
+  cy.get(EXCEPTION_ITEM_NAME_INPUT).should('have.value', name);
+};
+
+export const selectBulkCloseAlerts = () => {
+  cy.get(CLOSE_ALERTS_CHECKBOX).click({ force: true });
+};
+
+export const addExceptionConditions = (exception: Exception) => {
   cy.get(FIELD_INPUT).type(`${exception.field}{downArrow}{enter}`);
   cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
   exception.values.forEach((value) => {
     cy.get(VALUES_INPUT).type(`${value}{enter}`);
   });
-  cy.get(CLOSE_ALERTS_CHECKBOX).click({ force: true });
+};
+
+export const addExceptionFromRuleDetails = (exception: Exception) => {
+  addExceptionFlyoutFromViewerHeader();
+  addExceptionConditions(exception);
   cy.get(CONFIRM_BTN).click();
   cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
   cy.get(CONFIRM_BTN).should('not.exist');
@@ -109,12 +124,7 @@ export const addExceptionFromRuleDetails = (exception: Exception) => {
 
 export const addFirstExceptionFromRuleDetails = (exception: Exception) => {
   openExceptionFlyoutFromEmptyViewerPrompt();
-  cy.get(FIELD_INPUT).type(`${exception.field}{downArrow}{enter}`);
-  cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
-  exception.values.forEach((value) => {
-    cy.get(VALUES_INPUT).type(`${value}{enter}`);
-  });
-  cy.get(CLOSE_ALERTS_CHECKBOX).click({ force: true });
+  addExceptionConditions(exception);
   cy.get(CONFIRM_BTN).click();
   cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
   cy.get(CONFIRM_BTN).should('not.exist');
@@ -162,4 +172,14 @@ export const hasIndexPatterns = (indexPatterns: string) => {
   cy.get(DEFINITION_DETAILS).within(() => {
     getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns);
   });
+};
+
+export const selectSharedListToAddExceptionTo = (numListsToCheck = 1) => {
+  cy.get(ADD_TO_SHARED_LIST_RADIO_LABEL).click();
+  for (let i = 0; i < numListsToCheck; i++) {
+    cy.get(SHARED_LIST_CHECKBOX)
+      .eq(i)
+      .pipe(($el) => $el.trigger('click'))
+      .should('be.checked');
+  }
 };
