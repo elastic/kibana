@@ -65,10 +65,15 @@ const Template: ComponentStory<typeof UploadFile> = (props: Props) => (
   </FilesContext>
 );
 
-export const UX = Template.bind({});
+export const Basic = Template.bind({});
 
-export const UXError = Template.bind({});
-UXError.args = {
+export const BasicSmall = Template.bind({});
+BasicSmall.args = {
+  compressed: true,
+};
+
+export const ErrorUX = Template.bind({});
+ErrorUX.args = {
   client: {
     create: async () => ({ file: { id: 'test' } }),
     upload: async () => {
@@ -79,8 +84,8 @@ UXError.args = {
   } as unknown as FilesClient,
 };
 
-export const UXAbort = Template.bind({});
-UXAbort.args = {
+export const Abort = Template.bind({});
+Abort.args = {
   client: {
     create: async () => ({ file: { id: 'test' } }),
     upload: async () => {
@@ -90,12 +95,50 @@ UXAbort.args = {
   } as unknown as FilesClient,
 };
 
-export const UXMaxSize = Template.bind({});
-UXMaxSize.args = {
+export const MaxSize = Template.bind({});
+MaxSize.args = {
   kind: miniFile,
 };
 
-export const UXZipOnly = Template.bind({});
-UXZipOnly.args = {
+export const ZipOnly = Template.bind({});
+ZipOnly.args = {
   kind: zipOnly,
+};
+
+export const AllowClearAfterUpload = Template.bind({});
+AllowClearAfterUpload.args = {
+  allowClear: true,
+};
+
+export const ImmediateUpload = Template.bind({});
+ImmediateUpload.args = {
+  immediate: true,
+  allowClear: true,
+};
+
+export const ImmediateUploadError = Template.bind({});
+ImmediateUploadError.args = {
+  immediate: true,
+  allowClear: true,
+  client: {
+    create: async () => ({ file: { id: 'test' } }),
+    upload: async () => {
+      await sleep(1000);
+      throw new Error('nope!');
+    },
+    delete: async () => {},
+  } as unknown as FilesClient,
+};
+
+export const ImmediateUploadAbort = Template.bind({});
+ImmediateUploadAbort.args = {
+  immediate: true,
+  allowClear: true,
+  client: {
+    create: async () => ({ file: { id: 'test' } }),
+    upload: async () => {
+      await sleep(60000);
+    },
+    delete: async () => {},
+  } as unknown as FilesClient,
 };

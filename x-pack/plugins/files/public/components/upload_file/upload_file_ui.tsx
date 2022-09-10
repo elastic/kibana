@@ -8,13 +8,14 @@
 import React, { useMemo } from 'react';
 import classNames from 'classnames';
 import {
+  EuiIconTip,
   EuiButton,
-  EuiButtonEmpty,
-  EuiFilePicker,
-  EuiFilePickerProps,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiSpacer,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiFilePicker,
+  EuiButtonEmpty,
+  type EuiFilePickerProps,
 } from '@elastic/eui';
 import { i18nTexts } from './i18n_texts';
 
@@ -26,32 +27,36 @@ export interface Props
   onUpload: () => void;
   onClear: () => void;
   onCancel: () => void;
+  errorMessage?: string;
   accept?: string;
   done?: boolean;
   ready?: boolean;
   uploading?: boolean;
   immediate?: boolean;
   retry?: boolean;
+  allowClear?: boolean;
   initialFilePromptText?: string;
 }
 
 export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) => {
   const {
-    compressed,
-    uploading,
-    onChange,
-    onClear,
-    onCancel,
-    onUpload,
-    immediate,
-    initialFilePromptText,
-    className,
-    style,
-    isInvalid,
+    done,
     ready,
     retry,
-    done,
+    style,
     accept,
+    onClear,
+    onCancel,
+    onChange,
+    onUpload,
+    className,
+    immediate,
+    uploading,
+    isInvalid,
+    compressed,
+    errorMessage,
+    allowClear = false,
+    initialFilePromptText,
     ...rest
   } = props;
 
@@ -73,7 +78,12 @@ export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
 
       <EuiSpacer size="s" />
 
-      <EuiFlexGroup justifyContent="flexStart" direction="rowReverse" gutterSize="m">
+      <EuiFlexGroup
+        justifyContent="flexStart"
+        alignItems="center"
+        direction="rowReverse"
+        gutterSize="m"
+      >
         <EuiFlexItem grow={false}>
           {!immediate && !retry && (
             <EuiButton
@@ -82,7 +92,7 @@ export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
               onClick={onUpload}
               size="s"
             >
-              {i18nTexts.upload}
+              {uploading ? i18nTexts.uploading : i18nTexts.upload}
             </EuiButton>
           )}
           {retry && (
@@ -92,7 +102,7 @@ export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
           )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {uploading || !done ? (
+          {uploading || !done || !allowClear ? (
             <EuiButtonEmpty size="s" disabled={!uploading} onClick={onCancel} color="danger">
               {i18nTexts.cancel}
             </EuiButtonEmpty>
@@ -102,6 +112,11 @@ export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
             </EuiButtonEmpty>
           )}
         </EuiFlexItem>
+        {errorMessage && !uploading && (
+          <EuiFlexItem grow={false}>
+            <EuiIconTip type="alert" color="danger" content={errorMessage} />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </div>
   );

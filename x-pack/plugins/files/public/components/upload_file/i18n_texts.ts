@@ -11,6 +11,9 @@ export const i18nTexts = {
   upload: i18n.translate('xpack.files.uploadFile.uploadButtonLabel', {
     defaultMessage: 'Upload',
   }),
+  uploading: i18n.translate('xpack.files.uploadFile.uploadingButtonLabel', {
+    defaultMessage: 'Uploading',
+  }),
   retry: i18n.translate('xpack.files.uploadFile.retryButtonLabel', {
     defaultMessage: 'Retry',
   }),
@@ -20,7 +23,9 @@ export const i18nTexts = {
   cancel: i18n.translate('xpack.files.uploadFile.cancelButtonLabel', {
     defaultMessage: 'Cancel',
   }),
-  fileTooLarge: i18n.translate('xpack.files.uploadFile.fileTooLargeErrorMessage', {
-    defaultMessage: 'File is too large',
-  }),
+  fileTooLarge: (expectedSize: string) =>
+    i18n.translate('xpack.files.uploadFile.fileTooLargeErrorMessage', {
+      defaultMessage: 'File is too large. Maximum size is {expectedSize} bytes.',
+      values: { expectedSize },
+    }),
 };

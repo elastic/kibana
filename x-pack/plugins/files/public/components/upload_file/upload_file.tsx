@@ -6,7 +6,7 @@
  */
 
 import { EuiFilePicker } from '@elastic/eui';
-import React, { type FunctionComponent, useState, useRef } from 'react';
+import React, { type FunctionComponent, useState, useRef, useEffect, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { FileKind } from '../../../common';
 import { FilesClient } from '../../types';
@@ -21,13 +21,33 @@ export interface Props<Kind extends string = string> {
   kind: Kind;
   client: FilesClient;
   onDone: () => void;
-  onError?: (errors: Error[]) => void;
+  /**
+   * Allow users to clear a file after uploading.
+   *
+   * @note this will NOT delete an uploaded file.
+   */
+  allowClear?: boolean;
+  /**
+   * Start uploading the file as soon as it is provided
+   * by the user.
+   */
+  immediate?: boolean;
+  compressed?: boolean;
+  onError?: (e: Error) => void;
 }
 
 /**
  * In order to use this component you must register your file kind with {@link FileKindsRegistry}
  */
-export const UploadFile: FunctionComponent<Props> = ({ client, kind, onDone, onError }) => {
+export const UploadFile: FunctionComponent<Props> = ({
+  kind,
+  client,
+  onDone,
+  onError,
+  immediate = false,
+  allowClear,
+  compressed,
+}) => {
   const { registry } = useFilesContext();
 
   const ref = useRef<null | EuiFilePicker>(null);
@@ -47,28 +67,48 @@ export const UploadFile: FunctionComponent<Props> = ({ client, kind, onDone, onE
 
   const uploading = useBehaviorSubject(uploadState.uploading$);
   const files = useObservable(uploadState.files$, []);
+
   const errors = files.filter((f) => Boolean(f.error));
   const done = Boolean(files.length && files.every((f) => f.status === 'uploaded'));
   const retry = Boolean(files.some((f) => f.status === 'upload_failed'));
 
+  const hasErrors = Boolean(errors.length);
+
+  const upload = useCallback(
+    () =>
+      uploadState.upload().subscribe({
+        complete: onDone,
+        error: onError,
+      }),
+    [onDone, onError, uploadState]
+  );
+
+  useEffect(() => {
+    if (immediate && files.length && !uploading && !hasErrors) {
+      upload();
+    }
+  }, [files, uploadState, upload, uploading, hasErrors, immediate]);
+
   return (
     <UploadFileUI
       ref={ref}
-      onCancel={uploadState.abort}
+      immediate={immediate}
+      onCancel={() => {
+        uploadState.abort();
+        if (immediate) clearFiles();
+      }}
       onChange={uploadState.setFiles}
       ready={Boolean(files.length)}
       onClear={clearFiles}
       done={done}
-      retry={retry}
+      uploading={!done && uploading}
+      retry={!done && retry}
       accept={kindRef.current.allowedMimeTypes?.join(',')}
-      isInvalid={Boolean(errors.length)}
-      onUpload={() =>
-        uploadState.upload().subscribe({
-          complete: onDone,
-          error: onError,
-        })
-      }
-      uploading={uploading}
+      isInvalid={hasErrors}
+      allowClear={allowClear}
+      errorMessage={errors[0]?.error?.message}
+      display={compressed ? 'default' : 'large'}
+      onUpload={upload}
     />
   );
 };

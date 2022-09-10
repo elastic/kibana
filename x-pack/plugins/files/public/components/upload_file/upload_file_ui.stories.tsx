@@ -46,3 +46,8 @@ export const ImmediateUploadRetry = Template.bind({});
 ImmediateUploadRetry.args = {
   isInvalid: true,
 };
+
+export const DefaultDisplay = Template.bind({});
+DefaultDisplay.args = {
+  display: 'default',
+};

@@ -59,7 +59,7 @@ export class UploadState {
       this.fileKind.maxSizeBytes != null &&
       files.some((file) => file.size > this.fileKind.maxSizeBytes!)
     ) {
-      return i18nTexts.fileTooLarge;
+      return i18nTexts.fileTooLarge(String(this.fileKind.maxSizeBytes));
     }
     return;
   }
