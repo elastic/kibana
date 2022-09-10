@@ -8,7 +8,6 @@
 import {
   of,
   map,
-  tap,
   zip,
   from,
   race,
@@ -132,7 +131,7 @@ export class UploadState {
           })
         );
       }),
-      tap(() => {
+      map(() => {
         file$.setState({ status: 'uploaded', id: uploadTarget?.id });
       }),
       catchError((e) => {
