@@ -33,7 +33,7 @@ export interface DiscoverMainProps {
 }
 
 export function DiscoverMainApp(props: DiscoverMainProps) {
-  const { savedSearch, dataViewList } = props;
+  const { savedSearch: initialSavedSearch, dataViewList } = props;
   const services = useDiscoverServices();
   const { chrome, docLinks, uiSettings: config, data, spaces, history } = services;
   const usedHistory = useHistory();
@@ -50,18 +50,17 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    */
   const {
     data$,
-    dataView,
     inspectorAdapters,
     onChangeDataView,
     onUpdateQuery,
     refetch$,
     resetSavedSearch,
-    state,
     stateContainer,
+    savedSearch,
   } = useDiscoverState({
     services,
     history: usedHistory,
-    savedSearch,
+    initialSavedSearch,
     setExpandedDoc,
   });
 
@@ -87,7 +86,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    */
   useEffect(() => {
     addHelpMenuToAppChrome(chrome, docLinks);
-  }, [stateContainer, chrome, docLinks]);
+  }, [chrome, docLinks]);
 
   const resetCurrentSavedSearch = useCallback(() => {
     resetSavedSearch(savedSearch.id);
@@ -97,7 +96,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
 
   return (
     <DiscoverLayoutMemoized
-      dataView={dataView}
       dataViewList={dataViewList}
       inspectorAdapters={inspectorAdapters}
       expandedDoc={expandedDoc}
@@ -109,7 +107,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
       savedSearch={savedSearch}
       savedSearchData$={data$}
       savedSearchRefetch$={refetch$}
-      state={state}
       stateContainer={stateContainer}
     />
   );

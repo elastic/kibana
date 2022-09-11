@@ -11,7 +11,6 @@ import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { useDiscoverState } from './use_discover_state';
-import { dataViewMock } from '../../../__mocks__/data_view';
 
 describe('test useDiscoverState', () => {
   const originalSavedObjectsClient = discoverServiceMock.core.savedObjects.client;
@@ -35,11 +34,11 @@ describe('test useDiscoverState', () => {
       return useDiscoverState({
         services: discoverServiceMock,
         history,
-        savedSearch: savedSearchMock,
+        initialSavedSearch: savedSearchMock,
         setExpandedDoc: jest.fn(),
       });
     });
-    expect(result.current.state.index).toBe(dataViewMock.id);
+    expect(result.current.savedSearch.id).toBe(savedSearchMock.id);
     expect(result.current.stateContainer).toBeInstanceOf(Object);
   });
 });

@@ -25,7 +25,7 @@ export function useContextAppState({ services }: { services: DiscoverServices })
     });
   }, [config, history, core.notifications.toasts, services.data]);
 
-  const [appState, setAppState] = useState<AppState>(stateContainer.appState.getState());
+  const [appState, setAppState] = useState<AppState>(stateContainer.appStateContainer.getState());
   const [globalState, setGlobalState] = useState<GlobalState>(
     stateContainer.globalState.getState()
   );
@@ -40,7 +40,7 @@ export function useContextAppState({ services }: { services: DiscoverServices })
   }, [stateContainer]);
 
   useEffect(() => {
-    const unsubscribeAppState = stateContainer.appState.subscribe((newState) => {
+    const unsubscribeAppState = stateContainer.appStateContainer.subscribe((newState) => {
       const newStateEnsureFilter = { ...newState, filters: newState.filters ?? [] };
       setAppState((prevState) => ({ ...prevState, ...newStateEnsureFilter }));
     });
@@ -60,5 +60,6 @@ export function useContextAppState({ services }: { services: DiscoverServices })
     appState,
     globalState,
     setAppState: stateContainer.setAppState,
+    stateContainer,
   };
 }

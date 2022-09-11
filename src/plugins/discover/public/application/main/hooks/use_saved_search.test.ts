@@ -59,7 +59,7 @@ describe('test useSavedSearch', () => {
       return useDiscoverState({
         services: discoverServiceMock,
         history,
-        savedSearch: savedSearchMock,
+        initialSavedSearch: savedSearchMock,
         setExpandedDoc: jest.fn(),
       });
     });
@@ -109,7 +109,7 @@ describe('test useSavedSearch', () => {
       return useDiscoverState({
         services: discoverServiceMock,
         history,
-        savedSearch: savedSearchMock,
+        initialSavedSearch: savedSearchMock,
         setExpandedDoc: jest.fn(),
       });
     });

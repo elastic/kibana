@@ -114,6 +114,9 @@ export function DiscoverMainRoute(props: Props) {
 
   const loadSavedSearch = useCallback(async () => {
     try {
+      if (savedSearch) {
+        setSavedSearch(undefined);
+      }
       const currentSavedSearch = await getSavedSearch(id, {
         search: services.data.search,
         savedObjectsClient: core.savedObjects.client,
@@ -169,14 +172,10 @@ export function DiscoverMainRoute(props: Props) {
       }
     }
   }, [
+    savedSearch,
     id,
-    services.data,
-    services.spaces,
-    services.timefilter,
-    services.savedObjectsTagging,
-    core.savedObjects.client,
-    core.application.navigateToApp,
-    core.theme,
+    services,
+    core,
     loadDefaultOrCurrentDataView,
     chrome.recentlyAccessed,
     history,

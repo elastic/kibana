@@ -140,6 +140,9 @@ function mountComponent(
     charts$,
     availableFields$,
   };
+  const appState = {
+    interval: 'auto',
+  };
 
   const props = {
     dataView,
@@ -155,11 +158,11 @@ function mountComponent(
     searchSource: searchSourceMock,
     state: { columns: [], query },
     stateContainer: {
+      getAppState: () => appState,
       setAppState: () => {},
+      subscribe: jest.fn(),
       appStateContainer: {
-        getState: () => ({
-          interval: 'auto',
-        }),
+        getState: () => appState,
       },
     } as unknown as GetStateReturn,
     setExpandedDoc: jest.fn(),

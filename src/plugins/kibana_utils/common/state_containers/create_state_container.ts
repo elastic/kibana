@@ -109,6 +109,7 @@ export function createStateContainer<
 ): ReduxLikeStateContainer<State, PureTransitions, PureSelectors> {
   const { freeze = defaultFreeze } = options;
   const data$ = new BehaviorSubject<State>(freeze(defaultState));
+  let previousState = freeze(defaultState);
   const state$ = data$.pipe(skip(1));
   const get = () => data$.getValue();
   const container: ReduxLikeStateContainer<State, PureTransitions, PureSelectors> = {
@@ -116,6 +117,7 @@ export function createStateContainer<
     state$,
     getState: () => data$.getValue(),
     set: (state: State) => {
+      previousState = data$.getValue();
       container.dispatch({ type: $$setActionType, args: [state] });
     },
     reducer: (state, action) => {
@@ -143,8 +145,8 @@ export function createStateContainer<
     ),
     addMiddleware: (middleware) =>
       (container.dispatch = middleware(container as any)(container.dispatch)),
-    subscribe: (listener: (state: State) => void) => {
-      const subscription = state$.subscribe(listener);
+    subscribe: (listener: (state: State, prevState: State) => void) => {
+      const subscription = state$.subscribe((next) => listener(next, previousState));
       return () => subscription.unsubscribe();
     },
     [$$observable]: state$,

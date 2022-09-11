@@ -7,6 +7,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Query, AggregateQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -27,7 +28,6 @@ import { SavedObject } from '@kbn/core/types';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
-import { AppState } from '../../services/discover_state';
 import { AvailableFields$, DataDocuments$, RecordRawType } from '../../hooks/use_saved_search';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
@@ -80,7 +80,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * Discover App state
    */
-  state: AppState;
+  query: Query | AggregateQuery;
   /**
    * Metric tracking function
    * @param metricType
@@ -117,8 +117,8 @@ export interface DiscoverSidebarResponsiveProps {
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const services = useDiscoverServices();
   const isPlainRecord = useMemo(
-    () => getRawRecordType(props.state.query) === RecordRawType.PLAIN,
-    [props.state.query]
+    () => getRawRecordType(props.query) === RecordRawType.PLAIN,
+    [props.query]
   );
   const { selectedDataView, onFieldEdited, onDataViewCreated } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());

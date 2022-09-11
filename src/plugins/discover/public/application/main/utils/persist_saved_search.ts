@@ -12,23 +12,15 @@ import { SavedSearch, SortOrder, saveSavedSearch } from '@kbn/saved-search-plugi
 import { updateSearchSource } from './update_search_source';
 import { AppState } from '../services/discover_state';
 import { DiscoverServices } from '../../../build_services';
-/**
- * Helper function to update and persist the given savedSearch
- */
-export async function persistSavedSearch(
+
+export function updateSavedSearch(
   savedSearch: SavedSearch,
   {
     dataView,
-    onError,
-    onSuccess,
     services,
-    saveOptions,
     state,
   }: {
     dataView: DataView;
-    onError: (error: Error, savedSearch: SavedSearch) => void;
-    onSuccess: (id: string) => void;
-    saveOptions: SavedObjectSaveOpts;
     services: DiscoverServices;
     state: AppState;
   }
@@ -80,10 +72,33 @@ export async function persistSavedSearch(
     savedSearch.timeRestore || savedSearch.refreshInterval
       ? { value: refreshInterval.value, pause: refreshInterval.pause }
       : undefined;
-
+  return { ...savedSearch };
+}
+/**
+ * Helper function to update and persist the given savedSearch
+ */
+export async function persistSavedSearch(
+  savedSearch: SavedSearch,
+  {
+    dataView,
+    onError,
+    onSuccess,
+    services,
+    saveOptions,
+    state,
+  }: {
+    dataView: DataView;
+    onError: (error: Error, savedSearch: SavedSearch) => void;
+    onSuccess: (id: string) => void;
+    saveOptions: SavedObjectSaveOpts;
+    services: DiscoverServices;
+    state: AppState;
+  }
+) {
+  const tpPersist = updateSavedSearch(savedSearch, { dataView, services, state });
   try {
     const id = await saveSavedSearch(
-      savedSearch,
+      tpPersist,
       saveOptions,
       services.core.savedObjects.client,
       services.savedObjectsTagging

@@ -98,6 +98,8 @@ export interface AppState {
   rowsPerPage?: number;
 }
 
+export type AppStateContainer = ReduxLikeStateContainer<AppState>;
+
 export interface AppStateUrl extends Omit<AppState, 'sort'> {
   /**
    * Necessary to take care of legacy links [fieldName,direction]
@@ -140,7 +142,7 @@ export interface GetStateReturn {
   /**
    * App state, the _a part of the URL
    */
-  appStateContainer: ReduxLikeStateContainer<AppState>;
+  appStateContainer: AppStateContainer;
   /**
    * Initialize state with filters and query,  start state syncing
    */
@@ -157,6 +159,8 @@ export interface GetStateReturn {
    * Set app state to with a partial new app state
    */
   setAppState: (newState: Partial<AppState>) => void;
+
+  getAppState: () => AppState;
   /**
    * Set state in Url using history.replace
    */
@@ -170,10 +174,6 @@ export interface GetStateReturn {
    */
   resetInitialAppState: () => void;
   /**
-   * Return the Appstate before the current app state, useful for diffing changes
-   */
-  getPreviousAppState: () => AppState;
-  /**
    * Returns whether the current app state is different to the initial state
    */
   isAppStateDirty: () => boolean;
@@ -185,6 +185,7 @@ export interface GetStateReturn {
    * Pause the auto refresh interval without pushing an entry to history
    */
   pauseAutoRefreshInterval: () => Promise<void>;
+  subscribe: (listener: (state: AppState, prevState: AppState) => void) => () => void;
 }
 
 const APP_STATE_URL_KEY = '_a';
@@ -219,14 +220,12 @@ export function getState({
   );
 
   // todo filter source depending on fields fetching flag (if no columns remain and source fetching is enabled, use default columns)
-  let previousAppState: AppState;
   const appStateContainer = createStateContainer<AppState>(initialAppState);
 
   const appStateContainerModified = {
     ...appStateContainer,
     set: (value: AppState | null) => {
       if (value) {
-        previousAppState = appStateContainer.getState();
         appStateContainer.set(value);
       }
     },
@@ -260,6 +259,7 @@ export function getState({
       );
     }
   };
+  const subscribe = appStateContainerModified.subscribe;
 
   return {
     kbnUrlStateStorage: stateStorage,
@@ -270,6 +270,7 @@ export function getState({
       return stop;
     },
     setAppState: (newPartial: AppState) => setState(appStateContainerModified, newPartial),
+    getAppState: () => appStateContainerModified.getState(),
     replaceUrlAppState,
     resetInitialAppState: () => {
       initialAppState = appStateContainer.getState();
@@ -281,7 +282,7 @@ export function getState({
       );
       setState(appStateContainerModified, defaultState);
     },
-    getPreviousAppState: () => previousAppState,
+    subscribe,
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
     pauseAutoRefreshInterval,

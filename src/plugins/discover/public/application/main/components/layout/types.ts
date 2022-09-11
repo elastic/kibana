@@ -8,15 +8,14 @@
 
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import type { SavedObject } from '@kbn/data-plugin/public';
-import type { DataView, DataViewAttributes } from '@kbn/data-views-plugin/public';
+import type { DataViewAttributes } from '@kbn/data-views-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DataTableRecord } from '../../../../types';
-import { AppState, GetStateReturn } from '../../services/discover_state';
+import { GetStateReturn } from '../../services/discover_state';
 import { DataRefetch$, SavedSearchData } from '../../hooks/use_saved_search';
 
 export interface DiscoverLayoutProps {
-  dataView: DataView;
   dataViewList: Array<SavedObject<DataViewAttributes>>;
   inspectorAdapters: { requests: RequestAdapter };
   navigateTo: (url: string) => void;
@@ -31,6 +30,5 @@ export interface DiscoverLayoutProps {
   savedSearch: SavedSearch;
   savedSearchData$: SavedSearchData;
   savedSearchRefetch$: DataRefetch$;
-  state: AppState;
   stateContainer: GetStateReturn;
 }

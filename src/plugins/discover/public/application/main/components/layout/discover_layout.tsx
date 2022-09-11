@@ -24,7 +24,6 @@ import { isOfQueryType } from '@kbn/es-query';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
-import { InspectorSession } from '@kbn/inspector-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
@@ -46,8 +45,9 @@ import { FieldStatisticsTable } from '../field_stats_table';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 import { hasActiveFilter } from './utils';
-import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
+import { useStateContainer } from '../../hooks/use_state_container';
+import { useInspector } from '../../hooks/use_inspector';
 
 /**
  * Local storage key for sidebar persistence state
@@ -60,7 +60,6 @@ const DiscoverChartMemoized = React.memo(DiscoverChart);
 const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);
 
 export function DiscoverLayout({
-  dataView,
   dataViewList,
   inspectorAdapters,
   expandedDoc,
@@ -72,7 +71,6 @@ export function DiscoverLayout({
   resetSavedSearch,
   savedSearchData$,
   savedSearch,
-  state,
   stateContainer,
 }: DiscoverLayoutProps) {
   const {
@@ -88,13 +86,18 @@ export function DiscoverLayout({
     inspector,
   } = useDiscoverServices();
   const { main$, charts$, totalHits$ } = savedSearchData$;
-  const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
   const dataState: DataMainMsg = useDataState(main$);
+  const { interval, filters, query, savedQuery, hideChart, viewMode } = useStateContainer(
+    stateContainer,
+    ['interval', 'filters', 'query', 'viewMode', 'savedQuery', 'viewMode', 'hideChart']
+  );
 
-  const viewMode = useMemo(() => {
+  const dataView = savedSearch.searchSource.getField('index')!;
+
+  const actualViewMode = useMemo(() => {
     if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true) return VIEW_MODE.DOCUMENT_LEVEL;
-    return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
-  }, [uiSettings, state.viewMode]);
+    return viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
+  }, [uiSettings, viewMode]);
 
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
@@ -131,40 +134,25 @@ export function DiscoverLayout({
   const [isSidebarClosed, setIsSidebarClosed] = useState(initialSidebarClosed);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
-  const isPlainRecord = useMemo(
-    () => getRawRecordType(state.query) === RecordRawType.PLAIN,
-    [state.query]
-  );
+  const isPlainRecord = dataState.recordRawType === RecordRawType.PLAIN;
   const resultState = useMemo(
     () => getResultState(dataState.fetchStatus, dataState.foundDocuments!, isPlainRecord),
     [dataState.fetchStatus, dataState.foundDocuments, isPlainRecord]
   );
 
-  const onOpenInspector = useCallback(() => {
-    // prevent overlapping
-    setExpandedDoc(undefined);
-    const session = inspector.open(inspectorAdapters, {
-      title: savedSearch.title,
-    });
-    setInspectorSession(session);
-  }, [setExpandedDoc, inspectorAdapters, savedSearch, inspector]);
-
-  useEffect(() => {
-    return () => {
-      if (inspectorSession) {
-        // Close the inspector if this scope is destroyed (e.g. because the user navigates away).
-        inspectorSession.close();
-      }
-    };
-  }, [inspectorSession]);
+  const { onOpenInspector } = useInspector({
+    setExpandedDoc,
+    inspector,
+    inspectorAdapters,
+    savedSearch,
+  });
 
   const { columns, onAddColumn, onRemoveColumn } = useColumns({
     capabilities,
     config: uiSettings,
     dataView,
     dataViews,
-    setAppState: stateContainer.setAppState,
-    state,
+    stateContainer,
     useNewFieldsApi,
   });
 
@@ -241,9 +229,9 @@ export function DiscoverLayout({
       <TopNavMemoized
         dataView={dataView}
         onOpenInspector={onOpenInspector}
-        query={state.query}
+        query={query}
         navigateTo={navigateTo}
-        savedQuery={state.savedQuery}
+        savedQuery={savedQuery}
         savedSearch={savedSearch}
         stateContainer={stateContainer}
         updateQuery={onUpdateQuery}
@@ -270,12 +258,12 @@ export function DiscoverLayout({
               onRemoveField={onRemoveColumn}
               onChangeDataView={onChangeDataView}
               selectedDataView={dataView}
-              state={state}
+              query={query!}
               isClosed={isSidebarClosed}
               trackUiMetric={trackUiMetric}
               useNewFieldsApi={useNewFieldsApi}
               onFieldEdited={onFieldEdited}
-              viewMode={viewMode}
+              viewMode={actualViewMode}
               onDataViewCreated={onDataViewCreated}
               availableFields$={savedSearchData$.availableFields$}
             />
@@ -315,8 +303,8 @@ export function DiscoverLayout({
                   isTimeBased={isTimeBased}
                   data={data}
                   error={dataState.error}
-                  hasQuery={isOfQueryType(state.query) && !!state.query?.query}
-                  hasFilters={hasActiveFilter(state.filters)}
+                  hasQuery={isOfQueryType(query) && Boolean(query?.query)}
+                  hasFilters={hasActiveFilter(filters)}
                   onDisableFilters={onDisableFilters}
                 />
               )}
@@ -342,17 +330,17 @@ export function DiscoverLayout({
                           savedSearchDataTotalHits$={totalHits$}
                           stateContainer={stateContainer}
                           dataView={dataView}
-                          viewMode={viewMode}
+                          viewMode={actualViewMode}
                           setDiscoverViewMode={setDiscoverViewMode}
-                          hideChart={state.hideChart}
-                          interval={state.interval}
+                          hideChart={hideChart}
+                          interval={interval}
                           isTimeBased={isTimeBased}
                         />
                       </EuiFlexItem>
                       <EuiHorizontalRule margin="none" />
                     </>
                   )}
-                  {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
+                  {actualViewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
                     <DiscoverDocuments
                       documents$={savedSearchData$.documents$}
                       expandedDoc={expandedDoc}
@@ -361,7 +349,6 @@ export function DiscoverLayout({
                       onAddFilter={!isPlainRecord ? (onAddFilter as DocViewFilterFn) : undefined}
                       savedSearch={savedSearch}
                       setExpandedDoc={setExpandedDoc}
-                      state={state}
                       stateContainer={stateContainer}
                       onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
                     />
@@ -370,8 +357,8 @@ export function DiscoverLayout({
                       availableFields$={savedSearchData$.availableFields$}
                       savedSearch={savedSearch}
                       dataView={dataView}
-                      query={state.query}
-                      filters={state.filters}
+                      query={query}
+                      filters={filters}
                       columns={columns}
                       stateContainer={stateContainer}
                       onAddFilter={!isPlainRecord ? (onAddFilter as DocViewFilterFn) : undefined}

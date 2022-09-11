@@ -90,8 +90,7 @@ describe('Discover documents layout', () => {
         columnId: 'someField',
         width: 205.5435345534,
       },
-      stateContainer,
-      state
+      stateContainer
     );
 
     expect(state.grid?.columns?.someField.width).toEqual(206);

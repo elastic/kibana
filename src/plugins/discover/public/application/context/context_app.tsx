@@ -57,7 +57,7 @@ export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
   /**
    * Context app state
    */
-  const { appState, globalState, setAppState } = useContextAppState({ services });
+  const { appState, globalState, setAppState, stateContainer } = useContextAppState({ services });
   const prevAppState = useRef<AppState>();
   const prevGlobalState = useRef<GlobalState>({ filters: [] });
 
@@ -115,9 +115,8 @@ export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
     config: uiSettings,
     dataView,
     dataViews,
-    state: appState,
+    stateContainer,
     useNewFieldsApi,
-    setAppState,
   });
   const rows = useMemo(
     () => [

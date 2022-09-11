@@ -11,19 +11,21 @@ import { useColumns } from './use_data_grid_columns';
 import { dataViewMock } from '../__mocks__/data_view';
 import { configMock } from '../__mocks__/config';
 import { dataViewsMock } from '../__mocks__/data_views';
-import { AppState } from '../application/context/services/context_state';
 import { Capabilities } from '@kbn/core/types';
+import { GetStateReturn } from '../application/main/services/discover_state';
 
 describe('useColumns', () => {
+  const stateContainer = {
+    getAppState: () => {
+      return { columns: ['Time', 'message'] };
+    },
+  } as unknown as GetStateReturn;
   const defaultProps = {
     capabilities: { discover: { save: true } } as unknown as Capabilities,
     config: configMock,
     dataView: dataViewMock,
     dataViews: dataViewsMock,
-    setAppState: () => {},
-    state: {
-      columns: ['Time', 'message'],
-    } as AppState,
+    stateContainer,
     useNewFieldsApi: false,
   };
 
@@ -43,9 +45,11 @@ describe('useColumns', () => {
     const { result } = renderHook(() => {
       return useColumns({
         ...defaultProps,
-        state: {
-          columns: ['Time', '_source'],
-        },
+        stateContainer: {
+          getAppState: () => {
+            return { columns: ['Time', '_source'] };
+          },
+        } as unknown as GetStateReturn,
         useNewFieldsApi: true,
       });
     });
@@ -57,9 +61,11 @@ describe('useColumns', () => {
     const { result } = renderHook(() => {
       return useColumns({
         ...defaultProps,
-        state: {
-          columns: [],
-        },
+        stateContainer: {
+          getAppState: () => {
+            return { columns: [] };
+          },
+        } as unknown as GetStateReturn,
       });
     });
     expect(result.current.columns).toEqual([]);

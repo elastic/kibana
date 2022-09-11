@@ -93,7 +93,7 @@ export interface GetStateReturn {
   /**
    * App state, the _a part of the URL
    */
-  appState: ReduxLikeStateContainer<AppState>;
+  appStateContainer: ReduxLikeStateContainer<AppState>;
   /**
    * Start sync between state and URL
    */
@@ -106,6 +106,9 @@ export interface GetStateReturn {
    * Set app state to with a partial new app state
    */
   setAppState: (newState: Partial<AppState>) => void;
+
+  getAppState: () => AppState;
+
   /**
    * Get all filters, global and app state
    */
@@ -189,7 +192,7 @@ export function getState({
 
   return {
     globalState: globalStateContainer,
-    appState: appStateContainer,
+    appStateContainer,
     startSync: () => {
       data.query.filterManager.setFilters(cloneDeep(getAllFilters()));
 
@@ -220,6 +223,7 @@ export function getState({
         stateStorage.set(APP_STATE_URL_KEY, mergedState, { replace: true });
       }
     },
+    getAppState: () => appStateContainer.getState(),
     getFilters: getAllFilters,
     setFilters: (filterManager: FilterManager) => {
       // global state filters

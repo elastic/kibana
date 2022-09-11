@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
-import { DataViewType } from '@kbn/data-views-plugin/public';
+import { DataViewType, DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_SQL } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -18,10 +18,8 @@ import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { GetStateReturn } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
 
-export type DiscoverTopNavProps = Pick<
-  DiscoverLayoutProps,
-  'dataView' | 'navigateTo' | 'savedSearch'
-> & {
+export type DiscoverTopNavProps = Pick<DiscoverLayoutProps, 'navigateTo' | 'savedSearch'> & {
+  dataView: DataView;
   onOpenInspector: () => void;
   query?: Query | AggregateQuery;
   savedQuery?: string;
@@ -94,7 +92,7 @@ export const DiscoverTopNav = ({
   const editField = useMemo(
     () =>
       canEditDataView
-        ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
+        ? async (fieldName?: string) => {
             if (dataView?.id) {
               const dataViewInstance = await data.dataViews.get(dataView.id);
               closeFieldEditor.current = dataViewFieldEditor.openEditor({
@@ -113,7 +111,7 @@ export const DiscoverTopNav = ({
   );
 
   const addField = useMemo(
-    () => (canEditDataView && editField ? () => editField(undefined, 'add') : undefined),
+    () => (canEditDataView && editField ? () => editField(undefined) : undefined),
     [editField, canEditDataView]
   );
 

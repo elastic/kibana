@@ -41,7 +41,7 @@ describe('Test Discover Context State', () => {
     state.stopSync();
   });
   test('getState function default return', () => {
-    expect(state.appState.getState()).toMatchInlineSnapshot(`
+    expect(state.appStateContainer.getState()).toMatchInlineSnapshot(`
       Object {
         "columns": Array [
           "_source",
@@ -69,7 +69,7 @@ describe('Test Discover Context State', () => {
   });
   test('getState -> url to appState syncing', async () => {
     history.push('/#?_a=(columns:!(_source),predecessorCount:1,successorCount:1)');
-    expect(state.appState.getState()).toMatchInlineSnapshot(`
+    expect(state.appStateContainer.getState()).toMatchInlineSnapshot(`
       Object {
         "columns": Array [
           "_source",
@@ -81,7 +81,7 @@ describe('Test Discover Context State', () => {
   });
   test('getState -> url to appState syncing with return to a url without state', async () => {
     history.push('/#?_a=(columns:!(_source),predecessorCount:1,successorCount:1)');
-    expect(state.appState.getState()).toMatchInlineSnapshot(`
+    expect(state.appStateContainer.getState()).toMatchInlineSnapshot(`
       Object {
         "columns": Array [
           "_source",
@@ -91,7 +91,7 @@ describe('Test Discover Context State', () => {
       }
     `);
     history.push('/');
-    expect(state.appState.getState()).toMatchInlineSnapshot(`
+    expect(state.appStateContainer.getState()).toMatchInlineSnapshot(`
       Object {
         "columns": Array [
           "_source",

@@ -224,7 +224,6 @@ export const useSavedSearch = ({
     main$,
     refetch$,
     savedSearch,
-    JSON.stringify(savedSearch.searchSource.getSerializedFields()),
     searchSessionManager,
     services,
     stateContainer.appStateContainer,

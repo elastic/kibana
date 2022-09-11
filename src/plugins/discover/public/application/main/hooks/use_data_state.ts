@@ -15,6 +15,11 @@ export function useDataState(data$: BehaviorSubject<DataMsg>) {
   useEffect(() => {
     const subscription = data$.subscribe((next) => {
       if (next.fetchStatus !== fetchState.fetchStatus) {
+        // @ts-expect-error
+        if (window.ELASTIC_DISCOVER_LOGGER) {
+          // eslint-disable-next-line no-console
+          console.log('useDataState hook update', next);
+        }
         setFetchState({ ...fetchState, ...next });
       }
     });

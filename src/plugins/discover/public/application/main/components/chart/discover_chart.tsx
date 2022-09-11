@@ -135,7 +135,7 @@ export function DiscoverChart({
           >
             <HitsCounter
               savedSearchData$={savedSearchDataTotalHits$}
-              showResetButton={!!(savedSearch && savedSearch.id)}
+              showResetButton={Boolean(savedSearch && savedSearch.id)}
               onResetQuery={resetSavedSearch}
             />
           </EuiFlexItem>

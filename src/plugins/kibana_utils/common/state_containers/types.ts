@@ -105,7 +105,7 @@ export interface ReduxLikeStateContainer<
   replaceReducer: (nextReducer: Reducer<State>) => void;
   dispatch: (action: TransitionDescription) => void;
   addMiddleware: (middleware: Middleware<State>) => void;
-  subscribe: (listener: (state: State) => void) => () => void;
+  subscribe: (listener: (state: State, prevState: State) => void) => () => void;
 }
 
 /**
