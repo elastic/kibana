@@ -8,8 +8,6 @@
 import { EuiLoadingContent, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import { QueryClientProvider } from '@tanstack/react-query';
-import type { CoreStart } from '@kbn/core/public';
 import type { AddToTimelinePayload } from '../../timelines/use_add_to_timeline';
 import {
   AGENT_STATUS_ERROR,
