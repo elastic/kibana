@@ -10,12 +10,12 @@ import { EuiCode, EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { ECSMapping } from '../../common/schemas/common';
 import { LiveQueryForm } from './form';
 import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { OsqueryIcon } from '../components/osquery_icon';
 import type { AgentSelection } from '../agents/types';
+import type { EcsMappingSerialized } from '../packs/queries/ecs_mapping_editor_field';
 
 interface LiveQueryProps {
   agentId?: string;
@@ -24,7 +24,7 @@ interface LiveQueryProps {
   onSuccess?: () => void;
   query?: string;
   savedQueryId?: string;
-  ecs_mapping?: ECSMapping;
+  ecs_mapping?: EcsMappingSerialized;
   agentsField?: boolean;
   queryField?: boolean;
   ecsMappingField?: boolean;

@@ -205,7 +205,7 @@ const OsqueryResponseActionParamsFormComponent: React.ForwardRefExoticComponent<
                 />
               </>
             )}
-            <LiveQueryQueryField queryType={'query'} />
+            <LiveQueryQueryField />
             <EuiSpacer size="m" />
             <StyledEuiAccordion
               id="advanced"
