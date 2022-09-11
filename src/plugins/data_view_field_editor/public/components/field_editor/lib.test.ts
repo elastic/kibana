@@ -7,12 +7,12 @@
  */
 
 import { getFieldPreviewChanges } from './lib';
-import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { ChangeType, FieldPreview } from '../preview/types';
 
 describe('getFieldPreviewChanges', () => {
   it('should return new keys', (done) => {
-    const subj = new Subject<FieldPreview[]>();
+    const subj = new BehaviorSubject<FieldPreview[] | undefined>(undefined);
     const changes = getFieldPreviewChanges(subj);
     changes.subscribe((change) => {
       expect(change).toStrictEqual({ hello: { changeType: ChangeType.UPSERT, type: 'keyword' } });
@@ -23,7 +23,7 @@ describe('getFieldPreviewChanges', () => {
   });
 
   it('should return updated type', (done) => {
-    const subj = new Subject<FieldPreview[]>();
+    const subj = new BehaviorSubject<FieldPreview[] | undefined>(undefined);
     const changes = getFieldPreviewChanges(subj);
     changes.subscribe((change) => {
       expect(change).toStrictEqual({ hello: { changeType: ChangeType.UPSERT, type: 'long' } });
@@ -34,7 +34,7 @@ describe('getFieldPreviewChanges', () => {
   });
 
   it('should remove keys', (done) => {
-    const subj = new Subject<FieldPreview[]>();
+    const subj = new BehaviorSubject<FieldPreview[] | undefined>(undefined);
     const changes = getFieldPreviewChanges(subj);
     changes.subscribe((change) => {
       expect(change).toStrictEqual({ hello: { changeType: ChangeType.DELETE } });
@@ -45,7 +45,7 @@ describe('getFieldPreviewChanges', () => {
   });
 
   it('should add, update, and remove keys in a single change', (done) => {
-    const subj = new Subject<FieldPreview[]>();
+    const subj = new BehaviorSubject<FieldPreview[] | undefined>(undefined);
     const changes = getFieldPreviewChanges(subj);
     changes.subscribe((change) => {
       expect(change).toStrictEqual({
