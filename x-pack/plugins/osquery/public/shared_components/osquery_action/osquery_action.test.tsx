@@ -81,13 +81,6 @@ describe('Osquery Action', () => {
     const { getByText } = renderWithContext(<OsqueryAction agentId={'test'} formType={'steps'} />);
     expect(getByText(EMPTY_PROMPT)).toBeInTheDocument();
   });
-  it('should return empty prompt when no agentId', async () => {
-    spyOsquery();
-    mockKibana();
-
-    const { getByText } = renderWithContext(<OsqueryAction agentId={''} formType={'steps'} />);
-    expect(getByText(EMPTY_PROMPT)).toBeInTheDocument();
-  });
   it('should return permission denied when agentFetched and agentData available', async () => {
     spyOsquery({ agentData: {} });
     mockKibana();

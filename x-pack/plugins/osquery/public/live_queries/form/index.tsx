@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EuiAccordionProps } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
 import {
   EuiButton,
@@ -13,16 +12,15 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiAccordion,
   EuiCard,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useForm as useHookForm, FormProvider } from 'react-hook-form';
-
 import { isEmpty, map, find, pickBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
+
 import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
 import type {
   EcsMappingFormField,
@@ -33,8 +31,6 @@ import { convertECSMappingToObject } from '../../../common/schemas/common/utils'
 import { useKibana } from '../../common/lib/kibana';
 import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import { SavedQueryFlyout } from '../../saved_queries';
-import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
-import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
 import { usePacks } from '../../packs/use_packs';
 import { PackQueriesStatusTable } from './pack_queries_status_table';
 import { useCreateLiveQuery } from '../use_create_live_query_action';
@@ -99,13 +95,6 @@ const StyledEuiCard = styled(EuiCard)`
   }
 `;
 
-const StyledEuiAccordion = styled(EuiAccordion)`
-  ${({ isDisabled }: { isDisabled?: boolean }) => isDisabled && 'display: none;'}
-  .euiAccordion__button {
-    color: ${({ theme }) => theme.eui.euiColorPrimary};
-  }
-`;
-
 type FormType = 'simple' | 'steps';
 
 interface LiveQueryFormProps {
@@ -123,7 +112,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   defaultValue,
   onSuccess,
   queryField = true,
-  ecsMappingField = true,
   formType = 'steps',
   enabled = true,
   hideAgentsField = false,
@@ -161,8 +149,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     [permissions]
   );
 
-  const [advancedContentState, setAdvancedContentState] =
-    useState<EuiAccordionProps['forceState']>('closed');
   const [showSavedQueryFlyout, setShowSavedQueryFlyout] = useState(false);
   const [queryType, setQueryType] = useState<string>('query');
   const [isLive, setIsLive] = useState(false);
@@ -208,43 +194,14 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     [queryStatus]
   );
 
-  const handleSavedQueryChange = useCallback(
-    (savedQuery) => {
-      if (savedQuery) {
-        setValue('query', savedQuery.query);
-        setValue('savedQueryId', savedQuery.savedQueryId);
-        setValue(
-          'ecs_mapping',
-          !isEmpty(savedQuery.ecs_mapping)
-            ? map(savedQuery.ecs_mapping, (value, key) => ({
-                key,
-                result: {
-                  type: Object.keys(value)[0],
-                  value: Object.values(value)[0] as string,
-                },
-              }))
-            : [defaultEcsFormData]
-        );
-
-        if (!isEmpty(savedQuery.ecs_mapping)) {
-          setAdvancedContentState('open');
-        }
-      } else {
-        setValue('savedQueryId', null);
-      }
-    },
-    [setValue]
-  );
-
   const onSubmit = useCallback(
-    // not sure why, but submitOnCmdEnter doesn't have proper form values so I am passing them in manually
-    async (values: LiveQueryFormFields = watchedValues) => {
+    async (values: LiveQueryFormFields) => {
       const serializedData = pickBy(
         {
           agentSelection: values.agentSelection,
           saved_query_id: values.savedQueryId,
           query: values.query,
-          pack_id: packId?.length ? packId[0] : undefined,
+          pack_id: values?.packId?.length ? values?.packId[0] : undefined,
           ...(values.ecs_mapping
             ? { ecs_mapping: convertECSMappingToObject(values.ecs_mapping) }
             : {}),
@@ -259,47 +216,12 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         } catch (e) {}
       }
     },
-    [errors, mutateAsync, packId, watchedValues]
-  );
-  const commands = useMemo(
-    () => [
-      {
-        name: 'submitOnCmdEnter',
-        bindKey: { win: 'ctrl+enter', mac: 'cmd+enter' },
-        // @ts-expect-error update types - explanation in onSubmit()
-        exec: () => handleSubmit(onSubmit)(watchedValues),
-      },
-    ],
-    [handleSubmit, onSubmit, watchedValues]
-  );
-
-  const queryComponentProps = useMemo(
-    () => ({
-      commands,
-    }),
-    [commands]
+    [errors, mutateAsync]
   );
 
   const serializedData: SavedQuerySOFormData = useMemo(
     () => savedQueryDataSerializer(watchedValues),
     [watchedValues]
-  );
-
-  const handleToggle = useCallback((isOpen) => {
-    const newState = isOpen ? 'open' : 'closed';
-    setAdvancedContentState(newState);
-  }, []);
-
-  const ecsFieldProps = useMemo(
-    () => ({
-      isDisabled: !permissions.writeLiveQueries,
-    }),
-    [permissions.writeLiveQueries]
-  );
-
-  const isSavedQueryDisabled = useMemo(
-    () => !permissions.runSavedQueries || !permissions.readSavedQueries,
-    [permissions.readSavedQueries, permissions.runSavedQueries]
   );
 
   const { data: packsData, isFetched: isPackDataFetched } = usePacks({});
@@ -308,6 +230,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     () => (packId?.length ? find(packsData?.data, { id: packId[0] }) : null),
     [packId, packsData]
   );
+
+  const handleSubmitForm = useMemo(() => handleSubmit(onSubmit), [handleSubmit, onSubmit]);
 
   const submitButtonContent = useMemo(
     () => (
@@ -330,7 +254,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
             <EuiButton
               id="submit-button"
               disabled={!enabled || isSubmitting}
-              onClick={handleSubmit(onSubmit)}
+              onClick={handleSubmitForm}
             >
               <FormattedMessage
                 id="xpack.osquery.liveQueryForm.form.submitButtonLabel"
@@ -349,53 +273,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       handleShowSaveQueryFlyout,
       enabled,
       isSubmitting,
-      handleSubmit,
-      onSubmit,
-    ]
-  );
-
-  const queryFieldStepContent = useMemo(
-    () => (
-      <>
-        {queryField && (
-          <>
-            {!isSavedQueryDisabled && (
-              <>
-                <SavedQueriesDropdown
-                  disabled={isSavedQueryDisabled}
-                  onChange={handleSavedQueryChange}
-                />
-              </>
-            )}
-            <LiveQueryQueryField {...queryComponentProps} queryType={queryType} />
-          </>
-        )}
-        {ecsMappingField && (
-          <>
-            <EuiSpacer size="m" />
-            <StyledEuiAccordion
-              id="advanced"
-              forceState={advancedContentState}
-              onToggle={handleToggle}
-              buttonContent="Advanced"
-            >
-              <EuiSpacer size="xs" />
-              <ECSMappingEditorField euiFieldProps={ecsFieldProps} />
-            </StyledEuiAccordion>
-          </>
-        )}
-      </>
-    ),
-    [
-      queryField,
-      isSavedQueryDisabled,
-      handleSavedQueryChange,
-      queryComponentProps,
-      queryType,
-      ecsMappingField,
-      advancedContentState,
-      handleToggle,
-      ecsFieldProps,
+      handleSubmitForm,
     ]
   );
 
@@ -589,7 +467,9 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
             </>
           ) : (
             <>
-              <EuiFlexItem>{queryFieldStepContent}</EuiFlexItem>
+              <EuiFlexItem>
+                <LiveQueryQueryField handleSubmitForm={handleSubmitForm} />
+              </EuiFlexItem>
               {submitButtonContent}
               <EuiFlexItem>{resultsStepContent}</EuiFlexItem>
             </>
