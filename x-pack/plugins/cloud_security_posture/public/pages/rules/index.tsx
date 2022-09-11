@@ -14,7 +14,6 @@ import { i18n } from '@kbn/i18n';
 import { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { truthy } from '../../../common/utils/helpers';
 import { CspInlineDescriptionList } from '../../components/csp_inline_description_list';
-import { kubeDeployOptions } from '../../components/fleet_extensions/deployment_type_select';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import type { BreadcrumbEntry } from '../../common/navigation/types';
 import { RulesContainer, type PageUrlParams } from './rules_container';
@@ -24,6 +23,7 @@ import { useCspIntegrationInfo } from './use_csp_integration';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { SecuritySolutionContext } from '../../application/security_solution_context';
+import { CloudPostureIntegrations, cloudPostureIntegrations } from '../../common/constants';
 
 const getRulesBreadcrumbs = (
   name?: string,
@@ -45,20 +45,50 @@ const getRulesBreadcrumbs = (
   return breadCrumbs;
 };
 
+const assertPolicyTemplate = (
+  policyTemplate: any
+): policyTemplate is keyof CloudPostureIntegrations => {
+  if (typeof policyTemplate !== 'string') return false;
+
+  return cloudPostureIntegrations.hasOwnProperty(policyTemplate);
+};
+
 const getRulesSharedValues = (packageInfo: PackagePolicy, agentInfo: AgentPolicy) => {
-  const enabledPackage = packageInfo.inputs.find((input) => input.enabled);
-  const matchingKubeDeployOption = kubeDeployOptions.find(
-    (option) => option.value === enabledPackage?.type
+  const enabledPackage = packageInfo.inputs?.find((input) => input.enabled);
+  if (!enabledPackage || !assertPolicyTemplate(enabledPackage.policy_template)) return;
+
+  const integration = cloudPostureIntegrations[enabledPackage.policy_template];
+  if (!integration) return;
+
+  const enabledIntegrationOption = integration.options.find(
+    (option) => option.type === enabledPackage.type
   );
 
-  // TODO: most of the values here should come from the integration directly
   return [
-    { title: 'Integration', description: 'KSPM' },
-    !!matchingKubeDeployOption?.label && {
-      title: 'Type',
-      description: matchingKubeDeployOption?.label,
+    {
+      title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.integrationTitle', {
+        defaultMessage: 'Integration',
+      }),
+      description: integration.shortName,
     },
-    { title: 'Agent', description: agentInfo.name },
+    !!enabledIntegrationOption?.name && {
+      title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.typeTitle', {
+        defaultMessage: 'Type',
+      }),
+      description: enabledIntegrationOption.name,
+    },
+    !!enabledIntegrationOption?.benchmark && {
+      title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.typeTitle', {
+        defaultMessage: 'Benchmark',
+      }),
+      description: enabledIntegrationOption.benchmark,
+    },
+    {
+      title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.agentTitle', {
+        defaultMessage: 'Agent',
+      }),
+      description: agentInfo.name,
+    },
   ].filter(truthy);
 };
 
