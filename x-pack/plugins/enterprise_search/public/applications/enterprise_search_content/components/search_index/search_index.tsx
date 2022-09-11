@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useParams } from 'react-router-dom';
 
@@ -21,7 +21,11 @@ import { enableIndexPipelinesTab } from '../../../../../common/ui_settings_keys'
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
-import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
+import {
+  SEARCH_INDEX_PATH,
+  SEARCH_INDEX_SELECT_CONNECTOR_PATH,
+  SEARCH_INDEX_TAB_PATH,
+} from '../../routes';
 import { isConnectorIndex, isCrawlerIndex } from '../../utils/indices';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
@@ -64,6 +68,18 @@ export const SearchIndex: React.FC = () => {
   } = useKibana();
 
   const { indexName } = useValues(IndexNameLogic);
+
+  useEffect(() => {
+    if (
+      isConnectorIndex(indexData) &&
+      indexData.connector.is_native &&
+      indexData.connector.service_type === null
+    ) {
+      KibanaLogic.values.navigateToUrl(
+        generateEncodedPath(SEARCH_INDEX_SELECT_CONNECTOR_PATH, { indexName })
+      );
+    }
+  }, [indexData]);
 
   const pipelinesEnabled = uiSettings?.get<boolean>(enableIndexPipelinesTab) ?? false;
 
