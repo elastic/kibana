@@ -215,6 +215,10 @@ export interface VisTypeDefinition<TVisParams> {
    */
   readonly isDeprecated?: boolean;
   /**
+   * If returns true, no warning toasts will be shown
+   */
+  readonly suppressWarnings?: () => boolean;
+  /**
    * Describes the experience group that the visualization belongs.
    * It can be on tools, aggregation based or promoted group.
    * @default 'aggbased'

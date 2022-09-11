@@ -24,13 +24,13 @@ export function IndexLifecyclePhaseSelect() {
     {
       value: IndexLifecyclePhaseSelectOption.All,
       label: i18n.translate(
-        'xpack.apm.settings.storageExplorer.indexLifecyclePhase.all.label',
+        'xpack.apm.storageExplorer.indexLifecyclePhase.all.label',
         {
           defaultMessage: 'All',
         }
       ),
       description: i18n.translate(
-        'xpack.apm.settings.storageExplorer.indexLifecyclePhase.all.description',
+        'xpack.apm.storageExplorer.indexLifecyclePhase.all.description',
         {
           defaultMessage: 'Search data in all lifecycle phases.',
         }
@@ -39,13 +39,13 @@ export function IndexLifecyclePhaseSelect() {
     {
       value: IndexLifecyclePhaseSelectOption.Hot,
       label: i18n.translate(
-        'xpack.apm.settings.storageExplorer.indexLifecyclePhase.hot.label',
+        'xpack.apm.storageExplorer.indexLifecyclePhase.hot.label',
         {
           defaultMessage: 'Hot',
         }
       ),
       description: i18n.translate(
-        'xpack.apm.settings.storageExplorer.indexLifecyclePhase.hot.description',
+        'xpack.apm.storageExplorer.indexLifecyclePhase.hot.description',
         {
           defaultMessage:
             'Holds your most-recent, most-frequently-searched data.',
@@ -55,13 +55,13 @@ export function IndexLifecyclePhaseSelect() {
     {
       value: IndexLifecyclePhaseSelectOption.Warm,
       label: i18n.translate(
-        'xpack.apm.settings.storageExplorer.indexLifecyclePhase.warm.label',
+        'xpack.apm.storageExplorer.indexLifecyclePhase.warm.label',
         {
           defaultMessage: 'Warm',
         }
       ),
       description: i18n.translate(
-        'xpack.apm.settings.storageExplorer.indexLifecyclePhase.warm.description',
+        'xpack.apm.storageExplorer.indexLifecyclePhase.warm.description',
         {
           defaultMessage:
             'Holds data from recent weeks. Updates are still allowed, but likely infrequent.',
@@ -71,13 +71,13 @@ export function IndexLifecyclePhaseSelect() {
     {
       value: IndexLifecyclePhaseSelectOption.Cold,
       label: i18n.translate(
-        'xpack.apm.settings.storageExplorer.indexLifecyclePhase.cold.label',
+        'xpack.apm.storageExplorer.indexLifecyclePhase.cold.label',
         {
           defaultMessage: 'Cold',
         }
       ),
       description: i18n.translate(
-        'xpack.apm.settings.storageExplorer.indexLifecyclePhase.cold.description',
+        'xpack.apm.storageExplorer.indexLifecyclePhase.cold.description',
         {
           defaultMessage:
             'While still searchable, this tier is typically optimized for lower storage costs rather than search speed.',
@@ -87,13 +87,13 @@ export function IndexLifecyclePhaseSelect() {
     {
       value: IndexLifecyclePhaseSelectOption.Frozen,
       label: i18n.translate(
-        'xpack.apm.settings.storageExplorer.indexLifecyclePhase.frozen.label',
+        'xpack.apm.storageExplorer.indexLifecyclePhase.frozen.label',
         {
           defaultMessage: 'Frozen',
         }
       ),
       description: i18n.translate(
-        'xpack.apm.settings.storageExplorer.indexLifecyclePhase.frozen.description',
+        'xpack.apm.storageExplorer.indexLifecyclePhase.frozen.description',
         {
           defaultMessage:
             'Holds data that are no longer being queried, or being queried rarely.',
@@ -116,7 +116,7 @@ export function IndexLifecyclePhaseSelect() {
   return (
     <EuiSuperSelect
       prepend={i18n.translate(
-        'xpack.apm.settings.storageExplorer.indexLifecyclePhase.label',
+        'xpack.apm.storageExplorer.indexLifecyclePhase.label',
         {
           defaultMessage: 'Index lifecycle phase',
         }
