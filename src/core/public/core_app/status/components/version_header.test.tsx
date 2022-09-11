@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
-import type { ServerVersion } from '../../../../types/status';
+import type { ServerVersion } from '@kbn/core-status-common-internal';
 import { VersionHeader } from './version_header';
 
 const buildServerVersion = (parts: Partial<ServerVersion> = {}): ServerVersion => ({
