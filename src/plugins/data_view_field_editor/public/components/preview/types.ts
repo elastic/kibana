@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import type {
   RuntimeType,
   RuntimeField,
@@ -91,7 +91,7 @@ export type ChangeSet = Record<string, Change>;
 
 export interface Context {
   fields: FieldPreview[];
-  fieldPreview$: Subject<FieldPreview[]>;
+  fieldPreview$: BehaviorSubject<FieldPreview[] | undefined>;
   error: PreviewError | null;
   fieldTypeInfo?: FieldTypeInfo[];
   initialPreviewComplete: boolean;

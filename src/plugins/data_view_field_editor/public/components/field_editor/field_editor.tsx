@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
-import { BehaviorSubject } from 'rxjs';
 
 import {
   Form,
@@ -34,7 +33,7 @@ import { TypeField } from './form_fields';
 import { FieldDetail } from './field_detail';
 import { CompositeEditor } from './composite_editor';
 import { TypeSelection } from './types';
-import { ChangeType, FieldPreview } from '../preview/types';
+import { ChangeType } from '../preview/types';
 
 export interface FieldEditorFormState {
   isValid: boolean | undefined;
@@ -158,28 +157,17 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
 
   const isValueVisible = get(formData, '__meta__.isValueVisible');
 
-  const lastPreview$ = useCallback(() => {
-    const replaySubj = new BehaviorSubject<FieldPreview[]>([]);
-    fieldPreview$.subscribe(replaySubj);
-    return replaySubj;
-  }, [fieldPreview$])();
-
   const resetTypes = useCallback(() => {
-    const lastVal = lastPreview$.getValue();
+    const lastVal = fieldPreview$.getValue();
     // resets the preview history to an empty set
     fieldPreview$.next([]);
     // apply the last preview to get all the types
     fieldPreview$.next(lastVal);
-  }, [fieldPreview$, lastPreview$]);
-
-  const lastPreview = useRef<FieldPreview[]>();
+  }, [fieldPreview$]);
 
   useEffect(() => {
     const existingCompositeField = !!Object.keys(subfields$.getValue() || {}).length;
 
-    const subLastPreview = fieldPreview$.subscribe((val) => {
-      lastPreview.current = val;
-    });
     const changes$ = getFieldPreviewChanges(fieldPreview$);
 
     const subChanges = changes$.subscribe((previewFields) => {
@@ -204,13 +192,12 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     // first preview value is skipped for saved fields, need to populate for new fields and rerenders
     if (!existingCompositeField) {
       fieldPreview$.next([]);
-    } else if (lastPreview.current) {
-      fieldPreview$.next(lastPreview.current);
+    } else if (fieldPreview$.getValue()) {
+      fieldPreview$.next(fieldPreview$.getValue());
     }
 
     return () => {
       subChanges.unsubscribe();
-      subLastPreview.unsubscribe();
     };
   }, [form, fieldPreview$, subfields$]);
 

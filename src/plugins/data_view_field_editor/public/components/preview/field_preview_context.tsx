@@ -21,7 +21,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
-import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { RuntimePrimitiveTypes } from '../../shared_imports';
 
 import { parseEsError } from '../../lib/runtime_field_validation';
@@ -90,7 +90,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     fieldName$,
   } = useFieldEditorContext();
 
-  const fieldPreview$ = useRef(new Subject<FieldPreview[]>());
+  const fieldPreview$ = useRef(new BehaviorSubject<FieldPreview[] | undefined>(undefined));
 
   /** Response from the Painless _execute API */
   const [previewResponse, setPreviewResponse] = useState<{

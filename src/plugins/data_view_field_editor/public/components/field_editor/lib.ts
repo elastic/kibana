@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { map, bufferCount, filter, Subject } from 'rxjs';
+import { map, bufferCount, filter, BehaviorSubject } from 'rxjs';
 import { differenceWith, isEqual } from 'lodash';
 
 import { ValidationFunc, FieldConfig } from '../../shared_imports';
@@ -88,11 +88,12 @@ export const getNameFieldConfig = (
 export const valueToComboBoxOption = (value: string) =>
   RUNTIME_FIELD_OPTIONS_PRIMITIVE.find(({ value: optionValue }) => optionValue === value);
 
-export const getFieldPreviewChanges = (subject: Subject<FieldPreview[]>) =>
+export const getFieldPreviewChanges = (subject: BehaviorSubject<FieldPreview[] | undefined>) =>
   subject.pipe(
+    filter((preview) => preview !== undefined),
     map((items) =>
       // reduce the fields to make diffing easier
-      items.map((item) => {
+      items!.map((item) => {
         const key = item.key.slice(item.key.search('\\.') + 1);
         return { name: key, type: item.type! };
       })
