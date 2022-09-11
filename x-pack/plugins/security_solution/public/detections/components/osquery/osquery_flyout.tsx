@@ -18,41 +18,52 @@ const OsqueryActionWrapper = styled.div`
 `;
 
 export interface OsqueryFlyoutProps {
-  agentId: string;
+  agentId?: string;
+  defaultValues?: {};
   onClose: () => void;
 }
-
-export const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({ agentId, onClose }) => {
+export const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
+  agentId,
+  defaultValues,
+  onClose,
+}) => {
   const {
     services: { osquery },
   } = useKibana();
 
   const handleAddToTimeline = useHandleAddToTimeline();
 
-  // @ts-expect-error
-  const { OsqueryAction } = osquery;
-  return (
-    <EuiFlyout
-      ownFocus
-      maskProps={{ style: 'z-index: 5000' }} // For an edge case to display above the timeline flyout
-      size="m"
-      onClose={onClose}
-    >
-      <EuiFlyoutHeader hasBorder data-test-subj="flyout-header-osquery">
-        <EuiTitle>
-          <h2>{ACTION_OSQUERY}</h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <OsqueryActionWrapper data-test-subj="flyout-body-osquery">
-          <OsqueryAction agentId={agentId} formType="steps" addToTimeline={handleAddToTimeline} />
-        </OsqueryActionWrapper>
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <OsqueryEventDetailsFooter handleClick={onClose} data-test-subj="flyout-footer-osquery" />
-      </EuiFlyoutFooter>
-    </EuiFlyout>
-  );
+  if (osquery?.OsqueryAction) {
+    return (
+      <EuiFlyout
+        ownFocus
+        maskProps={{ style: 'z-index: 5000' }} // For an edge case to display above the timeline flyout
+        size="m"
+        onClose={onClose}
+      >
+        <EuiFlyoutHeader hasBorder data-test-subj="flyout-header-osquery">
+          <EuiTitle>
+            <h2>{ACTION_OSQUERY}</h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <OsqueryActionWrapper data-test-subj="flyout-body-osquery">
+            <osquery.OsqueryAction
+              agentId={agentId}
+              formType="steps"
+              defaultValues={defaultValues}
+              addToTimeline={handleAddToTimeline}
+            />
+          </OsqueryActionWrapper>
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <OsqueryEventDetailsFooter handleClick={onClose} data-test-subj="flyout-footer-osquery" />
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+    );
+  }
+
+  return null;
 };
 
 export const OsqueryFlyout = React.memo(OsqueryFlyoutComponent);
