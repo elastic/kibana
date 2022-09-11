@@ -22,7 +22,6 @@ import type {
   getLazyOsqueryAction,
   getLazyOsqueryResponseActionTypeForm,
 } from './shared_components';
-// import type { getLazyOsqueryResults } from './shared_components/lazy_osquery_results';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}
