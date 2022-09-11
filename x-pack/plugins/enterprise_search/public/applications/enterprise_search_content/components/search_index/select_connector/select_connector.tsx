@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 
-import { useValues } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
   EuiFormFieldset,
   EuiLink,
   EuiSpacer,
@@ -21,20 +20,29 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { Status } from '../../../../../../common/types/api';
+import { generateEncodedPath } from '../../../../shared/encode_path_params';
+
+import { flashSuccessToast } from '../../../../shared/flash_messages';
+import { KibanaLogic } from '../../../../shared/kibana';
 import { FetchIndexApiLogic } from '../../../api/index/fetch_index_api_logic';
+import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
+import { isConnectorIndex } from '../../../utils/indices';
 import { EnterpriseSearchContentPageTemplate } from '../../layout';
 import { baseBreadcrumbs } from '../../search_indices';
 import { IndexNameLogic } from '../index_name_logic';
 
 import { ConnectorCheckable } from './connector_checkable';
+import { SelectConnectorLogic } from './select_connector_logic';
 
 interface NativeConnector {
   name: string;
   serviceType: string;
 }
 
-const NATIVE_CONNECTORS: NativeConnector[] = [
+export const NATIVE_CONNECTORS: NativeConnector[] = [
   {
     name: 'MongoDB',
     serviceType: 'mongodb',
@@ -44,12 +52,37 @@ const NATIVE_CONNECTORS: NativeConnector[] = [
     serviceType: 'mysql',
   },
 ];
+
 export const SelectConnector: React.FC = () => {
   const { data: indexData, status: indexApiStatus } = useValues(FetchIndexApiLogic);
+  const { serviceType } = useValues(SelectConnectorLogic);
+  const { saveNativeConnector, setServiceType } = useActions(SelectConnectorLogic);
 
   const { indexName } = useValues(IndexNameLogic);
 
-  const [selectedConnector, selectConnector] = useState<NativeConnector | undefined>();
+  useEffect(() => {
+    if (isConnectorIndex(indexData) && indexData.connector.service_type) {
+      flashSuccessToast(
+        i18n.translate(
+          'xpack.enterpriseSearch.content.indices.selectConnector.successToast.title',
+          {
+            defaultMessage: 'Your index will now use the {connectorName} native connector.',
+            values: {
+              connectorName: NATIVE_CONNECTORS.find(
+                (connector) => connector.serviceType === indexData.connector.service_type
+              )?.name,
+            },
+          }
+        )
+      );
+      KibanaLogic.values.navigateToUrl(
+        generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+          indexName,
+          tabId: 'configuration',
+        })
+      );
+    }
+  }, [indexData]);
 
   return (
     <EnterpriseSearchContentPageTemplate
@@ -66,7 +99,7 @@ export const SelectConnector: React.FC = () => {
       <form
         onSubmit={(event) => {
           event.preventDefault();
-          console.log(`User selected connector ${selectedConnector?.name}`);
+          saveNativeConnector();
         }}
       >
         <EuiFormFieldset
@@ -93,15 +126,15 @@ export const SelectConnector: React.FC = () => {
               <EuiFlexItem>
                 <ConnectorCheckable
                   {...nativeConnector}
-                  onChange={() => selectConnector(nativeConnector)}
+                  onChange={() => setServiceType(nativeConnector.serviceType)}
                   documentationUrl={'' /* TODO docsUrl */}
-                  checked={selectedConnector === nativeConnector}
+                  checked={nativeConnector.serviceType === serviceType}
                 />
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
           <EuiSpacer />
-          <EuiButton fill color="primary" type="submit" disabled={selectedConnector === undefined}>
+          <EuiButton fill color="primary" type="submit" disabled={serviceType === null}>
             Select and configure
           </EuiButton>
           <EuiSpacer />

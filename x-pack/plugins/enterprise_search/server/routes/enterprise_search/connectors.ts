@@ -14,6 +14,7 @@ import { fetchSyncJobsByConnectorId } from '../../lib/connectors/fetch_sync_jobs
 import { startConnectorSync } from '../../lib/connectors/start_sync';
 import { updateConnectorConfiguration } from '../../lib/connectors/update_connector_configuration';
 import { updateConnectorScheduling } from '../../lib/connectors/update_connector_scheduling';
+import { updateConnectorServiceType } from '../../lib/connectors/update_connector_service_type';
 
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
@@ -133,6 +134,27 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         request.params.connectorId,
         request.query.page,
         request.query.size
+      );
+      return response.ok({ body: result });
+    })
+  );
+
+  router.put(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}/service_type',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+        body: schema.object({ serviceType: schema.string() }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const result = await updateConnectorServiceType(
+        client,
+        request.params.connectorId,
+        request.body.serviceType
       );
       return response.ok({ body: result });
     })
