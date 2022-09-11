@@ -13,6 +13,13 @@ export type {
   FilesClientFactory,
   FilesClientResponses,
 } from './types';
+export {
+  FilesContext,
+  Image,
+  type ImageProps,
+  UploadFile,
+  type UploadFileProps,
+} from './components';
 
 export function plugin() {
   return new FilesPlugin();
