@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "a4cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f",
-    "index": "ml_user_risk_score_latest_default",
+    "index": "ml_user_risk_score_latest_ecs_default",
     "source": {
       "@timestamp": "2021-03-10T14:51:05.766Z",
       "user": {
@@ -27,7 +27,7 @@
   "type": "doc",
   "value": {
     "id": "a2cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb71f",
-    "index": "ml_user_risk_score_latest_default",
+    "index": "ml_user_risk_score_latest_ecs_default",
     "source": {
       "@timestamp": "2021-03-10T14:51:05.766Z",
       "user": {
@@ -52,7 +52,7 @@
   "type": "doc",
   "value": {
     "id": "a2cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb72f",
-    "index": "ml_user_risk_score_latest_default",
+    "index": "ml_user_risk_score_latest_ecs_default",
     "source": {
       "@timestamp": "2021-03-10T14:51:05.766Z",
       "user": {
@@ -77,7 +77,7 @@
   "type": "doc",
   "value": {
     "id": "a2cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb73f",
-    "index": "ml_user_risk_score_latest_default",
+    "index": "ml_user_risk_score_latest_ecs_default",
     "source": {
       "@timestamp": "2021-03-10T14:51:05.766Z",
       "user": {
@@ -102,7 +102,7 @@
   "type": "doc",
   "value": {
     "id": "a2cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f",
-    "index": "ml_user_risk_score_latest_default",
+    "index": "ml_user_risk_score_latest_ecs_default",
     "source": {
       "@timestamp": "2021-03-10T14:51:05.766Z",
       "user": {
@@ -127,7 +127,7 @@
   "type": "doc",
   "value": {
     "id": "a2cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb75f",
-    "index": "ml_user_risk_score_latest_default",
+    "index": "ml_user_risk_score_latest_ecs_default",
     "source": {
       "@timestamp": "2021-03-10T14:51:05.766Z",
       "user": {
@@ -148,15 +148,17 @@
   }
 }
 
+
+
 {
   "type": "doc",
   "value": {
-    "id": "a4cf452c1e0375c3d4412cb550bd1783358468b3b3b777da4829d72c7d6fb74f",
-    "index": "ml_user_risk_score_default",
+    "id": "a4cf452c1e0375c3d4412cb550bd1783358468b3123314829d72c7df6fb74",
+    "index": "ml_user_risk_score_latest_ecs_default",
     "source": {
       "@timestamp": "2021-03-10T14:51:05.766Z",
       "user": {
-        "name": "user1",
+        "name": "test",
         "risk": {
           "calculated_score_norm": 21,
           "calculated_level": "Low",
