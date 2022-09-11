@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 
 export interface CreatedPipelines {
   created: string[];
+}
+
+export interface MlInferencePipeline extends IngestPipeline {
+  version?: number;
 }
 
 /**
@@ -224,4 +229,65 @@ export const createIndexPipelineDefinitions = (
     version: 1,
   });
   return { created: [indexName, `${indexName}@custom`, `${indexName}@ml-inference`] };
+};
+
+/**
+ * Format the body of an ML inference pipeline for a specified model.
+ * Does not create the pipeline, only returns JSON for the user to preview.
+ * @param modelId modelId selected by user.
+ * @param sourceField The document field that model will read.
+ * @param destinationField The document field that the model will write to.
+ * @param esClient the Elasticsearch Client to use when retrieving model details.
+ */
+export const formatMlPipelineBody = async (
+  modelId: string,
+  sourceField: string,
+  destinationField: string,
+  esClient: ElasticsearchClient
+): Promise<MlInferencePipeline> => {
+  const models = await esClient.ml.getTrainedModels({ model_id: modelId });
+  // if we didn't find this model, we can't return anything useful
+  if (models.trained_model_configs === undefined || models.trained_model_configs.length === 0) {
+    throw new Error(`Couldn't find any trained models with id [${modelId}]`);
+  }
+  const model = models.trained_model_configs[0];
+  // if model returned no input field, insert a placeholder
+  const modelInputField =
+    model.input?.field_names?.length > 0 ? model.input.field_names[0] : 'MODEL_INPUT_FIELD';
+  const modelType = model.model_type;
+  const modelVersion = model.version;
+  return {
+    description: '',
+    version: 1,
+    processors: [
+      {
+        remove: {
+          field: `ml.inference.${destinationField}`,
+          ignore_missing: true,
+        },
+      },
+      {
+        inference: {
+          model_id: modelId,
+          target_field: `ml.inference.${destinationField}`,
+          field_map: {
+            sourceField: modelInputField,
+          },
+        },
+      },
+      {
+        append: {
+          field: '_source._ingest.processors',
+          value: [
+            {
+              type: modelType,
+              model_id: modelId,
+              model_version: modelVersion,
+              processed_timestamp: '{{{ _ingest.timestamp }}}',
+            },
+          ],
+        },
+      },
+    ],
+  };
 };
