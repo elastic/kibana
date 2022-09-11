@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import classNames from 'classnames';
 import {
-  EuiIconTip,
+  EuiFormRow,
   EuiButton,
   EuiSpacer,
   EuiFlexItem,
@@ -27,6 +27,7 @@ export interface Props
   onUpload: () => void;
   onClear: () => void;
   onCancel: () => void;
+  label?: string;
   errorMessage?: string;
   accept?: string;
   done?: boolean;
@@ -41,6 +42,7 @@ export interface Props
 export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) => {
   const {
     done,
+    label,
     ready,
     retry,
     style,
@@ -64,26 +66,21 @@ export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
 
   return (
     <div className={cn} style={style}>
-      <EuiFilePicker
-        {...rest}
-        ref={ref}
-        onChange={(files) => onChange(Array.from(files ?? []))}
-        multiple={false}
-        initialPromptText={initialFilePromptText}
-        isLoading={uploading}
-        isInvalid={isInvalid}
-        accept={accept}
-        disabled={done || uploading}
-      />
-
+      <EuiFormRow isInvalid={isInvalid} label={label} error={errorMessage}>
+        <EuiFilePicker
+          {...rest}
+          ref={ref}
+          onChange={(files) => onChange(Array.from(files ?? []))}
+          multiple={false}
+          initialPromptText={initialFilePromptText}
+          isLoading={uploading}
+          isInvalid={isInvalid}
+          accept={accept}
+          disabled={done || uploading}
+        />
+      </EuiFormRow>
       <EuiSpacer size="s" />
-
-      <EuiFlexGroup
-        justifyContent="flexStart"
-        alignItems="center"
-        direction="rowReverse"
-        gutterSize="m"
-      >
+      <EuiFlexGroup justifyContent="flexStart" alignItems="center" direction="row" gutterSize="m">
         <EuiFlexItem grow={false}>
           {!immediate && !retry && (
             <EuiButton
@@ -112,11 +109,6 @@ export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
             </EuiButtonEmpty>
           )}
         </EuiFlexItem>
-        {errorMessage && !uploading && (
-          <EuiFlexItem grow={false}>
-            <EuiIconTip type="alert" color="danger" content={errorMessage} />
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
     </div>
   );
