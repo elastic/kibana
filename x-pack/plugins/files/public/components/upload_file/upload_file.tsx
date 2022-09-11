@@ -40,23 +40,23 @@ export interface Props<Kind extends string = string> {
  * In order to use this component you must register your file kind with {@link FileKindsRegistry}
  */
 export const UploadFile: FunctionComponent<Props> = ({
-  kind,
   client,
   onDone,
   onError,
-  immediate = false,
   allowClear,
   compressed,
+  kind: kindId,
+  immediate = false,
 }) => {
   const { registry } = useFilesContext();
 
   const ref = useRef<null | EuiFilePicker>(null);
-  const kindRef = useRef<FileKind>(registry.get(kind));
 
+  const [kind] = useState<FileKind>(() => registry.get(kindId));
   const [uploadState] = useState(() =>
     createUploadState({
       client,
-      fileKind: kindRef.current,
+      fileKind: kind,
     })
   );
 
@@ -77,11 +77,11 @@ export const UploadFile: FunctionComponent<Props> = ({
   const upload = useCallback(() => {
     uploadState.upload().subscribe({
       complete: () => {
-        onDone(files.map(({ id }) => ({ id: id!, kind })));
+        onDone(files.map(({ id }) => ({ id: id!, kind: kindId })));
       },
       error: onError,
     });
-  }, [onDone, onError, uploadState, files, kind]);
+  }, [onDone, onError, uploadState, files, kindId]);
 
   useEffect(() => {
     if (immediate && files.length && !uploading && !hasErrors) {
@@ -103,7 +103,7 @@ export const UploadFile: FunctionComponent<Props> = ({
       done={done}
       uploading={!done && uploading}
       retry={!done && retry}
-      accept={kindRef.current.allowedMimeTypes?.join(',')}
+      accept={kind.allowedMimeTypes?.join(',')}
       isInvalid={!uploading && hasErrors}
       allowClear={allowClear}
       errorMessage={errors[0]?.error?.message}
