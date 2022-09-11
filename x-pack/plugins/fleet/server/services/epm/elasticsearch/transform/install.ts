@@ -43,7 +43,7 @@ interface TransformInstallation extends TransformModuleBase {
   content: any;
 }
 
-export const installLegacyTransform = async (
+export const installLegacyTransforms = async (
   installablePackage: InstallablePackage,
   paths: string[],
   esClient: ElasticsearchClient,
@@ -143,10 +143,9 @@ export const installTransforms = async (
   esReferences?: EsAssetReference[]
 ) => {
   const transformPaths = paths.filter((path) => isTransform(path));
-  // @TODO: MOVE this down to remove redundant code
   // If package contains legacy transform specifications (i.e. with json instead of yml)
   if (transformPaths.some((p) => p.endsWith('.json'))) {
-    return await installLegacyTransform(
+    return await installLegacyTransforms(
       installablePackage,
       paths,
       esClient,
