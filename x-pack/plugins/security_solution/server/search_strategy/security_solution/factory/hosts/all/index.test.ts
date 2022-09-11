@@ -91,6 +91,12 @@ describe('allHosts search strategy', () => {
                 risk,
                 host: {
                   name: hostName,
+                  risk: {
+                    multipliers: [],
+                    calculated_score_norm: 9999,
+                    calculated_level: risk,
+                    rule_risks: [],
+                  },
                 },
               },
             },
