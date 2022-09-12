@@ -11,7 +11,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('machine learning - short tests', function () {
+  describe('machine learning - anomaly detection', function () {
+    this.tags(['skipFirefox']);
+
     before(async () => {
       await ml.securityCommon.createMlRoles();
       await ml.securityCommon.createMlUsers();
@@ -29,9 +31,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.resetKibanaTimeZone();
     });
 
-    loadTestFile(require.resolve('./pages'));
-    loadTestFile(require.resolve('./model_management'));
-    loadTestFile(require.resolve('./feature_controls'));
-    loadTestFile(require.resolve('./settings'));
+    loadTestFile(require.resolve('./anomaly_charts_dashboard_embeddables'));
+    loadTestFile(require.resolve('./anomaly_embeddables_migration'));
+    loadTestFile(require.resolve('./lens_to_ml'));
+    loadTestFile(require.resolve('./lens_to_ml_with_wizard'));
   });
 }

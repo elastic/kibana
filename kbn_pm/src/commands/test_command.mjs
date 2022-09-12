@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-export * from './visual_testing';
+/** @type {import('../lib/command').Command} */
+export const command = {
+  name: '_test',
+  async run({ log }) {
+    log.success('empty');
+  },
+};

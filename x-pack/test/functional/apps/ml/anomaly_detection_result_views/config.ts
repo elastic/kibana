@@ -7,25 +7,14 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 
-import { services } from './services';
-
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
+  const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
 
   return {
     ...functionalConfig.getAll(),
-
-    testFiles: [
-      require.resolve('./tests/canvas'),
-      require.resolve('./tests/login_page'),
-      require.resolve('./tests/maps'),
-      require.resolve('./tests/infra'),
-    ],
-
-    services,
-
+    testFiles: [require.resolve('.')],
     junit: {
-      reportName: 'X-Pack Visual Regression Tests',
+      reportName: 'Chrome X-Pack UI Functional Tests - ML anomaly_detection_result_views',
     },
   };
 }
