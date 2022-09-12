@@ -330,7 +330,7 @@ export const strings = {
       defaultMessage: 'Reference line value',
     }),
   getTimeLabel: () =>
-    i18n.translate('expressionXY.annotation.label', {
+    i18n.translate('expressionXY.annotation.time', {
       defaultMessage: 'Time',
     }),
   getLabelLabel: () =>

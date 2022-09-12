@@ -120,6 +120,7 @@ describe('XYChart component', () => {
       useLegacyTimeAxis: false,
       eventAnnotationService: eventAnnotationServiceMock,
       renderComplete: jest.fn(),
+      timeFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
     };
   });
 
@@ -3146,7 +3147,7 @@ describe('XYChart component', () => {
       // checking tooltip
       const renderLinks = mount(<div>{groupedAnnotation.prop('customTooltipDetails')!()}</div>);
       expect(renderLinks.text()).toEqual(
-        ' Event 12022-03-18, 04:25:002022-03-18, 04:25:002022-03-18, 04:25:00'
+        ' Event 1Mar 18, 2022 @ 04:25:00.000Mar 18, 2022 @ 04:25:00.020Mar 18, 2022 @ 04:25:00.001'
       );
     });
 

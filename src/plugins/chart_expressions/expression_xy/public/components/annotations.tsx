@@ -76,7 +76,7 @@ const TooltipAnnotationHeader = ({
 const TooltipAnnotationDetails = ({
   row,
   extraFields,
-  isGrouped,
+  timeFormat,
 }: {
   row: PointEventAnnotationRow;
   extraFields: Array<{
@@ -84,13 +84,12 @@ const TooltipAnnotationDetails = ({
     name: string;
     formatter: FieldFormat | undefined;
   }>;
-  isGrouped?: boolean;
+  timeFormat: string;
 }) => {
   return (
     <div className="echTooltip__item--container">
       <span className="echTooltip__value">
-        {isGrouped && <div>{moment(row.time).format('YYYY-MM-DD, hh:mm:ss')}</div>}
-
+        <div>{moment(row.time).format(timeFormat)}</div>
         <div className="xyAnnotationTooltip__extraFields">
           {extraFields.map((field) => (
             <div>
@@ -125,7 +124,8 @@ const createCustomTooltipDetails =
   (
     rows: PointEventAnnotationRow[],
     formatFactory: FormatFactory,
-    columns: DatatableColumn[] | undefined
+    columns: DatatableColumn[] | undefined,
+    timeFormat: string
   ): AnnotationTooltipFormatter =>
   () => {
     const groupedConfigs = groupBy(rows, 'id');
@@ -157,9 +157,9 @@ const createCustomTooltipDetails =
                     )}
                     <TooltipAnnotationDetails
                       key={snakeCase(row.time)}
-                      isGrouped={rows.length > 1}
                       row={row}
                       extraFields={extraFields}
+                      timeFormat={timeFormat}
                     />
                   </Fragment>
                 ))}
@@ -220,7 +220,8 @@ export const getAnnotationsGroupedByInterval = (
   annotations: PointEventAnnotationRow[],
   configs: EventAnnotationOutput[] | undefined,
   columns: DatatableColumn[] | undefined,
-  formatFactory: FormatFactory
+  formatFactory: FormatFactory,
+  timeFormat: string
 ) => {
   const visibleGroupedConfigs = annotations.reduce<Record<string, PointEventAnnotationRow[]>>(
     (acc, current) => {
@@ -249,7 +250,12 @@ export const getAnnotationsGroupedByInterval = (
       icon: firstRow.icon || 'triangle',
       timebucket: Number(timebucket),
       position: 'bottom',
-      customTooltipDetails: createCustomTooltipDetails(rowsPerBucket, formatFactory, columns),
+      customTooltipDetails: createCustomTooltipDetails(
+        rowsPerBucket,
+        formatFactory,
+        columns,
+        timeFormat
+      ),
       isGrouped: false,
     };
     if (rowsPerBucket.length > 1) {
