@@ -139,7 +139,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   const [{ severity: formSeverity, timestampOverride: formTimestampOverride }] =
     useFormData<AboutStepRule>({
       form,
-      watch: ['severity', 'timestampOverride'],
+      watch: ['isAssociatedToEndpointList', 'isBuildingBlock', 'riskScore', 'ruleNameOverride', 'severity', 'timestampOverride', 'threat', 'timestampOverrideFallbackDisabled'],
       onChange: (aboutData: AboutStepRule) => {
         if (onRuleDataChange) {
           onRuleDataChange({

@@ -29,7 +29,6 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   flex: 1;
 
   .euiFlyoutBody__overflow {
-    overflow: hidden;
     mask-image: none;
   }
 `;
