@@ -84,13 +84,13 @@ after it is created.
 unique, a distinctive name can help you identify a rule.
 
 `notify_when`::
-(Required, string) Defines how often to repeat actions while alerts are active.
-Valid values are: 
+(Required, string) Defines how often alerts generate actions. Valid values are: 
 +
 --
 
 * `onActionGroupChange`: Actions run only when the alert status changes.
-* `onActiveAlert`: Actions run at each check interval.
+* `onActiveAlert`: Actions run when the alert becomes active. If the alert
+remains active, actions run at each check interval.
 * `onThrottleInterval`: Actions run only when the alert remains active longer
 than the interval specified in the `throttle` property. 
 

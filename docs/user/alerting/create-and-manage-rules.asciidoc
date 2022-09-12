@@ -51,9 +51,9 @@ organize and find rules.
 Check every:: Defines how often to evaluate the rule condition. Checks are
 queued; they run as close to the defined value as capacity allows. For more
 details, go to <<alerting-production-considerations,Alerting production considerations>>.
-Notify:: Defines how often to repeat actions while alerts are active. Options
-include generating actions at each check interval, only when the alert status
-changes, or at a custom action interval. 
+Notify:: Defines how often alerts generate actions. Options include running
+actions at each check interval, only when the alert status changes, or at a
+custom action interval. 
 +
 --
 [[alerting-concepts-suppressing-duplicate-notifications]]
