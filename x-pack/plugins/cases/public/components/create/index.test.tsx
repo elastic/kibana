@@ -31,6 +31,7 @@ import { useGetConnectors } from '../../containers/configure/use_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
 
 jest.mock('../../containers/api');
+jest.mock('../../containers/user_profiles/api');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/configure/use_configure');
@@ -63,7 +64,7 @@ const fillForm = (wrapper: ReactWrapper) => {
 
   act(() => {
     (
-      wrapper.find(EuiComboBox).props() as unknown as {
+      wrapper.find(EuiComboBox).at(1).props() as unknown as {
         onChange: (a: EuiComboBoxOptionOption[]) => void;
       }
     ).onChange(sampleTags.map((tag) => ({ label: tag })));

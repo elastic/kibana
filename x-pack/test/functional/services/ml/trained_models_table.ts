@@ -284,7 +284,7 @@ export function TrainedModelsTableProvider(
     }
 
     public async openStartDeploymentModal(modelId: string) {
-      await testSubjects.clickWhenNotDisabledWithoutRetry(
+      await testSubjects.clickWhenNotDisabled(
         this.rowSelector(modelId, 'mlModelsTableRowStartDeploymentAction'),
         { timeout: 5000 }
       );
@@ -292,7 +292,7 @@ export function TrainedModelsTableProvider(
     }
 
     public async clickStopDeploymentAction(modelId: string) {
-      await testSubjects.clickWhenNotDisabledWithoutRetry(
+      await testSubjects.clickWhenNotDisabled(
         this.rowSelector(modelId, 'mlModelsTableRowStopDeploymentAction'),
         { timeout: 5000 }
       );

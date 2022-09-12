@@ -19,6 +19,7 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   search: '',
   searchFields: DEFAULT_SEARCH_FIELDS,
   severity: SeverityAll,
+  assignees: [],
   reporters: [],
   status: StatusAll,
   tags: [],

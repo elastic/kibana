@@ -6,7 +6,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { convertDataViewIntoLensIndexPattern } from '../../../../indexpattern_service/loader';
+import { convertDataViewIntoLensIndexPattern } from '../../../../data_views_service/loader';
 import type { IndexPattern } from '../../../../types';
 import type { PersistedIndexPatternLayer } from '../../../types';
 
