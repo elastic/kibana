@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { PackageInfo, RegistryRelease } from '../../../types';
+import type { PackageInfo, RegistryRelease } from '../types';
 
 const RELEASE_BADGE_LABEL: { [key in Exclude<RegistryRelease, 'ga'>]: string } = {
   beta: i18n.translate('xpack.fleet.epm.releaseBadge.betaLabel', {
@@ -43,7 +43,7 @@ export const HeaderReleaseBadge: React.FC<{ release: NonNullable<PackageInfo['re
   );
 };
 
-export const CardReleaseBadge: React.FC<{ release: NonNullable<PackageInfo['release']> }> = ({
+export const InlineReleaseBadge: React.FC<{ release: NonNullable<PackageInfo['release']> }> = ({
   release,
 }) => {
   if (release === 'ga') return null;

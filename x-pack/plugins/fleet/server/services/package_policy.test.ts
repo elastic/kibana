@@ -3502,6 +3502,7 @@ describe('_applyIndexPrivileges()', () => {
       type: '',
       dataset: '',
       title: '',
+      // @ts-ignore-error
       release: '',
       package: '',
       path: '',
