@@ -16,6 +16,14 @@ jest.mock('./filter_hosted_agents', () => ({
     .mockImplementation((soClient, givenAgents) => Promise.resolve(givenAgents)),
 }));
 
+const mockRunAsync = jest.fn().mockResolvedValue({});
+jest.mock('./update_agent_tags_action_runner', () => ({
+  ...jest.requireActual('./update_agent_tags_action_runner'),
+  UpdateAgentTagsActionRunner: jest.fn().mockImplementation(() => {
+    return { runActionAsyncWithRetry: mockRunAsync };
+  }),
+}));
+
 describe('update_agent_tags', () => {
   let esClient: ElasticsearchClientMock;
   let soClient: jest.Mocked<SavedObjectsClientContract>;
@@ -36,6 +44,8 @@ describe('update_agent_tags', () => {
     esClient.bulk.mockResolvedValue({
       items: [],
     } as any);
+
+    mockRunAsync.mockClear();
   });
 
   function expectTagsInEsBulk(tags: string[]) {
@@ -113,5 +123,34 @@ describe('update_agent_tags', () => {
     );
 
     expectTagsInEsBulk(['three', 'newName']);
+  });
+
+  it('should run add tags async when actioning more agents than batch size', async () => {
+    esClient.search.mockResolvedValue({
+      hits: {
+        total: 3,
+        hits: [
+          {
+            _id: 'agent1',
+            _source: {},
+          } as any,
+          {
+            _id: 'agent2',
+            _source: {},
+          } as any,
+          {
+            _id: 'agent3',
+            _source: {},
+          } as any,
+        ],
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {} as any,
+    });
+
+    await updateAgentTags(soClient, esClient, { kuery: '', batchSize: 2 }, ['newName'], []);
+
+    expect(mockRunAsync).toHaveBeenCalled();
   });
 });
