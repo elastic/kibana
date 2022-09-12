@@ -32,12 +32,15 @@ export const mockHostsState: HostsModel = {
         activePage: 8,
         limit: DEFAULT_TABLE_LIMIT,
       },
-      [HostsTableType.anomalies]: null,
+      [HostsTableType.anomalies]: {
+        jobIdSelection: [],
+        intervalSelection: 'auto',
+      },
       [HostsTableType.risk]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
-          field: RiskScoreFields.riskScore,
+          field: RiskScoreFields.hostRiskScore,
           direction: Direction.desc,
         },
         severitySelection: [],
@@ -68,12 +71,15 @@ export const mockHostsState: HostsModel = {
         activePage: 8,
         limit: DEFAULT_TABLE_LIMIT,
       },
-      [HostsTableType.anomalies]: null,
+      [HostsTableType.anomalies]: {
+        jobIdSelection: [],
+        intervalSelection: 'auto',
+      },
       [HostsTableType.risk]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
-          field: RiskScoreFields.riskScore,
+          field: RiskScoreFields.hostRiskScore,
           direction: Direction.desc,
         },
         severitySelection: [],
@@ -96,7 +102,10 @@ describe('Hosts redux store', () => {
           limit: 10,
           sortField: 'lastSeen',
         },
-        [HostsTableType.anomalies]: null,
+        [HostsTableType.anomalies]: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
         [HostsTableType.authentications]: {
           activePage: 0,
           limit: 10,
@@ -115,7 +124,7 @@ describe('Hosts redux store', () => {
           severitySelection: [],
           sort: {
             direction: 'desc',
-            field: 'risk_stats.risk_score',
+            field: RiskScoreFields.hostRiskScore,
           },
         },
         [HostsTableType.sessions]: {
@@ -133,7 +142,10 @@ describe('Hosts redux store', () => {
           limit: 10,
           sortField: 'lastSeen',
         },
-        [HostsTableType.anomalies]: null,
+        [HostsTableType.anomalies]: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
         [HostsTableType.authentications]: {
           activePage: 0,
           limit: 10,
@@ -152,7 +164,7 @@ describe('Hosts redux store', () => {
           severitySelection: [],
           sort: {
             direction: 'desc',
-            field: 'risk_stats.risk_score',
+            field: RiskScoreFields.hostRiskScore,
           },
         },
         [HostsTableType.sessions]: {

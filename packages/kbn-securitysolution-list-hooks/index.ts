@@ -10,7 +10,6 @@ export * from './src/use_api';
 export * from './src/use_create_list_index';
 export * from './src/use_cursor';
 export * from './src/use_delete_list';
-export * from './src/use_exception_list_items';
 export * from './src/use_exception_lists';
 export * from './src/use_export_list';
 export * from './src/use_find_lists';
