@@ -102,7 +102,7 @@ export const createQueryAlertType = (
         secondaryTimestamp,
       });
 
-      if (responseActions.length && result.createdSignalsCount) {
+      if (responseActions?.length && result.createdSignalsCount) {
         scheduleNotificationResponseActions(
           {
             signals: result.createdSignals,
