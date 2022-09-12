@@ -184,6 +184,7 @@ export function createCallerCalleeIntermediateRoot(
 }
 
 export interface CallerCalleeNode {
+  FrameID: string;
   FrameGroupID: string;
   Callers: CallerCalleeNode[];
   Callees: CallerCalleeNode[];
@@ -206,6 +207,7 @@ export interface CallerCalleeNode {
 export function createCallerCalleeNode(options: Partial<CallerCalleeNode> = {}): CallerCalleeNode {
   const node = {} as CallerCalleeNode;
 
+  node.FrameID = options.FrameID ?? '';
   node.FrameGroupID = options.FrameGroupID ?? '';
   node.Callers = clone(options.Callers ?? []);
   node.Callees = clone(options.Callees ?? []);
@@ -237,6 +239,7 @@ function selectCallerCalleeData(frameMetadata: Set<StackFrameMetadata>, node: Ca
     node.FunctionID = metadata.FunctionName;
     node.FunctionName = metadata.FunctionName;
     node.AddressOrLine = metadata.AddressOrLine;
+    node.FrameID = metadata.FrameID;
 
     // Unknown/invalid offsets are currently set to 0.
     //

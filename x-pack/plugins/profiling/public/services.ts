@@ -9,6 +9,7 @@ import { CoreStart, HttpFetchQuery } from '@kbn/core/public';
 import { getRoutePaths } from '../common';
 import { ElasticFlameGraph } from '../common/flamegraph';
 import { TopNFunctions } from '../common/functions';
+import { StackFrameMetadata } from '../common/profiling';
 import { TopNResponse } from '../common/topn';
 
 export interface Services {
@@ -30,6 +31,10 @@ export interface Services {
     timeTo: number;
     kuery: string;
   }) => Promise<ElasticFlameGraph>;
+  fetchFrameInformation: (params: {
+    frameID: string;
+    executableID: string;
+  }) => Promise<StackFrameMetadata>;
 }
 
 export function getServices(core: CoreStart): Services {
@@ -92,6 +97,23 @@ export function getServices(core: CoreStart): Services {
           kuery,
         };
         return await core.http.get(paths.FlamechartElastic, { query });
+      } catch (e) {
+        return e;
+      }
+    },
+    fetchFrameInformation: async ({
+      frameID,
+      executableID,
+    }: {
+      frameID: string;
+      executableID: string;
+    }) => {
+      try {
+        const query: HttpFetchQuery = {
+          frameID,
+          executableID,
+        };
+        return await core.http.get(paths.FrameInformation, { query });
       } catch (e) {
         return e;
       }

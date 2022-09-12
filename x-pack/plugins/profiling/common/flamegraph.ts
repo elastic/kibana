@@ -25,6 +25,8 @@ interface ColumnarCallerCallee {
   CountInclusive: number[];
   CountExclusive: number[];
   ID: string[];
+  FrameID: string[];
+  ExecutableID: string[];
 }
 
 export interface ElasticFlameGraph {
@@ -36,6 +38,11 @@ export interface ElasticFlameGraph {
   CountInclusive: number[];
   CountExclusive: number[];
   ID: string[];
+  FrameID: string[];
+  ExecutableID: string[];
+  TotalSeconds: number;
+  TotalTraces: number;
+  SampledTraces: number;
 }
 
 export enum FlameGraphComparisonMode {
@@ -133,25 +140,37 @@ export class FlameGraph {
   // Do the same for single entries in the events array.
   totalCount: number;
 
+  totalSeconds: number;
+
   events: Map<StackTraceID, number>;
   stacktraces: Map<StackTraceID, StackTrace>;
   stackframes: Map<StackFrameID, StackFrame>;
   executables: Map<FileID, Executable>;
 
-  constructor(
-    sampleRate: number,
-    totalCount: number,
-    events: Map<StackTraceID, number>,
-    stackTraces: Map<StackTraceID, StackTrace>,
-    stackFrames: Map<StackFrameID, StackFrame>,
-    executables: Map<FileID, Executable>
-  ) {
+  constructor({
+    sampleRate,
+    totalCount,
+    events,
+    stackTraces,
+    stackFrames,
+    executables,
+    totalSeconds,
+  }: {
+    sampleRate: number;
+    totalCount: number;
+    events: Map<StackTraceID, number>;
+    stackTraces: Map<StackTraceID, StackTrace>;
+    stackFrames: Map<StackFrameID, StackFrame>;
+    executables: Map<FileID, Executable>;
+    totalSeconds: number;
+  }) {
     this.sampleRate = sampleRate;
     this.totalCount = totalCount;
     this.events = events;
     this.stacktraces = stackTraces;
     this.stackframes = stackFrames;
     this.executables = executables;
+    this.totalSeconds = totalSeconds;
   }
 
   // createColumnarCallerCallee flattens the intermediate representation of the diagram
@@ -167,6 +186,8 @@ export class FlameGraph {
       CountInclusive: [],
       CountExclusive: [],
       ID: [],
+      FrameID: [],
+      ExecutableID: [],
     };
     const queue = [{ x: 0, depth: 1, node: root, parentID: 'root' }];
 
@@ -189,6 +210,8 @@ export class FlameGraph {
       const id = objectHash([parentID, node.FrameGroupID]);
 
       columnar.ID.push(id);
+      columnar.FrameID.push(node.FrameID);
+      columnar.ExecutableID.push(node.FileID);
 
       node.Callees.sort((a: CallerCalleeNode, b: CallerCalleeNode) => b.Samples - a.Samples);
 
@@ -218,6 +241,11 @@ export class FlameGraph {
       CountInclusive: [],
       CountExclusive: [],
       ID: [],
+      FrameID: [],
+      ExecutableID: [],
+      TotalSeconds: this.totalSeconds,
+      TotalTraces: Math.floor(this.totalCount / this.sampleRate),
+      SampledTraces: this.totalCount,
     };
 
     graph.Label = columnar.Label;
@@ -225,6 +253,8 @@ export class FlameGraph {
     graph.CountInclusive = columnar.CountInclusive;
     graph.CountExclusive = columnar.CountExclusive;
     graph.ID = columnar.ID;
+    graph.FrameID = columnar.FrameID;
+    graph.ExecutableID = columnar.ExecutableID;
 
     const maxX = columnar.Value[0];
     const maxY = columnar.Y.reduce((max, n) => (n > max ? n : max), 0);

@@ -13,6 +13,7 @@ import {
 } from '../types';
 
 import { registerFlameChartElasticSearchRoute } from './flamechart';
+import { registerFrameInformationRoute } from './frames';
 
 import { registerTopNFunctionsSearchRoute } from './functions';
 
@@ -41,4 +42,5 @@ export function registerRoutes(params: RouteRegisterParameters) {
   registerTraceEventsTopNHostsSearchRoute(params);
   registerTraceEventsTopNStackTracesSearchRoute(params);
   registerTraceEventsTopNThreadsSearchRoute(params);
+  registerFrameInformationRoute(params);
 }
