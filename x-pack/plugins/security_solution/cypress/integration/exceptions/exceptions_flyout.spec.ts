@@ -303,7 +303,7 @@ describe('Exceptions flyout', () => {
       goToExceptionsTab();
     });
 
-    context('When updating an item with version conflict', () => {
+    context.skip('When updating an item with version conflict', () => {
       it('Displays version conflict error', () => {
         editException();
 
@@ -334,7 +334,7 @@ describe('Exceptions flyout', () => {
       });
     });
 
-    context('When updating an item for a list that has since been deleted', () => {
+    context.skip('When updating an item for a list that has since been deleted', () => {
       it('Displays missing exception list error', () => {
         editException();
 

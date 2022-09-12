@@ -8,10 +8,11 @@
 /* eslint-disable no-console */
 
 import Url from 'url';
+import * as Rx from 'rxjs';
 import { inspect } from 'util';
 import { setTimeout } from 'timers/promises';
 import apm, { Span, Transaction } from 'elastic-apm-node';
-import playwright, { ChromiumBrowser, Page, BrowserContext, CDPSession } from 'playwright';
+import playwright, { ChromiumBrowser, Page, BrowserContext, CDPSession, Request } from 'playwright';
 import { FtrService, FtrProviderContext } from '../ftr_provider_context';
 
 export interface StepCtx {
@@ -24,11 +25,15 @@ export type Steps = Array<{ name: string; handler: StepFn }>;
 
 export class PerformanceTestingService extends FtrService {
   private readonly auth = this.ctx.getService('auth');
+  private readonly log = this.ctx.getService('log');
   private readonly config = this.ctx.getService('config');
 
   private browser: ChromiumBrowser | undefined;
   private currentSpanStack: Array<Span | null> = [];
   private currentTransaction: Transaction | undefined | null = undefined;
+
+  private pageTeardown$ = new Rx.Subject<Page>();
+  private telemetryTrackerSubs = new Map<Page, Rx.Subscription>();
 
   constructor(ctx: FtrProviderContext) {
     super(ctx);
@@ -164,6 +169,44 @@ export class PerformanceTestingService extends FtrService {
     return client;
   }
 
+  private telemetryTrackerCount = 0;
+
+  private trackTelemetryRequests(page: Page) {
+    const id = ++this.telemetryTrackerCount;
+
+    const requestFailure$ = Rx.fromEvent<Request>(page, 'requestfailed');
+    const requestSuccess$ = Rx.fromEvent<Request>(page, 'requestfinished');
+    const request$ = Rx.fromEvent<Request>(page, 'request').pipe(
+      Rx.takeUntil(
+        this.pageTeardown$.pipe(
+          Rx.first((p) => p === page),
+          Rx.delay(3000)
+          // If EBT client buffers:
+          // Rx.mergeMap(async () => {
+          //  await page.waitForFunction(() => {
+          //    // return window.kibana_ebt_client.buffer_size == 0
+          //  });
+          // })
+        )
+      ),
+      Rx.mergeMap((request) => {
+        if (!request.url().includes('telemetry-staging.elastic.co')) {
+          return Rx.EMPTY;
+        }
+
+        this.log.debug(`Waiting for telemetry request #${id} to complete`);
+        return Rx.merge(requestFailure$, requestSuccess$).pipe(
+          Rx.first((r) => r === request),
+          Rx.tap({
+            complete: () => this.log.debug(`Telemetry request #${id} complete`),
+          })
+        );
+      })
+    );
+
+    this.telemetryTrackerSubs.set(page, request$.subscribe());
+  }
+
   private async interceptBrowserRequests(page: Page) {
     await page.route('**', async (route, request) => {
       const headers = await request.allHeaders();
@@ -196,6 +239,7 @@ export class PerformanceTestingService extends FtrService {
       }
       const client = await this.sendCDPCommands(context, page);
 
+      this.trackTelemetryRequests(page);
       await this.interceptBrowserRequests(page);
       await this.handleSteps(steps, page);
       await this.tearDown(page, client, context);
@@ -204,6 +248,16 @@ export class PerformanceTestingService extends FtrService {
 
   private async tearDown(page: Page, client: CDPSession, context: BrowserContext) {
     if (page) {
+      const telemetryTracker = this.telemetryTrackerSubs.get(page);
+      this.telemetryTrackerSubs.delete(page);
+
+      if (telemetryTracker && !telemetryTracker.closed) {
+        this.log.info(
+          `Waiting for telemetry requests to complete, including requests starting within next 3 secs`
+        );
+        this.pageTeardown$.next(page);
+        await new Promise<void>((resolve) => telemetryTracker.add(resolve));
+      }
       await client.detach();
       await page.close();
       await context.close();
