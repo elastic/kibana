@@ -10,7 +10,6 @@ import { WebDriver, WebElement, By, until } from 'selenium-webdriver';
 
 import { Browsers } from '../remote/browsers';
 import { FtrService, FtrProviderContext } from '../../ftr_provider_context';
-import { retryOnStale } from './retry_on_stale';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
 import { TimeoutOpt } from './types';
 
@@ -18,6 +17,7 @@ export class FindService extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly config = this.ctx.getService('config');
   private readonly retry = this.ctx.getService('retry');
+  private readonly retryOnStale = this.ctx.getService('retryOnStale');
 
   private readonly WAIT_FOR_EXISTS_TIME = this.config.get('timeouts.waitForExists');
   private readonly POLLING_TIME = 500;
@@ -290,7 +290,7 @@ export class FindService extends FtrService {
   public async clickByCssSelectorWhenNotDisabled(selector: string, opts?: TimeoutOpt) {
     const timeout = opts?.timeout ?? this.defaultFindTimeout;
 
-    await retryOnStale(this.log, async () => {
+    await this.retryOnStale(async () => {
       this.log.debug(`Find.clickByCssSelectorWhenNotDisabled(${selector}, timeout=${timeout})`);
 
       const element = await this.byCssSelector(selector);
