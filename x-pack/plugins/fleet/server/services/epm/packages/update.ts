@@ -8,6 +8,8 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
+import type { ExperimentalIndexingFeature } from '../../../../common/types';
+
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type { Installation, UpdatePackageRequestSchema } from '../../../types';
 import { IngestManagerError } from '../../../errors';
@@ -39,4 +41,22 @@ export async function updatePackage(
   });
 
   return packageInfo;
+}
+
+export async function updateDatastreamExperimentalFeatures(
+  savedObjectsClient: SavedObjectsClientContract,
+  pkgName: string,
+  dataStreamFeatureMapping: Array<{
+    data_stream: string;
+    features: Record<ExperimentalIndexingFeature, boolean>;
+  }>
+) {
+  await savedObjectsClient.update<Installation>(
+    PACKAGES_SAVED_OBJECT_TYPE,
+    pkgName,
+    {
+      experimental_data_stream_features: dataStreamFeatureMapping,
+    },
+    { refresh: 'wait_for' }
+  );
 }
