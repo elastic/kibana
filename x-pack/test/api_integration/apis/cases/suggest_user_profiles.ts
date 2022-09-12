@@ -11,15 +11,16 @@ import { APP_ID as SECURITY_SOLUTION_APP_ID } from '@kbn/security-solution-plugi
 import { observabilityFeatureId as OBSERVABILITY_APP_ID } from '@kbn/observability-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-import {
-  deleteAllCaseItems,
-  suggestUserProfiles,
-} from '../../../cases_api_integration/common/lib/utils';
+import { deleteAllCaseItems } from '../../../cases_api_integration/common/lib/utils';
+import { suggestUserProfiles } from '../../../cases_api_integration/common/lib/user_profiles';
 import {
   casesAllUser,
   casesOnlyDeleteUser,
+  casesReadUser,
   obsCasesAllUser,
   obsCasesOnlyDeleteUser,
+  obsCasesReadUser,
+  secAllCasesNoneUser,
   secAllCasesReadUser,
   secAllUser,
 } from './common/users';
@@ -33,27 +34,34 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(es);
     });
 
-    for (const { user, owner } of [
-      { user: secAllUser, owner: SECURITY_SOLUTION_APP_ID },
-      { user: casesAllUser, owner: CASES_APP_ID },
-      { user: obsCasesAllUser, owner: OBSERVABILITY_APP_ID },
+    for (const { user, searchTerm, owner } of [
+      { user: secAllUser, searchTerm: secAllUser.username, owner: SECURITY_SOLUTION_APP_ID },
+      {
+        user: secAllCasesReadUser,
+        searchTerm: secAllUser.username,
+        owner: SECURITY_SOLUTION_APP_ID,
+      },
+      { user: casesAllUser, searchTerm: casesAllUser.username, owner: CASES_APP_ID },
+      { user: casesReadUser, searchTerm: casesAllUser.username, owner: CASES_APP_ID },
+      { user: obsCasesAllUser, searchTerm: obsCasesAllUser.username, owner: OBSERVABILITY_APP_ID },
+      { user: obsCasesReadUser, searchTerm: obsCasesAllUser.username, owner: OBSERVABILITY_APP_ID },
     ]) {
       it(`User ${
         user.username
       } with roles(s) ${user.roles.join()} can retrieve user profile suggestions`, async () => {
         const profiles = await suggestUserProfiles({
           supertest: supertestWithoutAuth,
-          req: { name: user.username, owners: [owner], size: 1 },
+          req: { name: searchTerm, owners: [owner], size: 1 },
           auth: { user, space: null },
         });
 
         expect(profiles.length).to.be(1);
-        expect(profiles[0].user.username).to.eql(user.username);
+        expect(profiles[0].user.username).to.eql(searchTerm);
       });
     }
 
     for (const { user, owner } of [
-      { user: secAllCasesReadUser, owner: SECURITY_SOLUTION_APP_ID },
+      { user: secAllCasesNoneUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: casesOnlyDeleteUser, owner: CASES_APP_ID },
       { user: obsCasesOnlyDeleteUser, owner: OBSERVABILITY_APP_ID },
     ]) {

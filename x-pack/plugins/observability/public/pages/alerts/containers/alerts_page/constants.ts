@@ -9,7 +9,8 @@ import { DataViewBase } from '@kbn/es-query';
 import { ALERT_STATUS } from '@kbn/rule-data-utils';
 
 export const ALERTS_PAGE_ID = 'alerts-o11y';
-export const ALERTS_TABLE_ID = 'xpack.observability.alerts.table';
+export const ALERTS_PER_PAGE = 50;
+export const ALERTS_TABLE_ID = 'xpack.observability.alerts.alert.table';
 
 const regExpEscape = (str: string) => str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 export const NO_INDEX_PATTERNS: DataViewBase[] = [];
