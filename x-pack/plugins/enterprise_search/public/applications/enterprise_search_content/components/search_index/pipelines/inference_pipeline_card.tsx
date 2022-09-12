@@ -22,13 +22,13 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { IInferencePipeline } from './types';
+import { InferencePipeline } from './types';
 
-export const InferencePipelineCard: React.FC<IInferencePipeline> = ({
+export const InferencePipelineCard: React.FC<InferencePipeline> = ({
   pipelineName,
   trainedModelName,
   isDeployed,
-  modelTypes,
+  modelType,
 }) => {
   const [isPopOverOpen, setIsPopOverOpen] = useState(false);
 
@@ -110,20 +110,9 @@ export const InferencePipelineCard: React.FC<IInferencePipeline> = ({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="xs">
-                    {modelTypes.length > 0 && (
-                      <EuiFlexItem>
-                        <EuiBadge color="hollow">{modelTypes[0]}</EuiBadge>
-                      </EuiFlexItem>
-                    )}
-                    {modelTypes.length > 1 && (
-                      <EuiFlexItem>
-                        <EuiToolTip position="top" content={modelTypes.slice(1).join(', ')}>
-                          <EuiBadge data-test-subj="overflowModelTypesBadge" color="hollow">
-                            +{modelTypes.length - 1}
-                          </EuiBadge>
-                        </EuiToolTip>
-                      </EuiFlexItem>
-                    )}
+                    <EuiFlexItem>
+                      <EuiBadge color="hollow">{modelType}</EuiBadge>
+                    </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>

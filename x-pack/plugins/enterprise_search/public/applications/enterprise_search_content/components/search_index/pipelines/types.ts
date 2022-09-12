@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export interface IInferencePipeline {
+export interface InferencePipeline {
   pipelineName: string;
   trainedModelName: string;
   isDeployed: boolean;
-  modelTypes: string[];
+  modelTypes: string;
 }

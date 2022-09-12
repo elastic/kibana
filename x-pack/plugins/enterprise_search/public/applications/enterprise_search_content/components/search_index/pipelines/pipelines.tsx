@@ -14,29 +14,29 @@ import { i18n } from '@kbn/i18n';
 import { DataPanel } from '../../../../shared/data_panel/data_panel';
 
 import { InferencePipelineCard } from './inference_pipeline_card';
-import { IInferencePipeline } from './types';
+import { InferencePipeline } from './types';
 
 export const SearchIndexPipelines: React.FC = () => {
   // TODO: REPLACE THIS DATA WITH REAL DATA
 
-  const inferencePipelines: IInferencePipeline[] = [
+  const inferencePipelines: InferencePipeline[] = [
     {
       pipelineName: 'NER Processor',
       trainedModelName: 'elastic_dslim_bert_base_ner',
       isDeployed: true,
-      modelTypes: ['pytorch', 'another'],
+      modelType: 'pytorch',
     },
     {
       pipelineName: 'Sentiment Analysis',
       trainedModelName: 'elastic_dslim_bert_base_ner',
       isDeployed: false,
-      modelTypes: ['pytorch', 'another', 'something', 'spice'],
+      modelType: 'pytorch',
     },
     {
       pipelineName: 'Sentiment Analysis',
       trainedModelName: 'elastic_dslim_bert_base_ner',
       isDeployed: false,
-      modelTypes: ['pytorch'],
+      modelType: 'pytorch',
     },
   ];
 

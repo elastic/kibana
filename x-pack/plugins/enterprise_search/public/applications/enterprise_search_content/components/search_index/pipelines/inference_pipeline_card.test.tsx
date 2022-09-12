@@ -19,7 +19,7 @@ export const DEFAULT_VALUES = {
   pipelineName: 'Sample Processor',
   trainedModelName: 'example_trained_model',
   isDeployed: true,
-  modelTypes: ['pytorch'],
+  modelType: 'pytorch',
 } 
 
 const mockValues = { ...DEFAULT_VALUES };
@@ -43,10 +43,5 @@ describe('InfererencePipelineCard', () => {
     const wrapper = shallow(<InferencePipelineCard {...mockValues} isDeployed={false} />);
     const health = wrapper.find(EuiHealth);
     expect(health.prop('children')).toEqual('Not deployed');
-  });
-  it('renders an overflow list of modelTypes', () => {
-    const wrapper = shallow(<InferencePipelineCard {...mockValues} modelTypes={['pytorch', 'another']} />);
-    expect(wrapper.find(EuiBadge)).toHaveLength(2);
-    expect(wrapper.find('[data-test-subj="overflowModelTypesBadge"]')).toHaveLength(1);
   });
 }) 
