@@ -560,7 +560,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       }
     }
 
-    const deletePromises = [];
+    let deletePromises = [];
 
     const deletePackagePolicy = async (id: string, packagePolicy?: PackagePolicy) => {
       try {
@@ -578,6 +578,8 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
           );
         }
 
+        // TODO: replace this with savedObject BulkDelete when following PR is merged
+        // https://github.com/elastic/kibana/pull/139680
         deletePromises.push(soClient.delete(SAVED_OBJECT_TYPE, id));
 
         result.push({
@@ -600,12 +602,19 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       }
     };
 
-    for (const id of ids) {
-      const packagePolicy = packagePolicies.find((p) => p.id === id);
-      deletePromises.push(deletePackagePolicy(id, packagePolicy));
-    }
+    // Doing in chunks to not overWhelm kibana, if there are too many to delete
+    const chunkSize = 1000;
+    for (let i = 0; i < ids.length; i += chunkSize) {
+      const chunkIds = ids.slice(i, i + chunkSize);
 
-    await Promise.all(deletePromises);
+      deletePromises = [];
+
+      for (const id of chunkIds) {
+        const packagePolicy = packagePolicies.find((p) => p.id === id);
+        deletePromises.push(deletePackagePolicy(id, packagePolicy));
+      }
+      await Promise.all(deletePromises);
+    }
 
     if (!options?.skipUnassignFromAgentPolicies) {
       const uniquePolicyIdsR = [
