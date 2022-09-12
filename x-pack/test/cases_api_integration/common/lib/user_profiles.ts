@@ -6,6 +6,7 @@
  */
 
 import type SuperTest from 'supertest';
+import { parse as parseCookie, Cookie } from 'tough-cookie';
 
 import { UserProfileBulkGetParams, UserProfileServiceStart } from '@kbn/security-plugin/server';
 import { INTERNAL_SUGGEST_USER_PROFILES_URL } from '@kbn/cases-plugin/common/constants';
@@ -69,8 +70,10 @@ export const loginUsers = async ({
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   users?: User[];
 }) => {
+  const cookies: Cookie[] = [];
+
   for (const user of users) {
-    await supertest
+    const response = await supertest
       .post('/internal/security/login')
       .set('kbn-xsrf', 'xxx')
       .send({
@@ -80,5 +83,9 @@ export const loginUsers = async ({
         params: { username: user.username, password: user.password },
       })
       .expect(200);
+
+    cookies.push(parseCookie(response.header['set-cookie'][0])!);
   }
+
+  return cookies;
 };

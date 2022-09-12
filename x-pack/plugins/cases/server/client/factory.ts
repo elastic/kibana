@@ -109,17 +109,12 @@ export class CasesClientFactory {
       esClient: scopedClusterClient,
     });
 
-    const userInfo = await this.options.securityPluginStart?.userProfiles.getCurrent({ request });
+    const userInfo = await this.getUserInfo(request);
 
     return createCasesClient({
       services,
       unsecuredSavedObjectsClient,
-      user: {
-        username: userInfo?.user.username,
-        email: userInfo?.user.email,
-        full_name: userInfo?.user.full_name,
-        profile_uid: userInfo?.uid,
-      },
+      user: userInfo,
       logger: this.logger,
       lensEmbeddableFactory: this.options.lensEmbeddableFactory,
       authorization: auth,
@@ -162,6 +157,64 @@ export class CasesClientFactory {
         this.options.persistableStateAttachmentTypeRegistry
       ),
       attachmentService,
+    };
+  }
+
+  /**
+   * This function attempts to retrieve the current user's info. The first method is using the user profile api
+   * provided by the security plugin. If that fails or the session isn't found then we will attempt using authc
+   * which will not retrieve the profile uid but at least gets us the username and sometimes full name, and email.
+   *
+   * This function also forces the fields to be strings or null (except the profile uid since it's optional anyway)
+   * because the get case API expects a created_by field to be set. If we leave the fields as undefined
+   * then the resulting object in ES will just be empty and it'll fail to encode the user when returning it to the API
+   * request. If we force them to be null it will succeed.
+   */
+  private async getUserInfo(request: KibanaRequest): Promise<{
+    username: string | null;
+    full_name: string | null;
+    email: string | null;
+    profile_uid?: string;
+  }> {
+    if (!this.isInitialized || !this.options) {
+      throw new Error('CasesClientFactory must be initialized before calling create');
+    }
+
+    try {
+      const userProfile = await this.options.securityPluginStart?.userProfiles.getCurrent({
+        request,
+      });
+
+      if (userProfile != null) {
+        return {
+          username: userProfile.user.username,
+          full_name: userProfile.user.full_name ?? null,
+          email: userProfile.user.email ?? null,
+          profile_uid: userProfile.uid,
+        };
+      }
+    } catch (error) {
+      this.logger.debug(`Failed to retrieve user profile, falling back to authc: ${error}`);
+    }
+
+    try {
+      const user = this.options.securityPluginStart?.authc.getCurrentUser(request);
+
+      if (user != null) {
+        return {
+          username: user.username,
+          full_name: user.full_name ?? null,
+          email: user.email ?? null,
+        };
+      }
+    } catch (error) {
+      this.logger.debug(`Failed to retrieve user info from authc: ${error}`);
+    }
+
+    return {
+      username: null,
+      full_name: null,
+      email: null,
     };
   }
 }

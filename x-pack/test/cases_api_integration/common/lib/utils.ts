@@ -65,6 +65,7 @@ import { superUser } from './authentication/users';
 import { getPostCaseRequest, postCaseReq } from './mock';
 import { ObjectRemover as ActionsRemover } from '../../../alerting_api_integration/common/lib';
 import { getServiceNowServer } from '../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
+import { RecordingServiceNowSimulator } from '../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/servicenow_simulation';
 
 function toArray<T>(input: T | T[]): T[] {
   if (Array.isArray(input)) {
@@ -594,6 +595,7 @@ export const createCaseWithConnector = async ({
   actionsRemover,
   auth = { user: superUser, space: null },
   createCaseReq = getPostCaseRequest(),
+  headers = {},
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   serviceNowSimulatorURL: string;
@@ -601,6 +603,7 @@ export const createCaseWithConnector = async ({
   configureReq?: Record<string, unknown>;
   auth?: { user: User; space: string | null };
   createCaseReq?: CasePostRequest;
+  headers?: Record<string, unknown>;
 }): Promise<{
   postedCase: CaseResponse;
   connector: CreateConnectorResponse;
@@ -648,7 +651,8 @@ export const createCaseWithConnector = async ({
       } as CaseConnector,
     },
     200,
-    auth
+    auth,
+    headers
   );
 
   return { postedCase, connector, configuration };
@@ -658,12 +662,14 @@ export const createCase = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   params: CasePostRequest,
   expectedHttpCode: number = 200,
-  auth: { user: User; space: string | null } = { user: superUser, space: null }
+  auth: { user: User; space: string | null } = { user: superUser, space: null },
+  headers: Record<string, unknown> = {}
 ): Promise<CaseResponse> => {
   const { body: theCase } = await supertest
     .post(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}`)
     .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
+    .set(headers)
     .send(params)
     .expect(expectedHttpCode);
 
@@ -1207,16 +1213,32 @@ export const getAlertsAttachedToCase = async ({
   return theCase;
 };
 
-export const getServiceNowSimulationServer = async (): Promise<{
-  server: http.Server;
+export const getRecordingServiceNowSimulatorServer = async (): Promise<{
+  server: RecordingServiceNowSimulator;
   url: string;
 }> => {
-  const server = await getServiceNowServer();
+  const simulator = await RecordingServiceNowSimulator.start();
+  const url = await startServiceNowSimulatorListening(simulator.server);
+
+  return { server: simulator, url };
+};
+
+const startServiceNowSimulatorListening = async (server: http.Server) => {
   const port = await getPort({ port: getPort.makeRange(9000, 9100) });
   if (!server.listening) {
     server.listen(port);
   }
   const url = `http://localhost:${port}`;
+
+  return url;
+};
+
+export const getServiceNowSimulationServer = async (): Promise<{
+  server: http.Server;
+  url: string;
+}> => {
+  const server = await getServiceNowServer();
+  const url = await startServiceNowSimulatorListening(server);
 
   return { server, url };
 };
