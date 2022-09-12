@@ -115,8 +115,8 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         // @ts-ignore // TODO: remove once we have real data
         const fieldValue = current[fieldName];
         if (fieldNameCountMap === undefined) {
-          countMap[fieldName] = { [fieldValue]: 1 }
-        }  else if (fieldNameCountMap[fieldValue] === undefined) {
+          countMap[fieldName] = { [fieldValue]: 1 };
+        } else if (fieldNameCountMap[fieldValue] === undefined) {
           fieldNameCountMap[fieldValue] = 1;
         } else {
           fieldNameCountMap[fieldValue] += 1;
@@ -129,8 +129,8 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     const tableItems = mockData.map((group, index) => {
       const dedupedGroup = {};
       const repeatedValues = {};
-      
-      for(const fieldName in group) {
+
+      for (const fieldName in group) {
         if (fieldName === 'doc_count') continue;
         // @ts-ignore // TODO: remove once we have real data
         const fieldValue = group[fieldName];
@@ -138,7 +138,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           // @ts-ignore // TODO: remove once we have real data
           dedupedGroup[fieldName] = fieldValue;
         } else {
-           // @ts-ignore // TODO: remove once we have real data
+          // @ts-ignore // TODO: remove once we have real data
           repeatedValues[fieldName] = fieldValue;
         }
       }
@@ -148,7 +148,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         docCount: group.doc_count,
         group: dedupedGroup,
         repeatedValues,
-      }
+      };
     });
 
     return tableItems;

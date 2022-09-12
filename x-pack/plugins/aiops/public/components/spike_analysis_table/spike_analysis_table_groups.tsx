@@ -54,7 +54,7 @@ interface GroupTableItem {
 
 interface SpikeAnalysisTableProps {
   changePoints: ChangePoint[];
-  groupTableItems: Array<GroupTableItem>;
+  groupTableItems: GroupTableItem[];
   dataViewId?: string;
   loading: boolean;
   onPinnedChangePoint?: (changePoint: ChangePoint | null) => void;
@@ -71,7 +71,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
   onSelectedChangePoint,
   selectedChangePoint,
 }) => {
-   // @ts-ignore
+  // @ts-ignore
   const euiTheme = useEuiTheme();
 
   const [pageIndex, setPageIndex] = useState(0);
@@ -155,12 +155,10 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
         listItems.push({
           title: `${fieldName}`,
           description: `${fullGroup[fieldName]}`,
-        })
+        });
       }
       // @ts-ignore
-      itemIdToExpandedRowMapValues[item.id] = (
-        <EuiDescriptionList listItems={listItems} />
-      );
+      itemIdToExpandedRowMapValues[item.id] = <EuiDescriptionList listItems={listItems} />;
     }
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
   };
@@ -195,12 +193,9 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       // @ts-ignore
       render: (_, { group }) => (
         <EuiCodeBlock
-          aria-label={i18n.translate(
-            'xpack.aiops.correlations.correlationsTable.groupJsonPane',
-            {
-              defaultMessage: 'JSON of groups',
-            }
-          )}
+          aria-label={i18n.translate('xpack.aiops.correlations.correlationsTable.groupJsonPane', {
+            defaultMessage: 'JSON of groups',
+          })}
           style={{ width: '100%' }}
           language="json"
           fontSize="s"
@@ -216,10 +211,9 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
     {
       'data-test-subj': 'aiopsSpikeAnalysisTableColumnDocCount',
       field: 'docCount',
-      name: i18n.translate(
-        'xpack.aiops.correlations.correlationsTable.docCountLabel',
-        { defaultMessage: 'Doc count' }
-      ),
+      name: i18n.translate('xpack.aiops.correlations.correlationsTable.docCountLabel', {
+        defaultMessage: 'Doc count',
+      }),
       sortable: true,
       width: '20%',
     },
