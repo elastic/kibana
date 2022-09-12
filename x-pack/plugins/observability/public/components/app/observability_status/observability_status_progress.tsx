@@ -67,16 +67,14 @@ export function ObservabilityStatusProgress({
 
   return !isGuidedSetupProgressDismissed ? (
     <>
-      <EuiPanel color="primary" data-test-subj="status-progress">
-        <EuiProgress color="primary" value={progress} max={100} size="m" />
-        <EuiSpacer size="s" />
+      <EuiPanel color="warning" data-test-subj="status-progress">
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiTitle size="xxs">
               <h2>
                 <FormattedMessage
                   id="xpack.observability.status.progressBarTitle"
-                  defaultMessage="Guided setup for Observability"
+                  defaultMessage="Integration status"
                 />
               </h2>
             </EuiTitle>
@@ -92,7 +90,7 @@ export function ObservabilityStatusProgress({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup responsive={false} direction="row" alignItems="center">
               <EuiFlexItem>
-                <EuiButtonEmpty size="s" onClick={dismissGuidedSetup}>
+                <EuiButtonEmpty color="warning" size="s" onClick={dismissGuidedSetup}>
                   <FormattedMessage
                     id="xpack.observability.status.progressBarDismiss"
                     defaultMessage="Dismiss"
@@ -100,10 +98,10 @@ export function ObservabilityStatusProgress({
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiButton size="s" onClick={showDetails}>
+                <EuiButton color="warning" size="s" onClick={showDetails}>
                   <FormattedMessage
                     id="xpack.observability.status.progressBarViewDetails"
-                    defaultMessage="View details"
+                    defaultMessage="Learn more"
                   />
                 </EuiButton>
               </EuiFlexItem>
