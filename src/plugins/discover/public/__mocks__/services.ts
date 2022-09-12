@@ -29,6 +29,8 @@ import { dataViewsMock } from './data_views';
 const dataPlugin = dataPluginMock.createStartContract();
 const expressionsPlugin = expressionsPluginMock.createStartContract();
 
+dataPlugin.query.filterManager.getFilters = jest.fn(() => []);
+
 export const discoverServiceMock = {
   core: coreMock.createStart(),
   chrome: chromeServiceMock.createStartContract(),

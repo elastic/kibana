@@ -57,7 +57,7 @@ export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
   /**
    * Context app state
    */
-  const { appState, globalState, setAppState } = useContextAppState({ services });
+  const { appState, globalState, setAppState } = useContextAppState({ services, dataView });
   const prevAppState = useRef<AppState>();
   const prevGlobalState = useRef<GlobalState>({ filters: [] });
 
