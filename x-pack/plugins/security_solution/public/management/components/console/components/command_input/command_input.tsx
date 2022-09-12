@@ -143,8 +143,8 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
     [keyCaptureFocusRef]
   );
 
-  const handleKeyCapture = useCallback<KeyCaptureProps['onCapture']>(
-    ({ value, eventDetails }) => {
+  const handleKeyCapture = useCallback<InputCaptureProps['onCapture']>(
+    ({ value, selection, eventDetails }) => {
       const keyCode = eventDetails.keyCode;
 
       // UP arrow key
@@ -159,77 +159,34 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
       // Update the store with the updated text that was entered
       dispatch({
         type: 'updateInputTextEnteredState',
-        payload: ({ rightOfCursor: prevRightOfCursor, textEntered: prevTextEntered }) => {
-          let updatedTextEnteredState = prevTextEntered + value;
+        payload: ({ textEntered: prevLeftOfCursor, rightOfCursor: prevRightOfCursor }) => {
+          let updatedLeftOfCursor = prevLeftOfCursor + value;
           let updatedRightOfCursor: ConsoleDataState['input']['rightOfCursor'] | undefined =
             prevRightOfCursor;
 
-          const lengthOfTextEntered = updatedTextEnteredState.length;
+          // If user selected some text and we have a key value, then replace that selection with new value
+          if (selection && value) {
+            const prevFullTextEntered = prevLeftOfCursor + prevRightOfCursor.text;
+
+            updatedLeftOfCursor =
+              prevFullTextEntered.substring(0, prevFullTextEntered.indexOf(selection)) + value;
+
+            updatedRightOfCursor = {
+              text: prevFullTextEntered.substring(
+                prevFullTextEntered.indexOf(selection) + selection.length
+              ),
+            };
+          }
+
+          const lengthOfTextEntered = updatedLeftOfCursor.length;
 
           switch (keyCode) {
             // BACKSPACE
             // remove the last character from the text entered
             case 8:
               if (lengthOfTextEntered) {
-                updatedTextEnteredState = updatedTextEnteredState.substring(
-                  0,
-                  lengthOfTextEntered - 1
-                );
+                updatedLeftOfCursor = updatedLeftOfCursor.substring(0, lengthOfTextEntered - 1);
               }
-              break;
-
-            // ENTER
-            // Execute command and blank out the input area
-            case 13:
-              setCommandToExecute(updatedTextEnteredState + rightOfCursor.text);
-              updatedTextEnteredState = '';
-              updatedRightOfCursor = undefined;
-              break;
-
-            // ARROW LEFT
-            // Move cursor left (or more accurately - move text to the right of the cursor)
-            case 37:
-              updatedRightOfCursor = {
-                ...prevRightOfCursor,
-                text:
-                  updatedTextEnteredState.charAt(lengthOfTextEntered - 1) + prevRightOfCursor.text,
-              };
-              updatedTextEnteredState = updatedTextEnteredState.substring(
-                0,
-                lengthOfTextEntered - 1
-              );
-              break;
-
-            // ARROW RIGHT
-            // Move cursor right (or more accurately - move text to the left of the cursor)
-            case 39:
-              updatedRightOfCursor = {
-                ...prevRightOfCursor,
-                text: prevRightOfCursor.text.substring(1),
-              };
-              updatedTextEnteredState = updatedTextEnteredState + prevRightOfCursor.text.charAt(0);
-              break;
-
-            // HOME
-            // Move cursor to the start of the input area
-            // (or more accurately - move all text to the right of the cursor)
-            case 36:
-              updatedRightOfCursor = {
-                ...prevRightOfCursor,
-                text: updatedTextEnteredState + prevRightOfCursor.text,
-              };
-              updatedTextEnteredState = '';
-              break;
-
-            // END
-            // Move cursor to the end of the input area
-            // (or more accurately - move all text to the left of the cursor)
-            case 35:
-              updatedRightOfCursor = {
-                ...prevRightOfCursor,
-                text: '',
-              };
-              updatedTextEnteredState = updatedTextEnteredState + prevRightOfCursor.text;
               break;
 
             // DELETE
@@ -242,10 +199,60 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
                 };
               }
               break;
+
+            // ENTER
+            // Execute command and blank out the input area
+            case 13:
+              setCommandToExecute(updatedLeftOfCursor + rightOfCursor.text);
+              updatedLeftOfCursor = '';
+              updatedRightOfCursor = undefined;
+              break;
+
+            // ARROW LEFT
+            // Move cursor left (or more accurately - move text to the right of the cursor)
+            case 37:
+              updatedRightOfCursor = {
+                ...prevRightOfCursor,
+                text: updatedLeftOfCursor.charAt(lengthOfTextEntered - 1) + prevRightOfCursor.text,
+              };
+              updatedLeftOfCursor = updatedLeftOfCursor.substring(0, lengthOfTextEntered - 1);
+              break;
+
+            // ARROW RIGHT
+            // Move cursor right (or more accurately - move text to the left of the cursor)
+            case 39:
+              updatedRightOfCursor = {
+                ...prevRightOfCursor,
+                text: prevRightOfCursor.text.substring(1),
+              };
+              updatedLeftOfCursor = updatedLeftOfCursor + prevRightOfCursor.text.charAt(0);
+              break;
+
+            // HOME
+            // Move cursor to the start of the input area
+            // (or more accurately - move all text to the right of the cursor)
+            case 36:
+              updatedRightOfCursor = {
+                ...prevRightOfCursor,
+                text: updatedLeftOfCursor + prevRightOfCursor.text,
+              };
+              updatedLeftOfCursor = '';
+              break;
+
+            // END
+            // Move cursor to the end of the input area
+            // (or more accurately - move all text to the left of the cursor)
+            case 35:
+              updatedRightOfCursor = {
+                ...prevRightOfCursor,
+                text: '',
+              };
+              updatedLeftOfCursor = updatedLeftOfCursor + prevRightOfCursor.text;
+              break;
           }
 
           return {
-            textEntered: updatedTextEnteredState,
+            textEntered: updatedLeftOfCursor,
             rightOfCursor: updatedRightOfCursor,
           };
         },
@@ -330,12 +337,6 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-
-        {/* <KeyCapture*/}
-        {/*  onCapture={handleKeyCapture}*/}
-        {/*  focusRef={keyCaptureFocusRef}*/}
-        {/*  onStateChange={handleKeyCaptureOnStateChange}*/}
-        {/* />*/}
       </CommandInputContainer>
     </InputAreaPopover>
   );
