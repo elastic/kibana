@@ -17,11 +17,8 @@ function getValueAsNumberArray(value: unknown) {
 }
 
 export const collapseFn: CollapseExpressionFunction['fn'] = (input, { by, metric, fn }) => {
-  const collapseFunctionsByMetricIndex = Array.isArray(fn)
-    ? fn
-    : metric
-    ? new Array(metric.length).fill(fn)
-    : [];
+  const collapseFunctionsByMetricIndex =
+    fn.length > 1 ? fn : metric ? new Array(metric.length).fill(fn[0]) : [];
 
   if (metric && metric.length !== collapseFunctionsByMetricIndex.length) {
     throw Error(`lens_collapse - Called with ${metric.length} metrics and ${fn.length} collapse functions. 

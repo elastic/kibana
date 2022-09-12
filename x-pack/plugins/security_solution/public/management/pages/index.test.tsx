@@ -16,8 +16,7 @@ import { endpointPageHttpMock } from './endpoint_hosts/mocks';
 
 jest.mock('../../common/components/user_privileges');
 
-// FLAKY: https://github.com/elastic/kibana/issues/135166
-describe.skip('when in the Administration tab', () => {
+describe('when in the Administration tab', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
 
   beforeEach(() => {
@@ -35,7 +34,8 @@ describe.skip('when in the Administration tab', () => {
     expect(await render().findByTestId('noIngestPermissions')).not.toBeNull();
   });
 
-  it('should display the Management view if user has privileges', async () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/135166
+  it.skip('should display the Management view if user has privileges', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       endpointPrivileges: { loading: false, canAccessEndpointManagement: true },
     });
