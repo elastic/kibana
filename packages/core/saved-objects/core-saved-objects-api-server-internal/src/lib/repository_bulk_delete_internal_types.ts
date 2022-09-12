@@ -26,9 +26,13 @@ export interface PreflightCheckForBulkDeleteParams {
  * @internal
  */
 export interface ExpectedBulkDeleteMultiNamespaceDocsParams {
+  // contains the type and id of all objects to delete
   expectedBulkGetResults: BulkDeleteExpectedBulkGetResult[];
+  // subset of multi-namespace only expectedBulkGetResults
   multiNamespaceDocsResponse: TransportResult<estypes.MgetResponse<unknown>, unknown> | undefined;
+  // current namespace in which the bulkDelete call is made
   namespace: string | undefined;
+  // optional parameter used to force delete multinamespace objects that exist in more than the current space
   force?: boolean;
 }
 /**
@@ -68,6 +72,7 @@ export type NewBulkItemResponse = BulkResponseItem & { error: ErrorCause & { ind
 
 /**
  * @internal
+ * contains all documents for bulk delete, regardless of namespace type.
  */
 export type BulkDeleteExpectedBulkGetResult = Either<
   { type: string; id: string; error: Payload },

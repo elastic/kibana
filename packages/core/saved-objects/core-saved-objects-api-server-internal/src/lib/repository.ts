@@ -775,12 +775,12 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   }
 
   /**
-   * performs initial checks on object type validity and flags multi-namespace objects for preflight checks
+   * performs initial checks on object type validity and flags multi-namespace objects for preflight checks by adding an `esRequestIndex`
    * @param objects SavedObjectsBulkDeleteObject[]
-   * @returns array BulkDeleteExpectedBulkGetResult[]: left (error) or right Either result
+   * @returns array BulkDeleteExpectedBulkGetResult[]: left as 400 for objects that don't have a valid type or right Either result with the object and an `esRequestIndex` if the object is of a multinamespace type.
    */
   private presortObjectsByNamespaceType(objects: SavedObjectsBulkDeleteObject[]) {
-    let bulkGetRequestIndexCounter = 0;
+    let bulkGetRequestIndexCounter = 0; // flag for multi-namespace objects
     return objects.map<BulkDeleteExpectedBulkGetResult>((object) => {
       const { type, id } = object;
       if (!this._allowedTypes.includes(type)) {
@@ -816,7 +816,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       .filter(isRight)
       .filter(({ value }) => value.esRequestIndex !== undefined) // only get docs that need multinamespace checks, I don't think we want to do this filtering
       .map(({ value: { type, id } }) => ({
-        _id: this._serializer.generateRawId(namespace, type, id),
+        _id: this._serializer.generateRawId(namespace, type, id), // prefixes the id with the space name in the api call's scope
         _index: this.getIndexForType(type),
         _source: ['type', 'namespaces'],
       }));
@@ -835,6 +835,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         headers: bulkGetMultiNamespaceDocsResponse.headers,
       })
     ) {
+      // I'm not sure if I want to throw here.
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
     }
     return bulkGetMultiNamespaceDocsResponse;
@@ -868,7 +869,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
 
           const docFound = indexFound && isMgetDoc(actualResult) && actualResult.found;
 
-          // return an error if the doc isnn't found at all or the doc doesn't exist in the namespaces
+          // return an error if the doc isn't found at all or the doc doesn't exist in the namespaces
           if (!docFound) {
             return {
               tag: 'Left',
@@ -879,7 +880,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
               },
             };
           }
-          // the following check should be redundant since we're retrieving the docs from elasticsearch but we check anyway
+          // the following check should be redundant since we're retrieving the docs from elasticsearch but we check just to make sure
           // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
           if (docFound && !this.rawDocExistsInNamespace(actualResult, namespace)) {
             return {
@@ -913,7 +914,8 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
             };
           }
         }
-
+        // contains all objects that passed initial preflight checks, including single namespace objects that skipped the mget call
+        // single namespace objects will have namespaces:undefined
         const expectedResult = {
           type,
           id,
@@ -1010,6 +1012,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         if (deleted) {
           // `namespaces` should only exist in the expectedResult.value if the type is multinamespace.
           if (namespaces) {
+            // in the bulk operation, one cannot specify a namespace from which to delete an object other than the namespace that the operation is performed in. If a multinamespace object exists in more than the current space (from which the call is made), force deleting the object will delete it from all namespaces it exists in. In that case, all legacy url aliases are deleted as well. If force isn't applied, the operation fails and the object isn't deleted.
             await deleteLegacyUrlAliases({
               mappings: this._mappings,
               registry: this._registry,
@@ -1019,7 +1022,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
               id,
               ...(namespaces.includes(ALL_NAMESPACES_STRING)
                 ? { namespaces: [], deleteBehavior: 'exclusive' } // delete legacy URL aliases for this type/ID for all spaces
-                : { namespaces, deleteBehavior: 'inclusive' }), // delete legacy URL aliases for this type/ID for these specific spaces
+                : { namespaces, deleteBehavior: 'inclusive' }), // delete legacy URL aliases for this type/ID for these specific spaces. In the bulk operation, this behavior is only applicable in the case of multi-namespace isolated types.
             }).catch((err) => {
               // The object has already been deleted, but we caught an error when attempting to delete aliases.
               // A consumer cannot attempt to delete the object again, so just log the error and swallow it.
@@ -1030,7 +1033,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           }
         }
         const successfulResult = {
-          success: true,
+          success: true, // could also use (rawResponse.result === 'deleted')
           id,
           type,
         };
