@@ -8,6 +8,7 @@
 
 const oneSec = 1000;
 const defMaxAge = 5 * oneSec;
+
 /**
  * @internal
  */

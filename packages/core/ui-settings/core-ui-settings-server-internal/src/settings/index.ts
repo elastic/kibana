@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { UiSettingsParams } from '../../../types';
+import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { getAccessibilitySettings } from './accessibility';
 import { getDateFormatSettings } from './date_formats';
 import { getMiscUiSettings } from './misc';

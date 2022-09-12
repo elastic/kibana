@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '../..';
+import type {
+  SavedObjectUnsanitizedDoc,
+  SavedObjectSanitizedDoc,
+} from '@kbn/core-saved-objects-server';
 
 export const migrations = {
   '7.9.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({

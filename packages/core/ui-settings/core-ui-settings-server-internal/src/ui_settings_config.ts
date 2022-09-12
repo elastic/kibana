@@ -21,7 +21,7 @@ const configSchema = schema.object({
 
 export type UiSettingsConfigType = TypeOf<typeof configSchema>;
 
-export const config: ServiceConfigDescriptor<UiSettingsConfigType> = {
+export const uiSettingsConfig: ServiceConfigDescriptor<UiSettingsConfigType> = {
   path: 'uiSettings',
   schema: configSchema,
   deprecations,

@@ -7,7 +7,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { UiSettingsParams, UserProvidedValues } from './types';
+import type { UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
 import { BaseUiSettingsClient } from './base_ui_settings_client';
 
 export interface UiSettingsDefaultsClientOptions {

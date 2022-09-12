@@ -13,20 +13,20 @@ import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
-import { UiSettingsConfigType, config as uiConfigDefinition } from './ui_settings_config';
+import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
+import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import { UiSettingsConfigType, uiSettingsConfig as uiConfigDefinition } from './ui_settings_config';
 import { UiSettingsClient } from './ui_settings_client';
-import {
+import type {
   InternalUiSettingsServicePreboot,
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
-  UiSettingsParams,
 } from './types';
+import type { InternalUiSettingsRequestHandlerContext } from './internal_types';
 import { uiSettingsType } from './saved_objects';
 import { registerRoutes } from './routes';
 import { getCoreSettings } from './settings';
 import { UiSettingsDefaultsClient } from './ui_settings_defaults_client';
-import type { InternalUiSettingsRequestHandlerContext } from './internal_types';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;

@@ -7,7 +7,7 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
-import type { SavedObjectsClientContract } from '../../types';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { UpgradeableConfigAttributes } from '../create_or_upgrade_saved_config';
 
 /**

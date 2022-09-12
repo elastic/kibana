@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { UiSettingsParams } from '../../../types';
-import { getStateSettings } from './state';
+import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import { getAnnouncementsSettings } from './announcements';
 
-describe('state settings', () => {
-  const state = getStateSettings();
+describe('announcements settings', () => {
+  const state = getAnnouncementsSettings();
 
   const getValidationFn = (setting: UiSettingsParams) => (value: any) =>
     setting.schema.validate(value);
 
-  describe('state:storeInSessionStorage', () => {
-    const validate = getValidationFn(state['state:storeInSessionStorage']);
+  describe('hideAnnouncements', () => {
+    const validate = getValidationFn(state.hideAnnouncements);
 
     it('should only accept boolean values', () => {
       expect(() => validate(true)).not.toThrow();

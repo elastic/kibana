@@ -7,14 +7,13 @@
  */
 
 import { omit } from 'lodash';
-
 import type { Logger } from '@kbn/logging';
-import {
-  IUiSettingsClient,
+import type {
   UiSettingsParams,
   PublicUiSettingsParams,
   UserProvidedValues,
-} from './types';
+} from '@kbn/core-ui-settings-common';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 
 export interface BaseUiSettingsDefaultsClientOptions {
   overrides?: Record<string, any>;
@@ -26,9 +25,9 @@ export interface BaseUiSettingsDefaultsClientOptions {
  * Base implementation of the {@link IUiSettingsClient}.
  */
 export abstract class BaseUiSettingsClient implements IUiSettingsClient {
-  private readonly defaults: NonNullable<BaseUiSettingsDefaultsClientOptions['defaults']>;
+  private readonly defaults: Record<string, UiSettingsParams>;
   private readonly defaultValues: Record<string, unknown>;
-  protected readonly overrides: NonNullable<BaseUiSettingsDefaultsClientOptions['overrides']>;
+  protected readonly overrides: Record<string, any>;
   protected readonly log: Logger;
 
   protected constructor(options: BaseUiSettingsDefaultsClientOptions) {
@@ -86,8 +85,12 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
   }
 
   abstract getUserProvided<T = any>(): Promise<Record<string, UserProvidedValues<T>>>;
+
   abstract setMany(changes: Record<string, any>): Promise<void>;
+
   abstract set(key: string, value: any): Promise<void>;
+
   abstract remove(key: string): Promise<void>;
+
   abstract removeMany(keys: string[]): Promise<void>;
 }

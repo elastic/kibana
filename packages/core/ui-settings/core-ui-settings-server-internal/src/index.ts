@@ -6,6 +6,13 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { uiSettingsConfig } from './ui_settings_config';
+export { UiSettingsService } from './ui_settings_service';
+export { CoreUiSettingsRouteHandlerContext } from './ui_settings_route_handler_context';
+export { UiSettingsClient } from './ui_settings_client';
+export type { UiSettingsServiceOptions } from './ui_settings_client';
+export type {
+  InternalUiSettingsServicePreboot,
+  InternalUiSettingsServiceSetup,
+  InternalUiSettingsServiceStart,
+} from './types';
