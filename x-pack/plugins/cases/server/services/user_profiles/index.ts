@@ -19,8 +19,8 @@ import { excess, SuggestUserProfilesRequestRt, throwErrors } from '../../../comm
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 
-const MAX_SUGGESTION_SIZE = 100;
-const MIN_SUGGESTION_SIZE = 0;
+const MAX_PROFILES_SIZE = 100;
+const MIN_PROFILES_SIZE = 0;
 
 interface UserProfileOptions {
   securityPluginSetup?: SecurityPluginSetup;
@@ -39,6 +39,32 @@ export class UserProfileService {
     }
 
     this.options = options;
+  }
+
+  private static suggestUsers({
+    securityPluginStart,
+    spaceId,
+    searchTerm,
+    size,
+    owners,
+  }: {
+    securityPluginStart: SecurityPluginStart;
+    spaceId: string;
+    searchTerm: string;
+    size?: number;
+    owners: string[];
+  }) {
+    return securityPluginStart.userProfiles.suggest({
+      name: searchTerm,
+      size,
+      dataPath: 'avatar',
+      requiredPrivileges: {
+        spaceId,
+        privileges: {
+          kibana: UserProfileService.buildRequiredPrivileges(owners, securityPluginStart),
+        },
+      },
+    });
   }
 
   public async suggest(request: KibanaRequest): Promise<UserProfile[]> {
@@ -61,29 +87,20 @@ export class UserProfileService {
         securityPluginStart: this.options.securityPluginStart,
       };
 
-      /**
-       * The limit of 100 helps prevent DDoS attacks and is also enforced by the security plugin.
-       */
-      if (size !== undefined && (size > MAX_SUGGESTION_SIZE || size < MIN_SUGGESTION_SIZE)) {
-        throw Boom.badRequest('size must be between 0 and 100');
-      }
+      UserProfileService.validateSizeParam(size);
 
-      if (!UserProfileService.isSecurityEnabled(securityPluginFields)) {
+      if (!UserProfileService.isSecurityEnabled(securityPluginFields) || owners.length <= 0) {
         return [];
       }
 
       const { securityPluginStart } = securityPluginFields;
 
-      return securityPluginStart.userProfiles.suggest({
-        name,
+      return UserProfileService.suggestUsers({
+        searchTerm: name,
         size,
-        dataPath: 'avatar',
-        requiredPrivileges: {
-          spaceId: spaces.spacesService.getSpaceId(request),
-          privileges: {
-            kibana: UserProfileService.buildRequiredPrivileges(owners, securityPluginStart),
-          },
-        },
+        owners,
+        securityPluginStart,
+        spaceId: spaces.spacesService.getSpaceId(request),
       });
     } catch (error) {
       throw createCaseError({
@@ -91,6 +108,15 @@ export class UserProfileService {
         message: `Failed to retrieve suggested user profiles in service for name: ${name} owners: [${owners}]: ${error}`,
         error,
       });
+    }
+  }
+
+  private static validateSizeParam(size?: number) {
+    /**
+     * The limit of 100 helps prevent DDoS attacks and is also enforced by the security plugin.
+     */
+    if (size !== undefined && (size > MAX_PROFILES_SIZE || size < MIN_PROFILES_SIZE)) {
+      throw Boom.badRequest('size must be between 0 and 100');
     }
   }
 

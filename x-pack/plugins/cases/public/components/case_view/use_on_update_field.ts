@@ -6,6 +6,8 @@
  */
 
 import { useCallback } from 'react';
+import deepEqual from 'fast-deep-equal';
+
 import { CaseConnector } from '../../../common/api';
 import { CaseAttributes } from '../../../common/api/cases/case';
 import { CaseStatuses } from '../../../common/api/cases/status';
@@ -68,6 +70,13 @@ export const useOnUpdateField = ({ caseData, caseId }: { caseData: Case; caseId:
           if (caseData.severity !== value) {
             callUpdate('severity', severityUpdate);
           }
+          break;
+        case 'assignees':
+          const assigneesUpdate = getTypedPayload<CaseAttributes['assignees']>(value);
+          if (!deepEqual(caseData.assignees, value)) {
+            callUpdate('assignees', assigneesUpdate);
+          }
+          break;
         default:
           return null;
       }
