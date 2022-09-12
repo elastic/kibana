@@ -21,23 +21,21 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { IExecutionLog } from '@kbn/alerting-plugin/common';
-import { Rule } from '../../../../types';
 import { RuleErrorLogWithApi } from './rule_error_log';
 import { RuleActionErrorBadge } from './rule_action_error_badge';
 
 export interface RuleActionErrorLogFlyoutProps {
-  rule: Rule;
   runLog: IExecutionLog;
   refreshToken?: number;
   onClose: () => void;
 }
 
 export const RuleActionErrorLogFlyout = (props: RuleActionErrorLogFlyoutProps) => {
-  const { rule, runLog, refreshToken, onClose } = props;
+  const { runLog, refreshToken, onClose } = props;
 
   const { euiTheme } = useEuiTheme();
 
-  const { id, message, num_errored_actions: totalErrors } = runLog;
+  const { id, rule_id: ruleId, message, num_errored_actions: totalErrors } = runLog;
 
   const isFlyoutPush = useIsWithinBreakpoints(['xl']);
 
@@ -84,7 +82,7 @@ export const RuleActionErrorLogFlyout = (props: RuleActionErrorLogFlyoutProps) =
             }}
           />
         </div>
-        <RuleErrorLogWithApi rule={rule} runId={id} refreshToken={refreshToken} />
+        <RuleErrorLogWithApi ruleId={ruleId} runId={id} refreshToken={refreshToken} />
         <EuiSpacer />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

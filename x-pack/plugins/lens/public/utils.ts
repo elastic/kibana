@@ -22,7 +22,7 @@ import type {
   IndexPatternRef,
 } from './types';
 import type { DatasourceStates, VisualizationState } from './state_management';
-import { IndexPatternServiceAPI } from './indexpattern_service/service';
+import { IndexPatternServiceAPI } from './data_views_service/service';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
   return i18n.translate('xpack.lens.visualizeGeoFieldMessage', {
@@ -113,9 +113,13 @@ export async function refreshIndexPatternsList({
 export function getIndexPatternsIds({
   activeDatasources,
   datasourceStates,
+  visualizationState,
+  activeVisualization,
 }: {
   activeDatasources: Record<string, Datasource>;
   datasourceStates: DatasourceStates;
+  visualizationState: unknown;
+  activeVisualization?: Visualization;
 }): string[] {
   let currentIndexPatternId: string | undefined;
   const references: SavedObjectReference[] = [];
@@ -125,6 +129,11 @@ export function getIndexPatternsIds({
     currentIndexPatternId = indexPatternId;
     references.push(...savedObjectReferences);
   });
+
+  if (activeVisualization?.getPersistableState) {
+    const { savedObjectReferences } = activeVisualization.getPersistableState(visualizationState);
+    references.push(...savedObjectReferences);
+  }
   const referencesIds = references
     .filter(({ type }) => type === 'index-pattern')
     .map(({ id }) => id);

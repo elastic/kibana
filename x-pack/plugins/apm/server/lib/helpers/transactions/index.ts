@@ -11,6 +11,8 @@ import { SearchAggregatedTransactionSetting } from '../../../../common/aggregate
 import {
   TRANSACTION_DURATION,
   TRANSACTION_DURATION_HISTOGRAM,
+  TRANSACTION_ROOT,
+  PARENT_ID,
 } from '../../../../common/elasticsearch_fieldnames';
 import { APMConfig } from '../../..';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
@@ -105,4 +107,20 @@ export function getProcessorEventForTransactions(
   return searchAggregatedTransactions
     ? ProcessorEvent.metric
     : ProcessorEvent.transaction;
+}
+
+export function isRootTransaction(searchAggregatedTransactions: boolean) {
+  return searchAggregatedTransactions
+    ? {
+        term: {
+          [TRANSACTION_ROOT]: true,
+        },
+      }
+    : {
+        bool: {
+          must_not: {
+            exists: { field: PARENT_ID },
+          },
+        },
+      };
 }
