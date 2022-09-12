@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { UploadFile, Props as UploadFileProps } from './upload_file';
+export { UploadFile, type Props as UploadFileProps } from './upload_file';
