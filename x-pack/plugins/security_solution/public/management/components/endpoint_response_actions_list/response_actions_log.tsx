@@ -48,7 +48,7 @@ import {
   useDateRangePicker,
 } from './components/hooks';
 import { StatusBadge } from './components/status_badge';
-import { useActionHistoryUrlParams } from '../../hooks/use_action_history_url_params';
+import { useActionHistoryUrlParams } from './components/use_action_history_url_params';
 import { useUrlPagination } from '../../hooks/use_url_pagination';
 
 const emptyValue = getEmptyValue();

@@ -22,7 +22,7 @@ import type { DateRangePickerValues } from './actions_log_date_range_picker';
 import type { FILTER_NAMES } from '../translations';
 import { UX_MESSAGES } from '../translations';
 import { StatusBadge } from './status_badge';
-import { useActionHistoryUrlParams } from '../../../hooks/use_action_history_url_params';
+import { useActionHistoryUrlParams } from './use_action_history_url_params';
 
 const defaultDateRangeOptions = Object.freeze({
   autoRefreshOptions: {

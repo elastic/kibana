@@ -18,7 +18,7 @@ import type {
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-import { useActionHistoryUrlParams } from '../../../hooks/use_action_history_url_params';
+import { useActionHistoryUrlParams } from './use_action_history_url_params';
 
 export interface DateRangePickerValues {
   autoRefreshOptions: {
