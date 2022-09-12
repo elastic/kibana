@@ -7,13 +7,13 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import {
-  IUiSettingsClient,
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import type {
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
   InternalUiSettingsServicePreboot,
-} from './types';
-import type { UiSettingsService } from './ui_settings_service';
+  UiSettingsService,
+} from '@kbn/core-ui-settings-server-internal';
 
 const createClientMock = () => {
   const mocked: jest.Mocked<IUiSettingsClient> = {
