@@ -46,20 +46,24 @@ export type UseFetchAlerts = ({ featureIds }: FetchAlertsArgs) => [boolean, Fetc
 
 export const useFetchBrowserFieldCapabilities = ({
   featureIds,
-}: FetchAlertsArgs): [boolean, BrowserFields] => {
+}: FetchAlertsArgs): [boolean | undefined, BrowserFields] => {
   const { http } = useKibana().services;
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean | undefined>(undefined);
   const [browserFields, setBrowserFields] = useState<BrowserFields>(() => ({}));
 
   const getBrowserFieldInfo = useCallback(async () => {
     if (!http) return Promise.resolve({});
 
     return await http.get<BrowserFields>(`${BASE_RAC_ALERTS_API_PATH}/browser_fields`, {
-      query: { featureIds: featureIds.toString() },
+      query: { featureIds },
     });
   }, [featureIds, http]);
 
   useEffect(() => {
+    if (isLoading !== undefined) return;
+
+    setIsLoading(true);
+
     const callApi = async () => {
       const browserFieldsInfo = await getBrowserFieldInfo();
       setIsLoading(false);
@@ -67,7 +71,7 @@ export const useFetchBrowserFieldCapabilities = ({
     };
 
     callApi();
-  }, [getBrowserFieldInfo]);
+  }, [getBrowserFieldInfo, isLoading]);
 
   return [isLoading, browserFields];
 };
