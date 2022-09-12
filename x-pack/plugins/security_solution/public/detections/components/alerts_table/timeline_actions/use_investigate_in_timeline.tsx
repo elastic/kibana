@@ -56,8 +56,8 @@ export const useInvestigateInTimeline = ({
           const parsedList = JSON.parse(next);
           if (parsedList.type === 'detection') {
             const formattedList = {
-              exceptionListId: parsedList.list_id,
-              namespaceType: parsedList.namespace_type,
+              exception_list_id: parsedList.list_id,
+              namespace_type: parsedList.namespace_type,
             };
             acc.push(formattedList);
           }
