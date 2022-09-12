@@ -2,7 +2,12 @@
 
 set -euo pipefail
 
-echo "Cloud deployments are not working for the moment.  Status updates will be posted in #kibana-operations."
+echo "Cloud deployments have been temporarily disabled.  We're investigating, status updates will be posted in #kibana-operations."
+cat << EOF | buildkite-agent annotate --style "error" --context cloud
+  ### Cloud Deployment
+
+  Cloud deployments have been temporarily disabled.  We're investigating, status updates will be posted in #kibana-operations.
+EOF
 exit 0
 
 source .buildkite/scripts/common/util.sh
