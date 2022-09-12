@@ -40,7 +40,27 @@
           "label": "OsqueryAction",
           "description": [],
           "signature": [
-            "((props: any) => JSX.Element) | undefined"
+            "((props: ",
+            "OsqueryActionProps",
+            ") => JSX.Element) | undefined"
+          ],
+          "path": "x-pack/plugins/osquery/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "osquery",
+          "id": "def-public.OsqueryPluginStart.LiveQueryField",
+          "type": "Function",
+          "tags": [],
+          "label": "LiveQueryField",
+          "description": [],
+          "signature": [
+            "(({ formMethods, ...props }: ",
+            "LiveQueryQueryFieldProps",
+            " & { formMethods: ",
+            "UseFormReturn",
+            "<{ label: string; query: string; ecs_mapping: Record<string, unknown>; }, any>; }) => JSX.Element) | undefined"
           ],
           "path": "x-pack/plugins/osquery/public/types.ts",
           "deprecated": false,
