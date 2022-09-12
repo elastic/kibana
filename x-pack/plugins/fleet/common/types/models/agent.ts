@@ -47,6 +47,7 @@ export interface NewAgentAction {
   start_time?: string;
   minimum_execution_duration?: number;
   source_uri?: string;
+  total?: number;
 }
 
 export interface AgentAction extends NewAgentAction {
@@ -105,6 +106,22 @@ export interface CurrentUpgrade {
   startTime?: string;
 }
 
+export interface ActionStatus {
+  actionId: string;
+  // how many agents are successfully included in action documents
+  nbAgentsActionCreated: number;
+  // how many agents acknowledged the action sucessfully (completed)
+  nbAgentsAck: number;
+  version: string;
+  startTime?: string;
+  type?: string;
+  // how many agents were actioned by the user
+  nbAgentsActioned: number;
+  status: 'complete' | 'expired' | 'cancelled' | 'failed' | 'in progress';
+  errorMessage?: string;
+}
+
+// Generated from FleetServer schema.json
 export interface FleetServerAgentComponentUnit {
   id: string;
   type: 'input' | 'output';
@@ -122,8 +139,6 @@ interface FleetServerAgentComponent {
   message: string;
   units: FleetServerAgentComponentUnit[];
 }
-
-// Initially generated from FleetServer schema.json
 
 /**
  * An Elastic Agent that has enrolled into Fleet
@@ -310,5 +325,7 @@ export interface FleetServerAgentAction {
   data?: {
     [k: string]: unknown;
   };
+
+  total?: number;
   [k: string]: unknown;
 }
