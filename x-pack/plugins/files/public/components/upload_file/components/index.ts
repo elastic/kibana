@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { UploadFileUI, type Props as UploadFileUIProps } from './upload_file_ui';
+export { UploadFileUI } from './upload_file_ui';
+export type { Props as UploadFileUIProps } from './upload_file_ui';
