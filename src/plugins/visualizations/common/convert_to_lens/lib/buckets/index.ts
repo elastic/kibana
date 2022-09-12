@@ -11,7 +11,6 @@ import {
   AggParamsTerms,
   BUCKET_TYPES,
   IAggConfig,
-  METRIC_TYPES,
 } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { Column, SchemaConfig } from '../../..';
@@ -87,8 +86,8 @@ export const getBucketColumns = (
   return null;
 };
 
-export const convertBucketToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
-  agg: SchemaConfig<T> | IAggConfig,
+export const convertBucketToColumns = (
+  agg: SchemaConfig | IAggConfig,
   dataView: DataView,
   isSplit: boolean = false,
   metricColumns: Column[],

@@ -7,14 +7,14 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
-import { BaseSchemaConfig } from '../../..';
+import { SchemaConfig } from '../../..';
 import { LastValueColumn, LastValueParams } from '../../types';
 import { getFieldNameFromField } from '../utils';
 import { createColumn, getFormat } from './column';
 import { CommonColumnConverterArgs } from './types';
 
 const convertToLastValueParams = (
-  agg: BaseSchemaConfig<METRIC_TYPES.TOP_HITS | METRIC_TYPES.TOP_METRICS>
+  agg: SchemaConfig<METRIC_TYPES.TOP_HITS | METRIC_TYPES.TOP_METRICS>
 ): LastValueParams => {
   return {
     sortField: agg.aggParams!.sortField!.name,

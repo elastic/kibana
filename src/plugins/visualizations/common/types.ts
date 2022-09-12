@@ -63,7 +63,11 @@ interface SchemaConfigParams {
 
 export type SupportedAggregation = METRIC_TYPES | BUCKET_TYPES;
 
-export interface SchemaConfig<Agg extends SupportedAggregation = SupportedAggregation> {
+type SchemasByAggs<Aggs extends SupportedAggregation> = {
+  [Agg in Aggs]: GenericSchemaConfig<Agg>;
+}[Aggs];
+
+export interface GenericSchemaConfig<Agg extends SupportedAggregation> {
   accessor: number;
   label: string;
   format: SerializedFieldFormat;
@@ -73,7 +77,5 @@ export interface SchemaConfig<Agg extends SupportedAggregation = SupportedAggreg
   aggParams?: AggParamsMapping[Agg];
 }
 
-export type BaseSchemaConfig<Agg extends SupportedAggregation = SupportedAggregation> = Omit<
-  SchemaConfig<Agg>,
-  'accessor'
->;
+export type SchemaConfig<Aggs extends SupportedAggregation = SupportedAggregation> =
+  SchemasByAggs<Aggs>;

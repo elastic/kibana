@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Column, ColumnWithMeta } from '@kbn/visualizations-plugin/common';
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import { Column, ColumnWithMeta, SchemaConfig } from '@kbn/visualizations-plugin/common';
 import {
   getColumnsFromVis,
   getVisSchemas,
@@ -70,7 +71,9 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
     if (!metricAgg) {
       return null;
     }
-    const percentageColumn = getPercentageColumnFormulaColumn(metricAgg);
+    const percentageColumn = getPercentageColumnFormulaColumn(
+      metricAgg as SchemaConfig<METRIC_TYPES>
+    );
     if (!percentageColumn) {
       return null;
     }

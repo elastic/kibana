@@ -11,11 +11,11 @@ import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { IAggConfig } from '@kbn/data-plugin/common';
 import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { DataType, FormatParams } from '../../types';
-import { BaseSchemaConfig, SupportedAggregation } from '../../../types';
+import { SchemaConfig } from '../../../types';
 import { AggId, ExtraColumnFields, GeneralColumnWithMeta } from './types';
 import { getLabel } from '../utils';
 
-export const createAggregationId = (agg: BaseSchemaConfig): AggId => `${agg.aggType}.${agg.aggId}`;
+export const createAggregationId = (agg: SchemaConfig): AggId => `${agg.aggType}.${agg.aggId}`;
 
 const isSupportedFormat = (format: string) => ['bytes', 'number', 'percent'].includes(format);
 
@@ -28,8 +28,8 @@ export const getFormat = (format?: SerializedFieldFormat): FormatParams => {
   return { format: { id: format.id } };
 };
 
-export const createColumn = <T extends SupportedAggregation>(
-  agg: BaseSchemaConfig<T>,
+export const createColumn = (
+  agg: SchemaConfig,
   field?: DataViewField,
   { isBucketed = false, isSplit = false, reducedTimeRange }: ExtraColumnFields = {}
 ): GeneralColumnWithMeta => ({

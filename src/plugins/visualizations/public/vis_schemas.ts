@@ -10,7 +10,7 @@ import { BUCKET_TYPES, IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common'
 import { search } from '@kbn/data-plugin/public';
 import { Vis, VisToExpressionAstParams } from './types';
 import { SchemaConfig } from '../common/types';
-import { convertToSchemaConfigWithAccessor } from '../common';
+import { convertToSchemaConfig } from '../common';
 
 const { isDateHistogramBucketAggConfig } = search.aggs;
 
@@ -64,7 +64,7 @@ const createSchemaConfig = (
   }
 
   const updatedAgg = updateDateHistogramParams(agg, params);
-  return convertToSchemaConfigWithAccessor(updatedAgg, accessor);
+  return { ...convertToSchemaConfig(updatedAgg), accessor };
 };
 
 export const getVisSchemas = <TVisParams>(

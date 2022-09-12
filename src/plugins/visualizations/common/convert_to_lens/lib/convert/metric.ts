@@ -105,7 +105,7 @@ export const convertMetricAggregationColumnWithoutSpecialParams = (
     }),
     params: { ...getFormat(agg.format) },
     timeShift: agg.aggParams?.timeShift,
-  } as MetricAggregationColumnWithoutSpecialParams;
+  };
 };
 
 export const convertСustomMetricAggregationColumnWithoutSpecialParams = (
@@ -131,5 +131,5 @@ export const convertСustomMetricAggregationColumnWithoutSpecialParams = (
       reducedTimeRange,
     }),
     params: {},
-  } as MetricAggregationColumnWithoutSpecialParams;
+  };
 };

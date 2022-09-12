@@ -6,29 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { BUCKET_TYPES, METRIC_TYPES } from '@kbn/data-plugin/common';
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { BaseSchemaConfig } from '../../..';
+import { SchemaConfig } from '../../..';
 import {
   convertMetricAggregationColumnWithoutSpecialParams,
-  MetricsWithoutSpecialParams,
   convertToParentPipelineAggColumns,
   convertToPercentileColumn,
   convertToPercentileRankColumn,
   convertToSiblingPipelineColumns,
   convertToStdDeviationFormulaColumns,
-  SiblingPipelineMetric,
-  ParentPipelineMetric,
   convertToLastValueColumn,
 } from '../convert';
 import { SUPPORTED_METRICS } from '../convert/supported_metrics';
 import { Column } from '../../types';
 import { getValidColumns } from '../utils';
 
-export const convertMetricToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
-  agg: BaseSchemaConfig<T>,
-  dataView: DataView
-): Column[] | null => {
+export const convertMetricToColumns = (agg: SchemaConfig, dataView: DataView): Column[] | null => {
   const supportedAgg = SUPPORTED_METRICS[agg.aggType];
   if (!supportedAgg) {
     return null;
@@ -44,28 +38,28 @@ export const convertMetricToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
     case METRIC_TYPES.VALUE_COUNT:
     case METRIC_TYPES.MEDIAN: {
       const columns = convertMetricAggregationColumnWithoutSpecialParams(supportedAgg, {
-        agg: agg as BaseSchemaConfig<MetricsWithoutSpecialParams>,
+        agg,
         dataView,
       });
       return getValidColumns(columns);
     }
-    case METRIC_TYPES.STD_DEV: {
+    case 'std_dev': {
       const columns = convertToStdDeviationFormulaColumns({
-        agg: agg as BaseSchemaConfig<METRIC_TYPES.STD_DEV>,
+        agg,
         dataView,
       });
       return getValidColumns(columns);
     }
     case METRIC_TYPES.PERCENTILES: {
       const columns = convertToPercentileColumn({
-        agg: agg as BaseSchemaConfig<METRIC_TYPES.PERCENTILES>,
+        agg,
         dataView,
       });
       return getValidColumns(columns);
     }
     case METRIC_TYPES.PERCENTILE_RANKS: {
       const columns = convertToPercentileRankColumn({
-        agg: agg as BaseSchemaConfig<METRIC_TYPES.PERCENTILE_RANKS>,
+        agg,
         dataView,
       });
       return getValidColumns(columns);
@@ -73,9 +67,7 @@ export const convertMetricToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
     case METRIC_TYPES.TOP_HITS:
     case METRIC_TYPES.TOP_METRICS: {
       const columns = convertToLastValueColumn({
-        agg: agg as
-          | BaseSchemaConfig<METRIC_TYPES.TOP_HITS>
-          | BaseSchemaConfig<METRIC_TYPES.TOP_METRICS>,
+        agg,
         dataView,
       });
       return getValidColumns(columns);
@@ -84,7 +76,7 @@ export const convertMetricToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
     case METRIC_TYPES.DERIVATIVE:
     case METRIC_TYPES.MOVING_FN: {
       const columns = convertToParentPipelineAggColumns({
-        agg: agg as BaseSchemaConfig<ParentPipelineMetric>,
+        agg,
         dataView,
       });
       return getValidColumns(columns);
@@ -94,7 +86,7 @@ export const convertMetricToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
     case METRIC_TYPES.MAX_BUCKET:
     case METRIC_TYPES.AVG_BUCKET: {
       const columns = convertToSiblingPipelineColumns({
-        agg: agg as BaseSchemaConfig<SiblingPipelineMetric>,
+        agg,
         dataView,
       });
       return getValidColumns(columns);

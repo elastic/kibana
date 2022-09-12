@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BaseSchemaConfig } from '../../..';
+import { SchemaConfig } from '../../..';
 import { FormulaColumn, FormulaParams } from '../../types';
 import { createColumn, getFormat } from './column';
 
@@ -14,10 +14,7 @@ const convertToFormulaParams = (formula: string): FormulaParams => ({
   formula,
 });
 
-export const createFormulaColumn = (
-  formula: string,
-  agg: BaseSchemaConfig
-): FormulaColumn | null => {
+export const createFormulaColumn = (formula: string, agg: SchemaConfig): FormulaColumn | null => {
   const params = convertToFormulaParams(formula);
   return {
     operationType: 'formula',

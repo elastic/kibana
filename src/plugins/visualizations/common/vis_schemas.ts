@@ -6,17 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { BUCKET_TYPES, IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
+import { IAggConfig } from '@kbn/data-plugin/common';
+import { SchemaConfig, SupportedAggregation } from './types';
 
 interface SchemaConfigParams {
   precision?: number;
   useGeocentroid?: boolean;
 }
 
-const SUPPORTED_AGGREGATIONS = [...Object.values(METRIC_TYPES), ...Object.values(BUCKET_TYPES)];
-type SupportedAggregation = typeof SUPPORTED_AGGREGATIONS[number];
-
-export function convertToSchemaConfig(agg: IAggConfig) {
+export function convertToSchemaConfig(agg: IAggConfig): SchemaConfig {
   const aggType = agg.type.name as SupportedAggregation;
   const hasSubAgg = [
     'derivative',
@@ -42,18 +40,12 @@ export function convertToSchemaConfig(agg: IAggConfig) {
 
   const label = agg.makeLabel && agg.makeLabel();
   return {
+    accessor: 0,
     format: formatAgg.toSerializedFieldFormat(),
     params,
     label,
     aggType,
     aggId: agg.id,
     aggParams: agg.params,
-  };
-}
-
-export function convertToSchemaConfigWithAccessor(agg: IAggConfig, accessor: number) {
-  return {
-    accessor,
-    ...convertToSchemaConfig(agg),
-  };
+  } as SchemaConfig;
 }
