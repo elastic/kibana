@@ -8,7 +8,6 @@
 import { EuiFormRow, EuiMutationObserver } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Subscription } from 'rxjs';
-import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
@@ -68,8 +67,6 @@ const savedQueryToFieldValue = (savedQuery: SavedQuery): FieldValueQueryBar => (
   query: savedQuery.attributes.query,
   saved_id: savedQuery.id,
 });
-
-const StyledEuiFormRow = styled(EuiFormRow)``;
 
 export const QueryBarDefineRule = ({
   browserFields,
@@ -259,7 +256,7 @@ export const QueryBarDefineRule = ({
 
   return (
     <>
-      <StyledEuiFormRow
+      <EuiFormRow
         label={field.label}
         labelAppend={field.labelAppend}
         helpText={field.helpText}
@@ -293,7 +290,7 @@ export const QueryBarDefineRule = ({
             </div>
           )}
         </EuiMutationObserver>
-      </StyledEuiFormRow>
+      </EuiFormRow>
       {openTimelineSearch ? (
         <OpenTimelineModal
           hideActions={actionTimelineToHide}
