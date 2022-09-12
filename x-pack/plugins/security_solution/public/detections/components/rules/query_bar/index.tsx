@@ -32,6 +32,7 @@ export interface FieldValueQueryBar {
   filters: Filter[];
   query: Query;
   saved_id: string | null;
+  title?: string;
 }
 export interface QueryBarDefineRuleProps {
   browserFields: BrowserFields;

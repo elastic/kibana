@@ -318,7 +318,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
             saved_id: newSavedQuery.id,
             filters: newSavedQuery.attributes.filters ?? [],
             query: newSavedQuery.attributes.query,
-            name: newSavedQuery.attributes.title,
+            title: newSavedQuery.attributes.title,
           });
         })
         .finally(() => setIsSavedQueryLoading(false));
@@ -795,9 +795,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                             defaultValues={{
                               dataViewTitle,
                               ...defineRuleData,
-                              ...(rule?.saved_id && savedQueryBar
-                                ? { queryBar: savedQueryBar }
-                                : {}),
+                              queryBar: savedQueryBar ?? defineRuleData.queryBar,
                             }}
                             kibanaDataViews={dataViewOptions}
                           />
