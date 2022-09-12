@@ -76,7 +76,7 @@ export const command = {
     // That is only intended during the migration process while non Bazel projects are not removed at all.
     if (forceInstall) {
       await time('force install dependencies', async () => {
-        removeYarnIntegrityFileIfExists();
+        await removeYarnIntegrityFileIfExists();
         await Bazel.expungeCache(log, { quiet });
         await Bazel.installYarnDeps(log, { offline, quiet });
       });
@@ -89,19 +89,17 @@ export const command = {
     // generate the synthetic package map which powers several other features, needed
     // as an input to the package build
     await time('regenerate synthetic package map', async () => {
-      regenerateSyntheticPackageMap(plugins);
+      await regenerateSyntheticPackageMap(plugins);
     });
 
-    // build packages
     await time('build packages', async () => {
       await Bazel.buildPackages(log, { offline, quiet });
     });
-
     await time('sort package json', async () => {
       await sortPackageJson();
     });
     await time('regenerate tsconfig.base.json', async () => {
-      regenerateBaseTsconfig(plugins);
+      await regenerateBaseTsconfig(plugins);
     });
 
     if (validate) {

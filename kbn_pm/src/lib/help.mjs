@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { COMMANDS } from '../commands/index.mjs';
+import { COMMANDS, getCmd } from '../commands/index.mjs';
 import { dedent, indent } from './indent.mjs';
 import { title } from './colors.mjs';
 
@@ -15,7 +15,7 @@ import { title } from './colors.mjs';
  * @returns {Promise<string>}
  */
 export async function getHelp(cmdName = undefined) {
-  const cmd = cmdName && COMMANDS.find((c) => c.name === cmdName);
+  const cmd = getCmd(cmdName);
 
   /**
    * @param {number} depth
@@ -49,6 +49,6 @@ export async function getHelp(cmdName = undefined) {
     '  yarn kbn <command> [...flags]',
     '',
     'Commands:',
-    ...COMMANDS.map((cmd) => cmdLines(2, cmd)).flat(),
+    ...COMMANDS.flatMap((cmd) => (cmd.name.startsWith('_') ? [] : cmdLines(2, cmd))),
   ].join('\n');
 }
