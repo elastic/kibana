@@ -159,10 +159,10 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
       refetch: refetchAll,
       totalCount: response.totalCount,
       isDeprecated,
-      isModuleEnabled: skip ? featureEnabled : isEnabled,
+      isModuleEnabled: isEnabled,
       isInspected: false,
     }),
-    [featureEnabled, inspect, isDeprecated, isEnabled, refetchAll, response, skip]
+    [inspect, isDeprecated, isEnabled, refetchAll, response]
   );
 
   const riskScoreRequest = useMemo(
@@ -194,10 +194,10 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
   }, [addError, error]);
 
   useEffect(() => {
-    if (!skip && riskScoreRequest != null && featureEnabled && !isDeprecated) {
+    if (!skip && riskScoreRequest != null && isEnabled && !isDeprecated) {
       search(riskScoreRequest);
     }
-  }, [featureEnabled, isDeprecated, riskScoreRequest, search, skip]);
+  }, [isEnabled, isDeprecated, riskScoreRequest, search, skip]);
 
   return [loading || isDeprecatedLoading, riskScoreResponse];
 };

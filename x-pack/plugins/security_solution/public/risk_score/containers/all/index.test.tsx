@@ -9,9 +9,9 @@ import { useHostRiskScore, useUserRiskScore } from '.';
 import { TestProviders } from '../../../common/mock';
 
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../common/hooks/use_app_toasts.mock';
+import { useRiskScoreDeprecated } from '../deprecated';
 
 jest.mock('../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
@@ -21,14 +21,11 @@ jest.mock('../../../common/hooks/use_space_id', () => ({
   useSpaceId: jest.fn().mockReturnValue('default'),
 }));
 
-jest.mock('../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
-}));
-
 jest.mock('../../../common/hooks/use_app_toasts');
+jest.mock('../deprecated');
 
+const mockUseRiskScoreDeprecated = useRiskScoreDeprecated as jest.Mock;
 const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 const mockSearch = jest.fn();
 const mockRefetch = jest.fn();
 
@@ -41,9 +38,20 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
       jest.clearAllMocks();
       appToastsMock = useAppToastsMock.create();
       (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+      mockUseRiskScoreDeprecated.mockReturnValue({
+        isLoading: false,
+        isDeprecated: false,
+        isEnabled: true,
+        refetch: () => {},
+      });
     });
     test('does not search if feature is not enabled', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+      mockUseRiskScoreDeprecated.mockReturnValue({
+        isLoading: false,
+        isDeprecated: false,
+        isEnabled: false,
+        refetch: () => {},
+      });
       mockUseSearchStrategy.mockReturnValue({
         loading: false,
         result: {
@@ -66,14 +74,14 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
           inspect: {},
           isInspected: false,
           isModuleEnabled: false,
-          refetch: mockRefetch,
+          isDeprecated: false,
+          refetch: result.current[1].refetch,
           totalCount: 0,
         },
       ]);
     });
 
     test('if query skipped and feature is enabled, isModuleEnabled should be true', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
       mockUseSearchStrategy.mockReturnValue({
         loading: false,
         result: {
@@ -95,15 +103,20 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
           inspect: {},
           isInspected: false,
           isModuleEnabled: true,
-          refetch: mockRefetch,
+          isDeprecated: false,
+          refetch: result.current[1].refetch,
           totalCount: 0,
         },
       ]);
     });
 
     test('handle index not found error', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-
+      mockUseRiskScoreDeprecated.mockReturnValue({
+        isLoading: false,
+        isDeprecated: false,
+        isEnabled: false,
+        refetch: () => {},
+      });
       mockUseSearchStrategy.mockReturnValue({
         loading: false,
         result: {
@@ -131,15 +144,14 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
           inspect: {},
           isInspected: false,
           isModuleEnabled: false,
-          refetch: mockRefetch,
+          isDeprecated: false,
+          refetch: result.current[1].refetch,
           totalCount: 0,
         },
       ]);
     });
 
     test('show error toast', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-
       const error = new Error();
       mockUseSearchStrategy.mockReturnValue({
         loading: false,
@@ -161,7 +173,6 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
     });
 
     test('runs search if feature is enabled', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
       mockUseSearchStrategy.mockReturnValue({
         loading: false,
         result: {
@@ -187,7 +198,6 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
     });
 
     test('return result', async () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
       mockUseSearchStrategy.mockReturnValue({
         loading: false,
         result: {
@@ -208,9 +218,10 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
           {
             data: [],
             inspect: {},
+            isDeprecated: false,
             isInspected: false,
             isModuleEnabled: true,
-            refetch: mockRefetch,
+            refetch: result.current[1].refetch,
             totalCount: 0,
           },
         ]);
