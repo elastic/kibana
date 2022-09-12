@@ -42,6 +42,7 @@ import {
   USER_PROFILES_BULK_GET_CACHE_KEY,
   USER_PROFILES_CACHE_KEY,
 } from '../../containers/constants';
+import { getAllPermissionsExceptFrom } from '../../utils/permissions';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
@@ -69,7 +70,7 @@ export interface AllCasesListProps {
 export const AllCasesList = React.memo<AllCasesListProps>(
   ({ hiddenStatuses = [], isSelectorView = false, onRowClick, doRefresh }) => {
     const { owner, permissions } = useCasesContext();
-    const availableSolutions = useAvailableCasesOwners();
+    const availableSolutions = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
     const [refresh, setRefresh] = useState(0);
 
     const hasOwner = !!owner.length;
@@ -77,7 +78,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const firstAvailableStatus = head(difference(caseStatuses, hiddenStatuses));
     const initialFilterOptions = {
       ...(!isEmpty(hiddenStatuses) && firstAvailableStatus && { status: firstAvailableStatus }),
-      owner: hasOwner ? owner : [],
+      owner: hasOwner ? owner : availableSolutions,
     };
     const [filterOptions, setFilterOptions] = useState<FilterOptions>({
       ...DEFAULT_FILTER_OPTIONS,
@@ -209,10 +210,28 @@ export const AllCasesList = React.memo<AllCasesListProps>(
         setFilterOptions((prevFilterOptions) => ({
           ...prevFilterOptions,
           ...newFilterOptions,
+          /**
+           * If the user selects and deselects all solutions
+           * then the owner is set to an empty array. This results in fetching all cases the user has access to including
+           * the ones with read access. We want to show only the cases the user has full access to.
+           * For that reason we fallback to availableSolutions if the owner is empty.
+           *
+           * If the consumer of cases has passed an owner we fallback to the provided owner
+           */
+          ...(newFilterOptions.owner != null && !hasOwner
+            ? {
+                owner:
+                  newFilterOptions.owner.length === 0 ? availableSolutions : newFilterOptions.owner,
+              }
+            : newFilterOptions.owner != null && hasOwner
+            ? {
+                owner: newFilterOptions.owner.length === 0 ? owner : newFilterOptions.owner,
+              }
+            : {}),
         }));
         refreshCases(false);
       },
-      [deselectCases, setFilterOptions, refreshCases, setQueryParams]
+      [deselectCases, refreshCases, hasOwner, availableSolutions, owner]
     );
 
     /**

@@ -68,7 +68,7 @@ const CasesTableFiltersComponent = ({
 }: CasesTableFiltersProps) => {
   const [search, setSearch] = useState(initial.search);
   const [selectedTags, setSelectedTags] = useState(initial.tags);
-  const [selectedOwner, setSelectedOwner] = useState(initial.owner);
+  const [selectedOwner, setSelectedOwner] = useState([]);
   const [selectedAssignees, setSelectedAssignees] = useState<UserProfileWithAvatar[]>([]);
   const { data: tags = [], refetch: fetchTags } = useGetTags(CASE_LIST_CACHE_KEY);
 
