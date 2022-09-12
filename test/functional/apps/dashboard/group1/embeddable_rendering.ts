@@ -175,7 +175,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await expectAllDataRenders();
     });
 
-    // TODO: This test seems to be flaky - investigating whether or not it is caused by this PR
     it('data rendered correctly when dashboard is hard refreshed', async () => {
       await browser.refresh();
       const alert = await browser.getAlert();
