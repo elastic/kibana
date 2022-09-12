@@ -28,7 +28,6 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1', enabled = false): Partial
   max_signals: 100,
   related_integrations: [],
   required_fields: [],
-  response_actions: [],
   risk_score: 1,
   risk_score_mapping: [],
   name: 'Simple Rule Query',
