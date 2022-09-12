@@ -6,7 +6,11 @@
     "declaration": true,
     "declarationMap": true
   },
-  "exclude": ["public/applications/**/cypress/**/*", "public/applications/**/cypress.config.ts"],
+  "exclude": [
+    "public/applications/**/cypress/**/*",
+    "public/applications/**/cypress.config.ts",
+    "**/node_modules/cypress",
+  ],
   "include": [
     "common/**/*",
     "public/**/*",
