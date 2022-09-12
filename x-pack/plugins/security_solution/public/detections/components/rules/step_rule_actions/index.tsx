@@ -47,7 +47,6 @@ interface StepRuleActionsProps extends RuleStepProps {
 export const stepActionsDefaultValue: ActionsStepRule = {
   enabled: true,
   actions: [],
-  responseActions: [],
   kibanaSiemAppUrl: '',
   throttle: DEFAULT_THROTTLE_OPTION.value,
 };
@@ -195,8 +194,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
             </UseArray>
           </>
         );
-      } else {
-        return <UseField path="responseActions" component={GhostFormField} />;
       }
     }
     return null;

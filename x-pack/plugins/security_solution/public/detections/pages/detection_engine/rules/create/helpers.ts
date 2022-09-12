@@ -548,7 +548,7 @@ export const formatAboutStepData = (
 export const formatActionsStepData = (actionsStepData: ActionsStepRule): ActionsStepRuleJson => {
   const {
     actions = [],
-    responseActions = [],
+    responseActions,
     enabled,
     kibanaSiemAppUrl,
     throttle = NOTIFICATION_THROTTLE_NO_ACTIONS,
@@ -559,7 +559,7 @@ export const formatActionsStepData = (actionsStepData: ActionsStepRule): Actions
     response_actions: responseActions?.map(transformAlertToRuleResponseAction),
     enabled,
     throttle:
-      actions.length || responseActions.length ? throttle : NOTIFICATION_THROTTLE_NO_ACTIONS,
+      actions.length || responseActions?.length ? throttle : NOTIFICATION_THROTTLE_NO_ACTIONS,
     meta: {
       kibana_siem_app_url: kibanaSiemAppUrl,
     },

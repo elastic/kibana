@@ -389,7 +389,7 @@ const commonRuleParamsKeys = [
   'type',
   'version',
 ];
-const queryRuleParams = ['index', 'filters', 'language', 'query', 'saved_id'];
+const queryRuleParams = ['index', 'filters', 'language', 'query', 'saved_id', 'response_actions'];
 const machineLearningRuleParams = ['anomaly_threshold', 'machine_learning_job_id'];
 const thresholdRuleParams = ['threshold', ...queryRuleParams];
 

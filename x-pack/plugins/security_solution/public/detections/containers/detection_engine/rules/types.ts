@@ -140,7 +140,6 @@ export const RuleSchema = t.intersection([
     updated_at: t.string,
     updated_by: t.string,
     actions: t.array(action),
-    response_actions: t.array(responseAction),
     throttle: t.union([t.string, t.null]),
   }),
   t.partial({

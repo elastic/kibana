@@ -99,6 +99,5 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =>
   exceptions_list: [],
   related_integrations: [],
   required_fields: [],
-  response_actions: [],
   setup: '',
 });

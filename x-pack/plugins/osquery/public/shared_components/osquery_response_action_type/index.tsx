@@ -7,7 +7,6 @@
 
 import React, { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { EuiAccordionProps } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 
 import uuid from 'uuid';
@@ -17,14 +16,10 @@ import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { QueryPackSelectable } from '../../live_queries/form/query_pack_selectable';
 import type { EcsMappingFormField } from '../../packs/queries/ecs_mapping_editor_field';
 import { defaultEcsFormData } from '../../packs/queries/ecs_mapping_editor_field';
-import { convertECSMappingToFormValue } from '../../../common/schemas/common/utils';
-import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
 import { useFormContext } from '../../shared_imports';
 import type { ArrayItem } from '../../shared_imports';
 import { useKibana } from '../../common/lib/kibana';
-import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
 import { LiveQueryQueryField } from '../../live_queries/form/live_query_query_field';
-import { StyledEuiAccordion } from '../../components/accordion';
 import { PackFieldWrapper } from './pack_field_wrapper';
 import { usePack } from '../../packs/use_pack';
 
@@ -72,7 +67,44 @@ const OsqueryResponseActionParamsFormComponent: React.ForwardRefExoticComponent<
   const [queryType, setQueryType] = useState<string>(
     !isEmpty(defaultParams?.queries) ? 'pack' : 'query'
   );
-  const onSubmit = useCallback(async () => null, []);
+  const onSubmit = useCallback(async () => {
+    try {
+      if (queryType === 'pack' && packData) {
+        context.updateFieldValues({
+          [item.path]: {
+            actionTypeId: '.osquery',
+            params: {
+              id: watchedValues.id,
+              packId: watchedValues?.packId?.length ? watchedValues?.packId[0] : undefined,
+              queries: packData?.queries,
+            },
+          },
+        });
+      } else {
+        context.updateFieldValues({
+          [item.path]: {
+            actionTypeId: '.osquery',
+            params: {
+              id: watchedValues.id,
+              savedQueryId: watchedValues.savedQueryId,
+              query: watchedValues.query,
+              ecs_mapping: watchedValues.ecs_mapping,
+            },
+          },
+        });
+      }
+    } catch (e) {}
+  }, [
+    context,
+    item.path,
+    packData,
+    queryType,
+    watchedValues.ecs_mapping,
+    watchedValues.id,
+    watchedValues?.packId,
+    watchedValues.query,
+    watchedValues.savedQueryId,
+  ]);
 
   useEffect(() => {
     // @ts-expect-error update types
@@ -92,45 +124,6 @@ const OsqueryResponseActionParamsFormComponent: React.ForwardRefExoticComponent<
   }, [register]);
 
   const permissions = useKibana().services.application.capabilities.osquery;
-  const [advancedContentState, setAdvancedContentState] = useState<EuiAccordionProps['forceState']>(
-    defaultParams?.ecs_mapping?.length ? 'open' : 'closed'
-  );
-  const handleToggle = useCallback((isOpen) => {
-    const newState = isOpen ? 'open' : 'closed';
-    setAdvancedContentState(newState);
-  }, []);
-
-  const isSavedQueryDisabled = useMemo(
-    () => !permissions.runSavedQueries || !permissions.readSavedQueries,
-    [permissions.readSavedQueries, permissions.runSavedQueries]
-  );
-
-  useEffect(() => {
-    if (queryType === 'pack' && packData) {
-      context.updateFieldValues({
-        [item.path]: {
-          actionTypeId: '.osquery',
-          params: {
-            id: watchedValues.id,
-            packId: watchedValues?.packId?.length ? watchedValues?.packId[0] : undefined,
-            queries: packData?.queries,
-          },
-        },
-      });
-    } else {
-      context.updateFieldValues({
-        [item.path]: {
-          actionTypeId: '.osquery',
-          params: {
-            id: watchedValues.id,
-            savedQueryId: watchedValues.savedQueryId,
-            query: watchedValues.query,
-            ecs_mapping: watchedValues.ecs_mapping,
-          },
-        },
-      });
-    }
-  }, [context, item.path, packData, queryType, watchedValues]);
 
   useEffectOnce(() => {
     if (defaultParams && defaultParams.id) {
@@ -153,23 +146,6 @@ const OsqueryResponseActionParamsFormComponent: React.ForwardRefExoticComponent<
     clearErrors();
   }, [clearErrors, setValue]);
 
-  const handleSavedQueryChange = useCallback(
-    (savedQuery) => {
-      if (savedQuery) {
-        setValue('savedQueryId', savedQuery.savedQueryId);
-        setValue('query', savedQuery.query);
-        setValue(
-          'ecs_mapping',
-          !isEmpty(savedQuery.ecs_mapping)
-            ? convertECSMappingToFormValue(savedQuery.ecs_mapping)
-            : [defaultEcsFormData]
-        );
-      } else {
-        setValue('savedQueryId', null);
-      }
-    },
-    [setValue]
-  );
   const canRunPacks = useMemo(
     () =>
       !!((permissions.runSavedQueries || permissions.writeLiveQueries) && permissions.readPacks),
@@ -195,29 +171,7 @@ const OsqueryResponseActionParamsFormComponent: React.ForwardRefExoticComponent<
           resetFormFields={resetFormFields}
         />
         <EuiSpacer size="m" />
-        {queryType === 'query' && (
-          <>
-            {!isSavedQueryDisabled && (
-              <>
-                <SavedQueriesDropdown
-                  disabled={isSavedQueryDisabled}
-                  onChange={handleSavedQueryChange}
-                />
-              </>
-            )}
-            <LiveQueryQueryField />
-            <EuiSpacer size="m" />
-            <StyledEuiAccordion
-              id="advanced"
-              forceState={advancedContentState}
-              onToggle={handleToggle}
-              buttonContent="Advanced"
-            >
-              <EuiSpacer size="xs" />
-              <ECSMappingEditorField />
-            </StyledEuiAccordion>
-          </>
-        )}
+        {queryType === 'query' && <LiveQueryQueryField />}
         {queryType === 'pack' && <PackFieldWrapper />}
       </FormProvider>
     </>

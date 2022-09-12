@@ -92,6 +92,5 @@ export const getOutputRuleAlertForRest = (): Omit<
   execution_summary: undefined,
   related_integrations: [],
   required_fields: [],
-  response_actions: [],
   setup: '',
 });

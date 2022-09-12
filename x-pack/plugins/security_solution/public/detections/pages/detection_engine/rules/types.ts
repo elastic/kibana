@@ -242,7 +242,7 @@ export interface ScheduleStepRuleJson {
 
 export interface ActionsStepRuleJson {
   actions: RuleAlertAction[];
-  response_actions: RuleAlertResponseAction[];
+  response_actions?: RuleAlertResponseAction[];
   enabled: boolean;
   throttle?: string | null;
   meta?: unknown;

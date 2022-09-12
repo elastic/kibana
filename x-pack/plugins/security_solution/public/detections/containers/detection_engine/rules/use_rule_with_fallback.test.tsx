@@ -89,7 +89,6 @@ describe('useRuleWithFallback', () => {
             "references": Array [],
             "related_integrations": Array [],
             "required_fields": Array [],
-            "response_actions": Array [],
             "risk_score": 75,
             "risk_score_mapping": Array [],
             "rule_id": "bbd3106e-b4b5-4d7c-a1a2-47531d6a2baf",

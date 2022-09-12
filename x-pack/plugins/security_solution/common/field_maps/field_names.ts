@@ -24,7 +24,6 @@ export const ALERT_ORIGINAL_EVENT_KIND = `${ALERT_ORIGINAL_EVENT}.kind` as const
 export const ALERT_ORIGINAL_EVENT_MODULE = `${ALERT_ORIGINAL_EVENT}.module` as const;
 
 export const ALERT_RULE_ACTIONS = `${ALERT_RULE_NAMESPACE}.actions` as const;
-export const ALERT_RULE_RESPONSE_ACTIONS = `${ALERT_RULE_NAMESPACE}.response_actions` as const;
 export const ALERT_RULE_EXCEPTIONS_LIST = `${ALERT_RULE_NAMESPACE}.exceptions_list` as const;
 export const ALERT_RULE_FALSE_POSITIVES = `${ALERT_RULE_NAMESPACE}.false_positives` as const;
 export const ALERT_RULE_IMMUTABLE = `${ALERT_RULE_NAMESPACE}.immutable` as const;
