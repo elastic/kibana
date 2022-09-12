@@ -323,7 +323,7 @@ export function getState({
       // some filters may not be valid for this context, so update
       // the filter manager with a modified list of valid filters
       const currentFilters = filterManager.getFilters();
-      const validFilters = getValidFilters(dataView, currentFilters);
+      const validFilters = getValidFilters(indexPattern, currentFilters);
       if (!isEqual(currentFilters, validFilters)) {
         filterManager.setFilters(validFilters);
       }
