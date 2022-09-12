@@ -12,7 +12,7 @@ export const USERNAME_LABEL = i18n.translate('xpack.enterpriseSearch.usernameLab
 });
 
 export const PASSWORD_LABEL = i18n.translate('xpack.enterpriseSearch.passwordLabel', {
-  defaultMessage: 'Username',
+  defaultMessage: 'Password',
 });
 
 export const TYPE_LABEL = i18n.translate('xpack.enterpriseSearch.typeLabel', {
