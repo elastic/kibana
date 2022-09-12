@@ -104,9 +104,9 @@ export const MonitorSelector = () => {
           }
         >
           {(list, search) => (
-            <div style={{ width: 240 }}>
+            <div style={{ width: 280 }}>
               <EuiPopoverTitle paddingSize="s">
-                {options.length > 0 ? (
+                {options.length > 0 || searchValue ? (
                   search
                 ) : (
                   <EuiText color="subdued" size="s" className="eui-textCenter">
@@ -148,5 +148,5 @@ const OTHER_MONITORS = i18n.translate('xpack.synthetics.monitorSummary.otherMoni
 });
 
 const NO_OTHER_MONITORS_EXISTS = i18n.translate('xpack.synthetics.monitorSummary.noOtherMonitors', {
-  defaultMessage: 'No other monitors exist',
+  defaultMessage: 'No other monitors exist.',
 });
