@@ -241,7 +241,7 @@ describe('UserActionPropertyActions ', () => {
 
       expect(renderResult.queryByTestId(`property-actions-${type}`)).toBeInTheDocument();
       /**
-       * This check ensures that no other action is render. There is
+       * This check ensures that no other action is rendered. There is
        * one button to open the popover and one button for the action
        **/
       expect(await renderResult.findAllByRole('button')).toHaveLength(2);

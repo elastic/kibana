@@ -266,7 +266,7 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByText('Attachment actions')).toBeInTheDocument();
     });
 
-    it('renders the delete attachment action correctly', async () => {
+    it('deletes the attachment correctly', async () => {
       const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
       externalReferenceAttachmentTypeRegistry.register(getExternalReferenceAttachment());
 
@@ -291,6 +291,20 @@ describe('createCommentUserActionBuilder', () => {
       await waitForEuiPopoverOpen();
 
       expect(result.queryByTestId('property-actions-trash')).toBeInTheDocument();
+
+      userEvent.click(result.getByTestId('property-actions-trash'));
+
+      await waitFor(() => {
+        expect(result.queryByTestId('property-actions-confirm-modal')).toBeInTheDocument();
+      });
+
+      userEvent.click(result.getByText('Delete'));
+
+      await waitFor(() => {
+        expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
+          'external-reference-comment-id'
+        );
+      });
     });
   });
 
@@ -428,7 +442,7 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByText('Attachment actions')).toBeInTheDocument();
     });
 
-    it('renders the delete attachment action correctly', async () => {
+    it('deletes the attachment correctly', async () => {
       const attachment = getPersistableStateAttachment();
       const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
       persistableStateAttachmentTypeRegistry.register(attachment);
@@ -454,6 +468,20 @@ describe('createCommentUserActionBuilder', () => {
       await waitForEuiPopoverOpen();
 
       expect(result.queryByTestId('property-actions-trash')).toBeInTheDocument();
+
+      userEvent.click(result.getByTestId('property-actions-trash'));
+
+      await waitFor(() => {
+        expect(result.queryByTestId('property-actions-confirm-modal')).toBeInTheDocument();
+      });
+
+      userEvent.click(result.getByText('Delete'));
+
+      await waitFor(() => {
+        expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
+          'persistable-state-comment-id'
+        );
+      });
     });
   });
 });

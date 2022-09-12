@@ -135,7 +135,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
               deleteLabel={i18n.DELETE_COMMENT}
               deleteConfirmTitle={i18n.DELETE_COMMENT_TITLE}
               isLoading={isLoading}
-              onDelete={handleDeleteComment.bind(null, comment.id)}
+              onDelete={() => handleDeleteComment(comment.id)}
               extraActions={attachmentViewObject.actions}
             />
           </>
