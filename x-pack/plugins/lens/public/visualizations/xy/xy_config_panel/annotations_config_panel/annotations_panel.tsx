@@ -258,6 +258,7 @@ export const AnnotationsPanel = (
                         }
                       }}
                       fieldIsInvalid={!fieldIsValid}
+                      autoFocus={!selectedField}
                     />
                   </>
                 );
