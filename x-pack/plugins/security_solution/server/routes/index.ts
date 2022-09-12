@@ -69,14 +69,19 @@ import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/rou
 import { createSourcererDataViewRoute, getSourcererDataViewRoute } from '../lib/sourcerer/routes';
 import type { ITelemetryReceiver } from '../lib/telemetry/receiver';
 import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
-import { readPrebuiltDevToolContentRoute } from '../lib/risky_score/prebuilt_dev_tool_content/routes/read_prebuilt_dev_tool_content_route';
-import { createPrebuiltSavedObjectsRoute } from '../lib/risky_score/prebuilt_saved_objects/routes/create_prebuilt_saved_objects';
 import { readAlertsIndexExistsRoute } from '../lib/detection_engine/routes/index/read_alerts_index_exists_route';
 import { getInstalledIntegrationsRoute } from '../lib/detection_engine/routes/fleet/get_installed_integrations/get_installed_integrations_route';
 import { registerResolverRoutes } from '../endpoint/routes/resolver';
 import { findRuleExceptionReferencesRoute } from '../lib/detection_engine/routes/rules/find_rule_exceptions_route';
 import { createRuleExceptionsRoute } from '../lib/detection_engine/routes/rules/create_rule_exceptions_route';
-import { createEsIndexRoute, deleteEsIndicesRoute } from '../lib/risky_score/indices';
+import {
+  createEsIndexRoute,
+  createPrebuiltSavedObjectsRoute,
+  createStoredScriptRoute,
+  deleteEsIndicesRoute,
+  deleteStoredScriptRoute,
+  readPrebuiltDevToolContentRoute,
+} from '../lib/risky_score/routes';
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
@@ -180,6 +185,8 @@ export const initRoutes = (
   // risky score module
   createEsIndexRoute(router);
   deleteEsIndicesRoute(router);
+  createStoredScriptRoute(router);
+  deleteStoredScriptRoute(router);
   readPrebuiltDevToolContentRoute(router);
   createPrebuiltSavedObjectsRoute(router, security);
 

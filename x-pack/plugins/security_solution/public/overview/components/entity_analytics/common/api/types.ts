@@ -38,6 +38,39 @@ export interface DeleteIndices {
   options: { indices: string[] };
 }
 
+export interface CreateStoredScript {
+  http: HttpSetup;
+  notifications?: NotificationsStart;
+  signal?: AbortSignal;
+  errorMessage?: string;
+  options: {
+    id: string;
+    script: {
+      lang: string | 'painless' | 'expression' | 'mustache' | 'java';
+      options?: Record<string, string>;
+      source: string;
+    };
+  };
+}
+
+export interface DeleteStoredScript {
+  http: HttpSetup;
+  notifications?: NotificationsStart;
+  signal?: AbortSignal;
+  errorMessage?: string;
+  options: {
+    id: string;
+  };
+}
+
+export interface DeleteStoredScripts {
+  http: HttpSetup;
+  notifications?: NotificationsStart;
+  signal?: AbortSignal;
+  errorMessage?: string;
+  ids: string[];
+}
+
 export interface CreateTransforms {
   http: HttpSetup;
   notifications?: NotificationsStart;

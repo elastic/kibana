@@ -130,25 +130,10 @@ Object {
     },
     Object {
       "script": Object {
+        "id": "ml_hostriskscore_levels_script",
         "params": Object {
           "risk_score": "host.risk.calculated_score_norm",
         },
-        "source": "double risk_score = (def)ctx.getByPath(params.risk_score);
-if (risk_score < 20) {
-    ctx['host']['risk']['calculated_level'] = 'Unknown'
-}
-else if (risk_score >= 20 && risk_score < 40) {
-    ctx['host']['risk']['calculated_level'] = 'Low'
-}
-else if (risk_score >= 40 && risk_score < 70) {
-    ctx['host']['risk']['calculated_level'] = 'Moderate'
-}
-else if (risk_score >= 70 && risk_score < 90) {
-    ctx['host']['risk']['calculated_level'] = 'High'
-}
-else if (risk_score >= 90) {
-    ctx['host']['risk']['calculated_level'] = 'Critical'
-}",
       },
     },
   ],
@@ -199,34 +184,10 @@ Object {
         "scripted_metric": Object {
           "combine_script": "return state",
           "init_script": Object {
-            "source": "state.rule_risk_stats = new HashMap();
-state.host_variant_set = false;
-state.host_variant = new String();
-state.tactic_ids = new HashSet();",
+            "id": "ml_hostriskscore_init_script",
           },
           "map_script": Object {
-            "source": "// Get the host variant
-if (state.host_variant_set == false) {
- if (doc.containsKey(\\"host.os.full\\") && doc[\\"host.os.full\\"].size() != 0) {
- state.host_variant = doc[\\"host.os.full\\"].value;
- state.host_variant_set = true;
- }
-}
-// Aggregate all the tactics seen on the host
-if (doc.containsKey(\\"signal.rule.threat.tactic.id\\") && doc[\\"signal.rule.threat.tactic.id\\"].size() != 0) {
- state.tactic_ids.add(doc[\\"signal.rule.threat.tactic.id\\"].value);
-}
-// Get running sum of time-decayed risk score per rule name per shard
-String rule_name = doc[\\"signal.rule.name\\"].value;
-def stats = state.rule_risk_stats.getOrDefault(rule_name, [0.0,\\"\\",false]);
-int time_diff = (int)((System.currentTimeMillis() - doc[\\"@timestamp\\"].value.toInstant().toEpochMilli()) / (1000.0 * 60.0 * 60.0));
-double risk_derate = Math.min(1, Math.exp((params.lookback_time - time_diff) / params.time_decay_constant));
-stats[0] = Math.max(stats[0], doc[\\"signal.rule.risk_score\\"].value * risk_derate);
-if (stats[2] == false) {
- stats[1] = doc[\\"kibana.alert.rule.uuid\\"].value;
- stats[2] = true;
-}
-state.rule_risk_stats.put(rule_name, stats);",
+            "id": "ml_hostriskscore_map_script",
           },
           "params": Object {
             "lookback_time": 72,
@@ -254,80 +215,7 @@ state.rule_risk_stats.put(rule_name, stats);",
             "zeta_constant": 2.612,
           },
           "reduce_script": Object {
-            "source": "// Consolidating time decayed risks and tactics from across all shards
-Map total_risk_stats = new HashMap();
-String host_variant = new String();
-def tactic_ids = new HashSet();
-for (state in states) {
- for (key in state.rule_risk_stats.keySet()) {
- def rule_stats = state.rule_risk_stats.get(key);
- def stats = total_risk_stats.getOrDefault(key, [0.0,\\"\\",false]);
- stats[0] = Math.max(stats[0], rule_stats[0]);
- if (stats[2] == false) {
- stats[1] = rule_stats[1];
- stats[2] = true;
- } 
- total_risk_stats.put(key, stats);
- }
- if (host_variant.length() == 0) {
- host_variant = state.host_variant;
- }
- tactic_ids.addAll(state.tactic_ids);
-}
-// Consolidating individual rule risks and arranging them in decreasing order
-List risks = new ArrayList();
-for (key in total_risk_stats.keySet()) {
- risks.add(total_risk_stats[key][0])
-}
-Collections.sort(risks, Collections.reverseOrder());
-// Calculating total host risk score
-double total_risk = 0.0;
-double risk_cap = params.max_risk * params.zeta_constant;
-for (int i=0;i<risks.length;i++) {
- total_risk += risks[i] / Math.pow((1+i), params.p);
-}
-// Normalizing the host risk score
-double total_norm_risk = 100 * total_risk / risk_cap;
-if (total_norm_risk < 40) {
- total_norm_risk = 2.125 * total_norm_risk;
-}
-else if (total_norm_risk >= 40 && total_norm_risk < 50) {
- total_norm_risk = 85 + (total_norm_risk - 40);
-}
-else {
- total_norm_risk = 95 + (total_norm_risk - 50) / 10;
-}
-// Calculating multipliers to the host risk score
-double risk_multiplier = 1.0;
-List multipliers = new ArrayList();
-// Add a multiplier if host is a server
-if (host_variant.toLowerCase().contains(\\"server\\")) {
- risk_multiplier *= params.server_multiplier;
- multipliers.add(\\"Host is a server\\");
-}
-// Add multipliers based on number and diversity of tactics seen on the host
-for (String tactic : tactic_ids) {
- multipliers.add(\\"Tactic \\"+tactic);
- risk_multiplier *= 1 + params.tactic_base_multiplier * params.tactic_weights.getOrDefault(tactic, 0);
-}
-// Calculating final risk
-double final_risk = total_norm_risk;
-if (risk_multiplier > 1.0) {
- double prior_odds = (total_norm_risk) / (100 - total_norm_risk);
- double updated_odds = prior_odds * risk_multiplier; 
- final_risk = 100 * updated_odds / (1 + updated_odds);
-}
-// Adding additional metadata
-List rule_stats = new ArrayList();
-for (key in total_risk_stats.keySet()) {
- Map temp = new HashMap();
- temp[\\"rule_name\\"] = key;
- temp[\\"rule_risk\\"] = total_risk_stats[key][0];
- temp[\\"rule_id\\"] = total_risk_stats[key][1];
- rule_stats.add(temp);
-}
-
-return [\\"calculated_score_norm\\": final_risk, \\"rule_risks\\": rule_stats, \\"multipliers\\": multipliers];",
+            "id": "ml_hostriskscore_reduce_script",
           },
         },
       },
@@ -363,6 +251,158 @@ return [\\"calculated_score_norm\\": final_risk, \\"rule_risks\\": rule_stats, \
       "delay": "120s",
       "field": "@timestamp",
     },
+  },
+}
+`;
+
+exports[`installHostRiskScoreModule Create script: ml_hostriskscore_init_script 1`] = `
+Object {
+  "id": "ml_hostriskscore_init_script",
+  "script": Object {
+    "lang": "painless",
+    "source": "state.rule_risk_stats = new HashMap();
+state.host_variant_set = false;
+state.host_variant = new String();
+state.tactic_ids = new HashSet();",
+  },
+}
+`;
+
+exports[`installHostRiskScoreModule Create script: ml_hostriskscore_levels_script 1`] = `
+Object {
+  "id": "ml_hostriskscore_levels_script",
+  "script": Object {
+    "lang": "painless",
+    "source": "double risk_score = (def)ctx.getByPath(params.risk_score);
+if (risk_score < 20) {
+    ctx['host']['risk']['calculated_level'] = 'Unknown'
+}
+else if (risk_score >= 20 && risk_score < 40) {
+    ctx['host']['risk']['calculated_level'] = 'Low'
+}
+else if (risk_score >= 40 && risk_score < 70) {
+    ctx['host']['risk']['calculated_level'] = 'Moderate'
+}
+else if (risk_score >= 70 && risk_score < 90) {
+    ctx['host']['risk']['calculated_level'] = 'High'
+}
+else if (risk_score >= 90) {
+    ctx['host']['risk']['calculated_level'] = 'Critical'
+}",
+  },
+}
+`;
+
+exports[`installHostRiskScoreModule Create script: ml_hostriskscore_map_script 1`] = `
+Object {
+  "id": "ml_hostriskscore_map_script",
+  "script": Object {
+    "lang": "painless",
+    "source": "// Get the host variant
+if (state.host_variant_set == false) {
+    if (doc.containsKey(\\"host.os.full\\") && doc[\\"host.os.full\\"].size() != 0) {
+        state.host_variant = doc[\\"host.os.full\\"].value;
+        state.host_variant_set = true;
+    }
+}
+// Aggregate all the tactics seen on the host
+if (doc.containsKey(\\"signal.rule.threat.tactic.id\\") && doc[\\"signal.rule.threat.tactic.id\\"].size() != 0) {
+    state.tactic_ids.add(doc[\\"signal.rule.threat.tactic.id\\"].value);
+}
+// Get running sum of time-decayed risk score per rule name per shard
+String rule_name = doc[\\"signal.rule.name\\"].value;
+def stats = state.rule_risk_stats.getOrDefault(rule_name, [0.0,\\"\\",false]);
+int time_diff = (int)((System.currentTimeMillis() - doc[\\"@timestamp\\"].value.toInstant().toEpochMilli()) / (1000.0 * 60.0 * 60.0));
+double risk_derate = Math.min(1, Math.exp((params.lookback_time - time_diff) / params.time_decay_constant));
+stats[0] = Math.max(stats[0], doc[\\"signal.rule.risk_score\\"].value * risk_derate);
+if (stats[2] == false) {
+    stats[1] = doc[\\"kibana.alert.rule.uuid\\"].value;
+    stats[2] = true;
+}
+state.rule_risk_stats.put(rule_name, stats);",
+  },
+}
+`;
+
+exports[`installHostRiskScoreModule Create script: ml_hostriskscore_reduce_script 1`] = `
+Object {
+  "id": "ml_hostriskscore_reduce_script",
+  "script": Object {
+    "lang": "painless",
+    "source": "// Consolidating time decayed risks and tactics from across all shards
+Map total_risk_stats = new HashMap();
+String host_variant = new String();
+def tactic_ids = new HashSet();
+for (state in states) {
+    for (key in state.rule_risk_stats.keySet()) {
+        def rule_stats = state.rule_risk_stats.get(key);
+        def stats = total_risk_stats.getOrDefault(key, [0.0,\\"\\",false]);
+        stats[0] = Math.max(stats[0], rule_stats[0]);
+        if (stats[2] == false) {
+            stats[1] = rule_stats[1];
+            stats[2] = true;
+        } 
+        total_risk_stats.put(key, stats);
+    }
+    if (host_variant.length() == 0) {
+        host_variant = state.host_variant;
+    }
+    tactic_ids.addAll(state.tactic_ids);
+}
+// Consolidating individual rule risks and arranging them in decreasing order
+List risks = new ArrayList();
+for (key in total_risk_stats.keySet()) {
+    risks.add(total_risk_stats[key][0])
+}
+Collections.sort(risks, Collections.reverseOrder());
+// Calculating total host risk score
+double total_risk = 0.0;
+double risk_cap = params.max_risk * params.zeta_constant;
+for (int i=0;i<risks.length;i++) {
+    total_risk += risks[i] / Math.pow((1+i), params.p);
+}
+// Normalizing the host risk score
+double total_norm_risk = 100 * total_risk / risk_cap;
+if (total_norm_risk < 40) {
+    total_norm_risk =  2.125 * total_norm_risk;
+}
+else if (total_norm_risk >= 40 && total_norm_risk < 50) {
+    total_norm_risk = 85 + (total_norm_risk - 40);
+}
+else {
+    total_norm_risk = 95 + (total_norm_risk - 50) / 10;
+}
+// Calculating multipliers to the host risk score
+double risk_multiplier = 1.0;
+List multipliers = new ArrayList();
+// Add a multiplier if host is a server
+if (host_variant.toLowerCase().contains(\\"server\\")) {
+    risk_multiplier *= params.server_multiplier;
+    multipliers.add(\\"Host is a server\\");
+}
+// Add multipliers based on number and diversity of tactics seen on the host
+for (String tactic : tactic_ids) {
+    multipliers.add(\\"Tactic \\"+tactic);
+    risk_multiplier *= 1 + params.tactic_base_multiplier * params.tactic_weights.getOrDefault(tactic, 0);
+}
+// Calculating final risk
+double final_risk = total_norm_risk;
+if (risk_multiplier > 1.0) {
+    double prior_odds = (total_norm_risk) / (100 - total_norm_risk);
+    double updated_odds = prior_odds * risk_multiplier; 
+    final_risk = 100 * updated_odds / (1 + updated_odds);
+}
+// Adding additional metadata
+List rule_stats = new ArrayList();
+for (key in total_risk_stats.keySet()) {
+    Map temp = new HashMap();
+    temp[\\"rule_name\\"] = key;
+    temp[\\"rule_risk\\"] = total_risk_stats[key][0];
+    temp[\\"rule_id\\"] = total_risk_stats[key][1];
+    rule_stats.add(temp);
+}
+
+return [\\"calculated_score_norm\\": final_risk, \\"rule_risks\\": rule_stats, \\"multipliers\\": multipliers];",
   },
 }
 `;
@@ -504,25 +544,10 @@ Object {
     },
     Object {
       "script": Object {
+        "id": "ml_userriskscore_levels_script",
         "params": Object {
           "risk_score": "user.risk.calculated_score_norm",
         },
-        "source": "double risk_score = (def)ctx.getByPath(params.risk_score);
-if (risk_score < 20) {
-    ctx['user']['risk']['calculated_level'] = 'Unknown'
-}
-else if (risk_score >= 20 && risk_score < 40) {
-    ctx['user']['risk']['calculated_level'] = 'Low'
-}
-else if (risk_score >= 40 && risk_score < 70) {
-    ctx['user']['risk']['calculated_level'] = 'Moderate'
-}
-else if (risk_score >= 70 && risk_score < 90) {
-    ctx['user']['risk']['calculated_level'] = 'High'
-}
-else if (risk_score >= 90) {
-    ctx['user']['risk']['calculated_level'] = 'Critical'
-}",
       },
     },
   ],
@@ -574,11 +599,7 @@ Object {
           "combine_script": "return state",
           "init_script": "state.rule_risk_stats = new HashMap();",
           "map_script": Object {
-            "source": "// Get running sum of risk score per rule name per shard\\\\\\\\
-String rule_name = doc[\\"signal.rule.name\\"].value;
-def stats = state.rule_risk_stats.getOrDefault(rule_name, 0.0);
-stats = doc[\\"signal.rule.risk_score\\"].value;
-state.rule_risk_stats.put(rule_name, stats);",
+            "id": "ml_userriskscore_map_script",
           },
           "params": Object {
             "max_risk": 100,
@@ -586,7 +607,96 @@ state.rule_risk_stats.put(rule_name, stats);",
             "zeta_constant": 2.612,
           },
           "reduce_script": Object {
-            "source": "// Consolidating time decayed risks from across all shards
+            "id": "ml_userriskscore_reduce_script",
+          },
+        },
+      },
+    },
+    "group_by": Object {
+      "user.name": Object {
+        "terms": Object {
+          "field": "user.name",
+        },
+      },
+    },
+  },
+  "source": Object {
+    "index": Array [
+      ".alerts-security.alerts-customSpace",
+    ],
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "now-90d",
+              },
+            },
+          },
+          Object {
+            "match": Object {
+              "signal.status": "open",
+            },
+          },
+        ],
+      },
+    },
+  },
+  "sync": Object {
+    "time": Object {
+      "delay": "120s",
+      "field": "@timestamp",
+    },
+  },
+}
+`;
+
+exports[`installUserRiskScoreModule Create script: ml_userriskscore_levels_script 1`] = `
+Object {
+  "id": "ml_userriskscore_levels_script",
+  "script": Object {
+    "lang": "painless",
+    "source": "double risk_score = (def)ctx.getByPath(params.risk_score);
+if (risk_score < 20) {
+  ctx['user']['risk']['calculated_level'] = 'Unknown'
+}
+else if (risk_score >= 20 && risk_score < 40) {
+  ctx['user']['risk']['calculated_level'] = 'Low'
+}
+else if (risk_score >= 40 && risk_score < 70) {
+  ctx['user']['risk']['calculated_level'] = 'Moderate'
+}
+else if (risk_score >= 70 && risk_score < 90) {
+  ctx['user']['risk']['calculated_level'] = 'High'
+}
+else if (risk_score >= 90) {
+  ctx['user']['risk']['calculated_level'] = 'Critical'
+}",
+  },
+}
+`;
+
+exports[`installUserRiskScoreModule Create script: ml_userriskscore_map_script 1`] = `
+Object {
+  "id": "ml_userriskscore_map_script",
+  "script": Object {
+    "lang": "painless",
+    "source": "// Get running sum of risk score per rule name per shard\\\\\\\\
+String rule_name = doc[\\"signal.rule.name\\"].value;
+def stats = state.rule_risk_stats.getOrDefault(rule_name, 0.0);
+stats = doc[\\"signal.rule.risk_score\\"].value;
+state.rule_risk_stats.put(rule_name, stats);",
+  },
+}
+`;
+
+exports[`installUserRiskScoreModule Create script: ml_userriskscore_reduce_script 1`] = `
+Object {
+  "id": "ml_userriskscore_reduce_script",
+  "script": Object {
+    "lang": "painless",
+    "source": "// Consolidating time decayed risks from across all shards
 Map total_risk_stats = new HashMap();
 for (state in states) {
     for (key in state.rule_risk_stats.keySet()) {
@@ -628,46 +738,6 @@ for (key in total_risk_stats.keySet()) {
 }
 
 return [\\"calculated_score_norm\\": total_norm_risk, \\"rule_risks\\": rule_stats];",
-          },
-        },
-      },
-    },
-    "group_by": Object {
-      "user.name": Object {
-        "terms": Object {
-          "field": "user.name",
-        },
-      },
-    },
-  },
-  "source": Object {
-    "index": Array [
-      ".alerts-security.alerts-customSpace",
-    ],
-    "query": Object {
-      "bool": Object {
-        "filter": Array [
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "gte": "now-90d",
-              },
-            },
-          },
-          Object {
-            "match": Object {
-              "signal.status": "open",
-            },
-          },
-        ],
-      },
-    },
-  },
-  "sync": Object {
-    "time": Object {
-      "delay": "120s",
-      "field": "@timestamp",
-    },
   },
 }
 `;

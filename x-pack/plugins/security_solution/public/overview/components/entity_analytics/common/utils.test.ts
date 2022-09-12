@@ -29,6 +29,22 @@ describe('installHostRiskScoreModule', () => {
     jest.clearAllMocks();
   });
 
+  it('Create script: ml_hostriskscore_levels_script', async () => {
+    expect((api.createStoredScript as jest.Mock).mock.calls[0][0].options).toMatchSnapshot();
+  });
+
+  it('Create script: ml_hostriskscore_init_script', async () => {
+    expect((api.createStoredScript as jest.Mock).mock.calls[1][0].options).toMatchSnapshot();
+  });
+
+  it('Create script: ml_hostriskscore_map_script', async () => {
+    expect((api.createStoredScript as jest.Mock).mock.calls[2][0].options).toMatchSnapshot();
+  });
+
+  it('Create script: ml_hostriskscore_reduce_script', async () => {
+    expect((api.createStoredScript as jest.Mock).mock.calls[3][0].options).toMatchSnapshot();
+  });
+
   it('Create IngestPipeline: ml_hostriskscore_ingest_pipeline', async () => {
     expect((api.createIngestPipeline as jest.Mock).mock.calls[0][0].options).toMatchSnapshot();
   });
@@ -61,6 +77,18 @@ describe('installUserRiskScoreModule', () => {
 
   afterAll(() => {
     jest.clearAllMocks();
+  });
+
+  it('Create script: ml_userriskscore_levels_script', async () => {
+    expect((api.createStoredScript as jest.Mock).mock.calls[0][0].options).toMatchSnapshot();
+  });
+
+  it('Create script: ml_userriskscore_map_script', async () => {
+    expect((api.createStoredScript as jest.Mock).mock.calls[1][0].options).toMatchSnapshot();
+  });
+
+  it('Create script: ml_userriskscore_reduce_script', async () => {
+    expect((api.createStoredScript as jest.Mock).mock.calls[2][0].options).toMatchSnapshot();
   });
 
   it('Create IngestPipeline: ml_userriskscore_ingest_pipeline', async () => {

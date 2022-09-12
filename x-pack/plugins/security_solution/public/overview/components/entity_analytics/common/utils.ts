@@ -9,8 +9,10 @@ import { RiskScoreEntity, RiskScoreFields } from '../../../../../common/search_s
 import {
   createIngestPipeline,
   createIndices,
+  createStoredScript,
   createTransform,
   startTransforms,
+  deleteStoredScripts,
   deleteTransforms,
   deleteIngestPipelines,
   stopTransforms,
@@ -58,6 +60,106 @@ export const getPivoTransformIndex = (riskScoreEntity: RiskScoreEntity, spaceId 
 export const getLatestTransformIndex = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') =>
   `ml_${riskScoreEntity}_risk_score_latest_${spaceId}`;
 
+const getRiskyScoreLevelScriptId = (riskScoreEntity: RiskScoreEntity) =>
+  `ml_${riskScoreEntity}riskscore_levels_script`;
+const getRiskyScoreInitScriptId = (riskScoreEntity: RiskScoreEntity) =>
+  `ml_${riskScoreEntity}riskscore_init_script`;
+const getRiskyScoreMapScriptId = (riskScoreEntity: RiskScoreEntity) =>
+  `ml_${riskScoreEntity}riskscore_map_script`;
+const getRiskyScoreReduceScriptId = (riskScoreEntity: RiskScoreEntity) =>
+  `ml_${riskScoreEntity}riskscore_reduce_script`;
+
+/**
+ * This should be aligned with
+ * console_templates/enable_host_risk_score.console step 1
+ */
+export const getRiskyHostCreateLevelScriptOptions = () => ({
+  id: getRiskyScoreLevelScriptId(RiskScoreEntity.host),
+  script: {
+    lang: 'painless',
+    source:
+      "double risk_score = (def)ctx.getByPath(params.risk_score);\nif (risk_score < 20) {\n    ctx['host']['risk']['calculated_level'] = 'Unknown'\n}\nelse if (risk_score >= 20 && risk_score < 40) {\n    ctx['host']['risk']['calculated_level'] = 'Low'\n}\nelse if (risk_score >= 40 && risk_score < 70) {\n    ctx['host']['risk']['calculated_level'] = 'Moderate'\n}\nelse if (risk_score >= 70 && risk_score < 90) {\n    ctx['host']['risk']['calculated_level'] = 'High'\n}\nelse if (risk_score >= 90) {\n    ctx['host']['risk']['calculated_level'] = 'Critical'\n}",
+  },
+});
+
+/**
+ * This should be aligned with
+ * console_templates/enable_host_risk_score.console step 2
+ */
+export const getRiskyHostCreateInitScriptOptions = () => ({
+  id: `ml_${RiskScoreEntity.host}riskscore_init_script`,
+  script: {
+    lang: 'painless',
+    source:
+      'state.rule_risk_stats = new HashMap();\nstate.host_variant_set = false;\nstate.host_variant = new String();\nstate.tactic_ids = new HashSet();',
+  },
+});
+
+/**
+ * This should be aligned with
+ * console_templates/enable_host_risk_score.console step 3
+ */
+export const getRiskyHostCreateMapScriptOptions = () => ({
+  id: getRiskyScoreMapScriptId(RiskScoreEntity.host),
+  script: {
+    lang: 'painless',
+    source:
+      '// Get the host variant\nif (state.host_variant_set == false) {\n    if (doc.containsKey("host.os.full") && doc["host.os.full"].size() != 0) {\n        state.host_variant = doc["host.os.full"].value;\n        state.host_variant_set = true;\n    }\n}\n// Aggregate all the tactics seen on the host\nif (doc.containsKey("signal.rule.threat.tactic.id") && doc["signal.rule.threat.tactic.id"].size() != 0) {\n    state.tactic_ids.add(doc["signal.rule.threat.tactic.id"].value);\n}\n// Get running sum of time-decayed risk score per rule name per shard\nString rule_name = doc["signal.rule.name"].value;\ndef stats = state.rule_risk_stats.getOrDefault(rule_name, [0.0,"",false]);\nint time_diff = (int)((System.currentTimeMillis() - doc["@timestamp"].value.toInstant().toEpochMilli()) / (1000.0 * 60.0 * 60.0));\ndouble risk_derate = Math.min(1, Math.exp((params.lookback_time - time_diff) / params.time_decay_constant));\nstats[0] = Math.max(stats[0], doc["signal.rule.risk_score"].value * risk_derate);\nif (stats[2] == false) {\n    stats[1] = doc["kibana.alert.rule.uuid"].value;\n    stats[2] = true;\n}\nstate.rule_risk_stats.put(rule_name, stats);',
+  },
+});
+
+/**
+ * This should be aligned with
+ * console_templates/enable_host_risk_score.console step 4
+ */
+export const getRiskyHostCreateReduceScriptOptions = () => ({
+  id: getRiskyScoreReduceScriptId(RiskScoreEntity.host),
+  script: {
+    lang: 'painless',
+    source:
+      '// Consolidating time decayed risks and tactics from across all shards\nMap total_risk_stats = new HashMap();\nString host_variant = new String();\ndef tactic_ids = new HashSet();\nfor (state in states) {\n    for (key in state.rule_risk_stats.keySet()) {\n        def rule_stats = state.rule_risk_stats.get(key);\n        def stats = total_risk_stats.getOrDefault(key, [0.0,"",false]);\n        stats[0] = Math.max(stats[0], rule_stats[0]);\n        if (stats[2] == false) {\n            stats[1] = rule_stats[1];\n            stats[2] = true;\n        } \n        total_risk_stats.put(key, stats);\n    }\n    if (host_variant.length() == 0) {\n        host_variant = state.host_variant;\n    }\n    tactic_ids.addAll(state.tactic_ids);\n}\n// Consolidating individual rule risks and arranging them in decreasing order\nList risks = new ArrayList();\nfor (key in total_risk_stats.keySet()) {\n    risks.add(total_risk_stats[key][0])\n}\nCollections.sort(risks, Collections.reverseOrder());\n// Calculating total host risk score\ndouble total_risk = 0.0;\ndouble risk_cap = params.max_risk * params.zeta_constant;\nfor (int i=0;i<risks.length;i++) {\n    total_risk += risks[i] / Math.pow((1+i), params.p);\n}\n// Normalizing the host risk score\ndouble total_norm_risk = 100 * total_risk / risk_cap;\nif (total_norm_risk < 40) {\n    total_norm_risk =  2.125 * total_norm_risk;\n}\nelse if (total_norm_risk >= 40 && total_norm_risk < 50) {\n    total_norm_risk = 85 + (total_norm_risk - 40);\n}\nelse {\n    total_norm_risk = 95 + (total_norm_risk - 50) / 10;\n}\n// Calculating multipliers to the host risk score\ndouble risk_multiplier = 1.0;\nList multipliers = new ArrayList();\n// Add a multiplier if host is a server\nif (host_variant.toLowerCase().contains("server")) {\n    risk_multiplier *= params.server_multiplier;\n    multipliers.add("Host is a server");\n}\n// Add multipliers based on number and diversity of tactics seen on the host\nfor (String tactic : tactic_ids) {\n    multipliers.add("Tactic "+tactic);\n    risk_multiplier *= 1 + params.tactic_base_multiplier * params.tactic_weights.getOrDefault(tactic, 0);\n}\n// Calculating final risk\ndouble final_risk = total_norm_risk;\nif (risk_multiplier > 1.0) {\n    double prior_odds = (total_norm_risk) / (100 - total_norm_risk);\n    double updated_odds = prior_odds * risk_multiplier; \n    final_risk = 100 * updated_odds / (1 + updated_odds);\n}\n// Adding additional metadata\nList rule_stats = new ArrayList();\nfor (key in total_risk_stats.keySet()) {\n    Map temp = new HashMap();\n    temp["rule_name"] = key;\n    temp["rule_risk"] = total_risk_stats[key][0];\n    temp["rule_id"] = total_risk_stats[key][1];\n    rule_stats.add(temp);\n}\n\nreturn ["calculated_score_norm": final_risk, "rule_risks": rule_stats, "multipliers": multipliers];',
+  },
+});
+
+/**
+ * This should be aligned with
+ * console_templates/enable_user_risk_score.console step 1
+ */
+export const getRiskyUserCreateLevelScriptOptions = () => ({
+  id: getRiskyScoreLevelScriptId(RiskScoreEntity.user),
+  script: {
+    lang: 'painless',
+    source:
+      "double risk_score = (def)ctx.getByPath(params.risk_score);\nif (risk_score < 20) {\n  ctx['user']['risk']['calculated_level'] = 'Unknown'\n}\nelse if (risk_score >= 20 && risk_score < 40) {\n  ctx['user']['risk']['calculated_level'] = 'Low'\n}\nelse if (risk_score >= 40 && risk_score < 70) {\n  ctx['user']['risk']['calculated_level'] = 'Moderate'\n}\nelse if (risk_score >= 70 && risk_score < 90) {\n  ctx['user']['risk']['calculated_level'] = 'High'\n}\nelse if (risk_score >= 90) {\n  ctx['user']['risk']['calculated_level'] = 'Critical'\n}",
+  },
+});
+
+/**
+ * This should be aligned with
+ * console_templates/enable_user_risk_score.console step 2
+ */
+export const getRiskyUserCreateMapScriptOptions = () => ({
+  id: getRiskyScoreMapScriptId(RiskScoreEntity.user),
+  script: {
+    lang: 'painless',
+    source:
+      '// Get running sum of risk score per rule name per shard\\\\\nString rule_name = doc["signal.rule.name"].value;\ndef stats = state.rule_risk_stats.getOrDefault(rule_name, 0.0);\nstats = doc["signal.rule.risk_score"].value;\nstate.rule_risk_stats.put(rule_name, stats);',
+  },
+});
+
+/**
+ * This should be aligned with
+ * console_templates/enable_user_risk_score.console step 3
+ */
+export const getRiskyUserCreateReduceScriptOptions = () => ({
+  id: getRiskyScoreReduceScriptId(RiskScoreEntity.user),
+  script: {
+    lang: 'painless',
+    source:
+      '// Consolidating time decayed risks from across all shards\nMap total_risk_stats = new HashMap();\nfor (state in states) {\n    for (key in state.rule_risk_stats.keySet()) {\n    def rule_stats = state.rule_risk_stats.get(key);\n    def stats = total_risk_stats.getOrDefault(key, 0.0);\n    stats = rule_stats;\n    total_risk_stats.put(key, stats);\n    }\n}\n// Consolidating individual rule risks and arranging them in decreasing order\nList risks = new ArrayList();\nfor (key in total_risk_stats.keySet()) {\n    risks.add(total_risk_stats[key])\n}\nCollections.sort(risks, Collections.reverseOrder());\n// Calculating total risk and normalizing it to a range\ndouble total_risk = 0.0;\ndouble risk_cap = params.max_risk * params.zeta_constant;\nfor (int i=0;i<risks.length;i++) {\n    total_risk += risks[i] / Math.pow((1+i), params.p);\n}\ndouble total_norm_risk = 100 * total_risk / risk_cap;\nif (total_norm_risk < 40) {\n    total_norm_risk =  2.125 * total_norm_risk;\n}\nelse if (total_norm_risk >= 40 && total_norm_risk < 50) {\n    total_norm_risk = 85 + (total_norm_risk - 40);\n}\nelse {\n    total_norm_risk = 95 + (total_norm_risk - 50) / 10;\n}\n\nList rule_stats = new ArrayList();\nfor (key in total_risk_stats.keySet()) {\n    Map temp = new HashMap();\n    temp["rule_name"] = key;\n    temp["rule_risk"] = total_risk_stats[key];\n    rule_stats.add(temp);\n}\n\nreturn ["calculated_score_norm": total_norm_risk, "rule_risks": rule_stats];',
+  },
+});
+
 /**
  * This should be aligned with
  * console_templates/enable_user_risk_score.console step 4
@@ -81,7 +183,7 @@ export const getRiskScoreIngestPipelineOptions = (riskScoreEntity: RiskScoreEnti
     },
     {
       script: {
-        source: `double risk_score = (def)ctx.getByPath(params.risk_score);\nif (risk_score < 20) {\n    ctx['${riskScoreEntity}']['risk']['calculated_level'] = 'Unknown'\n}\nelse if (risk_score >= 20 && risk_score < 40) {\n    ctx['${riskScoreEntity}']['risk']['calculated_level'] = 'Low'\n}\nelse if (risk_score >= 40 && risk_score < 70) {\n    ctx['${riskScoreEntity}']['risk']['calculated_level'] = 'Moderate'\n}\nelse if (risk_score >= 70 && risk_score < 90) {\n    ctx['${riskScoreEntity}']['risk']['calculated_level'] = 'High'\n}\nelse if (risk_score >= 90) {\n    ctx['${riskScoreEntity}']['risk']['calculated_level'] = 'Critical'\n}`,
+        id: getRiskyScoreLevelScriptId(riskScoreEntity),
         params: {
           risk_score: `${riskScoreEntity}.risk.calculated_score_norm`,
         },
@@ -241,12 +343,10 @@ export const getCreateMLHostPivotTransformOptions = ({
         scripted_metric: {
           combine_script: 'return state',
           init_script: {
-            source:
-              'state.rule_risk_stats = new HashMap();\nstate.host_variant_set = false;\nstate.host_variant = new String();\nstate.tactic_ids = new HashSet();',
+            id: getRiskyScoreInitScriptId(RiskScoreEntity.host),
           },
           map_script: {
-            source:
-              '// Get the host variant\nif (state.host_variant_set == false) {\n if (doc.containsKey("host.os.full") && doc["host.os.full"].size() != 0) {\n state.host_variant = doc["host.os.full"].value;\n state.host_variant_set = true;\n }\n}\n// Aggregate all the tactics seen on the host\nif (doc.containsKey("signal.rule.threat.tactic.id") && doc["signal.rule.threat.tactic.id"].size() != 0) {\n state.tactic_ids.add(doc["signal.rule.threat.tactic.id"].value);\n}\n// Get running sum of time-decayed risk score per rule name per shard\nString rule_name = doc["signal.rule.name"].value;\ndef stats = state.rule_risk_stats.getOrDefault(rule_name, [0.0,"",false]);\nint time_diff = (int)((System.currentTimeMillis() - doc["@timestamp"].value.toInstant().toEpochMilli()) / (1000.0 * 60.0 * 60.0));\ndouble risk_derate = Math.min(1, Math.exp((params.lookback_time - time_diff) / params.time_decay_constant));\nstats[0] = Math.max(stats[0], doc["signal.rule.risk_score"].value * risk_derate);\nif (stats[2] == false) {\n stats[1] = doc["kibana.alert.rule.uuid"].value;\n stats[2] = true;\n}\nstate.rule_risk_stats.put(rule_name, stats);',
+            id: getRiskyScoreMapScriptId(RiskScoreEntity.host),
           },
           params: {
             lookback_time: 72,
@@ -274,8 +374,7 @@ export const getCreateMLHostPivotTransformOptions = ({
             zeta_constant: 2.612,
           },
           reduce_script: {
-            source:
-              '// Consolidating time decayed risks and tactics from across all shards\nMap total_risk_stats = new HashMap();\nString host_variant = new String();\ndef tactic_ids = new HashSet();\nfor (state in states) {\n for (key in state.rule_risk_stats.keySet()) {\n def rule_stats = state.rule_risk_stats.get(key);\n def stats = total_risk_stats.getOrDefault(key, [0.0,"",false]);\n stats[0] = Math.max(stats[0], rule_stats[0]);\n if (stats[2] == false) {\n stats[1] = rule_stats[1];\n stats[2] = true;\n } \n total_risk_stats.put(key, stats);\n }\n if (host_variant.length() == 0) {\n host_variant = state.host_variant;\n }\n tactic_ids.addAll(state.tactic_ids);\n}\n// Consolidating individual rule risks and arranging them in decreasing order\nList risks = new ArrayList();\nfor (key in total_risk_stats.keySet()) {\n risks.add(total_risk_stats[key][0])\n}\nCollections.sort(risks, Collections.reverseOrder());\n// Calculating total host risk score\ndouble total_risk = 0.0;\ndouble risk_cap = params.max_risk * params.zeta_constant;\nfor (int i=0;i<risks.length;i++) {\n total_risk += risks[i] / Math.pow((1+i), params.p);\n}\n// Normalizing the host risk score\ndouble total_norm_risk = 100 * total_risk / risk_cap;\nif (total_norm_risk < 40) {\n total_norm_risk = 2.125 * total_norm_risk;\n}\nelse if (total_norm_risk >= 40 && total_norm_risk < 50) {\n total_norm_risk = 85 + (total_norm_risk - 40);\n}\nelse {\n total_norm_risk = 95 + (total_norm_risk - 50) / 10;\n}\n// Calculating multipliers to the host risk score\ndouble risk_multiplier = 1.0;\nList multipliers = new ArrayList();\n// Add a multiplier if host is a server\nif (host_variant.toLowerCase().contains("server")) {\n risk_multiplier *= params.server_multiplier;\n multipliers.add("Host is a server");\n}\n// Add multipliers based on number and diversity of tactics seen on the host\nfor (String tactic : tactic_ids) {\n multipliers.add("Tactic "+tactic);\n risk_multiplier *= 1 + params.tactic_base_multiplier * params.tactic_weights.getOrDefault(tactic, 0);\n}\n// Calculating final risk\ndouble final_risk = total_norm_risk;\nif (risk_multiplier > 1.0) {\n double prior_odds = (total_norm_risk) / (100 - total_norm_risk);\n double updated_odds = prior_odds * risk_multiplier; \n final_risk = 100 * updated_odds / (1 + updated_odds);\n}\n// Adding additional metadata\nList rule_stats = new ArrayList();\nfor (key in total_risk_stats.keySet()) {\n Map temp = new HashMap();\n temp["rule_name"] = key;\n temp["rule_risk"] = total_risk_stats[key][0];\n temp["rule_id"] = total_risk_stats[key][1];\n rule_stats.add(temp);\n}\n\nreturn ["calculated_score_norm": final_risk, "rule_risks": rule_stats, "multipliers": multipliers];',
+            id: getRiskyScoreReduceScriptId(RiskScoreEntity.host),
           },
         },
       },
@@ -338,8 +437,7 @@ export const getCreateMLUserPivotTransformOptions = ({
           combine_script: 'return state',
           init_script: 'state.rule_risk_stats = new HashMap();',
           map_script: {
-            source:
-              '// Get running sum of risk score per rule name per shard\\\\\nString rule_name = doc["signal.rule.name"].value;\ndef stats = state.rule_risk_stats.getOrDefault(rule_name, 0.0);\nstats = doc["signal.rule.risk_score"].value;\nstate.rule_risk_stats.put(rule_name, stats);',
+            id: getRiskyScoreMapScriptId(RiskScoreEntity.user),
           },
           params: {
             max_risk: 100,
@@ -347,8 +445,7 @@ export const getCreateMLUserPivotTransformOptions = ({
             zeta_constant: 2.612,
           },
           reduce_script: {
-            source:
-              '// Consolidating time decayed risks from across all shards\nMap total_risk_stats = new HashMap();\nfor (state in states) {\n    for (key in state.rule_risk_stats.keySet()) {\n    def rule_stats = state.rule_risk_stats.get(key);\n    def stats = total_risk_stats.getOrDefault(key, 0.0);\n    stats = rule_stats;\n    total_risk_stats.put(key, stats);\n    }\n}\n// Consolidating individual rule risks and arranging them in decreasing order\nList risks = new ArrayList();\nfor (key in total_risk_stats.keySet()) {\n    risks.add(total_risk_stats[key])\n}\nCollections.sort(risks, Collections.reverseOrder());\n// Calculating total risk and normalizing it to a range\ndouble total_risk = 0.0;\ndouble risk_cap = params.max_risk * params.zeta_constant;\nfor (int i=0;i<risks.length;i++) {\n    total_risk += risks[i] / Math.pow((1+i), params.p);\n}\ndouble total_norm_risk = 100 * total_risk / risk_cap;\nif (total_norm_risk < 40) {\n    total_norm_risk =  2.125 * total_norm_risk;\n}\nelse if (total_norm_risk >= 40 && total_norm_risk < 50) {\n    total_norm_risk = 85 + (total_norm_risk - 40);\n}\nelse {\n    total_norm_risk = 95 + (total_norm_risk - 50) / 10;\n}\n\nList rule_stats = new ArrayList();\nfor (key in total_risk_stats.keySet()) {\n    Map temp = new HashMap();\n    temp["rule_name"] = key;\n    temp["rule_risk"] = total_risk_stats[key];\n    rule_stats.add(temp);\n}\n\nreturn ["calculated_score_norm": total_norm_risk, "rule_risks": rule_stats];',
+            id: getRiskyScoreReduceScriptId(RiskScoreEntity.user),
           },
         },
       },
@@ -432,6 +529,46 @@ export const installHostRiskScoreModule = async ({
 }) => {
   /**
    * console_templates/enable_host_risk_score.console
+   * Step 1 Upload script: ml_hostriskscore_levels_script
+   */
+  await createStoredScript({
+    http,
+    notifications,
+    options: getRiskyHostCreateLevelScriptOptions(),
+  });
+
+  /**
+   * console_templates/enable_host_risk_score.console
+   * Step 2 Upload script: ml_hostriskscore_init_script
+   */
+  await createStoredScript({
+    http,
+    notifications,
+    options: getRiskyHostCreateInitScriptOptions(),
+  });
+
+  /**
+   * console_templates/enable_host_risk_score.console
+   * Step 3 Upload script: ml_hostriskscore_map_script
+   */
+  await createStoredScript({
+    http,
+    notifications,
+    options: getRiskyHostCreateMapScriptOptions(),
+  });
+
+  /**
+   * console_templates/enable_host_risk_score.console
+   * Step 4 Upload script: ml_hostriskscore_reduce_script
+   */
+  await createStoredScript({
+    http,
+    notifications,
+    options: getRiskyHostCreateReduceScriptOptions(),
+  });
+
+  /**
+   * console_templates/enable_host_risk_score.console
    * Step 5 Upload the ingest pipeline: ml_hostriskscore_ingest_pipeline
    */
   await createIngestPipeline({
@@ -513,6 +650,36 @@ export const installUserRiskScoreModule = async ({
 }) => {
   /**
    * console_templates/enable_user_risk_score.console
+   * Step 1 Upload script: ml_userriskscore_levels_script
+   */
+  await createStoredScript({
+    http,
+    notifications,
+    options: getRiskyUserCreateLevelScriptOptions(),
+  });
+
+  /**
+   * console_templates/enable_user_risk_score.console
+   * Step 2 Upload script: ml_userriskscore_map_script
+   */
+  await createStoredScript({
+    http,
+    notifications,
+    options: getRiskyUserCreateMapScriptOptions(),
+  });
+
+  /**
+   * console_templates/enable_user_risk_score.console
+   * Step 3 Upload script: ml_userriskscore_reduce_script
+   */
+  await createStoredScript({
+    http,
+    notifications,
+    options: getRiskyUserCreateReduceScriptOptions(),
+  });
+
+  /**
+   * console_templates/enable_user_risk_score.console
    * Step 4 Upload ingest pipeline: ml_userriskscore_ingest_pipeline
    */
   await createIngestPipeline({
@@ -532,6 +699,18 @@ export const installUserRiskScoreModule = async ({
       riskScoreEntity: RiskScoreEntity.user,
     }),
   });
+
+  /**
+   * console_templates/enable_user_risk_score.console
+   * Step 6 create Transform: ml_userriskscore_pivot_transform_{spaceId}
+   */
+  await createTransform({
+    http,
+    errorMessage: `${INSTALLATION_ERROR} - ${TRANSFORM_CREATION_ERROR_MESSAGE}`,
+    transformId: getRiskScorePivotTransformId(RiskScoreEntity.user, spaceId),
+    options: getCreateMLUserPivotTransformOptions({ spaceId }),
+  });
+
   /**
    * console_templates/enable_user_risk_score.console
    * Step 8 create ml_user_risk_score_latest_{spaceId} index
@@ -543,16 +722,7 @@ export const installUserRiskScoreModule = async ({
       riskScoreEntity: RiskScoreEntity.user,
     }),
   });
-  /**
-   * console_templates/enable_user_risk_score.console
-   * Step 6 create Transform: ml_userriskscore_pivot_transform_{spaceId}
-   */
-  await createTransform({
-    http,
-    errorMessage: `${INSTALLATION_ERROR} - ${TRANSFORM_CREATION_ERROR_MESSAGE}`,
-    transformId: getRiskScorePivotTransformId(RiskScoreEntity.user, spaceId),
-    options: getCreateMLUserPivotTransformOptions({ spaceId }),
-  });
+
   /**
    * console_templates/enable_user_risk_score.console
    * Step 9 create Transform: ml_userriskscore_latest_transform_{spaceId}
@@ -593,6 +763,24 @@ export const uninstallRiskScoreModule = async ({
     getRiskScorePivotTransformId(riskScoreEntity, spaceId),
     getRiskScoreLatestTransformId(riskScoreEntity, spaceId),
   ];
+  const riskyHostsScriptIds = [
+    getRiskyScoreLevelScriptId(RiskScoreEntity.host),
+    getRiskyScoreInitScriptId(RiskScoreEntity.host),
+    getRiskyScoreMapScriptId(RiskScoreEntity.host),
+    getRiskyScoreReduceScriptId(RiskScoreEntity.host),
+  ];
+  const riskyUsersScriptIds = [
+    getRiskyScoreLevelScriptId(RiskScoreEntity.user),
+    getRiskyScoreMapScriptId(RiskScoreEntity.user),
+    getRiskyScoreReduceScriptId(RiskScoreEntity.user),
+  ];
+
+  await deleteStoredScripts({
+    http,
+    notifications,
+    ids: riskScoreEntity === RiskScoreEntity.user ? riskyUsersScriptIds : riskyHostsScriptIds,
+  });
+
   await deleteTransforms({
     http,
     notifications,

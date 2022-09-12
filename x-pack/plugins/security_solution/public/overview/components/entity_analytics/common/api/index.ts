@@ -7,3 +7,4 @@
 export * from './indices';
 export * from './ingest_pipelines';
 export * from './transforms';
+export * from './stored_scripts';

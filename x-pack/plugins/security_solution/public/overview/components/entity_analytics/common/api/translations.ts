@@ -33,6 +33,20 @@ export const INDICES_DELETION_ERROR_MESSAGE = (totalCount: number) =>
     defaultMessage: `Failed to delete {totalCount, plural, =1 {index} other {indices}}`,
   });
 
+export const STORED_SCRIPT_CREATION_ERROR_MESSAGE = i18n.translate(
+  'xpack.securitySolution.riskyScore.api.storedScript.create.errorMessageTitle',
+  {
+    defaultMessage: 'Failed to create stored script',
+  }
+);
+
+export const STORED_SCRIPT_DELETION_ERROR_MESSAGE = i18n.translate(
+  'xpack.securitySolution.riskyScore.api.storedScript.delete.errorMessageTitle',
+  {
+    defaultMessage: `Failed to delete stored script`,
+  }
+);
+
 export const TRANSFORM_CREATION_ERROR_MESSAGE = i18n.translate(
   'xpack.securitySolution.riskyScore.api.transforms.create.errorMessageTitle',
   {

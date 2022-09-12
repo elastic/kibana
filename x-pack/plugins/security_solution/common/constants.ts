@@ -287,6 +287,8 @@ export const prebuiltSavedObjectsBulkCreateUrl = (templateName: string) =>
   `${INTERNAL_RISKY_SCORE_URL}/prebuilt_content/saved_objects/_bulk_create/${templateName}` as const;
 export const RISKY_SCORE_CREATE_INDEX = `${INTERNAL_RISKY_SCORE_URL}/indices/create`;
 export const RISKY_SCORE_DELETE_INDICES = `${INTERNAL_RISKY_SCORE_URL}/indices/delete`;
+export const RISKY_SCORE_CREATE_STORED_SCRIPT = `${INTERNAL_RISKY_SCORE_URL}/stored_scripts/create`;
+export const RISKY_SCORE_DELETE_STORED_SCRIPT = `${INTERNAL_RISKY_SCORE_URL}/stored_scripts/delete`;
 
 /**
  * Internal detection engine routes
