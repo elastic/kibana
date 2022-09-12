@@ -6,6 +6,8 @@
  */
 
 import React, { FC, useCallback, useMemo, useState } from 'react';
+import { sortBy } from 'lodash';
+
 import {
   EuiBadge,
   EuiBasicTable,
@@ -14,16 +16,17 @@ import {
   EuiTableSortingType,
   EuiToolTip,
 } from '@elastic/eui';
-import { sortBy } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { escapeKuery } from '@kbn/es-query';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
-import { useEuiTheme } from '../../hooks/use_eui_theme';
-import { MiniHistogram } from '../mini_histogram';
-import { useAiOpsKibana } from '../../kibana_context';
+
 import { SEARCH_QUERY_LANGUAGE } from '../../application/utils/search_utils';
+import { useEuiTheme } from '../../hooks/use_eui_theme';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+
+import { MiniHistogram } from '../mini_histogram';
 
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
 
@@ -64,10 +67,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   const [sortField, setSortField] = useState<keyof ChangePoint>(DEFAULT_SORT_FIELD);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
 
-  const aiOpsKibana = useAiOpsKibana();
-  const {
-    services: { application, share, data },
-  } = aiOpsKibana;
+  const { application, share, data } = useAiopsAppContext();
 
   const discoverLocator = useMemo(
     () => share.url.locators.get('DISCOVER_APP_LOCATOR'),
