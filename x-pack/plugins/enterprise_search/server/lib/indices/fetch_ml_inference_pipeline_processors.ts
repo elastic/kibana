@@ -54,7 +54,6 @@ const fetchPipelineProcessorInferenceData = async (
       // Find the inference processor, which we can assume there will only be one.
       const inferenceProcessor = subProcessors.find((obj) => 'inference' in obj);
 
-      // Check to make sure we can an inference processor and add the model_id to the list.
       const trainedModelName = inferenceProcessor?.inference?.model_id;
       if (trainedModelName)
         pipelineProcessorData[trainedModelName] = {

@@ -203,7 +203,7 @@ export function registerIndexRoutes({
       } catch (e) {
         log.warn(
           i18n.translate('xpack.enterpriseSearch.server.routes.indices.existsErrorLogMessage', {
-            defaultMessage: 'An error occured while resolving request to {requestUrl}',
+            defaultMessage: 'An error occurred while resolving request to {requestUrl}',
             values: {
               requestUrl: request.url.toString(),
             },

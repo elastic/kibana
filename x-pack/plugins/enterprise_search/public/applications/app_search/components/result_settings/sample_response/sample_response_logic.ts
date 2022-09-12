@@ -24,7 +24,7 @@ const NO_RESULTS_MESSAGE = i18n.translate(
 
 const ERROR_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.resultSettings.sampleResponse.errorMessage',
-  { defaultMessage: 'An error occured.' }
+  { defaultMessage: 'An error occurred.' }
 );
 
 interface SampleResponseValues {
