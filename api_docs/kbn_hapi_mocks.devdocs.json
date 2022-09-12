@@ -24,6 +24,7 @@
         "description": [],
         "path": "packages/kbn-hapi-mocks/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/hapi-mocks",
@@ -42,6 +43,7 @@
             ],
             "path": "packages/kbn-hapi-mocks/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -257,7 +259,8 @@
                   "<(name: string) => boolean> | undefined; }"
                 ],
                 "path": "packages/kbn-hapi-mocks/src/request.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }

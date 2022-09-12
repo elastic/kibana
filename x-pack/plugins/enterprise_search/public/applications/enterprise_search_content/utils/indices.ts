@@ -13,6 +13,7 @@ import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../co
 import { SyncStatus, ConnectorStatus } from '../../../../common/types/connectors';
 import {
   ConnectorIndex,
+  ConnectorCrawlerIndex,
   CrawlerIndex,
   ElasticsearchIndexWithIngestion,
 } from '../../../../common/types/indices';
@@ -33,6 +34,16 @@ export function isConnectorIndex(
   return (
     !!connectorIndex?.connector &&
     connectorIndex.connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE
+  );
+}
+
+export function isConnectorCrawlerIndex(
+  index: ElasticsearchIndexWithIngestion | undefined
+): index is ConnectorCrawlerIndex {
+  const crawlerIndex = index as CrawlerIndex;
+  return (
+    !!crawlerIndex?.connector &&
+    crawlerIndex.connector.service_type === ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE
   );
 }
 

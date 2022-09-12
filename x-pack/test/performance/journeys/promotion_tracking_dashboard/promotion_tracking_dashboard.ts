@@ -6,6 +6,7 @@
  */
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { StepCtx } from '../../services/performance';
+import { waitForVisualizations } from '../../utils';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('promotion_tracking_dashboard', () => {
@@ -48,16 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
           {
             name: 'Wait for visualization animations to finish',
             handler: async ({ page }) => {
-              await page.waitForFunction(function renderCompleted() {
-                const visualizations = Array.from(
-                  document.querySelectorAll('[data-rendering-count]')
-                );
-                const visualizationElementsLoaded = visualizations.length > 0;
-                const visualizationAnimationsFinished = visualizations.every(
-                  (e) => e.getAttribute('data-render-complete') === 'true'
-                );
-                return visualizationElementsLoaded && visualizationAnimationsFinished;
-              });
+              await waitForVisualizations(page, 1);
             },
           },
         ],

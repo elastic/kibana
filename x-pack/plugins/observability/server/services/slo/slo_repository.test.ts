@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
 import { SavedObject } from '@kbn/core-saved-objects-common';
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -13,33 +12,18 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SLO, StoredSLO } from '../../types/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { KibanaSavedObjectsSLORepository } from './slo_repository';
+import { createSLO } from './fixtures/slo';
 
-const anSLO: SLO = {
-  id: uuid.v1(),
-  name: 'irrelevant',
-  description: 'irrelevant',
-  indicator: {
-    type: 'slo.apm.transaction_duration',
-    params: {
-      environment: 'irrelevant',
-      service: 'irrelevant',
-      transaction_type: 'irrelevant',
-      transaction_name: 'irrelevant',
-      'threshold.us': 200000,
-    },
+const anSLO = createSLO({
+  type: 'slo.apm.transaction_duration',
+  params: {
+    environment: 'irrelevant',
+    service: 'irrelevant',
+    transaction_type: 'irrelevant',
+    transaction_name: 'irrelevant',
+    'threshold.us': 200000,
   },
-  time_window: {
-    duration: '7d',
-    is_rolling: true,
-  },
-  budgeting_method: 'occurrences',
-  objective: {
-    target: 0.999,
-  },
-  settings: {
-    destination_index: 'some-index',
-  },
-};
+});
 
 function aStoredSLO(slo: SLO): SavedObject<StoredSLO> {
   return {

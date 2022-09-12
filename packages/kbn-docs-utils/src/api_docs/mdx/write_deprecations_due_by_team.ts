@@ -8,7 +8,7 @@
 import moment from 'moment';
 import { ToolingLog } from '@kbn/tooling-log';
 import dedent from 'dedent';
-import fs from 'fs';
+import Fsp from 'fs/promises';
 import Path from 'path';
 import {
   ApiDeclaration,
@@ -19,12 +19,12 @@ import {
 import { AUTO_GENERATED_WARNING } from '../auto_generated_warning';
 import { getPluginApiDocId } from '../utils';
 
-export function writeDeprecationDueByTeam(
+export async function writeDeprecationDueByTeam(
   folder: string,
   deprecationsByPlugin: ReferencedDeprecationsByPlugin,
   plugins: PluginOrPackage[],
   log: ToolingLog
-): void {
+): Promise<void> {
   const groupedByTeam: ReferencedDeprecationsByPlugin = Object.keys(deprecationsByPlugin).reduce(
     (teamMap: ReferencedDeprecationsByPlugin, pluginId: string) => {
       const dueDeprecations = deprecationsByPlugin[pluginId].filter(
@@ -80,7 +80,7 @@ export function writeDeprecationDueByTeam(
               (ref) =>
                 `[${ref.path.substr(
                   ref.path.lastIndexOf(Path.sep) + 1
-                )}](https://github.com/elastic/kibana/tree/master/${
+                )}](https://github.com/elastic/kibana/tree/main/${
                   ref.path
                 }#:~:text=${encodeURIComponent(api.label)})`
             )
@@ -111,5 +111,5 @@ ${tableMdx}
 
 `);
 
-  fs.writeFileSync(Path.resolve(folder, 'deprecations_by_team.mdx'), mdx);
+  await Fsp.writeFile(Path.resolve(folder, 'deprecations_by_team.mdx'), mdx);
 }

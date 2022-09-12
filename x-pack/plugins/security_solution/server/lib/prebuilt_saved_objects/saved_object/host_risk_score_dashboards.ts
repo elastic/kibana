@@ -60,7 +60,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
                     label: 'Cumulative Risk Score',
                     operationType: 'max',
                     scale: 'ratio',
-                    sourceField: 'risk_stats.risk_score',
+                    sourceField: 'host.risk.calculated_score_norm',
                   },
                   'e82aed80-ee04-4ad1-9b9d-fde4a25be58a': {
                     dataType: 'date',
@@ -125,10 +125,10 @@ export const hostRiskScoreDashboards: SavedObject[] = [
       fields: '[]',
       runtimeFieldMap: '{}',
       timeFieldName: '@timestamp',
-      title: '.siem-signals-<REPLACE-WITH-SPACE>',
+      title: '.alerts-security.alerts-<REPLACE-WITH-SPACE>',
     },
     coreMigrationVersion: '7.13.4',
-    id: 'siem-signals-<REPLACE-WITH-SPACE>-index-pattern',
+    id: 'alerts-<REPLACE-WITH-SPACE>-index-pattern',
     migrationVersion: { 'index-pattern': '7.11.0' },
     references: [],
     type: 'index-pattern',
@@ -152,7 +152,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
     migrationVersion: { visualization: '7.13.1' },
     references: [
       {
-        id: 'siem-signals-<REPLACE-WITH-SPACE>-index-pattern',
+        id: 'alerts-<REPLACE-WITH-SPACE>-index-pattern',
         name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
         type: 'index-pattern',
       },
@@ -178,7 +178,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
     migrationVersion: { visualization: '7.13.1' },
     references: [
       {
-        id: 'siem-signals-<REPLACE-WITH-SPACE>-index-pattern',
+        id: 'alerts-<REPLACE-WITH-SPACE>-index-pattern',
         name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
         type: 'index-pattern',
       },
@@ -204,7 +204,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
     migrationVersion: { visualization: '7.13.1' },
     references: [
       {
-        id: 'siem-signals-<REPLACE-WITH-SPACE>-index-pattern',
+        id: 'alerts-<REPLACE-WITH-SPACE>-index-pattern',
         name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
         type: 'index-pattern',
       },
@@ -320,7 +320,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
                     label: 'Risk Score',
                     operationType: 'sum',
                     scale: 'ratio',
-                    sourceField: 'risk_stats.risk_score',
+                    sourceField: 'host.risk.calculated_score_norm',
                   },
                   'e2444d64-721a-4532-9633-5b206eee76d6': {
                     customLabel: true,
@@ -330,7 +330,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
                     operationType: 'last_value',
                     params: { sortField: '@timestamp' },
                     scale: 'ordinal',
-                    sourceField: 'risk.keyword',
+                    sourceField: 'host.risk.calculated_level',
                   },
                 },
                 incompleteColumns: {},
