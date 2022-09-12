@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { forOwn } from 'lodash';
-
 import type {
   RegistryPolicyInputOnlyTemplate,
   RegistryPolicyIntegrationTemplate,
