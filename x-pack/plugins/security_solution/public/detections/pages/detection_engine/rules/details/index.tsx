@@ -112,6 +112,7 @@ import { ExecutionLogTable } from './execution_log_table/execution_log_table';
 import * as detectionI18n from '../../translations';
 import * as ruleI18n from '../translations';
 import { RuleDetailsContextProvider } from './rule_details_context';
+import { useGetSavedQuery } from './use_get_saved_query';
 import * as i18n from './translations';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../../../components/callouts/missing_privileges_callout';
@@ -300,6 +301,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { globalFullScreen } = useGlobalFullScreen();
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
   const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
+
+  // load saved query only if rule type === 'saved_query', as other rule types still can have saved_id property that is not used
+  const savedQueryId = rule?.type === 'saved_query' ? rule?.saved_id : undefined;
+  const { isSavedQueryLoading, savedQueryBar } = useGetSavedQuery(savedQueryId);
 
   useEffect(() => {
     const fetchDataViews = async () => {
@@ -758,14 +763,21 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
                 <EuiFlexItem grow={1}>
                   <EuiFlexGroup direction="column">
-                    <EuiFlexItem component="section" grow={1}>
-                      <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
-                        {defineRuleData != null && (
+                    <EuiFlexItem component="section" grow={1} data-test-subj="defineRule">
+                      <StepPanel
+                        loading={isLoading || isSavedQueryLoading}
+                        title={ruleI18n.DEFINITION}
+                      >
+                        {defineRuleData != null && !isSavedQueryLoading && (
                           <StepDefineRule
                             descriptionColumns="singleSplit"
                             isReadOnlyView={true}
                             isLoading={false}
-                            defaultValues={{ dataViewTitle, ...defineRuleData }}
+                            defaultValues={{
+                              dataViewTitle,
+                              ...defineRuleData,
+                              queryBar: savedQueryBar ?? defineRuleData.queryBar,
+                            }}
                             kibanaDataViews={dataViewOptions}
                           />
                         )}
