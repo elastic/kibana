@@ -18,3 +18,10 @@ export const IMPORT_SAVED_OBJECTS_FAILURE = i18n.translate(
     defaultMessage: `Failed to import saved objects`,
   }
 );
+
+export const DELETE_SAVED_OBJECTS_FAILURE = i18n.translate(
+  'xpack.securitySolution.bulkDeleteSavedObjects.bulkDeleteFailureTitle',
+  {
+    defaultMessage: `Failed to delete saved objects`,
+  }
+);

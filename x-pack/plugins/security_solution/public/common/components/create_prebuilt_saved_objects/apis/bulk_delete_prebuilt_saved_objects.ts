@@ -6,14 +6,14 @@
  */
 
 import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
-import { prebuiltSavedObjectsBulkCreateUrl } from '../../../../../common/constants';
-import { IMPORT_SAVED_OBJECTS_FAILURE } from '../translations';
+import { prebuiltSavedObjectsBulkDeleteUrl } from '../../../../../common/constants';
+import { DELETE_SAVED_OBJECTS_FAILURE } from '../translations';
 
 interface Options {
   templateName: string;
 }
 
-export const bulkCreatePrebuiltSavedObjects = async ({
+export const bulkDeletePrebuiltSavedObjects = async ({
   http,
   notifications,
   errorMessage,
@@ -25,10 +25,10 @@ export const bulkCreatePrebuiltSavedObjects = async ({
   options: Options;
 }) => {
   const res = await http
-    .post(prebuiltSavedObjectsBulkCreateUrl(options.templateName))
+    .post(prebuiltSavedObjectsBulkDeleteUrl(options.templateName))
     .catch((e) => {
       notifications?.toasts?.addDanger({
-        title: errorMessage ?? IMPORT_SAVED_OBJECTS_FAILURE,
+        title: errorMessage ?? DELETE_SAVED_OBJECTS_FAILURE,
         text: e?.body?.message,
       });
     });

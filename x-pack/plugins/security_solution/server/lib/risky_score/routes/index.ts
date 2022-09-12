@@ -6,7 +6,11 @@
  */
 export { createEsIndexRoute } from '../indices/create_index_route';
 export { deleteEsIndicesRoute } from '../indices/delete_indices_route';
+
 export { readPrebuiltDevToolContentRoute } from '../prebuilt_dev_tool_content/routes/read_prebuilt_dev_tool_content_route';
+
 export { createPrebuiltSavedObjectsRoute } from '../prebuilt_saved_objects/routes/create_prebuilt_saved_objects';
+export { deletePrebuiltSavedObjectsRoute } from '../prebuilt_saved_objects/routes/delete_prebuilt_saved_objects';
+
 export { createStoredScriptRoute } from '../stored_scripts/create_script_route';
 export { deleteStoredScriptRoute } from '../stored_scripts/delete_script_route';

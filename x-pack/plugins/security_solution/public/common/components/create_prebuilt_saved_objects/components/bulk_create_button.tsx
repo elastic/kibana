@@ -43,8 +43,11 @@ const ImportSavedObjectsButtonComponent: React.FC<ImportSavedObjectsButtonProps>
     setStatus('loading');
 
     try {
-      const res = await bulkCreatePrebuiltSavedObjects(http, {
-        templateName,
+      const res = await bulkCreatePrebuiltSavedObjects({
+        http,
+        options: {
+          templateName,
+        },
       });
       const savedObjects: Array<SavedObject<SavedObjectAttributes>> = getOr(
         [],

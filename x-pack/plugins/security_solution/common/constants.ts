@@ -285,6 +285,9 @@ export const devToolPrebuiltContentUrl = (spaceId: string, consoleId: string) =>
 export const PREBUILT_SAVED_OBJECTS_BULK_CREATE = `${INTERNAL_RISKY_SCORE_URL}/prebuilt_content/saved_objects/_bulk_create/{template_name}`;
 export const prebuiltSavedObjectsBulkCreateUrl = (templateName: string) =>
   `${INTERNAL_RISKY_SCORE_URL}/prebuilt_content/saved_objects/_bulk_create/${templateName}` as const;
+export const PREBUILT_SAVED_OBJECTS_BULK_DELETE = `${INTERNAL_RISKY_SCORE_URL}/prebuilt_content/saved_objects/_bulk_delete/{template_name}`;
+export const prebuiltSavedObjectsBulkDeleteUrl = (templateName: string) =>
+  `${INTERNAL_RISKY_SCORE_URL}/prebuilt_content/saved_objects/_bulk_delete/${templateName}` as const;
 export const RISKY_SCORE_CREATE_INDEX = `${INTERNAL_RISKY_SCORE_URL}/indices/create`;
 export const RISKY_SCORE_DELETE_INDICES = `${INTERNAL_RISKY_SCORE_URL}/indices/delete`;
 export const RISKY_SCORE_CREATE_STORED_SCRIPT = `${INTERNAL_RISKY_SCORE_URL}/stored_scripts/create`;

@@ -79,6 +79,7 @@ import {
   createPrebuiltSavedObjectsRoute,
   createStoredScriptRoute,
   deleteEsIndicesRoute,
+  deletePrebuiltSavedObjectsRoute,
   deleteStoredScriptRoute,
   readPrebuiltDevToolContentRoute,
 } from '../lib/risky_score/routes';
@@ -189,6 +190,7 @@ export const initRoutes = (
   deleteStoredScriptRoute(router);
   readPrebuiltDevToolContentRoute(router);
   createPrebuiltSavedObjectsRoute(router, security);
+  deletePrebuiltSavedObjectsRoute(router, security);
 
   const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
   if (previewTelemetryUrlEnabled) {

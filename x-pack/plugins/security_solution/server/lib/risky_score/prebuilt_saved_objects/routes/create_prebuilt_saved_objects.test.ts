@@ -41,7 +41,7 @@ describe('createPrebuiltSavedObjects', () => {
       authz: {},
     } as unknown as SecurityPluginSetup;
 
-    clients.savedObjectsClient.bulkCreate.mockResolvedValue(getEmptySavedObjectsResponse()); // rule status request
+    clients.savedObjectsClient.bulkCreate.mockResolvedValue(getEmptySavedObjectsResponse());
 
     createPrebuiltSavedObjectsRoute(server.router, securitySetup);
   });

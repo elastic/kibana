@@ -6,6 +6,8 @@
  */
 import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
 import { RiskScoreEntity, RiskScoreFields } from '../../../../../common/search_strategy';
+import { bulkCreatePrebuiltSavedObjects } from '../../../../common/components/create_prebuilt_saved_objects/apis/bulk_create_prebuilt_saved_objects';
+import { bulkDeletePrebuiltSavedObjects } from '../../../../common/components/create_prebuilt_saved_objects/apis/bulk_delete_prebuilt_saved_objects';
 import {
   createIngestPipeline,
   createIndices,
@@ -637,6 +639,14 @@ export const installHostRiskScoreModule = async ({
       getRiskScoreLatestTransformId(RiskScoreEntity.host, spaceId),
     ],
   });
+
+  await bulkCreatePrebuiltSavedObjects({
+    http,
+    notifications,
+    options: {
+      templateName: `${RiskScoreEntity.host}RiskScoreDashboards`,
+    },
+  });
 };
 
 export const installUserRiskScoreModule = async ({
@@ -746,6 +756,14 @@ export const installUserRiskScoreModule = async ({
       getRiskScoreLatestTransformId(RiskScoreEntity.user, spaceId),
     ],
   });
+
+  await bulkCreatePrebuiltSavedObjects({
+    http,
+    notifications,
+    options: {
+      templateName: `${RiskScoreEntity.user}RiskScoreDashboards`,
+    },
+  });
 };
 
 export const uninstallRiskScoreModule = async ({
@@ -774,6 +792,14 @@ export const uninstallRiskScoreModule = async ({
     getRiskyScoreMapScriptId(RiskScoreEntity.user),
     getRiskyScoreReduceScriptId(RiskScoreEntity.user),
   ];
+
+  await bulkDeletePrebuiltSavedObjects({
+    http,
+    notifications,
+    options: {
+      templateName: `${riskScoreEntity}RiskScoreDashboards`,
+    },
+  });
 
   await deleteStoredScripts({
     http,

@@ -68,14 +68,13 @@ export async function deleteStoredScripts({
 }: DeleteStoredScripts) {
   const result = await Promise.all(
     ids.map((id) => {
-      const res = deleteStoredScript({
+      return deleteStoredScript({
         http,
         notifications,
         signal,
         errorMessage,
         options: { id },
       });
-      return res;
     })
   );
   return result;

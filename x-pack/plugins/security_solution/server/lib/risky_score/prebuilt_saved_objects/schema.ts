@@ -15,3 +15,12 @@ export const createPrebuiltSavedObjectsSchema = {
     ]),
   }),
 };
+
+export const deletePrebuiltSavedObjectsSchema = {
+  params: schema.object({
+    template_name: schema.oneOf([
+      schema.literal('hostRiskScoreDashboards'),
+      schema.literal('userRiskScoreDashboards'),
+    ]),
+  }),
+};
