@@ -43,5 +43,6 @@ export default function (providerContext: FtrProviderContext) {
     loadTestFile(require.resolve('./endpoint_permissions'));
     loadTestFile(require.resolve('./artifact_entries_list'));
     loadTestFile(require.resolve('./responder'));
+    loadTestFile(require.resolve('./endpoint_solution_integrations'));
   });
 }

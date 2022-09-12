@@ -463,6 +463,7 @@ describe('create()', () => {
     expect(taskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
                                                                         Array [
                                                                           Object {
+                                                                            "enabled": true,
                                                                             "id": "1",
                                                                             "params": Object {
                                                                               "alertId": "1",
