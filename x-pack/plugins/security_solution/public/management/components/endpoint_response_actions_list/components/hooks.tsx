@@ -110,6 +110,7 @@ export type FilterItems = Array<{
   key: string;
   label: string;
   checked: 'on' | undefined;
+  'data-test-subj': string;
 }>;
 
 export const getActionStatus = (status: ResponseActionStatus): string => {
@@ -191,6 +192,7 @@ export const useActionsLogFilter = (
             />
           ) as unknown as string,
           checked: !isFlyout && statuses?.includes(statusName) ? 'on' : undefined,
+          'data-test-subj': `${filterName}-filter-option`,
         }))
       : RESPONSE_ACTION_COMMANDS.map((commandName) => ({
           key: commandName,
@@ -199,6 +201,7 @@ export const useActionsLogFilter = (
             !isFlyout && commands?.map((command) => getCommandKey(command)).includes(commandName)
               ? 'on'
               : undefined,
+          'data-test-subj': `${filterName}-filter-option`,
         }))
   );
 

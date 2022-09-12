@@ -76,14 +76,22 @@ export const ActionLogDateRangePicker = memo(
               isLoading={isDataLoading}
               dateFormat={uiSettings.get('dateFormat')}
               commonlyUsedRanges={commonlyUsedRanges}
-              end={isFlyout ? dateRangePickerState.endDate : endDateFromUrl}
+              end={
+                isFlyout
+                  ? dateRangePickerState.endDate
+                  : endDateFromUrl ?? dateRangePickerState.endDate
+              }
               isPaused={!dateRangePickerState.autoRefreshOptions.enabled}
               onTimeChange={onTimeChange}
               onRefreshChange={onRefreshChange}
               refreshInterval={dateRangePickerState.autoRefreshOptions.duration}
               onRefresh={onRefresh}
               recentlyUsedRanges={dateRangePickerState.recentlyUsedDateRanges}
-              start={isFlyout ? dateRangePickerState.startDate : startDateFromUrl}
+              start={
+                isFlyout
+                  ? dateRangePickerState.startDate
+                  : startDateFromUrl ?? dateRangePickerState.startDate
+              }
               showUpdateButton={false}
               updateButtonProps={{ iconOnly: true, fill: false }}
               width="auto"
