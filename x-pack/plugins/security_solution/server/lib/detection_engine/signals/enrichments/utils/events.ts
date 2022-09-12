@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import type { GetEventValue } from '../types';
+import type { GetEventValue, GetFieldValue } from '../types';
 
 export const getEventValue: GetEventValue = (event, path) => {
   const value = get(event, `_source.${path}`) || event?._source?.[path];
@@ -17,3 +17,5 @@ export const getEventValue: GetEventValue = (event, path) => {
 
   return value;
 };
+
+export const getFieldValue: GetFieldValue = (event, path) => get(event?.fields, path)?.[0];

@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { makeSingleFieldMathQuery } from './requests';
+import { makeSingleFieldMatchQuery } from './requests';
 
-describe('makeSingleFieldMathQuery', () => {
+describe('makeSingleFieldMatchQuery', () => {
   it('return empty query if events are empty', () => {
-    expect(makeSingleFieldMathQuery([], 'enrichment.host.name')).toEqual({
+    expect(
+      makeSingleFieldMatchQuery({ values: [], searchByField: 'enrichment.host.name' })
+    ).toEqual({
       meta: {
         alias: null,
         negate: false,
@@ -26,7 +28,10 @@ describe('makeSingleFieldMathQuery', () => {
 
   it('return query to search for enrichments', () => {
     expect(
-      makeSingleFieldMathQuery(['host name 1', 'host name 2'], 'enrichment.host.name')
+      makeSingleFieldMatchQuery({
+        values: ['host name 1', 'host name 2'],
+        searchByField: 'enrichment.host.name',
+      })
     ).toEqual({
       meta: {
         alias: null,

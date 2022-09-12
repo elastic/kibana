@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { MakeSingleFieldMathQuery } from '../types';
+import type { MakeSingleFieldMatchQuery } from '../types';
 
-export const makeSingleFieldMathQuery: MakeSingleFieldMathQuery = (values, field) => {
+export const makeSingleFieldMatchQuery: MakeSingleFieldMatchQuery = ({ values, searchByField }) => {
   const shouldClauses = values.map((value) => ({
     match: {
-      [field]: {
+      [searchByField]: {
         query: value,
         minimum_should_match: 1,
       },

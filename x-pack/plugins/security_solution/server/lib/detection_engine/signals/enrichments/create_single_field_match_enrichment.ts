@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { get, flatten, chunk } from 'lodash';
+import { flatten, chunk } from 'lodash';
 import { searchEnrichments } from './search_enrichments';
-import { makeSingleFieldMathQuery } from './utils/requests';
-import { getEventValue } from './utils/events';
+import { makeSingleFieldMatchQuery } from './utils/requests';
+import { getEventValue, getFieldValue } from './utils/events';
 import type { CreateFieldsMatchEnrichment, EventsMapByEnrichments, EnrichmentType } from './types';
 
 const MAX_CLAUSES = 1000;
@@ -21,6 +21,7 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
   mappingField,
   createEnrichmentFunction,
   name,
+  enrichmentResponseFields,
 }) => {
   try {
     logger.debug(`Enrichment ${name}: started`);
@@ -42,7 +43,10 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
 
     const getAllEnrichment = chunksUniqueEventsValuesToSearchBy
       .map((enirhcmentValuesChunk) =>
-        makeSingleFieldMathQuery(enirhcmentValuesChunk, mappingField.enrichmentField)
+        makeSingleFieldMatchQuery({
+          values: enirhcmentValuesChunk,
+          searchByField: mappingField.enrichmentField,
+        })
       )
       .filter((query) => query.query?.bool?.should?.length > 0)
       .map((query) =>
@@ -51,12 +55,14 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
           services,
           logger,
           query,
+          fields: enrichmentResponseFields,
         })
       );
 
     const enrichmentsResults = (await Promise.allSettled(getAllEnrichment))
       .filter((result) => result.status === 'fulfilled')
       .map((result) => (result as PromiseFulfilledResult<EnrichmentType[]>)?.value);
+
 
     const enrichments = flatten(enrichmentsResults);
 
@@ -66,7 +72,9 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
     }
 
     const eventsMapById = enrichments.reduce<EventsMapByEnrichments>((acc, enrichment) => {
-      const enrichmentValue = get(enrichment, `_source.${mappingField.enrichmentField}`);
+      const enrichmentValue = getFieldValue(enrichment, mappingField.enrichmentField);
+
+      if (!enrichmentValue) return acc;
 
       const eventsWithoutEnrchment = eventsMapByFieldValue[enrichmentValue];
 

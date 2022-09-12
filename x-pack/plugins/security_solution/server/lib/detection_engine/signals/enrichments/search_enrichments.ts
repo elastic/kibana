@@ -8,11 +8,13 @@
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import type { SearchEnrichments } from './types';
 
-export const searchEnrichments: SearchEnrichments = async ({ index, services, query }) => {
+export const searchEnrichments: SearchEnrichments = async ({ index, services, query, fields }) => {
   try {
     const response = await services.scopedClusterClient.asCurrentUser.search({
       index,
       body: {
+        _source: '',
+        fields,
         query: getQueryFilter('', 'kuery', [query], index, []),
       },
       track_total_hits: false,

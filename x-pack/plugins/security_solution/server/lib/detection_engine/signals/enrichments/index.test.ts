@@ -32,6 +32,40 @@ jest.mock('./enrichment_by_type/user_risk', () => ({
 }));
 const mockGetIsUserRiskScoreAvailable = getIsUserRiskScoreAvailable as jest.Mock;
 
+const hostEnrichmentResponse = [
+  {
+    fields: {
+      'host.name': ['host name 1'],
+      'host.risk.calculated_level': ['Low'],
+      'host.risk.calculated_score_norm': [20],
+    },
+  },
+  {
+    fields: {
+      'host.name': ['host name 3'],
+      'host.risk.calculated_level': ['Critical'],
+      'host.risk.calculated_score_norm': [90],
+    },
+  },
+];
+
+const userEnrichmentResponse = [
+  {
+    fields: {
+      'user.name': ['user name 1'],
+      'user.risk.calculated_level': ['Moderate'],
+      'user.risk.calculated_score_norm': [50],
+    },
+  },
+  {
+    fields: {
+      'user.name': ['user name 2'],
+      'user.risk.calculated_level': ['Critical'],
+      'user.risk.calculated_score_norm': [90],
+    },
+  },
+];
+
 describe('enrichEvents', () => {
   let ruleExecutionLogger: ReturnType<typeof ruleExecutionLogMock.forExecutors.create>;
   let alertServices: RuleExecutorServicesMock;
@@ -78,54 +112,8 @@ describe('enrichEvents', () => {
 
   it('return enriched events', async () => {
     mockSearchEnrichments
-      .mockReturnValueOnce([
-        {
-          _source: {
-            host: {
-              name: 'host name 1',
-              risk: {
-                calculated_level: 'Low',
-                calculated_score_norm: 20,
-              },
-            },
-          },
-        },
-        {
-          _source: {
-            host: {
-              name: 'host name 3',
-              risk: {
-                calculated_level: 'Critical',
-                calculated_score_norm: 90,
-              },
-            },
-          },
-        },
-      ])
-      .mockReturnValueOnce([
-        {
-          _source: {
-            user: {
-              name: 'user name 1',
-              risk: {
-                calculated_level: 'Moderate',
-                calculated_score_norm: 50,
-              },
-            },
-          },
-        },
-        {
-          _source: {
-            user: {
-              name: 'user name 2',
-              risk: {
-                calculated_level: 'Critical',
-                calculated_score_norm: 90,
-              },
-            },
-          },
-        },
-      ]);
+      .mockReturnValueOnce(hostEnrichmentResponse)
+      .mockReturnValueOnce(userEnrichmentResponse);
     mockGetIsUserRiskScoreAvailable.mockImplementation(() => true);
     mockGetIsHostRiskScoreAvailable.mockImplementation(() => true);
 
@@ -176,30 +164,7 @@ describe('enrichEvents', () => {
       .mockImplementationOnce(() => {
         throw new Error('1');
       })
-      .mockImplementationOnce(() => [
-        {
-          _source: {
-            user: {
-              name: 'user name 1',
-              risk: {
-                calculated_level: 'Moderate',
-                calculated_score_norm: 50,
-              },
-            },
-          },
-        },
-        {
-          _source: {
-            user: {
-              name: 'user name 2',
-              risk: {
-                calculated_level: 'Critical',
-                calculated_score_norm: 90,
-              },
-            },
-          },
-        },
-      ]);
+      .mockImplementationOnce(() => userEnrichmentResponse);
     mockGetIsUserRiskScoreAvailable.mockImplementation(() => true);
     mockGetIsHostRiskScoreAvailable.mockImplementation(() => true);
 

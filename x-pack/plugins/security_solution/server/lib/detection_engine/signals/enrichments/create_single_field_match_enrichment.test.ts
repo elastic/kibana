@@ -44,6 +44,7 @@ describe('createSingleFieldMatchEnrichment', () => {
         eventField: 'host.name',
         enrichmentField: 'host.name',
       },
+      enrichmentResponseFields: ['host.name'],
       createEnrichmentFunction: () => (a) => a,
     });
 
@@ -53,13 +54,13 @@ describe('createSingleFieldMatchEnrichment', () => {
   it('return map with events to enrich', async () => {
     mockSearchEnrichments.mockImplementation(() => [
       {
-        _source: {
-          host: { name: 'host name 1' },
+        fields: {
+          'host.name': ['host name 1'],
         },
       },
       {
-        _source: {
-          host: { name: 'host name 3' },
+        fields: {
+          'host.name': ['host name 3'],
         },
       },
     ]);
@@ -76,6 +77,7 @@ describe('createSingleFieldMatchEnrichment', () => {
       ],
       logger: ruleExecutionLogger,
       services: alertServices,
+      enrichmentResponseFields: ['host.name'],
       mappingField: {
         eventField: 'host.name',
         enrichmentField: 'host.name',
@@ -89,13 +91,13 @@ describe('createSingleFieldMatchEnrichment', () => {
   it('make request only with unique values', async () => {
     mockSearchEnrichments.mockImplementation(() => [
       {
-        _source: {
-          host: { name: 'host name 1' },
+        fields: {
+          'host.name': ['host name 1'],
         },
       },
       {
-        _source: {
-          host: { name: 'host name 3' },
+        fields: {
+          'host.name': ['host name 3'],
         },
       },
     ]);
@@ -110,6 +112,7 @@ describe('createSingleFieldMatchEnrichment', () => {
         createAlert('2', { host: { name: 'host name 1' } }),
         createAlert('3', { host: { name: 'host name 1' } }),
       ],
+      enrichmentResponseFields: ['host.name'],
       logger: ruleExecutionLogger,
       services: alertServices,
       mappingField: {
@@ -138,6 +141,7 @@ describe('createSingleFieldMatchEnrichment', () => {
       events: [createAlert('1', { host: { name: 'host name 1' } })],
       logger: ruleExecutionLogger,
       services: alertServices,
+      enrichmentResponseFields: ['host.name'],
       mappingField: {
         eventField: 'host.name',
         enrichmentField: 'host.name',
@@ -159,6 +163,7 @@ describe('createSingleFieldMatchEnrichment', () => {
       events: [createAlert('1')],
       logger: ruleExecutionLogger,
       services: alertServices,
+      enrichmentResponseFields: ['host.name'],
       mappingField: {
         eventField: 'host.name',
         enrichmentField: 'host.name',
@@ -172,12 +177,12 @@ describe('createSingleFieldMatchEnrichment', () => {
   it('make several request to enrichment index, if there more than 1000 values to search', async () => {
     mockSearchEnrichments.mockImplementation(() =>
       [...Array(3000).keys()].map((item) => ({
-        _source: { host: { name: `host name ${item}` } },
+        fields: { 'host.name': [`host name ${item}`] },
       }))
     );
 
     const events = [...Array(3000).keys()].map((item) =>
-      createAlert(item, { host: { name: `host name ${item}` } })
+      createAlert(item.toString(), { host: { name: `host name ${item}` } })
     );
     const enrichFunction: EnrichmentFunction = (a) => a;
 
@@ -186,6 +191,7 @@ describe('createSingleFieldMatchEnrichment', () => {
       index: ['host-enrichment'],
       events,
       logger: ruleExecutionLogger,
+      enrichmentResponseFields: ['host.name'],
       services: alertServices,
       mappingField: {
         eventField: 'host.name',

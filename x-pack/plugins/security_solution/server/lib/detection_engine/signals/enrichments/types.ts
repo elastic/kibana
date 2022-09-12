@@ -57,9 +57,11 @@ export type GetEventValue = <T extends BaseFieldsLatest>(
   path: string
 ) => string | undefined;
 
-export type MakeSinleFieldMathRequest = <T extends BaseFieldsLatest>(params: {
-  events: Array<EventsForEnrichment<T>>;
-  mappingField: SingleMappingField;
+export type GetFieldValue = (events: EnrichmentType, path: string) => string | undefined;
+
+export type MakeSingleFieldMatchQuery = <T extends BaseFieldsLatest>(params: {
+  values: string[];
+  searchByField: string;
 }) => Filter;
 
 export type SearchEnrichments = (params: {
@@ -67,6 +69,7 @@ export type SearchEnrichments = (params: {
   services: RuleServices;
   logger: IRuleExecutionLogForExecutors;
   query: Filter;
+  fields: string[];
 }) => Promise<EnrichmentType[]>;
 
 export type GetIsRiskScoreAvailable = (params: {
@@ -85,6 +88,7 @@ export type CreateFieldsMatchEnrichment = <T extends BaseFieldsLatest>(
     name: string;
     index: string[];
     mappingField: SingleMappingField;
+    enrichmentResponseFields: string[];
     createEnrichmentFunction: (enrichmentDoc: EnrichmentType) => EnrichmentFunction;
   }
 ) => Promise<EventsMapByEnrichments>;
