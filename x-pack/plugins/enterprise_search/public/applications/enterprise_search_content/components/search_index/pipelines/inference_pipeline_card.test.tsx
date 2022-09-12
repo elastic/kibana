@@ -44,4 +44,4 @@ describe('InfererencePipelineCard', () => {
     const health = wrapper.find(EuiHealth);
     expect(health.prop('children')).toEqual('Not deployed');
   });
-}) 
+});
