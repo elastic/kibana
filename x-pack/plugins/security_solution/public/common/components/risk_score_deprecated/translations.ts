@@ -11,7 +11,7 @@ export const HOST_RISK_TITLE = i18n.translate('xpack.securitySolution.riskDeprec
   defaultMessage: 'Host Risk Score',
 });
 
-export const USER_RISK_TITLE = i18n.translate('xpack.securitySolution.riskDeprecated.hosts.title', {
+export const USER_RISK_TITLE = i18n.translate('xpack.securitySolution.riskDeprecated.users.title', {
   defaultMessage: 'User Risk Scores',
 });
 

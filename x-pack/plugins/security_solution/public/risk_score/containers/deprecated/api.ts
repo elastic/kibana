@@ -8,10 +8,16 @@
 import { KibanaServices } from '../../../common/lib/kibana';
 import { RISK_SCORE_DEPRECATION_API_URL } from '../../../../common/constants';
 
+// TODO: Future PR, make this a hard type everywhere relevant
+export const enum RiskEntity {
+  'user' = 'user',
+  'host' = 'host',
+}
+
 export interface Params {
   query: {
     indexName: string;
-    entity: 'user' | 'host';
+    entity: RiskEntity;
   };
   signal?: AbortSignal;
 }

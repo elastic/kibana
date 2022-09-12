@@ -4,222 +4,111 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../common/mock';
 
-import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
-import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import { useRiskScoreDeprecated } from '.';
+import { RiskQueries } from '../../../../common/search_strategy';
+import { useQuery } from '../../../common/hooks/use_query';
+import { RiskEntity } from './api';
+jest.mock('../../../common/hooks/use_query');
 
-jest.mock('../../../common/containers/use_search_strategy', () => ({
-  useSearchStrategy: jest.fn(),
-}));
-
-jest.mock('../../../common/hooks/use_app_toasts');
-
-const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
-const mockSearch = jest.fn();
+const mockUseFetch = useQuery as jest.Mock;
+const mockFetch = jest.fn();
 const mockRefetch = jest.fn();
 
+describe(`is risk score deprecated hook`, () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+  test('does not search if feature is not enabled, and initial isDeprecated state is false', () => {
+    mockUseFetch.mockReturnValue({
+      data: undefined,
+      error: undefined,
+      fetch: mockFetch,
+      isLoading: false,
+      refetch: mockRefetch,
+    });
+    const { result } = renderHook(
+      () => useRiskScoreDeprecated(false, RiskQueries.hostsRiskScore, 'the_right_one'),
+      {
+        wrapper: TestProviders,
+      }
+    );
+    expect(mockFetch).not.toHaveBeenCalled();
+    expect(result.current).toEqual({
+      error: undefined,
+      isDeprecated: false,
+      isEnabled: false,
+      isLoading: false,
+      refetch: result.current.refetch,
+    });
+  });
 
-  describe(`is risk score deprecated hook`, () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-      (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
-      mockUseRiskScoreDeprecated.mockReturnValue({
-        isLoading: false,
+  test('runs search if feature is enabled, and initial isDeprecated state is true', () => {
+    mockUseFetch.mockReturnValue({
+      data: undefined,
+      error: undefined,
+      query: mockFetch,
+      isLoading: false,
+      refetch: mockRefetch,
+    });
+    const { result } = renderHook(
+      () => useRiskScoreDeprecated(true, RiskQueries.hostsRiskScore, 'the_right_one'),
+      {
+        wrapper: TestProviders,
+      }
+    );
+    expect(mockFetch).toHaveBeenCalledWith({
+      query: { entity: RiskEntity.host, indexName: 'the_right_one' },
+    });
+    expect(result.current).toEqual({
+      error: undefined,
+      isDeprecated: true,
+      isEnabled: true,
+      isLoading: false,
+      refetch: result.current.refetch,
+    });
+  });
+
+  test('updates state after search returns isDeprecated = false', () => {
+    mockUseFetch.mockReturnValue({
+      data: undefined,
+      error: undefined,
+      query: mockFetch,
+      isLoading: false,
+      refetch: mockRefetch,
+    });
+    const { result, rerender } = renderHook(
+      () => useRiskScoreDeprecated(true, RiskQueries.hostsRiskScore, 'the_right_one'),
+      {
+        wrapper: TestProviders,
+      }
+    );
+    expect(result.current).toEqual({
+      error: undefined,
+      isDeprecated: true,
+      isEnabled: true,
+      isLoading: false,
+      refetch: result.current.refetch,
+    });
+    mockUseFetch.mockReturnValue({
+      data: {
         isDeprecated: false,
         isEnabled: true,
-        refetch: () => {},
-      });
+      },
+      error: undefined,
+      query: mockFetch,
+      isLoading: false,
+      refetch: mockRefetch,
     });
-    test('does not search if feature is not enabled', () => {
-      mockUseRiskScoreDeprecated.mockReturnValue({
-        isLoading: false,
-        isDeprecated: false,
-        isEnabled: false,
-        refetch: () => {},
-      });
-      mockUseSearchStrategy.mockReturnValue({
-        loading: false,
-        result: {
-          data: undefined,
-          totalCount: 0,
-        },
-        search: mockSearch,
-        refetch: mockRefetch,
-        inspect: {},
-        error: undefined,
-      });
-      const { result } = renderHook(() => fn(), {
-        wrapper: TestProviders,
-      });
-      expect(mockSearch).not.toHaveBeenCalled();
-      expect(result.current).toEqual([
-        false,
-        {
-          data: undefined,
-          inspect: {},
-          isInspected: false,
-          isModuleEnabled: false,
-          isDeprecated: false,
-          refetch: result.current[1].refetch,
-          totalCount: 0,
-        },
-      ]);
-    });
-
-    test('if index is deprecated, isDeprecated should be true & search if feature is not enabled', () => {
-      mockUseRiskScoreDeprecated.mockReturnValue({
-        isLoading: false,
-        isDeprecated: true,
-        isEnabled: true,
-        refetch: () => {},
-      });
-      mockUseSearchStrategy.mockReturnValue({
-        loading: false,
-        result: {
-          data: undefined,
-          totalCount: 0,
-        },
-        search: mockSearch,
-        refetch: mockRefetch,
-        inspect: {},
-        error: undefined,
-      });
-      const { result } = renderHook(() => fn({ skip: true }), {
-        wrapper: TestProviders,
-      });
-      expect(mockSearch).not.toHaveBeenCalled();
-      expect(result.current).toEqual([
-        false,
-        {
-          data: undefined,
-          inspect: {},
-          isInspected: false,
-          isModuleEnabled: true,
-          isDeprecated: true,
-          refetch: result.current[1].refetch,
-          totalCount: 0,
-        },
-      ]);
-    });
-
-    test('handle index not found error', () => {
-      mockUseRiskScoreDeprecated.mockReturnValue({
-        isLoading: false,
-        isDeprecated: false,
-        isEnabled: false,
-        refetch: () => {},
-      });
-      mockUseSearchStrategy.mockReturnValue({
-        loading: false,
-        result: {
-          data: undefined,
-          totalCount: 0,
-        },
-        search: mockSearch,
-        refetch: mockRefetch,
-        inspect: {},
-        error: {
-          attributes: {
-            caused_by: {
-              type: 'index_not_found_exception',
-            },
-          },
-        },
-      });
-      const { result } = renderHook(() => fn(), {
-        wrapper: TestProviders,
-      });
-      expect(result.current).toEqual([
-        false,
-        {
-          data: undefined,
-          inspect: {},
-          isInspected: false,
-          isModuleEnabled: false,
-          isDeprecated: false,
-          refetch: result.current[1].refetch,
-          totalCount: 0,
-        },
-      ]);
-    });
-
-    test('show error toast', () => {
-      const error = new Error();
-      mockUseSearchStrategy.mockReturnValue({
-        loading: false,
-        result: {
-          data: undefined,
-          totalCount: 0,
-        },
-        search: mockSearch,
-        refetch: mockRefetch,
-        inspect: {},
-        error,
-      });
-      renderHook(() => fn(), {
-        wrapper: TestProviders,
-      });
-      expect(appToastsMock.addError).toHaveBeenCalledWith(error, {
-        title: 'Failed to run search on risk score',
-      });
-    });
-
-    test('runs search if feature is enabled and not deprecated', () => {
-      mockUseSearchStrategy.mockReturnValue({
-        loading: false,
-        result: {
-          data: [],
-          totalCount: 0,
-        },
-        search: mockSearch,
-        refetch: mockRefetch,
-        inspect: {},
-        error: undefined,
-      });
-      renderHook(() => fn(), {
-        wrapper: TestProviders,
-      });
-      expect(mockSearch).toHaveBeenCalledWith({
-        defaultIndex: [`ml_${riskEntity}_risk_score_latest_default`],
-        factoryQueryType: `${riskEntity}sRiskScore`,
-        filterQuery: undefined,
-        pagination: undefined,
-        timerange: undefined,
-        sort: undefined,
-      });
-    });
-
-    test('return result', async () => {
-      mockUseSearchStrategy.mockReturnValue({
-        loading: false,
-        result: {
-          data: [],
-          totalCount: 0,
-        },
-        search: mockSearch,
-        refetch: mockRefetch,
-        inspect: {},
-        error: undefined,
-      });
-      const { result, waitFor } = renderHook(() => fn(), {
-        wrapper: TestProviders,
-      });
-      await waitFor(() => {
-        expect(result.current).toEqual([
-          false,
-          {
-            data: [],
-            inspect: {},
-            isDeprecated: false,
-            isInspected: false,
-            isModuleEnabled: true,
-            refetch: result.current[1].refetch,
-            totalCount: 0,
-          },
-        ]);
-      });
+    act(() => rerender());
+    expect(result.current).toEqual({
+      error: undefined,
+      isDeprecated: false,
+      isEnabled: true,
+      isLoading: false,
+      refetch: result.current.refetch,
     });
   });
 });

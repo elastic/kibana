@@ -9,15 +9,23 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { QUERY_NAMES, useQuery } from '../../../common/hooks/use_query';
 import { RiskQueries } from '../../../../common/search_strategy';
 import type { Params, Response } from './api';
-import { getRiskScoreDeprecated } from './api';
+import { getRiskScoreDeprecated, RiskEntity } from './api';
+
+interface RiskScoresDeprecated {
+  error: unknown;
+  isDeprecated: boolean;
+  isEnabled: boolean;
+  isLoading: boolean;
+  refetch: (indexName: string) => void;
+}
 
 export const useRiskScoreDeprecated = (
   isFeatureEnabled: boolean,
   factoryQueryType: RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore,
   defaultIndex?: string
-) => {
+): RiskScoresDeprecated => {
   const entity = useMemo(
-    () => (factoryQueryType === RiskQueries.hostsRiskScore ? 'host' : 'user'),
+    () => (factoryQueryType === RiskQueries.hostsRiskScore ? RiskEntity.host : RiskEntity.user),
     [factoryQueryType]
   );
 
@@ -26,7 +34,14 @@ export const useRiskScoreDeprecated = (
     getRiskScoreDeprecated
   );
 
-  const response = useMemo(() => (data ? data : { isDeprecated: true, isEnabled: false }), [data]);
+  const response = useMemo(
+    // if feature is enabled, let isDeprecated = true so the actual
+    // risk score fetch is not called until this check is complete
+    () => (data ? data : { isDeprecated: isFeatureEnabled, isEnabled: isFeatureEnabled }),
+    // isFeatureEnabled is initial state, not update requirement
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [data]
+  );
 
   const searchDeprecated = useCallback(
     (indexName: string) => {
@@ -43,5 +58,5 @@ export const useRiskScoreDeprecated = (
     }
   }, [isFeatureEnabled, defaultIndex, searchDeprecated]);
 
-  return { isLoading, ...response, refetch: searchDeprecated, error };
+  return { error, isLoading, refetch: searchDeprecated, ...response };
 };
