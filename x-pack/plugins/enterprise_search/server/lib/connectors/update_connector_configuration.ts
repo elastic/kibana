@@ -31,11 +31,13 @@ export const updateConnectorConfiguration = async (
       connector.status === ConnectorStatus.NEEDS_CONFIGURATION
         ? ConnectorStatus.CONFIGURED
         : connector.status;
-    return await client.asCurrentUser.index<ConnectorDocument>({
+    const result = await client.asCurrentUser.index<ConnectorDocument>({
       document: { ...connector, configuration, status },
       id: connectorId,
       index: CONNECTORS_INDEX,
     });
+    await client.asCurrentUser.indices.refresh({ index: CONNECTORS_INDEX });
+    return result;
   } else {
     throw new Error(
       i18n.translate('xpack.enterpriseSearch.server.connectors.configuration.error', {

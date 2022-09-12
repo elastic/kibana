@@ -22,41 +22,27 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { Status } from '../../../../../../common/types/api';
-import { generateEncodedPath } from '../../../../shared/encode_path_params';
+import { Status } from '../../../../../../../common/types/api';
+import { generateEncodedPath } from '../../../../../shared/encode_path_params';
 
-import { flashSuccessToast } from '../../../../shared/flash_messages';
-import { KibanaLogic } from '../../../../shared/kibana';
-import { FetchIndexApiLogic } from '../../../api/index/fetch_index_api_logic';
-import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
-import { isConnectorIndex } from '../../../utils/indices';
-import { EnterpriseSearchContentPageTemplate } from '../../layout';
-import { baseBreadcrumbs } from '../../search_indices';
-import { IndexNameLogic } from '../index_name_logic';
+import { flashSuccessToast } from '../../../../../shared/flash_messages';
+import { KibanaLogic } from '../../../../../shared/kibana';
+import { FetchIndexApiLogic } from '../../../../api/index/fetch_index_api_logic';
+import { SEARCH_INDEX_TAB_PATH } from '../../../../routes';
+import { isConnectorIndex } from '../../../../utils/indices';
+import { EnterpriseSearchContentPageTemplate } from '../../../layout';
+import { baseBreadcrumbs } from '../../../search_indices';
+import { IndexNameLogic } from '../../index_name_logic';
+
+import { NATIVE_CONNECTORS } from '../constants';
 
 import { ConnectorCheckable } from './connector_checkable';
 import { SelectConnectorLogic } from './select_connector_logic';
 
-interface NativeConnector {
-  name: string;
-  serviceType: string;
-}
-
-export const NATIVE_CONNECTORS: NativeConnector[] = [
-  {
-    name: 'MongoDB',
-    serviceType: 'mongodb',
-  },
-  {
-    name: 'MySQL',
-    serviceType: 'mysql',
-  },
-];
-
 export const SelectConnector: React.FC = () => {
   const { data: indexData, status: indexApiStatus } = useValues(FetchIndexApiLogic);
-  const { serviceType } = useValues(SelectConnectorLogic);
-  const { saveNativeConnector, setServiceType } = useActions(SelectConnectorLogic);
+  const { selectedNativeConnector } = useValues(SelectConnectorLogic);
+  const { saveNativeConnector, setSelectedConnector } = useActions(SelectConnectorLogic);
 
   const { indexName } = useValues(IndexNameLogic);
 
@@ -126,15 +112,15 @@ export const SelectConnector: React.FC = () => {
               <EuiFlexItem>
                 <ConnectorCheckable
                   {...nativeConnector}
-                  onChange={() => setServiceType(nativeConnector.serviceType)}
+                  onChange={() => setSelectedConnector(nativeConnector)}
                   documentationUrl={'' /* TODO docsUrl */}
-                  checked={nativeConnector.serviceType === serviceType}
+                  checked={nativeConnector === selectedNativeConnector}
                 />
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
           <EuiSpacer />
-          <EuiButton fill color="primary" type="submit" disabled={serviceType === null}>
+          <EuiButton fill color="primary" type="submit" disabled={selectedNativeConnector === null}>
             Select and configure
           </EuiButton>
           <EuiSpacer />

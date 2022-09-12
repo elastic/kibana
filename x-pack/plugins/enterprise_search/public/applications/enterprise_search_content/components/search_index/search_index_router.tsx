@@ -19,10 +19,10 @@ import {
 
 import { CrawlerDomainDetail } from '../crawler_domain_detail/crawler_domain_detail';
 
+import { SelectConnector } from './connector/select_connector/select_connector';
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
 import { SearchIndex } from './search_index';
-import { SelectConnector } from './select_connector/select_connector';
 
 export const SearchIndexRouter: React.FC = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);

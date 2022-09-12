@@ -7,37 +7,40 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { Actions } from '../../../../shared/api_logic/create_api_logic';
-import { generateEncodedPath } from '../../../../shared/encode_path_params';
-import { clearFlashMessages, flashAPIErrors } from '../../../../shared/flash_messages';
+import { Actions } from '../../../../../shared/api_logic/create_api_logic';
+import { generateEncodedPath } from '../../../../../shared/encode_path_params';
+import { clearFlashMessages, flashAPIErrors } from '../../../../../shared/flash_messages';
 
-import { KibanaLogic } from '../../../../shared/kibana';
+import { KibanaLogic } from '../../../../../shared/kibana';
 import {
-  PutConnectorServiceTypeArgs,
-  PutConnectorServiceTypeResponse,
-  ServiceTypeConnectorApiLogic,
-} from '../../../api/connector/update_connector_service_type_api_logic';
+  SetNativeConnectorArgs,
+  SetNativeConnectorLogic,
+  SetNativeConnectorResponse,
+} from '../../../../api/connector/set_native_connector_api_logic';
+
 import {
   FetchIndexApiLogic,
   FetchIndexApiResponse,
-} from '../../../api/index/fetch_index_api_logic';
+} from '../../../../api/index/fetch_index_api_logic';
 
-import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
-import { isConnectorIndex } from '../../../utils/indices';
+import { SEARCH_INDEX_TAB_PATH } from '../../../../routes';
+import { isConnectorIndex } from '../../../../utils/indices';
+import { NATIVE_CONNECTORS } from '../constants';
+import { NativeConnector } from '../types';
 
 type SelectConnectorActions = Pick<
-  Actions<PutConnectorServiceTypeArgs, PutConnectorServiceTypeResponse>,
+  Actions<SetNativeConnectorArgs, SetNativeConnectorResponse>,
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
   saveNativeConnector(): void;
-  setServiceType(serviceType: string): {
-    serviceType: string;
+  setSelectedConnector(nativeConnector: NativeConnector): {
+    nativeConnector: NativeConnector;
   };
 };
 
 interface SelectConnectorValues {
   index: FetchIndexApiResponse;
-  serviceType: string | null;
+  selectedNativeConnector: NativeConnector | null;
 }
 
 export const SelectConnectorLogic = kea<
@@ -45,18 +48,21 @@ export const SelectConnectorLogic = kea<
 >({
   actions: {
     saveNativeConnector: true,
-    setServiceType: (serviceType) => ({ serviceType }),
+    setSelectedConnector: (nativeConnector) => ({ nativeConnector }),
   },
   connect: {
-    actions: [ServiceTypeConnectorApiLogic, ['apiError', 'apiSuccess', 'makeRequest']],
+    actions: [SetNativeConnectorLogic, ['apiError', 'apiSuccess', 'makeRequest']],
     values: [FetchIndexApiLogic, ['data as index']],
   },
   events: ({ actions, values }) => ({
     afterMount: () => {
       if (isConnectorIndex(values.index)) {
         const serviceType = values.index.connector.service_type;
-        if (serviceType) {
-          actions.setServiceType(serviceType);
+        const nativeConnector = NATIVE_CONNECTORS.find(
+          (connector) => connector.serviceType === serviceType
+        );
+        if (nativeConnector) {
+          actions.setSelectedConnector(nativeConnector);
         }
       }
     },
@@ -68,7 +74,7 @@ export const SelectConnectorLogic = kea<
     },
     makeRequest: () => clearFlashMessages(),
     saveNativeConnector: () => {
-      if (!isConnectorIndex(values.index) || values.serviceType === null) {
+      if (!isConnectorIndex(values.index) || values.selectedNativeConnector === null) {
         KibanaLogic.values.navigateToUrl(
           generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
             indexName: values.index.name,
@@ -78,17 +84,17 @@ export const SelectConnectorLogic = kea<
       } else {
         actions.makeRequest({
           connectorId: values.index.connector.id,
-          serviceType: values.serviceType,
+          nativeConnector: values.selectedNativeConnector,
         });
       }
     },
   }),
   path: ['enterprise_search', 'content', 'select_connector'],
   reducers: () => ({
-    serviceType: [
+    selectedNativeConnector: [
       null,
       {
-        setServiceType: (_, { serviceType }) => serviceType,
+        setSelectedConnector: (_, { nativeConnector }) => nativeConnector,
       },
     ],
   }),
