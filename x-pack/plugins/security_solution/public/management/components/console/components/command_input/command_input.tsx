@@ -11,10 +11,10 @@ import type { CommonProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, useResizeObserver, EuiButtonIcon } from '@elastic/eui';
 import styled from 'styled-components';
 import classNames from 'classnames';
+import { EnteredInput } from './lib/entered_input';
 import type { InputCaptureProps } from './components/input_capture';
 import { InputCapture } from './components/input_capture';
 import { useWithInputVisibleState } from '../../hooks/state_selectors/use_with_input_visible_state';
-import type { ConsoleDataState } from '../console_state/types';
 import { useInputHints } from './hooks/use_input_hints';
 import { InputPlaceholder } from './components/input_placeholder';
 import { useWithInputTextEntered } from '../../hooks/state_selectors/use_with_input_text_entered';
@@ -160,113 +160,58 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
       dispatch({
         type: 'updateInputTextEnteredState',
         payload: ({ textEntered: prevLeftOfCursor, rightOfCursor: prevRightOfCursor }) => {
-          let updatedLeftOfCursor = prevLeftOfCursor + value;
-          let updatedRightOfCursor: ConsoleDataState['input']['rightOfCursor'] | undefined =
-            prevRightOfCursor;
+          let inputText = new EnteredInput(prevLeftOfCursor, prevRightOfCursor.text);
 
-          // If user selected some text and we have a key value, then replace that selection with new value
-          if (selection && value) {
-            const prevFullTextEntered = prevLeftOfCursor + prevRightOfCursor.text;
-
-            updatedLeftOfCursor =
-              prevFullTextEntered.substring(0, prevFullTextEntered.indexOf(selection)) + value;
-
-            updatedRightOfCursor = {
-              text: prevFullTextEntered.substring(
-                prevFullTextEntered.indexOf(selection) + selection.length
-              ),
-            };
-          }
-
-          const lengthOfTextEntered = updatedLeftOfCursor.length;
+          inputText.addValue(value ?? '');
 
           switch (keyCode) {
-            // BACKSPACE
-            // remove the last character from the text entered
+            // BACKSPACE = remove the last character from the text entered
             case 8:
-              if (lengthOfTextEntered) {
-                updatedLeftOfCursor = updatedLeftOfCursor.substring(0, lengthOfTextEntered - 1);
-              }
+              inputText.backspaceChar(selection);
               break;
 
-            // DELETE
-            // Remove the first character from the Right side of cursor
+            // DELETE = Remove the first character from the Right side of cursor
             case 46:
-              if (prevRightOfCursor.text) {
-                updatedRightOfCursor = {
-                  ...prevRightOfCursor,
-                  text: prevRightOfCursor.text.substring(1),
-                };
-              }
+              inputText.deleteChar(selection);
               break;
 
             // ENTER
             // Execute command and blank out the input area
             case 13:
-              setCommandToExecute(updatedLeftOfCursor + rightOfCursor.text);
-              updatedLeftOfCursor = '';
-              updatedRightOfCursor = undefined;
+              setCommandToExecute(inputText.getFullText());
+              inputText = new EnteredInput('', '');
               break;
 
-            // ARROW LEFT
-            // Move cursor left (or more accurately - move text to the right of the cursor)
+            // ARROW LEFT = Move cursor left
             case 37:
-              updatedRightOfCursor = {
-                ...prevRightOfCursor,
-                text: updatedLeftOfCursor.charAt(lengthOfTextEntered - 1) + prevRightOfCursor.text,
-              };
-              updatedLeftOfCursor = updatedLeftOfCursor.substring(0, lengthOfTextEntered - 1);
+              inputText.moveCursorTo('left');
               break;
 
-            // ARROW RIGHT
-            // Move cursor right (or more accurately - move text to the left of the cursor)
+            // ARROW RIGHT = Move cursor right
             case 39:
-              updatedRightOfCursor = {
-                ...prevRightOfCursor,
-                text: prevRightOfCursor.text.substring(1),
-              };
-              updatedLeftOfCursor = updatedLeftOfCursor + prevRightOfCursor.text.charAt(0);
+              inputText.moveCursorTo('right');
               break;
 
-            // HOME
-            // Move cursor to the start of the input area
-            // (or more accurately - move all text to the right of the cursor)
+            // HOME = Move cursor to the start of the input area
             case 36:
-              updatedRightOfCursor = {
-                ...prevRightOfCursor,
-                text: updatedLeftOfCursor + prevRightOfCursor.text,
-              };
-              updatedLeftOfCursor = '';
+              inputText.moveCursorTo('home');
               break;
 
-            // END
-            // Move cursor to the end of the input area
-            // (or more accurately - move all text to the left of the cursor)
+            // END = Move cursor to the end of the input area
             case 35:
-              updatedRightOfCursor = {
-                ...prevRightOfCursor,
-                text: '',
-              };
-              updatedLeftOfCursor = updatedLeftOfCursor + prevRightOfCursor.text;
+              inputText.moveCursorTo('end');
               break;
           }
 
           return {
-            textEntered: updatedLeftOfCursor,
-            rightOfCursor: updatedRightOfCursor,
+            textEntered: inputText.getLeftOfCursorText(),
+            rightOfCursor: { text: inputText.getRightOfCursorText() },
           };
         },
       });
     },
-    [dispatch, rightOfCursor.text]
+    [dispatch]
   );
-
-  // FIXME:PT clean up
-  // const handleOnFocus = useCallback(() => {
-  //   if (!isKeyInputBeingCaptured) {
-  //     dispatch({ type: 'addFocusToKeyCapture' });
-  //   }
-  // }, [dispatch, isKeyInputBeingCaptured]);
 
   // Execute the command if one was ENTER'd.
   useEffect(() => {
