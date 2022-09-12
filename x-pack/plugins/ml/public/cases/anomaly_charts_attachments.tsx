@@ -55,6 +55,15 @@ export const initComponent = memoize(
                     inputProps.timeRange.from
                   )} - ${dataFormatter.convert(inputProps.timeRange.to)}`,
                 },
+                {
+                  title: (
+                    <FormattedMessage
+                      id="xpack.ml.cases.anomalySwimLane.description.queryLabel"
+                      defaultMessage="Query"
+                    />
+                  ),
+                  description: inputProps.query.query,
+                },
               ]}
             />
             <EmbeddableComponent {...inputProps} />
