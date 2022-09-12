@@ -1,6 +1,7 @@
 # Fleet Data Model
 
 The Fleet plugin has 3 sources of data that it reads and writes to, these large categories are:
+
 - **Package Registry**: read-only data source for retrieving packages published by Elastic
 - **`.fleet-*` Indices**: read & write data source for interacting with Elastic Agent policies, actions, and enrollment tokens
 - **Saved Objects**: read & write data source for storing installed packages, configured policies, outputs, and other settings
@@ -65,6 +66,7 @@ This document is intended to outline what each type is for, the primary places i
 any caveats regarding the history of that saved object type.
 
 At this point in time, all types are currently:
+
 - `hidden: false`
 - `namespaceType: agnostic`
 - `management.importableAndExportable: false`
@@ -80,7 +82,6 @@ Tracks the Fleet server host addresses and whether or not the cluster has been s
 "fleet migration" notices in the UI.
 
 Can be accessed via the APIs exposed in the [server's settings service](../server/services/settings.ts).
-
 
 ### `ingest-agent-policies`
 
@@ -102,7 +103,6 @@ enrolled agents.
 - Migrations: 7.10.0, 7.11.0, 7.12.0, 7.13.0, 7.14.0, 7.15.0
 - References to other objects:
   - `policy_id` - ID that points to an agent policy (`ingest-agent-policies`)
-  - `output_id` - ID that points to an output (`ingest-outputs`)
 
 Contains the configuration for a specific instance of a package integration as configured for an agent policy.
 
@@ -134,7 +134,7 @@ used for other types of outputs like separate monitoring clusters, Logstash, etc
   - `package_assets` - array of original file contents of the package as it was installed
     - `package_assets.id` - Saved Object ID for a `epm-package-assets` type
     - `package_assets.type` - Saved Object type for the asset. As of now, only `epm-packages-assets` are supported.
-  
+
 Contains metadata on an installed integration package including references to all assets installed in Kibana and
 Elasticsearch. This allows for easy cleanup when a package is removed or upgraded.
 

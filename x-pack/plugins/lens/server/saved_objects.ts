@@ -6,6 +6,7 @@
  */
 
 import { CoreSetup } from '@kbn/core/server';
+import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { getEditPath } from '../common';
 import { getAllMigrations } from './migrations/saved_object_migrations';
@@ -31,7 +32,12 @@ export function setupSavedObjects(
         uiCapabilitiesPath: 'visualize.show',
       }),
     },
-    migrations: () => getAllMigrations(getFilterMigrations(), customVisualizationMigrations),
+    migrations: () =>
+      getAllMigrations(
+        getFilterMigrations(),
+        DataViewPersistableStateService.getAllMigrations(),
+        customVisualizationMigrations
+      ),
     mappings: {
       properties: {
         title: {

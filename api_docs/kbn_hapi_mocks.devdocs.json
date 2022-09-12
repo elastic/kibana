@@ -22,8 +22,9 @@
         "tags": [],
         "label": "hapiMocks",
         "description": [],
-        "path": "packages/kbn-hapi-mocks/src/index.ts",
+        "path": "packages/kbn-hapi-mocks/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/hapi-mocks",
@@ -40,8 +41,9 @@
               ">) => ",
               "Request"
             ],
-            "path": "packages/kbn-hapi-mocks/src/index.ts",
+            "path": "packages/kbn-hapi-mocks/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -257,7 +259,8 @@
                   "<(name: string) => boolean> | undefined; }"
                 ],
                 "path": "packages/kbn-hapi-mocks/src/request.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }

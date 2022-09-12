@@ -21,18 +21,24 @@ export const buildValidators = <
   connector: SubActionConnectorType<Config, Secrets>;
 }) => {
   return {
-    config: connector.schema.config,
-    secrets: connector.schema.secrets,
-    params: schema.object({
-      subAction: schema.string(),
-      /**
-       * With this validation we enforce the subActionParams to be an object.
-       * Each sub action has different parameters and they are validated inside the executor
-       * (x-pack/plugins/actions/server/sub_action_framework/executor.ts). For that reason,
-       * we allow all unknowns at this level of validation as they are not known at this
-       * time of execution.
-       */
-      subActionParams: schema.object({}, { unknowns: 'allow' }),
-    }),
+    config: {
+      schema: connector.schema.config,
+    },
+    secrets: {
+      schema: connector.schema.secrets,
+    },
+    params: {
+      schema: schema.object({
+        subAction: schema.string(),
+        /**
+         * With this validation we enforce the subActionParams to be an object.
+         * Each sub action has different parameters and they are validated inside the executor
+         * (x-pack/plugins/actions/server/sub_action_framework/executor.ts). For that reason,
+         * we allow all unknowns at this level of validation as they are not known at this
+         * time of execution.
+         */
+        subActionParams: schema.object({}, { unknowns: 'allow' }),
+      }),
+    },
   };
 };

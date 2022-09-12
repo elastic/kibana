@@ -36,23 +36,21 @@ export interface ElasticsearchIndex {
 export interface ConnectorIndex extends ElasticsearchIndex {
   connector: Connector;
 }
-
-export interface CrawlerIndex extends ElasticsearchIndex {
+export interface ConnectorCrawlerIndex extends ElasticsearchIndex {
+  connector: Connector;
   crawler: Crawler;
 }
-export interface ConnectorIndex extends ElasticsearchIndex {
-  connector: Connector;
+export interface CrawlerIndex extends ElasticsearchIndex {
+  connector?: Connector;
+  crawler: Crawler;
 }
+
 export interface ElasticsearchIndexWithPrivileges extends ElasticsearchIndex {
   alias: boolean;
   privileges: {
     manage: boolean;
     read: boolean;
   };
-}
-
-export interface CrawlerIndex extends ElasticsearchIndex {
-  crawler: Crawler;
 }
 
 export type ElasticsearchIndexWithIngestion = ElasticsearchIndex | ConnectorIndex | CrawlerIndex;

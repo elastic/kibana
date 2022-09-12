@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { InputsModelId } from '../store/inputs/constants';
 import {
   Direction,
   FlowTarget,
@@ -74,11 +75,14 @@ export const mockGlobalState: State = {
         },
         events: { activePage: 0, limit: 10 },
         uncommonProcesses: { activePage: 0, limit: 10 },
-        anomalies: null,
+        anomalies: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
         hostRisk: {
           activePage: 0,
           limit: 10,
-          sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+          sort: { field: RiskScoreFields.hostRiskScore, direction: Direction.desc },
           severitySelection: [],
         },
         sessions: { activePage: 0, limit: 10 },
@@ -95,11 +99,14 @@ export const mockGlobalState: State = {
         },
         events: { activePage: 0, limit: 10 },
         uncommonProcesses: { activePage: 0, limit: 10 },
-        anomalies: null,
+        anomalies: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
         hostRisk: {
           activePage: 0,
           limit: 10,
-          sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+          sort: { field: RiskScoreFields.hostRiskScore, direction: Direction.desc },
           severitySelection: [],
         },
         sessions: { activePage: 0, limit: 10 },
@@ -149,6 +156,10 @@ export const mockGlobalState: State = {
           activePage: 0,
           limit: 10,
         },
+        [networkModel.NetworkTableType.anomalies]: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
       },
     },
     details: {
@@ -189,6 +200,10 @@ export const mockGlobalState: State = {
           limit: 10,
           sort: { direction: Direction.desc },
         },
+        [networkModel.NetworkTableType.anomalies]: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
       },
     },
   },
@@ -204,7 +219,10 @@ export const mockGlobalState: State = {
           activePage: 0,
           limit: 10,
         },
-        [usersModel.UsersTableType.anomalies]: null,
+        [usersModel.UsersTableType.anomalies]: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
         [usersModel.UsersTableType.risk]: {
           activePage: 0,
           limit: 10,
@@ -219,7 +237,10 @@ export const mockGlobalState: State = {
     },
     details: {
       queries: {
-        [usersModel.UsersTableType.anomalies]: null,
+        [usersModel.UsersTableType.anomalies]: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
         [usersModel.UsersTableType.events]: { activePage: 0, limit: 10 },
       },
     },
@@ -233,7 +254,7 @@ export const mockGlobalState: State = {
         from: '2020-07-07T08:20:18.966Z',
         to: '2020-07-08T08:20:18.966Z',
       },
-      linkTo: ['timeline'],
+      linkTo: [InputsModelId.timeline, InputsModelId.socTrends],
       queries: [],
       policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
       query: {
@@ -250,7 +271,7 @@ export const mockGlobalState: State = {
         from: '2020-07-07T08:20:18.966Z',
         to: '2020-07-08T08:20:18.966Z',
       },
-      linkTo: ['global'],
+      linkTo: [InputsModelId.global, InputsModelId.socTrends],
       queries: [],
       policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
       query: {
@@ -258,6 +279,17 @@ export const mockGlobalState: State = {
         language: 'kuery',
       },
       filters: [],
+    },
+    socTrends: {
+      timerange: {
+        kind: 'relative',
+        fromStr: DEFAULT_FROM,
+        toStr: DEFAULT_TO,
+        from: '2020-07-06T08:20:18.966Z',
+        to: '2020-07-07T08:20:18.966Z',
+      },
+      linkTo: [InputsModelId.global, InputsModelId.timeline],
+      policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
     },
   },
   dragAndDrop: { dataProviders: {} },

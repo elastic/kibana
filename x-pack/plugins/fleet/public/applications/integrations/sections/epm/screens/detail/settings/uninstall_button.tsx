@@ -58,6 +58,7 @@ export const UninstallButton: React.FunctionComponent<UninstallButtonProps> = ({
   return canRemovePackages ? (
     <>
       <EuiButton
+        data-test-subj="uninstallAssetsButton"
         iconType={'trash'}
         isLoading={isRemoving}
         onClick={() => setIsUninstallModalVisible(true)}

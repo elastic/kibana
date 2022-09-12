@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, FC, useMemo, useState } from 'react';
-import { EuiPageContentBody } from '@elastic/eui';
+import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import type { AppMountParameters } from '@kbn/core/public';
@@ -54,6 +54,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
       Object.values(routes)
         .map((routeFactory) => routeFactory(navigateToPath, basePath.get()))
         .filter((d) => !d.disabled),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 

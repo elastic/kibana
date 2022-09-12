@@ -328,6 +328,9 @@ The _Start_ Plugin api allow you to use Task Manager to facilitate your Plugin's
   runSoon: (taskId: string) =>  {
     // ...
   },
+  bulkEnableDisable: (taskIds: string[], enabled: boolean) => {
+    // ...
+  },
   bulkUpdateSchedules: (taskIds: string[], schedule: IntervalSchedule) =>  {
     // ...
   },
@@ -413,6 +416,33 @@ export class Plugin {
       // If running the task has failed, we throw an error with an appropriate message.
       // For example, if the requested task doesnt exist: `Error: failed to run task "91760f10-ba42-de9799" as it does not exist`
       // Or if, for example, the task is already running: `Error: failed to run task "91760f10-ba42-de9799" as it is currently running`
+    }    
+  }
+}
+```
+
+#### bulkEnableDisable
+Using `bulkEnableDisable` you can instruct TaskManger to update the `enabled` status of tasks.
+
+Example:
+```js
+export class Plugin {
+  constructor() {
+  }
+
+  public setup(core: CoreSetup, plugins: { taskManager }) {
+  }
+
+  public start(core: CoreStart, plugins: { taskManager }) {
+    try {
+      const bulkDisableResults = await taskManager.bulkEnableDisable(
+        ['97c2c4e7-d850-11ec-bf95-895ffd19f959', 'a5ee24d1-dce2-11ec-ab8d-cf74da82133d'],
+        false,
+      );
+      // If no error is thrown, the bulkEnableDisable has completed successfully.
+      // But some updates of some tasks can be failed, due to OCC 409 conflict for example
+    } catch(err: Error) {
+      // if error is caught, means the whole method requested has failed and tasks weren't updated
     }    
   }
 }

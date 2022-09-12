@@ -16,6 +16,7 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiDescriptionList,
+  EuiDescriptionListProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -26,7 +27,6 @@ import {
   EuiPortal,
   EuiTitle,
 } from '@elastic/eui';
-import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { CytoscapeContext } from './cytoscape';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/util/date_utils';
 import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_frame_analytics';
@@ -130,10 +130,12 @@ export const Controls: FC<Props> = React.memo(
           })
         );
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [nodeLabel]);
 
     const onCloneJobClick = useCallback(async () => {
       navigateToWizardWithClonedJob({ config: details[nodeId], stats: details[nodeId]?.stats });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [nodeId]);
 
     const onActionsButtonClick = () => {
@@ -177,6 +179,7 @@ export const Controls: FC<Props> = React.memo(
           setShowFlyout(false);
         }
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [isModalVisible, deleteItem, didUntag]
     );
 

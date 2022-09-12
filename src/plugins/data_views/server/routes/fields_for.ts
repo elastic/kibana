@@ -73,7 +73,7 @@ const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, resp
   }
 
   try {
-    const fields = await indexPatterns.getFieldsForWildcard({
+    const { fields, indices } = await indexPatterns.getFieldsForWildcard({
       pattern,
       metaFields: parsedFields,
       type,
@@ -85,7 +85,7 @@ const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, resp
     });
 
     return response.ok({
-      body: { fields },
+      body: { fields, indices },
       headers: {
         'content-type': 'application/json',
       },
@@ -118,5 +118,6 @@ export const registerFieldForWildcard = (
   >
 ) => {
   router.put({ path, validate }, handler);
+  router.post({ path, validate }, handler);
   router.get({ path, validate }, handler);
 };

@@ -106,6 +106,7 @@ async function mockedGetInstallation(params: any) {
   let pkg;
   if (params.pkgName === 'apache') pkg = { version: '1.3.2' };
   if (params.pkgName === 'aws') pkg = { version: '0.3.3' };
+  if (params.pkgName === 'endpoint') pkg = { version: '1.0.0' };
   return Promise.resolve(pkg);
 }
 
@@ -113,7 +114,7 @@ async function mockedGetPackageInfo(params: any) {
   let pkg;
   if (params.pkgName === 'apache') pkg = { version: '1.3.2' };
   if (params.pkgName === 'aws') pkg = { version: '0.3.3' };
-  if (params.pkgName === 'endpoint') pkg = {};
+  if (params.pkgName === 'endpoint') pkg = { version: '1.0.0' };
   if (params.pkgName === 'test') {
     pkg = {
       version: '1.0.2',
@@ -1228,7 +1229,6 @@ describe('Package policy service', () => {
       inputs: [],
       name: 'endpoint-1',
       namespace: 'default',
-      output_id: '',
       package: {
         name: 'endpoint',
         title: 'Elastic Endpoint',
@@ -1409,7 +1409,6 @@ describe('Package policy service', () => {
       },
       enabled: true,
       policy_id: '1e6d0690-b995-11ec-a355-d35391e25881',
-      output_id: '',
       inputs: [
         {
           type: 'cloudbeat',
@@ -1497,7 +1496,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -1585,7 +1583,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -1683,7 +1680,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -1781,7 +1777,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -1951,7 +1946,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -2171,7 +2165,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -2266,7 +2259,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -2368,7 +2360,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -2467,7 +2458,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -2566,7 +2556,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -2737,7 +2726,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -2958,7 +2946,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -3052,7 +3039,6 @@ describe('Package policy service', () => {
           namespace: 'default',
           enabled: true,
           policy_id: 'xxxx',
-          output_id: 'xxxx',
           package: {
             name: 'test-package',
             title: 'Test Package',
@@ -3193,7 +3179,6 @@ describe('Package policy service', () => {
         package: { name: 'apache', title: 'Apache', version: '1.0.0' },
         enabled: true,
         policy_id: '1',
-        output_id: '',
         inputs: [
           {
             enabled: false,
@@ -3270,7 +3255,6 @@ describe('Package policy service', () => {
         package: { name: 'aws', title: 'AWS', version: '1.0.0' },
         enabled: true,
         policy_id: '1',
-        output_id: '',
         inputs: [
           {
             type: 'aws/metrics',
@@ -3297,7 +3281,6 @@ describe('Package policy service', () => {
         description: 'desc',
         enabled: false,
         policy_id: '2',
-        output_id: '3',
         inputs: [
           {
             type: 'logfile',
@@ -3332,7 +3315,6 @@ describe('Package policy service', () => {
         package: { name: 'apache', title: 'Apache', version: '1.0.0' },
         enabled: false,
         policy_id: '2',
-        output_id: '3',
         inputs: [
           {
             enabled: true,
@@ -3481,6 +3463,36 @@ describe('getUpgradeDryRunDiff', () => {
     );
 
     expect(res.hasErrors).toBeTruthy();
+  });
+
+  it('should return no errors if upgrading 2 package policies', async () => {
+    savedObjectsClient.get.mockImplementation((type, id) =>
+      Promise.resolve({
+        id,
+        type: 'abcd',
+        references: [],
+        version: '0.9.0',
+        attributes: { ...createPackagePolicyMock(), name: id },
+      })
+    );
+    const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const res = await packagePolicyService.upgrade(savedObjectsClient, elasticsearchClient, [
+      'package-policy-id',
+      'package-policy-id-2',
+    ]);
+
+    expect(res).toEqual([
+      {
+        id: 'package-policy-id',
+        name: 'package-policy-id',
+        success: true,
+      },
+      {
+        id: 'package-policy-id-2',
+        name: 'package-policy-id-2',
+        success: true,
+      },
+    ]);
   });
 });
 
