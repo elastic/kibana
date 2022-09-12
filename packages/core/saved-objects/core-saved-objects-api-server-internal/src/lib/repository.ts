@@ -1008,8 +1008,17 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           errorResult = { success: false, type, id, error };
           return errorResult;
         }
-        const deleted = rawResponse.result === 'deleted';
-        if (deleted) {
+        if (rawResponse.result === 'not_found') {
+          errorResult = {
+            success: false,
+            type,
+            id,
+            error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
+          };
+          return errorResult;
+        }
+
+        if (rawResponse.result === 'deleted') {
           // `namespaces` should only exist in the expectedResult.value if the type is multinamespace.
           if (namespaces) {
             // in the bulk operation, one cannot specify a namespace from which to delete an object other than the namespace that the operation is performed in. If a multinamespace object exists in more than the current space (from which the call is made), force deleting the object will delete it from all namespaces it exists in. In that case, all legacy url aliases are deleted as well. If force isn't applied, the operation fails and the object isn't deleted.
