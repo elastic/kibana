@@ -19,7 +19,6 @@ import { useInputHints } from './hooks/use_input_hints';
 import { InputPlaceholder } from './components/input_placeholder';
 import { useWithInputTextEntered } from '../../hooks/state_selectors/use_with_input_text_entered';
 import { InputAreaPopover } from './components/input_area_popover';
-import type { KeyCaptureProps } from './key_capture';
 import { useConsoleStateDispatch } from '../../hooks/state_selectors/use_console_state_dispatch';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../../hooks/state_selectors/use_data_test_subj';
@@ -77,7 +76,7 @@ const CommandInputContainer = styled.div`
 export interface CommandInputProps extends CommonProps {
   prompt?: string;
   isWaiting?: boolean;
-  focusRef?: KeyCaptureProps['focusRef'];
+  focusRef?: InputCaptureProps['focusRef'];
 }
 
 export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ...commonProps }) => {
@@ -90,12 +89,8 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
   const [commandToExecute, setCommandToExecute] = useState('');
 
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const _focusRef: KeyCaptureProps['focusRef'] = useRef(null);
-
-  // TODO:PT what do I use this for? investigate
-  const textDisplayRef = useRef<HTMLDivElement | null>(null);
-
   const dimensions = useResizeObserver(containerRef.current);
+  const _focusRef: InputCaptureProps['focusRef'] = useRef(null);
 
   const keyCaptureFocusRef = focusRef || _focusRef;
 
@@ -143,7 +138,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
     [keyCaptureFocusRef]
   );
 
-  const handleKeyCapture = useCallback<InputCaptureProps['onCapture']>(
+  const handleInputCapture = useCallback<InputCaptureProps['onCapture']>(
     ({ value, selection, eventDetails }) => {
       const keyCode = eventDetails.keyCode;
 
@@ -235,7 +230,6 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
           alignItems="center"
           gutterSize="none"
           justifyContent="flexStart"
-          ref={textDisplayRef}
         >
           {prompt && (
             <EuiFlexItem grow={false} data-test-subj={getTestId('cmdInput-prompt')}>
@@ -244,7 +238,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
           )}
           <EuiFlexItem className="textEntered">
             <InputCapture
-              onCapture={handleKeyCapture}
+              onCapture={handleInputCapture}
               onChangeFocus={handleOnChangeFocus}
               focusRef={focusRef}
             >
