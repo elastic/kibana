@@ -63,7 +63,6 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
       .filter((result) => result.status === 'fulfilled')
       .map((result) => (result as PromiseFulfilledResult<EnrichmentType[]>)?.value);
 
-
     const enrichments = flatten(enrichmentsResults);
 
     if (enrichments.length === 0) {
