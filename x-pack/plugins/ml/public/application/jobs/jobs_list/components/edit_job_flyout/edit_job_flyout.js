@@ -32,10 +32,12 @@ import { validateModelMemoryLimit, validateGroupNames, isValidCustomUrls } from 
 import { toastNotificationServiceProvider } from '../../../../services/toast_notification_service';
 import { ml } from '../../../../services/ml_api_service';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
-import { collapseLiteralStrings } from '../../../../../../shared_imports';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { DATAFEED_STATE, JOB_STATE } from '../../../../../../common/constants/states';
 import { isManagedJob } from '../../../jobs_utils';
 import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warning_callout';
+
+const { collapseLiteralStrings } = XJson;
 
 export class EditJobFlyoutUI extends Component {
   _initialJobFormState = null;
