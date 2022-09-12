@@ -82,7 +82,7 @@ export interface CommandInputProps extends CommonProps {
 export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ...commonProps }) => {
   useInputHints();
   const dispatch = useConsoleStateDispatch();
-  const { rightOfCursor, textEntered } = useWithInputTextEntered();
+  const { rightOfCursor, textEntered, fullTextEntered } = useWithInputTextEntered();
   const visibleState = useWithInputVisibleState();
   const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
   const getTestId = useTestIdGenerator(useDataTestSubj());
@@ -117,10 +117,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
     });
   }, [isKeyInputBeingCaptured, visibleState]);
 
-  const disableArrowButton = useMemo(
-    () => textEntered.length === 0 && rightOfCursor.text.length === 0,
-    [rightOfCursor.text.length, textEntered.length]
-  );
+  const disableArrowButton = useMemo(() => fullTextEntered.trim().length === 0, [fullTextEntered]);
 
   const handleSubmitButton = useCallback<MouseEventHandler>(
     (ev) => {
