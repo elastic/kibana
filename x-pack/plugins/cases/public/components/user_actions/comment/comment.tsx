@@ -63,7 +63,12 @@ const getCreateCommentUserAction = ({
   comment: Comment;
 } & Omit<
   UserActionBuilderArgs,
-  'caseServices' | 'comments' | 'index' | 'handleOutlineComment'
+  | 'caseServices'
+  | 'comments'
+  | 'index'
+  | 'handleOutlineComment'
+  | 'userProfiles'
+  | 'currentUserProfile'
 >): EuiCommentProps[] => {
   switch (comment.type) {
     case CommentType.user:
@@ -109,6 +114,8 @@ const getCreateCommentUserAction = ({
         comment,
         externalReferenceAttachmentTypeRegistry,
         caseData,
+        isLoading: loadingCommentIds.includes(comment.id),
+        handleDeleteComment,
       });
 
       return externalReferenceBuilder.build();
@@ -119,6 +126,8 @@ const getCreateCommentUserAction = ({
         comment,
         persistableStateAttachmentTypeRegistry,
         caseData,
+        isLoading: loadingCommentIds.includes(comment.id),
+        handleDeleteComment,
       });
 
       return persistableBuilder.build();
