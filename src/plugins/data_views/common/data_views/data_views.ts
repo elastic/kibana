@@ -784,7 +784,8 @@ export class DataViewsService {
     const addRuntimeFieldToSpecFields = (
       name: string,
       fieldType: RuntimeType,
-      runtimeField: RuntimeFieldSpec
+      runtimeField: RuntimeFieldSpec,
+      parentName?: string
     ) => {
       spec[name] = {
         name,
@@ -797,6 +798,10 @@ export class DataViewsService {
         customLabel: fieldAttrs?.[name]?.customLabel,
         count: fieldAttrs?.[name]?.count,
       };
+
+      if (parentName) {
+        spec[name].parentName = parentName;
+      }
     };
 
     // CREATE RUNTIME FIELDS
@@ -804,7 +809,7 @@ export class DataViewsService {
       // For composite runtime field we add the subFields, **not** the composite
       if (runtimeField.type === 'composite') {
         Object.entries(runtimeField.fields!).forEach(([subFieldName, subField]) => {
-          addRuntimeFieldToSpecFields(`${name}.${subFieldName}`, subField.type, runtimeField);
+          addRuntimeFieldToSpecFields(`${name}.${subFieldName}`, subField.type, runtimeField, name);
         });
       } else {
         addRuntimeFieldToSpecFields(name, runtimeField.type, runtimeField);

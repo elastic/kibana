@@ -14,13 +14,17 @@ export const deserializeField = (dataView: DataView, field?: DataViewField): Fie
     return undefined;
   }
 
+  const primitiveType = field?.esTypes ? (field.esTypes[0] as RuntimeType) : ('keyword' as const);
+  const editType = field.runtimeField?.type === 'composite' ? 'composite' : primitiveType;
+
   return {
     name: field.name,
-    type: field?.esTypes ? (field.esTypes[0] as RuntimeType) : ('keyword' as const),
+    type: editType,
     script: field.runtimeField ? field.runtimeField.script : undefined,
     customLabel: field.customLabel,
     popularity: field.count,
     format: dataView.getFormatterForFieldNoDefault(field.name)?.toJSON(),
+    fields: field.runtimeField?.fields,
   };
 };
 

@@ -20,6 +20,7 @@ export type {
   FieldSpec,
   DataViewAttributes,
   SavedObjectsClientCommon,
+  RuntimeField,
 } from '../common';
 export {
   DataViewField,

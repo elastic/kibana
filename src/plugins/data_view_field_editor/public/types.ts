@@ -17,8 +17,9 @@ import {
   DataViewsPublicPluginStart,
   FieldFormatsStart,
   RuntimeField,
-  RuntimeType,
   UsageCollectionStart,
+  RuntimeType,
+  SerializedFieldFormat,
 } from './shared_imports';
 
 /**
@@ -35,14 +36,27 @@ export interface PluginSetup {
  */
 export interface PluginStart {
   /**
-   * method to open the data view field editor fly-out
+   * Method to open the data view field editor fly-out
    */
   openEditor(options: OpenFieldEditorOptions): () => void;
+  /**
+   * Method to open the data view field delete fly-out
+   * @param options Configuration options for the fly-out
+   */
   openDeleteModal(options: OpenFieldDeleteModalOptions): () => void;
   fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
+  /**
+   * Convenience method for user permissions checks
+   */
   userPermissions: {
+    /**
+     * Whether the user has permission to edit data views
+     */
     editIndexPattern: () => boolean;
   };
+  /**
+   * Context provider for delete runtime field modal
+   */
   DeleteRuntimeFieldProvider: FunctionComponent<DeleteFieldProviderProps>;
 }
 
@@ -62,33 +76,21 @@ export type InternalFieldType = 'concrete' | 'runtime';
  * The data model for the field editor
  * @public
  */
-export interface Field {
+export interface Field extends RuntimeField {
   /**
    * name / path used for the field
    */
   name: FieldSpec['name'];
   /**
-   * ES type
+   * Name of parent field. Used for composite subfields
    */
-  type: RuntimeType;
-  /**
-   * source of the runtime field script
-   */
-  script?: RuntimeField['script'];
-  /**
-   * custom label for display
-   */
-  customLabel?: FieldSpec['customLabel'];
-  /**
-   * custom popularity
-   */
-  popularity?: number;
-  /**
-   * configuration of the field format
-   */
-  format?: FieldSpec['format'];
+  parentName?: string;
 }
 
+export interface FieldFormatConfig {
+  id: string;
+  params?: SerializedFieldFormat['params'];
+}
 export interface EsRuntimeField {
   type: RuntimeType | string;
   script?: {

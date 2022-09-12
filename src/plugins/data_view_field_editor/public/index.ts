@@ -26,7 +26,14 @@ export type {
   PluginStart as IndexPatternFieldEditorStart,
 } from './types';
 export { DefaultFormatEditor } from './components/field_format_editor/editors/default/default';
-export type { FieldFormatEditorFactory, FieldFormatEditor, FormatEditorProps } from './components';
+export type {
+  FieldFormatEditorFactory,
+  FieldFormatEditor,
+  DeleteFieldProviderProps,
+  FormatEditorProps,
+  FormatEditorState,
+  Sample,
+} from './components';
 
 export function plugin() {
   return new IndexPatternFieldEditorPlugin();
@@ -35,4 +42,4 @@ export function plugin() {
 // Expose types
 export type { FormatEditorServiceStart } from './service';
 export type { OpenFieldEditorOptions } from './open_editor';
-export type { OpenFieldDeleteModalOptions } from './open_delete_modal';
+export type { OpenFieldDeleteModalOptions, DeleteCompositeSubfield } from './open_delete_modal';
