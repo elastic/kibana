@@ -6,18 +6,25 @@
  * Side Public License, v 1.
  */
 
+import { QueryPointEventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 import { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { Dimension, prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
 import { LayerTypes, REFERENCE_LINE } from '../constants';
 import { strings } from '../i18n';
-import { CommonXYDataLayerConfig, CommonXYLayerConfig, ReferenceLineLayerConfig } from '../types';
+import {
+  CommonXYDataLayerConfig,
+  CommonXYLayerConfig,
+  ExpressionAnnotationResult,
+  ReferenceLineLayerConfig,
+} from '../types';
 
 export const logDatatables = (
   layers: CommonXYLayerConfig[],
   handlers: ExecutionContext,
   splitColumnAccessor?: string | ExpressionValueVisDimension,
-  splitRowAccessor?: string | ExpressionValueVisDimension
+  splitRowAccessor?: string | ExpressionValueVisDimension,
+  annotations?: ExpressionAnnotationResult
 ) => {
   if (!handlers?.inspectorAdapters?.tables) {
     return;
@@ -45,6 +52,29 @@ export const logDatatables = (
     const logTable = prepareLogTable(layer.table, layerDimensions, true);
     handlers.inspectorAdapters.tables.logDatatable(layer.layerId, logTable);
   });
+  if (annotations) {
+    annotations.layers.forEach((layer) => {
+      const layerDimensions: Dimension[] = [
+        [['label'], 'Label'],
+        [['time'], 'Time'],
+        [['skippedCount'], 'Skipped Count'],
+      ];
+      layer.annotations
+        .filter(
+          (a): a is QueryPointEventAnnotationOutput => a.type === 'query_point_event_annotation'
+        )
+        .forEach((annotation) => {
+          const dynamicDimensions: Dimension[] = [
+            ...(annotation.extraFields ? annotation.extraFields : []),
+            ...(annotation.textField ? [annotation.textField] : []),
+          ].map((f) => [[`field:${f}`], f]);
+          layerDimensions.push(...dynamicDimensions);
+        });
+
+      const logTable = prepareLogTable(annotations.datatable, layerDimensions, true);
+      handlers.inspectorAdapters.tables.logDatatable(layer.layerId, logTable);
+    });
+  }
 };
 
 export const logDatatable = (

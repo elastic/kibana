@@ -3073,6 +3073,7 @@ describe('XYChart component', () => {
     const createLayerWithAnnotations = (
       annotations: EventAnnotationOutput[] = [defaultLineStaticAnnotation]
     ): AnnotationLayerConfigResult => ({
+      layerId: 'annotations',
       type: 'annotationLayer',
       layerType: LayerTypes.ANNOTATIONS,
       annotations,

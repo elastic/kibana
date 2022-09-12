@@ -9,7 +9,7 @@
 import './annotations.scss';
 import './reference_lines/reference_lines.scss';
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { groupBy, snakeCase } from 'lodash';
 import {
   AnnotationDomainType,
@@ -137,7 +137,7 @@ const createCustomTooltipDetails =
           const extraFields = getExtraFields(firstElement, formatFactory, columns);
 
           return (
-            <div className="xyAnnotationTooltip__group">
+            <div className="xyAnnotationTooltip__group" key={firstElement.time}>
               <TooltipAnnotationHeader row={firstElement} />
               <EuiPanel
                 color="subdued"
@@ -147,7 +147,7 @@ const createCustomTooltipDetails =
                 hasBorder={true}
               >
                 {group.map((row, index) => (
-                  <>
+                  <Fragment key={`${row.id}-${row.time}`}>
                     {index > 0 && (
                       <>
                         <EuiSpacer size="xs" />
@@ -161,7 +161,7 @@ const createCustomTooltipDetails =
                       row={row}
                       extraFields={extraFields}
                     />
-                  </>
+                  </Fragment>
                 ))}
               </EuiPanel>
             </div>
