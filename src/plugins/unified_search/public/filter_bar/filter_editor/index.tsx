@@ -261,6 +261,14 @@ class FilterEditorUI extends Component<Props, State> {
   private renderFieldInput() {
     const { selectedIndexPattern, selectedField } = this.state;
     const fields = selectedIndexPattern ? getFilterableFields(selectedIndexPattern) : [];
+    const indexField = fields.find((f) => f.name === '_index');
+    if (indexField) {
+      fields.splice(
+        fields.findIndex((f) => f.name === '_index'),
+        1
+      );
+      fields.unshift(indexField);
+    }
 
     return (
       <EuiFormRow
@@ -280,7 +288,14 @@ class FilterEditorUI extends Component<Props, State> {
           })}
           options={fields}
           selectedOptions={selectedField ? [selectedField] : []}
-          getLabel={(field) => field.customLabel || field.name}
+          getLabel={(field) => {
+            if (field.name === '_index')
+              return this.props.intl.formatMessage({
+                id: 'unifiedSearch.filter.filterEditor.documentIndex',
+                defaultMessage: 'Document Index',
+              });
+            return field.customLabel || field.name;
+          }}
           onChange={this.onFieldChange}
           singleSelection={{ asPlainText: true }}
           isClearable={false}
