@@ -65,12 +65,14 @@ export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
   const cn = useMemo(() => classNames({ filesUploadFile: true }, className), [className]);
 
   return (
-    <div className={cn} style={style}>
+    <div data-test-subj="filesUploadFile" className={cn} style={style}>
       <EuiFormRow isInvalid={isInvalid} label={label} error={errorMessage}>
         <EuiFilePicker
           {...rest}
           ref={ref}
-          onChange={(files) => onChange(Array.from(files ?? []))}
+          onChange={(files) => {
+            onChange(Array.from(files ?? []));
+          }}
           multiple={false}
           initialPromptText={initialFilePromptText}
           isLoading={uploading}
@@ -88,23 +90,35 @@ export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
               disabled={done || uploading || !ready || isInvalid}
               onClick={onUpload}
               size="s"
+              data-test-subj="uploadButton"
             >
               {uploading ? i18nTexts.uploading : i18nTexts.upload}
             </EuiButton>
           )}
           {retry && (
-            <EuiButton disabled={done || uploading} onClick={onUpload} size="s">
+            <EuiButton
+              data-data-test-subj="retryButton"
+              disabled={done || uploading}
+              onClick={onUpload}
+              size="s"
+            >
               {i18nTexts.retry}
             </EuiButton>
           )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {uploading || !done || !allowClear ? (
-            <EuiButtonEmpty size="s" disabled={!uploading} onClick={onCancel} color="danger">
+            <EuiButtonEmpty
+              data-test-subj="cancelButton"
+              size="s"
+              disabled={!uploading}
+              onClick={onCancel}
+              color="danger"
+            >
               {i18nTexts.cancel}
             </EuiButtonEmpty>
           ) : (
-            <EuiButtonEmpty size="s" onClick={onClear} color="primary">
+            <EuiButtonEmpty data-test-subj="clearButton" size="s" onClick={onClear} color="primary">
               {i18nTexts.clear}
             </EuiButtonEmpty>
           )}

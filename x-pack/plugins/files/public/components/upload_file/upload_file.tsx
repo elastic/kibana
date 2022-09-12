@@ -6,7 +6,7 @@
  */
 
 import { EuiFilePicker } from '@elastic/eui';
-import React, { type FunctionComponent, useState, useRef, useEffect, useCallback } from 'react';
+import React, { type FunctionComponent, useState, useRef, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { FileKind } from '../../../common';
 import { FilesClient } from '../../types';
@@ -83,12 +83,6 @@ export const UploadFile: FunctionComponent<Props> = ({
     });
   }, [onDone, onError, uploadState, files, kindId]);
 
-  useEffect(() => {
-    if (immediate && files.length && !uploading && !hasErrors) {
-      upload();
-    }
-  }, [files, uploadState, upload, uploading, hasErrors, immediate]);
-
   return (
     <UploadFileUI
       ref={ref}
@@ -97,7 +91,10 @@ export const UploadFile: FunctionComponent<Props> = ({
         uploadState.abort();
         if (immediate) clearFiles();
       }}
-      onChange={uploadState.setFiles}
+      onChange={(fs) => {
+        uploadState.setFiles(fs);
+        if (immediate) upload();
+      }}
       ready={Boolean(files.length)}
       onClear={clearFiles}
       done={done}
