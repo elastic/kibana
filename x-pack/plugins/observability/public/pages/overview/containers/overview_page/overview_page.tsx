@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
+  EuiFlyoutSize,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
@@ -21,7 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
 
 import { calculateBucketSize } from './helpers';
@@ -38,10 +40,9 @@ import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
-import { useAlertIndexNames } from '../../../../hooks/use_alert_index_names';
+import { buildEsQuery } from '../../../../utils/build_es_query';
 import { getNewsFeed } from '../../../../services/get_news_feed';
 import { DataSections, LoadingObservability } from '../../components';
-import { AlertsTableTGrid } from '../../../alerts/containers/alerts_table_t_grid/alerts_table_t_grid';
 import { SectionContainer } from '../../../../components/app/section';
 import { ObservabilityAppServices } from '../../../../application/types';
 import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
@@ -51,7 +52,7 @@ import { ObservabilityStatusProgress } from '../../../../components/app/observab
 import { ObservabilityStatus } from '../../../../components/app/observability_status';
 import { useGuidedSetupProgress } from '../../../../hooks/use_guided_setup_progress';
 import { useObservabilityTourContext } from '../../../../components/shared/tour';
-import { CAPABILITIES_KEYS, ALERT_TABLE_STATE_STORAGE_KEY, ALERTS_PER_PAGE } from './constants';
+import { CAPABILITIES_KEYS, ALERTS_PER_PAGE, ALERTS_TABLE_ID } from './constants';
 
 export function OverviewPage() {
   const trackMetric = useUiTracker({ app: 'observability-overview' });
@@ -65,12 +66,13 @@ export function OverviewPage() {
     },
   ]);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [refreshNow, setRefreshNow] = useState<number>();
 
-  const indexNames = useAlertIndexNames();
   const {
     cases,
     http,
     application: { capabilities },
+    triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
   } = useKibana<ObservabilityAppServices>().services;
 
   const { ObservabilityPageTemplate } = usePluginContext();
@@ -94,10 +96,6 @@ export function OverviewPage() {
     [absoluteStart, absoluteEnd]
   );
 
-  const setRefetch = useCallback((ref) => {
-    refetch.current = ref;
-  }, []);
-
   const handleGuidedSetupClick = useCallback(() => {
     if (isGuidedSetupProgressDismissed) {
       trackMetric({ metric: 'guided_setup_view_details_after_dismiss' });
@@ -107,6 +105,7 @@ export function OverviewPage() {
   }, [trackMetric, isGuidedSetupProgressDismissed, hideGuidedSetupTour]);
 
   const onTimeRangeRefresh = useCallback(() => {
+    setRefreshNow(new Date().getTime());
     return refetch.current && refetch.current();
   }, []);
 
@@ -173,14 +172,24 @@ export function OverviewPage() {
                 permissions={userCasesPermissions}
                 features={{ alerts: { sync: false } }}
               >
-                <AlertsTableTGrid
-                  setRefetch={setRefetch}
-                  rangeFrom={relativeStart}
-                  rangeTo={relativeEnd}
-                  indexNames={indexNames}
-                  itemsPerPage={ALERTS_PER_PAGE}
-                  stateStorageKey={ALERT_TABLE_STATE_STORAGE_KEY}
-                  storage={new Storage(window.localStorage)}
+                <AlertsStateTable
+                  alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
+                  configurationId={AlertConsumers.OBSERVABILITY}
+                  id={ALERTS_TABLE_ID}
+                  flyoutSize={'s' as EuiFlyoutSize}
+                  featureIds={[
+                    AlertConsumers.APM,
+                    AlertConsumers.INFRASTRUCTURE,
+                    AlertConsumers.LOGS,
+                    AlertConsumers.UPTIME,
+                  ]}
+                  query={buildEsQuery({
+                    from: relativeStart,
+                    to: relativeEnd,
+                  })}
+                  showExpandToDetails={false}
+                  pageSize={ALERTS_PER_PAGE}
+                  refreshNow={refreshNow}
                 />
               </CasesContext>
             </SectionContainer>

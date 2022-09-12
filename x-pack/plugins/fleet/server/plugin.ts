@@ -37,6 +37,10 @@ import type {
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
@@ -100,6 +104,7 @@ import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';
 import { setupFleet } from './services/setup';
+import { BulkActionsResolver } from './services/agents';
 import type { PackagePolicyService } from './services/package_policy_service';
 import { PackagePolicyServiceImpl } from './services/package_policy';
 
@@ -111,6 +116,7 @@ export interface FleetSetupDeps {
   usageCollection?: UsageCollectionSetup;
   spaces: SpacesPluginStart;
   telemetry?: TelemetryPluginSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
 export interface FleetStartDeps {
@@ -120,6 +126,7 @@ export interface FleetStartDeps {
   security: SecurityPluginStart;
   telemetry?: TelemetryPluginStart;
   savedObjectsTagging: SavedObjectTaggingStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export interface FleetAppContext {
@@ -141,6 +148,7 @@ export interface FleetAppContext {
   logger?: Logger;
   httpSetup?: HttpServiceSetup;
   telemetryEventsSender: TelemetryEventsSender;
+  bulkActionsResolver: BulkActionsResolver;
 }
 
 export type FleetSetupContract = void;
@@ -205,6 +213,7 @@ export class FleetPlugin
   private encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   private readonly telemetryEventsSender: TelemetryEventsSender;
   private readonly fleetStatus$: BehaviorSubject<ServiceStatus>;
+  private bulkActionsResolver?: BulkActionsResolver;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -400,6 +409,7 @@ export class FleetPlugin
     }
 
     this.telemetryEventsSender.setup(deps.telemetry);
+    this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);
   }
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
@@ -424,10 +434,12 @@ export class FleetPlugin
       cloud: this.cloud,
       logger: this.logger,
       telemetryEventsSender: this.telemetryEventsSender,
+      bulkActionsResolver: this.bulkActionsResolver!,
     });
     licenseService.start(plugins.licensing.license$);
 
     this.telemetryEventsSender.start(plugins.telemetry, core);
+    this.bulkActionsResolver?.start(plugins.taskManager);
 
     const logger = appContextService.getLogger();
 

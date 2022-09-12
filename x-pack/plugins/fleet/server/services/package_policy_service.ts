@@ -21,8 +21,10 @@ import type {
   ListResult,
   UpgradePackagePolicyDryRunResponseItem,
 } from '../../common';
+import type { ExperimentalDataStreamFeature } from '../../common/types';
 import type { NewPackagePolicy, UpdatePackagePolicy, PackagePolicy } from '../types';
 import type { ExternalCallback } from '..';
+import type { NewPackagePolicyWithId } from './package_policy';
 
 export interface PackagePolicyService {
   asScoped(request: KibanaRequest): PackagePolicyClient;
@@ -50,9 +52,12 @@ export interface PackagePolicyClient {
   bulkCreate(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    packagePolicies: NewPackagePolicy[],
-    agentPolicyId: string,
-    options?: { user?: AuthenticatedUser; bumpRevision?: boolean }
+    packagePolicies: NewPackagePolicyWithId[],
+    options?: {
+      user?: AuthenticatedUser;
+      bumpRevision?: boolean;
+      force?: true;
+    }
   ): Promise<PackagePolicy[]>;
 
   get(soClient: SavedObjectsClientContract, id: string): Promise<PackagePolicy | null>;
@@ -143,5 +148,9 @@ export interface PackagePolicyClient {
   getUpgradePackagePolicyInfo(
     soClient: SavedObjectsClientContract,
     id: string
-  ): Promise<{ packagePolicy: PackagePolicy; packageInfo: PackageInfo }>;
+  ): Promise<{
+    packagePolicy: PackagePolicy;
+    packageInfo: PackageInfo;
+    experimentalDataStreamFeatures: ExperimentalDataStreamFeature[];
+  }>;
 }
