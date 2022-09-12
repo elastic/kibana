@@ -117,7 +117,9 @@ With PATH_TO_CONFIG and other options as follows.
 
     Group | PATH_TO_CONFIG
     ----- | --------------
-    anomaly detection | `test/functional/apps/ml/anomaly_detection/config.ts`
+    anomaly detection jobs | `test/functional/apps/ml/anomaly_detection_jobs/config.ts`
+    anomaly detection result views | `test/functional/apps/ml/anomaly_detection_result_views/config.ts`
+    anomaly detection integrations | `test/functional/apps/ml/anomaly_detection_integrations/config.ts`
     data frame analytics | `test/functional/apps/ml/data_frame_analytics/config.ts`
     data visualizer | `test/functional/apps/ml/data_visualizer/config.ts`
     permissions | `test/functional/apps/ml/permissions/config.ts`

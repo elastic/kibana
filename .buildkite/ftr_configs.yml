@@ -184,7 +184,9 @@ enabled:
   - x-pack/test/functional/apps/maps/group2/config.ts
   - x-pack/test/functional/apps/maps/group3/config.ts
   - x-pack/test/functional/apps/maps/group4/config.ts
-  - x-pack/test/functional/apps/ml/anomaly_detection/config.ts
+  - x-pack/test/functional/apps/ml/anomaly_detection_jobs/config.ts
+  - x-pack/test/functional/apps/ml/anomaly_detection_integrations/config.ts
+  - x-pack/test/functional/apps/ml/anomaly_detection_result_views/config.ts
   - x-pack/test/functional/apps/ml/data_frame_analytics/config.ts
   - x-pack/test/functional/apps/ml/data_visualizer/config.ts
   - x-pack/test/functional/apps/ml/permissions/config.ts
