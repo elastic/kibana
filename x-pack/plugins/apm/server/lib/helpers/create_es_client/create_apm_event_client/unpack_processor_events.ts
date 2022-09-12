@@ -15,9 +15,7 @@ const processorEventIndexMap = {
   [ProcessorEvent.transaction]: 'transaction',
   [ProcessorEvent.span]: 'span',
   [ProcessorEvent.metric]: 'metric',
-  [ProcessorEvent.error]: 'error',
-  // TODO: should have its own config setting
-  [ProcessorEvent.profile]: 'transaction',
+  [ProcessorEvent.error]: 'error'
 } as const;
 
 export function processorEventsToIndex(
