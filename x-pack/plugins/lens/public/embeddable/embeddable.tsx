@@ -103,6 +103,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   renderMode?: RenderMode;
   style?: React.CSSProperties;
   className?: string;
+  noPadding?: boolean;
   onBrushEnd?: (data: BrushTriggerEvent['data']) => void;
   onLoad?: (isLoading: boolean, adapters?: Partial<DefaultInspectorAdapters>) => void;
   onFilter?: (data: ClickTriggerEvent['data']) => void;
@@ -1016,6 +1017,17 @@ export class Embeddable
     ) {
       return;
     }
-    return this.deps.visualizationMap[this.savedVis.visualizationType].getDisplayOptions!();
+
+    let displayOptions =
+      this.deps.visualizationMap[this.savedVis.visualizationType].getDisplayOptions!();
+
+    if (this.input.noPadding !== undefined) {
+      displayOptions = {
+        ...displayOptions,
+        noPadding: this.input.noPadding,
+      };
+    }
+
+    return displayOptions;
   }
 }
