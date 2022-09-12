@@ -23,6 +23,7 @@ Options:
   --include-tag <tag>            Tags that suites must include to be run, can be included multiple times. 
   --exclude-tag <tag>            Tags that suites must NOT include to be run, can be included multiple times. 
   --assert-none-excluded         Exit with 1/0 based on if any test is excluded with the current set of tags. 
+  --logToFile                    Write the log output from Kibana/Elasticsearch to files instead of to stdout 
   --verbose                      Log everything. 
   --debug                        Run in debug mode. 
   --quiet                        Only log errors. 
@@ -40,6 +41,7 @@ Object {
   "esFrom": "snapshot",
   "esVersion": "999.999.999",
   "extraKbnOpts": undefined,
+  "logsDir": undefined,
   "suiteFiles": Object {
     "exclude": Array [],
     "include": Array [],
@@ -62,6 +64,7 @@ Object {
   "esFrom": "snapshot",
   "esVersion": "999.999.999",
   "extraKbnOpts": undefined,
+  "logsDir": undefined,
   "suiteFiles": Object {
     "exclude": Array [],
     "include": Array [],
@@ -85,6 +88,7 @@ Object {
   "esFrom": "snapshot",
   "esVersion": "999.999.999",
   "extraKbnOpts": undefined,
+  "logsDir": undefined,
   "suiteFiles": Object {
     "exclude": Array [],
     "include": Array [],
@@ -107,6 +111,7 @@ Object {
   "esFrom": "snapshot",
   "esVersion": "999.999.999",
   "extraKbnOpts": undefined,
+  "logsDir": undefined,
   "suiteFiles": Object {
     "exclude": Array [],
     "include": Array [],
@@ -133,6 +138,7 @@ Object {
   "extraKbnOpts": Object {
     "server.foo": "bar",
   },
+  "logsDir": undefined,
   "suiteFiles": Object {
     "exclude": Array [],
     "include": Array [],
@@ -154,6 +160,7 @@ Object {
   "esFrom": "snapshot",
   "esVersion": "999.999.999",
   "extraKbnOpts": undefined,
+  "logsDir": undefined,
   "quiet": true,
   "suiteFiles": Object {
     "exclude": Array [],
@@ -176,6 +183,7 @@ Object {
   "esFrom": "snapshot",
   "esVersion": "999.999.999",
   "extraKbnOpts": undefined,
+  "logsDir": undefined,
   "silent": true,
   "suiteFiles": Object {
     "exclude": Array [],
@@ -198,6 +206,7 @@ Object {
   "esFrom": "source",
   "esVersion": "999.999.999",
   "extraKbnOpts": undefined,
+  "logsDir": undefined,
   "suiteFiles": Object {
     "exclude": Array [],
     "include": Array [],
@@ -219,6 +228,7 @@ Object {
   "esFrom": "source",
   "esVersion": "999.999.999",
   "extraKbnOpts": undefined,
+  "logsDir": undefined,
   "suiteFiles": Object {
     "exclude": Array [],
     "include": Array [],
@@ -241,6 +251,7 @@ Object {
   "esVersion": "999.999.999",
   "extraKbnOpts": undefined,
   "installDir": "foo",
+  "logsDir": undefined,
   "suiteFiles": Object {
     "exclude": Array [],
     "include": Array [],
@@ -263,6 +274,7 @@ Object {
   "esVersion": "999.999.999",
   "extraKbnOpts": undefined,
   "grep": "management",
+  "logsDir": undefined,
   "suiteFiles": Object {
     "exclude": Array [],
     "include": Array [],
@@ -284,6 +296,7 @@ Object {
   "esFrom": "snapshot",
   "esVersion": "999.999.999",
   "extraKbnOpts": undefined,
+  "logsDir": undefined,
   "suiteFiles": Object {
     "exclude": Array [],
     "include": Array [],
@@ -306,6 +319,7 @@ Object {
   "esFrom": "snapshot",
   "esVersion": "999.999.999",
   "extraKbnOpts": undefined,
+  "logsDir": undefined,
   "suiteFiles": Object {
     "exclude": Array [],
     "include": Array [],
