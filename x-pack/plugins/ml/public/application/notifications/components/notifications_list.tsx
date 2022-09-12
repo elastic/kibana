@@ -80,6 +80,7 @@ export const NotificationsList: FC = () => {
       setIsLoading(true);
       const response = await mlApiServices.notifications.findMessages({
         size: pagination.pageSize,
+        from: pagination.pageIndex,
         sortField: sorting.sort!.field,
         sortDirection: sorting.sort!.direction,
         queryString: searchQueryText,

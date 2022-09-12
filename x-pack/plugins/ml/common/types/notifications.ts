@@ -11,6 +11,7 @@ export interface NotificationsQueryParams {
   level?: MessageLevel;
   type?: string;
   size?: number;
+  from?: number;
   sortField?: string;
   sortDirection?: string;
   queryString?: string;

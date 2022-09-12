@@ -21,6 +21,10 @@ export const getNotificationsQuerySchema = schema.object({
    */
   queryString: schema.maybe(schema.string()),
   /**
+   * Page numer, zero-indexed
+   */
+  from: schema.maybe(schema.number({ defaultValue: 0 })),
+  /**
    * Number of messages to return
    */
   size: schema.number({ defaultValue: 10 }),
