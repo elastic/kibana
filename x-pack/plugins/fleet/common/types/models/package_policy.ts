@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { RegistryRelease } from './epm';
+import type { RegistryRelease, ExperimentalDataStreamFeature } from './epm';
 
 export interface PackagePolicyPackage {
   name: string;
   title: string;
   version: string;
+  experimental_data_stream_features?: ExperimentalDataStreamFeature[];
 }
 
 export interface PackagePolicyConfigRecordEntry {
