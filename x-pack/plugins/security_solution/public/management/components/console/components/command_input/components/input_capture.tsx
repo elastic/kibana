@@ -78,6 +78,7 @@ export const InputCapture = memo<InputCaptureProps>(
           focusEleRef.current?.contains(selection.focusNode) &&
           focusEleRef.current?.contains(selection.anchorNode)
         ) {
+          selection.removeAllRanges();
           return selectionText;
         }
 
