@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { BUCKET_TYPES, IAggConfig, METRIC_TYPES, search } from '@kbn/data-plugin/public';
+import { BUCKET_TYPES, IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
+import { search } from '@kbn/data-plugin/public';
 import { Vis, VisToExpressionAstParams } from './types';
 import { SchemaConfig } from '../common/types';
+import { convertToSchemaConfigWithAccessor } from '../common';
 
 const { isDateHistogramBucketAggConfig } = search.aggs;
 
@@ -18,11 +20,6 @@ type SupportedAggregation = typeof SUPPORTED_AGGREGATIONS[number];
 
 function isSupportedAggType(name: string): name is SupportedAggregation {
   return SUPPORTED_AGGREGATIONS.includes(name as SupportedAggregation);
-}
-
-interface SchemaConfigParams {
-  precision?: number;
-  useGeocentroid?: boolean;
 }
 
 export interface Schemas {
@@ -40,60 +37,40 @@ export interface Schemas {
   [key: string]: any[] | undefined;
 }
 
+const updateDateHistogramParams = (
+  agg: IAggConfig,
+  { timeRange, timefilter }: VisToExpressionAstParams
+) => {
+  if (isDateHistogramBucketAggConfig(agg)) {
+    agg.params.timeRange = timeRange;
+    const bounds =
+      agg.params.timeRange && agg.fieldIsTimeField()
+        ? timefilter.calculateBounds(agg.params.timeRange)
+        : undefined;
+    agg.buckets.setBounds(bounds);
+    agg.buckets.setInterval(agg.params.interval);
+  }
+  return agg;
+};
+
+const createSchemaConfig = (
+  agg: IAggConfig,
+  accessor: number,
+  params: VisToExpressionAstParams
+): SchemaConfig => {
+  const aggType = agg.type.name;
+  if (!isSupportedAggType(aggType)) {
+    throw new Error(`Unsupported agg type: ${aggType}`);
+  }
+
+  const updatedAgg = updateDateHistogramParams(agg, params);
+  return convertToSchemaConfigWithAccessor(updatedAgg, accessor);
+};
+
 export const getVisSchemas = <TVisParams>(
   vis: Vis<TVisParams>,
-  { timeRange, timefilter }: VisToExpressionAstParams
+  params: VisToExpressionAstParams
 ): Schemas => {
-  const createSchemaConfig = (accessor: number, agg: IAggConfig): SchemaConfig => {
-    const aggType = agg.type.name;
-    if (!isSupportedAggType(aggType)) {
-      throw new Error(`Unsupported agg type: ${aggType}`);
-    }
-    if (isDateHistogramBucketAggConfig(agg)) {
-      agg.params.timeRange = timeRange;
-      const bounds =
-        agg.params.timeRange && agg.fieldIsTimeField()
-          ? timefilter.calculateBounds(agg.params.timeRange)
-          : undefined;
-      agg.buckets.setBounds(bounds);
-      agg.buckets.setInterval(agg.params.interval);
-    }
-
-    const hasSubAgg = [
-      'derivative',
-      'moving_avg',
-      'serial_diff',
-      'cumulative_sum',
-      'sum_bucket',
-      'avg_bucket',
-      'min_bucket',
-      'max_bucket',
-    ].includes(aggType);
-
-    const formatAgg = hasSubAgg
-      ? agg.params.customMetric || agg.aggConfigs.getRequestAggById(agg.params.metricAgg)
-      : agg;
-
-    const params: SchemaConfigParams = {};
-
-    if (aggType === 'geohash_grid') {
-      params.precision = agg.params.precision;
-      params.useGeocentroid = agg.params.useGeocentroid;
-    }
-
-    const label = agg.makeLabel && agg.makeLabel();
-
-    return {
-      accessor,
-      format: formatAgg.toSerializedFieldFormat(),
-      params,
-      label,
-      aggType,
-      aggId: agg.id,
-      aggParams: agg.params,
-    };
-  };
-
   let cnt = 0;
   const schemas: Schemas = {
     metric: [],
@@ -126,11 +103,11 @@ export const getVisSchemas = <TVisParams>(
       schemas[schemaName] = [];
     }
     if (!isHierarchical || agg.type.type !== 'metrics') {
-      schemas[schemaName]!.push(createSchemaConfig(cnt++, agg));
+      schemas[schemaName]!.push(createSchemaConfig(agg, cnt++, params));
     }
     if (isHierarchical && (agg.type.type !== 'metrics' || metrics.length === responseAggs.length)) {
       metrics.forEach((metric: any) => {
-        const schemaConfig = createSchemaConfig(cnt++, metric);
+        const schemaConfig = createSchemaConfig(metric, cnt++, params);
         if (!skipMetrics) {
           schemas.metric.push(schemaConfig);
         }

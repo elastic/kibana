@@ -7,13 +7,13 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
-import { SchemaConfig } from '../../..';
+import { BaseSchemaConfig } from '../../..';
 import { FormulaColumn } from '../../types';
 import { getFormat, createFormulaColumn } from '../convert';
 import { getFormulaForAgg } from './formula';
 
-export const getPercentageColumnFormulaColumn = (agg: SchemaConfig): FormulaColumn | null => {
-  const metricFormula = getFormulaForAgg(agg as SchemaConfig<METRIC_TYPES>);
+export const getPercentageColumnFormulaColumn = (agg: BaseSchemaConfig): FormulaColumn | null => {
+  const metricFormula = getFormulaForAgg(agg as BaseSchemaConfig<METRIC_TYPES>);
   if (!metricFormula) {
     return null;
   }

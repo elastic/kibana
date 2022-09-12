@@ -10,7 +10,7 @@ import { isEqual, omit } from 'lodash';
 import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { DataViewFieldBase } from '@kbn/es-query';
-import { SchemaConfig } from '../../types';
+import { BaseSchemaConfig } from '../../types';
 import { Column } from '../types';
 import {
   MetricsWithoutSpecialParams,
@@ -20,13 +20,13 @@ import {
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
-export const getLabel = (agg: SchemaConfig) => {
+export const getLabel = (agg: BaseSchemaConfig) => {
   return agg.aggParams && 'customLabel' in agg.aggParams
     ? agg.aggParams.customLabel ?? agg.label
     : agg.label;
 };
 
-export const getLabelForPercentile = (agg: SchemaConfig) => {
+export const getLabelForPercentile = (agg: BaseSchemaConfig) => {
   return agg.aggParams && 'customLabel' in agg.aggParams && agg.aggParams.customLabel !== ''
     ? agg.label
     : '';
@@ -62,8 +62,8 @@ export const getFieldNameFromField = (
   return field.name;
 };
 
-export const isSchemaConfig = (agg: SchemaConfig | IAggConfig): agg is SchemaConfig => {
-  if ((agg as SchemaConfig).aggType) {
+export const isSchemaConfig = (agg: BaseSchemaConfig | IAggConfig): agg is BaseSchemaConfig => {
+  if ((agg as BaseSchemaConfig).aggType) {
     return true;
   }
   return false;
@@ -103,47 +103,49 @@ const AGGS_WITHOUT_SPECIAL_RARAMS: string[] = [
 const PIPELINE_AGGS: string[] = [...SIBBLING_PIPELINE_AGGS, ...PARENT_PIPELINE_AGGS];
 
 export const isSiblingPipeline = (
-  metric: SchemaConfig
-): metric is SchemaConfig<SiblingPipelineMetric> => {
+  metric: BaseSchemaConfig
+): metric is BaseSchemaConfig<SiblingPipelineMetric> => {
   return SIBBLING_PIPELINE_AGGS.includes(metric.aggType);
 };
 
 export const isPipeline = (
-  metric: SchemaConfig
+  metric: BaseSchemaConfig
 ): metric is
-  | SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>
-  | SchemaConfig<METRIC_TYPES.DERIVATIVE>
-  | SchemaConfig<METRIC_TYPES.MOVING_FN>
-  | SchemaConfig<METRIC_TYPES.AVG_BUCKET>
-  | SchemaConfig<METRIC_TYPES.MAX_BUCKET>
-  | SchemaConfig<METRIC_TYPES.MIN_BUCKET>
-  | SchemaConfig<METRIC_TYPES.SUM_BUCKET> => {
+  | BaseSchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>
+  | BaseSchemaConfig<METRIC_TYPES.DERIVATIVE>
+  | BaseSchemaConfig<METRIC_TYPES.MOVING_FN>
+  | BaseSchemaConfig<METRIC_TYPES.AVG_BUCKET>
+  | BaseSchemaConfig<METRIC_TYPES.MAX_BUCKET>
+  | BaseSchemaConfig<METRIC_TYPES.MIN_BUCKET>
+  | BaseSchemaConfig<METRIC_TYPES.SUM_BUCKET> => {
   return PIPELINE_AGGS.includes(metric.aggType);
 };
 
 export const isMetricAggWithoutParams = (
-  metric: SchemaConfig
-): metric is SchemaConfig<MetricsWithoutSpecialParams> => {
+  metric: BaseSchemaConfig
+): metric is BaseSchemaConfig<MetricsWithoutSpecialParams> => {
   return AGGS_WITHOUT_SPECIAL_RARAMS.includes(metric.aggType);
 };
 
 export const isPercentileAgg = (
-  metric: SchemaConfig
-): metric is SchemaConfig<METRIC_TYPES.PERCENTILES> => {
+  metric: BaseSchemaConfig
+): metric is BaseSchemaConfig<METRIC_TYPES.PERCENTILES> => {
   return metric.aggType === METRIC_TYPES.PERCENTILES;
 };
 
 export const isPercentileRankAgg = (
-  metric: SchemaConfig
-): metric is SchemaConfig<METRIC_TYPES.PERCENTILE_RANKS> => {
+  metric: BaseSchemaConfig
+): metric is BaseSchemaConfig<METRIC_TYPES.PERCENTILE_RANKS> => {
   return metric.aggType === METRIC_TYPES.PERCENTILE_RANKS;
 };
 
-export const isStdDevAgg = (metric: SchemaConfig): metric is SchemaConfig<METRIC_TYPES.STD_DEV> => {
+export const isStdDevAgg = (
+  metric: BaseSchemaConfig
+): metric is BaseSchemaConfig<METRIC_TYPES.STD_DEV> => {
   return metric.aggType === METRIC_TYPES.STD_DEV;
 };
 
-export const getCutomBucketsFromSiblingAggs = (metrics: SchemaConfig[]) => {
+export const getCutomBucketsFromSiblingAggs = (metrics: BaseSchemaConfig[]) => {
   return metrics.reduce<IAggConfig[]>((acc, metric) => {
     if (
       isSiblingPipeline(metric) &&

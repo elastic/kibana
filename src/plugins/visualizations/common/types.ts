@@ -72,3 +72,8 @@ export interface SchemaConfig<Agg extends SupportedAggregation = SupportedAggreg
   aggId?: string;
   aggParams?: AggParamsMapping[Agg];
 }
+
+export type BaseSchemaConfig<Agg extends SupportedAggregation = SupportedAggregation> = Omit<
+  SchemaConfig<Agg>,
+  'accessor'
+>;

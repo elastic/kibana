@@ -9,7 +9,7 @@
 import { convertMetricToColumns } from '../metrics';
 import { CommonColumnConverterArgs, SiblingPipelineMetric } from './types';
 import { Column } from '../../types';
-import { convertToSchemaConfig } from '../agg';
+import { convertToSchemaConfig } from '../../../vis_schemas';
 
 export const convertToSiblingPipelineColumns = (
   columnConverterArgs: CommonColumnConverterArgs<SiblingPipelineMetric>,

@@ -8,7 +8,7 @@
 
 import { BUCKET_TYPES, METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { SchemaConfig } from '../../..';
+import { BaseSchemaConfig } from '../../..';
 import {
   convertMetricAggregationColumnWithoutSpecialParams,
   MetricsWithoutSpecialParams,
@@ -26,7 +26,7 @@ import { Column } from '../../types';
 import { getValidColumns } from '../utils';
 
 export const convertMetricToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
-  agg: SchemaConfig<T>,
+  agg: BaseSchemaConfig<T>,
   dataView: DataView
 ): Column[] | null => {
   const supportedAgg = SUPPORTED_METRICS[agg.aggType];
@@ -44,28 +44,28 @@ export const convertMetricToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
     case METRIC_TYPES.VALUE_COUNT:
     case METRIC_TYPES.MEDIAN: {
       const columns = convertMetricAggregationColumnWithoutSpecialParams(supportedAgg, {
-        agg: agg as SchemaConfig<MetricsWithoutSpecialParams>,
+        agg: agg as BaseSchemaConfig<MetricsWithoutSpecialParams>,
         dataView,
       });
       return getValidColumns(columns);
     }
     case METRIC_TYPES.STD_DEV: {
       const columns = convertToStdDeviationFormulaColumns({
-        agg: agg as SchemaConfig<METRIC_TYPES.STD_DEV>,
+        agg: agg as BaseSchemaConfig<METRIC_TYPES.STD_DEV>,
         dataView,
       });
       return getValidColumns(columns);
     }
     case METRIC_TYPES.PERCENTILES: {
       const columns = convertToPercentileColumn({
-        agg: agg as SchemaConfig<METRIC_TYPES.PERCENTILES>,
+        agg: agg as BaseSchemaConfig<METRIC_TYPES.PERCENTILES>,
         dataView,
       });
       return getValidColumns(columns);
     }
     case METRIC_TYPES.PERCENTILE_RANKS: {
       const columns = convertToPercentileRankColumn({
-        agg: agg as SchemaConfig<METRIC_TYPES.PERCENTILE_RANKS>,
+        agg: agg as BaseSchemaConfig<METRIC_TYPES.PERCENTILE_RANKS>,
         dataView,
       });
       return getValidColumns(columns);
@@ -73,7 +73,9 @@ export const convertMetricToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
     case METRIC_TYPES.TOP_HITS:
     case METRIC_TYPES.TOP_METRICS: {
       const columns = convertToLastValueColumn({
-        agg: agg as SchemaConfig<METRIC_TYPES.TOP_HITS> | SchemaConfig<METRIC_TYPES.TOP_METRICS>,
+        agg: agg as
+          | BaseSchemaConfig<METRIC_TYPES.TOP_HITS>
+          | BaseSchemaConfig<METRIC_TYPES.TOP_METRICS>,
         dataView,
       });
       return getValidColumns(columns);
@@ -82,7 +84,7 @@ export const convertMetricToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
     case METRIC_TYPES.DERIVATIVE:
     case METRIC_TYPES.MOVING_FN: {
       const columns = convertToParentPipelineAggColumns({
-        agg: agg as SchemaConfig<ParentPipelineMetric>,
+        agg: agg as BaseSchemaConfig<ParentPipelineMetric>,
         dataView,
       });
       return getValidColumns(columns);
@@ -92,7 +94,7 @@ export const convertMetricToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
     case METRIC_TYPES.MAX_BUCKET:
     case METRIC_TYPES.AVG_BUCKET: {
       const columns = convertToSiblingPipelineColumns({
-        agg: agg as SchemaConfig<SiblingPipelineMetric>,
+        agg: agg as BaseSchemaConfig<SiblingPipelineMetric>,
         dataView,
       });
       return getValidColumns(columns);

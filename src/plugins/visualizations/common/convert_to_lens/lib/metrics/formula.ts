@@ -7,7 +7,7 @@
  */
 
 import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
-import { SchemaConfig } from '../../..';
+import { BaseSchemaConfig } from '../../..';
 import { Operations } from '../../constants';
 import { isMetricWithField, getStdDeviationFormula } from '../convert';
 import { getFormulaFromMetric, SUPPORTED_METRICS } from '../convert/supported_metrics';
@@ -40,7 +40,7 @@ const METRIC_AGGS_WITHOUT_PARAMS: string[] = [
 ];
 
 const getFormulaForAggsWithoutParams = (
-  agg: IAggConfig | SchemaConfig<METRIC_TYPES>,
+  agg: IAggConfig | BaseSchemaConfig<METRIC_TYPES>,
   selector: string,
   reducedTimeRange?: string
 ) => {
@@ -55,7 +55,7 @@ const getFormulaForAggsWithoutParams = (
 };
 
 const getFormulaForPercentileRanks = (
-  agg: IAggConfig | SchemaConfig<METRIC_TYPES.PERCENTILE_RANKS>,
+  agg: IAggConfig | BaseSchemaConfig<METRIC_TYPES.PERCENTILE_RANKS>,
   selector: string,
   reducedTimeRange?: string
 ) => {
@@ -71,7 +71,7 @@ const getFormulaForPercentileRanks = (
 };
 
 const getFormulaForPercentile = (
-  agg: IAggConfig | SchemaConfig<METRIC_TYPES.PERCENTILES>,
+  agg: IAggConfig | BaseSchemaConfig<METRIC_TYPES.PERCENTILES>,
   selector: string,
   reducedTimeRange?: string
 ) => {
@@ -111,13 +111,13 @@ const getFormulaForSubMetric = (agg: IAggConfig, reducedTimeRange?: string): str
 
 export const getFormulaForPipelineAgg = (
   agg:
-    | SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>
-    | SchemaConfig<METRIC_TYPES.DERIVATIVE>
-    | SchemaConfig<METRIC_TYPES.MOVING_FN>
-    | SchemaConfig<METRIC_TYPES.AVG_BUCKET>
-    | SchemaConfig<METRIC_TYPES.MAX_BUCKET>
-    | SchemaConfig<METRIC_TYPES.MIN_BUCKET>
-    | SchemaConfig<METRIC_TYPES.SUM_BUCKET>
+    | BaseSchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>
+    | BaseSchemaConfig<METRIC_TYPES.DERIVATIVE>
+    | BaseSchemaConfig<METRIC_TYPES.MOVING_FN>
+    | BaseSchemaConfig<METRIC_TYPES.AVG_BUCKET>
+    | BaseSchemaConfig<METRIC_TYPES.MAX_BUCKET>
+    | BaseSchemaConfig<METRIC_TYPES.MIN_BUCKET>
+    | BaseSchemaConfig<METRIC_TYPES.SUM_BUCKET>
     | IAggConfig,
   reducedTimeRange?: string
 ) => {
@@ -169,7 +169,7 @@ export const getFormulaForPipelineAgg = (
   return subFormula;
 };
 
-export const getFormulaForAgg = (agg: SchemaConfig<METRIC_TYPES>) => {
+export const getFormulaForAgg = (agg: BaseSchemaConfig<METRIC_TYPES>) => {
   if (isPipeline(agg)) {
     return getFormulaForPipelineAgg(agg);
   }

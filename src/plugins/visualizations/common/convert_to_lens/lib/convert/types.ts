@@ -8,7 +8,7 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { SupportedAggregation } from '../../../types';
+import { BaseSchemaConfig, SupportedAggregation } from '../../../types';
 import {
   Operation,
   BaseColumn as GenericBaseColumn,
@@ -20,8 +20,6 @@ import {
   TermsColumn,
   FiltersColumn,
 } from '../../types';
-
-import { SchemaConfig } from '../../../types';
 
 export type MetricsWithField = Exclude<
   METRIC_TYPES,
@@ -52,7 +50,7 @@ export type BucketColumn = DateHistogramColumn | TermsColumn | FiltersColumn;
 export interface CommonColumnConverterArgs<
   Agg extends SupportedAggregation = SupportedAggregation
 > {
-  agg: SchemaConfig<Agg>;
+  agg: BaseSchemaConfig<Agg>;
   dataView: DataView;
 }
 

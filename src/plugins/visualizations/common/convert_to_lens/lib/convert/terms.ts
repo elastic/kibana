@@ -11,7 +11,7 @@ import { AggParamsTerms } from '@kbn/data-plugin/common';
 import uuid from 'uuid';
 import { Column, DataType, TermsColumn, TermsParams } from '../../types';
 import { getFieldNameFromField, isColumnWithMeta } from '../utils';
-import { convertToSchemaConfig } from '../agg';
+import { convertToSchemaConfig } from '../../../vis_schemas';
 import { convertMetricToColumns } from '../metrics';
 
 interface OrderByWithAgg {
