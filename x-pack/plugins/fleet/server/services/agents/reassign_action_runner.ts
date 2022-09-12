@@ -59,32 +59,17 @@ export async function reassignBatch(
 
   const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
 
-  // which are allowed to unenroll
-  const agentResults = await Promise.allSettled(
-    givenAgents.map(async (agent, index) => {
-      if (agent.policy_id === options.newAgentPolicyId) {
-        throw new AgentReassignmentError(
-          `${agent.id} is already assigned to ${options.newAgentPolicyId}`
-        );
-      }
-
-      if (isHostedAgent(hostedPolicies, agent)) {
-        throw new HostedAgentPolicyRestrictionRelatedError(
-          `Cannot reassign an agent from hosted agent policy ${agent.policy_id}`
-        );
-      }
-
-      return agent;
-    })
-  );
-
-  // Filter to agents that do not already use the new agent policy ID
-  const agentsToUpdate = agentResults.reduce<Agent[]>((agents, result, index) => {
-    if (result.status === 'fulfilled') {
-      agents.push(result.value);
+  const agentsToUpdate = givenAgents.reduce<Agent[]>((agents, agent) => {
+    if (agent.policy_id === options.newAgentPolicyId) {
+      errors[agent.id] = new AgentReassignmentError(
+        `${agent.id} is already assigned to ${options.newAgentPolicyId}`
+      );
+    } else if (isHostedAgent(hostedPolicies, agent)) {
+      errors[agent.id] = new HostedAgentPolicyRestrictionRelatedError(
+        `Cannot reassign an agent from hosted agent policy ${agent.policy_id}`
+      );
     } else {
-      const id = givenAgents[index].id;
-      errors[id] = result.reason;
+      agents.push(agent);
     }
     return agents;
   }, []);

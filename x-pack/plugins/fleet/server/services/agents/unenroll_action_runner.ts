@@ -61,10 +61,9 @@ export async function unenrollBatch(
   // And which are allowed to unenroll
   const agentsToUpdate = options.force
     ? agentsEnrolled
-    : agentsEnrolled.reduce<Agent[]>((agents, agent, index) => {
+    : agentsEnrolled.reduce<Agent[]>((agents, agent) => {
         if (isHostedAgent(hostedPolicies, agent)) {
-          const id = givenAgents[index].id;
-          outgoingErrors[id] = new HostedAgentPolicyRestrictionRelatedError(
+          outgoingErrors[agent.id] = new HostedAgentPolicyRestrictionRelatedError(
             `Cannot unenroll ${agent.id} from a hosted agent policy ${agent.policy_id}`
           );
         } else {
