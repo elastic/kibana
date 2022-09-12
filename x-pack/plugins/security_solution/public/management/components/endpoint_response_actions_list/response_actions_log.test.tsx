@@ -488,7 +488,7 @@ describe('Response Actions Log', () => {
       expect(filterList.querySelectorAll('ul>li').length).toEqual(5);
       expect(
         Array.from(filterList.querySelectorAll('ul>li')).map((option) => option.textContent)
-      ).toEqual(['isolate', 'release', 'kill-process', 'suspend-process', 'running-processes']);
+      ).toEqual(['isolate', 'release', 'kill-process', 'suspend-process', 'processes']);
     });
 
     it('should have `clear all` button `disabled` when no selected values', () => {

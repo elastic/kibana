@@ -1686,19 +1686,25 @@ paths:
                 required:
                   - item
       requestBody:
+        description: >-
+          You should use inputs as an object and not use the deprecated inputs
+          array.
         content:
           application/json:
             schema:
-              allOf:
-                - $ref: '#/components/schemas/new_package_policy'
-                - type: object
-                  properties:
-                    id:
-                      type: string
-                - type: object
-                  properties:
-                    force:
-                      type: boolean
+              oneOf:
+                - $ref: '#/components/schemas/simplified_package_policy'
+                - deprecated: true
+                  allOf:
+                    - $ref: '#/components/schemas/new_package_policy'
+                    - type: object
+                      properties:
+                        id:
+                          type: string
+                    - type: object
+                      properties:
+                        force:
+                          type: boolean
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
   /package_policies/_bulk_get:
@@ -1884,15 +1890,17 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  item:
-                    $ref: '#/components/schemas/package_policy'
-                  sucess:
-                    type: boolean
-                required:
-                  - item
-                  - sucess
+                oneOf:
+                  - $ref: '#/components/schemas/simplified_package_policy'
+                  - type: object
+                    properties:
+                      item:
+                        $ref: '#/components/schemas/package_policy'
+                      sucess:
+                        type: boolean
+                    required:
+                      - item
+                      - sucess
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
     delete:
@@ -2727,6 +2735,53 @@ components:
         - online
         - inactive
         - warning
+    agent_component_status:
+      title: Agent component status
+      type: string
+      enum:
+        - starting
+        - configuring
+        - healthy
+        - degraded
+        - failed
+        - stopping
+        - stopped
+    agent_component_unit_type:
+      title: Agent component unit type
+      type: string
+      enum:
+        - input
+        - output
+    agent_component_unit:
+      title: Agent component unit
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          $ref: '#/components/schemas/agent_component_unit_type'
+        status:
+          $ref: '#/components/schemas/agent_component_status'
+        message:
+          type: string
+        payload:
+          type: object
+    agent_component:
+      title: Agent component
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        status:
+          $ref: '#/components/schemas/agent_component_status'
+        message:
+          type: string
+        units:
+          type: array
+          items:
+            $ref: '#/components/schemas/agent_component_unit'
     agent:
       title: Agent
       type: object
@@ -2763,6 +2818,10 @@ components:
           $ref: '#/components/schemas/agent_status'
         default_api_key:
           type: string
+        components:
+          type: array
+          items:
+            $ref: '#/components/schemas/agent_component'
       required:
         - type
         - active
@@ -3062,6 +3121,83 @@ components:
         - api_key
         - active
         - created_at
+    simplified_package_policy:
+      title: Simplified Package Policy
+      type: object
+      properties:
+        id:
+          type: string
+          description: Package policy unique identifier
+        name:
+          type: string
+          description: Package policy name (should be unique)
+        description:
+          type: string
+          description: Package policy description
+        namespace:
+          type: string
+          description: namespace by default "default"
+        policy_id:
+          type: string
+          description: Agent policy ID where that package policy will be added
+        package:
+          type: object
+          properties:
+            name:
+              type: string
+              description: Package name
+            version:
+              type: string
+              description: Package version
+          required:
+            - name
+            - version
+        vars:
+          type: object
+          description: >-
+            Package root level variable (see integration documentation for more
+            information)
+        inputs:
+          type: object
+          description: >-
+            Package policy inputs (see integration documentation to know what
+            inputs are available)
+          additionalProperties:
+            type: object
+            properties:
+              enabled:
+                type: boolean
+                description: enable or disable that input, (default to true)
+              vars:
+                type: object
+                description: >-
+                  Input level variable (see integration documentation for more
+                  information)
+              streams:
+                type: object
+                description: >-
+                  Input streams (see integration documentation to know what
+                  streams are available)
+                additionalProperties:
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                      description: enable or disable that stream, (default to true)
+                    vars:
+                      type: object
+                      description: >-
+                        Stream level variable (see integration documentation for
+                        more information)
+        force:
+          type: boolean
+          description: >-
+            Force package policy creation even if package is not verified, or if
+            the agent policy is managed.
+      required:
+        - name
+        - policy_id
+        - package
     upgrade_diff:
       title: Package policy Upgrade dryrun
       type: array
