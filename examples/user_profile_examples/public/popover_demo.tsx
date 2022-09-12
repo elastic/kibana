@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { FunctionComponent, useState } from 'react';
-import { EuiButtonEmpty, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFilterGroup, EuiFilterButton, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { UserProfilesPopover, UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { PanelWithCodeBlock } from './panel_with_code_block';
 
@@ -121,25 +121,33 @@ export const PopoverDemo: FunctionComponent = () => {
         <h3>Unassigned option</h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <UserProfilesPopover
-        button={
-          <EuiButtonEmpty iconType="userAvatar" onClick={() => setIsOpen2((value) => !value)}>
-            Filter by assignee
-          </EuiButtonEmpty>
-        }
-        isOpen={isOpen2}
-        closePopover={() => setIsOpen2(false)}
-        selectableProps={{
-          selectedOptions: selectedOptions2,
-          options: options2,
-          onChange: setSelectedOptions2,
-          height: 32 * 8,
-          nullOptionLabel: 'Unassigned',
-        }}
-        panelStyle={{
-          width: 32 * 16,
-        }}
-      />
+      <EuiFilterGroup>
+        <UserProfilesPopover
+          button={
+            <EuiFilterButton
+              iconType="arrowDown"
+              numFilters={options2.length}
+              hasActiveFilters={selectedOptions2.length > 0}
+              numActiveFilters={selectedOptions2.length}
+              onClick={() => setIsOpen2((value) => !value)}
+            >
+              Assignees
+            </EuiFilterButton>
+          }
+          isOpen={isOpen2}
+          closePopover={() => setIsOpen2(false)}
+          selectableProps={{
+            selectedOptions: selectedOptions2,
+            options: options2,
+            onChange: setSelectedOptions2,
+            height: 32 * 8,
+            nullOptionLabel: 'Unassigned',
+          }}
+          panelStyle={{
+            width: 32 * 16,
+          }}
+        />
+      </EuiFilterGroup>
     </PanelWithCodeBlock>
   );
 };
