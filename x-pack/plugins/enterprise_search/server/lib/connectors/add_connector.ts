@@ -8,9 +8,13 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import { CONNECTORS_INDEX } from '../..';
+import { CONNECTORS_VERSION } from '../..';
 import { ConnectorDocument, ConnectorStatus } from '../../../common/types/connectors';
 import { ErrorCode } from '../../../common/types/error_codes';
-import { setupConnectorsIndices } from '../../index_management/setup_indices';
+import {
+  DefaultConnectorsPipelineMeta,
+  setupConnectorsIndices,
+} from '../../index_management/setup_indices';
 
 import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 import { createIndex } from '../indices/create_index';
@@ -67,6 +71,19 @@ export const addConnector = async (
     service_type?: string | null;
   }
 ): Promise<{ id: string; index_name: string }> => {
+  const connectorsIndexExists = await client.asCurrentUser.indices.exists({
+    index: CONNECTORS_INDEX,
+  });
+  if (!connectorsIndexExists) {
+    await setupConnectorsIndices(client.asCurrentUser);
+  }
+  const connectorsIndicesMapping = await client.asCurrentUser.indices.getMapping({
+    index: CONNECTORS_INDEX,
+  });
+  const connectorsPipelineMeta: DefaultConnectorsPipelineMeta =
+    connectorsIndicesMapping[`${CONNECTORS_INDEX}-v${CONNECTORS_VERSION}`]?.mappings?._meta
+      ?.pipeline;
+
   const document: ConnectorDocument = {
     api_key_id: null,
     configuration: {},
@@ -78,16 +95,18 @@ export const addConnector = async (
     last_sync_status: null,
     last_synced: null,
     name: input.index_name.startsWith('search-') ? input.index_name.substring(7) : input.index_name,
+    pipeline: connectorsPipelineMeta
+      ? {
+          extract_binary_content: connectorsPipelineMeta.default_extract_binary_content,
+          name: connectorsPipelineMeta.default_name,
+          reduce_whitespace: connectorsPipelineMeta.default_reduce_whitespace,
+          run_ml_inference: connectorsPipelineMeta.default_run_ml_inference,
+        }
+      : null,
     scheduling: { enabled: false, interval: '0 0 0 * * ?' },
     service_type: input.service_type || null,
     status: ConnectorStatus.CREATED,
     sync_now: false,
   };
-  const connectorsIndexExists = await client.asCurrentUser.indices.exists({
-    index: CONNECTORS_INDEX,
-  });
-  if (!connectorsIndexExists) {
-    await setupConnectorsIndices(client.asCurrentUser);
-  }
   return await createConnector(document, client, input.language, !!input.delete_existing_connector);
 };

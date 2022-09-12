@@ -18,10 +18,7 @@ import { getUserRiskScoreColumns } from './columns';
 import * as i18nUsers from '../../pages/translations';
 import * as i18n from './translations';
 import { usersModel, usersSelectors, usersActions } from '../../store';
-import type {
-  UserRiskScoreFields,
-  UserRiskScoreItem,
-} from '../../../../common/search_strategy/security_solution/users/common';
+import type { UserRiskScoreItem } from '../../../../common/search_strategy/security_solution/users/common';
 import type { SeverityCount } from '../../../common/components/severity/types';
 import { SeverityBadges } from '../../../common/components/severity/severity_badges';
 import { SeverityBar } from '../../../common/components/severity/severity_bar';
@@ -29,9 +26,10 @@ import { SeverityFilterGroup } from '../../../common/components/severity/severit
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import type { State } from '../../../common/store';
 import type {
+  RiskScoreFields,
   RiskScoreSortField,
   RiskSeverity,
-  UsersRiskScore,
+  UserRiskScore,
 } from '../../../../common/search_strategy';
 
 const IconWrapper = styled.span`
@@ -52,7 +50,7 @@ export const rowItems: ItemsPerRow[] = [
 const tableType = usersModel.UsersTableType.risk;
 
 interface UserRiskScoreTableProps {
-  data: UsersRiskScore[];
+  data: UserRiskScore[];
   id: string;
   isInspect: boolean;
   loading: boolean;
@@ -64,9 +62,9 @@ interface UserRiskScoreTableProps {
 }
 
 export type UserRiskScoreColumns = [
-  Columns<UserRiskScoreItem[UserRiskScoreFields.userName]>,
-  Columns<UserRiskScoreItem[UserRiskScoreFields.riskScore]>,
-  Columns<UserRiskScoreItem[UserRiskScoreFields.risk]>
+  Columns<UserRiskScoreItem[RiskScoreFields.userName]>,
+  Columns<UserRiskScoreItem[RiskScoreFields.userRiskScore]>,
+  Columns<UserRiskScoreItem[RiskScoreFields.userRisk]>
 ];
 
 const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
@@ -170,7 +168,7 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
   );
 
   const getUserRiskScoreFilterQuerySelector = useMemo(
-    () => usersSelectors.usersRiskScoreSeverityFilterSelector(),
+    () => usersSelectors.userRiskScoreSeverityFilterSelector(),
     []
   );
   const severitySelectionRedux = useDeepEqualSelector((state: State) =>
