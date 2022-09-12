@@ -6453,7 +6453,7 @@
           },
           " extends Omit<",
           "TimelineRequestBasicOptions",
-          ", \"timerange\" | \"filterQuery\" | \"runtimeMappings\">"
+          ", \"timerange\" | \"runtimeMappings\" | \"filterQuery\">"
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
         "deprecated": false,
