@@ -252,7 +252,7 @@ describe('successful migrations', () => {
       });
     });
 
-    test('adds enabled: false to tasks that are failed or unrecognized', () => {
+    test('does not modify tasks that are failed or unrecognized', () => {
       const migration850 = getMigrations()['8.5.0'];
       const inactiveTasks = [
         getMockData({
@@ -263,13 +263,7 @@ describe('successful migrations', () => {
         }),
       ];
       inactiveTasks.forEach((task) => {
-        expect(migration850(task, migrationContext)).toEqual({
-          ...task,
-          attributes: {
-            ...task.attributes,
-            enabled: false,
-          },
-        });
+        expect(migration850(task, migrationContext)).toEqual(task);
       });
     });
   });

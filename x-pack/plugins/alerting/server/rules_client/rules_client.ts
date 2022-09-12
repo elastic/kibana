@@ -384,7 +384,7 @@ export interface GetActionErrorLogByIdParams {
   sort: estypes.Sort;
 }
 
-interface ScheduleRuleOptions {
+interface ScheduleTaskOptions {
   id: string;
   consumer: string;
   ruleTypeId: string;
@@ -589,7 +589,7 @@ export class RulesClient {
     if (data.enabled) {
       let scheduledTask;
       try {
-        scheduledTask = await this.scheduleRule({
+        scheduledTask = await this.scheduleTask({
           id: createdAlert.id,
           consumer: data.consumer,
           ruleTypeId: rawRule.alertTypeId,
@@ -2155,7 +2155,7 @@ export class RulesClient {
 
     if (scheduledTaskIdToCreate) {
       // Schedule the task if it doesn't exist
-      const scheduledTask = await this.scheduleRule({
+      const scheduledTask = await this.scheduleTask({
         id,
         consumer: attributes.consumer,
         ruleTypeId: attributes.alertTypeId,
@@ -2794,7 +2794,7 @@ export class RulesClient {
     return this.spaceId;
   }
 
-  private async scheduleRule(opts: ScheduleRuleOptions) {
+  private async scheduleTask(opts: ScheduleTaskOptions) {
     const { id, consumer, ruleTypeId, schedule, throwOnConflict } = opts;
     const taskInstance = {
       id, // use the same ID for task document as the rule

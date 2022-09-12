@@ -20,7 +20,7 @@ export class TaskManagerUtils {
     this.retry = retry;
   }
 
-  async waitForDisabled(taskRunAtFilter: Date) {
+  async waitForDisabled(id: string, taskRunAtFilter: Date) {
     return await this.retry.try(async () => {
       const searchResult = await this.es.search({
         index: '.kibana_task_manager',
@@ -28,6 +28,11 @@ export class TaskManagerUtils {
           query: {
             bool: {
               must: [
+                {
+                  term: {
+                    'task.id': `task:${id}`,
+                  },
+                },
                 {
                   terms: {
                     'task.scope': ['actions', 'alerting'],
