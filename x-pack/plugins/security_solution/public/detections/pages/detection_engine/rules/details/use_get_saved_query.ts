@@ -36,7 +36,7 @@ export const useGetSavedQuery = (savedQueryId: string | undefined) => {
         })
         .finally(() => setIsSavedQueryLoading(false));
     }
-  }, [savedQueryId, savedQueryServices]);
+  }, [savedQueryId, savedQueryServices, addError]);
 
   return {
     isSavedQueryLoading,
