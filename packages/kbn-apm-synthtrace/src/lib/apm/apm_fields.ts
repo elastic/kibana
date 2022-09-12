@@ -18,6 +18,10 @@ export type ApmApplicationMetricFields = Partial<{
   'jvm.memory.heap.used': number;
   'jvm.memory.non_heap.used': number;
   'jvm.thread.count': number;
+  'faas.billed_duration': number;
+  'faas.timeout': number;
+  'faas.coldstart_duration': number;
+  'faas.duration': number;
 }>;
 
 export type ApmUserAgentFields = Partial<{
