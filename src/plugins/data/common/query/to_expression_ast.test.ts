@@ -11,7 +11,7 @@ import { queryStateToExpressionAst } from './to_expression_ast';
 describe('queryStateToExpressionAst', () => {
   it('returns an object with the correct structure', async () => {
     const dataViewsService = {} as unknown as DataViewsContract;
-    const actual = {
+    const actual = await queryStateToExpressionAst({
       filters: [],
       query: { language: 'lucene', query: '' },
       time: {
@@ -19,7 +19,7 @@ describe('queryStateToExpressionAst', () => {
         to: 'now+7d',
       },
       dataViewsService,
-    };
+    });
 
     expect(actual).toHaveProperty(
       'chain.1.arguments.timeRange.0.chain.0.arguments',
