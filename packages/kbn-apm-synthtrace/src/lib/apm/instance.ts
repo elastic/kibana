@@ -32,13 +32,12 @@ export class Instance extends Entity<ApmFields> {
     spanName,
     spanType,
     spanSubtype,
-    apmFields,
+    ...apmFields
   }: {
     spanName: string;
     spanType: string;
     spanSubtype?: string;
-    apmFields?: ApmFields;
-  }) {
+  } & ApmFields) {
     return new Span({
       ...this.fields,
       ...apmFields,

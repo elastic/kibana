@@ -61,14 +61,12 @@ export function httpExitSpan({
     spanName,
     spanType,
     spanSubType,
-    apmFields: {
-      'destination.address': destination.hostname,
-      'destination.port': parseInt(destination.port, 10),
-      'service.target.name': destination.host,
-      'span.destination.service.name': destination.origin,
-      'span.destination.service.resource': destination.host,
-      'span.destination.service.type': 'external',
-    },
+    'destination.address': destination.hostname,
+    'destination.port': parseInt(destination.port, 10),
+    'service.target.name': destination.host,
+    'span.destination.service.name': destination.origin,
+    'span.destination.service.resource': destination.host,
+    'span.destination.service.type': 'external',
   };
 }
 
@@ -79,11 +77,9 @@ export function dbExitSpan({ spanName, spanSubType }: { spanName: string; spanSu
     spanName,
     spanType,
     spanSubType,
-    apmFields: {
-      'service.target.type': spanSubType,
-      'span.destination.service.name': spanSubType,
-      'span.destination.service.resource': spanSubType,
-      'span.destination.service.type': spanType,
-    },
+    'service.target.type': spanSubType,
+    'span.destination.service.name': spanSubType,
+    'span.destination.service.resource': spanSubType,
+    'span.destination.service.type': spanType,
   };
 }
