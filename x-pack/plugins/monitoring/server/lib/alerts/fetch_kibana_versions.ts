@@ -10,7 +10,7 @@ import { AlertCluster, AlertVersions } from '../../../common/types/alerts';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getNewIndexPatterns, getKibanaDataset } from '../cluster/get_index_patterns';
 
 interface ESAggResponse {
   key: string;
@@ -41,7 +41,7 @@ export async function fetchKibanaVersions(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            createDatasetFilter('kibana_stats', 'stats', 'kibana.stats'),
+            createDatasetFilter('kibana_stats', 'stats', getKibanaDataset('stats')),
             {
               range: {
                 timestamp: {

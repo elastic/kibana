@@ -35,7 +35,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
     });
 
-    // https://github.com/elastic/kibana/issues/132628
     describe('global all privileges', () => {
       before(async () => {
         await security.role.create('global_all_role', {

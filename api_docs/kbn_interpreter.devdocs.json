@@ -37,6 +37,7 @@
         ],
         "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/interpreter",
@@ -50,6 +51,7 @@
             ],
             "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/interpreter",
@@ -63,6 +65,7 @@
                 ],
                 "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -80,6 +83,7 @@
             ],
             "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/interpreter",
@@ -93,6 +97,7 @@
                 ],
                 "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -110,6 +115,7 @@
             ],
             "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/interpreter",
@@ -123,6 +129,7 @@
                 ],
                 "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -140,6 +147,7 @@
             ],
             "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -155,6 +163,7 @@
             ],
             "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -170,6 +179,7 @@
             ],
             "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/interpreter",
@@ -183,6 +193,7 @@
                 ],
                 "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -200,6 +211,7 @@
             ],
             "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -215,6 +227,7 @@
             ],
             "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -242,6 +255,7 @@
         ],
         "path": "packages/kbn-interpreter/src/common/lib/ast/from_expression.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/interpreter",
@@ -255,6 +269,7 @@
             ],
             "path": "packages/kbn-interpreter/src/common/lib/ast/from_expression.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -269,6 +284,7 @@
             ],
             "path": "packages/kbn-interpreter/src/common/lib/ast/from_expression.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -287,6 +303,7 @@
         ],
         "path": "packages/kbn-interpreter/src/common/lib/get_type.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/interpreter",
@@ -300,6 +317,7 @@
             ],
             "path": "packages/kbn-interpreter/src/common/lib/get_type.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -318,6 +336,7 @@
         ],
         "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/interpreter",
@@ -331,6 +350,7 @@
             ],
             "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -349,6 +369,7 @@
         ],
         "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/interpreter",
@@ -362,6 +383,7 @@
             ],
             "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -387,6 +409,7 @@
         ],
         "path": "packages/kbn-interpreter/src/common/lib/ast/safe_element_from_expression.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/interpreter",
@@ -400,6 +423,7 @@
             ],
             "path": "packages/kbn-interpreter/src/common/lib/ast/safe_element_from_expression.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -426,6 +450,7 @@
         ],
         "path": "packages/kbn-interpreter/src/common/lib/ast/to_expression.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/interpreter",
@@ -445,6 +470,7 @@
             ],
             "path": "packages/kbn-interpreter/src/common/lib/ast/to_expression.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -459,6 +485,7 @@
             ],
             "path": "packages/kbn-interpreter/src/common/lib/ast/to_expression.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -489,6 +516,7 @@
         ],
         "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -510,6 +538,7 @@
         ],
         "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -531,6 +560,7 @@
         ],
         "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -553,6 +583,7 @@
         ],
         "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -583,6 +614,7 @@
         ],
         "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -611,6 +643,7 @@
         ],
         "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -641,6 +674,7 @@
         ],
         "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -655,6 +689,7 @@
         ],
         "path": "packages/kbn-interpreter/src/common/lib/parse.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
