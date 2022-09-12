@@ -30,7 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
       const setup = async () => {
         await observability.alerts.common.setKibanaTimeZoneToUTC();
-        await observability.alerts.common.navigateToTimeWithData();
+        await observability.alerts.common.navigateWithoutFilter();
       };
       await setup();
     });

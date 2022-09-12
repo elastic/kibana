@@ -29,6 +29,7 @@
         ],
         "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -42,6 +43,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/dev-cli-runner",
@@ -62,6 +64,7 @@
                 ],
                 "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -83,6 +86,7 @@
                 ],
                 "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -116,6 +120,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/dev-cli-runner",
@@ -136,6 +141,7 @@
                 ],
                 "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -153,6 +159,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -188,6 +195,7 @@
         ],
         "path": "packages/kbn-dev-cli-runner/src/flags.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -201,6 +209,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -222,6 +231,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -236,6 +246,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -277,6 +288,7 @@
         ],
         "path": "packages/kbn-dev-cli-runner/src/flags.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -296,6 +308,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -316,6 +329,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -350,6 +364,7 @@
         ],
         "path": "packages/kbn-dev-cli-runner/src/run.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -369,6 +384,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -389,6 +405,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -416,6 +433,7 @@
         ],
         "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -425,7 +443,8 @@
             "label": "name",
             "description": [],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -447,6 +466,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -467,7 +487,8 @@
                   " & T"
                 ],
                 "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -482,7 +503,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -495,7 +517,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -515,7 +538,8 @@
               " | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -529,6 +553,7 @@
         "description": [],
         "path": "packages/kbn-dev-cli-runner/src/flags.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -541,7 +566,8 @@
               "boolean | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -554,7 +580,8 @@
               "boolean | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -567,7 +594,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -580,7 +608,8 @@
               "{ [key: string]: string | string[]; } | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -593,7 +622,8 @@
               "string[] | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -606,7 +636,8 @@
               "string[] | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -619,7 +650,8 @@
               "{ [key: string]: any; } | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -633,6 +665,7 @@
         "description": [],
         "path": "packages/kbn-dev-cli-runner/src/flags.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -642,7 +675,8 @@
             "label": "verbose",
             "description": [],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -652,7 +686,8 @@
             "label": "quiet",
             "description": [],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -662,7 +697,8 @@
             "label": "silent",
             "description": [],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -672,7 +708,8 @@
             "label": "debug",
             "description": [],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -682,7 +719,8 @@
             "label": "help",
             "description": [],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -695,7 +733,8 @@
               "string[]"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -708,7 +747,8 @@
               "string[]"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -721,7 +761,8 @@
               "[key: string]:  string | boolean | string[] | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/flags.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -735,6 +776,7 @@
         "description": [],
         "path": "packages/kbn-dev-cli-runner/src/run.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -747,7 +789,8 @@
               "ToolingLog"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -766,7 +809,8 @@
               }
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -779,7 +823,8 @@
               "ProcRunner"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -792,7 +837,8 @@
               "Map<string, string | number | boolean>"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -814,6 +860,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/dev-cli-runner",
@@ -833,6 +880,7 @@
                 ],
                 "path": "packages/kbn-dev-cli-runner/src/run.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -850,6 +898,7 @@
         "description": [],
         "path": "packages/kbn-dev-cli-runner/src/run.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -862,7 +911,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -875,7 +925,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -888,7 +939,8 @@
               "{ defaultLevel?: \"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\" | undefined; } | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -908,7 +960,8 @@
               " | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -932,6 +985,7 @@
         ],
         "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -944,7 +998,8 @@
               "{ defaultLevel?: \"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\" | undefined; } | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -957,7 +1012,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -970,7 +1026,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -990,7 +1047,8 @@
               " | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/dev-cli-runner",
@@ -1012,6 +1070,7 @@
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/dev-cli-runner",
@@ -1031,6 +1090,7 @@
                 ],
                 "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1056,6 +1116,7 @@
         ],
         "path": "packages/kbn-dev-cli-runner/src/cleanup.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -1080,6 +1141,7 @@
         ],
         "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1100,7 +1162,8 @@
               " & T"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1125,6 +1188,7 @@
         ],
         "path": "packages/kbn-dev-cli-runner/src/run.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1144,7 +1208,8 @@
               }
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
