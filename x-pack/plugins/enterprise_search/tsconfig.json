@@ -9,7 +9,7 @@
   "exclude": [
     "public/applications/**/cypress/**/*",
     "public/applications/**/cypress.config.ts",
-    "**/node_modules/cypress",
+    "**/node_modules/cypress/**/*",
   ],
   "include": [
     "common/**/*",
