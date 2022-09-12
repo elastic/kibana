@@ -59,25 +59,25 @@ const BackToResourcesButton = () => (
 );
 
 const getResourceFindingSharedValues = (
-  sampleFinding: CspFinding
+  sharedValues: any
 ): EuiDescriptionListProps['listItems'] => [
   {
     title: i18n.translate('xpack.csp.findings.resourceFindingsSharedValues.resourceTypeTitle', {
       defaultMessage: 'Resource Type',
     }),
-    description: sampleFinding.resource.sub_type,
+    description: sharedValues.resourceSubType,
   },
   {
     title: i18n.translate('xpack.csp.findings.resourceFindingsSharedValues.resourceIdTitle', {
       defaultMessage: 'Resource ID',
     }),
-    description: sampleFinding.resource.id,
+    description: sharedValues.resourceId,
   },
   {
     title: i18n.translate('xpack.csp.findings.resourceFindingsSharedValues.clusterIdTitle', {
       defaultMessage: 'Cluster ID',
     }),
-    description: sampleFinding.cluster_id,
+    description: sharedValues.clusterId,
   },
 ];
 
@@ -107,9 +107,31 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
     query: baseEsQuery.query,
     resourceId: params.resourceId,
     enabled: !baseEsQuery.error,
+    aggs: {
+      resourceId: {
+        terms: { field: 'resource.id' },
+      },
+      clusterId: {
+        terms: { field: 'cluster_id' },
+      },
+      resourceSubType: {
+        terms: { field: 'resource.sub_type' },
+      },
+      resourceName: {
+        terms: { field: 'resource.name' },
+      },
+    },
   });
 
-  const sampleFinding = resourceFindings?.data?.page[0];
+  const sharedValues = {
+    clusterId: resourceFindings.data?.aggs.clusterId.buckets[0].key,
+    resourceId: resourceFindings.data?.aggs.resourceId.buckets[0].key,
+    resourceSubType: resourceFindings.data?.aggs.resourceSubType.buckets[0].key,
+    resourceName: resourceFindings.data?.aggs.resourceName.buckets[0].key,
+  };
+
+  console.log(sharedValues);
+
   const error = resourceFindings.error || baseEsQuery.error;
 
   return (
@@ -131,7 +153,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
                 'xpack.csp.findings.resourceFindings.resourceFindingsPageTitle',
                 {
                   defaultMessage: '{resourceName} - Findings',
-                  values: { resourceName: sampleFinding?.resource.name },
+                  values: { resourceName: sharedValues.resourceName },
                 }
               )}
             />
@@ -140,8 +162,8 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
       </PageTitle>
       <EuiPageHeader
         description={
-          sampleFinding && (
-            <CspInlineDescriptionList listItems={getResourceFindingSharedValues(sampleFinding)} />
+          sharedValues && (
+            <CspInlineDescriptionList listItems={getResourceFindingSharedValues(sharedValues)} />
           )
         }
       />

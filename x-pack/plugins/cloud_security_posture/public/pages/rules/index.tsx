@@ -17,7 +17,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { truthy } from '../../../common/utils/helpers';
 import { CspInlineDescriptionList } from '../../components/csp_inline_description_list';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
@@ -60,10 +60,7 @@ const assertPolicyTemplate = (
   return cloudPostureIntegrations.hasOwnProperty(policyTemplate);
 };
 
-const getRulesSharedValues = (
-  packageInfo: PackagePolicy,
-  agentInfo: AgentPolicy
-): EuiDescriptionListProps['listItems'] => {
+const getRulesSharedValues = (packageInfo: PackagePolicy): EuiDescriptionListProps['listItems'] => {
   const enabledPackage = packageInfo.inputs?.find((input) => input.enabled);
   if (!enabledPackage || !assertPolicyTemplate(enabledPackage.policy_template)) return;
 
@@ -82,8 +79,8 @@ const getRulesSharedValues = (
       description: integration.shortName,
     },
     !!enabledIntegrationOption?.name && {
-      title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.typeTitle', {
-        defaultMessage: 'Type',
+      title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.deploymentTypeTitle', {
+        defaultMessage: 'Deployment Type',
       }),
       description: enabledIntegrationOption.name,
     },
@@ -93,12 +90,6 @@ const getRulesSharedValues = (
       }),
       description: enabledIntegrationOption.benchmark,
     },
-    {
-      title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.agentPolicyTitle', {
-        defaultMessage: 'Agent Policy',
-      }),
-      description: agentInfo.name,
-    },
   ].filter(truthy);
 };
 
@@ -107,7 +98,7 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
   const integrationInfo = useCspIntegrationInfo(params);
   const securitySolutionContext = useContext(SecuritySolutionContext);
 
-  const [packageInfo, agentInfo] = integrationInfo.data || [];
+  const [packageInfo] = integrationInfo.data || [];
 
   const breadcrumbs = useMemo(
     () =>
@@ -155,10 +146,9 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
           </EuiFlexGroup>
         }
         description={
-          packageInfo &&
-          agentInfo && (
+          packageInfo && (
             <div data-test-subj={TEST_SUBJECTS.CSP_RULES_SHARED_VALUES}>
-              <CspInlineDescriptionList listItems={getRulesSharedValues(packageInfo, agentInfo)} />
+              <CspInlineDescriptionList listItems={getRulesSharedValues(packageInfo)} />
             </div>
           )
         }

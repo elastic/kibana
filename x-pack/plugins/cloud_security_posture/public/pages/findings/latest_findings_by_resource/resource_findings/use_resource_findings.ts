@@ -24,6 +24,7 @@ interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
   size: NonNullable<estypes.SearchRequest['size']>;
   sort: Sort<CspFinding>;
   enabled: boolean;
+  aggs: Record<string, estypes.AggregationsAggregationContainer>;
 }
 
 export interface ResourceFindingsQuery {
@@ -33,9 +34,11 @@ export interface ResourceFindingsQuery {
 }
 
 type ResourceFindingsRequest = IKibanaSearchRequest<estypes.SearchRequest>;
-type ResourceFindingsResponse = IKibanaSearchResponse<estypes.SearchResponse<CspFinding, Aggs>>;
+type ResourceFindingsResponse = IKibanaSearchResponse<
+  estypes.SearchResponse<CspFinding, CountAggs>
+>;
 
-interface Aggs {
+interface CountAggs {
   count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
 
@@ -46,6 +49,7 @@ const getResourceFindingsQuery = ({
   size,
   pitId,
   sort,
+  aggs,
 }: UseResourceFindingsOptions & { pitId: string }): estypes.SearchRequest => ({
   from,
   size,
@@ -59,7 +63,7 @@ const getResourceFindingsQuery = ({
     },
     sort: [{ [sort.field]: sort.direction }],
     pit: { id: pitId },
-    aggs: getFindingsCountAggQuery(),
+    aggs: { ...getFindingsCountAggQuery(), ...aggs },
   },
   ignore_unavailable: false,
 });
@@ -96,6 +100,7 @@ export const useResourceFindings = (options: UseResourceFindingsOptions) => {
           page: hits.hits.map((hit) => hit._source!),
           total: number.is(hits.total) ? hits.total : 0,
           count: getAggregationCount(aggregations.count.buckets),
+          aggs: aggregations,
           newPitId: newPitId!,
         };
       },
