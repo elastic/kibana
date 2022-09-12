@@ -27,7 +27,13 @@ export class CreateSLO {
 
     await this.resourceInstaller.ensureCommonResourcesInstalled(this.spaceId);
     await this.repository.save(slo);
-    await this.transformInstaller.installAndStartTransform(slo, this.spaceId);
+
+    try {
+      await this.transformInstaller.installAndStartTransform(slo, this.spaceId);
+    } catch (err) {
+      await this.repository.deleteById(slo.id);
+      throw err;
+    }
 
     return this.toResponse(slo);
   }

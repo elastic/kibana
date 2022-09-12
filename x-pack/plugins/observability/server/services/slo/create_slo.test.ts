@@ -52,4 +52,16 @@ describe('createSLO', () => {
       expect(response).toEqual(expect.objectContaining({ id: expect.any(String) }));
     });
   });
+
+  describe('unhappy path', () => {
+    it('deletes the SLO saved objects when transform installation fails', async () => {
+      mockTransformInstaller.installAndStartTransform.mockRejectedValue(
+        new Error('Transform Error')
+      );
+      const sloParams = createSLOParams(createAPMTransactionErrorRateIndicator());
+
+      await expect(createSLO.execute(sloParams)).rejects.toThrowError('Transform Error');
+      expect(mockRepository.deleteById).toBeCalled();
+    });
+  });
 });

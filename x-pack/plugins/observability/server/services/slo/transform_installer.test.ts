@@ -36,7 +36,7 @@ describe('TransformerGenerator', () => {
       };
       const service = new DefaultTransformInstaller(generators, esClientMock, loggerMock);
 
-      expect(() =>
+      await expect(
         service.installAndStartTransform(
           createSLO({
             type: 'slo.apm.transaction_error_rate',
@@ -58,7 +58,7 @@ describe('TransformerGenerator', () => {
       };
       const service = new DefaultTransformInstaller(generators, esClientMock, loggerMock);
 
-      expect(() =>
+      await expect(
         service.installAndStartTransform(
           createSLO({
             type: 'slo.apm.transaction_duration',
