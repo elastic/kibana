@@ -185,7 +185,7 @@ describe('useFieldBrowserOptions', () => {
   });
 
   it('should dispatch the proper action when a new field is saved', async () => {
-    let onSave: ((field: DataViewField) => void) | undefined;
+    let onSave: ((field: DataViewField[]) => void) | undefined;
     useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
     useKibanaMock().services.dataViewFieldEditor.openEditor = (options) => {
       onSave = options.onSave;
@@ -202,7 +202,7 @@ describe('useFieldBrowserOptions', () => {
     getByRole('button').click();
     expect(onSave).toBeDefined();
 
-    const savedField = { name: 'newField' } as DataViewField;
+    const savedField = [{ name: 'newField' }] as DataViewField[];
     onSave!(savedField);
     await runAllPromises();
 
@@ -213,7 +213,7 @@ describe('useFieldBrowserOptions', () => {
         id: TimelineId.test,
         column: {
           columnHeaderType: defaultColumnHeaderType,
-          id: savedField.name,
+          id: savedField[0].name,
           initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
         },
         index: 0,
@@ -222,7 +222,7 @@ describe('useFieldBrowserOptions', () => {
   });
 
   it('should dispatch the proper actions when a field is edited', async () => {
-    let onSave: ((field: DataViewField) => void) | undefined;
+    let onSave: ((field: DataViewField[]) => void) | undefined;
     useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
     useKibanaMock().services.dataViewFieldEditor.openEditor = (options) => {
       onSave = options.onSave;
@@ -243,7 +243,7 @@ describe('useFieldBrowserOptions', () => {
     getByTestId('actionEditRuntimeField').click();
     expect(onSave).toBeDefined();
 
-    const savedField = { name: `new ${fieldItem.name}` } as DataViewField;
+    const savedField = [{ name: `new ${fieldItem.name}` }] as DataViewField[];
     onSave!(savedField);
     await runAllPromises();
 
@@ -260,7 +260,7 @@ describe('useFieldBrowserOptions', () => {
         id: TimelineId.test,
         column: {
           columnHeaderType: defaultColumnHeaderType,
-          id: savedField.name,
+          id: savedField[0].name,
           initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
         },
         index: 0,

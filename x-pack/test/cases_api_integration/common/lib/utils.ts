@@ -24,7 +24,6 @@ import {
   CASE_REPORTERS_URL,
   CASE_STATUS_URL,
   CASE_TAGS_URL,
-  INTERNAL_SUGGEST_USER_PROFILES_URL,
 } from '@kbn/cases-plugin/common/constants';
 import {
   CasesConfigureRequest,
@@ -54,7 +53,6 @@ import {
   BulkCreateCommentRequest,
   CommentType,
   CasesMetricsResponse,
-  SuggestUserProfilesRequest,
 } from '@kbn/cases-plugin/common/api';
 import { getCaseUserActionUrl } from '@kbn/cases-plugin/common/api/helpers';
 import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
@@ -62,7 +60,6 @@ import { ActionResult, FindActionResult } from '@kbn/actions-plugin/server/types
 import { ESCasesConfigureAttributes } from '@kbn/cases-plugin/server/services/configure/types';
 import { ESCaseAttributes } from '@kbn/cases-plugin/server/services/cases/types';
 import type { SavedObjectsRawDocSource } from '@kbn/core/server';
-import { UserProfileService } from '@kbn/cases-plugin/server/services';
 import { User } from './authentication/types';
 import { superUser } from './authentication/users';
 import { getPostCaseRequest, postCaseReq } from './mock';
@@ -1348,45 +1345,3 @@ export const getReferenceFromEsResponse = (
   esResponse: TransportResult<GetResponse<SavedObjectsRawDocSource>, unknown>,
   id: string
 ) => esResponse.body._source?.references?.find((r) => r.id === id);
-
-export const suggestUserProfiles = async ({
-  supertest,
-  req,
-  expectedHttpCode = 200,
-  auth = { user: superUser, space: null },
-}: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
-  req: SuggestUserProfilesRequest;
-  expectedHttpCode?: number;
-  auth?: { user: User; space: string | null };
-}): ReturnType<UserProfileService['suggest']> => {
-  const { body: profiles } = await supertest
-    .post(`${getSpaceUrlPrefix(auth.space)}${INTERNAL_SUGGEST_USER_PROFILES_URL}`)
-    .auth(auth.user.username, auth.user.password)
-    .set('kbn-xsrf', 'true')
-    .send(req)
-    .expect(expectedHttpCode);
-
-  return profiles;
-};
-
-export const loginUsers = async ({
-  supertest,
-  users = [superUser],
-}: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
-  users?: User[];
-}) => {
-  for (const user of users) {
-    await supertest
-      .post('/internal/security/login')
-      .set('kbn-xsrf', 'xxx')
-      .send({
-        providerType: 'basic',
-        providerName: 'basic',
-        currentURL: '/',
-        params: { username: user.username, password: user.password },
-      })
-      .expect(200);
-  }
-};
