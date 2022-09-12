@@ -51,7 +51,7 @@ export default ({ getService }: FtrProviderContext): void => {
             { id: '7eb51035-5582-4cb8-9db2-5e71ef09aa5c', name: 'Host-123', count: 2 },
             { id: '7eb51035-5582-4cb8-9db2-5e71ef09aa5d', name: 'Host-100', count: 2 },
           ])
-        );
+        ).to.be(true);
       });
 
       it('returns the user metrics', async () => {
@@ -69,7 +69,7 @@ export default ({ getService }: FtrProviderContext): void => {
             { name: '7bgwxrbmcu', count: 1 },
             { name: 'jf9e87gsut', count: 1 },
           ])
-        );
+        ).to.be(true);
       });
 
       it('returns both the host and user metrics', async () => {
@@ -86,7 +86,7 @@ export default ({ getService }: FtrProviderContext): void => {
             { id: '7eb51035-5582-4cb8-9db2-5e71ef09aa5c', name: 'Host-123', count: 2 },
             { id: '7eb51035-5582-4cb8-9db2-5e71ef09aa5d', name: 'Host-100', count: 2 },
           ])
-        );
+        ).to.be(true);
 
         expect(metrics.alerts?.users?.total).to.be(4);
         expect(
@@ -96,7 +96,7 @@ export default ({ getService }: FtrProviderContext): void => {
             { name: '7bgwxrbmcu', count: 1 },
             { name: 'jf9e87gsut', count: 1 },
           ])
-        );
+        ).to.be(true);
       });
     });
 
