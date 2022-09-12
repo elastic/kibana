@@ -116,5 +116,5 @@ export const discoverServiceMock = {
   },
   expressions: expressionsPlugin,
   savedObjectsTagging: {},
-  dataViews: dataPlugin.dataViews,
+  dataViews: { ...dataPlugin.dataViews, create: jest.fn(), clearInstanceCache: jest.fn() },
 } as unknown as DiscoverServices;

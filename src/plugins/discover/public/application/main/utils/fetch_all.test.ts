@@ -91,6 +91,7 @@ describe('test fetchAll', () => {
       useNewFieldsApi: true,
       savedSearch: savedSearchMock,
       services: discoverServiceMock,
+      adHocDataViewList: [],
     };
     searchSource = savedSearchMock.searchSource.createChild();
 
@@ -256,6 +257,7 @@ describe('test fetchAll', () => {
       useNewFieldsApi: true,
       savedSearch: savedSearchMock,
       services: discoverServiceMock,
+      adHocDataViewList: [],
     };
     await fetchAll(subjects, searchSource, false, deps);
     expect(await collect()).toEqual([

@@ -8,7 +8,7 @@
 
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { discoverServiceMock as mockDiscoverServices } from '../../../__mocks__/services';
 import { GetStateReturn } from '../services/discover_state';
 import { useAdHocDataViews } from './use_adhoc_data_views';
@@ -19,10 +19,6 @@ import { setUrlTracker } from '../../../kibana_services';
 jest.mock('../../../hooks/use_confirm_persistence_prompt', () => {
   const createdDataView = {
     id: 'updated-mock-id',
-    title: 'mock-title',
-    timeFieldName: 'mock-time-field-name',
-    isPersisted: () => false,
-    getName: () => 'mock-data-view',
   };
   const mocks = {
     openConfirmSavePrompt: jest.fn(() => Promise.resolve(createdDataView)),
@@ -32,6 +28,17 @@ jest.mock('../../../hooks/use_confirm_persistence_prompt', () => {
   return {
     useConfirmPersistencePrompt: () => mocks,
     mocks,
+  };
+});
+
+jest.mock('../../../kibana_services', () => {
+  const actual = jest.requireActual('../../../kibana_services');
+  return {
+    ...actual,
+    getUiActions: jest.fn(() => ({
+      getTrigger: jest.fn(() => {}),
+      getAction: jest.fn(() => ({ execute: jest.fn() })),
+    })),
   };
 });
 
@@ -55,6 +62,7 @@ const mockDataView = {
   timeFieldName: 'mock-time-field-name',
   isPersisted: () => false,
   getName: () => 'mock-data-view',
+  toSpec: () => ({}),
 } as DataView;
 
 const savedSearchMock = {
@@ -82,5 +90,34 @@ describe('usePersistedDataView', () => {
     const updateSavedSearchCall = persistencePromptMocks.updateSavedSearch.mock.calls[0];
     expect(updateSavedSearchCall[0].dataView.id).toEqual('updated-mock-id');
     expect(savedDataView!.id).toEqual('updated-mock-id');
+  });
+
+  it('should update id of adhoc data view correctly', async () => {
+    const dataViewsCreateMock = mockDiscoverServices.dataViews.create as jest.Mock;
+    dataViewsCreateMock.mockImplementation(() => ({
+      ...mockDataView,
+      id: 'updated-mock-id',
+    }));
+    const hook = renderHook((d: DataView) =>
+      useAdHocDataViews({
+        dataView: mockDataView,
+        dataViews: mockDiscoverServices.dataViews,
+        savedSearch: savedSearchMock,
+        stateContainer: {
+          appStateContainer: { getState: jest.fn().mockReturnValue({}) },
+        } as unknown as GetStateReturn,
+        onChangeDataView: jest.fn(),
+      })
+    );
+
+    let updatedDataView: DataView;
+    await act(async () => {
+      updatedDataView = await hook.result.current.updateAdHocDataViewId(mockDataView);
+    });
+
+    expect(dataViewsCreateMock).toHaveBeenCalledWith({
+      id: undefined,
+    });
+    expect(updatedDataView!.id).toEqual('updated-mock-id');
   });
 });
