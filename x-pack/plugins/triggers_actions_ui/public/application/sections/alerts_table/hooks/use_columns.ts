@@ -6,6 +6,7 @@
  */
 
 import { EuiDataGridColumn } from '@elastic/eui';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useCallback, useState } from 'react';
 import { AlertsTableStorage } from '../alerts_table_state';
@@ -17,9 +18,8 @@ import {
 interface UseColumnsArgs {
   featureIds: AlertConsumers[];
   storageAlertsTable: React.MutableRefObject<AlertsTableStorage>;
-  storage: React.MutableRefObject<Storage>;
+  storage: React.MutableRefObject<IStorageWrapper>;
   id: string;
-  columnsLocal: EuiDataGridColumn[];
 }
 
 const fieldTypeToDataGridColumnTypeMapper = (fieldType: string) => {

@@ -9,6 +9,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import * as t from 'io-ts';
 
+import { FieldSpec } from '@kbn/data-plugin/common';
+
 // note: these schemas are not exhaustive. See the `Sort` type of `@elastic/elasticsearch` if you need to enhance it.
 const fieldSchema = t.string;
 export const sortOrderSchema = t.union([t.literal('asc'), t.literal('desc'), t.literal('_doc')]);
@@ -302,3 +304,11 @@ export interface ClusterPutComponentTemplateBody {
     mappings: estypes.MappingTypeMapping;
   };
 }
+
+export type BrowserField = FieldSpec & {
+  category: string;
+};
+
+export type BrowserFields = {
+  [category in string]: { fields: { [fieldName in string]: BrowserField } };
+};
