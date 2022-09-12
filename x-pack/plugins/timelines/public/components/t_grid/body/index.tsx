@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiProgress,
+  EuiDataGridSorting,
 } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
@@ -83,6 +84,8 @@ import { EventRenderedView } from '../event_rendered_view';
 import { REMOVE_COLUMN } from './column_headers/translations';
 import { TimelinesStartPlugins } from '../../../types';
 import { TGridComponentStateProvider } from '../../../methods/context';
+import { ALERT_TABLE_CONFIGURATION_KEY } from '../config';
+import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 
 const StatefulAlertBulkActions = lazy(() => import('../toolbar/bulk_actions/alert_bulk_actions'));
 
@@ -873,6 +876,61 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
     });
+
+    const useFetchAlertsData = () => {
+      const alerts: EcsFieldsResponse[] = data.map((alert) => {
+        return alert.data.reduce((acc, curr) => {
+          acc[curr.field] = curr.value as string[];
+          return acc;
+        }, {} as EcsFieldsResponse);
+      });
+
+      return {
+        activePage,
+        alerts,
+        alertsCount: totalItems,
+        // TODO: what does this control?
+        isInitializing: false,
+        isLoading,
+        // TODO: get actual data for this
+        getInspectQuery: () => ({ request: {}, respons: {} }),
+        onColumnsChange: (columns: EuiDataGridColumn[], vc: string[]) => {
+          onSetVisibleColumns(vc);
+        },
+        // TODO: check the types here
+        onPageChange: (pagination: any) => onChangePage(pagination),
+
+        onSortChange: (s: EuiDataGridSorting['columns']) => onSort(s),
+        // TODO: check what refresh refers to
+        refresh: () => console.log('refresh'),
+        sort: sortingColumns,
+      };
+    };
+
+    const config = triggersActionsUi.alertsTableConfigurationRegistry.get(
+      ALERT_TABLE_CONFIGURATION_KEY
+    );
+    const alertsTableProps = {
+      alertsTableConfiguration: config,
+      // TODO: why do we have to pass columns here again even though they're already part of the config?
+      columns: config.columns,
+      // defaultCellActions: TGridCellAction[];
+      deletedEventIds: [],
+      disabledCellActions: [],
+      // flyoutSize?: EuiFlyoutSize;
+      pageSize,
+      pageSizeOptions: itemsPerPageOptions,
+      // id?: string;
+      leadingControlColumns: [],
+      // TODO: render our flyout
+      showExpandToDetails: true,
+      trailingControlColumns: [],
+      useFetchAlertsData,
+      visibleColumns: config.columns,
+      'data-test-subj': 'body-data-grid',
+      updatedAt: Date.now(),
+    };
+
     return (
       <>
         <TGridComponentStateProvider
@@ -894,32 +952,33 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           showAlertStatusActions={showAlertStatusActions}
         >
           <StatefulEventContext.Provider value={activeStatefulEventContext}>
-            {tableView === 'gridView' && (
-              <EuiDataGridContainer hideLastPage={totalItems > ES_LIMIT_COUNT}>
-                <EuiDataGrid
-                  id={'body-data-grid'}
-                  data-test-subj="body-data-grid"
-                  aria-label={i18n.TGRID_BODY_ARIA_LABEL}
-                  columns={columnsWithCellActions}
-                  columnVisibility={{ visibleColumns, setVisibleColumns: onSetVisibleColumns }}
-                  gridStyle={gridStyle}
-                  leadingControlColumns={leadingTGridControlColumns}
-                  toolbarVisibility={toolbarVisibility}
-                  rowCount={totalItems}
-                  renderCellValue={renderTGridCellValue}
-                  sorting={{ columns: sortingColumns, onSort }}
-                  onColumnResize={onColumnResize}
-                  pagination={{
-                    pageIndex: activePage,
-                    pageSize,
-                    pageSizeOptions: itemsPerPageOptions,
-                    onChangeItemsPerPage,
-                    onChangePage,
-                  }}
-                  ref={dataGridRef}
-                />
-              </EuiDataGridContainer>
-            )}
+            {
+              tableView === 'gridView' && <>{triggersActionsUi.getAlertsTable(alertsTableProps)}</>
+              // <EuiDataGridContainer hideLastPage={totalItems > ES_LIMIT_COUNT}>
+              //   <EuiDataGrid
+              //     id={'body-data-grid'}
+              //     data-test-subj="body-data-grid"
+              //     aria-label={i18n.TGRID_BODY_ARIA_LABEL}
+              //     columns={columnsWithCellActions}
+              //     columnVisibility={{ visibleColumns, setVisibleColumns: onSetVisibleColumns }}
+              //     gridStyle={gridStyle}
+              //     leadingControlColumns={leadingTGridControlColumns}
+              //     toolbarVisibility={toolbarVisibility}
+              //     rowCount={totalItems}
+              //     renderCellValue={renderTGridCellValue}
+              //     sorting={{ columns: sortingColumns, onSort }}
+              //     onColumnResize={onColumnResize}
+              //     pagination={{
+              //       pageIndex: activePage,
+              //       pageSize,
+              //       pageSizeOptions: itemsPerPageOptions,
+              //       onChangeItemsPerPage,
+              //       onChangePage,
+              //     }}
+              //     ref={dataGridRef}
+              //   />
+              // </EuiDataGridContainer>
+            }
             {tableView === 'eventRenderedView' && (
               <EventRenderedView
                 appId={appId}
