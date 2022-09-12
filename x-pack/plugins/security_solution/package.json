@@ -11,7 +11,7 @@
     "cypress:open": "yarn cypress open --config-file ./cypress/cypress.config.ts",
     "cypress:open:ccs": "yarn cypress:open --config integrationFolder=./cypress/ccs_integration",
     "cypress:open-as-ci": "node ../../../scripts/functional_tests --config ../../test/security_solution_cypress/visual_config.ts",
-    "cypress:open:upgrade": "yarn cypress:open --config integrationFolder=./cypress/upgrade_integration",
+    "cypress:open:upgrade": "yarn cypress:open --config specPattern=./cypress/upgrade_integration/**/*.cy.ts",
     "cypress:run": "yarn cypress:run:reporter --browser chrome --spec './cypress/e2e/**/*.cy.ts'; status=$?; yarn junit:merge && exit $status",
     "cypress:run:spec": "yarn cypress:run:reporter --browser chrome --spec ${SPEC_LIST:-'./cypress/e2e/**/*.cy.ts'}; status=$?; yarn junit:merge && exit $status",
     "cypress:run:cases": "yarn cypress:run:reporter --browser chrome --spec './cypress/e2e/cases/*.cy.ts'; status=$?; yarn junit:merge && exit $status",
@@ -21,8 +21,7 @@
     "cypress:run:ccs": "yarn cypress:run:reporter --browser chrome --config integrationFolder=./cypress/ccs_integration; status=$?; yarn junit:merge && exit $status",
     "cypress:run-as-ci": "node --max-old-space-size=2048 ../../../scripts/functional_tests --config ../../test/security_solution_cypress/cli_config_parallel.ts",
     "cypress:run-as-ci:firefox": "node --max-old-space-size=2048 ../../../scripts/functional_tests --config ../../test/security_solution_cypress/config.firefox.ts",
-    "cypress:run:upgrade": "yarn cypress:run:reporter --browser chrome --config integrationFolder=./cypress/upgrade_integration",
-    "cypress:run:upgrade:old": "yarn cypress:run:reporter --browser chrome --config integrationFolder=./cypress/upgrade_integration --spec ./cypress/upgrade_integration/threat_hunting/**/*.cy.ts,./cypress/upgrade_integration/detections/**/custom_query_rule.spec.ts; status=$?; yarn junit:merge && exit $status",
+    "cypress:run:upgrade": "yarn cypress:run:reporter --browser chrome --config specPattern=./cypress/upgrade_integration/**/*.cy.ts",
     "junit:merge": "../../../node_modules/.bin/mochawesome-merge ../../../target/kibana-security-solution/cypress/results/mochawesome*.json > ../../../target/kibana-security-solution/cypress/results/output.json && ../../../node_modules/.bin/marge ../../../target/kibana-security-solution/cypress/results/output.json --reportDir ../../../target/kibana-security-solution/cypress/results && mkdir -p ../../../target/junit && cp ../../../target/kibana-security-solution/cypress/results/*.xml ../../../target/junit/",
     "test:generate": "node scripts/endpoint/resolver_generator"
   }
