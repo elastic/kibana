@@ -24,7 +24,6 @@ import {
   severity_mapping,
   throttleOrNull,
   max_signals,
-  responseActionsCamel,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { listArray } from '@kbn/securitysolution-io-ts-list-types';
 import { version } from '@kbn/securitysolution-io-ts-types';
@@ -79,6 +78,7 @@ import {
   newTermsFields,
   historyWindowStart,
   timestampOverrideFallbackDisabledOrUndefined,
+  responseActionsCamelCase,
 } from '../../../../common/detection_engine/schemas/common';
 import { SERVER_APP_ID } from '../../../../common/constants';
 
@@ -166,7 +166,7 @@ const querySpecificRuleParams = t.exact(
     filters: filtersOrUndefined,
     savedId: savedIdOrUndefined,
     dataViewId: dataViewIdOrUndefined,
-    responseActions: responseActionsCamel,
+    responseActions: responseActionsCamelCase,
   })
 );
 export const queryRuleParams = t.intersection([baseRuleParams, querySpecificRuleParams]);

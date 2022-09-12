@@ -105,6 +105,15 @@ export const dataViewIdOrUndefined = t.union([data_view_id, t.undefined]);
 export const action_action_type_id = t.string;
 export const action_params = saved_object_attributes;
 
+export const responseActionsCamelCase = t.array(
+  t.exact(
+    t.type({
+      actionTypeId: t.string,
+      params: action_params,
+    })
+  )
+);
+
 export const responseAction = t.exact(
   t.type({
     action_type_id: action_action_type_id,
