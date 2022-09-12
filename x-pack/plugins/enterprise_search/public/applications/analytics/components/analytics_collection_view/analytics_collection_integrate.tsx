@@ -28,11 +28,11 @@ interface AnalyticsCollectionIntegrateProps {
 export const AnalyticsCollectionIntegrate: React.FC<AnalyticsCollectionIntegrateProps> = ({
   collection,
 }) => {
-  const analyticsDNSUrl = getEnterpriseSearchUrl(`/analytics/${collection.name}`) as string;
+  const analyticsDNSUrl = getEnterpriseSearchUrl(`/analytics/${collection.name}`);
   const credentials = [
     {
       title: i18n.translate(
-        'xpack.enterpriseSearch.analytics.collections.integrate.credentials.collectionName',
+        'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.credentials.collectionName',
         {
           defaultMessage: 'Collection name',
         }
@@ -41,7 +41,7 @@ export const AnalyticsCollectionIntegrate: React.FC<AnalyticsCollectionIntegrate
     },
     {
       title: i18n.translate(
-        'xpack.enterpriseSearch.analytics.collections.integrate.credentials.collectionDns',
+        'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.credentials.collectionDns',
         {
           defaultMessage: 'DNS URL',
         }
@@ -49,13 +49,14 @@ export const AnalyticsCollectionIntegrate: React.FC<AnalyticsCollectionIntegrate
       description: analyticsDNSUrl,
     },
   ];
+  const webclientSrc = getEnterpriseSearchUrl('/analytics.js');
 
   return (
-    <div className="entSearch__collectionIntegrateLayout">
+    <>
       <EuiTitle>
         <h4>
           {i18n.translate(
-            'xpack.enterpriseSearch.analytics.collections.integrate.credentials.headingTitle',
+            'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.credentials.headingTitle',
             {
               defaultMessage: 'Credentials',
             }
@@ -68,7 +69,6 @@ export const AnalyticsCollectionIntegrate: React.FC<AnalyticsCollectionIntegrate
           listItems={credentials}
           type="column"
           align="center"
-          titleProps={{ className: 'entSearch__collectionCredentialTitle' }}
         />
       </EuiPanel>
 
@@ -77,7 +77,7 @@ export const AnalyticsCollectionIntegrate: React.FC<AnalyticsCollectionIntegrate
       <EuiTitle>
         <h4>
           {i18n.translate(
-            'xpack.enterpriseSearch.analytics.collections.integrate.embed.headingTitle',
+            'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.embed.headingTitle',
             {
               defaultMessage: 'Start tracking events',
             }
@@ -88,7 +88,7 @@ export const AnalyticsCollectionIntegrate: React.FC<AnalyticsCollectionIntegrate
       <EuiText size="s">
         <p>
           {i18n.translate(
-            'xpack.enterpriseSearch.analytics.collections.integrate.embed.description',
+            'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.embed.description',
             {
               defaultMessage:
                 'Embed the JS snippet below on every page of the website or application you’d like to tracks.',
@@ -98,16 +98,14 @@ export const AnalyticsCollectionIntegrate: React.FC<AnalyticsCollectionIntegrate
       </EuiText>
       <EuiSpacer size="s" />
       <EuiCodeBlock language="html" isCopyable>
-        {`<script src="${getEnterpriseSearchUrl(
-          '/analytics.js'
-        )}" data-dsn="${analyticsDNSUrl}" defer></script>`}
+        {`<script src="${webclientSrc}" data-dsn="${analyticsDNSUrl}" defer></script>`}
       </EuiCodeBlock>
 
       <EuiSpacer size="l" />
       <EuiText size="s">
         <p>
           {i18n.translate(
-            'xpack.enterpriseSearch.analytics.collections.integrate.embed.scriptDescription',
+            'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.scriptDescription',
             {
               defaultMessage:
                 'Track individual events, like clicks, by calling the <strong>trackEvent</strong> method.',
@@ -122,6 +120,6 @@ export const AnalyticsCollectionIntegrate: React.FC<AnalyticsCollectionIntegrate
   url: "www.elasitc.co/analytics/website"
 })`}
       </EuiCodeBlock>
-    </div>
+    </>
   );
 };

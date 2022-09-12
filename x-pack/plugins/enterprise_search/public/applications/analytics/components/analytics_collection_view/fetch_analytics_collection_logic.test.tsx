@@ -22,49 +22,14 @@ describe('fetchAnalyticsCollectionLogic', () => {
   });
 
   const DEFAULT_VALUES = {
-    analyticsCollection: {},
+    analyticsCollection: null,
     data: undefined,
-    hasNoAnalyticsCollection: true,
     isLoading: true,
     status: Status.IDLE,
   };
 
   it('has expected default values', () => {
     expect(FetchAnalyticsCollectionLogic.values).toEqual(DEFAULT_VALUES);
-  });
-
-  describe('reducers', () => {
-    describe('hasNoAnalyticsCollection', () => {
-      it('updates to true when apiSuccess returns empty analytics collections array', () => {
-        FetchAnalyticsCollectionLogic.actions.apiSuccess({} as AnalyticsCollection);
-        expect(FetchAnalyticsCollectionLogic.values.hasNoAnalyticsCollection).toBe(true);
-        expect(FetchAnalyticsCollectionLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          analyticsCollection: {},
-          hasNoAnalyticsCollection: true,
-          data: {},
-          isLoading: false,
-          status: Status.SUCCESS,
-        });
-      });
-
-      it('updates to false when apiSuccess returns analytics collections array', () => {
-        const collection = {
-          event_retention_day_length: 19,
-          id: 'collection1',
-          name: 'collection1',
-        };
-        FetchAnalyticsCollectionLogic.actions.apiSuccess(collection);
-        expect(FetchAnalyticsCollectionLogic.values.hasNoAnalyticsCollection).toBe(false);
-        expect(FetchAnalyticsCollectionLogic.values).toEqual({
-          analyticsCollection: collection,
-          data: collection,
-          hasNoAnalyticsCollection: false,
-          isLoading: false,
-          status: Status.SUCCESS,
-        });
-      });
-    });
   });
 
   describe('listeners', () => {
@@ -99,7 +64,6 @@ describe('fetchAnalyticsCollectionLogic', () => {
           ...DEFAULT_VALUES,
           analyticsCollection: {},
           data: {},
-          hasNoAnalyticsCollection: true,
           isLoading: false,
           status: Status.SUCCESS,
         });

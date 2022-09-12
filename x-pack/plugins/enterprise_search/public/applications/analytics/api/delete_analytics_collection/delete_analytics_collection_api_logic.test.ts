@@ -19,7 +19,7 @@ describe('DeleteAnalyticsCollectionApiLogic', () => {
 
   describe('DeleteAnalyticsCollectionsApiLogic', () => {
     it('calls the analytics collections list api', async () => {
-      const promise = Promise.resolve({ name: 'result' });
+      const promise = Promise.resolve();
       const name = 'collection';
       http.delete.mockReturnValue(promise);
       const result = deleteAnalyticsCollection({ name });
@@ -27,7 +27,7 @@ describe('DeleteAnalyticsCollectionApiLogic', () => {
       expect(http.delete).toHaveBeenCalledWith(
         `/internal/enterprise_search/analytics/collections/${name}`
       );
-      await expect(result).resolves.toEqual({ name: 'result' });
+      await expect(result).resolves.toEqual(undefined);
     });
   });
 });

@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { AnalyticsCollection } from '../../../../../common/types/analytics';
-
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
-export type DeleteAnalyticsCollectionApiLogicResponse = AnalyticsCollection;
+export type DeleteAnalyticsCollectionApiLogicResponse = void;
 
 export const deleteAnalyticsCollection = async ({ name }: { name: string }) => {
   const { http } = HttpLogic.values;
   const route = `/internal/enterprise_search/analytics/collections/${name}`;
-  const response = await http.delete<DeleteAnalyticsCollectionApiLogicResponse>(route);
-  return response;
+  await http.delete<DeleteAnalyticsCollectionApiLogicResponse>(route);
+
+  return;
 };
 
 export const DeleteAnalyticsCollectionAPILogic = createApiLogic(

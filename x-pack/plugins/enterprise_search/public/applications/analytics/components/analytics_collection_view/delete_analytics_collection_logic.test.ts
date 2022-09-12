@@ -29,8 +29,6 @@ describe('deleteAnalyticsCollectionLogic', () => {
   });
 
   const DEFAULT_VALUES = {
-    analyticsCollection: {},
-    data: undefined,
     isLoading: true,
     status: Status.IDLE,
   };
@@ -41,7 +39,7 @@ describe('deleteAnalyticsCollectionLogic', () => {
 
   describe('listeners', () => {
     it('calls clearFlashMessages on new makeRequest', async () => {
-      const promise = Promise.resolve({ name: 'test' });
+      const promise = Promise.resolve(undefined);
       http.delete.mockReturnValue(promise);
 
       await nextTick();
@@ -73,12 +71,10 @@ describe('deleteAnalyticsCollectionLogic', () => {
   describe('selectors', () => {
     describe('analyticsCollection', () => {
       it('updates when apiSuccess listener triggered', () => {
-        DeleteAnalyticsCollectionLogic.actions.apiSuccess({} as AnalyticsCollection);
+        DeleteAnalyticsCollectionLogic.actions.apiSuccess();
 
         expect(DeleteAnalyticsCollectionLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          analyticsCollection: {},
-          data: {},
           isLoading: false,
           status: Status.SUCCESS,
         });

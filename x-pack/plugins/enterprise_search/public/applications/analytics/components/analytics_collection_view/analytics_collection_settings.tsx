@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import {
   EuiPanel,
@@ -31,15 +31,16 @@ export const AnalyticsCollectionSettings: React.FC<AnalyticsCollectionSettingsPr
   collection,
 }) => {
   const { deleteAnalyticsCollection } = useActions(DeleteAnalyticsCollectionLogic);
+  const { isLoading } = useValues(DeleteAnalyticsCollectionLogic);
 
   return (
-    <div className="entSearch__collectionIntegrateLayout">
+    <>
       <EuiPanel hasShadow={false} color="subdued" paddingSize="xl" grow={false}>
         <EuiDescriptionList
           listItems={[
             {
               title: i18n.translate(
-                'xpack.enterpriseSearch.analytics.collections.integrate.credentials.collectionName',
+                'xpack.enterpriseSearch.analytics.collections.collectionsView.settingsTab.credentials.collectionName',
                 {
                   defaultMessage: 'Collection name',
                 }
@@ -49,7 +50,6 @@ export const AnalyticsCollectionSettings: React.FC<AnalyticsCollectionSettingsPr
           ]}
           type="column"
           align="center"
-          titleProps={{ className: 'entSearch__collectionCredentialTitle' }}
         />
       </EuiPanel>
       <EuiSpacer size="l" />
@@ -57,7 +57,7 @@ export const AnalyticsCollectionSettings: React.FC<AnalyticsCollectionSettingsPr
         <EuiTitle size="s">
           <h4>
             {i18n.translate(
-              'xpack.enterpriseSearch.analytics.collections.settings.delete.headingTitle',
+              'xpack.enterpriseSearch.analytics.collections.collectionsView.settingsTab.delete.headingTitle',
               {
                 defaultMessage: 'Delete this analytics collection',
               }
@@ -68,7 +68,7 @@ export const AnalyticsCollectionSettings: React.FC<AnalyticsCollectionSettingsPr
         <EuiText size="s">
           <p>
             {i18n.translate(
-              'xpack.enterpriseSearch.analytics.collections.settings.delete.warning',
+              'xpack.enterpriseSearch.analytics.collections.collectionsView.settingsTab.delete.warning',
               {
                 defaultMessage: 'This action is irreversible',
               }
@@ -80,18 +80,20 @@ export const AnalyticsCollectionSettings: React.FC<AnalyticsCollectionSettingsPr
           fill
           type="submit"
           color="danger"
+          isLoading={!isLoading}
+          disabled={!isLoading}
           onClick={() => {
             deleteAnalyticsCollection(collection.name);
           }}
         >
           {i18n.translate(
-            'xpack.enterpriseSearch.analytics.collections.settings.delete.buttonTitle',
+            'xpack.enterpriseSearch.analytics.collections.collectionsView.settingsTab.delete.buttonTitle',
             {
               defaultMessage: 'Delete this collection',
             }
           )}
         </EuiButton>
       </EuiPanel>
-    </div>
+    </>
   );
 };

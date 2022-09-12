@@ -10,6 +10,8 @@ import { AnalyticsCollection } from '../../../../../common/types/analytics';
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
+export type FetchAnalyticsCollectionApiLogicResponse = AnalyticsCollection;
+
 export const fetchAnalyticsCollection = async ({ name }: { name: string }) => {
   const { http } = HttpLogic.values;
   const route = `/internal/enterprise_search/analytics/collections/${name}`;

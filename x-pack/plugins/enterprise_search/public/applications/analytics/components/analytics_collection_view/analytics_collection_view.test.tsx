@@ -27,7 +27,6 @@ const mockValues = {
     id: '1',
     name: 'Analytics Collection 1',
   } as AnalyticsCollection,
-  hasNoAnalyticsCollection: false,
 };
 
 const mockActions = {
@@ -45,8 +44,7 @@ describe('AnalyticsOverview', () => {
     it('renders when analytics collection is empty on inital query', () => {
       setMockValues({
         ...mockValues,
-        analyticsCollection: {},
-        hasNoAnalyticsCollection: true,
+        analyticsCollection: null,
       });
       setMockActions(mockActions);
       const wrapper = shallow(<AnalyticsCollectionView />);
