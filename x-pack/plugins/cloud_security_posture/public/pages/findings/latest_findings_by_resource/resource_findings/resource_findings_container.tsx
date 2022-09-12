@@ -54,9 +54,24 @@ const BackToResourcesButton = () => (
 );
 
 const getResourceFindingSharedValues = (sampleFinding: CspFinding) => [
-  { title: 'Resource Type', description: sampleFinding.resource.sub_type },
-  { title: 'Resource ID', description: sampleFinding.resource.id },
-  { title: 'Cluster ID', description: sampleFinding.cluster_id },
+  {
+    title: i18n.translate('xpack.csp.findings.resourceFindingsSharedValues.resourceTypeTitle', {
+      defaultMessage: 'Resource Type',
+    }),
+    description: sampleFinding.resource.sub_type,
+  },
+  {
+    title: i18n.translate('xpack.csp.findings.resourceFindingsSharedValues.resourceIdTitle', {
+      defaultMessage: 'Resource ID',
+    }),
+    description: sampleFinding.resource.id,
+  },
+  {
+    title: i18n.translate('xpack.csp.findings.resourceFindingsSharedValues.clusterIdTitle', {
+      defaultMessage: 'Cluster ID',
+    }),
+    description: sampleFinding.cluster_id,
+  },
 ];
 
 export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
