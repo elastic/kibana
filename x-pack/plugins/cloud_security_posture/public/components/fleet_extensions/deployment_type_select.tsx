@@ -27,8 +27,7 @@ interface Props {
   isDisabled?: boolean;
 }
 
-// exporting those pairings in order to find the matching display name to value
-export const kubeDeployOptions: Array<EuiComboBoxOptionOption<InputType>> =
+const kubeDeployOptions: Array<EuiComboBoxOptionOption<InputType>> =
   cloudPostureIntegrations.kspm.options.map((o) => ({ value: o.type, label: o.name }));
 
 const KubernetesDeploymentFieldLabel = () => (
