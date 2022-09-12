@@ -161,12 +161,15 @@ const getMinAgeField = (phase: PhaseWithTiming, defaultValue?: string) => ({
   ],
 });
 
-const getDownsampleFieldsToValidateOnChange = (p: PhaseWithDownsample) => {
+const getDownsampleFieldsToValidateOnChange = (
+  p: PhaseWithDownsample,
+  includeCurrentPhase = true
+) => {
   const allPhases: PhaseWithDownsample[] = ['hot', 'warm', 'cold'];
   const getIntervalSizePath = (currentPhase: PhaseWithDownsample) =>
     `_meta.${currentPhase}.downsample.fixedIntervalSize`;
   const omitPreviousPhases = (currentPhase: PhaseWithDownsample) =>
-    allPhases.slice(allPhases.indexOf(currentPhase));
+    allPhases.slice(allPhases.indexOf(currentPhase) + (includeCurrentPhase ? 0 : 1));
   // when a phase is validated, need to also validate all downsample intervals in the next phases
   return omitPreviousPhases(p).map(getIntervalSizePath);
 };
@@ -175,7 +178,11 @@ const getDownsampleSchema = (phase: PhaseWithDownsample): FormSchema['downsample
     enabled: {
       defaultValue: false,
       label: i18nTexts.editPolicy.downsampleEnabledFieldLabel,
-      fieldsToValidateOnChange: getDownsampleFieldsToValidateOnChange(phase),
+      fieldsToValidateOnChange: getDownsampleFieldsToValidateOnChange(
+        phase,
+        /* don't trigger validation on the current validation to prevent showing error state on pristine input */
+        false
+      ),
     },
     fixedIntervalSize: {
       label: i18nTexts.editPolicy.downsampleIntervalFieldLabel,
