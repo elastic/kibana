@@ -469,8 +469,10 @@ class AgentPolicyService {
       await packagePolicyService.bulkCreate(
         soClient,
         esClient,
-        newPackagePolicies,
-        newAgentPolicy.id,
+        newPackagePolicies.map((newPackagePolicy) => ({
+          ...newPackagePolicy,
+          policy_id: newAgentPolicy.id,
+        })),
         {
           ...options,
           bumpRevision: false,

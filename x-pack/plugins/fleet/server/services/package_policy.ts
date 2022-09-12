@@ -216,26 +216,37 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
   public async bulkCreate(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    packagePolicies: NewPackagePolicy[],
-    agentPolicyId: string,
-    options?: { user?: AuthenticatedUser; bumpRevision?: boolean; force: true }
+    packagePolicies: NewPackagePolicyWithId[],
+    options?: {
+      user?: AuthenticatedUser;
+      bumpRevision?: boolean;
+      force: true;
+    }
   ): Promise<PackagePolicy[]> {
-    await validateIsNotHostedPolicy(soClient, agentPolicyId);
+    const agentPolicyIds = new Set(packagePolicies.map((pkgPol) => pkgPol.policy_id));
+
+    for (const agentPolicyId of agentPolicyIds) {
+      await validateIsNotHostedPolicy(soClient, agentPolicyId);
+    }
+
     const isoDate = new Date().toISOString();
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { saved_objects } = await soClient.bulkCreate<PackagePolicySOAttributes>(
       packagePolicies.map((packagePolicy) => {
-        const packagePolicyId = uuid.v4();
+        const packagePolicyId = packagePolicy.id ?? uuid.v4();
+        const agentPolicyId = packagePolicy.policy_id;
 
         const inputs = packagePolicy.inputs.map((input) =>
           assignStreamIdToInput(packagePolicyId, input)
         );
 
+        const { id, ...pkgPolicyWithoutId } = packagePolicy;
+
         return {
           type: SAVED_OBJECT_TYPE,
           id: packagePolicyId,
           attributes: {
-            ...packagePolicy,
+            ...pkgPolicyWithoutId,
             inputs,
             policy_id: agentPolicyId,
             revision: 1,
@@ -254,9 +265,11 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     // Assign it to the given agent policy
 
     if (options?.bumpRevision ?? true) {
-      await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
-        user: options?.user,
-      });
+      for (const agentPolicyIdT of agentPolicyIds) {
+        await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyIdT, {
+          user: options?.user,
+        });
+      }
     }
 
     return newSos.map((newSo) => ({
@@ -1265,6 +1278,11 @@ function _enforceFrozenVars(
   return resultVars;
 }
 
+export interface NewPackagePolicyWithId extends NewPackagePolicy {
+  id?: string;
+  policy_id: string;
+}
+
 export interface PackagePolicyServiceInterface {
   create(
     soClient: SavedObjectsClientContract,
@@ -1286,9 +1304,11 @@ export interface PackagePolicyServiceInterface {
   bulkCreate(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    packagePolicies: NewPackagePolicy[],
-    agentPolicyId: string,
-    options?: { user?: AuthenticatedUser; bumpRevision?: boolean }
+    packagePolicies: NewPackagePolicyWithId[],
+    options?: {
+      user?: AuthenticatedUser;
+      bumpRevision?: boolean;
+    }
   ): Promise<PackagePolicy[]>;
 
   get(soClient: SavedObjectsClientContract, id: string): Promise<PackagePolicy | null>;
