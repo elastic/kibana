@@ -14,3 +14,4 @@ export { PngService } from './png';
 export { ScreenshotsService } from './screenshots';
 export { SnapshotsService } from './snapshots';
 export { TestSubjects } from './test_subjects';
+export { RetryOnStaleProvider } from './retry_on_stale';

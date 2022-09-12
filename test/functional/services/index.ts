@@ -17,6 +17,7 @@ import {
   ScreenshotsService,
   SnapshotsService,
   TestSubjects,
+  RetryOnStaleProvider,
 } from './common';
 import { ComboBoxService } from './combo_box';
 import {
@@ -88,4 +89,5 @@ export const services = {
   managementMenu: ManagementMenuService,
   monacoEditor: MonacoEditorService,
   menuToggle: MenuToggleService,
+  retryOnStale: RetryOnStaleProvider,
 };
