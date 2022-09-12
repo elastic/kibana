@@ -27,6 +27,7 @@
         ],
         "path": "packages/core/preboot/core-preboot-server-mocks/src/preboot_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -42,6 +43,7 @@
         ],
         "path": "packages/core/preboot/core-preboot-server-mocks/src/preboot_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -55,6 +57,7 @@
         "description": [],
         "path": "packages/core/preboot/core-preboot-server-mocks/src/preboot_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-preboot-server-mocks",
@@ -68,6 +71,7 @@
             ],
             "path": "packages/core/preboot/core-preboot-server-mocks/src/preboot_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -90,6 +94,7 @@
             ],
             "path": "packages/core/preboot/core-preboot-server-mocks/src/preboot_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -112,6 +117,7 @@
             ],
             "path": "packages/core/preboot/core-preboot-server-mocks/src/preboot_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }
