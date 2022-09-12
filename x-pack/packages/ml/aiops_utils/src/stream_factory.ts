@@ -9,7 +9,7 @@ import { Stream } from 'stream';
 import * as zlib from 'zlib';
 
 import type { Logger } from '@kbn/logging';
-import type { Headers } from '@kbn/core-http-server';
+import type { Headers, ResponseHeaders } from '@kbn/core-http-server';
 
 import { acceptCompression } from './accept_compression';
 
@@ -29,7 +29,7 @@ interface StreamFactoryReturnType<T = unknown> {
   push: (d: T) => void;
   responseWithHeaders: {
     body: zlib.Gzip | ResponseStream;
-    headers?: Headers;
+    headers?: ResponseHeaders;
   };
 }
 
