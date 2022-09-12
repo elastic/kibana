@@ -42,6 +42,7 @@ import {
   USER_PROFILES_BULK_GET_CACHE_KEY,
   USER_PROFILES_CACHE_KEY,
 } from '../../containers/constants';
+import { getAllPermissionsExceptFrom } from '../../utils/permissions';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
@@ -69,7 +70,7 @@ export interface AllCasesListProps {
 export const AllCasesList = React.memo<AllCasesListProps>(
   ({ hiddenStatuses = [], isSelectorView = false, onRowClick, doRefresh }) => {
     const { owner, permissions } = useCasesContext();
-    const availableSolutions = useAvailableCasesOwners();
+    const availableSolutions = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
     const [refresh, setRefresh] = useState(0);
 
     const hasOwner = !!owner.length;
