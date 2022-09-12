@@ -16,12 +16,23 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
+import styled from 'styled-components';
 
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
 import { RulePreview } from '../../../../components/rules/rule_preview';
 import type { AboutStepRule, DefineStepRule, ScheduleStepRule } from '../types';
 
 import * as i18n from './translations';
+
+const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
+  overflow-y: hidden;
+  flex: 1;
+
+  .euiFlyoutBody__overflow {
+    overflow: hidden;
+    mask-image: none;
+  }
+`;
 
 interface PreviewFlyoutProps {
   isDisabled: boolean;
@@ -51,7 +62,7 @@ const PreviewFlyoutComponent: React.FC<PreviewFlyoutProps> = ({
           <p>{i18n.RULE_PREVIEW_DESCRIPTION}</p>
         </EuiText>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <StyledEuiFlyoutBody>
         <RulePreview
           isDisabled={isDisabled}
           defineRuleData={defineStepData}
@@ -59,7 +70,7 @@ const PreviewFlyoutComponent: React.FC<PreviewFlyoutProps> = ({
           scheduleRuleData={scheduleStepData}
           exceptionsList={exceptionsList}
         />
-      </EuiFlyoutBody>
+      </StyledEuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiButton onClick={onClose}>{i18n.CANCEL_BUTTON_LABEL}</EuiButton>
       </EuiFlyoutFooter>
