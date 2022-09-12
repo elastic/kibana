@@ -17,6 +17,7 @@ import {
   DeletePackagePoliciesResponse,
   PackagePolicyInput,
 } from '@kbn/fleet-plugin/common';
+import { DeepReadonly } from 'utility-types';
 import { createCspRuleSearchFilterByPackagePolicy } from '../../common/utils/helpers';
 import {
   CLOUDBEAT_VANILLA,
@@ -85,7 +86,7 @@ export const onPackagePolicyPostCreateCallback = async (
  * Callback to handle deletion of PackagePolicies in Fleet
  */
 export const removeCspRulesInstancesCallback = async (
-  deletedPackagePolicy: DeletePackagePoliciesResponse[number],
+  deletedPackagePolicy: DeepReadonly<DeletePackagePoliciesResponse[number]>,
   soClient: ISavedObjectsRepository,
   logger: Logger
 ): Promise<void> => {
