@@ -5,21 +5,66 @@
  * 2.0.
  */
 
-import { useSearchStrategy } from '.';
+import { useSearch, useSearchStrategy } from '.';
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import { useObservable } from '@kbn/securitysolution-hook-utils';
-import type { FactoryQueryTypes } from '../../../../common/search_strategy';
+import type { FactoryQueryTypes, StrategyRequestType } from '../../../../common/search_strategy';
+import { Observable } from 'rxjs';
 
+jest.mock('@kbn/securitysolution-hook-utils');
 const mockAddToastError = jest.fn();
-
+const mockAddToastWarning = jest.fn();
 jest.mock('../../hooks/use_app_toasts', () => ({
   useAppToasts: jest.fn(() => ({
     addError: mockAddToastError,
+    addWarning: mockAddToastWarning,
   })),
 }));
 
-jest.mock('@kbn/securitysolution-hook-utils');
+// default to completed response
+const mockResponse = jest.fn(
+  () =>
+    ({
+      rawResponse: {},
+      isPartial: false,
+      isRunning: false,
+    } as unknown)
+);
+const mockSearch = jest.fn(
+  () =>
+    new Observable((subscription) => {
+      subscription.next(mockResponse());
+    })
+);
+jest.mock('../../lib/kibana', () => {
+  const original = jest.requireActual('../../lib/kibana');
+  return {
+    ...original,
+    useKibana: () => ({
+      ...original.useKibana(),
+      services: {
+        ...original.useKibana().services,
+        data: {
+          search: {
+            search: mockSearch,
+          },
+        },
+      },
+    }),
+  };
+});
+
+const mockEndTracking = jest.fn();
+const mockStartTracking = jest.fn(() => ({
+  endTracking: mockEndTracking,
+}));
+jest.mock('../../lib/apm/use_track_http_request', () => ({
+  useTrackHttpRequest: () => ({ startTracking: mockStartTracking }),
+}));
+
+const mockAbortController = new AbortController();
+mockAbortController.abort = jest.fn();
 
 const useObservableHookResult = {
   start: jest.fn(),
@@ -28,13 +73,24 @@ const useObservableHookResult = {
   loading: false,
 };
 
+const factoryQueryType = 'testFactoryQueryType' as FactoryQueryTypes;
 const userSearchStrategyProps = {
-  factoryQueryType: 'testFactoryQueryType' as FactoryQueryTypes,
+  factoryQueryType,
   initialResult: {},
   errorMessage: 'testErrorMessage',
 };
 
+const request = {
+  fake: 'request',
+  search: 'parameters',
+} as unknown as StrategyRequestType<FactoryQueryTypes>;
+
 describe('useSearchStrategy', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.spyOn(window, 'AbortController').mockRestore();
+  });
+
   it("returns the provided initial result while the query hasn't returned data", () => {
     const initialResult = {};
     (useObservable as jest.Mock).mockReturnValue(useObservableHookResult);
@@ -46,22 +102,17 @@ describe('useSearchStrategy', () => {
     expect(result.current.result).toBe(initialResult);
   });
 
-  it('calls start with the given factoryQueryType', () => {
-    const factoryQueryType = 'fakeQueryType' as FactoryQueryTypes;
+  it('calls start with the given request', () => {
     const start = jest.fn();
 
     (useObservable as jest.Mock).mockReturnValue({ ...useObservableHookResult, start });
 
     const { result } = renderHook(() =>
-      useSearchStrategy<FactoryQueryTypes>({
-        ...userSearchStrategyProps,
-        factoryQueryType,
-      })
+      useSearchStrategy<FactoryQueryTypes>(userSearchStrategyProps)
     );
 
-    result.current.search({});
-
-    expect(start).toBeCalledWith(expect.objectContaining({ factoryQueryType }));
+    result.current.search(request);
+    expect(start).toBeCalledWith(expect.objectContaining({ request }));
   });
 
   it('returns inspect', () => {
@@ -102,9 +153,27 @@ describe('useSearchStrategy', () => {
     expect(mockAddToastError).toBeCalledWith(error, { title: errorMessage });
   });
 
+  it('does not show toast error if showErrorToast = false', () => {
+    const error = 'test error';
+    const errorMessage = 'error message title';
+    (useObservable as jest.Mock).mockReturnValue({
+      ...useObservableHookResult,
+      error,
+    });
+
+    renderHook(() =>
+      useSearchStrategy<FactoryQueryTypes>({
+        ...userSearchStrategyProps,
+        showErrorToast: false,
+        errorMessage,
+      })
+    );
+
+    expect(mockAddToastError).not.toBeCalled();
+  });
+
   it('start should be called when search is called ', () => {
     const start = jest.fn();
-    const searchParams = {};
 
     (useObservable as jest.Mock).mockReturnValue({ ...useObservableHookResult, start });
 
@@ -112,14 +181,13 @@ describe('useSearchStrategy', () => {
       useSearchStrategy<FactoryQueryTypes>(userSearchStrategyProps)
     );
 
-    result.current.search(searchParams);
+    result.current.search(request);
 
     expect(start).toBeCalled();
   });
 
   it('refetch should execute the previous search again with the same params', async () => {
     const start = jest.fn();
-    const searchParams = {};
 
     (useObservable as jest.Mock).mockReturnValue({ ...useObservableHookResult, start });
 
@@ -127,7 +195,7 @@ describe('useSearchStrategy', () => {
       useSearchStrategy<FactoryQueryTypes>(userSearchStrategyProps)
     );
 
-    result.current.search(searchParams);
+    result.current.search(request);
 
     rerender();
 
@@ -138,11 +206,7 @@ describe('useSearchStrategy', () => {
   });
 
   it('aborts previous search when a subsequent search is triggered', async () => {
-    const searchParams = {};
-    const abortFunction = jest.fn();
-    jest
-      .spyOn(window, 'AbortController')
-      .mockReturnValue({ abort: abortFunction, signal: {} as AbortSignal });
+    jest.spyOn(window, 'AbortController').mockReturnValue(mockAbortController);
 
     (useObservable as jest.Mock).mockReturnValue(useObservableHookResult);
 
@@ -150,18 +214,14 @@ describe('useSearchStrategy', () => {
       useSearchStrategy<FactoryQueryTypes>(userSearchStrategyProps)
     );
 
-    result.current.search(searchParams);
-    result.current.search(searchParams);
+    result.current.search(request);
+    result.current.search(request);
 
-    expect(abortFunction).toBeCalledTimes(2);
+    expect(mockAbortController.abort).toBeCalledTimes(2);
   });
 
   it('aborts search when component unmounts', async () => {
-    const searchParams = {};
-    const abortFunction = jest.fn();
-    jest
-      .spyOn(window, 'AbortController')
-      .mockReturnValue({ abort: abortFunction, signal: {} as AbortSignal });
+    jest.spyOn(window, 'AbortController').mockReturnValue(mockAbortController);
 
     (useObservable as jest.Mock).mockReturnValue(useObservableHookResult);
 
@@ -169,44 +229,95 @@ describe('useSearchStrategy', () => {
       useSearchStrategy<FactoryQueryTypes>(userSearchStrategyProps)
     );
 
-    result.current.search(searchParams);
+    result.current.search(request);
     unmount();
 
-    expect(abortFunction).toBeCalledTimes(2);
+    expect(mockAbortController.abort).toBeCalledTimes(2);
   });
 
   it('calls start with the AbortController signal', () => {
-    const factoryQueryType = 'fakeQueryType' as FactoryQueryTypes;
+    jest.spyOn(window, 'AbortController').mockReturnValue(mockAbortController);
     const start = jest.fn();
-    const signal = new AbortController().signal;
-    jest.spyOn(window, 'AbortController').mockReturnValue({ abort: jest.fn(), signal });
 
     (useObservable as jest.Mock).mockReturnValue({ ...useObservableHookResult, start });
 
     const { result } = renderHook(() =>
-      useSearchStrategy<FactoryQueryTypes>({
-        ...userSearchStrategyProps,
-        factoryQueryType,
-      })
+      useSearchStrategy<FactoryQueryTypes>(userSearchStrategyProps)
     );
 
-    result.current.search({});
+    result.current.search(request);
 
-    expect(start).toBeCalledWith(expect.objectContaining({ signal }));
+    expect(start).toBeCalledWith(
+      expect.objectContaining({ abortSignal: mockAbortController.signal })
+    );
   });
+
   it('abort = true will cancel any running request', () => {
-    const abortSpy = jest.fn();
-    const signal = new AbortController().signal;
-    jest.spyOn(window, 'AbortController').mockReturnValue({ abort: abortSpy, signal });
-    const factoryQueryType = 'fakeQueryType' as FactoryQueryTypes;
-    const localProps = {
-      ...userSearchStrategyProps,
-      abort: false,
-      factoryQueryType,
-    };
+    jest.spyOn(window, 'AbortController').mockReturnValue(mockAbortController);
+    const localProps = { ...userSearchStrategyProps, abort: false };
+
     const { rerender } = renderHook(() => useSearchStrategy<FactoryQueryTypes>(localProps));
     localProps.abort = true;
     act(() => rerender());
-    expect(abortSpy).toHaveBeenCalledTimes(1);
+
+    expect(mockAbortController.abort).toHaveBeenCalledTimes(1);
+  });
+
+  describe('search function', () => {
+    it('should track successful search result', () => {
+      const { result } = renderHook(() => useSearch<FactoryQueryTypes>(factoryQueryType));
+      result.current({ request, abortSignal: new AbortController().signal });
+
+      expect(mockStartTracking).toBeCalledTimes(1);
+      expect(mockEndTracking).toBeCalledTimes(1);
+      expect(mockEndTracking).toBeCalledWith('success');
+    });
+
+    it('should track invalid search result', () => {
+      mockResponse.mockReturnValueOnce({}); // mock invalid empty response
+
+      const { result } = renderHook(() => useSearch<FactoryQueryTypes>(factoryQueryType));
+      result.current({ request, abortSignal: new AbortController().signal });
+
+      expect(mockStartTracking).toBeCalledTimes(1);
+      expect(mockEndTracking).toBeCalledWith('invalid');
+    });
+
+    it('should track error search result', () => {
+      mockResponse.mockImplementationOnce(() => {
+        throw Error('fake server error');
+      });
+
+      const { result } = renderHook(() => useSearch<FactoryQueryTypes>(factoryQueryType));
+      result.current({ request, abortSignal: new AbortController().signal });
+
+      expect(mockStartTracking).toBeCalledTimes(1);
+      expect(mockEndTracking).toBeCalledTimes(1);
+      expect(mockEndTracking).toBeCalledWith('error');
+    });
+
+    it('should track aborted search result', () => {
+      const abortController = new AbortController();
+      mockResponse.mockImplementationOnce(() => {
+        abortController.abort();
+        throw Error('fake aborted');
+      });
+
+      const { result } = renderHook(() => useSearch<FactoryQueryTypes>(factoryQueryType));
+      result.current({ request, abortSignal: abortController.signal });
+
+      expect(mockStartTracking).toBeCalledTimes(1);
+      expect(mockEndTracking).toBeCalledTimes(1);
+      expect(mockEndTracking).toBeCalledWith('aborted');
+    });
+
+    it('should show toast warning when the API returns partial invalid response', () => {
+      mockResponse.mockReturnValueOnce({}); // mock invalid empty response
+
+      const { result } = renderHook(() => useSearch<FactoryQueryTypes>(factoryQueryType));
+      result.current({ request, abortSignal: new AbortController().signal });
+
+      expect(mockAddToastWarning).toBeCalled();
+    });
   });
 });

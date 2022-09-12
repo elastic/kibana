@@ -12,14 +12,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiText,
   EuiPanel,
-  useEuiTheme,
+  EuiText,
+  useEuiBackgroundColor,
+  useEuiPaddingSize,
 } from '@elastic/eui';
-import type { Filter } from '@kbn/es-query';
-import { cx, css } from '@emotion/css';
+import { Filter } from '@kbn/es-query';
+import { css, cx } from '@emotion/css';
 import type { Path } from './filters_builder_types';
-import { ConditionTypes, isOrFilter } from '../utils';
+import { ConditionTypes, getConditionalOperationType } from '../utils';
 import { FilterItem } from './filters_builder_filter_item';
 import { FiltersBuilderContextType } from './filters_builder_context';
 import { getPathInArray } from './filters_builder_utils';
@@ -28,88 +29,121 @@ export interface FilterGroupProps {
   filters: Filter[];
   conditionType: ConditionTypes;
   path: Path;
-  timeRangeForSuggestionsOverride?: boolean;
+
+  /** @internal used for recursive rendering **/
+  renderedLevel?: number;
   reverseBackground?: boolean;
 }
 
-const Delimiter = () => (
-  <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-    <EuiFlexItem grow={1} style={{ marginLeft: '-5px', flexGrow: 0.12 }}>
+/** @internal **/
+const Delimiter = ({
+  color,
+  conditionType,
+}: {
+  color: 'subdued' | 'plain';
+  conditionType: ConditionTypes;
+}) => {
+  const xsPadding = useEuiPaddingSize('xs');
+  const mPadding = useEuiPaddingSize('m');
+  const backgroundColor = useEuiBackgroundColor(color);
+
+  const delimiterStyles = useMemo(
+    () => css`
+      position: relative;
+
+      .filter-builder__delimiter_text {
+        position: absolute;
+        display: block;
+        padding: ${xsPadding};
+        top: 0;
+        left: ${mPadding};
+        background: ${backgroundColor};
+      }
+    `,
+    [backgroundColor, mPadding, xsPadding]
+  );
+
+  return (
+    <div className={delimiterStyles}>
       <EuiHorizontalRule margin="s" />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiText size="s" color="subdued">
-        {i18n.translate('unifiedSearch.filter.filtersBuilder.orDelimiterLabel', {
-          defaultMessage: 'OR',
+      <EuiText size="xs" className="filter-builder__delimiter_text">
+        {i18n.translate('unifiedSearch.filter.filtersBuilder.delimiterLabel', {
+          defaultMessage: '{conditionType}',
+          values: {
+            conditionType,
+          },
         })}
       </EuiText>
-    </EuiFlexItem>
-    <EuiFlexItem grow={10} style={{ marginRight: '-5px' }}>
-      <EuiHorizontalRule margin="s" />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+    </div>
+  );
+};
 
 export const FilterGroup = ({
   filters,
   conditionType,
   path,
-  timeRangeForSuggestionsOverride,
   reverseBackground = false,
+  renderedLevel = 0,
 }: FilterGroupProps) => {
-  const { euiTheme } = useEuiTheme();
-
   const {
     globalParams: { maxDepth, hideOr },
   } = useContext(FiltersBuilderContextType);
-
-  const border = useMemo(
-    () =>
-      css`
-        border: ${euiTheme.border.thin};
-        border-radius: ${euiTheme.border.radius.medium};
-      `,
-    [euiTheme.border.thin, euiTheme.border.radius.medium]
-  );
 
   const pathInArray = getPathInArray(path);
   const isDepthReached = maxDepth <= pathInArray.length;
   const orDisabled = hideOr || (isDepthReached && conditionType === ConditionTypes.AND);
   const andDisabled = isDepthReached && conditionType === ConditionTypes.OR;
   const removeDisabled = pathInArray.length <= 1 && filters.length === 1;
-  const color = !reverseBackground ? 'subdued' : 'plain';
+  const shouldNormalizeFirstLevel =
+    !path && filters.length === 1 && getConditionalOperationType(filters[0]);
 
-  const shouldDrawBorder = (filter: Filter) => Array.isArray(filter) || isOrFilter(filter);
+  if (shouldNormalizeFirstLevel) {
+    reverseBackground = true;
+    renderedLevel -= 1;
+  }
 
-  return (
-    <EuiPanel color={color} paddingSize="s" hasShadow={false}>
-      {filters.map((filter, index, acc) => (
-        <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem
-            className={cx({
-              [border]: shouldDrawBorder(filter),
-            })}
-          >
-            <FilterItem
-              filter={filter}
-              path={`${path}${path ? '.' : ''}${index}`}
-              timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-              reverseBackground={reverseBackground}
-              disableOr={orDisabled}
-              disableAnd={andDisabled}
-              disableRemove={removeDisabled}
-              color={color}
-              index={index}
-            />
-          </EuiFlexItem>
+  const color = reverseBackground ? 'plain' : 'subdued';
 
-          {conditionType === ConditionTypes.OR && index + 1 < acc.length ? (
-            <EuiFlexItem>
-              <Delimiter />
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-      ))}
+  const renderedFilters = filters.map((filter, index, acc) => (
+    <EuiFlexGroup direction="column" gutterSize="xs">
+      <EuiFlexItem>
+        <FilterItem
+          filter={filter}
+          path={`${path}${path ? '.' : ''}${index}`}
+          reverseBackground={reverseBackground}
+          disableOr={orDisabled}
+          disableAnd={andDisabled}
+          disableRemove={removeDisabled}
+          color={color}
+          index={index}
+          renderedLevel={renderedLevel}
+        />
+      </EuiFlexItem>
+
+      {conditionType && index + 1 < acc.length ? (
+        <EuiFlexItem>
+          {conditionType === ConditionTypes.OR && (
+            <Delimiter color={color} conditionType={conditionType} />
+          )}
+        </EuiFlexItem>
+      ) : null}
+    </EuiFlexGroup>
+  ));
+
+  return shouldNormalizeFirstLevel ? (
+    <>{renderedFilters}</>
+  ) : (
+    <EuiPanel
+      color={color}
+      hasShadow={false}
+      paddingSize="none"
+      hasBorder
+      className={cx({
+        'filter-builder__panel': true,
+        'filter-builder__panel-nested': renderedLevel > 0,
+      })}
+    >
+      {renderedFilters}
     </EuiPanel>
   );
 };

@@ -19,8 +19,8 @@ import {
   EuiPage,
   EuiPageHeader,
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
 } from '@elastic/eui';
 
 import { TestImageA } from '../components';

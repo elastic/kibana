@@ -9,6 +9,7 @@ import { pick } from 'lodash/fp';
 import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { InputsModelId } from '../../store/inputs/constants';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
@@ -23,12 +24,15 @@ export const useGlobalTime = (clearAllQuery: boolean = true) => {
 
   const setQuery = useCallback(
     ({ id, inspect, loading, refetch }: SetQuery) =>
-      dispatch(inputsActions.setQuery({ inputId: 'global', id, inspect, loading, refetch })),
+      dispatch(
+        inputsActions.setQuery({ inputId: InputsModelId.global, id, inspect, loading, refetch })
+      ),
     [dispatch]
   );
 
   const deleteQuery = useCallback(
-    ({ id }: DeleteQuery) => dispatch(inputsActions.deleteOneQuery({ inputId: 'global', id })),
+    ({ id }: DeleteQuery) =>
+      dispatch(inputsActions.deleteOneQuery({ inputId: InputsModelId.global, id })),
     [dispatch]
   );
 
@@ -40,7 +44,7 @@ export const useGlobalTime = (clearAllQuery: boolean = true) => {
   useEffect(() => {
     return () => {
       if (clearAllQuery) {
-        dispatch(inputsActions.deleteAllQuery({ id: 'global' }));
+        dispatch(inputsActions.deleteAllQuery({ id: InputsModelId.global }));
       }
     };
   }, [dispatch, clearAllQuery]);

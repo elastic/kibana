@@ -71,6 +71,7 @@ export interface QueryStringInputProps {
   isInvalid?: boolean;
   isClearable?: boolean;
   iconType?: EuiIconProps['type'];
+  isDisabled?: boolean;
 
   /**
    * @param nonKqlMode by default if language switch is enabled, user can switch between kql and lucene syntax mode
@@ -380,7 +381,9 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
           }
           break;
         case KEY_CODES.ESC:
-          event.preventDefault();
+          if (isSuggestionsVisible) {
+            event.preventDefault();
+          }
           this.setState({ isSuggestionsVisible: false, index: null });
           break;
         case KEY_CODES.TAB:
@@ -761,6 +764,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
                 onClick={this.onClickInput}
                 onBlur={this.onInputBlur}
                 onFocus={this.handleOnFocus}
+                disabled={this.props.isDisabled}
                 className={inputClassName}
                 fullWidth
                 rows={1}
@@ -797,7 +801,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
                   />
                 </div>
               ) : null}
-              {this.props.isClearable && this.props.query.query ? (
+              {this.props.isClearable && !this.props.isDisabled && this.props.query.query ? (
                 <div className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right">
                   <button
                     type="button"

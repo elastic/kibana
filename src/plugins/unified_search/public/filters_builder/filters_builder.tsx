@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useReducer, useCallback, useState } from 'react';
-import { EuiDragDropContext, DragDropContextProps } from '@elastic/eui';
+import React, { useEffect, useReducer, useCallback, useState, useMemo } from 'react';
+import { EuiDragDropContext, DragDropContextProps, useEuiPaddingSize } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
+import { css } from '@emotion/css';
 import { FiltersBuilderContextType } from './filters_builder_context';
 import { ConditionTypes } from '../utils';
 import { FilterGroup } from './filters_builder_filter_group';
@@ -37,6 +38,24 @@ function FiltersBuilder({
 }: FiltersBuilderProps) {
   const [state, dispatch] = useReducer(FiltersBuilderReducer, { filters });
   const [dropTarget, setDropTarget] = useState('');
+  const mPaddingSize = useEuiPaddingSize('m');
+
+  const filtersBuilderStyles = useMemo(
+    () => css`
+      .filter-builder__panel {
+        &.filter-builder__panel-nested {
+          padding: ${mPaddingSize} 0;
+        }
+      }
+
+      .filter-builder__item {
+        &.filter-builder__item-nested {
+          padding: 0 ${mPaddingSize};
+        }
+      }
+    `,
+    [mPaddingSize]
+  );
 
   useEffect(() => {
     if (state.filters !== filters) {
@@ -84,23 +103,21 @@ function FiltersBuilder({
   };
 
   return (
-    <FiltersBuilderContextType.Provider
-      value={{
-        globalParams: { hideOr, maxDepth },
-        dataView,
-        dispatch,
-        dropTarget,
-      }}
-    >
-      <EuiDragDropContext onDragEnd={onDragEnd} onDragUpdate={onDragActive}>
-        <FilterGroup
-          filters={state.filters}
-          conditionType={rootLevelConditionType}
-          path={''}
-          timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-        />
-      </EuiDragDropContext>
-    </FiltersBuilderContextType.Provider>
+    <div className={filtersBuilderStyles}>
+      <FiltersBuilderContextType.Provider
+        value={{
+          globalParams: { hideOr, maxDepth },
+          dataView,
+          dispatch,
+          dropTarget,
+          timeRangeForSuggestionsOverride,
+        }}
+      >
+        <EuiDragDropContext onDragEnd={onDragEnd} onDragUpdate={onDragActive}>
+          <FilterGroup filters={state.filters} conditionType={rootLevelConditionType} path={''} />
+        </EuiDragDropContext>
+      </FiltersBuilderContextType.Provider>
+    </div>
   );
 }
 

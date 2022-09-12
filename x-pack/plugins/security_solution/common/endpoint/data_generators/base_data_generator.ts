@@ -167,7 +167,9 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
   }
 
   protected randomVersion(): string {
-    return [7, ...this.randomNGenerator(20, 2)].map((x) => x.toString()).join('.');
+    // the `major` is sometimes (30%) 7 and most of the time (70%) 8
+    const major = this.randomBoolean(0.4) ? 7 : 8;
+    return [major, ...this.randomNGenerator(20, 2)].map((x) => x.toString()).join('.');
   }
 
   protected randomChoice<T>(choices: T[] | readonly T[]): T {
@@ -185,10 +187,14 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
   /**
    * Returns an single search hit (normally found in a `SearchResponse`) for the given document source.
    * @param hitSource
+   * @param index
    */
-  toEsSearchHit<T extends object = object>(hitSource: T): estypes.SearchHit<T> {
+  toEsSearchHit<T extends object = object>(
+    hitSource: T,
+    index: string = 'some-index'
+  ): estypes.SearchHit<T> {
     return {
-      _index: 'some-index',
+      _index: index,
       _id: this.seededUUIDv4(),
       _score: 1.0,
       _source: hitSource,

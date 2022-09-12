@@ -8,10 +8,16 @@
 import './workspace_panel_wrapper.scss';
 
 import React, { useCallback } from 'react';
-import { EuiPageContent, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import {
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+} from '@elastic/eui';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DatasourceMap, FramePublicAPI, VisualizationMap } from '../../../types';
+import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { NativeRenderer } from '../../../native_renderer';
 import { ChartSwitch } from './chart_switch';
 import { WarningsPopover } from './warnings_popover';
@@ -25,9 +31,10 @@ import {
   selectChangesApplied,
   applyChanges,
   selectAutoApplyEnabled,
+  selectStagedRequestWarnings,
 } from '../../../state_management';
 import { WorkspaceTitle } from './title';
-import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../config_panel/dimension_container';
+import { LensInspector } from '../../../lens_inspector_service';
 
 export const AUTO_APPLY_DISABLED_STORAGE_KEY = 'autoApplyDisabled';
 
@@ -40,6 +47,7 @@ export interface WorkspacePanelWrapperProps {
   datasourceMap: DatasourceMap;
   datasourceStates: DatasourceStates;
   isFullscreen: boolean;
+  lensInspector: LensInspector;
 }
 
 export function WorkspacePanelWrapper({
@@ -51,11 +59,13 @@ export function WorkspacePanelWrapper({
   datasourceMap,
   datasourceStates,
   isFullscreen,
+  lensInspector,
 }: WorkspacePanelWrapperProps) {
   const dispatchLens = useLensDispatch();
 
   const changesApplied = useLensSelector(selectChangesApplied);
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
+  const requestWarnings = useLensSelector(selectStagedRequestWarnings);
 
   const activeVisualization = visualizationId ? visualizationMap[visualizationId] : null;
   const setVisualizationState = useCallback(
@@ -94,12 +104,18 @@ export function WorkspacePanelWrapper({
     const datasource = datasourceMap[datasourceId];
     if (!datasourceState.isLoading && datasource.getWarningMessages) {
       warningMessages.push(
-        ...(datasource.getWarningMessages(datasourceState.state, framePublicAPI, (updater) =>
-          setDatasourceState(updater, datasourceId)
+        ...(datasource.getWarningMessages(
+          datasourceState.state,
+          framePublicAPI,
+          lensInspector.adapters,
+          (updater) => setDatasourceState(updater, datasourceId)
         ) || [])
       );
     }
   });
+  if (requestWarnings) {
+    warningMessages.push(...requestWarnings);
+  }
   return (
     <>
       {!(isFullscreen && (autoApplyEnabled || warningMessages?.length)) && (

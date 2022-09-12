@@ -17,6 +17,7 @@ export interface Request {
   http: {
     method: string;
     path: string;
+    query?: string;
     headers?: { [key: string]: string };
     params?: string;
     body?: JSON | string;
@@ -43,10 +44,16 @@ export interface ScalabilitySetup {
   maxDuration: string;
 }
 
+export interface TestData {
+  kbnArchives?: string[];
+  esArchives?: string[];
+}
+
 export interface CLIParams {
   param: {
     journeyName: string;
     scalabilitySetup: ScalabilitySetup;
+    testData: TestData;
     buildId: string;
     withoutStaticResources: boolean;
   };

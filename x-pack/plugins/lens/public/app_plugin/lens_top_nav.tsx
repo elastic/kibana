@@ -210,6 +210,7 @@ export const LensTopNavMenu = ({
   onAppLeave,
   redirectToOrigin,
   datasourceMap,
+  visualizationMap,
   title,
   goBackToOriginatingApp,
   contextOriginatingApp,
@@ -218,6 +219,7 @@ export const LensTopNavMenu = ({
   initialContext,
   theme$,
   indexPatternService,
+  currentDoc,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -304,6 +306,10 @@ export const LensTopNavMenu = ({
           {}
         ),
         datasourceStates,
+        visualizationState: visualization.state,
+        activeVisualization: visualization.activeId
+          ? visualizationMap[visualization.activeId]
+          : undefined,
       })
     );
     // Add ad-hoc data views from the Lens state even if they are not used
@@ -336,6 +342,8 @@ export const LensTopNavMenu = ({
     activeDatasourceId,
     rejectedIndexPatterns,
     datasourceMap,
+    visualizationMap,
+    visualization,
     indexPatterns,
     dataViewsService,
     dataViews,
@@ -377,6 +385,7 @@ export const LensTopNavMenu = ({
         query,
         filters,
         initialContext,
+        currentDoc,
       });
       return menuEntry ? [menuEntry] : [];
     });
@@ -391,6 +400,7 @@ export const LensTopNavMenu = ({
     query,
     filters,
     initialContext,
+    currentDoc,
   ]);
 
   const layerMetaInfo = useMemo(() => {

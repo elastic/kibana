@@ -7,27 +7,13 @@
  */
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { buildEmptyFilter, Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
-import { ConditionTypes, getConditionalOperationType, isOrFilter } from '../utils';
+import { ConditionTypes, getConditionalOperationType, isOrFilter, buildOrFilter } from '../utils';
 import type { FilterItem } from '../utils';
 import type { Operator } from '../filter_bar/filter_editor';
 
 const PATH_SEPARATOR = '.';
-
-/** to: @kbn/es-query **/
-const buildOrFilter = (filters: FilterItem) => {
-  const filter = buildEmptyFilter(false);
-
-  return {
-    ...filter,
-    meta: {
-      ...filter.meta,
-      type: 'OR',
-      params: filters,
-    },
-  };
-};
 
 /**
  * The method returns the filter nesting identification number as an array.

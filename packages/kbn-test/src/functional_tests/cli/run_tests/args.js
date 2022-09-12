@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { resolve } from 'path';
+import Path from 'path';
 
+import { v4 as uuid } from 'uuid';
 import dedent from 'dedent';
+import { REPO_ROOT } from '@kbn/utils';
 import { ToolingLog, pickLevelFromFlags } from '@kbn/tooling-log';
 import { EsVersion } from '../../../functional_test_runner';
 
@@ -60,6 +62,9 @@ const options = {
   },
   'assert-none-excluded': {
     desc: 'Exit with 1/0 based on if any test is excluded with the current set of tags.',
+  },
+  logToFile: {
+    desc: 'Write the log output from Kibana/Elasticsearch to files instead of to stdout',
   },
   verbose: { desc: 'Log everything.' },
   debug: { desc: 'Run in debug mode.' },
@@ -142,19 +147,24 @@ export function processOptions(userOptions, defaultConfigPaths) {
     delete userOptions['dry-run'];
   }
 
+  const log = new ToolingLog({
+    level: pickLevelFromFlags(userOptions),
+    writeTo: process.stdout,
+  });
   function createLogger() {
-    return new ToolingLog({
-      level: pickLevelFromFlags(userOptions),
-      writeTo: process.stdout,
-    });
+    return log;
   }
+
+  const logToFile = !!userOptions.logToFile;
+  const logsDir = logToFile ? Path.resolve(REPO_ROOT, 'data/ftr_servers_logs', uuid()) : undefined;
 
   return {
     ...userOptions,
-    configs: configs.map((c) => resolve(c)),
+    configs: configs.map((c) => Path.resolve(c)),
     createLogger,
     extraKbnOpts: userOptions._,
     esVersion: EsVersion.getDefault(),
+    logsDir,
   };
 }
 

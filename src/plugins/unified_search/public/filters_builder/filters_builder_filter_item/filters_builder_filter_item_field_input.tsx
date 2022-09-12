@@ -23,8 +23,8 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
   const id = useGeneratedHtmlId({ prefix: 'fieldInput' });
 
   const onFieldChange = useCallback(
-    ([selectedfield]: DataViewField[]) => {
-      onHandleField(selectedfield);
+    ([selectedField]: DataViewField[]) => {
+      onHandleField(selectedField);
     },
     [onHandleField]
   );

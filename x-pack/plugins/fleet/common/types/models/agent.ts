@@ -9,6 +9,7 @@ import type {
   AGENT_TYPE_EPHEMERAL,
   AGENT_TYPE_PERMANENT,
   AGENT_TYPE_TEMPORARY,
+  FleetServerAgentComponentStatuses,
 } from '../../constants';
 
 export type AgentType =
@@ -30,6 +31,9 @@ export type AgentStatus =
 export type SimplifiedAgentStatus = 'healthy' | 'unhealthy' | 'updating' | 'offline' | 'inactive';
 
 export type AgentActionType = 'UNENROLL' | 'UPGRADE' | 'SETTINGS' | 'POLICY_REASSIGN' | 'CANCEL';
+
+type FleetServerAgentComponentStatusTuple = typeof FleetServerAgentComponentStatuses;
+export type FleetServerAgentComponentStatus = FleetServerAgentComponentStatusTuple[number];
 
 export interface NewAgentAction {
   type: AgentActionType;
@@ -63,8 +67,9 @@ interface AgentBase {
   enrolled_at: string;
   unenrolled_at?: string;
   unenrollment_started_at?: string;
-  upgraded_at?: string | null;
+  upgraded_at?: string;
   upgrade_started_at?: string | null;
+  upgrade_status?: 'started' | 'completed';
   access_api_key_id?: string;
   default_api_key?: string;
   default_api_key_id?: string;
@@ -99,7 +104,25 @@ export interface CurrentUpgrade {
   startTime?: string;
 }
 
-// Generated from FleetServer schema.json
+interface FleetServerAgentComponentUnit {
+  id: string;
+  type: 'input' | 'output';
+  status: FleetServerAgentComponentStatus;
+  message: string;
+  payload?: {
+    [key: string]: any;
+  };
+}
+
+interface FleetServerAgentComponent {
+  id: string;
+  type: string;
+  status: FleetServerAgentComponentStatus;
+  message: string;
+  units: FleetServerAgentComponentUnit[];
+}
+
+// Initially generated from FleetServer schema.json
 
 /**
  * An Elastic Agent that has enrolled into Fleet
@@ -136,11 +159,15 @@ export interface FleetServerAgent {
   /**
    * Date/time the Elastic Agent was last upgraded
    */
-  upgraded_at?: string | null;
+  upgraded_at?: string;
   /**
    * Date/time the Elastic Agent started the current upgrade
    */
   upgrade_started_at?: string | null;
+  /**
+   * Upgrade status
+   */
+  upgrade_status?: 'started' | 'completed';
   /**
    * ID of the API key the Elastic Agent must used to contact Fleet Server
    */
@@ -175,7 +202,7 @@ export interface FleetServerAgent {
    */
   last_checkin?: string;
   /**
-   * Lst checkin status
+   * Last checkin status
    */
   last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating';
   /**
@@ -209,6 +236,10 @@ export interface FleetServerAgent {
     id: string;
     retired_at: string;
   }>;
+  /**
+   * Components array
+   */
+  components?: FleetServerAgentComponent[];
 }
 /**
  * An Elastic Agent metadata
