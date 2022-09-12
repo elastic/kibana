@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { useGetEndpointDetails, useWithShowEndpointResponder } from '../../../management/hooks';
 import { HostStatus } from '../../../../common/endpoint/types';
 import { useDoesEndpointSupportResponder } from '../../../common/hooks/endpoint/use_does_endpoint_support_responder';
-import {UPGRADE_ENDPOINT_FOR_RESPONDER} from '../../../common/translations';
+import { UPGRADE_ENDPOINT_FOR_RESPONDER } from '../../../common/translations';
 
 export const NOT_FROM_ENDPOINT_HOST_TOOLTIP = i18n.translate(
   'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.notSupportedTooltip',
@@ -49,7 +49,8 @@ export const ResponderContextMenuItem = memo<ResponderContextMenuItemProps>(
     } = useGetEndpointDetails(endpointId, { enabled: Boolean(endpointId) });
 
     const isResponderCapabilitiesEnabled = useDoesEndpointSupportResponder(
-      endpointHostInfo?.metadata);
+      endpointHostInfo?.metadata
+    );
 
     const [isDisabled, tooltip]: [disabled: boolean, tooltip: ReactNode] = useMemo(() => {
       if (!endpointId) {
