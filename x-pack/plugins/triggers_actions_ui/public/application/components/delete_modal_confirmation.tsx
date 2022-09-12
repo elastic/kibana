@@ -7,12 +7,14 @@
 
 import { EuiCallOut, EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '../../common/lib/kibana';
 
 export const DeleteModalConfirmation = ({
   idsToDelete,
+  idsToDeleteFilter,
+  numberOfSelectedRules,
   apiDeleteCall,
   onDeleted,
   onCancel,
@@ -24,11 +26,15 @@ export const DeleteModalConfirmation = ({
   setIsLoadingState,
 }: {
   idsToDelete: string[];
+  idsToDeleteFilter?: string;
+  numberOfSelectedRules?: number;
   apiDeleteCall: ({
     ids,
+    filter,
     http,
   }: {
-    ids: string[];
+    ids?: string[];
+    filter?: string;
     http: HttpSetup;
   }) => Promise<{ successes: string[]; errors: string[] }>;
   onDeleted: (deleted: string[]) => void;
@@ -43,14 +49,24 @@ export const DeleteModalConfirmation = ({
   const [deleteModalFlyoutVisible, setDeleteModalVisibility] = useState<boolean>(false);
 
   useEffect(() => {
-    setDeleteModalVisibility(idsToDelete.length > 0);
-  }, [idsToDelete]);
+    if (idsToDeleteFilter) {
+      setDeleteModalVisibility(true);
+    } else {
+      setDeleteModalVisibility(idsToDelete.length > 0);
+    }
+  }, [idsToDelete, idsToDeleteFilter]);
+
+  const numIdsToDelete = useMemo(() => {
+    if (idsToDeleteFilter) {
+      return numberOfSelectedRules;
+    }
+    return idsToDelete.length;
+  }, [idsToDelete, idsToDeleteFilter, numberOfSelectedRules]);
 
   const {
     http,
     notifications: { toasts },
   } = useKibana().services;
-  const numIdsToDelete = idsToDelete.length;
   if (!deleteModalFlyoutVisible) {
     return null;
   }
@@ -88,7 +104,11 @@ export const DeleteModalConfirmation = ({
       onConfirm={async () => {
         setDeleteModalVisibility(false);
         setIsLoadingState(true);
-        const { successes, errors } = await apiDeleteCall({ ids: idsToDelete, http });
+        const { successes, errors } = await apiDeleteCall({
+          ids: idsToDelete,
+          filter: idsToDeleteFilter,
+          http,
+        });
         setIsLoadingState(false);
 
         const numSuccesses = successes.length;

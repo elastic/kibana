@@ -19,8 +19,10 @@ import {
 } from '../../../../types';
 import {
   deleteRules,
-  disableRules,
-  enableRules,
+  bulkDisableRules,
+  BulkDisableRulesProps,
+  bulkEnableRules,
+  BulkEnableRulesProps,
   muteRules,
   unmuteRules,
   disableRule,
@@ -42,17 +44,19 @@ import {
   loadActionErrorLog,
   LoadActionErrorLogProps,
   snoozeRule,
-  snoozeRules,
+  bulkSnoozeRules,
+  BulkSnoozeRulesProps,
   unsnoozeRule,
-  unsnoozeRules,
+  bulkUnsnoozeRules,
+  BulkUnsnoozeRulesProps,
 } from '../../../lib/rule_api';
 import { useKibana } from '../../../../common/lib/kibana';
 
 export interface ComponentOpts {
   muteRules: (rules: Rule[]) => Promise<void>;
   unmuteRules: (rules: Rule[]) => Promise<void>;
-  enableRules: (rules: Rule[]) => Promise<void>;
-  disableRules: (rules: Rule[]) => Promise<void>;
+  bulkEnableRules: (props: BulkEnableRulesProps) => Promise<void>;
+  bulkDisableRules: (props: BulkDisableRulesProps) => Promise<void>;
   deleteRules: (rules: Rule[]) => Promise<{
     successes: string[];
     errors: string[];
@@ -81,9 +85,9 @@ export interface ComponentOpts {
   getHealth: () => Promise<AlertingFrameworkHealth>;
   resolveRule: (id: Rule['id']) => Promise<ResolvedRule>;
   snoozeRule: (rule: Rule, snoozeSchedule: SnoozeSchedule) => Promise<void>;
-  snoozeRules: (rules: Rule[], snoozeSchedule: SnoozeSchedule) => Promise<void>;
+  bulkSnoozeRules: (props: BulkSnoozeRulesProps) => Promise<void>;
   unsnoozeRule: (rule: Rule, scheduleIds?: string[]) => Promise<void>;
-  unsnoozeRules: (rules: Rule[], scheduleIds?: string[]) => Promise<void>;
+  bulkUnsnoozeRules: (props: BulkUnsnoozeRulesProps) => Promise<void>;
 }
 
 export type PropsWithOptionalApiHandlers<T> = Omit<T, keyof ComponentOpts> & Partial<ComponentOpts>;
@@ -105,14 +109,11 @@ export function withBulkRuleOperations<T>(
         unmuteRules={async (items: Rule[]) =>
           unmuteRules({ http, ids: items.filter(isRuleMuted).map((item) => item.id) })
         }
-        enableRules={async (items: Rule[]) =>
-          enableRules({ http, ids: items.filter(isRuleDisabled).map((item) => item.id) })
+        bulkEnableRules={async (bulkEanbleRulesProps: BulkEnableRulesProps) =>
+          bulkEnableRules({ http, ...bulkEanbleRulesProps })
         }
-        disableRules={async (items: Rule[]) =>
-          disableRules({
-            http,
-            ids: items.filter((item) => !isRuleDisabled(item)).map((item) => item.id),
-          })
+        bulkDisableRules={async (bulkDisableRulesProps: BulkDisableRulesProps) =>
+          bulkDisableRules({ http, ...bulkDisableRulesProps })
         }
         deleteRules={async (items: Rule[]) =>
           deleteRules({ http, ids: items.map((item) => item.id) })
@@ -179,14 +180,14 @@ export function withBulkRuleOperations<T>(
         snoozeRule={async (rule: Rule, snoozeSchedule: SnoozeSchedule) => {
           return await snoozeRule({ http, id: rule.id, snoozeSchedule });
         }}
-        snoozeRules={async (rules: Rule[], snoozeSchedule: SnoozeSchedule) => {
-          return await snoozeRules({ http, ids: rules.map((item) => item.id), snoozeSchedule });
+        bulkSnoozeRules={async (bulkSnoozeRulesProps: BulkSnoozeRulesProps) => {
+          return await bulkSnoozeRules({ http, ...bulkSnoozeRulesProps });
         }}
         unsnoozeRule={async (rule: Rule, scheduleIds?: string[]) => {
           return await unsnoozeRule({ http, id: rule.id, scheduleIds });
         }}
-        unsnoozeRules={async (rules: Rule[], scheduleIds?: string[]) => {
-          return await unsnoozeRules({ http, ids: rules.map((item) => item.id), scheduleIds });
+        bulkUnsnoozeRules={async (bulkUnsnoozeRulesProps: BulkUnsnoozeRulesProps) => {
+          return await bulkUnsnoozeRules({ http, ...bulkUnsnoozeRulesProps });
         }}
       />
     );

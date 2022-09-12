@@ -9,33 +9,32 @@ import React, { useMemo } from 'react';
 import {
   EuiModal,
   EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiModalBody,
   EuiModalFooter,
   EuiSpacer,
   EuiButtonEmpty,
+  EuiModalHeaderTitle,
 } from '@elastic/eui';
 import {
   withBulkRuleOperations,
   ComponentOpts as BulkOperationsComponentOpts,
 } from '../../common/components/with_bulk_rule_api_operations';
+import { RuleSnoozeScheduler } from './rule_snooze/scheduler';
 import { RuleTableItem, SnoozeSchedule } from '../../../../types';
-import { SnoozePanel } from './rule_snooze';
-import { isRuleSnoozed } from '../../../lib';
 import { useKibana } from '../../../../common/lib/kibana';
 
-export type BulkSnoozeModalProps = {
-  rulesToSnooze: RuleTableItem[];
-  rulesToSnoozeFilter?: string;
+export type BulkSnoozeScheduleModalProps = {
+  rulesToSchedule: RuleTableItem[];
+  rulesToScheduleFilter?: string;
   numberOfSelectedRules?: number;
   onClose: () => void;
   onSave: () => void;
 } & BulkOperationsComponentOpts;
 
-export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
+export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => {
   const {
-    rulesToSnooze,
-    rulesToSnoozeFilter,
+    rulesToSchedule,
+    rulesToScheduleFilter,
     // numberOfSelectedRules,
     onClose,
     onSave,
@@ -47,59 +46,51 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
     notifications: { toasts },
   } = useKibana().services;
 
-  const isSnoozeModalOpen = useMemo(() => {
-    if (rulesToSnoozeFilter) {
+  const isScheduleModalOpen = useMemo(() => {
+    if (rulesToScheduleFilter) {
       return true;
     }
-    return rulesToSnooze.length > 0;
-  }, [rulesToSnooze, rulesToSnoozeFilter]);
+    return rulesToSchedule.length > 0;
+  }, [rulesToSchedule, rulesToScheduleFilter]);
 
-  const isSnoozed = useMemo(() => {
-    if (rulesToSnoozeFilter) {
-      return true;
-    }
-    return rulesToSnooze.some((item) => isRuleSnoozed(item));
-  }, [rulesToSnooze, rulesToSnoozeFilter]);
-
-  const onSnoozeRule = async (schedule: SnoozeSchedule) => {
+  const onAddSnoozeSchedule = async (schedule: SnoozeSchedule) => {
     onClose();
     await bulkSnoozeRules({
-      ids: rulesToSnooze.map((item) => item.id),
-      filter: rulesToSnoozeFilter,
+      ids: rulesToSchedule.map((item) => item.id),
+      filter: rulesToScheduleFilter,
       snoozeSchedule: schedule,
     });
     toasts.addSuccess('Rules successfully snoozed.');
     onSave();
   };
 
-  const onUnsnoozeRule = async (scheduleIds?: string[]) => {
+  const onRemoveSnoozeSchedule = async () => {
     onClose();
     await bulkUnsnoozeRules({
-      ids: rulesToSnooze.map((item) => item.id),
-      filter: rulesToSnoozeFilter,
-      scheduleIds,
+      ids: rulesToSchedule.map((item) => item.id),
+      filter: rulesToScheduleFilter,
     });
-    toasts.addSuccess('Rules successfully unsnoozed.');
+    toasts.addSuccess('Rule schedules successfully unsnoozed.');
     onSave();
   };
 
-  if (isSnoozeModalOpen) {
+  if (isScheduleModalOpen) {
     return (
       <EuiModal onClose={onClose}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            Snooze Notifications
+            Add Snooze Schedule
             <EuiSpacer size="s" />
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
-          <SnoozePanel
-            snoozeRule={onSnoozeRule}
-            unsnoozeRule={onUnsnoozeRule}
-            showAddSchedule={false}
-            showCancel={isSnoozed}
-            scheduledSnoozes={[]}
-            activeSnoozes={[]}
+          <RuleSnoozeScheduler
+            hasTitle={false}
+            isLoading={false}
+            initialSchedule={null}
+            onSaveSchedule={onAddSnoozeSchedule}
+            onCancelSchedules={onRemoveSnoozeSchedule}
+            onClose={() => {}}
           />
         </EuiModalBody>
         <EuiModalFooter>
@@ -108,7 +99,8 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
       </EuiModal>
     );
   }
+
   return null;
 };
 
-export const BulkSnoozeModalWithApi = withBulkRuleOperations(BulkSnoozeModal);
+export const BulkSnoozeScheduleModalWithApi = withBulkRuleOperations(BulkSnoozeScheduleModal);

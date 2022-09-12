@@ -24,6 +24,7 @@ import {
   EuiSelectableOption,
   EuiIcon,
   EuiScreenReaderOnly,
+  EuiCheckbox,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import {
@@ -34,7 +35,12 @@ import {
   MONITORING_HISTORY_LIMIT,
 } from '@kbn/alerting-plugin/common';
 
-import { rulesStatusesTranslationsMapping, ALERT_STATUS_LICENSE_ERROR } from '../translations';
+import {
+  rulesStatusesTranslationsMapping,
+  ALERT_STATUS_LICENSE_ERROR,
+  SELECT_ALL_RULES,
+  CLEAR_SELECTION,
+} from '../translations';
 import { getHealthColor } from './rule_execution_status_filter';
 import {
   Rule,
@@ -99,6 +105,7 @@ interface ConvertRulesToTableItemsOpts {
 export interface RulesListTableProps {
   rulesListKey?: string;
   rulesState: RuleState;
+  items: RuleTableItem[];
   ruleTypesState: RuleTypeState;
   ruleTypeRegistry: RuleTypeRegistryContract;
   isLoading?: boolean;
@@ -116,13 +123,18 @@ export interface RulesListTableProps {
   onManageLicenseClick?: (rule: RuleTableItem) => void;
   onTagClick?: (rule: RuleTableItem) => void;
   onTagClose?: (rule: RuleTableItem) => void;
-  onSelectionChange?: (updatedSelectedItemsList: RuleTableItem[]) => void;
   onPercentileOptionsChange?: (options: EuiSelectableOption[]) => void;
   onRuleChanged: () => Promise<void>;
   onEnableRule: (rule: RuleTableItem) => Promise<void>;
   onDisableRule: (rule: RuleTableItem) => Promise<void>;
   onSnoozeRule: (rule: RuleTableItem, snoozeSchedule: SnoozeSchedule) => Promise<void>;
   onUnsnoozeRule: (rule: RuleTableItem, scheduleIds?: string[]) => Promise<void>;
+  onSelectAll: () => void;
+  onSelectPage: () => void;
+  onSelectRow: (rule: RuleTableItem) => void;
+  isPageSelected: boolean;
+  isAllSelected: boolean;
+  isRowSelected: (rule: RuleTableItem) => boolean;
   renderCollapsedItemActions?: (
     rule: RuleTableItem,
     onLoading: (isLoading: boolean) => void
@@ -162,10 +174,10 @@ export const RulesListTable = (props: RulesListTableProps) => {
   const {
     rulesListKey,
     rulesState,
+    items = [],
     ruleTypesState,
     ruleTypeRegistry,
     isLoading = false,
-    canExecuteActions = false,
     sort,
     page,
     percentileOptions,
@@ -177,13 +189,18 @@ export const RulesListTable = (props: RulesListTableProps) => {
     onRuleEditClick = EMPTY_HANDLER,
     onRuleDeleteClick = EMPTY_HANDLER,
     onManageLicenseClick = EMPTY_HANDLER,
-    onSelectionChange = EMPTY_HANDLER,
     onPercentileOptionsChange = EMPTY_HANDLER,
     onRuleChanged,
     onEnableRule = EMPTY_HANDLER,
     onDisableRule = EMPTY_HANDLER,
     onSnoozeRule = EMPTY_HANDLER,
     onUnsnoozeRule = EMPTY_HANDLER,
+    onSelectAll = EMPTY_HANDLER,
+    onSelectPage = EMPTY_HANDLER,
+    onSelectRow = EMPTY_HANDLER,
+    isPageSelected = false,
+    isAllSelected = false,
+    isRowSelected = () => false,
     renderCollapsedItemActions = EMPTY_RENDER,
     renderRuleError = EMPTY_RENDER,
     visibleColumns,
@@ -323,6 +340,32 @@ export const RulesListTable = (props: RulesListTableProps) => {
     },
     [onManageLicenseClick]
   );
+
+  const selectionColumn = useMemo(() => {
+    return {
+      id: 'ruleSelection',
+      field: 'selection',
+      sortable: false,
+      width: '32px',
+      mobileOptions: { header: false },
+      name: (
+        <EuiCheckbox
+          id="rulesListTable_selectAll"
+          checked={isPageSelected}
+          onChange={onSelectPage}
+        />
+      ),
+      render: (name: string, rule: RuleTableItem) => {
+        return (
+          <EuiCheckbox
+            id={`ruleListTable_select_${rule.id}}`}
+            onChange={() => onSelectRow(rule)}
+            checked={isRowSelected(rule)}
+          />
+        );
+      },
+    };
+  }, [isPageSelected, onSelectPage, onSelectRow, isRowSelected]);
 
   const getRulesTableColumns = useCallback((): RulesListColumns[] => {
     return [
@@ -788,32 +831,54 @@ export const RulesListTable = (props: RulesListTableProps) => {
     visibleColumns,
   });
 
+  const selectAllButtonText = useMemo(() => {
+    if (isAllSelected) {
+      return CLEAR_SELECTION;
+    }
+    return SELECT_ALL_RULES(rulesState.totalItemCount);
+  }, [isAllSelected, rulesState.totalItemCount]);
+
+  const rowProps = useCallback(
+    (rule: RuleTableItem) => {
+      const selectedClass = isRowSelected(rule) ? 'euiTableRow-isSelected' : '';
+      return {
+        'data-test-subj': 'rule-row',
+        className: !ruleTypesState.data.get(rule.ruleTypeId)?.enabledInLicense
+          ? `actRulesList__tableRowDisabled ${selectedClass}`
+          : selectedClass,
+      };
+    },
+    [ruleTypesState, isRowSelected]
+  );
+
   return (
     <EuiFlexGroup gutterSize="none" direction="column">
-      <EuiFlexItem>{ColumnSelector}</EuiFlexItem>
+      <EuiFlexGroup gutterSize="none">
+        <EuiFlexItem grow={false}>{ColumnSelector}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="xs"
+            aria-label={i18n.translate(
+              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.selectAllAriaLabel',
+              { defaultMessage: 'Toggle select all rules' }
+            )}
+            data-test-subj="selectAllRulesButton"
+            iconType={isAllSelected ? 'cross' : 'pagesSelect'}
+            onClick={onSelectAll}
+          >
+            {selectAllButtonText}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiFlexItem>
         <EuiBasicTable
           loading={isLoading}
           /* Don't display rules until we have the rule types initialized */
-          items={
-            ruleTypesState.isInitialized === false
-              ? []
-              : convertRulesToTableItems({
-                  rules: rulesState.data,
-                  ruleTypeIndex: ruleTypesState.data,
-                  canExecuteActions,
-                  config,
-                })
-          }
+          items={items}
           itemId="id"
-          columns={rulesListColumns}
+          columns={[selectionColumn, ...rulesListColumns]}
           sorting={{ sort }}
-          rowProps={(rule: RuleTableItem) => ({
-            'data-test-subj': 'rule-row',
-            className: !ruleTypesState.data.get(rule.ruleTypeId)?.enabledInLicense
-              ? 'actRulesList__tableRowDisabled'
-              : '',
-          })}
+          rowProps={rowProps}
           cellProps={(rule: RuleTableItem) => ({
             'data-test-subj': 'cell',
             className: !ruleTypesState.data.get(rule.ruleTypeId)?.enabledInLicense
@@ -826,10 +891,6 @@ export const RulesListTable = (props: RulesListTableProps) => {
             pageSize: page.size,
             /* Don't display rule count until we have the rule types initialized */
             totalItemCount: ruleTypesState.isInitialized === false ? 0 : rulesState.totalItemCount,
-          }}
-          selection={{
-            selectable: (rule: RuleTableItem) => rule.isEditable,
-            onSelectionChange,
           }}
           onChange={({
             page: changedPage,

@@ -64,11 +64,11 @@ import {
   enableRule,
   snoozeRule,
   unsnoozeRule,
-  deleteRules,
-  updateAPIKey,
+  bulkDeleteRules,
+  bulkUpdateAPIKey,
 } from '../../../lib/rule_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
-import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
+import { hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { routeToRuleDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
@@ -89,6 +89,9 @@ import { RulesListAutoRefresh } from './rules_list_auto_refresh';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
 import { RulesListVisibleColumns } from './rules_list_column_selector';
 import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
+import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
+import { useRulesBulkEditSelect } from '../../../hooks/use_rules_bulk_edit_selection';
+
 const ENTER_KEY = 13;
 
 interface RulesPageContainerState {
@@ -154,7 +157,6 @@ export const RulesList = ({
 
   const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
   const [searchText, setSearchText] = useState<string | undefined>();
@@ -203,8 +205,16 @@ export const RulesList = ({
   });
 
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
+  const [rulesToDeleteFilter, setRulesToDeleteFilter] = useState<string>('');
+
   const [rulesToSnooze, setRulesToSnooze] = useState<RuleTableItem[]>([]);
+  const [rulesToSnoozeFilter, setRulesToSnoozeFilter] = useState<string>('');
+
   const [rulesToSchedule, setRulesToSchedule] = useState<RuleTableItem[]>([]);
+  const [rulesToScheduleFilter, setRulesToScheduleFilter] = useState<string>('');
+
+  const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
+  const [rulesToUpdateAPIKeyFilter, setRulesToUpdateAPIKeyFilter] = useState<string>('');
 
   const hasAnyAuthorizedRuleType = useMemo(() => {
     return ruleTypesState.isInitialized && ruleTypesState.data.size > 0;
@@ -257,7 +267,6 @@ export const RulesList = ({
     onError,
   });
 
-  const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
   const onRuleEdit = (ruleItem: RuleTableItem) => {
     setEditFlyoutVisibility(true);
     setCurrentRuleToEdit(ruleItem);
@@ -518,11 +527,53 @@ export const RulesList = ({
     ...getRuleTagFilter(),
   ];
 
-  const authorizedToModifySelectedRules = selectedIds.length
-    ? filterRulesById(rulesState.data, selectedIds).every((selectedRule) =>
-        hasAllPrivilege(selectedRule, ruleTypesState.data.get(selectedRule.ruleTypeId))
-      )
-    : false;
+  const {
+    isAllSelected,
+    selectedIds,
+    isPageSelected,
+    numberOfSelectedItems,
+    isRowSelected,
+    getFilter,
+    onSelectRow,
+    onSelectAll,
+    onSelectPage,
+    onClearSelection,
+  } = useRulesBulkEditSelect({
+    totalItemCount: rulesState.totalItemCount,
+    itemIds: rulesState.data.map((item) => item.id),
+  });
+
+  const clearRulesToDelete = () => {
+    setRulesToDelete([]);
+    setRulesToDeleteFilter('');
+  };
+
+  const clearRulesToSnooze = () => {
+    setRulesToSnooze([]);
+    setRulesToSnoozeFilter('');
+  };
+
+  const clearRulesToSchedule = () => {
+    setRulesToSchedule([]);
+    setRulesToScheduleFilter('');
+  };
+
+  const clearRulesToUpdateAPIKey = () => {
+    setRulesToUpdateAPIKey([]);
+    setRulesToUpdateAPIKeyFilter('');
+  };
+
+  const tableItems = useMemo(() => {
+    if (ruleTypesState.isInitialized === false) {
+      return [];
+    }
+    return convertRulesToTableItems({
+      rules: rulesState.data,
+      ruleTypeIndex: ruleTypesState.data,
+      canExecuteActions,
+      config,
+    });
+  }, [ruleTypesState, rulesState, canExecuteActions, config]);
 
   const table = (
     <>
@@ -555,16 +606,18 @@ export const RulesList = ({
         </>
       ) : null}
       <EuiFlexGroup gutterSize="s">
-        {selectedIds.length > 0 && authorizedToModifySelectedRules && (
+        {numberOfSelectedItems > 0 && (
           <EuiFlexItem grow={false}>
             <BulkOperationPopover>
               <RuleQuickEditButtons
                 selectedItems={convertRulesToTableItems({
-                  rules: filterRulesById(rulesState.data, selectedIds),
+                  rules: filterRulesById(rulesState.data, [...selectedIds]),
                   ruleTypeIndex: ruleTypesState.data,
                   canExecuteActions,
                   config,
                 })}
+                isAllSelected={isAllSelected}
+                getFilter={getFilter}
                 onPerformingAction={() => setIsPerformingAction(true)}
                 onActionPerformed={() => {
                   loadData();
@@ -574,6 +627,10 @@ export const RulesList = ({
                 setRulesToUpdateAPIKey={setRulesToUpdateAPIKey}
                 setRulesToSnooze={setRulesToSnooze}
                 setRulesToSchedule={setRulesToSchedule}
+                setRulesToDeleteFilter={setRulesToDeleteFilter}
+                setRulesToSnoozeFilter={setRulesToSnoozeFilter}
+                setRulesToScheduleFilter={setRulesToScheduleFilter}
+                setRulesToUpdateAPIKeyFilter={setRulesToUpdateAPIKeyFilter}
               />
             </BulkOperationPopover>
           </EuiFlexItem>
@@ -746,6 +803,7 @@ export const RulesList = ({
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <RulesListTable
+        items={tableItems}
         canExecuteActions={canExecuteActions}
         isLoading={rulesState.isLoading || ruleTypesState.isLoading || isPerformingAction}
         rulesState={rulesState}
@@ -774,14 +832,17 @@ export const RulesList = ({
             ruleTypeId: rule.ruleTypeId,
           })
         }
-        onSelectionChange={(updatedSelectedItemsList) =>
-          setSelectedIds(updatedSelectedItemsList.map((item) => item.id))
-        }
         onPercentileOptionsChange={setPercentileOptions}
         onDisableRule={onDisableRule}
         onEnableRule={onEnableRule}
         onSnoozeRule={onSnoozeRule}
         onUnsnoozeRule={onUnsnoozeRule}
+        onSelectAll={onSelectAll}
+        onSelectPage={onSelectPage}
+        onSelectRow={onSelectRow}
+        isPageSelected={isPageSelected}
+        isAllSelected={isAllSelected}
+        isRowSelected={isRowSelected}
         renderCollapsedItemActions={(rule, onLoading) => (
           <CollapsedItemActions
             key={rule.id}
@@ -848,20 +909,22 @@ export const RulesList = ({
     <section data-test-subj="rulesList">
       <DeleteModalConfirmation
         onDeleted={async () => {
-          setRulesToDelete([]);
-          setSelectedIds([]);
+          clearRulesToDelete();
+          onClearSelection();
           await loadData();
         }}
         onErrors={async () => {
           // Refresh the rules from the server, some rules may have beend deleted
           await loadData();
-          setRulesToDelete([]);
+          clearRulesToDelete();
         }}
         onCancel={() => {
-          setRulesToDelete([]);
+          clearRulesToDelete();
         }}
-        apiDeleteCall={deleteRules}
+        apiDeleteCall={bulkDeleteRules}
         idsToDelete={rulesToDelete}
+        idsToDeleteFilter={rulesToDeleteFilter}
+        numberOfSelectedRules={numberOfSelectedItems}
         singleTitle={i18n.translate('xpack.triggersActionsUI.sections.rulesList.singleTitle', {
           defaultMessage: 'rule',
         })}
@@ -874,28 +937,43 @@ export const RulesList = ({
       />
       <BulkSnoozeModal
         rulesToSnooze={rulesToSnooze}
-        rulesToSchedule={rulesToSchedule}
+        rulesToSnoozeFilter={rulesToSnoozeFilter}
         onClose={() => {
-          setRulesToSnooze([]);
-          setRulesToSchedule([]);
+          clearRulesToSnooze();
         }}
         onSave={async () => {
-          setRulesToSnooze([]);
-          setRulesToSchedule([]);
+          clearRulesToSnooze();
+          onClearSelection();
+          await loadData();
+        }}
+      />
+      <BulkSnoozeScheduleModal
+        rulesToSchedule={rulesToSchedule}
+        rulesToScheduleFilter={rulesToScheduleFilter}
+        numberOfSelectedRules={numberOfSelectedItems}
+        onClose={() => {
+          clearRulesToSchedule();
+        }}
+        onSave={async () => {
+          clearRulesToSchedule();
+          onClearSelection();
           await loadData();
         }}
       />
       <UpdateApiKeyModalConfirmation
         onCancel={() => {
-          setRulesToUpdateAPIKey([]);
+          clearRulesToUpdateAPIKey();
         }}
         idsToUpdate={rulesToUpdateAPIKey}
-        apiUpdateApiKeyCall={updateAPIKey}
+        idsToUpdateFilter={rulesToUpdateAPIKeyFilter}
+        numberOfSelectedRules={numberOfSelectedItems}
+        apiUpdateApiKeyCall={bulkUpdateAPIKey}
         setIsLoadingState={(isLoading: boolean) => {
           setRulesState({ ...rulesState, isLoading });
         }}
         onUpdated={async () => {
-          setRulesToUpdateAPIKey([]);
+          clearRulesToUpdateAPIKey();
+          onClearSelection();
           await loadData();
         }}
       />

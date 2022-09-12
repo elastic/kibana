@@ -23,18 +23,22 @@ export async function unsnoozeRule({
   });
 }
 
-export async function unsnoozeRules({
-  ids,
-  http,
-  scheduleIds,
-}: {
-  ids: string[];
-  http: HttpSetup;
+export interface BulkUnsnoozeRulesProps {
+  ids?: string[];
+  filter?: string;
   scheduleIds?: string[];
-}): Promise<void> {
+}
+
+export async function bulkUnsnoozeRules({
+  ids,
+  filter,
+  scheduleIds,
+  http,
+}: BulkUnsnoozeRulesProps & { http: HttpSetup }): Promise<void> {
   await http.post(`${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_edit`, {
     body: JSON.stringify({
       ids,
+      filter,
       operations: [
         {
           operation: 'delete',

@@ -158,3 +158,17 @@ export const rulesWarningReasonTranslationsMapping = {
   maxAlerts: ALERT_WARNING_MAX_ALERTS_REASON,
   unknown: ALERT_WARNING_UNKNOWN_REASON,
 };
+
+export const SELECT_ALL_RULES = (totalRules: number) => {
+  return i18n.translate('xpack.triggersActionsUI.sections.rulesList.selectAllRulesButton', {
+    values: { totalRules },
+    defaultMessage: 'Select all {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
+  });
+};
+
+export const CLEAR_SELECTION = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.clearAllSelectionButton',
+  {
+    defaultMessage: 'Clear selection',
+  }
+);

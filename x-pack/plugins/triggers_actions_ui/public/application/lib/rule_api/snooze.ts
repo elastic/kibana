@@ -35,18 +35,22 @@ export async function snoozeRule({
   });
 }
 
-export async function snoozeRules({
+export interface BulkSnoozeRulesProps {
+  ids?: string[];
+  filter?: string;
+  snoozeSchedule: SnoozeSchedule;
+}
+
+export async function bulkSnoozeRules({
   ids,
+  filter,
   snoozeSchedule,
   http,
-}: {
-  ids: string[];
-  snoozeSchedule: SnoozeSchedule;
-  http: HttpSetup;
-}): Promise<void> {
+}: BulkSnoozeRulesProps & { http: HttpSetup }): Promise<void> {
   await http.post(`${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_edit`, {
     body: JSON.stringify({
       ids,
+      filter,
       operations: [
         {
           operation: 'set',
