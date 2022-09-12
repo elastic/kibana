@@ -434,17 +434,32 @@ export class SyntheticsService {
 
     const start = performance.now();
 
-    const monitors: Array<SavedObject<SyntheticsMonitorWithSecrets>> = await Promise.all(
-      encryptedMonitors.map((monitor) =>
-        encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
-          syntheticsMonitor.name,
-          monitor.id,
-          {
-            namespace: monitor.namespaces?.[0],
+    const monitors: Array<SavedObject<SyntheticsMonitorWithSecrets>> = (
+      await Promise.all(
+        encryptedMonitors.map((monitor) => {
+          try {
+            return encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
+              syntheticsMonitor.name,
+              monitor.id,
+              {
+                namespace: monitor.namespaces?.[0],
+              }
+            );
+          } catch (e) {
+            this.logger.error(e);
+            sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
+              reason: 'Failed to decrypt monitor',
+              message: e?.message,
+              type: 'runTaskError',
+              code: e?.code,
+              status: e.status,
+              kibanaVersion: this.server.kibanaVersion,
+            });
+            return null;
           }
-        )
+        })
       )
-    );
+    ).filter((monitor) => monitor !== null) as Array<SavedObject<SyntheticsMonitorWithSecrets>>;
 
     const end = performance.now();
     const duration = end - start;
