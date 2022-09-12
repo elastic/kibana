@@ -284,9 +284,9 @@ Below you can find the folder structure used on our Cypress tests.
 
 Contains the specs that are executed in a Cross Cluster Search configuration.
 
-### integration/
+### e2e/
 
-Cypress convention. Contains the specs that are going to be executed.
+Cypress convention starting version 10 (previously known as integration). Contains the specs that are going to be executed.
 
 ### fixtures/
 
