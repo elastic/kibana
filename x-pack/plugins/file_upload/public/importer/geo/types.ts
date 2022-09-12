@@ -10,11 +10,6 @@ import { ReactNode } from 'react';
 import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { IImporter } from '../types';
 
-export enum UPLOAD_SIZE {
-  NORMAL = 'NORMAL',
-  SMALL = 'SMALL',
-}
-
 export interface GeoFilePreview {
   features: Feature[];
   hasPoints: boolean;
@@ -28,5 +23,5 @@ export interface GeoFileImporter extends IImporter {
   previewFile(rowLimit?: number, sizeLimit?: number): Promise<GeoFilePreview>;
   renderEditor(onChange: () => void): ReactNode;
   setGeoFieldType(geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE): void;
-  setUploadSize(uploadSize: UPLOAD_SIZE): void;
+  setSmallChunks(smallChunks: boolean): void;
 }

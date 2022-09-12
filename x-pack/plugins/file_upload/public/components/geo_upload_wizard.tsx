@@ -14,7 +14,7 @@ import { GeoUploadForm, OnFileSelectParameters } from './geo_upload_form';
 import { ImportCompleteView } from './import_complete_view';
 import type { FileUploadComponentProps, FileUploadGeoResults } from '../lazy_load_bundle';
 import { ImportResults } from '../importer';
-import { GeoFileImporter, UPLOAD_SIZE } from '../importer/geo';
+import { GeoFileImporter } from '../importer/geo';
 import type { Settings } from '../../common/types';
 import { hasImportPermission } from '../api';
 
@@ -40,7 +40,7 @@ interface State {
   indexNameError?: string;
   dataViewResp?: object;
   phase: PHASE;
-  uploadSize: UPLOAD_SIZE;
+  smallChunks: boolean;
 }
 
 export class GeoUploadWizard extends Component<FileUploadComponentProps, State> {
@@ -53,7 +53,7 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     importStatus: '',
     indexName: '',
     phase: PHASE.CONFIGURE,
-    uploadSize: UPLOAD_SIZE.NORMAL,
+    smallChunks: false,
   };
 
   componentDidMount() {
@@ -148,7 +148,7 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     this.setState({
       importStatus: getWritingToIndexMsg(0),
     });
-    this._geoFileImporter.setUploadSize(this.state.uploadSize);
+    this._geoFileImporter.setSmallChunks(this.state.smallChunks);
     const importResults = await this._geoFileImporter.import(
       initializeImportResp.id,
       this.state.indexName,
@@ -284,8 +284,8 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     }
   };
 
-  _onUploadSizeChange = (uploadSize: UPLOAD_SIZE) => {
-    this.setState({ uploadSize });
+  _onSmallChunksChange = (smallChunks: boolean) => {
+    this.setState({ smallChunks });
   };
 
   render() {
@@ -318,12 +318,12 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
         indexNameError={this.state.indexNameError}
         onFileClear={this._onFileClear}
         onFileSelect={this._onFileSelect}
-        uploadSize={this.state.uploadSize}
+        smallChunks={this.state.smallChunks}
         onGeoFieldTypeSelect={this._onGeoFieldTypeSelect}
         onIndexNameChange={this._onIndexNameChange}
         onIndexNameValidationStart={this.props.disableImportBtn}
         onIndexNameValidationEnd={this.props.enableImportBtn}
-        onUploadSizeChange={this._onUploadSizeChange}
+        onSmallChunksChange={this._onSmallChunksChange}
       />
     );
   }

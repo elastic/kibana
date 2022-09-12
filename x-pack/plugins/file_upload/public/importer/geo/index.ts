@@ -23,4 +23,3 @@ export function geoImporterFactory(file: File): GeoFileImporter {
 }
 
 export type { GeoFileImporter, GeoFilePreview } from './types';
-export { UPLOAD_SIZE } from './types';
