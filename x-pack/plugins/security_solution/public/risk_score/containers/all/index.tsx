@@ -20,10 +20,10 @@ import * as i18n from './translations';
 import type { InspectResponse } from '../../../types';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { inputsModel } from '../../../common/store';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
+import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 
 export interface RiskScoreState<T extends RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore> {
   data: undefined | StrategyResponseType<T>['data'];
@@ -66,7 +66,7 @@ export const useHostRiskScore = (params?: UseRiskScoreParams) => {
   const { timerange, onlyLatest, filterQuery, sort, skip = false, pagination } = params ?? {};
   const spaceId = useSpaceId();
   const defaultIndex = spaceId ? getHostRiskIndex(spaceId, onlyLatest) : undefined;
-  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
+  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
 
   return useRiskScore({
     timerange,
@@ -75,7 +75,7 @@ export const useHostRiskScore = (params?: UseRiskScoreParams) => {
     sort,
     skip,
     pagination,
-    featureEnabled: riskyHostsFeatureEnabled,
+    featureEnabled: isPlatinumOrTrialLicense,
     defaultIndex,
     factoryQueryType: RiskQueries.hostsRiskScore,
   });
@@ -85,8 +85,8 @@ export const useUserRiskScore = (params?: UseRiskScoreParams) => {
   const { timerange, onlyLatest, filterQuery, sort, skip = false, pagination } = params ?? {};
   const spaceId = useSpaceId();
   const defaultIndex = spaceId ? getUserRiskIndex(spaceId, onlyLatest) : undefined;
+  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
 
-  const riskyUsersFeatureEnabled = useIsExperimentalFeatureEnabled('riskyUsersEnabled');
   return useRiskScore({
     timerange,
     onlyLatest,
@@ -94,7 +94,7 @@ export const useUserRiskScore = (params?: UseRiskScoreParams) => {
     sort,
     skip,
     pagination,
-    featureEnabled: riskyUsersFeatureEnabled,
+    featureEnabled: isPlatinumOrTrialLicense,
     defaultIndex,
     factoryQueryType: RiskQueries.usersRiskScore,
   });

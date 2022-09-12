@@ -42,7 +42,7 @@ import { InvestigationGuideView } from './investigation_guide_view';
 import { Overview } from './overview';
 import { Insights } from './insights/insights';
 import { useRiskScoreData } from './use_risk_score_data';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useMlCapabilities } from '../ml/hooks/use_ml_capabilities';
 
 type EventViewTab = EuiTabbedContentTab;
 
@@ -146,8 +146,8 @@ const EventDetailsComponent: React.FC<Props> = ({
   }, [isEnrichmentsLoading, enrichmentsResponse, existingEnrichments]);
 
   const enrichmentCount = allEnrichments.length;
-  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
-  const riskyUsersFeatureEnabled = useIsExperimentalFeatureEnabled('riskyUsersEnabled');
+  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
+
   const { hostRisk, userRisk } = useRiskScoreData(data);
 
   const summaryTab: EventViewTab | undefined = useMemo(
@@ -195,7 +195,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                   isReadOnly={isReadOnly}
                 />
 
-                {(enrichmentCount > 0 || riskyHostsFeatureEnabled || riskyUsersFeatureEnabled) && (
+                {(enrichmentCount > 0 || isPlatinumOrTrialLicense) && (
                   <ThreatSummaryView
                     isDraggable={isDraggable}
                     hostRisk={hostRisk}
@@ -235,9 +235,8 @@ const EventDetailsComponent: React.FC<Props> = ({
       goToTableTab,
       handleOnEventClosed,
       isReadOnly,
-      riskyHostsFeatureEnabled,
-      riskyUsersFeatureEnabled,
       userRisk,
+      isPlatinumOrTrialLicense,
     ]
   );
 

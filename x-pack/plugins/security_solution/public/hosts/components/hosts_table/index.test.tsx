@@ -24,7 +24,6 @@ import { HostsTableType } from '../../store/model';
 import { HostsTable } from '.';
 import { mockData } from './mock';
 import { render } from '@testing-library/react';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -45,7 +44,11 @@ jest.mock('../../../common/components/query_bar', () => ({
 
 jest.mock('../../../common/components/link_to');
 
-jest.mock('../../../common/hooks/use_experimental_features');
+const mockUseMlCapabilities = jest.fn();
+
+jest.mock('../../../common/components/ml/hooks/use_ml_capabilities', () => ({
+  useMlCapabilities: () => mockUseMlCapabilities(),
+}));
 
 describe('Hosts Table', () => {
   const loadPage = jest.fn();
@@ -81,8 +84,8 @@ describe('Hosts Table', () => {
       expect(wrapper.find('HostsTable')).toMatchSnapshot();
     });
 
-    test('it renders "Host Risk classfication" column when "riskyHostsEnabled" feature flag is enabled', () => {
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    test('it renders "Host Risk classfication" column when "isPlatinumOrTrialLicense" is truthy', () => {
+      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
 
       const { queryByTestId } = render(
         <TestProviders store={store}>
@@ -104,8 +107,8 @@ describe('Hosts Table', () => {
       expect(queryByTestId('tableHeaderCell_node.risk_4')).toBeInTheDocument();
     });
 
-    test("it doesn't renders 'Host Risk classfication' column when 'riskyHostsEnabled' feature flag is disabled", () => {
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    test("it doesn't renders 'Host Risk classfication' column when 'isPlatinumOrTrialLicense' is falsy", () => {
+      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: false });
 
       const { queryByTestId } = render(
         <TestProviders store={store}>

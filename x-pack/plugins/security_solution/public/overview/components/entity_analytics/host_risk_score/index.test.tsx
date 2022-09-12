@@ -20,8 +20,8 @@ const mockSeverityCount: SeverityCount = {
   [RiskSeverity.critical]: 1,
 };
 
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: () => true,
+jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities', () => ({
+  useMlCapabilities: () => ({ isPlatinumOrTrialLicense: true }),
 }));
 
 const mockUseQueryToggle = jest

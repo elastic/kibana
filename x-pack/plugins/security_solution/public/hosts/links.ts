@@ -52,7 +52,6 @@ export const links: LinkItem = {
         defaultMessage: 'Host risk',
       }),
       path: `${HOSTS_PATH}/hostRisk`,
-      experimentalKey: 'riskyHostsEnabled',
     },
     {
       id: SecurityPageName.sessions,

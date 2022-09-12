@@ -21,10 +21,10 @@ import { hostsActions } from '../../../../hosts/store';
 import { usersActions } from '../../../../users/store';
 import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirect_to_users';
 import { UsersTableType } from '../../../../users/store/model';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNotableAnomaliesSearch } from '../../../../common/components/ml/anomaly/use_anomalies_search';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 
 const StyledEuiTitle = styled(EuiTitle)`
   color: ${({ theme: { eui } }) => eui.euiColorVis9};
@@ -37,8 +37,8 @@ export const EntityAnalyticsHeader = () => {
   const { data } = useNotableAnomaliesSearch({ skip: false, from, to });
   const dispatch = useDispatch();
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
-  const riskyUsersFeatureEnabled = useIsExperimentalFeatureEnabled('riskyUsersEnabled');
-  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
+  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
+
   const {
     services: { ml, http },
   } = useKibana();
@@ -97,7 +97,7 @@ export const EntityAnalyticsHeader = () => {
   return (
     <EuiPanel hasBorder paddingSize="l">
       <EuiFlexGroup justifyContent="spaceAround">
-        {riskyHostsFeatureEnabled && (
+        {isPlatinumOrTrialLicense && (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFlexItem className="eui-textCenter">
@@ -117,7 +117,7 @@ export const EntityAnalyticsHeader = () => {
             </EuiFlexGroup>
           </EuiFlexItem>
         )}
-        {riskyUsersFeatureEnabled && (
+        {isPlatinumOrTrialLicense && (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFlexItem className="eui-textCenter">

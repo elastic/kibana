@@ -77,9 +77,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
   const isPolicyListEnabled = useIsExperimentalFeatureEnabled('policyListEnabled');
   const mlCapabilities = useMlCapabilities();
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlUserPermissions(mlCapabilities);
-  const isEntityAnalyticsDashboardEnabled = useIsExperimentalFeatureEnabled(
-    'entityAnalyticsDashboardEnabled'
-  );
+
   const uiCapabilities = useKibana().services.application.capabilities;
   return useMemo(
     () =>
@@ -99,9 +97,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
                 ...(navTabs[SecurityPageName.kubernetes] != null
                   ? [navTabs[SecurityPageName.kubernetes]]
                   : []),
-                ...(isEntityAnalyticsDashboardEnabled && hasMlPermissions
-                  ? [navTabs[SecurityPageName.entityAnalytics]]
-                  : []),
+                ...(hasMlPermissions ? [navTabs[SecurityPageName.entityAnalytics]] : []),
               ],
             },
             {
@@ -163,7 +159,6 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
     [
       uiCapabilities.siem.show,
       navTabs,
-      isEntityAnalyticsDashboardEnabled,
       hasCasesReadPermissions,
       canSeeHostIsolationExceptions,
       isPolicyListEnabled,

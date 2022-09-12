@@ -16,14 +16,16 @@ import { useUserRiskScore } from '../../../risk_score/containers';
 import { CallOutSwitcher } from '../../../common/components/callouts';
 import * as i18n from './translations';
 import { RISKY_USERS_DOC_LINK } from '../constants';
+import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 
 export const UsersKpiComponent = React.memo<UsersKpiProps>(
   ({ filterQuery, from, indexNames, to, setQuery, skip, updateDateRange }) => {
     const [loading, { isModuleEnabled }] = useUserRiskScore();
+    const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
 
     return (
       <>
-        {!isModuleEnabled && !loading && (
+        {isPlatinumOrTrialLicense && !isModuleEnabled && !loading && (
           <>
             <CallOutSwitcher
               namespace="users"

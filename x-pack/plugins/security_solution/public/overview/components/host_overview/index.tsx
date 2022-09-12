@@ -37,7 +37,6 @@ import { EndpointOverview } from './endpoint_overview';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
 import { useHostRiskScore } from '../../../risk_score/containers';
 import { RiskScore } from '../../../common/components/severity/common';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 interface HostSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -78,6 +77,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
+    const isPlatinumOrTrialLicense = capabilities.isPlatinumOrTrialLicense;
     const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
     const filterQuery = useMemo(
       () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
@@ -100,8 +100,6 @@ export const HostOverview = React.memo<HostSummaryProps>(
       ),
       [contextID, isDraggable]
     );
-
-    const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
     const [hostRiskScore, hostRiskLevel] = useMemo(() => {
       const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
@@ -269,7 +267,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
             )}
           </OverviewWrapper>
         </InspectButtonContainer>
-        {riskyHostsFeatureEnabled && (
+        {isPlatinumOrTrialLicense && (
           <HostRiskOverviewWrapper
             gutterSize={isInDetailsSidePanel ? 'm' : 'none'}
             direction={isInDetailsSidePanel ? 'column' : 'row'}

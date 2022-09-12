@@ -26,8 +26,8 @@ jest.mock('../../../risk_score/containers/all', () => ({
   ]),
 }));
 
-jest.mock('../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
+jest.mock('../../../common/components/ml/hooks/use_ml_capabilities', () => ({
+  useMlCapabilities: () => ({ isPlatinumOrTrialLicense: true, capabilities: {} }),
 }));
 
 describe('User Summary Component', () => {
