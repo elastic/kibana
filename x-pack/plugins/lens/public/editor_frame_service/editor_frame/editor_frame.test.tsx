@@ -376,6 +376,7 @@ describe('editor_frame', () => {
         getSourceId: jest.fn(),
         getFilters: jest.fn(),
         getMaxPossibleNumValues: jest.fn(),
+        isTextBasedLanguage: jest.fn(() => false),
       };
       mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
 
@@ -400,7 +401,7 @@ describe('editor_frame', () => {
 
   describe('datasource public api communication', () => {
     it('should give access to the datasource state in the datasource factory function', async () => {
-      const datasourceState = {};
+      const datasourceState = Promise.resolve({});
       mockDatasource.initialize.mockReturnValue(datasourceState);
       mockDatasource.getLayers.mockReturnValue(['first']);
 
@@ -514,7 +515,7 @@ describe('editor_frame', () => {
     });
 
     it('should call datasource render with new state on switch', async () => {
-      const initialState = {};
+      const initialState = Promise.resolve({});
       mockDatasource2.initialize.mockReturnValue(initialState);
 
       instance.find('button[data-test-subj="datasource-switch"]').simulate('click');

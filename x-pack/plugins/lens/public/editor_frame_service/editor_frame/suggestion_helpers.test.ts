@@ -745,6 +745,7 @@ describe('suggestion helpers', () => {
             getSourceId: jest.fn(),
             getFilters: jest.fn(),
             getMaxPossibleNumValues: jest.fn(),
+            isTextBasedLanguage: jest.fn(() => false),
           },
         },
         { activeId: 'testVis', state: {} },
@@ -782,6 +783,7 @@ describe('suggestion helpers', () => {
           getSourceId: jest.fn(),
           getFilters: jest.fn(),
           getMaxPossibleNumValues: jest.fn(),
+          isTextBasedLanguage: jest.fn(() => false),
         },
       };
       defaultParams[3] = {
@@ -844,6 +846,7 @@ describe('suggestion helpers', () => {
           getSourceId: jest.fn(),
           getFilters: jest.fn(),
           getMaxPossibleNumValues: jest.fn(),
+          isTextBasedLanguage: jest.fn(() => false),
         },
       };
       mockVisualization1.getSuggestions.mockReturnValue([]);
