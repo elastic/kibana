@@ -144,7 +144,7 @@ export const installTransforms = async (
 ) => {
   const transformPaths = paths.filter((path) => isTransform(path));
   // If package contains legacy transform specifications (i.e. with json instead of yml)
-  if (transformPaths.some((p) => p.endsWith('.json'))) {
+  if (transformPaths.some((p) => p.endsWith('.json')) || transformPaths.length === 0) {
     return await installLegacyTransforms(
       installablePackage,
       paths,
