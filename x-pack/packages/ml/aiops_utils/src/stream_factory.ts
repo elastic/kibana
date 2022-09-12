@@ -51,7 +51,8 @@ interface StreamFactoryReturnType<T = unknown> {
  */
 export function streamFactory<T = string>(
   headers: Headers,
-  logger: Logger
+  logger: Logger,
+  flushFix?: boolean
 ): StreamFactoryReturnType<T>;
 /**
  * Sets up a response stream with support for gzip compression depending on provided
@@ -63,7 +64,7 @@ export function streamFactory<T = string>(
 export function streamFactory<T = unknown>(
   headers: Headers,
   logger: Logger,
-  flushFix = false
+  flushFix: boolean = false
 ): StreamFactoryReturnType<T> {
   let streamType: StreamType;
   const isCompressed = acceptCompression(headers);
