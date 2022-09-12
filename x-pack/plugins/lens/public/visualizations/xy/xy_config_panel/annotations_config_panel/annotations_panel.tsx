@@ -6,7 +6,7 @@
  */
 
 import './index.scss';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch, EuiSwitchEvent, EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
@@ -68,6 +68,15 @@ export const AnnotationsPanel = (
 
   const isQueryBased = isQueryAnnotationConfig(currentAnnotation);
   const isRange = isRangeAnnotationConfig(currentAnnotation);
+
+  const [queryInputShouldOpen, setQueryInputShouldOpen] = React.useState(false);
+  useEffect(() => {
+    if (isQueryBased) {
+      setQueryInputShouldOpen(false);
+    } else {
+      setQueryInputShouldOpen(true);
+    }
+  }, [isQueryBased]);
 
   const setAnnotations = useCallback(
     (annotation) => {
@@ -151,6 +160,7 @@ export const AnnotationsPanel = (
             frame={frame}
             state={state}
             layer={localLayer}
+            queryInputShouldOpen={queryInputShouldOpen}
           />
         ) : (
           <ConfigPanelManualAnnotation

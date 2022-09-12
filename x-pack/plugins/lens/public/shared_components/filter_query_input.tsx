@@ -36,14 +36,16 @@ export function FilterQueryInput({
   indexPattern,
   helpMessage,
   label = filterByLabel,
+  initiallyOpen,
 }: {
   inputFilter: Query | undefined;
   onChange: (query: Query) => void;
   indexPattern: IndexPattern;
   helpMessage?: string | null;
   label?: string;
+  initiallyOpen?: boolean;
 }) {
-  const [filterPopoverOpen, setFilterPopoverOpen] = useState(false);
+  const [filterPopoverOpen, setFilterPopoverOpen] = useState(Boolean(initiallyOpen));
   const { inputValue: queryInput, handleInputChange: setQueryInput } = useDebouncedValue<Query>({
     value: inputFilter ?? defaultFilter,
     onChange,
@@ -51,10 +53,7 @@ export function FilterQueryInput({
 
   const onClosePopup: EuiPopoverProps['closePopover'] = useCallback(() => {
     setFilterPopoverOpen(false);
-    if (inputFilter) {
-      setQueryInput(inputFilter);
-    }
-  }, [inputFilter, setQueryInput]);
+  }, []);
 
   const { isValid: isInputFilterValid } = validateQuery(inputFilter, indexPattern);
   const { isValid: isQueryInputValid, error: queryInputError } = validateQuery(

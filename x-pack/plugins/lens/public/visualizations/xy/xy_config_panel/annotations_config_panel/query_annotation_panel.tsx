@@ -31,12 +31,14 @@ export const ConfigPanelQueryAnnotation = ({
   state,
   onChange,
   layer,
+  queryInputShouldOpen,
 }: {
   annotation?: QueryPointEventAnnotationConfig;
   onChange: (annotations: Partial<QueryPointEventAnnotationConfig> | undefined) => void;
   frame: FramePublicAPI;
   state: XYState;
   layer: XYAnnotationLayerConfig;
+  queryInputShouldOpen?: boolean;
 }) => {
   const currentIndexPattern = frame.dataViews.indexPatterns[layer.indexPatternId];
   const currentExistingFields = frame.dataViews.existingFields[currentIndexPattern.title];
@@ -76,6 +78,7 @@ export const ConfigPanelQueryAnnotation = ({
         data-test-subj="annotation-query-based-query-input"
       >
         <FilterQueryInput
+          initiallyOpen={queryInputShouldOpen}
           label=""
           inputFilter={annotation?.filter ?? defaultQuery}
           onChange={(query: Query) => {
