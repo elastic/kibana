@@ -67,7 +67,7 @@ export const postBulkAgentsUnenrollHandler: RequestHandler<
       return acc;
     }, {});
 
-    return response.ok({ body });
+    return response.ok({ body: { ...body, actionId: results.actionId } });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }
