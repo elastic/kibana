@@ -80,6 +80,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   showQueryInput?: boolean;
   showAddFilter?: boolean;
   showDatePicker?: boolean;
+  isDisabled?: boolean;
   showAutoRefreshOnly?: boolean;
   timeHistory?: TimeHistoryContract;
   timeRangeForSuggestionsOverride?: boolean;
@@ -353,6 +354,7 @@ export const QueryBarTopRow = React.memo(
       return (
         <EuiFlexItem className={wrapperClasses}>
           <SuperDatePicker
+            isDisabled={props.isDisabled}
             start={props.dateRangeFrom}
             end={props.dateRangeTo}
             isPaused={props.isRefreshPaused}
@@ -403,7 +405,7 @@ export const QueryBarTopRow = React.memo(
             iconType={props.isDirty ? iconDirty : 'refresh'}
             iconOnly={!isXXLarge}
             aria-label={props.isLoading ? buttonLabelUpdate : buttonLabelRefresh}
-            isDisabled={isDateRangeInvalid}
+            isDisabled={isDateRangeInvalid || props.isDisabled}
             isLoading={props.isLoading}
             onClick={onClickSubmitButton}
             size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
@@ -452,6 +454,7 @@ export const QueryBarTopRow = React.memo(
             onTextLangQuerySubmit={props.onTextLangQuerySubmit}
             textBasedLanguage={textBasedLanguage}
             onSaveTextLanguageQuery={props.onTextBasedSavedAndExit}
+            isDisabled={props.isDisabled}
           />
         </EuiFlexItem>
       );
@@ -467,6 +470,7 @@ export const QueryBarTopRow = React.memo(
               timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
               onFiltersUpdated={props.onFiltersUpdated}
               buttonProps={{ size: shouldShowDatePickerAsBadge() ? 's' : 'm', display: 'empty' }}
+              isDisabled={props.isDisabled}
             />
           </EuiFlexItem>
         )
@@ -511,6 +515,7 @@ export const QueryBarTopRow = React.memo(
                 disableLanguageSwitcher={true}
                 prepend={renderFilterMenuOnly() && renderFilterButtonGroup()}
                 size={props.suggestionsSize}
+                isDisabled={props.isDisabled}
               />
             </EuiFlexItem>
           )}
@@ -535,6 +540,7 @@ export const QueryBarTopRow = React.memo(
                 dateRange: dateRangeRef.current,
               })
             }
+            isDisabled={props.isDisabled}
           />
         )
       );

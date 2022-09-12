@@ -59,11 +59,26 @@ const defaultSettings: IndicesIndexSettings = {
   number_of_replicas: 0,
 };
 
+export interface DefaultConnectorsPipelineMeta {
+  default_extract_binary_content: boolean;
+  default_name: string;
+  default_reduce_whitespace: boolean;
+  default_run_ml_inference: boolean;
+}
+
+export const defaultConnectorsPipelineMeta: DefaultConnectorsPipelineMeta = {
+  default_extract_binary_content: true,
+  default_name: 'ent-search-generic-ingestion',
+  default_reduce_whitespace: true,
+  default_run_ml_inference: false,
+};
+
 const indices: IndexDefinition[] = [
   {
     aliases: ['.elastic-connectors'],
     mappings: {
       _meta: {
+        pipeline: defaultConnectorsPipelineMeta,
         version: '1',
       },
       properties: connectorMappingsProperties,

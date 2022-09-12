@@ -29,6 +29,7 @@ import type {
   PostBulkUpdateAgentTagsResponse,
   GetAgentTagsResponse,
   GetAvailableVersionsResponse,
+  GetActionStatusResponse,
 } from '../../../common/types';
 import type {
   GetAgentsRequestSchema,
@@ -149,7 +150,7 @@ export const bulkUpdateAgentTagsHandler: RequestHandler<
       request.body.tagsToRemove ?? []
     );
 
-    const body = results.items.reduce<PostBulkUpdateAgentTagsResponse>((acc, so) => {
+    const body = results.items.reduce<PostBulkUpdateAgentTagsResponse>((acc: any, so: any) => {
       acc[so.id] = {
         success: !so.error,
         error: so.error?.message,
@@ -157,7 +158,7 @@ export const bulkUpdateAgentTagsHandler: RequestHandler<
       return acc;
     }, {});
 
-    return response.ok({ body });
+    return response.ok({ body: { ...body, actionId: results.actionId } });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }
@@ -273,7 +274,7 @@ export const postBulkAgentsReassignHandler: RequestHandler<
       return acc;
     }, {});
 
-    return response.ok({ body });
+    return response.ok({ body: { ...body, actionId: results.actionId } });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }
@@ -357,6 +358,19 @@ export const getAvailableVersionsHandler: RequestHandler = async (context, reque
       ? [kibanaVersionCoerced].concat(parsedVersions)
       : parsedVersions;
     const body: GetAvailableVersionsResponse = { items: versionsToDisplay };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const getActionStatusHandler: RequestHandler = async (context, request, response) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  try {
+    const actionStatuses = await AgentService.getActionStatuses(esClient);
+    const body: GetActionStatusResponse = { items: actionStatuses };
     return response.ok({ body });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });

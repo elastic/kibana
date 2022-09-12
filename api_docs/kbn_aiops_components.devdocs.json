@@ -31,6 +31,7 @@
         ],
         "path": "x-pack/packages/ml/aiops_components/src/dual_brush/dual_brush.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/aiops-components",
@@ -44,6 +45,7 @@
             ],
             "path": "x-pack/packages/ml/aiops_components/src/dual_brush/dual_brush.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -62,6 +64,7 @@
         ],
         "path": "x-pack/packages/ml/aiops_components/src/dual_brush/dual_brush_annotation.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/aiops-components",
@@ -75,6 +78,7 @@
             ],
             "path": "x-pack/packages/ml/aiops_components/src/dual_brush/dual_brush_annotation.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -93,6 +97,7 @@
         ],
         "path": "x-pack/packages/ml/aiops_components/src/progress_controls/progress_controls.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/aiops-components",
@@ -106,6 +111,7 @@
             ],
             "path": "x-pack/packages/ml/aiops_components/src/progress_controls/progress_controls.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],

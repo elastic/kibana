@@ -27,6 +27,7 @@
         "description": [],
         "path": "packages/kbn-field-types/src/kbn_field_type.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/field-types",
@@ -36,7 +37,8 @@
             "label": "name",
             "description": [],
             "path": "packages/kbn-field-types/src/kbn_field_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/field-types",
@@ -46,7 +48,8 @@
             "label": "sortable",
             "description": [],
             "path": "packages/kbn-field-types/src/kbn_field_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/field-types",
@@ -56,7 +59,8 @@
             "label": "filterable",
             "description": [],
             "path": "packages/kbn-field-types/src/kbn_field_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/field-types",
@@ -77,7 +81,8 @@
               "[]"
             ],
             "path": "packages/kbn-field-types/src/kbn_field_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/field-types",
@@ -91,6 +96,7 @@
             ],
             "path": "packages/kbn-field-types/src/kbn_field_type.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/field-types",
@@ -112,6 +118,7 @@
                 ],
                 "path": "packages/kbn-field-types/src/kbn_field_type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -145,6 +152,7 @@
         ],
         "path": "packages/kbn-field-types/src/kbn_field_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/field-types",
@@ -158,6 +166,7 @@
             ],
             "path": "packages/kbn-field-types/src/kbn_field_types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -180,6 +189,7 @@
         ],
         "path": "packages/kbn-field-types/src/kbn_field_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -207,6 +217,7 @@
         ],
         "path": "packages/kbn-field-types/src/kbn_field_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/field-types",
@@ -220,6 +231,7 @@
             ],
             "path": "packages/kbn-field-types/src/kbn_field_types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -242,6 +254,7 @@
         ],
         "path": "packages/kbn-field-types/src/kbn_field_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -257,6 +270,7 @@
         "description": [],
         "path": "packages/kbn-field-types/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/field-types",
@@ -266,7 +280,8 @@
             "label": "sortable",
             "description": [],
             "path": "packages/kbn-field-types/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/field-types",
@@ -276,7 +291,8 @@
             "label": "filterable",
             "description": [],
             "path": "packages/kbn-field-types/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/field-types",
@@ -286,7 +302,8 @@
             "label": "name",
             "description": [],
             "path": "packages/kbn-field-types/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/field-types",
@@ -306,7 +323,8 @@
               "[]"
             ],
             "path": "packages/kbn-field-types/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -322,6 +340,7 @@
         "description": [],
         "path": "packages/kbn-field-types/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -333,6 +352,7 @@
         "description": [],
         "path": "packages/kbn-field-types/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
