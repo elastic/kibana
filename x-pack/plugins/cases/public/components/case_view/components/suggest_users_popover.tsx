@@ -20,9 +20,9 @@ import { EmptyMessage } from '../../user_profiles/empty_message';
 import { NoMatches } from '../../user_profiles/no_matches';
 import { CurrentUserProfile } from '../../types';
 
-const PopoverButton: React.FC<{ togglePopover: () => void; isLoading: boolean }> = ({
+const PopoverButton: React.FC<{ togglePopover: () => void; isDisabled: boolean }> = ({
   togglePopover,
-  isLoading,
+  isDisabled,
 }) => (
   <EuiToolTip position="left" content={i18n.EDIT_ASSIGNEES}>
     <EuiButtonIcon
@@ -30,7 +30,7 @@ const PopoverButton: React.FC<{ togglePopover: () => void; isLoading: boolean }>
       aria-label={i18n.EDIT_ASSIGNEES_ARIA_LABEL}
       iconType={'pencil'}
       onClick={togglePopover}
-      disabled={isLoading}
+      disabled={isDisabled}
     />
   </EuiToolTip>
 );
@@ -89,13 +89,18 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
 
   const onDebounce = useCallback(() => setIsUserTyping(false), []);
 
-  const { data: userProfiles, isLoading: isLoadingSuggest } = useSuggestUserProfiles({
+  const {
+    data: userProfiles,
+    isLoading: isLoadingSuggest,
+    isFetching: isFetchingSuggest,
+  } = useSuggestUserProfiles({
     name: searchTerm,
     owners: owner,
     onDebounce,
   });
 
-  const isLoadingData = isLoadingSuggest || isLoading;
+  const isLoadingData = isLoadingSuggest || isLoading || isFetchingSuggest || isUserTyping;
+  const isDisabled = isLoading;
 
   const searchResultProfiles = useMemo(
     () => bringCurrentUserToFrontAndSort(currentUserProfile, userProfiles),
@@ -105,7 +110,7 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
   return (
     <UserProfilesPopover
       title={i18n.EDIT_ASSIGNEES}
-      button={<PopoverButton togglePopover={togglePopover} isLoading={isLoadingData} />}
+      button={<PopoverButton togglePopover={togglePopover} isDisabled={isDisabled} />}
       isOpen={isPopoverOpen}
       closePopover={onClosePopover}
       panelStyle={{
@@ -123,12 +128,12 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
         selectedStatusMessage,
         options: searchResultProfiles,
         selectedOptions: selectedUsers ?? selectedProfiles,
-        isLoading: isLoadingData || isUserTyping,
+        isLoading: isLoadingData,
         height: 'full',
         searchPlaceholder: i18n.SEARCH_USERS,
         clearButtonLabel: i18n.REMOVE_ASSIGNEES,
         emptyMessage: <EmptyMessage />,
-        noMatchesMessage: !isUserTyping && !isLoadingData ? <NoMatches /> : <EmptyMessage />,
+        noMatchesMessage: !isLoadingData ? <NoMatches /> : <EmptyMessage />,
       }}
     />
   );

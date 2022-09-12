@@ -55,7 +55,15 @@ describe('AssignUsers', () => {
     appMockRender = createAppMockRenderer({ permissions: noUpdateCasesPermissions() });
     appMockRender.render(<AssignUsers {...defaultProps} />);
 
-    expect(screen.queryByTestId('case-view-assignees-edit')).not.toBeInTheDocument();
+    expect(screen.queryByText('case-view-assignees-edit')).not.toBeInTheDocument();
+  });
+
+  it('does not show the assign users link when the user does not have update permissions', () => {
+    appMockRender = createAppMockRenderer({ permissions: noUpdateCasesPermissions() });
+    appMockRender.render(<AssignUsers {...defaultProps} />);
+
+    expect(screen.queryByTestId('assign yourself')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('Assign a user')).not.toBeInTheDocument();
   });
 
   it('does not show the suggest users edit button when the component is still loading', () => {
