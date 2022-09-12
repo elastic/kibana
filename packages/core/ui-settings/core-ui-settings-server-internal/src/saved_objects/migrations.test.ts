@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectUnsanitizedDoc } from '../..';
+import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { migrations } from './migrations';
 
 describe('ui_settings 7.9.0 migrations', () => {

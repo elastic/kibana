@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { savedObjectsClientMock } from '../../mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
-import { SavedObject } from '../../types';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
 import type { UpgradeableConfigAttributes } from '../create_or_upgrade_saved_config';
 import { transformDefaultIndex } from './transforms';
 
