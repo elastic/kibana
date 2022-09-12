@@ -51,6 +51,15 @@ export const getCspNewPolicyMock = (type: BenchmarkId = 'cis_k8s'): NewPackagePo
             session_token: {
               type: 'text',
             },
+            shared_credential_file: {
+              type: 'text',
+            },
+            credential_profile_name: {
+              type: 'text',
+            },
+            role_arn: {
+              type: 'text',
+            },
           },
         },
       ],

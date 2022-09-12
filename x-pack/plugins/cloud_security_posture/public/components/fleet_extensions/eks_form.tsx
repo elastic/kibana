@@ -23,14 +23,35 @@ export const eksVars = [
     id: 'secret_access_key',
     label: i18n.translate(
       'xpack.csp.createPackagePolicy.eksIntegrationSettingsSection.secretAccessKeyFieldLabel',
-      { defaultMessage: 'Secret access key' }
+      { defaultMessage: 'Secret Access Key' }
     ),
   },
   {
     id: 'session_token',
     label: i18n.translate(
       'xpack.csp.createPackagePolicy.eksIntegrationSettingsSection.sessionTokenFieldLabel',
-      { defaultMessage: 'Session token' }
+      { defaultMessage: 'Session Token' }
+    ),
+  },
+  {
+    id: 'shared_credential_file',
+    label: i18n.translate(
+      'xpack.csp.createPackagePolicy.eksIntegrationSettingsSection.sharedCredentialsFileFieldLabel',
+      { defaultMessage: 'Shared Credential File' }
+    ),
+  },
+  {
+    id: 'credential_profile_name',
+    label: i18n.translate(
+      'xpack.csp.createPackagePolicy.eksIntegrationSettingsSection.sharedCredentialFileFieldLabel',
+      { defaultMessage: 'Credential Profile Name' }
+    ),
+  },
+  {
+    id: 'role_arn',
+    label: i18n.translate(
+      'xpack.csp.createPackagePolicy.eksIntegrationSettingsSection.roleARNFieldLabel',
+      { defaultMessage: 'ARN Role' }
     ),
   },
 ] as const;
@@ -50,6 +71,9 @@ const getEksVars = (input?: NewPackagePolicyInput): EksFormVars => {
     access_key_id: vars?.access_key_id.value || '',
     secret_access_key: vars?.secret_access_key.value || '',
     session_token: vars?.session_token.value || '',
+    shared_credential_file: vars?.shared_credential_file.value || '',
+    credential_profile_name: vars?.credential_profile_name.value || '',
+    role_arn: vars?.role_arn.value || '',
   };
 };
 
