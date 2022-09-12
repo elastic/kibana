@@ -111,6 +111,7 @@ export function useDiscoverState({
     dataViews,
     stateContainer,
     dataViewList,
+    savedSearch,
   });
 
   /**

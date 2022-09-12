@@ -12,8 +12,9 @@ import {
   AggregateQuery,
   Query,
 } from '@kbn/es-query';
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { DataViewListItem, DataViewsContract } from '@kbn/data-views-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { GetStateReturn } from '../services/discover_state';
 import type { DataDocuments$ } from './use_saved_search';
 import { FetchStatus } from '../../types';
@@ -29,24 +30,38 @@ export function useTextBasedQueryLanguage({
   dataViews,
   stateContainer,
   dataViewList,
+  savedSearch,
 }: {
   documents$: DataDocuments$;
   stateContainer: GetStateReturn;
   dataViews: DataViewsContract;
   dataViewList: DataViewListItem[];
+  savedSearch: SavedSearch;
 }) {
   const prev = useRef<{ query: AggregateQuery | Query | undefined; columns: string[] }>({
     columns: [],
     query: undefined,
   });
 
+  const cleanup = useCallback(() => {
+    if (prev.current.query) {
+      // cleanup when it's not a text based query lang
+      prev.current = {
+        columns: [],
+        query: undefined,
+      };
+    }
+  }, []);
+
   useEffect(() => {
     const subscription = documents$.subscribe(async (next) => {
       const { query } = next;
+      const { columns: stateColumns, index } = stateContainer.appStateContainer.getState();
       let nextColumns: string[] = [];
       const isTextBasedQueryLang =
         next.recordRawType === 'plain' && query && isOfAggregateQueryType(query) && 'sql' in query;
       const hasResults = next.result?.length && next.fetchStatus === FetchStatus.COMPLETE;
+      const initialFetch = !prev.current.columns.length;
 
       if (isTextBasedQueryLang) {
         if (hasResults) {
@@ -60,27 +75,39 @@ export function useTextBasedQueryLanguage({
             nextColumns = firstRowColumns;
             prev.current = { columns: nextColumns, query };
           }
+          if (firstRowColumns && initialFetch) {
+            prev.current = { columns: firstRowColumns, query };
+          }
         }
         const indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
         const dataViewObj = dataViewList.find(({ title }) => title === indexPatternFromQuery);
 
         if (dataViewObj) {
+          // don't set the columns on initial fetch, to prevent overwriting existing state
+          const addColumnsToState = Boolean(
+            nextColumns.length && (!initialFetch || !stateColumns?.length)
+          );
+          // no need to reset index to state if it hasn't changed
+          const addDataViewToState = Boolean(dataViewObj.id !== index);
+          if (!addColumnsToState && !addDataViewToState) {
+            return;
+          }
+
           const nextState = {
-            index: dataViewObj.id,
-            ...(nextColumns.length && { columns: nextColumns }),
+            ...(addDataViewToState && { index: dataViewObj.id }),
+            ...(addColumnsToState && { columns: nextColumns }),
           };
           stateContainer.replaceUrlAppState(nextState);
         }
       } else {
-        if (prev.current.query) {
-          // cleanup when it's not a text based query lang
-          prev.current = {
-            columns: [],
-            query: undefined,
-          };
-        }
+        // cleanup for a "regular" query
+        cleanup();
       }
     });
-    return () => subscription.unsubscribe();
-  }, [documents$, dataViews, stateContainer, dataViewList]);
+    return () => {
+      // cleanup for e.g. when savedSearch is switched
+      cleanup();
+      subscription.unsubscribe();
+    };
+  }, [documents$, dataViews, stateContainer, dataViewList, savedSearch, cleanup]);
 }

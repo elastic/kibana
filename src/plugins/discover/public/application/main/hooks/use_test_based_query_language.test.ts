@@ -18,6 +18,7 @@ import { DataTableRecord } from '../../../types';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import { dataViewMock } from '../../../__mocks__/data_view';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { savedSearchMock } from '../../../__mocks__/saved_search';
 
 function getHookProps(
   replaceUrlAppState: (newState: Partial<AppState>) => Promise<void>,
@@ -25,6 +26,11 @@ function getHookProps(
 ) {
   const stateContainer = {
     replaceUrlAppState,
+    appStateContainer: {
+      getState: () => {
+        return [];
+      },
+    },
   } as unknown as GetStateReturn;
 
   const msgLoading = {
@@ -40,6 +46,7 @@ function getHookProps(
     dataViews: discoverServiceMock.dataViews,
     stateContainer,
     dataViewList: [dataViewMock as DataViewListItem],
+    savedSearch: savedSearchMock,
   };
 }
 const query = { sql: 'SELECT * from the-data-view-title' };
@@ -197,6 +204,46 @@ describe('useTextBasedQueryLanguage', () => {
         index: 'the-data-view-id',
         columns: ['field1'],
       });
+    });
+  });
+
+  test('it should not overwrite existing state columns on initial fetch', async () => {
+    const replaceUrlAppState = jest.fn();
+    const props = getHookProps(replaceUrlAppState, query);
+    props.stateContainer.appStateContainer.getState = jest.fn(() => {
+      return { columns: ['field1'], index: 'the-data-view-id' };
+    });
+    const { documents$ } = props;
+
+    renderHook(() => useTextBasedQueryLanguage(props));
+    documents$.next({
+      recordRawType: RecordRawType.PLAIN,
+      fetchStatus: FetchStatus.COMPLETE,
+      result: [
+        {
+          id: '1',
+          raw: { field1: 1, field2: 2 },
+          flattened: { field1: 1 },
+        } as unknown as DataTableRecord,
+      ],
+      query: { sql: 'SELECT field1 from the-data-view-title WHERE field1=1' },
+    });
+
+    documents$.next({
+      recordRawType: RecordRawType.PLAIN,
+      fetchStatus: FetchStatus.COMPLETE,
+      result: [
+        {
+          id: '1',
+          raw: { field1: 1 },
+          flattened: { field1: 1 },
+        } as unknown as DataTableRecord,
+      ],
+      query: { sql: 'SELECT field1 from the-data-view-title' },
+    });
+    await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(1));
+    expect(replaceUrlAppState).toHaveBeenCalledWith({
+      columns: ['field1'],
     });
   });
 });
