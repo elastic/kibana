@@ -796,7 +796,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                               dataViewTitle,
                               ...defineRuleData,
                               ...(rule?.saved_id && savedQueryBar
-                                ? { queryBar: savedQueryBar, savedQueryName: savedQueryBar.name }
+                                ? { queryBar: savedQueryBar }
                                 : {}),
                             }}
                             kibanaDataViews={dataViewOptions}
