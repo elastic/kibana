@@ -41,7 +41,7 @@ import { LiveQueryQueryField } from './live_query_query_field';
 import { AgentsTableField } from './agents_table_field';
 import { PacksComboBoxField } from './packs_combobox_field';
 import { savedQueryDataSerializer } from '../../saved_queries/form/use_saved_query_form';
-import { AddToCase } from '../../cases/add_to_case';
+import { AddToCaseButton } from '../../cases/add_to_cases_button';
 
 export interface LiveQueryFormFields {
   query?: string;
@@ -284,7 +284,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const addToCaseButton = useCallback(
     (payload) => (
-      <AddToCase
+      <AddToCaseButton
         queryId={payload?.queryId}
         agentIds={agentIds}
         actionId={liveQueryActionId || ''}

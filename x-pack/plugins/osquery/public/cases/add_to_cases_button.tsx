@@ -43,12 +43,13 @@ export const AddToCaseButton: React.FC<IProps> = ({
   isIcon = false,
   isDisabled,
 }) => {
-  const { cases } = useKibana().services;
+  const { cases: casesUi } = useKibana().services;
+
   const casePermissions = useGetUserCasesPermissions();
   const hasWritePermissions = casePermissions.all;
 
-  const createCaseFlyout = cases.hooks.getUseCasesAddToNewCaseFlyout({});
-  const selectCaseModal = cases.hooks.getUseCasesAddToExistingCaseModal({});
+  const createCaseFlyout = casesUi.hooks.getUseCasesAddToNewCaseFlyout({});
+  const selectCaseModal = casesUi.hooks.getUseCasesAddToExistingCaseModal({});
 
   const handleClick = useCallback(() => {
     const attachments = [
