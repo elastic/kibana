@@ -26,7 +26,7 @@ import type { FileKind, FileJSON } from '../../../common/types';
 import type { FilesClient } from '../../types';
 import { i18nTexts } from './i18n_texts';
 
-import { createStateSubject, type SimpleStateSubject } from './simple_state_subject';
+import { createStateSubject, type SimpleStateSubject } from './util';
 
 const prop$ = <T = unknown>(initialValue: T) => new BehaviorSubject<T>(initialValue);
 

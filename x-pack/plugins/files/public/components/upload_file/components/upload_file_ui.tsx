@@ -17,7 +17,7 @@ import {
   EuiButtonEmpty,
   type EuiFilePickerProps,
 } from '@elastic/eui';
-import { i18nTexts } from './i18n_texts';
+import { i18nTexts } from '../i18n_texts';
 
 import './upload_file.scss';
 

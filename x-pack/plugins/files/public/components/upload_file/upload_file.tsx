@@ -14,7 +14,7 @@ import { FilesClient } from '../../types';
 import { useFilesContext } from '../context';
 import { useBehaviorSubject } from '../use_behavior_subject';
 
-import { UploadFileUI } from './upload_file_ui';
+import { UploadFileUI } from './components';
 import { createUploadState } from './upload_state';
 
 export interface Props<Kind extends string = string> {
