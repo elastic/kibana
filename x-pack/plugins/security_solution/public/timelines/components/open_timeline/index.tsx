@@ -48,6 +48,8 @@ import { deleteTimelinesByIds } from '../../containers/api';
 import type { Direction } from '../../../../common/search_strategy';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
+import { TIMELINE_ACTIONS } from '../../../common/lib/apm/user_actions';
 
 interface OwnProps<TCache = object> {
   /** Displays open timeline in modal */
@@ -86,6 +88,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     title,
   }) => {
     const dispatch = useDispatch();
+    const { startTransaction } = useStartTransaction();
     /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
     const [itemIdToExpandedNotesRowMap, setItemIdToExpandedNotesRowMap] = useState<
       Record<string, JSX.Element>
@@ -197,6 +200,10 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
 
     const deleteTimelines: DeleteTimelines = useCallback(
       async (timelineIds: string[]) => {
+        startTransaction({
+          name: timelineIds.length > 1 ? TIMELINE_ACTIONS.BULK_DELETE : TIMELINE_ACTIONS.DELETE,
+        });
+
         if (timelineIds.includes(timelineSavedObjectId)) {
           dispatch(
             dispatchCreateNewTimeline({
@@ -212,7 +219,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         await deleteTimelinesByIds(timelineIds);
         refetch();
       },
-      [timelineSavedObjectId, refetch, dispatch, dataViewId, selectedPatterns]
+      [startTransaction, timelineSavedObjectId, refetch, dispatch, dataViewId, selectedPatterns]
     );
 
     const onDeleteOneTimeline: OnDeleteOneTimeline = useCallback(
@@ -274,6 +281,10 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
 
     const openTimeline: OnOpenTimeline = useCallback(
       ({ duplicate, timelineId, timelineType: timelineTypeToOpen }) => {
+        if (duplicate) {
+          startTransaction({ name: TIMELINE_ACTIONS.DUPLICATE });
+        }
+
         if (isModal && closeModalTimeline != null) {
           closeModalTimeline();
         }
