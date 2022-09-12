@@ -163,7 +163,6 @@ export interface DefineStepRule {
   newTermsFields: string[];
   historyWindowSize: string;
   shouldLoadQueryDynamically: boolean;
-  savedQueryName?: string;
 }
 
 export interface ScheduleStepRule {
