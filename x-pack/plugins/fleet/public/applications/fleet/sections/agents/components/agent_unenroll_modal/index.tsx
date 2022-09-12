@@ -40,7 +40,7 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
   async function onSubmit() {
     try {
       setIsSubmitting(true);
-      const { error } = isSingleAgent
+      const { error, data } = isSingleAgent
         ? await sendPostAgentUnenroll((agents[0] as Agent).id, {
             revoke: forceUnenroll,
           })
@@ -52,6 +52,13 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
         throw error;
       }
       setIsSubmitting(false);
+      const hasCompleted = isSingleAgent || Object.keys(data ?? {}).length > 0;
+      const submittedMessage = i18n.translate(
+        'xpack.fleet.unenrollAgents.submittedNotificationTitle',
+        {
+          defaultMessage: 'Agent(s) unenroll submitted',
+        }
+      );
       if (forceUnenroll) {
         const successMessage = isSingleAgent
           ? i18n.translate('xpack.fleet.unenrollAgents.successForceSingleNotificationTitle', {
@@ -60,7 +67,7 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
           : i18n.translate('xpack.fleet.unenrollAgents.successForceMultiNotificationTitle', {
               defaultMessage: 'Agents unenrolled',
             });
-        notifications.toasts.addSuccess(successMessage);
+        notifications.toasts.addSuccess(hasCompleted ? successMessage : submittedMessage);
       } else {
         const successMessage = isSingleAgent
           ? i18n.translate('xpack.fleet.unenrollAgents.successSingleNotificationTitle', {
@@ -69,7 +76,7 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
           : i18n.translate('xpack.fleet.unenrollAgents.successMultiNotificationTitle', {
               defaultMessage: 'Unenrolling agents',
             });
-        notifications.toasts.addSuccess(successMessage);
+        notifications.toasts.addSuccess(hasCompleted ? successMessage : submittedMessage);
       }
       onClose();
     } catch (error) {

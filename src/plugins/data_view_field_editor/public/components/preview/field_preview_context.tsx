@@ -21,6 +21,8 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
+import { BehaviorSubject } from 'rxjs';
+import { RuntimePrimitiveTypes } from '../../shared_imports';
 
 import { parseEsError } from '../../lib/runtime_field_validation';
 import { useFieldEditorContext } from '../field_editor_context';
@@ -33,6 +35,7 @@ import type {
   EsDocument,
   ScriptErrorCodes,
   FetchDocError,
+  FieldPreview,
 } from './types';
 
 const fieldPreviewContext = createContext<Context | undefined>(undefined);
@@ -44,11 +47,20 @@ const defaultParams: Params = {
   document: null,
   type: null,
   format: null,
+  parentName: null,
 };
 
 export const defaultValueFormatter = (value: unknown) => {
   const content = typeof value === 'object' ? JSON.stringify(value) : String(value) ?? '-';
   return renderToString(<>{content}</>);
+};
+
+export const valueTypeToSelectedType = (value: unknown): RuntimePrimitiveTypes => {
+  const valueType = typeof value;
+  if (valueType === 'string') return 'keyword';
+  if (valueType === 'number') return 'double';
+  if (valueType === 'boolean') return 'boolean';
+  return 'keyword';
 };
 
 export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
@@ -75,13 +87,18 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       api: { getFieldPreview },
     },
     fieldFormats,
+    fieldName$,
   } = useFieldEditorContext();
+
+  const fieldPreview$ = useRef(new BehaviorSubject<FieldPreview[] | undefined>(undefined));
 
   /** Response from the Painless _execute API */
   const [previewResponse, setPreviewResponse] = useState<{
     fields: Context['fields'];
     error: Context['error'];
   }>({ fields: [], error: null });
+  const [initialPreviewComplete, setInitialPreviewComplete] = useState(false);
+
   /** Possible error while fetching sample documents */
   const [fetchDocError, setFetchDocError] = useState<FetchDocError | null>(null);
   /** The parameters required for the Painless _execute API */
@@ -126,7 +143,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     isPreviewAvailable = false;
   }
 
-  const { name, document, script, format, type } = params;
+  const { name, document, script, format, type, parentName } = params;
 
   const updateParams: Context['params']['update'] = useCallback((updated) => {
     setParams((prev) => ({ ...prev, ...updated }));
@@ -314,12 +331,67 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     [dataView, search]
   );
 
+  const updateSingleFieldPreview = useCallback(
+    (fieldName: string, values: unknown[]) => {
+      const [value] = values;
+      const formattedValue = valueFormatter(value);
+
+      setPreviewResponse({
+        fields: [{ key: fieldName, value, formattedValue }],
+        error: null,
+      });
+    },
+    [valueFormatter]
+  );
+
+  const updateCompositeFieldPreview = useCallback(
+    (compositeValues: Record<string, unknown[]>) => {
+      const updatedFieldsInScript: string[] = [];
+      // if we're displaying a composite subfield, filter results
+      const filterSubfield = parentName ? (field: FieldPreview) => field.key === name : () => true;
+
+      const fields = Object.entries(compositeValues)
+        .map<FieldPreview>(([key, values]) => {
+          // The Painless _execute API returns the composite field values under a map.
+          // Each of the key is prefixed with "composite_field." (e.g. "composite_field.field1: ['value']")
+          const { 1: fieldName } = key.split('composite_field.');
+          updatedFieldsInScript.push(fieldName);
+
+          const [value] = values;
+          const formattedValue = valueFormatter(value);
+
+          return {
+            key: parentName
+              ? `${parentName ?? ''}.${fieldName}`
+              : `${fieldName$.getValue() ?? ''}.${fieldName}`,
+            value,
+            formattedValue,
+            type: valueTypeToSelectedType(value),
+          };
+        })
+        .filter(filterSubfield)
+        // ...and sort alphabetically
+        .sort((a, b) => a.key.localeCompare(b.key));
+
+      fieldPreview$.current.next(fields);
+      setPreviewResponse({
+        fields,
+        error: null,
+      });
+    },
+    [valueFormatter, parentName, name, fieldPreview$, fieldName$]
+  );
+
   const updatePreview = useCallback(async () => {
-    if (scriptEditorValidation.isValidating) {
+    // don't prevent rendering if we're working with a composite subfield (has parentName)
+    if (!parentName && scriptEditorValidation.isValidating) {
       return;
     }
 
-    if (!allParamsDefined || !hasSomeParamsChanged || scriptEditorValidation.isValid === false) {
+    if (
+      !parentName &&
+      (!allParamsDefined || !hasSomeParamsChanged || scriptEditorValidation.isValid === false)
+    ) {
       setIsLoadingPreview(false);
       return;
     }
@@ -332,11 +404,13 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
     const currentApiCall = ++previewCount.current;
 
+    const previewScript = (parentName && dataView.getRuntimeField(parentName)?.script) || script!;
+
     const response = await getFieldPreview({
       index: currentDocIndex,
       document: document!,
-      context: `${type!}_field` as PainlessExecuteContext,
-      script: script!,
+      context: (parentName ? 'composite_field' : `${type!}_field`) as PainlessExecuteContext,
+      script: previewScript,
     });
 
     if (currentApiCall !== previewCount.current) {
@@ -363,33 +437,41 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
       if (error) {
         setPreviewResponse({
-          fields: [{ key: name ?? '', value: '', formattedValue: defaultValueFormatter('') }],
+          fields: [
+            {
+              key: name ?? '',
+              value: '',
+              formattedValue: defaultValueFormatter(''),
+            },
+          ],
           error: { code: 'PAINLESS_SCRIPT_ERROR', error: parseEsError(error) },
         });
       } else {
-        const [value] = values;
-        const formattedValue = valueFormatter(value);
-
-        setPreviewResponse({
-          fields: [{ key: name!, value, formattedValue }],
-          error: null,
-        });
+        if (!Array.isArray(values)) {
+          updateCompositeFieldPreview(values);
+        } else {
+          updateSingleFieldPreview(name!, values);
+        }
       }
     }
 
+    setInitialPreviewComplete(true);
     setIsLoadingPreview(false);
   }, [
     name,
     type,
     script,
+    parentName,
+    dataView,
     document,
     currentDocId,
     getFieldPreview,
     notifications.toasts,
-    valueFormatter,
     allParamsDefined,
     scriptEditorValidation,
     hasSomeParamsChanged,
+    updateSingleFieldPreview,
+    updateCompositeFieldPreview,
     currentDocIndex,
   ]);
 
@@ -428,8 +510,10 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     () => ({
       fields: previewResponse.fields,
       error: previewResponse.error,
+      fieldPreview$: fieldPreview$.current,
       isPreviewAvailable,
       isLoadingPreview,
+      initialPreviewComplete,
       params: {
         value: params,
         update: updateParams,
@@ -470,6 +554,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     }),
     [
       previewResponse,
+      fieldPreview$,
       fetchDocError,
       params,
       isPreviewAvailable,
@@ -489,6 +574,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       from,
       reset,
       pinnedFields,
+      initialPreviewComplete,
     ]
   );
 
@@ -539,20 +625,61 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
    */
   useEffect(() => {
     setPreviewResponse((prev) => {
-      const {
-        fields: { 0: field },
-      } = prev;
+      const { fields } = prev;
 
-      const nextValue =
-        script === null && Boolean(document)
-          ? get(document, name ?? '') // When there is no script we read the value from _source
-          : field?.value;
+      let updatedFields: Context['fields'] = fields.map((field) => {
+        let key = name ?? '';
 
-      const formattedValue = valueFormatter(nextValue);
+        if (type === 'composite') {
+          // restore initial key segement (the parent name), which was not returned
+          const { 1: fieldName } = field.key.split('.');
+          key = `${name ?? ''}.${fieldName}`;
+        }
+
+        return {
+          ...field,
+          key,
+        };
+      });
+
+      // If the user has entered a name but not yet any script we will display
+      // the field in the preview with just the name
+      if (updatedFields.length === 0 && name !== null) {
+        updatedFields = [
+          { key: name, value: undefined, formattedValue: undefined, type: undefined },
+        ];
+      }
 
       return {
         ...prev,
-        fields: [{ ...field, key: name ?? '', value: nextValue, formattedValue }],
+        fields: updatedFields,
+      };
+    });
+  }, [name, type, parentName]);
+
+  /**
+   * Whenever the format changes we immediately update the preview
+   */
+  useEffect(() => {
+    setPreviewResponse((prev) => {
+      const { fields } = prev;
+
+      return {
+        ...prev,
+        fields: fields.map((field) => {
+          const nextValue =
+            script === null && Boolean(document)
+              ? get(document, name ?? '') // When there is no script we try to read the value from _source
+              : field?.value;
+
+          const formattedValue = valueFormatter(nextValue);
+
+          return {
+            ...field,
+            value: nextValue,
+            formattedValue,
+          };
+        }),
       };
     });
   }, [name, script, document, valueFormatter]);

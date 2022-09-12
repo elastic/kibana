@@ -109,6 +109,7 @@ export default function createScheduledTaskIdTests({ getService }: FtrProviderCo
         spaceId: 'default',
         consumer: 'alertsFixture',
       });
+      expect(taskRecord.task.enabled).to.eql(true);
     });
   });
 }
