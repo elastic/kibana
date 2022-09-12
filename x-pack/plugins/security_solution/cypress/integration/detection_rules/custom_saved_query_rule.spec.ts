@@ -11,7 +11,11 @@ import {
   DEFINE_CONTINUE_BUTTON,
   LOAD_QUERY_DYNAMICALLY_CHECKBOX,
 } from '../../screens/create_new_rule';
-import { RULE_NAME_HEADER, SAVED_QUERY_NAME_DETAILS } from '../../screens/rule_details';
+import {
+  RULE_NAME_HEADER,
+  SAVED_QUERY_NAME_DETAILS,
+  DEFINE_RULE_PANEL_PROGRESS,
+} from '../../screens/rule_details';
 
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
@@ -78,15 +82,14 @@ describe('Custom query rules', () => {
       cy.wait('@savedQueryRule').then(({ response }) => {
         // created rule should have saved_query type
         cy.wrap(response?.body.type).should('equal', 'saved_query');
-
-        goToRuleDetails();
-
-        cy.get(RULE_NAME_HEADER).should('contain', `${this.rule.name}`);
-
-        // TO DO: https://github.com/elastic/kibana/issues/136178 to display query name and actual queries
-        // for now, only id will be displayed
-        getDetails(SAVED_QUERY_NAME_DETAILS).should('contain', response?.body.saved_id);
       });
+
+      goToRuleDetails();
+
+      cy.get(RULE_NAME_HEADER).should('contain', `${this.rule.name}`);
+
+      cy.get(DEFINE_RULE_PANEL_PROGRESS).should('not.exist');
+      getDetails(SAVED_QUERY_NAME_DETAILS).should('contain', savedQueryName);
     });
   });
 });

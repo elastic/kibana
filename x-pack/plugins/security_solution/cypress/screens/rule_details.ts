@@ -114,3 +114,6 @@ export const removeExternalLinkText = (str: string) =>
   str.replace(/\(opens in a new tab or window\)/g, '');
 
 export const BACK_TO_RULES = '[data-test-subj="ruleDetailsBackToAllRules"]';
+
+export const DEFINE_RULE_PANEL_PROGRESS =
+  '[data-test-subj="defineRule"] [data-test-subj="stepPanelProgress"]';
