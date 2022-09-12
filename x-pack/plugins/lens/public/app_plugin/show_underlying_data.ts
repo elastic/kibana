@@ -92,17 +92,15 @@ export function getLayerMetaInfo(
       isVisible,
     };
   }
-  let datasourceAPI: DatasourcePublicAPI | undefined;
+  let datasourceAPI: DatasourcePublicAPI;
 
   try {
     const [firstLayerId] = currentDatasource.getLayers(datasourceState);
-    datasourceAPI = firstLayerId
-      ? currentDatasource.getPublicAPI({
-          layerId: firstLayerId,
-          state: datasourceState,
-          indexPatterns,
-        })
-      : undefined;
+    datasourceAPI = currentDatasource.getPublicAPI({
+      layerId: firstLayerId,
+      state: datasourceState,
+      indexPatterns,
+    });
   } catch (error) {
     showMemoizedErrorNotification(error);
 
@@ -113,7 +111,7 @@ export function getLayerMetaInfo(
     };
   }
   // maybe add also datasourceId validation here?
-  if (datasourceAPI?.datasourceId !== 'indexpattern') {
+  if (datasourceAPI.datasourceId !== 'indexpattern') {
     return {
       meta: undefined,
       error: i18n.translate('xpack.lens.app.showUnderlyingDataUnsupportedDatasource', {
@@ -125,7 +123,7 @@ export function getLayerMetaInfo(
   const tableSpec = datasourceAPI.getTableSpec();
 
   const columnsWithNoTimeShifts = tableSpec.filter(
-    ({ columnId }) => !datasourceAPI?.getOperationForColumnId(columnId)?.hasTimeShift
+    ({ columnId }) => !datasourceAPI.getOperationForColumnId(columnId)?.hasTimeShift
   );
   if (columnsWithNoTimeShifts.length < tableSpec.length) {
     return {

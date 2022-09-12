@@ -217,7 +217,7 @@ export function getIndexPatternDatasource({
     },
 
     getLayers(state: IndexPatternPrivateState) {
-      return state && state.layers ? Object.keys(state?.layers) : [];
+      return Object.keys(state?.layers);
     },
 
     removeColumn({ prevState, layerId, columnId, indexPatterns }) {
@@ -294,7 +294,7 @@ export function getIndexPatternDatasource({
     },
 
     uniqueLabels(state: IndexPatternPrivateState) {
-      const layers = state?.layers;
+      const layers = state.layers;
       const columnLabelMap = {} as Record<string, string>;
       const counts = {} as Record<string, number>;
 
@@ -312,16 +312,14 @@ export function getIndexPatternDatasource({
         counts[uniqueLabel] = 0;
         return uniqueLabel;
       };
-      if (layers) {
-        Object.values(layers).forEach((layer) => {
-          if (!layer.columns) {
-            return;
-          }
-          Object.entries(layer.columns).forEach(([columnId, column]) => {
-            columnLabelMap[columnId] = makeUnique(column.label);
-          });
+      Object.values(layers).forEach((layer) => {
+        if (!layer.columns) {
+          return;
+        }
+        Object.entries(layer.columns).forEach(([columnId, column]) => {
+          columnLabelMap[columnId] = makeUnique(column.label);
         });
-      }
+      });
 
       return columnLabelMap;
     },

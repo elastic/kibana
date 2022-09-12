@@ -845,13 +845,17 @@ export class Embeddable
     );
 
     if (!this.activeDataInfo.activeDatasourceState) {
-      this.activeDataInfo.activeDatasourceState = this.activeDataInfo.activeDatasource.initialize(
-        docDatasourceState,
-        [...(this.savedVis?.references || []), ...(this.savedVis?.state.internalReferences || [])],
-        undefined,
-        undefined,
-        indexPatternsCache
-      );
+      this.activeDataInfo.activeDatasourceState =
+        await this.activeDataInfo.activeDatasource.initialize(
+          docDatasourceState,
+          [
+            ...(this.savedVis?.references || []),
+            ...(this.savedVis?.state.internalReferences || []),
+          ],
+          undefined,
+          undefined,
+          indexPatternsCache
+        );
     }
 
     const viewUnderlyingDataArgs = getViewUnderlyingDataArgs({
