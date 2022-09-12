@@ -8,7 +8,9 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
+import { noop } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
 import { useKibana } from '../../utils/kibana_react';
 import { ObservabilityAppServices } from '../../application/types';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -20,17 +22,14 @@ import PageNotFound from '../404';
 // import { AlertDetailsPathParams } from './types';
 
 export function AlertDetailsPage() {
-  const {
-    http,
-    application: { navigateToUrl },
-  } = useKibana<ObservabilityAppServices>().services;
+  const { http } = useKibana<ObservabilityAppServices>().services;
 
   const { ObservabilityPageTemplate, config } = usePluginContext();
   // const { alertId } = useParams<AlertDetailsPathParams>();
   const alert = {};
 
   const handleSnoozeRule = () => {
-    navigateToUrl(http.basePath.prepend(paths.observability.ruleDetails(alert.ruleId)));
+    noop();
   };
 
   useBreadcrumbs([

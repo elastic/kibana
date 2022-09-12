@@ -37,7 +37,7 @@ export function PageTitle({ alert }: PageTitleProps) {
 
       <EuiFlexGroup direction="column" alignItems="flexStart">
         <EuiFlexItem component="span" grow={false}>
-          <EuiText color="subdued" size="xs">
+          <EuiText color="subdued" size="xs" data-test-subj="lastUpdatedCreatedBy">
             <b>{LAST_UPDATED_MESSAGE}</b> {BY_WORD} {alert.updatedBy} {ON_WORD}&nbsp;
             {moment(alert.updatedAt).format('ll')} &emsp;
             <b>{CREATED_WORD}</b> {BY_WORD} {alert.createdBy} {ON_WORD}&nbsp;
