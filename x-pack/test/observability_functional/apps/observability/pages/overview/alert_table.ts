@@ -14,7 +14,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['header']);
   const esArchiver = getService('esArchiver');
 
-  describe('Observability overview', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/140507
+  describe.skip('Observability overview', function () {
     this.tags('includeFirefox');
 
     const observability = getService('observability');
