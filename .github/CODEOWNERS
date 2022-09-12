@@ -97,6 +97,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 # Unified Observability - on hold due to team capacity shortage
 # For now, if you're changing these pages, get a review from someone who understand the changes
 # /x-pack/plugins/observability/public/context @elastic/unified-observability
+# /x-pack/test/observability_functional @elastic/unified-observability
 
 # Home/Overview/Landing Pages
 /x-pack/plugins/observability/public/pages/home @elastic/observability-design
@@ -110,7 +111,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/plugins/observability/public/pages/cases  @elastic/actionable-observability
 /x-pack/plugins/observability/public/pages/rules  @elastic/actionable-observability
 /x-pack/plugins/observability/public/pages/rule_details  @elastic/actionable-observability
-/x-pack/test/observability_functional @elastic/actionable-observability @elastic/unified-observability
+/x-pack/test/observability_functional @elastic/actionable-observability
 
 # Infra Monitoring
 /x-pack/plugins/infra/ @elastic/infra-monitoring-ui
