@@ -18,17 +18,27 @@ import {
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import { isEqual } from 'lodash/fp';
-import * as i18n from './translations';
-import { Form, FormDataProvider, useForm, getUseField, Field } from '../../common/shared_imports';
-import { schema } from './schema';
-import { useGetTags } from '../../containers/use_get_tags';
+import * as i18n from '../../tags/translations';
+import {
+  Form,
+  FormDataProvider,
+  useForm,
+  getUseField,
+  Field,
+  FormSchema,
+} from '../../../common/shared_imports';
+import { useGetTags } from '../../../containers/use_get_tags';
+import { Tags } from '../../tags/tags';
+import { useCasesContext } from '../../cases_context/use_cases_context';
+import { schemaTags } from '../../create/schema';
 
-import { Tags } from './tags';
-import { useCasesContext } from '../cases_context/use_cases_context';
+export const schema: FormSchema = {
+  tags: schemaTags,
+};
 
 const CommonUseField = getUseField({ component: Field });
 
-export interface TagListProps {
+export interface EditTagsProps {
   isLoading: boolean;
   onSubmit: (a: string[]) => void;
   tags: string[];
@@ -55,7 +65,7 @@ const ColumnFlexGroup = styled(EuiFlexGroup)`
   `}
 `;
 
-export const TagList = React.memo(({ isLoading, onSubmit, tags }: TagListProps) => {
+export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps) => {
   const { permissions } = useCasesContext();
   const initialState = { tags };
   const { form } = useForm({
@@ -194,4 +204,4 @@ export const TagList = React.memo(({ isLoading, onSubmit, tags }: TagListProps) 
   );
 });
 
-TagList.displayName = 'TagList';
+EditTags.displayName = 'EditTags';
