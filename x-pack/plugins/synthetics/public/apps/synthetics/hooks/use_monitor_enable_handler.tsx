@@ -41,11 +41,11 @@ export function useMonitorEnableHandler({
   const savedObjEnabledState = upsertStatuses[id]?.enabled;
   const [isEnabled, setIsEnabled] = useState<boolean | null>(null);
   const updateMonitorEnabledState = useCallback(
-    (monitor: EncryptedSyntheticsMonitor | MonitorOverviewItem, enabled: boolean) => {
+    (enabled: boolean) => {
       dispatch(
         fetchUpsertMonitorAction({
           id,
-          monitor: { ...monitor, [ConfigKey.ENABLED]: enabled },
+          monitor: { [ConfigKey.ENABLED]: enabled },
         })
       );
     },
