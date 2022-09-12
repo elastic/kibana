@@ -25,6 +25,7 @@ export class CreateSLO {
 
   public async execute(sloParams: CreateSLOParams): Promise<SLO> {
     await this.resourceInstaller.ensureCommonResourcesInstalled(this.spaceId);
+
     const slo: SLO = {
       ...sloParams,
       id: uuid.v1(),
