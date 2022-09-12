@@ -712,6 +712,7 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   groupId: string;
   accessors: AccessorConfig[];
   supportsMoreColumns: boolean;
+  dimensionsTooMany?: number;
   /** If required, a warning will appear if accessors are empty */
   required?: boolean;
   requiredMinDimensionCount?: number;
