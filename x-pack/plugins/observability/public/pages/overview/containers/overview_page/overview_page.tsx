@@ -220,7 +220,7 @@ export function OverviewPage() {
               <h2 id="statusVisualizationFlyoutTitle">
                 <FormattedMessage
                   id="xpack.observability.overview.statusVisualizationFlyoutTitle"
-                  defaultMessage="Guided setup"
+                  defaultMessage="Integration status"
                 />
               </h2>
             </EuiTitle>
@@ -289,7 +289,7 @@ function PageHeader({
         >
           <FormattedMessage
             id="xpack.observability.overview.guidedSetupButton"
-            defaultMessage="Guided setup"
+            defaultMessage="Integration status"
           />
         </EuiButton>
         {showTour ? (
