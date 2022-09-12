@@ -9,7 +9,6 @@ import { omit, partition, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import { getFlattenedObject } from '@kbn/std';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
   KibanaRequest,
   ElasticsearchClient,
@@ -539,9 +538,32 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
   ): Promise<DeletePackagePoliciesResponse> {
     const result: DeletePackagePoliciesResponse = [];
 
-    for (const id of ids) {
+    const packagePolicies = await this.getByIDs(soClient, ids, { ignoreMissing: true });
+    if (!packagePolicies) {
+      return [];
+    }
+
+    const uniqueAgentPolicyIds = [...new Set(packagePolicies.map((pP) => pP.policy_id))];
+
+    const hostedAgentPolicies: string[] = [];
+
+    for (const agentPolicyId of uniqueAgentPolicyIds) {
       try {
-        const packagePolicy = await this.get(soClient, id);
+        await validateIsNotHostedPolicy(
+          soClient,
+          agentPolicyId,
+          options?.force,
+          'Cannot remove integrations of hosted agent policy'
+        );
+      } catch (e) {
+        hostedAgentPolicies.push(agentPolicyId);
+      }
+    }
+
+    const deletePromises = [];
+
+    const deletePackagePolicy = async (id: string, packagePolicy?: PackagePolicy) => {
+      try {
         if (!packagePolicy) {
           throw new Error('Package policy not found');
         }
@@ -550,31 +572,14 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
           throw new PackagePolicyRestrictionRelatedError(`Cannot delete package policy ${id}`);
         }
 
-        await validateIsNotHostedPolicy(
-          soClient,
-          packagePolicy?.policy_id,
-          options?.force,
-          'Cannot remove integrations of hosted agent policy'
-        );
-
-        const agentPolicy = await agentPolicyService
-          .get(soClient, packagePolicy.policy_id)
-          .catch((err) => {
-            if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-              appContextService
-                .getLogger()
-                .warn(`Agent policy ${packagePolicy.policy_id} not found`);
-              return null;
-            }
-            throw err;
-          });
-
-        await soClient.delete(SAVED_OBJECT_TYPE, id);
-        if (agentPolicy && !options?.skipUnassignFromAgentPolicies) {
-          await agentPolicyService.bumpRevision(soClient, esClient, packagePolicy.policy_id, {
-            user: options?.user,
-          });
+        if (hostedAgentPolicies.includes(packagePolicy.policy_id)) {
+          throw new HostedAgentPolicyRestrictionRelatedError(
+            'Cannot remove integrations of hosted agent policy'
+          );
         }
+
+        deletePromises.push(soClient.delete(SAVED_OBJECT_TYPE, id));
+
         result.push({
           id,
           name: packagePolicy.name,
@@ -592,6 +597,30 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
           success: false,
           ...ingestErrorToResponseOptions(error),
         });
+      }
+    };
+
+    for (const id of ids) {
+      const packagePolicy = packagePolicies.find((p) => p.id === id);
+      deletePromises.push(deletePackagePolicy(id, packagePolicy));
+    }
+
+    await Promise.all(deletePromises);
+
+    if (!options?.skipUnassignFromAgentPolicies) {
+      const uniquePolicyIdsR = [
+        ...new Set(result.filter((r) => r.success && r.policy_id).map((r) => r.policy_id!)),
+      ];
+
+      const agentPolicies = await agentPolicyService.getByIDs(soClient, uniquePolicyIdsR);
+
+      for (const policyId of uniquePolicyIdsR) {
+        const agentPolicy = agentPolicies.find((p) => p.id === policyId);
+        if (agentPolicy) {
+          await agentPolicyService.bumpRevision(soClient, esClient, policyId, {
+            user: options?.user,
+          });
+        }
       }
     }
 
