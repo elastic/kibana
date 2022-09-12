@@ -78,7 +78,6 @@ export function adjustTimeScaleOnOtherColumnChange<T extends GenericIndexPattern
   }
   return {
     ...column,
-    timeScale: undefined,
     label: adjustTimeScaleLabelSuffix(
       column.label,
       column.timeScale,

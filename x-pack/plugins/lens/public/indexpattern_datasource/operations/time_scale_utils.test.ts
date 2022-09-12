@@ -315,13 +315,6 @@ describe('time scale utils', () => {
       ).toBe(baseColumn);
     });
 
-    it('should remove time scale if there is no date histogram', () => {
-      expect(adjustTimeScaleOnOtherColumnChange(baseLayer, 'col1')).toHaveProperty(
-        'timeScale',
-        undefined
-      );
-    });
-
     it('should remove suffix from label', () => {
       expect(
         adjustTimeScaleOnOtherColumnChange({ ...baseLayer, columns: { col1: baseColumn } }, 'col1')
