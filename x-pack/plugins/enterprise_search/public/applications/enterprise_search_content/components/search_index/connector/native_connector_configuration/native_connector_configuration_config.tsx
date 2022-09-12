@@ -66,11 +66,6 @@ export const NativeConnectorConfigurationConfig: React.FC<
                         value: event.target.value,
                       },
                     };
-                    console.log({
-                      configurationValues,
-                      isEditing,
-                      updatedConfiguration,
-                    });
                     setConfiguration(updatedConfiguration);
                   }}
                 />
