@@ -59,6 +59,9 @@ export const getFilterClickData = (
           (col) => col.id === bucketColumns[index].id
         );
 
+        // this logic maps the indices of the elements in the
+        // visualization's table to the indices in the table before
+        // any multiple metrics were collapsed into one metric column
         const originalColumnIndexes = currentColumn!.meta?.sourceParams?.consolidatedMetricsColumn
           ? // if this is the special combined column, expand it into both original columns
             currentColumn!.meta.sourceParams.combinedWithBucketColumn

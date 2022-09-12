@@ -5,16 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { DatatableColumn } from '@kbn/expressions-plugin/public';
+import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { getFilterClickData, getFilterEventData } from './filter_helpers';
 import { createMockBucketColumns, createMockVisData } from '../mocks';
+import { consolidateMetricColumns } from '../../common/utils';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { LayerValue } from '@elastic/charts';
+import faker from 'faker';
 
 const bucketColumns = createMockBucketColumns();
 const visData = createMockVisData();
 
 describe('getFilterClickData', () => {
   it('returns the correct filter data for the specific layer', () => {
-    const clickedLayers = [
+    const clickedLayers: LayerValue[] = [
       {
         groupByRollup: 'Logstash Airways',
         value: 729,
@@ -32,7 +36,7 @@ describe('getFilterClickData', () => {
   });
 
   it('changes the filter if the user clicks on another layer', () => {
-    const clickedLayers = [
+    const clickedLayers: LayerValue[] = [
       {
         groupByRollup: 'ES-Air',
         value: 572,
@@ -50,7 +54,7 @@ describe('getFilterClickData', () => {
   });
 
   it('returns the correct filters for small multiples', () => {
-    const clickedLayers = [
+    const clickedLayers: LayerValue[] = [
       {
         groupByRollup: 'ES-Air',
         value: 572,
@@ -77,6 +81,178 @@ describe('getFilterClickData', () => {
     expect(data[0].row).toEqual(5);
     expect(data[0].column).toEqual(0);
     expect(data[1].value).toEqual(1);
+  });
+
+  describe('multi-metric scenarios', () => {
+    describe('without any original bucket columns', () => {
+      const originalTable: Datatable = {
+        type: 'datatable',
+        columns: [
+          {
+            name: 'metric1',
+            id: '1',
+            meta: {
+              type: 'number',
+            },
+          },
+          {
+            name: 'metric2',
+            id: '2',
+            meta: {
+              type: 'number',
+            },
+          },
+          {
+            name: 'metric3',
+            id: '3',
+            meta: {
+              type: 'number',
+            },
+          },
+        ],
+        rows: [{ '1': 1, '2': 2, '3': 3 }],
+      };
+
+      const { table: consolidatedTable } = consolidateMetricColumns(
+        originalTable,
+        [],
+        ['1', '2', '3'],
+        {
+          deserialize: () => ({
+            getConverterFor: () => (str: string) => `<formatted>${str}</formatted>`,
+          }),
+        } as FieldFormatsStart
+      );
+
+      it('generates the correct filters', () => {
+        const clickedLayers: LayerValue[] = [
+          {
+            groupByRollup: 'metric2',
+            value: faker.random.number(),
+            depth: faker.random.number(),
+            path: [],
+            sortIndex: faker.random.number(),
+            smAccessorValue: '',
+          },
+        ];
+
+        const data = getFilterClickData(
+          clickedLayers,
+          consolidatedTable.columns.slice(0, 1),
+          consolidatedTable,
+          originalTable,
+          3
+        );
+
+        expect(data).toHaveLength(1);
+
+        const datum = data[0];
+
+        expect(datum.column).toBe(1);
+        expect(datum.row).toBe(0);
+        expect(datum.value).toBe('metric2');
+        expect(datum.table).toBe(originalTable);
+      });
+    });
+
+    describe('with original bucket columns', () => {
+      const originalTable: Datatable = {
+        type: 'datatable',
+        columns: [
+          { name: 'bucket1', id: '0', meta: { type: 'string' } },
+          { name: 'bucket2', id: '1', meta: { type: 'string' } },
+          {
+            name: 'metric1',
+            id: '2',
+            meta: {
+              type: 'number',
+            },
+          },
+          {
+            name: 'metric2',
+            id: '3',
+            meta: {
+              type: 'number',
+            },
+          },
+        ],
+        rows: [
+          { '0': 'square', '1': 'red', '2': 1, '3': 2 },
+          { '0': 'square', '1': 'blue', '2': 3, '3': 4 },
+          { '0': 'circle', '1': 'green', '2': 5, '3': 6 },
+          { '0': 'circle', '1': 'gray', '2': 7, '3': 8 },
+        ],
+      };
+
+      const { table: consolidatedTable } = consolidateMetricColumns(
+        originalTable,
+        ['0', '1'],
+        ['2', '3'],
+        {
+          deserialize: () => ({
+            getConverterFor: () => (str: string) => `<formatted>${str}</formatted>`,
+          }),
+        } as FieldFormatsStart
+      );
+
+      it('generates the correct filters', () => {
+        const localBucketColumns = consolidatedTable.columns.slice(0, 2);
+
+        const clickedLayers: LayerValue[] = [
+          {
+            groupByRollup: 'circle',
+            value: faker.random.number(),
+            depth: faker.random.number(),
+            path: [],
+            sortIndex: faker.random.number(),
+            smAccessorValue: '',
+          },
+          {
+            groupByRollup: '<formatted>green</formatted> - metric2',
+            value: faker.random.number(),
+            depth: faker.random.number(),
+            path: [],
+            sortIndex: faker.random.number(),
+            smAccessorValue: '',
+          },
+        ];
+
+        const data = getFilterClickData(
+          clickedLayers,
+          localBucketColumns,
+          consolidatedTable,
+          originalTable,
+          2
+        );
+
+        expect(data).toHaveLength(3);
+
+        expect(data.map((datum) => ({ ...datum, table: undefined }))).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "column": 0,
+              "row": 2,
+              "table": undefined,
+              "value": "circle",
+            },
+            Object {
+              "column": 3,
+              "row": 2,
+              "table": undefined,
+              "value": "<formatted>green</formatted> - metric2",
+            },
+            Object {
+              "column": 1,
+              "row": 2,
+              "table": undefined,
+              "value": "<formatted>green</formatted> - metric2",
+            },
+          ]
+        `);
+
+        expect(data.map((datum) => datum.table === originalTable).every(Boolean)).toBe(true);
+      });
+    });
   });
 });
 
