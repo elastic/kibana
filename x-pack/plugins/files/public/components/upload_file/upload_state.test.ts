@@ -84,12 +84,12 @@ describe('UploadState', () => {
       filesClient.delete.mockReturnValue(of(undefined) as any);
 
       const file1 = { name: 'test' } as File;
-      const file2 = { name: 'test 2' } as File;
+      const file2 = { name: 'test 2.png' } as File;
 
       uploadState.setFiles([file1, file2]);
 
       // Simulate upload being triggered async
-      const upload$ = cold('-0|').pipe(mergeMap(uploadState.upload));
+      const upload$ = cold('-0|').pipe(mergeMap(() => uploadState.upload({ myMeta: true })));
       const abort$ = cold(' --1|').pipe(tap(uploadState.abort));
 
       expectObservable(merge(upload$, abort$)).toBe('--0#', ['1'], new Error('Abort!'));
@@ -118,6 +118,18 @@ describe('UploadState', () => {
       flush();
 
       expect(filesClient.create).toHaveBeenCalledTimes(2);
+      expect(filesClient.create).toHaveBeenNthCalledWith(1, {
+        kind: 'test',
+        meta: { myMeta: true },
+        mimeType: undefined,
+        name: 'test',
+      });
+      expect(filesClient.create).toHaveBeenNthCalledWith(2, {
+        kind: 'test',
+        meta: { myMeta: true },
+        mimeType: 'image/png',
+        name: 'test 2',
+      });
       expect(filesClient.upload).toHaveBeenCalledTimes(2);
       expect(filesClient.delete).toHaveBeenCalledTimes(2);
     });

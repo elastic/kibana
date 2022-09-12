@@ -26,7 +26,7 @@ import type { FileKind, FileJSON } from '../../../common/types';
 import type { FilesClient } from '../../types';
 import { i18nTexts } from './i18n_texts';
 
-import { createStateSubject, type SimpleStateSubject } from './util';
+import { createStateSubject, type SimpleStateSubject, parseFileName } from './util';
 
 const prop$ = <T = unknown>(initialValue: T) => new BehaviorSubject<T>(initialValue);
 
@@ -94,7 +94,8 @@ export class UploadState {
    */
   private uploadFile = (
     file$: SimpleStateSubject<FileState>,
-    abort$: Observable<void>
+    abort$: Observable<void>,
+    meta?: unknown
   ): Observable<void | Error> => {
     const abortController = new AbortController();
     const abortSignal = abortController.signal;
@@ -108,10 +109,14 @@ export class UploadState {
 
     file$.setState({ status: 'uploading', error: undefined });
 
+    const { name, mime } = parseFileName(file.name);
+
     return from(
       this.client.create({
         kind: this.fileKind.id,
-        name: file.name,
+        name,
+        mimeType: mime,
+        meta: meta as Record<string, unknown>,
       })
     ).pipe(
       mergeMap((result) => {
@@ -147,7 +152,7 @@ export class UploadState {
     );
   };
 
-  public upload = (): Observable<void> => {
+  public upload = (meta?: unknown): Observable<void> => {
     if (this.isUploading()) {
       throw new Error('Upload already in progress');
     }
@@ -157,7 +162,7 @@ export class UploadState {
     return this.files$$.pipe(
       take(1),
       switchMap((files$) => {
-        return forkJoin(files$.map((file$) => this.uploadFile(file$, abort$)));
+        return forkJoin(files$.map((file$) => this.uploadFile(file$, abort$, meta)));
       }),
       map((results) => {
         const errors = results.filter(Boolean) as Error[];

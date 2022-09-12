@@ -20,7 +20,6 @@ import { createUploadState } from './upload_state';
 export interface Props<Kind extends string = string> {
   kind: Kind;
   client: FilesClient;
-  onDone: (files: Array<{ id: string; kind: string }>) => void;
   /**
    * Allow users to clear a file after uploading.
    *
@@ -32,7 +31,13 @@ export interface Props<Kind extends string = string> {
    * by the user.
    */
   immediate?: boolean;
+  /**
+   * Metadata that you want to associate with any uploaded files
+   */
+  meta?: Record<string, unknown>;
   compressed?: boolean;
+
+  onDone: (files: Array<{ id: string; kind: string }>) => void;
   onError?: (e: Error) => void;
 }
 
@@ -40,6 +45,7 @@ export interface Props<Kind extends string = string> {
  * In order to use this component you must register your file kind with {@link FileKindsRegistry}
  */
 export const UploadFile: FunctionComponent<Props> = ({
+  meta,
   client,
   onDone,
   onError,
@@ -75,13 +81,13 @@ export const UploadFile: FunctionComponent<Props> = ({
   const hasErrors = Boolean(errors.length);
 
   const upload = useCallback(() => {
-    uploadState.upload().subscribe({
+    uploadState.upload(meta).subscribe({
       complete: () => {
         onDone(files.map(({ id }) => ({ id: id!, kind: kindId })));
       },
       error: onError,
     });
-  }, [onDone, onError, uploadState, files, kindId]);
+  }, [onDone, onError, uploadState, files, kindId, meta]);
 
   return (
     <UploadFileUI
