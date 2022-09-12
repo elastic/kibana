@@ -68,6 +68,7 @@ describe('getFormat', () => {
         id: 'number',
         params: {
           suffix: 'd',
+          decimals: 2,
         },
       },
     });
