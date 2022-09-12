@@ -6,7 +6,11 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { LIST_DETECTION_RULE_EXCEPTION, TELEMETRY_CHANNEL_LISTS, TASK_METRICS_CHANNEL } from '../constants';
+import {
+  LIST_DETECTION_RULE_EXCEPTION,
+  TELEMETRY_CHANNEL_LISTS,
+  TASK_METRICS_CHANNEL,
+} from '../constants';
 import { batchTelemetryRecords, templateExceptionList, createTaskMetric } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
@@ -46,7 +50,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
 
         // Lists Telemetry: Detection Rules
 
-        const {body: prebuiltRules} = await receiver.fetchDetectionRules();
+        const { body: prebuiltRules } = await receiver.fetchDetectionRules();
 
         if (!prebuiltRules) {
           logger.debug('no prebuilt rules found');
@@ -95,10 +99,14 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
         for (const batch of batches) {
           await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
         }
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [createTaskMetric(taskName, true, startTime)]);
+        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+          createTaskMetric(taskName, true, startTime),
+        ]);
         return detectionRuleExceptions.length;
       } catch (err) {
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [createTaskMetric(taskName, true, startTime, err.message)]);
+        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+          createTaskMetric(taskName, true, startTime, err.message),
+        ]);
       }
     },
   };

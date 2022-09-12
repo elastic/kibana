@@ -51,10 +51,14 @@ export function createTelemetryDiagnosticsTaskConfig() {
           h._source != null ? [h._source] : []
         );
         sender.queueTelemetryEvents(diagAlerts);
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [createTaskMetric(taskName, true, startTime)]);
+        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+          createTaskMetric(taskName, true, startTime),
+        ]);
         return diagAlerts.length;
       } catch (err) {
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [createTaskMetric(taskName, true, startTime, err.message)]);
+        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+          createTaskMetric(taskName, true, startTime, err.message),
+        ]);
       }
     },
   };

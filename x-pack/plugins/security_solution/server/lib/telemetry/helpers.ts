@@ -21,7 +21,7 @@ import type {
   ValueListExceptionListResponseAggregation,
   ValueListItemsResponseAggregation,
   ValueListIndicatorMatchResponseAggregation,
-  TaskMetric
+  TaskMetric,
 } from './types';
 import {
   LIST_DETECTION_RULE_EXCEPTION,
@@ -268,9 +268,14 @@ export const metricsResponseToValueListMetaData = ({
     indicatorMatchMetricsResponse?.aggregations?.vl_used_in_indicator_match_rule_count?.value ?? 0,
 });
 
-export const createTaskMetric = (name: string, passed: boolean, startTime: number, errorMessage?: string): TaskMetric => ({
+export const createTaskMetric = (
+  name: string,
+  passed: boolean,
+  startTime: number,
+  errorMessage?: string
+): TaskMetric => ({
   name,
   passed,
   time_executed_in_ms: Date.now() - startTime,
-  error_message: errorMessage
-})
+  error_message: errorMessage,
+});

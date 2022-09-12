@@ -26,7 +26,7 @@ import {
   extractEndpointPolicyConfig,
   getPreviousDailyTaskTimestamp,
   isPackagePolicyList,
-  createTaskMetric
+  createTaskMetric,
 } from '../helpers';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { TELEMETRY_CHANNEL_ENDPOINT_META, TASK_METRICS_CHANNEL } from '../constants';
@@ -97,7 +97,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
           return 0;
         }
 
-        const {body: endpointMetricsResponse} = endpointData.endpointMetrics as unknown as {
+        const { body: endpointMetricsResponse } = endpointData.endpointMetrics as unknown as {
           body: EndpointMetricsAggregation;
         };
 
@@ -165,7 +165,10 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
               packagePolicies
                 .map((pPolicy) => pPolicy as PolicyData)
                 .forEach((pPolicy) => {
-                  if (pPolicy.inputs[0]?.config !== undefined && pPolicy.inputs[0]?.config !== null) {
+                  if (
+                    pPolicy.inputs[0]?.config !== undefined &&
+                    pPolicy.inputs[0]?.config !== null
+                  ) {
                     pPolicy.inputs.forEach((input) => {
                       if (
                         input.type === FLEET_ENDPOINT_PACKAGE &&
@@ -191,20 +194,20 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
          * the last 24h or no failures/warnings in the policy applied.
          *
          */
-        const {body: failedPolicyResponses} = endpointData.epPolicyResponse as unknown as {
+        const { body: failedPolicyResponses } = endpointData.epPolicyResponse as unknown as {
           body: EndpointPolicyResponseAggregation;
         };
 
         // If there is no policy responses in the 24h > now then we will continue
         const policyResponses = failedPolicyResponses.aggregations
           ? failedPolicyResponses.aggregations.policy_responses.buckets.reduce(
-            (cache, endpointAgentId) => {
-              const doc = endpointAgentId.latest_response.hits.hits[0];
-              cache.set(endpointAgentId.key, doc);
-              return cache;
-            },
-            new Map<string, EndpointPolicyResponseDocument>()
-          )
+              (cache, endpointAgentId) => {
+                const doc = endpointAgentId.latest_response.hits.hits[0];
+                cache.set(endpointAgentId.key, doc);
+                return cache;
+              },
+              new Map<string, EndpointPolicyResponseDocument>()
+            )
           : new Map<string, EndpointPolicyResponseDocument>();
 
         /** STAGE 4 - Fetch Endpoint Agent Metadata
@@ -218,7 +221,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
           logger.debug(`no endpoint metadata to report`);
         }
 
-        const {body: endpointMetadataResponse} = endpointData.endpointMetadata as unknown as {
+        const { body: endpointMetadataResponse } = endpointData.endpointMetadata as unknown as {
           body: EndpointMetadataAggregation;
         };
 
@@ -310,16 +313,16 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
               policy_response:
                 failedPolicy !== null && failedPolicy !== undefined
                   ? {
-                    agent_policy_status: failedPolicy._source.event.agent_id_status,
-                    manifest_version:
-                    failedPolicy._source.Endpoint.policy.applied.artifacts.global.version,
-                    status: failedPolicy._source.Endpoint.policy.applied.status,
-                    actions: failedPolicy._source.Endpoint.policy.applied.actions
-                      .map((action) => (action.status !== 'success' ? action : null))
-                      .filter((action) => action !== null),
-                    configuration: failedPolicy._source.Endpoint.configuration,
-                    state: failedPolicy._source.Endpoint.state,
-                  }
+                      agent_policy_status: failedPolicy._source.event.agent_id_status,
+                      manifest_version:
+                        failedPolicy._source.Endpoint.policy.applied.artifacts.global.version,
+                      status: failedPolicy._source.Endpoint.policy.applied.status,
+                      actions: failedPolicy._source.Endpoint.policy.applied.actions
+                        .map((action) => (action.status !== 'success' ? action : null))
+                        .filter((action) => action !== null),
+                      configuration: failedPolicy._source.Endpoint.configuration,
+                      state: failedPolicy._source.Endpoint.state,
+                    }
                   : {},
               telemetry_meta: {
                 metrics_timestamp: endpoint.endpoint_metrics['@timestamp'],
@@ -336,15 +339,21 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
           for (const batch of batches) {
             await sender.sendOnDemand(TELEMETRY_CHANNEL_ENDPOINT_META, batch);
           }
-          await sender.sendOnDemand(TASK_METRICS_CHANNEL, [createTaskMetric(taskName, true, startTime)]);
+          await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+            createTaskMetric(taskName, true, startTime),
+          ]);
           return telemetryPayloads.length;
         } catch (err) {
           logger.warn('could not complete endpoint alert telemetry task');
-          await sender.sendOnDemand(TASK_METRICS_CHANNEL, [createTaskMetric(taskName, true, startTime, err.message)]);
+          await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+            createTaskMetric(taskName, true, startTime, err.message),
+          ]);
           return 0;
         }
       } catch (err) {
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [createTaskMetric(taskName, true, startTime, err.message)]);
+        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+          createTaskMetric(taskName, true, startTime, err.message),
+        ]);
       }
     },
   };

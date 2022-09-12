@@ -175,10 +175,14 @@ export function createTelemetryTimelineTaskConfig() {
         }
 
         logger.debug(`sent ${counter} timelines. concluding timeline task.`);
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [createTaskMetric(taskName, true, startTime)]);
+        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+          createTaskMetric(taskName, true, startTime),
+        ]);
         return counter;
       } catch (err) {
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [createTaskMetric(taskName, true, startTime, err.message)]);
+        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+          createTaskMetric(taskName, true, startTime, err.message),
+        ]);
       }
     },
   };

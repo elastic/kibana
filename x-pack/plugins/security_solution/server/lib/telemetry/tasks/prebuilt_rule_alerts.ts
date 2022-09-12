@@ -78,11 +78,15 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
         for (const batch of batches) {
           await sender.sendOnDemand(TELEMETRY_CHANNEL_DETECTION_ALERTS, batch);
         }
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [createTaskMetric(taskName, true, startTime)]);
+        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+          createTaskMetric(taskName, true, startTime),
+        ]);
         return enrichedAlerts.length;
       } catch (err) {
         logger.debug('could not complete prebuilt alerts telemetry task');
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [createTaskMetric(taskName, true, startTime, err.message)]);
+        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+          createTaskMetric(taskName, true, startTime, err.message),
+        ]);
         return 0;
       }
     },

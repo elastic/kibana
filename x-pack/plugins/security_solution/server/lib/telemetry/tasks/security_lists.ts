@@ -15,7 +15,7 @@ import {
   LIST_ENDPOINT_EVENT_FILTER,
   LIST_TRUSTED_APPLICATION,
   TELEMETRY_CHANNEL_LISTS,
-  TASK_METRICS_CHANNEL
+  TASK_METRICS_CHANNEL,
 } from '../constants';
 import type { ESClusterInfo, ESLicense } from '../types';
 import { batchTelemetryRecords, templateExceptionList, createTaskMetric } from '../helpers';
@@ -119,10 +119,14 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
         if (valueListMetaData?.total_list_count) {
           await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, [valueListMetaData]);
         }
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [createTaskMetric(taskName, true, startTime)]);
+        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+          createTaskMetric(taskName, true, startTime),
+        ]);
         return count;
       } catch (err) {
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [createTaskMetric(taskName, true, startTime, err.message)]);
+        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+          createTaskMetric(taskName, true, startTime, err.message),
+        ]);
       }
     },
   };
