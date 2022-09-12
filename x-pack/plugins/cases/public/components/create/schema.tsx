@@ -100,4 +100,5 @@ export const schema: FormSchema<FormProps> = {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: true,
   },
+  assignees: {},
 };
