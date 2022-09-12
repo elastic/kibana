@@ -30,6 +30,14 @@ export enum SyncStatus {
   COMPLETED = 'completed',
   ERROR = 'error',
 }
+
+export interface IngestPipelineParams {
+  extract_binary_content: boolean;
+  name: string;
+  reduce_whitespace: boolean;
+  run_ml_inference: boolean;
+}
+
 export interface Connector {
   api_key_id: string | null;
   configuration: ConnectorConfiguration;
@@ -39,9 +47,10 @@ export interface Connector {
   language: string | null;
   last_seen: string | null;
   last_sync_error: string | null;
-  last_sync_status: string | null;
+  last_sync_status: SyncStatus | null;
   last_synced: string | null;
   name: string;
+  pipeline?: IngestPipelineParams | null;
   scheduling: {
     enabled: boolean;
     interval: string; // crontab syntax
@@ -52,3 +61,16 @@ export interface Connector {
 }
 
 export type ConnectorDocument = Omit<Connector, 'id'>;
+
+export interface ConnectorSyncJob {
+  completed_at: string | null;
+  connector?: ConnectorDocument;
+  connector_id: string;
+  created_at: string;
+  deleted_document_count: number;
+  error: string | null;
+  index_name: string;
+  indexed_document_count: number;
+  status: SyncStatus;
+  worker_hostname: string;
+}

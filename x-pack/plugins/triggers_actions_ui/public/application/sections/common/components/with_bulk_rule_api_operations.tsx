@@ -36,7 +36,9 @@ import {
   alertingFrameworkHealth,
   resolveRule,
   loadExecutionLogAggregations,
+  loadGlobalExecutionLogAggregations,
   LoadExecutionLogAggregationsProps,
+  LoadGlobalExecutionLogAggregationsProps,
   loadActionErrorLog,
   LoadActionErrorLogProps,
   snoozeRule,
@@ -71,6 +73,9 @@ export interface ComponentOpts {
   loadRuleTypes: () => Promise<RuleType[]>;
   loadExecutionLogAggregations: (
     props: LoadExecutionLogAggregationsProps
+  ) => Promise<IExecutionLogResult>;
+  loadGlobalExecutionLogAggregations: (
+    props: LoadGlobalExecutionLogAggregationsProps
   ) => Promise<IExecutionLogResult>;
   loadActionErrorLog: (props: LoadActionErrorLogProps) => Promise<IExecutionErrorsResult>;
   getHealth: () => Promise<AlertingFrameworkHealth>;
@@ -151,6 +156,14 @@ export function withBulkRuleOperations<T>(
         loadRuleTypes={async () => loadRuleTypes({ http })}
         loadExecutionLogAggregations={async (loadProps: LoadExecutionLogAggregationsProps) =>
           loadExecutionLogAggregations({
+            ...loadProps,
+            http,
+          })
+        }
+        loadGlobalExecutionLogAggregations={async (
+          loadProps: LoadGlobalExecutionLogAggregationsProps
+        ) =>
+          loadGlobalExecutionLogAggregations({
             ...loadProps,
             http,
           })

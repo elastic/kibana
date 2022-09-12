@@ -25,6 +25,7 @@
         ],
         "path": "packages/kbn-crypto/src/sha256.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/crypto",
@@ -38,6 +39,7 @@
             ],
             "path": "packages/kbn-crypto/src/sha256.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -52,6 +54,7 @@
             ],
             "path": "packages/kbn-crypto/src/sha256.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -81,6 +84,7 @@
         ],
         "path": "packages/kbn-crypto/src/pkcs12.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/crypto",
@@ -96,6 +100,7 @@
             ],
             "path": "packages/kbn-crypto/src/pkcs12.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -112,6 +117,7 @@
             ],
             "path": "packages/kbn-crypto/src/pkcs12.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -134,6 +140,7 @@
         ],
         "path": "packages/kbn-crypto/src/pkcs12.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/crypto",
@@ -149,6 +156,7 @@
             ],
             "path": "packages/kbn-crypto/src/pkcs12.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -165,6 +173,7 @@
             ],
             "path": "packages/kbn-crypto/src/pkcs12.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -184,6 +193,7 @@
         "description": [],
         "path": "packages/kbn-crypto/src/pkcs12.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/crypto",
@@ -196,7 +206,8 @@
               "string[] | undefined"
             ],
             "path": "packages/kbn-crypto/src/pkcs12.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/crypto",
@@ -209,7 +220,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-crypto/src/pkcs12.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/crypto",
@@ -222,7 +234,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-crypto/src/pkcs12.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

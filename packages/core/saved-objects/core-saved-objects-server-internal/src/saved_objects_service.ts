@@ -9,7 +9,7 @@
 import { Subject, Observable, firstValueFrom } from 'rxjs';
 import { filter, take, switchMap } from 'rxjs/operators';
 import type { Logger } from '@kbn/logging';
-import type { ServiceStatus } from '@kbn/core-base-common';
+import type { ServiceStatus } from '@kbn/core-status-common';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
