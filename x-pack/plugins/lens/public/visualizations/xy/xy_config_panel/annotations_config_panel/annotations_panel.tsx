@@ -31,7 +31,7 @@ import {
   useDebouncedValue,
 } from '../../../../shared_components';
 import { isHorizontalChart } from '../../state_helpers';
-import { defaultAnnotationLabel } from '../../annotations/helpers';
+import { defaultAnnotationLabel, defaultRangeAnnotationLabel } from '../../annotations/helpers';
 import { ColorPicker } from '../color_picker';
 import { IconSelectSetting, TextDecorationSetting } from '../shared/marker_decoration_settings';
 import { LineStyleSettings } from '../shared/line_style_settings';
@@ -42,7 +42,7 @@ import type { State, XYState, XYAnnotationLayerConfig } from '../../types';
 import { ConfigPanelManualAnnotation } from './manual_annotation_panel';
 import { ConfigPanelQueryAnnotation } from './query_annotation_panel';
 import { TooltipSection } from './tooltip_annotation_panel';
-import { sanitizeProperties } from './helpers';
+import { sanitizeProperties, toLineAnnotationColor } from './helpers';
 
 export const AnnotationsPanel = (
   props: VisualizationDimensionEditorProps<State> & {
@@ -68,7 +68,6 @@ export const AnnotationsPanel = (
 
   const isQueryBased = isQueryAnnotationConfig(currentAnnotation);
   const isRange = isRangeAnnotationConfig(currentAnnotation);
-
   const [queryInputShouldOpen, setQueryInputShouldOpen] = React.useState(false);
   useEffect(() => {
     if (isQueryBased) {
@@ -123,11 +122,11 @@ export const AnnotationsPanel = (
             buttonSize="compressed"
             options={[
               {
-                id: `lens_xyChart_annotation_staticDate`,
-                label: i18n.translate('xpack.lens.xyChart.annotation.staticDate', {
+                id: `lens_xyChart_annotation_manual`,
+                label: i18n.translate('xpack.lens.xyChart.annotation.manual', {
                   defaultMessage: 'Static Date',
                 }),
-                'data-test-subj': 'lnsXY_annotation_staticDate',
+                'data-test-subj': 'lnsXY_annotation_manual',
               },
               {
                 id: `lens_xyChart_annotation_query`,
@@ -137,18 +136,28 @@ export const AnnotationsPanel = (
                 'data-test-subj': 'lnsXY_annotation_query',
               },
             ]}
-            idSelected={`lens_xyChart_annotation_${
-              currentAnnotation?.type === 'query' ? 'query' : 'staticDate'
-            }`}
+            idSelected={`lens_xyChart_annotation_${currentAnnotation?.type}`}
             onChange={(id) => {
-              setAnnotations({
-                type: id === `lens_xyChart_annotation_query` ? 'query' : 'manual',
-                // when switching to query, reset the key value
-                key:
-                  !isQueryBased && id === `lens_xyChart_annotation_query`
-                    ? { type: 'point_in_time' }
-                    : currentAnnotation?.key,
-              });
+              const typeFromId = id.replace('lens_xyChart_annotation_', '');
+              if (currentAnnotation?.type === typeFromId) {
+                return;
+              }
+              if (currentAnnotation?.key.type === 'range') {
+                setAnnotations({
+                  type: typeFromId,
+                  label:
+                    currentAnnotation.label === defaultRangeAnnotationLabel
+                      ? defaultAnnotationLabel
+                      : currentAnnotation.label,
+                  color: toLineAnnotationColor(currentAnnotation.color),
+                  key: { type: 'point_in_time' },
+                });
+              } else {
+                setAnnotations({
+                  type: typeFromId,
+                  key: currentAnnotation?.key,
+                });
+              }
             }}
             isFullWidth
           />
