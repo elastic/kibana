@@ -365,6 +365,15 @@ export interface GetExecutionLogByIdParams {
   sort: estypes.Sort;
 }
 
+export interface GetGlobalExecutionLogParams {
+  dateStart: string;
+  dateEnd?: string;
+  filter?: string;
+  page: number;
+  perPage: number;
+  sort: estypes.Sort;
+}
+
 export interface GetActionErrorLogByIdParams {
   id: string;
   dateStart: string;
@@ -870,6 +879,100 @@ export class RulesClient {
     } catch (err) {
       this.logger.debug(
         `rulesClient.getExecutionLogForRule(): error searching event log for rule ${id}: ${err.message}`
+      );
+      throw err;
+    }
+  }
+
+  public async getGlobalExecutionLogWithAuth({
+    dateStart,
+    dateEnd,
+    filter,
+    page,
+    perPage,
+    sort,
+  }: GetGlobalExecutionLogParams): Promise<IExecutionLogResult> {
+    this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
+
+    let authorizationTuple;
+    try {
+      authorizationTuple = await this.authorization.getFindAuthorizationFilter(
+        AlertingAuthorizationEntity.Alert,
+        {
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'kibana.alert.rule.rule_type_id',
+            consumer: 'kibana.alert.rule.consumer',
+          },
+        }
+      );
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.GET_GLOBAL_EXECUTION_LOG,
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.GET_GLOBAL_EXECUTION_LOG,
+      })
+    );
+
+    const dateNow = new Date();
+    const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
+    const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    try {
+      const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
+        'alert',
+        authorizationTuple.filter as KueryNode,
+        {
+          start: parsedDateStart.toISOString(),
+          end: parsedDateEnd.toISOString(),
+          aggs: getExecutionLogAggregation({
+            filter,
+            page,
+            perPage,
+            sort,
+          }),
+        }
+      );
+
+      const formattedResult = formatExecutionLogResult(aggResult);
+      const ruleIds = [...new Set(formattedResult.data.map((l) => l.rule_id))].filter(
+        Boolean
+      ) as string[];
+      const ruleNameIdEntries = await Promise.all(
+        ruleIds.map(async (id) => {
+          try {
+            const result = await this.get({ id });
+            return [id, result.name];
+          } catch (e) {
+            return [id, id];
+          }
+        })
+      );
+      const ruleNameIdMap: Record<string, string> = ruleNameIdEntries.reduce(
+        (result, [key, val]) => ({ ...result, [key]: val }),
+        {}
+      );
+
+      return {
+        ...formattedResult,
+        data: formattedResult.data.map((entry) => ({
+          ...entry,
+          rule_name: ruleNameIdMap[entry.rule_id!],
+        })),
+      };
+    } catch (err) {
+      this.logger.debug(
+        `rulesClient.getGlobalExecutionLogWithAuth(): error searching global event log: ${err.message}`
       );
       throw err;
     }
