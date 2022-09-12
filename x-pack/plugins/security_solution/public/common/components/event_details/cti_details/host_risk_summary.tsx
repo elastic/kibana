@@ -11,13 +11,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
 import { EnrichedDataRow, ThreatSummaryPanelHeader } from './threat_summary_view';
 import { RiskScore } from '../../severity/common';
+import type { RiskSeverity } from '../../../../../common/search_strategy';
 import type { HostRisk } from '../../../../risk_score/containers';
 import { getEmptyValue } from '../../empty_value';
 import { RISKY_HOSTS_DOC_LINK } from '../../../../../common/constants';
 
 const HostRiskSummaryComponent: React.FC<{
   hostRisk: HostRisk;
-  originalHostRisk: RiskSeverity | undefined;
+  originalHostRisk?: RiskSeverity;
 }> = ({ hostRisk, originalHostRisk }) => {
   const currentHostRiskScore = hostRisk?.result?.[0]?.host?.risk?.calculated_level;
   return (
