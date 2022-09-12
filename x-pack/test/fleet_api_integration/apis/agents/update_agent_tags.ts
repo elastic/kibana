@@ -88,7 +88,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should bulk update tags of multiple agents by kuery in batches', async () => {
-        const { body: updatedBody } = await supertest
+        await supertest
           .post(`/api/fleet/agents/bulk_update_agent_tags`)
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -99,18 +99,18 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        expect(updatedBody).to.eql({
-          agent1: { success: true },
-          agent2: { success: true },
-          agent3: { success: true },
-          agent4: { success: true },
-        });
-
-        const { body } = await supertest.get(`/api/fleet/agents`).set('kbn-xsrf', 'xxx');
-        expect(body.total).to.eql(4);
-        body.items.forEach((agent: any) => {
-          expect(agent.tags.includes('newTag')).to.be(true);
-          expect(agent.tags.includes('existingTag')).to.be(false);
+        await new Promise((resolve, reject) => {
+          setTimeout(async () => {
+            const { body } = await supertest.get(`/api/fleet/agents`).set('kbn-xsrf', 'xxx');
+            expect(body.total).to.eql(4);
+            body.items.forEach((agent: any) => {
+              expect(agent.tags.includes('newTag')).to.be(true);
+              expect(agent.tags.includes('existingTag')).to.be(false);
+            });
+            resolve({});
+          }, 2000);
+        }).catch((e) => {
+          throw e;
         });
       });
 
