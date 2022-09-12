@@ -388,6 +388,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     }
   }, [ruleType, previousRuleType, getFields]);
 
+  useEffect(() => {
+    // if query bar is not valid, reset shouldLoadFormDynamically to false,
+    // as invalid query cannot be used for loading and execution
+    if (!isQueryBarValid) {
+      form.setFieldValue('shouldLoadQueryDynamically', false);
+    }
+  }, [form, isQueryBarValid]);
+
   const handleSubmit = useCallback(() => {
     if (onSubmit) {
       onSubmit();
@@ -751,10 +759,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           </RuleTypeEuiFormRow>
 
-          {isQueryRule(ruleType) && formQuery?.saved_id && (
+          {isQueryRule(ruleType) && (
             <>
               <EuiSpacer size="s" />
-              <RuleTypeEuiFormRow label={i18n.SAVED_QUERY_CHECKBOX_LABEL} $isVisible fullWidth>
+              <RuleTypeEuiFormRow
+                label={i18n.SAVED_QUERY_CHECKBOX_LABEL}
+                $isVisible={Boolean(formQuery?.saved_id)}
+                fullWidth
+              >
                 <CommonUseField
                   path="shouldLoadQueryDynamically"
                   componentProps={{

@@ -46,7 +46,7 @@ export interface QueryBarDefineRuleProps {
   onValidityChange?: (arg: boolean) => void;
   isDisabled?: boolean;
   /**
-   * if saved query selected, reset values of query and filters to its value
+   * if saved query selected, reset query and filters to saved query values
    */
   resetToSavedQuery?: boolean;
 }
@@ -146,7 +146,6 @@ export const QueryBarDefineRule = ({
           }
         } catch (err) {
           setSavedQuery(undefined);
-          setFieldValue(getFieldValueFromEmptySavedQuery());
         }
       } else if (savedId == null && savedQuery != null) {
         setSavedQuery(undefined);
@@ -156,7 +155,7 @@ export const QueryBarDefineRule = ({
     return () => {
       isSubscribed = false;
     };
-  }, [fieldValue, filterManager, savedQuery, savedQueryServices, setFieldValue]);
+  }, [fieldValue, filterManager, savedQuery, savedQueryServices]);
 
   useEffect(() => {
     if (resetToSavedQuery && savedQuery) {
