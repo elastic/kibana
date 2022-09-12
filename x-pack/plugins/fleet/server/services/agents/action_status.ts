@@ -4,84 +4,62 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { ElasticsearchClient } from '@kbn/core/server';
-import pMap from 'p-map';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
-import type { FleetServerAgentAction, ActionStatus } from '../../types';
+import type { FleetServerAgentAction, ActionStatus, ListWithKuery } from '../../types';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
 
 /**
  * Return current bulk actions
  */
-export async function getActionStatuses(esClient: ElasticsearchClient): Promise<ActionStatus[]> {
-  let actions = await _getActions(esClient);
+export async function getActionStatuses(
+  esClient: ElasticsearchClient,
+  options: ListWithKuery
+): Promise<ActionStatus[]> {
+  const actions = await _getActions(esClient, options);
   const cancelledActions = await _getCancelledActions(esClient);
 
-  // Fetch acknowledged result for every action
-  actions = await pMap(
-    actions,
-    async (action) => {
-      const { count } = await esClient.count({
-        index: AGENT_ACTIONS_RESULTS_INDEX,
-        ignore_unavailable: true,
-        query: {
-          bool: {
-            must: [
-              {
-                term: {
-                  action_id: action.actionId,
-                },
-              },
-            ],
-          },
-        },
-      });
-
-      const nbAgentsActioned = action.nbAgentsActioned || action.nbAgentsActionCreated;
-      const complete = count === nbAgentsActioned;
-      const cancelledAction = cancelledActions.find((a) => a.actionId === action.actionId);
-      let completionTime: string | undefined;
-
-      if (complete) {
-        // querying the last action result for this action in case all agents acked, to report completion time
-        const { aggregations } = await esClient.search({
-          index: AGENT_ACTIONS_RESULTS_INDEX,
-          ignore_unavailable: true,
-          query: {
-            bool: {
-              must: [
-                {
-                  term: {
-                    action_id: action.actionId,
-                  },
-                },
-              ],
-            },
-          },
-          size: 0,
-          aggs: {
-            max_timestamp: { max: { field: '@timestamp' } },
-          },
-        });
-        completionTime = (aggregations?.max_timestamp as any).value_as_string;
-      }
-
-      return {
-        ...action,
-        nbAgentsAck: count,
-        status: complete ? 'complete' : cancelledAction ? 'cancelled' : action.status,
-        nbAgentsActioned,
-        cancellationTime: cancelledAction?.timestamp,
-        completionTime,
-      };
+  const acks = await esClient.search({
+    index: AGENT_ACTIONS_RESULTS_INDEX,
+    query: {
+      bool: {
+        // There's some perf/caching advantages to using filter over must
+        // See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-filter-context.html#filter-context
+        filter: [{ terms: { action_id: actions.map((a) => a.actionId) } }],
+      },
     },
-    { concurrency: 20 }
-  );
+    size: 0,
+    aggs: {
+      ack_counts: {
+        terms: { field: 'action_id' },
+        aggs: {
+          max_timestamp: { max: { field: '@timestamp' } },
+        },
+      },
+    },
+  });
 
-  return actions;
+  return actions.map((action) => {
+    const matchingBucket = (acks.aggregations?.ack_counts as any).buckets?.find(
+      (b: any) => b.key === action.actionId
+    );
+    const nbAgentsAck = matchingBucket?.doc_count ?? 0;
+    const completionTime = (matchingBucket?.max_timestamp as any)?.value_as_string;
+    const nbAgentsActioned = action.nbAgentsActioned || action.nbAgentsActionCreated;
+    const complete = nbAgentsAck === nbAgentsActioned;
+    const cancelledAction = cancelledActions.find((a) => a.actionId === action.actionId);
+
+    return {
+      ...action,
+      nbAgentsAck,
+      status: complete ? 'complete' : cancelledAction ? 'cancelled' : action.status,
+      nbAgentsActioned,
+      cancellationTime: cancelledAction?.timestamp,
+      completionTime: complete ? completionTime : undefined,
+    };
+  });
 }
 
 async function _getCancelledActions(
@@ -99,11 +77,6 @@ async function _getCancelledActions(
               type: 'CANCEL',
             },
           },
-          {
-            exists: {
-              field: 'agents',
-            },
-          },
         ],
       },
     },
@@ -115,24 +88,21 @@ async function _getCancelledActions(
   }));
 }
 
-async function _getActions(esClient: ElasticsearchClient) {
+async function _getActions(
+  esClient: ElasticsearchClient,
+  options: ListWithKuery
+): Promise<ActionStatus[]> {
   const res = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
-    size: SO_SEARCH_LIMIT,
+    from: options.page ?? 1,
+    size: options.perPage ?? 10,
     query: {
       bool: {
         must_not: [
           {
             term: {
               type: 'CANCEL',
-            },
-          },
-        ],
-        must: [
-          {
-            exists: {
-              field: 'agents',
             },
           },
         ],
@@ -149,22 +119,22 @@ async function _getActions(esClient: ElasticsearchClient) {
         return acc;
       }
 
-      if (!acc[hit._source.action_id]) {
-        const startTime = hit._source?.start_time ?? hit._source?.['@timestamp'];
-        const isExpired = hit._source?.expiration
-          ? Date.parse(hit._source?.expiration) < Date.now()
-          : false;
+      const source = hit._source!;
+
+      if (!acc[source.action_id!]) {
+        const isExpired = source.expiration ? Date.parse(source.expiration) < Date.now() : false;
         acc[hit._source.action_id] = {
           actionId: hit._source.action_id,
           nbAgentsActionCreated: 0,
           nbAgentsAck: 0,
           version: hit._source.data?.version as string,
-          startTime,
-          type: hit._source?.type,
-          nbAgentsActioned: hit._source?.total ?? 0,
+          startTime: source.start_time,
+          type: source.type,
+          nbAgentsActioned: source.total ?? 0,
           status: isExpired ? 'expired' : 'in progress',
-          expiration: hit._source?.expiration,
-          newPolicyId: hit._source?.data?.policy_id as string,
+          expiration: source.expiration,
+          newPolicyId: source.data?.policy_id as string,
+          creationTime: source['@timestamp']!,
         };
       }
 

@@ -42,13 +42,29 @@ export const AgentActivityFlyout: React.FunctionComponent<{ onClose: () => {} }>
     return policy?.name ?? policyId;
   };
 
-  const currentActionsEnriched = currentActions
-    .slice(0, 10)
-    .map((a) => ({ ...a, newPolicyId: getAgentPolicyName(a.newPolicyId ?? '') }));
+  const currentActionsEnriched = currentActions.map((a) => ({
+    ...a,
+    newPolicyId: getAgentPolicyName(a.newPolicyId ?? ''),
+  }));
 
   const inProgressActions = currentActionsEnriched.filter((a) => a.status === 'in progress');
 
   const completedActions = currentActionsEnriched.filter((a) => a.status !== 'in progress');
+
+  const todayActions = completedActions.filter((a) =>
+    a.creationTime.startsWith(new Date().toISOString().substring(0, 10))
+  );
+
+  const otherDays: { [day: string]: ActionStatus[] } = {};
+  completedActions
+    .filter((a) => !todayActions.includes(a))
+    .forEach((action) => {
+      const day = action.creationTime.substring(0, 10);
+      if (!otherDays[day]) {
+        otherDays[day] = [];
+      }
+      otherDays[day].push(action);
+    });
 
   return (
     <>
@@ -86,7 +102,14 @@ export const AgentActivityFlyout: React.FunctionComponent<{ onClose: () => {} }>
             actions={inProgressActions}
             abortUpgrade={abortUpgrade}
           />
-          <ActivitySection title="Today" actions={completedActions} abortUpgrade={abortUpgrade} />
+          <ActivitySection title="Today" actions={todayActions} abortUpgrade={abortUpgrade} />
+          {Object.keys(otherDays).map((day) => (
+            <ActivitySection
+              title={<FormattedDate value={day} year="numeric" month="short" day="2-digit" />}
+              actions={otherDays[day]}
+              abortUpgrade={abortUpgrade}
+            />
+          ))}
         </EuiFlyoutBody>
       </EuiFlyout>
     </>
@@ -94,7 +117,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{ onClose: () => {} }>
 };
 
 const ActivitySection: React.FunctionComponent<{
-  title: string;
+  title: string | ReactNode;
   actions: ActionStatus[];
   abortUpgrade: (action: ActionStatus) => Promise<void>;
 }> = ({ title, actions, abortUpgrade }) => {
