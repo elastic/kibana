@@ -11,6 +11,7 @@ import type { CommonProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, useResizeObserver, EuiButtonIcon } from '@elastic/eui';
 import styled from 'styled-components';
 import classNames from 'classnames';
+import type { InputCaptureProps } from './components/input_capture';
 import { InputCapture } from './components/input_capture';
 import { useWithInputVisibleState } from '../../hooks/state_selectors/use_with_input_visible_state';
 import type { ConsoleDataState } from '../console_state/types';
@@ -29,10 +30,6 @@ const CommandInputContainer = styled.div`
   padding: ${({ theme: { eui } }) => eui.euiSizeS};
   outline: ${({ theme: { eui } }) => eui.euiBorderThin};
 
-  .prompt {
-    padding-right: 1ch;
-  }
-
   &:focus-within {
     border-bottom: ${({ theme: { eui } }) => eui.euiBorderThick};
     border-bottom-color: ${({ theme: { eui } }) => eui.euiColorPrimary};
@@ -46,29 +43,33 @@ const CommandInputContainer = styled.div`
     white-space: break-spaces;
   }
 
+  .prompt {
+    padding-right: 1ch;
+  }
+
   .cursor {
     display: inline-block;
     width: 1px;
     height: ${({ theme: { eui } }) => eui.euiLineHeight}em;
-    background-color: ${({ theme: { eui } }) => eui.euiTextColor};
+    background-color: ${({ theme }) => theme.eui.euiTextSubduedColor};
+  }
 
-    animation: cursor-blink-animation 1s steps(5, start) infinite;
-    -webkit-animation: cursor-blink-animation 1s steps(5, start) infinite;
-    @keyframes cursor-blink-animation {
-      to {
-        visibility: hidden;
-      }
-    }
-    @-webkit-keyframes cursor-blink-animation {
-      to {
-        visibility: hidden;
-      }
-    }
+  &.hasFocus {
+    .cursor {
+      background-color: ${({ theme: { eui } }) => eui.euiTextColor};
+      animation: cursor-blink-animation 1s steps(5, start) infinite;
+      -webkit-animation: cursor-blink-animation 1s steps(5, start) infinite;
 
-    &.inactive {
-      background-color: ${({ theme }) => theme.eui.euiTextSubduedColor} !important;
-      animation: none;
-      -webkit-animation: none;
+      @keyframes cursor-blink-animation {
+        to {
+          visibility: hidden;
+        }
+      }
+      @-webkit-keyframes cursor-blink-animation {
+        to {
+          visibility: hidden;
+        }
+      }
     }
   }
 `;
@@ -102,19 +103,10 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
     return dimensions.width ? `${dimensions.width}px` : '92vw';
   }, [dimensions.width]);
 
-  const cursorClassName = useMemo(() => {
-    return classNames({
-      cursor: true,
-      // FIXME:PT Is this still needed?
-      inactive: !isKeyInputBeingCaptured,
-    });
-  }, [isKeyInputBeingCaptured]);
-
   const inputContainerClassname = useMemo(() => {
     return classNames({
       cmdInput: true,
-      // FIXME:PT is this still needed?
-      active: isKeyInputBeingCaptured,
+      hasFocus: isKeyInputBeingCaptured,
       error: visibleState === 'error',
     });
   }, [isKeyInputBeingCaptured, visibleState]);
@@ -135,13 +127,12 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
     [dispatch, textEntered, rightOfCursor.text]
   );
 
-  // FIXME:PT Delete this?
-  // const handleKeyCaptureOnStateChange = useCallback<NonNullable<KeyCaptureProps['onStateChange']>>(
-  //   (isCapturing) => {
-  //     setIsKeyInputBeingCaptured(isCapturing);
-  //   },
-  //   []
-  // );
+  const handleOnChangeFocus = useCallback<NonNullable<InputCaptureProps['onChangeFocus']>>(
+    (hasFocus) => {
+      setIsKeyInputBeingCaptured(hasFocus);
+    },
+    []
+  );
 
   const handleTypingAreaClick = useCallback<MouseEventHandler>(
     (ev) => {
@@ -263,11 +254,12 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
     [dispatch, rightOfCursor.text]
   );
 
-  const handleOnFocus = useCallback(() => {
-    if (!isKeyInputBeingCaptured) {
-      dispatch({ type: 'addFocusToKeyCapture' });
-    }
-  }, [dispatch, isKeyInputBeingCaptured]);
+  // FIXME:PT clean up
+  // const handleOnFocus = useCallback(() => {
+  //   if (!isKeyInputBeingCaptured) {
+  //     dispatch({ type: 'addFocusToKeyCapture' });
+  //   }
+  // }, [dispatch, isKeyInputBeingCaptured]);
 
   // Execute the command if one was ENTER'd.
   useEffect(() => {
@@ -284,7 +276,6 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
         className={inputContainerClassname}
         onClick={handleTypingAreaClick}
         ref={containerRef}
-        onFocus={handleOnFocus}
         data-test-subj={getTestId('cmdInput-container')}
       >
         <EuiFlexGroup
@@ -301,7 +292,11 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
             </EuiFlexItem>
           )}
           <EuiFlexItem className="textEntered">
-            <InputCapture onCapture={handleKeyCapture} focusRef={focusRef}>
+            <InputCapture
+              onCapture={handleKeyCapture}
+              onChangeFocus={handleOnChangeFocus}
+              focusRef={focusRef}
+            >
               <EuiFlexGroup
                 responsive={false}
                 alignItems="center"
@@ -312,7 +307,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
                   <div data-test-subj={getTestId('cmdInput-userTextInput')}>{textEntered}</div>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <span className={cursorClassName} />
+                  <span className="cursor essentialAnimation" />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <div data-test-subj={getTestId('cmdInput-rightOfCursor')}>

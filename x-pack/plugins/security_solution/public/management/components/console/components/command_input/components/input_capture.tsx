@@ -48,139 +48,155 @@ export type InputCaptureProps = PropsWithChildren<{
     >;
   }) => void;
   focusRef?: MutableRefObject<InputFocusInterface | null>;
-  onStateChange?: (isCapturing: boolean) => void; // FIXME:PT Is this needed in this new component?
+  onChangeFocus?: (hasFocus: boolean) => void;
 }>;
 
 /**
  * Component that will capture keyboard and other user input (ex. paste) that
  * occur within this component
  */
-export const InputCapture = memo<InputCaptureProps>(({ onCapture, focusRef, children }) => {
-  const getTestId = useTestIdGenerator(useDataTestSubj());
-  // Reference to the `<div>` that take in focus (`tabIndex`)
-  const focusEleRef = useRef<HTMLDivElement | null>(null);
+export const InputCapture = memo<InputCaptureProps>(
+  ({ onCapture, focusRef, onChangeFocus, children }) => {
+    const getTestId = useTestIdGenerator(useDataTestSubj());
+    // Reference to the `<div>` that take in focus (`tabIndex`)
+    const focusEleRef = useRef<HTMLDivElement | null>(null);
 
-  const getTextSelection = useCallback((): string => {
-    if (focusEleRef.current) {
-      const selection = document.getSelection();
-      const selectionText = selection?.toString() ?? '';
+    const getTextSelection = useCallback((): string => {
+      if (focusEleRef.current) {
+        const selection = document.getSelection();
+        const selectionText = selection?.toString() ?? '';
 
-      if (!selection || selectionText.length === 0) {
+        if (!selection || selectionText.length === 0) {
+          return '';
+        }
+
+        // Determine if the text selection is only from inside of the text input area
+        // (ex. User could have selected text that also capture content outside of the input area)
+        if (
+          focusEleRef.current?.contains(selection.focusNode) &&
+          focusEleRef.current?.contains(selection.anchorNode)
+        ) {
+          return selectionText;
+        }
+
         return '';
       }
 
-      // Determine if the text selection is only from inside of the text input area
-      // (ex. User could have selected text that also capture content outside of the input area)
-      if (
-        focusEleRef.current?.contains(selection.focusNode) &&
-        focusEleRef.current?.contains(selection.anchorNode)
-      ) {
-        return selectionText;
-      }
-
       return '';
-    }
+    }, []);
 
-    return '';
-  }, []);
-
-  const handleOnKeyDown = useCallback<KeyboardEventHandler>(
-    (ev) => {
-      // allows for clipboard events to be captured via onPaste event handler
-      if (ev.metaKey || ev.ctrlKey) {
-        return;
-      }
-
-      // checking to ensure that the key is not a control character. Control character's `.key`
-      // are at least two characters long and because we are handling `onKeyDown` we know that
-      // a printible `.key` will always be just one character long.
-      const newValue = /^[\w\d]{2}/.test(ev.key) ? '' : ev.key;
-
-      const eventDetails = pick(ev, [
-        'key',
-        'altKey',
-        'ctrlKey',
-        'keyCode',
-        'metaKey',
-        'repeat',
-        'shiftKey',
-      ]);
-
-      onCapture({
-        value: newValue,
-        selection: getTextSelection(),
-        eventDetails,
-      });
-    },
-    [getTextSelection, onCapture]
-  );
-
-  const handleOnPaste = useCallback<ClipboardEventHandler>(
-    (ev) => {
-      const value = ev.clipboardData.getData('text');
-
-      // hard-coded for use in onCapture and future keyboard functions
-      const eventDetails = {
-        altKey: false,
-        ctrlKey: false,
-        key: 'Meta',
-        keyCode: 91,
-        metaKey: true,
-        repeat: false,
-        shiftKey: false,
-      };
-
-      onCapture({
-        value,
-        selection: getTextSelection(),
-        eventDetails,
-      });
-    },
-    [getTextSelection, onCapture]
-  );
-
-  const focusInterface = useMemo<InputFocusInterface>(() => {
-    return {
-      focus: (force: boolean = false) => {
-        // If user selected text and `force` is not true, then don't focus (else they lose selection)
-        if (
-          (!force && (window.getSelection()?.toString() ?? '').length > 0) ||
-          document.activeElement === focusEleRef.current
-        ) {
+    const handleOnKeyDown = useCallback<KeyboardEventHandler>(
+      (ev) => {
+        // allows for clipboard events to be captured via onPaste event handler
+        if (ev.metaKey || ev.ctrlKey) {
           return;
         }
 
-        focusEleRef.current?.focus();
+        // checking to ensure that the key is not a control character. Control character's `.key`
+        // are at least two characters long and because we are handling `onKeyDown` we know that
+        // a printible `.key` will always be just one character long.
+        const newValue = /^[\w\d]{2}/.test(ev.key) ? '' : ev.key;
+
+        const eventDetails = pick(ev, [
+          'key',
+          'altKey',
+          'ctrlKey',
+          'keyCode',
+          'metaKey',
+          'repeat',
+          'shiftKey',
+        ]);
+
+        onCapture({
+          value: newValue,
+          selection: getTextSelection(),
+          eventDetails,
+        });
       },
+      [getTextSelection, onCapture]
+    );
 
-      blur: () => {
-        // only blur if the input has focus
-        if (focusEleRef.current && document.activeElement === focusEleRef.current) {
-          focusEleRef.current?.blur();
-        }
+    const handleOnPaste = useCallback<ClipboardEventHandler>(
+      (ev) => {
+        const value = ev.clipboardData.getData('text');
+
+        // hard-coded for use in onCapture and future keyboard functions
+        const eventDetails = {
+          altKey: false,
+          ctrlKey: false,
+          key: 'Meta',
+          keyCode: 91,
+          metaKey: true,
+          repeat: false,
+          shiftKey: false,
+        };
+
+        onCapture({
+          value,
+          selection: getTextSelection(),
+          eventDetails,
+        });
       },
-    };
-  }, []);
+      [getTextSelection, onCapture]
+    );
 
-  if (focusRef) {
-    focusRef.current = focusInterface;
-  }
+    const handleOnFocus = useCallback(() => {
+      if (onChangeFocus) {
+        onChangeFocus(true);
+      }
+    }, [onChangeFocus]);
 
-  return (
-    <InputCaptureContainer
-      data-test-subj={getTestId('inputCapture')}
-      onKeyDown={handleOnKeyDown}
-      onPaste={handleOnPaste}
-    >
-      <div
-        tabIndex={0}
-        ref={focusEleRef}
-        className="invisible-input"
-        data-test-subj={getTestId('keyCapture-input')}
+    const handleOnBlur = useCallback(() => {
+      if (onChangeFocus) {
+        onChangeFocus(false);
+      }
+    }, [onChangeFocus]);
+
+    const focusInterface = useMemo<InputFocusInterface>(() => {
+      return {
+        focus: (force: boolean = false) => {
+          // If user selected text and `force` is not true, then don't focus (else they lose selection)
+          if (
+            (!force && (window.getSelection()?.toString() ?? '').length > 0) ||
+            document.activeElement === focusEleRef.current
+          ) {
+            return;
+          }
+
+          focusEleRef.current?.focus();
+        },
+
+        blur: () => {
+          // only blur if the input has focus
+          if (focusEleRef.current && document.activeElement === focusEleRef.current) {
+            focusEleRef.current?.blur();
+          }
+        },
+      };
+    }, []);
+
+    if (focusRef) {
+      focusRef.current = focusInterface;
+    }
+
+    return (
+      <InputCaptureContainer
+        data-test-subj={getTestId('inputCapture')}
+        onKeyDown={handleOnKeyDown}
+        onPaste={handleOnPaste}
       >
-        {children}
-      </div>
-    </InputCaptureContainer>
-  );
-});
+        <div
+          tabIndex={0}
+          ref={focusEleRef}
+          className="invisible-input"
+          data-test-subj={getTestId('keyCapture-input')}
+          onBlur={handleOnBlur}
+          onFocus={handleOnFocus}
+        >
+          {children}
+        </div>
+      </InputCaptureContainer>
+    );
+  }
+);
 InputCapture.displayName = 'InputCapture';
