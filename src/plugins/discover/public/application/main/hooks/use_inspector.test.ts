@@ -25,7 +25,7 @@ describe('test useInspector', () => {
       });
     });
     result.current();
-    expect(setExpandedDoc).toHaveBeenCalled();
+    expect(setExpandedDoc).toHaveBeenCalledWith(undefined);
     expect(discoverServiceMock.inspector.open).toHaveBeenCalled();
   });
 });
