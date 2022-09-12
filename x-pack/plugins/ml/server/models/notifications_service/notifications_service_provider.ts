@@ -27,7 +27,7 @@ export class NotificationsService {
       {
         index: ML_NOTIFICATION_INDEX_PATTERN,
         ignore_unavailable: true,
-        from: params.from,
+        from: params.from * params.size,
         size: params.size,
         body: {
           sort: [{ [params.sortField]: { order: params.sortDirection } }],
