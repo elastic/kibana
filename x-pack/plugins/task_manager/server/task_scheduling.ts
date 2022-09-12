@@ -48,7 +48,7 @@ import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTaskRejectedDueToCapacityError } from './task_running';
 
 const VERSION_CONFLICT_STATUS = 409;
-
+const BULK_ACTION_SIZE = 100;
 export interface TaskSchedulingOpts {
   logger: Logger;
   taskStore: TaskStore;
@@ -61,7 +61,7 @@ export interface TaskSchedulingOpts {
 /**
  * return type of TaskScheduling.bulkUpdateSchedules method
  */
-export interface BulkUpdateSchedulesResult {
+export interface BulkUpdateTaskResult {
   /**
    * list of successfully updated tasks
    */
@@ -126,6 +126,7 @@ export class TaskScheduling {
     return await this.store.schedule({
       ...modifiedTask,
       traceparent: traceparent || '',
+      enabled: modifiedTask.enabled ?? true,
     });
   }
 
@@ -149,11 +150,70 @@ export class TaskScheduling {
           ...options,
           taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
         });
-        return { ...modifiedTask, traceparent: traceparent || '' };
+        return {
+          ...modifiedTask,
+          traceparent: traceparent || '',
+          enabled: modifiedTask.enabled ?? true,
+        };
       })
     );
 
     return await this.store.bulkSchedule(modifiedTasks);
+  }
+
+  public async bulkEnableDisable(
+    taskIds: string[],
+    enabled: boolean
+  ): Promise<BulkUpdateTaskResult> {
+    const tasks = await pMap(
+      chunk(taskIds, BULK_ACTION_SIZE),
+      async (taskIdsChunk) =>
+        this.store.fetch({
+          query: {
+            bool: {
+              must: [
+                {
+                  terms: {
+                    _id: taskIdsChunk.map((taskId) => `task:${taskId}`),
+                  },
+                },
+                {
+                  term: {
+                    'task.enabled': !enabled,
+                  },
+                },
+              ],
+            },
+          },
+          size: BULK_ACTION_SIZE,
+        }),
+      { concurrency: 10 }
+    );
+
+    const updatedTasks = tasks
+      .flatMap(({ docs }) => docs)
+      .reduce<ConcreteTaskInstance[]>((acc, task) => {
+        // if task is not enabled, no need to update it
+        if (enabled === task.enabled) {
+          return acc;
+        }
+
+        acc.push({ ...task, enabled });
+        return acc;
+      }, []);
+
+    return (await this.store.bulkUpdate(updatedTasks)).reduce<BulkUpdateTaskResult>(
+      (acc, task) => {
+        if (task.tag === 'ok') {
+          acc.tasks.push(task.value);
+        } else {
+          acc.errors.push({ error: task.error.error, task: task.error.entity });
+        }
+
+        return acc;
+      },
+      { tasks: [], errors: [] }
+    );
   }
 
   /**
@@ -163,14 +223,14 @@ export class TaskScheduling {
    *
    * @param {string[]} taskIds  - list of task ids
    * @param {IntervalSchedule} schedule  - new schedule
-   * @returns {Promise<BulkUpdateSchedulesResult>}
+   * @returns {Promise<BulkUpdateTaskResult>}
    */
   public async bulkUpdateSchedules(
     taskIds: string[],
     schedule: IntervalSchedule
-  ): Promise<BulkUpdateSchedulesResult> {
+  ): Promise<BulkUpdateTaskResult> {
     const tasks = await pMap(
-      chunk(taskIds, 100),
+      chunk(taskIds, BULK_ACTION_SIZE),
       async (taskIdsChunk) =>
         this.store.fetch({
           query: mustBeAllOf(
@@ -185,7 +245,7 @@ export class TaskScheduling {
               },
             }
           ),
-          size: 100,
+          size: BULK_ACTION_SIZE,
         }),
       { concurrency: 10 }
     );
@@ -211,7 +271,7 @@ export class TaskScheduling {
         return acc;
       }, []);
 
-    return (await this.store.bulkUpdate(updatedTasks)).reduce<BulkUpdateSchedulesResult>(
+    return (await this.store.bulkUpdate(updatedTasks)).reduce<BulkUpdateTaskResult>(
       (acc, task) => {
         if (task.tag === 'ok') {
           acc.tasks.push(task.value);
@@ -226,7 +286,7 @@ export class TaskScheduling {
   }
 
   /**
-   * Run  task.
+   * Run task.
    *
    * @param taskId - The task being scheduled.
    * @returns {Promise<RunSoonResult>}

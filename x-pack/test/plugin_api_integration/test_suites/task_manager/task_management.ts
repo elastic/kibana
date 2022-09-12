@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import TaskManagerMapping from '@kbn/task-manager-plugin/server/saved_objects/mappings.json';
 import { DEFAULT_POLL_INTERVAL } from '@kbn/task-manager-plugin/server/config';
-import { ConcreteTaskInstance, BulkUpdateSchedulesResult } from '@kbn/task-manager-plugin/server';
+import { ConcreteTaskInstance, BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const {
@@ -184,7 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .send({ taskIds, schedule })
         .expect(200)
-        .then((response: { body: BulkUpdateSchedulesResult }) => response.body);
+        .then((response: { body: BulkUpdateTaskResult }) => response.body);
     }
 
     // TODO: Add this back in with https://github.com/elastic/kibana/issues/106139

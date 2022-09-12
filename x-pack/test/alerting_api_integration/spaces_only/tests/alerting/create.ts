@@ -108,6 +108,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         spaceId: Spaces.space1.id,
         consumer: 'alertsFixture',
       });
+      expect(taskRecord.task.enabled).to.eql(true);
       // Ensure AAD isn't broken
       await checkAAD({
         supertest,
@@ -498,6 +499,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           spaceId: Spaces.space1.id,
           consumer: 'alertsFixture',
         });
+        expect(taskRecord.task.enabled).to.eql(true);
         // Ensure AAD isn't broken
         await checkAAD({
           supertest,
