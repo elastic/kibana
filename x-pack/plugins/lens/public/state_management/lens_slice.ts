@@ -161,6 +161,14 @@ export const removeOrClearLayer = createAction<{
   layerId: string;
   layerIds: string[];
 }>('lens/removeOrClearLayer');
+
+export const cloneLayer = createAction(
+  'cloneLayer',
+  function prepare({ visualizationId, layerId }: { visualizationId: string; layerId: string }) {
+    return { payload: { newLayerId: generateId(), visualizationId, layerId } };
+  }
+);
+
 export const addLayer = createAction<{
   layerId: string;
   layerType: LayerType;
@@ -210,6 +218,7 @@ export const lensActions = {
   removeLayers,
   removeOrClearLayer,
   addLayer,
+  cloneLayer,
   setLayerDefaultDimension,
   updateIndexPatterns,
   replaceIndexpattern,
@@ -274,6 +283,69 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         ...newState,
         stagedPreview: undefined,
       };
+    },
+    [cloneLayer.type]: (
+      state,
+      {
+        payload: { visualizationId, layerId, newLayerId },
+      }: {
+        payload: {
+          visualizationId: string;
+          layerId: string;
+          newLayerId: string;
+        };
+      }
+    ) => {
+      if (!state.activeDatasourceId || !state.visualization.activeId) {
+        return state;
+      }
+
+      const activeVisualization = visualizationMap[state.visualization.activeId];
+      const activeDatasource = datasourceMap[state.activeDatasourceId];
+      // reuse the active datasource dataView id for the new layer
+      const currentDataViewsId = activeDatasource.getCurrentIndexPatternId(
+        state.datasourceStates[state.activeDatasourceId!].state
+      );
+
+      const layerType = getLayerType(activeVisualization, state.visualization.state, layerId);
+
+      state.datasourceStates = mapValues(
+        state.datasourceStates,
+        (datasourceState, datasourceId) => {
+          const datasource = datasourceMap[datasourceId!];
+          return {
+            ...datasourceState,
+            state: datasource.cloneLayer(datasourceState.state, layerId, newLayerId),
+          };
+        }
+      );
+
+      console.log(state.datasourceStates);
+
+      const { activeDatasourceState, activeVisualizationState } = addInitialValueIfAvailable({
+        datasourceState: state.datasourceStates[state.activeDatasourceId].state,
+        visualizationState: state.visualization.state,
+        framePublicAPI: selectFramePublicAPI({ lens: current(state) }, datasourceMap),
+        activeVisualization,
+        activeDatasource,
+        layerId,
+        layerType,
+      });
+
+      console.log({
+        activeDatasourceState,
+        activeVisualizationState,
+        activeVisualization,
+        currentDataViewsId,
+        visualizationId,
+        layerId,
+        state,
+        newLayerId,
+      });
+
+      state.visualization.state = activeVisualizationState;
+      state.datasourceStates[state.activeDatasourceId].state = activeDatasourceState;
+      state.stagedPreview = undefined;
     },
     [removeOrClearLayer.type]: (
       state,

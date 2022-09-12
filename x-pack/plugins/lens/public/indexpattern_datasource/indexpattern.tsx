@@ -189,6 +189,19 @@ export function getIndexPatternDatasource({
       };
     },
 
+    cloneLayer(state: IndexPatternPrivateState, layerId: string, newLayerId: string) {
+      console.log('data source: clone layer');
+      return {
+        ...state,
+        layers: {
+          ...state.layers,
+          [newLayerId]: {
+            ...state.layers[layerId],
+          },
+        },
+      };
+    },
+
     removeLayer(state: IndexPatternPrivateState, layerId: string) {
       const newLayers = { ...state.layers };
       delete newLayers[layerId];

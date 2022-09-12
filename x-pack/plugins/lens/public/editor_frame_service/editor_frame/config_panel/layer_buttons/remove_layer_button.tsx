@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,12 +17,14 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiContextMenuItem,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { Visualization } from '../../../types';
-import { LocalStorageLens, LOCAL_STORAGE_LENS_KEY } from '../../../settings_storage';
-import { LayerType, layerTypes } from '../../..';
+import { Visualization } from '../../../../types';
+import { LocalStorageLens, LOCAL_STORAGE_LENS_KEY } from '../../../../settings_storage';
+import { LayerType, layerTypes } from '../../../..';
 
 const modalDescClear = i18n.translate('xpack.lens.layer.confirmModal.clearVis', {
   defaultMessage: `Clearing this layer removes the visualization and its configurations. `,
@@ -109,12 +110,14 @@ export function RemoveLayerButton({
   isOnlyLayer,
   activeVisualization,
   layerType,
+  closeContextMenu,
 }: {
   onRemoveLayer: () => void;
   layerIndex: number;
   isOnlyLayer: boolean;
   activeVisualization: Visualization;
   layerType?: LayerType;
+  closeContextMenu: () => void;
 }) {
   const { ariaLabel, modalTitle, modalDesc } = getButtonCopy(
     layerIndex,
@@ -129,35 +132,32 @@ export function RemoveLayerButton({
     {}
   );
 
-  const onChangeShouldShowModal = () =>
-    setLensLocalStorage({
-      ...lensLocalStorage,
-      skipDeleteModal: !lensLocalStorage?.skipDeleteModal,
-    });
+  const onChangeShouldShowModal = useCallback(
+    () =>
+      setLensLocalStorage({
+        ...lensLocalStorage,
+        skipDeleteModal: !lensLocalStorage?.skipDeleteModal,
+      }),
+    [lensLocalStorage, setLensLocalStorage]
+  );
 
-  const closeModal = () => setIsModalVisible(false);
-  const showModal = () => setIsModalVisible(true);
+  const closeModal = useCallback(() => setIsModalVisible(false), []);
+  const showModal = useCallback(() => setIsModalVisible(true), []);
 
-  const removeLayer = () => {
-    // If we don't blur the remove / clear button, it remains focused
-    // which is a strange UX in this case. e.target.blur doesn't work
-    // due to who knows what, but probably event re-writing. Additionally,
-    // activeElement does not have blur so, we need to do some casting + safeguards.
-    const el = document.activeElement as unknown as { blur: () => void };
-
-    if (el?.blur) {
-      el.blur();
-    }
-
+  const removeLayer = useCallback(() => {
+    closeContextMenu();
     onRemoveLayer();
-  };
+  }, [closeContextMenu, onRemoveLayer]);
+
+  const onCloseModal = useCallback(() => {
+    closeContextMenu();
+    closeModal();
+  }, [closeContextMenu, closeModal]);
 
   return (
     <>
-      <EuiButtonIcon
-        size="xs"
-        iconType={isOnlyLayer ? 'eraser' : 'trash'}
-        color="danger"
+      <EuiContextMenuItem
+        icon={<EuiIcon color="danger" type={isOnlyLayer ? 'eraser' : 'trash'} title={ariaLabel} />}
         data-test-subj={`lnsLayerRemove--${layerIndex}`}
         aria-label={ariaLabel}
         title={ariaLabel}
@@ -167,13 +167,15 @@ export function RemoveLayerButton({
           }
           return showModal();
         }}
-      />
+      >
+        {ariaLabel}
+      </EuiContextMenuItem>
       {isModalVisible ? (
         <RemoveConfirmModal
           modalTitle={modalTitle}
           isDeletable={!!activeVisualization.removeLayer && !isOnlyLayer}
           modalDesc={modalDesc}
-          closeModal={closeModal}
+          closeModal={onCloseModal}
           skipDeleteModal={lensLocalStorage?.skipDeleteModal}
           onChangeShouldShowModal={onChangeShouldShowModal}
           removeLayer={removeLayer}

@@ -22,6 +22,7 @@ import {
   setLayerDefaultDimension,
   useLensDispatch,
   removeOrClearLayer,
+  cloneLayer,
   addLayer,
   updateState,
   updateDatasourceState,
@@ -222,6 +223,14 @@ export function LayerPanels(
                 })
               );
             }
+          }}
+          onCloneLayer={() => {
+            dispatchLens(
+              cloneLayer({
+                visualizationId: activeVisualization.id,
+                layerId,
+              })
+            );
           }}
           onRemoveLayer={() => {
             const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerId];

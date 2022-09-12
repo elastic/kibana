@@ -6,7 +6,7 @@
  */
 import type { Ast } from '@kbn/interpreter';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
-import type { CoreSetup, SavedObjectReference, ResolvedSimpleSavedObject } from '@kbn/core/public';
+import type { CoreStart, SavedObjectReference, ResolvedSimpleSavedObject } from '@kbn/core/public';
 import type { PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { MutableRefObject } from 'react';
@@ -265,6 +265,7 @@ export interface Datasource<T = unknown, P = unknown> {
   insertLayer: (state: T, newLayerId: string) => T;
   removeLayer: (state: T, layerId: string) => T;
   clearLayer: (state: T, layerId: string) => T;
+  cloneLayer: (state: T, layerId: string, newLayerId: string) => T;
   getLayers: (state: T) => string[];
   removeColumn: (props: {
     prevState: T;
@@ -491,7 +492,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   dragDropContext: DragContextState;
   setState: StateSetter<T, { applyImmediately?: boolean }>;
   showNoDataPopover: () => void;
-  core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
+  core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings' | 'overlays'>;
   query: Query;
   dateRange: DateRange;
   filters: Filter[];
@@ -545,7 +546,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
       forceRender?: boolean;
     }
   >;
-  core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
+  core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings' | 'overlays'>;
   dateRange: DateRange;
   dimensionGroups: VisualizationDimensionGroupConfig[];
   toggleFullscreen: () => void;
@@ -918,6 +919,8 @@ export interface Visualization<T = unknown, P = unknown> {
   getLayerIds: (state: T) => string[];
   /** Reset button on each layer triggers this */
   clearLayer: (state: T, layerId: string, indexPatternId: string) => T;
+  /** Reset button on each layer triggers this */
+  cloneLayer?: (state: T, layerId: string, newLayerId: string) => T;
   /** Optional, if the visualization supports multiple layers */
   removeLayer?: (state: T, layerId: string) => T;
   /** Track added layers in internal state */
