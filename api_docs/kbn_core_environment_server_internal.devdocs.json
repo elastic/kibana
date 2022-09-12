@@ -26,6 +26,7 @@
         ],
         "path": "packages/core/environment/core-environment-server-internal/src/pid_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -39,6 +40,7 @@
         "description": [],
         "path": "packages/core/environment/core-environment-server-internal/src/pid_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-environment-server-internal",
@@ -48,7 +50,8 @@
             "label": "path",
             "description": [],
             "path": "packages/core/environment/core-environment-server-internal/src/pid_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-environment-server-internal",
@@ -66,7 +69,8 @@
               "<boolean>; }>"
             ],
             "path": "packages/core/environment/core-environment-server-internal/src/pid_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

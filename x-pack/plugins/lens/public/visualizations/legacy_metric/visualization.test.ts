@@ -70,7 +70,7 @@ describe('metric_visualization', () => {
   describe('#clearLayer', () => {
     it('returns a clean layer', () => {
       (generateId as jest.Mock).mockReturnValueOnce('test-id1');
-      expect(metricVisualization.clearLayer(exampleState(), 'l1')).toEqual({
+      expect(metricVisualization.clearLayer(exampleState(), 'l1', 'indexPattern1')).toEqual({
         accessor: undefined,
         layerId: 'l1',
         layerType: layerTypes.DATA,
