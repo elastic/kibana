@@ -47,6 +47,7 @@ interface StepRuleActionsProps extends RuleStepProps {
 export const stepActionsDefaultValue: ActionsStepRule = {
   enabled: true,
   actions: [],
+  responseActions: [],
   kibanaSiemAppUrl: '',
   throttle: DEFAULT_THROTTLE_OPTION.value,
 };

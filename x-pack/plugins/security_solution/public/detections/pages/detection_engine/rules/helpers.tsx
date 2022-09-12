@@ -75,7 +75,7 @@ export const getStepsData = ({
 export const getActionsStepsData = (
   rule: Omit<Rule, 'actions'> & {
     actions: RuleAlertAction[];
-    response_actions: RuleAlertResponseAction[];
+    response_actions?: RuleAlertResponseAction[];
   }
 ): ActionsStepRule => {
   // eslint-disable-next-line @typescript-eslint/naming-convention

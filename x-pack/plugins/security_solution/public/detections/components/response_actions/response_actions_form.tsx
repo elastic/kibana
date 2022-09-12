@@ -13,9 +13,6 @@ import { ResponseActionsList } from './response_actions_list';
 
 import type { ArrayItem } from '../../../shared_imports';
 import { useSupportedResponseActionTypes } from './use_supported_response_action_types';
-import { UseField } from '../../../shared_imports';
-
-const GhostFormField = () => <></>;
 
 export interface ResponseActionValidatorRef {
   validation: {
@@ -58,7 +55,7 @@ export const ResponseActionsForm = ({ items, addItem, removeItem, saveClickRef }
 
   const form = useMemo(() => {
     if (!supportedResponseActionTypes?.length) {
-      return <UseField path="responseActions" component={GhostFormField} />;
+      return null;
     }
     return (
       <ResponseActionsList
