@@ -37,6 +37,7 @@ import { EndpointOverview } from './endpoint_overview';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
 import { useHostRiskScore } from '../../../risk_score/containers';
 import { RiskScore } from '../../../common/components/severity/common';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 interface HostSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -83,7 +84,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
       [hostName]
     );
 
-    const [_, { data: hostRisk, isModuleEnabled }] = useHostRiskScore({
+    const [_, { data: hostRisk }] = useHostRiskScore({
       filterQuery,
       skip: hostName == null,
     });
@@ -100,40 +101,35 @@ export const HostOverview = React.memo<HostSummaryProps>(
       [contextID, isDraggable]
     );
 
-    const [hostRiskScore, hostRiskLevel] = useMemo(() => {
-      if (isModuleEnabled) {
-        const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
-        return [
-          {
-            title: i18n.HOST_RISK_SCORE,
-            description: (
-              <>
-                {hostRiskData
-                  ? Math.round(hostRiskData.host.risk.calculated_score_norm)
-                  : getEmptyTagValue()}
-              </>
-            ),
-          },
+    const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
-          {
-            title: i18n.HOST_RISK_CLASSIFICATION,
-            description: (
-              <>
-                {hostRiskData ? (
-                  <RiskScore
-                    severity={hostRiskData.host.risk.calculated_level}
-                    hideBackgroundColor
-                  />
-                ) : (
-                  getEmptyTagValue()
-                )}
-              </>
-            ),
-          },
-        ];
-      }
-      return [undefined, undefined];
-    }, [hostRisk, isModuleEnabled]);
+    const [hostRiskScore, hostRiskLevel] = useMemo(() => {
+      const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
+      return [
+        {
+          title: i18n.HOST_RISK_SCORE,
+          description: (
+            <>
+              {hostRiskData
+                ? Math.round(hostRiskData.host.risk.calculated_score_norm)
+                : getEmptyTagValue()}
+            </>
+          ),
+        },
+        {
+          title: i18n.HOST_RISK_CLASSIFICATION,
+          description: (
+            <>
+              {hostRiskData ? (
+                <RiskScore severity={hostRiskData.host.risk.calculated_level} hideBackgroundColor />
+              ) : (
+                getEmptyTagValue()
+              )}
+            </>
+          ),
+        },
+      ];
+    }, [hostRisk]);
 
     const column: DescriptionList[] = useMemo(
       () => [
@@ -273,7 +269,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
             )}
           </OverviewWrapper>
         </InspectButtonContainer>
-        {hostRiskScore && hostRiskLevel && (
+        {riskyHostsFeatureEnabled && (
           <HostRiskOverviewWrapper
             gutterSize={isInDetailsSidePanel ? 'm' : 'none'}
             direction={isInDetailsSidePanel ? 'column' : 'row'}

@@ -26,6 +26,10 @@ jest.mock('../../../risk_score/containers/all', () => ({
   ]),
 }));
 
+jest.mock('../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
+}));
+
 describe('Host Summary Component', () => {
   describe('rendering', () => {
     const mockProps = {
