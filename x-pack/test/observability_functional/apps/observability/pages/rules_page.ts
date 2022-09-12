@@ -171,6 +171,8 @@ export default ({ getService }: FtrProviderContext) => {
           'No permissions prompt',
           async () => await testSubjects.exists('noPermissionPrompt')
         );
+
+        await observability.users.restoreDefaultTestUserRole();
       });
     });
   });

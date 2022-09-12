@@ -21,6 +21,9 @@ describe('buildEsQuery', () => {
     },
     {
       timeRange: defaultTimeRange,
+    },
+    {
+      timeRange: defaultTimeRange,
       kuery: 'nestedField: { child: "something" }',
     },
     {
