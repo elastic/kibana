@@ -7,9 +7,8 @@
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import type { DataViewAttributes } from '@kbn/data-views-plugin/public';
-import type { SavedObject } from '@kbn/data-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { DiscoverLayout } from './components/layout';
 import { setBreadcrumbsTitle } from '../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
@@ -25,7 +24,7 @@ export interface DiscoverMainProps {
   /**
    * List of available data views
    */
-  dataViewList: Array<SavedObject<DataViewAttributes>>;
+  dataViewList: DataViewListItem[];
   /**
    * Current instance of SavedSearch
    */
@@ -35,7 +34,7 @@ export interface DiscoverMainProps {
 export function DiscoverMainApp(props: DiscoverMainProps) {
   const { savedSearch, dataViewList } = props;
   const services = useDiscoverServices();
-  const { chrome, docLinks, uiSettings: config, data, spaces, history } = services;
+  const { chrome, docLinks, data, spaces, history } = services;
   const usedHistory = useHistory();
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
   const navigateTo = useCallback(
@@ -64,6 +63,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     history: usedHistory,
     savedSearch,
     setExpandedDoc,
+    dataViewList,
   });
 
   /**
@@ -81,7 +81,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     return () => {
       data.search.session.clear();
     };
-  }, [savedSearch, chrome, docLinks, refetch$, stateContainer, data, config]);
+  }, [savedSearch, chrome, data]);
 
   /**
    * Initializing syncing with state and help menu

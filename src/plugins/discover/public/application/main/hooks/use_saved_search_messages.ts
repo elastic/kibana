@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { AggregateQuery, Query } from '@kbn/es-query';
 import { FetchStatus } from '../../types';
 import {
   DataCharts$,
@@ -61,12 +62,14 @@ export function sendPartialMsg(main$: DataMain$) {
  */
 export function sendLoadingMsg(
   data$: DataMain$ | DataDocuments$ | DataTotalHits$ | DataCharts$,
-  recordRawType: RecordRawType
+  recordRawType: RecordRawType,
+  query?: AggregateQuery | Query
 ) {
   if (data$.getValue().fetchStatus !== FetchStatus.LOADING) {
     data$.next({
       fetchStatus: FetchStatus.LOADING,
       recordRawType,
+      query,
     });
   }
 }

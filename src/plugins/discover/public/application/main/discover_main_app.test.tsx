@@ -7,12 +7,11 @@
  */
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { DiscoverMainApp } from './discover_main_app';
 import { DiscoverTopNav } from './components/top_nav/discover_topnav';
 import { savedSearchMock } from '../../__mocks__/saved_search';
-import { SavedObject } from '@kbn/core/types';
-import type { DataViewAttributes } from '@kbn/data-views-plugin/public';
 import { setHeaderActionMenuMounter } from '../../kibana_services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
@@ -25,7 +24,7 @@ describe('DiscoverMainApp', () => {
   test('renders', () => {
     const dataViewList = [dataViewMock].map((ip) => {
       return { ...ip, ...{ attributes: { title: ip.title } } };
-    }) as unknown as Array<SavedObject<DataViewAttributes>>;
+    }) as unknown as DataViewListItem[];
     const props = {
       dataViewList,
       savedSearch: savedSearchMock,
