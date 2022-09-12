@@ -66,8 +66,9 @@ export const useFetchBrowserFieldCapabilities = ({
 
     const callApi = async () => {
       const browserFieldsInfo = await getBrowserFieldInfo();
-      setIsLoading(false);
+
       setBrowserFields(browserFieldsInfo);
+      setIsLoading(false);
     };
 
     callApi();

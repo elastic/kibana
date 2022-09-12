@@ -8,7 +8,7 @@
 import { EuiDataGridColumn } from '@elastic/eui';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { AlertsTableStorage } from '../alerts_table_state';
 import {
   BrowserFields,
@@ -46,7 +46,7 @@ const euiColumnFactory = (
 };
 
 /**
- * Searches in the browser fields object for a specific field
+ * Searches in browser fields object for a specific field
  */
 const getBrowserFieldProps = (_columnId: string, browserFields: BrowserFields) => {
   const key = Object.keys(browserFields).find((_key) =>
@@ -75,9 +75,18 @@ export const useColumns = ({ featureIds, storageAlertsTable, storage, id }: UseC
     featureIds,
   });
   const [columns, setColumns] = useState<EuiDataGridColumn[]>(storageAlertsTable.current.columns);
+  const [isColumnsPopulated, setColumnsPopulated] = useState<boolean>(false);
   const [visibleColumns, setVisibleColumns] = useState(
     storageAlertsTable.current.visibleColumns ?? []
   );
+
+  useEffect(() => {
+    if (isBrowserFieldDataLoading !== false || isColumnsPopulated === true) return;
+
+    const populatedColumns = populateColumns(columns, browserFields);
+    setColumnsPopulated(true);
+    setColumns(populatedColumns);
+  }, [browserFields, columns, isBrowserFieldDataLoading, isColumnsPopulated]);
 
   const onColumnsChange = useCallback(
     (newColumns: EuiDataGridColumn[], newVisibleColumns: string[]) => {
@@ -111,9 +120,8 @@ export const useColumns = ({ featureIds, storageAlertsTable, storage, id }: UseC
           ? [...visibleColumns.slice(0, currentIndex), ...visibleColumns.slice(currentIndex + 1)]
           : [...visibleColumns, columnId];
 
-      const newColumns = populateColumns(
-        newColumnIds.map((_columnId) => euiColumnFactory({ id: _columnId }, browserFields)),
-        browserFields
+      const newColumns = newColumnIds.map((_columnId) =>
+        euiColumnFactory({ id: _columnId }, browserFields)
       );
       onChangeVisibleColumns(newColumnIds);
       onColumnsChange(newColumns, newColumnIds);
