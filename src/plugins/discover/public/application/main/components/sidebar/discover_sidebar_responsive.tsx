@@ -27,13 +27,11 @@ import { SavedObject } from '@kbn/core/types';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
-import { AppState } from '../../services/discover_state';
-import { AvailableFields$, DataDocuments$, RecordRawType } from '../../hooks/use_saved_search';
+import { AvailableFields$, DataDocuments$ } from '../../hooks/use_saved_search';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { FetchStatus } from '../../../types';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
-import { getRawRecordType } from '../../utils/get_raw_record_type';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -78,9 +76,9 @@ export interface DiscoverSidebarResponsiveProps {
    */
   selectedDataView?: DataView;
   /**
-   * Discover App state
+   * determines if documents or text based query language records are displayed
    */
-  state: AppState;
+  isPlainRecord: boolean;
   /**
    * Metric tracking function
    * @param metricType
@@ -116,11 +114,7 @@ export interface DiscoverSidebarResponsiveProps {
  */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const services = useDiscoverServices();
-  const isPlainRecord = useMemo(
-    () => getRawRecordType(props.state.query) === RecordRawType.PLAIN,
-    [props.state.query]
-  );
-  const { selectedDataView, onFieldEdited, onDataViewCreated } = props;
+  const { selectedDataView, onFieldEdited, onDataViewCreated, isPlainRecord } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   /**

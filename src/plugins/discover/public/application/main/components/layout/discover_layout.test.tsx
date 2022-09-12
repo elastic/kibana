@@ -156,10 +156,14 @@ function mountComponent(
     state: { columns: [], query },
     stateContainer: {
       setAppState: () => {},
+      getAppState: () => ({
+        interval: 'auto',
+      }),
       appStateContainer: {
         getState: () => ({
           interval: 'auto',
         }),
+        subscribe: jest.fn(),
       },
     } as unknown as GetStateReturn,
     setExpandedDoc: jest.fn(),

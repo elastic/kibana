@@ -105,7 +105,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
     selectedDataView: dataView,
-    state: {},
+    isPlainRecord: false,
     trackUiMetric: jest.fn(),
     onFieldEdited: jest.fn(),
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
@@ -176,10 +176,7 @@ describe('discover responsive sidebar', function () {
         recordRawType: RecordRawType.PLAIN,
         result: getDataTableRecords(stubLogstashDataView),
       }) as DataDocuments$,
-      state: {
-        ...initialProps.state,
-        query: { sql: 'SELECT * FROM `index`' },
-      },
+      isPlainRecord: true,
     };
     const compInViewerMode = mountWithIntl(
       <KibanaContextProvider services={mockServices}>

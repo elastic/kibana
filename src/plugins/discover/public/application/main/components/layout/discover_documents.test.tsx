@@ -44,7 +44,18 @@ function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
     searchSource: documents$,
     setExpandedDoc: jest.fn(),
     state: { columns: [] },
-    stateContainer: { setAppState: () => {} } as unknown as GetStateReturn,
+    stateContainer: {
+      setAppState: () => {},
+      getAppState: () => ({
+        interval: 'auto',
+      }),
+      appStateContainer: {
+        getState: () => ({
+          interval: 'auto',
+        }),
+        subscribe: jest.fn(),
+      },
+    } as unknown as GetStateReturn,
     navigateTo: jest.fn(),
     onFieldEdited: jest.fn(),
   };

@@ -66,7 +66,6 @@ function getCompProps(): DiscoverSidebarProps {
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
     selectedDataView: dataView,
-    state: {},
     trackUiMetric: jest.fn(),
     fieldFilter: getDefaultFieldFilter(),
     setFieldFilter: jest.fn(),
@@ -77,6 +76,7 @@ function getCompProps(): DiscoverSidebarProps {
     onDataViewCreated: jest.fn(),
     availableFields$,
     useNewFieldsApi: true,
+    isPlainRecord: false,
   };
 }
 

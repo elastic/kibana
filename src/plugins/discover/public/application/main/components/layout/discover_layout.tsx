@@ -160,12 +160,8 @@ export function DiscoverLayout({
   }, [inspectorSession]);
 
   const { columns, onAddColumn, onRemoveColumn } = useColumns({
-    capabilities,
-    config: uiSettings,
     dataView,
-    dataViews,
-    setAppState: stateContainer.setAppState,
-    state,
+    stateContainer,
     useNewFieldsApi,
   });
 
@@ -272,7 +268,7 @@ export function DiscoverLayout({
               onRemoveField={onRemoveColumn}
               onChangeDataView={onChangeDataView}
               selectedDataView={dataView}
-              state={state}
+              isPlainRecord={isPlainRecord}
               isClosed={isSidebarClosed}
               trackUiMetric={trackUiMetric}
               useNewFieldsApi={useNewFieldsApi}

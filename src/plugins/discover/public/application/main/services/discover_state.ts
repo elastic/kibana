@@ -158,6 +158,10 @@ export interface GetStateReturn {
    */
   setAppState: (newState: Partial<AppState>) => void;
   /**
+   * Get app state
+   */
+  getAppState: () => AppState;
+  /**
    * Set state in Url using history.replace
    */
   replaceUrlAppState: (newState: Partial<AppState>) => Promise<void>;
@@ -270,6 +274,7 @@ export function getState({
       return stop;
     },
     setAppState: (newPartial: AppState) => setState(appStateContainerModified, newPartial),
+    getAppState: () => appStateContainer.getState(),
     replaceUrlAppState,
     resetInitialAppState: () => {
       initialAppState = appStateContainer.getState();

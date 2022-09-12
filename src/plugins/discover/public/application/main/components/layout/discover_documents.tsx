@@ -78,7 +78,7 @@ function DiscoverDocumentsComponent({
   stateContainer: GetStateReturn;
   onFieldEdited?: () => void;
 }) {
-  const { capabilities, dataViews, uiSettings } = useDiscoverServices();
+  const { uiSettings } = useDiscoverServices();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const hideAnnouncements = useMemo(() => uiSettings.get(HIDE_ANNOUNCEMENTS), [uiSettings]);
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
@@ -93,12 +93,8 @@ function DiscoverDocumentsComponent({
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
 
   const { columns, onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useColumns({
-    capabilities,
-    config: uiSettings,
     dataView,
-    dataViews,
-    setAppState: stateContainer.setAppState,
-    state,
+    stateContainer,
     useNewFieldsApi,
   });
 

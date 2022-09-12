@@ -6,65 +6,72 @@
  * Side Public License, v 1.
  */
 
-import { useMemo } from 'react';
-import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
-
-import { Capabilities, IUiSettingsClient } from '@kbn/core/public';
+import { useEffect, useMemo, useState } from 'react';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { isEqual } from 'lodash';
+import { useDiscoverServices } from './use_discover_services';
 import {
-  AppState as DiscoverState,
+  AppState,
   GetStateReturn as DiscoverGetStateReturn,
 } from '../application/main/services/discover_state';
-import {
-  AppState as ContextState,
-  GetStateReturn as ContextGetStateReturn,
-} from '../application/context/services/context_state';
+import { GetStateReturn as ContextGetStateReturn } from '../application/context/services/context_state';
 import { getStateColumnActions } from '../components/doc_table/actions/columns';
 
 interface UseColumnsProps {
-  capabilities: Capabilities;
-  config: IUiSettingsClient;
   dataView: DataView;
-  dataViews: DataViewsContract;
   useNewFieldsApi: boolean;
-  setAppState: DiscoverGetStateReturn['setAppState'] | ContextGetStateReturn['setAppState'];
-  state: DiscoverState | ContextState;
+  stateContainer: DiscoverGetStateReturn | ContextGetStateReturn;
 }
 
-export const useColumns = ({
-  capabilities,
-  config,
-  dataView,
-  dataViews,
-  setAppState,
-  state,
-  useNewFieldsApi,
-}: UseColumnsProps) => {
+export const useColumns = ({ dataView, stateContainer, useNewFieldsApi }: UseColumnsProps) => {
+  const { capabilities, dataViews, uiSettings } = useDiscoverServices();
+  const [state, setState] = useState(
+    getFieldsByState(stateContainer.getAppState(), useNewFieldsApi)
+  );
   const { onAddColumn, onRemoveColumn, onSetColumns, onMoveColumn } = useMemo(
     () =>
       getStateColumnActions({
         capabilities,
-        config,
+        config: uiSettings,
         dataView,
         dataViews,
-        setAppState,
+        setAppState: stateContainer.setAppState,
         state,
         useNewFieldsApi,
       }),
-    [capabilities, config, dataView, dataViews, setAppState, state, useNewFieldsApi]
+    [capabilities, uiSettings, dataView, dataViews, stateContainer, useNewFieldsApi, state]
   );
+  useEffect(() => {
+    const unsubscribe = stateContainer.appStateContainer.subscribe((nextState) => {
+      const next = getFieldsByState(nextState, useNewFieldsApi);
 
-  const columns = useMemo(() => {
-    if (!state.columns) {
-      return [];
-    }
-    return useNewFieldsApi ? state.columns.filter((col) => col !== '_source') : state.columns;
-  }, [state, useNewFieldsApi]);
+      if (!isEqual(next, state)) {
+        setState(next);
+      }
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, [state, stateContainer.appStateContainer, useNewFieldsApi]);
 
   return {
-    columns,
+    columns: state.columns,
     onAddColumn,
     onRemoveColumn,
     onMoveColumn,
     onSetColumns,
   };
+};
+
+const getColumns = (nextColumns: string[] | undefined, useNewFieldsApi: boolean) => {
+  if (!nextColumns) {
+    return [];
+  }
+  return useNewFieldsApi ? nextColumns.filter((col) => col !== '_source') : nextColumns;
+};
+
+const getFieldsByState = (appState: AppState, useNewFieldsApi: boolean) => {
+  const columns = getColumns(appState.columns, useNewFieldsApi);
+  const sort = appState.sort;
+  return { columns, sort };
 };
