@@ -6,6 +6,7 @@
  */
 
 import type {
+  GetActionStatusResponse,
   GetAgentTagsResponse,
   PostBulkUpdateAgentTagsRequest,
   UpdateAgentRequest,
@@ -192,6 +193,13 @@ export function sendPostBulkAgentUpgrade(
     method: 'post',
     body,
     ...options,
+  });
+}
+
+export function sendGetActionStatus() {
+  return sendRequest<GetActionStatusResponse>({
+    path: agentRouteService.getActionStatusPath(),
+    method: 'get',
   });
 }
 

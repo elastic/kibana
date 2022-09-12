@@ -73,6 +73,7 @@ export const createAppContextStartContractMock = (
     kibanaVersion: '8.99.0', // Fake version :)
     kibanaBranch: 'main',
     telemetryEventsSender: createMockTelemetryEventsSender(),
+    bulkActionsResolver: {} as any,
   };
 };
 

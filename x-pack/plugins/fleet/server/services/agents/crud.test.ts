@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
 
-import { errorsToResults, getAgentsByKuery, getAgentTags, processAgentsInBatches } from './crud';
+import { errorsToResults, getAgentsByKuery, getAgentTags } from './crud';
 
 jest.mock('../../../common/services/is_agent_upgradeable', () => ({
   isAgentUpgradeable: jest.fn().mockImplementation((agent: Agent) => agent.id.includes('up')),
@@ -290,53 +290,6 @@ describe('Agents CRUD test', () => {
       expect(searchMock.mock.calls[searchMock.mock.calls.length - 1][0].body.sort).toEqual([
         { policy_id: { order: 'desc' } },
       ]);
-    });
-  });
-
-  describe('processAgentsInBatches', () => {
-    const mockProcessAgents = (agents: Agent[]) =>
-      Promise.resolve({ items: agents.map((agent) => ({ id: agent.id, success: true })) });
-    it('should return results for multiple batches', async () => {
-      searchMock
-        .mockImplementationOnce(() => Promise.resolve(getEsResponse(['1', '2'], 3)))
-        .mockImplementationOnce(() => Promise.resolve(getEsResponse(['3'], 3)));
-
-      const response = await processAgentsInBatches(
-        esClientMock,
-        {
-          kuery: 'active:true',
-          batchSize: 2,
-          showInactive: false,
-        },
-        mockProcessAgents
-      );
-      expect(response).toEqual({
-        items: [
-          { id: '1', success: true },
-          { id: '2', success: true },
-          { id: '3', success: true },
-        ],
-      });
-    });
-
-    it('should return results for one batch', async () => {
-      searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse(['1', '2', '3'], 3)));
-
-      const response = await processAgentsInBatches(
-        esClientMock,
-        {
-          kuery: 'active:true',
-          showInactive: false,
-        },
-        mockProcessAgents
-      );
-      expect(response).toEqual({
-        items: [
-          { id: '1', success: true },
-          { id: '2', success: true },
-          { id: '3', success: true },
-        ],
-      });
     });
   });
 

@@ -26,6 +26,7 @@ export type {
   DownloadSource,
   DataStream,
   Settings,
+  ActionStatus,
   CurrentUpgrade,
   GetFleetStatusResponse,
   GetAgentPoliciesRequest,
