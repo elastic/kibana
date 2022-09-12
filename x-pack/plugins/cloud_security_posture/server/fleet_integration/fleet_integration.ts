@@ -70,7 +70,8 @@ export const onPackagePolicyPostCreateCallback = async (
   const cspRules = generateRulesFromTemplates(
     packagePolicy.id,
     packagePolicy.policy_id,
-    existingRuleTemplates.saved_objects
+    existingRuleTemplates.saved_objects,
+    new Map()
   );
 
   try {
@@ -107,27 +108,16 @@ export const OnPackagePolicyUpgradeCallback = async (
     }),
   });
   console.log('currentRules:', oldCspRules);
-oldCspRules.
-  const oldCspRulesDictionary: any = oldCspRules.saved_objects.map((rule) => ({
-    [rule.attributes.metadata.rego]: rule,
-  }));
 
-  const newRules: Array<SavedObjectsFindResult<CspRuleTemplate>> = [];
-  // const updatedRules = [] as Array<SavedObjectsBulkCreateObject<CspRule>>;
-  for (const { template, rule } of templatesWithRules) {
-    // If no rule exists, create it
-    if (!rule) {
-      newRules.push(template);
-      continue;
-    }
-    // rule.attributes = template.attributes;
-  }
+  const oldCspRulesDictionary: Map<string, SavedObjectsFindResult<CspRule>> = new Map(
+    oldCspRules.saved_objects.map((rule) => [rule.attributes.metadata.rego_rule_id, rule])
+  );
 
   const cspRules = generateRulesFromTemplates(
     packagePolicy.id,
     packagePolicy.policy_id,
-    oldCspRulesDictionary,
-    newRules
+    existingRuleTemplates.saved_objects,
+    oldCspRulesDictionary
   );
 
   try {
@@ -193,16 +183,21 @@ const generateRulesFromTemplates = (
   packagePolicyId: string,
   policyId: string,
   cspRuleTemplates: Array<SavedObjectsFindResult<CspRuleTemplate>>,
+  oldCspRules: Map<string, SavedObjectsFindResult<CspRule>>
 ): Array<SavedObjectsBulkCreateObject<CspRule>> =>
-  cspRuleTemplates.map((template) => ({
-    type: CSP_RULE_SAVED_OBJECT_TYPE,
-    attributes: {
-      ...template.attributes,
-      package_policy_id: packagePolicyId,
-      policy_id: policyId,
-      enabled: true,
-    },
-  }));
+  cspRuleTemplates.map((template) => {
+    const cspRule = oldCspRules.get(template.attributes.metadata.rego_rule_id);
+    const response = {
+      type: CSP_RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        ...template.attributes,
+        package_policy_id: packagePolicyId,
+        policy_id: policyId,
+        enabled: cspRule?.attributes.enabled ?? false,
+      },
+    };
+    return response;
+  });
 
 const getInputType = (inputType: string): string => {
   // Get the last part of the input type, input type structure: cloudbeat/<benchmark_id>

@@ -15,11 +15,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { DeepReadonly } from 'utility-types';
-import {
-  DeletePackagePoliciesResponse,
-  PackagePolicy,
-  UpdatePackagePolicy,
-} from '@kbn/fleet-plugin/common';
+import { DeletePackagePoliciesResponse, PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
