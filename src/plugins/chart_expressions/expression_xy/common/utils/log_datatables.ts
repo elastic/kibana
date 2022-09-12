@@ -63,9 +63,8 @@ export const logDatatables = (
 
 const getLogAnnotationTable = (data: Datatable, layer: AnnotationLayerConfigResult) => {
   const layerDimensions: Dimension[] = [
-    [['label'], 'Label'],
-    [['time'], 'Time'],
-    [['skippedCount'], 'Skipped Count'],
+    [['label'], strings.getLabelLabel()],
+    [['time'], strings.getTimeLabel()],
   ];
   layer.annotations
     .filter((a): a is QueryPointEventAnnotationOutput => a.type === 'query_point_event_annotation')
