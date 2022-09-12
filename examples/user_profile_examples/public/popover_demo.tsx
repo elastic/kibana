@@ -58,7 +58,42 @@ export const PopoverDemo: FunctionComponent = () => {
   ];
 
   const [isOpen2, setIsOpen2] = useState(false);
-  const [selectedOptions2, setSelectedOptions2] = useState<UserProfileWithAvatar[] | null>([]);
+  const [selectedOptions2, setSelectedOptions2] = useState<Array<UserProfileWithAvatar | null>>([
+    null,
+  ]);
+  const options2: Array<UserProfileWithAvatar | null> = [
+    null,
+    {
+      uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+      enabled: true,
+      data: {},
+      user: {
+        username: 'damaged_raccoon',
+        email: 'damaged_raccoon@elastic.co',
+        full_name: 'Damaged Raccoon',
+      },
+    },
+    {
+      uid: 'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0',
+      enabled: true,
+      data: {},
+      user: {
+        username: 'physical_dinosaur',
+        email: 'physical_dinosaur@elastic.co',
+        full_name: 'Physical Dinosaur',
+      },
+    },
+    {
+      uid: 'u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0',
+      enabled: true,
+      data: {},
+      user: {
+        username: 'wet_dingo',
+        email: 'wet_dingo@elastic.co',
+        full_name: 'Wet Dingo',
+      },
+    },
+  ];
 
   return (
     <PanelWithCodeBlock title="Popover" code={code}>
@@ -96,10 +131,9 @@ export const PopoverDemo: FunctionComponent = () => {
         closePopover={() => setIsOpen2(false)}
         selectableProps={{
           selectedOptions: selectedOptions2,
-          defaultOptions,
+          options: options2,
           onChange: setSelectedOptions2,
           height: 32 * 8,
-          allowNull: true,
           nullOptionLabel: 'Unassigned',
         }}
         panelStyle={{

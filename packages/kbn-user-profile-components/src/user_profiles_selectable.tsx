@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { EuiSelectableOption, EuiSelectableProps, ExclusiveUnion } from '@elastic/eui';
+import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -19,7 +19,7 @@ import {
   EuiHighlight,
   EuiTextColor,
 } from '@elastic/eui';
-import type { FunctionComponent, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import React, { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -30,56 +30,9 @@ import type { UserProfileWithAvatar } from './user_avatar';
 import { UserAvatar } from './user_avatar';
 
 /**
- * Props of {@link UserProfilesSelectable} component without ability to explicitly select "no user".
+ * Props of {@link UserProfilesSelectable} component
  */
-interface PropsWithoutNull {
-  /**
-   * Allow explicitly selecting "no user".
-   */
-  allowNull?: false;
-
-  /**
-   * List of selected users.
-   */
-  selectedOptions?: UserProfileWithAvatar[];
-
-  /**
-   * Passes back the current selection.
-   * @param options List of selected users.
-   */
-  onChange?(options: UserProfileWithAvatar[]): void;
-}
-
-/**
- * Props of {@link UserProfilesSelectable} component with ability to explicitly select "no user".
- */
-interface PropsWithNull {
-  /**
-   * Allow explicitly selecting "no user".
-   */
-  allowNull: true;
-
-  /**
-   * List of selected users or `null` (no user).
-   */
-  selectedOptions?: UserProfileWithAvatar[] | null;
-
-  /**
-   * Passes back the current selection.
-   * @param options Either the list of selected users or `null` (no user).
-   */
-  onChange?(options: UserProfileWithAvatar[] | null): void;
-
-  /**
-   * Label of "no user" option.
-   */
-  nullOptionLabel?: string;
-}
-
-/**
- * Common props of {@link UserProfilesSelectable} component
- */
-interface CommonProps
+export interface UserProfilesSelectableProps<Option extends UserProfileWithAvatar | null>
   extends Pick<
     EuiSelectableProps,
     | 'height'
@@ -92,17 +45,23 @@ interface CommonProps
   /**
    * List of users to be rendered as suggestions.
    */
-  defaultOptions?: UserProfileWithAvatar[];
+  defaultOptions?: Option[];
+
+  /**
+   * List of selected users or `null` (no users).
+   */
+  selectedOptions?: Option[];
 
   /**
    * List of users from search results. Should be updated based on the search term provided by `onSearchChange` callback.
    */
-  options?: UserProfileWithAvatar[];
+  options?: Option[];
 
   /**
-   * Show group separator between selected and default options.
+   * Passes back the current selection.
+   * @param options Either the list of selected users or `null` (no users).
    */
-  showSeparator?: boolean;
+  onChange?(options: Option[]): void;
 
   /**
    * Passes back the search term.
@@ -137,30 +96,27 @@ interface CommonProps
   clearButtonLabel?: ReactNode;
 
   /**
-   * Label for default options separator.
+   * Label of "no users" option.
    */
-  separatorLabel?: string;
-}
+  nullOptionLabel?: string;
 
-/**
- * Props of {@link UserProfilesSelectable} component
- */
-export type UserProfilesSelectableProps = CommonProps &
-  ExclusiveUnion<PropsWithoutNull, PropsWithNull>;
+  /**
+   * Label for default options group separator.
+   */
+  defaultOptionsLabel?: string;
+}
 
 /**
  * Renders a selectable component given a list of user profiles
  */
-export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectableProps> = ({
+export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | null>({
   selectedOptions,
   defaultOptions,
   options,
-  allowNull = false,
-  showSeparator = !allowNull,
   onChange,
   onSearchChange,
   isLoading = false,
-  singleSelection = allowNull,
+  singleSelection = false,
   height,
   loadingMessage,
   noMatchesMessage,
@@ -170,33 +126,20 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
   searchInputId,
   selectedStatusMessage,
   nullOptionLabel,
-  separatorLabel,
+  defaultOptionsLabel,
   clearButtonLabel,
-}) => {
+}: UserProfilesSelectableProps<Option>) => {
   const [displayedOptions, setDisplayedOptions] = useState<SelectableOption[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Resets all displayed options
   const resetDisplayedOptions = () => {
     if (options) {
-      setDisplayedOptions(options.map((option) => toSelectableOption(option, searchTerm)));
+      setDisplayedOptions(options.map((option) => toSelectableOption(option, nullOptionLabel)));
       return;
     }
 
-    setDisplayedOptions(
-      allowNull
-        ? [
-            {
-              key: 'null',
-              label:
-                nullOptionLabel ??
-                i18n.translate('userProfileComponents.userProfilesSelectable.nullLabel', {
-                  defaultMessage: 'No user',
-                }),
-            },
-          ]
-        : []
-    );
+    setDisplayedOptions([]);
     updateDisplayedOptions();
   };
 
@@ -205,8 +148,8 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
     if (index === -1) {
       const length = values.push({
         label:
-          separatorLabel ??
-          i18n.translate('userProfileComponents.userProfilesSelectable.separatorLabel', {
+          defaultOptionsLabel ??
+          i18n.translate('userProfileComponents.userProfilesSelectable.defaultOptionsLabel', {
             defaultMessage: 'Suggested',
           }),
         isGroupLabel: true,
@@ -229,8 +172,11 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
       // Get any newly added selected options
       const selectedOptionsToAdd: SelectableOption[] = selectedOptions
         ? selectedOptions
-            .filter((profile) => !nextOptions.find((option) => option.key === profile.uid))
-            .map((option) => toSelectableOption(option, searchTerm))
+            .filter(
+              (profile) =>
+                !nextOptions.find((option) => option.key === (profile ? profile.uid : 'null'))
+            )
+            .map((option) => toSelectableOption(option, nullOptionLabel))
         : [];
 
       // Get any newly added default options
@@ -238,15 +184,17 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
         ? defaultOptions
             .filter(
               (profile) =>
-                !nextOptions.find((option) => option.key === profile.uid) &&
-                !selectedOptionsToAdd.find((option) => option.key === profile.uid)
+                !nextOptions.find((option) => option.key === (profile ? profile.uid : 'null')) &&
+                !selectedOptionsToAdd.find(
+                  (option) => option.key === (profile ? profile.uid : 'null')
+                )
             )
-            .map((option) => toSelectableOption(option, searchTerm))
+            .map((option) => toSelectableOption(option, nullOptionLabel))
         : [];
 
       // Merge in any new options and add group separator if necessary
       if (defaultOptionsToAdd.length) {
-        const separatorIndex = showSeparator ? ensureSeparator(nextOptions) : nextOptions.length;
+        const separatorIndex = ensureSeparator(nextOptions);
         nextOptions.splice(separatorIndex, 0, ...selectedOptionsToAdd);
         nextOptions.push(...defaultOptionsToAdd);
       } else {
@@ -261,12 +209,9 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
   const updateCheckedStatus = () => {
     setDisplayedOptions((values) =>
       values.map((option) => {
-        if (option.key === 'null') {
-          return { ...option, checked: selectedOptions === null ? 'on' : undefined };
-        }
         if (selectedOptions) {
-          const match = selectedOptions.find((p) => p.uid === option.key);
-          return { ...option, checked: match ? 'on' : undefined };
+          const match = selectedOptions.find((p) => option.key === (p ? p.uid : 'null'));
+          return { ...option, checked: match === undefined ? undefined : 'on' };
         }
         return { ...option, checked: undefined };
       })
@@ -283,38 +228,40 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
     <EuiSelectable
       options={displayedOptions}
       // @ts-expect-error: Type of `nextOptions` in EuiSelectable does not match what's actually being passed back so need to manually override it
-      onChange={(nextOptions: Array<EuiSelectableOption<{ data: UserProfileWithAvatar }>>) => {
+      onChange={(
+        nextOptions: Array<EuiSelectableOption<{ data: Partial<UserProfileWithAvatar> }>>
+      ) => {
         if (!onChange) {
           return;
         }
 
-        // Return `null` if selected
-        const [firstOption] = nextOptions;
-        if (firstOption && firstOption.key === 'null' && firstOption.checked === 'on') {
-          // @ts-expect-error: Typescript doesn't correctly infer that change handler must accept `null` when `allowNull` is enabled
-          onChange(null);
-          return;
-        }
-
         // Take all selected options from `nextOptions` unless already in `props.selectedOptions`
-        const values: UserProfileWithAvatar[] = nextOptions
+        // @ts-expect-error
+        const values: Option[] = nextOptions
           .filter((option) => {
             if (option.isGroupLabel || option.checked !== 'on') {
               return false;
             }
-            if (selectedOptions && selectedOptions.find((p) => p.uid === option.key)) {
+            if (
+              selectedOptions &&
+              selectedOptions.find((p) => option.key === (p ? p.uid : 'null')) !== undefined
+            ) {
               return false;
             }
             return true;
           })
-          .map((option) => option.data);
+          .map((option) => (option.key === 'null' ? null : option.data));
 
         // Add all options from `props.selectedOptions` unless they have been deselected in `nextOptions`
         if (selectedOptions && !singleSelection) {
           selectedOptions.forEach((profile) => {
-            const match = nextOptions.find((o) => o.key === profile.uid);
-            if (!match || match.checked === 'on') {
-              values.push(profile);
+            const match = nextOptions.find((o) => o.key === (profile ? profile.uid : 'null'));
+            if (match === undefined || match.checked === 'on') {
+              if (match && match.key === 'null') {
+                values.unshift(profile);
+              } else {
+                values.push(profile);
+              }
             }
           });
         }
@@ -431,11 +378,24 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
 
 type SelectableOption = EuiSelectableOption<Partial<UserProfileWithAvatar>>;
 
-function toSelectableOption(userProfile: UserProfileWithAvatar, search: string): SelectableOption {
+function toSelectableOption(
+  userProfile: UserProfileWithAvatar | null,
+  nullOptionLabel?: string
+): SelectableOption {
+  if (userProfile) {
+    return {
+      key: userProfile.uid,
+      prepend: <UserAvatar user={userProfile.user} avatar={userProfile.data.avatar} size="s" />,
+      label: getUserDisplayName(userProfile.user),
+      data: userProfile,
+    };
+  }
   return {
-    key: userProfile.uid,
-    prepend: <UserAvatar user={userProfile.user} avatar={userProfile.data.avatar} size="s" />,
-    label: getUserDisplayName(userProfile.user),
-    data: userProfile,
+    key: 'null',
+    label:
+      nullOptionLabel ??
+      i18n.translate('userProfileComponents.userProfilesSelectable.nullOptionLabel', {
+        defaultMessage: 'No users',
+      }),
   };
 }

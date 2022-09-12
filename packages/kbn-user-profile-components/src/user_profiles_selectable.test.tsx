@@ -206,11 +206,11 @@ describe('UserProfilesSelectable', () => {
     expect(wrapper.find('input[type="search"]').prop('id')).toBe('testSearchField');
   });
 
-  describe('with `allowNull` enabled', () => {
-    it('should render `null` option before `defaultOptions`', () => {
+  describe('with "no users" option', () => {
+    it('should render `null` option correctly', () => {
       const [firstOption] = userProfiles;
       const wrapper = mount(
-        <UserProfilesSelectable selectedOptions={null} defaultOptions={[firstOption]} allowNull />
+        <UserProfilesSelectable selectedOptions={[null]} options={[null, firstOption]} />
       );
       expect(wrapper.find('EuiSelectable').prop('options')).toEqual([
         expect.objectContaining({
@@ -224,33 +224,37 @@ describe('UserProfilesSelectable', () => {
       ]);
     });
 
-    it('should trigger `onChange` callback with `null` when "no user" gets selected', () => {
+    it('should trigger `onChange` callback with `null` when "no users" get selected', () => {
       const onChange = jest.fn();
       const [firstOption] = userProfiles;
       const wrapper = mount(
-        <UserProfilesSelectable selectedOptions={[firstOption]} onChange={onChange} allowNull />
+        <UserProfilesSelectable options={[null, firstOption]} onChange={onChange} />
       );
 
       wrapper.find('EuiSelectableListItem').first().simulate('click');
-      expect(onChange).toHaveBeenCalledWith(null);
+      expect(onChange).toHaveBeenCalledWith(expect.arrayContaining([null]));
     });
 
     it('should trigger `onChange` callback with empty array when nothing gets selected', () => {
       const onChange = jest.fn();
       const [firstOption] = userProfiles;
       const wrapper = mount(
-        <UserProfilesSelectable selectedOptions={[firstOption]} onChange={onChange} allowNull />
+        <UserProfilesSelectable
+          selectedOptions={[null]}
+          options={[null, firstOption]}
+          onChange={onChange}
+        />
       );
 
-      wrapper.find('EuiSelectableListItem').last().simulate('click');
+      wrapper.find('EuiSelectableListItem').first().simulate('click');
       expect(onChange).toHaveBeenCalledWith(expect.arrayContaining([]));
     });
 
-    it('should trigger `onChange` callback with correct option when it gets selected', () => {
+    it('should trigger `onChange` callback with selected option when selected', () => {
       const onChange = jest.fn();
       const [firstOption] = userProfiles;
       const wrapper = mount(
-        <UserProfilesSelectable defaultOptions={[firstOption]} onChange={onChange} allowNull />
+        <UserProfilesSelectable options={[null, firstOption]} onChange={onChange} />
       );
 
       wrapper.find('EuiSelectableListItem').last().simulate('click');
