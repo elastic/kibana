@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/server-http-tools",
+  "owner": "@elastic/kibana-core",
+  "runtimeDeps": [],
+  "typeDeps": []
+}

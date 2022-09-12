@@ -452,7 +452,7 @@
         "label": "fetchExceptionListsItemsByListIdsWithValidation",
         "description": [],
         "signature": [
-          "({ filterOptions, http, listIds, namespaceTypes, pagination, signal, }: ",
+          "({ filter, http, listIds, namespaceTypes, pagination, search, signal, }: ",
           "ApiCallByListIdProps",
           ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } & { pit?: string | undefined; }>"
         ],
@@ -465,7 +465,7 @@
             "id": "def-common.fetchExceptionListsItemsByListIdsWithValidation.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  filterOptions,\n  http,\n  listIds,\n  namespaceTypes,\n  pagination,\n  signal,\n}",
+            "label": "{\n  filter,\n  http,\n  listIds,\n  namespaceTypes,\n  pagination,\n  search,\n  signal,\n}",
             "description": [],
             "signature": [
               "ApiCallByListIdProps"
