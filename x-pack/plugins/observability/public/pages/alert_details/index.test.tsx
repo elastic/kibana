@@ -17,6 +17,7 @@ import { AlertDetailsPage } from '.';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { createMemoryHistory } from 'history';
+import { ConfigSchema } from '../../plugin';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
@@ -40,6 +41,11 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   ObservabilityPageTemplate: KibanaPageTemplate,
   kibanaFeatures: [],
   core: {} as CoreStart,
+  config: {
+    unsafe: {
+      alertDetails: { enabled: true },
+    },
+  } as ConfigSchema,
 }));
 
 const history = createMemoryHistory({ initialEntries: ['/alerts'] });
