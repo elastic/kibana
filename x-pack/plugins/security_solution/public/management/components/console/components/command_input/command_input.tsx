@@ -249,7 +249,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
                 justifyContent="flexStart"
               >
                 <EuiFlexItem grow={false}>
-                  <div data-test-subj={getTestId('cmdInput-userTextInput')}>{textEntered}</div>
+                  <div data-test-subj={getTestId('cmdInput-leftOfCursor')}>{textEntered}</div>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <span className="cursor essentialAnimation" />
