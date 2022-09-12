@@ -11,11 +11,14 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiLink,
+  EuiText,
 } from '@elastic/eui';
 
 import { ConnectorConfiguration } from '../../../../../../../common/types/connectors';
@@ -73,6 +76,23 @@ export const NativeConnectorConfigurationConfig: React.FC<
             </EuiFlexItem>
           );
         })}
+        <EuiFlexItem>
+          <EuiCallOut
+            color="warning"
+            iconType="iInCircle"
+            title="Data source credentials are unencrypted"
+          >
+            <EuiText size="s">
+              Encryption for data source credentials is unavailable in this technical preview. Your
+              data source credentials will be stored, unencrypted, in Elasticsearch.
+            </EuiText>
+          </EuiCallOut>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiLink target="_blank" href={'' /* TODO needs link */}>
+            {nativeConnector.name} authentication
+          </EuiLink>
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>

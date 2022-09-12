@@ -27,12 +27,16 @@ export const ResearchConfiguration: React.FC<ResearchConfigurationProps> = ({
         credentials to use to connect.
       </EuiText>
       <EuiSpacer />
-      <EuiFlexGroup direction="row">
-        <EuiFlexItem>
-          <EuiLink target="_blank">Documentation</EuiLink>
+      <EuiFlexGroup direction="row" alignItems="flexStart">
+        <EuiFlexItem grow={false}>
+          <EuiLink target="_blank" href="">
+            Documentation
+          </EuiLink>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiLink target="_blank">{name} Documentation</EuiLink>
+        <EuiFlexItem grow={false}>
+          <EuiLink target="_blank" href="">
+            {name} Documentation
+          </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

@@ -126,9 +126,14 @@ export const SelectConnector: React.FC = () => {
           <EuiSpacer />
           <EuiText size="s">
             Looking for more connectors?{' '}
-            <EuiLink target="_blank">View additional integrations in Workplace Search</EuiLink>
+            <EuiLink target="_blank" href={'' /* TODO needs link */}>
+              View additional integrations in Workplace Search
+            </EuiLink>
             {' or '}
-            <EuiLink target="_blank">build your own</EuiLink>.
+            <EuiLink target="_blank" href={'' /* TODO needs link */}>
+              build your own
+            </EuiLink>
+            .
           </EuiText>
         </EuiFormFieldset>
       </form>
