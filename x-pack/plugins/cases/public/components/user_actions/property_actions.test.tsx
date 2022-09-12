@@ -213,4 +213,38 @@ describe('UserActionPropertyActions ', () => {
       expect(onDelete).toHaveBeenCalledWith(deleteProps.id);
     });
   });
+
+  describe('action filtering', () => {
+    const tests = [
+      ['edit', 'pencil'],
+      ['delete', 'trash'],
+      ['quote', 'quote'],
+    ] as const;
+
+    it.each(tests)('renders action %s', async (action, type) => {
+      const renderResult = render(
+        <TestProviders>
+          <UserActionPropertyActions
+            {...props}
+            onDelete={() => {}}
+            deleteLabel={'test'}
+            actions={[action]}
+          />
+        </TestProviders>
+      );
+
+      expect(renderResult.queryByTestId('user-action-title-loading')).not.toBeInTheDocument();
+      expect(renderResult.getByTestId('property-actions')).toBeInTheDocument();
+
+      userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
+      await waitForEuiPopoverOpen();
+
+      expect(renderResult.queryByTestId(`property-actions-${type}`)).toBeInTheDocument();
+      /**
+       * This check ensures that no other action is rendered. There is
+       * one button to open the popover and one button for the action
+       **/
+      expect(await renderResult.findAllByRole('button')).toHaveLength(2);
+    });
+  });
 });

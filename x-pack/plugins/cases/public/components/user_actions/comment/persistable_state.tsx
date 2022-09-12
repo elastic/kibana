@@ -12,9 +12,10 @@ import { createRegisteredAttachmentUserActionBuilder } from './registered_attach
 
 type BuilderArgs = Pick<
   UserActionBuilderArgs,
-  'userAction' | 'persistableStateAttachmentTypeRegistry' | 'caseData'
+  'userAction' | 'persistableStateAttachmentTypeRegistry' | 'caseData' | 'handleDeleteComment'
 > & {
   comment: SnakeToCamelCase<CommentResponseTypePersistableState>;
+  isLoading: boolean;
 };
 
 export const createPersistableStateAttachmentUserActionBuilder = ({
@@ -22,12 +23,16 @@ export const createPersistableStateAttachmentUserActionBuilder = ({
   comment,
   persistableStateAttachmentTypeRegistry,
   caseData,
+  isLoading,
+  handleDeleteComment,
 }: BuilderArgs): ReturnType<UserActionBuilder> => {
   return createRegisteredAttachmentUserActionBuilder({
     userAction,
     comment,
     registry: persistableStateAttachmentTypeRegistry,
     caseData,
+    handleDeleteComment,
+    isLoading,
     getId: () => comment.persistableStateAttachmentTypeId,
     getAttachmentViewProps: () => ({
       persistableStateAttachmentTypeId: comment.persistableStateAttachmentTypeId,
