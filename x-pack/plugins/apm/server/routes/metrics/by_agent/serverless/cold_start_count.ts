@@ -20,8 +20,8 @@ const chartBase: ChartBase = {
     defaultMessage: 'Cold start',
   }),
   key: 'cold_start_count',
-  type: 'linemark',
-  yUnit: 'number',
+  type: 'bar',
+  yUnit: 'integer',
   series: {
     coldStart: {
       title: i18n.translate('xpack.apm.agentMetrics.serverless.coldStart', {

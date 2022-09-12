@@ -20,23 +20,6 @@ import { getVizColorForIndex } from '../../../../../common/viz_colors';
 import { getMetricsDateHistogramParams } from '../../../../lib/helpers/metrics';
 import { Setup } from '../../../../lib/helpers/setup_request';
 import { GenericMetricsChart } from '../../fetch_and_transform_metrics';
-import { ChartBase } from '../../types';
-
-const chartBase: ChartBase = {
-  title: i18n.translate('xpack.apm.agentMetrics.serverless.computeUsage', {
-    defaultMessage: 'Compute usage',
-  }),
-  key: 'compute_usage',
-  type: 'linemark',
-  yUnit: 'number',
-  series: {
-    computeUsage: {
-      title: i18n.translate('xpack.apm.agentMetrics.serverless.computeUsage', {
-        defaultMessage: 'Compute usage',
-      }),
-    },
-  },
-};
 
 /**
  * To calculate the compute usage we need to multiple the "system.memory.total" by "faas.billed_duration".
@@ -118,9 +101,18 @@ export async function getComputeUsage({
   const timeseriesData = aggregations?.timeseriesData;
 
   return {
-    title: chartBase.title,
-    key: chartBase.key,
-    yUnit: chartBase.yUnit,
+    title: i18n.translate('xpack.apm.agentMetrics.serverless.computeUsage', {
+      defaultMessage: 'Compute usage',
+    }),
+    key: 'compute_usage',
+    yUnit: 'number',
+    description: i18n.translate(
+      'xpack.apm.agentMetrics.serverless.computeUsage.description',
+      {
+        defaultMessage:
+          "Compute usage (in GB-seconds) is the execution time multiplied by the available memory size of your function's instances. The compute usage is a direct indicator for the costs of your serverless function.",
+      }
+    ),
     series:
       !timeseriesData || timeseriesData.buckets.length === 0
         ? []
@@ -131,7 +123,7 @@ export async function getComputeUsage({
                 { defaultMessage: 'Compute usage' }
               ),
               key: 'compute_usage',
-              type: 'linemark',
+              type: 'bar',
               overallValue: calculateComputeUsageGBSeconds({
                 faasBilledDuration: aggregations?.avgFaasBilledDuration.value,
                 totalMemory: aggregations?.avgTotalMemory.value,

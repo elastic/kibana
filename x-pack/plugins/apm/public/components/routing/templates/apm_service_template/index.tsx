@@ -149,8 +149,7 @@ export function isMetricsTabHidden({
     isRumAgentName(agentName) ||
     isJavaAgentName(agentName) ||
     isMobileAgentName(agentName) ||
-    isJRubyAgent(agentName, runtimeName) ||
-    isServerlessAgent(runtimeName)
+    isJRubyAgent(agentName, runtimeName)
   );
 }
 

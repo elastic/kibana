@@ -92,7 +92,14 @@ export async function getActiveInstances({
       defaultMessage: 'Active instances',
     }),
     key: 'active_instances',
-    yUnit: 'number',
+    yUnit: 'integer',
+    description: i18n.translate(
+      'xpack.apm.agentMetrics.serverless.activeInstances.description',
+      {
+        defaultMessage:
+          'This chart shows the number of active instances of your serverless function over time. Multiple active instances may be a result of provisioned concurrency for your function or an increase in concurrent load that scales your function on-demand. An increase in active instance can be an indicator for an increase in concurrent invocations.',
+      }
+    ),
     series: [
       {
         title: i18n.translate(
@@ -100,7 +107,7 @@ export async function getActiveInstances({
           { defaultMessage: 'Active instances' }
         ),
         key: 'active_instances',
-        type: 'linemark',
+        type: 'bar',
         color: getVizColorForIndex(0, theme),
         overallValue: aggregations?.activeInstances.value ?? 0,
         data:

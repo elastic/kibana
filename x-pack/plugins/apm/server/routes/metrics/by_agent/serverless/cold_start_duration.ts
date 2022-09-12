@@ -26,6 +26,13 @@ const chartBase: ChartBase = {
       ),
     },
   },
+  description: i18n.translate(
+    'xpack.apm.agentMetrics.serverless.coldStartDuration.description',
+    {
+      defaultMessage:
+        'Cold start duration shows the execution duration of the serverless runtime for requests that experience cold starts.',
+    }
+  ),
 };
 
 export function getColdStartDuration({
