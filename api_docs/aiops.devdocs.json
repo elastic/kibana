@@ -48,25 +48,7 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": [],
-    "start": {
-      "parentPluginId": "aiops",
-      "id": "def-public.AiopsPluginStart",
-      "type": "Type",
-      "tags": [],
-      "label": "AiopsPluginStart",
-      "description": [
-        "\naiops plugin public start contract"
-      ],
-      "signature": [
-        "void"
-      ],
-      "path": "x-pack/plugins/aiops/public/types.ts",
-      "deprecated": false,
-      "trackAdoption": false,
-      "lifecycle": "start",
-      "initialIsOpen": true
-    }
+    "objects": []
   },
   "server": {
     "classes": [],

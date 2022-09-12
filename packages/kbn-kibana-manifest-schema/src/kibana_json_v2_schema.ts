@@ -13,11 +13,18 @@ export const PLUGIN_ID_PATTERN = /^[a-z][a-zA-Z_]*$/;
 
 export const MANIFEST_V2: JSONSchema = {
   type: 'object',
-  required: ['id', 'type', 'owner', 'typeDependencies', 'runtimeDependencies'],
+  required: ['id', 'type', 'owner', 'typeDeps', 'runtimeDeps'],
+  // @ts-expect-error VSCode specific JSONSchema extension
+  allowTrailingCommas: true,
   properties: {
     id: {
       type: 'string',
       pattern: '^@kbn/',
+      description: desc`
+        Module ID for this package. This must be globbally unique amoungst all
+        packages and should include the most important information about how this
+        package should be used. Avoid generic names to aid in disambiguation.
+      `,
     },
     owner: {
       type: 'string',
@@ -25,12 +32,11 @@ export const MANIFEST_V2: JSONSchema = {
         Github handle for the person or team who is responsible for this package.
         This owner will be used in the codeowners files for this package.
 
-        For additional codeowners, you add additional entries at the end of the
-        codeowners file.
+        For additional codeowners, you add manually add entries to the codeowners file.
       `,
       pattern: '^@',
     },
-    typeDependencies: {
+    typeDeps: {
       type: 'array',
       description: desc`
         Packages which are required for the source code in the package to be
@@ -40,7 +46,7 @@ export const MANIFEST_V2: JSONSchema = {
         type: 'string',
       },
     },
-    runtimeDependencies: {
+    runtimeDeps: {
       type: 'array',
       description: desc`
         Packages which are required for the source code in the package to run. This list
@@ -49,6 +55,14 @@ export const MANIFEST_V2: JSONSchema = {
       items: {
         type: 'string',
       },
+    },
+    devOnly: {
+      type: 'boolean',
+      description: desc`
+        A devOnly package can be used by other devOnly packages and only by other devOnly
+        packages and will never be included in the distributable.
+      `,
+      default: false,
     },
   },
   oneOf: [

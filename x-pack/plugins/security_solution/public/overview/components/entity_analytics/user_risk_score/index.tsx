@@ -20,6 +20,7 @@ import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/
 import { LastUpdatedAt } from '../../detection_response/utils';
 import { HeaderSection } from '../../../../common/components/header_section';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { SecurityPageName } from '../../../../app/types';
 import * as i18n from './translations';
 import { generateSeverityFilter } from '../../../../hosts/store/helpers';
@@ -55,7 +56,7 @@ export const EntityAnalyticsUserRiskScores = () => {
   const riskyUsersFeatureEnabled = useIsExperimentalFeatureEnabled('riskyUsersEnabled');
 
   const severityFilter = useMemo(() => {
-    const [filter] = generateSeverityFilter(selectedSeverity);
+    const [filter] = generateSeverityFilter(selectedSeverity, RiskScoreEntity.user);
 
     return filter ? JSON.stringify(filter.query) : undefined;
   }, [selectedSeverity]);
@@ -125,7 +126,7 @@ export const EntityAnalyticsUserRiskScores = () => {
     return null;
   }
 
-  if (!isModuleEnabled) {
+  if (!isModuleEnabled && !isTableLoading) {
     return <EntityAnalyticsUserRiskScoresDisable />;
   }
 
