@@ -7,7 +7,7 @@
  */
 
 import type { IRouter, RequestHandlerContextBase } from '@kbn/core-http-server';
-import type { UiSettingsRequestHandlerContext } from '../ui_settings';
+import type { UiSettingsRequestHandlerContext } from '@kbn/core-ui-settings-server';
 
 /**
  * Request handler context used by core's coreApp routes.

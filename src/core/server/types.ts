@@ -47,4 +47,16 @@ export type {
 } from '@kbn/core-deprecations-common';
 export type { ExternalUrlConfig } from '@kbn/core-http-server-internal';
 export type { SavedObjectStatusMeta } from '@kbn/core-saved-objects-server';
-export * from './ui_settings/types';
+export type {
+  UiSettingsParams,
+  PublicUiSettingsParams,
+  UiSettingsType,
+  UserProvidedValues,
+  DeprecationSettings,
+} from '@kbn/core-ui-settings-common';
+export type {
+  IUiSettingsClient,
+  UiSettingsServiceSetup,
+  UiSettingsServiceStart,
+  UiSettingsRequestHandlerContext,
+} from '@kbn/core-ui-settings-server';

@@ -18,3 +18,6 @@ export type {
   InternalUiSettingsServiceStart,
   UiSettingsServiceOptions,
 } from './src';
+
+// only exported for integration tests
+export { createOrUpgradeSavedConfig } from './src/create_or_upgrade_saved_config';
