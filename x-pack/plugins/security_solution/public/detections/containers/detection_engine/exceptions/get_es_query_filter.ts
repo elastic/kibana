@@ -47,7 +47,6 @@ export const getEsQueryFilter = async (
     excludeExceptions,
     chunkSize: 1024,
   });
-  console.log('HERE', filter);
   const initialQuery = { query, language };
   const allFilters = getAllFilters(filters as Filter[], filter);
 
