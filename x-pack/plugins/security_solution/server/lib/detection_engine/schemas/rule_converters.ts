@@ -665,7 +665,7 @@ export const internalRuleToAPIResponse = (
   const mergedExecutionSummary = mergeRuleExecutionSummary(rule, ruleExecutionSummary ?? null);
   const isResolvedRule = (obj: unknown): obj is ResolvedSanitizedRule<RuleParams> =>
     (obj as ResolvedSanitizedRule<RuleParams>).outcome != null;
-  const test = {
+  return {
     // saved object properties
     outcome: isResolvedRule(rule) ? rule.outcome : undefined,
     alias_target_id: isResolvedRule(rule) ? rule.alias_target_id : undefined,
@@ -690,6 +690,4 @@ export const internalRuleToAPIResponse = (
     // Execution summary
     execution_summary: mergedExecutionSummary ?? undefined,
   };
-  console.log({ test });
-  return test;
 };
