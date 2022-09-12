@@ -15042,7 +15042,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.repositoryHelpText": "每个阶段使用相同的快照存储库。",
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.storageHelpText": "为可搜索快照安装的快照类型。这是高级选项。只有了解此功能时才能更改。",
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.storageLabel": "存储",
-    "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutBody": "在此阶段将数据转换为完全安装的索引时，不允许强制合并、缩小和只读操作。",
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotLicenseCalloutBody": "要创建可搜索快照，需要企业许可证。",
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotLicenseCalloutTitle": "需要企业许可证",
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotRepoFieldLabel": "快照存储库",

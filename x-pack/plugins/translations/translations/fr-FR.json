@@ -15037,7 +15037,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.repositoryHelpText": "Chaque phase utilise le même référentiel de snapshot.",
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.storageHelpText": "Type de snapshot installé pour le snapshot qu’il est possible de rechercher. Il s'agit d'une option avancée. Ne la modifiez que si vous savez ce que vous faites.",
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.storageLabel": "Stockage",
-    "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutBody": "Les actions Forcer la fusion, Réduire et Lecture seule ne sont pas autorisées lors de la conversion des données en index entièrement installé dans cette phase.",
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotLicenseCalloutBody": "Licence Enterprise obligatoire pour créer un snapshot qu’il est possible de rechercher.",
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotLicenseCalloutTitle": "Licence Enterprise requise",
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotRepoFieldLabel": "Référentiel de snapshot",
