@@ -1308,7 +1308,7 @@ export interface PackagePolicyServiceInterface {
     options?: {
       user?: AuthenticatedUser;
       bumpRevision?: boolean;
-      force: true;
+      force?: true;
     }
   ): Promise<PackagePolicy[]>;
 
