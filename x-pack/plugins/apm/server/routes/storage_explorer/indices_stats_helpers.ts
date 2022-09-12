@@ -21,10 +21,8 @@ export async function getTotalIndicesStats({
   } = setup;
   const index = uniq([transaction, span, metric, error]).join();
   const esClient = (await context.core).elasticsearch.client;
-  const indicesStats = (await esClient.asCurrentUser.indices.stats({ index }))
-    .indices;
-
-  return indicesStats;
+  const totalStats = await esClient.asCurrentUser.indices.stats({ index });
+  return totalStats;
 }
 
 export function getEstimatedSizeForDocumentsInIndex({

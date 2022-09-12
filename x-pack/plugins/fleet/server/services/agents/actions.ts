@@ -36,6 +36,7 @@ export async function createAgentAction(
     type: newAgentAction.type,
     start_time: newAgentAction.start_time,
     minimum_execution_duration: newAgentAction.minimum_execution_duration,
+    total: newAgentAction.total,
   };
 
   await esClient.create({
@@ -96,6 +97,33 @@ export async function bulkCreateAgentActions(
   return actions;
 }
 
+export async function getAgentActions(esClient: ElasticsearchClient, actionId: string) {
+  const res = await esClient.search<FleetServerAgentAction>({
+    index: AGENT_ACTIONS_INDEX,
+    query: {
+      bool: {
+        must: [
+          {
+            term: {
+              action_id: actionId,
+            },
+          },
+        ],
+      },
+    },
+    size: SO_SEARCH_LIMIT,
+  });
+
+  if (res.hits.hits.length === 0) {
+    throw new AgentActionNotFoundError('Action not found');
+  }
+
+  return res.hits.hits.map((hit) => ({
+    ...hit._source,
+    id: hit._id,
+  }));
+}
+
 export async function cancelAgentAction(esClient: ElasticsearchClient, actionId: string) {
   const res = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,
@@ -139,8 +167,8 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
         hit._source.agents.map((agentId) => ({
           agentId,
           data: {
-            upgraded_at: null,
             upgrade_started_at: null,
+            upgrade_status: 'completed',
           },
         }))
       );
@@ -163,4 +191,6 @@ export interface ActionsService {
     esClient: ElasticsearchClient,
     newAgentAction: Omit<AgentAction, 'id'>
   ) => Promise<AgentAction>;
+
+  getAgentActions: (esClient: ElasticsearchClient, actionId: string) => Promise<any[]>;
 }

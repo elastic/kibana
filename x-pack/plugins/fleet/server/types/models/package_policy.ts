@@ -87,6 +87,16 @@ const PackagePolicyBaseSchema = {
       name: schema.string(),
       title: schema.string(),
       version: schema.string(),
+      experimental_data_stream_features: schema.maybe(
+        schema.arrayOf(
+          schema.object({
+            data_stream: schema.string(),
+            features: schema.object({
+              synthetic_source: schema.boolean(),
+            }),
+          })
+        )
+      ),
     })
   ),
   // Deprecated TODO create remove issue
@@ -111,6 +121,14 @@ const CreatePackagePolicyProps = {
       name: schema.string(),
       title: schema.maybe(schema.string()),
       version: schema.string(),
+      experimental_data_stream_features: schema.maybe(
+        schema.arrayOf(
+          schema.object({
+            data_stream: schema.string(),
+            features: schema.object({ synthetic_source: schema.boolean() }),
+          })
+        )
+      ),
     })
   ),
   // Deprecated TODO create remove issue
@@ -127,6 +145,51 @@ export const CreatePackagePolicyRequestBodySchema = schema.object({
   ...CreatePackagePolicyProps,
   id: schema.maybe(schema.string()),
   force: schema.maybe(schema.boolean()),
+});
+
+const SimplifiedVarsSchema = schema.recordOf(
+  schema.string(),
+  schema.nullable(
+    schema.oneOf([
+      schema.boolean(),
+      schema.string(),
+      schema.number(),
+      schema.arrayOf(schema.string()),
+      schema.arrayOf(schema.number()),
+    ])
+  )
+);
+
+export const SimplifiedCreatePackagePolicyRequestBodySchema = schema.object({
+  id: schema.maybe(schema.string()),
+  name: schema.string(),
+  description: schema.maybe(schema.string()),
+  policy_id: schema.string(),
+  namespace: schema.string({ defaultValue: 'default' }),
+  package: schema.object({
+    name: schema.string(),
+    version: schema.string(),
+  }),
+  force: schema.maybe(schema.boolean()),
+  vars: schema.maybe(SimplifiedVarsSchema),
+  inputs: schema.maybe(
+    schema.recordOf(
+      schema.string(),
+      schema.object({
+        enabled: schema.maybe(schema.boolean()),
+        vars: schema.maybe(SimplifiedVarsSchema),
+        streams: schema.maybe(
+          schema.recordOf(
+            schema.string(),
+            schema.object({
+              enabled: schema.maybe(schema.boolean()),
+              vars: schema.maybe(SimplifiedVarsSchema),
+            })
+          )
+        ),
+      })
+    )
+  ),
 });
 
 export const UpdatePackagePolicyRequestBodySchema = schema.object({

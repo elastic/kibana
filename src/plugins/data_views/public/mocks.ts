@@ -36,6 +36,7 @@ const createStartContract = (): Start => {
     clearCache: jest.fn(),
     getCanSaveSync: jest.fn(),
     getIdsWithTitle: jest.fn(),
+    getFieldsForIndexPattern: jest.fn(),
   } as unknown as jest.Mocked<DataViewsContract>;
 };
 

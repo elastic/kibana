@@ -41,6 +41,8 @@ import type {
 import type { FleetAppContext } from '../plugin';
 import type { TelemetryEventsSender } from '../telemetry/sender';
 
+import type { BulkActionsResolver } from './agents';
+
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
   private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
@@ -61,6 +63,7 @@ class AppContextService {
   private externalCallbacks: ExternalCallbacksStorage = new Map();
   private telemetryEventsSender: TelemetryEventsSender | undefined;
   private savedObjectsTagging: SavedObjectTaggingStart | undefined;
+  private bulkActionsResolver: BulkActionsResolver | undefined;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
@@ -79,6 +82,7 @@ class AppContextService {
     this.httpSetup = appContext.httpSetup;
     this.telemetryEventsSender = appContext.telemetryEventsSender;
     this.savedObjectsTagging = appContext.savedObjectsTagging;
+    this.bulkActionsResolver = appContext.bulkActionsResolver;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -227,6 +231,10 @@ class AppContextService {
 
   public getTelemetryEventsSender() {
     return this.telemetryEventsSender;
+  }
+
+  public getBulkActionsResolver() {
+    return this.bulkActionsResolver;
   }
 }
 

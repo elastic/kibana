@@ -8,7 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiEmptyPrompt, EuiPageTemplate } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageTemplate_Deprecated as EuiPageTemplate } from '@elastic/eui';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 
 export const NotFoundPage = React.memo(() => (

@@ -23,6 +23,7 @@
         ],
         "path": "packages/kbn-cli-dev-mode/src/bootstrap.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/cli-dev-mode",
@@ -36,6 +37,7 @@
             ],
             "path": "packages/kbn-cli-dev-mode/src/bootstrap.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],

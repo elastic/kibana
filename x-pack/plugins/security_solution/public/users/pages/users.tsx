@@ -45,7 +45,7 @@ import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { UsersKpiComponent } from '../components/kpi_users';
 import type { UpdateDateRange } from '../../common/components/charts/common';
-import { LastEventIndexKey } from '../../../common/search_strategy';
+import { LastEventIndexKey, RiskScoreEntity } from '../../../common/search_strategy';
 import { generateSeverityFilter } from '../../hosts/store/helpers';
 import { UsersTableType } from '../store/model';
 import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';
@@ -77,12 +77,12 @@ const UsersComponent = () => {
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
-  const getUsersRiskScoreFilterQuerySelector = useMemo(
-    () => usersSelectors.usersRiskScoreSeverityFilterSelector(),
+  const getUserRiskScoreFilterQuerySelector = useMemo(
+    () => usersSelectors.userRiskScoreSeverityFilterSelector(),
     []
   );
   const severitySelection = useDeepEqualSelector((state: State) =>
-    getUsersRiskScoreFilterQuerySelector(state)
+    getUserRiskScoreFilterQuerySelector(state)
   );
 
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
@@ -96,7 +96,7 @@ const UsersComponent = () => {
     }
 
     if (tabName === UsersTableType.risk) {
-      const severityFilter = generateSeverityFilter(severitySelection);
+      const severityFilter = generateSeverityFilter(severitySelection, RiskScoreEntity.user);
 
       return [...severityFilter, ...filters];
     }
