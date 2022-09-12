@@ -12,9 +12,8 @@ import { ResourceInstaller } from './resource_installer';
 import { SLORepository } from './slo_repository';
 import { TransformInstaller } from './transform_installer';
 
-import { CreateSLOParams } from '../../types/schema';
+import { CreateSLOParams, CreateSLOResponse } from '../../types/schema';
 
-// TODO Add CreateSLOResponse schema & type
 export class CreateSLO {
   constructor(
     private resourceInstaller: ResourceInstaller,
@@ -23,7 +22,7 @@ export class CreateSLO {
     private spaceId: string
   ) {}
 
-  public async execute(sloParams: CreateSLOParams): Promise<SLO> {
+  public async execute(sloParams: CreateSLOParams): Promise<CreateSLOResponse> {
     await this.resourceInstaller.ensureCommonResourcesInstalled(this.spaceId);
 
     const slo: SLO = {
@@ -37,6 +36,12 @@ export class CreateSLO {
     await this.repository.save(slo);
     await this.transformInstaller.installAndStartTransform(slo, this.spaceId);
 
-    return slo;
+    return this.toResponse(slo);
+  }
+
+  private toResponse(slo: SLO): CreateSLOResponse {
+    return {
+      id: slo.id,
+    };
   }
 }

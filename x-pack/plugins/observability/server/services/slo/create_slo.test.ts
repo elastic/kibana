@@ -39,7 +39,7 @@ describe('createSLO', () => {
   describe('happy path', () => {
     it('calls the expected services', async () => {
       const sloParams = createSLOParams(createAPMTransactionErrorRateIndicator());
-      await createSLO.execute(sloParams);
+      const response = await createSLO.execute(sloParams);
 
       expect(mockResourceInstaller.ensureCommonResourcesInstalled).toHaveBeenCalledWith(SPACE_ID);
       expect(mockRepository.save).toHaveBeenCalledWith(
@@ -49,6 +49,7 @@ describe('createSLO', () => {
         expect.objectContaining({ ...sloParams, id: expect.any(String) }),
         SPACE_ID
       );
+      expect(response).toEqual(expect.objectContaining({ id: expect.any(String) }));
     });
   });
 });
