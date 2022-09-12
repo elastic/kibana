@@ -24,6 +24,7 @@ const alert: Alert = {
   updatedBy: 'Elastic',
   createdAt: '2022-09-06',
   createdBy: 'Elastic',
+  tags: ['kibana', 'region:na', 'kibana'],
 };
 
 export const PageTitle = () => {
@@ -32,13 +33,8 @@ export const PageTitle = () => {
 
 export const PageTitleUsedInObservabilityPageTemplate = () => {
   return (
-    <EuiPageTemplate
-      pageHeader={{
-        pageTitle: <Component alert={alert} />,
-        bottomBorder: false,
-      }}
-    >
-      <></>
+    <EuiPageTemplate>
+      <EuiPageTemplate.Header pageTitle={<Component alert={alert} />} bottomBorder={false} />
     </EuiPageTemplate>
   );
 };

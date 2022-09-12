@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import moment from 'moment';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiBetaBadge } from '@elastic/eui';
 import { PageTitleProps } from '../types';
 import { LAST_UPDATED_MESSAGE, CREATED_WORD, BY_WORD, ON_WORD } from '../translations';
 
@@ -18,9 +18,23 @@ export function PageTitle({ alert }: PageTitleProps) {
           {alert.name}
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexItem grow={false}>
+
+      {alert.tags ? (
+        <>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup gutterSize="m">
+            {alert.tags.map((tag) => (
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge label={tag} color="hollow" />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+          <EuiSpacer size="l" />
+        </>
+      ) : (
         <EuiSpacer size="xl" />
-      </EuiFlexItem>
+      )}
+
       <EuiFlexGroup direction="column" alignItems="flexStart">
         <EuiFlexItem component="span" grow={false}>
           <EuiText color="subdued" size="xs">
