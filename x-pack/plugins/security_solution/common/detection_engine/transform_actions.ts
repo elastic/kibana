@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { map, reduce, isEmpty } from 'lodash';
 import type { RuleAction, RuleResponseAction } from '@kbn/alerting-plugin/common';
 import type { RuleAlertAction, RuleAlertResponseAction } from './types';
 import { ResponseActionsTypes } from './types';
+import type { EcsMappingFormValueArray } from './utils';
+import { convertECSMappingToFormValue, convertECSMappingToObject } from './utils';
 
 export const transformRuleToAlertAction = ({
   group,
@@ -33,17 +34,6 @@ export const transformAlertToRuleAction = ({
   params,
   action_type_id: actionTypeId,
 });
-
-export const convertECSMappingToFormValue = (
-  mapping?: Record<string, Record<'field', string>>
-): EcsMappingFormValueArray =>
-  map(mapping, (value, key) => ({
-    key,
-    result: {
-      type: Object.keys(value)[0],
-      value: Object.values(value)[0],
-    },
-  }));
 
 export const transformRuleToAlertResponseAction = ({
   action_type_id, // eslint-disable-line @typescript-eslint/naming-convention
@@ -86,28 +76,3 @@ export const transformAlertToRuleResponseAction = ({
     action_type_id: actionTypeId,
   };
 };
-
-export const convertECSMappingToObject = (
-  ecsMapping?: EcsMappingFormValueArray
-): Record<string, { field?: string; value?: string }> =>
-  reduce(
-    ecsMapping,
-    (acc, value) => {
-      if (!isEmpty(value?.key) && !isEmpty(value.result?.type) && !isEmpty(value.result?.value)) {
-        acc[value.key] = {
-          [value.result.type]: value.result.value,
-        };
-      }
-
-      return acc;
-    },
-    {} as Record<string, { field?: string; value?: string }>
-  );
-
-export type EcsMappingFormValueArray = Array<{
-  key: string;
-  result: {
-    type: string;
-    value: string;
-  };
-}>;
