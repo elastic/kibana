@@ -39,8 +39,8 @@ const createSLORoute = createObservabilityServerRoute({
     const resourceInstaller = new DefaultResourceInstaller(esClient, logger);
     const repository = new KibanaSavedObjectsSLORepository(soClient);
     const transformInstaller = new DefaultTransformInstaller(transformGenerators, esClient, logger);
-
     const createSLO = new CreateSLO(resourceInstaller, repository, transformInstaller, spaceId);
+
     const response = await createSLO.execute(params.body);
 
     return response;

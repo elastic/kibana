@@ -23,20 +23,23 @@ export class CreateSLO {
   ) {}
 
   public async execute(sloParams: CreateSLOParams): Promise<CreateSLOResponse> {
-    await this.resourceInstaller.ensureCommonResourcesInstalled(this.spaceId);
+    const slo = this.toSLO(sloParams);
 
-    const slo: SLO = {
+    await this.resourceInstaller.ensureCommonResourcesInstalled(this.spaceId);
+    await this.repository.save(slo);
+    await this.transformInstaller.installAndStartTransform(slo, this.spaceId);
+
+    return this.toResponse(slo);
+  }
+
+  private toSLO(sloParams: CreateSLOParams): SLO {
+    return {
       ...sloParams,
       id: uuid.v1(),
       settings: {
         destination_index: sloParams.settings?.destination_index,
       },
     };
-
-    await this.repository.save(slo);
-    await this.transformInstaller.installAndStartTransform(slo, this.spaceId);
-
-    return this.toResponse(slo);
   }
 
   private toResponse(slo: SLO): CreateSLOResponse {
