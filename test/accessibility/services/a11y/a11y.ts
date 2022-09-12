@@ -9,7 +9,6 @@
 import Fs from 'fs';
 import Path from 'path';
 
-import chalk from 'chalk';
 import dedent from 'dedent';
 import testSubjectToCss from '@kbn/test-subj-selector';
 import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/axe-config';
@@ -17,7 +16,7 @@ import { REPO_ROOT } from '@kbn/utils';
 import { v4 as uuid } from 'uuid';
 
 import { FtrService } from '../../ftr_provider_context';
-import { AxeReport, printResult } from './axe_report';
+import { AxeReport } from './axe_report';
 // @ts-ignore JS that is run in browser as is
 import { analyzeWithAxe, analyzeWithAxeWithClient } from './analyze_with_axe';
 
@@ -81,10 +80,16 @@ export class AccessibilityService extends FtrService {
   }
 
   private assertValidAxeReport(report: AxeReport, skipFailures?: boolean) {
-    const errorMsgs = [];
+    const errorMsgs: string[] = [];
 
     for (const result of report.violations) {
-      errorMsgs.push(printResult(chalk.red('VIOLATION'), result));
+      errorMsgs.push(dedent`
+        [${result.id}]: ${result.description}
+          Impact: ${result.impact}
+          Help: ${result.helpUrl}
+          Elements:
+            - ${result.nodes.map((node) => node.html).join('\n      - ')}
+      `);
     }
 
     if (!errorMsgs.length) {

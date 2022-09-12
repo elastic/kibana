@@ -50,10 +50,3 @@ export interface AxeReport {
   violations: AxeResultGroup;
 }
 
-export const printResult = (title: string, result: AxeResult) => `
-${title}
-  [${result.id}]: ${result.description}
-    Impact: ${result.impact}
-    Help: ${result.helpUrl}
-    Elements:
-      - ${result.nodes.map((node) => node.html).join('\n      - ')}`;
