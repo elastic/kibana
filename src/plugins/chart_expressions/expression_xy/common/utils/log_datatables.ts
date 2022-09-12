@@ -13,6 +13,7 @@ import { Dimension, prepareLogTable } from '@kbn/visualizations-plugin/common/ut
 import { LayerTypes, REFERENCE_LINE } from '../constants';
 import { strings } from '../i18n';
 import {
+  AnnotationLayerConfigResult,
   CommonXYDataLayerConfig,
   CommonXYLayerConfig,
   ExpressionAnnotationResult,
@@ -54,27 +55,29 @@ export const logDatatables = (
   });
   if (annotations) {
     annotations.layers.forEach((layer) => {
-      const layerDimensions: Dimension[] = [
-        [['label'], 'Label'],
-        [['time'], 'Time'],
-        [['skippedCount'], 'Skipped Count'],
-      ];
-      layer.annotations
-        .filter(
-          (a): a is QueryPointEventAnnotationOutput => a.type === 'query_point_event_annotation'
-        )
-        .forEach((annotation) => {
-          const dynamicDimensions: Dimension[] = [
-            ...(annotation.extraFields ? annotation.extraFields : []),
-            ...(annotation.textField ? [annotation.textField] : []),
-          ].map((f) => [[`field:${f}`], f]);
-          layerDimensions.push(...dynamicDimensions);
-        });
-
-      const logTable = prepareLogTable(annotations.datatable, layerDimensions, true);
+      const logTable = getLogAnnotationTable(annotations.datatable, layer);
       handlers.inspectorAdapters.tables.logDatatable(layer.layerId, logTable);
     });
   }
+};
+
+const getLogAnnotationTable = (data: Datatable, layer: AnnotationLayerConfigResult) => {
+  const layerDimensions: Dimension[] = [
+    [['label'], 'Label'],
+    [['time'], 'Time'],
+    [['skippedCount'], 'Skipped Count'],
+  ];
+  layer.annotations
+    .filter((a): a is QueryPointEventAnnotationOutput => a.type === 'query_point_event_annotation')
+    .forEach((annotation) => {
+      const dynamicDimensions: Dimension[] = [
+        ...(annotation.extraFields ? annotation.extraFields : []),
+        ...(annotation.textField ? [annotation.textField] : []),
+      ].map((f) => [[`field:${f}`], f]);
+      layerDimensions.push(...dynamicDimensions);
+    });
+
+  return prepareLogTable(data, layerDimensions, true);
 };
 
 export const logDatatable = (
