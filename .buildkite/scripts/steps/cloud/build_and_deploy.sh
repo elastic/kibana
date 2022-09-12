@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+echo "Cloud deployments are not working for the moment.  Status updates will be posted in #kibana-operations."
+exit 0
+
 source .buildkite/scripts/common/util.sh
 
 .buildkite/scripts/bootstrap.sh
