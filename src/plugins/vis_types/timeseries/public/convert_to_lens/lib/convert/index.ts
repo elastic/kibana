@@ -20,7 +20,7 @@ export { convertToLastValueColumn } from './last_value';
 export { convertToStaticValueColumn } from './static_value';
 export { convertToFiltersColumn } from './filters';
 export { convertToDateHistogramColumn } from './date_histogram';
-export { converToTermsColumn } from './terms';
+export { convertToTermsColumn } from './terms';
 export { convertToCounterRateColumn } from './counter_rate';
 export { convertToStandartDeviationColumn } from './std_deviation';
 

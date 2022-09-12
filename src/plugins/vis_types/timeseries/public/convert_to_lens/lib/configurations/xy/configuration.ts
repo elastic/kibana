@@ -33,6 +33,8 @@ export const getConfigurationForTimeseries = (
     },
     yLeftExtent: extents.yLeftExtent,
     yRightExtent: extents.yRightExtent,
+    yLeftScale: model.axis_scale === 'log' ? 'log' : 'linear',
+    yRightScale: model.axis_scale === 'log' ? 'log' : 'linear',
   };
 };
 

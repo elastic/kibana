@@ -34,7 +34,7 @@ const isSupportedFormat = (format: string) => ['bytes', 'number', 'percent'].inc
 export const getFormat = (series: Series): FormatParams => {
   let suffix;
 
-  if (!series.formatter) {
+  if (!series.formatter || series.formatter === 'default') {
     return {};
   }
 
@@ -44,10 +44,12 @@ export const getFormat = (series: Series): FormatParams => {
 
   // not supported formatters should be converted to number
   if (!isSupportedFormat(series.formatter)) {
-    return { format: { id: DATA_FORMATTERS.NUMBER, ...(suffix && { params: { suffix } }) } };
+    return {
+      format: { id: DATA_FORMATTERS.NUMBER, ...(suffix && { params: { suffix, decimals: 2 } }) },
+    };
   }
 
-  return { format: { id: series.formatter, ...(suffix && { params: { suffix } }) } };
+  return { format: { id: series.formatter, ...(suffix && { params: { suffix, decimals: 2 } }) } };
 };
 
 export const createColumn = (
@@ -63,6 +65,7 @@ export const createColumn = (
   isSplit,
   reducedTimeRange,
   filter: series.filter,
+  timeShift: series.offset_time,
   timeScale: getTimeScale(metric),
   meta: { metricId: metric.id },
 });

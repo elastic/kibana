@@ -233,7 +233,8 @@ function getParams(column: Column) {
 function getIncompleteParams(column: Column) {
   return {
     filter: column.filter,
-    shift: column.timeShift,
+    timeShift: column.timeShift,
+    timeScale: column.timeScale,
     dataType: column.dataType,
     ...(column.reducedTimeRange && { reducedTimeRange: column.reducedTimeRange }),
   };
@@ -274,13 +275,29 @@ function convertToColumnChange(columns: Layer['columns'], indexPattern: IndexPat
       if (
         isTermsColumn(column) &&
         column.params.orderAgg &&
+        newColumn.columnParams &&
         !columns.some((c) => c.columnId === column.params.orderAgg?.columnId)
       ) {
-        const orderAggColumn: ColumnChange = createColumnChange(
-          column.params.orderAgg,
-          indexPattern
+        const orderColumn = column.params.orderAgg;
+        const operationDefinition = operationDefinitionMap[orderColumn.operationType];
+        const layer: IndexPatternLayer = {
+          indexPatternId: indexPattern.id,
+          columns: {},
+          columnOrder: [],
+        };
+        newColumn.columnParams.orderAgg = operationDefinition.buildColumn(
+          {
+            previousColumn: {
+              ...column.params.orderAgg,
+              label: column.params.orderAgg?.label || '',
+            },
+            indexPattern,
+            layer,
+            referenceIds: [],
+            field: getFieldWithLabel(column.params.orderAgg, indexPattern)!,
+          },
+          column.params
         );
-        acc.push(orderAggColumn);
       }
       acc.push(newColumn);
     }
@@ -310,7 +327,7 @@ function createNewLayerWithMetricAggregationFromVizEditor(
         {
           previousColumn: {
             ...previousColumn,
-            label: previousColumn?.label || '',
+            label: previousColumn?.label || (column.columnParams?.formula as string) || '',
           },
           indexPattern,
           layer: newLayer,
@@ -329,7 +346,13 @@ function createNewLayerWithMetricAggregationFromVizEditor(
   });
   let updatedLayer = newLayer;
   layer.columns.forEach(({ columnId, label: customLabel }) => {
-    updatedLayer = updateColumnLabel({ layer: updatedLayer, columnId, customLabel });
+    if (customLabel) {
+      updatedLayer = updateColumnLabel({
+        layer: updatedLayer,
+        columnId,
+        customLabel: isReferenced(updatedLayer, columnId) ? '' : customLabel,
+      });
+    }
   });
   return updatedLayer;
 }

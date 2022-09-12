@@ -25,3 +25,8 @@ export type ConvertToColumnsFn<C extends Column> = (
   { series: Series, metric: Metric, dataView: DataView }: CommonColumnConverterArgs,
   reducedTimeRange?: string
 ) => Array<C | null> | null;
+
+export interface AdditionalFormulaArgs {
+  reducedTimeRange?: string;
+  timeShift?: string;
+}

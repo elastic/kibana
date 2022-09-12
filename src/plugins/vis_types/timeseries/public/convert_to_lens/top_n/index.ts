@@ -7,6 +7,7 @@
  */
 
 import uuid from 'uuid';
+import { parseTimeShift } from '@kbn/data-plugin/common';
 import { Layer } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
@@ -36,6 +37,11 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
   for (const [layerIdx, series] of model.series.entries()) {
     if (series.hidden) {
       continue;
+    }
+
+    // not valid time shift
+    if (series.offset_time && parseTimeShift(series.offset_time) === 'invalid') {
+      return null;
     }
 
     if (!isValidMetrics(series.metrics, PANEL_TYPES.TOP_N, series.time_range_mode)) {

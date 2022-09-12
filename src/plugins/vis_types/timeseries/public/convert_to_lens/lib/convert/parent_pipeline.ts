@@ -31,9 +31,9 @@ import { Metric } from '../../../../common/types';
 import {
   getFilterRatioFormula,
   getFormulaFromMetric,
-  getParentPipelineSeriesFormula,
   SupportedMetric,
   SUPPORTED_METRICS,
+  getPipelineSeriesFormula
 } from '../metrics';
 import { createColumn, getFormat } from './column';
 import { createFormulaColumn } from './formula';
@@ -186,7 +186,10 @@ export const computeParentPipelineColumns = (
   const aggFormula = getFormulaFromMetric(agg);
 
   if (subFunctionMetric.type === 'filter_ratio') {
-    const script = getFilterRatioFormula(subFunctionMetric, reducedTimeRange);
+    const script = getFilterRatioFormula(subFunctionMetric, {
+      reducedTimeRange,
+      timeShift: series.offset_time,
+    });
     if (!script) {
       return null;
     }
@@ -235,13 +238,11 @@ const convertMovingAvgOrDerivativeToColumns = (
   // support nested aggs with formula
   const additionalSubFunction = metrics.find(({ id }) => id === nestedFieldId);
   if (additionalSubFunction || pipelineAgg.name === 'counter_rate') {
-    const formula = getParentPipelineSeriesFormula(
-      metrics,
-      subFunctionMetric,
-      pipelineAgg,
-      metric.type,
-      { metaValue, reducedTimeRange }
-    );
+    const formula = getPipelineSeriesFormula(metric, metrics, subFunctionMetric, {
+      metaValue,
+      reducedTimeRange,
+      timeShift: series.offset_time,
+    });
     if (!formula) {
       return null;
     }

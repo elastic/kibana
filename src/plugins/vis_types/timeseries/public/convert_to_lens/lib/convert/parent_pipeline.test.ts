@@ -467,8 +467,8 @@ describe('convertParentPipelineAggToColumns', () => {
           series,
           metrics: [
             { id, field, type: METRIC_TYPES.MAX },
-            { id: id1, field: `${id}[75]`, type: METRIC_TYPES.AVG },
-            { id: id2, field: `${id1}[50]`, type: TSVB_METRIC_TYPES.MOVING_AVERAGE },
+            { id: id1, field: `${id}`, type: METRIC_TYPES.DERIVATIVE },
+            { id: id2, field: `${id1}`, type: TSVB_METRIC_TYPES.MOVING_AVERAGE },
           ],
           dataView,
         },
@@ -476,7 +476,7 @@ describe('convertParentPipelineAggToColumns', () => {
       {
         meta: { metricId: 'some-id-2' },
         operationType: 'formula',
-        params: { formula: 'moving_average(average(max(bytes)))' },
+        params: { formula: 'moving_average(differences(max(bytes)), window=5)' },
       },
     ],
     [
@@ -486,8 +486,8 @@ describe('convertParentPipelineAggToColumns', () => {
           series,
           metrics: [
             { id, field, type: METRIC_TYPES.MAX },
-            { id: id1, field: `${id}[75]`, type: METRIC_TYPES.AVG },
-            { id: id2, field: `${id1}[50]`, type: METRIC_TYPES.DERIVATIVE },
+            { id: id1, field: `${id}`, type: TSVB_METRIC_TYPES.MOVING_AVERAGE },
+            { id: id2, field: `${id1}`, type: METRIC_TYPES.DERIVATIVE },
           ],
           dataView,
         },
@@ -495,7 +495,7 @@ describe('convertParentPipelineAggToColumns', () => {
       {
         meta: { metricId: 'some-id-2' },
         operationType: 'formula',
-        params: { formula: 'differences(average(max(bytes)))' },
+        params: { formula: 'differences(moving_average(max(bytes), window=5))' },
       },
     ],
     [

@@ -9,7 +9,8 @@
 import type { Query } from '@kbn/es-query';
 import type { Metric, MetricType } from '../../../../common/types';
 import { getFormulaFromMetric, SupportedMetric, SUPPORTED_METRICS } from './supported_metrics';
-import { addTimeRangeToFormula } from '.';
+import { addAdditionalArgs } from '.';
+import { AdditionalFormulaArgs } from '../../types';
 
 const escapeQuotes = (str: string) => {
   return str?.replace(/'/g, "\\'");
@@ -18,16 +19,19 @@ const escapeQuotes = (str: string) => {
 const constructFilterRationFormula = (
   operation: string,
   metric?: Query,
-  reducedTimeRange?: string
+  additionalArgs?: AdditionalFormulaArgs
 ) => {
   return `${operation}${metric?.language === 'lucene' ? 'lucene' : 'kql'}='${
     metric?.query && typeof metric?.query === 'string'
       ? escapeQuotes(metric?.query)
       : metric?.query ?? '*'
-  }'${addTimeRangeToFormula(reducedTimeRange)})`;
+  }'${additionalArgs ? addAdditionalArgs(additionalArgs) : ''})`;
 };
 
-export const getFilterRatioFormula = (currentMetric: Metric, reducedTimeRange?: string) => {
+export const getFilterRatioFormula = (
+  currentMetric: Metric,
+  additionalArgs: AdditionalFormulaArgs
+) => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { numerator, denominator, metric_agg, field } = currentMetric;
   let aggregation: SupportedMetric | null | undefined = SUPPORTED_METRICS.count;
@@ -42,24 +46,20 @@ export const getFilterRatioFormula = (currentMetric: Metric, reducedTimeRange?: 
   const operation = metric_agg && metric_agg !== 'count' ? `${aggFormula}('${field}',` : 'count(';
 
   if (aggregation.name === 'counter_rate') {
-    const numeratorFormula = `max(${constructFilterRationFormula(
-      `differences(max('${field}',`,
+    const numeratorFormula = `counter_rate(${constructFilterRationFormula(
+      `(max('${field}',`,
       numerator,
-      reducedTimeRange
+      additionalArgs
     )})`;
-    const denominatorFormula = `max(${constructFilterRationFormula(
-      `differences(max('${field}',`,
+    const denominatorFormula = `counter_rate(${constructFilterRationFormula(
+      `(max('${field}',`,
       denominator,
-      reducedTimeRange
+      additionalArgs
     )})`;
     return `${numeratorFormula}) / ${denominatorFormula})`;
   } else {
-    const numeratorFormula = constructFilterRationFormula(operation, numerator, reducedTimeRange);
-    const denominatorFormula = constructFilterRationFormula(
-      operation,
-      denominator,
-      reducedTimeRange
-    );
+    const numeratorFormula = constructFilterRationFormula(operation, numerator, additionalArgs);
+    const denominatorFormula = constructFilterRationFormula(operation, denominator, additionalArgs);
     return `${numeratorFormula} / ${denominatorFormula}`;
   }
 };

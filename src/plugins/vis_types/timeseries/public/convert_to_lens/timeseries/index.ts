@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { parseTimeShift } from '@kbn/data-plugin/common';
 import { Layer } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import uuid from 'uuid';
 import { Panel } from '../../../common/types';
@@ -44,6 +45,11 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model: Panel
   for (const [layerIdx, series] of model.series.entries()) {
     if (series.hidden) {
       continue;
+    }
+
+    // not valid time shift
+    if (series.offset_time && parseTimeShift(series.offset_time) === 'invalid') {
+      return null;
     }
 
     if (!isValidMetrics(series.metrics, PANEL_TYPES.TIMESERIES)) {

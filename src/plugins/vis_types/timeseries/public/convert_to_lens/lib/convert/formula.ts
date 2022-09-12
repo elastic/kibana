@@ -11,8 +11,9 @@ import { FormulaParams } from '@kbn/visualizations-plugin/common/convert_to_lens
 import { CommonColumnConverterArgs, CommonColumnsConverterArgs, FormulaColumn } from './types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import type { Metric } from '../../../../common/types';
-import { getFormulaEquivalent, getSiblingPipelineSeriesFormula } from '../metrics';
+import { getFormulaEquivalent, getPipelineSeriesFormula } from '../metrics';
 import { createColumn, getFormat } from './column';
+import { AdditionalFormulaArgs } from '../../types';
 
 type OtherFormulaAggregations =
   | typeof TSVB_METRIC_TYPES.POSITIVE_ONLY
@@ -43,7 +44,7 @@ const convertFormulaScriptForPercentileAggs = (
   variables: Exclude<Metric['variables'], undefined>,
   metric: Metric,
   allAggMetrics: Metric[],
-  reducedTimeRange?: string
+  additionalArgs: AdditionalFormulaArgs
 ) => {
   variables.forEach((variable) => {
     const [_, meta] = variable?.field?.split('[') ?? [];
@@ -51,7 +52,7 @@ const convertFormulaScriptForPercentileAggs = (
     if (!metaValue) {
       return;
     }
-    const script = getFormulaEquivalent(metric, allAggMetrics, { metaValue, reducedTimeRange });
+    const script = getFormulaEquivalent(metric, allAggMetrics, { metaValue, ...additionalArgs });
     if (!script) {
       return;
     }
@@ -65,9 +66,9 @@ const convertFormulaScriptForAggs = (
   variables: Exclude<Metric['variables'], undefined>,
   metric: Metric,
   allAggMetrics: Metric[],
-  reducedTimeRange?: string
+  additionalArgs: AdditionalFormulaArgs
 ) => {
-  const script = getFormulaEquivalent(metric, allAggMetrics, { reducedTimeRange });
+  const script = getFormulaEquivalent(metric, allAggMetrics, { ...additionalArgs });
   if (!script) {
     return null;
   }
@@ -107,21 +108,15 @@ export const convertMathToFormulaColumn = (
 
     // should treat percentiles differently
     if (notMathMetric.type === 'percentile' || notMathMetric.type === 'percentile_rank') {
-      script = convertFormulaScriptForPercentileAggs(
-        script!,
-        variables,
-        notMathMetric,
-        metrics,
-        reducedTimeRange
-      );
+      script = convertFormulaScriptForPercentileAggs(script!, variables, notMathMetric, metrics, {
+        reducedTimeRange,
+        timeShift: series.offset_time,
+      });
     } else {
-      script = convertFormulaScriptForAggs(
-        script!,
-        variables,
-        notMathMetric,
-        metrics,
-        reducedTimeRange
-      );
+      script = convertFormulaScriptForAggs(script!, variables, notMathMetric, metrics, {
+        reducedTimeRange,
+        timeShift: series.offset_time,
+      });
     }
   }
 
@@ -143,8 +138,19 @@ export const convertOtherAggsToFormulaColumn = (
   reducedTimeRange?: string
 ): FormulaColumn | null => {
   const metric = metrics[metrics.length - 1];
+  const [fieldId, meta] = metric?.field?.split('[') ?? [];
+  const subFunctionMetric = metrics.find(({ id }) => id === fieldId);
+  const metaValue = meta ? Number(meta?.replace(']', '')) : undefined;
 
-  const formula = getSiblingPipelineSeriesFormula(aggregation, metric, metrics, reducedTimeRange);
+  if (!subFunctionMetric) {
+    return null;
+  }
+
+  const formula = getPipelineSeriesFormula(metric, metrics, subFunctionMetric, {
+    metaValue,
+    reducedTimeRange,
+    timeShift: series.offset_time,
+  });
   if (!formula) {
     return null;
   }

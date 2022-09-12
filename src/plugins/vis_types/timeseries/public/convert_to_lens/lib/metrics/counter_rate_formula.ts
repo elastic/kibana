@@ -6,16 +6,23 @@
  * Side Public License, v 1.
  */
 
-const buildMaxFormula = (selector: string) => {
-  return `max(${selector})`;
+import { addAdditionalArgs } from '.';
+import { AdditionalFormulaArgs } from '../../types';
+
+const buildMaxFormula = (selector: string, additionalArgs: AdditionalFormulaArgs) => {
+  return `max(${selector}${addAdditionalArgs(additionalArgs)})`;
 };
 
 const buildСounterRateFormula = (aggFormula: string, selector: string) => {
   return `${aggFormula}(${selector})`;
 };
 
-export const buildCounterRateFormula = (aggFormula: string, fieldName: string) => {
-  const maxFormula = buildMaxFormula(fieldName);
+export const buildCounterRateFormula = (
+  aggFormula: string,
+  fieldName: string,
+  additionalArgs: AdditionalFormulaArgs
+) => {
+  const maxFormula = buildMaxFormula(fieldName, additionalArgs);
 
   const counterRateFormula = buildСounterRateFormula(aggFormula, maxFormula);
   return counterRateFormula;

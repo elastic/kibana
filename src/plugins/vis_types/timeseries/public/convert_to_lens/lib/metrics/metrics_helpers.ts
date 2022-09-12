@@ -15,10 +15,10 @@ import { getUISettings } from '../../../services';
 import type { Metric, Panel, Series } from '../../../../common/types';
 import { TIME_RANGE_DATA_MODES } from '../../../../common/enums';
 import { getFilterRatioFormula } from './filter_ratio_formula';
-import { getParentPipelineSeriesFormula } from './parent_pipeline_formula';
-import { getSiblingPipelineSeriesFormula } from './sibling_pipeline_formula';
 import { getFormulaFromMetric, SUPPORTED_METRICS } from './supported_metrics';
 import { buildCounterRateFormula } from './counter_rate_formula';
+import { getPipelineSeriesFormula } from './pipeline_formula';
+import { AdditionalFormulaArgs } from '../../types';
 
 const shouldCalculateReducedTimeRange = (timeRangeMode?: string) => {
   return timeRangeMode === TIME_RANGE_DATA_MODES.LAST_VALUE;
@@ -68,15 +68,27 @@ export const getTimeScale = (metric: Metric): TimeScaleUnit | undefined => {
   return timeScale;
 };
 
-export const addTimeRangeToFormula = (reducedTimeRange?: string) => {
+const addTimeRangeToFormula = (reducedTimeRange?: string) => {
   return reducedTimeRange ? `, reducedTimeRange='${reducedTimeRange}'` : '';
+};
+
+const addTimeShiftToFormula = (timeShift?: string) => {
+  return timeShift ? `, shift='${timeShift}'` : '';
+};
+
+export const addAdditionalArgs = ({ reducedTimeRange, timeShift }: AdditionalFormulaArgs) => {
+  return `${addTimeShiftToFormula(timeShift)}${addTimeRangeToFormula(reducedTimeRange)}`;
 };
 
 export const getFormulaEquivalent = (
   currentMetric: Metric,
   metrics: Metric[],
-  { metaValue, reducedTimeRange }: { metaValue?: number; reducedTimeRange?: string } = {}
-) => {
+  {
+    metaValue,
+    reducedTimeRange,
+    timeShift,
+  }: { metaValue?: number; reducedTimeRange?: string; timeShift?: string } = {}
+): string | null => {
   const aggregation = SUPPORTED_METRICS[currentMetric.type];
   if (!aggregation) {
     return null;
@@ -85,77 +97,77 @@ export const getFormulaEquivalent = (
   const aggFormula = getFormulaFromMetric(aggregation);
 
   switch (currentMetric.type) {
+    case 'cumulative_sum':
+    case 'derivative':
+    case 'moving_average':
     case 'avg_bucket':
     case 'max_bucket':
     case 'min_bucket':
     case 'sum_bucket':
     case 'positive_only': {
-      return getSiblingPipelineSeriesFormula(
-        currentMetric.type,
-        currentMetric,
-        metrics,
-        reducedTimeRange
-      );
+      const [subMetricId, nestedMetaValue] = currentMetric?.field?.split('[') ?? [];
+      const subFunctionMetric = metrics.find((metric) => metric.id === subMetricId);
+      if (!subFunctionMetric || !SUPPORTED_METRICS[subFunctionMetric.type]) {
+        return null;
+      }
+
+      return getPipelineSeriesFormula(currentMetric, metrics, subFunctionMetric, {
+        metaValue: nestedMetaValue ? Number(nestedMetaValue?.replace(']', '')) : undefined,
+        reducedTimeRange,
+        timeShift,
+      });
     }
     case 'count': {
-      return `${aggFormula}()`;
+      return `${aggFormula}(${timeShift ? `shift='${timeShift}'` : ''}${
+        timeShift && reducedTimeRange ? ', ' : ''
+      }${reducedTimeRange ? `reducedTimeRange='${reducedTimeRange}'` : ''})`;
     }
     case 'percentile': {
       return `${aggFormula}(${currentMetric.field}${
         metaValue ? `, percentile=${metaValue}` : ''
-      }${addTimeRangeToFormula(reducedTimeRange)})`;
+      }${addAdditionalArgs({ reducedTimeRange, timeShift })})`;
     }
     case 'percentile_rank': {
       return `${aggFormula}(${currentMetric.field}${
         metaValue ? `, value=${metaValue}` : ''
-      }${addTimeRangeToFormula(reducedTimeRange)})`;
-    }
-    case 'cumulative_sum':
-    case 'derivative':
-    case 'moving_average': {
-      const [fieldId, _] = currentMetric?.field?.split('[') ?? [];
-      const subFunctionMetric = metrics.find((metric) => metric.id === fieldId);
-      if (!subFunctionMetric) {
-        return null;
-      }
-      const pipelineAgg = SUPPORTED_METRICS[subFunctionMetric.type];
-      if (!pipelineAgg) {
-        return null;
-      }
-      return getParentPipelineSeriesFormula(
-        metrics,
-        subFunctionMetric,
-        pipelineAgg,
-        currentMetric.type,
-        { metaValue, reducedTimeRange }
-      );
+      }${addAdditionalArgs({ reducedTimeRange, timeShift })})`;
     }
     case 'positive_rate': {
-      return buildCounterRateFormula(aggFormula, currentMetric.field!);
+      return buildCounterRateFormula(aggFormula, currentMetric.field!, {
+        reducedTimeRange,
+        timeShift,
+      });
     }
     case 'filter_ratio': {
-      return getFilterRatioFormula(currentMetric, reducedTimeRange);
+      return getFilterRatioFormula(currentMetric, { reducedTimeRange, timeShift });
     }
     case 'static': {
       return `${currentMetric.value}`;
     }
     case 'std_deviation': {
       if (currentMetric.mode === 'lower') {
-        return `average(${currentMetric.field}${addTimeRangeToFormula(reducedTimeRange)}) - ${
-          currentMetric.sigma || 1.5
-        } * ${aggFormula}(${currentMetric.field}${addTimeRangeToFormula(reducedTimeRange)})`;
+        return `average(${currentMetric.field}${addAdditionalArgs({
+          reducedTimeRange,
+          timeShift,
+        })}) - ${currentMetric.sigma || 1.5} * ${aggFormula}(${
+          currentMetric.field
+        }${addAdditionalArgs({ reducedTimeRange, timeShift })})`;
       }
       if (currentMetric.mode === 'upper') {
-        return `average(${currentMetric.field}${addTimeRangeToFormula(reducedTimeRange)}) + ${
-          currentMetric.sigma || 1.5
-        } * ${aggFormula}(${currentMetric.field}${addTimeRangeToFormula(reducedTimeRange)})`;
+        return `average(${currentMetric.field}${addAdditionalArgs({
+          reducedTimeRange,
+          timeShift,
+        })}) + ${currentMetric.sigma || 1.5} * ${aggFormula}(${
+          currentMetric.field
+        }${addAdditionalArgs({ reducedTimeRange, timeShift })})`;
       }
       return `${aggFormula}(${currentMetric.field})`;
     }
     default: {
-      return `${aggFormula}(${currentMetric.field ?? ''}${addTimeRangeToFormula(
-        reducedTimeRange
-      )})`;
+      return `${aggFormula}(${currentMetric.field ?? ''}${addAdditionalArgs({
+        reducedTimeRange,
+        timeShift,
+      })})`;
     }
   }
 };

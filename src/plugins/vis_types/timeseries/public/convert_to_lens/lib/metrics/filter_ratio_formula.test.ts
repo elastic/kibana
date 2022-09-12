@@ -10,6 +10,7 @@ import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import type { Metric } from '../../../../common/types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { getFilterRatioFormula } from './filter_ratio_formula';
+import { AdditionalFormulaArgs } from '../../types';
 
 describe('getFilterRatioFormula', () => {
   const metric: Metric = {
@@ -32,22 +33,27 @@ describe('getFilterRatioFormula', () => {
     metric_agg: METRIC_TYPES.MEDIAN,
   };
 
-  test.each<[string, [Metric, string | undefined], string | null]>([
-    ['null if metric_agg is not supported', [metricWithNotSupportedMetricAgg, undefined], null],
+  test.each<[string, [Metric, AdditionalFormulaArgs], string | null]>([
+    ['null if metric_agg is not supported', [metricWithNotSupportedMetricAgg, {}], null],
     [
       'filter ratio formula if metric_agg is not specified',
-      [metric, undefined],
+      [metric, {}],
       "count(kql='*') / count(kql='*')",
     ],
     [
       'filter ratio formula if metric_agg is specified',
-      [metricWithMetricAgg, undefined],
+      [metricWithMetricAgg, {}],
       "average('test-1',kql='*') / average('test-1',kql='*')",
     ],
     [
       'filter ratio formula if reducedTimeRange is provided',
-      [metricWithMetricAgg, '1h'],
+      [metricWithMetricAgg, { reducedTimeRange: '1h' }],
       "average('test-1',kql='*', reducedTimeRange='1h') / average('test-1',kql='*', reducedTimeRange='1h')",
+    ],
+    [
+      'filter ratio formula if time shift is provided',
+      [metricWithMetricAgg, { reducedTimeRange: '1h', timeShift: '3h' }],
+      "average('test-1',kql='*', shift='3h', reducedTimeRange='1h') / average('test-1',kql='*', shift='3h', reducedTimeRange='1h')",
     ],
   ])('should return %s', (_, input, expected) => {
     if (expected === null) {

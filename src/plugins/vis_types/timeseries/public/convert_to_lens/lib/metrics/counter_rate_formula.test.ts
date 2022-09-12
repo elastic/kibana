@@ -23,7 +23,8 @@ describe('buildCounterRateFormula', () => {
 
     const formula = buildCounterRateFormula(
       SUPPORTED_METRICS[metric.type]!.name,
-      dataView.fields[0].name
+      dataView.fields[0].name,
+      {}
     );
     expect(formula).toStrictEqual('counter_rate(max(bytes))');
   });

@@ -123,7 +123,7 @@ describe('getFormulaEquivalent', () => {
     [
       'correct formula if metric is parent pipeline agg',
       [parentPipelineMetric[1], parentPipelineMetric, {}],
-      'moving_average(average(test-field-1))',
+      'moving_average(average(test-field-1), window=5)',
     ],
     ['correct formula if metric is count agg', [countMetric, [countMetric], {}], 'count()'],
     ['correct formula if metric is static value', [staticValue, [staticValue], {}], '100'],
