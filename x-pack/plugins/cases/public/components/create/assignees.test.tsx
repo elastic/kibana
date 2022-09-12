@@ -92,6 +92,31 @@ describe('Assignees', () => {
     });
   });
 
+  it('disables the assign yourself button if the current user is already selected', async () => {
+    const spyOnGetCurrentUserProfile = jest.spyOn(api, 'getCurrentUserProfile');
+    spyOnGetCurrentUserProfile.mockResolvedValue(currentUserProfile);
+
+    const result = appMockRender.render(
+      <MockHookWrapperComponent>
+        <Assignees isLoading={false} />
+      </MockHookWrapperComponent>
+    );
+
+    await waitFor(() => {
+      expect(result.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
+    });
+
+    act(() => {
+      userEvent.click(result.getByTestId('create-case-assign-yourself-link'));
+    });
+
+    await waitFor(() => {
+      expect(globalForm.getFormData()).toEqual({ assignees: [{ uid: currentUserProfile.uid }] });
+    });
+
+    expect(result.getByTestId('create-case-assign-yourself-link')).toBeDisabled();
+  });
+
   it('assignees users correctly', async () => {
     const result = appMockRender.render(
       <MockHookWrapperComponent>

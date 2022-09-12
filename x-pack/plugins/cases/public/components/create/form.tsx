@@ -93,6 +93,9 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
               </Container>
             ) : null}
             <Container>
+              <Assignees isLoading={isSubmitting} />
+            </Container>
+            <Container>
               <Tags isLoading={isSubmitting} />
             </Container>
             <Container>
