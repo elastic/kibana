@@ -7,7 +7,6 @@
 
 import { map, reduce, isEmpty } from 'lodash';
 import type { RuleAction, RuleResponseAction } from '@kbn/alerting-plugin/common';
-import type { EcsMappingFormValueArray } from '@kbn/osquery-plugin/common/schemas/common/utils';
 import type { RuleAlertAction, RuleAlertResponseAction } from './types';
 import { ResponseActionsTypes } from './types';
 
@@ -104,3 +103,11 @@ export const convertECSMappingToObject = (
     },
     {} as Record<string, { field?: string; value?: string }>
   );
+
+export type EcsMappingFormValueArray = Array<{
+  key: string;
+  result: {
+    type: string;
+    value: string;
+  };
+}>;

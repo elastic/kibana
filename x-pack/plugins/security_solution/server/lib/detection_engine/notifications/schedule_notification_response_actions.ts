@@ -6,7 +6,7 @@
  */
 
 import { map, uniq } from 'lodash';
-import type { EcsMappingFormValueArray } from '@kbn/osquery-plugin/common/schemas/common/utils';
+import type { EcsMappingFormValueArray } from '../../../../common/detection_engine/transform_actions';
 import { convertECSMappingToObject } from '../../../../common/detection_engine/transform_actions';
 import type { SetupPlugins } from '../../../plugin_contract';
 

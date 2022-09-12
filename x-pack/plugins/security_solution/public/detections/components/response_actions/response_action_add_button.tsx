@@ -14,7 +14,6 @@ import {
   EuiKeyPadMenuItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { suspendedComponentWithProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useLicense } from '../../../common/hooks/use_license';
 import type { ResponseActionType } from './get_supported_response_actions';
@@ -79,14 +78,7 @@ export const ResponseActionAddButton = ({
             label={item.name}
             onClick={() => handleAddActionType(item)}
           >
-            <EuiIcon
-              size="xl"
-              type={
-                typeof item.iconClass === 'string'
-                  ? item.iconClass
-                  : suspendedComponentWithProps(item.iconClass as React.ComponentType)
-              }
-            />
+            <EuiIcon size="xl" type={item.iconClass} />
           </EuiKeyPadMenuItem>
         );
 

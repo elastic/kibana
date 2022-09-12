@@ -12,7 +12,6 @@ import { EuiSpacer } from '@elastic/eui';
 import uuid from 'uuid';
 import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { get, isEmpty, map } from 'lodash';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { QueryPackSelectable } from '../../live_queries/form/query_pack_selectable';
 import type { EcsMappingFormField } from '../../packs/queries/ecs_mapping_editor_field';
 import { defaultEcsFormData } from '../../packs/queries/ecs_mapping_editor_field';
@@ -126,7 +125,7 @@ const OsqueryResponseActionParamsFormComponent: React.ForwardRefExoticComponent<
 
   const permissions = useKibana().services.application.capabilities.osquery;
 
-  useEffectOnce(() => {
+  useEffect(() => {
     if (defaultParams && defaultParams.id) {
       const { packId, ...restParams } = defaultParams;
       map(restParams, (value, key: keyof OsqueryResponseActionsParamsFormFields) => {
@@ -138,7 +137,9 @@ const OsqueryResponseActionParamsFormComponent: React.ForwardRefExoticComponent<
         setValue('packId', [packId]);
       }
     }
-  });
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, []);
+
   const resetFormFields = useCallback(() => {
     setValue('packId', []);
     setValue('savedQueryId', '');
