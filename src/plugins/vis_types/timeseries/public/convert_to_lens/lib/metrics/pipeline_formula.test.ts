@@ -124,12 +124,7 @@ describe('getParentPipelineSeriesFormula', () => {
   >([
     [
       'null if metric is not supported',
-      [
-        metricsWithNotSupportedSubFunction[0],
-        metrics,
-        metrics[0],
-        {},
-      ],
+      [metricsWithNotSupportedSubFunction[0], metrics, metrics[0], {}],
       null,
     ],
     [
@@ -144,22 +139,12 @@ describe('getParentPipelineSeriesFormula', () => {
     ],
     [
       'correct formula if metric is supported',
-      [
-        metrics[1],
-        metrics,
-        metrics[0],
-        {},
-      ],
+      [metrics[1], metrics, metrics[0], {}],
       'moving_average(average(test-field-1), window=5)',
     ],
     [
       'correct formula if metric have additional sub function',
-      [
-        metricsWithSubFunction[2],
-        metricsWithSubFunction,
-        metricsWithSubFunction[1],
-        {},
-      ],
+      [metricsWithSubFunction[2], metricsWithSubFunction, metricsWithSubFunction[1], {}],
       'moving_average(differences(average(test-field-1)), window=5)',
     ],
     [

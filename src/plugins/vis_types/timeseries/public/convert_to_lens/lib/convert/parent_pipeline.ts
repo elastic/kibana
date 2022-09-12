@@ -33,7 +33,7 @@ import {
   getFormulaFromMetric,
   SupportedMetric,
   SUPPORTED_METRICS,
-  getPipelineSeriesFormula
+  getPipelineSeriesFormula,
 } from '../metrics';
 import { createColumn, getFormat } from './column';
 import { createFormulaColumn } from './formula';
