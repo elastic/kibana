@@ -22,9 +22,9 @@ export interface AlertSummaryItemProps {
 }
 
 export interface HeaderActionsProps {
-  onViewEditRuleConditions: () => void;
   onAddToExistingCase: () => void;
   onCreateNewCase: () => void;
+  onSnoozeRule: () => void;
 }
 
 export const ALERT_DETAILS_PAGE_ID = 'alert-details-o11y';

@@ -11,9 +11,9 @@ import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiPopover, EuiText } from '@e
 import { HeaderActionsProps } from '../types';
 
 export function HeaderActions({
-  onViewEditRuleConditions,
   onAddToExistingCase,
   onCreateNewCase,
+  onSnoozeRule,
 }: HeaderActionsProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
@@ -43,18 +43,6 @@ export function HeaderActions({
         <EuiButtonEmpty
           size="s"
           color="text"
-          onClick={onViewEditRuleConditions}
-          data-test-subj="edit-rule-conditions-button"
-        >
-          <EuiText size="s">
-            {i18n.translate('xpack.observability.alertDetails.editRuleConditions', {
-              defaultMessage: 'View/Edit rule conditions',
-            })}
-          </EuiText>
-        </EuiButtonEmpty>
-        <EuiButtonEmpty
-          size="s"
-          color="text"
           onClick={onAddToExistingCase}
           data-test-subj="add-to-existing-case-button"
         >
@@ -72,7 +60,19 @@ export function HeaderActions({
         >
           <EuiText size="s">
             {i18n.translate('xpack.observability.alertDetails.createNewCaseButton', {
-              defaultMessage: 'Create new case',
+              defaultMessage: 'Add to new case',
+            })}
+          </EuiText>
+        </EuiButtonEmpty>
+        <EuiButtonEmpty
+          size="s"
+          color="text"
+          onClick={onSnoozeRule}
+          data-test-subj="edit-snooze-rule-button"
+        >
+          <EuiText size="s">
+            {i18n.translate('xpack.observability.alertDetails.editSnoozeRule', {
+              defaultMessage: 'Edit or snooze the rule',
             })}
           </EuiText>
         </EuiButtonEmpty>

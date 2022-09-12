@@ -29,6 +29,10 @@ export function AlertDetailsPage() {
   // const { alertId } = useParams<AlertDetailsPathParams>();
   const alert = {};
 
+  const handleSnoozeRule = () => {
+    navigateToUrl(http.basePath.prepend(paths.observability.ruleDetails(alert.ruleId)));
+  };
+
   useBreadcrumbs([
     {
       href: http.basePath.prepend(paths.observability.alerts),
@@ -52,9 +56,9 @@ export function AlertDetailsPage() {
           <EuiFlexGroup direction="rowReverse" alignItems="center">
             <EuiFlexItem>
               <HeaderActions
-                onViewEditRuleConditions={handleViewEditRuleConditions}
                 onAddToExistingCase={handleAddToExistingCase}
                 onCreateNewCase={handleCreateNewCase}
+                onSnoozeRule={handleSnoozeRule}
               />
             </EuiFlexItem>
           </EuiFlexGroup>,
