@@ -107,5 +107,15 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
         `Expected case description to be '${expectedDescription}' (got '${actualDescription}')`
       );
     },
+
+    async openAssigneesPopover() {
+      await common.clickAndValidate('case-view-assignees-edit-button', 'euiSelectableList');
+      await header.waitUntilLoadingHasFinished();
+    },
+
+    async closeAssigneesPopover() {
+      await testSubjects.click('case-refresh');
+      await header.waitUntilLoadingHasFinished();
+    },
   };
 }
