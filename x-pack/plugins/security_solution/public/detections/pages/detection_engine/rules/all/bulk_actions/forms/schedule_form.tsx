@@ -65,7 +65,7 @@ export const ScheduleForm = ({ rulesCount, onClose, onConfirm }: ScheduleFormCom
   }, [form, onConfirm]);
 
   const warningCallout = (
-    <EuiCallOut color="warning" data-test-subj="bulkEditRulesTimelineTemplateWarning">
+    <EuiCallOut color="warning" data-test-subj="bulkEditRulesSchedulesWarning">
       {i18n.warningCalloutMessage(rulesCount)}
     </EuiCallOut>
   );

@@ -35,6 +35,7 @@ import {
   UPDATE_SCHEDULE_INTERVAL_INPUT,
   UPDATE_SCHEDULE_TIME_UNIT_SELECT,
   UPDATE_SCHEDULE_LOOKBACK_INPUT,
+  RULES_BULK_EDIT_SCHEDULES_WARNING,
 } from '../screens/rules_bulk_edit';
 import { SCHEDULE_DETAILS } from '../screens/rule_details';
 
@@ -203,6 +204,13 @@ export const setScheduleLookbackTimeUnit = (timeUnit: TimeUnit) => {
   cy.get(UPDATE_SCHEDULE_LOOKBACK_INPUT).within(() => {
     cy.get(UPDATE_SCHEDULE_TIME_UNIT_SELECT).select(timeUnit);
   });
+};
+
+export const assertUpdateScheduleWarningExists = (expectedNumberOfNotMLRules: number) => {
+  cy.get(RULES_BULK_EDIT_SCHEDULES_WARNING).should(
+    'have.text',
+    `You're about to apply changes to ${expectedNumberOfNotMLRules} selected rules. The changes you made will be overwritten to the existing Rule schedules and additional look-back time (if any).`
+  );
 };
 
 export const assertRuleScheduleValues = ({

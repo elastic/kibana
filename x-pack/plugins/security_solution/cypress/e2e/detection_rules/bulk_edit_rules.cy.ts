@@ -23,7 +23,7 @@ import {
   APPLY_TIMELINE_RULE_BULK_MENU_ITEM,
 } from '../../screens/rules_bulk_edit';
 
-import { SCHEDULE_DETAILS, TIMELINE_TEMPLATE_DETAILS } from '../../screens/rule_details';
+import { TIMELINE_TEMPLATE_DETAILS } from '../../screens/rule_details';
 
 import { EUI_FILTER_SELECT_ITEM } from '../../screens/common/controls';
 
@@ -70,6 +70,7 @@ import {
   setScheduleLookbackTimeUnit,
   setScheduleIntervalTimeUnit,
   assertRuleScheduleValues,
+  assertUpdateScheduleWarningExists,
 } from '../../tasks/rules_bulk_edit';
 
 import { hasIndexPatterns, getDetails } from '../../tasks/rule_details';
@@ -495,6 +496,8 @@ describe('Detection rules, bulk edit', () => {
     it('Updates schedule for custom rules', () => {
       selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
       clickUpdateScheduleMenuItem();
+
+      assertUpdateScheduleWarningExists(expectedNumberOfCustomRulesToBeEdited);
 
       typeScheduleInterval('20');
       setScheduleIntervalTimeUnit('Hours');

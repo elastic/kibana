@@ -48,6 +48,8 @@ export const RULES_BULK_EDIT_TIMELINE_TEMPLATES_SELECTOR =
 export const RULES_BULK_EDIT_TIMELINE_TEMPLATES_WARNING =
   '[data-test-subj="bulkEditRulesTimelineTemplateWarning"]';
 
+export const RULES_BULK_EDIT_SCHEDULES_WARNING = '[data-test-subj="bulkEditRulesSchedulesWarning"]';
+
 export const UPDATE_SCHEDULE_INTERVAL_INPUT =
   '[data-test-subj="bulkEditRulesScheduleIntervalSelector"]';
 
