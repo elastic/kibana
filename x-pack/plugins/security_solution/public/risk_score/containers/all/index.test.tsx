@@ -9,7 +9,6 @@ import { useHostRiskScore, useUserRiskScore } from '.';
 import { TestProviders } from '../../../common/mock';
 
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../common/hooks/use_app_toasts.mock';
 
@@ -21,14 +20,14 @@ jest.mock('../../../common/hooks/use_space_id', () => ({
   useSpaceId: jest.fn().mockReturnValue('default'),
 }));
 
-jest.mock('../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
-}));
-
 jest.mock('../../../common/hooks/use_app_toasts');
 
+const mockUseMlCapabilities = jest.fn();
+jest.mock('../../../common/components/ml/hooks/use_ml_capabilities', () => ({
+  useMlCapabilities: () => mockUseMlCapabilities(),
+}));
+
 const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 const mockSearch = jest.fn();
 const mockRefetch = jest.fn();
 
@@ -43,7 +42,7 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
       (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
     });
     test('does not search if feature is not enabled', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: false });
       mockUseSearchStrategy.mockReturnValue({
         loading: false,
         result: {
@@ -73,7 +72,7 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
     });
 
     test('if query skipped and feature is enabled, isModuleEnabled should be true', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
       mockUseSearchStrategy.mockReturnValue({
         loading: false,
         result: {
@@ -102,7 +101,7 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
     });
 
     test('handle index not found error', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
 
       mockUseSearchStrategy.mockReturnValue({
         loading: false,
@@ -138,7 +137,7 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
     });
 
     test('show error toast', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
 
       const error = new Error();
       mockUseSearchStrategy.mockReturnValue({
@@ -161,7 +160,7 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
     });
 
     test('runs search if feature is enabled', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
       mockUseSearchStrategy.mockReturnValue({
         loading: false,
         result: {
@@ -187,7 +186,7 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
     });
 
     test('return result', async () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
       mockUseSearchStrategy.mockReturnValue({
         loading: false,
         result: {
