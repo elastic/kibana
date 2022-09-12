@@ -60,9 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-
-      await testSubjects.click('openFieldActionsButton-@timestamp');
-      await testSubjects.click('addExistsFilterButton-@timestamp');
+      await dataGrid.clickFieldActionInFlyout('@timestamp', 'addExistsFilterButton');
 
       const hasExistsFilter = await filterBar.hasFilter('@timestamp', 'exists', true, false, false);
       expect(hasExistsFilter).to.be(true);

@@ -20,6 +20,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { euiFlyoutClassname } from '../constants';
 import type { Field } from '../types';
 import { ModifiedFieldModal, SaveFieldTypeOrNameChangedModal } from './confirm_modals';
+
 import { FieldEditor, FieldEditorFormState } from './field_editor/field_editor';
 import { useFieldEditorContext } from './field_editor_context';
 import { FlyoutPanels } from './flyout_panels';
@@ -69,7 +70,8 @@ const FieldEditorFlyoutContentComponent = ({
 }: Props) => {
   const isMounted = useRef(false);
   const isEditingExistingField = !!fieldToEdit;
-  const { dataView } = useFieldEditorContext();
+  const { dataView, subfields$ } = useFieldEditorContext();
+
   const {
     panel: { isVisible: isPanelVisible },
   } = useFieldPreviewContext();
@@ -100,7 +102,7 @@ const FieldEditorFlyoutContentComponent = ({
   }, [isFormModified]);
 
   const onClickSave = useCallback(async () => {
-    const { isValid, data } = await submit();
+    const { isValid, data: updatedField } = await submit();
 
     if (!isMounted.current) {
       // User has closed the flyout meanwhile submitting the form
@@ -108,8 +110,8 @@ const FieldEditorFlyoutContentComponent = ({
     }
 
     if (isValid) {
-      const nameChange = fieldToEdit?.name !== data.name;
-      const typeChange = fieldToEdit?.type !== data.type;
+      const nameChange = fieldToEdit?.name !== updatedField.name;
+      const typeChange = fieldToEdit?.type !== updatedField.type;
 
       if (isEditingExistingField && (nameChange || typeChange)) {
         setModalVisibility({
@@ -117,10 +119,14 @@ const FieldEditorFlyoutContentComponent = ({
           confirmChangeNameOrType: true,
         });
       } else {
-        onSave(data);
+        if (updatedField.type === 'composite') {
+          onSave({ ...updatedField, fields: subfields$.getValue() });
+        } else {
+          onSave(updatedField);
+        }
       }
     }
-  }, [onSave, submit, fieldToEdit, isEditingExistingField]);
+  }, [onSave, submit, fieldToEdit, isEditingExistingField, subfields$]);
 
   const onClickCancel = useCallback(() => {
     const canClose = canCloseValidator();
@@ -136,8 +142,12 @@ const FieldEditorFlyoutContentComponent = ({
         <SaveFieldTypeOrNameChangedModal
           fieldName={fieldToEdit?.name!}
           onConfirm={async () => {
-            const { data } = await submit();
-            onSave(data);
+            const { data: updatedField } = await submit();
+            if (updatedField.type === 'composite') {
+              onSave({ ...updatedField, fields: subfields$.getValue() });
+            } else {
+              onSave(updatedField);
+            }
           }}
           onCancel={() => {
             setModalVisibility(defaultModalVisibility);
