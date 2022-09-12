@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Truthy } from 'lodash';
+import type { Truthy } from 'lodash';
 import { CSP_RULE_SAVED_OBJECT_TYPE } from '../constants';
 
 /**

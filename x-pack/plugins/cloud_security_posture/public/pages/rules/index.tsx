@@ -9,7 +9,7 @@ import React, { useContext, useMemo } from 'react';
 import { generatePath, Link, type RouteComponentProps } from 'react-router-dom';
 import {
   EuiButtonEmpty,
-  EuiDescriptionListProps,
+  type EuiDescriptionListProps,
   EuiFlexGroup,
   EuiPageHeader,
   EuiSpacer,

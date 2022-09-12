@@ -5,7 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiSpacer, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiButtonEmpty,
+  EuiPageHeader,
+  type EuiDescriptionListProps,
+} from '@elastic/eui';
 import { Link, useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { generatePath } from 'react-router-dom';
@@ -53,7 +58,9 @@ const BackToResourcesButton = () => (
   </Link>
 );
 
-const getResourceFindingSharedValues = (sampleFinding: CspFinding) => [
+const getResourceFindingSharedValues = (
+  sampleFinding: CspFinding
+): EuiDescriptionListProps['listItems'] => [
   {
     title: i18n.translate('xpack.csp.findings.resourceFindingsSharedValues.resourceTypeTitle', {
       defaultMessage: 'Resource Type',
