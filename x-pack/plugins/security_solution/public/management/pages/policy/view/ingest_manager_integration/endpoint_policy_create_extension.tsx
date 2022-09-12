@@ -172,7 +172,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                         ...newPolicy.inputs[0].config._config.value.cloudConfig,
                         preventions: {
                           ...newPolicy.inputs[0].config._config.value.cloudConfig.preventions,
-                          ...(isPlatinumPlus && { behavior_protection: statusBehaviour }),
+                          behavior_protection: statusBehaviour,
                           malware: statusMalware,
                         },
                       },
@@ -184,7 +184,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
           },
         });
       },
-      [onChange, newPolicy.inputs, isPlatinumPlus]
+      [onChange, newPolicy.inputs]
     );
 
     const setPreset = useCallback(
@@ -291,9 +291,8 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                         type: e?.target?.value,
                         cloudConfig: {
                           preventions: {
-                            ...(isPlatinumPlus && {
-                              behavior_protection: checkboxMaliciousChecked,
-                            }),
+                            behavior_protection: checkboxMaliciousChecked,
+
                             malware: checkboxMalwareChecked,
                           },
                         },
@@ -337,7 +336,6 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
         radioEndpointOption,
         checkboxMaliciousChecked,
         checkboxMalwareChecked,
-        isPlatinumPlus,
         radioComprehensiveSelected,
       ]
     );
