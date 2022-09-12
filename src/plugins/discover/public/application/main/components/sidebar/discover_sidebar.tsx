@@ -18,7 +18,7 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiNotificationBadge,
-  EuiPageSideBar,
+  EuiPageSideBar_Deprecated as EuiPageSideBar,
   useResizeObserver,
   EuiButton,
 } from '@elastic/eui';

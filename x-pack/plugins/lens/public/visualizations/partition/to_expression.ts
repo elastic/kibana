@@ -61,14 +61,16 @@ type GenerateLabelsAstArguments = (
 
 export const getSortedGroups = (
   datasource: DatasourcePublicAPI | undefined,
-  layer: PieLayerState
+  layer: PieLayerState,
+  accessor: 'primaryGroups' | 'secondaryGroups' = 'primaryGroups'
 ) => {
   const originalOrder = datasource
     ?.getTableSpec()
     .map(({ columnId }: { columnId: string }) => columnId)
-    .filter((columnId: string) => layer.groups.includes(columnId));
+    .filter((columnId: string) => layer[accessor]?.includes(columnId));
+
   // When we add a column it could be empty, and therefore have no order
-  return Array.from(new Set(originalOrder?.concat(layer.groups)));
+  return Array.from(new Set(originalOrder?.concat(layer[accessor] ?? [])));
 };
 
 const prepareDimension = (accessor: string) => {
@@ -262,7 +264,15 @@ function expressionHelper(
 ): Ast | null {
   const layer = state.layers[0];
   const datasource = datasourceLayers[layer.layerId];
-  const groups = getSortedGroups(datasource, layer);
+
+  const groups = Array.from(
+    new Set(
+      [
+        getSortedGroups(datasource, layer, 'primaryGroups'),
+        layer.secondaryGroups ? getSortedGroups(datasource, layer, 'secondaryGroups') : [],
+      ].flat()
+    )
+  );
 
   const operations = groups
     .map((columnId) => ({

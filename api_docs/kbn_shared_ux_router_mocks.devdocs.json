@@ -1,0 +1,45 @@
+{
+  "id": "@kbn/shared-ux-router-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-router-mocks",
+        "id": "def-common.foo",
+        "type": "Function",
+        "tags": [],
+        "label": "foo",
+        "description": [],
+        "signature": [
+          "() => string"
+        ],
+        "path": "packages/shared-ux/router/mocks/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
