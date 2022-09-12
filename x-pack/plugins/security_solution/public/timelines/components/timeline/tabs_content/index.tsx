@@ -362,11 +362,11 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             data-test-subj={`timelineTabs-${TimelineTabs.notes}`}
             onClick={setNotesAsActiveTab}
             isSelected={activeTab === TimelineTabs.notes}
-            disabled={false}
+            disabled={timelineType === TimelineType.template}
             key={TimelineTabs.notes}
           >
             <span>{i18n.NOTES_TAB}</span>
-            {showTimeline && numberOfNotes > 0 && (
+            {showTimeline && numberOfNotes > 0 && timelineType === TimelineType.default && (
               <div>
                 <CountBadge>{numberOfNotes}</CountBadge>
               </div>
@@ -375,11 +375,12 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
           <StyledEuiTab
             data-test-subj={`timelineTabs-${TimelineTabs.pinned}`}
             onClick={setPinnedAsActiveTab}
+            disabled={timelineType === TimelineType.template}
             isSelected={activeTab === TimelineTabs.pinned}
             key={TimelineTabs.pinned}
           >
             <span>{i18n.PINNED_TAB}</span>
-            {showTimeline && numberOfPinnedEvents > 0 && (
+            {showTimeline && numberOfPinnedEvents > 0 && timelineType === TimelineType.default && (
               <div>
                 <CountBadge>{numberOfPinnedEvents}</CountBadge>
               </div>
