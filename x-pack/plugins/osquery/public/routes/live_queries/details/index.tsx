@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { AddToCaseButton } from '../../../cases/add_to_cases_button';
+import { AddToCase } from '../../../cases/add_to_case';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useLiveQueryDetails } from '../../../actions/use_live_query_details';
@@ -55,7 +55,7 @@ const LiveQueryDetailsPageComponent = () => {
   }, [data?.status]);
   const addToCaseButton = useCallback(
     (payload) => (
-      <AddToCaseButton
+      <AddToCase
         queryId={payload?.queryId}
         actionId={actionId}
         agentIds={data?.agents}

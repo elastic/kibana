@@ -8,9 +8,6 @@
 import { EuiTabbedContent, EuiNotificationBadge } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { ReactElement } from 'react';
-import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
-import { useKibana } from '../../../common/lib/kibana';
-import { useGetUserCasesPermissions } from '../../../cases/use_get_cases_permissions';
 
 import type { AddToTimelinePayload } from '../../../timelines/use_add_to_timeline';
 import type { ECSMapping } from '../../../../common/schemas/common';
@@ -38,10 +35,6 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   addToTimeline,
   addToCase,
 }) => {
-  const { cases } = useKibana().services;
-  const casePermissions = useGetUserCasesPermissions();
-  const CasesContext = cases.ui.getCasesContext();
-
   const tabs = useMemo(
     () => [
       {
@@ -83,19 +76,16 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
       failedAgentsCount,
     ]
   );
-  const casesOwner = useMemo(() => [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER], []);
 
   return (
-    <CasesContext owner={casesOwner} permissions={casePermissions}>
-      <EuiTabbedContent
-        // TODO: extend the EuiTabbedContent component to support EuiTabs props
-        // bottomBorder={false}
-        tabs={tabs}
-        initialSelectedTab={tabs[0]}
-        autoFocus="selected"
-        expand={false}
-      />
-    </CasesContext>
+    <EuiTabbedContent
+      // TODO: extend the EuiTabbedContent component to support EuiTabs props
+      // bottomBorder={false}
+      tabs={tabs}
+      initialSelectedTab={tabs[0]}
+      autoFocus="selected"
+      expand={false}
+    />
   );
 };
 
