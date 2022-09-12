@@ -220,7 +220,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     options?: {
       user?: AuthenticatedUser;
       bumpRevision?: boolean;
-      force: true;
+      force?: true;
     }
   ): Promise<PackagePolicy[]> {
     const agentPolicyIds = new Set(packagePolicies.map((pkgPol) => pkgPol.policy_id));
