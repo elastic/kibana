@@ -159,3 +159,11 @@ export const GetAgentDataRequestSchema = {
     previewData: schema.boolean({ defaultValue: false }),
   }),
 };
+
+export const GetActionStatusRequestSchema = {
+  query: schema.object({
+    page: schema.number({ defaultValue: 1 }),
+    perPage: schema.number({ defaultValue: 10 }),
+    kuery: schema.maybe(schema.string()),
+  }),
+};
