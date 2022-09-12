@@ -35,20 +35,22 @@ export const config: RenderValue['visConfig'] = {
     last_level: false,
   },
   dimensions: {
-    metric: {
-      type: 'vis_dimension',
-      accessor: {
-        id: 'percent_uptime',
-        name: 'percent_uptime',
-        meta: {
-          type: 'number',
+    metrics: [
+      {
+        type: 'vis_dimension',
+        accessor: {
+          id: 'percent_uptime',
+          name: 'percent_uptime',
+          meta: {
+            type: 'number',
+          },
+        },
+        format: {
+          id: 'string',
+          params: {},
         },
       },
-      format: {
-        id: 'string',
-        params: {},
-      },
-    },
+    ],
   },
 };
 
