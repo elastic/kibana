@@ -8,13 +8,14 @@
 import { useEffect, useState } from 'react';
 
 import { useSavedQueryServices } from '../../../../../common/utils/saved_query_services';
-
+import { useAppToasts  } from '../../../../../common/hooks/use_app_toasts';
 import type { DefineStepRule } from '../types';
 
 export const useGetSavedQuery = (savedQueryId: string | undefined) => {
   const savedQueryServices = useSavedQueryServices();
   const [isSavedQueryLoading, setIsSavedQueryLoading] = useState(false);
   const [savedQueryBar, setSavedQueryBar] = useState<DefineStepRule['queryBar'] | null>(null);
+  const { addError } = useAppToasts();
 
   useEffect(() => {
     if (savedQueryId) {
@@ -29,6 +30,9 @@ export const useGetSavedQuery = (savedQueryId: string | undefined) => {
             query: newSavedQuery.attributes.query,
             title: newSavedQuery.attributes.title,
           });
+        })
+        .catch((err) => {
+            addError(err, { title: 'Failed to fetch saved query' } )
         })
         .finally(() => setIsSavedQueryLoading(false));
     }
