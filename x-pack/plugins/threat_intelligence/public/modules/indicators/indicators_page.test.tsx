@@ -10,13 +10,13 @@ import { render } from '@testing-library/react';
 import { IndicatorsPage } from './indicators_page';
 import { useIndicators } from './hooks/use_indicators';
 import { useAggregatedIndicators } from './hooks/use_aggregated_indicators';
-import { useFilters } from './hooks/use_filters';
+import { useFilters } from '../query_bar/hooks/use_filters';
 import moment from 'moment';
 import { TestProvidersComponent } from '../../common/mocks/test_providers';
 import { TABLE_TEST_ID } from './components/indicators_table';
 
+jest.mock('../query_bar/hooks/use_filters');
 jest.mock('./hooks/use_indicators');
-jest.mock('./hooks/use_filters');
 jest.mock('./hooks/use_aggregated_indicators');
 
 const stub = () => {};

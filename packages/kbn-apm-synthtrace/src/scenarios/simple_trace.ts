@@ -27,9 +27,8 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
 
       const transactionName = '240rpm/75% 1000ms';
 
-      const successfulTimestamps = range.interval('1s').rate(3);
-
-      const failedTimestamps = range.interval('1s').rate(1);
+      const successfulTimestamps = range.ratePerMinute(180);
+      const failedTimestamps = range.ratePerMinute(180);
 
       const instances = [...Array(numServices).keys()].map((index) =>
         apm.service(`opbeans-go-${index}`, ENVIRONMENT, 'go').instance('instance')

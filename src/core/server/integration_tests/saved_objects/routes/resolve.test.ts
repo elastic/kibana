@@ -11,9 +11,11 @@ import { ContextService } from '@kbn/core-http-context-server-internal';
 import type { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import { createHttpServer, createCoreContext } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { CoreUsageStatsClient } from '../../../core_usage_data';
-import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
-import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
+import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
+import {
+  coreUsageStatsClientMock,
+  coreUsageDataServiceMock,
+} from '@kbn/core-usage-data-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock, coreMock } from '../../../mocks';
 import {
@@ -28,7 +30,7 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
   let httpSetup: InternalHttpServiceSetup;
   let handlerContext: ReturnType<typeof coreMock.createRequestHandlerContext>;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
-  let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;
+  let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
 
   beforeEach(async () => {
     const coreContext = createCoreContext({ coreId });

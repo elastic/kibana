@@ -31,16 +31,16 @@ import { OverlayService } from '@kbn/core-overlays-browser-internal';
 import { KBN_LOAD_MARKS } from '@kbn/core-mount-utils-browser-internal';
 import { SavedObjectsService } from '@kbn/core-saved-objects-browser-internal';
 import { NotificationsService } from '@kbn/core-notifications-browser-internal';
+import { ChromeService } from '@kbn/core-chrome-browser-internal';
 import {
   ApplicationService,
   type InternalApplicationSetup,
   type InternalApplicationStart,
 } from '@kbn/core-application-browser-internal';
+import { RenderingService } from '@kbn/core-rendering-browser-internal';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import { CoreSetup, CoreStart } from '.';
-import { ChromeService } from './chrome';
 import { PluginsService } from './plugins';
-import { RenderingService } from './rendering';
 import { CoreApp } from './core_app';
 
 import {

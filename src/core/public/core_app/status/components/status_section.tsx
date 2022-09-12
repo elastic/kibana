@@ -7,7 +7,13 @@
  */
 
 import React, { FC, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { StatusTable } from './status_table';
 import { FormattedStatus, getHighestStatus } from '../lib';
 import { StatusBadge } from './status_badge';

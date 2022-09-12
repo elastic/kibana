@@ -6,8 +6,5 @@
   "keywords": [],
   "author": "Spencer Alger <email@spalger.com>",
   "license": "SSPL-1.0 OR Elastic License 2.0",
-  "private": "true",
-  "kibana": {
-    "devOnly": true
-  }
+  "private": "true"
 }

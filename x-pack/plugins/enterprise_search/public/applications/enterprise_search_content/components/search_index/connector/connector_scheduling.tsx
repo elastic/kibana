@@ -30,11 +30,11 @@ import { ConnectorIndex } from '../../../../../../common/types/indices';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import { UnsavedChangesPrompt } from '../../../../shared/unsaved_changes_prompt';
-import { UpdateConnectorSchedulingApiLogic } from '../../../api/connector_package/update_connector_scheduling_api_logic';
+import { UpdateConnectorSchedulingApiLogic } from '../../../api/connector/update_connector_scheduling_api_logic';
 
 import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
 import { IngestionStatus } from '../../../types';
-import { isConnectorIndex } from '../../../utils/indices';
+import { isConnectorIndex, isConnectorCrawlerIndex } from '../../../utils/indices';
 
 import { IndexViewLogic } from '../index_view_logic';
 
@@ -61,7 +61,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
     frequency: schedulingInput?.interval ? cronToFrequency(schedulingInput.interval) : 'HOUR',
   });
 
-  if (!isConnectorIndex(index)) {
+  if (!isConnectorIndex(index) && !isConnectorCrawlerIndex(index)) {
     return <></>;
   }
 

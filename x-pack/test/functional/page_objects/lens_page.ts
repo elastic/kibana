@@ -47,7 +47,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async isLensPageOrFail() {
-      return await testSubjects.existOrFail('lnsApp', { timeout: 5000 });
+      return await testSubjects.existOrFail('lnsApp', { timeout: 10000 });
     },
 
     /**
@@ -1396,7 +1396,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async typeFormula(formula: string) {
       await find.byCssSelector('.monaco-editor');
-      await find.clickByCssSelectorWhenNotDisabled('.monaco-editor');
+      await find.clickByCssSelectorWhenNotDisabledWithoutRetry('.monaco-editor');
       const input = await find.activeElement();
       await input.clearValueWithKeyboard({ charByChar: true });
       await input.type(formula);
