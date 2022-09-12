@@ -223,10 +223,10 @@ export const getDatatableVisualization = ({
         {
           groupId: 'columns',
           groupLabel: i18n.translate('xpack.lens.datatable.breakdownColumns', {
-            defaultMessage: 'Columns',
+            defaultMessage: 'Split metrics by',
           }),
           dimensionEditorGroupLabel: i18n.translate('xpack.lens.datatable.breakdownColumn', {
-            defaultMessage: 'Column',
+            defaultMessage: 'Split metrics by',
           }),
           groupTooltip: i18n.translate('xpack.lens.datatable.breakdownColumns.description', {
             defaultMessage:

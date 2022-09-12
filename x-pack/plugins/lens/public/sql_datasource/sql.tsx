@@ -130,6 +130,10 @@ export function getSQLDatasource({
     },
     onRefreshIndexPattern() {},
 
+    getUsedDataViews: (state) => {
+      return Object.values(state.layers).map(({ index }) => index);
+    },
+
     getPersistableState({ layers }: EsSQLPrivateState) {
       return { state: { layers }, savedObjectReferences: [] };
     },
@@ -337,7 +341,7 @@ export function getSQLDatasource({
     },
 
     uniqueLabels(state: EsSQLPrivateState) {
-      const layers = state.layers;
+      const layers = state?.layers;
       const columnLabelMap = {} as Record<string, string>;
 
       Object.values(layers).forEach((layer) => {
