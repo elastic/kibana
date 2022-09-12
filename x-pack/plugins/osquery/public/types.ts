@@ -16,12 +16,13 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { getLazyOsqueryAction } from './shared_components';
+import type { getLazyLiveQueryField, getLazyOsqueryAction } from './shared_components';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}
 export interface OsqueryPluginStart {
   OsqueryAction?: ReturnType<typeof getLazyOsqueryAction>;
+  LiveQueryField?: ReturnType<typeof getLazyLiveQueryField>;
   isOsqueryAvailable: (props: { agentId: string }) => boolean;
 }
 
