@@ -696,6 +696,48 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.aggregateEventsWithAuthFilter",
+            "type": "Function",
+            "tags": [],
+            "label": "aggregateEventsWithAuthFilter",
+            "description": [],
+            "signature": [
+              "(queryOptions: ",
+              "AggregateEventsWithAuthFilter",
+              ") => Promise<",
+              {
+                "pluginId": "eventLog",
+                "scope": "server",
+                "docId": "kibEventLogPluginApi",
+                "section": "def-server.AggregateEventsBySavedObjectResult",
+                "text": "AggregateEventsBySavedObjectResult"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.aggregateEventsWithAuthFilter.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "queryOptions",
+                "description": [],
+                "signature": [
+                  "AggregateEventsWithAuthFilter"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -999,6 +1041,82 @@
                 "description": [],
                 "signature": [
                   "string[] | undefined"
+                ],
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.IEventLogClient.aggregateEventsWithAuthFilter",
+            "type": "Function",
+            "tags": [],
+            "label": "aggregateEventsWithAuthFilter",
+            "description": [],
+            "signature": [
+              "(type: string, authFilter: ",
+              "KueryNode",
+              ", options?: Partial<",
+              "AggregateOptionsType",
+              "> | undefined) => Promise<",
+              {
+                "pluginId": "eventLog",
+                "scope": "server",
+                "docId": "kibEventLogPluginApi",
+                "section": "def-server.AggregateEventsBySavedObjectResult",
+                "text": "AggregateEventsBySavedObjectResult"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/event_log/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogClient.aggregateEventsWithAuthFilter.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogClient.aggregateEventsWithAuthFilter.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "authFilter",
+                "description": [],
+                "signature": [
+                  "KueryNode"
+                ],
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogClient.aggregateEventsWithAuthFilter.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  "AggregateOptionsType",
+                  "> | undefined"
                 ],
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "deprecated": false,
