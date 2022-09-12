@@ -10,6 +10,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/e
 import * as i18n from './translations';
 import { Assignee } from './types';
 import { HoverableUserWithAvatar } from './hoverable_user_with_avatar';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 export interface UserRepresentationProps {
   assignee: Assignee;
@@ -20,6 +21,7 @@ const RemovableUserComponent: React.FC<UserRepresentationProps> = ({
   assignee,
   onRemoveAssignee,
 }) => {
+  const { permissions } = useCasesContext();
   const [isHovering, setIsHovering] = useState(false);
 
   const removeAssigneeCallback = useCallback(
@@ -44,27 +46,29 @@ const RemovableUserComponent: React.FC<UserRepresentationProps> = ({
       <EuiFlexItem grow={false}>
         <HoverableUserWithAvatar userInfo={assignee.profile} />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          position="left"
-          content={i18n.REMOVE_ASSIGNEE}
-          data-test-subj={`user-profile-assigned-user-cross-tooltip-${usernameDataTestSubj}`}
-        >
-          <EuiButtonIcon
-            css={{
-              opacity: isHovering ? 1 : 0,
-            }}
-            onFocus={onFocus}
-            onBlur={onFocusLeave}
-            data-test-subj={`user-profile-assigned-user-cross-${usernameDataTestSubj}`}
-            aria-label={i18n.REMOVE_ASSIGNEE_ARIA_LABEL}
-            iconType="cross"
-            color="danger"
-            iconSize="m"
-            onClick={removeAssigneeCallback}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
+      {permissions.update && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            position="left"
+            content={i18n.REMOVE_ASSIGNEE}
+            data-test-subj={`user-profile-assigned-user-cross-tooltip-${usernameDataTestSubj}`}
+          >
+            <EuiButtonIcon
+              css={{
+                opacity: isHovering ? 1 : 0,
+              }}
+              onFocus={onFocus}
+              onBlur={onFocusLeave}
+              data-test-subj={`user-profile-assigned-user-cross-${usernameDataTestSubj}`}
+              aria-label={i18n.REMOVE_ASSIGNEE_ARIA_LABEL}
+              iconType="cross"
+              color="danger"
+              iconSize="m"
+              onClick={removeAssigneeCallback}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
