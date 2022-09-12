@@ -7,7 +7,7 @@
 import { keyBy, last } from 'lodash';
 import { Logger } from '@kbn/core/server';
 import util from 'util';
-import { ESFilter } from '@kbn/core/types/elasticsearch';
+import type { ESFilter } from '@kbn/es-types';
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { maybe } from '../../../../common/utils/maybe';

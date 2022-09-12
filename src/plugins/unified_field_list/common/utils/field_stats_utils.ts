@@ -8,7 +8,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import DateMath from '@kbn/datemath';
-import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import type { ESSearchResponse } from '@kbn/es-types';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { FieldStatsResponse } from '../types';
 
