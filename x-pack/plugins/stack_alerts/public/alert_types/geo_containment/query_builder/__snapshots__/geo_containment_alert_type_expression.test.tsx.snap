@@ -34,6 +34,7 @@ exports[`should render BoundaryIndexExpression 1`] = `
               "getCanSaveSync": [MockFunction],
               "getDefaultDataView": [MockFunction],
               "getDefaultId": [MockFunction],
+              "getFieldsForIndexPattern": [MockFunction],
               "getIdsWithTitle": [MockFunction],
               "hasData": Object {
                 "hasDataView": [MockFunction],
@@ -120,6 +121,7 @@ exports[`should render EntityIndexExpression 1`] = `
               "getCanSaveSync": [MockFunction],
               "getDefaultDataView": [MockFunction],
               "getDefaultId": [MockFunction],
+              "getFieldsForIndexPattern": [MockFunction],
               "getIdsWithTitle": [MockFunction],
               "hasData": Object {
                 "hasDataView": [MockFunction],
@@ -212,6 +214,7 @@ exports[`should render EntityIndexExpression w/ invalid flag if invalid 1`] = `
               "getCanSaveSync": [MockFunction],
               "getDefaultDataView": [MockFunction],
               "getDefaultId": [MockFunction],
+              "getFieldsForIndexPattern": [MockFunction],
               "getIdsWithTitle": [MockFunction],
               "hasData": Object {
                 "hasDataView": [MockFunction],
