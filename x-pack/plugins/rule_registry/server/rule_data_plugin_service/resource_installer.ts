@@ -314,6 +314,7 @@ export class ResourceInstaller {
               name: ilmPolicyName,
               rollover_alias: primaryNamespacedAlias,
             },
+            auto_expand_replicas: '0-1',
           },
           mappings: {
             dynamic: false,
