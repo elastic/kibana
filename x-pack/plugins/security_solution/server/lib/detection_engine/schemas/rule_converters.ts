@@ -138,7 +138,7 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
         query: params.query ?? '',
         filters: params.filters,
         savedId: params.saved_id,
-        responseActions: params.response_actions?.map(transformRuleToAlertResponseAction) ?? [],
+        responseActions: params.response_actions?.map(transformRuleToAlertResponseAction),
       };
     }
     case 'saved_query': {
@@ -665,7 +665,7 @@ export const internalRuleToAPIResponse = (
   const mergedExecutionSummary = mergeRuleExecutionSummary(rule, ruleExecutionSummary ?? null);
   const isResolvedRule = (obj: unknown): obj is ResolvedSanitizedRule<RuleParams> =>
     (obj as ResolvedSanitizedRule<RuleParams>).outcome != null;
-  return {
+  const test = {
     // saved object properties
     outcome: isResolvedRule(rule) ? rule.outcome : undefined,
     alias_target_id: isResolvedRule(rule) ? rule.alias_target_id : undefined,
@@ -690,4 +690,6 @@ export const internalRuleToAPIResponse = (
     // Execution summary
     execution_summary: mergedExecutionSummary ?? undefined,
   };
+  console.log({ test });
+  return test;
 };
