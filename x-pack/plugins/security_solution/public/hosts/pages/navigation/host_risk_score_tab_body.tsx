@@ -7,6 +7,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { noop } from 'lodash/fp';
+import { RiskScoresDeprecated } from '../../../common/components/risk_score_deprecated';
 import type { HostsComponentsQueryProps } from './types';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { HostRiskScoreTable } from '../../components/host_risk_score_table';
@@ -31,9 +32,9 @@ export const HostRiskScoreQueryTabBody = ({
   startDate,
   type,
 }: HostsComponentsQueryProps) => {
-  const getHosRiskScoreSelector = useMemo(() => hostsSelectors.hostRiskScoreSelector(), []);
+  const getHostRiskScoreSelector = useMemo(() => hostsSelectors.hostRiskScoreSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state: State) =>
-    getHosRiskScoreSelector(state, hostsModel.HostsType.page)
+    getHostRiskScoreSelector(state, hostsModel.HostsType.page)
   );
 
   const pagination = useMemo(
@@ -50,17 +51,22 @@ export const HostRiskScoreQueryTabBody = ({
     setQuerySkip(!toggleStatus);
   }, [toggleStatus]);
 
-  const [loading, { data, totalCount, inspect, isInspected, refetch }] = useHostRiskScore({
-    filterQuery,
-    skip: querySkip,
-    pagination,
-    sort,
-  });
+  const [loading, { data, totalCount, inspect, isInspected, isDeprecated, refetch }] =
+    useHostRiskScore({
+      filterQuery,
+      skip: querySkip,
+      pagination,
+      sort,
+    });
 
   const { severityCount, loading: isKpiLoading } = useHostRiskScoreKpi({
     filterQuery,
     skip: querySkip,
   });
+
+  if (isDeprecated) {
+    return <RiskScoresDeprecated entityType="host" />;
+  }
 
   return (
     <HostRiskScoreTableManage

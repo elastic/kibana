@@ -26,7 +26,7 @@ export const useRiskScoreDeprecated = (
     getRiskScoreDeprecated
   );
 
-  const response = useMemo(() => (data ? data : { isDeprecated: false, isEnabled: false }), [data]);
+  const response = useMemo(() => (data ? data : { isDeprecated: true, isEnabled: false }), [data]);
 
   const searchDeprecated = useCallback(
     (indexName: string) => {

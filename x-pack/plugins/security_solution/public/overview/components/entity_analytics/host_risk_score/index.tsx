@@ -17,6 +17,7 @@ import {
 
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import { RiskScoresDeprecated } from '../../../../common/components/risk_score_deprecated';
 import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
@@ -135,7 +136,7 @@ export const EntityAnalyticsHostRiskScores = () => {
   }
 
   if (isDeprecated) {
-    return <EntityAnalyticsHostRiskScoresDeprecated />;
+    return <RiskScoresDeprecated entityType="host" />;
   }
 
   return (
@@ -218,33 +219,6 @@ const EntityAnalyticsHostRiskScoresDisable = () => {
               data-test-subj="enable_host_risk_score"
             >
               {i18n.ENABLE_HOST_RISK_SCORE}
-            </EuiButton>
-          </EuiToolTip>
-        }
-      />
-    </EuiPanel>
-  );
-};
-
-const EntityAnalyticsHostRiskScoresDeprecated = () => {
-  const { signalIndexExists } = useCheckSignalIndex();
-
-  return (
-    <EuiPanel hasBorder>
-      <HeaderSection title={<h2>{i18n.HOST_RISK_TITLE}</h2>} titleSize="s" />
-      <EuiEmptyPrompt
-        title={<h2>{i18n.UPGRADE_HOST_RISK_SCORE}</h2>}
-        body={i18n.UPGRADE_HOST_RISK_SCORE_DESCRIPTION}
-        actions={
-          <EuiToolTip content={!signalIndexExists ? i18n.ENABLE_RISK_SCORE_POPOVER : null}>
-            <EuiButton
-              color="primary"
-              fill
-              onClick={() => alert('Angela do the upgrade')}
-              isDisabled={!signalIndexExists}
-              data-test-subj="upgrade_host_risk_score"
-            >
-              {i18n.UPGRADE_HOST_RISK_SCORE}
             </EuiButton>
           </EuiToolTip>
         }

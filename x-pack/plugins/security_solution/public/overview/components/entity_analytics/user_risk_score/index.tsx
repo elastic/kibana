@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import { RiskScoresDeprecated } from '../../../../common/components/risk_score_deprecated';
 import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { LastUpdatedAt } from '../../detection_response/utils';
@@ -131,7 +132,7 @@ export const EntityAnalyticsUserRiskScores = () => {
   }
 
   if (isDeprecated) {
-    return <EntityAnalyticsUserRiskScoresDeprecated />;
+    return <RiskScoresDeprecated entityType="user" />;
   }
 
   return (
@@ -208,26 +209,6 @@ const EntityAnalyticsUserRiskScoresDisable = () => (
           data-test-subj="enable_user_risk_score"
         >
           {i18n.ENABLE_USER_RISK_SCORE}
-        </EuiButton>
-      }
-    />
-  </EuiPanel>
-);
-
-const EntityAnalyticsUserRiskScoresDeprecated = () => (
-  <EuiPanel hasBorder>
-    <HeaderSection title={<h2>{i18n.USER_RISK_TITLE}</h2>} titleSize="s" />
-    <EuiEmptyPrompt
-      title={<h2>{i18n.UPGRADE_USER_RISK_SCORE}</h2>}
-      body={i18n.UPGRADE_USER_RISK_SCORE_DESCRIPTION}
-      actions={
-        <EuiButton
-          color="primary"
-          fill
-          onClick={() => alert('Angela do the upgrade')}
-          data-test-subj="upgrade_user_risk_score"
-        >
-          {i18n.UPGRADE_USER_RISK_SCORE}
         </EuiButton>
       }
     />

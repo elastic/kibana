@@ -9,6 +9,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { RiskScoresDeprecated } from '../../../common/components/risk_score_deprecated';
 import * as i18n from '../translations';
 
 import { useQueryInspector } from '../../../common/components/page/manage_query';
@@ -57,7 +58,7 @@ const UserRiskTabBodyComponent: React.FC<
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
     [userName]
   );
-  const [loading, { data, refetch, inspect }] = useUserRiskScore({
+  const [loading, { data, refetch, inspect, isDeprecated }] = useUserRiskScore({
     filterQuery,
     onlyLatest: false,
     skip: !overTimeToggleStatus && !contributorsToggleStatus,
@@ -86,6 +87,10 @@ const UserRiskTabBodyComponent: React.FC<
     },
     [setOverTimeToggleStatus]
   );
+
+  if (isDeprecated) {
+    return <RiskScoresDeprecated entityType="user" />;
+  }
 
   const lastUsertRiskItem: UserRiskScore | null =
     data && data.length > 0 ? data[data.length - 1] : null;
