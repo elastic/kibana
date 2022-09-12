@@ -44,16 +44,19 @@ const selectedIdsToTimelineItemMapper = (
 ): TimelineItem[] => {
   return Array.from(rowSelection.values()).map((rowIndex: number) => {
     const alert = alerts[rowIndex];
+    const id = alert._id[0];
+    const index = alert._index[0];
+
     return {
-      _id: alert._id,
-      _index: alert._index,
+      _id: id,
+      _index: index,
       data: [
         { field: ALERT_RULE_NAME, value: alert[ALERT_RULE_NAME] },
         { field: ALERT_RULE_UUID, value: alert[ALERT_RULE_UUID] },
       ],
       ecs: {
-        _id: alert._id,
-        _index: alert._index,
+        _id: id,
+        _index: index,
       },
     };
   });
