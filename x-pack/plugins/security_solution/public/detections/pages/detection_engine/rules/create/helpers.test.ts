@@ -751,7 +751,6 @@ describe('helpers', () => {
       const result = formatActionsStepData(mockData);
       const expected: ActionsStepRuleJson = {
         actions: [],
-        response_actions: [],
         enabled: false,
         meta: {
           kibana_siem_app_url: 'http://localhost:5601/app/siem',
@@ -770,7 +769,6 @@ describe('helpers', () => {
       const result = formatActionsStepData(mockStepData);
       const expected: ActionsStepRuleJson = {
         actions: [],
-        response_actions: [],
         enabled: false,
         meta: {
           kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
@@ -804,7 +802,6 @@ describe('helpers', () => {
             params: mockStepData.actions[0].params,
           },
         ],
-        response_actions: [],
         enabled: false,
         meta: {
           kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
@@ -838,7 +835,6 @@ describe('helpers', () => {
             params: mockStepData.actions[0].params,
           },
         ],
-        response_actions: [],
         enabled: false,
         meta: {
           kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
@@ -871,7 +867,6 @@ describe('helpers', () => {
             action_type_id: mockAction.actionTypeId,
           },
         ],
-        response_actions: [],
         enabled: false,
         meta: {
           kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,

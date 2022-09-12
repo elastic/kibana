@@ -78,7 +78,7 @@ import {
   newTermsFields,
   historyWindowStart,
   timestampOverrideFallbackDisabledOrUndefined,
-  responseActionsCamelCase,
+  responseActionsOrUndefined,
 } from '../../../../common/detection_engine/schemas/common';
 import { SERVER_APP_ID } from '../../../../common/constants';
 
@@ -166,7 +166,7 @@ const querySpecificRuleParams = t.exact(
     filters: filtersOrUndefined,
     savedId: savedIdOrUndefined,
     dataViewId: dataViewIdOrUndefined,
-    responseActions: responseActionsCamelCase,
+    responseActions: responseActionsOrUndefined,
   })
 );
 export const queryRuleParams = t.intersection([baseRuleParams, querySpecificRuleParams]);
