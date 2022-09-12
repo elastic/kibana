@@ -16,9 +16,9 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type { getLazyLiveQueryField, getLazyOsqueryAction } from './shared_components';
 import type { CasesUiStart, CasesUiSetup } from '@kbn/cases-plugin/public';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
-import type { getLazyLiveQueryField, getLazyOsqueryAction } from './shared_components';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}
