@@ -164,6 +164,7 @@ export const getCases = async ({
     search: '',
     searchFields: [],
     severity: SeverityAll,
+    assignees: [],
     reporters: [],
     status: StatusAll,
     tags: [],
@@ -180,6 +181,7 @@ export const getCases = async ({
   const query = {
     ...(filterOptions.status !== StatusAll ? { status: filterOptions.status } : {}),
     ...(filterOptions.severity !== SeverityAll ? { severity: filterOptions.severity } : {}),
+    assignees: filterOptions.assignees,
     reporters: filterOptions.reporters.map((r) => r.username ?? '').filter((r) => r !== ''),
     tags: filterOptions.tags,
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),

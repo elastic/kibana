@@ -163,3 +163,8 @@ export const PUSH_CASES_CAPABILITY = 'push_cases' as const;
  */
 
 export const DEFAULT_USER_SIZE = 10;
+
+/**
+ * Delays
+ */
+export const SEARCH_DEBOUNCE_MS = 500;

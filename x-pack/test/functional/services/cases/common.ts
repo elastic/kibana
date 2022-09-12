@@ -89,5 +89,17 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
         }
       });
     },
+
+    async setSearchTextInAssigneesPopover(text: string) {
+      await (
+        await (await find.byClassName('euiContextMenuPanel')).findByClassName('euiFieldSearch')
+      ).type(text);
+      await header.waitUntilLoadingHasFinished();
+    },
+
+    async selectFirstRowInAssigneesPopover() {
+      await (await find.byClassName('euiSelectableListItem__content')).click();
+      await header.waitUntilLoadingHasFinished();
+    },
   };
 }

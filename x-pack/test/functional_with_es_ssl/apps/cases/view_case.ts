@@ -10,6 +10,11 @@ import uuid from 'uuid';
 import { CaseStatuses } from '@kbn/cases-plugin/common';
 import { CaseSeverity } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import {
+  createUsersAndRoles,
+  deleteUsersAndRoles,
+} from '../../../cases_api_integration/common/lib/authentication';
+import { users, roles, casesAllUser } from './common';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
@@ -18,21 +23,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const cases = getService('cases');
   const retry = getService('retry');
   const comboBox = getService('comboBox');
+  const security = getPageObject('security');
+  const kibanaServer = getService('kibanaServer');
 
   describe('View case', () => {
     describe('properties', () => {
-      // create the case to test on
-      before(async () => {
-        await cases.navigation.navigateToApp();
-        await cases.api.createNthRandomCases(1);
-        await cases.casesTable.waitForCasesToBeListed();
-        await cases.casesTable.goToFirstListedCase();
-        await header.waitUntilLoadingHasFinished();
-      });
-
-      after(async () => {
-        await cases.api.deleteAllCases();
-      });
+      createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
       it('edits a case title from the case view page', async () => {
         const newTitle = `test-${uuid.v4()}`;
@@ -167,18 +163,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('actions', () => {
-      // create the case to test on
-      before(async () => {
-        await cases.navigation.navigateToApp();
-        await cases.api.createNthRandomCases(1);
-        await cases.casesTable.waitForCasesToBeListed();
-        await cases.casesTable.goToFirstListedCase();
-        await header.waitUntilLoadingHasFinished();
-      });
-
-      after(async () => {
-        await cases.api.deleteAllCases();
-      });
+      createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
       it('deletes the case successfully', async () => {
         await cases.singleCase.deleteCase();
@@ -187,21 +172,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Severity field', () => {
-      before(async () => {
-        await cases.navigation.navigateToApp();
-        await cases.api.createNthRandomCases(1);
-        await cases.casesTable.waitForCasesToBeListed();
-        await cases.casesTable.goToFirstListedCase();
-        await header.waitUntilLoadingHasFinished();
-      });
-
-      after(async () => {
-        await cases.api.deleteAllCases();
-      });
+      createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
       it('shows the severity field on the sidebar', async () => {
         await testSubjects.existOrFail('case-severity-selection');
       });
+
       it('changes the severity level from the selector', async () => {
         await cases.common.selectSeverity(CaseSeverity.MEDIUM);
         await header.waitUntilLoadingHasFinished();
@@ -212,19 +188,127 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Tabs', () => {
-      // create the case to test on
+    describe('Assignees field', () => {
       before(async () => {
-        await cases.navigation.navigateToApp();
-        await cases.api.createNthRandomCases(1);
-        await cases.casesTable.waitForCasesToBeListed();
-        await cases.casesTable.goToFirstListedCase();
-        await header.waitUntilLoadingHasFinished();
+        await createUsersAndRoles(getService, users, roles);
+        await cases.api.activateUserProfiles([casesAllUser]);
       });
 
       after(async () => {
-        await cases.api.deleteAllCases();
+        await deleteUsersAndRoles(getService, users, roles);
       });
+
+      describe('unknown users', () => {
+        beforeEach(async () => {
+          await kibanaServer.importExport.load(
+            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_assignees.json'
+          );
+
+          await cases.navigation.navigateToApp();
+          await cases.casesTable.waitForCasesToBeListed();
+          await cases.casesTable.goToFirstListedCase();
+          await header.waitUntilLoadingHasFinished();
+        });
+
+        afterEach(async () => {
+          await kibanaServer.importExport.unload(
+            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_assignees.json'
+          );
+
+          await cases.api.deleteAllCases();
+        });
+
+        it('shows the unknown assignee', async () => {
+          await testSubjects.existOrFail('user-profile-assigned-user-group-abc');
+        });
+
+        it('removes the unknown assignee when selecting the remove all users in the popover', async () => {
+          await testSubjects.existOrFail('user-profile-assigned-user-group-abc');
+
+          await cases.singleCase.openAssigneesPopover();
+          await cases.common.setSearchTextInAssigneesPopover('case');
+          await cases.common.selectFirstRowInAssigneesPopover();
+
+          await (await find.byButtonText('Remove all assignees')).click();
+          await cases.singleCase.closeAssigneesPopover();
+          await testSubjects.missingOrFail('user-profile-assigned-user-group-abc');
+        });
+      });
+
+      describe('login with cases all user', () => {
+        before(async () => {
+          await security.forceLogout();
+          await security.login(casesAllUser.username, casesAllUser.password);
+          await createAndNavigateToCase(getPageObject, getService);
+        });
+
+        after(async () => {
+          await cases.api.deleteAllCases();
+          await security.forceLogout();
+        });
+
+        it('assigns the case to the current user when clicking the assign to self link', async () => {
+          await testSubjects.click('case-view-assign-yourself-link');
+          await header.waitUntilLoadingHasFinished();
+          await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user');
+        });
+      });
+
+      describe('logs in with default user', () => {
+        createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
+
+        afterEach(async () => {
+          await cases.singleCase.closeAssigneesPopover();
+        });
+
+        it('shows the assign users popover when clicked', async () => {
+          await testSubjects.missingOrFail('euiSelectableList');
+
+          await cases.singleCase.openAssigneesPopover();
+        });
+
+        it('assigns a user from the popover', async () => {
+          await cases.singleCase.openAssigneesPopover();
+          await cases.common.setSearchTextInAssigneesPopover('case');
+          await cases.common.selectFirstRowInAssigneesPopover();
+
+          // navigate out of the modal
+          await cases.singleCase.closeAssigneesPopover();
+          await header.waitUntilLoadingHasFinished();
+          await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user');
+        });
+      });
+
+      describe('logs in with default user and creates case before each', () => {
+        createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
+
+        it('removes an assigned user', async () => {
+          await cases.singleCase.openAssigneesPopover();
+          await cases.common.setSearchTextInAssigneesPopover('case');
+          await cases.common.selectFirstRowInAssigneesPopover();
+
+          // navigate out of the modal
+          await cases.singleCase.closeAssigneesPopover();
+          await header.waitUntilLoadingHasFinished();
+          await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user');
+
+          // hover over the assigned user
+          await (
+            await find.byCssSelector(
+              '[data-test-subj="user-profile-assigned-user-group-cases_all_user"]'
+            )
+          ).moveMouseTo();
+
+          // delete the user
+          await testSubjects.click('user-profile-assigned-user-cross-cases_all_user');
+
+          await testSubjects.existOrFail('case-view-assign-yourself-link');
+        });
+      });
+    });
+
+    describe('Tabs', () => {
+      createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
       it('shows the "activity" tab by default', async () => {
         await testSubjects.existOrFail('case-view-tab-title-activity');
@@ -238,4 +322,33 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
   });
+};
+
+const createOneCaseBeforeDeleteAllAfter = (
+  getPageObject: FtrProviderContext['getPageObject'],
+  getService: FtrProviderContext['getService']
+) => {
+  const cases = getService('cases');
+
+  before(async () => {
+    await createAndNavigateToCase(getPageObject, getService);
+  });
+
+  after(async () => {
+    await cases.api.deleteAllCases();
+  });
+};
+
+const createAndNavigateToCase = async (
+  getPageObject: FtrProviderContext['getPageObject'],
+  getService: FtrProviderContext['getService']
+) => {
+  const header = getPageObject('header');
+  const cases = getService('cases');
+
+  await cases.navigation.navigateToApp();
+  await cases.api.createNthRandomCases(1);
+  await cases.casesTable.waitForCasesToBeListed();
+  await cases.casesTable.goToFirstListedCase();
+  await header.waitUntilLoadingHasFinished();
 };

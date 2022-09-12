@@ -16,15 +16,16 @@ import {
   noCreateCasesPermissions,
   TestProviders,
 } from '../../common/mock';
-import { useGetReporters } from '../../containers/use_get_reporters';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { casesStatus, connectorsMock, useGetCasesMockState } from '../../containers/mock';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetCases } from '../../containers/use_get_cases';
+import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
+import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
+import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 
-jest.mock('../../containers/use_get_reporters');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/use_get_action_license', () => {
   return {
@@ -35,11 +36,15 @@ jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/api');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../containers/use_get_cases_status');
+jest.mock('../../containers/user_profiles/use_get_current_user_profile');
+jest.mock('../../containers/user_profiles/use_bulk_get_user_profiles');
 
 const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
 const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
+const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
+const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
 
 describe('AllCases', () => {
   const refetchCases = jest.fn();
@@ -71,17 +76,13 @@ describe('AllCases', () => {
 
   beforeAll(() => {
     (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
-    (useGetReporters as jest.Mock).mockReturnValue({
-      reporters: ['casetester'],
-      respReporters: [{ username: 'casetester' }],
-      isLoading: true,
-      isError: false,
-      fetchReporters: jest.fn(),
-    });
     useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
     useGetCasesStatusMock.mockReturnValue(defaultCasesStatus);
     useGetActionLicenseMock.mockReturnValue(defaultActionLicense);
     useGetCasesMock.mockReturnValue(defaultGetCases);
+
+    useGetCurrentUserProfileMock.mockReturnValue({ data: userProfiles[0], isLoading: false });
+    useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
   });
 
   let appMockRender: AppMockRenderer;

@@ -26,7 +26,6 @@ import {
   casesStatus,
   caseUserActions,
   pushedCase,
-  respReporters,
   tags,
 } from '../mock';
 import { ResolvedCase, SeverityAll } from '../../../common/ui/types';
@@ -34,11 +33,12 @@ import {
   CasePatchRequest,
   CasePostRequest,
   CommentRequest,
-  User,
   CaseStatuses,
   SingleCaseMetricsResponse,
 } from '../../../common/api';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
+import { UserProfile } from '@kbn/security-plugin/common';
+import { userProfiles } from '../user_profiles/api.mock';
 
 export const getCase = async (
   caseId: string,
@@ -62,8 +62,7 @@ export const getCasesStatus = async (signal: AbortSignal): Promise<CasesStatus> 
 
 export const getTags = async (signal: AbortSignal): Promise<string[]> => Promise.resolve(tags);
 
-export const getReporters = async (signal: AbortSignal): Promise<User[]> =>
-  Promise.resolve(respReporters);
+export const findAssignees = async (): Promise<UserProfile[]> => userProfiles;
 
 export const getCaseUserActions = async (
   caseId: string,
@@ -75,6 +74,7 @@ export const getCases = async ({
     severity: SeverityAll,
     search: '',
     searchFields: [],
+    assignees: [],
     reporters: [],
     status: CaseStatuses.open,
     tags: [],

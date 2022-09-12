@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { loginUsers, suggestUserProfiles } from '../../../../common/lib/utils';
+import { loginUsers, suggestUserProfiles } from '../../../../common/lib/user_profiles';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   superUser,
@@ -21,6 +21,19 @@ export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('suggest_user_profiles', () => {
+    it('returns no suggestions when the owner is an empty array', async () => {
+      const profiles = await suggestUserProfiles({
+        supertest: supertestWithoutAuth,
+        req: {
+          name: 'delete',
+          owners: [],
+        },
+        auth: { user: superUser, space: 'space1' },
+      });
+
+      expect(profiles.length).to.be(0);
+    });
+
     it('finds the profile for the user without deletion privileges', async () => {
       const profiles = await suggestUserProfiles({
         supertest: supertestWithoutAuth,

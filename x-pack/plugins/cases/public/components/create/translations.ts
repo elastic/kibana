@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export * from '../../common/translations';
+export * from '../user_profiles/translations';
 
 export const STEP_ONE_TITLE = i18n.translate('xpack.cases.create.stepOneTitle', {
   defaultMessage: 'Case fields',
@@ -23,4 +24,8 @@ export const STEP_THREE_TITLE = i18n.translate('xpack.cases.create.stepThreeTitl
 
 export const SYNC_ALERTS_LABEL = i18n.translate('xpack.cases.create.syncAlertsLabel', {
   defaultMessage: 'Sync alert status with case status',
+});
+
+export const ASSIGN_YOURSELF = i18n.translate('xpack.cases.create.assignYourself', {
+  defaultMessage: 'Assign yourself',
 });

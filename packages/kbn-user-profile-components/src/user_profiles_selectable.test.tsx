@@ -8,10 +8,11 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
+import { UserProfile } from './user_profile';
 
 import { UserProfilesSelectable } from './user_profiles_selectable';
 
-const userProfiles = [
+const userProfiles: UserProfile[] = [
   {
     uid: 'u_BOulL4QMPSyV9jg5lQI2JmCkUnokHTazBnet3xVHNv0_0',
     enabled: true,

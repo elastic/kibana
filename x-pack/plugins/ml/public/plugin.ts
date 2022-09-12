@@ -30,7 +30,7 @@ import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/publ
 
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 
 import type { MapsStartApi, MapsSetupApi } from '@kbn/maps-plugin/public';
 import {
@@ -66,10 +66,10 @@ export interface MlStartDependencies {
   charts: ChartsPluginStart;
   lens?: LensPublicStart;
   cases?: CasesUiStart;
+  security: SecurityPluginStart;
 }
 
 export interface MlSetupDependencies {
-  security?: SecurityPluginSetup;
   maps?: MapsSetupApi;
   licensing: LicensingPluginSetup;
   management?: ManagementSetup;
@@ -119,7 +119,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             unifiedSearch: pluginsStart.unifiedSearch,
             dashboard: pluginsStart.dashboard,
             share: pluginsStart.share,
-            security: pluginsSetup.security,
+            security: pluginsStart.security,
             licensing: pluginsSetup.licensing,
             management: pluginsSetup.management,
             licenseManagement: pluginsSetup.licenseManagement,

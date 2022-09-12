@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable no-console */
+
 import React from 'react';
 import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -14,7 +16,7 @@ import { render as reactRender, RenderOptions, RenderResult } from '@testing-lib
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import { CasesCapabilities, CasesFeatures, CasesPermissions } from '../../../common/ui/types';
+import { CasesFeatures, CasesPermissions } from '../../../common/ui/types';
 import { CasesProvider } from '../../components/cases_context';
 import {
   createKibanaContextProviderMock,
@@ -25,6 +27,7 @@ import { StartServices } from '../../types';
 import { ReleasePhase } from '../../components/types';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
+import { allCasesPermissions } from './permissions';
 
 interface TestProviderProps {
   children: React.ReactNode;
@@ -55,6 +58,11 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
       queries: {
         retry: false,
       },
+    },
+    logger: {
+      log: console.log,
+      warn: console.warn,
+      error: () => {},
     },
   });
 
@@ -98,68 +106,16 @@ export const testQueryClient = new QueryClient({
       retry: false,
     },
   },
+  /**
+   * React query prints the errors in the console even though
+   * all tests are passings. We turn them off for testing.
+   */
+  logger: {
+    log: console.log,
+    warn: console.warn,
+    error: () => {},
+  },
 });
-
-export const allCasesPermissions = () => buildCasesPermissions();
-export const noCasesPermissions = () =>
-  buildCasesPermissions({ read: false, create: false, update: false, delete: false, push: false });
-export const readCasesPermissions = () =>
-  buildCasesPermissions({ read: true, create: false, update: false, delete: false, push: false });
-export const noCreateCasesPermissions = () => buildCasesPermissions({ create: false });
-export const noUpdateCasesPermissions = () => buildCasesPermissions({ update: false });
-export const noPushCasesPermissions = () => buildCasesPermissions({ push: false });
-export const noDeleteCasesPermissions = () => buildCasesPermissions({ delete: false });
-export const writeCasesPermissions = () => buildCasesPermissions({ read: false });
-
-export const buildCasesPermissions = (overrides: Partial<Omit<CasesPermissions, 'all'>> = {}) => {
-  const create = overrides.create ?? true;
-  const read = overrides.read ?? true;
-  const update = overrides.update ?? true;
-  const deletePermissions = overrides.delete ?? true;
-  const push = overrides.push ?? true;
-  const all = create && read && update && deletePermissions && push;
-
-  return {
-    all,
-    create,
-    read,
-    update,
-    delete: deletePermissions,
-    push,
-  };
-};
-
-export const allCasesCapabilities = () => buildCasesCapabilities();
-export const noCasesCapabilities = () =>
-  buildCasesCapabilities({
-    create_cases: false,
-    read_cases: false,
-    update_cases: false,
-    delete_cases: false,
-    push_cases: false,
-  });
-export const readCasesCapabilities = () =>
-  buildCasesCapabilities({
-    create_cases: false,
-    update_cases: false,
-    delete_cases: false,
-    push_cases: false,
-  });
-export const writeCasesCapabilities = () => {
-  return buildCasesCapabilities({
-    read_cases: false,
-  });
-};
-
-export const buildCasesCapabilities = (overrides?: Partial<CasesCapabilities>) => {
-  return {
-    create_cases: overrides?.create_cases ?? true,
-    read_cases: overrides?.read_cases ?? true,
-    update_cases: overrides?.update_cases ?? true,
-    delete_cases: overrides?.delete_cases ?? true,
-    push_cases: overrides?.push_cases ?? true,
-  };
-};
 
 export const createAppMockRenderer = ({
   features,
@@ -175,6 +131,11 @@ export const createAppMockRenderer = ({
       queries: {
         retry: false,
       },
+    },
+    logger: {
+      log: console.log,
+      warn: console.warn,
+      error: () => {},
     },
   });
 

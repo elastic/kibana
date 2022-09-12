@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FormSchema } from '../../common/shared_imports';
-import { schemaTags } from '../create/schema';
+import React from 'react';
 
-export const schema: FormSchema = {
-  tags: schemaTags,
-};
+const EmptyMessageComponent: React.FC = () => null;
+EmptyMessageComponent.displayName = 'EmptyMessage';
+
+export const EmptyMessage = React.memo(EmptyMessageComponent);

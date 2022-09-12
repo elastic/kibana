@@ -36,6 +36,7 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { CaseAttachmentsWithoutOwner } from '../../types';
 import { Severity } from './severity';
+import { Assignees } from './assignees';
 
 interface ContainerProps {
   big?: boolean;
@@ -86,6 +87,9 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
         children: (
           <>
             <Title isLoading={isSubmitting} />
+            <Container>
+              <Assignees isLoading={isSubmitting} />
+            </Container>
             <Container>
               <Tags isLoading={isSubmitting} />
             </Container>

@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { Assignee } from './types';
 
-export const SEND_EMAIL_ARIA = (user: string) =>
-  i18n.translate('xpack.cases.caseView.sendEmalLinkAria', {
-    values: { user },
-    defaultMessage: 'click to send an email to {user}',
-  });
+export const getUsernameDataTestSubj = (assignee: Assignee) => {
+  return assignee.profile?.user.username ?? assignee.uid;
+};

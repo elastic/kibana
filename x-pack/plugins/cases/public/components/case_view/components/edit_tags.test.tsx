@@ -8,15 +8,15 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { TagList, TagListProps } from '.';
-import { getFormMock } from '../__mock__/form';
-import { readCasesPermissions, TestProviders } from '../../common/mock';
+import { EditTags, EditTagsProps } from './edit_tags';
+import { getFormMock } from '../../__mock__/form';
+import { readCasesPermissions, TestProviders } from '../../../common/mock';
 import { waitFor } from '@testing-library/react';
 import { useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/hooks/use_form';
-import { useGetTags } from '../../containers/use_get_tags';
+import { useGetTags } from '../../../containers/use_get_tags';
 
 jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/hooks/use_form');
-jest.mock('../../containers/use_get_tags');
+jest.mock('../../../containers/use_get_tags');
 jest.mock(
   '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/components/form_data_provider',
   () => ({
@@ -32,13 +32,13 @@ jest.mock('@elastic/eui', () => {
   };
 });
 const onSubmit = jest.fn();
-const defaultProps: TagListProps = {
+const defaultProps: EditTagsProps = {
   isLoading: false,
   onSubmit,
   tags: [],
 };
 
-describe('TagList ', () => {
+describe('EditTags ', () => {
   const sampleTags = ['coke', 'pepsi'];
   const fetchTags = jest.fn();
   const formHookMock = getFormMock({ tags: sampleTags });
@@ -55,7 +55,7 @@ describe('TagList ', () => {
   it('Renders no tags, and then edit', () => {
     const wrapper = mount(
       <TestProviders>
-        <TagList {...defaultProps} />
+        <EditTags {...defaultProps} />
       </TestProviders>
     );
     expect(wrapper.find(`[data-test-subj="no-tags"]`).last().exists()).toBeTruthy();
@@ -67,7 +67,7 @@ describe('TagList ', () => {
   it('Edit tag on submit', async () => {
     const wrapper = mount(
       <TestProviders>
-        <TagList {...defaultProps} />
+        <EditTags {...defaultProps} />
       </TestProviders>
     );
     wrapper.find(`[data-test-subj="tag-list-edit-button"]`).last().simulate('click');
@@ -78,7 +78,7 @@ describe('TagList ', () => {
   it('Tag options render with new tags added', () => {
     const wrapper = mount(
       <TestProviders>
-        <TagList {...defaultProps} />
+        <EditTags {...defaultProps} />
       </TestProviders>
     );
     wrapper.find(`[data-test-subj="tag-list-edit-button"]`).last().simulate('click');
@@ -94,7 +94,7 @@ describe('TagList ', () => {
     };
     const wrapper = mount(
       <TestProviders>
-        <TagList {...props} />
+        <EditTags {...props} />
       </TestProviders>
     );
 
@@ -110,7 +110,7 @@ describe('TagList ', () => {
   it('does not render when the user does not have update permissions', () => {
     const wrapper = mount(
       <TestProviders permissions={readCasesPermissions()}>
-        <TagList {...defaultProps} />
+        <EditTags {...defaultProps} />
       </TestProviders>
     );
     expect(wrapper.find(`[data-test-subj="tag-list-edit"]`).exists()).toBeFalsy();

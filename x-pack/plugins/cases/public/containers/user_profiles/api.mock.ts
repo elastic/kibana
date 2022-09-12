@@ -41,3 +41,5 @@ export const userProfiles: UserProfile[] = [
 ];
 
 export const userProfilesIds = userProfiles.map((profile) => profile.uid);
+
+export const userProfilesMap = new Map(userProfiles.map((profile) => [profile.uid, profile]));
