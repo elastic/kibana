@@ -28,6 +28,8 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 const dataPlugin = dataPluginMock.createStartContract();
 const expressionsPlugin = expressionsPluginMock.createStartContract();
 
+dataPlugin.query.filterManager.getFilters = jest.fn(() => []);
+
 export const discoverServiceMock = {
   core: coreMock.createStart(),
   chrome: chromeServiceMock.createStartContract(),
