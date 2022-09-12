@@ -8,12 +8,14 @@ import React, { FC, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFieldNumber, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
 import { Query } from '@kbn/es-query';
+import useObservable from 'react-use/lib/useObservable';
+import { isDefined } from '../../../../common/types/guards';
+import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 import { escapeKueryForFieldValuePair } from '../../util/string_utils';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 import { useDashboardTable } from './use_dashboards_table';
 import { AddToDashboardControl } from './add_to_dashboard_controls';
 import { useAddToDashboardActions } from './use_add_to_dashboard_actions';
-import { AppStateSelectedCells, getSelectionInfluencers } from '../explorer_utils';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../../services/anomaly_explorer_charts_service';
 import { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../../../embeddables';
@@ -30,9 +32,7 @@ function getDefaultEmbeddablePanelConfig(jobIds: JobId[], queryString?: string) 
 
 export interface AddToDashboardControlProps {
   jobIds: string[];
-  selectedCells?: AppStateSelectedCells | null;
   onClose: (callback?: () => Promise<void>) => void;
-  queryString?: string;
 }
 
 /**
@@ -41,24 +41,29 @@ export interface AddToDashboardControlProps {
 export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> = ({
   onClose,
   jobIds,
-  selectedCells,
-  queryString,
 }) => {
   const [severity] = useTableSeverity();
   const [maxSeriesToPlot, setMaxSeriesToPlot] = useState(DEFAULT_MAX_SERIES_TO_PLOT);
+  const { anomalyExplorerCommonStateService, anomalyTimelineStateService } =
+    useAnomalyExplorerContext();
+  const { queryString } = useObservable(
+    anomalyExplorerCommonStateService.getFilterSettings$(),
+    anomalyExplorerCommonStateService.getFilterSettings()
+  );
+
+  const selectionInfluencers = useObservable(
+    anomalyTimelineStateService.getSelectedInfluencers$(),
+    anomalyTimelineStateService.getSelectedInfluencers()
+  );
 
   const getEmbeddableInput = useCallback(() => {
     // Respect the query and the influencers selected
     // If no query or filter set, filter out to the lanes the selected cells
     // And if no selected cells, show everything
-    let queryFromSelectedCells = queryString ?? '';
 
+    const influencers = selectionInfluencers ?? [];
     const config = getDefaultEmbeddablePanelConfig(jobIds, queryString);
-    const selectionInfluencers = getSelectionInfluencers(
-      selectedCells,
-      selectedCells?.viewByFieldName!
-    );
-    queryFromSelectedCells = selectionInfluencers
+    const queryFromSelectedCells = influencers
       .map((s) => escapeKueryForFieldValuePair(s.fieldName, s.fieldValue))
       .join(' or ');
 
@@ -69,7 +74,8 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
       jobIds,
       maxSeriesToPlot: maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT,
       severityThreshold: severity.val,
-      ...(queryString !== undefined && queryFromSelectedCells !== ''
+      ...((isDefined(queryString) && queryString !== '') ||
+      (queryFromSelectedCells !== undefined && queryFromSelectedCells !== '')
         ? {
             query: {
               query: queryString === '' ? queryFromSelectedCells : queryString,
@@ -78,7 +84,7 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
           }
         : {}),
     };
-  }, [jobIds, maxSeriesToPlot, severity, queryString, selectedCells]);
+  }, [jobIds, maxSeriesToPlot, severity, queryString, selectionInfluencers]);
 
   const { dashboardItems, isLoading, search } = useDashboardTable();
   const { addToDashboardAndEditCallback } = useAddToDashboardActions(

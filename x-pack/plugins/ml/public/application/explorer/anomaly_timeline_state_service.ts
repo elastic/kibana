@@ -19,6 +19,7 @@ import {
 import { isEqual, sortBy, uniq } from 'lodash';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
+import { EntityField } from '../../../common/util/anomaly_utils';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import type {
   AppStateSelectedCells,
@@ -81,6 +82,7 @@ export class AnomalyTimelineStateService extends StateService {
   private _isOverallSwimLaneLoading$ = new BehaviorSubject(true);
   private _isViewBySwimLaneLoading$ = new BehaviorSubject(true);
   private _swimLaneBucketInterval$ = new BehaviorSubject<TimeBucketsInterval | null>(null);
+  private _selectedInfluencers$ = new BehaviorSubject<EntityField[] | undefined>(undefined);
 
   private _timeBounds$: Observable<TimeRangeBounds>;
   private _refreshSubject$: Observable<Refresh>;
@@ -185,6 +187,12 @@ export class AnomalyTimelineStateService extends StateService {
       );
       this._viewBySwimlaneFieldName$.next(viewBySwimlaneFieldName);
       this._viewBySwimLaneOptions$.next(viewBySwimlaneOptions);
+
+      if (selectedCells && selectedCells.viewByFieldName !== undefined) {
+        this._selectedInfluencers$.next(
+          getSelectionInfluencers(selectedCells, selectedCells.viewByFieldName)
+        );
+      }
     });
   }
 
@@ -646,6 +654,14 @@ export class AnomalyTimelineStateService extends StateService {
 
   public getViewBySwimLaneOptions(): string[] {
     return this._viewBySwimLaneOptions$.getValue();
+  }
+
+  public getSelectedInfluencers$(): Observable<EntityField[] | undefined> {
+    return this._selectedInfluencers$.asObservable();
+  }
+
+  public getSelectedInfluencers(): EntityField[] | undefined {
+    return this._selectedInfluencers$.getValue();
   }
 
   public isOverallSwimLaneLoading$(): Observable<boolean> {

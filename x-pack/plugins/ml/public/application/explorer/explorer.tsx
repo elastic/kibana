@@ -569,7 +569,6 @@ export const Explorer: FC<ExplorerUIProps> = ({
                 bounds={bounds}
                 interval={swimLaneBucketInterval ? swimLaneBucketInterval.asSeconds() : undefined}
                 chartsCount={chartsData.seriesToPlot.length}
-                queryString={queryString}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
