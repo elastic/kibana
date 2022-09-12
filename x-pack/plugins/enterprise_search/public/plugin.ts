@@ -31,6 +31,8 @@ import {
 } from '../common/constants';
 import { InitialAppData } from '../common/types';
 
+import { enableBehavioralAnalyticsSection } from '../common/ui_settings_keys';
+
 import { docLinks } from './applications/shared/doc_links';
 
 export interface ClientConfigType {
@@ -67,6 +69,10 @@ export class EnterpriseSearchPlugin implements Plugin {
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
     const { cloud } = plugins;
+
+    const bahavioralAnalyticsEnabled = core.uiSettings?.get<boolean>(
+      enableBehavioralAnalyticsSection
+    );
 
     core.application.register({
       id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
@@ -114,26 +120,28 @@ export class EnterpriseSearchPlugin implements Plugin {
       },
     });
 
-    core.application.register({
-      id: ANALYTICS_PLUGIN.ID,
-      title: ANALYTICS_PLUGIN.NAME,
-      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
-      appRoute: ANALYTICS_PLUGIN.URL,
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      mount: async (params: AppMountParameters) => {
-        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
-        const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(ANALYTICS_PLUGIN.NAME);
+    if (bahavioralAnalyticsEnabled) {
+      core.application.register({
+        id: ANALYTICS_PLUGIN.ID,
+        title: ANALYTICS_PLUGIN.NAME,
+        euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
+        appRoute: ANALYTICS_PLUGIN.URL,
+        category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+        mount: async (params: AppMountParameters) => {
+          const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+          const { chrome, http } = kibanaDeps.core;
+          chrome.docTitle.change(ANALYTICS_PLUGIN.NAME);
 
-        await this.getInitialData(http);
-        const pluginData = this.getPluginData();
+          await this.getInitialData(http);
+          const pluginData = this.getPluginData();
 
-        const { renderApp } = await import('./applications');
-        const { Analytics } = await import('./applications/analytics');
+          const { renderApp } = await import('./applications');
+          const { Analytics } = await import('./applications/analytics');
 
-        return renderApp(Analytics, kibanaDeps, pluginData);
-      },
-    });
+          return renderApp(Analytics, kibanaDeps, pluginData);
+        },
+      });
+    }
 
     core.application.register({
       id: ELASTICSEARCH_PLUGIN.ID,
@@ -211,15 +219,17 @@ export class EnterpriseSearchPlugin implements Plugin {
         order: 100,
       });
 
-      plugins.home.featureCatalogue.register({
-        id: ANALYTICS_PLUGIN.ID,
-        title: ANALYTICS_PLUGIN.NAME,
-        icon: 'appAnalytics',
-        description: ANALYTICS_PLUGIN.DESCRIPTION,
-        path: ANALYTICS_PLUGIN.URL,
-        category: 'data',
-        showOnHomePage: false,
-      });
+      if (bahavioralAnalyticsEnabled) {
+        plugins.home.featureCatalogue.register({
+          id: ANALYTICS_PLUGIN.ID,
+          title: ANALYTICS_PLUGIN.NAME,
+          icon: 'appAnalytics',
+          description: ANALYTICS_PLUGIN.DESCRIPTION,
+          path: ANALYTICS_PLUGIN.URL,
+          category: 'data',
+          showOnHomePage: false,
+        });
+      }
 
       plugins.home.featureCatalogue.register({
         id: APP_SEARCH_PLUGIN.ID,
