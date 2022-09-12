@@ -30,6 +30,7 @@ import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
 import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-server-mocks';
 import { statusServiceMock } from '@kbn/core-status-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -40,7 +41,6 @@ import type {
 } from '.';
 import { httpResourcesMock } from './http_resources/http_resources_service.mock';
 import { renderingMock } from './rendering/rendering_service.mock';
-import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { SharedGlobalConfig } from './plugins';
 
 export { configServiceMock, configDeprecationsMock } from '@kbn/config-mocks';
@@ -55,7 +55,7 @@ export {
   savedObjectsRepositoryMock,
 } from '@kbn/core-saved-objects-api-server-mocks';
 export { migrationMocks } from '@kbn/core-saved-objects-migration-server-mocks';
-export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
+export { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 export { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 export { renderingMock } from './rendering/rendering_service.mock';
 export { statusServiceMock } from '@kbn/core-status-server-mocks';

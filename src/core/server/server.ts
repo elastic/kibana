@@ -57,13 +57,12 @@ import {
 } from '@kbn/core-deprecations-server-internal';
 import { CoreUsageDataService } from '@kbn/core-usage-data-server-internal';
 import { StatusService, statusConfig } from '@kbn/core-status-server-internal';
+import { UiSettingsService, uiSettingsConfig } from '@kbn/core-ui-settings-server-internal';
+
 import { CoreApp } from './core_app';
 import { HttpResourcesService } from './http_resources';
 import { RenderingService } from './rendering';
-import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
-
-import { config as uiSettingsConfig } from './ui_settings';
 import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from './internal_types';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
 import { PrebootCoreRouteHandlerContext } from './preboot_core_route_handler_context';
