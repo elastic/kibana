@@ -14,15 +14,7 @@ export { CoreUiSettingsRouteHandlerContext } from './ui_settings_route_handler_c
 export type { UiSettingsRequestHandlerContext } from './ui_settings_route_handler_context';
 
 export type {
-  UiSettingsServiceSetup,
-  UiSettingsServiceStart,
-  IUiSettingsClient,
-  UiSettingsParams,
-  PublicUiSettingsParams,
   InternalUiSettingsServicePreboot,
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
-  UiSettingsType,
-  UserProvidedValues,
-  DeprecationSettings,
 } from './types';

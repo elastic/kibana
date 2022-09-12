@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
-export type {
-  IUiSettingsClient,
-  UiSettingsServiceSetup,
-  UiSettingsServiceStart,
-  UiSettingsRequestHandlerContext,
-} from './src';
+import type { IUiSettingsClient } from './ui_settings_client';
+
+/**
+ * Core's `uiSettings` request handler context.
+ * @public
+ */
+export interface UiSettingsRequestHandlerContext {
+  client: IUiSettingsClient;
+}

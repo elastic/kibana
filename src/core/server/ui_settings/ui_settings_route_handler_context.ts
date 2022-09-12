@@ -7,15 +7,11 @@
  */
 
 import type { CoreSavedObjectsRouteHandlerContext } from '@kbn/core-saved-objects-server-internal';
-import type { IUiSettingsClient, InternalUiSettingsServiceStart } from './types';
-
-/**
- * Core's `uiSettings` request handler context.
- * @public
- */
-export interface UiSettingsRequestHandlerContext {
-  client: IUiSettingsClient;
-}
+import type {
+  UiSettingsRequestHandlerContext,
+  IUiSettingsClient,
+} from '@kbn/core-ui-settings-server';
+import type { InternalUiSettingsServiceStart } from './types';
 
 /**
  * The {@link UiSettingsRequestHandlerContext} implementation.
