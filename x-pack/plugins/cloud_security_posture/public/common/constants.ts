@@ -14,23 +14,9 @@ const [success, warning, danger] = euiPaletteForStatus(3);
 export const statusColors = { success, warning, danger };
 export const CSP_MOMENT_FORMAT = 'MMMM D, YYYY @ HH:mm:ss.SSS';
 
-type PolicyTemplate = 'kspm';
+export type CloudPostureIntegrations = typeof cloudPostureIntegrations;
 
-export type CloudPostureIntegrations = Record<
-  PolicyTemplate,
-  {
-    policyTemplate: PolicyTemplate;
-    name: string;
-    shortName: string;
-    options: Array<{
-      type: 'cloudbeat/cis_k8s' | 'cloudbeat/cis_eks';
-      benchmark: string;
-      name: string;
-    }>;
-  }
->;
-
-export const cloudPostureIntegrations: CloudPostureIntegrations = {
+export const cloudPostureIntegrations = {
   kspm: {
     policyTemplate: 'kspm',
     name: i18n.translate('xpack.csp.kspmIntegration.integration.nameTitle', {
@@ -60,4 +46,4 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
       },
     ],
   },
-};
+} as const;
