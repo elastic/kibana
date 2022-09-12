@@ -78,14 +78,14 @@ const getRulesSharedValues = (packageInfo: PackagePolicy, agentInfo: AgentPolicy
       description: enabledIntegrationOption.name,
     },
     !!enabledIntegrationOption?.benchmark && {
-      title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.typeTitle', {
+      title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.benchmarkTitle', {
         defaultMessage: 'Benchmark',
       }),
       description: enabledIntegrationOption.benchmark,
     },
     {
-      title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.agentTitle', {
-        defaultMessage: 'Agent',
+      title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.agentPolicyTitle', {
+        defaultMessage: 'Agent Policy',
       }),
       description: agentInfo.name,
     },
