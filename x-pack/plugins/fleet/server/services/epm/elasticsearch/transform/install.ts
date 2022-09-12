@@ -82,7 +82,7 @@ export const installLegacyTransforms = async (
   if (transformPaths.length > 0) {
     const transformRefs = transformPaths.reduce<EsAssetReference[]>((acc, path) => {
       acc.push({
-        id: getTransformNameForInstallation(installablePackage, path, installNameSuffix),
+        id: getLegacyTransformNameForInstallation(installablePackage, path, installNameSuffix),
         type: ElasticsearchAssetType.transform,
       });
 
