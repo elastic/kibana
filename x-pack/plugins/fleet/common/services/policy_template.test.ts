@@ -146,7 +146,6 @@ describe('getNormalizedInputs', () => {
         type: 'string',
         title: 'myFoo',
         description: 'myFoo',
-        template_path: 'some/path.hbl',
       },
     ]);
   });
