@@ -78,7 +78,7 @@ ErrorUX.args = {
     create: async () => ({ file: { id: 'test' } }),
     upload: async () => {
       await sleep(1000);
-      throw new Error('nope!');
+      throw new Error('Something went wrong while uploading!');
     },
     delete: async () => {},
   } as unknown as FilesClient,
@@ -113,18 +113,16 @@ AllowClearAfterUpload.args = {
 export const ImmediateUpload = Template.bind({});
 ImmediateUpload.args = {
   immediate: true,
-  allowClear: true,
 };
 
 export const ImmediateUploadError = Template.bind({});
 ImmediateUploadError.args = {
   immediate: true,
-  allowClear: true,
   client: {
     create: async () => ({ file: { id: 'test' } }),
     upload: async () => {
       await sleep(1000);
-      throw new Error('nope!');
+      throw new Error('Something went wrong while uploading!');
     },
     delete: async () => {},
   } as unknown as FilesClient,
@@ -133,7 +131,6 @@ ImmediateUploadError.args = {
 export const ImmediateUploadAbort = Template.bind({});
 ImmediateUploadAbort.args = {
   immediate: true,
-  allowClear: true,
   client: {
     create: async () => ({ file: { id: 'test' } }),
     upload: async () => {

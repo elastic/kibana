@@ -82,7 +82,13 @@ export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
         />
       </EuiFormRow>
       <EuiSpacer size="s" />
-      <EuiFlexGroup justifyContent="flexStart" alignItems="center" direction="row" gutterSize="m">
+
+      <EuiFlexGroup
+        justifyContent="flexStart"
+        alignItems="center"
+        direction="rowReverse"
+        gutterSize="m"
+      >
         <EuiFlexItem grow={false}>
           {!immediate && !retry && (
             <EuiButton
