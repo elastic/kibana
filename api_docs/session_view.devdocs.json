@@ -13,6 +13,7 @@
         "description": [],
         "path": "x-pack/plugins/session_view/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "sessionView",
@@ -28,6 +29,7 @@
             ],
             "path": "x-pack/plugins/session_view/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "sessionView",
@@ -41,6 +43,7 @@
                 ],
                 "path": "x-pack/plugins/session_view/public/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],

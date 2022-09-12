@@ -35,6 +35,7 @@
         ],
         "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionRepeatImage",
@@ -51,6 +52,7 @@
             ],
             "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -93,6 +95,7 @@
         ],
         "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionRepeatImage",
@@ -113,6 +116,7 @@
             ],
             "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -136,6 +140,7 @@
       ],
       "path": "src/plugins/expression_repeat_image/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -159,6 +164,7 @@
       ],
       "path": "src/plugins/expression_repeat_image/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -178,6 +184,7 @@
         ],
         "path": "src/plugins/expression_repeat_image/common/expression_functions/repeat_image_function.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -193,6 +200,7 @@
         "description": [],
         "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionRepeatImage",
@@ -202,7 +210,8 @@
             "label": "width",
             "description": [],
             "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionRepeatImage",
@@ -212,7 +221,8 @@
             "label": "height",
             "description": [],
             "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -226,6 +236,7 @@
         "description": [],
         "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionRepeatImage",
@@ -235,7 +246,8 @@
             "label": "max",
             "description": [],
             "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionRepeatImage",
@@ -245,7 +257,8 @@
             "label": "count",
             "description": [],
             "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionRepeatImage",
@@ -255,7 +268,8 @@
             "label": "emptyImage",
             "description": [],
             "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionRepeatImage",
@@ -265,7 +279,8 @@
             "label": "image",
             "description": [],
             "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionRepeatImage",
@@ -275,7 +290,8 @@
             "label": "size",
             "description": [],
             "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -289,6 +305,7 @@
         "description": [],
         "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionRepeatImage",
@@ -298,7 +315,8 @@
             "label": "count",
             "description": [],
             "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionRepeatImage",
@@ -308,7 +326,8 @@
             "label": "image",
             "description": [],
             "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionRepeatImage",
@@ -318,7 +337,8 @@
             "label": "size",
             "description": [],
             "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionRepeatImage",
@@ -328,7 +348,8 @@
             "label": "max",
             "description": [],
             "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionRepeatImage",
@@ -341,7 +362,8 @@
               "string | null"
             ],
             "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -361,6 +383,7 @@
         ],
         "path": "src/plugins/expression_repeat_image/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -375,6 +398,7 @@
         ],
         "path": "src/plugins/expression_repeat_image/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -423,6 +447,7 @@
         ],
         "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -446,6 +471,7 @@
         ],
         "path": "src/plugins/expression_repeat_image/common/expression_functions/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -460,6 +486,7 @@
         ],
         "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -474,6 +501,7 @@
         ],
         "path": "src/plugins/expression_repeat_image/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -488,6 +516,7 @@
         ],
         "path": "src/plugins/expression_repeat_image/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -502,6 +531,7 @@
         ],
         "path": "src/plugins/expression_repeat_image/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
