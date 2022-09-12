@@ -34,6 +34,7 @@ import type {
 import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/constants';
 import { FilterStateStore } from '@kbn/es-query';
 import styled from 'styled-components';
+import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER } from '@kbn/cases-plugin/common';
 import type { AddToTimelinePayload } from '../../timelines/use_add_to_timeline';
 import { PackResultsHeader } from './pack_results_header';
 import { Direction } from '../../../common/search_strategy';
@@ -44,6 +45,7 @@ import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import type { PackItem } from '../../packs/types';
 import type { LogsDataView } from '../../common/hooks/use_logs_data_view';
 import { useLogsDataView } from '../../common/hooks/use_logs_data_view';
+import { useGetUserCasesPermissions } from '../../cases/use_get_cases_permissions';
 
 const TruncateTooltipText = styled.div`
   width: 100%;
@@ -558,6 +560,9 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   showResultsHeader,
 }) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, unknown>>({});
+  const { cases } = useKibana().services;
+  const casePermissions = useGetUserCasesPermissions();
+  const CasesContext = cases.ui.getCasesContext();
 
   const renderIDColumn = useCallback(
     (id: string) => (
@@ -789,21 +794,24 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
       })),
     [data]
   );
+  const casesOwner = useMemo(() => [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER], []);
 
   return (
     <>
-      {showResultsHeader && (
-        <PackResultsHeader queryIds={queryIds} actionId={actionId} addToCase={addToCase} />
-      )}
+      <CasesContext owner={casesOwner} permissions={casePermissions}>
+        {showResultsHeader && (
+          <PackResultsHeader queryIds={queryIds} actionId={actionId} addToCase={addToCase} />
+        )}
 
-      <StyledEuiBasicTable
-        items={data ?? EMPTY_ARRAY}
-        itemId={getItemId}
-        columns={columns}
-        sorting={sorting}
-        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        isExpandable
-      />
+        <StyledEuiBasicTable
+          items={data ?? EMPTY_ARRAY}
+          itemId={getItemId}
+          columns={columns}
+          sorting={sorting}
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+          isExpandable
+        />
+      </CasesContext>
     </>
   );
 };

@@ -5,13 +5,10 @@
  * 2.0.
  */
 import type { ReactElement } from 'react';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
-import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
-import { useKibana } from '../../common/lib/kibana';
-import { useGetUserCasesPermissions } from '../../cases/use_get_cases_permissions';
 
 interface PackResultsHeadersProps {
   actionId?: string;
@@ -34,32 +31,23 @@ const StyledIconsList = styled(EuiFlexItem)`
 //   <EuiButtonIcon iconType={'casesApp'} color="text" size="xs" iconSize="l" />
 // );
 
-export const PackResultsHeader = ({ actionId, addToCase }: PackResultsHeadersProps) => {
-  const { cases } = useKibana().services;
-  const casePermissions = useGetUserCasesPermissions();
-  const CasesContext = cases.ui.getCasesContext();
-  const casesOwner = useMemo(() => [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER], []);
-
-  return (
-    <>
-      <CasesContext owner={casesOwner} permissions={casePermissions}>
-        <EuiFlexGroup direction="row" gutterSize="m">
-          <StyledResultsHeading grow={false}>
-            <EuiText>
-              <h2>
-                <FormattedMessage
-                  id="xpack.osquery.liveQueryActionResults.results"
-                  defaultMessage="Results"
-                />
-              </h2>
-            </EuiText>
-          </StyledResultsHeading>
-          <StyledIconsList grow={false}>
-            <span>{actionId && addToCase && addToCase({ isIcon: true })}</span>
-          </StyledIconsList>
-        </EuiFlexGroup>
-        <EuiSpacer size={'l'} />
-      </CasesContext>
-    </>
-  );
-};
+export const PackResultsHeader = ({ actionId, addToCase }: PackResultsHeadersProps) => (
+  <>
+    <EuiFlexGroup direction="row" gutterSize="m">
+      <StyledResultsHeading grow={false}>
+        <EuiText>
+          <h2>
+            <FormattedMessage
+              id="xpack.osquery.liveQueryActionResults.results"
+              defaultMessage="Results"
+            />
+          </h2>
+        </EuiText>
+      </StyledResultsHeading>
+      <StyledIconsList grow={false}>
+        <span>{actionId && addToCase && addToCase({ isIcon: true })}</span>
+      </StyledIconsList>
+    </EuiFlexGroup>
+    <EuiSpacer size={'l'} />
+  </>
+);
