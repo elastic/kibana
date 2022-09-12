@@ -78,7 +78,7 @@ export function useLoadRuleAlertsAggs({ features, ruleId }: UseLoadRuleAlertsAgg
           setRuleAlertsAggs((oldState: LoadRuleAlertsAggs) => ({
             ...oldState,
             isLoadingRuleAlertsAggs: false,
-            errorRuleAlertsAggs: 'error',
+            errorRuleAlertsAggs: error,
             alertsChartData: [],
           }));
         }

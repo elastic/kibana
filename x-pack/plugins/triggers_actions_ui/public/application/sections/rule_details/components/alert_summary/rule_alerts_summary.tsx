@@ -98,6 +98,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
   if (errorRuleAlertsAggs)
     return (
       <EuiEmptyPrompt
+        data-test-subj="alertsRuleSummaryErrorPrompt"
         iconType="alert"
         color="danger"
         title={
@@ -123,7 +124,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
     );
   const isVisibleFunction: FilterPredicate = (series) => series.splitAccessors.get('g') !== 'total';
   return (
-    <EuiPanel hasShadow={false} hasBorder>
+    <EuiPanel data-test-subj="ruleAlertsSummary" hasShadow={false} hasBorder>
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="column">
@@ -156,7 +157,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
                       />
                     </EuiText>
                     <EuiText>
-                      <h4>{active + recovered}</h4>
+                      <h4 data-test-subj="totalAlertsCount">{active + recovered}</h4>
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -169,7 +170,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
                       />
                     </EuiText>
                     <EuiText color={LIGHT_THEME.colors.vizColors[2]}>
-                      <h4>{active}</h4>
+                      <h4 data-test-subj="activeAlertsCount">{active}</h4>
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -183,7 +184,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
                     </EuiText>
                     <EuiFlexItem>
                       <EuiText color={LIGHT_THEME.colors.vizColors[1]}>
-                        <h4>{recovered}</h4>
+                        <h4 data-test-subj="recoveredAlertsCount">{recovered}</h4>
                       </EuiText>
                     </EuiFlexItem>
                   </EuiFlexItem>
