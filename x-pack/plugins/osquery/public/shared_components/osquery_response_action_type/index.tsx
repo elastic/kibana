@@ -93,6 +93,7 @@ const OsqueryResponseActionParamsFormComponent: React.ForwardRefExoticComponent<
           },
         });
       }
+      // eslint-disable-next-line no-empty
     } catch (e) {}
   }, [
     context,
