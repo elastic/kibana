@@ -23,6 +23,7 @@
         ],
         "path": "packages/kbn-ci-stats-performance-metrics/src/reporter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ci-stats-performance-metrics",
@@ -36,6 +37,7 @@
             ],
             "path": "packages/kbn-ci-stats-performance-metrics/src/reporter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -54,6 +56,7 @@
         ],
         "path": "packages/kbn-ci-stats-performance-metrics/src/cli.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
