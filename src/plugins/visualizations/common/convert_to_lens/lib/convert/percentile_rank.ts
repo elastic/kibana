@@ -7,6 +7,7 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import { SchemaConfig } from '../../..';
 import { PercentileRanksParams } from '../..';
 import { getFieldNameFromField, getLabelForPercentile } from '../utils';
 import { createColumn, getFormat } from './column';
@@ -16,10 +17,21 @@ export const convertToPercentileRankParams = (value: number): PercentileRanksPar
   value: Number(value),
 });
 
-export const convertToPercentileRankColumn = (
-  { agg, dataView }: CommonColumnConverterArgs<METRIC_TYPES.PERCENTILE_RANKS>,
-  { index, reducedTimeRange }: { index?: number; reducedTimeRange?: string } = {}
-): PercentileRanksColumn | null => {
+const isSinglePercentileRank = (
+  agg: SchemaConfig<METRIC_TYPES.PERCENTILE_RANKS | METRIC_TYPES.SINGLE_PERCENTILE_RANK>
+): agg is SchemaConfig<METRIC_TYPES.SINGLE_PERCENTILE_RANK> => {
+  if (agg.aggType === METRIC_TYPES.SINGLE_PERCENTILE_RANK) {
+    return true;
+  }
+  return false;
+};
+
+const getPercent = (
+  agg: SchemaConfig<METRIC_TYPES.PERCENTILE_RANKS | METRIC_TYPES.SINGLE_PERCENTILE_RANK>
+) => {
+  if (isSinglePercentileRank(agg)) {
+    return agg.aggParams?.value;
+  }
   const { aggParams, aggId } = agg;
   if (!aggParams || !aggId) {
     return null;
@@ -32,9 +44,25 @@ export const convertToPercentileRankColumn = (
   if (!values || !values.length || percentStr === '' || isNaN(percent)) {
     return null;
   }
+  return percent;
+};
+
+export const convertToPercentileRankColumn = (
+  {
+    agg,
+    dataView,
+  }: CommonColumnConverterArgs<METRIC_TYPES.SINGLE_PERCENTILE_RANK | METRIC_TYPES.PERCENTILE_RANKS>,
+  { index, reducedTimeRange }: { index?: number; reducedTimeRange?: string } = {}
+): PercentileRanksColumn | null => {
+  const { aggParams } = agg;
+  const percent = getPercent(agg);
+
+  if (percent === null || percent === undefined) {
+    return null;
+  }
 
   const params = convertToPercentileRankParams(percent);
-  const fieldName = getFieldNameFromField(agg.aggParams!.field);
+  const fieldName = getFieldNameFromField(aggParams!.field);
   if (!fieldName) {
     return null;
   }
@@ -59,6 +87,6 @@ export const convertToPercentileRankColumn = (
             ...commonColumnParams.meta,
           }
         : commonColumnParams.meta,
-    timeShift: agg.aggParams?.timeShift,
+    timeShift: aggParams?.timeShift,
   };
 };

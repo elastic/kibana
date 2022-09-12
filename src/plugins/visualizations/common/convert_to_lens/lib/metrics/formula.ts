@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import { DataViewField, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { convertToSchemaConfig } from '../../../vis_schemas';
 import { SchemaConfig } from '../../..';
 import { Operations } from '../../constants';
@@ -19,6 +19,7 @@ import {
   isPipeline,
   isStdDevAgg,
 } from '../utils';
+import { SIBLING_PIPELINE_AGGS } from '../convert/constants';
 
 type PipelineAggs = SchemaConfig<
   | METRIC_TYPES.CUMULATIVE_SUM
@@ -43,13 +44,13 @@ export const addTimeRangeToFormula = (reducedTimeRange?: string) => {
   return reducedTimeRange ? `, reducedTimeRange='${reducedTimeRange}'` : '';
 };
 
-const PARENT_PIPELINE_AGGS: string[] = [
+const PARENT_PIPELINE_OPS: string[] = [
   Operations.CUMULATIVE_SUM,
   Operations.DIFFERENCES,
   Operations.MOVING_AVERAGE,
 ];
 
-const METRIC_AGGS_WITHOUT_PARAMS: string[] = [
+const METRIC_OPS_WITHOUT_PARAMS: string[] = [
   Operations.AVERAGE,
   Operations.MAX,
   Operations.MIN,
@@ -104,23 +105,34 @@ const getFormulaForPercentile = (
   )})`;
 };
 
+const isDataViewField = (field: string | DataViewField): field is DataViewField => {
+  if (field && typeof field === 'object') {
+    return true;
+  }
+  return false;
+};
+
 const getFormulaForSubMetric = (agg: SchemaConfig, reducedTimeRange?: string): string | null => {
   const op = SUPPORTED_METRICS[agg.aggType];
   if (!op) {
     return null;
   }
 
-  if (PARENT_PIPELINE_AGGS.includes(op.name)) {
+  if (
+    PARENT_PIPELINE_OPS.includes(op.name) ||
+    SIBLING_PIPELINE_AGGS.includes(agg.aggType as METRIC_TYPES)
+  ) {
     return getFormulaForPipelineAgg(agg as PipelineAggs, reducedTimeRange);
   }
 
-  if (METRIC_AGGS_WITHOUT_PARAMS.includes(op.name)) {
+  if (METRIC_OPS_WITHOUT_PARAMS.includes(op.name)) {
     const metricAgg = agg as MetricAggsWithoutParams;
-
     return getFormulaForAggsWithoutParams(
       metricAgg,
       metricAgg.aggParams && 'field' in metricAgg.aggParams
-        ? metricAgg.aggParams?.field
+        ? isDataViewField(metricAgg.aggParams.field)
+          ? metricAgg.aggParams?.field.displayName
+          : metricAgg.aggParams?.field
         : undefined,
       reducedTimeRange
     );
@@ -167,7 +179,7 @@ export const getFormulaForPipelineAgg = (
     return null;
   }
 
-  if (PARENT_PIPELINE_AGGS.includes(supportedAgg.name)) {
+  if (PARENT_PIPELINE_OPS.includes(supportedAgg.name)) {
     const formula = getFormulaFromMetric(supportedAgg);
     return `${formula}(${subFormula})`;
   }

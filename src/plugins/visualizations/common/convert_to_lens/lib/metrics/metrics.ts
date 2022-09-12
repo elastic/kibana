@@ -11,12 +11,13 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { SchemaConfig } from '../../..';
 import {
   convertMetricAggregationColumnWithoutSpecialParams,
-  convertToParentPipelineAggColumns,
+  convertToOtherParentPipelineAggColumns,
   convertToPercentileColumn,
   convertToPercentileRankColumn,
   convertToSiblingPipelineColumns,
   convertToStdDeviationFormulaColumns,
   convertToLastValueColumn,
+  convertToCumulativeSumAggColumn,
 } from '../convert';
 import { SUPPORTED_METRICS } from '../convert/supported_metrics';
 import { Column } from '../../types';
@@ -43,7 +44,7 @@ export const convertMetricToColumns = (agg: SchemaConfig, dataView: DataView): C
       });
       return getValidColumns(columns);
     }
-    case 'std_dev': {
+    case METRIC_TYPES.STD_DEV: {
       const columns = convertToStdDeviationFormulaColumns({
         agg,
         dataView,
@@ -57,7 +58,21 @@ export const convertMetricToColumns = (agg: SchemaConfig, dataView: DataView): C
       });
       return getValidColumns(columns);
     }
+    case METRIC_TYPES.SINGLE_PERCENTILE: {
+      const columns = convertToPercentileColumn({
+        agg,
+        dataView,
+      });
+      return getValidColumns(columns);
+    }
     case METRIC_TYPES.PERCENTILE_RANKS: {
+      const columns = convertToPercentileRankColumn({
+        agg,
+        dataView,
+      });
+      return getValidColumns(columns);
+    }
+    case METRIC_TYPES.SINGLE_PERCENTILE_RANK: {
       const columns = convertToPercentileRankColumn({
         agg,
         dataView,
@@ -72,10 +87,16 @@ export const convertMetricToColumns = (agg: SchemaConfig, dataView: DataView): C
       });
       return getValidColumns(columns);
     }
-    case METRIC_TYPES.CUMULATIVE_SUM:
+    case METRIC_TYPES.CUMULATIVE_SUM: {
+      const columns = convertToCumulativeSumAggColumn({
+        agg,
+        dataView,
+      });
+      return getValidColumns(columns);
+    }
     case METRIC_TYPES.DERIVATIVE:
     case METRIC_TYPES.MOVING_FN: {
-      const columns = convertToParentPipelineAggColumns({
+      const columns = convertToOtherParentPipelineAggColumns({
         agg,
         dataView,
       });

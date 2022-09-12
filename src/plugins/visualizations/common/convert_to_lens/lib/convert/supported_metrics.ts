@@ -45,7 +45,9 @@ interface LocalSupportedMetrics {
   [METRIC_TYPES.VALUE_COUNT]: Metric<typeof Operations.COUNT>;
   [METRIC_TYPES.STD_DEV]: Metric<typeof Operations.STANDARD_DEVIATION>;
   [METRIC_TYPES.PERCENTILES]: Metric<typeof Operations.PERCENTILE>;
+  [METRIC_TYPES.SINGLE_PERCENTILE]: Metric<typeof Operations.PERCENTILE>;
   [METRIC_TYPES.PERCENTILE_RANKS]: Metric<typeof Operations.PERCENTILE_RANK>;
+  [METRIC_TYPES.SINGLE_PERCENTILE_RANK]: Metric<typeof Operations.PERCENTILE_RANK>;
   [METRIC_TYPES.TOP_HITS]: Metric<typeof Operations.LAST_VALUE>;
   [METRIC_TYPES.TOP_METRICS]: Metric<typeof Operations.LAST_VALUE>;
   [METRIC_TYPES.MOVING_FN]: Metric<typeof Operations.MOVING_AVERAGE>;
@@ -133,7 +135,17 @@ export const SUPPORTED_METRICS: SupportedMetrics = {
     isFullReference: false,
     isFieldRequired: true,
   },
+  single_percentile: {
+    name: 'percentile',
+    isFullReference: false,
+    isFieldRequired: true,
+  },
   percentile_ranks: {
+    name: 'percentile_rank',
+    isFullReference: false,
+    isFieldRequired: true,
+  },
+  single_percentile_rank: {
     name: 'percentile_rank',
     isFullReference: false,
     isFieldRequired: true,
