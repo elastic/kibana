@@ -61,7 +61,10 @@ disabled:
   # Scalability testing config that we run in its own pipeline
   - x-pack/test/performance/scalability/config.ts
 
-    - test/analytics/config.ts
+defaultQueue: 'n2-4-spot'
+enabled:
+  - test/accessibility/config.ts
+  - test/analytics/config.ts
   - test/api_integration/config.js
   - test/examples/config.js
   - test/functional/apps/bundles/config.ts
@@ -113,6 +116,7 @@ disabled:
   - test/server_integration/http/ssl_with_p12/config.js
   - test/server_integration/http/ssl/config.js
   - test/ui_capabilities/newsfeed_err/config.ts
+  - x-pack/test/accessibility/config.ts
   - x-pack/test/alerting_api_integration/basic/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group1/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group2/config.ts
@@ -271,8 +275,3 @@ disabled:
   - x-pack/test/performance/journeys/many_fields_discover/config.ts
   - x-pack/test/performance/journeys/promotion_tracking_dashboard/config.ts
   - x-pack/test/performance/journeys/web_logs_dashboard/config.ts
-
-defaultQueue: 'n2-4-spot'
-enabled:
-  - test/accessibility/config.ts
-  - x-pack/test/accessibility/config.ts
