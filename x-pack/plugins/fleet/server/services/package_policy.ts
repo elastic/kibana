@@ -405,6 +405,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     const oldPackagePolicy = await this.get(soClient, id);
     const { version, ...restOfPackagePolicy } = packagePolicy;
 
+    console.log('Package policy update' + packagePolicyUpdate);
     if (packagePolicyUpdate.is_managed && !options?.force) {
       throw new PackagePolicyRestrictionRelatedError(`Cannot update package policy ${id}`);
     }
@@ -444,7 +445,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       inputs = await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
       elasticsearch = pkgInfo.elasticsearch;
     }
-
+    console.log('inputs---ss', JSON.stringify(inputs));
     await soClient.update<PackagePolicySOAttributes>(
       SAVED_OBJECT_TYPE,
       id,
@@ -461,13 +462,14 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       }
     );
 
+    console.log('package policy --', JSON.stringify(packagePolicy));
     // Bump revision of associated agent policy
     await agentPolicyService.bumpRevision(soClient, esClient, packagePolicy.policy_id, {
       user: options?.user,
     });
 
     const newPolicy = (await this.get(soClient, id)) as PackagePolicy;
-
+    console.log('new policy --', JSON.stringify(newPolicy));
     if (packagePolicy.package) {
       await removeOldAssets({
         soClient,
@@ -656,7 +658,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyResponse> {
     const result: UpgradePackagePolicyResponse = [];
-
+    console.log('upgrade function in package policy');
     for (const id of ids) {
       try {
         let packageInfo: PackageInfo;

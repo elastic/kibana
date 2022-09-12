@@ -15,7 +15,11 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { DeepReadonly } from 'utility-types';
-import { DeletePackagePoliciesResponse, PackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  DeletePackagePoliciesResponse,
+  PackagePolicy,
+  UpdatePackagePolicy,
+} from '@kbn/fleet-plugin/common';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -34,6 +38,7 @@ import { initializeCspTransforms } from './create_transforms/create_transforms';
 import {
   isCspPackageInstalled,
   onPackagePolicyPostCreateCallback,
+  OnPackagePolicyUpgradeCallback,
   removeCspRulesInstancesCallback,
 } from './fleet_integration/fleet_integration';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
@@ -64,6 +69,7 @@ export class CspPlugin
     core: CoreSetup<CspServerPluginStartDeps, CspServerPluginStart>,
     plugins: CspServerPluginSetupDeps
   ): CspServerPluginSetup {
+    console.log('CspPlugin.setupDependencies:', plugins);
     setupSavedObjects(core.savedObjects);
 
     setupRoutes({
@@ -78,6 +84,7 @@ export class CspPlugin
   }
 
   public start(core: CoreStart, plugins: CspServerPluginStartDeps): CspServerPluginStart {
+    console.log('CspPlugin.startDependencies:', plugins);
     plugins.fleet.fleetSetupCompleted().then(async () => {
       const packageInfo = await plugins.fleet.packageService.asInternalUser.getInstallation(
         CLOUD_SECURITY_POSTURE_PACKAGE_NAME
@@ -96,6 +103,7 @@ export class CspPlugin
           context: RequestHandlerContext,
           request: KibanaRequest
         ): Promise<PackagePolicy> => {
+          console.log('packagePolicyPostCreate');
           if (packagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
             await this.initialize(core, plugins.taskManager);
 
@@ -120,11 +128,11 @@ export class CspPlugin
       plugins.fleet.registerExternalCallback(
         'postPackagePolicyDelete',
         async (deletedPackagePolicies: DeepReadonly<DeletePackagePoliciesResponse>) => {
+          console.log('postPackagePolicyDelete');
           for (const deletedPackagePolicy of deletedPackagePolicies) {
             if (deletedPackagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
               const soClient = core.savedObjects.createInternalRepository();
               await removeCspRulesInstancesCallback(deletedPackagePolicy, soClient, this.logger);
-
               const isPackageExists = await isCspPackageInstalled(soClient, this.logger);
 
               if (isPackageExists) {
@@ -136,7 +144,23 @@ export class CspPlugin
       );
     });
 
-    return {};
+    plugins.fleet.registerExternalCallback(
+      'packagePolicyUpgrade',
+      async (
+        updatePackagePolicy: PackagePolicy,
+        context: RequestHandlerContext,
+        request: KibanaRequest
+      ): Promise<PackagePolicy> => {
+        if (updatePackagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
+          console.log('packagePolicyUpgrade');
+          const soClient = (await context.core).savedObjects.client;
+          const packagePolicy = updatePackagePolicy as PackagePolicy;
+          console.log('packagePolicy:' + packagePolicy);
+          await OnPackagePolicyUpgradeCallback(this.logger, packagePolicy, soClient);
+        }
+        return updatePackagePolicy;
+      }
+    );
   }
 
   public stop() {}

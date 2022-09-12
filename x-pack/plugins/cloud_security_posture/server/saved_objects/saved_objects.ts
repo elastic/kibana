@@ -24,6 +24,7 @@ import {
 } from '../../common/constants';
 
 export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
+  console.log("setup saved objects");
   savedObjects.registerType<CspRule>({
     name: CSP_RULE_SAVED_OBJECT_TYPE,
     hidden: false,

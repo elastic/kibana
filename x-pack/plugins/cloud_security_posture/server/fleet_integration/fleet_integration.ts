@@ -51,6 +51,7 @@ export const onPackagePolicyPostCreateCallback = async (
   packagePolicy: PackagePolicy,
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
+  console.log('OnPackagePolicyPostCreateCallback');
   const benchmarkType = getBenchmarkInputType(packagePolicy.inputs);
 
   // Create csp-rules from the generic asset
@@ -75,6 +76,68 @@ export const onPackagePolicyPostCreateCallback = async (
   try {
     await savedObjectsClient.bulkCreate(cspRules);
     logger.info(`Generated CSP rules for package ${packagePolicy.policy_id}`);
+  } catch (e) {
+    logger.error('failed to generate rules out of template');
+    logger.error(e);
+  }
+};
+
+export const OnPackagePolicyUpgradeCallback = async (
+  logger: Logger,
+  packagePolicy: PackagePolicy,
+  savedObjectsClient: SavedObjectsClientContract
+): Promise<void> => {
+  const benchmarkType = getBenchmarkInputType(packagePolicy.inputs);
+  packagePolicy.id = `04f32290-b7cf-47ee-803a-8286565f2b4b`;
+  // Create csp-rules from the generic asset
+  const existingRuleTemplates: SavedObjectsFindResponse<CspRuleTemplate> =
+    await savedObjectsClient.find({
+      type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+      perPage: 10000,
+      filter: getBenchmarkTypeFilter(benchmarkType),
+    });
+
+  console.log('existing templates:', existingRuleTemplates);
+  const oldCspRules: SavedObjectsFindResponse<CspRule> = await savedObjectsClient.find({
+    type: CSP_RULE_SAVED_OBJECT_TYPE,
+    perPage: 10000,
+    filter: createCspRuleSearchFilterByPackagePolicy({
+      packagePolicyId: packagePolicy.id,
+      policyId: packagePolicy.policy_id,
+    }),
+  });
+  console.log('currentRules:', oldCspRules);
+oldCspRules.
+  const oldCspRulesDictionary: any = oldCspRules.saved_objects.map((rule) => ({
+    [rule.attributes.metadata.rego]: rule,
+  }));
+
+  const newRules: Array<SavedObjectsFindResult<CspRuleTemplate>> = [];
+  // const updatedRules = [] as Array<SavedObjectsBulkCreateObject<CspRule>>;
+  for (const { template, rule } of templatesWithRules) {
+    // If no rule exists, create it
+    if (!rule) {
+      newRules.push(template);
+      continue;
+    }
+    // rule.attributes = template.attributes;
+  }
+
+  const cspRules = generateRulesFromTemplates(
+    packagePolicy.id,
+    packagePolicy.policy_id,
+    oldCspRulesDictionary,
+    newRules
+  );
+
+  try {
+    await savedObjectsClient.bulkCreate(cspRules);
+    logger.info(`Generated CSP rules for package ${packagePolicy.policy_id}`);
+    await Promise.all(
+      oldCspRules.saved_objects.map((rule) =>
+        savedObjectsClient.delete(CSP_RULE_SAVED_OBJECT_TYPE, rule.id)
+      )
+    );
   } catch (e) {
     logger.error('failed to generate rules out of template');
     logger.error(e);
@@ -129,7 +192,7 @@ export const isCspPackageInstalled = async (
 const generateRulesFromTemplates = (
   packagePolicyId: string,
   policyId: string,
-  cspRuleTemplates: Array<SavedObjectsFindResult<CspRuleTemplate>>
+  cspRuleTemplates: Array<SavedObjectsFindResult<CspRuleTemplate>>,
 ): Array<SavedObjectsBulkCreateObject<CspRule>> =>
   cspRuleTemplates.map((template) => ({
     type: CSP_RULE_SAVED_OBJECT_TYPE,
@@ -137,6 +200,7 @@ const generateRulesFromTemplates = (
       ...template.attributes,
       package_policy_id: packagePolicyId,
       policy_id: policyId,
+      enabled: true,
     },
   }));
 

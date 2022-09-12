@@ -381,6 +381,7 @@ export const upgradePackagePolicyHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
+  console.log("upgradePackagePolicyHandler");
   try {
     const body: UpgradePackagePolicyResponse = await packagePolicyService.upgrade(
       soClient,

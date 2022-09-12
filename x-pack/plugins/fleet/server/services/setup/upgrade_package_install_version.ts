@@ -35,7 +35,7 @@ export async function upgradePackageInstallVersion({
   logger: Logger;
 }) {
   const res = await findOutdatedInstallations(soClient);
-
+  console.log("upgrade Package install version function");
   if (res.total === 0) {
     return;
   }

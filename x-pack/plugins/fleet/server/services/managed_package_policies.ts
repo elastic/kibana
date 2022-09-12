@@ -36,7 +36,7 @@ export const upgradeManagedPackagePolicies = async (
     .getLogger()
     .debug('Running required package policies upgrades for managed policies');
   const results: UpgradeManagedPackagePoliciesResult[] = [];
-
+  console.log("upgrade Managed package policies");
   const installedPackages = await getInstallations(soClient, {
     filter: `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status:installed AND ${PACKAGES_SAVED_OBJECT_TYPE}.attributes.keep_policies_up_to_date:true`,
   });
