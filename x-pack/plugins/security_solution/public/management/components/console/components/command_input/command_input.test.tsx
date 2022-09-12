@@ -59,6 +59,20 @@ describe('When entering data into the Console input', () => {
     expect(getUserInputText()).toEqual('cm');
   });
 
+  it('should repeat letters if the user holds letter key down on the keyboard', () => {
+    render();
+    enterCommand('{a>5/}', { inputOnly: true, useKeyboard: true });
+    expect(getUserInputText()).toEqual('aaaaa');
+  });
+
+  it('should not display command key names in the input, when command keys are used', () => {
+    render();
+    enterCommand('{Meta>}', { inputOnly: true, useKeyboard: true });
+    expect(getUserInputText()).toEqual('');
+    enterCommand('{Shift>}A{/Shift}', { inputOnly: true, useKeyboard: true });
+    expect(getUserInputText()).toEqual('A');
+  });
+
   it('should display placeholder text when input area is blank', () => {
     render();
 
@@ -199,6 +213,11 @@ describe('When entering data into the Console input', () => {
       typeKeyboardKey('{backspace}');
       expect(getUserInputText()).toEqual('isolat');
       expect(getRightOfCursorText()).toEqual('');
+    });
+
+    it('should clear the input if the user holds down the delete/backspace key', () => {
+      typeKeyboardKey('{backspace>7/}');
+      expect(getUserInputText()).toEqual('');
     });
 
     it('should move cursor to the left', () => {
