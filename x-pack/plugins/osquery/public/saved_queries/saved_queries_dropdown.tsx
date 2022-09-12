@@ -27,7 +27,7 @@ const StyledEuiCodeBlock = styled(EuiCodeBlock)`
   }
 `;
 
-interface SavedQueriesDropdownProps {
+export interface SavedQueriesDropdownProps {
   disabled?: boolean;
   onChange: (
     value:
