@@ -285,12 +285,12 @@ describe('getFetchEventAnnotations', () => {
     (startServices[1].data.dataViews.create as jest.Mock).mockClear();
     (handleRequest as jest.Mock).mockClear();
   });
-  test('Returns null for empty groups', async () => {
+  test('Returns empty datatable for empty groups', async () => {
     const result = await runGetFetchEventAnnotations({
       interval: '2h',
       groups: [],
     });
-    expect(result).toEqual(null);
+    expect(result).toEqual({ columns: [], rows: [], type: 'datatable' });
   });
 
   describe('Manual annotations', () => {
@@ -322,10 +322,6 @@ describe('getFetchEventAnnotations', () => {
       ],
     } as unknown as FetchEventAnnotationsArgs;
 
-    test(`Doesn't run dataViews.create for manual annotations groups only`, async () => {
-      await runGetFetchEventAnnotations(manualOnlyArgs);
-      expect(startServices[1].data.dataViews.create).not.toHaveBeenCalled();
-    });
     test('Sorts annotations by time, assigns correct timebuckets, filters out hidden and out of range annotations', async () => {
       const result = await runGetFetchEventAnnotations(manualOnlyArgs);
       expect(result!.rows).toMatchSnapshot();
@@ -340,7 +336,7 @@ describe('getFetchEventAnnotations', () => {
           {
             type: 'event_annotation_group',
             annotations: [manualAnnotationSamples.point1],
-            dataView1,
+            dataView: dataView1,
           },
           {
             type: 'event_annotation_group',

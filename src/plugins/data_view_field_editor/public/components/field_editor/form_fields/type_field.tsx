@@ -9,18 +9,27 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 
-import { UseField, RuntimeType } from '../../../shared_imports';
-import { RUNTIME_FIELD_OPTIONS } from '../constants';
+import { UseField } from '../../../shared_imports';
+import { RUNTIME_FIELD_OPTIONS, RUNTIME_FIELD_OPTIONS_PRIMITIVE } from '../constants';
+import { TypeSelection } from '../types';
 
 interface Props {
   isDisabled?: boolean;
+  includeComposite?: boolean;
+  path: string;
+  defaultValue?: TypeSelection;
 }
 
-export const TypeField = ({ isDisabled = false }: Props) => {
+export const TypeField = ({
+  isDisabled = false,
+  includeComposite,
+  path,
+  defaultValue = [RUNTIME_FIELD_OPTIONS_PRIMITIVE[0]],
+}: Props) => {
   return (
-    <UseField<Array<EuiComboBoxOptionOption<RuntimeType>>> path="type">
+    <UseField<TypeSelection> path={path}>
       {({ label, value, setValue }) => {
         if (value === undefined) {
           return null;
@@ -36,8 +45,8 @@ export const TypeField = ({ isDisabled = false }: Props) => {
                   }
                 )}
                 singleSelection={{ asPlainText: true }}
-                options={RUNTIME_FIELD_OPTIONS}
-                selectedOptions={value}
+                options={includeComposite ? RUNTIME_FIELD_OPTIONS : RUNTIME_FIELD_OPTIONS_PRIMITIVE}
+                selectedOptions={value || defaultValue}
                 onChange={(newValue) => {
                   if (newValue.length === 0) {
                     // Don't allow clearing the type. One must always be selected

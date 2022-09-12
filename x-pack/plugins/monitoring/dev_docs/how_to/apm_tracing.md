@@ -15,7 +15,11 @@ All data will be available on the shared APM cluster. See (internal) https://doc
 
 ## For ESS
 
-Add the settings into the `user_settings_override_yaml` deployment configuration within `kibana.plan.kibana` section as escaped YAML inside JSON.
+ESS clusters in the Elastic organization are configured to send data to the cloud overview cluster automatically (via the cloud `KibanaInternalApmSettings` class). Search for `label.deploymentId: <your deployment ID>` in a kibana dashboard or APM UI.
+
+For clusters outside the Elastic organization, or to send APM data to a different deployment, you can add the APM settings into the `user_settings_override_yaml` deployment configuration within `kibana.plan.kibana` section as escaped YAML inside JSON.
+
+For example:
 
 ```json
 {

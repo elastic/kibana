@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/core-analytics-server-mocks",
+  "owner": "@elastic/kibana-core",
+  "runtimeDeps": [],
+  "typeDeps": []
+}
