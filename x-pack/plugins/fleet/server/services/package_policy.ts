@@ -216,28 +216,33 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
   public async bulkCreate(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    packagePolicies: NewPackagePolicy[],
-    agentPolicyId: string,
+    packagePolicies: NewPackagePolicyWithId[],
+    agentPolicyId?: string,
     options?: { user?: AuthenticatedUser; bumpRevision?: boolean; force: true }
   ): Promise<PackagePolicy[]> {
-    await validateIsNotHostedPolicy(soClient, agentPolicyId);
+    if (agentPolicyId) {
+      await validateIsNotHostedPolicy(soClient, agentPolicyId);
+    }
     const isoDate = new Date().toISOString();
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { saved_objects } = await soClient.bulkCreate<PackagePolicySOAttributes>(
       packagePolicies.map((packagePolicy) => {
-        const packagePolicyId = uuid.v4();
+        const packagePolicyId = packagePolicy.id ?? uuid.v4();
+        const agentPolicyIdT = agentPolicyId ?? packagePolicy.policy_id!;
 
         const inputs = packagePolicy.inputs.map((input) =>
           assignStreamIdToInput(packagePolicyId, input)
         );
 
+        const { id, ...pkgPolicyWithoutId } = packagePolicy;
+
         return {
           type: SAVED_OBJECT_TYPE,
           id: packagePolicyId,
           attributes: {
-            ...packagePolicy,
+            ...pkgPolicyWithoutId,
             inputs,
-            policy_id: agentPolicyId,
+            policy_id: agentPolicyIdT,
             revision: 1,
             created_at: isoDate,
             created_by: options?.user?.username ?? 'system',
@@ -254,9 +259,18 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     // Assign it to the given agent policy
 
     if (options?.bumpRevision ?? true) {
-      await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
-        user: options?.user,
-      });
+      if (agentPolicyId) {
+        await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
+          user: options?.user,
+        });
+      } else {
+        const agentPolicyIds = new Set(packagePolicies.map((pkgPol) => pkgPol.policy_id!));
+        for (const agentPolicyIdT of agentPolicyIds) {
+          await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyIdT, {
+            user: options?.user,
+          });
+        }
+      }
     }
 
     return newSos.map((newSo) => ({
@@ -504,9 +518,34 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
   ): Promise<DeletePackagePoliciesResponse> {
     const result: DeletePackagePoliciesResponse = [];
 
+    const packagePolicies = await this.getByIDs(soClient, ids, { ignoreMissing: true });
+    if (!packagePolicies) {
+      return [];
+    }
+
+    const policyIds = packagePolicies.map((pP) => pP.policy_id);
+    const uniquePolicyIds = [...new Set(policyIds)];
+
+    const hostedAgentPolicies = [];
+
+    for (const policyId of uniquePolicyIds) {
+      try {
+        await validateIsNotHostedPolicy(
+          soClient,
+          policyId,
+          options?.force,
+          'Cannot remove integrations of hosted agent policy'
+        );
+      } catch (e) {
+        hostedAgentPolicies.push(policyId);
+      }
+    }
+
+    const deletePromises = [];
+
     for (const id of ids) {
       try {
-        const packagePolicy = await this.get(soClient, id);
+        const packagePolicy = packagePolicies.find((p) => p.id === id);
         if (!packagePolicy) {
           throw new Error('Package policy not found');
         }
@@ -515,31 +554,14 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
           throw new PackagePolicyRestrictionRelatedError(`Cannot delete package policy ${id}`);
         }
 
-        await validateIsNotHostedPolicy(
-          soClient,
-          packagePolicy?.policy_id,
-          options?.force,
-          'Cannot remove integrations of hosted agent policy'
-        );
-
-        const agentPolicy = await agentPolicyService
-          .get(soClient, packagePolicy.policy_id)
-          .catch((err) => {
-            if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-              appContextService
-                .getLogger()
-                .warn(`Agent policy ${packagePolicy.policy_id} not found`);
-              return null;
-            }
-            throw err;
-          });
-
-        await soClient.delete(SAVED_OBJECT_TYPE, id);
-        if (agentPolicy && !options?.skipUnassignFromAgentPolicies) {
-          await agentPolicyService.bumpRevision(soClient, esClient, packagePolicy.policy_id, {
-            user: options?.user,
-          });
+        if (hostedAgentPolicies.includes(packagePolicy.policy_id)) {
+          throw new HostedAgentPolicyRestrictionRelatedError(
+            'Cannot remove integrations of hosted agent policy'
+          );
         }
+
+        deletePromises.push(soClient.delete(SAVED_OBJECT_TYPE, id));
+
         result.push({
           id,
           name: packagePolicy.name,
@@ -557,6 +579,29 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
           success: false,
           ...ingestErrorToResponseOptions(error),
         });
+      }
+    }
+
+    await Promise.all(deletePromises);
+
+    if (!options?.skipUnassignFromAgentPolicies) {
+      const policyIdsResult = result.map((r) => r.policy_id);
+      const uniquePolicyIdsR = [...new Set(policyIdsResult)];
+      for (const policyId of uniquePolicyIdsR) {
+        if (policyId) {
+          const agentPolicy = await agentPolicyService.get(soClient, policyId).catch((err) => {
+            if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+              appContextService.getLogger().warn(`Agent policy ${policyId} not found`);
+              return null;
+            }
+            throw err;
+          });
+          if (agentPolicy) {
+            await agentPolicyService.bumpRevision(soClient, esClient, policyId, {
+              user: options?.user,
+            });
+          }
+        }
       }
     }
 
@@ -1265,6 +1310,10 @@ function _enforceFrozenVars(
   return resultVars;
 }
 
+export interface NewPackagePolicyWithId extends NewPackagePolicy {
+  id?: string;
+}
+
 export interface PackagePolicyServiceInterface {
   create(
     soClient: SavedObjectsClientContract,
@@ -1286,8 +1335,8 @@ export interface PackagePolicyServiceInterface {
   bulkCreate(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    packagePolicies: NewPackagePolicy[],
-    agentPolicyId: string,
+    packagePolicies: NewPackagePolicyWithId[],
+    agentPolicyId?: string,
     options?: { user?: AuthenticatedUser; bumpRevision?: boolean }
   ): Promise<PackagePolicy[]>;
 

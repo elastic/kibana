@@ -51,6 +51,41 @@ export class SyntheticsMonitorClient {
     }
   }
 
+  async addMonitorBulk(
+    monitors: Array<{ monitor: MonitorFields; id: string }>,
+    request: KibanaRequest,
+    savedObjectsClient: SavedObjectsClientContract
+  ) {
+    const privateConfigs: HeartbeatConfig[] = [];
+    const publicConfigs: HeartbeatConfig[] = [];
+
+    for (const monitorObj of monitors) {
+      const { monitor, id } = monitorObj;
+      const config = formatHeartbeatRequest({
+        monitor,
+        monitorId: id,
+        customHeartbeatId: monitor[ConfigKey.CUSTOM_HEARTBEAT_ID],
+      });
+
+      const { privateLocations, publicLocations } = this.parseLocations(config);
+      if (privateLocations.length > 0) {
+        privateConfigs.push(config);
+      }
+
+      if (publicLocations.length > 0) {
+        publicConfigs.push(config);
+      }
+    }
+
+    if (privateConfigs.length > 0) {
+      await this.privateLocationAPI.createMonitorBulk(privateConfigs, request, savedObjectsClient);
+    }
+
+    if (publicConfigs.length > 0) {
+      return await this.syntheticsService.addConfig(publicConfigs);
+    }
+  }
+
   async editMonitor(
     editedMonitor: MonitorFields,
     id: string,
@@ -81,6 +116,23 @@ export class SyntheticsMonitorClient {
   ) {
     await this.privateLocationAPI.deleteMonitor(monitor, request, savedObjectsClient);
     return await this.syntheticsService.deleteConfigs([monitor]);
+  }
+
+  async deleteMonitorBulk(
+    monitors: SyntheticsMonitorWithId[],
+    request: KibanaRequest,
+    savedObjectsClient: SavedObjectsClientContract
+  ) {
+    const privateDeletePromise = this.privateLocationAPI.deleteMonitorBulk(
+      monitors,
+      request,
+      savedObjectsClient
+    );
+
+    const publicDeletePromise = this.syntheticsService.deleteConfigs(monitors);
+    const [pubicResponse] = await Promise.all([publicDeletePromise, privateDeletePromise]);
+
+    return pubicResponse;
   }
 
   parseLocations(config: HeartbeatConfig) {

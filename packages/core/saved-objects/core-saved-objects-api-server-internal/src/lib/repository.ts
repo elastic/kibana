@@ -569,10 +569,12 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         // When method == 'index' the bulkResponse doesn't include the indexed
         // _source so we return rawMigratedDoc but have to spread the latest
         // _seq_no and _primary_term values from the rawResponse.
-        return this._rawToSavedObject({
+
+        const resultT = this._rawToSavedObject({
           ...rawMigratedDoc,
           ...{ _seq_no: rawResponse._seq_no, _primary_term: rawResponse._primary_term },
         });
+        return resultT;
       }),
     };
   }

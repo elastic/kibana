@@ -13,6 +13,8 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { deleteMonitorBulk } from '../routes/monitor_cruds/bulk_cruds/delete_monitor_bulk';
+import { syncNewMonitorBulk } from '../routes/monitor_cruds/bulk_cruds/add_monitor_bulk';
 import { SyntheticsMonitorClient } from './synthetics_monitor/synthetics_monitor_client';
 import {
   BrowserFields,
@@ -65,6 +67,8 @@ export class ProjectMonitorFormatter {
   private request: KibanaRequest;
   private subject?: Subject<unknown>;
 
+  private writeIntegrationPoliciesPermissions?: boolean;
+
   constructor({
     locations,
     privateLocations,
@@ -109,30 +113,79 @@ export class ProjectMonitorFormatter {
 
   public configureAllProjectMonitors = async () => {
     this.staleMonitorsMap = await this.getAllProjectMonitorsForProject();
-    for (const monitors of this.chunkRequests(this.monitors)) {
-      await Promise.all(
-        monitors.map((monitor) =>
-          this.configureProjectMonitor({ monitor: monitor as ProjectBrowserMonitor })
-        )
+
+    await this.syntheticsMonitorClient.privateLocationAPI.init(
+      this.savedObjectsClient,
+      this.request
+    );
+
+    const normalizedNewMonitors: BrowserFields[] = [];
+    const normalizedUpdateMonitors: BrowserFields[] = [];
+
+    const existingMonitors = await this.getExistingMonitors();
+
+    for (const monitor of this.monitors) {
+      const previousMonitor = existingMonitors.find(
+        (eM) => eM.attributes[ConfigKey.JOURNEY_ID] === monitor.id
       );
+
+      const normM = await this.validateProjectMonitor({
+        monitor,
+      });
+      if (normM) {
+        if (previousMonitor) {
+          this.updatedMonitors.push(monitor.id);
+          if (this.staleMonitorsMap[monitor.id]) {
+            this.staleMonitorsMap[monitor.id].stale = false;
+          }
+          normalizedUpdateMonitors.push(normM);
+        } else {
+          this.createdMonitors.push(monitor.id);
+          normalizedNewMonitors.push(normM);
+        }
+      }
+    }
+
+    await this.createMonitorsBulk(normalizedNewMonitors);
+
+    if (normalizedNewMonitors.length > 0) {
+      this.handleStreamingMessage({
+        message: `${normalizedNewMonitors.length}: monitors created successfully`,
+      });
+    }
+
+    await this.updateMonitorBulk(normalizedUpdateMonitors);
+
+    if (normalizedUpdateMonitors.length > 0) {
+      this.handleStreamingMessage({
+        message: `${normalizedUpdateMonitors.length}: monitors updated successfully`,
+      });
     }
 
     await this.handleStaleMonitors();
   };
 
-  private configureProjectMonitor = async ({ monitor }: { monitor: ProjectBrowserMonitor }) => {
+  validatePermissions = async ({ monitor }: { monitor: ProjectBrowserMonitor }) => {
+    if (this.writeIntegrationPoliciesPermissions || (monitor.privateLocations ?? []).length === 0) {
+      return;
+    }
+    const {
+      integrations: { writeIntegrationPolicies },
+    } = await this.server.fleet.authz.fromRequest(this.request);
+
+    this.writeIntegrationPoliciesPermissions = writeIntegrationPolicies;
+
+    if ((monitor.privateLocations ?? []).length > 0 && !writeIntegrationPolicies) {
+      throw new Error(
+        'Insufficient permissions. In order to configure private locations, you must have Fleet and Integrations write permissions. To resolve, please generate a new API key with a user who has Fleet and Integrations write permissions.'
+      );
+    }
+  };
+
+  validateProjectMonitor = async ({ monitor }: { monitor: ProjectBrowserMonitor }) => {
     try {
-      const {
-        integrations: { writeIntegrationPolicies },
-      } = await this.server.fleet.authz.fromRequest(this.request);
+      await this.validatePermissions({ monitor });
 
-      if (monitor.privateLocations?.length && !writeIntegrationPolicies) {
-        throw new Error(
-          'Insufficient permissions. In order to configure private locations, you must have Fleet and Integrations write permissions. To resolve, please generate a new API key with a user who has Fleet and Integrations write permissions.'
-        );
-      }
-
-      // check to see if monitor already exists
       const normalizedMonitor = normalizeProjectMonitor({
         locations: this.locations,
         privateLocations: this.privateLocations,
@@ -157,20 +210,7 @@ export class ProjectMonitorFormatter {
         return null;
       }
 
-      const previousMonitor = await this.getExistingMonitor(monitor.id);
-
-      if (previousMonitor) {
-        await this.updateMonitor(previousMonitor, normalizedMonitor);
-        this.updatedMonitors.push(monitor.id);
-        if (this.staleMonitorsMap[monitor.id]) {
-          this.staleMonitorsMap[monitor.id].stale = false;
-        }
-        this.handleStreamingMessage({ message: `${monitor.id}: monitor updated successfully` });
-      } else {
-        await this.createMonitor(normalizedMonitor);
-        this.createdMonitors.push(monitor.id);
-        this.handleStreamingMessage({ message: `${monitor.id}: monitor created successfully` });
-      }
+      return normalizedMonitor;
     } catch (e) {
       this.server.logger.error(e);
       this.failedMonitors.push({
@@ -205,7 +245,7 @@ export class ProjectMonitorFormatter {
 
       page++;
       totalMonitors = total;
-    } while (Object.keys(staleMonitors).length < totalMonitors);
+    } while (false);
     return staleMonitors;
   };
 
@@ -213,9 +253,17 @@ export class ProjectMonitorFormatter {
     return await this.savedObjectsClient.find<EncryptedSyntheticsMonitor>({
       type: syntheticsMonitorType,
       page,
-      perPage: 500,
+      perPage: 10000,
       filter: this.projectFilter,
     });
+  };
+
+  private getExistingMonitors = async (): Promise<
+    Array<SavedObjectsFindResult<EncryptedSyntheticsMonitor>>
+  > => {
+    const { total, saved_objects: savedObjects } = await this.getProjectMonitorsForProject(1);
+
+    return savedObjects;
   };
 
   private getExistingMonitor = async (
@@ -240,6 +288,24 @@ export class ProjectMonitorFormatter {
       savedObjectsClient: this.savedObjectsClient,
       request: this.request,
     });
+  };
+
+  private createMonitorsBulk = async (normalizedMonitors: BrowserFields[]) => {
+    await syncNewMonitorBulk({
+      normalizedMonitors,
+      monitors: normalizedMonitors,
+      server: this.server,
+      syntheticsMonitorClient: this.syntheticsMonitorClient,
+      savedObjectsClient: this.savedObjectsClient,
+      request: this.request,
+    });
+  };
+
+  private updateMonitorBulk = async (normalizedMonitors: BrowserFields[]) => {
+    for (const monitor of normalizedMonitors) {
+      const previousMonitor = await this.getExistingMonitor(monitor[ConfigKey.JOURNEY_ID]!);
+      await this.updateMonitor(previousMonitor, monitor);
+    }
   };
 
   private updateMonitor = async (
@@ -292,20 +358,20 @@ export class ProjectMonitorFormatter {
         (monitor) => monitor.stale === true
       );
 
-      for (const staleMonitors of this.chunkRequests(staleMonitorsData)) {
-        await Promise.all(
-          (staleMonitors as StaleMonitor[]).map((staleMonitor) => {
-            if (!this.keepStale) {
-              return this.deleteStaleMonitor({
-                monitorId: staleMonitor.savedObjectId,
-                journeyId: staleMonitor.journeyId,
-              });
-            } else {
-              this.staleMonitors.push(staleMonitor.journeyId);
-              return null;
-            }
-          })
-        );
+      for (const staleMons of this.chunkRequests(staleMonitorsData)) {
+        await deleteMonitorBulk({
+          monitorIds: staleMons.map((sm) => sm.savedObjectId),
+          savedObjectsClient: this.savedObjectsClient,
+          server: this.server,
+          syntheticsMonitorClient: this.syntheticsMonitorClient,
+          request: this.request,
+        });
+      }
+
+      if (staleMonitorsData.length > 0) {
+        this.handleStreamingMessage({
+          message: `Deleted ${staleMonitorsData.length} stale monitors`,
+        });
       }
     } catch (e) {
       this.server.logger.error(e);
@@ -321,9 +387,9 @@ export class ProjectMonitorFormatter {
   }) => {
     try {
       await deleteMonitor({
+        monitorId,
         savedObjectsClient: this.savedObjectsClient,
         server: this.server,
-        monitorId,
         syntheticsMonitorClient: this.syntheticsMonitorClient,
         request: this.request,
       });
@@ -346,7 +412,7 @@ export class ProjectMonitorFormatter {
   };
 
   private chunkRequests = (requests: unknown[]) => {
-    const perChunk = 50; // items per chunk
+    const perChunk = 1000; // items per chunk
 
     const result = requests.reduce<unknown[][]>((resultArray, item, index) => {
       const chunkIndex = Math.floor(index / perChunk);
