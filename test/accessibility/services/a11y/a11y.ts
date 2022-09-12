@@ -6,9 +6,15 @@
  * Side Public License, v 1.
  */
 
+import Fs from 'fs';
+import Path from 'path';
+
 import chalk from 'chalk';
+import dedent from 'dedent';
 import testSubjectToCss from '@kbn/test-subj-selector';
 import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/axe-config';
+import { REPO_ROOT } from '@kbn/utils';
+import { v4 as uuid } from 'uuid';
 
 import { FtrService } from '../../ftr_provider_context';
 import { AxeReport, printResult } from './axe_report';
@@ -42,7 +48,13 @@ export const normalizeResult = (report: any) => {
  */
 export class AccessibilityService extends FtrService {
   private readonly browser = this.ctx.getService('browser');
+  private readonly log = this.ctx.getService('log');
   private readonly Wd = this.ctx.getService('__webdriver__');
+
+  private readonly logPath = Path.resolve(
+    REPO_ROOT,
+    `data/ftr_a11y_report_${process.env.BUILDKITE_JOB_ID || uuid()}.txt`
+  );
 
   public async testAppSnapshot(options: TestOptions = {}) {
     const { excludeTestSubj, skipFailures } = options;
@@ -75,21 +87,34 @@ export class AccessibilityService extends FtrService {
       errorMsgs.push(printResult(chalk.red('VIOLATION'), result));
     }
 
+    if (!errorMsgs.length) {
+      return;
+    }
+
     // Throw a new Error if not skipping failures
-    if (!skipFailures && errorMsgs.length) {
+    if (!skipFailures) {
       throw new Error(`a11y report:\n${errorMsgs.join('\n')}`);
     }
 
-    // Log to the console only when skipping failures
-    if (skipFailures && errorMsgs.length) {
-      // eslint-disable-next-line no-console
-      console.info(`
-========================================
-* A11Y REPORT MODE ONLY
-========================================
-a11y report:\n${errorMsgs.join('\n')}
-      `);
+    // Append to a log file if we are skipping failures
+    if (!Fs.existsSync(this.logPath)) {
+      Fs.mkdirSync(Path.dirname(this.logPath), { recursive: true });
+      Fs.writeFileSync(
+        this.logPath,
+        dedent`
+          ========================================
+          * A11Y REPORT MODE ONLY
+          ========================================
+        ` + '\n\n'
+      );
     }
+
+    this.log.warning(
+      `Found ${errorMsgs.length} errors, writing them to the log file at ${this.logPath}`
+    );
+    Fs.writeFileSync(this.logPath, errorMsgs.join('\n\n'), {
+      flag: 'a',
+    });
   }
 
   private async captureAxeReport(context: AxeContext): Promise<AxeReport> {
