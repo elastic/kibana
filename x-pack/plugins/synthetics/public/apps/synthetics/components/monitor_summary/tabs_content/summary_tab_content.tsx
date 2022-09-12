@@ -6,16 +6,27 @@
  */
 
 import React from 'react';
-import { EuiTitle, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { MonitorDurationTrend } from './duration_trend';
 import { StepDurationPanel } from './step_duration_panel';
 import { AvailabilityPanel } from './availability_panel';
+import { DurationPanel } from './duration_panel';
 import { MonitorDetailsPanel } from './monitor_details_panel';
 import { AvailabilitySparklines } from './availability_sparklines';
 
 export const SummaryTabContent = () => {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <>
       <EuiFlexGroup>
@@ -28,9 +39,9 @@ export const SummaryTabContent = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          <EuiPanel style={{ paddingBottom: 0, height: 150 }}>
+          <EuiPanel css={{ padding: euiTheme.size.s, height: 158 }}>
             <EuiTitle size="xs">
-              <h3>{LAST_30DAYS_LABEL}</h3>
+              <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>{LAST_30DAYS_LABEL}</h3>
             </EuiTitle>
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem>
@@ -39,7 +50,9 @@ export const SummaryTabContent = () => {
               <EuiFlexItem>
                 <AvailabilitySparklines />
               </EuiFlexItem>
-              <EuiFlexItem>{/* TODO: Add duration metric*/}</EuiFlexItem>
+              <EuiFlexItem>
+                <DurationPanel />
+              </EuiFlexItem>
               <EuiFlexItem>{/* TODO: Add duration metric sparkline*/}</EuiFlexItem>
               <EuiFlexItem>{/* TODO: Add error metric and sparkline*/}</EuiFlexItem>
             </EuiFlexGroup>
@@ -50,7 +63,7 @@ export const SummaryTabContent = () => {
               <EuiPanel>
                 <EuiFlexGroup alignItems="center">
                   <EuiFlexItem grow={false}>
-                    <EuiTitle size="s">
+                    <EuiTitle size="xs">
                       <h3>{DURATION_TREND_LABEL}</h3>
                     </EuiTitle>
                   </EuiFlexItem>

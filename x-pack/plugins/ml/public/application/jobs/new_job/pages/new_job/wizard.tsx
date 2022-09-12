@@ -88,6 +88,7 @@ export const Wizard: FC<Props> = ({
     return () => {
       return subscription.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -102,12 +103,14 @@ export const Wizard: FC<Props> = ({
       setHighestStep(currentStep);
       setStringifiedConfigs(tempConfigs);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   useEffect(() => {
     jobCreator.subscribeToProgress(setProgress);
 
     setCurrentStep(firstWizardStep);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // disable the step links if the job is running
@@ -120,6 +123,7 @@ export const Wizard: FC<Props> = ({
     if (currentStep >= highestStep) {
       setHighestStep(currentStep);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep]);
 
   useModelMemoryEstimator(jobCreator, jobValidator, jobCreatorUpdate, jobCreatorUpdated);

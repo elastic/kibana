@@ -1,0 +1,130 @@
+{
+  "id": "@kbn/core-deprecations-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-deprecations-server-mocks",
+        "id": "def-server.deprecationsServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "deprecationsServiceMock",
+        "description": [],
+        "path": "packages/core/deprecations/core-deprecations-server-mocks/src/deprecations_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-deprecations-server-mocks",
+            "id": "def-server.deprecationsServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<DeprecationsServiceContract>"
+            ],
+            "path": "packages/core/deprecations/core-deprecations-server-mocks/src/deprecations_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-deprecations-server-mocks",
+            "id": "def-server.deprecationsServiceMock.createInternalSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalSetupContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "DeprecationRegistryProvider",
+              ">"
+            ],
+            "path": "packages/core/deprecations/core-deprecations-server-mocks/src/deprecations_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-deprecations-server-mocks",
+            "id": "def-server.deprecationsServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "DeprecationsServiceSetup",
+              ">"
+            ],
+            "path": "packages/core/deprecations/core-deprecations-server-mocks/src/deprecations_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-deprecations-server-mocks",
+            "id": "def-server.deprecationsServiceMock.createInternalStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalStartContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "InternalDeprecationsServiceStart",
+              ">"
+            ],
+            "path": "packages/core/deprecations/core-deprecations-server-mocks/src/deprecations_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-deprecations-server-mocks",
+            "id": "def-server.deprecationsServiceMock.createClient",
+            "type": "Function",
+            "tags": [],
+            "label": "createClient",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "DeprecationsClient",
+              ">"
+            ],
+            "path": "packages/core/deprecations/core-deprecations-server-mocks/src/deprecations_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

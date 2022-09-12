@@ -11,11 +11,13 @@ import { WebDriver, WebElement, By, until } from 'selenium-webdriver';
 import { Browsers } from '../remote/browsers';
 import { FtrService, FtrProviderContext } from '../../ftr_provider_context';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
+import { TimeoutOpt } from './types';
 
 export class FindService extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly config = this.ctx.getService('config');
   private readonly retry = this.ctx.getService('retry');
+  private readonly retryOnStale = this.ctx.getService('retryOnStale');
 
   private readonly WAIT_FOR_EXISTS_TIME = this.config.get('timeouts.waitForExists');
   private readonly POLLING_TIME = 500;
@@ -285,16 +287,33 @@ export class FindService extends FtrService {
     }, timeout);
   }
 
-  public async clickByCssSelectorWhenNotDisabled(
+  public async clickByCssSelectorWhenNotDisabled(selector: string, opts?: TimeoutOpt) {
+    const timeout = opts?.timeout ?? this.defaultFindTimeout;
+
+    await this.retryOnStale(async () => {
+      this.log.debug(`Find.clickByCssSelectorWhenNotDisabled(${selector}, timeout=${timeout})`);
+
+      const element = await this.byCssSelector(selector);
+      await element.moveMouseTo();
+      await this.driver.wait(until.elementIsEnabled(element._webElement), timeout);
+      await element.click();
+    });
+  }
+
+  public async clickByCssSelectorWhenNotDisabledWithoutRetry(
     selector: string,
-    { timeout } = { timeout: this.defaultFindTimeout }
+    opts?: TimeoutOpt
   ): Promise<void> {
-    this.log.debug(`Find.clickByCssSelectorWhenNotDisabled('${selector}') with timeout=${timeout}`);
+    const timeout = opts?.timeout ?? this.defaultFindTimeout;
+
+    this.log.debug(
+      `Find.clickByCssSelectorWhenNotDisabledWithoutRetry(${selector}, timeout=${timeout})`
+    );
 
     // Don't wrap this code in a retry, or stale element checks may get caught here and the element
     // will never be re-grabbed.  Let errors bubble, but continue checking for disabled property until
     // it's gone.
-    const element = await this.byCssSelector(selector, timeout);
+    const element = await this.byCssSelector(selector);
     await element.moveMouseTo();
     await this.driver.wait(until.elementIsEnabled(element._webElement), timeout);
     await element.click();

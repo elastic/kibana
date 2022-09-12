@@ -314,6 +314,17 @@ describe('TaskClaiming', () => {
           must: [
             {
               bool: {
+                must: [
+                  {
+                    term: {
+                      'task.enabled': true,
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              bool: {
                 should: [
                   {
                     bool: {
@@ -437,6 +448,17 @@ if (doc['task.runAt'].size()!=0) {
                 organic: {
                   bool: {
                     must: [
+                      {
+                        bool: {
+                          must: [
+                            {
+                              term: {
+                                'task.enabled': true,
+                              },
+                            },
+                          ],
+                        },
+                      },
                       {
                         bool: {
                           should: [
@@ -929,6 +951,17 @@ if (doc['task.runAt'].size()!=0) {
       expect(query).toMatchObject({
         bool: {
           must: [
+            {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      'task.enabled': true,
+                    },
+                  },
+                ],
+              },
+            },
             {
               bool: {
                 should: [
