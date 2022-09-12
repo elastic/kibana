@@ -13,13 +13,12 @@ interface Result {
 }
 
 export function parseFileName(fileName: string): Result {
-  const mimeType = mime.lookup(fileName);
   return {
     name: fileName
       .slice(0, 256)
       .trim()
       .replace(/\..*$/, '') // remove extension
       .replace(/[^a-z0-9\s]/gi, '_'), // replace invalid chars
-    mime: mimeType || undefined,
+    mime: mime.lookup(fileName) || undefined,
   };
 }
