@@ -87,13 +87,13 @@ describe('When entering data into the Console input', () => {
     render();
     enterCommand('cm', { inputOnly: true });
 
-    expect(getInputPlaceholderText()).toEqual('');
+    expect(renderResult.queryByTestId('test-inputPlaceholder')).toEqual(null);
   });
 
   it('should NOT display any hint test in footer if nothing is displayed', () => {
     render();
 
-    expect(getFooterText()?.trim()).toEqual('');
+    expect(getFooterText()?.trim()).toBeNull();
   });
 
   it('should display hint when a known command is typed', () => {
