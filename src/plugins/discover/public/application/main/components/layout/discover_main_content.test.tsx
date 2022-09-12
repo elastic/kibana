@@ -40,9 +40,11 @@ import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle'
 const mountComponent = async ({
   isPlainRecord = false,
   hideChart = false,
+  isTimeBased = true,
 }: {
   isPlainRecord?: boolean;
   hideChart?: boolean;
+  isTimeBased?: boolean;
 } = {}) => {
   const services = discoverServiceMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
@@ -145,7 +147,7 @@ const mountComponent = async ({
         }),
       },
     } as unknown as GetStateReturn,
-    isTimeBased: true,
+    isTimeBased,
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     onAddFilter: jest.fn(),
     onFieldEdited: jest.fn(),
@@ -203,6 +205,11 @@ describe('Discover main content component', () => {
     expect(component.find(DiscoverPanels).prop('mode')).toBe(DISCOVER_PANELS_MODE.FIXED);
   });
 
+  it('should set the panels mode to DISCOVER_PANELS_MODE.FIXED if isTimeBased is false', async () => {
+    const component = await mountComponent({ isTimeBased: false });
+    expect(component.find(DiscoverPanels).prop('mode')).toBe(DISCOVER_PANELS_MODE.FIXED);
+  });
+
   it('should set the panels mode to DISCOVER_PANELS_MODE.SINGLE if isPlainRecord is true', async () => {
     const component = await mountComponent({ isPlainRecord: true });
     expect(component.find(DiscoverPanels).prop('mode')).toBe(DISCOVER_PANELS_MODE.SINGLE);
@@ -219,6 +226,15 @@ describe('Discover main content component', () => {
 
   it('should not set a fixed height for DiscoverChart when panels mode is DISCOVER_PANELS_MODE.FIXED and hideChart is true', async () => {
     const component = await mountComponent({ hideChart: true });
+    setWindowWidth(component, euiThemeVars.euiBreakpoints.s);
+    const expectedHeight = component.find(DiscoverPanels).prop('initialTopPanelHeight');
+    expect(component.find(DiscoverChart).childAt(0).getDOMNode()).not.toHaveStyle({
+      height: `${expectedHeight}px`,
+    });
+  });
+
+  it('should not set a fixed height for DiscoverChart when panels mode is DISCOVER_PANELS_MODE.FIXED and isTimeBased is false', async () => {
+    const component = await mountComponent({ isTimeBased: false });
     setWindowWidth(component, euiThemeVars.euiBreakpoints.s);
     const expectedHeight = component.find(DiscoverPanels).prop('initialTopPanelHeight');
     expect(component.find(DiscoverChart).childAt(0).getDOMNode()).not.toHaveStyle({

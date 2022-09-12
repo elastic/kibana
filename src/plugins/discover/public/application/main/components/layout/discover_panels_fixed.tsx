@@ -7,6 +7,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { ReactElement } from 'react';
 
 export const DiscoverPanelsFixed = ({
@@ -20,6 +21,15 @@ export const DiscoverPanelsFixed = ({
   topPanel: ReactElement;
   mainPanel: ReactElement;
 }) => {
+  // By default a flex item has overflow: visible, min-height: auto, and min-width: auto.
+  // This can cause the item to overflow the flexbox parent when its content is too large.
+  // Setting the overflow to something other than visible (e.g. auto) resets the min-height
+  // and min-width to 0 and makes the item respect the flexbox parent's size.
+  // https://stackoverflow.com/questions/36247140/why-dont-flex-items-shrink-past-content-size
+  const mainPanelCss = css`
+    overflow: auto;
+  `;
+
   return (
     <EuiFlexGroup
       className={className}
@@ -29,7 +39,7 @@ export const DiscoverPanelsFixed = ({
       responsive={false}
     >
       {!hideTopPanel && <EuiFlexItem grow={false}>{topPanel}</EuiFlexItem>}
-      <EuiFlexItem>{mainPanel}</EuiFlexItem>
+      <EuiFlexItem css={mainPanelCss}>{mainPanel}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };

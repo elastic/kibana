@@ -101,14 +101,15 @@ export const DiscoverMainContent = ({
     []
   );
 
-  const showFixedPanels = useIsWithinBreakpoints(['xs', 's']) || isPlainRecord || state.hideChart;
+  const hideChart = state.hideChart || !isTimeBased;
+  const showFixedPanels = useIsWithinBreakpoints(['xs', 's']) || isPlainRecord || hideChart;
   const { euiTheme } = useEuiTheme();
   const topPanelHeight = euiTheme.base * 12;
   const minTopPanelHeight = euiTheme.base * 8;
   const minMainPanelHeight = euiTheme.base * 10;
 
   const chartClassName =
-    showFixedPanels && !state.hideChart
+    showFixedPanels && !hideChart
       ? css`
           height: ${topPanelHeight}px;
         `
