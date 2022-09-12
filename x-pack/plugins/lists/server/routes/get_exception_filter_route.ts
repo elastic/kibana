@@ -39,9 +39,17 @@ export const getExceptionFilterRoute = (router: ListsPluginRouter): void => {
         }
         const exceptionListClient = ctx.lists?.getExceptionListClient();
         const exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> = [];
-        const { type, alias = null, excludeExceptions = true, chunkSize = 1024 } = request.body;
-        if (type === 'exceptionListIds') {
-          for await (const { exceptionListId, namespaceType } of request.body.exceptionListIds) {
+        const {
+          type,
+          alias = null,
+          exclude_exceptions: excludeExceptions = true,
+          chunk_size: chunkSize = 1024,
+        } = request.body;
+        if (type === 'exception_list_ids') {
+          for (const {
+            exception_list_id: exceptionListId,
+            namespace_type: namespaceType,
+          } of request.body.exception_list_ids) {
             const exceptionList = await exceptionListClient?.findExceptionListItem({
               filter: undefined,
               listId: exceptionListId,
@@ -72,7 +80,7 @@ export const getExceptionFilterRoute = (router: ListsPluginRouter): void => {
           lists: exceptionItems,
         });
 
-        return response.ok({ body: filter ?? {} });
+        return response.ok({ body: { filter } ?? {} });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

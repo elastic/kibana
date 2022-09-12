@@ -571,11 +571,11 @@ export const getExceptionFilterFromExceptionListIds = async ({
   http.fetch(EXCEPTION_FILTER, {
     method: 'POST',
     body: JSON.stringify({
-      exceptionListIds,
-      type: 'exceptionListIds',
+      exception_list_ids: exceptionListIds,
+      type: 'exception_list_ids',
       alias,
-      excludeExceptions,
-      chunkSize,
+      exclude_exceptions: excludeExceptions,
+      chunk_size: chunkSize,
     }),
     signal,
   });
@@ -600,10 +600,10 @@ export const getExceptionFilterFromExceptions = async ({
     method: 'POST',
     body: JSON.stringify({
       exceptions,
-      type: 'exceptionItems',
+      type: 'exception_items',
       alias,
-      excludeExceptions,
-      chunkSize,
+      exclude_exceptions: excludeExceptions,
+      chunk_size: chunkSize,
     }),
     signal,
   });

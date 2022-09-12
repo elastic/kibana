@@ -25,7 +25,7 @@ export const findSmallListRoute = (router: ListsPluginRouter): void => {
       options: {
         tags: ['access:lists-read'],
       },
-      path: `${INTERNAL_LIST_URL}/_find_small`, // TODO: probably use a better name
+      path: `${INTERNAL_LIST_URL}/_find_lists_by_size`,
       validate: {
         query: buildRouteValidation(findListSchema),
       },

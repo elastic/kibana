@@ -115,7 +115,7 @@ const findSmallLists = async ({
   per_page,
   signal,
 }: ApiParams & FindListSchemaEncoded): Promise<FoundSmallListSchema> => {
-  return http.fetch(`${INTERNAL_LIST_URL}/_find_small`, {
+  return http.fetch(`${INTERNAL_LIST_URL}/_find_lists_by_size`, {
     method: 'GET',
     query: {
       cursor,
