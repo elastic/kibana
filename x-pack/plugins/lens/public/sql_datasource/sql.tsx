@@ -55,13 +55,6 @@ export function getSQLDatasource({
 }) {
   const getSuggestionsForState = (state: EsSQLPrivateState) => {
     return Object.entries(state.layers)?.map(([id, layer]) => {
-      // const reducedState: EsSQLPrivateState = {
-      //   ...state,
-      //   fieldList: state.fieldList,
-      //   layers: {
-      //     [id]: state.layers[id],
-      //   },
-      // };
       return {
         state: {
           ...state,
@@ -129,26 +122,9 @@ export function getSQLDatasource({
           fieldList = columnsFromQuery;
         }
       }
-      // if (context && 'sql' in context) {
-      //   const table = await fetchSql(context, dataViews, data, expressions);
-      //   const index = getIndexPatternFromSQLQuery(context.sql);
-      //   // todo hack some logic in for dates
-      //   const columns = table?.columns ?? [];
-      //   cachedFieldList['123'] = {
-      //     fields: columns ?? [],
-      //     singleRow: table?.rows.length === 1,
-      //   };
-      //   initState.layers['123'] = {
-      //     hideFilterBar: true,
-      //     query: context.sql,
-      //     index,
-      //     columns: columns.map((c) => ({ columnId: c.id, fieldName: c.id })),
-      //   };
-      // }
       return {
         ...initState,
         fieldList,
-        removedLayers: [],
         indexPatternRefs,
       };
     },
@@ -164,8 +140,6 @@ export function getSQLDatasource({
       const layer = Object.values(state?.layers)?.[0];
       const query = layer?.query;
       const columns = layer?.allColumns ?? [];
-      const removedLayer = state.removedLayers[0];
-      const newRemovedList = removedLayer ? state.removedLayers.slice(1) : state.removedLayers;
       const index =
         layer?.index ??
         (JSON.parse(localStorage.getItem('lens-settings') || '{}').indexPatternId ||
@@ -174,22 +148,19 @@ export function getSQLDatasource({
         ...state,
         layers: {
           ...state.layers,
-          [newLayerId]: removedLayer ? removedLayer.layer : blankLayer(index, query, columns),
+          [newLayerId]: blankLayer(index, query, columns),
         },
-        removedLayers: newRemovedList,
       };
     },
     createEmptyLayer() {
       return {
         indexPatternRefs: [],
         layers: {},
-        removedLayers: [],
         fieldList: [],
       };
     },
 
     removeLayer(state: EsSQLPrivateState, layerId: string) {
-      const deletedLayer = state.layers[layerId];
       const newLayers = {
         ...state.layers,
         [layerId]: {
@@ -197,17 +168,11 @@ export function getSQLDatasource({
           columns: [],
         },
       };
-      // delete newLayers[layerId];
-
-      const deletedFieldList = state.fieldList;
 
       return {
         ...state,
         layers: newLayers,
         fieldList: state.fieldList,
-        removedLayers: deletedLayer.query
-          ? [{ layer: { ...deletedLayer }, fieldList: deletedFieldList }, ...state.removedLayers]
-          : state.removedLayers,
       };
     },
 
@@ -230,25 +195,13 @@ export function getSQLDatasource({
     },
     isTimeBased: (state, indexPatterns) => {
       if (!state) return false;
-      // const { layers } = state;
-      // return (
-      //   Boolean(layers) &&
-      //   Object.values(layers).some((layer) => {
-      //     return (
-      //       Boolean(indexPatterns[layer.indexPatternId]?.timeFieldName) ||
-      //       layer.columnOrder
-      //         .filter((colId) => layer.columns[colId].isBucketed)
-      //         .some((colId) => {
-      //           const column = layer.columns[colId];
-      //           return (
-      //             isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column) &&
-      //             !column.params.ignoreTimeRange
-      //           );
-      //         })
-      //     );
-      //   })
-      // );
-      return true;
+      const { layers } = state;
+      return (
+        Boolean(layers) &&
+        Object.values(layers).some((layer) => {
+          return Boolean(indexPatterns[layer.index]?.timeFieldName);
+        })
+      );
     },
     getUsedDataView: (state: EsSQLPrivateState, layerId: string) => {
       return state.layers[layerId].index;
@@ -434,47 +387,10 @@ export function getSQLDatasource({
                 ...props.state.layers[layerId],
                 columns: [...currentLayer.columns, newColumn],
                 allColumns: [...currentLayer.allColumns, newColumn],
-                // columns: currentLayer.columns.map((c) =>
-                //   c.columnId !== target.columnId
-                //     ? c
-                //     : { ...c, fieldName: field?.fieldName ?? '', meta: field?.meta }
-                // ),
               },
             },
           });
         });
-        // const field = layers[layerId].columns.find((f) => f.columnId === source.id);
-        // const currentLayer = props.state.layers[layerId];
-        // const columnExists = currentLayer.columns.some((c) => c.columnId === source.columnId);
-        // const numCols = currentLayer.columns.filter((c) => c.fieldName === field?.fieldName);
-        // props.setState({
-        //   ...props.state,
-        //   // fieldList: field
-        //   //   ? [...fieldList, { id: target.columnId, name: field.name, meta: field.meta }]
-        //   //   : fieldList,
-        //   layers: {
-        //     ...props.state.layers,
-        //     [layerId]: {
-        //       ...props.state.layers[layerId],
-        //       columns: [
-        //         ...currentLayer.columns,
-        //         {
-        //           columnId: target.columnId,
-        //           customLabel: columnExists
-        //             ? `${field?.fieldName}[${numCols.length - 1}]`
-        //             : field?.fieldName ?? '',
-        //           fieldName: field?.fieldName ?? '',
-        //           meta: field?.meta,
-        //         },
-        //       ],
-        //       // columns: currentLayer.columns.map((c) =>
-        //       //   c.columnId !== target.columnId
-        //       //     ? c
-        //       //     : { ...c, fieldName: field?.fieldName ?? '', meta: field?.meta }
-        //       // ),
-        //     },
-        //   },
-        // });
         return true;
       }
       return false;

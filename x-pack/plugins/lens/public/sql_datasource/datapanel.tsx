@@ -105,7 +105,6 @@ export function EsSQLDataPanel({
         setState({
           ...tempState,
           fieldList: columnsFromQuery ?? [],
-          removedLayers: [],
           indexPatternRefs,
         });
       }

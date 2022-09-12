@@ -34,12 +34,7 @@ export interface EsSQLPersistedState {
 
 export type EsSQLPrivateState = EsSQLPersistedState & {
   indexPatternRefs: IndexPatternRef[];
-  autoMap?: boolean;
   fieldList: DatatableColumn[];
-  removedLayers: Array<{
-    layer: EsSQLLayer;
-    fieldList: DatatableColumn[];
-  }>;
 };
 
 export interface IndexPatternRef {

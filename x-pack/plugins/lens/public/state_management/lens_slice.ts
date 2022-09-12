@@ -624,32 +624,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         newVizState = activeVisualization.initialize(() => ids[0]);
       }
       const updater = datasourceMap[payload.newDatasourceId].insertLayer;
-      // let datasourceStates = state.datasourceStates;
       const currentVizId = ids[0];
-      // Object.keys(datasourceMap).forEach((datasourceId) => {
-      //   if (datasourceId !== payload.newDatasourceId) {
-      //     // const datasourceState = current(state).datasourceStates[datasourceId]
-      //     //   ? current(state).datasourceStates[datasourceId]?.state
-      //     //   : datasourceMap[datasourceId].createEmptyLayer(
-      //     //       currentVizId,
-      //     //       payload.currentIndexPatternId
-      //     //     );
-      //     const newLayerId = generateId();
-      //     const updatedState = datasourceMap[datasourceId].updateLayerId(
-      //       current(state).datasourceStates[datasourceId]?.state,
-      //       ids[0],
-      //       newLayerId
-      //     );
-      //     datasourceStates = {
-      //       [datasourceId]: {
-      //         isLoading: false,
-      //         state: updatedState,
-      //       },
-      //     };
-      //   }
-      // });
-      // console.log(payload);
-      // if (!payload.currentIndexPatternId) return;
       const datasourceState = current(state).datasourceStates[payload.newDatasourceId]
         ? current(state).datasourceStates[payload.newDatasourceId]?.state
         : datasourceMap[payload.newDatasourceId].createEmptyLayer(
@@ -660,12 +635,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       return {
         ...state,
         datasourceStates: {
-          // ...datasourceStates,
           [payload.newDatasourceId]: {
-            // state: updater(
-            //   current(state).datasourceStates[payload.newDatasourceId]?.state ?? null,
-            //   ids[0]
-            // ),
             state: updatedState,
             isLoading: false,
           },
