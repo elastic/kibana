@@ -45,7 +45,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
         ui: casesCapabilities.all,
       },
       read: {
-        api: ['bulkGetUserProfiles'],
+        api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
         app: [CASES_FEATURE_ID, 'kibana'],
         catalogue: [APP_ID],
         cases: {

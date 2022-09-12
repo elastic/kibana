@@ -8,9 +8,11 @@
 import type { Exception } from '../objects/exception';
 import { RULE_STATUS } from '../screens/create_new_rule';
 import {
-  ADD_EXCEPTIONS_BTN,
+  ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN,
+  ADD_EXCEPTIONS_BTN_FROM_VIEWER_HEADER,
   CLOSE_ALERTS_CHECKBOX,
   CONFIRM_BTN,
+  EXCEPTION_ITEM_VIEWER_SEARCH,
   FIELD_INPUT,
   LOADING_SPINNER,
   OPERATOR_INPUT,
@@ -65,14 +67,48 @@ export const addsFieldsToTimeline = (search: string, fields: string[]) => {
   closeFieldsBrowser();
 };
 
-export const openExceptionFlyoutFromRuleSettings = () => {
-  cy.get(ADD_EXCEPTIONS_BTN).click();
-  cy.get(LOADING_SPINNER).should('not.exist');
-  cy.get(FIELD_INPUT).should('be.visible');
+export const openExceptionFlyoutFromEmptyViewerPrompt = () => {
+  cy.root()
+    .pipe(($el) => {
+      $el.find(ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN).trigger('click');
+      return $el.find(FIELD_INPUT);
+    })
+    .should('be.visible');
 };
 
-export const addsExceptionFromRuleSettings = (exception: Exception) => {
-  openExceptionFlyoutFromRuleSettings();
+export const searchForExceptionItem = (query: string) => {
+  cy.get(EXCEPTION_ITEM_VIEWER_SEARCH).type(`${query}`).trigger('keydown', {
+    key: 'Enter',
+    keyCode: 13,
+    code: 'Enter',
+    type: 'keydown',
+  });
+};
+
+export const addExceptionFlyoutFromViewerHeader = () => {
+  cy.root()
+    .pipe(($el) => {
+      $el.find(ADD_EXCEPTIONS_BTN_FROM_VIEWER_HEADER).trigger('click');
+      return $el.find(FIELD_INPUT);
+    })
+    .should('be.visible');
+};
+
+export const addExceptionFromRuleDetails = (exception: Exception) => {
+  addExceptionFlyoutFromViewerHeader();
+  cy.get(FIELD_INPUT).type(`${exception.field}{downArrow}{enter}`);
+  cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
+  exception.values.forEach((value) => {
+    cy.get(VALUES_INPUT).type(`${value}{enter}`);
+  });
+  cy.get(CLOSE_ALERTS_CHECKBOX).click({ force: true });
+  cy.get(CONFIRM_BTN).click();
+  cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
+  cy.get(CONFIRM_BTN).should('not.exist');
+};
+
+export const addFirstExceptionFromRuleDetails = (exception: Exception) => {
+  openExceptionFlyoutFromEmptyViewerPrompt();
   cy.get(FIELD_INPUT).type(`${exception.field}{downArrow}{enter}`);
   cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
   exception.values.forEach((value) => {
@@ -89,13 +125,14 @@ export const goToAlertsTab = () => {
 };
 
 export const goToExceptionsTab = () => {
+  cy.get(EXCEPTIONS_TAB).should('exist');
   cy.get(EXCEPTIONS_TAB).click();
 };
 
 export const editException = () => {
-  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).click({ force: true });
+  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).eq(0).click({ force: true });
 
-  cy.get(EDIT_EXCEPTION_BTN).click({ force: true });
+  cy.get(EDIT_EXCEPTION_BTN).eq(0).click({ force: true });
 };
 
 export const removeException = () => {
