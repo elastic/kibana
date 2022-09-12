@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'react';
 
 import { useSavedQueryServices } from '../../../../../common/utils/saved_query_services';
-import { useAppToasts  } from '../../../../../common/hooks/use_app_toasts';
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import type { DefineStepRule } from '../types';
 
 export const useGetSavedQuery = (savedQueryId: string | undefined) => {
@@ -32,7 +32,7 @@ export const useGetSavedQuery = (savedQueryId: string | undefined) => {
           });
         })
         .catch((err) => {
-            addError(err, { title: 'Failed to fetch saved query' } )
+          addError(err, { title: 'Failed to fetch saved query' });
         })
         .finally(() => setIsSavedQueryLoading(false));
     }
