@@ -47,7 +47,9 @@ export type InputCaptureProps = PropsWithChildren<{
       'key' | 'altKey' | 'ctrlKey' | 'keyCode' | 'metaKey' | 'repeat' | 'shiftKey'
     >;
   }) => void;
+  /** Sets an interface that allows interactions with this component's focus/blur states */
   focusRef?: MutableRefObject<InputFocusInterface | null>;
+  /** Callback triggered whenever Focus/Blur events are triggered */
   onChangeFocus?: (hasFocus: boolean) => void;
 }>;
 
@@ -70,7 +72,7 @@ export const InputCapture = memo<InputCaptureProps>(
           return '';
         }
 
-        // Determine if the text selection is only from inside of the text input area
+        // Determine if the text selection is only from inside the text input area
         // (ex. User could have selected text that also capture content outside of the input area)
         if (
           focusEleRef.current?.contains(selection.focusNode) &&
@@ -79,6 +81,7 @@ export const InputCapture = memo<InputCaptureProps>(
           return selectionText;
         }
 
+        selection.removeAllRanges();
         return '';
       }
 
@@ -94,7 +97,7 @@ export const InputCapture = memo<InputCaptureProps>(
 
         // checking to ensure that the key is not a control character. Control character's `.key`
         // are at least two characters long and because we are handling `onKeyDown` we know that
-        // a printible `.key` will always be just one character long.
+        // a printable `.key` will always be just one character long.
         const newValue = /^[\w\d]{2}/.test(ev.key) ? '' : ev.key;
 
         const eventDetails = pick(ev, [

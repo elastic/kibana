@@ -162,42 +162,41 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
         payload: ({ textEntered: prevLeftOfCursor, rightOfCursor: prevRightOfCursor }) => {
           let inputText = new EnteredInput(prevLeftOfCursor, prevRightOfCursor.text);
 
-          inputText.addValue(value ?? '');
+          inputText.addValue(value ?? '', selection);
 
           switch (keyCode) {
-            // BACKSPACE = remove the last character from the text entered
+            // BACKSPACE
             case 8:
               inputText.backspaceChar(selection);
               break;
 
-            // DELETE = Remove the first character from the Right side of cursor
+            // DELETE
             case 46:
               inputText.deleteChar(selection);
               break;
 
-            // ENTER
-            // Execute command and blank out the input area
+            // ENTER  = Execute command and blank out the input area
             case 13:
               setCommandToExecute(inputText.getFullText());
               inputText = new EnteredInput('', '');
               break;
 
-            // ARROW LEFT = Move cursor left
+            // ARROW LEFT
             case 37:
               inputText.moveCursorTo('left');
               break;
 
-            // ARROW RIGHT = Move cursor right
+            // ARROW RIGHT
             case 39:
               inputText.moveCursorTo('right');
               break;
 
-            // HOME = Move cursor to the start of the input area
+            // HOME
             case 36:
               inputText.moveCursorTo('home');
               break;
 
-            // END = Move cursor to the end of the input area
+            // END
             case 35:
               inputText.moveCursorTo('end');
               break;
