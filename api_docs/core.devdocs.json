@@ -577,6 +577,10 @@
                 "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts"
               },
               {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.ts"
+              },
+              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/analytics/analytics_service.test.ts"
               },
@@ -587,6 +591,18 @@
               {
                 "plugin": "@kbn/core-analytics-server-mocks",
                 "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-mocks",
@@ -919,6 +935,10 @@
                 "path": "packages/core/execution-context/core-execution-context-browser-internal/src/execution_context_service.ts"
               },
               {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.ts"
+              },
+              {
                 "plugin": "cloud",
                 "path": "x-pack/plugins/cloud/public/plugin.test.ts"
               },
@@ -981,6 +1001,14 @@
               {
                 "plugin": "@kbn/core-elasticsearch-server-internal",
                 "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/register_analytics_context_provider.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
@@ -18604,6 +18632,10 @@
                 "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts"
               },
               {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.ts"
+              },
+              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/analytics/analytics_service.test.ts"
               },
@@ -18614,6 +18646,18 @@
               {
                 "plugin": "@kbn/core-analytics-server-mocks",
                 "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-mocks",
@@ -18946,6 +18990,10 @@
                 "path": "packages/core/execution-context/core-execution-context-browser-internal/src/execution_context_service.ts"
               },
               {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.ts"
+              },
+              {
                 "plugin": "cloud",
                 "path": "x-pack/plugins/cloud/public/plugin.test.ts"
               },
@@ -19008,6 +19056,14 @@
               {
                 "plugin": "@kbn/core-elasticsearch-server-internal",
                 "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/register_analytics_context_provider.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
@@ -21123,13 +21179,7 @@
               "{@link StatusServiceSetup}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.StatusServiceSetup",
-                "text": "StatusServiceSetup"
-              }
+              "StatusServiceSetup"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false,
@@ -21383,7 +21433,10 @@
         "description": [
           "\nStatus of core services.\n"
         ],
-        "path": "src/core/server/status/types.ts",
+        "signature": [
+          "CoreStatus"
+        ],
+        "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -21398,7 +21451,7 @@
               "ServiceStatus",
               "<unknown>"
             ],
-            "path": "src/core/server/status/types.ts",
+            "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -21413,7 +21466,7 @@
               "ServiceStatus",
               "<unknown>"
             ],
-            "path": "src/core/server/status/types.ts",
+            "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -36028,6 +36081,14 @@
                 "path": "packages/core/metrics/core-metrics-server-internal/src/logging/get_ops_metrics_log.ts"
               },
               {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/routes/status.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/routes/status.ts"
+              },
+              {
                 "plugin": "@kbn/core-usage-data-server-internal",
                 "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts"
               },
@@ -46420,7 +46481,7 @@
           "ServiceStatus",
           "<Meta>"
         ],
-        "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
+        "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46436,7 +46497,7 @@
             "signature": [
               "Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }> | Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }> | Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }> | Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>"
             ],
-            "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
+            "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -46449,7 +46510,7 @@
             "description": [
               "\nA high-level summary of the service status."
             ],
-            "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
+            "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -46465,7 +46526,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
+            "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -46481,7 +46542,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
+            "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -46497,7 +46558,7 @@
             "signature": [
               "Meta | undefined"
             ],
-            "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
+            "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -46906,7 +46967,10 @@
         "description": [
           "\nAPI for accessing status of Core and this plugin's dependencies as well as for customizing this plugin's status.\n"
         ],
-        "path": "src/core/server/status/types.ts",
+        "signature": [
+          "StatusServiceSetup"
+        ],
+        "path": "node_modules/@types/kbn__core-status-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46922,16 +46986,10 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreStatus",
-                "text": "CoreStatus"
-              },
+              "CoreStatus",
               ">"
             ],
-            "path": "src/core/server/status/types.ts",
+            "path": "node_modules/@types/kbn__core-status-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -46950,7 +47008,7 @@
               "ServiceStatus",
               "<unknown>>"
             ],
-            "path": "src/core/server/status/types.ts",
+            "path": "node_modules/@types/kbn__core-status-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -46970,7 +47028,7 @@
               "ServiceStatus",
               "<unknown>>) => void"
             ],
-            "path": "src/core/server/status/types.ts",
+            "path": "node_modules/@types/kbn__core-status-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -46987,7 +47045,7 @@
                   "ServiceStatus",
                   "<unknown>>"
                 ],
-                "path": "src/core/server/status/types.ts",
+                "path": "node_modules/@types/kbn__core-status-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -47010,7 +47068,7 @@
               "ServiceStatus",
               "<unknown>>>"
             ],
-            "path": "src/core/server/status/types.ts",
+            "path": "node_modules/@types/kbn__core-status-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -47029,7 +47087,7 @@
               "ServiceStatus",
               "<unknown>>"
             ],
-            "path": "src/core/server/status/types.ts",
+            "path": "node_modules/@types/kbn__core-status-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -47045,7 +47103,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "src/core/server/status/types.ts",
+            "path": "node_modules/@types/kbn__core-status-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -52214,7 +52272,7 @@
         "signature": [
           "Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }> | Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }> | Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }> | Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>"
         ],
-        "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
+        "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -52405,7 +52463,7 @@
         "signature": [
           "{ readonly available: Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }>; readonly degraded: Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }>; readonly unavailable: Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }>; readonly critical: Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>; }"
         ],
-        "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
+        "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
