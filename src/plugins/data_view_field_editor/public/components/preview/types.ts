@@ -6,9 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import React from 'react';
-import type { RuntimeField, RuntimeType } from '../../shared_imports';
+import { BehaviorSubject } from 'rxjs';
+import type {
+  RuntimeType,
+  RuntimeField,
+  SerializedFieldFormat,
+  RuntimePrimitiveTypes,
+} from '../../shared_imports';
 import type { RuntimeFieldPainlessError } from '../../types';
 
 export type From = 'cluster' | 'custom';
@@ -57,17 +62,39 @@ export interface Params {
   script: Required<RuntimeField>['script'] | null;
   format: SerializedFieldFormat | null;
   document: { [key: string]: unknown } | null;
+  // used for composite subfields
+  parentName: string | null;
 }
 
 export interface FieldPreview {
   key: string;
   value: unknown;
   formattedValue?: string;
+  type?: string;
 }
+
+export interface FieldTypeInfo {
+  name: string;
+  type: string;
+}
+
+export enum ChangeType {
+  UPSERT = 'upsert',
+  DELETE = 'delete',
+}
+export interface Change {
+  changeType: ChangeType;
+  type?: RuntimePrimitiveTypes;
+}
+
+export type ChangeSet = Record<string, Change>;
 
 export interface Context {
   fields: FieldPreview[];
+  fieldPreview$: BehaviorSubject<FieldPreview[] | undefined>;
   error: PreviewError | null;
+  fieldTypeInfo?: FieldTypeInfo[];
+  initialPreviewComplete: boolean;
   params: {
     value: Params;
     update: (updated: Partial<Params>) => void;

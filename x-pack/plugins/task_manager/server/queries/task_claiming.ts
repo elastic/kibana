@@ -43,6 +43,7 @@ import {
   SortByRunAtAndRetryAt,
   tasksClaimedByOwner,
   tasksOfType,
+  EnabledTask,
 } from './mark_available_tasks_as_claimed';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import {
@@ -384,6 +385,8 @@ export class TaskClaiming {
           : 'taskTypesToSkip'
     );
     const queryForScheduledTasks = mustBeAllOf(
+      // Task must be enabled
+      EnabledTask,
       // Either a task with idle status and runAt <= now or
       // status running or claiming with a retryAt <= now.
       shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt)

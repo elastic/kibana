@@ -24,12 +24,12 @@ export const useAvailableCasesOwners = (
   const { capabilities: kibanaCapabilities } = useKibana().services.application;
 
   return Object.entries(kibanaCapabilities).reduce(
-    (availableOwners: string[], [featureId, kibananCapability]) => {
+    (availableOwners: string[], [featureId, kibanaCapability]) => {
       if (!featureId.endsWith('Cases')) {
         return availableOwners;
       }
       for (const cap of capabilities) {
-        const hasCapability = !!kibananCapability[`${cap}_cases`];
+        const hasCapability = !!kibanaCapability[`${cap}_cases`];
         if (!hasCapability) {
           return availableOwners;
         }
