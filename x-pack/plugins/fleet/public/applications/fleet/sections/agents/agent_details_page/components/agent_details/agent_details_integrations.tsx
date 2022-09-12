@@ -126,11 +126,13 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
       return packageErrorUnits;
     }
 
-    for (let i = 0; i < agent.components?.length; i++) {
-      if (agent.components[i].type === packagePolicy.package?.name) {
-        packageErrorUnits.push(...filter(agent.components[i].units, { status: 'failed' }));
-      }
-    }
+    const filteredPackageComponents = filter(agent.components, {
+      type: packagePolicy.package?.name,
+    });
+
+    filteredPackageComponents.forEach((component) => {
+      packageErrorUnits.push(...filter(component.units, { status: 'failed' }));
+    });
     return packageErrorUnits;
   }, [agent.components, packagePolicy]);
 
