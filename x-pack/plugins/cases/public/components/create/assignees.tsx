@@ -116,6 +116,10 @@ const AssigneesFieldComponent: React.FC<FieldProps> = React.memo(
       []
     );
 
+    const isCurrentUserSelected = Boolean(
+      selectedOptions?.find((option) => option.value === currentUserProfile?.uid)
+    );
+
     return (
       <EuiFormRow
         id="createCaseAssignees"
@@ -124,7 +128,11 @@ const AssigneesFieldComponent: React.FC<FieldProps> = React.memo(
         labelAppend={OptionalFieldLabel}
         helpText={
           currentUserProfile ? (
-            <EuiLink data-test-subj="create-case-assign-yourself-link" onClick={onSelfAssign}>
+            <EuiLink
+              data-test-subj="create-case-assign-yourself-link"
+              onClick={onSelfAssign}
+              disabled={isCurrentUserSelected}
+            >
               {i18n.ASSIGN_YOURSELF}
             </EuiLink>
           ) : undefined
@@ -178,9 +186,8 @@ const AssigneesComponent: React.FC<Props> = ({ isLoading: isLoadingForm }) => {
     ) ?? [];
 
   const onSearchComboChange = (value: string) => {
-    setSearchTerm(value);
-
     if (!isEmpty(value)) {
+      setSearchTerm(value);
       setIsUserTyping(true);
     }
   };
