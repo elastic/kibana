@@ -11,6 +11,7 @@ import { TIMELINE_DRAFT_URL, TIMELINE_URL } from '@kbn/security-solution-plugin/
 import { TimelineResponse } from '@kbn/security-solution-plugin/common/types';
 import { TimelineInput } from '@kbn/security-solution-plugin/common/search_strategy';
 import moment from 'moment';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { FtrService } from '../../../functional/ftr_provider_context';
 
 export class TimelineTestService extends FtrService {
@@ -67,10 +68,9 @@ export class TimelineTestService extends FtrService {
       this.log.info(JSON.stringify(createdTimeline));
     });
 
-    const { savedObjectId: timelineId, version, ...timelineDoc } = createdTimeline;
+    const { savedObjectId: timelineId, version } = createdTimeline;
 
     const timelineUpdate: TimelineInput = {
-      ...(timelineDoc as TimelineInput),
       title,
       // Set date range to the last 1 year
       dateRange: {
@@ -109,9 +109,6 @@ export class TimelineTestService extends FtrService {
     version: string
   ): Promise<TimelineResponse> {
     return await this.supertest
-      // DEV NOTE/FYI:
-      // Although this API is a `patch`, it does not seem that it actually does a patch,
-      // so `updates` should always be the full timeline record
       .patch(TIMELINE_URL)
       .set('kbn-xsrf', 'true')
       .send({
@@ -133,5 +130,67 @@ export class TimelineTestService extends FtrService {
       })
       .then(this.getHttpResponseFailureHandler())
       .then((response) => response.body as TimelineResponse);
+  }
+
+  /**
+   * Get the KQL query that will filter the content of a timeline to display Endpoint alerts
+   * @param endpointAgentId
+   */
+  getEndpointAlertsKqlQuery(endpointAgentId?: string): {
+    expression: string;
+    esQuery: ReturnType<typeof toElasticsearchQuery>;
+  } {
+    const expression = [
+      'agent.type: "endpoint"',
+      'kibana.alert.rule.uuid : *',
+      ...(endpointAgentId ? [`agent.id: "${endpointAgentId}"`] : []),
+    ].join(' AND ');
+
+    const esQuery = toElasticsearchQuery(fromKueryExpression(expression));
+
+    return {
+      expression,
+      esQuery,
+    };
+  }
+
+  /**
+   * Crates a new Timeline and sets its `kqlQuery` so that Endpoint Alerts are displayed.
+   * Can be limited to an endpoint by providing its `agent.id`
+   *
+   * @param title
+   * @param endpointAgentId
+   */
+  async createTimelineForEndpointAlerts(
+    title: string,
+    {
+      endpointAgentId,
+    }: Partial<{
+      /** If defined, then only alerts from the specific `agent.id` will be displayed */
+      endpointAgentId: string;
+    }>
+  ): Promise<TimelineResponse> {
+    const newTimeline = await this.createTimeline(title);
+
+    const { expression, esQuery } = this.getEndpointAlertsKqlQuery(endpointAgentId);
+
+    const updatedTimeline = await this.updateTimeline(
+      newTimeline.data.persistTimeline.timeline.savedObjectId,
+      {
+        title,
+        kqlQuery: {
+          filterQuery: {
+            kuery: {
+              kind: 'kuery',
+              expression,
+            },
+            serializedQuery: JSON.stringify(esQuery),
+          },
+        },
+      },
+      newTimeline.data.persistTimeline.timeline.version
+    );
+
+    return updatedTimeline;
   }
 }

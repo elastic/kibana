@@ -72,6 +72,18 @@ export const InactiveTasks: MustNotCondition = {
   },
 };
 
+export const EnabledTask: MustCondition = {
+  bool: {
+    must: [
+      {
+        term: {
+          'task.enabled': true,
+        },
+      },
+    ],
+  },
+};
+
 export const RunningOrClaimingTaskWithExpiredRetryAt: MustCondition = {
   bool: {
     must: [

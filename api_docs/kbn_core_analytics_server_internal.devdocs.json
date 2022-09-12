@@ -19,6 +19,7 @@
         "description": [],
         "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server-internal",
@@ -32,6 +33,7 @@
             ],
             "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-analytics-server-internal",
@@ -45,6 +47,7 @@
                 ],
                 "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -63,6 +66,7 @@
             ],
             "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -79,6 +83,7 @@
             ],
             "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -95,6 +100,7 @@
             ],
             "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -110,6 +116,7 @@
             ],
             "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }

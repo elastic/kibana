@@ -22,12 +22,17 @@ import { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { UserActionTimestamp } from '../timestamp';
 import { SnakeToCamelCase } from '../../../../common/types';
 import { UserActionUsernameWithAvatar } from '../avatar_username';
-import { UserActionCopyLink } from '../copy_link';
 import { ATTACHMENT_NOT_REGISTERED_ERROR, DEFAULT_EVENT_ATTACHMENT_TITLE } from './translations';
+import { UserActionContentToolbar } from '../content_toolbar';
+import * as i18n from '../translations';
 
-type BuilderArgs<C, R> = Pick<UserActionBuilderArgs, 'userAction' | 'caseData'> & {
+type BuilderArgs<C, R> = Pick<
+  UserActionBuilderArgs,
+  'userAction' | 'caseData' | 'handleDeleteComment'
+> & {
   comment: SnakeToCamelCase<C>;
   registry: R;
+  isLoading: boolean;
   getId: () => string;
   getAttachmentViewProps: () => object;
 };
@@ -64,8 +69,10 @@ export const createRegisteredAttachmentUserActionBuilder = <
   comment,
   registry,
   caseData,
+  isLoading,
   getId,
   getAttachmentViewProps,
+  handleDeleteComment,
 }: BuilderArgs<C, R>): ReturnType<UserActionBuilder> => ({
   // TODO: Fix this manually. Issue #123375
   // eslint-disable-next-line react/display-name
@@ -122,8 +129,15 @@ export const createRegisteredAttachmentUserActionBuilder = <
         timelineAvatar: attachmentViewObject.timelineAvatar,
         actions: (
           <>
-            <UserActionCopyLink id={comment.id} />
-            {attachmentViewObject.actions}
+            <UserActionContentToolbar
+              actions={['delete']}
+              id={comment.id}
+              deleteLabel={i18n.DELETE_COMMENT}
+              deleteConfirmTitle={i18n.DELETE_COMMENT_TITLE}
+              isLoading={isLoading}
+              onDelete={() => handleDeleteComment(comment.id)}
+              extraActions={attachmentViewObject.actions}
+            />
           </>
         ),
         children: renderer(props),

@@ -46,11 +46,11 @@ describe('createPrebuiltSavedObjects', () => {
     createPrebuiltSavedObjectsRoute(server.router, securitySetup);
   });
 
-  it.each([['hostRiskScoreDashboards', 'userRiskScoreDashboards']])(
+  it.each([['hostRiskScoreDashboards'], ['userRiskScoreDashboards']])(
     'should create saved objects from given template - %p',
-    async () => {
+    async (object) => {
       const response = await server.inject(
-        createPrebuiltSavedObjectsRequest('userRiskScoreDashboards'),
+        createPrebuiltSavedObjectsRequest(object),
         requestContextMock.convertContext(context)
       );
 

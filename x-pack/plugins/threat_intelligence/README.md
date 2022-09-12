@@ -19,13 +19,23 @@ Verify your node version [here](https://github.com/elastic/kibana/blob/main/.nod
 **Run Kibana:**
 
 > **Important:**
-> 
+>
 > See here to get your `kibana.yaml` to enable the Threat Intelligence plugin.
 
 ```
 yarn kbn reset && yarn kbn bootstrap
 yarn start --no-base-path
 ```
+
+### Performance
+
+You can generate large volumes of threat indicators on demand with the following script:
+
+```
+node scripts/generate_indicators.js
+```
+
+see the file in order to adjust the amount of indicators generated. The default is one million.
 
 ### Useful hints
 
@@ -45,4 +55,4 @@ See [CONTRIBUTING.md](https://github.com/elastic/kibana/blob/main/x-pack/plugins
 
 ## Issues
 
-Please report any issues in [this GitHub project](https://github.com/orgs/elastic/projects/758/). 
+Please report any issues in [this GitHub project](https://github.com/orgs/elastic/projects/758/).

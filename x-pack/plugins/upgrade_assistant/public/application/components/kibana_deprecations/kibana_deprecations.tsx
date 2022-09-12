@@ -8,7 +8,12 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import uuid from 'uuid';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { EuiPageContent, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import {
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageHeader,
+  EuiSpacer,
+  EuiCallOut,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 
