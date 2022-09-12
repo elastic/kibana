@@ -8,8 +8,8 @@
 import { UserProfile } from '@kbn/security-plugin/common';
 import { userProfiles } from '../api.mock';
 
-export const suggestUserProfiles = async (): Promise<UserProfile[]> =>
-  Promise.resolve(userProfiles);
+export const suggestUserProfiles = async (): Promise<UserProfile[]> => userProfiles;
 
-export const bulkGetUserProfiles = async (): Promise<UserProfile[]> =>
-  Promise.resolve(userProfiles);
+export const bulkGetUserProfiles = async (): Promise<UserProfile[]> => userProfiles;
+
+export const getCurrentUserProfile = async (): Promise<UserProfile> => userProfiles[0];

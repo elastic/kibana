@@ -23,7 +23,6 @@ import {
   getCase,
   getCases,
   getCaseUserActions,
-  getReporters,
   getTags,
   patchCase,
   patchCasesStatus,
@@ -48,8 +47,6 @@ import {
   cases,
   caseUserActions,
   pushedCase,
-  reporters,
-  respReporters,
   tags,
   caseUserActionsSnake,
   casesStatusSnake,
@@ -200,6 +197,7 @@ describe('Cases API', () => {
         query: {
           ...DEFAULT_QUERY_PARAMS,
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          assignees: [],
           reporters: [],
           tags: [],
           owner: [SECURITY_SOLUTION_OWNER],
@@ -212,7 +210,8 @@ describe('Cases API', () => {
       await getCases({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
-          reporters: [...respReporters, { username: null, full_name: null, email: null }],
+          assignees: ['123'],
+          reporters: [{ username: 'username', full_name: null, email: null }],
           tags,
           status: CaseStatuses.open,
           search: 'hello',
@@ -225,7 +224,8 @@ describe('Cases API', () => {
         method: 'GET',
         query: {
           ...DEFAULT_QUERY_PARAMS,
-          reporters,
+          assignees: ['123'],
+          reporters: ['username'],
           tags: ['coke', 'pepsi'],
           search: 'hello',
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
@@ -250,6 +250,7 @@ describe('Cases API', () => {
         query: {
           ...DEFAULT_QUERY_PARAMS,
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          assignees: [],
           reporters: [],
           tags: [],
           severity: CaseSeverity.HIGH,
@@ -272,6 +273,7 @@ describe('Cases API', () => {
         query: {
           ...DEFAULT_QUERY_PARAMS,
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          assignees: [],
           reporters: [],
           tags: [],
         },
@@ -285,7 +287,8 @@ describe('Cases API', () => {
       await getCases({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
-          reporters: [...respReporters, { username: null, full_name: null, email: null }],
+          assignees: ['123'],
+          reporters: [{ username: undefined, full_name: undefined, email: undefined }],
           tags: weirdTags,
           status: CaseStatuses.open,
           search: 'hello',
@@ -298,7 +301,8 @@ describe('Cases API', () => {
         method: 'GET',
         query: {
           ...DEFAULT_QUERY_PARAMS,
-          reporters,
+          assignees: ['123'],
+          reporters: [],
           tags: ['(', '"double"'],
           search: 'hello',
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
@@ -375,29 +379,6 @@ describe('Cases API', () => {
       fetchMock.mockResolvedValue(caseUserActionsWithRegisteredAttachmentsSnake);
       const resp = await getCaseUserActions(basicCase.id, abortCtrl.signal);
       expect(resp).toEqual(caseUserActionsWithRegisteredAttachments);
-    });
-  });
-
-  describe('getReporters', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(respReporters);
-    });
-
-    test('should be called with correct check url, method, signal', async () => {
-      await getReporters(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/reporters`, {
-        method: 'GET',
-        signal: abortCtrl.signal,
-        query: {
-          owner: [SECURITY_SOLUTION_OWNER],
-        },
-      });
-    });
-
-    test('should return correct response', async () => {
-      const resp = await getReporters(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
-      expect(resp).toEqual(respReporters);
     });
   });
 
