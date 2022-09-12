@@ -18,7 +18,7 @@ import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../commo
  */
 export async function getActionStatuses(esClient: ElasticsearchClient): Promise<ActionStatus[]> {
   let actions = await _getActions(esClient);
-  const cancelledActionIds = await _getCancelledActionId(esClient);
+  const cancelledActions = await _getCancelledActions(esClient);
 
   // Fetch acknowledged result for every action
   actions = await pMap(
@@ -42,13 +42,40 @@ export async function getActionStatuses(esClient: ElasticsearchClient): Promise<
 
       const nbAgentsActioned = action.nbAgentsActioned || action.nbAgentsActionCreated;
       const complete = count === nbAgentsActioned;
-      const isCancelled = cancelledActionIds.indexOf(action.actionId) > -1;
+      const cancelledAction = cancelledActions.find((a) => a.actionId === action.actionId);
+      let completionTime: string | undefined;
+
+      if (complete) {
+        // querying the last action result for this action in case all agents acked, to report completion time
+        const { aggregations } = await esClient.search({
+          index: AGENT_ACTIONS_RESULTS_INDEX,
+          ignore_unavailable: true,
+          query: {
+            bool: {
+              must: [
+                {
+                  term: {
+                    action_id: action.actionId,
+                  },
+                },
+              ],
+            },
+          },
+          size: 0,
+          aggs: {
+            max_timestamp: { max: { field: '@timestamp' } },
+          },
+        });
+        completionTime = (aggregations?.max_timestamp as any).value_as_string;
+      }
 
       return {
         ...action,
         nbAgentsAck: count,
-        status: complete ? 'complete' : isCancelled ? 'cancelled' : action.status,
+        status: complete ? 'complete' : cancelledAction ? 'cancelled' : action.status,
         nbAgentsActioned,
+        cancellationTime: cancelledAction?.timestamp,
+        completionTime,
       };
     },
     { concurrency: 20 }
@@ -57,7 +84,9 @@ export async function getActionStatuses(esClient: ElasticsearchClient): Promise<
   return actions;
 }
 
-async function _getCancelledActionId(esClient: ElasticsearchClient) {
+async function _getCancelledActions(
+  esClient: ElasticsearchClient
+): Promise<Array<{ actionId: string; timestamp?: string }>> {
   const res = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
@@ -80,7 +109,10 @@ async function _getCancelledActionId(esClient: ElasticsearchClient) {
     },
   });
 
-  return res.hits.hits.map((hit) => hit._source?.data?.target_id as string);
+  return res.hits.hits.map((hit) => ({
+    actionId: hit._source?.data?.target_id as string,
+    timestamp: hit._source?.['@timestamp'],
+  }));
 }
 
 async function _getActions(esClient: ElasticsearchClient) {
@@ -131,6 +163,8 @@ async function _getActions(esClient: ElasticsearchClient) {
           type: hit._source?.type,
           nbAgentsActioned: hit._source?.total ?? 0,
           status: isExpired ? 'expired' : 'in progress',
+          expiration: hit._source?.expiration,
+          newPolicyId: hit._source?.data?.policy_id as string,
         };
       }
 

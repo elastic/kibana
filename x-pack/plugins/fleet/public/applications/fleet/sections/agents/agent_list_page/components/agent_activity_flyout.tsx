@@ -25,16 +25,30 @@ import {
 
 import type { ActionStatus } from '../../../../types';
 import { useActionStatus } from '../hooks';
-import { useStartServices } from '../../../../hooks';
+import { useGetAgentPolicies, useStartServices } from '../../../../hooks';
+import { SO_SEARCH_LIMIT } from '../../../../constants';
 
 export const AgentActivityFlyout: React.FunctionComponent<{ onClose: () => {} }> = ({
   onClose,
 }) => {
+  const { data: agentPoliciesData } = useGetAgentPolicies({
+    perPage: SO_SEARCH_LIMIT,
+  });
+
   const { currentActions, abortUpgrade } = useActionStatus(() => {}); // TODO refresh agent list
 
-  const inProgressActions = currentActions.filter((a) => a.status === 'in progress');
+  const getAgentPolicyName = (policyId: string) => {
+    const policy = agentPoliciesData?.items.find((item) => item.id === policyId);
+    return policy?.name ?? policyId;
+  };
 
-  const completedActions = currentActions.filter((a) => a.status !== 'in progress');
+  const currentActionsEnriched = currentActions
+    .slice(0, 10)
+    .map((a) => ({ ...a, newPolicyId: getAgentPolicyName(a.newPolicyId ?? '') }));
+
+  const inProgressActions = currentActionsEnriched.filter((a) => a.status === 'in progress');
+
+  const completedActions = currentActionsEnriched.filter((a) => a.status !== 'in progress');
 
   return (
     <>
@@ -122,13 +136,31 @@ const actionNames: {
 
 const inProgressTitleColor = '#0077CC';
 
+const formattedTime = (time?: string) => {
+  return time ? (
+    <>
+      <FormattedDate value={time} year="numeric" month="short" day="2-digit" />
+      &nbsp;
+      <FormattedTime value={time} />
+    </>
+  ) : null;
+};
+
 const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ action }) => {
   const completeTitle = (
-    <EuiText>{`${
-      action.nbAgentsAck === action.nbAgentsActioned
-        ? action.nbAgentsAck
-        : action.nbAgentsAck + ' of ' + action.nbAgentsActioned
-    } agents ${actionNames[action.type ?? 'ACTION'].completedText}`}</EuiText>
+    <EuiText>
+      <FormattedMessage
+        id="xpack.fleet.agentActivity.completedTitle"
+        defaultMessage="{nbAgents, plural, one {# agent} other {# agents}} {completedText}"
+        values={{
+          nbAgents:
+            action.nbAgentsAck === action.nbAgentsActioned
+              ? action.nbAgentsAck
+              : action.nbAgentsAck + ' of ' + action.nbAgentsActioned,
+          completedText: actionNames[action.type ?? 'ACTION'].completedText,
+        }}
+      />
+    </EuiText>
   );
 
   const displayByStatus: {
@@ -142,9 +174,20 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
     'in progress': {
       icon: <EuiLoadingSpinner size="m" />,
       title: (
-        <EuiText>{`${actionNames[action.type ?? 'ACTION'].inProgressText} ${
-          action.nbAgentsActioned
-        } agents `}</EuiText>
+        <EuiText>
+          <FormattedMessage
+            id="xpack.fleet.agentActivity.inProgressTitle"
+            defaultMessage="{inProgressText} {nbAgents, plural, one {# agent} other {# agents}} {reassignText}"
+            values={{
+              nbAgents: action.nbAgentsActioned,
+              inProgressText: actionNames[action.type ?? 'ACTION'].inProgressText,
+              reassignText:
+                action.type === 'POLICY_REASSIGN' && action.newPolicyId
+                  ? `to ${action.newPolicyId}`
+                  : '',
+            }}
+          />
+        </EuiText>
       ),
       titleColor: inProgressTitleColor,
       description: null,
@@ -154,13 +197,13 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
       title: completeTitle,
       titleColor: 'green',
       description:
-        action.type === 'POLICY_REASSIGN' ? (
+        action.type === 'POLICY_REASSIGN' && action.newPolicyId ? (
           <EuiText color="subdued">
-            Assigned to Agent policy 1. <br />
-            Completed
+            Assigned to {action.newPolicyId}. <br />
+            Completed {formattedTime(action.completionTime)}
           </EuiText>
         ) : (
-          <EuiText color="subdued">Completed</EuiText>
+          <EuiText color="subdued">Completed {formattedTime(action.completionTime)}</EuiText>
         ),
     },
     failed: {
@@ -175,7 +218,9 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
       title: (
         <EuiText>{`Agent ${actionNames[action.type ?? 'ACTION'].cancelledText} cancelled`}</EuiText>
       ),
-      description: <EuiText color="subdued">Cancelled on</EuiText>,
+      description: (
+        <EuiText color="subdued">Cancelled on {formattedTime(action.cancellationTime)}</EuiText>
+      ),
     },
     expired: {
       icon: <EuiIcon size="m" type="alert" color="grey" />,
@@ -183,7 +228,7 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
       title: (
         <EuiText>{`Agent ${actionNames[action.type ?? 'ACTION'].cancelledText} expired`}</EuiText>
       ),
-      description: <EuiText color="subdued">Expired on</EuiText>,
+      description: <EuiText color="subdued">Expired on {formattedTime(action.expiration)}</EuiText>,
     },
   };
 
@@ -239,7 +284,7 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
         <EuiFlexItem>
           <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
             <EuiFlexItem grow={false}>
-              {isScheduled ? <EuiIcon type="iInCircle" /> : <EuiLoadingSpinner size="m" />}
+              {isScheduled ? <EuiIcon type="clock" /> : <EuiLoadingSpinner size="m" />}
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText color={inProgressTitleColor}>
@@ -250,18 +295,6 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
                     values={{
                       nbAgents: action.nbAgentsActioned - action.nbAgentsAck,
                       version: action.version,
-                      date: (
-                        <>
-                          <FormattedDate
-                            value={action.startTime}
-                            year="numeric"
-                            month="short"
-                            day="2-digit"
-                          />
-                          &nbsp;
-                          <FormattedTime value={action.startTime} />
-                        </>
-                      ),
                     }}
                   />
                 ) : (
@@ -284,17 +317,7 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
               <EuiText color="subdued">
                 {isScheduled && action.startTime ? (
                   <>
-                    Scheduled for{' '}
-                    <b>
-                      <FormattedDate
-                        value={action.startTime}
-                        year="numeric"
-                        month="short"
-                        day="2-digit"
-                      />
-                      &nbsp;
-                      <FormattedTime value={action.startTime} />
-                    </b>
+                    Scheduled for <b>{formattedTime(action.startTime)}</b>
                     .<br />
                   </>
                 ) : null}
