@@ -27,6 +27,8 @@ import { ACTION_INVESTIGATE_IN_TIMELINE } from '../translations';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { getField } from '../../../../helpers';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
+import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 
 interface UseInvestigateInTimelineActionProps {
   ecsRowData?: Ecs | Ecs[] | null;
@@ -42,6 +44,7 @@ export const useInvestigateInTimeline = ({
     data: { search: searchStrategyClient, query },
   } = useKibana().services;
   const dispatch = useDispatch();
+  const { startTransaction } = useStartTransaction();
 
   const { services } = useKibana();
   const { getExceptionFilterFromIds } = useApi(services.http);
@@ -130,6 +133,7 @@ export const useInvestigateInTimeline = ({
   );
 
   const investigateInTimelineAlertClick = useCallback(async () => {
+    startTransaction({ name: ALERTS_ACTIONS.INVESTIGATE_IN_TIMELINE });
     if (onInvestigateInTimelineAlertClick) {
       onInvestigateInTimelineAlertClick();
     }
@@ -143,6 +147,7 @@ export const useInvestigateInTimeline = ({
       });
     }
   }, [
+    startTransaction,
     createTimeline,
     ecsRowData,
     onInvestigateInTimelineAlertClick,

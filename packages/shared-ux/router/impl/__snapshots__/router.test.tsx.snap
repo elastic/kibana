@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Route component prop renders 1`] = `
+<Route
+  component={[Function]}
+/>
+`;
+
+exports[`Route location renders as expected 1`] = `
+<Route
+  location={
+    Object {
+      "hash": "",
+      "key": "s5brde",
+      "pathname": "/app/wow",
+      "search": "",
+      "state": undefined,
+    }
+  }
+>
+  <MatchPropagator />
+</Route>
+`;
+
+exports[`Route render prop renders 1`] = `
+<Route
+  render={[Function]}
+/>
+`;
+
+exports[`Route renders 1`] = `
+<Route>
+  <MatchPropagator />
+</Route>
+`;

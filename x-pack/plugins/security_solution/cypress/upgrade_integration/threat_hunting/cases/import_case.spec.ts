@@ -13,7 +13,6 @@ import {
   ALL_CASES_NOT_PUSHED,
   ALL_CASES_NUMBER_OF_ALERTS,
   ALL_CASES_OPEN_CASES_STATS,
-  ALL_CASES_REPORTER,
   ALL_CASES_IN_PROGRESS_STATUS,
 } from '../../../screens/all_cases';
 import {
@@ -108,7 +107,6 @@ describe('Import case after upgrade', () => {
 
   it('Displays the correct case details on the cases page', () => {
     cy.get(ALL_CASES_NAME).should('have.text', importedCase.title);
-    cy.get(ALL_CASES_REPORTER).should('have.text', importedCase.initial);
     cy.get(ALL_CASES_NUMBER_OF_ALERTS).should('have.text', importedCase.numberOfAlerts);
     cy.get(ALL_CASES_COMMENTS_COUNT).should('have.text', importedCase.numberOfComments);
     cy.get(ALL_CASES_NOT_PUSHED).should('be.visible');
