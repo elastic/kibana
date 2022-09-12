@@ -22,6 +22,7 @@ import {
   templateExceptionList,
   addDefaultAdvancedPolicyConfigSettings,
   metricsResponseToValueListMetaData,
+  createTaskMetric,
 } from './helpers';
 import type { ESClusterInfo, ESLicense, ExceptionListItem } from './types';
 import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
@@ -904,6 +905,35 @@ describe('test metrics response to value list meta data', () => {
       lists: [],
       included_in_exception_lists_count: 0,
       used_in_indicator_match_rule_count: 0,
+    });
+  });
+});
+
+describe('test create task metrics', () => {
+  test('can succeed when all parameters are given', async () => {
+    const stubTaskName = 'test';
+    const stubPassed = true;
+    const stubStartTime = Date.now();
+    await new Promise(r => setTimeout(r, 11));
+    const response = createTaskMetric(stubTaskName, stubPassed, stubStartTime);
+    const {time_executed_in_ms, ...rest} = response;
+    expect(time_executed_in_ms).toBeGreaterThan(10);
+    expect(rest).toEqual({
+      name: 'test',
+      passed: true
+    });
+  });
+  test('can succeed when error given', async () => {
+    const stubTaskName = 'test';
+    const stubPassed = false;
+    const stubStartTime = Date.now();
+    const errorMessage = 'failed';
+    const response = createTaskMetric(stubTaskName, stubPassed, stubStartTime, errorMessage);
+    const {time_executed_in_ms, ...rest} = response;
+    expect(rest).toEqual({
+      name: 'test',
+      passed: false,
+      error_message: 'failed'
     });
   });
 });

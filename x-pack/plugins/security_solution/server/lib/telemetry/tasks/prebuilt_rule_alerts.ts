@@ -10,8 +10,8 @@ import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
 import type { ESClusterInfo, ESLicense, TelemetryEvent } from '../types';
 import type { TaskExecutionPeriod } from '../task';
-import { TELEMETRY_CHANNEL_DETECTION_ALERTS } from '../constants';
-import { batchTelemetryRecords } from '../helpers';
+import { TELEMETRY_CHANNEL_DETECTION_ALERTS, TASK_METRICS_CHANNEL } from '../constants';
+import { batchTelemetryRecords, createTaskMetric } from '../helpers';
 import { copyAllowlistedFields, prebuiltRuleAllowlistFields } from '../filterlists';
 
 export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: number) {
@@ -28,6 +28,8 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
       sender: ITelemetryEventsSender,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
+      const startTime = Date.now();
+      const taskName = 'Security Solution - Prebuilt Rule and Elastic ML Alerts Telemetry';
       try {
         const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
           receiver.fetchClusterInfo(),
@@ -76,10 +78,11 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
         for (const batch of batches) {
           await sender.sendOnDemand(TELEMETRY_CHANNEL_DETECTION_ALERTS, batch);
         }
-
+        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [createTaskMetric(taskName, true, startTime)]);
         return enrichedAlerts.length;
       } catch (err) {
         logger.debug('could not complete prebuilt alerts telemetry task');
+        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [createTaskMetric(taskName, true, startTime, err.message)]);
         return 0;
       }
     },
