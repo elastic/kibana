@@ -49,4 +49,3 @@ export interface AxeReport {
   incomplete: AxeResultGroup;
   violations: AxeResultGroup;
 }
-
