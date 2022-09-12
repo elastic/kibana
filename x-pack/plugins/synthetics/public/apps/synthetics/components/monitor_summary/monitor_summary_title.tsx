@@ -10,6 +10,7 @@ import { useParams } from 'react-router-dom';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { MonitorSummaryLastRunInfo } from './last_run_info';
 import { getMonitorStatusAction, selectMonitorStatus } from '../../state';
+import { RunTestManually } from './run_test_manually';
 
 export const MonitorSummaryTitle = () => {
   const dispatch = useDispatch();
@@ -23,9 +24,18 @@ export const MonitorSummaryTitle = () => {
   }, [dispatch, monitorId]);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs">
-      <EuiFlexItem>{data?.monitor.name}</EuiFlexItem>
-      <EuiFlexItem grow={false}>{data && <MonitorSummaryLastRunInfo ping={data} />}</EuiFlexItem>
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiFlexGroup direction="column" gutterSize="xs">
+          <EuiFlexItem>{data?.monitor.name}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {data && <MonitorSummaryLastRunInfo ping={data} />}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <RunTestManually />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
