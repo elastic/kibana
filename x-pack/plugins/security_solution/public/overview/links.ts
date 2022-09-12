@@ -85,6 +85,12 @@ export const entityAnalyticsLinks: LinkItem = {
   capabilities: [`${SERVER_APP_ID}.show`],
   experimentalKey: 'entityAnalyticsDashboardEnabled',
   licenseType: 'platinum',
+  isBeta: true,
+  betaOptions: {
+    text: i18n.translate('xpack.securitySolution.appLinks.technicalPreview', {
+      defaultMessage: 'technical preview',
+    }),
+  },
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.entityAnalytics', {
       defaultMessage: 'Entity Analytics',

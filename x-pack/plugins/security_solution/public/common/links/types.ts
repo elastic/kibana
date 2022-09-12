@@ -85,6 +85,12 @@ export interface LinkItem {
    */
   isBeta?: boolean;
   /**
+   * Customize the "Beta" badge content.
+   */
+  betaOptions?: {
+    text: string;
+  };
+  /**
    * Icon that is displayed on menu navigation landing page.
    * Only required for pages that are displayed inside a landing page.
    */

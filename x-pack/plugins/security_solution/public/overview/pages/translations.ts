@@ -76,3 +76,10 @@ export const GO_TO_DOCUMENTATION = i18n.translate(
     defaultMessage: 'View documentation',
   }
 );
+
+export const TECHNICAL_PREVIEW = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.technicalPreviewLabel',
+  {
+    defaultMessage: 'Technical Preview',
+  }
+);

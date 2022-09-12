@@ -156,7 +156,7 @@ const SolutionNavPanelCategories: React.FC<SolutionNavPanelCategoriesProps> = ({
 
 const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({ items, onClose }) => (
   <>
-    {items.map(({ id, href, onClick, label, description, isBeta }) => (
+    {items.map(({ id, href, onClick, label, description, isBeta, betaOptions }) => (
       <Fragment key={id}>
         <EuiDescriptionListTitle>
           <FlexLink
@@ -170,7 +170,7 @@ const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({ items, on
             }}
           >
             {label}
-            {isBeta && <NavItemBetaBadge />}
+            {isBeta && <NavItemBetaBadge text={betaOptions?.text} />}
           </FlexLink>
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>

@@ -21,4 +21,7 @@ export interface TabNavigationItemProps {
   name: string;
   isSelected: boolean;
   isBeta?: boolean;
+  betaOptions?: {
+    text: string;
+  };
 }
