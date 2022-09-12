@@ -32,7 +32,7 @@ export const useGetSavedQuery = (savedQueryId: string | undefined) => {
           });
         })
         .catch((err) => {
-          addError(err, { title: 'Failed to fetch saved query' });
+          addError(err, { title: 'Failed to load the saved query' });
         })
         .finally(() => setIsSavedQueryLoading(false));
     }

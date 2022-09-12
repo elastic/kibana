@@ -62,6 +62,8 @@ export const CREATE_AND_ENABLE_BTN = '[data-test-subj="create-enable"]';
 
 export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
 
+export const CUSTOM_QUERY_BAR = '[data-test-subj="detectionEngineStepDefineRuleQueryBar"]';
+
 export const THREAT_MAPPING_COMBO_BOX_INPUT =
   '[data-test-subj="threatMatchInput"] [data-test-subj="fieldAutocompleteComboBox"]';
 

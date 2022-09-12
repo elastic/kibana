@@ -10,14 +10,16 @@ import { getNewRule } from '../../objects/rule';
 import {
   DEFINE_CONTINUE_BUTTON,
   LOAD_QUERY_DYNAMICALLY_CHECKBOX,
+  CUSTOM_QUERY_BAR,
 } from '../../screens/create_new_rule';
+import { TOASTER } from '../../screens/alerts_detection_rules';
 import {
   RULE_NAME_HEADER,
   SAVED_QUERY_NAME_DETAILS,
   DEFINE_RULE_PANEL_PROGRESS,
 } from '../../screens/rule_details';
 
-import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
+import { goToRuleDetails, editFirstRule } from '../../tasks/alerts_detection_rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { createSavedQuery } from '../../tasks/api_calls/saved_queries';
 import { cleanKibana, deleteAlertsAndRules, deleteSavedQueries } from '../../tasks/common';
@@ -30,8 +32,9 @@ import {
 } from '../../tasks/create_new_rule';
 import { login, visit } from '../../tasks/login';
 import { getDetails } from '../../tasks/rule_details';
+import { createSavedQueryRule } from '../../tasks/api_calls/rules';
 
-import { RULE_CREATION } from '../../urls/navigation';
+import { RULE_CREATION, SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 
 const savedQueryName = 'custom saved query';
 const savedQueryQuery = 'process.name: test';
@@ -90,6 +93,28 @@ describe('Custom query rules', () => {
 
       cy.get(DEFINE_RULE_PANEL_PROGRESS).should('not.exist');
       getDetails(SAVED_QUERY_NAME_DETAILS).should('contain', savedQueryName);
+    });
+
+    context('Non existent saved query', () => {
+      const FAILED_TO_LOAD_ERROR = 'Failed to load the saved query';
+      beforeEach(() => {
+        createSavedQueryRule({ ...getNewRule(), savedId: 'non-existent' });
+      });
+      it('Shows error toast on details page when saved query can not be loaded', function () {
+        cy.visit(SECURITY_DETECTIONS_RULES_URL);
+
+        goToRuleDetails();
+
+        cy.get(TOASTER).should('contain', FAILED_TO_LOAD_ERROR);
+      });
+
+      it('Shows validation error on rule edit when saved query can not be loaded', function () {
+        cy.visit(SECURITY_DETECTIONS_RULES_URL);
+
+        editFirstRule();
+
+        cy.get(CUSTOM_QUERY_BAR).should('contain', FAILED_TO_LOAD_ERROR);
+      });
     });
   });
 });

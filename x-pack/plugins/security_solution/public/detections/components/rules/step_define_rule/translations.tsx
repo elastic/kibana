@@ -17,7 +17,7 @@ export const CUSTOM_QUERY_REQUIRED = i18n.translate(
 export const SAVED_QUERY_REQUIRED = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.savedQueryFieldRequiredError',
   {
-    defaultMessage: 'The saved query has failed to load. Select a new one or add a custom query.',
+    defaultMessage: 'Failed to load the saved query. Select a new one or add a custom query.',
   }
 );
 
