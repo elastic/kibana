@@ -439,6 +439,7 @@ export const installHostRiskScoreModule = async ({
     notifications,
     options: getRiskScoreIngestPipelineOptions(RiskScoreEntity.host),
   });
+
   /**
    * console_templates/enable_host_risk_score.console
    * Step 6 create ml_host_risk_score_{spaceId} index
@@ -451,6 +452,18 @@ export const installHostRiskScoreModule = async ({
       riskScoreEntity: RiskScoreEntity.host,
     }),
   });
+
+  /**
+   * console_templates/enable_host_risk_score.console
+   * Step 7 create transform: ml_hostriskscore_pivot_transform_{spaceId}
+   */
+  await createTransform({
+    http,
+    errorMessage: `${INSTALLATION_ERROR} - ${TRANSFORM_CREATION_ERROR_MESSAGE}`,
+    transformId: getRiskScorePivotTransformId(RiskScoreEntity.host, spaceId),
+    options: getCreateMLHostPivotTransformOptions({ spaceId }),
+  });
+
   /**
    * console_templates/enable_host_risk_score.console
    * Step 9 create ml_host_risk_score_latest_{spaceId} index
@@ -462,16 +475,7 @@ export const installHostRiskScoreModule = async ({
       riskScoreEntity: RiskScoreEntity.host,
     }),
   });
-  /**
-   * console_templates/enable_host_risk_score.console
-   * Step 7 create transform: ml_hostriskscore_pivot_transform_{spaceId}
-   */
-  await createTransform({
-    http,
-    errorMessage: `${INSTALLATION_ERROR} - ${TRANSFORM_CREATION_ERROR_MESSAGE}`,
-    transformId: getRiskScorePivotTransformId(RiskScoreEntity.host, spaceId),
-    options: getCreateMLHostPivotTransformOptions({ spaceId }),
-  });
+
   /**
    * console_templates/enable_host_risk_score.console
    * Step 10 create transform: ml_hostriskscore_latest_transform_{spaceId}
@@ -482,6 +486,7 @@ export const installHostRiskScoreModule = async ({
     transformId: getRiskScoreLatestTransformId(RiskScoreEntity.host, spaceId),
     options: getCreateLatestTransformOptions({ spaceId, riskScoreEntity: RiskScoreEntity.host }),
   });
+
   /**
    * console_templates/enable_host_risk_score.console
    * Step 8 Start the pivot transform
