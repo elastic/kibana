@@ -18,7 +18,7 @@ import { fetchCrawlerByIndexName, fetchCrawlers } from '../../lib/crawler/fetch_
 import { createIndex } from '../../lib/indices/create_index';
 import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices } from '../../lib/indices/fetch_indices';
-import { fetchMlInferencePipelineProcessors } from '../../lib/indices/fetch_ml_inference_pipeline_config';
+import { fetchMlInferencePipelineProcessors } from '../../lib/indices/fetch_ml_inference_pipeline_processors';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
@@ -268,7 +268,7 @@ export function registerIndexRoutes({
 
   router.get(
     {
-      path: '/internal/enterprise_search/indices/{indexName}/ml_inference_pipeline_processors',
+      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors',
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -279,13 +279,13 @@ export function registerIndexRoutes({
       const indexName = decodeURIComponent(request.params.indexName);
       const { client } = (await context.core).elasticsearch;
 
-      const mlInferencePipelineConfig = await fetchMlInferencePipelineProcessors(
+      const mlInferencePipelineProcessorConfigs = await fetchMlInferencePipelineProcessors(
         client.asCurrentUser,
         indexName
       );
 
       return response.ok({
-        body: mlInferencePipelineConfig,
+        body: mlInferencePipelineProcessorConfigs,
         headers: { 'content-type': 'application/json' },
       });
     })
