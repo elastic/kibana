@@ -112,6 +112,7 @@ const getCreateCommentUserAction = ({
     case CommentType.externalReference:
       const externalReferenceBuilder = createExternalReferenceAttachmentUserActionBuilder({
         userAction,
+        userProfiles,
         comment,
         externalReferenceAttachmentTypeRegistry,
         caseData,
