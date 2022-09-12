@@ -118,7 +118,9 @@ export const InferencePipelineCard: React.FC<IInferencePipeline> = ({
                     {modelTypes.length > 1 && (
                       <EuiFlexItem>
                         <EuiToolTip position="top" content={modelTypes.slice(1).join(', ')}>
-                          <EuiBadge color="hollow">+{modelTypes.length - 1}</EuiBadge>
+                          <EuiBadge data-test-subj="overflowModelTypesBadge" color="hollow">
+                            +{modelTypes.length - 1}
+                          </EuiBadge>
                         </EuiToolTip>
                       </EuiFlexItem>
                     )}
