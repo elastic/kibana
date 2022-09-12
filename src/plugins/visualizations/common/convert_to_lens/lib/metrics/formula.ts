@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import { convertToSchemaConfig } from '../../../vis_schemas';
 import { SchemaConfig } from '../../..';
 import { Operations } from '../../constants';
 import { isMetricWithField, getStdDeviationFormula } from '../convert';
@@ -16,9 +17,27 @@ import {
   isPercentileAgg,
   isPercentileRankAgg,
   isPipeline,
-  isSchemaConfig,
   isStdDevAgg,
 } from '../utils';
+
+type PipelineAggs = SchemaConfig<
+  | METRIC_TYPES.CUMULATIVE_SUM
+  | METRIC_TYPES.DERIVATIVE
+  | METRIC_TYPES.MOVING_FN
+  | METRIC_TYPES.AVG_BUCKET
+  | METRIC_TYPES.MAX_BUCKET
+  | METRIC_TYPES.MIN_BUCKET
+  | METRIC_TYPES.SUM_BUCKET
+>;
+
+type MetricAggsWithoutParams = SchemaConfig<
+  | METRIC_TYPES.AVG
+  | METRIC_TYPES.MAX
+  | METRIC_TYPES.MIN
+  | METRIC_TYPES.SUM
+  | METRIC_TYPES.CARDINALITY
+  | METRIC_TYPES.COUNT
+>;
 
 export const addTimeRangeToFormula = (reducedTimeRange?: string) => {
   return reducedTimeRange ? `, reducedTimeRange='${reducedTimeRange}'` : '';
@@ -40,12 +59,11 @@ const METRIC_AGGS_WITHOUT_PARAMS: string[] = [
 ];
 
 const getFormulaForAggsWithoutParams = (
-  agg: IAggConfig | SchemaConfig<METRIC_TYPES>,
-  selector: string,
+  agg: SchemaConfig<METRIC_TYPES>,
+  selector: string | undefined,
   reducedTimeRange?: string
 ) => {
-  const type = isSchemaConfig(agg) ? agg.aggType : (agg.type.name as METRIC_TYPES);
-  const op = SUPPORTED_METRICS[type];
+  const op = SUPPORTED_METRICS[agg.aggType];
   if (!op) {
     return null;
   }
@@ -55,13 +73,12 @@ const getFormulaForAggsWithoutParams = (
 };
 
 const getFormulaForPercentileRanks = (
-  agg: IAggConfig | SchemaConfig<METRIC_TYPES.PERCENTILE_RANKS>,
-  selector: string,
+  agg: SchemaConfig<METRIC_TYPES.PERCENTILE_RANKS>,
+  selector: string | undefined,
   reducedTimeRange?: string
 ) => {
-  const type = isSchemaConfig(agg) ? agg.aggType : (agg.type.name as METRIC_TYPES);
-  const value = isSchemaConfig(agg) ? Number(agg.aggId?.split('.')[1]) : agg.params.value;
-  const op = SUPPORTED_METRICS[type];
+  const value = Number(agg.aggId?.split('.')[1]);
+  const op = SUPPORTED_METRICS[agg.aggType];
   if (!op) {
     return null;
   }
@@ -71,13 +88,12 @@ const getFormulaForPercentileRanks = (
 };
 
 const getFormulaForPercentile = (
-  agg: IAggConfig | SchemaConfig<METRIC_TYPES.PERCENTILES>,
+  agg: SchemaConfig<METRIC_TYPES.PERCENTILES>,
   selector: string,
   reducedTimeRange?: string
 ) => {
-  const type = isSchemaConfig(agg) ? agg.aggType : (agg.type.name as METRIC_TYPES);
-  const percentile = isSchemaConfig(agg) ? Number(agg.aggId?.split('.')[1]) : agg.params.percentile;
-  const op = SUPPORTED_METRICS[type];
+  const percentile = Number(agg.aggId?.split('.')[1]);
+  const op = SUPPORTED_METRICS[agg.aggType];
   if (!op) {
     return null;
   }
@@ -88,83 +104,71 @@ const getFormulaForPercentile = (
   )})`;
 };
 
-const getFormulaForSubMetric = (agg: IAggConfig, reducedTimeRange?: string): string | null => {
-  const op = SUPPORTED_METRICS[agg.type.name as METRIC_TYPES];
+const getFormulaForSubMetric = (agg: SchemaConfig, reducedTimeRange?: string): string | null => {
+  const op = SUPPORTED_METRICS[agg.aggType];
   if (!op) {
     return null;
   }
 
   if (PARENT_PIPELINE_AGGS.includes(op.name)) {
-    return getFormulaForPipelineAgg(agg, reducedTimeRange);
+    return getFormulaForPipelineAgg(agg as PipelineAggs, reducedTimeRange);
   }
 
   if (METRIC_AGGS_WITHOUT_PARAMS.includes(op.name)) {
-    return getFormulaForAggsWithoutParams(agg, agg.params.field?.displayName, reducedTimeRange);
+    const metricAgg = agg as MetricAggsWithoutParams;
+
+    return getFormulaForAggsWithoutParams(
+      metricAgg,
+      metricAgg.aggParams && 'field' in metricAgg.aggParams
+        ? metricAgg.aggParams?.field
+        : undefined,
+      reducedTimeRange
+    );
   }
 
   if (op.name === Operations.PERCENTILE_RANK) {
-    return getFormulaForPercentileRanks(agg, agg.params.field?.displayName, reducedTimeRange);
+    const percentileRanksAgg = agg as SchemaConfig<METRIC_TYPES.PERCENTILE_RANKS>;
+
+    return getFormulaForPercentileRanks(
+      percentileRanksAgg,
+      percentileRanksAgg.aggParams?.field,
+      reducedTimeRange
+    );
   }
 
   return null;
 };
 
 export const getFormulaForPipelineAgg = (
-  agg:
-    | SchemaConfig<
-        | METRIC_TYPES.CUMULATIVE_SUM
-        | METRIC_TYPES.DERIVATIVE
-        | METRIC_TYPES.MOVING_FN
-        | METRIC_TYPES.AVG_BUCKET
-        | METRIC_TYPES.MAX_BUCKET
-        | METRIC_TYPES.MIN_BUCKET
-        | METRIC_TYPES.SUM_BUCKET
-      >
-    | IAggConfig,
+  agg: SchemaConfig<
+    | METRIC_TYPES.CUMULATIVE_SUM
+    | METRIC_TYPES.DERIVATIVE
+    | METRIC_TYPES.MOVING_FN
+    | METRIC_TYPES.AVG_BUCKET
+    | METRIC_TYPES.MAX_BUCKET
+    | METRIC_TYPES.MIN_BUCKET
+    | METRIC_TYPES.SUM_BUCKET
+  >,
   reducedTimeRange?: string
 ) => {
-  if (isSchemaConfig(agg)) {
-    const { aggType } = agg;
-    const supportedAgg = SUPPORTED_METRICS[aggType];
-    if (!supportedAgg) {
-      return null;
-    }
-
-    if (!agg.aggParams || !agg.aggParams.customMetric) {
-      return null;
-    }
-
-    const subFormula = getFormulaForSubMetric(agg.aggParams.customMetric);
-    if (subFormula === null) {
-      return null;
-    }
-
-    if (PARENT_PIPELINE_AGGS.includes(supportedAgg.name)) {
-      const formula = getFormulaFromMetric(supportedAgg);
-      return `${formula}(${subFormula})`;
-    }
-
-    return subFormula;
-  }
-
-  const op = SUPPORTED_METRICS[agg.type.name as METRIC_TYPES];
-  if (!op) {
-    return null;
-  }
-  if (!agg.params.customMetric) {
+  const { aggType } = agg;
+  const supportedAgg = SUPPORTED_METRICS[aggType];
+  if (!supportedAgg) {
     return null;
   }
 
-  const subFormula = getFormulaForSubMetric(
-    agg.params.customMetric as IAggConfig,
-    reducedTimeRange
-  );
-  if (!subFormula) {
+  if (!agg.aggParams || !agg.aggParams.customMetric) {
     return null;
   }
 
-  if (PARENT_PIPELINE_AGGS.includes(op.name)) {
-    const formula = getFormulaFromMetric(op);
+  const metricAgg = convertToSchemaConfig(agg.aggParams.customMetric);
+  const subFormula = getFormulaForSubMetric(metricAgg);
+  if (subFormula === null) {
+    return null;
+  }
+
+  if (PARENT_PIPELINE_AGGS.includes(supportedAgg.name)) {
+    const formula = getFormulaFromMetric(supportedAgg);
     return `${formula}(${subFormula})`;
   }
 

@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { Operations } from '../../constants';
-import { createColumn, createColumnFromCustomAgg, getFormat } from './column';
+import { createColumn, getFormat } from './column';
 import { SupportedMetric } from './supported_metrics';
 import { CommonColumnConverterArgs, MetricsWithField } from './types';
 import { SchemaConfig } from '../../../types';
@@ -105,31 +104,5 @@ export const convertMetricAggregationColumnWithoutSpecialParams = (
     }),
     params: { ...getFormat(agg.format) },
     timeShift: agg.aggParams?.timeShift,
-  };
-};
-
-export const convertСustomMetricAggregationColumnWithoutSpecialParams = (
-  aggregation: SupportedMetric,
-  { agg, dataView }: { agg: IAggConfig; dataView: DataView },
-  reducedTimeRange?: string
-): MetricAggregationColumnWithoutSpecialParams | null => {
-  if (!isSupportedAggregationWithoutParams(aggregation.name)) {
-    return null;
-  }
-
-  const sourceField: string = getFieldNameFromField(agg?.params?.field) ?? 'document';
-
-  const field = dataView.getFieldByName(sourceField);
-  if (!field && aggregation.isFieldRequired) {
-    return null;
-  }
-
-  return {
-    operationType: aggregation.name,
-    sourceField,
-    ...createColumnFromCustomAgg(agg, field, {
-      reducedTimeRange,
-    }),
-    params: {},
   };
 };

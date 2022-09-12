@@ -7,6 +7,7 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import { convertToSchemaConfig } from '../../../vis_schemas';
 import { SchemaConfig } from '../../..';
 import { Operations } from '../../constants';
 import {
@@ -20,8 +21,9 @@ import { getFormulaForPipelineAgg } from '../metrics';
 import { createColumn } from './column';
 import { createFormulaColumn } from './formula';
 import {
-  convertСustomMetricAggregationColumnWithoutSpecialParams,
+  convertMetricAggregationColumnWithoutSpecialParams,
   MetricAggregationColumnWithoutSpecialParams,
+  MetricsWithoutSpecialParams,
 } from './metric';
 import { SUPPORTED_METRICS } from './supported_metrics';
 import { CommonColumnConverterArgs, ParentPipelineMetric } from './types';
@@ -58,10 +60,11 @@ export const convertToParentPipelineAggColumns = (
   }
 
   if ((!customMetric.getField() && subAgg.name === 'count') || subAgg.name === 'sum') {
+    const metric = convertToSchemaConfig(customMetric) as SchemaConfig<MetricsWithoutSpecialParams>;
     // create column for sum or count
-    const subMetric = convertСustomMetricAggregationColumnWithoutSpecialParams(
+    const subMetric = convertMetricAggregationColumnWithoutSpecialParams(
       subAgg,
-      { agg: customMetric, dataView },
+      { agg: metric, dataView },
       reducedTimeRange
     );
     if (subMetric === null) {

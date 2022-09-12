@@ -13,6 +13,7 @@ import {
   IAggConfig,
 } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { convertToSchemaConfig } from '../../../vis_schemas';
 import { Column, SchemaConfig } from '../../..';
 import {
   convertToDateHistogramColumn,
@@ -93,29 +94,13 @@ export const convertBucketToColumns = (
   metricColumns: Column[],
   dropEmptyRowsInDateHistogram: boolean = false
 ) => {
-  if (isSchemaConfig(agg)) {
-    if (!agg.aggParams || !isSupportedBucketAgg(agg)) {
-      return null;
-    }
-    return getBucketColumns(agg.aggType, agg.aggParams, dataView, metricColumns, {
-      label: getLabel(agg),
-      isSplit,
-      dropEmptyRowsInDateHistogram,
-    });
-  } else {
-    const isTermsAgg = agg.type.name === 'terms';
-    const orderAgg = agg.getParam('orderAgg');
-    const aggParams = agg.serialize().params;
-    const aggType = agg.type.name as BUCKET_TYPES;
-    if (!aggParams || !SUPPORTED_BUCKETS.includes(aggType)) {
-      return null;
-    }
-    return getBucketColumns(
-      aggType,
-      isTermsAgg ? ({ ...aggParams, orderAgg } as AggParamsTerms) : aggParams,
-      dataView,
-      metricColumns,
-      { label: agg.makeLabel(), isSplit, dropEmptyRowsInDateHistogram }
-    );
+  const currentAgg = isSchemaConfig(agg) ? agg : convertToSchemaConfig(agg);
+  if (!currentAgg.aggParams || !isSupportedBucketAgg(currentAgg)) {
+    return null;
   }
+  return getBucketColumns(currentAgg.aggType, currentAgg.aggParams, dataView, metricColumns, {
+    label: getLabel(currentAgg),
+    isSplit,
+    dropEmptyRowsInDateHistogram,
+  });
 };
