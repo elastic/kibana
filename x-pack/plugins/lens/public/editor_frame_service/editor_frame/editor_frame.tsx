@@ -30,7 +30,7 @@ import {
 } from '../../state_management';
 import type { LensInspector } from '../../lens_inspector_service';
 import { ErrorBoundary, showMemoizedErrorNotification } from '../../lens_ui_errors';
-import { IndexPatternServiceAPI } from '../../indexpattern_service/service';
+import { IndexPatternServiceAPI } from '../../data_views_service/service';
 
 export interface EditorFrameProps {
   datasourceMap: DatasourceMap;
@@ -120,6 +120,7 @@ export function EditorFrame(props: EditorFrameProps) {
               core={props.core}
               plugins={props.plugins}
               datasourceMap={datasourceMap}
+              visualizationMap={visualizationMap}
               showNoDataPopover={props.showNoDataPopover}
               dropOntoWorkspace={dropOntoWorkspace}
               hasSuggestionForField={hasSuggestionForField}

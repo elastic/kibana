@@ -42,3 +42,7 @@ export const OTHER_DATA_SOURCE_TITLE = i18n.translate(
     defaultMessage: 'Others',
   }
 );
+
+export const LINK_COPY = i18n.translate('xpack.securitySolution.overview.ctiLinkSource', {
+  defaultMessage: 'Source',
+});

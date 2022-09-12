@@ -10,7 +10,7 @@ import type { Adapters } from '@kbn/inspector-plugin/common';
 import { KibanaContext } from '@kbn/data-plugin/public';
 import { getTimezone } from './application/lib/get_timezone';
 import { getUISettings, getDataStart, getCoreStart } from './services';
-import { ROUTES, UI_SETTINGS } from '../common/constants';
+import { ROUTES } from '../common/constants';
 
 import type { TimeseriesVisParams } from './types';
 import type { TimeseriesVisData } from '../common/types';
@@ -84,14 +84,6 @@ export const metricsRequestHandler = async ({
             ?.start(query.label ?? key, { searchSessionId })
             .json(query.body)
             .ok({ time: query.time, json: { rawResponse: query.response } });
-
-          if (
-            query.response &&
-            inspectorAdapters?.requests &&
-            config.get(UI_SETTINGS.ALLOW_CHECKING_FOR_FAILED_SHARDS)
-          ) {
-            data.search.showWarnings(inspectorAdapters.requests);
-          }
         });
 
         return visData;

@@ -20,7 +20,7 @@ import {
   getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../lib/helpers/transactions';
-import { calculateThroughput } from '../../lib/helpers/calculate_throughput';
+import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
 import {
   getLatencyAggregation,
   getLatencyValue,
@@ -126,7 +126,7 @@ export async function getServiceTransactionGroups({
           latencyAggregationType,
           aggregation: bucket.latency,
         }),
-        throughput: calculateThroughput({
+        throughput: calculateThroughputWithRange({
           start,
           end,
           value: bucket.doc_count,
