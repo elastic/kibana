@@ -188,7 +188,7 @@ A rule can have one of the following statuses:
 `pending`:: The rule has not yet run.  The rule was either just created, or enabled after being disabled.
 `unknown`:: A problem occurred when calculating the status. Most likely, something went wrong with the alerting code.
 
-Each alert also has one of the following statuses:
+Alerts also have statuses, for example:
 
 `active`:: The conditions for the rule are met, and actions should be generated according to the notification settings.
 `recovered`:: The conditions for the rule are no longer met.
