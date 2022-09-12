@@ -69,7 +69,7 @@ export class EncryptedSavedObjectsPlugin
         .update(config.encryptionKey)
         .digest('base64');
 
-      this.logger.info(`Hashed 'encryptionKey' for this instance: ${hashedEncryptionKey}`);
+      this.logger.info(`Hashed 'xpack.encryptedSavedObjects.encryptionKey' for this instance: ${hashedEncryptionKey}`);
     }
 
     const primaryCrypto = config.encryptionKey

@@ -47,7 +47,7 @@ describe('EncryptedSavedObjects Plugin', () => {
 
       expect(infoLogs.length).toBe(1);
       expect(infoLogs[0]).toEqual([
-        `Hashed 'encryptionKey' for this instance: WLbjNGKEm7aA4NfJHYyW88jHUkHtyF7ENHcF0obYGBU=`,
+        `Hashed 'xpack.encryptedSavedObjects.encryptionKey' for this instance: WLbjNGKEm7aA4NfJHYyW88jHUkHtyF7ENHcF0obYGBU=`,
       ]);
     });
   });
