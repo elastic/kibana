@@ -65,8 +65,6 @@ export async function queryStateToExpressionAst({
 
       // use ad-hoc data view if exists
       if (!dataViewId) {
-        // eslint-disable-next-line no-console
-        console.log('adHocDataViews', adHocDataViews);
         const adHocDataView = adHocDataViews.find(({ title }) => title === idxPattern);
         if (adHocDataView) {
           dataViewId = adHocDataView.id;

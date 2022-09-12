@@ -9,7 +9,7 @@ import { useMemo, useEffect, useState, useCallback } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { isEqual } from 'lodash';
 import { History } from 'history';
-import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import {
   isOfAggregateQueryType,
   getIndexPatternFromSQLQuery,
@@ -18,13 +18,7 @@ import {
 } from '@kbn/es-query';
 import { SavedSearch, getSavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import {
-  UPDATE_FILTER_REFERENCES_ACTION,
-  UPDATE_FILTER_REFERENCES_TRIGGER,
-} from '@kbn/unified-search-plugin/public';
-import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { useUrlTracking } from './use_url_tracking';
-import { usePersistedDataView } from '../../../hooks/use_persisted_data_view';
 import { getState } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
@@ -42,8 +36,7 @@ import { FetchStatus } from '../../types';
 import { getDataViewAppState } from '../utils/get_switch_data_view_app_state';
 import { DataTableRecord } from '../../../types';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
-import { getUiActions, getUrlTracker } from '../../../kibana_services';
-import { removeAdHocDataView } from '../utils/adhoc_data_views';
+import { useAdHocDataViews } from './use_adhoc_data_views';
 
 const MAX_NUM_OF_COLUMNS = 50;
 
@@ -113,6 +106,51 @@ export function useDiscoverState({
   }, [config, savedSearch.id, searchSessionManager, timefilter]);
 
   /**
+   * Function triggered when user changes data view in the sidebar
+   */
+  const onChangeDataView = useCallback(
+    async (id: string) => {
+      const nextDataView = await dataViews.get(id);
+      if (nextDataView && dataView) {
+        const nextAppState = getDataViewAppState(
+          dataView,
+          nextDataView,
+          state.columns || [],
+          (state.sort || []) as SortOrder[],
+          config.get(MODIFY_COLUMNS_ON_SWITCH),
+          config.get(SORT_DEFAULT_ORDER_SETTING),
+          state.query
+        );
+        setUrlTracking(nextDataView);
+        stateContainer.setAppState(nextAppState);
+      }
+      setExpandedDoc(undefined);
+    },
+    [
+      setUrlTracking,
+      config,
+      dataView,
+      dataViews,
+      setExpandedDoc,
+      state.columns,
+      state.query,
+      state.sort,
+      stateContainer,
+    ]
+  );
+
+  /**
+   * Adhoc data views functionality
+   */
+  const { adHocDataViewList, persistDataView, updateAdHocDataViewId } = useAdHocDataViews({
+    dataView,
+    dataViews,
+    stateContainer,
+    savedSearch,
+    onChangeDataView,
+  });
+
+  /**
    * Data fetching logic
    */
   const { data$, refetch$, reset, inspectorAdapters } = useSavedSearchData({
@@ -123,6 +161,7 @@ export function useDiscoverState({
     services,
     stateContainer,
     useNewFieldsApi,
+    adHocDataViewList,
   });
 
   const documentState: DataDocumentsMsg = useDataState(data$.documents$);
@@ -220,39 +259,6 @@ export function useDiscoverState({
   );
 
   /**
-   * Function triggered when user changes data view in the sidebar
-   */
-  const onChangeDataView = useCallback(
-    async (id: string) => {
-      const nextDataView = await dataViews.get(id);
-      if (nextDataView && dataView) {
-        const nextAppState = getDataViewAppState(
-          dataView,
-          nextDataView,
-          state.columns || [],
-          (state.sort || []) as SortOrder[],
-          config.get(MODIFY_COLUMNS_ON_SWITCH),
-          config.get(SORT_DEFAULT_ORDER_SETTING),
-          state.query
-        );
-        setUrlTracking(nextDataView);
-        stateContainer.setAppState(nextAppState);
-      }
-      setExpandedDoc(undefined);
-    },
-    [
-      setUrlTracking,
-      config,
-      dataView,
-      dataViews,
-      setExpandedDoc,
-      state.columns,
-      state.query,
-      state.sort,
-      stateContainer,
-    ]
-  );
-  /**
    * Function triggered when the user changes the query in the search bar
    */
   const onUpdateQuery = useCallback(
@@ -325,56 +331,6 @@ export function useDiscoverState({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config, documentState, dataViews]);
 
-  /**
-   * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
-   * This is to prevent duplicate ids messing with our system
-   */
-  const updateAdHocDataViewId = useCallback(
-    async (dataViewToUpdate: DataView) => {
-      const newDataView = await dataViews.create({ ...dataViewToUpdate.toSpec(), id: undefined });
-
-      dataViews.clearInstanceCache(dataViewToUpdate.id);
-      removeAdHocDataView(dataViewToUpdate.id!);
-      savedSearch.searchSource.setField('index', newDataView);
-
-      // update filters references
-      const uiActions = await getUiActions();
-      const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
-      const action = uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
-      action?.execute({
-        trigger,
-        fromDataView: dataViewToUpdate.id,
-        toDataView: newDataView.id,
-        usedDataViews: [],
-      } as ActionExecutionContext);
-
-      return newDataView;
-    },
-    [dataViews, savedSearch.searchSource]
-  );
-
-  const { openConfirmSavePrompt, updateSavedSearch } = usePersistedDataView(updateAdHocDataViewId);
-  const persistDataView = useCallback(async () => {
-    const currentDataView = savedSearch.searchSource.getField('index')!;
-    if (currentDataView && !currentDataView.isPersisted()) {
-      const createdDataView = await openConfirmSavePrompt(currentDataView);
-      if (createdDataView) {
-        savedSearch.searchSource.setField('index', createdDataView);
-        await onChangeDataView(createdDataView.id!);
-
-        // update saved search with saved data view
-        if (savedSearch.id) {
-          const currentState = stateContainer.appStateContainer.getState();
-          await updateSavedSearch({ savedSearch, dataView: createdDataView, state: currentState });
-        }
-        getUrlTracker().setTrackingEnabled(true);
-        return createdDataView;
-      }
-      return undefined;
-    }
-    return currentDataView;
-  }, [stateContainer, onChangeDataView, openConfirmSavePrompt, savedSearch, updateSavedSearch]);
-
   return {
     data$,
     dataView,
@@ -382,12 +338,13 @@ export function useDiscoverState({
     refetch$,
     resetSavedSearch,
     onChangeDataView,
-    persistDataView,
-    updateAdHocDataViewId,
     onUpdateQuery,
     searchSource,
     setState,
     state,
     stateContainer,
+    adHocDataViewList,
+    persistDataView,
+    updateAdHocDataViewId,
   };
 }

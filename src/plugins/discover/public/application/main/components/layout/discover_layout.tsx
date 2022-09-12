@@ -77,6 +77,7 @@ export function DiscoverLayout({
   stateContainer,
   persistDataView,
   updateAdHocDataViewId,
+  adHocDataViewList,
 }: DiscoverLayoutProps) {
   const {
     trackUiMetric,
@@ -258,6 +259,7 @@ export function DiscoverLayout({
         onFieldEdited={onFieldEdited}
         persistDataView={persistDataView}
         updateAdHocDataViewId={updateAdHocDataViewId}
+        adHocDataViewList={adHocDataViewList}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout

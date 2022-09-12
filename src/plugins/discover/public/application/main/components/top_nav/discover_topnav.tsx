@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
@@ -17,11 +17,6 @@ import { getTopNavLinks } from './get_top_nav_links';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { GetStateReturn } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
-import {
-  clearAdHocDataViews,
-  getAdHocDataViews,
-  setAdHocDataView,
-} from '../../utils/adhoc_data_views';
 
 export type DiscoverTopNavProps = Pick<
   DiscoverLayoutProps,
@@ -42,6 +37,7 @@ export type DiscoverTopNavProps = Pick<
   onFieldEdited: () => void;
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
   updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
+  adHocDataViewList: DataView[];
 };
 
 export const DiscoverTopNav = ({
@@ -61,6 +57,7 @@ export const DiscoverTopNav = ({
   onFieldEdited,
   persistDataView,
   updateAdHocDataViewId,
+  adHocDataViewList,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
 
@@ -75,19 +72,6 @@ export const DiscoverTopNav = ({
 
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
-
-  const [adHocDataViews, setAdHocDataViews] = useState<DataView[]>(getAdHocDataViews());
-
-  useEffect(() => {
-    if (!dataView.isPersisted()) {
-      setAdHocDataView(dataView);
-    }
-
-    setAdHocDataViews(getAdHocDataViews());
-  }, [dataView]);
-
-  // clear adHocDataViews before on unmount only
-  useEffect(() => () => clearAdHocDataViews(), []);
 
   const { AggregateQueryTopNavMenu } = navigation.ui;
 
@@ -219,7 +203,7 @@ export const DiscoverTopNav = ({
     onDataViewCreated: createNewDataView,
     onChangeDataView,
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
-    adHocDataViews,
+    adHocDataViews: adHocDataViewList,
   };
 
   const onTextBasedSavedAndExit = useCallback(

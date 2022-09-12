@@ -14,7 +14,7 @@ import { useDiscoverServices } from './use_discover_services';
 import { showConfirmPanel } from './show_confirm_panel';
 import { persistSavedSearch } from '../application/main/utils/persist_saved_search';
 
-export const usePersistedDataView = (
+export const useConfirmPersistencePrompt = (
   updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>
 ) => {
   const services = useDiscoverServices();

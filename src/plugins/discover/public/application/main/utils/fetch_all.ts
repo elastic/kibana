@@ -8,7 +8,7 @@
 import { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
-import { DataViewType } from '@kbn/data-views-plugin/public';
+import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { getRawRecordType } from './get_raw_record_type';
 import {
@@ -35,7 +35,6 @@ import {
 } from '../hooks/use_saved_search';
 import { DiscoverServices } from '../../../build_services';
 import { fetchSql } from './fetch_sql';
-import { getAdHocDataViews } from './adhoc_data_views';
 
 export interface FetchDeps {
   abortController: AbortController;
@@ -47,6 +46,7 @@ export interface FetchDeps {
   searchSessionId: string;
   services: DiscoverServices;
   useNewFieldsApi: boolean;
+  adHocDataViewList: DataView[];
 }
 
 /**
@@ -111,11 +111,16 @@ export function fetchAll(
     const isChartVisible =
       !hideChart && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP;
 
-    const adHocDataViews = getAdHocDataViews();
     // Start fetching all required requests
     const documents =
       useSql && query
-        ? fetchSql(query, services.dataViews, data, services.expressions, adHocDataViews)
+        ? fetchSql(
+            query,
+            services.dataViews,
+            data,
+            services.expressions,
+            fetchDeps.adHocDataViewList
+          )
         : fetchDocuments(searchSource.createCopy(), fetchDeps);
     const charts =
       isChartVisible && !useSql ? fetchChart(searchSource.createCopy(), fetchDeps) : undefined;

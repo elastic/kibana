@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -108,6 +109,7 @@ export const useSavedSearch = ({
   services,
   stateContainer,
   useNewFieldsApi,
+  adHocDataViewList,
 }: {
   initialFetchStatus: FetchStatus;
   savedSearch: SavedSearch;
@@ -116,6 +118,7 @@ export const useSavedSearch = ({
   services: DiscoverServices;
   stateContainer: GetStateReturn;
   useNewFieldsApi: boolean;
+  adHocDataViewList: DataView[];
 }) => {
   const { data, filterManager } = services;
   const timefilter = data.query.timefilter.timefilter;
@@ -158,7 +161,12 @@ export const useSavedSearch = ({
    */
   const refs = useRef<{
     autoRefreshDone?: AutoRefreshDoneFn;
+    adHocDataViewList?: DataView[];
   }>({});
+
+  useEffect(() => {
+    refs.current.adHocDataViewList = adHocDataViewList;
+  }, [adHocDataViewList]);
 
   /**
    * This part takes care of triggering the data fetching by creating and subscribing
@@ -203,6 +211,7 @@ export const useSavedSearch = ({
         searchSessionId: searchSessionManager.getNextSearchSessionId(),
         services,
         useNewFieldsApi,
+        adHocDataViewList: refs.current.adHocDataViewList || [],
       });
 
       // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
