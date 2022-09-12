@@ -42,7 +42,7 @@ const mappingsArray: Mappings = [
       RawIndicatorFieldId.FileVhash,
     ],
   ],
-  [['url'], [RawIndicatorFieldId.UrlOriginal]],
+  [['url'], [RawIndicatorFieldId.UrlFull]],
   [['domain', 'domain-name'], [RawIndicatorFieldId.UrlDomain]],
   [['x509-certificate', 'x509 serial'], [RawIndicatorFieldId.X509Serial]],
   [['email-addr'], [RawIndicatorFieldId.EmailAddress]],

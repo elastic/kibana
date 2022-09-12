@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import React, { useContext, VFC } from 'react';
+import moment from 'moment';
 import { DataProvider, QueryOperator } from '@kbn/timelines-plugin/common';
-import { useDispatch } from 'react-redux';
 import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { unwrapValue } from '../../../indicators/lib/unwrap_value';
+import { SecuritySolutionContext } from '../../../../containers/security_solution_context';
 import { IN_ICON_TEST_ID } from '../../../query_bar/components/filter_in_out';
-import { createTimeline, setSelectedDataView } from '../../actions';
 import { getIndicatorFieldAndValue } from '../../../indicators/lib/field_value';
 import {
   Indicator,
@@ -41,7 +42,8 @@ export interface AddToTimelineProps {
  */
 export const InvestigateInTimeline: VFC<AddToTimelineProps> = ({ data, testId }) => {
   const styles = useStyles();
-  const dispatch = useDispatch();
+
+  const securitySolutionContext = useContext(SecuritySolutionContext);
 
   const { key, value } = getIndicatorFieldAndValue(data, RawIndicatorFieldId.Name);
 
@@ -85,35 +87,14 @@ export const InvestigateInTimeline: VFC<AddToTimelineProps> = ({ data, testId })
     });
   }
 
-  // remove previous provider added to the timeline
-  const onClick = () => {
-    dispatch(
-      setSelectedDataView({
-        id: 'timeline',
-        selectedDataViewId: 'security-solution-default',
-        selectedPatterns: ['filebeat-*'],
-      })
-    );
+  const to = unwrapValue(data, RawIndicatorFieldId.TimeStamp) as string;
+  const from = moment(to).subtract(10, 'm').toISOString();
 
-    dispatch(
-      createTimeline({
-        columns: [
-          {
-            columnHeaderType: 'not-filtered',
-            id: '@timestamp',
-            initialWidth: 190,
-            type: 'date',
-          },
-        ],
-        dataViewId: 'security-solution-default',
-        dataProviders,
-        id: 'timeline-1',
-        indexNames: ['filebeat-*'],
-        show: true,
-        timelineType: 'default',
-      })
-    );
-  };
+  const investigateInTimelineClick = securitySolutionContext?.getUseInvestigateInTimeline({
+    dataProviders,
+    from,
+    to,
+  });
 
   return (
     <div data-test-subj={testId} css={styles.inlineFlex}>
@@ -129,7 +110,7 @@ export const InvestigateInTimeline: VFC<AddToTimelineProps> = ({ data, testId })
         iconSize="s"
         size="xs"
         color="primary"
-        onClick={onClick}
+        onClick={investigateInTimelineClick}
       />
     </div>
   );
