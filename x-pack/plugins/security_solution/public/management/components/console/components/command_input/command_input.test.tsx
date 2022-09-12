@@ -42,6 +42,10 @@ describe('When entering data into the Console input', () => {
     return renderResult.getByTestId('test-footer').textContent;
   };
 
+  const typeKeyboardKey = (key: string) => {
+    enterCommand(key, { inputOnly: true, useKeyboard: true });
+  };
+
   beforeEach(() => {
     const testSetup = getConsoleTestSetup();
 
@@ -124,6 +128,23 @@ describe('When entering data into the Console input', () => {
     expect(arrowButton).toBeDisabled();
   });
 
+  it('should show the arrow button as disabled if input has only whitespace entered and it is left to the cursor', () => {
+    render();
+    enterCommand(' ', { inputOnly: true });
+
+    const arrowButton = renderResult.getByTestId('test-inputTextSubmitButton');
+    expect(arrowButton).toBeDisabled();
+  });
+
+  it('should show the arrow button as disabled if input has only whitespace entered and it is right to the cursor', () => {
+    render();
+    enterCommand(' ', { inputOnly: true });
+    typeKeyboardKey('{ArrowLeft}');
+
+    const arrowButton = renderResult.getByTestId('test-inputTextSubmitButton');
+    expect(arrowButton).toBeDisabled();
+  });
+
   it('should execute correct command if arrow button is clicked', () => {
     render();
     enterCommand('isolate', { inputOnly: true });
@@ -198,10 +219,6 @@ describe('When entering data into the Console input', () => {
   describe('and keyboard special keys are pressed', () => {
     const getRightOfCursorText = () => {
       return renderResult.getByTestId('test-cmdInput-rightOfCursor').textContent;
-    };
-
-    const typeKeyboardKey = (key: string) => {
-      enterCommand(key, { inputOnly: true, useKeyboard: true });
     };
 
     beforeEach(() => {

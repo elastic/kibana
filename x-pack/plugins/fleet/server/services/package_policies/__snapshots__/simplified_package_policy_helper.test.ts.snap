@@ -15,6 +15,7 @@ Object {
             "type": "logs",
           },
           "enabled": true,
+          "release": "ga",
           "vars": Object {
             "ignore_older": Object {
               "type": "text",
@@ -48,6 +49,7 @@ Object {
             "type": "logs",
           },
           "enabled": true,
+          "release": "ga",
           "vars": Object {
             "ignore_older": Object {
               "type": "text",
@@ -89,6 +91,7 @@ Object {
             "type": "logs",
           },
           "enabled": false,
+          "release": "ga",
           "vars": Object {
             "interval": Object {
               "type": "text",
@@ -121,6 +124,7 @@ Object {
             "type": "logs",
           },
           "enabled": false,
+          "release": "ga",
           "vars": Object {
             "interval": Object {
               "type": "text",
@@ -203,6 +207,7 @@ Object {
             "type": "metrics",
           },
           "enabled": true,
+          "release": "ga",
           "vars": Object {
             "period": Object {
               "type": "text",

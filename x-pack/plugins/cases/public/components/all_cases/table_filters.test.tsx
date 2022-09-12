@@ -272,6 +272,21 @@ describe('CasesTableFilters ', () => {
 
       expect(onFilterChanged).toBeCalledWith({ owner: [] });
     });
+
+    it('does not select a solution on initial render', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <CasesTableFilters
+            {...props}
+            availableSolutions={[SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER]}
+          />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find(`[data-test-subj="options-filter-popover-button-Solution"]`).first().props()
+      ).toEqual(expect.objectContaining({ hasActiveFilters: false }));
+    });
   });
 
   describe('create case button', () => {
