@@ -11,7 +11,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('machine learning - short tests', function () {
+  describe('machine learning - anomaly detection', function () {
+    this.tags(['skipFirefox']);
+
     before(async () => {
       await ml.securityCommon.createMlRoles();
       await ml.securityCommon.createMlUsers();
@@ -25,13 +27,21 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.securityCommon.cleanMlRoles();
 
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/ecommerce');
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/categorization_small');
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/event_rate_nanos');
 
       await ml.testResources.resetKibanaTimeZone();
     });
 
-    loadTestFile(require.resolve('./pages'));
-    loadTestFile(require.resolve('./model_management'));
-    loadTestFile(require.resolve('./feature_controls'));
-    loadTestFile(require.resolve('./settings'));
+    loadTestFile(require.resolve('./single_metric_job'));
+    loadTestFile(require.resolve('./single_metric_job_without_datafeed_start'));
+    loadTestFile(require.resolve('./multi_metric_job'));
+    loadTestFile(require.resolve('./population_job'));
+    loadTestFile(require.resolve('./saved_search_job'));
+    loadTestFile(require.resolve('./advanced_job'));
+    loadTestFile(require.resolve('./categorization_job'));
+    loadTestFile(require.resolve('./date_nanos_job'));
+    loadTestFile(require.resolve('./custom_urls'));
   });
 }
