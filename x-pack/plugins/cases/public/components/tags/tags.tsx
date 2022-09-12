@@ -14,9 +14,11 @@ interface TagsProps {
   color?: string;
   gutterSize?: EuiBadgeGroupProps['gutterSize'];
 }
+
 const MyEuiBadge = styled(EuiBadge)`
   max-width: 200px;
 `;
+
 const TagsComponent: React.FC<TagsProps> = ({ tags, color = 'default', gutterSize }) => (
   <>
     {tags.length > 0 && (

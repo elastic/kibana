@@ -15,7 +15,7 @@ import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 jest.mock('../api');
 jest.mock('../common/lib/kibana');
 
-describe('useGetReporters', () => {
+describe('useGetCasesMetrics', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
