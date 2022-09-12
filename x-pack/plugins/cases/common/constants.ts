@@ -103,14 +103,17 @@ export const GENERAL_CASES_OWNER = APP_ID;
 
 export const OWNER_INFO = {
   [SECURITY_SOLUTION_OWNER]: {
+    appId: 'securitySolutionUI',
     label: 'Security',
     iconType: 'logoSecurity',
   },
   [OBSERVABILITY_OWNER]: {
+    appId: 'observability-overview',
     label: 'Observability',
     iconType: 'logoObservability',
   },
   [GENERAL_CASES_OWNER]: {
+    appId: 'management',
     label: 'Stack',
     iconType: 'casesApp',
   },
