@@ -30,7 +30,7 @@ import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/publ
 
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 
 import type { MapsStartApi, MapsSetupApi } from '@kbn/maps-plugin/public';
 import {
@@ -38,7 +38,6 @@ import {
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
-import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -62,16 +61,15 @@ export interface MlStartDependencies {
   maps?: MapsStartApi;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
   dataVisualizer: DataVisualizerPluginStart;
-  aiops: AiopsPluginStart;
   fieldFormats: FieldFormatsStart;
   dashboard: DashboardStart;
   charts: ChartsPluginStart;
   lens?: LensPublicStart;
   cases?: CasesUiStart;
+  security: SecurityPluginStart;
 }
 
 export interface MlSetupDependencies {
-  security?: SecurityPluginSetup;
   maps?: MapsSetupApi;
   licensing: LicensingPluginSetup;
   management?: ManagementSetup;
@@ -121,7 +119,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             unifiedSearch: pluginsStart.unifiedSearch,
             dashboard: pluginsStart.dashboard,
             share: pluginsStart.share,
-            security: pluginsSetup.security,
+            security: pluginsStart.security,
             licensing: pluginsSetup.licensing,
             management: pluginsSetup.management,
             licenseManagement: pluginsSetup.licenseManagement,
@@ -132,7 +130,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             kibanaVersion,
             triggersActionsUi: pluginsStart.triggersActionsUi,
             dataVisualizer: pluginsStart.dataVisualizer,
-            aiops: pluginsStart.aiops,
             usageCollection: pluginsSetup.usageCollection,
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,

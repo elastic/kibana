@@ -59,6 +59,39 @@
       },
       {
         "parentPluginId": "unifiedFieldList",
+        "id": "def-public.loadFieldExisting",
+        "type": "Function",
+        "tags": [],
+        "label": "loadFieldExisting",
+        "description": [],
+        "signature": [
+          "({\n  data,\n  dslQuery,\n  fromDate,\n  toDate,\n  timeFieldName,\n  dataViewsService,\n  uiSettingsClient,\n  dataView,\n}: FetchFieldExistenceParams) => Promise<{ indexPatternTitle: string; existingFieldNames: string[]; }>"
+        ],
+        "path": "src/plugins/unified_field_list/public/services/field_existing/load_field_existing.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.loadFieldExisting.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  data,\n  dslQuery,\n  fromDate,\n  toDate,\n  timeFieldName,\n  dataViewsService,\n  uiSettingsClient,\n  dataView,\n}",
+            "description": [],
+            "signature": [
+              "FetchFieldExistenceParams"
+            ],
+            "path": "src/plugins/unified_field_list/public/services/field_existing/load_field_existing.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
         "id": "def-public.loadFieldStats",
         "type": "Function",
         "tags": [],
@@ -810,6 +843,21 @@
     "interfaces": [],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-common.FIELD_EXISTENCE_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "FIELD_EXISTENCE_SETTING",
+        "description": [],
+        "signature": [
+          "\"lens:useFieldExistenceSampling\""
+        ],
+        "path": "src/plugins/unified_field_list/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "unifiedFieldList",
         "id": "def-common.PLUGIN_ID",
