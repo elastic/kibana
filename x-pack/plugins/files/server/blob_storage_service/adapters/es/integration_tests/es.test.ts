@@ -24,6 +24,7 @@ describe('Elasticsearch blob storage', () => {
   const sandbox = sinon.createSandbox();
 
   beforeAll(async () => {
+    ElasticsearchBlobStorageClient.configureConcurrentUpload(Infinity);
     const { startES, startKibana } = createTestServers({ adjustTimeout: jest.setTimeout });
     manageES = await startES();
     manageKbn = await startKibana();

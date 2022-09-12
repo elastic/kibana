@@ -15,7 +15,7 @@ import {
   EuiEmptyPrompt,
   EuiLoadingLogo,
   EuiOverlayMask,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiSpacer,
   EuiPageHeader,
 } from '@elastic/eui';

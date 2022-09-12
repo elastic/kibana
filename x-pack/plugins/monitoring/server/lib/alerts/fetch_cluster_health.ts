@@ -9,7 +9,7 @@ import { AlertCluster, AlertClusterHealth } from '../../../common/types/alerts';
 import { ElasticsearchSource } from '../../../common/types/es';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getNewIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 
 export async function fetchClusterHealth(
@@ -50,7 +50,11 @@ export async function fetchClusterHealth(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            createDatasetFilter('cluster_stats', 'cluster_stats', 'elasticsearch.cluster_stats'),
+            createDatasetFilter(
+              'cluster_stats',
+              'cluster_stats',
+              getElasticsearchDataset('cluster_stats')
+            ),
             {
               range: {
                 timestamp: {

@@ -27,7 +27,7 @@ import type {
   NodesVersionCompatibility,
   ClusterInfo,
 } from '@kbn/core-elasticsearch-server-internal';
-import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core-base-common';
+import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
 
 type MockedElasticSearchServicePreboot = jest.Mocked<ElasticsearchServicePreboot>;
 

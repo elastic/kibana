@@ -38,7 +38,7 @@ export interface WorkerData {
 
 const { bucketFrom, bucketTo, runOptions, workerIndex, version } = workerData as WorkerData;
 
-const { logger, apmEsClient } = getCommonServices(runOptions, l);
+const { logger, apmEsClient, apmIntakeClient } = getCommonServices(runOptions, l);
 const file = runOptions.file;
 let scenario: Scenario<Fields>;
 let events: EntityIterable<Fields>;
@@ -64,10 +64,11 @@ async function setup() {
     }
   };
   const aggregators: StreamAggregator[] = [new ServiceLatencyAggregator()];
+  // If we are sending data to apm-server we do not have to create any aggregates in the stream processor
   streamProcessor = new StreamProcessor({
     version,
-    processors: StreamProcessor.apmProcessors,
-    streamAggregators: aggregators,
+    processors: apmIntakeClient ? [] : StreamProcessor.apmProcessors,
+    streamAggregators: apmIntakeClient ? [] : aggregators,
     maxSourceEvents: runOptions.maxDocs,
     logger: l,
     processedCallback: (processedDocuments) => {
@@ -78,10 +79,13 @@ async function setup() {
 }
 
 async function doWork() {
-  await logger.perf(
-    'index_scenario',
-    async () => await apmEsClient.index(events, streamToBulkOptions, streamProcessor)
-  );
+  await logger.perf('index_scenario', async () => {
+    if (apmIntakeClient) {
+      await apmIntakeClient.index(events, streamToBulkOptions, streamProcessor);
+    } else {
+      await apmEsClient.index(events, streamToBulkOptions, streamProcessor);
+    }
+  });
 }
 
 parentPort!.on('message', async (message) => {

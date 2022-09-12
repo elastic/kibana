@@ -8,7 +8,7 @@
 import sinon from 'sinon';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Alert } from './alert';
-import { createAlertFactory } from './create_alert_factory';
+import { createAlertFactory, getPublicAlertFactory } from './create_alert_factory';
 import { processAlerts } from '../lib';
 
 jest.mock('../lib', () => ({
@@ -237,5 +237,79 @@ describe('createAlertFactory()', () => {
     expect(logger.debug).toHaveBeenCalledWith(
       `Set doesSetRecoveryContext to true on rule type to get access to recovered alerts.`
     );
+  });
+
+  test('throws error when checking limit usage if alertLimit.getValue is called but alertLimit.setLimitReached is not', () => {
+    const alertFactory = createAlertFactory({
+      alerts: {},
+      logger,
+      maxAlerts: 1000,
+    });
+
+    const limit = alertFactory.alertLimit.getValue();
+    expect(limit).toEqual(1000);
+
+    expect(() => {
+      alertFactory.alertLimit.checkLimitUsage();
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"Rule has not reported whether alert limit has been reached after requesting limit value!"`
+    );
+  });
+
+  test('does not throw error when checking limit usage if alertLimit.getValue is called and alertLimit.setLimitReached is called with reached = true', () => {
+    const alertFactory = createAlertFactory({
+      alerts: {},
+      logger,
+      maxAlerts: 1000,
+    });
+
+    const limit = alertFactory.alertLimit.getValue();
+    expect(limit).toEqual(1000);
+
+    alertFactory.alertLimit.setLimitReached(true);
+    alertFactory.alertLimit.checkLimitUsage();
+  });
+
+  test('does not throw error when checking limit usage if alertLimit.getValue is called and alertLimit.setLimitReached is called with reached = false', () => {
+    const alertFactory = createAlertFactory({
+      alerts: {},
+      logger,
+      maxAlerts: 1000,
+    });
+
+    const limit = alertFactory.alertLimit.getValue();
+    expect(limit).toEqual(1000);
+
+    alertFactory.alertLimit.setLimitReached(false);
+    alertFactory.alertLimit.checkLimitUsage();
+  });
+});
+
+describe('getPublicAlertFactory', () => {
+  test('only returns subset of function from given alert factory', () => {
+    const alertFactory = createAlertFactory({
+      alerts: {},
+      logger,
+      maxAlerts: 1000,
+    });
+
+    expect(alertFactory.create).toBeDefined();
+    expect(alertFactory.alertLimit.getValue).toBeDefined();
+    expect(alertFactory.alertLimit.setLimitReached).toBeDefined();
+    expect(alertFactory.alertLimit.checkLimitUsage).toBeDefined();
+    expect(alertFactory.hasReachedAlertLimit).toBeDefined();
+    expect(alertFactory.done).toBeDefined();
+
+    const publicAlertFactory = getPublicAlertFactory(alertFactory);
+
+    expect(publicAlertFactory.create).toBeDefined();
+    expect(publicAlertFactory.done).toBeDefined();
+    expect(publicAlertFactory.alertLimit.getValue).toBeDefined();
+    expect(publicAlertFactory.alertLimit.setLimitReached).toBeDefined();
+
+    // @ts-expect-error
+    expect(publicAlertFactory.alertLimit.checkLimitUsage).not.toBeDefined();
+    // @ts-expect-error
+    expect(publicAlertFactory.hasReachedAlertLimit).not.toBeDefined();
   });
 });

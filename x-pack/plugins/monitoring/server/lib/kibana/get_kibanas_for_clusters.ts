@@ -8,7 +8,7 @@
 import { chain, find } from 'lodash';
 import { Globals } from '../../static_globals';
 import { Bucket, Cluster, LegacyRequest } from '../../types';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getNewIndexPatterns, getKibanaDataset } from '../cluster/get_index_patterns';
 import { createQuery } from '../create_query';
 import { KibanaClusterMetric } from '../metrics';
 import { isKibanaStatusStale } from './is_kibana_status_stale';
@@ -52,7 +52,7 @@ export function getKibanasForClusters(req: LegacyRequest, clusters: Cluster[], c
         body: {
           query: createQuery({
             type,
-            dsDataset: `${moduleType}.${dataset}`,
+            dsDataset: getKibanaDataset(dataset),
             metricset: dataset,
             start,
             end,

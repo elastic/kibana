@@ -34,6 +34,7 @@
         ],
         "path": "x-pack/plugins/rollup/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -48,6 +49,7 @@
         ],
         "path": "x-pack/plugins/rollup/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -62,6 +64,7 @@
         ],
         "path": "x-pack/plugins/rollup/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -76,6 +79,7 @@
         ],
         "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -90,6 +94,7 @@
         ],
         "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -104,6 +109,7 @@
         ],
         "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -118,6 +124,7 @@
         ],
         "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -132,6 +139,7 @@
         ],
         "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -146,6 +154,7 @@
         ],
         "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -160,6 +169,7 @@
         ],
         "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -174,6 +184,7 @@
         ],
         "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -188,6 +199,7 @@
         ],
         "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -202,6 +214,7 @@
         ],
         "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -216,6 +229,7 @@
         ],
         "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -230,6 +244,7 @@
         ],
         "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -244,6 +259,7 @@
         ],
         "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -258,6 +274,7 @@
         ],
         "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -272,6 +289,7 @@
         ],
         "path": "x-pack/plugins/rollup/common/ui_metric.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -285,6 +303,7 @@
         "description": [],
         "path": "x-pack/plugins/rollup/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "rollup",
@@ -294,7 +313,8 @@
             "label": "ID",
             "description": [],
             "path": "x-pack/plugins/rollup/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "rollup",
@@ -307,7 +327,8 @@
               "\"basic\""
             ],
             "path": "x-pack/plugins/rollup/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

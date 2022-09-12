@@ -11,7 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import {
   EuiIcon,
   EuiSpacer,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageBody,
   EuiPage,
   EuiImage,

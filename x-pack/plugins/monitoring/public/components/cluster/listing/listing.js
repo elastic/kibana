@@ -15,7 +15,7 @@ import {
   EuiLink,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiCallOut,
   EuiSpacer,
   EuiIcon,

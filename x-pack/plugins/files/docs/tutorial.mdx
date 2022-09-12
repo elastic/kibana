@@ -1,8 +1,8 @@
 ---
-id: kibDevTutorialFilesService
-slug: /kibana-dev-docs/files-service
-title: Kibana File service
-description: The files service abstracts over a blob store and provides CRUD functionality for blobs.
+id: kibDevTutorialFileService
+slug: /kibana-dev-docs/file-service
+title: Kibana file service
+description: The file service abstracts over a blob store and provides CRUD functionality for blobs.
 date: 2022-08-29
 tags: ['kibana', 'onboarding', 'dev', 'architecture']
 ---
@@ -30,7 +30,7 @@ Blobs include any of the following:
   To ensure the most secure file storage experience:
 
   1. Only expose the needed actions against your files
-  2. Control access to your files using security tags on your HTTP routes
+  2. Control access to your files using security tags on your HTTP routes (see code snippets below)
   3. Do not ask users to store data in files that should not be visible to other users of the app
   4. Do not store sensitive data in files - if you have a use case that requires this, please reach out to the Kibana App Services team
 </DocCallOut>
