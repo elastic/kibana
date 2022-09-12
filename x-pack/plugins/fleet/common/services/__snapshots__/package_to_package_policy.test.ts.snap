@@ -15,6 +15,7 @@ Object {
             "type": "metrics",
           },
           "enabled": true,
+          "release": "beta",
           "vars": Object {
             "cost_explorer_config.group_by_dimension_keys": Object {
               "type": "text",
@@ -53,6 +54,7 @@ Object {
             "type": "logs",
           },
           "enabled": true,
+          "release": "beta",
           "vars": Object {
             "api_timeout": Object {
               "type": "text",
@@ -85,6 +87,7 @@ Object {
             "type": "logs",
           },
           "enabled": false,
+          "release": "beta",
           "vars": Object {
             "interval": Object {
               "type": "text",
@@ -131,6 +134,7 @@ Object {
             "type": "logs",
           },
           "enabled": true,
+          "release": "beta",
           "vars": Object {
             "api_timeout": Object {
               "type": "text",
@@ -163,6 +167,7 @@ Object {
             "type": "metrics",
           },
           "enabled": true,
+          "release": "beta",
           "vars": Object {
             "latency": Object {
               "type": "text",
@@ -209,6 +214,7 @@ Object {
             "type": "metrics",
           },
           "enabled": true,
+          "release": "beta",
           "vars": Object {
             "latency": Object {
               "type": "text",
@@ -243,6 +249,7 @@ Object {
             "type": "metrics",
           },
           "enabled": true,
+          "release": "beta",
           "vars": Object {
             "latency": Object {
               "type": "text",
@@ -277,6 +284,7 @@ Object {
             "type": "logs",
           },
           "enabled": true,
+          "release": "beta",
           "vars": Object {
             "api_timeout": Object {
               "type": "text",
@@ -309,6 +317,7 @@ Object {
             "type": "metrics",
           },
           "enabled": true,
+          "release": "beta",
           "vars": Object {
             "latency": Object {
               "type": "text",
@@ -343,6 +352,7 @@ Object {
             "type": "logs",
           },
           "enabled": true,
+          "release": "beta",
           "vars": Object {
             "api_timeout": Object {
               "type": "text",
@@ -375,6 +385,7 @@ Object {
             "type": "metrics",
           },
           "enabled": true,
+          "release": "beta",
           "vars": Object {
             "latency": Object {
               "type": "text",
@@ -409,6 +420,7 @@ Object {
             "type": "metrics",
           },
           "enabled": true,
+          "release": "beta",
           "vars": Object {
             "latency": Object {
               "type": "text",
@@ -443,6 +455,7 @@ Object {
             "type": "metrics",
           },
           "enabled": true,
+          "release": "beta",
           "vars": Object {
             "latency": Object {
               "type": "text",
@@ -471,6 +484,7 @@ Object {
             "type": "metrics",
           },
           "enabled": true,
+          "release": "beta",
           "vars": Object {
             "latency": Object {
               "type": "text",
@@ -505,6 +519,7 @@ Object {
             "type": "logs",
           },
           "enabled": true,
+          "release": "beta",
           "vars": Object {
             "api_timeout": Object {
               "type": "text",
@@ -537,6 +552,7 @@ Object {
             "type": "metrics",
           },
           "enabled": true,
+          "release": "beta",
           "vars": Object {
             "latency": Object {
               "type": "text",
@@ -558,6 +574,7 @@ Object {
             "type": "metrics",
           },
           "enabled": true,
+          "release": "beta",
           "vars": Object {
             "latency": Object {
               "type": "text",
@@ -586,6 +603,7 @@ Object {
             "type": "metrics",
           },
           "enabled": true,
+          "release": "beta",
           "vars": Object {
             "latency": Object {
               "type": "text",
@@ -620,6 +638,7 @@ Object {
             "type": "metrics",
           },
           "enabled": true,
+          "release": "beta",
           "vars": Object {
             "latency": Object {
               "type": "text",
@@ -648,6 +667,7 @@ Object {
             "type": "metrics",
           },
           "enabled": true,
+          "release": "beta",
           "vars": Object {
             "latency": Object {
               "type": "text",
@@ -676,6 +696,7 @@ Object {
             "type": "metrics",
           },
           "enabled": true,
+          "release": "beta",
           "vars": Object {
             "latency": Object {
               "type": "text",
@@ -704,6 +725,7 @@ Object {
             "type": "logs",
           },
           "enabled": true,
+          "release": "beta",
           "vars": Object {
             "api_timeout": Object {
               "type": "text",
@@ -736,6 +758,7 @@ Object {
             "type": "metrics",
           },
           "enabled": true,
+          "release": "beta",
           "vars": Object {
             "latency": Object {
               "type": "text",

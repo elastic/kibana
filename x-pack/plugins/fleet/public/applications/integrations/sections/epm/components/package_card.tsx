@@ -16,10 +16,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { CardIcon } from '../../../../../components/package_icon';
 import type { IntegrationCardItem } from '../../../../../../common/types/models/epm';
 
+import { InlineReleaseBadge } from '../../../components';
 import { useStartServices } from '../../../hooks';
 import { INTEGRATIONS_BASE_PATH, INTEGRATIONS_PLUGIN_ID } from '../../../constants';
-
-import { CardReleaseBadge } from './release_badge';
 
 export type PackageCardProps = IntegrationCardItem;
 
@@ -50,7 +49,7 @@ export function PackageCard({
       <EuiFlexItem grow={false}>
         <EuiSpacer size="xs" />
         <span>
-          <CardReleaseBadge release={release} />
+          <InlineReleaseBadge release={release} />
         </span>
       </EuiFlexItem>
     );

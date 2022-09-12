@@ -315,7 +315,7 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.hidden]?: boolean;
   [RegistryDataStreamKeys.dataset]: string;
   [RegistryDataStreamKeys.title]: string;
-  [RegistryDataStreamKeys.release]: string;
+  [RegistryDataStreamKeys.release]: RegistryRelease;
   [RegistryDataStreamKeys.streams]?: RegistryStream[];
   [RegistryDataStreamKeys.package]: string;
   [RegistryDataStreamKeys.path]: string;
