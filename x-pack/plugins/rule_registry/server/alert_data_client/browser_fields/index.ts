@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FieldSpec } from '@kbn/data-plugin/common';
+import { FieldDescriptor } from '@kbn/data-views-plugin/server';
 import { BrowserField, BrowserFields } from '../../types';
 
-const getFieldCategory = (fieldCapability: FieldSpec) => {
+const getFieldCategory = (fieldCapability: FieldDescriptor) => {
   const name = fieldCapability.name.split('.');
 
   if (name.length === 1) {
@@ -19,7 +19,7 @@ const getFieldCategory = (fieldCapability: FieldSpec) => {
 };
 
 const browserFieldFactory = (
-  fieldCapability: FieldSpec,
+  fieldCapability: FieldDescriptor,
   category: string
 ): { [fieldName in string]: BrowserField } => {
   return {
@@ -30,17 +30,15 @@ const browserFieldFactory = (
   };
 };
 
-export const fieldDescriptorToBrowserFieldMapper = (
-  fieldDescriptor: FieldSpec[]
-): BrowserFields => {
-  return fieldDescriptor.reduce((browserFields: BrowserFields, fieldCapability: FieldSpec) => {
-    const category = getFieldCategory(fieldCapability);
-    const field = browserFieldFactory(fieldCapability, category);
+export const fieldDescriptorToBrowserFieldMapper = (fields: FieldDescriptor[]): BrowserFields => {
+  return fields.reduce((browserFields: BrowserFields, field: FieldDescriptor) => {
+    const category = getFieldCategory(field);
+    const browserField = browserFieldFactory(field, category);
 
     if (browserFields[category]) {
-      browserFields[category] = { fields: { ...browserFields[category].fields, ...field } };
+      browserFields[category] = { fields: { ...browserFields[category].fields, ...browserField } };
     } else {
-      browserFields[category] = { fields: field };
+      browserFields[category] = { fields: browserField };
     }
 
     return browserFields;
