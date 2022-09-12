@@ -202,8 +202,8 @@ const useFetchAlerts = ({
                       if (hit.fields) {
                         acc.push({
                           ...hit.fields,
-                          _id: hit._id,
-                          _index: hit._index,
+                          _id: [hit._id],
+                          _index: [hit._index],
                         } as EcsFieldsResponse);
                       }
 

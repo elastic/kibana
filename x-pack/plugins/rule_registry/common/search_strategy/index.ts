@@ -26,8 +26,8 @@ export interface RuleRegistrySearchRequestPagination {
 }
 
 export interface BasicFields {
-  _id: string;
-  _index: string;
+  _id: string[];
+  _index: string[];
 }
 export type EcsFieldsResponse = BasicFields & {
   [Property in TechnicalRuleDataFieldName]?: string[];
