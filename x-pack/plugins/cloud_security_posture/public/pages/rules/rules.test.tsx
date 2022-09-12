@@ -95,6 +95,18 @@ describe('<Rules />', () => {
           package: {
             title: 'my package',
           },
+          inputs: [
+            {
+              enabled: true,
+              policy_template: 'kspm',
+              type: 'cloudbeat/cis_k8s',
+            },
+            {
+              enabled: false,
+              policy_template: 'kspm',
+              type: 'cloudbeat/cis_eks',
+            },
+          ],
         },
         { name: 'my agent' },
       ],
@@ -104,9 +116,7 @@ describe('<Rules />', () => {
 
     render(<Component />);
 
-    expect(
-      await screen.findByText(`${response.data?.[0]?.package?.title}, ${response.data?.[1].name}`)
-    ).toBeInTheDocument();
     expect(await screen.findByTestId(TEST_SUBJECTS.CSP_RULES_CONTAINER)).toBeInTheDocument();
+    expect(await screen.findByTestId(TEST_SUBJECTS.CSP_RULES_SHARED_VALUES)).toBeInTheDocument();
   });
 });

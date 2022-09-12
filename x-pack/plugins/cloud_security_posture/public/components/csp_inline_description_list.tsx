@@ -15,7 +15,7 @@ const getModifiedTitlesListItems = (listItems: EuiDescriptionListProps['listItem
     .map((item) => ({ ...item, title: `${item.title}:` }));
 
 // eui size m is 12px which is too small, and next after it is base which is 16px which is too big
-const customFontSize = '1rem';
+const fontSize = '1rem';
 
 export const CspInlineDescriptionList = ({
   listItems,
@@ -32,7 +32,7 @@ export const CspInlineDescriptionList = ({
         style: {
           background: 'initial',
           color: euiTheme.colors.subduedText,
-          fontSize: customFontSize,
+          fontSize,
           paddingRight: 0,
         },
       }}
@@ -40,7 +40,7 @@ export const CspInlineDescriptionList = ({
         style: {
           color: euiTheme.colors.subduedText,
           marginRight: euiTheme.size.xs,
-          fontSize: customFontSize,
+          fontSize,
         },
       }}
       listItems={modifiedTitlesListItems}

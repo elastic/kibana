@@ -7,7 +7,13 @@
 
 import React, { useContext, useMemo } from 'react';
 import { generatePath, Link, type RouteComponentProps } from 'react-router-dom';
-import { EuiButtonEmpty, EuiFlexGroup, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiDescriptionListProps,
+  EuiFlexGroup,
+  EuiPageHeader,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -24,6 +30,7 @@ import { useKibana } from '../../common/hooks/use_kibana';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { SecuritySolutionContext } from '../../application/security_solution_context';
 import { CloudPostureIntegrations, cloudPostureIntegrations } from '../../common/constants';
+import * as TEST_SUBJECTS from './test_subjects';
 
 const getRulesBreadcrumbs = (
   name?: string,
@@ -46,14 +53,17 @@ const getRulesBreadcrumbs = (
 };
 
 const assertPolicyTemplate = (
-  policyTemplate: any
+  policyTemplate: unknown
 ): policyTemplate is keyof CloudPostureIntegrations => {
   if (typeof policyTemplate !== 'string') return false;
 
   return cloudPostureIntegrations.hasOwnProperty(policyTemplate);
 };
 
-const getRulesSharedValues = (packageInfo: PackagePolicy, agentInfo: AgentPolicy) => {
+const getRulesSharedValues = (
+  packageInfo: PackagePolicy,
+  agentInfo: AgentPolicy
+): EuiDescriptionListProps['listItems'] => {
   const enabledPackage = packageInfo.inputs?.find((input) => input.enabled);
   if (!enabledPackage || !assertPolicyTemplate(enabledPackage.policy_template)) return;
 
@@ -147,7 +157,9 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
         description={
           packageInfo &&
           agentInfo && (
-            <CspInlineDescriptionList listItems={getRulesSharedValues(packageInfo, agentInfo)} />
+            <div data-test-subj={TEST_SUBJECTS.CSP_RULES_SHARED_VALUES}>
+              <CspInlineDescriptionList listItems={getRulesSharedValues(packageInfo, agentInfo)} />
+            </div>
           )
         }
         bottomBorder
