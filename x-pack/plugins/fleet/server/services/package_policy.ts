@@ -226,7 +226,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     const agentPolicyIds = new Set(packagePolicies.map((pkgPol) => pkgPol.policy_id));
 
     for (const agentPolicyId of agentPolicyIds) {
-      await validateIsNotHostedPolicy(soClient, agentPolicyId);
+      await validateIsNotHostedPolicy(soClient, agentPolicyId, options?.force);
     }
 
     const isoDate = new Date().toISOString();
@@ -1308,6 +1308,7 @@ export interface PackagePolicyServiceInterface {
     options?: {
       user?: AuthenticatedUser;
       bumpRevision?: boolean;
+      force: true;
     }
   ): Promise<PackagePolicy[]>;
 
