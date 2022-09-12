@@ -26,6 +26,7 @@ import { useGetCaseUserActions } from '../../../containers/use_get_case_user_act
 import { usePostPushToService } from '../../../containers/use_post_push_to_service';
 import { useGetConnectors } from '../../../containers/configure/use_connectors';
 import { useGetTags } from '../../../containers/use_get_tags';
+import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
 
 jest.mock('../../../containers/use_get_case_user_actions');
 jest.mock('../../../containers/configure/use_connectors');
@@ -36,6 +37,7 @@ jest.mock('../../user_actions/timestamp', () => ({
 jest.mock('../../../common/navigation/hooks');
 jest.mock('../../../containers/use_get_action_license');
 jest.mock('../../../containers/use_get_tags');
+jest.mock('../../../containers/user_profiles/use_bulk_get_user_profiles');
 
 (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
 
@@ -93,12 +95,14 @@ export const caseProps = {
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
+const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
 
 describe('Case View Page activity tab', () => {
   beforeAll(() => {
     useGetCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
     useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
     usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
+    useBulkGetUserProfilesMock.mockReturnValue({ isLoading: false, data: new Map() });
   });
   let appMockRender: AppMockRenderer;
 
