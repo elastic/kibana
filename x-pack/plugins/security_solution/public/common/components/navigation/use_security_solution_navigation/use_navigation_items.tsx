@@ -147,6 +147,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
                   ? [navTabs[SecurityPageName.hostIsolationExceptions]]
                   : []),
                 navTabs[SecurityPageName.blocklist],
+                navTabs[SecurityPageName.actionHistory],
                 navTabs[SecurityPageName.cloudSecurityPostureBenchmarks],
               ],
             },
