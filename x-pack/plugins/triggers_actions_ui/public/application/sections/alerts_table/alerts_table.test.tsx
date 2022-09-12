@@ -123,7 +123,7 @@ describe('AlertsTable', () => {
       expect(getByTestId('toolbar-updated-at')).not.toBe(null);
     });
 
-    it.only('should show alerts count', () => {
+    it('should show alerts count', () => {
       const { getByTestId } = render(<AlertsTableWithLocale {...tableProps} />);
       expect(getByTestId('toolbar-alerts-count')).not.toBe(null);
     });
