@@ -16,7 +16,6 @@ import {
   EuiPanel,
   EuiPopover,
   EuiTextColor,
-  EuiToolTip,
   EuiTitle,
 } from '@elastic/eui';
 

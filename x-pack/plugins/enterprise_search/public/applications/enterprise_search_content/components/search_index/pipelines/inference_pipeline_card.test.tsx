@@ -20,7 +20,7 @@ export const DEFAULT_VALUES = {
   trainedModelName: 'example_trained_model',
   isDeployed: true,
   modelType: 'pytorch',
-} 
+};
 
 const mockValues = { ...DEFAULT_VALUES };
 
