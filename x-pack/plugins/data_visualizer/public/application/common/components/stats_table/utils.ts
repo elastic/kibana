@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getBreakpoint } from '@elastic/eui';
 import { FileBasedFieldVisConfig } from './types';
 
 export const getTFPercentage = (config: FileBasedFieldVisConfig) => {
@@ -46,36 +45,30 @@ export const calculateTableColumnsDimensions = (width?: number) => {
     distinctValues: '225px',
     distributions: '225px',
     showIcon: true,
-    breakPoint: 'xl',
+    breakPoint: 'large',
   };
   if (width === undefined) return defaultSettings;
-  const breakPoint = getBreakpoint(width);
-  switch (breakPoint) {
-    case 'xs':
-    case 's':
-      return {
-        expander: '25px',
-        type: '40px',
-        docCount: 'auto',
-        distinctValues: 'auto',
-        distributions: 'auto',
-        showIcon: false,
-        breakPoint,
-      };
-
-    case 'm':
-    case 'l':
-      return {
-        expander: '25px',
-        type: '40px',
-        docCount: 'auto',
-        distinctValues: 'auto',
-        distributions: 'auto',
-        showIcon: false,
-        breakPoint,
-      };
-
-    default:
-      return defaultSettings;
+  if (width <= 575) {
+    return {
+      expander: '25px',
+      type: '40px',
+      docCount: 'auto',
+      distinctValues: 'auto',
+      distributions: 'auto',
+      showIcon: false,
+      breakPoint: 'small',
+    };
   }
+  if (width <= 992) {
+    return {
+      expander: '25px',
+      type: '40px',
+      docCount: 'auto',
+      distinctValues: 'auto',
+      distributions: 'auto',
+      showIcon: false,
+      breakPoint: 'medium',
+    };
+  }
+  return defaultSettings;
 };
