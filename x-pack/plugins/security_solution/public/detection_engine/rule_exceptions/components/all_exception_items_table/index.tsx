@@ -271,9 +271,8 @@ const ExceptionsViewerComponent = ({
       if (didRuleChange && onRuleChange != null) {
         onRuleChange();
       }
-      handleGetExceptionListItems();
     },
-    [onRuleChange, setFlyoutType, handleGetExceptionListItems]
+    [onRuleChange, setFlyoutType]
   );
 
   const handleConfirmExceptionFlyout = useCallback(

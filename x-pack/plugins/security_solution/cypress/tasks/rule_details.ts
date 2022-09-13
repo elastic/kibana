@@ -10,15 +10,8 @@ import { RULE_STATUS } from '../screens/create_new_rule';
 import {
   ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN,
   ADD_EXCEPTIONS_BTN_FROM_VIEWER_HEADER,
-<<<<<<< Updated upstream
-  ADD_TO_SHARED_LIST_RADIO_LABEL,
-=======
-<<<<<<< Updated upstream
-=======
   ADD_TO_RULE_RADIO_LABEL,
   ADD_TO_SHARED_LIST_RADIO_LABEL,
->>>>>>> Stashed changes
->>>>>>> Stashed changes
   CLOSE_ALERTS_CHECKBOX,
   CONFIRM_BTN,
   EXCEPTION_ITEM_NAME_INPUT,
@@ -26,16 +19,9 @@ import {
   FIELD_INPUT,
   LOADING_SPINNER,
   OPERATOR_INPUT,
-<<<<<<< Updated upstream
-  SHARED_LIST_CHECKBOX,
-=======
-<<<<<<< Updated upstream
-=======
   OS_INPUT,
   OS_SELECTION_SECTION,
   SHARED_LIST_CHECKBOX,
->>>>>>> Stashed changes
->>>>>>> Stashed changes
   VALUES_INPUT,
 } from '../screens/exceptions';
 import {
@@ -130,21 +116,9 @@ export const addExceptionConditions = (exception: Exception) => {
   exception.values.forEach((value) => {
     cy.get(VALUES_INPUT).type(`${value}{enter}`);
   });
-<<<<<<< Updated upstream
-};
-
-export const addExceptionFromRuleDetails = (exception: Exception) => {
-  addExceptionFlyoutFromViewerHeader();
-  addExceptionConditions(exception);
-=======
-<<<<<<< Updated upstream
-  cy.get(CLOSE_ALERTS_CHECKBOX).click({ force: true });
-=======
 };
 
 export const submitNewExceptionItem = () => {
->>>>>>> Stashed changes
->>>>>>> Stashed changes
   cy.get(CONFIRM_BTN).click();
   cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
   cy.get(CONFIRM_BTN).should('not.exist');
@@ -158,24 +132,8 @@ export const addExceptionFromRuleDetails = (exception: Exception) => {
 
 export const addFirstExceptionFromRuleDetails = (exception: Exception) => {
   openExceptionFlyoutFromEmptyViewerPrompt();
-<<<<<<< Updated upstream
-  addExceptionConditions(exception);
-=======
-<<<<<<< Updated upstream
-  cy.get(FIELD_INPUT).type(`${exception.field}{downArrow}{enter}`);
-  cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
-  exception.values.forEach((value) => {
-    cy.get(VALUES_INPUT).type(`${value}{enter}`);
-  });
-  cy.get(CLOSE_ALERTS_CHECKBOX).click({ force: true });
->>>>>>> Stashed changes
-  cy.get(CONFIRM_BTN).click();
-  cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
-  cy.get(CONFIRM_BTN).should('not.exist');
-=======
   addExceptionConditions(exception);
   submitNewExceptionItem();
->>>>>>> Stashed changes
 };
 
 export const goToAlertsTab = () => {
@@ -226,15 +184,10 @@ export const hasIndexPatterns = (indexPatterns: string) => {
     getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns);
   });
 };
-<<<<<<< Updated upstream
-=======
-<<<<<<< Updated upstream
-=======
 
 export const selectAddToRuleRadio = (numListsToCheck = 1) => {
   cy.get(ADD_TO_RULE_RADIO_LABEL).click();
 };
->>>>>>> Stashed changes
 
 export const selectSharedListToAddExceptionTo = (numListsToCheck = 1) => {
   cy.get(ADD_TO_SHARED_LIST_RADIO_LABEL).click();
@@ -245,12 +198,8 @@ export const selectSharedListToAddExceptionTo = (numListsToCheck = 1) => {
       .should('be.checked');
   }
 };
-<<<<<<< Updated upstream
-=======
 
 export const selectOs = (os: string) => {
   cy.get(OS_SELECTION_SECTION).should('exist');
   cy.get(OS_INPUT).type(`${os}{downArrow}{enter}`);
 };
->>>>>>> Stashed changes
->>>>>>> Stashed changes

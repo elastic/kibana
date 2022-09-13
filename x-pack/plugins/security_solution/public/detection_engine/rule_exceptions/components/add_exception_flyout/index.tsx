@@ -325,7 +325,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         alertData,
         bulkCloseIndex,
         addToRules: addToRules && !isEmpty(selectedRulesToAddTo),
-        addToSharedLists: addToRules && !isEmpty(exceptionListsToAddTo),
+        addToSharedLists: addToSharedLists && !isEmpty(exceptionListsToAddTo),
+        sharedLists: exceptionListsToAddTo,
       });
 
       // Rule only would have been updated if we had to create a rule default list
