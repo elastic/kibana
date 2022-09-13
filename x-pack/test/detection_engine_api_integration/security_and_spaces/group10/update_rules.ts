@@ -82,6 +82,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const outputRule = getSimpleMlRuleOutput();
+        // @ts-expect-error type narrowing is lost due to Omit<>
         outputRule.machine_learning_job_id = ['legacy_job_id'];
         outputRule.version = 2;
         const bodyToCompare = removeServerGeneratedProperties(body);

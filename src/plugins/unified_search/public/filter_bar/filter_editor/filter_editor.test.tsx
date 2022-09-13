@@ -7,7 +7,8 @@
  */
 
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
-import { FilterEditor, Props } from '.';
+import type { FilterEditorProps } from '.';
+import { FilterEditor } from '.';
 import React from 'react';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {
@@ -32,7 +33,7 @@ describe('<FilterEditor />', () => {
     let testBed: TestBed;
 
     beforeEach(async () => {
-      const defaultProps: Omit<Props, 'intl'> = {
+      const defaultProps: Omit<FilterEditorProps, 'intl'> = {
         filter: {
           meta: {
             type: 'phase',
