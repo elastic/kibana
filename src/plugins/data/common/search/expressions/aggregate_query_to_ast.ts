@@ -9,6 +9,7 @@
 import { buildExpressionFunction, ExpressionAstFunction } from '@kbn/expressions-plugin/common';
 import { AggregateQuery } from '../../query';
 import { EssqlExpressionFunctionDefinition } from './essql';
+import { EsqlExpressionFunctionDefinition } from './esql';
 
 export const aggregateQueryToAst = (
   query: AggregateQuery,
@@ -21,7 +22,7 @@ export const aggregateQueryToAst = (
     }).toAst();
   }
   if ('esql' in query) {
-    return buildExpressionFunction<EssqlExpressionFunctionDefinition>('esql', {
+    return buildExpressionFunction<EsqlExpressionFunctionDefinition>('esql', {
       query: query.esql,
     }).toAst();
   }
