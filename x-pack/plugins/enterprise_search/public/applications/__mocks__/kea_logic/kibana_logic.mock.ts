@@ -6,6 +6,7 @@
  */
 
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 
@@ -25,9 +26,7 @@ export const mockKibanaValues = {
     hasAppSearchAccess: true,
     hasWorkplaceSearchAccess: true,
   },
-  uiSettings: {
-    get: jest.fn(),
-  },
+  uiSettings: uiSettingsServiceMock.createStartContract(),
   security: securityMock.createStart(),
   setBreadcrumbs: jest.fn(),
   setChromeIsVisible: jest.fn(),
