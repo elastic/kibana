@@ -31,7 +31,7 @@ interface Props {
 interface State {
   isPopoverOpen: boolean;
   curlCode: string;
-  curlError: string | null;
+  curlError: Error | null;
 }
 
 export class ConsoleMenu extends Component<Props, State> {
@@ -77,7 +77,7 @@ export class ConsoleMenu extends Component<Props, State> {
 
   async copyText(text: string) {
     if (this.state.curlError) {
-      throw new Error(this.state.curlError);
+      throw this.state.curlError;
     }
     if (window.navigator?.clipboard) {
       await window.navigator.clipboard.writeText(text);
