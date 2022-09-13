@@ -7,21 +7,18 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useParams } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 import { useKibana } from '../../../utils/kibana_react';
 import { ObservabilityAppServices } from '../../../application/types';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
 import { paths } from '../../../config/paths';
-import { AlertDetailsPathParams } from '../types';
 import { CenterJustifiedSpinner } from '../../rule_details/components/center_justified_spinner';
 import { AlertSummary } from '.';
 import PageNotFound from '../../404';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 
 function getStaticAlertData() {
-  const alert: EcsFieldsResponse = {
+  const alert: any = {
     "_index": "",
     "_id": "",
     "kibana.alert.rule.category": "Inventory",
@@ -48,8 +45,7 @@ function getStaticAlertData() {
 
 export function AlertDetails() {
   const { http } = useKibana<ObservabilityAppServices>().services;
-  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry, config } = usePluginContext();
-  const { alertId, ruleId } = useParams<AlertDetailsPathParams>();
+  const { ObservabilityPageTemplate, config } = usePluginContext();
   const { isLoading, alert } = getStaticAlertData();
 
   useBreadcrumbs([
