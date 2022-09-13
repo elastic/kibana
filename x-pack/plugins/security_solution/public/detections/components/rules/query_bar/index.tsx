@@ -178,6 +178,7 @@ export const QueryBarDefineRule = ({
     }
   }, [onSavedQueryError, isSavedQueryFailedToLoad]);
 
+  // if saved query fetched, reset values in queryBar input and filters to saved query's values
   useEffect(() => {
     if (resetToSavedQuery && savedQuery) {
       const newFiledValue = savedQueryToFieldValue(savedQuery);
