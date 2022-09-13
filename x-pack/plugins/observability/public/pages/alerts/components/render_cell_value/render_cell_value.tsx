@@ -53,10 +53,14 @@ export const getRenderCellValue = ({
 }) => {
   return ({ columnId, data }: CellValueElementProps) => {
     if (!data) return null;
-    const value = getMappedNonEcsValue({
+    const mappedNonEcsValue = getMappedNonEcsValue({
       data,
       fieldName: columnId,
-    })?.reduce((x) => x[0]);
+    });
+
+    const value = Array.isArray(mappedNonEcsValue)
+      ? mappedNonEcsValue.reduce((x) => x[0])
+      : mappedNonEcsValue;
 
     switch (columnId) {
       case ALERT_STATUS:
