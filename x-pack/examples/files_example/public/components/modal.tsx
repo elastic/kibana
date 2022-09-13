@@ -7,18 +7,23 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { EuiModal, EuiModalHeader, EuiModalBody, EuiModalFooter } from '@elastic/eui';
+import { EuiModal, EuiModalHeader, EuiModalBody } from '@elastic/eui';
+import { exampleFileKind } from '../../common';
+import { FilesClient, UploadFile } from '../imports';
 
 interface Props {
+  client: FilesClient;
   onDismiss: () => void;
+  onUploaded: () => void;
 }
 
-export const Modal: FunctionComponent<Props> = ({ onDismiss }) => {
+export const Modal: FunctionComponent<Props> = ({ onDismiss, onUploaded, client }) => {
   return (
     <EuiModal onClose={onDismiss}>
       <EuiModalHeader>Upload file</EuiModalHeader>
-      <EuiModalBody>Upload file</EuiModalBody>
-      <EuiModalFooter>OK</EuiModalFooter>
+      <EuiModalBody>
+        <UploadFile kind={exampleFileKind.id} client={client} onDone={onUploaded} />
+      </EuiModalBody>
     </EuiModal>
   );
 };
