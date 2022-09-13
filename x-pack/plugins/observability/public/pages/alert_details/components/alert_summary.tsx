@@ -58,7 +58,7 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                 <h5>
                   <FormattedMessage
                     id="xpack.observability.pages.alertDetails.alertSummary.averageValue"
-                    defaultMessage="Actual Value"
+                    defaultMessage="Actual value"
                   />
                 </h5>
               </EuiTitle>
@@ -108,7 +108,7 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                 <h5>
                   <FormattedMessage
                     id="xpack.observability.pages.alertDetails.alertSummary.runbook"
-                    defaultMessage="Relation"
+                    defaultMessage="Source"
                   />
                 </h5>
               </EuiTitle>
@@ -140,7 +140,7 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                 <h5>
                   <FormattedMessage
                     id="xpack.observability.pages.alertDetails.alertSummary.lastStatusUpdate"
-                    defaultMessage="Last Status Update"
+                    defaultMessage="Last status update"
                   />
                 </h5>
               </EuiTitle>
@@ -157,7 +157,7 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                     <h5>
                       <FormattedMessage
                         id="xpack.observability.pages.alertDetails.alertSummary.tags"
-                        defaultMessage="Tags"
+                        defaultMessage="Rule Tags"
                       />
                     </h5>
                   </EuiTitle>
