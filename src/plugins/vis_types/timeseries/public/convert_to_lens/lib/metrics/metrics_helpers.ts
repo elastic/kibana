@@ -118,13 +118,7 @@ export const getFormulaEquivalent = (
       });
     }
     case 'count': {
-      const field = currentMetric.field
-        ? timeShift || reducedTimeRange
-          ? `${currentMetric.field} ,`
-          : currentMetric.field
-        : '';
-
-      return `${aggFormula}(${field}${timeShift ? `shift='${timeShift}'` : ''}${
+      return `${aggFormula}(${timeShift ? `shift='${timeShift}'` : ''}${
         timeShift && reducedTimeRange ? ', ' : ''
       }${reducedTimeRange ? `reducedTimeRange='${reducedTimeRange}'` : ''})`;
     }

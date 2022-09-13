@@ -26,9 +26,16 @@ const subAggMetric: Metric = {
   field: dataView.fields[0].name,
 };
 
+const countValueMetric: Metric = {
+  id: 'some-random-value',
+  type: METRIC_TYPES.VALUE_COUNT,
+  field: dataView.fields[0].name,
+};
+
 const countMetric: Metric = {
   id: 'some-random-value',
   type: METRIC_TYPES.COUNT,
+  field: dataView.fields[0].name,
 };
 
 const notSupportedSubAggMetric: Metric = {
@@ -107,10 +114,7 @@ describe('convertToCumulativeSumColumns', () => {
       [
         {
           series,
-          metrics: [
-            { ...countMetric, field: subAggMetric.field },
-            { ...metric, field: `${subAggMetric.id}[50]` },
-          ],
+          metrics: [countValueMetric, { ...metric, field: `${subAggMetric.id}[50]` }],
           dataView,
         },
       ],
