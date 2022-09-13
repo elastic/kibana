@@ -24,16 +24,21 @@ import {
   isIntegrationPolicyTemplate,
 } from './policy_template';
 
+type PackagePolicyStream = RegistryStream & { release?: 'beta' | 'experimental' | 'ga' } & {
+  data_stream: { type: string; dataset: string };
+};
+
 export const getStreamsForInputType = (
   inputType: string,
   packageInfo: PackageInfo,
   dataStreamPaths: string[] = []
-): Array<RegistryStream & { data_stream: { type: string; dataset: string } }> => {
-  const streams: Array<RegistryStream & { data_stream: { type: string; dataset: string } }> = [];
+): PackagePolicyStream[] => {
+  const streams: PackagePolicyStream[] = [];
   const dataStreams = getNormalizedDataStreams(packageInfo);
   const dataStreamsToSearch = dataStreamPaths.length
     ? dataStreams.filter((dataStream) => dataStreamPaths.includes(dataStream.path))
     : dataStreams;
+
   dataStreamsToSearch.forEach((dataStream) => {
     (dataStream.streams || []).forEach((stream) => {
       if (stream.input === inputType) {
@@ -43,6 +48,7 @@ export const getStreamsForInputType = (
             type: dataStream.type,
             dataset: dataStream.dataset,
           },
+          release: dataStream.release,
         });
       }
     });
@@ -107,6 +113,7 @@ export const packageToPackagePolicyInputs = (
       const stream: NewPackagePolicyInputStream = {
         enabled: packageStream.enabled === false ? false : true,
         data_stream: packageStream.data_stream,
+        release: packageStream.release,
       };
       if (packageStream.vars && packageStream.vars.length) {
         stream.vars = packageStream.vars.reduce(varsReducer, {});
