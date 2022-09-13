@@ -31,7 +31,10 @@ export const convertToCumulativeSumColumns = (
   let formula;
   // lens supports cumulative sum for count and sum as quick function
   // and everything else as formula
-  if (pipelineAgg.name !== 'count' && pipelineAgg.name !== 'sum') {
+  if (
+    ((pipelineAgg.name === 'count' && subFunctionMetric.field) || pipelineAgg.name !== 'count') &&
+    pipelineAgg.name !== 'sum'
+  ) {
     const metaValue = Number(meta?.replace(']', ''));
     formula = getPipelineSeriesFormula(metric, metrics, subFunctionMetric, {
       metaValue,
