@@ -41,6 +41,8 @@ const RiskyScoreUpgradeButtonComponent = ({
 
   return (
     <EuiButton
+      color="primary"
+      fill
       onClick={upgradeHostRiskScore}
       isLoading={status === UpgradeState.Started}
       data-test-subj="risk-score-upgrade"
