@@ -96,14 +96,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel');
         await testSubjects.missingOrFail('median-partial-warning');
         await PageObjects.lens.assertNoEditorWarning();
-        await PageObjects.lens.closeDimensionEditor();
       });
     });
 
     describe('for rolled up metric', () => {
       it('defaults to average for rolled up metric', async () => {
-        await PageObjects.lens.removeLayer();
         await PageObjects.lens.switchDataPanelIndexPattern(rollupDataViewTitle);
+        await PageObjects.lens.removeLayer();
         await PageObjects.lens.waitForField('kubernetes.container.memory.available.bytes');
         await PageObjects.lens.dragFieldToWorkspace(
           'kubernetes.container.memory.available.bytes',
