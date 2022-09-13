@@ -89,7 +89,7 @@ describe('Service overview - header filters', () => {
       );
     });
 
-    it.skip('calls APIs with correct transaction type', () => {
+    it('calls APIs with correct transaction type', () => {
       apisToIntercept.map(({ endpoint, name }) => {
         cy.intercept('GET', endpoint).as(name);
       });
@@ -117,7 +117,7 @@ describe('Service overview - header filters', () => {
     });
   });
 
-  describe.skip('Filtering by kuerybar', () => {
+  describe('Filtering by kuerybar', () => {
     beforeEach(() => {
       cy.loginAsViewerUser();
     });

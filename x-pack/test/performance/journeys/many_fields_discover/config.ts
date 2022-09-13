@@ -15,8 +15,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const testFiles = [require.resolve(`./${JOURNEY_MANY_FIELDS_DISCOVER}`)];
 
   const config = {
-    testFiles,
     ...performanceConfig.getAll(),
+    testFiles,
+    testData: {
+      kbnArchives: ['test/functional/fixtures/kbn_archiver/many_fields_data_view'],
+      esArchives: ['test/functional/fixtures/es_archiver/many_fields'],
+    },
   };
 
   const apmGlobalLabels = {

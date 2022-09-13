@@ -12,7 +12,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { CoreThemeProvider } from '@kbn/core-theme-browser-internal';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { NotificationsSetup } from '@kbn/core-notifications-browser';
-import type { AppMountParameters } from '../../application';
+import type { AppMountParameters } from '@kbn/core-application-browser';
 import { StatusApp } from './status_app';
 
 interface Deps {

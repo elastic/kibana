@@ -28,6 +28,7 @@ import { createEsClientForTesting } from '@kbn/test';
 /**
  * @type {Cypress.PluginConfig}
  */
+
 const plugin: Cypress.PluginConfig = (on, config) => {
   // `on` is used to hook into various events Cypress emits
   // `config` is the resolved Cypress config
@@ -42,12 +43,19 @@ const plugin: Cypress.PluginConfig = (on, config) => {
     client,
     createLogger(LogLevel.info),
     {
-      forceLegacyIndices: true,
+      forceLegacyIndices: false,
       refreshAfterIndex: true,
     }
   );
 
   on('task', {
+    // send logs to node process
+    log(message) {
+      // eslint-disable-next-line no-console
+      console.log(message);
+      return null;
+    },
+
     'synthtrace:index': async (events: Array<Record<string, any>>) => {
       await synthtraceEsClient.index(new EntityArrayIterable(events));
       return null;

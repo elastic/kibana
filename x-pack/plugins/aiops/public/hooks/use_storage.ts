@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useState } from 'react';
-import { useAiOpsKibana } from '../kibana_context';
+import { useAiopsAppContext } from './use_aiops_app_context';
 
 export const AIOPS_FROZEN_TIER_PREFERENCE = 'aiops.frozenDataTierPreference';
 
@@ -22,9 +22,7 @@ export type AiOpsKey = keyof Exclude<AiOps, null>;
  * @param initValue
  */
 export function useStorage<T>(key: AiOpsKey, initValue?: T): [T, (value: T) => void] {
-  const {
-    services: { storage },
-  } = useAiOpsKibana();
+  const { storage } = useAiopsAppContext();
 
   const [val, setVal] = useState<T>(storage.get(key) ?? initValue);
 

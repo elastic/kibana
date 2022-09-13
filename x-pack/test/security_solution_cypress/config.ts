@@ -51,7 +51,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'riskyHostsEnabled',
           'riskyUsersEnabled',
-          'insightsRelatedAlertsByProcessAncestry',
+          'entityAnalyticsDashboardEnabled',
           'threatIntelligenceEnabled',
         ])}`,
         `--home.disableWelcomeScreen=true`,

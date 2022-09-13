@@ -2,6 +2,14 @@
 
 set -euo pipefail
 
+echo "Cloud deployments have been temporarily disabled.  We're investigating, status updates will be posted in #kibana-operations."
+cat << EOF | buildkite-agent annotate --style "error" --context cloud
+  ### Cloud Deployment
+
+  Cloud deployments have been temporarily disabled.  We're investigating, status updates will be posted in #kibana-operations.
+EOF
+exit 0
+
 source .buildkite/scripts/common/util.sh
 
 .buildkite/scripts/bootstrap.sh
@@ -134,3 +142,4 @@ cat << EOF | buildkite-agent annotate --style "info" --context cloud
 EOF
 
 buildkite-agent meta-data set pr_comment:deploy_cloud:head "* [Cloud Deployment](${CLOUD_DEPLOYMENT_KIBANA_URL})"
+buildkite-agent meta-data set pr_comment:early_comment_job_id "$BUILDKITE_JOB_ID"

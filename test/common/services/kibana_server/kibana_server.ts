@@ -17,7 +17,8 @@ export function KibanaServerProvider({ getService }: FtrProviderContext): KbnCli
   const lifecycle = getService('lifecycle');
   const url = Url.format(config.get('servers.kibana'));
   const defaults = config.get('uiSettings.defaults');
-  const kbnArchives = config.get('testData.kbnArchives');
+  const kbnArchives: string[] = config.get('testData.kbnArchives');
+
   const kbn = new KbnClient({
     log,
     url,
@@ -31,7 +32,7 @@ export function KibanaServerProvider({ getService }: FtrProviderContext): KbnCli
     });
   }
 
-  if (kbnArchives) {
+  if (kbnArchives.length) {
     lifecycle.beforeTests.add(async () => {
       for (const archive of kbnArchives) {
         await kbn.importExport.load(archive);

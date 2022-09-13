@@ -13,14 +13,16 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+
 import { forceReRender } from '@storybook/react';
 
 import { Chat } from './chat';
+import { ServicesProvider } from '../../services';
 
 export default {
   title: 'Chat Widget',
-  description: '',
-  parameters: {},
+  description:
+    'A Chat widget, enabled in Cloud, that allows a person to talk to Elastic about their deployment',
 };
 
 const Toaster = () => {
@@ -53,11 +55,28 @@ const Toaster = () => {
   );
 };
 
-export const Component = () => {
+interface Params {
+  id: string;
+  email: string;
+  chatURL: string;
+  jwt: string;
+}
+
+export const Component = ({ id, email, chatURL, jwt }: Params) => {
   const [isHidden, setIsHidden] = useState(false);
 
   return (
-    <>
+    <ServicesProvider
+      chat={{
+        enabled: true,
+        chatURL,
+        user: {
+          jwt,
+          id,
+          email,
+        },
+      }}
+    >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
           <Toaster />
@@ -74,7 +93,14 @@ export const Component = () => {
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <Chat onHide={() => setIsHidden(true)} />
-    </>
+      {isHidden ? null : <Chat onHide={() => setIsHidden(true)} />}
+    </ServicesProvider>
   );
+};
+
+Component.args = {
+  id: '1234567890',
+  email: 'email.address@elastic.co',
+  chatURL: 'https://elasticcloud-production-chat-us-east-1.s3.amazonaws.com/drift-iframe.html',
+  jwt: 'abcdefghijklmnopqrstuvwxyz',
 };

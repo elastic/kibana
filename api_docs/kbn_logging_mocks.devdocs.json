@@ -44,6 +44,7 @@
         ],
         "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -57,6 +58,7 @@
         "description": [],
         "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/logging-mocks",
@@ -77,6 +79,7 @@
             ],
             "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -90,7 +93,8 @@
                   "string[]"
                 ],
                 "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -114,6 +118,7 @@
             ],
             "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -145,7 +150,8 @@
                   " & { context: string[]; }"
                 ],
                 "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -183,6 +189,7 @@
             ],
             "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -214,7 +221,8 @@
                   " & { context: string[]; }"
                 ],
                 "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }

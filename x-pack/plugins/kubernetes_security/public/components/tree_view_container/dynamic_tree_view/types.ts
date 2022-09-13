@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainerBool, TreeNavSelection, DynamicTree } from '../../../types';
+import { QueryDslQueryContainerBool, KubernetesCollectionMap, DynamicTree } from '../../../types';
 
 export type DynamicTreeViewProps = {
   tree: DynamicTree[];
   depth?: number;
-  selectionDepth?: TreeNavSelection;
+  selectionDepth?: Partial<KubernetesCollectionMap>;
   query: QueryDslQueryContainerBool;
   onSelect: (
-    selectionDepth: TreeNavSelection,
+    selectionDepth: Partial<KubernetesCollectionMap>,
     type: string,
     key: string | number,
     clusterName?: string

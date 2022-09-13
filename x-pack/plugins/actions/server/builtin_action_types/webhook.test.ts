@@ -21,11 +21,12 @@ import {
   WebhookMethods,
 } from './webhook';
 
-import * as utils from './lib/axios_utils';
+import * as utils from '../lib/axios_utils';
+import { ActionsConfigurationUtilities } from '../actions_config';
 
 jest.mock('axios');
-jest.mock('./lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('./lib/axios_utils');
+jest.mock('../lib/axios_utils', () => {
+  const originalUtils = jest.requireActual('../lib/axios_utils');
   return {
     ...originalUtils,
     request: jest.fn(),
@@ -44,6 +45,7 @@ const services: Services = actionsMock.createServices();
 
 let actionType: WebhookActionType;
 let mockedLogger: jest.Mocked<Logger>;
+let configurationUtilities: ActionsConfigurationUtilities;
 
 beforeAll(() => {
   const { logger, actionTypeRegistry } = createActionTypeRegistry();
@@ -53,6 +55,7 @@ beforeAll(() => {
     ActionParamsType
   >(ACTION_TYPE_ID);
   mockedLogger = logger;
+  configurationUtilities = actionTypeRegistry.getUtils();
 });
 
 describe('actionType', () => {
@@ -68,19 +71,22 @@ describe('secrets validation', () => {
       user: 'bob',
       password: 'supersecret',
     };
-    expect(validateSecrets(actionType, secrets)).toEqual(secrets);
+    expect(validateSecrets(actionType, secrets, { configurationUtilities })).toEqual(secrets);
   });
 
   test('fails when secret user is provided, but password is omitted', () => {
     expect(() => {
-      validateSecrets(actionType, { user: 'bob' });
+      validateSecrets(actionType, { user: 'bob' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: both user and password must be specified"`
     );
   });
 
   test('succeeds when basic authentication credentials are omitted', () => {
-    expect(validateSecrets(actionType, {})).toEqual({ password: null, user: null });
+    expect(validateSecrets(actionType, {}, { configurationUtilities })).toEqual({
+      password: null,
+      user: null,
+    });
   });
 });
 
@@ -95,7 +101,7 @@ describe('config validation', () => {
       url: 'http://mylisteningserver:9200/endpoint',
       hasAuth: true,
     };
-    expect(validateConfig(actionType, config)).toEqual({
+    expect(validateConfig(actionType, config, { configurationUtilities })).toEqual({
       ...defaultValues,
       ...config,
     });
@@ -108,7 +114,7 @@ describe('config validation', () => {
         method,
         hasAuth: true,
       };
-      expect(validateConfig(actionType, config)).toEqual({
+      expect(validateConfig(actionType, config, { configurationUtilities })).toEqual({
         ...defaultValues,
         ...config,
       });
@@ -121,7 +127,7 @@ describe('config validation', () => {
       method: 'https',
     };
     expect(() => {
-      validateConfig(actionType, config);
+      validateConfig(actionType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
 "error validating action type config: [method]: types that failed validation:
 - [method.0]: expected value to equal [post]
@@ -134,7 +140,7 @@ describe('config validation', () => {
       url: 'http://mylisteningserver:9200/endpoint',
       hasAuth: true,
     };
-    expect(validateConfig(actionType, config)).toEqual({
+    expect(validateConfig(actionType, config, { configurationUtilities })).toEqual({
       ...defaultValues,
       ...config,
     });
@@ -145,7 +151,7 @@ describe('config validation', () => {
       url: 'example.com/do-something',
     };
     expect(() => {
-      validateConfig(actionType, config);
+      validateConfig(actionType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       '"error validating action type config: error configuring webhook action: unable to parse url: TypeError: Invalid URL: example.com/do-something"'
     );
@@ -161,7 +167,7 @@ describe('config validation', () => {
       },
       hasAuth: true,
     };
-    expect(validateConfig(actionType, config)).toEqual({
+    expect(validateConfig(actionType, config, { configurationUtilities })).toEqual({
       ...defaultValues,
       ...config,
     });
@@ -173,7 +179,7 @@ describe('config validation', () => {
       headers: 'application/json',
     };
     expect(() => {
-      validateConfig(actionType, config);
+      validateConfig(actionType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
 "error validating action type config: [headers]: types that failed validation:
 - [headers.0]: could not parse record value from json input
@@ -192,21 +198,22 @@ describe('config validation', () => {
       hasAuth: true,
     };
 
-    expect(validateConfig(actionType, config)).toEqual({
+    expect(validateConfig(actionType, config, { configurationUtilities })).toEqual({
       ...defaultValues,
       ...config,
     });
   });
 
   test('config validation returns an error if the specified URL isnt added to allowedHosts', () => {
+    const configUtils = {
+      ...actionsConfigMock.create(),
+      ensureUriAllowed: (_: string) => {
+        throw new Error(`target url is not present in allowedHosts`);
+      },
+    };
     actionType = getActionType({
       logger: mockedLogger,
-      configurationUtilities: {
-        ...actionsConfigMock.create(),
-        ensureUriAllowed: (_) => {
-          throw new Error(`target url is not present in allowedHosts`);
-        },
-      },
+      configurationUtilities: configUtils,
     });
 
     // any for testing
@@ -219,7 +226,7 @@ describe('config validation', () => {
     };
 
     expect(() => {
-      validateConfig(actionType, config);
+      validateConfig(actionType, config, { configurationUtilities: configUtils });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: error configuring webhook action: target url is not present in allowedHosts"`
     );
@@ -229,14 +236,14 @@ describe('config validation', () => {
 describe('params validation', () => {
   test('param validation passes when no fields are provided as none are required', () => {
     const params: Record<string, string> = {};
-    expect(validateParams(actionType, params)).toEqual({});
+    expect(validateParams(actionType, params, { configurationUtilities })).toEqual({});
   });
 
   test('params validation passes when a valid body is provided', () => {
     const params: Record<string, string> = {
       body: 'count: {{ctx.payload.hits.total}}',
     };
-    expect(validateParams(actionType, params)).toEqual({
+    expect(validateParams(actionType, params, { configurationUtilities })).toEqual({
       ...params,
     });
   });

@@ -18,6 +18,7 @@ type UseChatType =
       ref: React.MutableRefObject<HTMLIFrameElement | null>;
       style: CSSProperties;
       isReady: boolean;
+      isResized: boolean;
     };
 
 const MESSAGE_WIDGET_READY = 'driftWidgetReady';
@@ -36,8 +37,9 @@ export const useChatConfig = ({
 }: ChatConfigParams): UseChatType => {
   const ref = useRef<HTMLIFrameElement>(null);
   const chat = useChat();
-  const [style, setStyle] = useState<CSSProperties>({});
+  const [style, setStyle] = useState<CSSProperties>({ height: 0, width: 0 });
   const [isReady, setIsReady] = useState(false);
+  const [isResized, setIsResized] = useState(false);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent): void => {
@@ -84,12 +86,8 @@ export const useChatConfig = ({
           const styles = message.data.styles || ({} as CSSProperties);
           setStyle({ ...style, ...styles });
 
-          // While it might appear we should set this when we receive MESSAGE_WIDGET_READY,
-          // we need to wait for the iframe to be resized the first time before it's considered
-          // *visibly* ready.
-          if (!isReady) {
-            setIsReady(true);
-            onReady();
+          if (!isResized) {
+            setIsResized(true);
           }
 
           onResize();
@@ -98,6 +96,8 @@ export const useChatConfig = ({
 
         // The chat widget is ready.
         case MESSAGE_WIDGET_READY:
+          setIsReady(true);
+          onReady();
         default:
           break;
       }
@@ -106,10 +106,10 @@ export const useChatConfig = ({
     window.addEventListener('message', handleMessage);
 
     return () => window.removeEventListener('message', handleMessage);
-  }, [chat, style, onReady, onResize, isReady]);
+  }, [chat, style, onReady, onResize, isReady, isResized]);
 
   if (chat.enabled) {
-    return { enabled: true, src: chat.chatURL, ref, style, isReady };
+    return { enabled: true, src: chat.chatURL, ref, style, isReady, isResized };
   }
 
   return { enabled: false };

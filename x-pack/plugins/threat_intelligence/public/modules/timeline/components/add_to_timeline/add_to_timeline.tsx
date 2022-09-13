@@ -9,12 +9,10 @@ import React, { VFC } from 'react';
 import { DataProvider, QueryOperator } from '@kbn/timelines-plugin/common';
 import { AddToTimelineButtonProps } from '@kbn/timelines-plugin/public';
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui/src/components/button';
+import { getIndicatorFieldAndValue } from '../../../indicators/lib/field_value';
 import { EMPTY_VALUE } from '../../../../../common/constants';
-import { displayField, displayValue } from '../../../indicators/lib/display_value';
-import { ComputedIndicatorFieldId } from '../../../indicators/components/indicators_table/cell_renderer';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { unwrapValue } from '../../../indicators/lib/unwrap_value';
-import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
+import { Indicator } from '../../../../../common/types/indicator';
 import { useStyles } from './styles';
 
 export interface AddToTimelineProps {
@@ -29,7 +27,7 @@ export interface AddToTimelineProps {
   /**
    * Only used with `EuiDataGrid` (see {@link AddToTimelineButtonProps}).
    */
-  component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+  as?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   /**
    * Used as `data-test-subj` value for e2e tests.
    */
@@ -44,23 +42,16 @@ export interface AddToTimelineProps {
  *
  * @returns add to timeline button or an empty component.
  */
-export const AddToTimeline: VFC<AddToTimelineProps> = ({ data, field, component, testId }) => {
+export const AddToTimeline: VFC<AddToTimelineProps> = ({ data, field, as, testId }) => {
   const styles = useStyles();
 
   const addToTimelineButton =
     useKibana().services.timelines.getHoverActions().getAddToTimelineButton;
 
-  let value: string | null;
-  if (typeof data === 'string') {
-    value = data;
-  } else if (field === ComputedIndicatorFieldId.DisplayValue) {
-    field = displayField(data) || '';
-    value = displayValue(data);
-  } else {
-    value = unwrapValue(data, field as RawIndicatorFieldId);
-  }
+  const { key, value } =
+    typeof data === 'string' ? { key: field, value: data } : getIndicatorFieldAndValue(data, field);
 
-  if (!value || value === EMPTY_VALUE || !field) {
+  if (!value || value === EMPTY_VALUE || !key) {
     return <></>;
   }
 
@@ -70,12 +61,12 @@ export const AddToTimeline: VFC<AddToTimelineProps> = ({ data, field, component,
     {
       and: [],
       enabled: true,
-      id: `timeline-indicator-${field}-${value}`,
+      id: `timeline-indicator-${key}-${value}`,
       name: value,
       excluded: false,
       kqlQuery: '',
       queryMatch: {
-        field,
+        field: key,
         value,
         operator,
       },
@@ -84,10 +75,10 @@ export const AddToTimeline: VFC<AddToTimelineProps> = ({ data, field, component,
 
   const addToTimelineProps: AddToTimelineButtonProps = {
     dataProvider,
-    field,
+    field: key,
     ownFocus: false,
   };
-  if (component) addToTimelineProps.Component = component;
+  if (as) addToTimelineProps.Component = as;
 
   return (
     <div data-test-subj={testId} css={styles.button}>

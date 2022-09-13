@@ -12,6 +12,7 @@ import { getActionType, SlackActionType, SlackActionTypeExecutorOptions } from '
 import { actionsConfigMock } from '../actions_config.mock';
 import { actionsMock } from '../mocks';
 import { createActionTypeRegistry } from './index.test';
+import { ActionsConfigurationUtilities } from '../actions_config';
 
 jest.mock('@slack/webhook', () => {
   return {
@@ -27,14 +28,16 @@ const services: Services = actionsMock.createServices();
 
 let actionType: SlackActionType;
 let mockedLogger: jest.Mocked<Logger>;
+let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
 
 beforeAll(() => {
   const { logger } = createActionTypeRegistry();
+  configurationUtilities = actionsConfigMock.create();
   actionType = getActionType({
     async executor(options) {
       return { status: 'ok', actionId: options.actionId };
     },
-    configurationUtilities: actionsConfigMock.create(),
+    configurationUtilities,
     logger,
   });
   mockedLogger = logger;
@@ -50,20 +53,22 @@ describe('action registeration', () => {
 
 describe('validateParams()', () => {
   test('should validate and pass when params is valid', () => {
-    expect(validateParams(actionType, { message: 'a message' })).toEqual({
+    expect(
+      validateParams(actionType, { message: 'a message' }, { configurationUtilities })
+    ).toEqual({
       message: 'a message',
     });
   });
 
   test('should validate and throw error when params is invalid', () => {
     expect(() => {
-      validateParams(actionType, {});
+      validateParams(actionType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action params: [message]: expected value of type [string] but got [undefined]"`
     );
 
     expect(() => {
-      validateParams(actionType, { message: 1 });
+      validateParams(actionType, { message: 1 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action params: [message]: expected value of type [string] but got [number]"`
     );
@@ -72,60 +77,76 @@ describe('validateParams()', () => {
 
 describe('validateActionTypeSecrets()', () => {
   test('should validate and pass when config is valid', () => {
-    validateSecrets(actionType, {
-      webhookUrl: 'https://example.com',
-    });
+    validateSecrets(
+      actionType,
+      {
+        webhookUrl: 'https://example.com',
+      },
+      { configurationUtilities }
+    );
   });
 
   test('should validate and throw error when config is invalid', () => {
     expect(() => {
-      validateSecrets(actionType, {});
+      validateSecrets(actionType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: [webhookUrl]: expected value of type [string] but got [undefined]"`
     );
 
     expect(() => {
-      validateSecrets(actionType, { webhookUrl: 1 });
+      validateSecrets(actionType, { webhookUrl: 1 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: [webhookUrl]: expected value of type [string] but got [number]"`
     );
 
     expect(() => {
-      validateSecrets(actionType, { webhookUrl: 'fee-fi-fo-fum' });
+      validateSecrets(actionType, { webhookUrl: 'fee-fi-fo-fum' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: error configuring slack action: unable to parse host name from webhookUrl"`
     );
   });
 
   test('should validate and pass when the slack webhookUrl is added to allowedHosts', () => {
+    const configUtils = {
+      ...actionsConfigMock.create(),
+      ensureUriAllowed: (url: string) => {
+        expect(url).toEqual('https://api.slack.com/');
+      },
+    };
     actionType = getActionType({
       logger: mockedLogger,
-      configurationUtilities: {
-        ...actionsConfigMock.create(),
-        ensureUriAllowed: (url) => {
-          expect(url).toEqual('https://api.slack.com/');
-        },
-      },
+      configurationUtilities: configUtils,
     });
 
-    expect(validateSecrets(actionType, { webhookUrl: 'https://api.slack.com/' })).toEqual({
+    expect(
+      validateSecrets(
+        actionType,
+        { webhookUrl: 'https://api.slack.com/' },
+        { configurationUtilities: configUtils }
+      )
+    ).toEqual({
       webhookUrl: 'https://api.slack.com/',
     });
   });
 
   test('config validation returns an error if the specified URL isnt added to allowedHosts', () => {
+    const configUtils = {
+      ...actionsConfigMock.create(),
+      ensureUriAllowed: () => {
+        throw new Error(`target hostname is not added to allowedHosts`);
+      },
+    };
     actionType = getActionType({
       logger: mockedLogger,
-      configurationUtilities: {
-        ...actionsConfigMock.create(),
-        ensureUriAllowed: () => {
-          throw new Error(`target hostname is not added to allowedHosts`);
-        },
-      },
+      configurationUtilities: configUtils,
     });
 
     expect(() => {
-      validateSecrets(actionType, { webhookUrl: 'https://api.slack.com/' });
+      validateSecrets(
+        actionType,
+        { webhookUrl: 'https://api.slack.com/' },
+        { configurationUtilities: configUtils }
+      );
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: error configuring slack action: target hostname is not added to allowedHosts"`
     );
@@ -191,8 +212,8 @@ describe('execute()', () => {
   });
 
   test('calls the mock executor with success proxy', async () => {
-    const configurationUtilities = actionsConfigMock.create();
-    configurationUtilities.getProxySettings.mockReturnValue({
+    const configUtils = actionsConfigMock.create();
+    configUtils.getProxySettings.mockReturnValue({
       proxyUrl: 'https://someproxyhost',
       proxySSLSettings: {
         verificationMode: 'none',
@@ -202,7 +223,7 @@ describe('execute()', () => {
     });
     const actionTypeProxy = getActionType({
       logger: mockedLogger,
-      configurationUtilities,
+      configurationUtilities: configUtils,
     });
     await actionTypeProxy.executor({
       actionId: 'some-id',
@@ -218,8 +239,8 @@ describe('execute()', () => {
 
   test('ensure proxy bypass will bypass when expected', async () => {
     mockedLogger.debug.mockReset();
-    const configurationUtilities = actionsConfigMock.create();
-    configurationUtilities.getProxySettings.mockReturnValue({
+    const configUtils = actionsConfigMock.create();
+    configUtils.getProxySettings.mockReturnValue({
       proxyUrl: 'https://someproxyhost',
       proxySSLSettings: {
         verificationMode: 'none',
@@ -229,7 +250,7 @@ describe('execute()', () => {
     });
     const actionTypeProxy = getActionType({
       logger: mockedLogger,
-      configurationUtilities,
+      configurationUtilities: configUtils,
     });
     await actionTypeProxy.executor({
       actionId: 'some-id',
@@ -245,8 +266,8 @@ describe('execute()', () => {
 
   test('ensure proxy bypass will not bypass when expected', async () => {
     mockedLogger.debug.mockReset();
-    const configurationUtilities = actionsConfigMock.create();
-    configurationUtilities.getProxySettings.mockReturnValue({
+    const configUtils = actionsConfigMock.create();
+    configUtils.getProxySettings.mockReturnValue({
       proxyUrl: 'https://someproxyhost',
       proxySSLSettings: {
         verificationMode: 'none',
@@ -256,7 +277,7 @@ describe('execute()', () => {
     });
     const actionTypeProxy = getActionType({
       logger: mockedLogger,
-      configurationUtilities,
+      configurationUtilities: configUtils,
     });
     await actionTypeProxy.executor({
       actionId: 'some-id',
@@ -272,8 +293,8 @@ describe('execute()', () => {
 
   test('ensure proxy only will proxy when expected', async () => {
     mockedLogger.debug.mockReset();
-    const configurationUtilities = actionsConfigMock.create();
-    configurationUtilities.getProxySettings.mockReturnValue({
+    const configUtils = actionsConfigMock.create();
+    configUtils.getProxySettings.mockReturnValue({
       proxyUrl: 'https://someproxyhost',
       proxySSLSettings: {
         verificationMode: 'none',
@@ -283,7 +304,7 @@ describe('execute()', () => {
     });
     const actionTypeProxy = getActionType({
       logger: mockedLogger,
-      configurationUtilities,
+      configurationUtilities: configUtils,
     });
     await actionTypeProxy.executor({
       actionId: 'some-id',
@@ -299,8 +320,8 @@ describe('execute()', () => {
 
   test('ensure proxy only will not proxy when expected', async () => {
     mockedLogger.debug.mockReset();
-    const configurationUtilities = actionsConfigMock.create();
-    configurationUtilities.getProxySettings.mockReturnValue({
+    const configUtils = actionsConfigMock.create();
+    configUtils.getProxySettings.mockReturnValue({
       proxyUrl: 'https://someproxyhost',
       proxySSLSettings: {
         verificationMode: 'none',
@@ -310,7 +331,7 @@ describe('execute()', () => {
     });
     const actionTypeProxy = getActionType({
       logger: mockedLogger,
-      configurationUtilities,
+      configurationUtilities: configUtils,
     });
     await actionTypeProxy.executor({
       actionId: 'some-id',

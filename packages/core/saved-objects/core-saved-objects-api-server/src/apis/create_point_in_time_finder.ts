@@ -20,8 +20,16 @@ export type SavedObjectsCreatePointInTimeFinderOptions = Omit<
 /**
  * @public
  */
+export type SavedObjectsPointInTimeFinderClient = Pick<
+  SavedObjectsClientContract,
+  'find' | 'openPointInTimeForType' | 'closePointInTime'
+>;
+
+/**
+ * @public
+ */
 export interface SavedObjectsCreatePointInTimeFinderDependencies {
-  client: Pick<SavedObjectsClientContract, 'find' | 'openPointInTimeForType' | 'closePointInTime'>;
+  client: SavedObjectsPointInTimeFinderClient;
 }
 
 /** @public */

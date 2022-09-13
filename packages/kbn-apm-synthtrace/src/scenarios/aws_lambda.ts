@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { apm, timerange } from '..';
+import { apm, timerange } from '../..';
 import { ApmFields } from '../lib/apm/apm_fields';
 import { Scenario } from '../cli/scenario';
 import { getLogger } from '../cli/utils/get_common_services';
@@ -21,9 +21,11 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   return {
     generate: ({ from, to }) => {
       const range = timerange(from, to);
-      const timestamps = range.interval('1s').rate(3);
+      const timestamps = range.ratePerMinute(180);
 
-      const instance = apm.service('lambda-python', ENVIRONMENT, 'python').instance('instance');
+      const instance = apm
+        .service({ name: 'lambda-python', environment: ENVIRONMENT, agentName: 'python' })
+        .instance('instance');
 
       const traceEventsSetups = [
         { functionName: 'lambda-python-1', coldStart: true },
@@ -33,7 +35,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
       const traceEvents = ({ functionName, coldStart }: typeof traceEventsSetups[0]) => {
         return timestamps.generator((timestamp) =>
           instance
-            .transaction('GET /order/{id}')
+            .transaction({ transactionName: 'GET /order/{id}' })
             .defaults({
               'service.runtime.name': 'AWS_Lambda_python3.8',
               'cloud.provider': 'aws',
