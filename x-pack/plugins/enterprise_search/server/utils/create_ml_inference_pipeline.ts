@@ -7,6 +7,7 @@
 
 import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
+
 import { formatMlPipelineBody } from './create_pipeline_definitions';
 
 export interface MlInferencePipeline extends IngestPipeline {
@@ -28,7 +29,12 @@ export const createMlInferencePipeline = async (
   const inferencePipelineGeneratedName = `ml-inference-${pipelineName}`;
 
   // TODO: use formatMlPipelineBody()
-  const mlInferencePipeline = await formatMlPipelineBody(modelId, sourceField, destinationField, esClient);
+  const mlInferencePipeline = await formatMlPipelineBody(
+    modelId,
+    sourceField,
+    destinationField,
+    esClient
+  );
   // const inferenceProcessorDefinition = {
   //   inference: {
   //     model_id: modelId,
@@ -37,7 +43,6 @@ export const createMlInferencePipeline = async (
   //   }
   // }
 
-
   // PUT _ingest/pipeline/ml-inference-{pipeline_name}
   await esClient.ingest.putPipeline({
     id: inferencePipelineGeneratedName,
@@ -45,6 +50,6 @@ export const createMlInferencePipeline = async (
   });
 
   return {
-    created: inferencePipelineGeneratedName
+    created: inferencePipelineGeneratedName,
   };
-}
+};
