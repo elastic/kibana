@@ -14,14 +14,14 @@ describe('esql query helpers', () => {
       const idxPattern1 = getIndexPatternFromESQLQuery('FROM foo');
       expect(idxPattern1).toBe('foo');
 
-      const idxPattern2 = getIndexPatternFromESQLQuery('from foo | project abc, def');
-      expect(idxPattern2).toBe('foo');
+      const idxPattern3 = getIndexPatternFromESQLQuery('from foo | project abc, def');
+      expect(idxPattern3).toBe('foo');
 
-      const idxPattern2 = getIndexPatternFromESQLQuery('from foo | project a | limit 2');
-      expect(idxPattern2).toBe('foo');
+      const idxPattern4 = getIndexPatternFromESQLQuery('from foo | project a | limit 2');
+      expect(idxPattern4).toBe('foo');
 
-      const idxPattern2 = getIndexPatternFromESQLQuery('from foo | limit 2');
-      expect(idxPattern2).toBe('foo');
+      const idxPattern5 = getIndexPatternFromESQLQuery('from foo | limit 2');
+      expect(idxPattern5).toBe('foo');
     });
   });
 });
