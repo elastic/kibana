@@ -40,10 +40,11 @@ export const getDataSourceInfo = async (
     indexPattern = await dataViews.getDefault();
     indexPatternId = indexPattern?.id ?? '';
     timeField = indexPattern?.timeFieldName;
-  }
-  if (!timeField) {
+  } else {
     indexPattern = await dataViews.get(indexPatternId);
-    timeField = indexPattern.timeFieldName;
+    if (!timeField) {
+      timeField = indexPattern.timeFieldName;
+    }
   }
 
   return {
