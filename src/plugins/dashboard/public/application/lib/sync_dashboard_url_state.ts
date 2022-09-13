@@ -26,7 +26,7 @@ type SyncDashboardUrlStateProps = DashboardBuildContext;
  * @returns whether or not there is a panel in the URL state saved with a version before 7.3
  */
 export const isPanelVersionTooOld = (panels: RawDashboardState['panels']) => {
-  for (let panel of panels) {
+  for (const panel of panels) {
     if (!panel.version || semverSatisfies(panel.version, '<7.3')) return true;
   }
   return false;
@@ -46,7 +46,7 @@ export const syncDashboardUrlState = ({
     const rawAppStateInUrl = kbnUrlStateStorage.get<RawDashboardState>(DASHBOARD_STATE_STORAGE_KEY);
     if (!rawAppStateInUrl) return {};
 
-    let panelsMap: DashboardPanelMap | undefined = undefined;
+    let panelsMap: DashboardPanelMap | undefined;
     if (rawAppStateInUrl.panels && rawAppStateInUrl.panels.length > 0) {
       if (isPanelVersionTooOld(rawAppStateInUrl.panels)) {
         notifications.toasts.addWarning(dashboardSavedObjectErrorStrings.getPanelTooOldError());
