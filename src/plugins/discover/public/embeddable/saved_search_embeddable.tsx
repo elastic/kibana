@@ -59,7 +59,7 @@ import { VIEW_MODE } from '../components/view_mode_toggle';
 import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
 import { getRawRecordType } from '../application/main/utils/get_raw_record_type';
-import { fetchSql } from '../application/main/utils/fetch_sql';
+import { fetchTextBased } from '../application/main/utils/fetch_textbased';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
@@ -221,7 +221,7 @@ export class SavedSearchEmbeddable
     try {
       // Request SQL data
       if (useSql && query) {
-        const result = await fetchSql(
+        const result = await fetchTextBased(
           this.savedSearch.searchSource.getField('query')!,
           this.services.dataViews,
           this.services.data,

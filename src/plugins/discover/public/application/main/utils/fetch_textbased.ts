@@ -22,7 +22,7 @@ interface SQLErrorResponse {
   type: 'error';
 }
 
-export function fetchSql(
+export function fetchTextBased(
   query: Query | AggregateQuery,
   dataViewsService: DataViewsContract,
   data: DataPublicPluginStart,

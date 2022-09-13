@@ -313,7 +313,7 @@ export function ChangeDataView({
             setPopoverIsOpen(false);
             setIsTextBasedLangSelected(true);
             // also update the query with the sql query
-            if (lang === 'sql') {
+            if (lang === 'SQL') {
               onTextLangQuerySubmit?.({ sql: `SELECT * FROM "${trigger.title}"` });
             } else {
               onTextLangQuerySubmit?.({ esql: `from ${trigger.title} | limit 10` });

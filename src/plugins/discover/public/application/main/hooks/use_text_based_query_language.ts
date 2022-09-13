@@ -9,6 +9,7 @@ import { isEqual } from 'lodash';
 import {
   isOfAggregateQueryType,
   getIndexPatternFromSQLQuery,
+  getIndexPatternFromESQLQuery,
   AggregateQuery,
   Query,
 } from '@kbn/es-query';
@@ -82,9 +83,10 @@ export function useTextBasedQueryLanguage({
             prev.current = { columns: firstRowColumns, query };
           }
         }
-        const indexPatternFromQuery = getIndexPatternFromSQLQuery(
-          'sql' in query ? query.sql : query.esql
-        );
+        const indexPatternFromQuery =
+          'sql' in query
+            ? getIndexPatternFromSQLQuery(query.sql)
+            : getIndexPatternFromESQLQuery(query.esql);
         const dataViewObj = dataViewList.find(({ title }) => title === indexPatternFromQuery);
 
         if (dataViewObj) {

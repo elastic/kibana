@@ -65,7 +65,7 @@ import { NowProviderInternalContract } from '../now_provider';
 import { DataPublicPluginStart, DataStartDependencies } from '../types';
 import { AggsService } from './aggs';
 import { createUsageCollector, SearchUsageCollector } from './collectors';
-import { getEql, getEsaggs, getEsdsl, getEssql } from './expressions';
+import { getEql, getEsaggs, getEsdsl, getEssql, getEsql } from './expressions';
 import { getKibanaContext } from './expressions/kibana_context';
 import { handleWarnings } from './fetch/handle_warnings';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
@@ -175,6 +175,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     );
     expressions.registerFunction(
       getEssql({ getStartServices } as {
+        getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
+      })
+    );
+    expressions.registerFunction(
+      getEsql({ getStartServices } as {
         getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
       })
     );
