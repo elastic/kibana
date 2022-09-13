@@ -60,7 +60,7 @@ export const convertToStandartDeviationColumn = (
       convertMetricAggregationColumnWithoutSpecialParams(
         SUPPORTED_METRICS.std_deviation,
         { series, metrics: [metric], dataView },
-        reducedTimeRange
+        { reducedTimeRange, timeShift: series.offset_time }
       )
     );
   }

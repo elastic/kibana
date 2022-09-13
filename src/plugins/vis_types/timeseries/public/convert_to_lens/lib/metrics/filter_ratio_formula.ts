@@ -10,7 +10,7 @@ import type { Query } from '@kbn/es-query';
 import type { Metric, MetricType } from '../../../../common/types';
 import { getFormulaFromMetric, SupportedMetric, SUPPORTED_METRICS } from './supported_metrics';
 import { addAdditionalArgs } from '.';
-import { AdditionalFormulaArgs } from '../../types';
+import { AdditionalArgs } from '../../types';
 
 const escapeQuotes = (str: string) => {
   return str?.replace(/'/g, "\\'");
@@ -19,7 +19,7 @@ const escapeQuotes = (str: string) => {
 const constructFilterRationFormula = (
   operation: string,
   metric?: Query,
-  additionalArgs?: AdditionalFormulaArgs
+  additionalArgs?: AdditionalArgs
 ) => {
   return `${operation}${metric?.language === 'lucene' ? 'lucene' : 'kql'}='${
     metric?.query && typeof metric?.query === 'string'
@@ -30,7 +30,7 @@ const constructFilterRationFormula = (
 
 export const getFilterRatioFormula = (
   currentMetric: Metric,
-  additionalArgs: AdditionalFormulaArgs
+  additionalArgs: AdditionalArgs
 ) => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { numerator, denominator, metric_agg, field } = currentMetric;

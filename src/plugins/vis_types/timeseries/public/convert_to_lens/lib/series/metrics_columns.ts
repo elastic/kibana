@@ -57,7 +57,7 @@ export const getMetricsColumns = (
     case 'percentile': {
       const percentileColumns = convertToPercentileColumns(
         { series, metric: metrics[metricIdx], dataView },
-        reducedTimeRange
+        { reducedTimeRange, timeShift: series.offset_time }
       );
 
       return getValidColumns(percentileColumns);
@@ -65,7 +65,7 @@ export const getMetricsColumns = (
     case 'percentile_rank': {
       const percentileRankColumns = convertToPercentileRankColumns(
         { series, metric: metrics[metricIdx], dataView },
-        reducedTimeRange
+        { reducedTimeRange, timeShift: series.offset_time }
       );
 
       return getValidColumns(percentileRankColumns);
@@ -131,7 +131,7 @@ export const getMetricsColumns = (
       const column = convertMetricAggregationColumnWithoutSpecialParams(
         aggregationMap,
         columnsConverterArgs,
-        reducedTimeRange
+        { reducedTimeRange, timeShift: series.offset_time }
       );
       return getValidColumns(column);
     }

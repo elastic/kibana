@@ -115,7 +115,7 @@ const isSupportedAggregationWithoutParams = (
 export const convertMetricAggregationColumnWithoutSpecialParams = (
   aggregation: SupportedMetric,
   { series, metrics, dataView }: CommonColumnsConverterArgs,
-  reducedTimeRange?: string
+  additionalArgs: { reducedTimeRange?: string; timeShift?: string }
 ): MetricAggregationColumnWithoutSpecialParams | null => {
   if (!isSupportedAggregationWithoutParams(aggregation.name)) {
     return null;
@@ -131,7 +131,7 @@ export const convertMetricAggregationColumnWithoutSpecialParams = (
   return {
     operationType: aggregation.name,
     sourceField,
-    ...createColumn(series, metric, field, { reducedTimeRange }),
+    ...createColumn(series, metric, field, additionalArgs),
     params: { ...getFormat(series) },
   } as MetricAggregationColumnWithoutSpecialParams;
 };
@@ -167,7 +167,7 @@ export const convertMetricAggregationToColumn = (
   return convertMetricAggregationColumnWithoutSpecialParams(
     aggregation,
     { series, metrics: [metric], dataView },
-    reducedTimeRange
+    { reducedTimeRange }
   );
 };
 
@@ -292,7 +292,7 @@ export const createParentPipelineAggregationColumn = (
   return {
     operationType: aggregation,
     references,
-    ...createColumn(series, metric),
+    ...createColumn(series, metric, undefined, { timeShift: series.offset_time }),
     params,
   } as ParentPipelineAggColumn;
 };

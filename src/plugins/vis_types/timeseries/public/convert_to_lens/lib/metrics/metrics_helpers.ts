@@ -18,7 +18,7 @@ import { getFilterRatioFormula } from './filter_ratio_formula';
 import { getFormulaFromMetric, SUPPORTED_METRICS } from './supported_metrics';
 import { buildCounterRateFormula } from './counter_rate_formula';
 import { getPipelineSeriesFormula } from './pipeline_formula';
-import { AdditionalFormulaArgs } from '../../types';
+import { AdditionalArgs } from '../../types';
 
 const shouldCalculateReducedTimeRange = (timeRangeMode?: string) => {
   return timeRangeMode === TIME_RANGE_DATA_MODES.LAST_VALUE;
@@ -76,7 +76,7 @@ const addTimeShiftToFormula = (timeShift?: string) => {
   return timeShift ? `, shift='${timeShift}'` : '';
 };
 
-export const addAdditionalArgs = ({ reducedTimeRange, timeShift }: AdditionalFormulaArgs) => {
+export const addAdditionalArgs = ({ reducedTimeRange, timeShift }: AdditionalArgs) => {
   return `${addTimeShiftToFormula(timeShift)}${addTimeRangeToFormula(reducedTimeRange)}`;
 };
 

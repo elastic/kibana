@@ -10,5 +10,5 @@ import { MovingAverageParams } from '@kbn/visualizations-plugin/common/convert_t
 import { Metric } from '../../../../common/types';
 
 export const convertToMovingAverageParams = ({ window }: Metric): MovingAverageParams => ({
-  window: window ?? 0,
+  window: window ?? 5,
 });

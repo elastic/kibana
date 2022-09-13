@@ -20,7 +20,7 @@ export interface Filter {
   lucene?: string | { [key: string]: any } | undefined;
 }
 
-export interface AdditionalFormulaArgs {
+export interface AdditionalArgs {
   reducedTimeRange?: string;
   timeShift?: string;
 }

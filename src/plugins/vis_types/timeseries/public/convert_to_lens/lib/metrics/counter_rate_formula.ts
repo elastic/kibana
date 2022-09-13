@@ -7,9 +7,9 @@
  */
 
 import { addAdditionalArgs } from '.';
-import { AdditionalFormulaArgs } from '../../types';
+import { AdditionalArgs } from '../../types';
 
-const buildMaxFormula = (selector: string, additionalArgs: AdditionalFormulaArgs) => {
+const buildMaxFormula = (selector: string, additionalArgs: AdditionalArgs) => {
   return `max(${selector}${addAdditionalArgs(additionalArgs)})`;
 };
 
@@ -20,7 +20,7 @@ const buildСounterRateFormula = (aggFormula: string, selector: string) => {
 export const buildCounterRateFormula = (
   aggFormula: string,
   fieldName: string,
-  additionalArgs: AdditionalFormulaArgs
+  additionalArgs: AdditionalArgs
 ) => {
   const maxFormula = buildMaxFormula(fieldName, additionalArgs);
 

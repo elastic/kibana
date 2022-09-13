@@ -26,6 +26,7 @@ interface ExtraColumnFields {
   isBucketed?: boolean;
   isSplit?: boolean;
   reducedTimeRange?: string;
+  timeShift?: string;
 }
 
 const isSupportedFormat = (format: string) => ['bytes', 'number', 'percent'].includes(format);
@@ -55,7 +56,7 @@ export const createColumn = (
   series: Series,
   metric: Metric,
   field?: DataViewField,
-  { isBucketed = false, isSplit = false, reducedTimeRange }: ExtraColumnFields = {}
+  { isBucketed = false, isSplit = false, reducedTimeRange, timeShift }: ExtraColumnFields = {}
 ): GeneralColumnWithMeta => ({
   columnId: uuid(),
   dataType: (field?.type as DataType) ?? undefined,
@@ -64,7 +65,7 @@ export const createColumn = (
   isSplit,
   reducedTimeRange,
   filter: series.filter,
-  timeShift: series.offset_time,
+  timeShift,
   timeScale: getTimeScale(metric),
   meta: { metricId: metric.id },
 });

@@ -10,7 +10,7 @@ import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import type { Metric } from '../../../../common/types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { getFilterRatioFormula } from './filter_ratio_formula';
-import { AdditionalFormulaArgs } from '../../types';
+import { AdditionalArgs } from '../../types';
 
 describe('getFilterRatioFormula', () => {
   const metric: Metric = {
@@ -33,7 +33,7 @@ describe('getFilterRatioFormula', () => {
     metric_agg: METRIC_TYPES.MEDIAN,
   };
 
-  test.each<[string, [Metric, AdditionalFormulaArgs], string | null]>([
+  test.each<[string, [Metric, AdditionalArgs], string | null]>([
     ['null if metric_agg is not supported', [metricWithNotSupportedMetricAgg, {}], null],
     [
       'filter ratio formula if metric_agg is not specified',

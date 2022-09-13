@@ -34,7 +34,7 @@ export const convertToCounterRateColumn = ({
     {
       operationType: Operations.COUNTER_RATE,
       references: [maxColumn.columnId],
-      ...createColumn(series, metric, field),
+      ...createColumn(series, metric, field, { timeShift: series.offset_time }),
       params: { ...getFormat(series) },
     },
   ];

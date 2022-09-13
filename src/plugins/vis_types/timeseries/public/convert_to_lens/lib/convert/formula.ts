@@ -13,7 +13,7 @@ import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import type { Metric } from '../../../../common/types';
 import { getFormulaEquivalent, getPipelineSeriesFormula } from '../metrics';
 import { createColumn, getFormat } from './column';
-import { AdditionalFormulaArgs } from '../../types';
+import { AdditionalArgs } from '../../types';
 
 type OtherFormulaAggregations =
   | typeof TSVB_METRIC_TYPES.POSITIVE_ONLY
@@ -44,7 +44,7 @@ const convertFormulaScriptForPercentileAggs = (
   variables: Exclude<Metric['variables'], undefined>,
   metric: Metric,
   allAggMetrics: Metric[],
-  additionalArgs: AdditionalFormulaArgs
+  additionalArgs: AdditionalArgs
 ) => {
   variables.forEach((variable) => {
     const [_, meta] = variable?.field?.split('[') ?? [];
@@ -66,7 +66,7 @@ const convertFormulaScriptForAggs = (
   variables: Exclude<Metric['variables'], undefined>,
   metric: Metric,
   allAggMetrics: Metric[],
-  additionalArgs: AdditionalFormulaArgs
+  additionalArgs: AdditionalArgs
 ) => {
   const script = getFormulaEquivalent(metric, allAggMetrics, { ...additionalArgs });
   if (!script) {
