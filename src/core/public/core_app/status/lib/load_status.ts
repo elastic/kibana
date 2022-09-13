@@ -14,7 +14,7 @@ import type {
   StatusResponse,
   StatusInfoServiceStatus as ServiceStatus,
 } from '@kbn/core-status-common-internal';
-import type { DataType } from './format_number';
+import type { DataType } from '.';
 
 interface MetricMeta {
   title: string;
