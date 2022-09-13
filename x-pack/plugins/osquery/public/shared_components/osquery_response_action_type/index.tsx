@@ -12,6 +12,10 @@ import { EuiSpacer } from '@elastic/eui';
 import uuid from 'uuid';
 import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { get, isEmpty, map } from 'lodash';
+import {
+  convertECSMappingToFormValue,
+  convertECSMappingToObject,
+} from '../../../common/schemas/common/utils';
 import { QueryPackSelectable } from '../../live_queries/form/query_pack_selectable';
 import type { EcsMappingFormField } from '../../packs/queries/ecs_mapping_editor_field';
 import { defaultEcsFormData } from '../../packs/queries/ecs_mapping_editor_field';
@@ -87,7 +91,7 @@ const OsqueryResponseActionParamsFormComponent: React.ForwardRefExoticComponent<
               id: watchedValues.id,
               savedQueryId: watchedValues.savedQueryId,
               query: watchedValues.query,
-              ecs_mapping: watchedValues.ecs_mapping,
+              ecs_mapping: convertECSMappingToObject(watchedValues.ecs_mapping),
             },
           },
         });
@@ -127,12 +131,17 @@ const OsqueryResponseActionParamsFormComponent: React.ForwardRefExoticComponent<
 
   useEffect(() => {
     if (defaultParams && defaultParams.id) {
-      const { packId, ...restParams } = defaultParams;
+      const { packId, ecs_mapping: ecsMapping, ...restParams } = defaultParams;
       map(restParams, (value, key: keyof OsqueryResponseActionsParamsFormFields) => {
         if (!isEmpty(value)) {
           setValue(key, value);
         }
       });
+      if (ecsMapping) {
+        const converted = convertECSMappingToFormValue(ecsMapping);
+        setValue('ecs_mapping', converted);
+      }
+
       if (!isEmpty(packId)) {
         setValue('packId', [packId]);
       }

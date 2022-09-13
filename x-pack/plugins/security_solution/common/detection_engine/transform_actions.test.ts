@@ -44,125 +44,27 @@ describe('transform_actions', () => {
       params: alertAction.params,
     });
   });
-
   test('it should transform RuleAlertResponseAction[] to RuleResponseAction[]', () => {
     const ruleAction = {
       action_type_id: 'action_type_id',
-      params: {
-        query: 'test',
-        ecs_mapping: {
-          question: {
-            field: 'answer',
-          },
-        },
-      },
+      params: {},
     };
     const alertAction = transformRuleToAlertResponseAction(ruleAction);
     expect(alertAction).toEqual({
       actionTypeId: ruleAction.action_type_id,
-      params: {
-        ecs_mapping: {
-          question: {
-            field: 'answer',
-          },
-        },
-        query: ruleAction.params.query,
-      },
+      params: ruleAction.params,
     });
   });
-  test('it should transform RuleAlertResponseAction[] to RuleResponseAction[] with ecs_mapping transform', () => {
-    const ruleAction = {
-      action_type_id: '.osquery',
-      params: {
-        query: 'test',
-        ecs_mapping: {
-          question: {
-            field: 'answer',
-          },
-        },
-      },
-    };
-    const alertAction = transformRuleToAlertResponseAction(ruleAction);
-    expect(alertAction).toEqual({
-      actionTypeId: ruleAction.action_type_id,
-      params: {
-        ecs_mapping: [
-          {
-            key: 'question',
-            result: {
-              type: 'field',
-              value: 'answer',
-            },
-          },
-        ],
-        query: ruleAction.params.query,
-      },
-    });
-  });
+
   test('it should transform RuleResponseAction[] to RuleAlertResponseAction[]', () => {
     const alertAction = {
       actionTypeId: 'actionTypeId',
-      params: {
-        query: 'test',
-        ecs_mapping: [
-          {
-            key: 'question',
-            result: {
-              type: 'field',
-              value: 'answer',
-            },
-          },
-        ],
-      },
+      params: {},
     };
     const ruleAction = transformAlertToRuleResponseAction(alertAction);
     expect(ruleAction).toEqual({
       action_type_id: alertAction.actionTypeId,
-      params: {
-        query: 'test',
-        ecs_mapping: [
-          {
-            key: 'question',
-            result: {
-              type: 'field',
-              value: 'answer',
-            },
-          },
-        ],
-      },
-    });
-  });
-  test('it should transform RuleResponseAction[] to RuleAlertResponseAction[] with ecs_mapping transform', () => {
-    const alertAction = {
-      actionTypeId: 'actionTypeId',
-      params: {
-        query: 'test',
-        ecs_mapping: [
-          {
-            key: 'question',
-            result: {
-              type: 'field',
-              value: 'answer',
-            },
-          },
-        ],
-      },
-    };
-    const ruleAction = transformAlertToRuleResponseAction(alertAction);
-    expect(ruleAction).toEqual({
-      action_type_id: alertAction.actionTypeId,
-      params: {
-        query: 'test',
-        ecs_mapping: [
-          {
-            key: 'question',
-            result: {
-              type: 'field',
-              value: 'answer',
-            },
-          },
-        ],
-      },
+      params: alertAction.params,
     });
   });
 });

@@ -48,11 +48,3 @@ export const convertECSMappingToFormValue = (
       value: Object.values(value)[0],
     },
   }));
-
-// export const convertECSMappingToArray = (ecsMapping: Record<string, object> | undefined) =>
-//   ecsMapping
-//     ? Object.entries(ecsMapping).map((item) => ({
-//       key: item[0],
-//       value: item[1],
-//     }))
-//     : undefined;

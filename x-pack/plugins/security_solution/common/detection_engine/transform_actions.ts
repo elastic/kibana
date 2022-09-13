@@ -7,9 +7,6 @@
 
 import type { RuleAction, RuleResponseAction } from '@kbn/alerting-plugin/common';
 import type { RuleAlertAction, RuleAlertResponseAction } from './types';
-import { ResponseActionsTypes } from './types';
-import type { EcsMappingFormValueArray } from './utils';
-import { convertECSMappingToFormValue, convertECSMappingToObject } from './utils';
 
 export const transformRuleToAlertAction = ({
   group,
@@ -39,18 +36,6 @@ export const transformRuleToAlertResponseAction = ({
   action_type_id, // eslint-disable-line @typescript-eslint/naming-convention
   params,
 }: RuleAlertResponseAction): RuleResponseAction => {
-  if (action_type_id === ResponseActionsTypes.OSQUERY) {
-    return {
-      params: {
-        ...params,
-        ecs_mapping: convertECSMappingToFormValue(
-          params.ecs_mapping as Record<string, Record<'field', string>>
-        ),
-      },
-      actionTypeId: action_type_id,
-    };
-  }
-
   return {
     params,
     actionTypeId: action_type_id,
@@ -61,16 +46,6 @@ export const transformAlertToRuleResponseAction = ({
   actionTypeId,
   params,
 }: RuleResponseAction): RuleAlertResponseAction => {
-  if (actionTypeId === ResponseActionsTypes.OSQUERY) {
-    return {
-      params: {
-        ...params,
-        ecs_mapping: convertECSMappingToObject(params.ecs_mapping as EcsMappingFormValueArray),
-      },
-      action_type_id: actionTypeId,
-    };
-  }
-
   return {
     params,
     action_type_id: actionTypeId,

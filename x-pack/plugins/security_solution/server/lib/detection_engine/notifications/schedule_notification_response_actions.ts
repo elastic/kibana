@@ -6,9 +6,7 @@
  */
 
 import { map, uniq } from 'lodash';
-import type { EcsMappingFormValueArray } from '../../../../common/detection_engine/utils';
 import type { SetupPlugins } from '../../../plugin_contract';
-import { convertECSMappingToObject } from '../../../../common/detection_engine/utils';
 
 interface OsqueryQuery {
   id: string;
@@ -26,7 +24,7 @@ interface OsqueryResponseAction {
     savedQueryId: string;
     query: string;
     packId: string;
-    ecs_mapping?: EcsMappingFormValueArray;
+    ecs_mapping?: Record<string, { field?: string; value?: string }>;
   };
 }
 
@@ -71,7 +69,7 @@ export const scheduleNotificationResponseActions = (
           };
         }) as unknown as OsqueryQuery[],
         ...rest,
-        ecs_mapping: convertECSMappingToObject(ecsMapping),
+        ecs_mapping: ecsMapping,
         saved_query_id: savedQueryId,
         agent_ids: agentIds,
         alert_ids: alertIds,
