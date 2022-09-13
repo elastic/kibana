@@ -80,7 +80,7 @@ export interface Props<Kind extends string = string> {
 /**
  * In order to use this component you must register your file kind with {@link FileKindsRegistry}
  */
-const UploadFile: FunctionComponent<Props> = ({
+export const UploadFile: FunctionComponent<Props> = ({
   meta,
   client,
   onDone,
