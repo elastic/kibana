@@ -7,7 +7,7 @@
 
 import type { SearchHit } from '@kbn/core/types/elasticsearch';
 
-import type { Agent, AgentAction, CurrentUpgrade, NewAgentAction } from '../models';
+import type { Agent, AgentAction, ActionStatus, CurrentUpgrade, NewAgentAction } from '../models';
 
 import type { ListResult, ListWithKuery } from './common';
 
@@ -125,6 +125,7 @@ export interface PostBulkAgentReassignRequest {
   body: {
     policy_id: string;
     agents: string[] | string;
+    batchSize?: number;
   };
 }
 
@@ -204,6 +205,9 @@ export interface GetAgentIncomingDataResponse {
 
 export interface GetCurrentUpgradesResponse {
   items: CurrentUpgrade[];
+}
+export interface GetActionStatusResponse {
+  items: ActionStatus[];
 }
 export interface GetAvailableVersionsResponse {
   items: string[];

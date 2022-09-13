@@ -22,13 +22,48 @@ import {
   POLICIES_TAB,
   SETTINGS_TAB,
   UPDATE_PACKAGE_BTN,
-  INTEGRATIONS_SEARCHBAR_INPUT,
+  INTEGRATIONS_SEARCHBAR,
   SETTINGS,
   INTEGRATION_POLICIES_UPGRADE_CHECKBOX,
+  INTEGRATION_LIST,
+  getIntegrationCategories,
 } from '../screens/integrations';
 import { LOADING_SPINNER, CONFIRM_MODAL } from '../screens/navigation';
 import { ADD_PACKAGE_POLICY_BTN } from '../screens/fleet';
 import { cleanupAgentPolicies } from '../tasks/cleanup';
+
+function setupIntegrations() {
+  cy.intercept(
+    '/api/fleet/epm/packages?*',
+    {
+      middleware: true,
+    },
+    (req) => {
+      req.on('before:response', (res) => {
+        // force all API responses to not be cached
+        res.headers['cache-control'] = 'no-store';
+      });
+    }
+  ).as('packages');
+
+  navigateTo(INTEGRATIONS);
+  cy.wait('@packages');
+}
+
+it('should install integration without policy', () => {
+  cy.visit('/app/integrations/detail/tomcat/settings');
+
+  cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).click();
+  cy.get('.euiCallOut').contains('This action will install 1 assets');
+  cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
+
+  cy.getBySel(LOADING_SPINNER).should('not.exist');
+
+  cy.getBySel(SETTINGS.UNINSTALL_ASSETS_BTN).click();
+  cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
+  cy.getBySel(LOADING_SPINNER).should('not.exist');
+  cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).should('exist');
+});
 
 describe('Add Integration - Real API', () => {
   const integration = 'apache';
@@ -40,29 +75,6 @@ describe('Add Integration - Real API', () => {
   afterEach(() => {
     cleanupAgentPolicies();
   });
-
-  function addAndVerifyIntegration() {
-    cy.intercept(
-      '/api/fleet/epm/packages?*',
-      {
-        middleware: true,
-      },
-      (req) => {
-        req.on('before:response', (res) => {
-          // force all API responses to not be cached
-          res.headers['cache-control'] = 'no-store';
-        });
-      }
-    ).as('packages');
-
-    navigateTo(INTEGRATIONS);
-    cy.wait('@packages');
-    cy.getBySel(LOADING_SPINNER).should('not.exist');
-    cy.getBySel(INTEGRATIONS_SEARCHBAR_INPUT).type('Apache');
-    cy.getBySel(getIntegrationCard(integration)).click();
-    addIntegration();
-    cy.getBySel(INTEGRATION_NAME_LINK).contains('apache-1');
-  }
 
   it('should install integration without policy', () => {
     cy.visit('/app/integrations/detail/tomcat/settings');
@@ -80,7 +92,12 @@ describe('Add Integration - Real API', () => {
   });
 
   it('should display Apache integration in the Policies list once installed ', () => {
-    addAndVerifyIntegration();
+    setupIntegrations();
+    cy.getBySel(LOADING_SPINNER).should('not.exist');
+    cy.getBySel(INTEGRATIONS_SEARCHBAR.INPUT).clear().type('Apache');
+    cy.getBySel(getIntegrationCard(integration)).click();
+    addIntegration();
+    cy.getBySel(INTEGRATION_NAME_LINK).contains('apache-1');
     cy.getBySel(AGENT_POLICY_NAME_LINK).contains('Agent policy 1');
   });
 
@@ -118,7 +135,7 @@ describe('Add Integration - Real API', () => {
       cy.getBySel(ADD_PACKAGE_POLICY_BTN).click();
       cy.wait('@packages');
       cy.getBySel(LOADING_SPINNER).should('not.exist');
-      cy.getBySel(INTEGRATIONS_SEARCHBAR_INPUT).type('Apache');
+      cy.getBySel(INTEGRATIONS_SEARCHBAR.INPUT).clear().type('Apache');
       cy.getBySel(getIntegrationCard(integration)).click();
       addIntegration({ useExistingPolicy: true });
       cy.get('.euiBasicTable-loading').should('not.exist');
@@ -151,5 +168,17 @@ describe('Add Integration - Real API', () => {
       cy.getBySel(PACKAGE_VERSION).contains(oldVersion).should('not.exist');
       cy.getBySel(PACKAGE_VERSION).contains(newVersion);
     });
+  });
+
+  it('should filter integrations by category', () => {
+    setupIntegrations();
+    cy.getBySel(getIntegrationCategories('aws')).click();
+    cy.getBySel(INTEGRATIONS_SEARCHBAR.BADGE).contains('AWS').should('exist');
+    cy.getBySel(INTEGRATION_LIST).find('.euiCard').should('have.length', 30);
+
+    cy.getBySel(INTEGRATIONS_SEARCHBAR.INPUT).clear().type('Cloud');
+    cy.getBySel(INTEGRATION_LIST).find('.euiCard').should('have.length', 3);
+    cy.getBySel(INTEGRATIONS_SEARCHBAR.REMOVE_BADGE_BUTTON).click();
+    cy.getBySel(INTEGRATIONS_SEARCHBAR.BADGE).should('not.exist');
   });
 });

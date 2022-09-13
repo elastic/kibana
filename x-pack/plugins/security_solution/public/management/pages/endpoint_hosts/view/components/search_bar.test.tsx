@@ -16,7 +16,8 @@ import { fireEvent } from '@testing-library/dom';
 import { uiQueryParams } from '../../store/selectors';
 import type { EndpointIndexUIQueryParams } from '../../types';
 
-describe('when rendering the endpoint list `AdminSearchBar`', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/140618
+describe.skip('when rendering the endpoint list `AdminSearchBar`', () => {
   let render: (
     urlParams?: EndpointIndexUIQueryParams
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
