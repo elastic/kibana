@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { errors } from '@elastic/elasticsearch';
 import * as indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
@@ -117,6 +117,53 @@ describe('ES search strategy', () => {
         expect(request.id).toEqual('foo');
         expect(request).toHaveProperty('wait_for_completion_timeout');
         expect(request).toHaveProperty('keep_alive', '1m');
+      });
+
+      it('sets transport options on POST requests', async () => {
+        const transportOptions = { maxRetries: 1 };
+        mockSubmitCaller.mockResolvedValueOnce(mockAsyncResponse);
+        const params = { index: 'logstash-*', body: { query: {} } };
+        const esSearch = enhancedEsSearchStrategyProvider(mockLegacyConfig$, mockLogger);
+
+        await firstValueFrom(
+          esSearch.search({ params }, { transport: transportOptions }, mockDeps)
+        );
+
+        expect(mockSubmitCaller).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            batched_reduce_size: 64,
+            body: { query: {} },
+            ignore_unavailable: true,
+            index: 'logstash-*',
+            keep_alive: '1m',
+            keep_on_completion: false,
+            max_concurrent_shard_requests: undefined,
+            track_total_hits: true,
+            wait_for_completion_timeout: '100ms',
+          }),
+          expect.objectContaining({ maxRetries: 1, meta: true, signal: undefined })
+        );
+      });
+
+      it('sets transport options on GET requests', async () => {
+        mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
+        const params = { index: 'logstash-*', body: { query: {} } };
+        const esSearch = enhancedEsSearchStrategyProvider(mockLegacyConfig$, mockLogger);
+
+        await firstValueFrom(
+          esSearch.search({ id: 'foo', params }, { transport: { maxRetries: 1 } }, mockDeps)
+        );
+
+        expect(mockGetCaller).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            id: 'foo',
+            keep_alive: '1m',
+            wait_for_completion_timeout: '100ms',
+          }),
+          expect.objectContaining({ maxRetries: 1, meta: true, signal: undefined })
+        );
       });
 
       it('sets wait_for_completion_timeout and keep_alive in the request', async () => {

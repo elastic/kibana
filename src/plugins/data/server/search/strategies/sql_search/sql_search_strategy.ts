@@ -59,10 +59,7 @@ export const sqlSearchStrategyProvider = (
             ...getDefaultAsyncGetParams(sessionConfig, options),
             id,
           },
-          {
-            signal: options.abortSignal,
-            meta: true,
-          }
+          { ...options.transport, signal: options.abortSignal, meta: true }
         ));
       } else {
         ({ headers, body } = await client.sql.query(
@@ -71,10 +68,7 @@ export const sqlSearchStrategyProvider = (
             ...getDefaultAsyncSubmitParams(sessionConfig, options),
             ...params,
           },
-          {
-            signal: options.abortSignal,
-            meta: true,
-          }
+          { ...options.transport, signal: options.abortSignal, meta: true }
         ));
       }
 

@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import { eqlSearchStrategyProvider } from './eql_search_strategy';
 import { SearchStrategyDependencies } from '../../types';
 import { EqlSearchStrategyRequest } from '../../../../common';
+import { firstValueFrom } from 'rxjs';
 
 const getMockEqlResponse = () => ({
   body: {
@@ -84,9 +85,15 @@ describe('EQL search strategy', () => {
         await eqlSearch.search({ options, params }, {}, mockDeps).toPromise();
         const [[request, requestOptions]] = mockEqlSearch.mock.calls;
 
-        expect(request.index).toEqual('logstash-*');
-        expect(request.body).toEqual(expect.objectContaining({ query: 'process where 1 == 1' }));
-        expect(requestOptions).toEqual(expect.objectContaining({ ignore: [400] }));
+        expect(request).toEqual({
+          body: { query: 'process where 1 == 1' },
+          ignore_unavailable: true,
+          index: 'logstash-*',
+          keep_alive: '1m',
+          max_concurrent_shard_requests: undefined,
+          wait_for_completion_timeout: '100ms',
+        });
+        expect(requestOptions).toEqual({ ignore: [400], meta: true, signal: undefined });
       });
 
       it('retrieves the current request if an id is provided', async () => {
@@ -95,7 +102,11 @@ describe('EQL search strategy', () => {
         const [[requestParams]] = mockEqlGet.mock.calls;
 
         expect(mockEqlSearch).not.toHaveBeenCalled();
-        expect(requestParams).toEqual(expect.objectContaining({ id: 'my-search-id' }));
+        expect(requestParams).toEqual({
+          id: 'my-search-id',
+          keep_alive: '1m',
+          wait_for_completion_timeout: '100ms',
+        });
       });
 
       it('emits an error if the client throws', async () => {
@@ -184,7 +195,7 @@ describe('EQL search strategy', () => {
         );
       });
 
-      it('passes transport options for an existing request', async () => {
+      it('passes (deprecated) transport options for an existing request', async () => {
         const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
         await eqlSearch
           .search({ id: 'my-search-id', options: { ignore: [400] } }, {}, mockDeps)
@@ -193,6 +204,42 @@ describe('EQL search strategy', () => {
 
         expect(mockEqlSearch).not.toHaveBeenCalled();
         expect(requestOptions).toEqual(expect.objectContaining({ ignore: [400] }));
+      });
+
+      it('passes abort signal', async () => {
+        const eqlSearch = eqlSearchStrategyProvider(mockLogger);
+        const eql: EqlSearchStrategyRequest = { id: 'my-search-id' };
+        const abortController = new AbortController();
+        await firstValueFrom(
+          eqlSearch.search(eql, { abortSignal: abortController.signal }, mockDeps)
+        );
+        const [[_params, requestOptions]] = mockEqlGet.mock.calls;
+
+        expect(requestOptions).toEqual({ meta: true, signal: expect.any(AbortSignal) });
+      });
+
+      it('passes transport options for search with id', async () => {
+        const eqlSearch = eqlSearchStrategyProvider(mockLogger);
+        const eql: EqlSearchStrategyRequest = { id: 'my-search-id' };
+        await firstValueFrom(
+          eqlSearch.search(eql, { transport: { maxResponseSize: 13131313 } }, mockDeps)
+        );
+        const [[_params, requestOptions]] = mockEqlGet.mock.calls;
+
+        expect(requestOptions).toEqual({
+          maxResponseSize: 13131313,
+          meta: true,
+          signal: undefined,
+        });
+      });
+
+      it('passes transport options for search without id', async () => {
+        const eqlSearch = eqlSearchStrategyProvider(mockLogger);
+        const eql: EqlSearchStrategyRequest = { params: { index: 'all' } };
+        await firstValueFrom(eqlSearch.search(eql, { transport: { ignore: [400] } }, mockDeps));
+        const [[_params, requestOptions]] = mockEqlSearch.mock.calls;
+
+        expect(requestOptions).toEqual({ ignore: [400], meta: true, signal: undefined });
       });
     });
 

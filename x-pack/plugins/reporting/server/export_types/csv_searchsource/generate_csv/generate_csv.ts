@@ -24,11 +24,11 @@ import type {
 } from '@kbn/field-formats-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import type { Writable } from 'stream';
-import type { ReportingConfig } from '../../..';
 import type { CancellationToken } from '../../../../common/cancellation_token';
 import { CONTENT_TYPE_CSV } from '../../../../common/constants';
 import { AuthenticationExpiredError, ReportingError } from '../../../../common/errors';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';
+import { ReportingConfigType } from '../../../config';
 import type { TaskRunResult } from '../../../lib/tasks';
 import type { JobParamsCSV } from '../types';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
@@ -53,7 +53,7 @@ export class CsvGenerator {
 
   constructor(
     private job: Omit<JobParamsCSV, 'version'>,
-    private config: ReportingConfig,
+    private config: ReportingConfigType['csv'],
     private clients: Clients,
     private dependencies: Dependencies,
     private cancellationToken: CancellationToken,
@@ -84,7 +84,13 @@ export class CsvGenerator {
     try {
       results = (
         await lastValueFrom(
-          this.clients.data.search(searchParams, { strategy: ES_SEARCH_STRATEGY })
+          this.clients.data.search(searchParams, {
+            strategy: ES_SEARCH_STRATEGY,
+            transport: {
+              maxRetries: 0, // retrying reporting jobs is handled in the task manager scheduling logic
+              requestTimeout: this.config.scroll.duration,
+            },
+          })
         )
       ).rawResponse as estypes.SearchResponse<unknown>;
     } catch (err) {

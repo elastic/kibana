@@ -72,14 +72,25 @@ describe('SQL search strategy', () => {
         };
         const esSearch = await sqlSearchStrategyProvider(mockLogger);
 
-        await esSearch.search({ params }, {}, mockDeps).toPromise();
+        await esSearch
+          .search({ params }, { transport: { requestTimeout: 30000 } }, mockDeps)
+          .toPromise();
 
         expect(mockSqlQuery).toBeCalled();
-        const request = mockSqlQuery.mock.calls[0][0];
-        expect(request.query).toEqual(params.query);
-        expect(request).toHaveProperty('format', 'json');
-        expect(request).toHaveProperty('keep_alive', '1m');
-        expect(request).toHaveProperty('wait_for_completion_timeout');
+        const [request, searchOptions] = mockSqlQuery.mock.calls[0];
+        expect(request).toEqual({
+          format: 'json',
+          keep_alive: '1m',
+          keep_on_completion: undefined,
+          query:
+            'SELECT customer_first_name FROM kibana_sample_data_ecommerce ORDER BY order_date DESC',
+          wait_for_completion_timeout: '100ms',
+        });
+        expect(searchOptions).toEqual({
+          meta: true,
+          requestTimeout: 30000,
+          signal: undefined,
+        });
       });
 
       it('makes a GET request to async search with ID', async () => {
@@ -92,14 +103,23 @@ describe('SQL search strategy', () => {
 
         const esSearch = await sqlSearchStrategyProvider(mockLogger);
 
-        await esSearch.search({ id: 'foo', params }, {}, mockDeps).toPromise();
+        await esSearch
+          .search({ id: 'foo', params }, { transport: { requestTimeout: 30000 } }, mockDeps)
+          .toPromise();
 
         expect(mockSqlGetAsync).toBeCalled();
-        const request = mockSqlGetAsync.mock.calls[0][0];
-        expect(request.id).toEqual('foo');
-        expect(request).toHaveProperty('wait_for_completion_timeout');
-        expect(request).toHaveProperty('keep_alive', '1m');
-        expect(request).toHaveProperty('format', 'json');
+        const [request, searchOptions] = mockSqlGetAsync.mock.calls[0];
+        expect(request).toEqual({
+          format: 'json',
+          id: 'foo',
+          keep_alive: '1m',
+          wait_for_completion_timeout: '100ms',
+        });
+        expect(searchOptions).toEqual({
+          meta: true,
+          requestTimeout: 30000,
+          signal: undefined,
+        });
       });
     });
 
