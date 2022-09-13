@@ -340,8 +340,8 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
         radioEndpointOption,
         checkboxMaliciousChecked,
         checkboxMalwareChecked,
-        radioComprehensiveSelected,
         newPolicy,
+        radioInteractiveSelected,
       ]
     );
 
