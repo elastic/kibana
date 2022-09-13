@@ -21,7 +21,7 @@ const PlatinumLicenseCalloutComponent: React.FC = () => {
     >
       <FormattedMessage
         defaultMessage="Assign users to cases or opening cases in external systems is available when you have the {appropriateLicense}, are using a {cloud}, or are testing out a Free Trial."
-        id="xpack.cases.caseView.pushToServiceDisableByLicenseDescription"
+        id="xpack.cases.platinumLicenseCalloutMessage"
         values={{
           appropriateLicense: (
             <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
