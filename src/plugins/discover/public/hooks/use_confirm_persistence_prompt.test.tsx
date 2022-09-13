@@ -25,9 +25,10 @@ const mockDataView = {
   timeFieldName: 'mock-time-field-name',
   isPersisted: () => false,
   getName: () => 'mock-data-view',
+  toSpec: () => ({}),
 } as DataView;
 
-describe('usePersistedDataView', () => {
+describe('useConfirmPersistencePrompt', () => {
   it('should save data view correctly', async () => {
     mockDiscoverServices.dataViews.createAndSave = jest.fn().mockResolvedValue(mockDataView);
     const hook = renderHook(
@@ -42,12 +43,8 @@ describe('usePersistedDataView', () => {
 
     const result = await hook.result.current.openConfirmSavePrompt(mockDataView);
 
-    expect(mockDiscoverServices.dataViews.createAndSave).toHaveBeenCalledWith({
-      id: mockDataView.id,
-      title: mockDataView.title,
-      timeFieldName: mockDataView.timeFieldName,
-    });
-    expect(result).toBeTruthy();
+    expect(mockDiscoverServices.dataViews.createAndSave).toHaveBeenCalled();
+    expect(result).toEqual(mockDataView);
   });
 
   it('should show error toast if creation failed', async () => {

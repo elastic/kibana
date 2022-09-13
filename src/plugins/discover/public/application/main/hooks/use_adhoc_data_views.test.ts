@@ -70,7 +70,7 @@ const savedSearchMock = {
   searchSource: createSearchSourceMock({ index: mockDataView }),
 };
 
-describe('usePersistedDataView', () => {
+describe('useAdHocDataViews', () => {
   it('should save data view with new id and update saved search', async () => {
     const hook = renderHook((d: DataView) =>
       useAdHocDataViews({
