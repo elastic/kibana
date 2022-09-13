@@ -21,13 +21,15 @@ import { useFilterManager } from './lib/use_filter_manager';
 import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
 import { useQueryStringManager } from './lib/use_query_string_manager';
+import { UnifiedSearchPublicPluginStart } from '../types';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
-  data: Omit<DataPublicPluginStart, 'ui'>;
+  data: DataPublicPluginStart;
   storage: IStorageWrapper;
   usageCollection?: UsageCollectionSetup;
   isScreenshotMode?: boolean;
+  unifiedSearch: Omit<UnifiedSearchPublicPluginStart, 'ui'>;
 }
 
 export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> =
@@ -127,6 +129,7 @@ export function createSearchBar({
   data,
   usageCollection,
   isScreenshotMode = false,
+  unifiedSearch,
 }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
@@ -179,6 +182,7 @@ export function createSearchBar({
           data,
           storage,
           usageCollection,
+          unifiedSearch,
           ...core,
         }}
       >

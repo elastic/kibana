@@ -242,10 +242,11 @@ describe('test fetchAll', () => {
     ];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchSQL.mockResolvedValue(documents);
+    const query = { sql: 'SELECT * from foo' };
     deps = {
       appStateContainer: {
         getState: () => {
-          return { interval: 'auto', query: { sql: 'SELECT * from foo' } };
+          return { interval: 'auto', query };
         },
       } as unknown as ReduxLikeStateContainer<AppState>,
       abortController: new AbortController(),
@@ -260,11 +261,12 @@ describe('test fetchAll', () => {
     await fetchAll(subjects, searchSource, false, deps);
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING, recordRawType: 'plain' },
+      { fetchStatus: FetchStatus.LOADING, recordRawType: 'plain', query },
       {
         fetchStatus: FetchStatus.COMPLETE,
         recordRawType: 'plain',
         result: documents,
+        query,
       },
     ]);
   });
