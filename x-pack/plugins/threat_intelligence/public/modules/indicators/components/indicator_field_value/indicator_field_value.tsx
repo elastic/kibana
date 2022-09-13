@@ -6,12 +6,13 @@
  */
 
 import React, { VFC } from 'react';
+import { useFieldTypes } from '../../../../hooks/use_field_types';
 import { EMPTY_VALUE } from '../../../../../common/constants';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { DateFormatter } from '../../../../components/date_formatter';
 import { unwrapValue } from '../../lib/unwrap_value';
 
-export interface IndicatorFieldProps {
+export interface IndicatorFieldValueProps {
   /**
    * Indicator to display the field value from (see {@link Indicator}).
    */
@@ -20,19 +21,16 @@ export interface IndicatorFieldProps {
    * The field to get the indicator's value for.
    */
   field: string;
-  /**
-   * An object to know what type the field is ('file', 'date', ...).
-   */
-  fieldTypesMap: { [id: string]: string };
 }
 
 /**
  * Takes an indicator object, a field and a field => type object to returns the correct value to display.
  * @returns If the type is a 'date', returns the {@link DateFormatter} component, else returns the value or {@link EMPTY_VALUE}.
  */
-export const IndicatorField: VFC<IndicatorFieldProps> = ({ indicator, field, fieldTypesMap }) => {
+export const IndicatorFieldValue: VFC<IndicatorFieldValueProps> = ({ indicator, field }) => {
+  const fieldType = useFieldTypes()[field];
+
   const value = unwrapValue(indicator, field as RawIndicatorFieldId);
-  const fieldType = fieldTypesMap[field];
   return fieldType === 'date' ? (
     <DateFormatter date={value as string} />
   ) : value ? (
