@@ -9,21 +9,29 @@ import { apm, timerange } from '@kbn/apm-synthtrace';
 export function generateData({ from, to }: { from: number; to: number }) {
   const range = timerange(from, to);
   const serviceRunsInContainerInstance = apm
-    .service('synth-go', 'production', 'go')
+    .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
     .instance('instance-a');
 
   const serviceInstance = apm
-    .service('synth-java', 'production', 'java')
+    .service({
+      name: 'synth-java',
+      environment: 'production',
+      agentName: 'java',
+    })
     .instance('instance-b');
 
   const serviceNoInfraDataInstance = apm
-    .service('synth-node', 'production', 'node')
+    .service({
+      name: 'synth-node',
+      environment: 'production',
+      agentName: 'node',
+    })
     .instance('instance-b');
 
   return range.interval('1m').generator((timestamp) => {
     return [
       serviceRunsInContainerInstance
-        .transaction('GET /apple 🍎')
+        .transaction({ transactionName: 'GET /apple 🍎' })
         .defaults({
           'container.id': 'foo',
           'host.hostname': 'bar',
@@ -33,7 +41,7 @@ export function generateData({ from, to }: { from: number; to: number }) {
         .duration(1000)
         .success(),
       serviceInstance
-        .transaction('GET /banana 🍌')
+        .transaction({ transactionName: 'GET /banana 🍌' })
         .defaults({
           'host.hostname': 'bar',
         })
@@ -41,7 +49,7 @@ export function generateData({ from, to }: { from: number; to: number }) {
         .duration(1000)
         .success(),
       serviceNoInfraDataInstance
-        .transaction('GET /banana 🍌')
+        .transaction({ transactionName: 'GET /banana 🍌' })
         .timestamp(timestamp)
         .duration(1000)
         .success(),
