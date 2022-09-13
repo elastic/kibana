@@ -295,7 +295,7 @@ export function registerIndexRoutes({
         pipelineName,
         modelId,
         sourceField,
-        destinationField || '{$modelId}',
+        destinationField || modelId,
         client.asCurrentUser
       );
 
