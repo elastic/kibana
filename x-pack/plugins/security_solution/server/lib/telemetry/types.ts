@@ -412,3 +412,11 @@ export interface ValueListIndicatorMatchResponseAggregation {
     vl_used_in_indicator_match_rule_count: { value: number };
   };
 }
+
+export interface TelemetryConfiguration {
+  telemetry_max_buffer_size: number;
+  max_security_list_telemetry_batch: number;
+  max_endpoint_telemetry_batch: number;
+  max_detection_rule_telemetry_batch: number;
+  max_detection_alerts_batch: number;
+}
