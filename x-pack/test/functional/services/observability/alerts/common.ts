@@ -56,10 +56,10 @@ export function ObservabilityAlertsCommonProvider({
     );
   };
 
-  const navigateToAlertDetails = async (alertId: string) => {
+  const navigateToAlertDetails = async (alertId: string, ruleId: string) => {
     return await pageObjects.common.navigateToUrlWithBrowserHistory(
       'observability',
-      `/alerts/${alertId}`,
+      `/alerts/rules/${ruleId}/alerts/${alertId}`,
       '',
       { ensureCurrentUrl: false }
     );
