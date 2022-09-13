@@ -366,7 +366,6 @@ export const LensTopNavMenu = ({
     const fetchDataViews = async () => {
       const totalDataViewsList = [];
       const dataViewsIds = await data.dataViews.getIds();
-      // dataViewsIds.forEach(async (id) => await data.dataViews.find(id));
       for (let i = 0; i < dataViewsIds.length; i++) {
         const d = await data.dataViews.get(dataViewsIds[i]);
         totalDataViewsList.push(d);
