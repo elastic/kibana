@@ -396,25 +396,42 @@ export function DashboardTopNav({
       isTitleDuplicateConfirmed: boolean,
       onTitleDuplicate: () => void
     ) => {
-      // dashboardAppState.savedDashboard.copyOnSave = true;
-      const saveOptions = {
-        confirmOverwrite: false,
-        isTitleDuplicateConfirmed,
-        onTitleDuplicate,
-        saveAsCopy: true,
-      };
+      /**
+       * Check for duplicate title
+       */
+      try {
+        await checkForDuplicateDashboardTitle(
+          {
+            title: newTitle,
+            onTitleDuplicate,
+            lastSavedTitle: currentState.title,
+            copyOnSave: true,
+            isTitleDuplicateConfirmed,
+          },
+          savedObjectsClient
+        );
+      } catch (error) {
+        if (
+          error &&
+          dashboardSavedObjectErrorStrings.getSaveDuplicateTitleRejected() === error.message
+        ) {
+          return { id: '' };
+        }
+        return { error };
+      }
+
       const saveResult = await saveDashboardStateToSavedObject({
         toasts,
         timefilter,
         redirectTo,
-        saveOptions,
-        currentState,
         dataStart: data,
         savedObjectsClient,
         savedObjectsTagging,
         version: kibanaVersion,
         dashboardSessionStorage,
         embeddableStart: embeddable,
+        saveOptions: { saveAsCopy: true },
+        currentState: { ...currentState, title: newTitle },
       });
       return saveResult.id ? { id: saveResult.id } : { error: saveResult.error };
     };

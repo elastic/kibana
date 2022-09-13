@@ -146,7 +146,7 @@ describe('ShowShareModal', () => {
     });
     unsavedStateKeys.forEach((key) => {
       expect(shareLocatorParams[key]).toStrictEqual(
-        (rawDashboardState as Partial<DashboardAppLocatorParams>)[key]
+        (rawDashboardState as unknown as Partial<DashboardAppLocatorParams>)[key]
       );
     });
   });
