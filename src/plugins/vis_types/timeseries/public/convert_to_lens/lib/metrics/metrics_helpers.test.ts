@@ -33,7 +33,6 @@ describe('getFormulaEquivalent', () => {
   const countMetric: Metric = {
     id: 'some-random-value',
     type: METRIC_TYPES.COUNT,
-    field: 'test-1',
   };
 
   const staticValue: Metric = {

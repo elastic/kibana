@@ -25,6 +25,12 @@ const subAggMetric: Metric = {
   type: METRIC_TYPES.AVG,
   field: dataView.fields[0].name,
 };
+
+const countMetric: Metric = {
+  id: 'some-random-value',
+  type: METRIC_TYPES.COUNT,
+};
+
 const notSupportedSubAggMetric: Metric = {
   id: 'some-random-value',
   type: METRIC_TYPES.MEDIAN,
@@ -97,14 +103,30 @@ describe('convertToCumulativeSumColumns', () => {
       },
     ],
     [
-      'columns with parent aggregation if submetric is count',
+      'formula if submetric is count with field',
       [
         {
           series,
           metrics: [
-            { ...subAggMetric, type: METRIC_TYPES.COUNT },
+            { ...countMetric, field: subAggMetric.field },
             { ...metric, field: `${subAggMetric.id}[50]` },
           ],
+          dataView,
+        },
+      ],
+      {
+        meta: { metricId: 'some-id' },
+        operationType: 'formula',
+        params: { formula: 'cumulative_sum(count(bytes))' },
+      },
+    ],
+
+    [
+      'columns with parent aggregation if submetric is count',
+      [
+        {
+          series,
+          metrics: [countMetric, { ...metric, field: `${subAggMetric.id}[50]` }],
           dataView,
         },
       ],
