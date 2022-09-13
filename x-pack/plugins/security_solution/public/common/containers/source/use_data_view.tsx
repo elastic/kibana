@@ -25,6 +25,8 @@ import { sourcererActions } from '../../store/sourcerer';
 import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { getSourcererDataView } from '../sourcerer/api';
+import { useTrackHttpRequest } from '../../lib/apm/use_track_http_request';
+import { APP_UI_ID } from '../../../../common/constants';
 
 export type IndexFieldSearch = (param: {
   dataViewId: string;
@@ -86,6 +88,7 @@ export const useDataView = (): {
   const searchSubscription$ = useRef<Record<string, Subscription>>({});
   const dispatch = useDispatch();
   const { addError, addWarning } = useAppToasts();
+  const { startTracking } = useTrackHttpRequest();
 
   const setLoading = useCallback(
     ({ id, loading }: { id: string; loading: boolean }) => {
@@ -112,6 +115,9 @@ export const useDataView = (): {
           [dataViewId]: new AbortController(),
         };
         setLoading({ id: dataViewId, loading: true });
+
+        const { endTracking } = startTracking({ name: `${APP_UI_ID} indexFieldsSearch` });
+
         if (needToBeInit) {
           const dataViewToUpdate = await getSourcererDataView(
             dataViewId,
@@ -139,6 +145,8 @@ export const useDataView = (): {
             .subscribe({
               next: async (response) => {
                 if (isCompleteResponse(response)) {
+                  endTracking('success');
+
                   const patternString = response.indicesExist.sort().join();
                   if (needToBeInit && scopeId) {
                     dispatch(
@@ -167,6 +175,7 @@ export const useDataView = (): {
                     })
                   );
                 } else if (isErrorResponse(response)) {
+                  endTracking('invalid');
                   setLoading({ id: dataViewId, loading: false });
                   addWarning(i18n.ERROR_BEAT_FIELDS);
                 }
@@ -174,6 +183,7 @@ export const useDataView = (): {
                 resolve();
               },
               error: (msg) => {
+                endTracking('error');
                 if (msg.message === DELETED_SECURITY_SOLUTION_DATA_VIEW) {
                   // reload app if security solution data view is deleted
                   return location.reload();
@@ -200,7 +210,7 @@ export const useDataView = (): {
       }
       return asyncSearch();
     },
-    [addError, addWarning, data.search, dispatch, setLoading]
+    [addError, addWarning, data.search, dispatch, setLoading, startTracking]
   );
 
   useEffect(() => {
