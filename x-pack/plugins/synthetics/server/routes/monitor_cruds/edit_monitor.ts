@@ -146,10 +146,7 @@ export const syncEditedMonitor = async ({
     const editedSOPromise = savedObjectsClient.update<MonitorFields>(
       syntheticsMonitorType,
       previousMonitor.id,
-      monitorWithRevision.type === 'browser' &&
-        monitorWithRevision[ConfigKey.FORM_MONITOR_TYPE] !== FormMonitorType.SINGLE
-        ? { ...monitorWithRevision, urls: '' }
-        : monitorWithRevision
+      monitorWithRevision
     );
 
     const editSyncPromise = syntheticsMonitorClient.editMonitor(
