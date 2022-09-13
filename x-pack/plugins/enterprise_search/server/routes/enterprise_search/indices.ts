@@ -21,8 +21,8 @@ import { fetchIndices } from '../../lib/indices/fetch_indices';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
-import { createIndexPipelineDefinitions } from '../../utils/create_pipeline_definitions';
 import { createMlInferencePipeline } from '../../utils/create_ml_inference_pipeline';
+import { createIndexPipelineDefinitions } from '../../utils/create_pipeline_definitions';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
@@ -295,8 +295,9 @@ export function registerIndexRoutes({
         pipelineName,
         modelId,
         sourceField,
-        destinationField || `{$modelId}`,
-        client.asCurrentUser);
+        destinationField || '{$modelId}',
+        client.asCurrentUser
+      );
 
       return response.ok({
         body: createResult,

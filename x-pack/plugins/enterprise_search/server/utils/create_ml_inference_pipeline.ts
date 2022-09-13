@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+
 import { formatMlPipelineBody } from './create_pipeline_definitions';
 
 export interface CreatedPipeline {
@@ -43,6 +44,6 @@ export const createMlInferencePipeline = async (
   });
 
   return {
-    created: inferencePipelineGeneratedName
+    created: inferencePipelineGeneratedName,
   };
-}
+};
