@@ -102,7 +102,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
                 additionalData(content: string, loaderContext: any) {
                   return `@import ${stringifyRequest(
                     loaderContext,
-                    resolve(REPO_ROOT, 'src/core/public/core_app/styles/_globals_v8light.scss')
+                    resolve(REPO_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
                   )};\n${content}`;
                 },
                 implementation: require('node-sass'),
@@ -120,7 +120,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
       extensions: ['.js', '.ts', '.tsx', '.json', '.mdx'],
       mainFields: ['browser', 'main'],
       alias: {
-        core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/core_app/images'),
+        core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/styles/core_app/images'),
         core_styles: resolve(REPO_ROOT, 'src/core/public/index.scss'),
       },
       symlinks: false,
