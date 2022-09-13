@@ -252,10 +252,6 @@ export const useSessionView = ({
   });
 
   const sessionViewComponent = useMemo(() => {
-    const isEnterprisePlus = useLicense().isEnterprise();
-    if(!isEnterprisePlus){
-      return null;
-    }
     const sessionViewSearchBarHeight = 118;
     const heightMinusSearchBar = height ? height - sessionViewSearchBarHeight : undefined;
     return sessionViewConfig !== null

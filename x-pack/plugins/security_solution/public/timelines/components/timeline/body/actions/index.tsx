@@ -290,7 +290,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
             </EventsTdContent>
           </div>
         ) : null}
-        {(sessionViewConfig !== null && isEnterprisePlus) ? (
+        {(sessionViewConfig !== null && (isEnterprisePlus || timelineId === TimelineId.kubernetesPageSessions)) ? (
           <div>
             <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
               <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.OPEN_SESSION_VIEW}>
