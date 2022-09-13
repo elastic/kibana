@@ -245,7 +245,7 @@ interface InstallUploadedArchiveParams {
 }
 
 function getTelemetryEvent(pkgName: string, pkgVersion: string): PackageUpdateEvent {
-  console.log("get telemtary event")
+  console.log('get telemtary event');
   return {
     packageName: pkgName,
     currentVersion: 'unknown',
@@ -274,7 +274,7 @@ async function installPackageFromRegistry({
   ignoreConstraints = false,
   neverIgnoreVerificationError = false,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
-  console.log("install Package From Registry");
+  console.log('install Package From Registry');
   const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
   const { pkgName, pkgVersion } = Registry.splitPkgKey(pkgkey);
@@ -443,7 +443,7 @@ async function installPackageByUpload({
   version,
 }: InstallUploadedArchiveParams): Promise<InstallResult> {
   // Workaround apm issue with async spans: https://github.com/elastic/apm-agent-nodejs/issues/2611
-  console.log("install package by upload");
+  console.log('install package by upload');
   await Promise.resolve();
   const span = apm.startSpan(`Install package from upload`, 'package');
 
