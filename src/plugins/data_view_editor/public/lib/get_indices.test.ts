@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getIndices, responseToItemArray } from './get_indices';
+import { getIndices, getIndicesViaResolve, responseToItemArray } from './get_indices';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { ResolveIndexResponseItemIndexAttrs } from '../types';
 
@@ -39,6 +39,10 @@ const http = httpServiceMock.createStartContract();
 http.get.mockResolvedValue(successfulResolveResponse);
 
 describe('getIndices', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should work in a basic case', async () => {
     const uncalledSearchClient = jest.fn();
     const result = await getIndices({
@@ -101,6 +105,23 @@ describe('getIndices', () => {
     };
     expect(responseToItemArray(result, getTags)).toMatchSnapshot();
     expect(responseToItemArray({}, getTags)).toEqual([]);
+  });
+
+  describe('getIndicesViaResolve', () => {
+    it('should encode the pattern for a working URI', async () => {
+      const spy = jest.spyOn(http, 'get');
+      const pattern = 'test-%';
+      await getIndicesViaResolve({
+        http,
+        pattern,
+        showAllIndices: true,
+        isRollupIndex: () => false,
+      });
+      expect(spy).toHaveBeenCalledWith(
+        '/internal/index-pattern-management/resolve_index/test-%25',
+        { query: { expand_wildcards: 'all' } }
+      );
+    });
   });
 
   describe('errors', () => {

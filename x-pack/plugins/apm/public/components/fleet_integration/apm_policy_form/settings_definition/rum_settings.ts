@@ -4,9 +4,37 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import * as t from 'io-ts';
+import { either } from 'fp-ts/lib/Either';
 import { i18n } from '@kbn/i18n';
 import { PackagePolicyVars, SettingsRow } from '../typings';
 import { isSettingsFormValid, OPTIONAL_LABEL } from '../settings_form/utils';
+
+const arrayRegex = new RegExp(/[\[\]]/);
+function getAllowedOriginsRt() {
+  return new t.Type<string, string, unknown>(
+    'allowedOriginsRt',
+    t.string.is,
+    (input, context) => {
+      return either.chain(
+        t.string.validate(input, context),
+        (inputAsString) => {
+          return arrayRegex.test(inputAsString)
+            ? t.failure(
+                input,
+                context,
+                i18n.translate(
+                  'xpack.apm.fleet_integration.settings.rum.allowedHeadersValidation',
+                  { defaultMessage: 'Square brackets not allowed' }
+                )
+              )
+            : t.success(inputAsString);
+        }
+      );
+    },
+    t.identity
+  );
+}
 
 const ENABLE_RUM_KEY = 'enable_rum';
 export function getRUMSettings(): SettingsRow[] {
@@ -28,7 +56,7 @@ export function getRUMSettings(): SettingsRow[] {
           type: 'combo',
           label: i18n.translate(
             'xpack.apm.fleet_integration.settings.rum.rumAllowOriginsLabel',
-            { defaultMessage: 'Origin Headers' }
+            { defaultMessage: 'Allowed Origins' }
           ),
           labelAppend: OPTIONAL_LABEL,
           helpText: i18n.translate(
@@ -38,6 +66,7 @@ export function getRUMSettings(): SettingsRow[] {
                 'Allowed Origin headers to be sent by User Agents.',
             }
           ),
+          validation: getAllowedOriginsRt(),
         },
         {
           key: 'rum_allow_headers',

@@ -15,7 +15,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const maps = getPageObject('maps');
   const ml = getService('ml');
-  const mlScreenshots = getService('mlScreenshots');
+  const commonScreenshots = getService('commonScreenshots');
   const renderable = getService('renderable');
 
   const screenshotDirectories = ['ml_docs', 'anomaly_detection'];
@@ -119,7 +119,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await maps.setView(44.1, -68.9, 4.5);
       await maps.closeLegend();
 
-      await mlScreenshots.takeScreenshot('weblogs-data-visualizer-geopoint', screenshotDirectories);
+      await commonScreenshots.takeScreenshot(
+        'weblogs-data-visualizer-geopoint',
+        screenshotDirectories
+      );
     });
 
     it('ecommerce wizard screenshot', async () => {
@@ -163,8 +166,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       });
 
       await ml.testExecution.logTestStep('take screenshot');
-      await mlScreenshots.removeFocusFromElement();
-      await mlScreenshots.takeScreenshot(
+      await commonScreenshots.removeFocusFromElement();
+      await commonScreenshots.takeScreenshot(
         'ecommerce-advanced-wizard-geopoint',
         screenshotDirectories
       );
@@ -217,8 +220,11 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       });
 
       await ml.testExecution.logTestStep('take screenshot');
-      await mlScreenshots.removeFocusFromElement();
-      await mlScreenshots.takeScreenshot('weblogs-advanced-wizard-geopoint', screenshotDirectories);
+      await commonScreenshots.removeFocusFromElement();
+      await commonScreenshots.takeScreenshot(
+        'weblogs-advanced-wizard-geopoint',
+        screenshotDirectories
+      );
     });
 
     // the job stopped to produce an anomaly, needs investigation
@@ -246,7 +252,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.anomaliesTable.ensureDetailsOpen(0);
       await ml.anomalyExplorer.scrollChartsContainerIntoView();
 
-      await mlScreenshots.takeScreenshot(
+      await commonScreenshots.takeScreenshot(
         'ecommerce-anomaly-explorer-geopoint',
         screenshotDirectories
       );
@@ -284,7 +290,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.anomalyExplorer.scrollChartsContainerIntoView();
       await maps.closeLegend();
 
-      await mlScreenshots.takeScreenshot(
+      await commonScreenshots.takeScreenshot(
         'weblogs-anomaly-explorer-geopoint',
         screenshotDirectories
       );

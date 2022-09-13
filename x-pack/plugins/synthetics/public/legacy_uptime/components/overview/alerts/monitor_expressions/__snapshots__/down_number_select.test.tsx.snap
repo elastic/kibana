@@ -2,11 +2,11 @@
 
 exports[`DownNoExpressionSelect component should renders against props 1`] = `
 <div
-  class="euiPopover euiPopover--anchorDownLeft"
+  class="euiPopover emotion-euiPopover"
   id="ping-count"
 >
   <div
-    class="euiPopover__anchor"
+    class="euiPopover__anchor css-16vtueo-render"
   >
     <span
       aria-label="Open the popover for down count input"

@@ -17,6 +17,7 @@ import {
 } from '../../../components/builtin_action_types/test_utils';
 import EditConnectorFlyout from '.';
 import { ActionConnector, EditConnectorTabs, GenericValidationResult } from '../../../../types';
+import { betaBadgeProps } from '../beta_badge_props';
 
 const updateConnectorResponse = {
   connector_type_id: 'test',
@@ -190,6 +191,33 @@ describe('EditConnectorFlyout', () => {
       );
 
       expect(getByTestId('preconfiguredBadge')).toBeInTheDocument();
+    });
+
+    it('does not show beta badge when isExperimental is false', async () => {
+      const { queryByText } = appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={{ ...connector, isPreconfigured: true }}
+          onConnectorUpdated={onConnectorUpdated}
+        />
+      );
+      await act(() => Promise.resolve());
+      expect(queryByText(betaBadgeProps.label)).not.toBeInTheDocument();
+    });
+
+    it('shows beta badge when isExperimental is true', async () => {
+      actionTypeRegistry.get.mockReturnValue({ ...actionTypeModel, isExperimental: true });
+      const { getByText } = appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={{ ...connector, isPreconfigured: true }}
+          onConnectorUpdated={onConnectorUpdated}
+        />
+      );
+      await act(() => Promise.resolve());
+      expect(getByText(betaBadgeProps.label)).toBeInTheDocument();
     });
   });
 

@@ -69,9 +69,11 @@ describe('Fleet integration policy endpoint security event filters card', () => 
     );
 
     await render();
-    expect(renderResult.getByTestId('artifacts-fleet-integration-card')).toHaveTextContent(
-      'Event filters3'
-    );
+    await waitFor(() => {
+      expect(renderResult.getByTestId('artifacts-fleet-integration-card')).toHaveTextContent(
+        'Event filters3'
+      );
+    });
   });
 
   it('should show the card even when no event filters associated with the policy', async () => {

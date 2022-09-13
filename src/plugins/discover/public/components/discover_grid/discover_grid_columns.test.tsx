@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { indexPatternMock } from '../../__mocks__/index_pattern';
+import { dataViewMock } from '../../__mocks__/data_view';
 import { getEuiGridColumns } from './discover_grid_columns';
-import { indexPatternWithTimefieldMock } from '../../__mocks__/index_pattern_with_timefield';
+import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { discoverGridContextMock } from '../../__mocks__/grid_context';
 import { discoverServiceMock } from '../../__mocks__/services';
 
@@ -17,13 +17,14 @@ describe('Discover grid columns', function () {
     const actual = getEuiGridColumns({
       columns: ['extension', 'message'],
       settings: {},
-      indexPattern: indexPatternMock,
+      dataView: dataViewMock,
       showTimeCol: false,
       defaultColumns: false,
       isSortEnabled: true,
       valueToStringConverter: discoverGridContextMock.valueToStringConverter,
       rowsCount: 100,
       services: discoverServiceMock,
+      onFilter: () => {},
     });
     expect(actual).toMatchInlineSnapshot(`
       Array [
@@ -70,7 +71,7 @@ describe('Discover grid columns', function () {
             [Function],
             [Function],
           ],
-          "display": "extension",
+          "displayAsText": "extension",
           "id": "extension",
           "isSortable": false,
           "schema": "string",
@@ -115,7 +116,7 @@ describe('Discover grid columns', function () {
             "showMoveRight": true,
           },
           "cellActions": undefined,
-          "display": "message",
+          "displayAsText": "message",
           "id": "message",
           "isSortable": false,
           "schema": "string",
@@ -127,13 +128,14 @@ describe('Discover grid columns', function () {
     const actual = getEuiGridColumns({
       columns: ['extension', 'message'],
       settings: {},
-      indexPattern: indexPatternWithTimefieldMock,
+      dataView: dataViewWithTimefieldMock,
       showTimeCol: false,
       defaultColumns: true,
       isSortEnabled: true,
       valueToStringConverter: discoverGridContextMock.valueToStringConverter,
       rowsCount: 100,
       services: discoverServiceMock,
+      onFilter: () => {},
     });
     expect(actual).toMatchInlineSnapshot(`
       Array [
@@ -177,7 +179,7 @@ describe('Discover grid columns', function () {
             [Function],
             [Function],
           ],
-          "display": undefined,
+          "displayAsText": "extension",
           "id": "extension",
           "isSortable": false,
           "schema": "string",
@@ -219,7 +221,7 @@ describe('Discover grid columns', function () {
             "showMoveRight": false,
           },
           "cellActions": undefined,
-          "display": undefined,
+          "displayAsText": "message",
           "id": "message",
           "isSortable": false,
           "schema": "string",
@@ -231,13 +233,14 @@ describe('Discover grid columns', function () {
     const actual = getEuiGridColumns({
       columns: ['extension', 'message'],
       settings: {},
-      indexPattern: indexPatternWithTimefieldMock,
+      dataView: dataViewWithTimefieldMock,
       showTimeCol: true,
       defaultColumns: false,
       isSortEnabled: true,
       valueToStringConverter: discoverGridContextMock.valueToStringConverter,
       rowsCount: 100,
       services: discoverServiceMock,
+      onFilter: () => {},
     });
     expect(actual).toMatchInlineSnapshot(`
       Array [
@@ -299,6 +302,7 @@ describe('Discover grid columns', function () {
               </React.Fragment>
             </EuiToolTip>
           </div>,
+          "displayAsText": "timestamp",
           "id": "timestamp",
           "initialWidth": 210,
           "isSortable": true,
@@ -347,7 +351,7 @@ describe('Discover grid columns', function () {
             [Function],
             [Function],
           ],
-          "display": undefined,
+          "displayAsText": "extension",
           "id": "extension",
           "isSortable": false,
           "schema": "string",
@@ -392,7 +396,7 @@ describe('Discover grid columns', function () {
             "showMoveRight": true,
           },
           "cellActions": undefined,
-          "display": undefined,
+          "displayAsText": "message",
           "id": "message",
           "isSortable": false,
           "schema": "string",

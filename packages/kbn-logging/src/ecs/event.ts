@@ -48,6 +48,7 @@ export type EcsEventCategory =
   | 'configuration'
   | 'database'
   | 'driver'
+  | 'email'
   | 'file'
   | 'host'
   | 'iam'

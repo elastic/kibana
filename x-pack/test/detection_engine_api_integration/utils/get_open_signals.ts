@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
-import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/schemas/common';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
 import type { FullResponseSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 
 import { waitForRuleSuccessOrStatus } from './wait_for_rule_success_or_status';

@@ -58,13 +58,14 @@ const getFilter = ({ runId, message }: { runId?: string; message?: string }) => 
   }
 
   if (message) {
-    filter.push(`message: "${message}"`);
+    const escapedMessage = message.replace(/([\)\(\<\>\}\{\"\:\\])/gm, '\\$&');
+    filter.push(`message: "${escapedMessage}" OR error.message: "${escapedMessage}"`);
   }
 
   return filter;
 };
 
-export const loadActionErrorLog = async ({
+export const loadActionErrorLog = ({
   id,
   http,
   dateStart,

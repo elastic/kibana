@@ -17,6 +17,6 @@ export interface EcsOs {
   kernel?: string;
   name?: string;
   platform?: string;
-  type?: string;
+  type?: 'linux' | 'macos' | 'unix' | 'windows';
   version?: string;
 }

@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-jest.mock('getos', () => (cb: Function) => cb(null, { dist: 'distrib', release: 'release' }));
+let mockGetOsResult: object = {};
+jest.mock('getos', () => (cb: Function) => cb(null, mockGetOsResult));
 
 import { loggerMock } from '@kbn/logging-mocks';
 import os from 'os';
@@ -17,6 +18,7 @@ describe('OsMetricsCollector', () => {
   let collector: OsMetricsCollector;
 
   beforeEach(() => {
+    mockGetOsResult = { dist: 'distrib', release: 'release' };
     collector = new OsMetricsCollector({ logger: loggerMock.create() });
     cgroupCollectorMock.collect.mockReset();
     cgroupCollectorMock.reset.mockReset();
@@ -48,6 +50,19 @@ describe('OsMetricsCollector', () => {
 
     expect(metrics.distro).toBe('distrib');
     expect(metrics.distroRelease).toBe('distrib-release');
+  });
+
+  it('remove whitespaces and carriage return from getos call', async () => {
+    mockGetOsResult = { dist: 'dist\n', release: '\nrel\n\n' };
+
+    const platform = 'linux';
+
+    jest.spyOn(os, 'platform').mockImplementation(() => platform);
+
+    const metrics = await collector.collect();
+
+    expect(metrics.distro).toBe('dist');
+    expect(metrics.distroRelease).toBe('dist-rel');
   });
 
   it('collects memory info from the os package', async () => {

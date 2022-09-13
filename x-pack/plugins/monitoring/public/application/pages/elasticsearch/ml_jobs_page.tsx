@@ -16,7 +16,7 @@ import { SetupModeRenderer } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useTable } from '../../hooks/use_table';
 import type { MLJobs } from '../../../types';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 
 interface SetupModeProps {
@@ -27,7 +27,7 @@ interface SetupModeProps {
 
 export const ElasticsearchMLJobsPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
   const { services } = useKibana<{ data: any }>();
   const { getPaginationTableProps } = useTable('elasticsearch.mlJobs');
   const clusterUuid = globalState.cluster_uuid;

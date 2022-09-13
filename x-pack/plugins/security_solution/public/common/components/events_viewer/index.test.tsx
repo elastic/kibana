@@ -39,7 +39,7 @@ jest.mock('../../../timelines/containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
 
-jest.mock('../url_state/normalize_time_range');
+jest.mock('../../utils/normalize_time_range');
 
 const mockUseFieldBrowserOptions = jest.fn();
 jest.mock('../../../timelines/components/fields_browser', () => ({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   AlertInstanceContext,
@@ -18,11 +18,16 @@ import type { CompleteRule, MachineLearningRuleParams } from '../../schemas/rule
 import { bulkCreateMlSignals } from '../bulk_create_ml_signals';
 import { filterEventsAgainstList } from '../filters/filter_events_against_list';
 import { findMlSignals } from '../find_ml_signals';
-import type { BuildRuleMessage } from '../rule_messages';
 import type { BulkCreate, RuleRangeTuple, WrapHits } from '../types';
-import { createErrorsFromShard, createSearchAfterReturnType, mergeReturns } from '../utils';
+import {
+  addToSearchAfterReturn,
+  createErrorsFromShard,
+  createSearchAfterReturnType,
+  mergeReturns,
+} from '../utils';
 import type { SetupPlugins } from '../../../../plugin';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 
 export const mlExecutor = async ({
   completeRule,
@@ -31,8 +36,7 @@ export const mlExecutor = async ({
   listClient,
   exceptionItems,
   services,
-  logger,
-  buildRuleMessage,
+  ruleExecutionLogger,
   bulkCreate,
   wrapHits,
 }: {
@@ -42,8 +46,7 @@ export const mlExecutor = async ({
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  logger: Logger;
-  buildRuleMessage: BuildRuleMessage;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
 }) => {
@@ -69,7 +72,7 @@ export const mlExecutor = async ({
       jobSummaries.length < 1 ||
       jobSummaries.some((job) => !isJobStarted(job.jobState, job.datafeedState))
     ) {
-      const warningMessage = buildRuleMessage(
+      const warningMessage = [
         'Machine learning job(s) are not started:',
         ...jobSummaries.map((job) =>
           [
@@ -77,10 +80,11 @@ export const mlExecutor = async ({
             `job status: "${job.jobState}"`,
             `datafeed status: "${job.datafeedState}"`,
           ].join(', ')
-        )
-      );
+        ),
+      ].join(' ');
+
       result.warningMessages.push(warningMessage);
-      logger.warn(warningMessage);
+      ruleExecutionLogger.warn(warningMessage);
       result.warning = true;
     }
 
@@ -100,45 +104,35 @@ export const mlExecutor = async ({
     const [filteredAnomalyHits, _] = await filterEventsAgainstList({
       listClient,
       exceptionsList: exceptionItems,
-      logger,
+      ruleExecutionLogger,
       events: anomalyResults.hits.hits,
-      buildRuleMessage,
     });
 
     const anomalyCount = filteredAnomalyHits.length;
     if (anomalyCount) {
-      logger.debug(buildRuleMessage(`Found ${anomalyCount} signals from ML anomalies.`));
+      ruleExecutionLogger.debug(`Found ${anomalyCount} signals from ML anomalies`);
     }
-    const { success, errors, bulkCreateDuration, createdItemsCount, createdItems } =
-      await bulkCreateMlSignals({
-        anomalyHits: filteredAnomalyHits,
-        completeRule,
-        services,
-        logger,
-        id: completeRule.alertId,
-        signalsIndex: ruleParams.outputIndex,
-        buildRuleMessage,
-        bulkCreate,
-        wrapHits,
-      });
-    // The legacy ES client does not define failures when it can be present on the structure, hence why I have the & { failures: [] }
-    const shardFailures =
-      (
-        anomalyResults._shards as typeof anomalyResults._shards & {
-          failures: [];
-        }
-      ).failures ?? [];
+
+    const createResult = await bulkCreateMlSignals({
+      anomalyHits: filteredAnomalyHits,
+      completeRule,
+      services,
+      ruleExecutionLogger,
+      id: completeRule.alertId,
+      signalsIndex: ruleParams.outputIndex,
+      bulkCreate,
+      wrapHits,
+    });
+    addToSearchAfterReturn({ current: result, next: createResult });
+    const shardFailures = anomalyResults._shards.failures ?? [];
     const searchErrors = createErrorsFromShard({
       errors: shardFailures,
     });
     return mergeReturns([
       result,
       createSearchAfterReturnType({
-        success: success && anomalyResults._shards.failed === 0,
-        errors: [...errors, ...searchErrors],
-        createdSignalsCount: createdItemsCount,
-        createdSignals: createdItems,
-        bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
+        success: anomalyResults._shards.failed === 0,
+        errors: searchErrors,
       }),
     ]);
   });

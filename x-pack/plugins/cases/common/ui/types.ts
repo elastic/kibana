@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsResolveResponse } from '@kbn/core/public';
+import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import {
   CREATE_CASES_CAPABILITY,
   DELETE_CASES_CAPABILITY,
@@ -36,7 +36,7 @@ import { SnakeToCamelCase } from '../types';
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 
 export interface CasesContextFeatures {
-  alerts: { sync?: boolean; enabled?: boolean };
+  alerts: { sync?: boolean; enabled?: boolean; isExperimental?: boolean };
   metrics: SingleCaseMetricsFeature[];
 }
 
@@ -85,9 +85,9 @@ export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;
 
 export interface ResolvedCase {
   case: Case;
-  outcome: SavedObjectsResolveResponse['outcome'];
-  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
-  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
+  outcome: ResolvedSimpleSavedObject['outcome'];
+  aliasTargetId?: ResolvedSimpleSavedObject['alias_target_id'];
+  aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
 }
 
 export interface QueryParams {
@@ -103,6 +103,7 @@ export interface FilterOptions {
   severity: CaseSeverityWithAll;
   status: CaseStatusWithAllStatus;
   tags: string[];
+  assignees: string[];
   reporters: User[];
   owner: string[];
 }
@@ -141,6 +142,7 @@ export interface BulkUpdateStatus {
   id: string;
   version: string;
 }
+
 export interface ActionLicense {
   id: string;
   name: string;
@@ -161,7 +163,7 @@ export interface FieldMappings {
 
 export type UpdateKey = keyof Pick<
   CasePatchRequest,
-  'connector' | 'description' | 'status' | 'tags' | 'title' | 'settings' | 'severity'
+  'connector' | 'description' | 'status' | 'tags' | 'title' | 'settings' | 'severity' | 'assignees'
 >;
 
 export interface UpdateByKey {

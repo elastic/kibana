@@ -15,13 +15,46 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Unusual Print Spooler Child Process",
-  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
+  "note": "",
   "query": "process where event.type == \"start\" and\n process.parent.name : \"spoolsv.exe\" and\n (?process.Ext.token.integrity_level_name : \"System\" or\n ?winlog.event_data.IntegrityLevel : \"System\") and\n\n /* exclusions for FP control below */\n not process.name : (\"splwow64.exe\", \"PDFCreator.exe\", \"acrodist.exe\", \"spoolsv.exe\", \"msiexec.exe\", \"route.exe\", \"WerFault.exe\") and\n not process.command_line : \"*\\\\WINDOWS\\\\system32\\\\spool\\\\DRIVERS*\" and\n not (process.name : \"net.exe\" and process.command_line : (\"*stop*\", \"*start*\")) and\n not (process.name : (\"cmd.exe\", \"powershell.exe\") and process.command_line : (\"*.spl*\", \"*\\\\program files*\", \"*route add*\")) and\n not (process.name : \"netsh.exe\" and process.command_line : (\"*add portopening*\", \"*rule name*\")) and\n not (process.name : \"regsvr32.exe\" and process.command_line : \"*PrintConfig.dll*\")\n",
   "references": [
     "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2021-34527"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": false,
+      "name": "process.Ext.token.integrity_level_name",
+      "type": "unknown"
+    },
+    {
+      "ecs": true,
+      "name": "process.command_line",
+      "type": "wildcard"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.parent.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": false,
+      "name": "winlog.event_data.IntegrityLevel",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "ee5300a7-7e31-4a72-a258-250abb8b3aa1",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -49,5 +82,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 6
+  "version": 8
 }

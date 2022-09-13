@@ -125,7 +125,7 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
                         <EuiLink
                           target="_blank"
                           data-test-subj="ConfigCompletedPrivateSourcesDocsLink"
-                          href={docLinks.workplaceSearchPermissions}
+                          href={docLinks.workplaceSearchPrivateSourcePermissions}
                         >
                           {CONFIG_COMPLETED_PRIVATE_SOURCES_DOCS_LINK}
                         </EuiLink>

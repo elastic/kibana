@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { UseMutationOptions, UseMutationResult } from 'react-query';
-import { useMutation } from 'react-query';
+import type { UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type {
   HostIsolationRequestBody,
-  HostIsolationResponse,
+  ResponseActionApiResponse,
 } from '../../../../common/endpoint/types';
 import { unIsolateHost } from '../../../common/lib/endpoint_isolation';
 
@@ -20,12 +20,12 @@ import { unIsolateHost } from '../../../common/lib/endpoint_isolation';
  */
 export const useSendReleaseEndpointRequest = (
   customOptions?: UseMutationOptions<
-    HostIsolationResponse,
+    ResponseActionApiResponse,
     IHttpFetchError,
     HostIsolationRequestBody
   >
-): UseMutationResult<HostIsolationResponse, IHttpFetchError, HostIsolationRequestBody> => {
-  return useMutation<HostIsolationResponse, IHttpFetchError, HostIsolationRequestBody>(
+): UseMutationResult<ResponseActionApiResponse, IHttpFetchError, HostIsolationRequestBody> => {
+  return useMutation<ResponseActionApiResponse, IHttpFetchError, HostIsolationRequestBody>(
     (releaseData: HostIsolationRequestBody) => {
       return unIsolateHost(releaseData);
     },

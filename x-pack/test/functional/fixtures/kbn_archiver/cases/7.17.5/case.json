@@ -1,0 +1,1084 @@
+{
+  "attributes": {
+    "actionTypeId": ".jira",
+    "config": {
+      "apiUrl": "https://example.com/",
+      "projectKey": "ROC"
+    },
+    "isMissingSecrets": true,
+    "name": "Jira"
+  },
+  "coreMigrationVersion": "7.17.5",
+  "id": "92b970e0-09c4-11ed-9088-a95ba44d7455",
+  "migrationVersion": {
+    "action": "7.16.0"
+  },
+  "references": [],
+  "type": "action",
+  "updated_at": "2022-07-22T13:45:39.841Z",
+  "version": "WzIxNTMsMV0="
+}
+
+{
+  "attributes": {
+    "closed_at": null,
+    "closed_by": null,
+    "connector": {
+      "fields": [
+        {
+          "key": "issueType",
+          "value": "10024"
+        },
+        {
+          "key": "parent",
+          "value": null
+        },
+        {
+          "key": "priority",
+          "value": "Low"
+        }
+      ],
+      "name": "Jira",
+      "type": ".jira"
+    },
+    "created_at": "2022-07-22T13:40:43.989Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "description": "Testing upgrade! Let's see how it goes.",
+    "external_service": {
+      "connector_name": "Jira",
+      "external_id": "71891",
+      "external_title": "ROC-526",
+      "external_url": "https://example.com/browse/ROC-526",
+      "pushed_at": "2022-07-22T13:46:32.245Z",
+      "pushed_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      }
+    },
+    "owner": "cases",
+    "settings": {
+      "syncAlerts": true
+    },
+    "status": "open",
+    "tags": [
+      "upgrade",
+      "test",
+      "kibana"
+    ],
+    "title": "Upgrade test in Kibana",
+    "type": "individual",
+    "updated_at": "2022-07-22T13:46:32.245Z",
+    "updated_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    }
+  },
+  "coreMigrationVersion": "7.17.5",
+  "id": "e26361b0-09c3-11ed-9088-a95ba44d7455",
+  "migrationVersion": {
+    "cases": "7.15.0"
+  },
+  "references": [
+    {
+      "id": "92b970e0-09c4-11ed-9088-a95ba44d7455",
+      "name": "connectorId",
+      "type": "action"
+    },
+    {
+      "id": "92b970e0-09c4-11ed-9088-a95ba44d7455",
+      "name": "pushConnectorId",
+      "type": "action"
+    }
+  ],
+  "type": "cases",
+  "updated_at": "2022-07-22T13:46:32.245Z",
+  "version": "WzIxNzEsMV0="
+}
+
+{
+  "attributes": {
+    "action": "update",
+    "action_at": "2022-07-22T13:41:39.160Z",
+    "action_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "action_field": [
+      "description"
+    ],
+    "new_value": "Testing upgrade! Let's see how it goes.",
+    "old_value": "Testing upgrade",
+    "owner": "cases"
+  },
+  "coreMigrationVersion": "7.17.5",
+  "id": "03e08840-09c4-11ed-9088-a95ba44d7455",
+  "migrationVersion": {
+    "cases-user-actions": "7.16.0"
+  },
+  "references": [
+    {
+      "id": "e26361b0-09c3-11ed-9088-a95ba44d7455",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1658497299160,
+    6464
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-07-22T13:41:40.164Z",
+  "version": "WzIwNjcsMV0="
+}
+
+{
+  "attributes": {
+    "fieldFormatMap": "{\"hour_of_day\":{}}",
+    "runtimeFieldMap": "{\"hour_of_day\":{\"type\":\"long\",\"script\":{\"source\":\"emit(doc['timestamp'].value.getHour());\"}}}",
+    "timeFieldName": "timestamp",
+    "title": "kibana_sample_data_logs"
+  },
+  "coreMigrationVersion": "7.17.5",
+  "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+  "migrationVersion": {
+    "index-pattern": "7.11.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2022-07-22T13:42:47.083Z",
+  "version": "WzIwODEsMV0="
+}
+
+{
+  "attributes": {
+    "associationType": "case",
+    "comment": "Comment with a lens embeddable \n\n!{lens{\"timeRange\":{\"from\":\"now-7d\",\"to\":\"now\",\"mode\":\"relative\"},\"attributes\":{\"title\":\"\",\"visualizationType\":\"lnsXY\",\"type\":\"lens\",\"references\":[{\"type\":\"index-pattern\",\"id\":\"90943e30-9a47-11e8-b64d-95841ca0b247\",\"name\":\"indexpattern-datasource-current-indexpattern\"},{\"type\":\"index-pattern\",\"id\":\"90943e30-9a47-11e8-b64d-95841ca0b247\",\"name\":\"indexpattern-datasource-layer-a447e707-f9a1-4a13-bc55-aad8205cbf56\"}],\"state\":{\"visualization\":{\"legend\":{\"isVisible\":true,\"position\":\"right\"},\"valueLabels\":\"hide\",\"fittingFunction\":\"None\",\"yLeftExtent\":{\"mode\":\"full\"},\"yRightExtent\":{\"mode\":\"full\"},\"axisTitlesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"tickLabelsVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"labelsOrientation\":{\"x\":0,\"yLeft\":0,\"yRight\":0},\"gridlinesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"preferredSeriesType\":\"bar_stacked\",\"layers\":[{\"layerId\":\"a447e707-f9a1-4a13-bc55-aad8205cbf56\",\"accessors\":[\"11f9c443-aa33-4395-a2bb-0ffe73317c51\"],\"position\":\"top\",\"seriesType\":\"bar_stacked\",\"showGridlines\":false,\"layerType\":\"data\",\"xAccessor\":\"4a29d805-efdd-45c2-a5cb-3b9823e4db7f\"}]},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filters\":[],\"datasourceStates\":{\"indexpattern\":{\"layers\":{\"a447e707-f9a1-4a13-bc55-aad8205cbf56\":{\"columns\":{\"4a29d805-efdd-45c2-a5cb-3b9823e4db7f\":{\"label\":\"timestamp\",\"dataType\":\"date\",\"operationType\":\"date_histogram\",\"sourceField\":\"timestamp\",\"isBucketed\":true,\"scale\":\"interval\",\"params\":{\"interval\":\"auto\"}},\"11f9c443-aa33-4395-a2bb-0ffe73317c51\":{\"label\":\"Median of memory\",\"dataType\":\"number\",\"operationType\":\"median\",\"sourceField\":\"memory\",\"isBucketed\":false,\"scale\":\"ratio\"}},\"columnOrder\":[\"4a29d805-efdd-45c2-a5cb-3b9823e4db7f\",\"11f9c443-aa33-4395-a2bb-0ffe73317c51\"],\"incompleteColumns\":{}}}}}}}}}",
+    "created_at": "2022-07-22T13:44:17.579Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "owner": "cases",
+    "pushed_at": "2022-07-22T13:46:02.727Z",
+    "pushed_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "type": "user",
+    "updated_at": null,
+    "updated_by": null
+  },
+  "coreMigrationVersion": "7.17.5",
+  "id": "61b2ef30-09c4-11ed-9088-a95ba44d7455",
+  "migrationVersion": {
+    "cases-comments": "7.16.0"
+  },
+  "references": [
+    {
+      "id": "e26361b0-09c3-11ed-9088-a95ba44d7455",
+      "name": "associated-cases",
+      "type": "cases"
+    },
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern"
+    },
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "indexpattern-datasource-layer-a447e707-f9a1-4a13-bc55-aad8205cbf56",
+      "type": "index-pattern"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1658497457579,
+    6605
+  ],
+  "type": "cases-comments",
+  "updated_at": "2022-07-22T13:46:02.729Z",
+  "version": "WzIxNjAsMV0="
+}
+
+{
+  "attributes": {
+    "action": "create",
+    "action_at": "2022-07-22T13:44:17.579Z",
+    "action_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "action_field": [
+      "comment"
+    ],
+    "new_value": "{\"comment\":\"Comment with a lens embeddable \\n\\n!{lens{\\\"timeRange\\\":{\\\"from\\\":\\\"now-7d\\\",\\\"to\\\":\\\"now\\\",\\\"mode\\\":\\\"relative\\\"},\\\"attributes\\\":{\\\"title\\\":\\\"\\\",\\\"visualizationType\\\":\\\"lnsXY\\\",\\\"type\\\":\\\"lens\\\",\\\"references\\\":[{\\\"type\\\":\\\"index-pattern\\\",\\\"id\\\":\\\"90943e30-9a47-11e8-b64d-95841ca0b247\\\",\\\"name\\\":\\\"indexpattern-datasource-current-indexpattern\\\"},{\\\"type\\\":\\\"index-pattern\\\",\\\"id\\\":\\\"90943e30-9a47-11e8-b64d-95841ca0b247\\\",\\\"name\\\":\\\"indexpattern-datasource-layer-a447e707-f9a1-4a13-bc55-aad8205cbf56\\\"}],\\\"state\\\":{\\\"visualization\\\":{\\\"legend\\\":{\\\"isVisible\\\":true,\\\"position\\\":\\\"right\\\"},\\\"valueLabels\\\":\\\"hide\\\",\\\"fittingFunction\\\":\\\"None\\\",\\\"yLeftExtent\\\":{\\\"mode\\\":\\\"full\\\"},\\\"yRightExtent\\\":{\\\"mode\\\":\\\"full\\\"},\\\"axisTitlesVisibilitySettings\\\":{\\\"x\\\":true,\\\"yLeft\\\":true,\\\"yRight\\\":true},\\\"tickLabelsVisibilitySettings\\\":{\\\"x\\\":true,\\\"yLeft\\\":true,\\\"yRight\\\":true},\\\"labelsOrientation\\\":{\\\"x\\\":0,\\\"yLeft\\\":0,\\\"yRight\\\":0},\\\"gridlinesVisibilitySettings\\\":{\\\"x\\\":true,\\\"yLeft\\\":true,\\\"yRight\\\":true},\\\"preferredSeriesType\\\":\\\"bar_stacked\\\",\\\"layers\\\":[{\\\"layerId\\\":\\\"a447e707-f9a1-4a13-bc55-aad8205cbf56\\\",\\\"accessors\\\":[\\\"11f9c443-aa33-4395-a2bb-0ffe73317c51\\\"],\\\"position\\\":\\\"top\\\",\\\"seriesType\\\":\\\"bar_stacked\\\",\\\"showGridlines\\\":false,\\\"layerType\\\":\\\"data\\\",\\\"xAccessor\\\":\\\"4a29d805-efdd-45c2-a5cb-3b9823e4db7f\\\"}]},\\\"query\\\":{\\\"query\\\":\\\"\\\",\\\"language\\\":\\\"kuery\\\"},\\\"filters\\\":[],\\\"datasourceStates\\\":{\\\"indexpattern\\\":{\\\"layers\\\":{\\\"a447e707-f9a1-4a13-bc55-aad8205cbf56\\\":{\\\"columns\\\":{\\\"4a29d805-efdd-45c2-a5cb-3b9823e4db7f\\\":{\\\"label\\\":\\\"timestamp\\\",\\\"dataType\\\":\\\"date\\\",\\\"operationType\\\":\\\"date_histogram\\\",\\\"sourceField\\\":\\\"timestamp\\\",\\\"isBucketed\\\":true,\\\"scale\\\":\\\"interval\\\",\\\"params\\\":{\\\"interval\\\":\\\"auto\\\"}},\\\"11f9c443-aa33-4395-a2bb-0ffe73317c51\\\":{\\\"label\\\":\\\"Median of memory\\\",\\\"dataType\\\":\\\"number\\\",\\\"operationType\\\":\\\"median\\\",\\\"sourceField\\\":\\\"memory\\\",\\\"isBucketed\\\":false,\\\"scale\\\":\\\"ratio\\\"}},\\\"columnOrder\\\":[\\\"4a29d805-efdd-45c2-a5cb-3b9823e4db7f\\\",\\\"11f9c443-aa33-4395-a2bb-0ffe73317c51\\\"],\\\"incompleteColumns\\\":{}}}}}}}}}\",\"type\":\"user\",\"owner\":\"securitySolution\"}",
+    "old_value": null,
+    "owner": "cases"
+  },
+  "coreMigrationVersion": "7.17.5",
+  "id": "62175650-09c4-11ed-9088-a95ba44d7455",
+  "migrationVersion": {
+    "cases-user-actions": "7.16.0"
+  },
+  "references": [
+    {
+      "id": "e26361b0-09c3-11ed-9088-a95ba44d7455",
+      "name": "associated-cases",
+      "type": "cases"
+    },
+    {
+      "id": "61b2ef30-09c4-11ed-9088-a95ba44d7455",
+      "name": "associated-cases-comments",
+      "type": "cases-comments"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1658497457579,
+    6556
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-07-22T13:44:18.229Z",
+  "version": "WzIxMjcsMV0="
+}
+
+{
+  "attributes": {
+    "associationType": "case",
+    "comment": "How did you do that?",
+    "created_at": "2022-07-22T13:44:33.855Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "owner": "cases",
+    "pushed_at": "2022-07-22T13:46:02.727Z",
+    "pushed_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "type": "user",
+    "updated_at": null,
+    "updated_by": null
+  },
+  "coreMigrationVersion": "7.17.5",
+  "id": "6b649fb0-09c4-11ed-9088-a95ba44d7455",
+  "migrationVersion": {
+    "cases-comments": "7.16.0"
+  },
+  "references": [
+    {
+      "id": "e26361b0-09c3-11ed-9088-a95ba44d7455",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1658497473855,
+    6607
+  ],
+  "type": "cases-comments",
+  "updated_at": "2022-07-22T13:46:02.729Z",
+  "version": "WzIxNjEsMV0="
+}
+
+{
+  "attributes": {
+    "action": "create",
+    "action_at": "2022-07-22T13:44:33.855Z",
+    "action_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "action_field": [
+      "comment"
+    ],
+    "new_value": "{\"comment\":\"How did you do that?\",\"type\":\"user\",\"owner\":\"securitySolution\"}",
+    "old_value": null,
+    "owner": "cases"
+  },
+  "coreMigrationVersion": "7.17.5",
+  "id": "6be9fc50-09c4-11ed-9088-a95ba44d7455",
+  "migrationVersion": {
+    "cases-user-actions": "7.16.0"
+  },
+  "references": [
+    {
+      "id": "e26361b0-09c3-11ed-9088-a95ba44d7455",
+      "name": "associated-cases",
+      "type": "cases"
+    },
+    {
+      "id": "6b649fb0-09c4-11ed-9088-a95ba44d7455",
+      "name": "associated-cases-comments",
+      "type": "cases-comments"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1658497473855,
+    6576
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-07-22T13:44:34.709Z",
+  "version": "WzIxMzIsMV0="
+}
+
+{
+  "attributes": {
+    "associationType": "case",
+    "comment": "This is interesting. I am curious also.",
+    "created_at": "2022-07-22T13:41:24.946Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "owner": "cases",
+    "pushed_at": "2022-07-22T13:46:02.727Z",
+    "pushed_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "type": "user",
+    "updated_at": "2022-07-22T13:44:45.032Z",
+    "updated_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    }
+  },
+  "coreMigrationVersion": "7.17.5",
+  "id": "facc7750-09c3-11ed-9088-a95ba44d7455",
+  "migrationVersion": {
+    "cases-comments": "7.16.0"
+  },
+  "references": [
+    {
+      "id": "e26361b0-09c3-11ed-9088-a95ba44d7455",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1658497284946,
+    6601
+  ],
+  "type": "cases-comments",
+  "updated_at": "2022-07-22T13:46:02.729Z",
+  "version": "WzIxNTksMV0="
+}
+
+{
+  "attributes": {
+    "action": "update",
+    "action_at": "2022-07-22T13:44:45.032Z",
+    "action_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "action_field": [
+      "comment"
+    ],
+    "new_value": "{\"comment\":\"This is interesting. I am curious also.\",\"type\":\"user\",\"owner\":\"securitySolution\"}",
+    "old_value": "{\"comment\":\"This is interesting\",\"type\":\"user\",\"owner\":\"securitySolution\"}",
+    "owner": "cases"
+  },
+  "coreMigrationVersion": "7.17.5",
+  "id": "728a9c40-09c4-11ed-9088-a95ba44d7455",
+  "migrationVersion": {
+    "cases-user-actions": "7.16.0"
+  },
+  "references": [
+    {
+      "id": "e26361b0-09c3-11ed-9088-a95ba44d7455",
+      "name": "associated-cases",
+      "type": "cases"
+    },
+    {
+      "id": "facc7750-09c3-11ed-9088-a95ba44d7455",
+      "name": "associated-cases-comments",
+      "type": "cases-comments"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1658497485032,
+    6573
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-07-22T13:44:45.828Z",
+  "version": "WzIxNDIsMV0="
+}
+
+{
+  "attributes": {
+    "action": "update",
+    "action_at": "2022-07-22T13:44:49.805Z",
+    "action_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "action_field": [
+      "status"
+    ],
+    "new_value": "in-progress",
+    "old_value": "open",
+    "owner": "cases"
+  },
+  "coreMigrationVersion": "7.17.5",
+  "id": "754835a0-09c4-11ed-9088-a95ba44d7455",
+  "migrationVersion": {
+    "cases-user-actions": "7.16.0"
+  },
+  "references": [
+    {
+      "id": "e26361b0-09c3-11ed-9088-a95ba44d7455",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1658497489805,
+    6580
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-07-22T13:44:50.426Z",
+  "version": "WzIxNDQsMV0="
+}
+
+{
+  "attributes": {
+    "action": "update",
+    "action_at": "2022-07-22T13:44:54.308Z",
+    "action_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "action_field": [
+      "status"
+    ],
+    "new_value": "closed",
+    "old_value": "in-progress",
+    "owner": "cases"
+  },
+  "coreMigrationVersion": "7.17.5",
+  "id": "77ee4f60-09c4-11ed-9088-a95ba44d7455",
+  "migrationVersion": {
+    "cases-user-actions": "7.16.0"
+  },
+  "references": [
+    {
+      "id": "e26361b0-09c3-11ed-9088-a95ba44d7455",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1658497494308,
+    6578
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-07-22T13:44:54.870Z",
+  "version": "WzIxNDYsMV0="
+}
+
+{
+  "attributes": {
+    "action": "update",
+    "action_at": "2022-07-22T13:44:57.717Z",
+    "action_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "action_field": [
+      "status"
+    ],
+    "new_value": "open",
+    "old_value": "closed",
+    "owner": "cases"
+  },
+  "coreMigrationVersion": "7.17.5",
+  "id": "7a13c770-09c4-11ed-9088-a95ba44d7455",
+  "migrationVersion": {
+    "cases-user-actions": "7.16.0"
+  },
+  "references": [
+    {
+      "id": "e26361b0-09c3-11ed-9088-a95ba44d7455",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1658497497717,
+    6596
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-07-22T13:44:58.471Z",
+  "version": "WzIxNDgsMV0="
+}
+
+{
+  "attributes": {
+    "action": "update",
+    "action_at": "2022-07-22T13:45:01.200Z",
+    "action_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "action_field": [
+      "settings"
+    ],
+    "new_value": "{\"syncAlerts\":false}",
+    "old_value": "{\"syncAlerts\":true}",
+    "owner": "cases"
+  },
+  "coreMigrationVersion": "7.17.5",
+  "id": "7c1eb2a0-09c4-11ed-9088-a95ba44d7455",
+  "migrationVersion": {
+    "cases-user-actions": "7.16.0"
+  },
+  "references": [
+    {
+      "id": "e26361b0-09c3-11ed-9088-a95ba44d7455",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1658497501200,
+    6592
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-07-22T13:45:01.898Z",
+  "version": "WzIxNTAsMV0="
+}
+
+{
+  "attributes": {
+    "action": "update",
+    "action_at": "2022-07-22T13:45:04.933Z",
+    "action_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "action_field": [
+      "settings"
+    ],
+    "new_value": "{\"syncAlerts\":true}",
+    "old_value": "{\"syncAlerts\":false}",
+    "owner": "cases"
+  },
+  "coreMigrationVersion": "7.17.5",
+  "id": "7e855260-09c4-11ed-9088-a95ba44d7455",
+  "migrationVersion": {
+    "cases-user-actions": "7.16.0"
+  },
+  "references": [
+    {
+      "id": "e26361b0-09c3-11ed-9088-a95ba44d7455",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1658497504933,
+    6594
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-07-22T13:45:05.926Z",
+  "version": "WzIxNTIsMV0="
+}
+
+{
+  "attributes": {
+    "action": "update",
+    "action_at": "2022-07-22T13:45:54.311Z",
+    "action_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "action_field": [
+      "connector"
+    ],
+    "new_value": "{\"name\":\"Jira\",\"type\":\".jira\",\"fields\":{\"issueType\":\"10024\",\"parent\":null,\"priority\":\"High\"}}",
+    "old_value": "{\"name\":\"none\",\"type\":\".none\",\"fields\":null}",
+    "owner": "cases"
+  },
+  "coreMigrationVersion": "7.17.5",
+  "id": "9bc71930-09c4-11ed-9088-a95ba44d7455",
+  "migrationVersion": {
+    "cases-user-actions": "7.16.0"
+  },
+  "references": [
+    {
+      "id": "e26361b0-09c3-11ed-9088-a95ba44d7455",
+      "name": "associated-cases",
+      "type": "cases"
+    },
+    {
+      "id": "92b970e0-09c4-11ed-9088-a95ba44d7455",
+      "name": "connectorId",
+      "type": "action"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1658497554311,
+    6636
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-07-22T13:45:55.011Z",
+  "version": "WzIxNTcsMV0="
+}
+
+{
+  "attributes": {
+    "action": "push-to-service",
+    "action_at": "2022-07-22T13:46:02.727Z",
+    "action_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "action_field": [
+      "pushed"
+    ],
+    "new_value": "{\"pushed_at\":\"2022-07-22T13:46:02.727Z\",\"pushed_by\":{\"username\":\"2450600727\",\"full_name\":\"christos.nasikas@elastic.co\",\"email\":null},\"connector_name\":\"Jira\",\"external_id\":\"71891\",\"external_title\":\"ROC-526\",\"external_url\":\"https://example.com/browse/ROC-526\"}",
+    "old_value": null,
+    "owner": "cases"
+  },
+  "coreMigrationVersion": "7.17.5",
+  "id": "a060c590-09c4-11ed-9088-a95ba44d7455",
+  "migrationVersion": {
+    "cases-user-actions": "7.16.0"
+  },
+  "references": [
+    {
+      "id": "e26361b0-09c3-11ed-9088-a95ba44d7455",
+      "name": "associated-cases",
+      "type": "cases"
+    },
+    {
+      "id": "92b970e0-09c4-11ed-9088-a95ba44d7455",
+      "name": "pushConnectorId",
+      "type": "action"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1658497562727,
+    6610
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-07-22T13:46:02.729Z",
+  "version": "WzIxNjIsMV0="
+}
+
+{
+  "attributes": {
+    "associationType": "case",
+    "comment": "It was complicated but we did it!",
+    "created_at": "2022-07-22T13:46:19.528Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "owner": "cases",
+    "pushed_at": "2022-07-22T13:46:32.245Z",
+    "pushed_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "type": "user",
+    "updated_at": null,
+    "updated_by": null
+  },
+  "coreMigrationVersion": "7.17.5",
+  "id": "aa630710-09c4-11ed-9088-a95ba44d7455",
+  "migrationVersion": {
+    "cases-comments": "7.16.0"
+  },
+  "references": [
+    {
+      "id": "e26361b0-09c3-11ed-9088-a95ba44d7455",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1658497579528,
+    6623
+  ],
+  "type": "cases-comments",
+  "updated_at": "2022-07-22T13:46:32.246Z",
+  "version": "WzIxNzAsMV0="
+}
+
+{
+  "attributes": {
+    "action": "create",
+    "action_at": "2022-07-22T13:46:19.528Z",
+    "action_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "action_field": [
+      "comment"
+    ],
+    "new_value": "{\"comment\":\"It was complicated but we did it!\",\"type\":\"user\",\"owner\":\"securitySolution\"}",
+    "old_value": null,
+    "owner": "cases"
+  },
+  "coreMigrationVersion": "7.17.5",
+  "id": "aab7b6c0-09c4-11ed-9088-a95ba44d7455",
+  "migrationVersion": {
+    "cases-user-actions": "7.16.0"
+  },
+  "references": [
+    {
+      "id": "e26361b0-09c3-11ed-9088-a95ba44d7455",
+      "name": "associated-cases",
+      "type": "cases"
+    },
+    {
+      "id": "aa630710-09c4-11ed-9088-a95ba44d7455",
+      "name": "associated-cases-comments",
+      "type": "cases-comments"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1658497579528,
+    6639
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-07-22T13:46:20.076Z",
+  "version": "WzIxNjYsMV0="
+}
+
+{
+  "attributes": {
+    "action": "update",
+    "action_at": "2022-07-22T13:46:27.096Z",
+    "action_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "action_field": [
+      "connector"
+    ],
+    "new_value": "{\"name\":\"Jira\",\"type\":\".jira\",\"fields\":{\"issueType\":\"10024\",\"parent\":null,\"priority\":\"Low\"}}",
+    "old_value": "{\"name\":\"Jira\",\"type\":\".jira\",\"fields\":{\"issueType\":\"10024\",\"parent\":null,\"priority\":\"High\"}}",
+    "owner": "cases"
+  },
+  "coreMigrationVersion": "7.17.5",
+  "id": "af80b080-09c4-11ed-9088-a95ba44d7455",
+  "migrationVersion": {
+    "cases-user-actions": "7.16.0"
+  },
+  "references": [
+    {
+      "id": "e26361b0-09c3-11ed-9088-a95ba44d7455",
+      "name": "associated-cases",
+      "type": "cases"
+    },
+    {
+      "id": "92b970e0-09c4-11ed-9088-a95ba44d7455",
+      "name": "connectorId",
+      "type": "action"
+    },
+    {
+      "id": "92b970e0-09c4-11ed-9088-a95ba44d7455",
+      "name": "oldConnectorId",
+      "type": "action"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1658497587096,
+    6633
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-07-22T13:46:28.104Z",
+  "version": "WzIxNjgsMV0="
+}
+
+{
+  "attributes": {
+    "action": "push-to-service",
+    "action_at": "2022-07-22T13:46:32.245Z",
+    "action_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "action_field": [
+      "pushed"
+    ],
+    "new_value": "{\"pushed_at\":\"2022-07-22T13:46:32.245Z\",\"pushed_by\":{\"username\":\"2450600727\",\"full_name\":\"christos.nasikas@elastic.co\",\"email\":null},\"connector_name\":\"Jira\",\"external_id\":\"71891\",\"external_title\":\"ROC-526\",\"external_url\":\"https://example.com/browse/ROC-526\"}",
+    "old_value": null,
+    "owner": "cases"
+  },
+  "coreMigrationVersion": "7.17.5",
+  "id": "b1f8b560-09c4-11ed-9088-a95ba44d7455",
+  "migrationVersion": {
+    "cases-user-actions": "7.16.0"
+  },
+  "references": [
+    {
+      "id": "e26361b0-09c3-11ed-9088-a95ba44d7455",
+      "name": "associated-cases",
+      "type": "cases"
+    },
+    {
+      "id": "92b970e0-09c4-11ed-9088-a95ba44d7455",
+      "name": "pushConnectorId",
+      "type": "action"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1658497592245,
+    6621
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-07-22T13:46:32.246Z",
+  "version": "WzIxNjksMV0="
+}
+
+{
+  "attributes": {
+    "action": "create",
+    "action_at": "2022-07-22T13:40:43.989Z",
+    "action_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "action_field": [
+      "description",
+      "status",
+      "tags",
+      "title",
+      "connector",
+      "settings",
+      "owner"
+    ],
+    "new_value": "{\"type\":\"individual\",\"title\":\"Upgrade test\",\"tags\":[\"upgrade\",\"test\",\"cases\"],\"description\":\"Testing upgrade\",\"connector\":{\"name\":\"none\",\"type\":\".none\",\"fields\":null},\"settings\":{\"syncAlerts\":true},\"owner\":\"securitySolution\"}",
+    "old_value": null,
+    "owner": "cases"
+  },
+  "coreMigrationVersion": "7.17.5",
+  "id": "e30aec50-09c3-11ed-9088-a95ba44d7455",
+  "migrationVersion": {
+    "cases-user-actions": "7.16.0"
+  },
+  "references": [
+    {
+      "id": "e26361b0-09c3-11ed-9088-a95ba44d7455",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1658497243989,
+    6448
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-07-22T13:40:45.077Z",
+  "version": "WzIwNTYsMV0="
+}
+
+{
+  "attributes": {
+    "action": "update",
+    "action_at": "2022-07-22T13:41:08.774Z",
+    "action_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "action_field": [
+      "title"
+    ],
+    "new_value": "Upgrade test in Kibana",
+    "old_value": "Upgrade test",
+    "owner": "cases"
+  },
+  "coreMigrationVersion": "7.17.5",
+  "id": "f1b691a0-09c3-11ed-9088-a95ba44d7455",
+  "migrationVersion": {
+    "cases-user-actions": "7.16.0"
+  },
+  "references": [
+    {
+      "id": "e26361b0-09c3-11ed-9088-a95ba44d7455",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1658497268774,
+    6450
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-07-22T13:41:09.690Z",
+  "version": "WzIwNTksMV0="
+}
+
+{
+  "attributes": {
+    "action": "add",
+    "action_at": "2022-07-22T13:41:15.995Z",
+    "action_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "action_field": [
+      "tags"
+    ],
+    "new_value": "kibana",
+    "old_value": null,
+    "owner": "cases"
+  },
+  "coreMigrationVersion": "7.17.5",
+  "id": "f5e658a0-09c3-11ed-9088-a95ba44d7455",
+  "migrationVersion": {
+    "cases-user-actions": "7.16.0"
+  },
+  "references": [
+    {
+      "id": "e26361b0-09c3-11ed-9088-a95ba44d7455",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1658497275995,
+    6457
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-07-22T13:41:16.714Z",
+  "version": "WzIwNjEsMV0="
+}
+
+{
+  "attributes": {
+    "action": "delete",
+    "action_at": "2022-07-22T13:41:15.995Z",
+    "action_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "action_field": [
+      "tags"
+    ],
+    "new_value": "cases",
+    "old_value": null,
+    "owner": "cases"
+  },
+  "coreMigrationVersion": "7.17.5",
+  "id": "f5e658a1-09c3-11ed-9088-a95ba44d7455",
+  "migrationVersion": {
+    "cases-user-actions": "7.16.0"
+  },
+  "references": [
+    {
+      "id": "e26361b0-09c3-11ed-9088-a95ba44d7455",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1658497275995,
+    6459
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-07-22T13:41:16.714Z",
+  "version": "WzIwNjIsMV0="
+}
+
+{
+  "attributes": {
+    "action": "create",
+    "action_at": "2022-07-22T13:41:24.946Z",
+    "action_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "action_field": [
+      "comment"
+    ],
+    "new_value": "{\"comment\":\"This is interesting\",\"type\":\"user\",\"owner\":\"securitySolution\"}",
+    "old_value": null,
+    "owner": "cases"
+  },
+  "coreMigrationVersion": "7.17.5",
+  "id": "fb488520-09c3-11ed-9088-a95ba44d7455",
+  "migrationVersion": {
+    "cases-user-actions": "7.16.0"
+  },
+  "references": [
+    {
+      "id": "e26361b0-09c3-11ed-9088-a95ba44d7455",
+      "name": "associated-cases",
+      "type": "cases"
+    },
+    {
+      "id": "facc7750-09c3-11ed-9088-a95ba44d7455",
+      "name": "associated-cases-comments",
+      "type": "cases-comments"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1658497284946,
+    6462
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-07-22T13:41:25.746Z",
+  "version": "WzIwNjUsMV0="
+}

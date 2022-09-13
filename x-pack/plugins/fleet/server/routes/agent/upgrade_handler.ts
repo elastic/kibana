@@ -133,7 +133,7 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
       return acc;
     }, {});
 
-    return response.ok({ body });
+    return response.ok({ body: { ...body, actionId: results.actionId } });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }
@@ -160,7 +160,7 @@ export const checkKibanaVersion = (version: string, kibanaVersion: string) => {
   if (!versionToUpgradeNumber)
     throw new Error(`version to upgrade ${versionToUpgradeNumber} is not valid`);
 
-  if (semverGt(version, kibanaVersion))
+  if (semverGt(versionToUpgradeNumber, kibanaVersionNumber))
     throw new Error(
       `cannot upgrade agent to ${versionToUpgradeNumber} because it is higher than the installed kibana version ${kibanaVersionNumber}`
     );

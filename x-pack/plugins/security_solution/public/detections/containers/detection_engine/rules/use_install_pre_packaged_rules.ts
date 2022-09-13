@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useMutation } from 'react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { createPrepackagedRules } from './api';
 import * as i18n from './translations';

@@ -14,9 +14,31 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Potential Shell via Web Server",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:(bash or dash) and\n  user.name:(apache or nginx or www or \"www-data\")\n",
+  "query": "event.category:process and event.type:(start or process_started) and\nprocess.name:(bash or dash or ash or zsh or \"python*\" or \"perl*\" or \"php*\") and\nprocess.parent.name:(\"apache\" or \"nginx\" or \"www\" or \"apache2\" or \"httpd\" or \"www-data\")\n",
   "references": [
     "https://pentestlab.blog/tag/web-shell/"
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.category",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.parent.name",
+      "type": "keyword"
+    }
   ],
   "risk_score": 47,
   "rule_id": "231876e7-4d1f-4d63-a47c-47dd1acdc1cb",
@@ -54,5 +76,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 9
+  "version": 11
 }

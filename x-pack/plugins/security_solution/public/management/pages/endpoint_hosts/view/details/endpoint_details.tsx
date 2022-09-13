@@ -7,7 +7,7 @@
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
-import { ResponseActionsList } from '../../../../components/endpoint_response_actions_list/response_actions_list';
+import { ResponseActionsLog } from '../../../../components/endpoint_response_actions_list/response_actions_log';
 import { PolicyResponseWrapper } from '../../../../components/policy_response';
 import type { HostMetadata } from '../../../../../../common/endpoint/types';
 import { useToasts } from '../../../../../common/lib/kibana';
@@ -82,7 +82,7 @@ export const EndpointDetails = memo(() => {
           name: 'endpointActivityLog',
           selected_endpoint: id,
         }),
-        content: <ResponseActionsList agentIds={id} />,
+        content: <ResponseActionsLog agentIds={id} />,
       },
     ],
     [ContentLoadingMarkup, hostDetails, policyInfo, hostStatus, queryParams]

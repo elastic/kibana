@@ -10,6 +10,8 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { FleetSetup, FleetStart } from '@kbn/fleet-plugin/public';
+import type { CspRouterProps } from './application/csp_router';
 import type { BreadcrumbEntry, CloudSecurityPosturePageId } from './common/navigation/types';
 
 /**
@@ -23,15 +25,13 @@ export interface CspClientPluginSetup {}
  */
 export interface CspClientPluginStart {
   /** Gets the cloud security posture router component for embedding in the security solution. */
-  getCloudSecurityPostureRouter(): ComponentType<{
-    securitySolutionContext: CspSecuritySolutionContext;
-  }>;
+  getCloudSecurityPostureRouter(): ComponentType<CspRouterProps>;
 }
 
 export interface CspClientPluginSetupDeps {
   // required
   data: DataPublicPluginSetup;
-
+  fleet: FleetSetup;
   // optional
 }
 
@@ -41,6 +41,7 @@ export interface CspClientPluginStartDeps {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   charts: ChartsPluginStart;
   discover: DiscoverStart;
+  fleet: FleetStart;
   // optional
 }
 
@@ -53,5 +54,5 @@ export interface CspSecuritySolutionContext {
   /** Gets the `SpyRoute` component for navigation highlighting and breadcrumbs. */
   getSpyRouteComponent: () => ComponentType<{ pageName?: CloudSecurityPosturePageId }>;
   /** Gets the `Manage` breadcrumb entry. */
-  getManageBreadcrumbEntry: () => BreadcrumbEntry;
+  getManageBreadcrumbEntry: () => BreadcrumbEntry | undefined;
 }

@@ -26,7 +26,7 @@ export const useListsIndex = (): UseListsIndexReturn => {
   const { lists } = useKibana().services;
   const http = useHttp();
   const { addError } = useAppToasts();
-  const { canReadIndex } = useListsPrivileges();
+  const { canReadIndex, canManageIndex, canWriteIndex } = useListsPrivileges();
   const { loading: readLoading, start: readListIndex, ...readListIndexState } = useReadListIndex();
   const {
     loading: createLoading,
@@ -35,17 +35,19 @@ export const useListsIndex = (): UseListsIndexReturn => {
   } = useCreateListIndex();
   const loading = readLoading || createLoading;
 
+  // read route utilizes `esClient.indices.getAlias` which requires
+  // management privileges
   const readIndex = useCallback(() => {
-    if (lists && canReadIndex) {
+    if (lists && canReadIndex && canManageIndex) {
       readListIndex({ http });
     }
-  }, [http, lists, readListIndex, canReadIndex]);
+  }, [http, lists, readListIndex, canReadIndex, canManageIndex]);
 
   const createIndex = useCallback(() => {
-    if (lists) {
+    if (lists && canManageIndex && canWriteIndex) {
       createListIndex({ http });
     }
-  }, [createListIndex, http, lists]);
+  }, [createListIndex, http, lists, canManageIndex, canWriteIndex]);
 
   // initial read list
   useEffect(() => {

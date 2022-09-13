@@ -16,23 +16,28 @@ describe('SessionViewSearchBar component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
+  let props = {
+    searchQuery: 'ls',
+    totalMatches: 0,
+    onNext: jest.fn((query) => query),
+    onPrevious: jest.fn((query) => query),
+    setSearchQuery: jest.fn((query) => query),
+  };
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
+
+    props = {
+      searchQuery: 'ls',
+      totalMatches: 0,
+      onNext: jest.fn((query) => query),
+      onPrevious: jest.fn((query) => query),
+      setSearchQuery: jest.fn((query) => query),
+    };
   });
 
   it('handles a typed search query', async () => {
-    const mockSetSearchQuery = jest.fn((query) => query);
-    const mockOnProcessSelected = jest.fn((process) => process);
-
-    renderResult = mockedContext.render(
-      <SessionViewSearchBar
-        searchQuery="ls"
-        searchResults={[]}
-        onProcessSelected={mockOnProcessSelected}
-        setSearchQuery={mockSetSearchQuery}
-      />
-    );
+    renderResult = mockedContext.render(<SessionViewSearchBar {...props} />);
 
     const searchInput = renderResult.getByTestId('sessionView:searchBar').querySelector('input');
 
@@ -44,24 +49,17 @@ describe('SessionViewSearchBar component', () => {
     }
 
     expect(searchInput?.value).toEqual('ls -la');
-    expect(mockSetSearchQuery.mock.calls.length).toBe(1);
-    expect(mockSetSearchQuery.mock.results[0].value).toBe('ls -la');
+    expect(props.setSearchQuery.mock.calls.length).toBe(1);
+    expect(props.setSearchQuery.mock.results[0].value).toBe('ls -la');
   });
 
   it('shows a results navigator when searchResults provided', async () => {
     const processMock2 = { ...processMock };
     const processMock3 = { ...processMock };
     const mockResults = [processMock, processMock2, processMock3];
-    const mockSetSearchQuery = jest.fn((query) => query);
-    const mockOnProcessSelected = jest.fn((process) => process);
 
     renderResult = mockedContext.render(
-      <SessionViewSearchBar
-        searchQuery="ls"
-        searchResults={mockResults}
-        onProcessSelected={mockOnProcessSelected}
-        setSearchQuery={mockSetSearchQuery}
-      />
+      <SessionViewSearchBar {...props} totalMatches={mockResults.length} />
     );
 
     const searchPagination = renderResult.getByTestId('sessionView:searchPagination');
@@ -71,6 +69,16 @@ describe('SessionViewSearchBar component', () => {
     expect(searchPagination.querySelector(paginationTextClass)?.textContent).toEqual('1 of 3');
 
     userEvent.click(renderResult.getByTestId('pagination-button-next'));
+    expect(searchPagination.querySelector(paginationTextClass)?.textContent).toEqual('2 of 3');
+
+    userEvent.click(renderResult.getByTestId('pagination-button-next'));
+    expect(searchPagination.querySelector(paginationTextClass)?.textContent).toEqual('3 of 3');
+
+    // ensure clicking next after we reach the end doesn't cause a 4 of 3 situation.
+    userEvent.click(renderResult.getByTestId('pagination-button-next'));
+    expect(searchPagination.querySelector(paginationTextClass)?.textContent).toEqual('3 of 3');
+
+    userEvent.click(renderResult.getByTestId('pagination-button-previous'));
     expect(searchPagination.querySelector(paginationTextClass)?.textContent).toEqual('2 of 3');
 
     const searchInput = renderResult.getByTestId('sessionView:searchBar').querySelector('input');
@@ -83,13 +91,8 @@ describe('SessionViewSearchBar component', () => {
     // after search is changed, results index should reset to 1
     expect(searchPagination.querySelector(paginationTextClass)?.textContent).toEqual('1 of 3');
 
-    // setSelectedProcess should be called 3 times:
-    // 1. searchResults is set so auto select first item
-    // 2. next button hit, so call with 2nd item
-    // 3. search changed, so call with first result.
-    expect(mockOnProcessSelected.mock.calls.length).toBe(3);
-    expect(mockOnProcessSelected.mock.results[0].value).toEqual(processMock);
-    expect(mockOnProcessSelected.mock.results[1].value).toEqual(processMock2);
-    expect(mockOnProcessSelected.mock.results[1].value).toEqual(processMock);
+    expect(props.onNext.mock.calls.length).toBe(2);
+    expect(props.onPrevious.mock.calls.length).toBe(1);
+    expect(props.onPrevious.mock.results[0].value).toEqual(1); // e.g 2 of 3, 1 because index is zero based.
   });
 });

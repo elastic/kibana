@@ -5,9 +5,24 @@ load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types",
 PKG_BASE_NAME = "kbn-apm-utils"
 PKG_REQUIRE_NAME = "@kbn/apm-utils"
 
-SOURCE_FILES = glob([
-  "src/index.ts",
-])
+SOURCE_FILES = glob(
+  [
+    "**/*.ts",
+  ],
+  exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
+    "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
+  ],
+)
 
 SRCS = SOURCE_FILES
 
@@ -53,7 +68,6 @@ ts_project(
   declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

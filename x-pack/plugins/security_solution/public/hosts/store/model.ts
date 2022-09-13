@@ -23,7 +23,6 @@ export enum HostsTableType {
   events = 'events',
   uncommonProcesses = 'uncommonProcesses',
   anomalies = 'anomalies',
-  alerts = 'externalAlerts',
   risk = 'hostRisk',
   sessions = 'sessions',
 }
@@ -43,13 +42,17 @@ export interface HostRiskScoreQuery extends BasicQueryPaginated {
   severitySelection: RiskSeverity[];
 }
 
+export interface HostsAnomaliesQuery {
+  jobIdSelection: string[];
+  intervalSelection: string;
+}
+
 export interface Queries {
   [HostsTableType.authentications]: BasicQueryPaginated;
   [HostsTableType.hosts]: HostsQuery;
   [HostsTableType.events]: BasicQueryPaginated;
   [HostsTableType.uncommonProcesses]: BasicQueryPaginated;
-  [HostsTableType.anomalies]: null | undefined;
-  [HostsTableType.alerts]: BasicQueryPaginated;
+  [HostsTableType.anomalies]: HostsAnomaliesQuery;
   [HostsTableType.risk]: HostRiskScoreQuery;
   [HostsTableType.sessions]: BasicQueryPaginated;
 }

@@ -7,7 +7,6 @@
 
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 
-import type { Logger } from '@kbn/core/server';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
@@ -27,7 +26,6 @@ interface BulkCreateThresholdSignalsParams {
   completeRule: CompleteRule<ThresholdRuleParams>;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   inputIndexPattern: string[];
-  logger: Logger;
   filter: unknown;
   signalsIndex: string;
   startedAt: Date;

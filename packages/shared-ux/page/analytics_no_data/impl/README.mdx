@@ -1,0 +1,23 @@
+---
+id: sharedUX/Page/AnalyticsNoDataPage
+slug: /shared-ux/page/analytics-no-data-page
+title: Analytics "No Data" Page
+description: An entire page that can be displayed when Kibana "has no data", specifically for Analytics.
+tags: ['shared-ux', 'component']
+date: 2021-12-28
+---
+
+This is an Analytics-specific version of `KibanaNoDataPage`, which defaults most of the fields appropriate for Analytics solutions.
+
+## API
+
+| Export | Description |
+|---|---|
+| `AnalyticsNoDataPageProvider` | Provides contextual services to `AnalyticsNoDataPage`. |
+| `AnalyticsNoDataPageKibanaProvider` | Maps Kibana dependencies to provide contextual services to `AnalyticsNoDataPage`. |
+| `AnalyticsNoDataPage` | Uses a `Provider` to access contextual services to populate props on the `AnalyticsNoDataPageComponent`. |
+| `AnalyticsNoDataPageComponent` | The pure component. |
+
+## EUI Promotion Status
+
+This component is not currently considered for promotion to EUI.

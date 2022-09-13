@@ -22,7 +22,6 @@ import type {
 import type {
   ElasticsearchClient,
   IUiSettingsClient,
-  Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type {
@@ -36,7 +35,7 @@ import type {
   TimestampOverride,
   Privilege,
 } from '../../../../common/detection_engine/schemas/common';
-import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common';
+import { RuleExecutionStatus } from '../../../../common/detection_engine/rule_monitoring';
 import type {
   BulkResponseErrorAggregation,
   SignalHit,
@@ -50,7 +49,6 @@ import type {
   SimpleHit,
   WrappedEventHit,
 } from './types';
-import type { BuildRuleMessage } from './rule_messages';
 import type { ShardError } from '../../types';
 import type {
   EqlRuleParams,
@@ -61,21 +59,23 @@ import type {
   ThresholdRuleParams,
 } from '../schemas/rule_schemas';
 import type { BaseHit, SearchTypes } from '../../../../common/detection_engine/types';
-import type { IRuleExecutionLogForExecutors } from '../rule_execution_log';
+import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
 import { withSecuritySpan } from '../../../utils/with_security_span';
-import type { DetectionAlert } from '../../../../common/detection_engine/schemas/alerts';
+import type {
+  BaseFieldsLatest,
+  DetectionAlert,
+} from '../../../../common/detection_engine/schemas/alerts';
 import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../common/constants';
+import type { GenericBulkCreateResponse } from '../rule_types/factories';
 
 export const MAX_RULE_GAP_RATIO = 4;
 
 export const hasReadIndexPrivileges = async (args: {
   privileges: Privilege;
-  logger: Logger;
-  buildRuleMessage: BuildRuleMessage;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   uiSettingsClient: IUiSettingsClient;
 }): Promise<boolean> => {
-  const { privileges, logger, buildRuleMessage, ruleExecutionLogger, uiSettingsClient } = args;
+  const { privileges, ruleExecutionLogger, uiSettingsClient } = args;
 
   const isCcsPermissionWarningEnabled = await uiSettingsClient.get(ENABLE_CCS_READ_WARNING_SETTING);
 
@@ -89,19 +89,16 @@ export const hasReadIndexPrivileges = async (args: {
     (indexName) => privileges.index[indexName].read
   );
 
+  // Some indices have read privileges others do not.
   if (indexesWithNoReadPrivileges.length > 0) {
-    // some indices have read privileges others do not.
-    // set a warning status
-    const errorString = `This rule may not have the required read privileges to the following indices/index patterns: ${JSON.stringify(
-      indexesWithNoReadPrivileges
-    )}`;
-    logger.warn(buildRuleMessage(errorString));
+    const indexesString = JSON.stringify(indexesWithNoReadPrivileges);
     await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatus['partial failure'],
-      message: errorString,
+      message: `This rule may not have the required read privileges to the following indices/index patterns: ${indexesString}`,
     });
     return true;
   }
+
   return false;
 };
 
@@ -113,18 +110,8 @@ export const hasTimestampFields = async (args: {
   timestampFieldCapsResponse: TransportResult<Record<string, any>, unknown>;
   inputIndices: string[];
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  logger: Logger;
-  buildRuleMessage: BuildRuleMessage;
-}): Promise<boolean> => {
-  const {
-    timestampField,
-    timestampFieldCapsResponse,
-    inputIndices,
-    ruleExecutionLogger,
-    logger,
-    buildRuleMessage,
-  } = args;
-
+}): Promise<{ wroteWarningStatus: boolean; foundNoIndices: boolean }> => {
+  const { timestampField, timestampFieldCapsResponse, inputIndices, ruleExecutionLogger } = args;
   const { ruleName } = ruleExecutionLogger.context;
 
   if (isEmpty(timestampFieldCapsResponse.body.indices)) {
@@ -135,12 +122,13 @@ export const hasTimestampFields = async (args: {
         ? 'If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.'
         : ''
     }`;
-    logger.warn(buildRuleMessage(errorString.trimEnd()));
+
     await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatus['partial failure'],
       message: errorString.trimEnd(),
     });
-    return true;
+
+    return { wroteWarningStatus: true, foundNoIndices: true };
   } else if (
     isEmpty(timestampFieldCapsResponse.body.fields) ||
     timestampFieldCapsResponse.body.fields[timestampField] == null ||
@@ -159,15 +147,15 @@ export const hasTimestampFields = async (args: {
         : timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices
     )}`;
 
-    logger.warn(buildRuleMessage(errorString));
     await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatus['partial failure'],
       message: errorString,
     });
 
-    return true;
+    return { wroteWarningStatus: true, foundNoIndices: false };
   }
-  return false;
+
+  return { wroteWarningStatus: false, foundNoIndices: false };
 };
 
 export const checkPrivileges = async (
@@ -413,29 +401,28 @@ export const errorAggregator = (
 };
 
 export const getRuleRangeTuples = ({
-  logger,
+  startedAt,
   previousStartedAt,
   from,
   to,
   interval,
   maxSignals,
-  buildRuleMessage,
-  startedAt,
+  ruleExecutionLogger,
 }: {
-  logger: Logger;
+  startedAt: Date;
   previousStartedAt: Date | null | undefined;
   from: string;
   to: string;
   interval: string;
   maxSignals: number;
-  buildRuleMessage: BuildRuleMessage;
-  startedAt: Date;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }) => {
-  const originalTo = dateMath.parse(to, { forceNow: startedAt });
   const originalFrom = dateMath.parse(from, { forceNow: startedAt });
-  if (originalTo == null || originalFrom == null) {
-    throw new Error(buildRuleMessage('dateMath parse failed'));
+  const originalTo = dateMath.parse(to, { forceNow: startedAt });
+  if (originalFrom == null || originalTo == null) {
+    throw new Error('Failed to parse date math of rule.from or rule.to');
   }
+
   const tuples = [
     {
       to: originalTo,
@@ -443,11 +430,15 @@ export const getRuleRangeTuples = ({
       maxSignals,
     },
   ];
+
   const intervalDuration = parseInterval(interval);
   if (intervalDuration == null) {
-    logger.error(`Failed to compute gap between rule runs: could not parse rule interval`);
+    ruleExecutionLogger.error(
+      'Failed to compute gap between rule runs: could not parse rule interval'
+    );
     return { tuples, remainingGap: moment.duration(0) };
   }
+
   const gap = getGapBetweenRuns({
     previousStartedAt,
     originalTo,
@@ -465,13 +456,19 @@ export const getRuleRangeTuples = ({
     catchup,
     intervalDuration,
   });
+
   tuples.push(...catchupTuples);
+
   // Each extra tuple adds one extra intervalDuration to the time range this rule will cover.
   const remainingGapMilliseconds = Math.max(
     gap.asMilliseconds() - catchup * intervalDuration.asMilliseconds(),
     0
   );
-  return { tuples: tuples.reverse(), remainingGap: moment.duration(remainingGapMilliseconds) };
+
+  return {
+    tuples: tuples.reverse(),
+    remainingGap: moment.duration(remainingGapMilliseconds),
+  };
 };
 
 /**
@@ -601,7 +598,7 @@ export const getValidDateFromDoc = ({
     if (tempMoment.isValid()) {
       return tempMoment.toDate();
     } else if (typeof timestampValue === 'string') {
-      // worse case we have a string from fields API or other areas of Elasticsearch that have given us a number as a string,
+      // worst case we have a string from fields API or other areas of Elasticsearch that have given us a number as a string,
       // so we try one last time to parse this best we can by converting from string to a number
       const maybeDate = moment(+lastTimestamp);
       if (maybeDate.isValid()) {
@@ -648,9 +645,7 @@ export interface PreviewReturnType {
   warningMessages?: string[] | undefined;
 }
 
-export const createSearchAfterReturnType = <
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
->({
+export const createSearchAfterReturnType = ({
   success,
   warning,
   searchAfterTimes,
@@ -704,6 +699,23 @@ export const createSearchResultReturnType = <
       hits,
     },
   };
+};
+
+/**
+ * Merges the return values from bulk creating alerts into the appropriate fields in the combined return object.
+ */
+export const addToSearchAfterReturn = ({
+  current,
+  next,
+}: {
+  current: SearchAfterAndBulkCreateReturnType;
+  next: GenericBulkCreateResponse<BaseFieldsLatest>;
+}) => {
+  current.success = current.success && next.success;
+  current.createdSignalsCount += next.createdItemsCount;
+  current.createdSignals.push(...next.createdItems);
+  current.bulkCreateTimes.push(next.bulkCreateDuration);
+  current.errors = [...new Set([...current.errors, ...next.errors])];
 };
 
 export const mergeReturns = (

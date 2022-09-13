@@ -11,15 +11,28 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Privilege Escalation via Rogue Named Pipe Impersonation",
-  "note": "## Config\n\nNamed Pipe Creation Events need to be enabled within the Sysmon configuration by including the following settings:\n`condition equal \"contains\" and keyword equal \"pipe\"`\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n\n",
+  "note": "Named Pipe Creation Events need to be enabled within the Sysmon configuration by including the following settings:\n`condition equal \"contains\" and keyword equal \"pipe\"`\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "query": "file where event.action : \"Pipe Created*\" and\n /* normal sysmon named pipe creation events truncate the pipe keyword */\n  file.name : \"\\\\*\\\\Pipe\\\\*\"\n",
   "references": [
     "https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/",
     "https://github.com/zcgonvh/EfsPotato",
     "https://twitter.com/SBousseaden/status/1429530155291193354"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "file.name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 73,
   "rule_id": "76ddb638-abf7-42d5-be22-4a70b0bf7241",
+  "setup": "Named Pipe Creation Events need to be enabled within the Sysmon configuration by including the following settings:\n`condition equal &quot;contains&quot; and keyword equal &quot;pipe&quot;`\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "high",
   "tags": [
     "Elastic",
@@ -47,5 +60,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 4
 }

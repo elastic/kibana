@@ -8,7 +8,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import {
-  enumeration,
   IsoDateString,
   NonEmptyString,
   PositiveInteger,
@@ -193,35 +192,11 @@ export type QueryFilterOrUndefined = t.TypeOf<typeof queryFilterOrUndefined>;
 export const references = t.array(t.string);
 export type References = t.TypeOf<typeof references>;
 
-export const per_page = PositiveInteger;
-export type PerPage = t.TypeOf<typeof per_page>;
-
-export const perPageOrUndefined = t.union([per_page, t.undefined]);
-export type PerPageOrUndefined = t.TypeOf<typeof perPageOrUndefined>;
-
-export const page = PositiveIntegerGreaterThanZero;
-export type Page = t.TypeOf<typeof page>;
-
-export const pageOrUndefined = t.union([page, t.undefined]);
-export type PageOrUndefined = t.TypeOf<typeof pageOrUndefined>;
-
 export const signal_ids = t.array(t.string);
 export type SignalIds = t.TypeOf<typeof signal_ids>;
 
 // TODO: Can this be more strict or is this is the set of all Elastic Queries?
 export const signal_status_query = t.object;
-
-export const sort_field = t.string;
-export type SortField = t.TypeOf<typeof sort_field>;
-
-export const sortFieldOrUndefined = t.union([sort_field, t.undefined]);
-export type SortFieldOrUndefined = t.TypeOf<typeof sortFieldOrUndefined>;
-
-export const sort_order = t.keyof({ asc: null, desc: null });
-export type SortOrder = t.TypeOf<typeof sort_order>;
-
-export const sortOrderOrUndefined = t.union([sort_order, t.undefined]);
-export type SortOrderOrUndefined = t.TypeOf<typeof sortOrderOrUndefined>;
 
 export const tags = t.array(t.string);
 export type Tags = t.TypeOf<typeof tags>;
@@ -383,75 +358,3 @@ export const privilege = t.type({
 });
 
 export type Privilege = t.TypeOf<typeof privilege>;
-
-export enum BulkAction {
-  'enable' = 'enable',
-  'disable' = 'disable',
-  'export' = 'export',
-  'delete' = 'delete',
-  'duplicate' = 'duplicate',
-  'edit' = 'edit',
-}
-
-export const bulkAction = enumeration('BulkAction', BulkAction);
-
-export enum BulkActionEditType {
-  'add_tags' = 'add_tags',
-  'delete_tags' = 'delete_tags',
-  'set_tags' = 'set_tags',
-  'add_index_patterns' = 'add_index_patterns',
-  'delete_index_patterns' = 'delete_index_patterns',
-  'set_index_patterns' = 'set_index_patterns',
-  'set_timeline' = 'set_timeline',
-}
-
-const bulkActionEditPayloadTags = t.type({
-  type: t.union([
-    t.literal(BulkActionEditType.add_tags),
-    t.literal(BulkActionEditType.delete_tags),
-    t.literal(BulkActionEditType.set_tags),
-  ]),
-  value: tags,
-});
-
-export type BulkActionEditPayloadTags = t.TypeOf<typeof bulkActionEditPayloadTags>;
-
-const bulkActionEditPayloadIndexPatterns = t.intersection([
-  t.type({
-    type: t.union([
-      t.literal(BulkActionEditType.add_index_patterns),
-      t.literal(BulkActionEditType.delete_index_patterns),
-      t.literal(BulkActionEditType.set_index_patterns),
-    ]),
-    value: index,
-  }),
-  t.exact(t.partial({ overwriteDataViews: t.boolean })),
-]);
-
-export type BulkActionEditPayloadIndexPatterns = t.TypeOf<
-  typeof bulkActionEditPayloadIndexPatterns
->;
-
-const bulkActionEditPayloadTimeline = t.type({
-  type: t.literal(BulkActionEditType.set_timeline),
-  value: t.type({
-    timeline_id,
-    timeline_title,
-  }),
-});
-
-export type BulkActionEditPayloadTimeline = t.TypeOf<typeof bulkActionEditPayloadTimeline>;
-
-export const bulkActionEditPayload = t.union([
-  bulkActionEditPayloadTags,
-  bulkActionEditPayloadIndexPatterns,
-  bulkActionEditPayloadTimeline,
-]);
-
-export type BulkActionEditPayload = t.TypeOf<typeof bulkActionEditPayload>;
-
-export type BulkActionEditForRuleAttributes = BulkActionEditPayloadTags;
-
-export type BulkActionEditForRuleParams =
-  | BulkActionEditPayloadIndexPatterns
-  | BulkActionEditPayloadTimeline;

@@ -17,22 +17,33 @@ function getValueAsNumberArray(value: unknown) {
 }
 
 export const collapseFn: CollapseExpressionFunction['fn'] = (input, { by, metric, fn }) => {
+  const collapseFunctionsByMetricIndex =
+    fn.length > 1 ? fn : metric ? new Array(metric.length).fill(fn[0]) : [];
+
+  if (metric && metric.length !== collapseFunctionsByMetricIndex.length) {
+    throw Error(`lens_collapse - Called with ${metric.length} metrics and ${fn.length} collapse functions. 
+Must be called with either a single collapse function for all metrics,
+or a number of collapse functions matching the number of metrics.`);
+  }
+
   const accumulators: Record<string, Partial<Record<string, number>>> = {};
   const valueCounter: Record<string, Partial<Record<string, number>>> = {};
   metric?.forEach((m) => {
     accumulators[m] = {};
     valueCounter[m] = {};
   });
+
   const setMarker: Partial<Record<string, boolean>> = {};
   input.rows.forEach((row) => {
     const bucketIdentifier = getBucketIdentifier(row, by);
 
-    metric?.forEach((m) => {
+    metric?.forEach((m, i) => {
       const accumulatorValue = accumulators[m][bucketIdentifier];
       const currentValue = row[m];
       if (currentValue != null) {
         const currentNumberValues = getValueAsNumberArray(currentValue);
-        switch (fn) {
+
+        switch (collapseFunctionsByMetricIndex[i]) {
           case 'avg':
             valueCounter[m][bucketIdentifier] =
               (valueCounter[m][bucketIdentifier] ?? 0) + currentNumberValues.length;
@@ -66,8 +77,9 @@ export const collapseFn: CollapseExpressionFunction['fn'] = (input, { by, metric
       }
     });
   });
-  if (fn === 'avg') {
-    metric?.forEach((m) => {
+
+  metric?.forEach((m, i) => {
+    if (collapseFunctionsByMetricIndex[i] === 'avg') {
       Object.keys(accumulators[m]).forEach((bucketIdentifier) => {
         const accumulatorValue = accumulators[m][bucketIdentifier];
         const valueCount = valueCounter[m][bucketIdentifier];
@@ -75,8 +87,8 @@ export const collapseFn: CollapseExpressionFunction['fn'] = (input, { by, metric
           accumulators[m][bucketIdentifier] = accumulatorValue / valueCount;
         }
       });
-    });
-  }
+    }
+  });
 
   return {
     ...input,

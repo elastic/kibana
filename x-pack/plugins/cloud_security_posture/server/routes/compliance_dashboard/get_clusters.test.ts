@@ -11,8 +11,11 @@ const mockClusterBuckets: ClusterBucket[] = [
   {
     key: 'cluster_id',
     doc_count: 10,
-    benchmarks: {
+    benchmarkName: {
       buckets: [{ key: 'CIS Kubernetes', doc_count: 10 }],
+    },
+    benchmarkId: {
+      buckets: [{ key: 'cis_k8s', doc_count: 10 }],
     },
     timestamps: {
       buckets: [{ key: 123, doc_count: 1 }],
@@ -59,6 +62,7 @@ describe('getClustersFromAggs', () => {
           lastUpdate: 123,
           clusterId: 'cluster_id',
           benchmarkName: 'CIS Kubernetes',
+          benchmarkId: 'cis_k8s',
         },
         stats: {
           totalFindings: 12,

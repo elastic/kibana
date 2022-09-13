@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import type { FailedTransactionsCorrelationsResponse } from '@kbn/apm-plugin/common/correlations/failed_transactions_correlations/types';
 import { EVENT_OUTCOME } from '@kbn/apm-plugin/common/elasticsearch_fieldnames';
 import { EventOutcome } from '@kbn/apm-plugin/common/event_outcome';
+import { LatencyDistributionChartType } from '@kbn/apm-plugin/common/latency_distribution_chart_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // These tests go through the full sequence of queries required
@@ -34,6 +35,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           body: {
             ...getOptions(),
             percentileThreshold: 95,
+            chartType: LatencyDistributionChartType.failedTransactionsCorrelations,
           },
         },
       });
@@ -50,6 +52,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ...getOptions(),
             percentileThreshold: 95,
             termFilters: [{ fieldName: EVENT_OUTCOME, fieldValue: EventOutcome.failure }],
+            chartType: LatencyDistributionChartType.failedTransactionsCorrelations,
           },
         },
       });
@@ -109,6 +112,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           body: {
             ...getOptions(),
             percentileThreshold: 95,
+            chartType: LatencyDistributionChartType.failedTransactionsCorrelations,
           },
         },
       });
@@ -125,6 +129,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ...getOptions(),
             percentileThreshold: 95,
             termFilters: [{ fieldName: EVENT_OUTCOME, fieldValue: EventOutcome.failure }],
+            chartType: LatencyDistributionChartType.failedTransactionsCorrelations,
           },
         },
       });

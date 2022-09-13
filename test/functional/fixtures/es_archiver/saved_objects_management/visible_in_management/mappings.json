@@ -470,7 +470,10 @@
         "number_of_shards": "1",
         "priority": "10",
         "refresh_interval": "1s",
-        "routing_partition_size": "1"
+        "routing_partition_size": "1",
+        "mapping": {
+          "total_fields": { "limit": 1500 }
+        }
       }
     }
   }

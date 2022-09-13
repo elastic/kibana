@@ -26,6 +26,38 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 jest.mock('./hooks/use_fetch_alerts');
 jest.mock('@kbn/kibana-utils-plugin/public');
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: () => ({
+    services: {
+      application: {
+        capabilities: {
+          fakeCases: {
+            create_cases: true,
+            read_cases: true,
+            update_cases: true,
+            delete_cases: true,
+            push_cases: true,
+          },
+        },
+      },
+      cases: {
+        ui: {
+          getCasesContext: () => null,
+        },
+        helpers: {
+          getUICapabilities: () => ({
+            all: true,
+            read: true,
+            create: true,
+            update: true,
+            delete: true,
+            push: true,
+          }),
+        },
+      },
+    },
+  }),
+}));
 
 const columns = [
   {
@@ -92,6 +124,7 @@ storageMock.mockImplementation(() => {
   return { get: jest.fn(), set: jest.fn() };
 });
 
+const refecthMock = jest.fn();
 const hookUseFetchAlerts = useFetchAlerts as jest.Mock;
 hookUseFetchAlerts.mockImplementation(() => [
   false,
@@ -99,7 +132,7 @@ hookUseFetchAlerts.mockImplementation(() => [
     alerts,
     isInitializing: false,
     getInspectQuery: jest.fn(),
-    refetch: jest.fn(),
+    refetch: refecthMock,
     totalAlerts: alerts.length,
   },
 ]);
@@ -123,6 +156,7 @@ describe('AlertsTableState', () => {
   beforeEach(() => {
     hasMock.mockClear();
     getMock.mockClear();
+    refecthMock.mockClear();
   });
 
   describe('Alerts table configuration registry', () => {
@@ -203,6 +237,7 @@ describe('AlertsTableState', () => {
 
   describe('empty state', () => {
     beforeEach(() => {
+      refecthMock.mockClear();
       hookUseFetchAlerts.mockClear();
       hookUseFetchAlerts.mockImplementation(() => [
         false,
@@ -210,7 +245,7 @@ describe('AlertsTableState', () => {
           alerts: [],
           isInitializing: false,
           getInspectQuery: jest.fn(),
-          refetch: jest.fn(),
+          refetch: refecthMock,
           totalAlerts: 0,
         },
       ]);
@@ -219,6 +254,34 @@ describe('AlertsTableState', () => {
     it('should render an empty screen if there are no alerts', async () => {
       const result = render(<AlertsTableWithLocale {...tableProps} />);
       expect(result.getByTestId('alertsStateTableEmptyState')).toBeTruthy();
+    });
+  });
+
+  describe('refresh alerts', () => {
+    beforeEach(() => {
+      refecthMock.mockClear();
+      hookUseFetchAlerts.mockClear();
+      hookUseFetchAlerts.mockImplementation(() => [
+        false,
+        {
+          alerts: [],
+          isInitializing: false,
+          getInspectQuery: jest.fn(),
+          refetch: refecthMock,
+          totalAlerts: 0,
+        },
+      ]);
+    });
+
+    it('should NOT refetch the alert at initialization', async () => {
+      render(<AlertsTableWithLocale {...tableProps} />);
+      expect(refecthMock).toBeCalledTimes(0);
+    });
+    it('should refetch the alert when refreshNow is updated', async () => {
+      const result = render(<AlertsTableWithLocale {...tableProps} />);
+      const props = { ...tableProps, refreshNow: 123456789 };
+      result.rerender(<AlertsTableWithLocale {...props} />);
+      expect(refecthMock).toBeCalledTimes(1);
     });
   });
 });

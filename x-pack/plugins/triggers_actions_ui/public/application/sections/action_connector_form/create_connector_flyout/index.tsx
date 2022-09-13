@@ -8,6 +8,7 @@
 import React, { memo, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
 
+import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import {
   ActionConnector,
   ActionType,
@@ -156,7 +157,8 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         icon={actionTypeModel?.iconClass}
         actionTypeName={actionType?.name}
         actionTypeMessage={actionTypeModel?.selectMessage}
-        featureIds={actionType?.supportedFeatureIds}
+        compatibility={getConnectorCompatibility(actionType?.supportedFeatureIds)}
+        isExperimental={actionTypeModel?.isExperimental}
       />
       <EuiFlyoutBody
         banner={!actionType && hasActionsUpgradeableByTrial ? <UpgradeLicenseCallOut /> : null}

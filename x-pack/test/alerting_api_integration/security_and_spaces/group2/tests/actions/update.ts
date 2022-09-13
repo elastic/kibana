@@ -351,6 +351,41 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });
+
+        it(`should handle update action request appropriately when empty strings are submitted`, async () => {
+          const response = await supertestWithoutAuth
+            .put(`${getUrlPrefix(space.id)}/api/actions/connector/1`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send({
+              name: 'My action updated',
+              config: {
+                unencrypted: ' ',
+              },
+              secrets: {
+                encrypted: 'This value should be encrypted',
+              },
+            });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(400);
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: `[request body.config.unencrypted]: value '' is not valid`,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
       });
     }
   });

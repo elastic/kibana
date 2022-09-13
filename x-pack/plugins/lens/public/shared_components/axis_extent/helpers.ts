@@ -45,7 +45,7 @@ export function validateAxisDomain(extents?: { lowerBound?: number; upperBound?:
  * @returns boolean
  */
 export function hasNumericHistogramDimension(
-  datasourceLayer: DatasourcePublicAPI,
+  datasourceLayer: DatasourcePublicAPI | undefined,
   columnId?: string
 ) {
   if (!columnId) {

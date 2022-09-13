@@ -26,11 +26,15 @@ jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 
-jest.mock('@kbn/core/server/saved_objects/service/lib/utils', () => ({
-  SavedObjectsUtils: {
-    generateId: () => 'mock-saved-object-id',
-  },
-}));
+jest.mock('@kbn/core-saved-objects-utils-server', () => {
+  const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
+  return {
+    ...actual,
+    SavedObjectsUtils: {
+      generateId: () => 'mock-saved-object-id',
+    },
+  };
+});
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -412,7 +416,6 @@ describe('create()', () => {
           "status": "pending",
           "warning": null,
         },
-        "isSnoozedUntil": null,
         "legacyId": null,
         "meta": Object {
           "versionApiKeyLastmodified": "v8.0.0",
@@ -460,6 +463,7 @@ describe('create()', () => {
     expect(taskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
                                                                         Array [
                                                                           Object {
+                                                                            "enabled": true,
                                                                             "id": "1",
                                                                             "params": Object {
                                                                               "alertId": "1",
@@ -619,7 +623,6 @@ describe('create()', () => {
           "status": "pending",
           "warning": null,
         },
-        "isSnoozedUntil": null,
         "legacyId": "123",
         "meta": Object {
           "versionApiKeyLastmodified": "v7.10.0",
@@ -1046,7 +1049,6 @@ describe('create()', () => {
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
         enabled: true,
-        isSnoozedUntil: null,
         legacyId: null,
         executionStatus: {
           error: null,
@@ -1246,7 +1248,6 @@ describe('create()', () => {
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
         enabled: true,
-        isSnoozedUntil: null,
         legacyId: null,
         executionStatus: {
           error: null,
@@ -1411,7 +1412,6 @@ describe('create()', () => {
         alertTypeId: '123',
         apiKey: null,
         apiKeyOwner: null,
-        isSnoozedUntil: null,
         legacyId: null,
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
@@ -1576,7 +1576,6 @@ describe('create()', () => {
         alertTypeId: '123',
         consumer: 'bar',
         name: 'abc',
-        isSnoozedUntil: null,
         legacyId: null,
         params: { bar: true },
         apiKey: null,
@@ -1706,7 +1705,6 @@ describe('create()', () => {
             params: { foo: true },
           },
         ],
-        isSnoozedUntil: null,
         legacyId: null,
         alertTypeId: '123',
         consumer: 'bar',
@@ -1839,7 +1837,6 @@ describe('create()', () => {
             params: { foo: true },
           },
         ],
-        isSnoozedUntil: null,
         legacyId: null,
         alertTypeId: '123',
         consumer: 'bar',
@@ -2001,7 +1998,6 @@ describe('create()', () => {
         ],
         apiKeyOwner: null,
         apiKey: null,
-        isSnoozedUntil: null,
         legacyId: null,
         createdBy: 'elastic',
         updatedBy: 'elastic',
@@ -2354,7 +2350,6 @@ describe('create()', () => {
         alertTypeId: '123',
         consumer: 'bar',
         name: 'abc',
-        isSnoozedUntil: null,
         legacyId: null,
         params: { bar: true },
         apiKey: Buffer.from('123:abc').toString('base64'),
@@ -2454,7 +2449,6 @@ describe('create()', () => {
             params: { foo: true },
           },
         ],
-        isSnoozedUntil: null,
         legacyId: null,
         alertTypeId: '123',
         consumer: 'bar',

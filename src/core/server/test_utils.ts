@@ -7,9 +7,8 @@
  */
 
 export { createHttpServer } from '@kbn/core-http-server-mocks';
-export { ServiceStatusLevelSnapshotSerializer } from './status/test_utils';
-export { setupServer } from './saved_objects/routes/test_utils';
+export { setupServer } from './integration_tests/saved_objects/routes/test_utils';
 export {
   getDeprecationsFor,
   getDeprecationsForGlobalSettings,
-} from '@kbn/core-config-server-internal';
+} from '@kbn/core-test-helpers-deprecations-getters';

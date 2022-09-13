@@ -80,6 +80,8 @@ import { getInitialInterval } from './get_initial_interval';
 
 const ENTER_KEY = 13;
 
+const INTEGER_REGEX = /^[1-9][0-9]*$/;
+
 function getProducerFeatureName(producer: string, kibanaFeatures: KibanaFeature[]) {
   return kibanaFeatures.find((featureItem) => featureItem.id === producer)?.name;
 }
@@ -729,9 +731,11 @@ export const RuleForm = ({
                   data-test-subj="intervalInput"
                   onChange={(e) => {
                     const value = e.target.value;
-                    const interval = value !== '' ? parseInt(value, 10) : undefined;
-                    setRuleInterval(interval);
-                    setScheduleProperty('interval', `${value}${ruleIntervalUnit}`);
+                    if (value === '' || INTEGER_REGEX.test(value)) {
+                      const parsedValue = value === '' ? '' : parseInt(value, 10);
+                      setRuleInterval(parsedValue || undefined);
+                      setScheduleProperty('interval', `${parsedValue}${ruleIntervalUnit}`);
+                    }
                   }}
                 />
               </EuiFlexItem>

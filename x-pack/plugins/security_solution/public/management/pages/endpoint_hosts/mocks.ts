@@ -38,6 +38,9 @@ import {
   fleetGetAgentPolicyListHttpMock,
   fleetGetCheckPermissionsHttpMock,
   fleetGetPackageListHttpMock,
+  fleetBulkGetPackagePoliciesListHttpMock,
+  fleetBulkGetAgentPolicyListHttpMock,
+  fleetGetPackagePoliciesListHttpMock,
 } from '../../mocks';
 
 type EndpointMetadataHttpMocksInterface = ResponseProvidersInterface<{
@@ -133,6 +136,9 @@ export const endpointListFleetApisHttpMock =
   composeHttpHandlerMocks<EndpointListFleetApisHttpMockInterface>([
     fleetGetPackageListHttpMock,
     fleetGetAgentPolicyListHttpMock,
+    fleetBulkGetPackagePoliciesListHttpMock,
+    fleetBulkGetAgentPolicyListHttpMock,
+    fleetGetPackagePoliciesListHttpMock,
     fleetGetCheckPermissionsHttpMock,
   ]);
 type EndpointPageHttpMockInterface = EndpointMetadataHttpMocksInterface &

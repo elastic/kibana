@@ -1,0 +1,143 @@
+{
+  "id": "@kbn/core-mount-utils-browser",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-mount-utils-browser",
+        "id": "def-common.OverlayRef",
+        "type": "Interface",
+        "tags": [],
+        "label": "OverlayRef",
+        "description": [
+          "\nReturned by {@link OverlayStart} methods for closing a mounted overlay."
+        ],
+        "path": "packages/core/mount-utils/core-mount-utils-browser/src/overlay_ref.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-mount-utils-browser",
+            "id": "def-common.OverlayRef.onClose",
+            "type": "Object",
+            "tags": [],
+            "label": "onClose",
+            "description": [
+              "\nA Promise that will resolve once this overlay is closed.\n\nOverlays can close from user interaction, calling `close()` on the overlay\nreference or another overlay replacing yours via `openModal` or `openFlyout`."
+            ],
+            "signature": [
+              "Promise<void>"
+            ],
+            "path": "packages/core/mount-utils/core-mount-utils-browser/src/overlay_ref.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-mount-utils-browser",
+            "id": "def-common.OverlayRef.close",
+            "type": "Function",
+            "tags": [],
+            "label": "close",
+            "description": [
+              "\nCloses the referenced overlay if it's still open which in turn will\nresolve the `onClose` Promise. If the overlay had already been\nclosed this method does nothing."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/core/mount-utils/core-mount-utils-browser/src/overlay_ref.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-mount-utils-browser",
+        "id": "def-common.MountPoint",
+        "type": "Type",
+        "tags": [],
+        "label": "MountPoint",
+        "description": [
+          "\nA function that should mount DOM content inside the provided container element\nand return a handler to unmount it.\n"
+        ],
+        "signature": [
+          "(element: T) => ",
+          {
+            "pluginId": "@kbn/core-mount-utils-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+            "section": "def-common.UnmountCallback",
+            "text": "UnmountCallback"
+          }
+        ],
+        "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [
+          "a {@link UnmountCallback } that unmount the element on call."
+        ],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-mount-utils-browser",
+            "id": "def-common.MountPoint.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "element",
+            "description": [
+              "the container element to render into"
+            ],
+            "signature": [
+              "T"
+            ],
+            "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-mount-utils-browser",
+        "id": "def-common.UnmountCallback",
+        "type": "Type",
+        "tags": [],
+        "label": "UnmountCallback",
+        "description": [
+          "\nA function that will unmount the element previously mounted by\nthe associated {@link MountPoint}\n"
+        ],
+        "signature": [
+          "() => void"
+        ],
+        "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

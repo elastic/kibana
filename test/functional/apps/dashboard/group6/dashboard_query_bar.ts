@@ -16,10 +16,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pieChart = getService('pieChart');
   const queryBar = getService('queryBar');
   const retry = getService('retry');
+  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'dashboard', 'discover']);
 
   describe('dashboard query bar', () => {
     before(async () => {
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
@@ -34,6 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await security.testUser.restoreDefaults();
     });
 
     it('causes panels to reload when refresh is clicked', async () => {

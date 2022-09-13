@@ -34,8 +34,6 @@ export const stubDataViewWithoutTimeField = createStubDataView({
   },
 });
 
-export const stubIndexPatternWithoutTimeField = stubDataViewWithoutTimeField;
-
 export const stubLogstashDataView = createStubDataView({
   spec: {
     id: 'logstash-*',
@@ -44,8 +42,6 @@ export const stubLogstashDataView = createStubDataView({
     fields: stubLogstashFieldSpecMap,
   },
 });
-
-export const stubLogstashIndexPattern = stubLogstashDataView;
 
 export function stubbedSavedObjectDataView(
   id: string | null = null

@@ -573,6 +573,52 @@ test('Updates when hidePanelTitles is toggled', async () => {
   expect(title.length).toBe(1);
 });
 
+test('Respects options from SelfStyledEmbeddable', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
+
+  const container = new HelloWorldContainer(
+    { id: '123', panels: {}, viewMode: ViewMode.VIEW, hidePanelTitles: false },
+    { getEmbeddableFactory } as any
+  );
+
+  const contactCardEmbeddable = await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, {
+    firstName: 'Rob',
+    lastName: 'Stark',
+  });
+
+  const selfStyledEmbeddable = embeddablePluginMock.mockSelfStyledEmbeddable(
+    contactCardEmbeddable,
+    { hideTitle: true }
+  );
+
+  // make sure the title is being hidden because of the self styling, not the container
+  container.updateInput({ hidePanelTitles: false });
+
+  const component = mount(
+    <I18nProvider>
+      <EmbeddablePanel
+        embeddable={selfStyledEmbeddable}
+        getActions={() => Promise.resolve([])}
+        getAllEmbeddableFactories={start.getEmbeddableFactories}
+        getEmbeddableFactory={start.getEmbeddableFactory}
+        notifications={{} as any}
+        overlays={{} as any}
+        application={applicationMock}
+        inspector={inspector}
+        SavedObjectFinder={() => null}
+        theme={theme}
+      />
+    </I18nProvider>
+  );
+
+  const title = findTestSubject(component, `embeddablePanelHeading-HelloRobStark`);
+  expect(title.length).toBe(0);
+});
+
 test('Check when hide header option is false', async () => {
   const inspector = inspectorPluginMock.createStartContract();
 

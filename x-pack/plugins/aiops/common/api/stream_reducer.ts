@@ -12,6 +12,7 @@ import { API_ACTION_NAME, AiopsExplainLogRateSpikesApiAction } from './explain_l
 interface StreamState {
   ccsWarning: boolean;
   changePoints: ChangePoint[];
+  errors: string[];
   loaded: number;
   loadingState: string;
 }
@@ -19,6 +20,7 @@ interface StreamState {
 export const initialState: StreamState = {
   ccsWarning: false,
   changePoints: [],
+  errors: [],
   loaded: 0,
   loadingState: '',
 };
@@ -37,7 +39,7 @@ export function streamReducer(
     case API_ACTION_NAME.ADD_CHANGE_POINTS_HISTOGRAM:
       const changePoints = state.changePoints.map((cp) => {
         const cpHistogram = action.payload.find(
-          (h) => h.fieldName === cp.fieldName && h.fieldValue && cp.fieldName
+          (h) => h.fieldName === cp.fieldName && h.fieldValue === cp.fieldValue
         );
         if (cpHistogram) {
           cp.histogram = cpHistogram.histogram;
@@ -45,6 +47,8 @@ export function streamReducer(
         return cp;
       });
       return { ...state, changePoints };
+    case API_ACTION_NAME.ADD_ERROR:
+      return { ...state, errors: [...state.errors, action.payload] };
     case API_ACTION_NAME.RESET:
       return initialState;
     case API_ACTION_NAME.UPDATE_LOADING_STATE:

@@ -31,7 +31,6 @@ export const RelatedCases = React.memo<Props>(({ eventId }) => {
   const toasts = useToasts();
 
   const [relatedCases, setRelatedCases] = useState<RelatedCaseList | undefined>(undefined);
-  const [areCasesLoading, setAreCasesLoading] = useState(true);
   const [hasError, setHasError] = useState<boolean>(false);
 
   const renderContent = useCallback(() => renderCaseContent(relatedCases), [relatedCases]);
@@ -50,7 +49,6 @@ export const RelatedCases = React.memo<Props>(({ eventId }) => {
       toasts.addWarning(CASES_ERROR_TOAST(error));
     }
     setRelatedCases(relatedCaseList);
-    setAreCasesLoading(false);
   }, [eventId, cases.api, toasts]);
 
   useEffect(() => {
@@ -60,8 +58,6 @@ export const RelatedCases = React.memo<Props>(({ eventId }) => {
   let state: InsightAccordionState = 'loading';
   if (hasError) {
     state = 'error';
-  } else if (!areCasesLoading && relatedCases?.length === 0) {
-    state = 'empty';
   } else if (relatedCases) {
     state = 'success';
   }
@@ -121,7 +117,6 @@ function getTextFromState(state: InsightAccordionState, caseCount = 0) {
     case 'error':
       return CASES_ERROR;
     case 'success':
-    case 'empty':
       return CASES_COUNT(caseCount);
     default:
       return '';

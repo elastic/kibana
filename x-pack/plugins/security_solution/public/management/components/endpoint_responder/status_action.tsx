@@ -46,7 +46,7 @@ export const EndpointStatusActionResult = memo<
     error: fetchedDetailsError,
     isFetching,
     isFetched,
-  } = useGetEndpointDetails(endpointId, { enabled: isPending, queryKey });
+  } = useGetEndpointDetails(endpointId, { enabled: isPending, queryKey: [queryKey] });
 
   const { data: fetchedPendingActionsSummary } = useGetEndpointPendingActionsSummary([endpointId], {
     enabled: isPending,
@@ -54,7 +54,10 @@ export const EndpointStatusActionResult = memo<
   });
 
   const pendingIsolationActions = useMemo<
-    Pick<Required<EndpointHostIsolationStatusProps>, 'pendingIsolate' | 'pendingUnIsolate'>
+    Pick<
+      Required<EndpointHostIsolationStatusProps['pendingActions']>,
+      'pendingIsolate' | 'pendingUnIsolate'
+    >
   >(() => {
     if (endpointPendingActions?.data.length) {
       const pendingActions = endpointPendingActions.data[0].pending_actions;
@@ -71,7 +74,7 @@ export const EndpointStatusActionResult = memo<
   }, [endpointPendingActions?.data]);
 
   useEffect(() => {
-    if (!isPending) {
+    if (!apiCalled) {
       setStore((prevState) => {
         return {
           ...prevState,
@@ -79,7 +82,7 @@ export const EndpointStatusActionResult = memo<
         };
       });
     }
-  }, [apiCalled, isPending, setStore]);
+  }, [apiCalled, setStore]);
 
   // update command store if endpoint details fetch api call completed
   useEffect(() => {
@@ -105,7 +108,7 @@ export const EndpointStatusActionResult = memo<
 
   // Update the store once we get back pending actions for this endpoint
   useEffect(() => {
-    if (fetchedPendingActionsSummary) {
+    if (fetchedPendingActionsSummary && !endpointPendingActions) {
       setStore((prevState) => {
         return {
           ...prevState,
@@ -113,7 +116,7 @@ export const EndpointStatusActionResult = memo<
         };
       });
     }
-  }, [fetchedPendingActionsSummary, setStore]);
+  }, [fetchedPendingActionsSummary, setStore, endpointPendingActions]);
 
   const getStatusDescriptionList = useCallback(() => {
     if (!endpointDetails) {

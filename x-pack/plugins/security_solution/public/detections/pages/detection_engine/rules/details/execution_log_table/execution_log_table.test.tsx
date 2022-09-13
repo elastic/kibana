@@ -5,20 +5,23 @@
  * 2.0.
  */
 
-import { ruleExecutionEventsMock } from '../../../../../containers/detection_engine/rules/mock';
-import { render, screen } from '@testing-library/react';
-import { TestProviders } from '../../../../../../common/mock';
-import { useRuleDetailsContextMock } from '../__mocks__/rule_details_context';
 import React from 'react';
 import { noop } from 'lodash/fp';
+import { render, screen } from '@testing-library/react';
 
-import { useRuleExecutionEvents } from '../../../../../containers/detection_engine/rules';
+import { TestProviders } from '../../../../../../common/mock';
+import { useRuleDetailsContextMock } from '../__mocks__/rule_details_context';
+import { getRuleExecutionResultsResponseMock } from '../../../../../../../common/detection_engine/rule_monitoring/mocks';
+
+import { useExecutionResults } from '../../../../../../detection_engine/rule_monitoring';
 import { useSourcererDataView } from '../../../../../../common/containers/sourcerer';
 import { useRuleDetailsContext } from '../rule_details_context';
 import { ExecutionLogTable } from './execution_log_table';
 
 jest.mock('../../../../../../common/containers/sourcerer');
-jest.mock('../../../../../containers/detection_engine/rules');
+jest.mock(
+  '../../../../../../detection_engine/rule_monitoring/components/execution_results_table/use_execution_results'
+);
 jest.mock('../rule_details_context');
 
 const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
@@ -30,9 +33,9 @@ mockUseSourcererDataView.mockReturnValue({
   loading: false,
 });
 
-const mockUseRuleExecutionEvents = useRuleExecutionEvents as jest.Mock;
+const mockUseRuleExecutionEvents = useExecutionResults as jest.Mock;
 mockUseRuleExecutionEvents.mockReturnValue({
-  data: ruleExecutionEventsMock,
+  data: getRuleExecutionResultsResponseMock.getSomeResponse(),
   isLoading: false,
   isFetching: false,
 });

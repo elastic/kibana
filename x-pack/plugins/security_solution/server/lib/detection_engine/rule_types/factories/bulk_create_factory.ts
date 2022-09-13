@@ -8,10 +8,9 @@
 import { performance } from 'perf_hooks';
 import { isEmpty } from 'lodash';
 
-import type { Logger } from '@kbn/core/server';
 import type { PersistenceAlertService } from '@kbn/rule-registry-plugin/server';
 import type { AlertWithCommonFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
-import type { BuildRuleMessage } from '../../signals/rule_messages';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { makeFloatString } from '../../signals/utils';
 import type { RefreshTypes } from '../../types';
 import type {
@@ -30,10 +29,9 @@ export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
 
 export const bulkCreateFactory =
   (
-    logger: Logger,
     alertWithPersistence: PersistenceAlertService,
-    buildRuleMessage: BuildRuleMessage,
-    refreshForBulkCreate: RefreshTypes
+    refreshForBulkCreate: RefreshTypes,
+    ruleExecutionLogger: IRuleExecutionLogForExecutors
   ) =>
   async <T extends BaseFieldsLatest>(
     wrappedDocs: Array<WrappedFieldsLatest<T>>,
@@ -64,15 +62,13 @@ export const bulkCreateFactory =
 
     const end = performance.now();
 
-    logger.debug(
-      buildRuleMessage(
-        `individual bulk process time took: ${makeFloatString(end - start)} milliseconds`
-      )
+    ruleExecutionLogger.debug(
+      `individual bulk process time took: ${makeFloatString(end - start)} milliseconds`
     );
 
     if (!isEmpty(errors)) {
-      logger.debug(
-        buildRuleMessage(`[-] bulkResponse had errors with responses of: ${JSON.stringify(errors)}`)
+      ruleExecutionLogger.debug(
+        `[-] bulkResponse had errors with responses of: ${JSON.stringify(errors)}`
       );
       return {
         errors: Object.keys(errors),

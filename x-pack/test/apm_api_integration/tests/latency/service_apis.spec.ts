@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
 import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
@@ -116,7 +116,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   let latencyMetricValues: Awaited<ReturnType<typeof getLatencyValues>>;
   let latencyTransactionValues: Awaited<ReturnType<typeof getLatencyValues>>;
 
-  registry.when('Services APIs', { config: 'basic', archives: ['apm_mappings_only_8.0.0'] }, () => {
+  registry.when('Services APIs', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded ', () => {
       const GO_PROD_RATE = 80;
       const GO_DEV_RATE = 20;

@@ -28,6 +28,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useUiTracker } from '@kbn/observability-plugin/public';
 
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   asPercent,
   asPreciseDecimal,
@@ -55,7 +56,6 @@ import { OnAddFilter } from './context_popover/top_values';
 import { useFailedTransactionsCorrelations } from './use_failed_transactions_correlations';
 import { getTransactionDistributionChartData } from './get_transaction_distribution_chart_data';
 import { ChartTitleToolTip } from './chart_title_tool_tip';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { MIN_TAB_TITLE_HEIGHT } from '../../shared/charts/duration_distribution_chart_with_scrubber';
 import { TotalDocCountLabel } from '../../shared/charts/duration_distribution_chart/total_doc_count_label';
 

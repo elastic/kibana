@@ -12,7 +12,7 @@ import { UsersTableType } from '../../store/model';
 import { USERS_PATH } from '../../../../common/constants';
 
 const getTabsOnUsersDetailsUrl = (userName: string, tabName: UsersTableType) =>
-  `${USERS_PATH}/${userName}/${tabName}`;
+  `${USERS_PATH}/name/${userName}/${tabName}`;
 
 export const navTabsUsersDetails = (
   userName: string,
@@ -38,12 +38,6 @@ export const navTabsUsersDetails = (
       id: UsersTableType.events,
       name: i18n.NAVIGATION_EVENTS_TITLE,
       href: getTabsOnUsersDetailsUrl(userName, UsersTableType.events),
-      disabled: false,
-    },
-    [UsersTableType.alerts]: {
-      id: UsersTableType.alerts,
-      name: i18n.NAVIGATION_ALERTS_TITLE,
-      href: getTabsOnUsersDetailsUrl(userName, UsersTableType.alerts),
       disabled: false,
     },
     [UsersTableType.risk]: {

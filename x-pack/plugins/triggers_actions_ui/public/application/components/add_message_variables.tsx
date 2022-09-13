@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiPopover,
@@ -13,21 +13,26 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiText,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { templateActionVariable } from '../lib';
 
 interface Props {
+  buttonTitle?: string;
   messageVariables?: ActionVariable[];
   paramsProperty: string;
   onSelectEventHandler: (variable: ActionVariable) => void;
+  showButtonTitle?: boolean;
 }
 
 export const AddMessageVariables: React.FunctionComponent<Props> = ({
+  buttonTitle,
   messageVariables,
   paramsProperty,
   onSelectEventHandler,
+  showButtonTitle = false,
 }) => {
   const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
 
@@ -54,20 +59,34 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
       </EuiContextMenuItem>
     ));
 
-  const addVariableButtonTitle = i18n.translate(
-    'xpack.triggersActionsUI.components.addMessageVariables.addRuleVariableTitle',
-    {
-      defaultMessage: 'Add rule variable',
-    }
-  );
+  const addVariableButtonTitle = buttonTitle
+    ? buttonTitle
+    : i18n.translate(
+        'xpack.triggersActionsUI.components.addMessageVariables.addRuleVariableTitle',
+        {
+          defaultMessage: 'Add rule variable',
+        }
+      );
 
-  if ((messageVariables?.length ?? 0) === 0) {
-    return <></>;
-  }
-
-  return (
-    <EuiPopover
-      button={
+  const Button = useMemo(
+    () =>
+      showButtonTitle ? (
+        <EuiButtonEmpty
+          id={`${paramsProperty}AddVariableButton`}
+          data-test-subj={`${paramsProperty}AddVariableButton-Title`}
+          size="xs"
+          onClick={() => setIsVariablesPopoverOpen(true)}
+          iconType="indexOpen"
+          aria-label={i18n.translate(
+            'xpack.triggersActionsUI.components.addMessageVariables.addVariablePopoverButton',
+            {
+              defaultMessage: 'Add variable',
+            }
+          )}
+        >
+          {addVariableButtonTitle}
+        </EuiButtonEmpty>
+      ) : (
         <EuiButtonIcon
           id={`${paramsProperty}AddVariableButton`}
           data-test-subj={`${paramsProperty}AddVariableButton`}
@@ -81,7 +100,16 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
             }
           )}
         />
-      }
+      ),
+    [addVariableButtonTitle, paramsProperty, showButtonTitle]
+  );
+  if ((messageVariables?.length ?? 0) === 0) {
+    return <></>;
+  }
+
+  return (
+    <EuiPopover
+      button={Button}
       isOpen={isVariablesPopoverOpen}
       closePopover={() => setIsVariablesPopoverOpen(false)}
       panelPaddingSize="none"

@@ -11,11 +11,17 @@ import { SecurityPageName } from '../../app/types';
 import { TestProviders } from '../../common/mock';
 import { DashboardsLandingPage } from './dashboards';
 import type { NavLinkItem } from '../../common/components/navigation/types';
+import { useCapabilities } from '../../common/lib/kibana';
 
+jest.mock('../../common/lib/kibana');
 jest.mock('../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
 jest.mock('../../common/components/dashboards/dashboards_table', () => ({
   DashboardsTable: () => <span data-test-subj="dashboardsTable" />,
 }));
+
+const DEFAULT_DASHBOARD_CAPABILITIES = { show: true, createNew: true };
+const mockUseCapabilities = useCapabilities as jest.Mock;
+mockUseCapabilities.mockReturnValue(DEFAULT_DASHBOARD_CAPABILITIES);
 
 const OVERVIEW_ITEM_LABEL = 'Overview';
 const DETECTION_RESPONSE_ITEM_LABEL = 'Detection & Response';
@@ -99,11 +105,31 @@ describe('Dashboards landing', () => {
       expect(result.getByTestId('dashboardsTable')).toBeInTheDocument();
     });
 
+    it('should not render dashboards table if no read capability', () => {
+      mockUseCapabilities.mockReturnValueOnce({
+        ...DEFAULT_DASHBOARD_CAPABILITIES,
+        show: false,
+      });
+      const result = renderDashboardLanding();
+
+      expect(result.queryByTestId('dashboardsTable')).not.toBeInTheDocument();
+    });
+
     describe('Create Security Dashboard button', () => {
       it('should render', () => {
         const result = renderDashboardLanding();
 
         expect(result.getByTestId('createDashboardButton')).toBeInTheDocument();
+      });
+
+      it('should not render if no write capability', () => {
+        mockUseCapabilities.mockReturnValueOnce({
+          ...DEFAULT_DASHBOARD_CAPABILITIES,
+          createNew: false,
+        });
+        const result = renderDashboardLanding();
+
+        expect(result.queryByTestId('createDashboardButton')).not.toBeInTheDocument();
       });
 
       it('should be enabled when link loaded', () => {

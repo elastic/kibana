@@ -7,14 +7,13 @@
 
 import React, { useMemo } from 'react';
 
+import type { DataViewFieldBase } from '@kbn/es-query';
 import type { FieldHook } from '../../../../shared_imports';
 import { Field } from '../../../../shared_imports';
-import type { BrowserFields } from '../../../../common/containers/source';
-import { getCategorizedFieldNames } from '../../../../timelines/components/edit_data_provider/helpers';
 import { NEW_TERMS_FIELD_PLACEHOLDER } from './translations';
 
 interface NewTermsFieldsProps {
-  browserFields: BrowserFields;
+  browserFields: DataViewFieldBase[];
   field: FieldHook;
 }
 
@@ -30,7 +29,7 @@ export const NewTermsFieldsComponent: React.FC<NewTermsFieldsProps> = ({
     () => ({
       fullWidth: true,
       noSuggestions: false,
-      options: getCategorizedFieldNames(browserFields),
+      options: browserFields.map((browserField) => ({ label: browserField.name })),
       placeholder: NEW_TERMS_FIELD_PLACEHOLDER,
       onCreateOption: undefined,
       style: { width: `${FIELD_COMBO_BOX_WIDTH}px` },

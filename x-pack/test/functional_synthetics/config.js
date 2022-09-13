@@ -8,16 +8,10 @@
 import path, { resolve } from 'path';
 
 import { defineDockerServersConfig } from '@kbn/test';
+import { dockerImage as fleetDockerImage } from '../fleet_api_integration/config';
 
 import { services } from './services';
 import { pageObjects } from './page_objects';
-
-// Docker image to use for Fleet API integration tests.
-// This hash comes from the latest successful build of the Snapshot Distribution of the Package Registry, for
-// example: https://beats-ci.elastic.co/blue/organizations/jenkins/Ingest-manager%2Fpackage-storage/detail/snapshot/74/pipeline/257#step-302-log-1.
-// It should be updated any time there is a new Docker image published for the Snapshot Distribution of the Package Registry that updates Synthetics.
-export const dockerImage =
-  'docker.elastic.co/package-registry/distribution:93ffe45d8c4ae11365bc70b1038643121049b9fe';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
@@ -99,7 +93,7 @@ export default async function ({ readConfigFile }) {
     dockerServers: defineDockerServersConfig({
       registry: {
         enabled: !!registryPort,
-        image: dockerImage,
+        image: fleetDockerImage,
         portInContainer: 8080,
         port: registryPort,
         args: dockerArgs,

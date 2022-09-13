@@ -13,12 +13,11 @@ import type { MachineLearningRuleParams } from '../../schemas/rule_schemas';
 import { machineLearningRuleParams } from '../../schemas/rule_schemas';
 import { mlExecutor } from '../../signals/executors/ml';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
-import { validateImmutable } from '../utils';
 
 export const createMlAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<MachineLearningRuleParams, {}, {}, 'default'> => {
-  const { logger, ml } = createOptions;
+  const { ml } = createOptions;
   return {
     id: ML_RULE_TYPE_ID,
     name: 'Machine Learning Rule',
@@ -33,17 +32,6 @@ export const createMlAlertType = (
             throw new Error('Validation of rule params failed');
           }
           return validated;
-        },
-        /**
-         * validate rule params when rule is bulk edited (update and created in future as well)
-         * returned params can be modified (useful in case of version increment)
-         * @param mutatedRuleParams
-         * @returns mutatedRuleParams
-         */
-        validateMutatedParams: (mutatedRuleParams) => {
-          validateImmutable(mutatedRuleParams.immutable);
-
-          return mutatedRuleParams;
         },
       },
     },
@@ -63,11 +51,11 @@ export const createMlAlertType = (
     async executor(execOptions) {
       const {
         runOpts: {
-          buildRuleMessage,
           bulkCreate,
+          completeRule,
           exceptionItems,
           listClient,
-          completeRule,
+          ruleExecutionLogger,
           tuple,
           wrapHits,
         },
@@ -76,15 +64,14 @@ export const createMlAlertType = (
       } = execOptions;
 
       const result = await mlExecutor({
-        buildRuleMessage,
-        bulkCreate,
-        exceptionItems,
-        listClient,
-        logger,
-        ml,
         completeRule,
-        services,
         tuple,
+        ml,
+        listClient,
+        exceptionItems,
+        services,
+        ruleExecutionLogger,
+        bulkCreate,
         wrapHits,
       });
       return { ...result, state };

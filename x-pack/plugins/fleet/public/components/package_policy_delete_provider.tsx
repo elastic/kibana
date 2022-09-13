@@ -15,7 +15,7 @@ import { AGENT_API_ROUTES, AGENTS_PREFIX } from '../../common/constants';
 import type { AgentPolicy } from '../types';
 
 interface Props {
-  agentPolicy: AgentPolicy;
+  agentPolicy?: AgentPolicy;
   children: (deletePackagePoliciesPrompt: DeletePackagePoliciesPrompt) => React.ReactElement;
 }
 
@@ -43,7 +43,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
 
   const fetchAgentsCount = useMemo(
     () => async () => {
-      if (isLoadingAgentsCount || !isFleetEnabled) {
+      if (isLoadingAgentsCount || !isFleetEnabled || !agentPolicy) {
         return;
       }
       setIsLoadingAgentsCount(true);
@@ -59,7 +59,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
       setAgentsCount(data?.total || 0);
       setIsLoadingAgentsCount(false);
     },
-    [agentPolicy.id, isFleetEnabled, isLoadingAgentsCount]
+    [agentPolicy, isFleetEnabled, isLoadingAgentsCount]
   );
 
   const deletePackagePoliciesPrompt = useMemo(
@@ -200,7 +200,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                 id="xpack.fleet.deletePackagePolicy.confirmModal.affectedAgentsMessage"
                 defaultMessage="Fleet has detected that {agentPolicyName} is already in use by some of your agents."
                 values={{
-                  agentPolicyName: <strong>{agentPolicy.name}</strong>,
+                  agentPolicyName: <strong>{agentPolicy?.name}</strong>,
                 }}
               />
             </EuiCallOut>

@@ -12,8 +12,8 @@ import { mapToObject } from '@kbn/std';
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
-import { SavedObjectsClientContract } from '../saved_objects/types';
-import { InternalSavedObjectsServiceSetup } from '../saved_objects';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
 import { UiSettingsConfigType, config as uiConfigDefinition } from './ui_settings_config';
 import { UiSettingsClient } from './ui_settings_client';
 import {

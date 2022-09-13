@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { take, filter } from 'rxjs/operators';
 
 import { i18n } from '@kbn/i18n';
 import type {
@@ -37,10 +37,16 @@ import type {
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+
+import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 
 import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';
@@ -98,6 +104,7 @@ import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';
 import { setupFleet } from './services/setup';
+import { BulkActionsResolver } from './services/agents';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -107,6 +114,7 @@ export interface FleetSetupDeps {
   usageCollection?: UsageCollectionSetup;
   spaces: SpacesPluginStart;
   telemetry?: TelemetryPluginSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
 export interface FleetStartDeps {
@@ -115,6 +123,8 @@ export interface FleetStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security: SecurityPluginStart;
   telemetry?: TelemetryPluginStart;
+  savedObjectsTagging: SavedObjectTaggingStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export interface FleetAppContext {
@@ -128,6 +138,7 @@ export interface FleetAppContext {
   configInitialValue: FleetConfigType;
   experimentalFeatures: ExperimentalFeatures;
   savedObjects: SavedObjectsServiceStart;
+  savedObjectsTagging?: SavedObjectTaggingStart;
   isProductionMode: PluginInitializerContext['env']['mode']['prod'];
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   kibanaBranch: PluginInitializerContext['env']['packageInfo']['branch'];
@@ -135,6 +146,7 @@ export interface FleetAppContext {
   logger?: Logger;
   httpSetup?: HttpServiceSetup;
   telemetryEventsSender: TelemetryEventsSender;
+  bulkActionsResolver: BulkActionsResolver;
 }
 
 export type FleetSetupContract = void;
@@ -199,6 +211,7 @@ export class FleetPlugin
   private encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   private readonly telemetryEventsSender: TelemetryEventsSender;
   private readonly fleetStatus$: BehaviorSubject<ServiceStatus>;
+  private bulkActionsResolver?: BulkActionsResolver;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -384,6 +397,7 @@ export class FleetPlugin
     }
 
     this.telemetryEventsSender.setup(deps.telemetry);
+    this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);
   }
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
@@ -400,6 +414,7 @@ export class FleetPlugin
         this.configInitialValue.enableExperimental || []
       ),
       savedObjects: core.savedObjects,
+      savedObjectsTagging: plugins.savedObjectsTagging,
       isProductionMode: this.isProductionMode,
       kibanaVersion: this.kibanaVersion,
       kibanaBranch: this.kibanaBranch,
@@ -407,10 +422,12 @@ export class FleetPlugin
       cloud: this.cloud,
       logger: this.logger,
       telemetryEventsSender: this.telemetryEventsSender,
+      bulkActionsResolver: this.bulkActionsResolver!,
     });
     licenseService.start(plugins.licensing.license$);
 
     this.telemetryEventsSender.start(plugins.telemetry, core);
+    this.bulkActionsResolver?.start(plugins.taskManager);
 
     const logger = appContextService.getLogger();
 
@@ -423,7 +440,18 @@ export class FleetPlugin
           summary: 'Fleet is setting up',
         });
 
-        await plugins.licensing.license$.pipe(take(1)).toPromise();
+        // We need to wait for the licence feature to be available,
+        // to have our internal saved object client with encrypted saved object working properly
+        await plugins.licensing.license$
+          .pipe(
+            filter(
+              (licence) =>
+                licence.getFeature('security').isEnabled &&
+                licence.getFeature('security').isAvailable
+            ),
+            take(1)
+          )
+          .toPromise();
 
         await setupFleet(
           new SavedObjectsClient(core.savedObjects.createInternalRepository()),

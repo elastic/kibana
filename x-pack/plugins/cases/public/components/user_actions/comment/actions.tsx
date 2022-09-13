@@ -53,7 +53,7 @@ export const createActionAttachmentUserActionBuilder = ({
         ),
         'data-test-subj': 'endpoint-action',
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-        timelineIcon: <ActionIcon actionType={comment.actions.type} />,
+        timelineAvatar: <ActionIcon actionType={comment.actions.type} />,
         actions: <UserActionCopyLink id={comment.id} />,
         children: comment.comment.trim().length > 0 && (
           <ContentWrapper data-test-subj="user-action-markdown">

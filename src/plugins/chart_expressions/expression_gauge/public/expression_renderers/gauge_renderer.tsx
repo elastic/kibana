@@ -16,6 +16,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { ExpressionGaugePluginStart } from '../plugin';
 import { EXPRESSION_GAUGE_NAME, GaugeExpressionProps, GaugeShapes } from '../../common';
 import { getFormatService, getPaletteService } from '../services';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { extractContainerType, extractVisualizationType } from '../../../common';
 
 interface ExpressionGaugeRendererDependencies {

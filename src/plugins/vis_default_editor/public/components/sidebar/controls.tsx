@@ -97,7 +97,7 @@ function DefaultEditorControls({
                     content={i18n.translate('visDefaultEditor.sidebar.updateInfoTooltip', {
                       defaultMessage: 'CTRL + Enter is a shortcut for Update.',
                     })}
-                    type="keyboardShortcut"
+                    type="keyboard"
                     color="subdued"
                   />
                 </EuiFlexItem>

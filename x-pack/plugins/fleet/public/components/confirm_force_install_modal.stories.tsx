@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { DocLinksStart } from '@kbn/core/public';
 import React from 'react';
 
 import { ConfirmForceInstallModal } from './confirm_force_install_modal';
@@ -44,12 +45,24 @@ const argTypes = {
   },
 };
 
-export const UnverifiedIntegrationModal = ({ packageName, packageVersion }: Args) => (
-  <ConfirmForceInstallModal
-    onCancel={() => {}}
-    onConfirm={() => {}}
-    pkg={{ name: packageName, version: packageVersion }}
-  />
-);
+export const UnverifiedIntegrationModal = ({ packageName, packageVersion }: Args) => {
+  const mockDocLinks: DocLinksStart = {
+    links: {
+      // @ts-ignore only defining what we need
+      fleet: {
+        packageSignatures: 'elastic.co',
+      },
+    },
+  };
+
+  return (
+    <ConfirmForceInstallModal
+      onCancel={() => {}}
+      onConfirm={() => {}}
+      pkg={{ name: packageName, version: packageVersion }}
+      docLinks={mockDocLinks}
+    />
+  );
+};
 UnverifiedIntegrationModal.args = args;
 UnverifiedIntegrationModal.argTypes = argTypes;

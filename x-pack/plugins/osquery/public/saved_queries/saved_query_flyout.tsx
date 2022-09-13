@@ -17,17 +17,18 @@ import {
   EuiButtonEmpty,
   EuiButton,
 } from '@elastic/eui';
+import { FormProvider } from 'react-hook-form';
+
 import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { Form } from '../shared_imports';
+import type { SavedQuerySOFormData, SavedQueryFormData } from './form/use_saved_query_form';
 import { useSavedQueryForm } from './form/use_saved_query_form';
 import { SavedQueryForm } from './form';
 import { useCreateSavedQuery } from './use_create_saved_query';
-import type { PackQueryFormData } from '../packs/queries/use_pack_query_form';
 
 interface AddQueryFlyoutProps {
-  defaultValue: PackQueryFormData;
+  defaultValue: SavedQuerySOFormData;
   onClose: () => void;
   isExternal?: boolean;
 }
@@ -41,18 +42,24 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
 }) => {
   const createSavedQueryMutation = useCreateSavedQuery({ withRedirect: false });
 
-  const handleSubmit = useCallback(
-    async (payload) => {
-      await createSavedQueryMutation.mutateAsync(payload).then(() => onClose());
-    },
-    [createSavedQueryMutation, onClose]
-  );
-
-  const { form } = useSavedQueryForm({
+  const hooksForm = useSavedQueryForm({
     defaultValue,
-    handleSubmit,
   });
-  const { submit, isSubmitting } = form;
+  const {
+    serializer,
+    idSet,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = hooksForm;
+  const onSubmit = useCallback(
+    async (payload: SavedQueryFormData) => {
+      const serializedData = serializer(payload);
+      // TODO CHECK THIS
+      // @ts-expect-error update types
+      await createSavedQueryMutation.mutateAsync(serializedData).then(() => onClose());
+    },
+    [createSavedQueryMutation, onClose, serializer]
+  );
 
   return (
     <EuiPortal>
@@ -74,9 +81,9 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <Form form={form}>
-            <SavedQueryForm />
-          </Form>
+          <FormProvider {...hooksForm}>
+            <SavedQueryForm idSet={idSet} />
+          </FormProvider>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
@@ -89,7 +96,7 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton isLoading={isSubmitting} onClick={submit} fill>
+              <EuiButton isLoading={isSubmitting} onClick={handleSubmit(onSubmit)} fill>
                 <FormattedMessage
                   id="xpack.osquery.pack.queryFlyoutForm.saveButtonLabel"
                   defaultMessage="Save"

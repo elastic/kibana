@@ -37,6 +37,7 @@
         ],
         "path": "x-pack/plugins/actions/public/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -50,6 +51,7 @@
             ],
             "path": "x-pack/plugins/actions/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "actions",
@@ -72,6 +74,7 @@
                 ],
                 "path": "x-pack/plugins/actions/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -96,6 +99,7 @@
             ],
             "path": "x-pack/plugins/actions/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -111,6 +115,7 @@
             ],
             "path": "x-pack/plugins/actions/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -132,6 +137,7 @@
       "description": [],
       "path": "x-pack/plugins/actions/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "actions",
@@ -161,6 +167,7 @@
           ],
           "path": "x-pack/plugins/actions/public/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "actions",
@@ -174,6 +181,7 @@
               ],
               "path": "x-pack/plugins/actions/public/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -195,6 +203,7 @@
               ],
               "path": "x-pack/plugins/actions/public/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": false
             }
           ],
@@ -235,6 +244,7 @@
         ],
         "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -248,6 +258,7 @@
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "actions",
@@ -268,6 +279,7 @@
                 ],
                 "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -285,6 +297,7 @@
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "actions",
@@ -295,6 +308,7 @@
                 "description": [],
                 "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "actions",
@@ -304,7 +318,8 @@
                     "label": "incidentId",
                     "description": [],
                     "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "actions",
@@ -314,7 +329,8 @@
                     "label": "comment",
                     "description": [],
                     "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -335,6 +351,7 @@
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "actions",
@@ -348,6 +365,7 @@
                 ],
                 "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -367,6 +385,7 @@
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "actions",
@@ -377,6 +396,7 @@
                 "description": [],
                 "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "actions",
@@ -386,7 +406,8 @@
                     "label": "incidentId",
                     "description": [],
                     "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "actions",
@@ -399,7 +420,8 @@
                       "{ [x: string]: unknown; }"
                     ],
                     "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -420,6 +442,7 @@
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "actions",
@@ -430,6 +453,7 @@
                 "description": [],
                 "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "actions",
@@ -439,7 +463,8 @@
                     "label": "id",
                     "description": [],
                     "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -462,6 +487,7 @@
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "actions",
@@ -475,6 +501,7 @@
                 ],
                 "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -502,6 +529,7 @@
         ],
         "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -514,7 +542,8 @@
               "Logger"
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -527,7 +556,8 @@
               "{ id: string; type: string; }"
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -540,7 +570,8 @@
               "Config"
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -553,7 +584,8 @@
               "Secrets"
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -567,6 +599,7 @@
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "actions",
@@ -587,6 +620,7 @@
                 ],
                 "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -606,6 +640,7 @@
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "actions",
@@ -619,6 +654,7 @@
                 ],
                 "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -636,6 +672,7 @@
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "actions",
@@ -649,6 +686,7 @@
                 ],
                 "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -668,6 +706,7 @@
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -685,6 +724,7 @@
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "actions",
@@ -699,6 +739,7 @@
                 ],
                 "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -724,6 +765,7 @@
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "actions",
@@ -743,6 +785,7 @@
                 ],
                 "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -768,6 +811,7 @@
         ],
         "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -782,6 +826,7 @@
             ],
             "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -803,6 +848,7 @@
         ],
         "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -818,6 +864,7 @@
             ],
             "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -845,6 +892,7 @@
         ],
         "path": "x-pack/plugins/actions/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -854,7 +902,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/plugins/actions/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -864,7 +913,8 @@
             "label": "actionTypeId",
             "description": [],
             "path": "x-pack/plugins/actions/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -874,7 +924,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/plugins/actions/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -887,7 +938,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -900,7 +952,8 @@
               "Config | undefined"
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -910,7 +963,8 @@
             "label": "isPreconfigured",
             "description": [],
             "path": "x-pack/plugins/actions/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -920,7 +974,8 @@
             "label": "isDeprecated",
             "description": [],
             "path": "x-pack/plugins/actions/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -934,6 +989,7 @@
         "description": [],
         "path": "x-pack/plugins/actions/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -954,6 +1010,7 @@
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -965,7 +1022,7 @@
             "label": "listTypes",
             "description": [],
             "signature": [
-              "() => ",
+              "(featureId?: string | undefined) => ",
               {
                 "pluginId": "actions",
                 "scope": "common",
@@ -977,8 +1034,24 @@
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
-            "children": []
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.ActionsApiRequestHandlerContext.listTypes.$1",
+                "type": "string",
+                "tags": [],
+                "label": "featureId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/actions/server/action_type_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -992,6 +1065,7 @@
         "description": [],
         "path": "x-pack/plugins/actions/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -1010,7 +1084,8 @@
               }
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -1029,7 +1104,8 @@
               }
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1053,6 +1129,7 @@
         ],
         "path": "x-pack/plugins/actions/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -1062,7 +1139,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/plugins/actions/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -1072,7 +1150,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/plugins/actions/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -1085,7 +1164,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -1098,7 +1178,22 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ActionType.supportedFeatureIds",
+            "type": "Array",
+            "tags": [],
+            "label": "supportedFeatureIds",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -1111,7 +1206,8 @@
               "{ params?: ValidatorType<Params> | undefined; config?: ValidatorType<Config> | undefined; secrets?: ValidatorType<Secrets> | undefined; connector?: ((config: Config, secrets: Secrets) => string | null) | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -1125,6 +1221,7 @@
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "actions",
@@ -1138,6 +1235,7 @@
                 ],
                 "path": "x-pack/plugins/actions/server/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1152,6 +1250,7 @@
                 ],
                 "path": "x-pack/plugins/actions/server/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1166,6 +1265,7 @@
                 ],
                 "path": "x-pack/plugins/actions/server/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1199,6 +1299,7 @@
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -1219,7 +1320,8 @@
                   "<Config, Secrets, Params>"
                 ],
                 "path": "x-pack/plugins/actions/server/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -1245,6 +1347,7 @@
         ],
         "path": "x-pack/plugins/actions/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -1254,7 +1357,8 @@
             "label": "actionId",
             "description": [],
             "path": "x-pack/plugins/actions/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -1267,7 +1371,8 @@
               "Services"
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -1280,7 +1385,8 @@
               "Config"
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -1293,7 +1399,8 @@
               "Secrets"
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -1306,7 +1413,8 @@
               "Params"
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -1319,7 +1427,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -1333,7 +1442,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1367,6 +1477,7 @@
         ],
         "path": "x-pack/plugins/actions/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -1376,7 +1487,8 @@
             "label": "referencedByCount",
             "description": [],
             "path": "x-pack/plugins/actions/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1408,6 +1520,7 @@
         ],
         "path": "x-pack/plugins/actions/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -1420,7 +1533,8 @@
               "Secrets"
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1444,6 +1558,7 @@
         ],
         "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -1458,7 +1573,8 @@
               "{ id: string; type: string; }"
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -1471,7 +1587,8 @@
               "Config"
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -1484,7 +1601,8 @@
               "ActionsConfigurationUtilities"
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -1497,7 +1615,8 @@
               "Logger"
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -1510,7 +1629,8 @@
               "Secrets"
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -1523,7 +1643,8 @@
               "Services"
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1543,6 +1664,7 @@
         ],
         "path": "x-pack/plugins/actions/server/constants/saved_objects.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1553,10 +1675,26 @@
         "label": "ActionParamsType",
         "description": [],
         "signature": [
-          "{ readonly to: string[]; readonly message: string; readonly subject: string; readonly cc: string[]; readonly bcc: string[]; readonly kibanaFooterLink: Readonly<{} & { path: string; text: string; }>; }"
+          "{ readonly subAction: \"pushToService\"; readonly subActionParams: Readonly<{} & { incident: Readonly<{} & { tags: string[] | null; title: string; description: string | null; externalId: string | null; }>; comments: Readonly<{} & { comment: string; commentId: string; }>[] | null; }>; }"
+        ],
+        "path": "x-pack/plugins/actions/server/builtin_action_types/cases_webhook/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-server.ActionParamsType",
+        "type": "Type",
+        "tags": [],
+        "label": "ActionParamsType",
+        "description": [],
+        "signature": [
+          "{ readonly message: string; readonly to: string[]; readonly subject: string; readonly cc: string[]; readonly bcc: string[]; readonly kibanaFooterLink: Readonly<{} & { path: string; text: string; }>; }"
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/email.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1571,6 +1709,7 @@
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/es_index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1581,10 +1720,11 @@
         "label": "ActionParamsType",
         "description": [],
         "signature": [
-          "{ readonly group?: string | undefined; readonly source?: string | undefined; readonly component?: string | undefined; readonly summary?: string | undefined; readonly timestamp?: string | undefined; readonly eventAction?: \"resolve\" | \"trigger\" | \"acknowledge\" | undefined; readonly dedupKey?: string | undefined; readonly severity?: \"error\" | \"warning\" | \"info\" | \"critical\" | undefined; readonly class?: string | undefined; }"
+          "{ readonly source?: string | undefined; readonly summary?: string | undefined; readonly group?: string | undefined; readonly component?: string | undefined; readonly timestamp?: string | undefined; readonly eventAction?: \"resolve\" | \"trigger\" | \"acknowledge\" | undefined; readonly dedupKey?: string | undefined; readonly severity?: \"error\" | \"warning\" | \"info\" | \"critical\" | undefined; readonly class?: string | undefined; }"
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/pagerduty.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1599,6 +1739,7 @@
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/server_log.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1613,6 +1754,7 @@
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/slack.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1627,6 +1769,7 @@
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/webhook.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1637,10 +1780,11 @@
         "label": "ActionParamsType",
         "description": [],
         "signature": [
-          "Readonly<{} & { subAction: \"getFields\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"getIncident\"; subActionParams: Readonly<{} & { externalId: string; }>; }> | Readonly<{} & { subAction: \"handshake\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"pushToService\"; subActionParams: Readonly<{} & { incident: Readonly<{} & { description: string | null; category: string | null; severity: string | null; externalId: string | null; urgency: string | null; impact: string | null; short_description: string; subcategory: string | null; correlation_id: string | null; correlation_display: string | null; }>; comments: Readonly<{} & { comment: string; commentId: string; }>[] | null; }>; }> | Readonly<{} & { subAction: \"getChoices\"; subActionParams: Readonly<{} & { fields: string[]; }>; }> | Readonly<{} & { subAction: \"getFields\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"getIncident\"; subActionParams: Readonly<{} & { externalId: string; }>; }> | Readonly<{} & { subAction: \"handshake\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"pushToService\"; subActionParams: Readonly<{} & { incident: Readonly<{} & { description: string | null; category: string | null; externalId: string | null; short_description: string; subcategory: string | null; correlation_id: string | null; correlation_display: string | null; dest_ip: string | string[] | null; malware_hash: string | string[] | null; malware_url: string | string[] | null; source_ip: string | string[] | null; priority: string | null; }>; comments: Readonly<{} & { comment: string; commentId: string; }>[] | null; }>; }> | Readonly<{} & { subAction: \"getChoices\"; subActionParams: Readonly<{} & { fields: string[]; }>; }>"
+          "Readonly<{} & { subAction: \"getFields\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"getIncident\"; subActionParams: Readonly<{} & { externalId: string; }>; }> | Readonly<{} & { subAction: \"handshake\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"pushToService\"; subActionParams: Readonly<{} & { incident: Readonly<{} & { description: string | null; category: string | null; externalId: string | null; severity: string | null; urgency: string | null; impact: string | null; short_description: string; subcategory: string | null; correlation_id: string | null; correlation_display: string | null; }>; comments: Readonly<{} & { comment: string; commentId: string; }>[] | null; }>; }> | Readonly<{} & { subAction: \"getChoices\"; subActionParams: Readonly<{} & { fields: string[]; }>; }> | Readonly<{} & { subAction: \"getFields\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"getIncident\"; subActionParams: Readonly<{} & { externalId: string; }>; }> | Readonly<{} & { subAction: \"handshake\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"pushToService\"; subActionParams: Readonly<{} & { incident: Readonly<{} & { description: string | null; category: string | null; externalId: string | null; short_description: string; subcategory: string | null; correlation_id: string | null; correlation_display: string | null; dest_ip: string | string[] | null; malware_hash: string | string[] | null; malware_url: string | string[] | null; source_ip: string | string[] | null; priority: string | null; }>; comments: Readonly<{} & { comment: string; commentId: string; }>[] | null; }>; }> | Readonly<{} & { subAction: \"getChoices\"; subActionParams: Readonly<{} & { fields: string[]; }>; }>"
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/servicenow/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1655,6 +1799,7 @@
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/jira/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1665,10 +1810,11 @@
         "label": "ActionParamsType",
         "description": [],
         "signature": [
-          "Readonly<{} & { subAction: \"getFields\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"getIncident\"; subActionParams: Readonly<{} & { externalId: string; }>; }> | Readonly<{} & { subAction: \"handshake\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"pushToService\"; subActionParams: Readonly<{} & { incident: Readonly<{} & { name: string; description: string | null; externalId: string | null; incidentTypes: number[] | null; severityCode: number | null; }>; comments: Readonly<{} & { comment: string; commentId: string; }>[] | null; }>; }> | Readonly<{} & { subAction: \"incidentTypes\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"severity\"; subActionParams: Readonly<{} & {}>; }>"
+          "Readonly<{} & { subAction: \"getFields\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"getIncident\"; subActionParams: Readonly<{} & { externalId: string; }>; }> | Readonly<{} & { subAction: \"handshake\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"pushToService\"; subActionParams: Readonly<{} & { incident: Readonly<{} & { description: string | null; name: string; externalId: string | null; incidentTypes: number[] | null; severityCode: number | null; }>; comments: Readonly<{} & { comment: string; commentId: string; }>[] | null; }>; }> | Readonly<{} & { subAction: \"incidentTypes\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"severity\"; subActionParams: Readonly<{} & {}>; }>"
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/resilient/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1683,6 +1829,7 @@
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/teams.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1697,6 +1844,7 @@
         ],
         "path": "x-pack/plugins/actions/server/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1707,19 +1855,7 @@
         "label": "ActionsClient",
         "description": [],
         "signature": [
-          "{ execute: ({ actionId, params, source, relatedSavedObjects, }: Omit<",
-          "ExecuteOptions",
-          "<unknown>, \"request\">) => Promise<",
-          {
-            "pluginId": "actions",
-            "scope": "common",
-            "docId": "kibActionsPluginApi",
-            "section": "def-common.ActionTypeExecutorResult",
-            "text": "ActionTypeExecutorResult"
-          },
-          "<unknown>>; create: ({ action: { actionTypeId, name, config, secrets }, }: ",
-          "CreateOptions",
-          ") => Promise<",
+          "{ get: ({ id }: { id: string; }) => Promise<",
           {
             "pluginId": "actions",
             "scope": "server",
@@ -1729,7 +1865,9 @@
           },
           "<",
           "ActionTypeConfig",
-          ">>; delete: ({ id }: { id: string; }) => Promise<{}>; get: ({ id }: { id: string; }) => Promise<",
+          ">>; delete: ({ id }: { id: string; }) => Promise<{}>; create: ({ action: { actionTypeId, name, config, secrets }, }: ",
+          "CreateOptions",
+          ") => Promise<",
           {
             "pluginId": "actions",
             "scope": "server",
@@ -1751,7 +1889,17 @@
           },
           "<",
           "ActionTypeConfig",
-          ">>; getAll: () => Promise<",
+          ">>; execute: ({ actionId, params, source, relatedSavedObjects, }: Omit<",
+          "ExecuteOptions",
+          "<unknown>, \"request\">) => Promise<",
+          {
+            "pluginId": "actions",
+            "scope": "common",
+            "docId": "kibActionsPluginApi",
+            "section": "def-common.ActionTypeExecutorResult",
+            "text": "ActionTypeExecutorResult"
+          },
+          "<unknown>>; getAll: () => Promise<",
           {
             "pluginId": "actions",
             "scope": "server",
@@ -1769,11 +1917,13 @@
           },
           "<",
           "ActionTypeConfig",
-          ">[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"client\" | \"jwt\"; options: Readonly<{} & { config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; tokenUrl: string; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { scope: string; config: Readonly<{} & { clientId: string; tenantId: string; }>; tokenUrl: string; secrets: Readonly<{} & { clientSecret: string; }>; }>; }>, configurationUtilities: ",
+          ">[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { options: Readonly<{} & { config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; tokenUrl: string; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { scope: string; config: Readonly<{} & { clientId: string; tenantId: string; }>; tokenUrl: string; secrets: Readonly<{} & { clientSecret: string; }>; }>; type: \"jwt\" | \"client\"; }>, configurationUtilities: ",
           "ActionsConfigurationUtilities",
           ") => Promise<{ accessToken: string | null; }>; enqueueExecution: (options: ",
           "ExecuteOptions",
-          ") => Promise<void>; ephemeralEnqueuedExecution: (options: ",
+          ") => Promise<void>; bulkEnqueueExecution: (options: ",
+          "ExecuteOptions",
+          "[]) => Promise<void>; ephemeralEnqueuedExecution: (options: ",
           "ExecuteOptions",
           ") => Promise<",
           {
@@ -1783,7 +1933,7 @@
             "section": "def-server.RunNowResult",
             "text": "RunNowResult"
           },
-          ">; listTypes: () => Promise<",
+          ">; listTypes: (featureId?: string | undefined) => Promise<",
           {
             "pluginId": "actions",
             "scope": "common",
@@ -1795,6 +1945,22 @@
         ],
         "path": "x-pack/plugins/actions/server/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-server.ActionTypeId",
+        "type": "string",
+        "tags": [],
+        "label": "ActionTypeId",
+        "description": [],
+        "signature": [
+          "\".cases-webhook\""
+        ],
+        "path": "x-pack/plugins/actions/server/builtin_action_types/cases_webhook/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1809,6 +1975,7 @@
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/email.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1823,6 +1990,7 @@
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/es_index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1837,6 +2005,7 @@
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/pagerduty.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1851,6 +2020,7 @@
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/server_log.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1865,6 +2035,7 @@
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/slack.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1879,6 +2050,7 @@
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/webhook.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1893,6 +2065,7 @@
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/jira/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1907,6 +2080,7 @@
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/resilient/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1921,6 +2095,7 @@
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/teams.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1935,6 +2110,7 @@
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/servicenow/config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1949,6 +2125,7 @@
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/servicenow/config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1962,6 +2139,7 @@
       "description": [],
       "path": "x-pack/plugins/actions/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "actions",
@@ -1995,6 +2173,7 @@
           ],
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "actions",
@@ -2015,6 +2194,7 @@
               ],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -2042,6 +2222,7 @@
           ],
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "actions",
@@ -2056,6 +2237,7 @@
               ],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -2073,6 +2255,7 @@
           ],
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "actions",
@@ -2086,6 +2269,7 @@
               ],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -2105,6 +2289,7 @@
           ],
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [],
           "returnComment": []
         },
@@ -2122,6 +2307,7 @@
           ],
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [],
           "returnComment": []
         }
@@ -2138,6 +2324,7 @@
       "description": [],
       "path": "x-pack/plugins/actions/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "actions",
@@ -2151,6 +2338,7 @@
           ],
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "actions",
@@ -2164,6 +2352,7 @@
               ],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -2175,6 +2364,7 @@
               "description": [],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "children": [
                 {
                   "parentPluginId": "actions",
@@ -2184,7 +2374,8 @@
                   "label": "notifyUsage",
                   "description": [],
                   "path": "x-pack/plugins/actions/server/plugin.ts",
-                  "deprecated": false
+                  "deprecated": false,
+                  "trackAdoption": false
                 }
               ]
             }
@@ -2203,6 +2394,7 @@
           ],
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "actions",
@@ -2216,6 +2408,7 @@
               ],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -2230,6 +2423,7 @@
               ],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -2241,6 +2435,7 @@
               "description": [],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "children": [
                 {
                   "parentPluginId": "actions",
@@ -2250,7 +2445,8 @@
                   "label": "notifyUsage",
                   "description": [],
                   "path": "x-pack/plugins/actions/server/plugin.ts",
-                  "deprecated": false
+                  "deprecated": false,
+                  "trackAdoption": false
                 }
               ]
             }
@@ -2281,6 +2477,7 @@
           ],
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "actions",
@@ -2295,6 +2492,7 @@
               ],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -2324,6 +2522,7 @@
           ],
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "actions",
@@ -2338,6 +2537,7 @@
               ],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -2365,7 +2565,8 @@
             ">[]"
           ],
           "path": "x-pack/plugins/actions/server/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "actions",
@@ -2383,6 +2584,7 @@
           ],
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "actions",
@@ -2396,6 +2598,7 @@
               ],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -2410,6 +2613,7 @@
               ],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -2424,6 +2628,7 @@
               ],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -2438,6 +2643,7 @@
               ],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -2453,6 +2659,39 @@
     "functions": [
       {
         "parentPluginId": "actions",
+        "id": "def-common.areValidFeatures",
+        "type": "Function",
+        "tags": [],
+        "label": "areValidFeatures",
+        "description": [],
+        "signature": [
+          "(ids: string[]) => boolean"
+        ],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.areValidFeatures.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "ids",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
         "id": "def-common.buildAlertHistoryDocument",
         "type": "Function",
         "tags": [],
@@ -2463,6 +2702,7 @@
         ],
         "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -2476,6 +2716,73 @@
             ],
             "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
             "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.getConnectorCompatibility",
+        "type": "Function",
+        "tags": [],
+        "label": "getConnectorCompatibility",
+        "description": [],
+        "signature": [
+          "(featureIds: string[] | undefined) => string[]"
+        ],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.getConnectorCompatibility.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "featureIds",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.getConnectorFeatureName",
+        "type": "Function",
+        "tags": [],
+        "label": "getConnectorFeatureName",
+        "description": [],
+        "signature": [
+          "(id: string) => string"
+        ],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.getConnectorFeatureName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2496,6 +2803,7 @@
         ],
         "path": "x-pack/plugins/actions/common/mustache_template.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -2509,6 +2817,7 @@
             ],
             "path": "x-pack/plugins/actions/common/mustache_template.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2535,6 +2844,7 @@
         ],
         "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -2555,6 +2865,7 @@
             ],
             "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2573,6 +2884,7 @@
         ],
         "path": "x-pack/plugins/actions/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -2586,6 +2898,7 @@
             ],
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2620,6 +2933,7 @@
         ],
         "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -2633,6 +2947,7 @@
             ],
             "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -2647,6 +2962,7 @@
             ],
             "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2667,6 +2983,7 @@
             ],
             "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2693,6 +3010,7 @@
         ],
         "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -2706,6 +3024,7 @@
             ],
             "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2726,6 +3045,7 @@
         ],
         "path": "x-pack/plugins/actions/common/mustache_template.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -2739,6 +3059,7 @@
             ],
             "path": "x-pack/plugins/actions/common/mustache_template.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2756,6 +3077,7 @@
         "description": [],
         "path": "x-pack/plugins/actions/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -2765,7 +3087,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/plugins/actions/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -2775,7 +3098,8 @@
             "label": "actionTypeId",
             "description": [],
             "path": "x-pack/plugins/actions/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -2785,7 +3109,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/plugins/actions/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -2798,7 +3123,8 @@
               "{ [x: string]: any; }"
             ],
             "path": "x-pack/plugins/actions/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -2808,7 +3134,8 @@
             "label": "isPreconfigured",
             "description": [],
             "path": "x-pack/plugins/actions/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2822,6 +3149,7 @@
         "description": [],
         "path": "x-pack/plugins/actions/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -2834,7 +3162,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/actions/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2848,6 +3177,7 @@
         "description": [],
         "path": "x-pack/plugins/actions/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -2857,7 +3187,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/plugins/actions/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -2867,7 +3198,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/plugins/actions/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -2877,7 +3209,8 @@
             "label": "enabled",
             "description": [],
             "path": "x-pack/plugins/actions/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -2887,7 +3220,8 @@
             "label": "enabledInConfig",
             "description": [],
             "path": "x-pack/plugins/actions/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -2897,7 +3231,8 @@
             "label": "enabledInLicense",
             "description": [],
             "path": "x-pack/plugins/actions/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -2910,7 +3245,22 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
             "path": "x-pack/plugins/actions/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.ActionType.supportedFeatureIds",
+            "type": "Array",
+            "tags": [],
+            "label": "supportedFeatureIds",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/actions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2934,6 +3284,7 @@
         ],
         "path": "x-pack/plugins/actions/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -2943,7 +3294,8 @@
             "label": "actionId",
             "description": [],
             "path": "x-pack/plugins/actions/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -2956,7 +3308,8 @@
               "\"error\" | \"ok\""
             ],
             "path": "x-pack/plugins/actions/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -2969,7 +3322,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/actions/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -2982,7 +3336,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/actions/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -2995,7 +3350,8 @@
               "Data | undefined"
             ],
             "path": "x-pack/plugins/actions/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -3008,7 +3364,8 @@
               "boolean | Date | null | undefined"
             ],
             "path": "x-pack/plugins/actions/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3022,6 +3379,7 @@
         "description": [],
         "path": "x-pack/plugins/actions/common/servicenow_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -3031,7 +3389,8 @@
             "label": "table",
             "description": [],
             "path": "x-pack/plugins/actions/common/servicenow_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -3041,7 +3400,8 @@
             "label": "appScope",
             "description": [],
             "path": "x-pack/plugins/actions/common/servicenow_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -3051,7 +3411,8 @@
             "label": "useImportAPI",
             "description": [],
             "path": "x-pack/plugins/actions/common/servicenow_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -3061,7 +3422,8 @@
             "label": "importSetTable",
             "description": [],
             "path": "x-pack/plugins/actions/common/servicenow_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -3071,7 +3433,8 @@
             "label": "commentFieldKey",
             "description": [],
             "path": "x-pack/plugins/actions/common/servicenow_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -3084,7 +3447,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/actions/common/servicenow_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3098,6 +3462,7 @@
         "description": [],
         "path": "x-pack/plugins/actions/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -3107,7 +3472,8 @@
             "label": "address",
             "description": [],
             "path": "x-pack/plugins/actions/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -3117,7 +3483,8 @@
             "label": "valid",
             "description": [],
             "path": "x-pack/plugins/actions/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -3137,7 +3504,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/actions/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3153,6 +3521,7 @@
         ],
         "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -3167,7 +3536,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3183,6 +3553,7 @@
         "description": [],
         "path": "x-pack/plugins/actions/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3194,6 +3565,7 @@
         "description": [],
         "path": "x-pack/plugins/actions/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -3210,6 +3582,7 @@
         ],
         "path": "x-pack/plugins/actions/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3231,6 +3604,7 @@
         ],
         "path": "x-pack/plugins/actions/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3245,6 +3619,7 @@
         ],
         "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3256,6 +3631,7 @@
         "description": [],
         "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3270,6 +3646,7 @@
         ],
         "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3284,6 +3661,22 @@
         ],
         "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.AlertingConnectorFeatureId",
+        "type": "string",
+        "tags": [],
+        "label": "AlertingConnectorFeatureId",
+        "description": [],
+        "signature": [
+          "\"alerting\""
+        ],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3298,6 +3691,7 @@
         ],
         "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3312,6 +3706,22 @@
         ],
         "path": "x-pack/plugins/actions/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.CasesConnectorFeatureId",
+        "type": "string",
+        "tags": [],
+        "label": "CasesConnectorFeatureId",
+        "description": [],
+        "signature": [
+          "\"cases\""
+        ],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3326,6 +3736,7 @@
         ],
         "path": "x-pack/plugins/actions/common/servicenow_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3340,6 +3751,7 @@
         ],
         "path": "x-pack/plugins/actions/common/servicenow_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3354,6 +3766,7 @@
         ],
         "path": "x-pack/plugins/actions/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3376,6 +3789,7 @@
         ],
         "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -3389,7 +3803,8 @@
               "{ [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: T[K]; }"
             ],
             "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3422,6 +3837,7 @@
         ],
         "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -3435,9 +3851,25 @@
               "T"
             ],
             "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.SecurityConnectorFeatureId",
+        "type": "string",
+        "tags": [],
+        "label": "SecurityConnectorFeatureId",
+        "description": [],
+        "signature": [
+          "\"siem\""
+        ],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3452,6 +3884,7 @@
         ],
         "path": "x-pack/plugins/actions/common/servicenow_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3466,6 +3899,7 @@
         ],
         "path": "x-pack/plugins/actions/common/servicenow_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3480,6 +3914,7 @@
         ],
         "path": "x-pack/plugins/actions/common/servicenow_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3494,6 +3929,7 @@
         ],
         "path": "x-pack/plugins/actions/common/servicenow_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3508,6 +3944,7 @@
         ],
         "path": "x-pack/plugins/actions/common/servicenow_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3530,10 +3967,120 @@
         ],
         "path": "x-pack/plugins/actions/common/servicenow_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.UptimeConnectorFeatureId",
+        "type": "string",
+        "tags": [],
+        "label": "UptimeConnectorFeatureId",
+        "description": [],
+        "signature": [
+          "\"uptime\""
+        ],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.AlertingConnectorFeature",
+        "type": "Object",
+        "tags": [],
+        "label": "AlertingConnectorFeature",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.AlertingConnectorFeature.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.AlertingConnectorFeature.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.AlertingConnectorFeature.compatibility",
+            "type": "string",
+            "tags": [],
+            "label": "compatibility",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.CasesConnectorFeature",
+        "type": "Object",
+        "tags": [],
+        "label": "CasesConnectorFeature",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.CasesConnectorFeature.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.CasesConnectorFeature.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.CasesConnectorFeature.compatibility",
+            "type": "string",
+            "tags": [],
+            "label": "compatibility",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "actions",
         "id": "def-common.MustacheInEmailRegExp",
@@ -3546,6 +4093,54 @@
         ],
         "path": "x-pack/plugins/actions/common/mustache_template.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.SecuritySolutionFeature",
+        "type": "Object",
+        "tags": [],
+        "label": "SecuritySolutionFeature",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.SecuritySolutionFeature.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.SecuritySolutionFeature.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.SecuritySolutionFeature.compatibility",
+            "type": "string",
+            "tags": [],
+            "label": "compatibility",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -3557,6 +4152,7 @@
         "description": [],
         "path": "x-pack/plugins/actions/common/servicenow_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "actions",
@@ -3567,6 +4163,7 @@
             "description": [],
             "path": "x-pack/plugins/actions/common/servicenow_config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "actions",
@@ -3576,7 +4173,8 @@
                 "label": "importSetTable",
                 "description": [],
                 "path": "x-pack/plugins/actions/common/servicenow_config.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "actions",
@@ -3586,7 +4184,8 @@
                 "label": "appScope",
                 "description": [],
                 "path": "x-pack/plugins/actions/common/servicenow_config.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "actions",
@@ -3596,7 +4195,8 @@
                 "label": "table",
                 "description": [],
                 "path": "x-pack/plugins/actions/common/servicenow_config.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "actions",
@@ -3609,7 +4209,8 @@
                   "true"
                 ],
                 "path": "x-pack/plugins/actions/common/servicenow_config.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "actions",
@@ -3619,7 +4220,8 @@
                 "label": "commentFieldKey",
                 "description": [],
                 "path": "x-pack/plugins/actions/common/servicenow_config.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "actions",
@@ -3629,7 +4231,8 @@
                 "label": "appId",
                 "description": [],
                 "path": "x-pack/plugins/actions/common/servicenow_config.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -3642,6 +4245,7 @@
             "description": [],
             "path": "x-pack/plugins/actions/common/servicenow_config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "actions",
@@ -3651,7 +4255,8 @@
                 "label": "importSetTable",
                 "description": [],
                 "path": "x-pack/plugins/actions/common/servicenow_config.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "actions",
@@ -3661,7 +4266,8 @@
                 "label": "appScope",
                 "description": [],
                 "path": "x-pack/plugins/actions/common/servicenow_config.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "actions",
@@ -3671,7 +4277,8 @@
                 "label": "table",
                 "description": [],
                 "path": "x-pack/plugins/actions/common/servicenow_config.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "actions",
@@ -3684,7 +4291,8 @@
                   "true"
                 ],
                 "path": "x-pack/plugins/actions/common/servicenow_config.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "actions",
@@ -3694,7 +4302,8 @@
                 "label": "commentFieldKey",
                 "description": [],
                 "path": "x-pack/plugins/actions/common/servicenow_config.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "actions",
@@ -3704,7 +4313,8 @@
                 "label": "appId",
                 "description": [],
                 "path": "x-pack/plugins/actions/common/servicenow_config.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -3717,6 +4327,7 @@
             "description": [],
             "path": "x-pack/plugins/actions/common/servicenow_config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "actions",
@@ -3726,7 +4337,8 @@
                 "label": "importSetTable",
                 "description": [],
                 "path": "x-pack/plugins/actions/common/servicenow_config.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "actions",
@@ -3736,7 +4348,8 @@
                 "label": "appScope",
                 "description": [],
                 "path": "x-pack/plugins/actions/common/servicenow_config.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "actions",
@@ -3746,7 +4359,8 @@
                 "label": "table",
                 "description": [],
                 "path": "x-pack/plugins/actions/common/servicenow_config.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "actions",
@@ -3759,7 +4373,8 @@
                   "false"
                 ],
                 "path": "x-pack/plugins/actions/common/servicenow_config.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "actions",
@@ -3769,9 +4384,57 @@
                 "label": "commentFieldKey",
                 "description": [],
                 "path": "x-pack/plugins/actions/common/servicenow_config.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.UptimeConnectorFeature",
+        "type": "Object",
+        "tags": [],
+        "label": "UptimeConnectorFeature",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.UptimeConnectorFeature.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.UptimeConnectorFeature.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.UptimeConnectorFeature.compatibility",
+            "type": "string",
+            "tags": [],
+            "label": "compatibility",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

@@ -248,9 +248,7 @@ describe('Fleet preconfiguration reset', () => {
     it('Works if the preconfigured policies already exists with a missing package policy', async () => {
       const soClient = kbnServer.coreStart.savedObjects.createInternalRepository();
 
-      await soClient.update('ingest-agent-policies', POLICY_ID, {
-        package_policies: [],
-      });
+      await soClient.update('ingest-agent-policies', POLICY_ID, {});
 
       const resetAPI = getSupertestWithAdminUser(
         kbnServer.root,
@@ -268,7 +266,6 @@ describe('Fleet preconfiguration reset', () => {
         expect.arrayContaining([
           expect.objectContaining({
             name: 'Elastic Cloud agent policy 0001',
-            package_policies: expect.arrayContaining([expect.stringMatching(/.*/)]),
           }),
           expect.objectContaining({
             name: 'Second preconfigured policy',

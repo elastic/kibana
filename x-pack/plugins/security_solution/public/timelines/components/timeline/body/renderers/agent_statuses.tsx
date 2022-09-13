@@ -46,8 +46,10 @@ export const AgentStatuses = React.memo(
         <EuiFlexItem grow={false}>
           <EndpointHostIsolationStatus
             isIsolated={isIsolated}
-            pendingIsolate={pendingIsolation}
-            pendingUnIsolate={pendingUnisolation}
+            pendingActions={{
+              pendingIsolate: pendingIsolation,
+              pendingUnIsolate: pendingUnisolation,
+            }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

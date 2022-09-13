@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
 
-import { errorsToResults, getAgentsByKuery, getAgentTags, processAgentsInBatches } from './crud';
+import { errorsToResults, getAgentsByKuery, getAgentTags } from './crud';
 
 jest.mock('../../../common/services/is_agent_upgradeable', () => ({
   isAgentUpgradeable: jest.fn().mockImplementation((agent: Agent) => agent.id.includes('up')),
@@ -48,9 +48,17 @@ describe('Agents CRUD test', () => {
         },
       });
 
-      const result = await getAgentTags(esClientMock);
+      const result = await getAgentTags(esClientMock, { showInactive: false });
 
       expect(result).toEqual(['tag1', 'tag2']);
+      expect(searchMock).toHaveBeenCalledWith({
+        aggs: { tags: { terms: { field: 'tags', size: 10000 } } },
+        body: {
+          query: { bool: { minimum_should_match: 1, should: [{ match: { active: true } }] } },
+        },
+        index: '.fleet-agents',
+        size: 0,
+      });
     });
 
     it('should return empty list if no agent tags', async () => {
@@ -60,7 +68,7 @@ describe('Agents CRUD test', () => {
         },
       });
 
-      const result = await getAgentTags(esClientMock);
+      const result = await getAgentTags(esClientMock, { showInactive: false });
 
       expect(result).toEqual([]);
     });
@@ -68,9 +76,42 @@ describe('Agents CRUD test', () => {
     it('should return empty list if no agent index', async () => {
       searchMock.mockRejectedValueOnce(new errors.ResponseError({ statusCode: 404 } as any));
 
-      const result = await getAgentTags(esClientMock);
+      const result = await getAgentTags(esClientMock, { showInactive: false });
 
       expect(result).toEqual([]);
+    });
+
+    it('should pass query when called with kuery', async () => {
+      searchMock.mockResolvedValueOnce({
+        aggregations: {
+          tags: { buckets: [{ key: 'tag1' }, { key: 'tag2' }] },
+        },
+      });
+
+      await getAgentTags(esClientMock, {
+        showInactive: true,
+        kuery: 'fleet-agents.policy_id: 123',
+      });
+
+      expect(searchMock).toHaveBeenCalledWith({
+        aggs: { tags: { terms: { field: 'tags', size: 10000 } } },
+        body: {
+          query: {
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                {
+                  match: {
+                    policy_id: '123',
+                  },
+                },
+              ],
+            },
+          },
+        },
+        index: '.fleet-agents',
+        size: 0,
+      });
     });
   });
 
@@ -249,53 +290,6 @@ describe('Agents CRUD test', () => {
       expect(searchMock.mock.calls[searchMock.mock.calls.length - 1][0].body.sort).toEqual([
         { policy_id: { order: 'desc' } },
       ]);
-    });
-  });
-
-  describe('processAgentsInBatches', () => {
-    const mockProcessAgents = (agents: Agent[]) =>
-      Promise.resolve({ items: agents.map((agent) => ({ id: agent.id, success: true })) });
-    it('should return results for multiple batches', async () => {
-      searchMock
-        .mockImplementationOnce(() => Promise.resolve(getEsResponse(['1', '2'], 3)))
-        .mockImplementationOnce(() => Promise.resolve(getEsResponse(['3'], 3)));
-
-      const response = await processAgentsInBatches(
-        esClientMock,
-        {
-          kuery: 'active:true',
-          batchSize: 2,
-          showInactive: false,
-        },
-        mockProcessAgents
-      );
-      expect(response).toEqual({
-        items: [
-          { id: '1', success: true },
-          { id: '2', success: true },
-          { id: '3', success: true },
-        ],
-      });
-    });
-
-    it('should return results for one batch', async () => {
-      searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse(['1', '2', '3'], 3)));
-
-      const response = await processAgentsInBatches(
-        esClientMock,
-        {
-          kuery: 'active:true',
-          showInactive: false,
-        },
-        mockProcessAgents
-      );
-      expect(response).toEqual({
-        items: [
-          { id: '1', success: true },
-          { id: '2', success: true },
-          { id: '3', success: true },
-        ],
-      });
     });
   });
 

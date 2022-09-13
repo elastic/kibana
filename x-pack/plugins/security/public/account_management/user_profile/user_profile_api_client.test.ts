@@ -39,4 +39,11 @@ describe('UserProfileAPIClient', () => {
       body: '{"avatar":{"imageUrl":"avatar.png"}}',
     });
   });
+
+  it('should get user profiles in bulk', async () => {
+    await apiClient.bulkGet({ uids: new Set(['UID-1', 'UID-2']), dataPath: '*' });
+    expect(coreStart.http.post).toHaveBeenCalledWith('/internal/security/user_profile/_bulk_get', {
+      body: '{"uids":["UID-1","UID-2"],"dataPath":"*"}',
+    });
+  });
 });

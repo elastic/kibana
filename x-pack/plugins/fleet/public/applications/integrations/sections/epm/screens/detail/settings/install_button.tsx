@@ -52,7 +52,12 @@ export function InstallButton(props: InstallationButtonProps) {
 
   return canInstallPackages ? (
     <Fragment>
-      <EuiButton iconType={'importAction'} isLoading={isInstalling} onClick={toggleInstallModal}>
+      <EuiButton
+        iconType={'importAction'}
+        isLoading={isInstalling}
+        onClick={toggleInstallModal}
+        data-test-subj="installAssetsButton"
+      >
         {isInstalling ? (
           <FormattedMessage
             id="xpack.fleet.integrations.installPackage.installingPackageButtonLabel"

@@ -16,6 +16,7 @@ import {
   createAppMockRenderer,
 } from '../../../components/builtin_action_types/test_utils';
 import CreateConnectorFlyout from '.';
+import { betaBadgeProps } from '../beta_badge_props';
 
 jest.mock('../../../lib/action_connector_api', () => ({
   ...(jest.requireActual('../../../lib/action_connector_api') as any),
@@ -79,6 +80,7 @@ describe('CreateConnectorFlyout', () => {
         onTestConnector={onTestConnector}
       />
     );
+    await act(() => Promise.resolve());
 
     expect(getByTestId('create-connector-flyout')).toBeInTheDocument();
     expect(getByTestId('create-connector-flyout-header')).toBeInTheDocument();
@@ -244,7 +246,7 @@ describe('CreateConnectorFlyout', () => {
       expect(getByText('Select a connector')).toBeInTheDocument();
     });
 
-    it('shows the feature id badges when the connector type is selected', async () => {
+    it('shows the compatibility badges when the connector type is selected', async () => {
       const { getByTestId, getByText } = appMockRenderer.render(
         <CreateConnectorFlyout
           actionTypeRegistry={actionTypeRegistry}
@@ -264,9 +266,8 @@ describe('CreateConnectorFlyout', () => {
         expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
       });
 
-      expect(getByTestId('create-connector-flyout-header-availability')).toBeInTheDocument();
-      expect(getByText('Alerting')).toBeInTheDocument();
-      expect(getByText('Security Solution')).toBeInTheDocument();
+      expect(getByTestId('create-connector-flyout-header-compatibility')).toBeInTheDocument();
+      expect(getByText('Alerting Rules')).toBeInTheDocument();
     });
 
     it('shows the icon when the connector type is selected', async () => {
@@ -293,6 +294,47 @@ describe('CreateConnectorFlyout', () => {
       expect(getByTestId('create-connector-flyout-header-icon')).toBeInTheDocument();
       expect(getByText('Test connector')).toBeInTheDocument();
       expect(getByText(`selectMessage-${actionTypeModel.id}`)).toBeInTheDocument();
+    });
+
+    it('does not show beta badge when isExperimental is undefined', async () => {
+      const { queryByText } = appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+          onTestConnector={onTestConnector}
+        />
+      );
+      await act(() => Promise.resolve());
+      expect(queryByText(betaBadgeProps.label)).not.toBeInTheDocument();
+    });
+
+    it('does not show beta badge when isExperimental is false', async () => {
+      actionTypeRegistry.get.mockReturnValue({ ...actionTypeModel, isExperimental: false });
+      const { queryByText } = appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+          onTestConnector={onTestConnector}
+        />
+      );
+      await act(() => Promise.resolve());
+      expect(queryByText(betaBadgeProps.label)).not.toBeInTheDocument();
+    });
+
+    it('shows beta badge when isExperimental is true', async () => {
+      actionTypeRegistry.get.mockReturnValue({ ...actionTypeModel, isExperimental: true });
+      const { getByText } = appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+          onTestConnector={onTestConnector}
+        />
+      );
+      await act(() => Promise.resolve());
+      expect(getByText(betaBadgeProps.label)).toBeInTheDocument();
     });
   });
 

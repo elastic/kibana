@@ -10,11 +10,9 @@ import { i18n } from '@kbn/i18n';
 import alertsGif from '../../images/onboarding_tour_step_alerts.gif';
 import casesGif from '../../images/onboarding_tour_step_cases.gif';
 
-export type StepConfig = Pick<
-  EuiTourStepProps,
-  'step' | 'content' | 'anchorPosition' | 'title' | 'data-test-subj'
-> & {
+export type StepConfig = Pick<EuiTourStepProps, 'step' | 'content' | 'anchorPosition' | 'title'> & {
   anchor: string;
+  dataTestSubj: string;
   imageConfig?: {
     altText: string;
     src: string;
@@ -33,38 +31,39 @@ export const tourConfig: TourConfig = [
       'xpack.securitySolution.guided_onboarding.tour.overviewStep.tourContent',
       {
         defaultMessage:
-          'Take a quick tour of the Security solution to get a feel for how it works.',
+          'Take a quick tour to explore a unified workflow for investigating suspicious activity.',
       }
     ),
     anchor: `[id^="SolutionNav"]`,
     anchorPosition: 'rightUp',
-    'data-test-subj': 'welcomeStep',
+    dataTestSubj: 'welcomeStep',
   },
   {
     step: 2,
     title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.manageStep.tourTitle', {
-      defaultMessage: 'Define prevention, detection, and response across your entire ecosystem',
+      defaultMessage: 'Protect your ecosystem',
     }),
     content: i18n.translate(
       'xpack.securitySolution.guided_onboarding.tour.manageStep.tourContent',
       {
         defaultMessage:
-          'Create rules to detect and prevent malicious activity, and implement threat intelligence to protect endpoints and cloud workloads.',
+          'Decide what matters to you and your environment and create rules to detect and prevent malicious activity. ',
       }
     ),
     anchor: `[data-test-subj="groupedNavItemLink-administration"]`,
     anchorPosition: 'rightUp',
-    'data-test-subj': 'manageStep',
+    dataTestSubj: 'manageStep',
   },
   {
     step: 3,
     title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.alertsStep.tourTitle', {
-      defaultMessage: 'Get notified when your security rules are triggered',
+      defaultMessage: 'Get notified when something changes',
     }),
     content: i18n.translate(
       'xpack.securitySolution.guided_onboarding.tour.alertsStep.tourContent',
       {
-        defaultMessage: 'Detect, investigate, and respond to evolving threats in your environment.',
+        defaultMessage:
+          "Know when a rule's conditions are met, so you can start your investigation right away. Set up notifications with third-party platforms like Slack, PagerDuty, and ServiceNow.",
       }
     ),
     anchor: `[data-test-subj="groupedNavItemLink-alerts"]`,
@@ -78,16 +77,16 @@ export const tourConfig: TourConfig = [
         }
       ),
     },
-    'data-test-subj': 'alertsStep',
+    dataTestSubj: 'alertsStep',
   },
   {
     step: 4,
     title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.casesStep.tourTitle', {
-      defaultMessage: 'Collect and share information about security issues',
+      defaultMessage: 'Create a case to track your investigation',
     }),
     content: i18n.translate('xpack.securitySolution.guided_onboarding.tour.casesStep.tourContent', {
       defaultMessage:
-        'Track key investigation details, collect alerts in a central location, and more.',
+        'Collect evidence, add more collaborators, and even push case details to third-party case management systems.',
     }),
     anchor: `[data-test-subj="groupedNavItemLink-cases"]`,
     anchorPosition: 'rightUp',
@@ -100,18 +99,18 @@ export const tourConfig: TourConfig = [
         }
       ),
     },
-    'data-test-subj': 'casesStep',
+    dataTestSubj: 'casesStep',
   },
   {
     step: 5,
     title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.dataStep.tourTitle', {
-      defaultMessage: `You're ready!`,
+      defaultMessage: `Start gathering your data!`,
     }),
     content: i18n.translate('xpack.securitySolution.guided_onboarding.tour.dataStep.tourContent', {
-      defaultMessage: `View and add your first integration to start protecting your environment. Return to the Security solution when you're done.`,
+      defaultMessage: `Collect data from your endpoints using the Elastic Agent and a variety of third-party integrations.`,
     }),
     anchor: `[data-test-subj="add-data"]`,
     anchorPosition: 'rightUp',
-    'data-test-subj': 'dataStep',
+    dataTestSubj: 'dataStep',
   },
 ];

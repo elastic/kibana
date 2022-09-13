@@ -14,3 +14,5 @@ export const getAgentPoliciesAction = createAsyncAction<void, AgentPoliciesList>
 );
 
 export const setManageFlyoutOpen = createAction<boolean>('SET MANAGE FLYOUT OPEN');
+
+export const setAddingNewPrivateLocation = createAction<boolean>('SET MANAGE FLYOUT ADDING NEW');

@@ -50,7 +50,7 @@ export interface CiStatsMetric {
   /** optional limit which will generate an error on PRs when the metric exceeds the limit */
   limit?: number;
   /**
-   * path, relative to the repo, where the config file contianing limits
+   * path, relative to the repo, where the config file containing limits
    * is kept. Linked from PR comments instructing contributors how to fix
    * their PRs.
    */
@@ -244,6 +244,7 @@ export class CiStatsReporter {
       body: {
         buildId,
         defaultMeta: options?.defaultMeta,
+        buildkiteJobId: process.env.BUILDKITE_JOB_ID,
         metrics,
       },
       bodyDesc: `metrics: ${metrics

@@ -14,7 +14,7 @@ describe('convertValueToString', () => {
   it('should convert a keyword value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'keyword_key',
       rowIndex: 0,
@@ -29,7 +29,7 @@ describe('convertValueToString', () => {
   it('should convert a text value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'text_message',
       rowIndex: 0,
@@ -44,7 +44,7 @@ describe('convertValueToString', () => {
   it('should convert a multiline text value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'text_message',
       rowIndex: 1,
@@ -60,7 +60,7 @@ describe('convertValueToString', () => {
   it('should convert a number value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'number_price',
       rowIndex: 0,
@@ -75,7 +75,7 @@ describe('convertValueToString', () => {
   it('should convert a date value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'date',
       rowIndex: 0,
@@ -90,7 +90,7 @@ describe('convertValueToString', () => {
   it('should convert a date nanos value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'date_nanos',
       rowIndex: 0,
@@ -105,7 +105,7 @@ describe('convertValueToString', () => {
   it('should convert a boolean value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'bool_enabled',
       rowIndex: 0,
@@ -120,7 +120,7 @@ describe('convertValueToString', () => {
   it('should convert a binary value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'binary_blob',
       rowIndex: 0,
@@ -135,7 +135,7 @@ describe('convertValueToString', () => {
   it('should convert an object value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'object_user.first',
       rowIndex: 0,
@@ -150,7 +150,7 @@ describe('convertValueToString', () => {
   it('should convert a nested value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'nested_user',
       rowIndex: 0,
@@ -167,7 +167,7 @@ describe('convertValueToString', () => {
   it('should convert a flattened value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'flattened_labels',
       rowIndex: 0,
@@ -182,7 +182,7 @@ describe('convertValueToString', () => {
   it('should convert a range value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'range_time_frame',
       rowIndex: 0,
@@ -199,7 +199,7 @@ describe('convertValueToString', () => {
   it('should convert a rank features value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'rank_features',
       rowIndex: 0,
@@ -214,7 +214,7 @@ describe('convertValueToString', () => {
   it('should convert a histogram value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'histogram',
       rowIndex: 0,
@@ -229,7 +229,7 @@ describe('convertValueToString', () => {
   it('should convert a IP value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'ip_addr',
       rowIndex: 0,
@@ -244,7 +244,7 @@ describe('convertValueToString', () => {
   it('should convert a version value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'version',
       rowIndex: 0,
@@ -259,7 +259,7 @@ describe('convertValueToString', () => {
   it('should convert a vector value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'vector',
       rowIndex: 0,
@@ -274,7 +274,7 @@ describe('convertValueToString', () => {
   it('should convert a geo point value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'geo_point',
       rowIndex: 0,
@@ -289,7 +289,7 @@ describe('convertValueToString', () => {
   it('should convert a geo point object value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'geo_point',
       rowIndex: 1,
@@ -304,7 +304,7 @@ describe('convertValueToString', () => {
   it('should convert an array value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'array_tags',
       rowIndex: 0,
@@ -319,7 +319,7 @@ describe('convertValueToString', () => {
   it('should convert a shape value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'geometry',
       rowIndex: 0,
@@ -336,7 +336,7 @@ describe('convertValueToString', () => {
   it('should convert a runtime value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'runtime_number',
       rowIndex: 0,
@@ -351,7 +351,7 @@ describe('convertValueToString', () => {
   it('should convert a scripted value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'scripted_string',
       rowIndex: 0,
@@ -366,7 +366,7 @@ describe('convertValueToString', () => {
   it('should return an empty string and not fail', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'unknown',
       rowIndex: 0,
@@ -381,7 +381,7 @@ describe('convertValueToString', () => {
   it('should return an empty string when rowIndex is out of range', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'unknown',
       rowIndex: -1,
@@ -396,7 +396,7 @@ describe('convertValueToString', () => {
   it('should return _source value', () => {
     const result = convertValueToString({
       rows: discoverGridContextMock.rows,
-      dataView: discoverGridContextMock.indexPattern,
+      dataView: discoverGridContextMock.dataView,
       services: discoverServiceMock,
       columnId: '_source',
       rowIndex: 0,
@@ -419,7 +419,7 @@ describe('convertValueToString', () => {
   it('should return a formatted _source value', () => {
     const result = convertValueToString({
       rows: discoverGridContextMock.rows,
-      dataView: discoverGridContextMock.indexPattern,
+      dataView: discoverGridContextMock.dataView,
       services: discoverServiceMock,
       columnId: '_source',
       rowIndex: 0,
@@ -436,7 +436,7 @@ describe('convertValueToString', () => {
   it('should escape formula', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'array_tags',
       rowIndex: 1,
@@ -450,7 +450,7 @@ describe('convertValueToString', () => {
 
     const result2 = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
+      dataView: discoverGridContextComplexMock.dataView,
       services: discoverServiceMock,
       columnId: 'scripted_string',
       rowIndex: 1,

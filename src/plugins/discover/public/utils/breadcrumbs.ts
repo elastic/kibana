@@ -8,7 +8,7 @@
 
 import { ChromeStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { SavedSearch } from '../services/saved_searches';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 
 export function getRootBreadcrumbs(breadcrumb?: string) {
   return [

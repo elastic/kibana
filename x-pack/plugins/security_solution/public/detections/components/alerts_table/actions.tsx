@@ -36,6 +36,7 @@ import {
   ALERT_RULE_TIMELINE_ID,
   ALERT_THRESHOLD_RESULT,
   ALERT_NEW_TERMS,
+  ALERT_RULE_INDICES,
 } from '../../../../common/field_maps/field_names';
 import type { TimelineResult } from '../../../../common/types/timeline';
 import { TimelineId, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
@@ -403,7 +404,12 @@ const createThresholdTimeline = async (
   ecsData: Ecs,
   createTimeline: ({ from, timeline, to }: CreateTimelineProps) => void,
   noteContent: string,
-  templateValues: { filters?: Filter[]; query?: string; dataProviders?: DataProvider[] },
+  templateValues: {
+    filters?: Filter[];
+    query?: string;
+    dataProviders?: DataProvider[];
+    columns?: TGridModel['columns'];
+  },
   getExceptions: (ecs: Ecs) => Promise<ExceptionListItemSchema[]>
 ) => {
   try {
@@ -439,7 +445,7 @@ const createThresholdTimeline = async (
     });
     const language = params.language ?? alertDoc.signal?.rule?.language ?? 'kuery';
     const query = params.query ?? alertDoc.signal?.rule?.query ?? '';
-    const indexNames = params.index ?? alertDoc.signal?.rule?.index ?? [];
+    const indexNames = getField(alertDoc, ALERT_RULE_INDICES) ?? alertDoc.signal?.rule?.index ?? [];
 
     const { thresholdFrom, thresholdTo, dataProviders } = getThresholdAggregationData(alertDoc);
     const exceptions = await getExceptions(ecsData);
@@ -457,6 +463,7 @@ const createThresholdTimeline = async (
       notes: null,
       timeline: {
         ...timelineDefaults,
+        columns: templateValues.columns ?? timelineDefaults.columns,
         description: `_id: ${alertDoc._id}`,
         filters: allFilters,
         dataProviders: templateValues.dataProviders ?? dataProviders,
@@ -588,7 +595,7 @@ const createNewTermsTimeline = async (
     });
     const language = params.language ?? alertDoc.signal?.rule?.language ?? 'kuery';
     const query = params.query ?? alertDoc.signal?.rule?.query ?? '';
-    const indexNames = params.index ?? alertDoc.signal?.rule?.index ?? [];
+    const indexNames = getField(alertDoc, ALERT_RULE_INDICES) ?? alertDoc.signal?.rule?.index ?? [];
 
     const { from, to, dataProviders } = getNewTermsData(alertDoc);
     const exceptions = await getExceptions(ecsData);
@@ -742,6 +749,7 @@ export const sendAlertToTimelineAction = async ({
               filters,
               query,
               dataProviders,
+              columns: timeline.columns,
             },
             getExceptions
           );

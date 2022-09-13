@@ -15,6 +15,7 @@ import {
 import { ColorDynamicOptions } from '../../../../../common/descriptor_types';
 import { IVectorLayer } from '../vector_layer';
 import { IVectorSource } from '../../../sources/vector_source';
+import { OTHER_CATEGORY_KEY } from '../../../styles/vector/properties/dynamic_style_property';
 import { DynamicColorProperty } from '../../../styles/vector/properties/dynamic_color_property';
 import { InlineField } from '../../../fields/inline_field';
 import {
@@ -317,6 +318,69 @@ describe('pluckStyleMetaFromFeatures', () => {
 });
 
 describe('pluckCategoricalStyleMetaFromFeatures', () => {
+  const features = [
+    {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [-10, 0],
+      },
+      properties: {
+        foobar: 'CN',
+      },
+    },
+    {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [-10, 0],
+      },
+      properties: {
+        foobar: 'CN',
+      },
+    },
+    {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [-10, 0],
+      },
+      properties: {
+        foobar: 'US',
+      },
+    },
+    {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [-10, 0],
+      },
+      properties: {
+        foobar: 'CN',
+      },
+    },
+    {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [-10, 0],
+      },
+      properties: {
+        foobar: 'US',
+      },
+    },
+    {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [-10, 0],
+      },
+      properties: {
+        foobar: 'IN',
+      },
+    },
+  ] as Feature[];
+
   test('Should pluck the categorical style-meta', async () => {
     const field = new InlineField({
       fieldName: 'foobar',
@@ -338,75 +402,44 @@ describe('pluckCategoricalStyleMetaFromFeatures', () => {
       } // getFieldFormatter
     );
 
-    const features = [
-      {
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: [-10, 0],
-        },
-        properties: {
-          foobar: 'CN',
-        },
-      },
-      {
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: [-10, 0],
-        },
-        properties: {
-          foobar: 'CN',
-        },
-      },
-      {
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: [-10, 0],
-        },
-        properties: {
-          foobar: 'US',
-        },
-      },
-      {
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: [-10, 0],
-        },
-        properties: {
-          foobar: 'CN',
-        },
-      },
-      {
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: [-10, 0],
-        },
-        properties: {
-          foobar: 'US',
-        },
-      },
-      {
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: [-10, 0],
-        },
-        properties: {
-          foobar: 'IN',
-        },
-      },
-    ] as Feature[];
-
     const categories = pluckCategoricalStyleMetaFromFeatures(dynamicColorProperty, features);
 
     expect(categories).toEqual([
       { key: 'CN', count: 3 },
       { key: 'US', count: 2 },
       { key: 'IN', count: 1 },
+    ]);
+  });
+
+  test('Should include "other" category when cardinality is greater than size', async () => {
+    const field = new InlineField({
+      fieldName: 'foobar',
+      source: {} as unknown as IVectorSource,
+      origin: FIELD_ORIGIN.SOURCE,
+      dataType: 'number',
+    });
+    const dynamicColorProperty = new DynamicColorProperty(
+      {
+        type: COLOR_MAP_TYPE.CATEGORICAL,
+        colorCategory: 'palette_0',
+        fieldMetaOptions: { isEnabled: true },
+      },
+      VECTOR_STYLES.LINE_COLOR,
+      field,
+      {} as unknown as IVectorLayer,
+      () => {
+        return null;
+      } // getFieldFormatter
+    );
+    dynamicColorProperty.getNumberOfCategories = () => {
+      return 1;
+    };
+
+    const categories = pluckCategoricalStyleMetaFromFeatures(dynamicColorProperty, features);
+
+    expect(categories).toEqual([
+      { key: 'CN', count: 3 },
+      { key: OTHER_CATEGORY_KEY, count: 3 },
     ]);
   });
 });

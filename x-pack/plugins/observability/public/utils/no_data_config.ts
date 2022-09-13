@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { IBasePath } from '@kbn/core/public';
-import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
+import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 
 export function getNoDataConfig({
   docsLink,
@@ -17,7 +17,7 @@ export function getNoDataConfig({
   docsLink: string;
   basePath: IBasePath;
   hasData?: boolean;
-}): KibanaPageTemplateProps['noDataConfig'] {
+}): NoDataConfig | undefined {
   if (hasData === false) {
     return {
       solution: i18n.translate('xpack.observability.noDataConfig.solutionName', {

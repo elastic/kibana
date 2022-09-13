@@ -46,6 +46,7 @@ export const renderApp = (
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);
+    plugins.data.search.session.clear();
   };
 };
 

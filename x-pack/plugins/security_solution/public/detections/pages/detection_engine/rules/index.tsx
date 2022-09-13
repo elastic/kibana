@@ -42,6 +42,7 @@ import { useInvalidateRules } from '../../../containers/detection_engine/rules/u
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { RULES_TABLE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
+import { RulesPageTourComponent } from './tour';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -230,17 +231,19 @@ const RulesPageComponent: React.FC = () => {
                   {i18n.IMPORT_RULE}
                 </EuiButton>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <SecuritySolutionLinkButton
-                  data-test-subj="create-new-rule"
-                  fill
-                  iconType="plusInCircle"
-                  isDisabled={!userHasPermissions(canUserCRUD) || loading}
-                  deepLinkId={SecurityPageName.rulesCreate}
-                >
-                  {i18n.ADD_NEW_RULE}
-                </SecuritySolutionLinkButton>
-              </EuiFlexItem>
+              <RulesPageTourComponent>
+                <EuiFlexItem grow={false}>
+                  <SecuritySolutionLinkButton
+                    data-test-subj="create-new-rule"
+                    fill
+                    iconType="plusInCircle"
+                    isDisabled={!userHasPermissions(canUserCRUD) || loading}
+                    deepLinkId={SecurityPageName.rulesCreate}
+                  >
+                    {i18n.ADD_NEW_RULE}
+                  </SecuritySolutionLinkButton>
+                </EuiFlexItem>
+              </RulesPageTourComponent>
             </EuiFlexGroup>
           </HeaderPage>
           {(prePackagedRuleStatus === 'ruleNeedUpdate' ||

@@ -39,14 +39,14 @@ describe('getAlerts', () => {
   esClient.mget.mockResolvedValue({ docs });
 
   it('returns an empty array if the alert info are empty', async () => {
-    const clientArgs = { alertsService } as unknown as CasesClientArgs;
+    const clientArgs = { services: { alertsService } } as unknown as CasesClientArgs;
     const res = await getAlerts([], clientArgs);
 
     expect(res).toEqual([]);
   });
 
   it('returns the alerts correctly', async () => {
-    const clientArgs = { alertsService } as unknown as CasesClientArgs;
+    const clientArgs = { services: { alertsService } } as unknown as CasesClientArgs;
     const res = await getAlerts(
       [
         {
@@ -79,7 +79,7 @@ describe('getAlerts', () => {
         },
       ],
     });
-    const clientArgs = { alertsService } as unknown as CasesClientArgs;
+    const clientArgs = { services: { alertsService } } as unknown as CasesClientArgs;
 
     const res = await getAlerts(
       [
@@ -113,7 +113,7 @@ describe('getAlerts', () => {
         },
       ],
     });
-    const clientArgs = { alertsService } as unknown as CasesClientArgs;
+    const clientArgs = { services: { alertsService } } as unknown as CasesClientArgs;
 
     const res = await getAlerts(
       [

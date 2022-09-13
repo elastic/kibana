@@ -18,8 +18,8 @@ const serviceOverviewHref = url.format({
 });
 
 describe('Errors table', () => {
-  before(async () => {
-    await synthtrace.index(
+  before(() => {
+    synthtrace.index(
       opbeans({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
@@ -27,8 +27,8 @@ describe('Errors table', () => {
     );
   });
 
-  after(async () => {
-    await synthtrace.clean();
+  after(() => {
+    synthtrace.clean();
   });
 
   beforeEach(() => {
@@ -36,20 +36,20 @@ describe('Errors table', () => {
   });
 
   it('errors table is populated', () => {
-    cy.visit(serviceOverviewHref);
+    cy.visitKibana(serviceOverviewHref);
     cy.contains('opbeans-java');
     cy.contains('[MockError] Foo');
   });
 
   it('navigates to the errors page', () => {
-    cy.visit(serviceOverviewHref);
+    cy.visitKibana(serviceOverviewHref);
     cy.contains('opbeans-java');
     cy.contains('a', 'View errors').click();
     cy.url().should('include', '/opbeans-java/errors');
   });
 
   it('clicking on type adds a filter in the kuerybar and navigates to errors page', () => {
-    cy.visit(serviceOverviewHref);
+    cy.visitKibana(serviceOverviewHref);
     cy.get('[data-test-subj="headerFilterKuerybar"]')
       .invoke('val')
       .should('be.empty');
@@ -64,7 +64,7 @@ describe('Errors table', () => {
   });
 
   it('navigates to error detail page', () => {
-    cy.visit(serviceOverviewHref);
+    cy.visitKibana(serviceOverviewHref);
     cy.contains('a', '[MockError] Foo').click();
     cy.contains('div', 'Exception message');
   });

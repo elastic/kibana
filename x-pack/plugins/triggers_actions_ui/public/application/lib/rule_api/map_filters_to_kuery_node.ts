@@ -54,12 +54,9 @@ export const mapFiltersToKueryNode = ({
   if (ruleStatusesFilter && ruleStatusesFilter.length) {
     const snoozedFilter = nodeBuilder.or([
       fromKueryExpression('alert.attributes.muteAll: true'),
-      nodeTypes.function.buildNode('range', 'alert.attributes.isSnoozedUntil', 'gt', 'now'),
+      fromKueryExpression('alert.attributes.snoozeSchedule:{ duration > 0 }'),
     ]);
-    const enabledFilter = nodeBuilder.and([
-      fromKueryExpression('alert.attributes.enabled: true'),
-      nodeTypes.function.buildNode('not', snoozedFilter),
-    ]);
+    const enabledFilter = fromKueryExpression('alert.attributes.enabled: true');
     const disabledFilter = fromKueryExpression('alert.attributes.enabled: false');
 
     const ruleStatusesFilterKueryNode = [];
@@ -73,10 +70,9 @@ export const mapFiltersToKueryNode = ({
     }
 
     if (ruleStatusesFilter.includes('snoozed')) {
-      ruleStatusesFilterKueryNode.push(
-        nodeBuilder.and([snoozedFilter, nodeTypes.function.buildNode('not', disabledFilter)])
-      );
+      ruleStatusesFilterKueryNode.push(snoozedFilter);
     }
+
     filterKueryNode.push(nodeBuilder.or(ruleStatusesFilterKueryNode));
   }
 
@@ -87,10 +83,14 @@ export const mapFiltersToKueryNode = ({
   }
 
   if (searchText && searchText !== '') {
+    // if the searchText includes quotes, treat it as an exact match query
+    const value = searchText.match(/(['"`])(.*?)\1/g)
+      ? nodeTypes.literal.buildNode(searchText, true)
+      : nodeTypes.wildcard.buildNode(searchText);
     filterKueryNode.push(
       nodeBuilder.or([
-        nodeBuilder.is('alert.attributes.name', nodeTypes.wildcard.buildNode(searchText)),
-        nodeBuilder.is('alert.attributes.tags', nodeTypes.wildcard.buildNode(searchText)),
+        nodeBuilder.is('alert.attributes.name', value),
+        nodeBuilder.is('alert.attributes.tags', value),
       ])
     );
   }

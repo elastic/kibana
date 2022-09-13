@@ -17,8 +17,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import React from 'react';
-import { ProcessorEvent } from '../../../../../../../../common/processor_event';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { TransactionMetadata } from '../../../../../../shared/metadata_table/transaction_metadata';
 import { getSpanLinksTabContent } from '../../../../../../shared/span_links/span_links_tab_content';

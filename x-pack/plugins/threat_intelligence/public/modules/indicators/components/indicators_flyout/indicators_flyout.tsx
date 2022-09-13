@@ -18,31 +18,57 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { fullDateFormatter } from '../../../../common/utils/dates';
-import { EMPTY_VALUE } from '../../../../../common/constants';
+import { DateFormatter } from '../../../../components/date_formatter/date_formatter';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
-import { IndicatorsFlyoutJson } from '../indicators_flyout_json/indicators_flyout_json';
-import { IndicatorsFlyoutTable } from '../indicators_flyout_table/indicators_flyout_table';
+import { IndicatorsFlyoutJson } from './tabs/indicators_flyout_json/indicators_flyout_json';
+import { IndicatorsFlyoutTable } from './tabs/indicators_flyout_table/indicators_flyout_table';
 import { unwrapValue } from '../../lib/unwrap_value';
-import { displayValue } from '../../lib/display_value';
+import { IndicatorsFlyoutOverview } from './tabs/indicators_flyout_overview';
 
 export const TITLE_TEST_ID = 'tiIndicatorFlyoutTitle';
 export const SUBTITLE_TEST_ID = 'tiIndicatorFlyoutSubtitle';
 export const TABS_TEST_ID = 'tiIndicatorFlyoutTabs';
 
 const enum TAB_IDS {
+  overview,
   table,
   json,
 }
 
-export const IndicatorsFlyout: VFC<{ indicator: Indicator; closeFlyout: () => void }> = ({
-  indicator,
-  closeFlyout,
-}) => {
-  const [selectedTabId, setSelectedTabId] = useState(TAB_IDS.table);
+export interface IndicatorsFlyoutProps {
+  /**
+   * Indicator passed down to the different tabs (table and json views).
+   */
+  indicator: Indicator;
+  /**
+   * Event to close flyout (used by {@link EuiFlyout}).
+   */
+  closeFlyout: () => void;
+}
+
+/**
+ * Leverages the {@link EuiFlyout} from the @elastic/eui library to dhow the details of a specific {@link Indicator}.
+ */
+export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({ indicator, closeFlyout }) => {
+  const [selectedTabId, setSelectedTabId] = useState(TAB_IDS.overview);
 
   const tabs = useMemo(
     () => [
+      {
+        id: TAB_IDS.overview,
+        name: (
+          <FormattedMessage
+            id="xpack.threatIntelligence.indicator.flyout.overviewTabLabel"
+            defaultMessage="Overview"
+          />
+        ),
+        content: (
+          <IndicatorsFlyoutOverview
+            indicator={indicator}
+            onViewAllFieldsInTable={() => setSelectedTabId(TAB_IDS.table)}
+          />
+        ),
+      },
       {
         id: TAB_IDS.table,
         name: (
@@ -83,9 +109,8 @@ export const IndicatorsFlyout: VFC<{ indicator: Indicator; closeFlyout: () => vo
     [selectedTabId, tabs]
   );
 
-  const firstSeen = unwrapValue(indicator, RawIndicatorFieldId.FirstSeen);
-  const value = displayValue(indicator) || EMPTY_VALUE;
-  const formattedFirstSeen: string = firstSeen ? fullDateFormatter(firstSeen) : EMPTY_VALUE;
+  const firstSeen: string = unwrapValue(indicator, RawIndicatorFieldId.FirstSeen) as string;
+
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'simpleFlyoutTitle',
   });
@@ -96,9 +121,8 @@ export const IndicatorsFlyout: VFC<{ indicator: Indicator; closeFlyout: () => vo
         <EuiTitle>
           <h2 data-test-subj={TITLE_TEST_ID} id={flyoutTitleId}>
             <FormattedMessage
-              id="xpack.threatIntelligence.indicator.flyout.panelTitle"
-              defaultMessage="Indicator: {title}"
-              values={{ title: value }}
+              id="xpack.threatIntelligence.indicator.flyout.panelTitleWithOverviewTab"
+              defaultMessage="Indicator details"
             />
           </h2>
         </EuiTitle>
@@ -107,9 +131,9 @@ export const IndicatorsFlyout: VFC<{ indicator: Indicator; closeFlyout: () => vo
           <p data-test-subj={SUBTITLE_TEST_ID}>
             <FormattedMessage
               id="xpack.threatIntelligence.indicator.flyout.panelSubTitle"
-              defaultMessage="First seen: {subTitle}"
-              values={{ subTitle: formattedFirstSeen }}
+              defaultMessage="First seen: "
             />
+            <DateFormatter date={firstSeen} />
           </p>
         </EuiText>
         <EuiSpacer size="m" />

@@ -38,7 +38,7 @@ export const fetchIndices = async ({
   // We need this to determine whether to show the empty state on the indices page
   const isInitialRequest = meta.page.current === 1 && !searchQuery;
 
-  return { ...response, isInitialRequest };
+  return { ...response, isInitialRequest, returnHiddenIndices, searchQuery };
 };
 
 export const FetchIndicesAPILogic = createApiLogic(['content', 'indices_api_logic'], fetchIndices);

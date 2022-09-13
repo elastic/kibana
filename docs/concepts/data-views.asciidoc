@@ -65,7 +65,7 @@ based on different timestamps.
 
 . To specify your own {data-source} name, click *Show advanced settings*, then enter the name in the *Custom {data-source} ID* field. For example, enter your {es} index alias name.
 
-. Click *Create {data-source}*.
+. Click *Save {data-source} to {kib}*.
 +
 [[reload-fields]] {kib} is now configured to use your {es} data. When a new field is added to an index,
 the {data-source} field list is updated
@@ -149,4 +149,4 @@ WARNING: Deleting a {data-source} breaks all visualizations, saved searches, and
 . Open the main menu, then click *Stack Management > Data Views*.
 
 . Find the {data-source} that you want to delete, and then
-click (image:management/index-patterns/images/delete.png[Delete icon]) in the *Actions* column.
+click image:management/index-patterns/images/delete.png[Delete icon] in the *Actions* column.

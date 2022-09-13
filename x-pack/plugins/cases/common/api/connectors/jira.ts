@@ -7,7 +7,6 @@
 
 import * as rt from 'io-ts';
 
-// New fields should also be added at: x-pack/plugins/cases/server/connectors/case/schema.ts
 export const JiraFieldsRT = rt.type({
   issueType: rt.union([rt.string, rt.null]),
   priority: rt.union([rt.string, rt.null]),

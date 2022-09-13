@@ -16,11 +16,7 @@ import { formatRequest } from '@kbn/server-route-repository';
 import { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import { FetchOptions } from '../../../common/fetch_options';
 import { CallApi, callApi } from './call_api';
-import type {
-  APMServerRouteRepository,
-  APIEndpoint,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../server';
+import type { APMServerRouteRepository, APIEndpoint } from '../../../server';
 
 export type APMClientOptions = Omit<
   FetchOptions,

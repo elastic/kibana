@@ -29,6 +29,7 @@
         ],
         "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionRevealImage",
@@ -45,6 +46,7 @@
             ],
             "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -81,6 +83,7 @@
         ],
         "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionRevealImage",
@@ -101,6 +104,7 @@
             ],
             "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -124,6 +128,7 @@
       ],
       "path": "src/plugins/expression_reveal_image/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -147,6 +152,7 @@
       ],
       "path": "src/plugins/expression_reveal_image/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -170,6 +176,7 @@
         ],
         "path": "src/plugins/expression_reveal_image/common/expression_functions/reveal_image_function.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -190,6 +197,7 @@
         ],
         "path": "src/plugins/expression_reveal_image/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -205,6 +213,7 @@
         ],
         "path": "src/plugins/expression_reveal_image/common/expression_functions/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -219,6 +228,7 @@
         ],
         "path": "src/plugins/expression_reveal_image/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -233,6 +243,7 @@
         ],
         "path": "src/plugins/expression_reveal_image/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -247,6 +258,7 @@
         ],
         "path": "src/plugins/expression_reveal_image/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

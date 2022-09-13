@@ -10,8 +10,8 @@ import { defaults } from 'lodash';
 
 import type { Logger, LogMeta } from '@kbn/logging';
 import { asyncForEach } from '@kbn/std';
-import { SavedObjectsClientContract } from '../../saved_objects/types';
-import { SavedObjectsErrorHelpers } from '../../saved_objects';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 
 import { getUpgradeableConfig } from './get_upgradeable_config';
 import { transforms } from '../saved_objects';

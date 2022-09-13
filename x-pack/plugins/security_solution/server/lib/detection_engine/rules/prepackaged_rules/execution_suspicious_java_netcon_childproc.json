@@ -17,6 +17,48 @@
     "https://github.com/christophetd/log4shell-vulnerable-app",
     "https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE.pdf"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "destination.port",
+      "type": "long"
+    },
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "host.id",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.parent.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.parent.pid",
+      "type": "long"
+    },
+    {
+      "ecs": true,
+      "name": "process.pid",
+      "type": "long"
+    }
+  ],
   "risk_score": 73,
   "rule_id": "c3f5e1d8-910e-43b4-8d44-d748e498ca86",
   "severity": "high",
@@ -58,5 +100,5 @@
     }
   ],
   "type": "eql",
-  "version": 2
+  "version": 3
 }

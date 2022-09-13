@@ -59,10 +59,6 @@ export const ColorStopsOrdinal = ({
     );
   };
 
-  const canDeleteStop = (colorStops) => {
-    return colorStops.length > 1;
-  };
-
   return (
     <ColorStops
       onChange={onChange}
@@ -70,7 +66,6 @@ export const ColorStopsOrdinal = ({
       isStopsInvalid={isOrdinalStopsInvalid}
       getStopError={getStopError}
       renderStopInput={renderStopInput}
-      canDeleteStop={canDeleteStop}
       addNewRow={addOrdinalRow}
       swatches={swatches}
     />

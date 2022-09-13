@@ -6,7 +6,7 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
-import { ruleExecutionLogMock } from '../rule_execution_log/__mocks__';
+import { ruleExecutionLogMock } from '../rule_monitoring/mocks';
 import { deleteRules } from './delete_rules';
 import type { DeleteRuleOptions } from './types';
 

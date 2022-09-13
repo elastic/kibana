@@ -43,6 +43,9 @@ const rulesSchema = schema.object({
       max: schema.number({ defaultValue: 100000, max: 100000 }),
       connectorTypeOverrides: schema.maybe(schema.arrayOf(connectorTypeSchema)),
     }),
+    alerts: schema.object({
+      max: schema.number({ defaultValue: 1000 }),
+    }),
     ruleTypeOverrides: schema.maybe(schema.arrayOf(ruleTypeSchema)),
   }),
 });

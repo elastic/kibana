@@ -64,6 +64,64 @@ exports[`tests loading fields.yml: base.yml 1`] = `
 ]
 `;
 
+exports[`tests loading fields.yml: cockroachdb_dynamic_templates.yml 1`] = `
+[
+  {
+    "name": "cockroachdb",
+    "type": "group",
+    "fields": [
+      {
+        "name": "status",
+        "type": "group",
+        "release": "beta",
+        "fields": [
+          {
+            "name": "labels",
+            "type": "object",
+            "object_type": "keyword",
+            "description": "Prometheus metric labels\\n"
+          },
+          {
+            "name": "*",
+            "type": "group",
+            "fields": [
+              {
+                "name": "value",
+                "type": "object",
+                "object_type": "double",
+                "object_type_mapping_type": "*",
+                "description": "Prometheus gauge metric\\n"
+              },
+              {
+                "name": "counter",
+                "type": "object",
+                "object_type": "double",
+                "object_type_mapping_type": "*",
+                "description": "Prometheus counter metric\\n"
+              },
+              {
+                "name": "rate",
+                "type": "object",
+                "object_type": "double",
+                "object_type_mapping_type": "*",
+                "description": "Prometheus rated counter metric\\n"
+              },
+              {
+                "name": "histogram",
+                "type": "object",
+                "object_type": "histogram",
+                "object_type_mapping_type": "*",
+                "description": "Prometheus histogram metric"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
+`;
+
 exports[`tests loading fields.yml: coredns.logs.yml 1`] = `
 [
   {

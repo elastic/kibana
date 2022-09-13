@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import { merge } from 'lodash';
-
-import { ElasticsearchResponse } from '../../../../../../common/types/es';
-import { TimeRange } from '../../../../../../common/http_api/shared';
 
 import { buildMonitoredClusters, MonitoredClusters } from './build_monitored_clusters';
 import {
@@ -17,15 +13,11 @@ import {
   persistentMetricsetsQuery,
   enterpriseSearchQuery,
 } from './monitored_clusters_query';
-
-type SearchFn = (params: any) => Promise<ElasticsearchResponse>;
+import type { FetchParameters, FetchExecution } from '../types';
 
 interface MonitoredClustersResponse {
   clusters?: MonitoredClusters;
-  execution: {
-    timedOut?: boolean;
-    errors?: string[];
-  };
+  execution: FetchExecution;
 }
 
 /**
@@ -40,13 +32,9 @@ export const fetchMonitoredClusters = async ({
   timeRange,
   search,
   logger,
-}: {
-  timeout: number;
-  timeRange: TimeRange;
+}: FetchParameters & {
   monitoringIndex: string;
   entSearchIndex: string;
-  search: SearchFn;
-  logger: Logger;
 }): Promise<MonitoredClustersResponse> => {
   const getMonitoredClusters = async (
     index: string,

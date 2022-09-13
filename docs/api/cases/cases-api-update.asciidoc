@@ -25,6 +25,7 @@ You must have `all` privileges for the *Cases* feature in the *Management*,
 (Optional, string) An identifier for the space. If it is not specified, the
 default space is used.
 
+[role="child_attributes"]
 === {api-request-body-title}
 
 `cases`::
@@ -40,12 +41,13 @@ default space is used.
 [%collapsible%open]
 =====
 `fields`::
-(Required, object) An object containing the connector fields.
+(Required, object) An object containing the connector fields. To remove the
+connector, specify `null`. If you want to omit any individual field, specify
+`null` as its value.
 +
---
-To remove the connector, specify `null`. If you want to omit any individual
-field, specify `null` as its value.
-
+.Properties of `fields`
+[%collapsible%open]
+=======
 For {ibm-r} connectors, specify:
 
 `issueTypes`:::
@@ -110,7 +112,9 @@ For {swimlane} connectors, specify:
 
 `caseId`:::
 (Required, string) The identifier for the case.
---
+
+For {webhook-cm} connectors, specify `null`.
+=======
 
 `id`::
 (Required, string) The identifier for the connector. To remove the connector,
@@ -121,9 +125,9 @@ use `none`. To retrieve connector IDs, use <<cases-api-find-connectors>>).
 `none`.
 
 `type`::
-(Required, string) The type of the connector. Valid values are: `.jira`, `.none`,
-`.resilient`,`.servicenow`, `.servicenow-sir`, and `.swimlane`. To remove the
-connector, use `.none`.
+(Required, string) The type of the connector. Valid values are: `.cases-webhook`,
+`.jira`, `.none`, `.resilient`,`.servicenow`, `.servicenow-sir`, and `.swimlane`.
+To remove the connector, use `.none`.
 
 =====
 

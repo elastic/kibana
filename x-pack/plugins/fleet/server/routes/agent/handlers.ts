@@ -5,9 +5,20 @@
  * 2.0.
  */
 
+import { readFile } from 'fs/promises';
+import Path from 'path';
+
+import { REPO_ROOT } from '@kbn/utils';
 import { uniq } from 'lodash';
-import type { RequestHandler } from '@kbn/core/server';
+import semverGte from 'semver/functions/gte';
+import semverGt from 'semver/functions/gt';
+import semverCoerce from 'semver/functions/coerce';
+import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+
+import { appContextService } from '../../services';
+
+const MINIMUM_SUPPORTED_VERSION = '7.17.0';
 
 import type {
   GetAgentsResponse,
@@ -17,9 +28,12 @@ import type {
   PostBulkAgentReassignResponse,
   PostBulkUpdateAgentTagsResponse,
   GetAgentTagsResponse,
+  GetAvailableVersionsResponse,
+  GetActionStatusResponse,
 } from '../../../common/types';
 import type {
   GetAgentsRequestSchema,
+  GetTagsRequestSchema,
   GetOneAgentRequestSchema,
   UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
@@ -36,7 +50,6 @@ export const getAgentHandler: RequestHandler<
   TypeOf<typeof GetOneAgentRequestSchema.params>
 > = async (context, request, response) => {
   const coreContext = await context.core;
-  const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   try {
@@ -46,7 +59,7 @@ export const getAgentHandler: RequestHandler<
 
     return response.ok({ body });
   } catch (error) {
-    if (soClient.errors.isNotFoundError(error)) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
       return response.notFound({
         body: { message: `Agent ${request.params.agentId} not found` },
       });
@@ -137,7 +150,7 @@ export const bulkUpdateAgentTagsHandler: RequestHandler<
       request.body.tagsToRemove ?? []
     );
 
-    const body = results.items.reduce<PostBulkUpdateAgentTagsResponse>((acc, so) => {
+    const body = results.items.reduce<PostBulkUpdateAgentTagsResponse>((acc: any, so: any) => {
       acc[so.id] = {
         success: !so.error,
         error: so.error?.message,
@@ -145,7 +158,7 @@ export const bulkUpdateAgentTagsHandler: RequestHandler<
       return acc;
     }, {});
 
-    return response.ok({ body });
+    return response.ok({ body: { ...body, actionId: results.actionId } });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }
@@ -188,16 +201,18 @@ export const getAgentsHandler: RequestHandler<
   }
 };
 
-export const getAgentTagsHandler: RequestHandler<undefined, undefined, undefined> = async (
-  context,
-  request,
-  response
-) => {
+export const getAgentTagsHandler: RequestHandler<
+  undefined,
+  TypeOf<typeof GetTagsRequestSchema.query>
+> = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   try {
-    const tags = await AgentService.getAgentTags(esClient);
+    const tags = await AgentService.getAgentTags(esClient, {
+      showInactive: request.query.showInactive,
+      kuery: request.query.kuery,
+    });
 
     const body: GetAgentTagsResponse = {
       items: tags,
@@ -259,7 +274,7 @@ export const postBulkAgentsReassignHandler: RequestHandler<
       return acc;
     }, {});
 
-    return response.ok({ body });
+    return response.ok({ body: { ...body, actionId: results.actionId } });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }
@@ -315,3 +330,49 @@ export const getAgentDataHandler: RequestHandler<
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
 }
+
+// Read a static file generated at build time
+export const getAvailableVersionsHandler: RequestHandler = async (context, request, response) => {
+  const AGENT_VERSION_BUILD_FILE = 'x-pack/plugins/fleet/target/agent_versions_list.json';
+  let versionsToDisplay: string[] = [];
+
+  const kibanaVersion = appContextService.getKibanaVersion();
+  const kibanaVersionCoerced = semverCoerce(kibanaVersion)?.version ?? kibanaVersion;
+
+  try {
+    const file = await readFile(Path.join(REPO_ROOT, AGENT_VERSION_BUILD_FILE), 'utf-8');
+
+    // Exclude versions older than MINIMUM_SUPPORTED_VERSION and pre-release versions (SNAPSHOT, rc..)
+    // De-dup and sort in descending order
+    const data: string[] = JSON.parse(file);
+
+    const versions = data
+      .map((item: any) => semverCoerce(item)?.version || '')
+      .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
+      .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1));
+    const parsedVersions = uniq(versions) as string[];
+
+    // Add current version if not already present
+    const hasCurrentVersion = parsedVersions.some((v) => v === kibanaVersionCoerced);
+    versionsToDisplay = !hasCurrentVersion
+      ? [kibanaVersionCoerced].concat(parsedVersions)
+      : parsedVersions;
+    const body: GetAvailableVersionsResponse = { items: versionsToDisplay };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const getActionStatusHandler: RequestHandler = async (context, request, response) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  try {
+    const actionStatuses = await AgentService.getActionStatuses(esClient);
+    const body: GetActionStatusResponse = { items: actionStatuses };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};

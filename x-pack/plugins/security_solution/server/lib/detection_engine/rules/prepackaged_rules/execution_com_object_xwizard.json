@@ -12,14 +12,37 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Execution of COM object via Xwizard",
-  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
+  "note": "",
   "query": "process where event.type in (\"start\", \"process_started\") and\n process.pe.original_file_name : \"xwizard.exe\" and\n (\n   (process.args : \"RunWizard\" and process.args : \"{*}\") or\n   (process.executable != null and\n     not process.executable : (\"C:\\\\Windows\\\\SysWOW64\\\\xwizard.exe\", \"C:\\\\Windows\\\\System32\\\\xwizard.exe\")\n   )\n )\n",
   "references": [
     "https://lolbas-project.github.io/lolbas/Binaries/Xwizard/",
     "http://www.hexacorn.com/blog/2017/07/31/the-wizard-of-x-oppa-plugx-style/"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.executable",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.pe.original_file_name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "1a6075b0-7479-450e-8fe7-b8b8438ac570",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -54,5 +77,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 4
 }

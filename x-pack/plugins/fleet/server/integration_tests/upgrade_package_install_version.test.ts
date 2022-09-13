@@ -39,6 +39,8 @@ const fakeRequest = {
   },
 } as unknown as KibanaRequest;
 
+const PACKAGES = ['fleet_server', 'system', 'nginx', 'apache'];
+
 describe('Uprade package install version', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let kbnServer: kbnTestServer.TestKibanaUtils;
@@ -183,6 +185,10 @@ describe('Uprade package install version', () => {
 
       res.saved_objects.forEach((so) => {
         expect(so.attributes.install_format_schema_version).toBe(FLEET_INSTALL_FORMAT_VERSION);
+        if (!PACKAGES.includes(so.attributes.name)) {
+          return;
+        }
+
         if (!OUTDATED_PACKAGES.includes(so.attributes.name)) {
           expect(new Date(so.updated_at as string).getTime()).toBeLessThan(now);
         } else {

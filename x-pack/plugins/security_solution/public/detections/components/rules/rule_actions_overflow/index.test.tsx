@@ -11,6 +11,7 @@ import React from 'react';
 import {
   goToRuleEditPage,
   executeRulesBulkAction,
+  bulkExportRules,
 } from '../../../pages/detection_engine/rules/all/actions';
 import { RuleActionsOverflow } from '.';
 import { mockRule } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
@@ -33,6 +34,8 @@ jest.mock('../../../../common/lib/kibana', () => {
 jest.mock('../../../pages/detection_engine/rules/all/actions');
 
 const executeRulesBulkActionMock = executeRulesBulkAction as jest.Mock;
+const bulkExportRulesMock = bulkExportRules as jest.Mock;
+
 const flushPromises = () => new Promise(setImmediate);
 
 describe('RuleActionsOverflow', () => {
@@ -233,6 +236,28 @@ describe('RuleActionsOverflow', () => {
   });
 
   describe('rules details export rule', () => {
+    test('should call export actions and display toast when export option is clicked', async () => {
+      bulkExportRulesMock.mockImplementation(() => Promise.resolve({}));
+      const wrapper = mount(
+        <RuleActionsOverflow
+          rule={mockRule('id')}
+          userHasPermissions
+          canDuplicateRuleWithActions={true}
+        />
+      );
+      wrapper.find('[data-test-subj="rules-details-popover-button-icon"] button').simulate('click');
+      wrapper.update();
+      wrapper.find('[data-test-subj="rules-details-export-rule"] button').simulate('click');
+      wrapper.update();
+      await flushPromises();
+
+      expect(bulkExportRulesMock).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'export' })
+      );
+      expect(bulkExportRulesMock).toHaveBeenCalledWith(
+        expect.not.objectContaining({ onSuccess: expect.any })
+      );
+    });
     test('it does not open the popover when rules-details-popover-button-icon is clicked and the user does not have permission', () => {
       const rule = mockRule('id');
       const wrapper = mount(

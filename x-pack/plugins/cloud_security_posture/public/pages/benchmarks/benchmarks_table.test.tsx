@@ -65,7 +65,7 @@ describe('<BenchmarksTable />', () => {
     const agentPolicy = {
       id: chance.guid(),
       name: chance.sentence(),
-      number_of_agents: chance.integer({ min: 1 }),
+      agents: chance.integer({ min: 1 }),
     };
 
     const benchmarks = [createCspBenchmarkIntegrationFixture({ agent_policy: agentPolicy })];

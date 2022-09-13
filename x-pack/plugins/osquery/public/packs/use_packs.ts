@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SavedObjectsFindResponsePublic } from '@kbn/core/public';
-import { useQuery } from 'react-query';
+import type { SavedObjectsFindResponse } from '@kbn/core/public';
+import { useQuery } from '@tanstack/react-query';
 
 import { useKibana } from '../common/lib/kibana';
 import { PACKS_ID } from './constants';
@@ -22,7 +22,7 @@ export const usePacks = ({
   const { http } = useKibana().services;
 
   return useQuery<
-    Omit<SavedObjectsFindResponsePublic, 'savedObjects'> & {
+    Omit<SavedObjectsFindResponse, 'savedObjects'> & {
       data: PackSavedObject[];
     }
   >(

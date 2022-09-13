@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { clear } from '../../../canvas_plugin_src/functions/common/clear';
+import type { clear } from '../../../canvas_plugin_src/functions/common/clear';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { CONTEXT, TYPE_NULL } from '../../constants';

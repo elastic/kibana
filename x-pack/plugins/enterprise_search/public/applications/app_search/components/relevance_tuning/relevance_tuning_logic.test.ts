@@ -549,6 +549,8 @@ describe('RelevanceTuningLogic', () => {
               },
             ],
           },
+          precision: 5,
+          precision_enabled: true,
         };
 
         const searchSettingsWithoutNewBoostProp = {
@@ -561,6 +563,7 @@ describe('RelevanceTuningLogic', () => {
               },
             ],
           },
+          precision: 5,
         };
         mount({
           searchSettings: searchSettingsWithNewBoostProp,

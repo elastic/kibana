@@ -56,12 +56,5 @@ export const links: LinkItem = {
       }),
       path: `${USERS_PATH}/events`,
     },
-    {
-      id: SecurityPageName.usersExternalAlerts,
-      title: i18n.translate('xpack.securitySolution.appLinks.users.externalAlerts', {
-        defaultMessage: 'External Alerts',
-      }),
-      path: `${USERS_PATH}/externalAlerts`,
-    },
   ],
 };

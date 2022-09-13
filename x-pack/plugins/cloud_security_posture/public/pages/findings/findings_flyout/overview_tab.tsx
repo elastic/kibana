@@ -7,6 +7,7 @@
 
 import {
   EuiAccordion,
+  EuiBadge,
   EuiDescriptionList,
   EuiLink,
   EuiPanel,
@@ -17,6 +18,7 @@ import React, { useMemo } from 'react';
 import moment from 'moment';
 import type { EuiDescriptionListProps, EuiAccordionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { CSP_MOMENT_FORMAT } from '../../../common/constants';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
 import { useLatestFindingsDataView } from '../../../common/api/use_latest_findings_data_view';
 import { useKibana } from '../../../common/hooks/use_kibana';
@@ -34,10 +36,22 @@ const getDetailsList = (data: CspFinding, discoverIndexLink: string | undefined)
     description: data.rule.name,
   },
   {
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleTagsTitle', {
+      defaultMessage: 'Rule Tags',
+    }),
+    description: (
+      <>
+        {data.rule.tags.map((tag) => (
+          <EuiBadge>{tag}</EuiBadge>
+        ))}
+      </>
+    ),
+  },
+  {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.evaluatedAtTitle', {
       defaultMessage: 'Evaluated at',
     }),
-    description: moment(data['@timestamp']).format('MMMM D, YYYY @ HH:mm:ss.SSS'),
+    description: moment(data['@timestamp']).format(CSP_MOMENT_FORMAT),
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.resourceNameTitle', {
@@ -49,7 +63,7 @@ const getDetailsList = (data: CspFinding, discoverIndexLink: string | undefined)
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.frameworkSourcesTitle', {
       defaultMessage: 'Framework Sources',
     }),
-    description: <CisKubernetesIcons />,
+    description: <CisKubernetesIcons benchmarkId={data.rule.benchmark.id} />,
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.cisSectionTitle', {

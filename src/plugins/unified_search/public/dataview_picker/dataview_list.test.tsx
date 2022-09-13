@@ -51,6 +51,7 @@ describe('DataView list component', () => {
       currentDataViewId: 'dataview-1',
       onChangeDataView: changeDataViewSpy,
       dataViewsList: list,
+      isTextBasedLangSelected: false,
     };
   });
   it('should trigger the onChangeDataView if a new dataview is selected', async () => {
@@ -68,5 +69,11 @@ describe('DataView list component', () => {
       'dataview-1',
       'dataview-2',
     ]);
+  });
+
+  it('should render a warning icon if a text based language is selected', () => {
+    const component = shallow(<DataViewsList {...props} isTextBasedLangSelected />);
+
+    expect(getDataViewPickerOptions(component)!.map((option: any) => option.append)).not.toBeNull();
   });
 });

@@ -12,14 +12,47 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Potential Remote Desktop Shadowing Activity",
-  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
-  "query": "/* Identifies the modification of RDP Shadow registry or\n  the execution of processes indicative of active shadow RDP session */\n\nany where \n  (event.category == \"registry\" and\n     registry.path : \"HKLM\\\\Software\\\\Policies\\\\Microsoft\\\\Windows NT\\\\Terminal Services\\\\Shadow\"\n  ) or\n  (event.category == \"process\" and \n     (process.name : (\"RdpSaUacHelper.exe\", \"RdpSaProxy.exe\") and process.parent.name : \"svchost.exe\") or\n     (process.pe.original_file_name : \"mstsc.exe\" and process.args : \"/shadow:*\")\n  )\n",
+  "note": "",
+  "query": "/* Identifies the modification of RDP Shadow registry or\n  the execution of processes indicative of active shadow RDP session */\n\nany where\n  (event.category == \"registry\" and\n     registry.path : \"HKLM\\\\Software\\\\Policies\\\\Microsoft\\\\Windows NT\\\\Terminal Services\\\\Shadow\"\n  ) or\n  (event.category == \"process\" and\n     (process.name : (\"RdpSaUacHelper.exe\", \"RdpSaProxy.exe\") and process.parent.name : \"svchost.exe\") or\n     (process.pe.original_file_name : \"mstsc.exe\" and process.args : \"/shadow:*\")\n  )\n",
   "references": [
     "https://bitsadm.in/blog/spying-on-users-using-rdp-shadowing",
     "https://swarm.ptsecurity.com/remote-desktop-services-shadowing/"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.category",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.parent.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.pe.original_file_name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "registry.path",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 73,
   "rule_id": "c57f8579-e2a5-4804-847f-f2732edc5156",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "high",
   "tags": [
     "Elastic",
@@ -47,5 +80,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 4
 }

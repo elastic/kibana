@@ -9,6 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { render, waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { EditConnector, EditConnectorProps } from '.';
 import {
@@ -218,21 +219,13 @@ describe('EditConnector ', () => {
     expect(wrapper.find(`[data-test-subj="has-data-to-push-button"]`).exists()).toBeFalsy();
   });
 
-  it('displays the callout message when none is selected', async () => {
+  it('display the callout message when none is selected', async () => {
     const defaultProps = getDefaultProps();
     const props = { ...defaultProps, connectors: [] };
-    const wrapper = mount(
-      <TestProviders>
-        <EditConnector {...props} />
-      </TestProviders>
-    );
-    wrapper.update();
+    const result = appMockRender.render(<EditConnector {...props} />);
+
     await waitFor(() => {
-      expect(true).toBeTruthy();
-    });
-    wrapper.update();
-    await waitFor(() => {
-      expect(wrapper.find(`[data-test-subj="push-callouts"]`).exists()).toEqual(true);
+      expect(result.getByTestId('push-callouts')).toBeInTheDocument();
     });
   });
 
@@ -267,6 +260,7 @@ describe('EditConnector ', () => {
 
     // simulate changing the connector
     userEvent.click(result.getByTestId('dropdown-connectors'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getAllByTestId('dropdown-connector-no-connector')[0]);
     expect(result.getByTestId('edit-connectors-submit')).toBeEnabled();
 
@@ -300,6 +294,7 @@ describe('EditConnector ', () => {
 
     // simulate changing the connector
     userEvent.click(result.getByTestId('dropdown-connectors'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getAllByTestId('dropdown-connector-resilient-2')[0]);
     expect(result.getByTestId('edit-connectors-submit')).toBeEnabled();
 

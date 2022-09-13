@@ -11,10 +11,7 @@
     ]
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
+    "**/*.ts",
+    "**/*.tsx",
   ],
-  "exclude": [
-    "**/__fixtures__/**/*"
-  ]
 }

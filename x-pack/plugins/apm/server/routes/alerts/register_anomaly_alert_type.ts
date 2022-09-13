@@ -18,6 +18,7 @@ import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
 import { KibanaRequest } from '@kbn/core/server';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   AlertType,
   ALERT_TYPES_CONFIG,
@@ -40,7 +41,6 @@ import {
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
 import { ANOMALY_SEVERITY } from '../../../common/ml_constants';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { getAlertUrlTransaction } from '../../../common/utils/formatters';
 import { getMLJobs } from '../service_map/get_service_anomalies';

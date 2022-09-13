@@ -14,6 +14,7 @@ export { CaseUserActionService } from './user_actions';
 export { ConnectorMappingsService } from './connector_mappings';
 export { AlertService } from './alerts';
 export { AttachmentService } from './attachments';
+export { UserProfileService } from './user_profiles';
 
 export interface ClientArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;

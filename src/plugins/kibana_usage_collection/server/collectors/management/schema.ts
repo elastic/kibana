@@ -430,10 +430,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:enableInfrastructureView': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:enableServiceGroups': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -483,6 +479,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'discover:showMultiFields': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'discover:enableSql': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -539,6 +539,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'visualization:visualize:legacyGaugeChartsLibrary': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'enterpriseSearch:enableIndexTransformsTab': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

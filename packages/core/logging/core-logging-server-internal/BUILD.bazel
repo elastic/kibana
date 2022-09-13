@@ -7,10 +7,19 @@ PKG_REQUIRE_NAME = "@kbn/core-logging-server-internal"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
+    "**/*.ts",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -29,7 +38,7 @@ RUNTIME_DEPS = [
   "@npm//lodash",
   "@npm//moment-timezone",
   "@npm//elastic-apm-node",
-  "//packages/elastic-safer-lodash-set",
+  "//packages/kbn-safer-lodash-set",
   "//packages/kbn-config-schema",
   "//packages/kbn-std",
 ]
@@ -41,7 +50,7 @@ TYPES_DEPS = [
   "@npm//rxjs",
   "@npm//@types/moment-timezone",
   "@npm//elastic-apm-node",
-  "//packages/elastic-safer-lodash-set:npm_module_types",
+  "//packages/kbn-safer-lodash-set:npm_module_types",
   "//packages/kbn-logging:npm_module_types",
   "//packages/kbn-config-schema:npm_module_types",
   "//packages/core/base/core-base-server-internal:npm_module_types",
@@ -72,7 +81,6 @@ ts_project(
   declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

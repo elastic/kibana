@@ -9,19 +9,19 @@ import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { ISearchSource, EsQuerySortValue } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { DataTableRecord } from '../../../types';
+import { DataTableRecord, EsHitRecord } from '../../../types';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
 
 export async function fetchAnchor(
   anchorId: string,
-  indexPattern: DataView,
+  dataView: DataView,
   searchSource: ISearchSource,
   sort: EsQuerySortValue[],
   useNewFieldsApi: boolean = false
 ): Promise<DataTableRecord> {
-  updateSearchSource(searchSource, anchorId, sort, useNewFieldsApi, indexPattern);
-  const { rawResponse } = await lastValueFrom(await searchSource.fetch$());
-  const doc = rawResponse.hits?.hits?.[0];
+  updateSearchSource(searchSource, anchorId, sort, useNewFieldsApi, dataView);
+  const { rawResponse } = await lastValueFrom(searchSource.fetch$());
+  const doc = rawResponse.hits?.hits?.[0] as EsHitRecord;
 
   if (!doc) {
     throw new Error(
@@ -30,7 +30,7 @@ export async function fetchAnchor(
       })
     );
   }
-  return buildDataTableRecord(doc, indexPattern, true);
+  return buildDataTableRecord(doc, dataView, true);
 }
 
 export function updateSearchSource(
@@ -38,11 +38,11 @@ export function updateSearchSource(
   anchorId: string,
   sort: EsQuerySortValue[],
   useNewFieldsApi: boolean,
-  indexPattern: DataView
+  dataView: DataView
 ) {
   searchSource
     .setParent(undefined)
-    .setField('index', indexPattern)
+    .setField('index', dataView)
     .setField('version', true)
     .setField('size', 1)
     .setField('query', {

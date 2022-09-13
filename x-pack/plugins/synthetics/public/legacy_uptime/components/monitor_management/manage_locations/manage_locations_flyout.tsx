@@ -4,48 +4,54 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiFlyout,
   EuiButtonEmpty,
   EuiFlyoutHeader,
   EuiTitle,
-  EuiSpacer,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
   EuiCallOut,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ManageEmptyState } from './manage_empty_state';
+import { useEnablement } from '../hooks/use_enablement';
+import { AddLocationFlyout } from './add_location_flyout';
 import { ClientPluginsStart } from '../../../../plugin';
-import { EmptyLocations } from './empty_locations';
 import { getServiceLocations } from '../../../state/actions';
-import { LocationForm } from './location_form';
 import { PrivateLocationsList } from './locations_list';
 import { useLocationsAPI } from './hooks/use_locations_api';
 import {
   getAgentPoliciesAction,
+  selectAddingNewPrivateLocation,
   selectManageFlyoutOpen,
+  setAddingNewPrivateLocation,
   setManageFlyoutOpen,
 } from '../../../state/private_locations';
+import { PrivateLocation } from '../../../../../common/runtime_types';
 
 export const ManageLocationsFlyout = () => {
-  const [isAddingNew, setIsAddingNew] = useState(false);
-
   const dispatch = useDispatch();
+
+  const { isEnabled } = useEnablement().enablement;
 
   const setIsOpen = (val: boolean) => dispatch(setManageFlyoutOpen(val));
 
   const isOpen = useSelector(selectManageFlyoutOpen);
+  const isAddingNew = useSelector(selectAddingNewPrivateLocation);
 
-  const { onSubmit, saveLoading, fetchLoading, deleteLoading, privateLocations, onDelete } =
-    useLocationsAPI({
-      isOpen,
-    });
+  const setIsAddingNew = (val: boolean) => dispatch(setAddingNewPrivateLocation(val));
+
+  const { onSubmit, loading, privateLocations, onDelete } = useLocationsAPI({
+    isOpen,
+  });
 
   const { fleet } = useKibana<ClientPluginsStart>().services;
 
@@ -64,54 +70,34 @@ export const ManageLocationsFlyout = () => {
     dispatch(getServiceLocations());
   };
 
+  const handleSubmit = (formData: PrivateLocation) => {
+    onSubmit(formData);
+    setIsAddingNew(false);
+  };
+
   const flyout = (
-    <EuiFlyout onClose={closeFlyout}>
+    <EuiFlyout onClose={closeFlyout} size="m" style={{ width: 540 }}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>{MANAGE_PRIVATE_LOCATIONS}</h2>
+          <h2>{PRIVATE_LOCATIONS}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        {loading ? (
+          <EuiLoadingSpinner />
+        ) : (
+          <ManageEmptyState
+            privateLocations={privateLocations}
+            setIsAddingNew={setIsAddingNew}
+            hasFleetPermissions={hasFleetPermissions}
+          >
+            <PrivateLocationsList privateLocations={privateLocations} onDelete={onDelete} />
+          </ManageEmptyState>
+        )}
         {!hasFleetPermissions && (
           <EuiCallOut title={NEED_PERMISSIONS} color="warning" iconType="help">
             <p>{NEED_FLEET_READ_AGENT_POLICIES_PERMISSION}</p>
           </EuiCallOut>
-        )}
-        {privateLocations.length === 0 && !(saveLoading || fetchLoading) && !isAddingNew ? (
-          <EmptyLocations setIsAddingNew={setIsAddingNew} disabled={!hasFleetPermissions} />
-        ) : (
-          <PrivateLocationsList
-            privateLocations={privateLocations}
-            loading={fetchLoading}
-            onDelete={onDelete}
-            onSubmit={onSubmit}
-            hasFleetPermissions={hasFleetPermissions}
-          />
-        )}
-        <EuiSpacer />
-        {isAddingNew && (
-          <LocationForm
-            privateLocations={privateLocations}
-            onSubmit={(val) => {
-              onSubmit(val);
-              setIsAddingNew(false);
-            }}
-            onDiscard={() => setIsAddingNew(false)}
-          />
-        )}
-        {!isAddingNew && privateLocations.length > 0 && (
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                isLoading={saveLoading || fetchLoading || deleteLoading}
-                disabled={!hasFleetPermissions || !canSave}
-                onClick={() => setIsAddingNew(true)}
-              >
-                {ADD_LABEL}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -121,6 +107,18 @@ export const ManageLocationsFlyout = () => {
               {CLOSE_LABEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              data-test-subj={'addPrivateLocationButton'}
+              isLoading={loading}
+              disabled={!hasFleetPermissions || !canSave}
+              onClick={() => setIsAddingNew(true)}
+            >
+              {ADD_LABEL}
+            </EuiButton>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
@@ -128,18 +126,25 @@ export const ManageLocationsFlyout = () => {
 
   return (
     <div>
-      <EuiButtonEmpty onClick={() => setIsOpen(true)} iconType="visMapCoordinate">
-        {MANAGE_PRIVATE_LOCATIONS}
-      </EuiButtonEmpty>
-      {isOpen ? flyout : null}
+      {isEnabled && (
+        <EuiButtonEmpty onClick={() => setIsOpen(true)}>{PRIVATE_LOCATIONS}</EuiButtonEmpty>
+      )}
+      {isOpen && !isAddingNew ? flyout : null}
+      {isAddingNew ? (
+        <AddLocationFlyout
+          setIsOpen={setIsAddingNew}
+          onSubmit={handleSubmit}
+          privateLocations={privateLocations}
+        />
+      ) : null}
     </div>
   );
 };
 
-const MANAGE_PRIVATE_LOCATIONS = i18n.translate(
+const PRIVATE_LOCATIONS = i18n.translate(
   'xpack.synthetics.monitorManagement.managePrivateLocations',
   {
-    defaultMessage: 'Manage private locations',
+    defaultMessage: 'Private locations',
   }
 );
 
@@ -151,11 +156,14 @@ const ADD_LABEL = i18n.translate('xpack.synthetics.monitorManagement.addLocation
   defaultMessage: 'Add location',
 });
 
-const NEED_PERMISSIONS = i18n.translate('xpack.synthetics.monitorManagement.needPermissions', {
-  defaultMessage: 'Need permissions',
-});
+export const NEED_PERMISSIONS = i18n.translate(
+  'xpack.synthetics.monitorManagement.needPermissions',
+  {
+    defaultMessage: 'Need permissions',
+  }
+);
 
-const NEED_FLEET_READ_AGENT_POLICIES_PERMISSION = i18n.translate(
+export const NEED_FLEET_READ_AGENT_POLICIES_PERMISSION = i18n.translate(
   'xpack.synthetics.monitorManagement.needFleetReadAgentPoliciesPermission',
   {
     defaultMessage:

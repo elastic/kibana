@@ -30,4 +30,13 @@ describe('InnerLinkPanel', () => {
     expect(screen.getByRole('button')).toBeInTheDocument();
     expect(screen.getByTestId('inner-link-panel-title')).toHaveTextContent(defaultProps.title);
   });
+
+  it('renders learn more link', () => {
+    render(
+      <TestProviders>
+        <InnerLinkPanel color="warning" {...defaultProps} learnMoreLink="/learn_more" />
+      </TestProviders>
+    );
+    expect(screen.getByTestId('custom_test_subj-learn-more')).toBeInTheDocument();
+  });
 });

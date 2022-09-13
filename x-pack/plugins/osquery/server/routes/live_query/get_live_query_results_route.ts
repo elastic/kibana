@@ -28,10 +28,10 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
         query: schema.object(
           {
             filterQuery: schema.maybe(schema.string()),
-            pageIndex: schema.maybe(schema.number()),
+            page: schema.maybe(schema.number()),
             pageSize: schema.maybe(schema.number()),
-            sortField: schema.maybe(schema.string()),
-            sortOrder: schema.maybe(schema.string()),
+            sort: schema.maybe(schema.string()),
+            sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
           },
           { unknowns: 'allow' }
         ),
@@ -78,15 +78,13 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
               factoryQueryType: OsqueryQueries.results,
               filterQuery: createFilter(request.query.filterQuery),
               pagination: generateTablePaginationOptions(
-                request.query.pageIndex ?? 0,
+                request.query.page ?? 0,
                 request.query.pageSize ?? 100
               ),
-              sort: [
-                {
-                  direction: request.query.sortOrder ?? 'desc',
-                  field: request.query.sortField ?? '@timestamp',
-                },
-              ],
+              sort: {
+                direction: request.query.sortOrder ?? 'desc',
+                field: request.query.sort ?? '@timestamp',
+              },
             },
             { abortSignal, strategy: 'osquerySearchStrategy' }
           )

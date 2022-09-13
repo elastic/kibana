@@ -44,6 +44,9 @@ import {
   isOneOfOperator,
   isOperator,
   DETECTION_ENGINE_EXCEPTION_OPERATORS,
+  isNotOneOfOperator,
+  isInListOperator,
+  isNotInListOperator,
 } from '../autocomplete_operators';
 
 import {
@@ -668,6 +671,10 @@ export const getEntryOnOperatorChange = (
   }
 };
 
+const fieldSupportsMatches = (field: DataViewFieldBase) => {
+  return field.type === 'string';
+};
+
 /**
  * Determines which operators to make available
  *
@@ -691,9 +698,31 @@ export const getOperatorOptions = (
   } else if (isBoolean) {
     return [isOperator, isNotOperator, existsOperator, doesNotExistOperator];
   } else if (!includeValueListOperators) {
-    return EXCEPTION_OPERATORS_SANS_LISTS;
+    return fieldSupportsMatches(item.field)
+      ? EXCEPTION_OPERATORS_SANS_LISTS
+      : [
+          isOperator,
+          isNotOperator,
+          isOneOfOperator,
+          isNotOneOfOperator,
+          existsOperator,
+          doesNotExistOperator,
+        ];
   } else {
-    return listType === 'detection' ? DETECTION_ENGINE_EXCEPTION_OPERATORS : ALL_OPERATORS;
+    return listType === 'detection'
+      ? fieldSupportsMatches(item.field)
+        ? DETECTION_ENGINE_EXCEPTION_OPERATORS
+        : [
+            isOperator,
+            isNotOperator,
+            isOneOfOperator,
+            isNotOneOfOperator,
+            existsOperator,
+            doesNotExistOperator,
+            isInListOperator,
+            isNotInListOperator,
+          ]
+      : ALL_OPERATORS;
   }
 };
 

@@ -9,22 +9,22 @@ import { LogicMounter } from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { Status } from '../../../../../common/types/api';
 import { IndexExistsApiLogic } from '../../api/index/index_exists_api_logic';
 
 import { UNIVERSAL_LANGUAGE_VALUE } from './constants';
+import { flashIndexCreatedToast } from './new_index_created_toast';
 import { NewSearchIndexLogic, NewSearchIndexValues } from './new_search_index_logic';
+
+jest.mock('./new_index_created_toast', () => ({ flashIndexCreatedToast: jest.fn() }));
 
 const DEFAULT_VALUES: NewSearchIndexValues = {
   data: undefined as any,
   fullIndexName: 'search-',
   fullIndexNameExists: false,
   fullIndexNameIsValid: true,
-  isLoading: false,
   language: null,
   languageSelectValue: UNIVERSAL_LANGUAGE_VALUE,
   rawName: '',
-  status: Status.IDLE,
 };
 
 describe('NewSearchIndexLogic', () => {
@@ -107,20 +107,29 @@ describe('NewSearchIndexLogic', () => {
           data: { exists: true, indexName: 'search-indexname' },
           fullIndexName: 'search-indexname',
           fullIndexNameExists: true,
-          isLoading: false,
           rawName: 'indexname',
-          status: Status.SUCCESS,
         });
       });
     });
-    describe('isLoading', () => {
-      it('should set to true when status is loading', () => {
-        IndexExistsApiLogic.actions.makeRequest({ indexName: 'search-indexname' });
-        expect(NewSearchIndexLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          isLoading: true,
-          status: Status.LOADING,
+    describe('apiIndexCreated', () => {
+      it('calls flash index created toast', () => {
+        NewSearchIndexLogic.actions.apiIndexCreated({ indexName: 'indexName' });
+        expect(flashIndexCreatedToast).toHaveBeenCalled();
+      });
+    });
+    describe('connectorIndexCreated', () => {
+      it('calls flash index created toast', () => {
+        NewSearchIndexLogic.actions.connectorIndexCreated({
+          id: 'connectorId',
+          indexName: 'indexName',
         });
+        expect(flashIndexCreatedToast).toHaveBeenCalled();
+      });
+    });
+    describe('crawlerIndexCreated', () => {
+      it('calls flash index created toast', () => {
+        NewSearchIndexLogic.actions.crawlerIndexCreated({ created: 'indexName' });
+        expect(flashIndexCreatedToast).toHaveBeenCalled();
       });
     });
   });

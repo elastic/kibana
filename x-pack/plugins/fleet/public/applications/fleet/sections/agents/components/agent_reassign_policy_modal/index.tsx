@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiConfirmModal,
@@ -44,13 +44,24 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
     perPage: SO_SEARCH_LIMIT,
   });
 
-  const agentPolicies = agentPoliciesRequest.data
-    ? agentPoliciesRequest.data.items.filter((policy) => policy && !policy.is_managed)
-    : [];
+  const agentPolicies = useMemo(
+    () =>
+      agentPoliciesRequest.data
+        ? agentPoliciesRequest.data.items.filter((policy) => policy && !policy.is_managed)
+        : [],
+    [agentPoliciesRequest.data]
+  );
 
   const [selectedAgentPolicyId, setSelectedAgentPolicyId] = useState<string | undefined>(
-    isSingleAgent ? (agents[0] as Agent).policy_id : agentPolicies[0]?.id ?? undefined
+    isSingleAgent ? (agents[0] as Agent).policy_id : undefined
   );
+
+  // Select the first policy if not policy is selected
+  useEffect(() => {
+    if (!selectedAgentPolicyId && agentPolicies.length) {
+      setSelectedAgentPolicyId(agentPolicies[0]?.id);
+    }
+  }, [selectedAgentPolicyId, agentPolicies]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   async function onSubmit() {
@@ -71,13 +82,20 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
         throw res.error;
       }
       setIsSubmitting(false);
+      const hasCompleted = isSingleAgent || Object.keys(res.data ?? {}).length > 0;
       const successMessage = i18n.translate(
         'xpack.fleet.agentReassignPolicy.successSingleNotificationTitle',
         {
           defaultMessage: 'Agent policy reassigned',
         }
       );
-      notifications.toasts.addSuccess(successMessage);
+      const submittedMessage = i18n.translate(
+        'xpack.fleet.agentReassignPolicy.submittedNotificationTitle',
+        {
+          defaultMessage: 'Agent policy reassign submitted',
+        }
+      );
+      notifications.toasts.addSuccess(hasCompleted ? successMessage : submittedMessage);
       onClose();
     } catch (error) {
       setIsSubmitting(false);
@@ -146,8 +164,13 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="l" />
-
-      {selectedAgentPolicyId && <AgentPolicyPackageBadges agentPolicyId={selectedAgentPolicyId} />}
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          {selectedAgentPolicyId && (
+            <AgentPolicyPackageBadges agentPolicyId={selectedAgentPolicyId} />
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiConfirmModal>
   );
 };

@@ -1,0 +1,31 @@
+---
+id: kibDevDocsOpsRepoSourceClassifier
+slug: /kibana-dev-docs/ops/repo-source-classifier
+title: "@kbn/repo-source-classifier"
+description: 'The tool which classifies source files into categories'
+date: 2022-07-25
+tags: ['kibana', 'dev', 'contributor', 'operations', 'packages', 'scripts']
+---
+
+This package exposes a class which can be used to efficiently classify all of the files in the repository into one of the following groups:
+
+- `server package`: plugin code in the root `server/` directory, eventually this will include packages of type `server-plugin` or `server-shared`
+ - `browser package`: plugin code in the root `public/` directory (and a few others in specific plugins), eventually this will include packages of type `browser-plugin` or `browser-shared`
+ - `common packages`: includes any existing package, plugin code in root `common/` directories, (and a few others in specific plugins), Eventually this will include `common-shared` packages
+ - `tests or mocks`: code that is loaded by jest/storybook, and mocks/helpers intended for use by that code. These files usually live along side package code but will have a separate dependency tree and are pieces of code which should never end up in the product.
+ - `static`: static files, currently any .json file or things loaded via `raw-loader` in browser code
+ - `tooling`: scripts, config files for tools like eslint, webpack, etc. 
+ - `non-package`: code that lives outside of packages/plugins or doesn't fit into other more specific categories. Once the package project is complete this category should be limited to just `@kbn/pm`
+
+This is a map of types to the types they are allowed to import:
+ - `non-package`: `non-package`, `server package`, `browser package`, `common package` or `static`
+ - `server package`: `common package`, `server package`, or `static`
+ - `browser package`: `common package`, `browser package`, or `static`
+ - `common package`: `common package` or`static`
+ - `static`: static files are not allowed to have dependencies
+ - `tests or mocks`: anything
+ - `tooling`: anything
+
+The `RepoSourceClassifier` class implements several caches to make these lookups as efficient as possible in ESLint when all imports across the entire repository are validated. This cache lasts for the lifetime of the class and to invalidate the cache the object should just be discarded and a new instance created.
+
+A CLI is provided for inspecting the results of the classifier, check out `node scripts/classify_source --help` for more information about usage.

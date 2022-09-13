@@ -35,17 +35,31 @@ export const UNKNOWN = i18n.translate(
   }
 );
 
-export const RULE_EXECUTION_LOGS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLogsTab',
+export const EXCEPTIONS_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExceptionsTab',
   {
-    defaultMessage: 'Rule execution logs ',
+    defaultMessage: 'Rule exceptions',
   }
 );
 
-export const EXCEPTIONS_TAB = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.exceptionsTab',
+export const ENDPOINT_EXCEPTIONS_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.endpointExceptionsTab',
   {
-    defaultMessage: 'Exceptions',
+    defaultMessage: 'Endpoint exceptions',
+  }
+);
+
+export const EXECUTION_RESULTS_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionResultsTab',
+  {
+    defaultMessage: 'Execution results',
+  }
+);
+
+export const EXECUTION_EVENTS_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionEventsTab',
+  {
+    defaultMessage: 'Execution events',
   }
 );
 

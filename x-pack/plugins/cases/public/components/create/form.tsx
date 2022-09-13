@@ -34,8 +34,9 @@ import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { CreateCaseOwnerSelector } from './owner_selector';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
-import { CaseAttachments } from '../../types';
+import { CaseAttachmentsWithoutOwner } from '../../types';
 import { Severity } from './severity';
+import { Assignees } from './assignees';
 
 interface ContainerProps {
   big?: boolean;
@@ -67,7 +68,7 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
     createAttachments: UseCreateAttachments['createAttachments']
   ) => Promise<void>;
   timelineIntegration?: CasesTimelineIntegration;
-  attachments?: CaseAttachments;
+  attachments?: CaseAttachmentsWithoutOwner;
 }
 
 const empty: ActionConnector[] = [];
@@ -86,6 +87,9 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
         children: (
           <>
             <Title isLoading={isSubmitting} />
+            <Container>
+              <Assignees isLoading={isSubmitting} />
+            </Container>
             <Container>
               <Tags isLoading={isSubmitting} />
             </Container>

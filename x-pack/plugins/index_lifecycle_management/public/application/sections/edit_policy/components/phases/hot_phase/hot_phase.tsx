@@ -29,12 +29,14 @@ import {
   SearchableSnapshotField,
   ReadonlyField,
   ShrinkField,
+  DownsampleField,
 } from '../shared_fields';
 import { Phase } from '../phase';
 
 import { useRolloverValueRequiredValidation } from './use_rollover_value_required_validation';
 import {
   MaxPrimaryShardSizeField,
+  MaxPrimaryShardDocsField,
   MaxAgeField,
   MaxDocumentCountField,
   MaxIndexSizeField,
@@ -151,6 +153,9 @@ export const HotPhase: FunctionComponent = () => {
                 <MaxPrimaryShardSizeField />
                 <EuiSpacer />
 
+                <MaxPrimaryShardDocsField />
+                <EuiSpacer />
+
                 <MaxAgeField />
                 <EuiSpacer />
 
@@ -172,6 +177,7 @@ export const HotPhase: FunctionComponent = () => {
           <ShrinkField phase={'hot'} />
           {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase="hot" />}
           <ReadonlyField phase={'hot'} />
+          <DownsampleField phase="hot" />
         </>
       )}
       <IndexPriorityField phase={'hot'} />

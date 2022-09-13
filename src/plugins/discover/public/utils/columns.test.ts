@@ -7,20 +7,20 @@
  */
 
 import { getDisplayedColumns } from './columns';
-import { indexPatternWithTimefieldMock } from '../__mocks__/index_pattern_with_timefield';
-import { indexPatternMock } from '../__mocks__/index_pattern';
+import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
+import { dataViewMock } from '../__mocks__/data_view';
 
 describe('getDisplayedColumns', () => {
-  test('returns default columns given a index pattern without timefield', async () => {
-    const result = getDisplayedColumns([], indexPatternMock);
+  test('returns default columns given a data view without timefield', async () => {
+    const result = getDisplayedColumns([], dataViewMock);
     expect(result).toMatchInlineSnapshot(`
       Array [
         "_source",
       ]
     `);
   });
-  test('returns default columns given a index pattern with timefield', async () => {
-    const result = getDisplayedColumns([], indexPatternWithTimefieldMock);
+  test('returns default columns given a data view with timefield', async () => {
+    const result = getDisplayedColumns([], dataViewWithTimefieldMock);
     expect(result).toMatchInlineSnapshot(`
       Array [
         "_source",
@@ -28,7 +28,7 @@ describe('getDisplayedColumns', () => {
     `);
   });
   test('returns default columns when just timefield is in state', async () => {
-    const result = getDisplayedColumns(['timestamp'], indexPatternWithTimefieldMock);
+    const result = getDisplayedColumns(['timestamp'], dataViewWithTimefieldMock);
     expect(result).toMatchInlineSnapshot(`
       Array [
         "_source",
@@ -36,7 +36,7 @@ describe('getDisplayedColumns', () => {
     `);
   });
   test('returns columns given by argument, no fallback ', async () => {
-    const result = getDisplayedColumns(['test'], indexPatternWithTimefieldMock);
+    const result = getDisplayedColumns(['test'], dataViewWithTimefieldMock);
     expect(result).toMatchInlineSnapshot(`
       Array [
         "test",
@@ -44,8 +44,8 @@ describe('getDisplayedColumns', () => {
     `);
   });
   test('returns the same instance of ["_source"] over multiple calls', async () => {
-    const result = getDisplayedColumns([], indexPatternWithTimefieldMock);
-    const result2 = getDisplayedColumns([], indexPatternWithTimefieldMock);
+    const result = getDisplayedColumns([], dataViewWithTimefieldMock);
+    const result2 = getDisplayedColumns([], dataViewWithTimefieldMock);
     expect(result).toBe(result2);
   });
 });

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { pipe } from 'lodash/fp';
 
+import { InputsModelId } from '../../../store/inputs/constants';
 import { mockGlobalState } from '../../../mock';
 
 const filters = [
@@ -43,7 +44,7 @@ const input = {
     },
   ],
   policy: { kind: 'manual', duration: 300000 },
-  linkTo: ['global'],
+  linkTo: [InputsModelId.global],
   query: { query: '', language: 'kuery' },
   filters: [],
   fullScreen: false,

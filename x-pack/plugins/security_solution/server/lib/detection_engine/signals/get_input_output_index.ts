@@ -34,6 +34,8 @@ export interface GetInputIndexReturn {
   warningToWrite?: string;
 }
 
+export class DataViewError extends Error {}
+
 export const getInputIndex = async ({
   index,
   services,
@@ -45,10 +47,15 @@ export const getInputIndex = async ({
   // If data views defined, use it
   if (dataViewId != null && dataViewId !== '') {
     // Check to see that the selected dataView exists
-    const dataView = await services.savedObjectsClient.get<DataViewAttributes>(
-      'index-pattern',
-      dataViewId
-    );
+    let dataView;
+    try {
+      dataView = await services.savedObjectsClient.get<DataViewAttributes>(
+        'index-pattern',
+        dataViewId
+      );
+    } catch (exc) {
+      throw new DataViewError(exc.message);
+    }
     const indices = dataView.attributes.title.split(',');
     const runtimeMappings =
       dataView.attributes.runtimeFieldMap != null

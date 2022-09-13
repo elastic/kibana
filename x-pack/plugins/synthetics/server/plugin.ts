@@ -101,7 +101,7 @@ export class Plugin implements PluginType {
 
     initUptimeServer(this.server, plugins, ruleDataClient, this.logger);
 
-    initSyntheticsServer(this.server, this.syntheticsMonitorClient);
+    initSyntheticsServer(this.server, this.syntheticsMonitorClient, plugins);
 
     registerUptimeSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
 

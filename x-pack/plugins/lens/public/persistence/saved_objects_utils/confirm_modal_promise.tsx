@@ -16,7 +16,7 @@ export function confirmModalPromise(
   title = '',
   confirmBtnText = '',
   overlays: OverlayStart
-): Promise<true> {
+): Promise<boolean> {
   return new Promise((resolve, reject) => {
     const cancelButtonText = i18n.translate('xpack.lens.confirmModal.cancelButtonLabel', {
       defaultMessage: 'Cancel',

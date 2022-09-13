@@ -72,7 +72,9 @@ function executeSyntheticsRunner(dirPath) {
     );
   } else if (runner) {
     childProcess.execSync(
-      `node ../../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}'  --headless ${headless} --bail ${pauseOnError} --grep '${grep}'`,
+      `node ../../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}'  --headless ${headless} --bail ${pauseOnError} ${
+        grep ? '--grep ' + grep : ''
+      }`,
       {
         cwd: dirPath,
         stdio: 'inherit',

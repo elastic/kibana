@@ -9,27 +9,20 @@ import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-
-import type { Query } from '@kbn/es-query';
 import { DatatableUtilitiesService, parseTimeShift } from '@kbn/data-plugin/common';
 import {
   adjustTimeScaleLabelSuffix,
   GenericIndexPatternColumn,
   operationDefinitionMap,
 } from '../operations';
-import { IndexPattern, IndexPatternLayer } from '../types';
-import { IndexPatternDimensionEditorProps } from './dimension_panel';
+import type { IndexPatternLayer } from '../types';
+import type { IndexPatternDimensionEditorProps } from './dimension_panel';
 import {
   getDateHistogramInterval,
   getLayerTimeShiftChecks,
   timeShiftOptions,
 } from '../time_shift_utils';
-
-// to do: get the language from uiSettings
-export const defaultFilter: Query = {
-  query: '',
-  language: 'kuery',
-};
+import type { IndexPattern } from '../../types';
 
 export function setTimeShift(
   columnId: string,
@@ -45,7 +38,9 @@ export function setTimeShift(
         currentColumn.timeScale,
         currentColumn.timeScale,
         currentColumn.timeShift,
-        trimmedTimeShift
+        trimmedTimeShift,
+        currentColumn.reducedTimeRange,
+        currentColumn.reducedTimeRange
       );
   return {
     ...layer,
@@ -108,13 +103,16 @@ export function TimeShift({
   const localValueNotMultiple = parsedLocalValue && isValueNotMultiple(parsedLocalValue);
 
   function getSelectedOption() {
-    if (!localValue) return [];
     const goodPick = timeShiftOptions.filter(({ value }) => value === localValue);
     if (goodPick.length > 0) return goodPick;
     return [
       {
-        value: localValue,
-        label: localValue,
+        value: localValue ?? '',
+        label:
+          localValue ??
+          i18n.translate('xpack.lens.timeShift.none', {
+            defaultMessage: 'None',
+          }),
       },
     ];
   }
@@ -180,7 +178,7 @@ export function TimeShift({
                 }
               }}
               onChange={(choices) => {
-                if (choices.length === 0) {
+                if (choices.length === 0 || (choices.length && choices[0].value === '')) {
                   updateLayer(setTimeShift(columnId, layer, ''));
                   setLocalValue('');
                   return;

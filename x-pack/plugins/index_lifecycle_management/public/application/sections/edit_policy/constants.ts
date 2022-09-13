@@ -20,6 +20,7 @@ export const ROLLOVER_FORM_PATHS = {
   maxAge: 'phases.hot.actions.rollover.max_age',
   maxSize: 'phases.hot.actions.rollover.max_size',
   maxPrimaryShardSize: 'phases.hot.actions.rollover.max_primary_shard_size',
+  maxPrimaryShardDocs: 'phases.hot.actions.rollover.max_primary_shard_docs',
 };
 
 /**
@@ -115,5 +116,44 @@ export const timeUnits = [
     text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.timeUnits.nanosecondsLabel', {
       defaultMessage: 'nanoseconds',
     }),
+  },
+];
+
+/*
+ * Labels for fixed intervals
+ */
+export const fixedIntervalUnits = [
+  {
+    value: 'd',
+    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.fixedIntervalUnits.daysLabel', {
+      defaultMessage: 'days',
+    }),
+  },
+  {
+    value: 'h',
+    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.fixedIntervalUnits.hoursLabel', {
+      defaultMessage: 'hours',
+    }),
+  },
+  {
+    value: 'm',
+    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.fixedIntervalUnits.minutesLabel', {
+      defaultMessage: 'minutes',
+    }),
+  },
+  {
+    value: 's',
+    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.fixedIntervalUnits.secondsLabel', {
+      defaultMessage: 'seconds',
+    }),
+  },
+  {
+    value: 'ms',
+    text: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.fixedIntervalUnits.millisecondsLabel',
+      {
+        defaultMessage: 'milliseconds',
+      }
+    ),
   },
 ];

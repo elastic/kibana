@@ -22,7 +22,6 @@ export const staticGenericExternalSourceData: SourceDataItem = {
   categories: ['API', 'Custom'],
   serviceType: 'external',
   configuration: {
-    isPublicKey: false,
     hasOauthRedirect: false,
     needsBaseUrl: false,
     documentationUrl: docLinks.workplaceSearchCustomConnectorPackage,
@@ -48,7 +47,6 @@ export const staticSourceData: SourceDataItem[] = [
       SOURCE_CATEGORIES.CLOUD,
     ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchBox,
@@ -76,7 +74,6 @@ export const staticSourceData: SourceDataItem[] = [
     serviceType: 'confluence_cloud',
     categories: [SOURCE_CATEGORIES.WIKI, SOURCE_CATEGORIES.ATLASSIAN, SOURCE_CATEGORIES.INTRANET],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: true,
       documentationUrl: docLinks.workplaceSearchConfluenceCloud,
@@ -111,7 +108,6 @@ export const staticSourceData: SourceDataItem[] = [
     baseServiceType: 'confluence_cloud',
     categories: [SOURCE_CATEGORIES.WIKI, SOURCE_CATEGORIES.ATLASSIAN, SOURCE_CATEGORIES.INTRANET],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: true,
       documentationUrl: docLinks.workplaceSearchConfluenceCloudConnectorPackage,
@@ -145,9 +141,8 @@ export const staticSourceData: SourceDataItem[] = [
     serviceType: 'confluence_server',
     categories: [SOURCE_CATEGORIES.WIKI, SOURCE_CATEGORIES.ATLASSIAN, SOURCE_CATEGORIES.INTRANET],
     configuration: {
-      isPublicKey: true,
       hasOauthRedirect: true,
-      needsBaseUrl: false,
+      needsBaseUrl: true,
       documentationUrl: docLinks.workplaceSearchConfluenceServer,
     },
     objTypes: [
@@ -180,7 +175,6 @@ export const staticSourceData: SourceDataItem[] = [
       SOURCE_CATEGORIES.CLOUD,
     ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchDropbox,
@@ -212,7 +206,6 @@ export const staticSourceData: SourceDataItem[] = [
       SOURCE_CATEGORIES.CODE_REPOSITORY,
     ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       needsConfiguration: true,
@@ -251,7 +244,6 @@ export const staticSourceData: SourceDataItem[] = [
       SOURCE_CATEGORIES.CODE_REPOSITORY,
     ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsConfiguration: true,
       needsBaseUrl: true,
@@ -296,7 +288,6 @@ export const staticSourceData: SourceDataItem[] = [
       SOURCE_CATEGORIES.GOOGLE,
     ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchGmail,
@@ -319,7 +310,6 @@ export const staticSourceData: SourceDataItem[] = [
       SOURCE_CATEGORIES.GSUITE,
     ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchGoogleDrive,
@@ -356,7 +346,6 @@ export const staticSourceData: SourceDataItem[] = [
       SOURCE_CATEGORIES.PROJECT_MANAGEMENT,
     ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: true,
       documentationUrl: docLinks.workplaceSearchJiraCloud,
@@ -396,9 +385,8 @@ export const staticSourceData: SourceDataItem[] = [
       SOURCE_CATEGORIES.PROJECT_MANAGEMENT,
     ],
     configuration: {
-      isPublicKey: true,
       hasOauthRedirect: true,
-      needsBaseUrl: false,
+      needsBaseUrl: true,
       documentationUrl: docLinks.workplaceSearchJiraServer,
       applicationPortalUrl: '',
     },
@@ -431,7 +419,6 @@ export const staticSourceData: SourceDataItem[] = [
     serviceType: 'custom',
     baseServiceType: 'network_drive',
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: false,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchNetworkDrive,
@@ -451,7 +438,6 @@ export const staticSourceData: SourceDataItem[] = [
       SOURCE_CATEGORIES.OFFICE_365,
     ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchOneDrive,
@@ -483,7 +469,6 @@ export const staticSourceData: SourceDataItem[] = [
       SOURCE_CATEGORIES.ACCOUNT_MANAGEMENT,
     ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchSalesforce,
@@ -522,7 +507,6 @@ export const staticSourceData: SourceDataItem[] = [
       SOURCE_CATEGORIES.ACCOUNT_MANAGEMENT,
     ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchSalesforce,
@@ -557,7 +541,6 @@ export const staticSourceData: SourceDataItem[] = [
     serviceType: 'service_now',
     categories: [SOURCE_CATEGORIES.WORKFLOW],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: false,
       needsBaseUrl: true,
       needsCredentials: true,
@@ -596,7 +579,6 @@ export const staticSourceData: SourceDataItem[] = [
       SOURCE_CATEGORIES.OFFICE_365,
     ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchSharePoint,
@@ -631,7 +613,6 @@ export const staticSourceData: SourceDataItem[] = [
       SOURCE_CATEGORIES.OFFICE_365,
     ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchExternalSharePointOnline,
@@ -667,7 +648,6 @@ export const staticSourceData: SourceDataItem[] = [
     serviceType: 'custom',
     baseServiceType: 'share_point_server',
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: false,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchSharePointServer,
@@ -686,7 +666,6 @@ export const staticSourceData: SourceDataItem[] = [
       SOURCE_CATEGORIES.CHAT,
     ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchSlack,
@@ -713,7 +692,6 @@ export const staticSourceData: SourceDataItem[] = [
       SOURCE_CATEGORIES.HELPDESK,
     ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       needsSubdomain: true,
@@ -744,7 +722,6 @@ export const staticCustomSourceData: SourceDataItem = {
   categories: ['API', 'Custom'],
   serviceType: 'custom',
   configuration: {
-    isPublicKey: false,
     hasOauthRedirect: false,
     needsBaseUrl: false,
     documentationUrl: docLinks.workplaceSearchCustomSources,

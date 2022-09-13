@@ -391,7 +391,7 @@ describe('BuilderEntryItem', () => {
         entry={{
           correspondingKeywordField: undefined,
           entryIndex: 0,
-          field: getField('ip'),
+          field: getField('@tags'),
           id: '123',
           nested: undefined,
           operator: matchesOperator,
@@ -412,7 +412,7 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('ip');
+    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('@tags');
     expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
       'matches'
     );
@@ -428,7 +428,7 @@ describe('BuilderEntryItem', () => {
         entry={{
           correspondingKeywordField: undefined,
           entryIndex: 0,
-          field: getField('ip'),
+          field: getField('@tags'),
           id: '123',
           nested: undefined,
           operator: doesNotMatchOperator,
@@ -449,7 +449,7 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('ip');
+    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('@tags');
     expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
       'does not match'
     );

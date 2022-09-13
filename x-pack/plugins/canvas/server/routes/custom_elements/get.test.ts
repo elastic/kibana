@@ -8,7 +8,12 @@
 import { AwaitedProperties } from '@kbn/utility-types';
 import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
 import { initializeGetCustomElementRoute } from './get';
-import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from '@kbn/core/server';
+import {
+  kibanaResponseFactory,
+  RequestHandlerContext,
+  RequestHandler,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
 import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import { getMockedRouterDeps } from '../test_helpers';
 
@@ -85,7 +90,7 @@ describe('GET custom element', () => {
 
     const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.get.mockImplementation(() => {
-      throw savedObjectsClient.errors.createGenericNotFoundError(CUSTOM_ELEMENT_TYPE, id);
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(CUSTOM_ELEMENT_TYPE, id);
     });
     mockRouteContext.core.savedObjects.client = savedObjectsClient;
 

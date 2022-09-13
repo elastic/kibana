@@ -5,17 +5,23 @@
  * 2.0.
  */
 
-import { EuiSideNavItemType } from '@elastic/eui';
+import { EuiSideNavItemType, EuiPageSectionProps } from '@elastic/eui';
+import { _EuiPageBottomBarProps } from '@elastic/eui/src/components/page_template/bottom_bar/page_bottom_bar';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import type { ApplicationStart } from '@kbn/core/public';
-import { SharedUxServicesProvider } from '@kbn/shared-ux-services';
-import type { SharedUXPluginStart } from '@kbn/shared-ux-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-components';
+import {
+  KibanaPageTemplate,
+  KibanaPageTemplateKibanaProvider,
+} from '@kbn/shared-ux-page-kibana-template';
+import type {
+  KibanaPageTemplateProps,
+  KibanaPageTemplateKibanaDependencies,
+} from '@kbn/shared-ux-page-kibana-template';
 import type { NavigationSection } from '../../../services/navigation_registry';
 import { ObservabilityTour } from '../tour';
 import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
@@ -25,17 +31,16 @@ export type WrappedPageTemplateProps = Pick<
   | 'children'
   | 'data-test-subj'
   | 'paddingSize'
-  | 'pageBodyProps'
-  | 'pageContentBodyProps'
-  | 'pageContentProps'
   | 'pageHeader'
   | 'restrictWidth'
-  | 'template'
   | 'isEmptyState'
   | 'noDataConfig'
 > & {
   showSolutionNav?: boolean;
   isPageDataLoaded?: boolean;
+  pageSectionProps?: EuiPageSectionProps;
+  bottomBar?: React.ReactNode;
+  bottomBarProps?: _EuiPageBottomBarProps;
 };
 
 export interface ObservabilityPageTemplateDependencies {
@@ -43,7 +48,7 @@ export interface ObservabilityPageTemplateDependencies {
   getUrlForApp: ApplicationStart['getUrlForApp'];
   navigateToApp: ApplicationStart['navigateToApp'];
   navigationSections$: Observable<NavigationSection[]>;
-  getSharedUXContext: SharedUXPluginStart['getContextServices'];
+  getPageTemplateServices: () => KibanaPageTemplateKibanaDependencies;
 }
 
 export type ObservabilityPageTemplateProps = ObservabilityPageTemplateDependencies &
@@ -55,15 +60,17 @@ export function ObservabilityPageTemplate({
   getUrlForApp,
   navigateToApp,
   navigationSections$,
-  getSharedUXContext,
   showSolutionNav = true,
   isPageDataLoaded = true,
+  getPageTemplateServices,
+  bottomBar,
+  bottomBarProps,
+  pageSectionProps,
   ...pageTemplateProps
 }: ObservabilityPageTemplateProps): React.ReactElement | null {
   const sections = useObservable(navigationSections$, []);
   const currentAppId = useObservable(currentAppId$, undefined);
   const { pathname: currentPath } = useLocation();
-  const sharedUXServices = getSharedUXContext();
 
   const { services } = useKibana();
 
@@ -130,7 +137,7 @@ export function ObservabilityPageTemplate({
   );
 
   return (
-    <SharedUxServicesProvider {...sharedUXServices}>
+    <KibanaPageTemplateKibanaProvider {...getPageTemplateServices()}>
       <ObservabilityTour
         navigateToApp={navigateToApp}
         prependBasePath={services?.http?.basePath.prepend}
@@ -155,12 +162,23 @@ export function ObservabilityPageTemplate({
                   : undefined
               }
             >
-              {children}
+              <KibanaPageTemplate.Section
+                component="div"
+                alignment={pageTemplateProps.isEmptyState ? 'center' : 'top'}
+                {...pageSectionProps}
+              >
+                {children}
+              </KibanaPageTemplate.Section>
+              {bottomBar && (
+                <KibanaPageTemplate.BottomBar {...bottomBarProps}>
+                  {bottomBar}
+                </KibanaPageTemplate.BottomBar>
+              )}
             </KibanaPageTemplate>
           );
         }}
       </ObservabilityTour>
-    </SharedUxServicesProvider>
+    </KibanaPageTemplateKibanaProvider>
   );
 }
 

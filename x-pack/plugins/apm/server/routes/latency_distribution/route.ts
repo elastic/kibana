@@ -11,6 +11,7 @@ import { termQuery } from '@kbn/observability-plugin/server';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getOverallLatencyDistribution } from './get_overall_latency_distribution';
 import { setupRequest } from '../../lib/helpers/setup_request';
+import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import {
@@ -18,7 +19,10 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../common/processor_event';
+import {
+  latencyDistributionChartTypeRt,
+  LatencyDistributionChartType,
+} from '../../../common/latency_distribution_chart_types';
 
 const latencyOverallTransactionDistributionRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',
@@ -34,12 +38,15 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
             fieldValue: t.union([t.string, toNumberRt]),
           })
         ),
+        durationMin: toNumberRt,
+        durationMax: toNumberRt,
       }),
       environmentRt,
       kueryRt,
       rangeRt,
       t.type({
         percentileThreshold: toNumberRt,
+        chartType: latencyDistributionChartTypeRt,
       }),
     ]),
   }),
@@ -58,12 +65,26 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
       start,
       end,
       percentileThreshold,
+      durationMin,
+      durationMax,
       termFilters,
+      chartType,
     } = resources.params.body;
+
+    // only the transaction latency distribution chart can use metrics data
+    const searchAggregatedTransactions =
+      chartType === LatencyDistributionChartType.transactionLatency
+        ? await getSearchAggregatedTransactions({
+            ...setup,
+            kuery,
+            start,
+            end,
+          })
+        : false;
 
     return getOverallLatencyDistribution({
       setup,
-      eventType: ProcessorEvent.transaction,
+      chartType,
       environment,
       kuery,
       start,
@@ -82,6 +103,9 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
         },
       },
       percentileThreshold,
+      durationMinOverride: durationMin,
+      durationMaxOverride: durationMax,
+      searchMetrics: searchAggregatedTransactions,
     });
   },
 });

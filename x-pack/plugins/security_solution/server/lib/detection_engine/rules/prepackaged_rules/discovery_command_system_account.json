@@ -12,10 +12,38 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Account Discovery Command via SYSTEM Account",
-  "note": "## Triage and analysis\n\n### Investigating Account Discovery Command via SYSTEM Account\n\nAfter successfully compromising an environment, attackers may try to gain situational awareness to plan their next steps.\nThis can happen by running commands to enumerate network resources, users, connections, files, and installed security\nsoftware.\n\nThis rule looks for the execution of account discovery utilities using the SYSTEM account, which is commonly observed\nafter attackers successfully perform privilege escalation or exploit web applications.\n\n#### Possible investigation steps\n\n- Investigate the process execution chain (parent process tree) for unknown processes. Examine their executable files\nfor prevalence, whether they are located in expected locations, and if they are signed with valid digital signatures.\n  - If the process tree includes a web-application server process such as w3wp, httpd.exe, nginx.exe and alike,\n  investigate any suspicious file creation or modification in the last 48 hours to assess the presence of any potential\n  webshell backdoor.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n- Determine how the SYSTEM account is being used. For example, users with administrator privileges can spawn a system\nshell using Windows services, scheduled tasks or other third party utilities.\n\n### False positive analysis\n\n- Discovery activities are not inherently malicious if they occur in isolation. As long as the analyst did not identify\nsuspicious activity related to the user or host, such alerts can be dismissed.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved hosts to prevent further post-compromise behavior.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are\nidentified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business\nsystems, and web services.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and\nmalware components.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection via the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the\nmean time to respond (MTTR).\n- Use the data collected through the analysis to investigate other machines affected in the environment.\n\n## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
-  "query": "process where event.type in (\"start\", \"process_started\") and \n  (?process.Ext.token.integrity_level_name : \"System\" or\n  ?winlog.event_data.IntegrityLevel : \"System\") and\n  (process.name : \"whoami.exe\" or\n  (process.name : \"net1.exe\" and not process.parent.name : \"net.exe\"))\n",
+  "note": "## Triage and analysis\n\n### Investigating Account Discovery Command via SYSTEM Account\n\nAfter successfully compromising an environment, attackers may try to gain situational awareness to plan their next steps.\nThis can happen by running commands to enumerate network resources, users, connections, files, and installed security\nsoftware.\n\nThis rule looks for the execution of account discovery utilities using the SYSTEM account, which is commonly observed\nafter attackers successfully perform privilege escalation or exploit web applications.\n\n#### Possible investigation steps\n\n- Investigate the process execution chain (parent process tree) for unknown processes. Examine their executable files\nfor prevalence, whether they are located in expected locations, and if they are signed with valid digital signatures.\n  - If the process tree includes a web-application server process such as w3wp, httpd.exe, nginx.exe and alike,\n  investigate any suspicious file creation or modification in the last 48 hours to assess the presence of any potential\n  webshell backdoor.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n- Determine how the SYSTEM account is being used. For example, users with administrator privileges can spawn a system\nshell using Windows services, scheduled tasks or other third party utilities.\n\n### False positive analysis\n\n- Discovery activities are not inherently malicious if they occur in isolation. As long as the analyst did not identify\nsuspicious activity related to the user or host, such alerts can be dismissed.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved hosts to prevent further post-compromise behavior.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are\nidentified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business\nsystems, and web services.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and\nmalware components.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection via the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the\nmean time to respond (MTTR).\n- Use the data collected through the analysis to investigate other machines affected in the environment.",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  (?process.Ext.token.integrity_level_name : \"System\" or\n  ?winlog.event_data.IntegrityLevel : \"System\") and\n  (process.name : \"whoami.exe\" or\n  (process.name : \"net1.exe\" and not process.parent.name : \"net.exe\"))\n",
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": false,
+      "name": "process.Ext.token.integrity_level_name",
+      "type": "unknown"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.parent.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": false,
+      "name": "winlog.event_data.IntegrityLevel",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 21,
   "rule_id": "2856446a-34e6-435b-9fb5-f8f040bfa7ed",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "low",
   "tags": [
     "Elastic",
@@ -43,5 +71,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 12
+  "version": 14
 }

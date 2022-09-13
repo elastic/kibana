@@ -8,7 +8,12 @@
 import React, { useState, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiCallOut, EuiSpacer, EuiPageBody, EuiPageContent } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiSpacer,
+  EuiPageBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+} from '@elastic/eui';
 
 import type { SimpleSavedObject } from '@kbn/core/public';
 
@@ -145,6 +150,7 @@ export const SourceSelection: FC = () => {
                     defaultMessage: 'Data view',
                   }
                 ),
+                defaultSearchField: 'name',
               },
             ]}
             fixedPageSize={fixedPageSize}

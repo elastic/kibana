@@ -26,7 +26,7 @@ export class PrivateLocationTestService {
         name,
         description: '',
         namespace: 'default',
-        monitoring_enabled: ['logs', 'metrics'],
+        monitoring_enabled: [],
       })
       .expect(200);
   }
@@ -38,8 +38,8 @@ export class PrivateLocationTestService {
       id: privateLocationsSavedObjectId,
       attributes: {
         locations: testFleetPolicyIds.map((id, index) => ({
-          name: 'Test private location ' + index,
-          policyHostId: id,
+          label: 'Test private location ' + index,
+          agentPolicyId: id,
           id,
           geo: {
             lat: '',

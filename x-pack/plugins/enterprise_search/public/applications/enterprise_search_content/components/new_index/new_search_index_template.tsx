@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/**
- * TODO:
- * - Need to add documentation URLs (search for `#`s)
- * - Bind create index button
- */
-
 import React, { ChangeEvent } from 'react';
 
 import { useValues, useActions } from 'kea';
@@ -38,6 +32,8 @@ import { LanguageForOptimization } from './types';
 
 export interface Props {
   buttonLoading?: boolean;
+  disabled?: boolean;
+  docsUrl?: string;
   error?: string | React.ReactNode;
   onNameChange?(name: string): void;
   onSubmit(name: string, language: LanguageForOptimization): void;
@@ -47,6 +43,8 @@ export interface Props {
 
 export const NewSearchIndexTemplate: React.FC<Props> = ({
   children,
+  disabled,
+  docsUrl,
   error,
   title,
   onNameChange,
@@ -57,7 +55,6 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
     fullIndexName,
     fullIndexNameExists,
     fullIndexNameIsValid,
-    isLoading,
     language,
     rawName,
     languageSelectValue,
@@ -106,12 +103,12 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
   return (
     <EuiPanel hasBorder>
       <EuiForm
+        component="form"
+        id="enterprise-search-add-connector"
         onSubmit={(event) => {
           event.preventDefault();
           onSubmit(fullIndexName, language);
         }}
-        component="form"
-        id="enterprise-search-add-connector"
       >
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
@@ -123,6 +120,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
             <EuiFlexGroup>
               <EuiFlexItem grow>
                 <EuiFormRow
+                  isDisabled={disabled}
                   label={i18n.translate(
                     'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputLabel',
                     {
@@ -150,6 +148,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
                       }
                     )}
                     fullWidth
+                    disabled={disabled}
                     isInvalid={false}
                     value={rawName}
                     onChange={handleNameChange}
@@ -169,6 +168,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFormRow
+                  isDisabled={disabled}
                   label={i18n.translate(
                     'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.languageInputLabel',
                     {
@@ -183,6 +183,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
                   )}
                 >
                   <EuiSelect
+                    disabled={disabled}
                     options={SUPPORTED_LANGUAGES}
                     onChange={handleLanguageChange}
                     value={languageSelectValue}
@@ -197,8 +198,8 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              isDisabled={!rawName || buttonLoading || isLoading || formInvalid}
-              isLoading={buttonLoading || isLoading}
+              isDisabled={!rawName || buttonLoading || formInvalid || disabled}
+              isLoading={buttonLoading}
               type="submit"
             >
               {i18n.translate(
@@ -209,16 +210,18 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
               )}
             </EuiButton>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink target="_blank" href="#">
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.viewDocumentation.linkText',
-                {
-                  defaultMessage: 'View the documentation',
-                }
-              )}
-            </EuiLink>
-          </EuiFlexItem>
+          {!!docsUrl && (
+            <EuiFlexItem grow={false}>
+              <EuiLink target="_blank" href={docsUrl}>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.viewDocumentation.linkText',
+                  {
+                    defaultMessage: 'View the documentation',
+                  }
+                )}
+              </EuiLink>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiForm>
       <EuiHorizontalRule />

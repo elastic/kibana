@@ -19,7 +19,13 @@ export enum UsersTableType {
   anomalies = 'anomalies',
   risk = 'userRisk',
   events = 'events',
-  alerts = 'externalAlerts',
+}
+
+export enum UsersDetailsTableType {
+  authentications = 'authentications',
+  anomalies = 'anomalies',
+  risk = 'userRisk',
+  events = 'events',
 }
 
 export interface BasicQueryPaginated {
@@ -31,24 +37,27 @@ export interface AllUsersQuery extends BasicQueryPaginated {
   sort: SortUsersField;
 }
 
-export interface UsersRiskScoreQuery extends BasicQueryPaginated {
+export interface UserRiskScoreQuery extends BasicQueryPaginated {
   sort: RiskScoreSortField;
   severitySelection: RiskSeverity[];
+}
+
+export interface UsersAnomaliesQuery {
+  jobIdSelection: string[];
+  intervalSelection: string;
 }
 
 export interface UsersQueries {
   [UsersTableType.allUsers]: AllUsersQuery;
   [UsersTableType.authentications]: BasicQueryPaginated;
-  [UsersTableType.anomalies]: null | undefined;
-  [UsersTableType.risk]: UsersRiskScoreQuery;
+  [UsersTableType.anomalies]: UsersAnomaliesQuery;
+  [UsersTableType.risk]: UserRiskScoreQuery;
   [UsersTableType.events]: BasicQueryPaginated;
-  [UsersTableType.alerts]: BasicQueryPaginated;
 }
 
 export interface UserDetailsQueries {
-  [UsersTableType.anomalies]: null | undefined;
+  [UsersTableType.anomalies]: UsersAnomaliesQuery;
   [UsersTableType.events]: BasicQueryPaginated;
-  [UsersTableType.alerts]: BasicQueryPaginated;
 }
 
 export interface UsersPageModel {

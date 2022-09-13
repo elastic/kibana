@@ -105,12 +105,15 @@ export class TelemetryEventsSender {
     this.isSending = false;
   }
 
-  private async fetchClusterInfo(): Promise<InfoResponse> {
-    if (this.esClient === undefined || this.esClient === null) {
-      throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
+  private async fetchClusterInfo(): Promise<InfoResponse | undefined> {
+    try {
+      if (this.esClient === undefined || this.esClient === null) {
+        throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
+      }
+      return await this.esClient.info();
+    } catch (e) {
+      this.logger.debug(`Error fetching cluster information: ${e}`);
     }
-
-    return await this.esClient.info();
   }
 
   public async sendEvents(

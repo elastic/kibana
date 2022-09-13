@@ -9,7 +9,7 @@ import {
   Logger,
   ElasticsearchClient,
   SavedObjectsFindResult,
-  SavedObjectsSerializer,
+  ISavedObjectsSerializer,
 } from '@kbn/core/server';
 import { TaskInstance } from '@kbn/task-manager-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -24,7 +24,7 @@ export interface CleanupTasksOpts {
   esClient: ElasticsearchClient;
   tasks: Array<SavedObjectsFindResult<TaskInstance>>;
   spaces?: SpacesPluginStart;
-  savedObjectsSerializer: SavedObjectsSerializer;
+  savedObjectsSerializer: ISavedObjectsSerializer;
   kibanaIndex: string;
   taskManagerIndex: string;
 }

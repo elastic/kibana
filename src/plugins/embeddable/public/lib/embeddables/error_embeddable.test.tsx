@@ -34,10 +34,10 @@ test('ErrorEmbeddable renders in compact mode', async () => {
       <div>
         <div>
           <div
-            class="euiPopover euiPopover--anchorDownCenter"
+            class="euiPopover emotion-euiPopover"
           >
             <div
-              class="euiPopover__anchor errorEmbeddableCompact__popoverAnchor"
+              class="euiPopover__anchor errorEmbeddableCompact__popoverAnchor css-16vtueo-render"
             >
               <div
                 class="euiText errorEmbeddableCompact__button emotion-euiText-xs"

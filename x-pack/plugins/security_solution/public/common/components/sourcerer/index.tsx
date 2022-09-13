@@ -33,7 +33,7 @@ import { Trigger } from './trigger';
 import { AlertsCheckbox, SaveButtons, SourcererCallout } from './sub_components';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
 import { useUpdateUrlParam } from '../../utils/global_query_string';
-import { CONSTANTS } from '../url_state/constants';
+import { URL_PARAM_KEY } from '../../hooks/use_url_state';
 
 export interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;
@@ -44,7 +44,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const isDetectionsSourcerer = scopeId === SourcererScopeName.detections;
   const isTimelineSourcerer = scopeId === SourcererScopeName.timeline;
   const isDefaultSourcerer = scopeId === SourcererScopeName.default;
-  const updateUrlParam = useUpdateUrlParam<SourcererUrlState>(CONSTANTS.sourcerer);
+  const updateUrlParam = useUpdateUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer);
 
   const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
   const {

@@ -15,8 +15,7 @@ import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FieldFormatParams } from '@kbn/field-formats-plugin/common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ISearchSource } from '../../../public';
+import type { ISearchSource } from '../../../public';
 import { initParams } from './agg_params';
 import { AggConfig } from './agg_config';
 import { IAggConfigs } from './agg_configs';

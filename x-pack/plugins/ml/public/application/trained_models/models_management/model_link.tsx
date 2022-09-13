@@ -20,5 +20,9 @@ export const TrainedModelLink: FC<TrainedModelLinkProps> = ({ id }) => {
     pageState: { modelId: id },
   });
 
-  return <EuiLink href={href}>{id}</EuiLink>;
+  return (
+    <EuiLink href={href} css={{ overflow: 'hidden', 'text-overflow': 'ellipsis' }} title={id}>
+      {id}
+    </EuiLink>
+  );
 };

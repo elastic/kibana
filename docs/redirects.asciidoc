@@ -419,7 +419,7 @@ This page has been deleted. Refer to <<osquery>>.
 [role="exclude",id="machine-learning-api-sync"]
 == Sync machine learning saved objects API
 
-This page has been deleted. Refer to <<ml-sync-default>> and <<ml-sync>>.
+This page has been deleted. Refer to <<ml-sync>>.
 
 [role="exclude",id="machine-learning-api"]
 == Machine learning APIs

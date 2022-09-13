@@ -11,14 +11,16 @@ export type FlashMessageTypes = 'success' | 'info' | 'warning' | 'error';
 export type FlashMessageColors = 'success' | 'primary' | 'warning' | 'danger';
 
 export interface IFlashMessage {
-  type: FlashMessageTypes;
-  message: ReactNode;
   description?: ReactNode;
+  iconType?: string;
+  message: ReactNode;
+  type: FlashMessageTypes;
 }
 
 // @see EuiGlobalToastListToast for more props
 export interface ToastOptions {
+  iconType?: string;
+  id?: string;
   text?: ReactChild; // Additional text below the message/title, same as IFlashMessage['description']
   toastLifeTimeMs?: number; // Allows customing per-toast timeout
-  id?: string;
 }

@@ -12,9 +12,9 @@ import { DataTableRecord } from '../../../types';
  * This function is calculating stats of the available fields, for usage in sidebar and sharing
  * Note that this values aren't displayed, but used for internal calculations
  */
-export function calcFieldCounts(rows?: DataTableRecord[], indexPattern?: DataView) {
+export function calcFieldCounts(rows?: DataTableRecord[], dataView?: DataView) {
   const counts: Record<string, number> = {};
-  if (!rows || !indexPattern) {
+  if (!rows || !dataView) {
     return {};
   }
   for (const hit of rows) {

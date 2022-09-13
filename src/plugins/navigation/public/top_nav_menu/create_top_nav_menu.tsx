@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { AggregateQuery, Query } from '@kbn/es-query';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { TopNavMenuProps, TopNavMenu } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu_data';
@@ -16,7 +17,7 @@ export function createTopNav(
   unifiedSearch: UnifiedSearchPublicPluginStart,
   extraConfig: RegisteredTopNavMenuData[]
 ) {
-  return (props: TopNavMenuProps) => {
+  return <QT extends AggregateQuery | Query = Query>(props: TopNavMenuProps<QT>) => {
     const relevantConfig = extraConfig.filter(
       (dataItem) => dataItem.appName === undefined || dataItem.appName === props.appName
     );

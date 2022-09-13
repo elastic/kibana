@@ -7,28 +7,14 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { DataViewListItem, SearchSource } from '@kbn/data-plugin/public';
 import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { useDiscoverState } from './use_discover_state';
-import { indexPatternMock } from '../../../__mocks__/index_pattern';
-import { SearchSource } from '@kbn/data-plugin/public';
+import { dataViewMock } from '../../../__mocks__/data_view';
 
 describe('test useDiscoverState', () => {
-  const originalSavedObjectsClient = discoverServiceMock.core.savedObjects.client;
-
-  beforeAll(() => {
-    discoverServiceMock.core.savedObjects.client.resolve = jest.fn().mockReturnValue({
-      saved_object: {
-        attributes: {},
-      },
-    });
-  });
-
-  afterAll(() => {
-    discoverServiceMock.core.savedObjects.client = originalSavedObjectsClient;
-  });
-
   test('return is valid', async () => {
     const { history } = createSearchSessionMock();
 
@@ -38,9 +24,10 @@ describe('test useDiscoverState', () => {
         history,
         savedSearch: savedSearchMock,
         setExpandedDoc: jest.fn(),
+        dataViewList: [dataViewMock as DataViewListItem],
       });
     });
-    expect(result.current.state.index).toBe(indexPatternMock.id);
+    expect(result.current.state.index).toBe(dataViewMock.id);
     expect(result.current.stateContainer).toBeInstanceOf(Object);
     expect(result.current.searchSource).toBeInstanceOf(SearchSource);
   });

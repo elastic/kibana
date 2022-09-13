@@ -34,13 +34,13 @@ export interface UsageStats {
   'discover:searchFieldsFromSource': boolean;
   'discover:showFieldStatistics': boolean;
   'discover:showMultiFields': boolean;
+  'discover:enableSql': boolean;
   'discover:maxDocFieldsDisplayed': number;
   'securitySolution:rulesTableRefresh': string;
   'observability:enableInspectEsQueries': boolean;
   'observability:enableNewSyntheticsView': boolean;
   'observability:maxSuggestions': number;
   'observability:enableComparisonByDefault': boolean;
-  'observability:enableInfrastructureView': boolean;
   'observability:enableServiceGroups': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
@@ -145,4 +145,5 @@ export interface UsageStats {
   'securitySolution:enableGroupedNav': boolean;
   'securitySolution:showRelatedIntegrations': boolean;
   'visualization:visualize:legacyGaugeChartsLibrary': boolean;
+  'enterpriseSearch:enableIndexTransformsTab': boolean;
 }

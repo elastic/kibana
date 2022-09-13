@@ -17,8 +17,8 @@ const timeRange = {
 };
 
 describe('Transaction details', () => {
-  before(async () => {
-    await synthtrace.index(
+  before(() => {
+    synthtrace.index(
       opbeans({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
@@ -26,13 +26,13 @@ describe('Transaction details', () => {
     );
   });
 
-  after(async () => {
-    await synthtrace.clean();
+  after(() => {
+    synthtrace.clean();
   });
 
   beforeEach(() => {
     cy.loginAsViewerUser();
-    cy.visit(
+    cy.visitKibana(
       `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams({
         ...timeRange,
         transactionName: 'GET /api/product',
@@ -54,5 +54,15 @@ describe('Transaction details', () => {
       .contains('a', '[MockError] Foo')
       .click();
     cy.url().should('include', 'opbeans-java/errors');
+  });
+
+  describe('when navigating to a trace sample', () => {
+    it('keeps the same trace sample after reloading the page', () => {
+      cy.get('[data-test-subj="pagination-button-last"]').click();
+      cy.url().then((url) => {
+        cy.reload();
+        cy.url().should('eq', url);
+      });
+    });
   });
 });

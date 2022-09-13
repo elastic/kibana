@@ -9,15 +9,22 @@ import { cloneDeep, omit } from 'lodash';
 
 import { SchemaType } from '../../../shared/schema/types';
 
-import { RawBoost, Boost, SearchSettings, BoostType, ValueBoost } from './types';
+import {
+  RawBoost,
+  Boost,
+  SearchSettingsRequest,
+  SearchSettings,
+  BoostType,
+  ValueBoost,
+} from './types';
 
 // If the user hasn't entered a filter, then we can skip filtering the array entirely
 export const filterIfTerm = (array: string[], filterTerm: string): string[] => {
   return filterTerm === '' ? array : array.filter((item) => item.includes(filterTerm));
 };
 
-export const removeBoostStateProps = (searchSettings: SearchSettings): SearchSettings => {
-  const updatedSettings = cloneDeep(searchSettings);
+export const removeBoostStateProps = (searchSettings: SearchSettings): SearchSettingsRequest => {
+  const { precision_enabled: precisionEnabled, ...updatedSettings } = cloneDeep(searchSettings);
   const { boosts } = updatedSettings;
   const keys = Object.keys(boosts);
   keys.forEach((key) => boosts[key].forEach((boost) => delete boost.newBoost));

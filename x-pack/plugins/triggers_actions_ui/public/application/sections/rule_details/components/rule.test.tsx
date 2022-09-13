@@ -12,15 +12,31 @@ import { act } from 'react-dom/test-utils';
 import { RuleComponent, alertToListItem } from './rule';
 import { AlertListItem } from './types';
 import { RuleAlertList } from './rule_alert_list';
-import { RuleSummary, AlertStatus, RuleType } from '../../../../types';
-import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
+import { RuleSummary, AlertStatus, RuleType, RuleTypeModel } from '../../../../types';
 import { mockRule } from './test_helpers';
+import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
+import { useKibana } from '../../../../common/lib/kibana';
 
 jest.mock('../../../../common/lib/kibana');
 
 jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),
 }));
+
+const ruleTypeR: RuleTypeModel = {
+  id: 'my-rule-type',
+  iconClass: 'test',
+  description: 'Rule when testing',
+  documentationUrl: 'https://localhost.local/docs',
+  validate: () => {
+    return { errors: {} };
+  },
+  ruleParamsExpression: jest.fn(),
+  requiresAppContext: false,
+};
+
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
@@ -37,6 +53,8 @@ const mockAPIs = {
 
 beforeAll(() => {
   jest.clearAllMocks();
+  ruleTypeRegistry.get.mockReturnValue(ruleTypeR);
+  useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
   global.Date.now = jest.fn(() => fakeNow.getTime());
 });
 
@@ -316,91 +334,6 @@ describe('execution duration overview', () => {
     expect(ruleExecutionStatusStat.first().prop('description')).toEqual('Last response');
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-ok"]').text()).toEqual('Ok');
   });
-
-  it('renders average execution duration', async () => {
-    const rule = mockRule();
-    const ruleType = mockRuleType({ ruleTaskTimeout: '10m' });
-    const ruleSummary = mockRuleSummary({
-      executionDuration: { average: 60284, valuesWithTimestamp: {} },
-    });
-
-    const wrapper = mountWithIntl(
-      <RuleComponent
-        {...mockAPIs}
-        rule={rule}
-        ruleType={ruleType}
-        readOnly={false}
-        ruleSummary={ruleSummary}
-      />
-    );
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    const avgExecutionDurationPanel = wrapper.find('[data-test-subj="avgExecutionDurationPanel"]');
-    expect(avgExecutionDurationPanel.exists()).toBeTruthy();
-    expect(avgExecutionDurationPanel.first().prop('color')).toEqual('subdued');
-    expect(wrapper.find('EuiStat[data-test-subj="avgExecutionDurationStat"]').text()).toEqual(
-      'Average duration00:01:00.284'
-    );
-    expect(wrapper.find('[data-test-subj="ruleDurationWarning"]').exists()).toBeFalsy();
-  });
-
-  it('renders warning when average execution duration exceeds rule timeout', async () => {
-    const rule = mockRule();
-    const ruleType = mockRuleType({ ruleTaskTimeout: '10m' });
-    const ruleSummary = mockRuleSummary({
-      executionDuration: { average: 60284345, valuesWithTimestamp: {} },
-    });
-
-    const wrapper = mountWithIntl(
-      <RuleComponent
-        {...mockAPIs}
-        rule={rule}
-        ruleType={ruleType}
-        readOnly={false}
-        ruleSummary={ruleSummary}
-      />
-    );
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    const avgExecutionDurationPanel = wrapper.find('[data-test-subj="avgExecutionDurationPanel"]');
-    expect(avgExecutionDurationPanel.exists()).toBeTruthy();
-    expect(avgExecutionDurationPanel.first().prop('color')).toEqual('warning');
-
-    const avgExecutionDurationStat = wrapper
-      .find('EuiStat[data-test-subj="avgExecutionDurationStat"]')
-      .text()
-      .replaceAll('Info', '');
-    expect(avgExecutionDurationStat).toEqual('Average duration16:44:44.345');
-    expect(wrapper.find('[data-test-subj="ruleDurationWarning"]').exists()).toBeTruthy();
-  });
-
-  it('renders execution duration chart', () => {
-    const rule = mockRule();
-    const ruleType = mockRuleType();
-    const ruleSummary = mockRuleSummary();
-
-    expect(
-      shallow(
-        <RuleComponent
-          {...mockAPIs}
-          rule={rule}
-          ruleType={ruleType}
-          ruleSummary={ruleSummary}
-          readOnly={false}
-        />
-      )
-        .find(ExecutionDurationChart)
-        .exists()
-    ).toBeTruthy();
-  });
 });
 
 describe('disable/enable functionality', () => {
@@ -489,15 +422,15 @@ describe('tabbed content', () => {
     expect(tabbedContent.find('[aria-labelledby="rule_event_log_list"]').exists()).toBeTruthy();
     expect(tabbedContent.find('[aria-labelledby="rule_alert_list"]').exists()).toBeFalsy();
 
-    tabbedContent.find('[data-test-subj="ruleAlertListTab"]').simulate('click');
-
-    expect(tabbedContent.find('[aria-labelledby="rule_event_log_list"]').exists()).toBeFalsy();
-    expect(tabbedContent.find('[aria-labelledby="rule_alert_list"]').exists()).toBeTruthy();
-
     tabbedContent.find('[data-test-subj="eventLogListTab"]').simulate('click');
 
     expect(tabbedContent.find('[aria-labelledby="rule_event_log_list"]').exists()).toBeTruthy();
     expect(tabbedContent.find('[aria-labelledby="rule_alert_list"]').exists()).toBeFalsy();
+
+    tabbedContent.find('[data-test-subj="ruleAlertListTab"]').simulate('click');
+
+    expect(tabbedContent.find('[aria-labelledby="rule_event_log_list"]').exists()).toBeFalsy();
+    expect(tabbedContent.find('[aria-labelledby="rule_alert_list"]').exists()).toBeTruthy();
   });
 });
 

@@ -65,6 +65,7 @@ export class ReportingPlugin
       basePath: http.basePath,
       router: http.createRouter<ReportingRequestHandlerContext>(),
       usageCounter,
+      docLinks: core.docLinks,
       ...plugins,
     });
 

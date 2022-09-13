@@ -16,6 +16,36 @@
     "misc": [
       {
         "parentPluginId": "enterpriseSearch",
+        "id": "def-server.ANALYTICS_COLLECTIONS_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "ANALYTICS_COLLECTIONS_INDEX",
+        "description": [],
+        "signature": [
+          "\".elastic-analytics-collections\""
+        ],
+        "path": "x-pack/plugins/enterprise_search/server/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "enterpriseSearch",
+        "id": "def-server.ANALYTICS_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "ANALYTICS_VERSION",
+        "description": [],
+        "signature": [
+          "\"1\""
+        ],
+        "path": "x-pack/plugins/enterprise_search/server/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "enterpriseSearch",
         "id": "def-server.ConfigType",
         "type": "Type",
         "tags": [],
@@ -26,6 +56,7 @@
         ],
         "path": "x-pack/plugins/enterprise_search/server/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -40,6 +71,7 @@
         ],
         "path": "x-pack/plugins/enterprise_search/server/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -54,6 +86,7 @@
         ],
         "path": "x-pack/plugins/enterprise_search/server/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -68,6 +101,22 @@
         ],
         "path": "x-pack/plugins/enterprise_search/server/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "enterpriseSearch",
+        "id": "def-server.CRAWLERS_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "CRAWLERS_INDEX",
+        "description": [],
+        "signature": [
+          "\".ent-search-actastic-crawler2_configurations\""
+        ],
+        "path": "x-pack/plugins/enterprise_search/server/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -81,24 +130,25 @@
         "description": [],
         "signature": [
           "ObjectType",
-          "<{ host: ",
-          "Type",
-          "<string | undefined>; accessCheckTimeout: ",
+          "<{ accessCheckTimeout: ",
           "Type",
           "<number>; accessCheckTimeoutWarning: ",
           "Type",
-          "<number>; ssl: ",
+          "<number>; customHeaders: ",
+          "Type",
+          "<Readonly<{} & {}> | undefined>; host: ",
+          "Type",
+          "<string | undefined>; ssl: ",
           "ObjectType",
           "<{ certificateAuthorities: ",
           "Type",
           "<string | string[] | undefined>; verificationMode: ",
           "Type",
-          "<\"none\" | \"full\" | \"certificate\">; }>; customHeaders: ",
-          "Type",
-          "<Readonly<{} & {}> | undefined>; }>"
+          "<\"none\" | \"full\" | \"certificate\">; }>; }>"
         ],
         "path": "x-pack/plugins/enterprise_search/server/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]

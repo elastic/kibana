@@ -12,13 +12,31 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Windows Defender Disabled via Registry Modification",
-  "note": "## Triage and analysis\n\n### Investigating Windows Defender Disabled via Registry Modification\n\nMicrosoft Windows Defender is an antivirus product built into Microsoft Windows, which makes it popular across multiple\nenvironments. Disabling it is a common step in threat actor playbooks.\n\nThis rule monitors the registry for configurations that disable Windows Defender or the start of its service.\n\n#### Possible investigation steps\n\n- Investigate the process execution chain (parent process tree) for unknown processes. Examine their executable files\nfor prevalence, whether they are located in expected locations, and if they are signed with valid digital signatures.\n- Validate the activity is not related to planned patches, updates, network administrator activity, or legitimate\nsoftware installations.\n- Identify the user account that performed the action and whether it should perform this kind of action.\n- Contact the account owner and confirm whether they are aware of this activity.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n- Check if this operation is done under change management and approved according to the organization's policy.\n\n### False positive analysis\n\n- This mechanism can be used legitimately. Analysts can dismiss the alert if the administrator is aware of the activity,\nthe configuration is justified (for example, it is being used to deploy other security solutions or troubleshooting),\nand no other suspicious activity has been observed.\n\n### Related rules\n\n- Disabling Windows Defender Security Settings via PowerShell - c8cccb06-faf2-4cd5-886e-2c9636cfcb87\n- Microsoft Windows Defender Tampering - fe794edd-487f-4a90-b285-3ee54f2af2d3\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved hosts to prevent further post-compromise behavior.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are\nidentified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business\nsystems, and web services.\n- Re-enable Windows Defender and restore the service configurations to automatic start.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and\nmalware components.\n- Review the privileges assigned to the user to ensure that the least privilege principle is being followed.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the\nmean time to respond (MTTR).\n\n## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
+  "note": "## Triage and analysis\n\n### Investigating Windows Defender Disabled via Registry Modification\n\nMicrosoft Windows Defender is an antivirus product built into Microsoft Windows, which makes it popular across multiple\nenvironments. Disabling it is a common step in threat actor playbooks.\n\nThis rule monitors the registry for configurations that disable Windows Defender or the start of its service.\n\n#### Possible investigation steps\n\n- Investigate the process execution chain (parent process tree) for unknown processes. Examine their executable files\nfor prevalence, whether they are located in expected locations, and if they are signed with valid digital signatures.\n- Validate the activity is not related to planned patches, updates, network administrator activity, or legitimate\nsoftware installations.\n- Identify the user account that performed the action and whether it should perform this kind of action.\n- Contact the account owner and confirm whether they are aware of this activity.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n- Check if this operation was approved and performed according to the organization's change management policy.\n\n### False positive analysis\n\n- This mechanism can be used legitimately. Analysts can dismiss the alert if the administrator is aware of the activity,\nthe configuration is justified (for example, it is being used to deploy other security solutions or troubleshooting),\nand no other suspicious activity has been observed.\n\n### Related rules\n\n- Disabling Windows Defender Security Settings via PowerShell - c8cccb06-faf2-4cd5-886e-2c9636cfcb87\n- Microsoft Windows Defender Tampering - fe794edd-487f-4a90-b285-3ee54f2af2d3\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved hosts to prevent further post-compromise behavior.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are\nidentified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business\nsystems, and web services.\n- Re-enable Windows Defender and restore the service configurations to automatic start.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and\nmalware components.\n- Review the privileges assigned to the user to ensure that the least privilege principle is being followed.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the\nmean time to respond (MTTR).",
   "query": "registry where event.type in (\"creation\", \"change\") and\n  (\n    (\n      registry.path:\"HKLM\\\\SOFTWARE\\\\Policies\\\\Microsoft\\\\Windows Defender\\\\DisableAntiSpyware\" and\n      registry.data.strings: (\"1\", \"0x00000001\")\n   ) or\n   (\n      registry.path:\"HKLM\\\\System\\\\*ControlSet*\\\\Services\\\\WinDefend\\\\Start\" and\n      registry.data.strings in (\"3\", \"4\", \"0x00000003\", \"0x00000004\")\n   )\n  )\n",
   "references": [
     "https://thedfirreport.com/2020/12/13/defender-control/"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "registry.data.strings",
+      "type": "wildcard"
+    },
+    {
+      "ecs": true,
+      "name": "registry.path",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 21,
   "rule_id": "2ffa1f1e-b6db-47fa-994b-1512743847eb",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "low",
   "tags": [
     "Elastic",
@@ -58,5 +76,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 6
+  "version": 8
 }

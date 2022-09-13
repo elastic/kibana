@@ -15,12 +15,16 @@ import {
   Settings,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
+import {
+  EUI_CHARTS_THEME_DARK,
+  EUI_CHARTS_THEME_LIGHT,
+} from '@elastic/eui/dist/eui_charts_theme';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 import { useTheme } from '../../../../hooks/use_theme';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ChartContainer } from '../../../shared/charts/chart_container';
@@ -89,6 +93,11 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
             showLegend
             showLegendExtra
             legendPosition={Position.Bottom}
+            theme={
+              theme.darkMode
+                ? EUI_CHARTS_THEME_DARK.theme
+                : EUI_CHARTS_THEME_LIGHT.theme
+            }
           />
           <Axis
             id="x-axis"

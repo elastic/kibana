@@ -2,11 +2,11 @@
 
 exports[`Storyshots components/WorkpadHeader/ElementMenu default 1`] = `
 <div
-  className="euiPopover euiPopover--anchorDownLeft"
+  className="euiPopover emotion-euiPopover"
   data-test-subj="add-element-button"
 >
   <div
-    className="euiPopover__anchor"
+    className="euiPopover__anchor css-16vtueo-render"
   >
     <button
       className="euiButton euiButton--primary euiButton--fill solutionToolbarButton undefined"

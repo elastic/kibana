@@ -99,7 +99,6 @@ export enum SecurityPageName {
   hostIsolationExceptions = 'host_isolation_exceptions',
   hosts = 'hosts',
   hostsAnomalies = 'hosts-anomalies',
-  hostsExternalAlerts = 'hosts-external_alerts',
   hostsRisk = 'hosts-risk',
   hostsEvents = 'hosts-events',
   investigate = 'investigate',
@@ -108,27 +107,31 @@ export enum SecurityPageName {
   network = 'network',
   networkAnomalies = 'network-anomalies',
   networkDns = 'network-dns',
-  networkExternalAlerts = 'network-external_alerts',
+  networkEvents = 'network-events',
   networkHttp = 'network-http',
   networkTls = 'network-tls',
   noPage = '',
   overview = 'overview',
   policies = 'policy',
-  responseActions = 'response_actions',
+  actionHistory = 'action_history',
   rules = 'rules',
   rulesCreate = 'rules-create',
   sessions = 'sessions',
-  threatIntelligence = 'threat-intelligence',
+  /*
+   * Warning: Computed values are not permitted in an enum with string valued members
+   * All threat intelligence page names must match `TIPageId` in x-pack/plugins/threat_intelligence/public/common/navigation/types.ts
+   */
+  threatIntelligenceIndicators = 'threat_intelligence-indicators',
   timelines = 'timelines',
   timelinesTemplates = 'timelines-templates',
   trustedApps = 'trusted_apps',
   uncommonProcesses = 'uncommon_processes',
   users = 'users',
-  usersAuthentications = 'users-authentications',
   usersAnomalies = 'users-anomalies',
-  usersRisk = 'users-risk',
+  usersAuthentications = 'users-authentications',
   usersEvents = 'users-events',
-  usersExternalAlerts = 'users-external_alerts',
+  usersRisk = 'users-risk',
+  entityAnalytics = 'entity-analytics',
 }
 
 export const EXPLORE_PATH = '/explore' as const;
@@ -156,9 +159,8 @@ export const EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/event_filters` as const;
 export const HOST_ISOLATION_EXCEPTIONS_PATH =
   `${MANAGEMENT_PATH}/host_isolation_exceptions` as const;
 export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
-export const RESPONSE_ACTIONS_PATH = `${MANAGEMENT_PATH}/response_actions` as const;
-export const THREAT_INTELLIGENCE_PATH = '/threat_intelligence' as const;
-
+export const ACTION_HISTORY_PATH = `${MANAGEMENT_PATH}/action_history` as const;
+export const ENTITY_ANALYTICS_PATH = '/entity_analytics' as const;
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
 export const APP_LANDING_PATH = `${APP_PATH}${LANDING_PATH}` as const;
 export const APP_DETECTION_RESPONSE_PATH = `${APP_PATH}${DETECTION_RESPONSE_PATH}` as const;
@@ -181,8 +183,8 @@ export const APP_EVENT_FILTERS_PATH = `${APP_PATH}${EVENT_FILTERS_PATH}` as cons
 export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
   `${APP_PATH}${HOST_ISOLATION_EXCEPTIONS_PATH}` as const;
 export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
-export const APP_RESPONSE_ACTIONS_PATH = `${APP_PATH}${RESPONSE_ACTIONS_PATH}` as const;
-export const APP_THREAT_INTELLIGENCE_PATH = `${APP_PATH}${THREAT_INTELLIGENCE_PATH}` as const;
+export const APP_ACTION_HISTORY_PATH = `${APP_PATH}${ACTION_HISTORY_PATH}` as const;
+export const APP_ENTITY_ANALYTICS_PATH = `${APP_PATH}${ENTITY_ANALYTICS_PATH}` as const;
 
 // cloud logs to exclude from default index pattern
 export const EXCLUDE_ELASTIC_CLOUD_INDICES = ['-*elastic-cloud-logs-*'];
@@ -232,6 +234,14 @@ export const IP_REPUTATION_LINKS_SETTING_DEFAULT = `[
 export const SHOW_RELATED_INTEGRATIONS_SETTING =
   'securitySolution:showRelatedIntegrations' as const;
 
+/** This Kibana Advanced Setting enables extended rule execution logging to Event Log */
+export const EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING =
+  'securitySolution:extendedRuleExecutionLoggingEnabled' as const;
+
+/** This Kibana Advanced Setting sets minimum log level starting from which execution logs will be written to Event Log */
+export const EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING =
+  'securitySolution:extendedRuleExecutionLoggingMinLevel' as const;
+
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -252,6 +262,8 @@ export const DETECTION_ENGINE_PREPACKAGED_URL =
   `${DETECTION_ENGINE_RULES_URL}/prepackaged` as const;
 export const DETECTION_ENGINE_PRIVILEGES_URL = `${DETECTION_ENGINE_URL}/privileges` as const;
 export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index` as const;
+
+export const DETECTION_ENGINE_RULES_URL_FIND = `${DETECTION_ENGINE_RULES_URL}/_find` as const;
 export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags` as const;
 export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL =
   `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status` as const;
@@ -265,17 +277,26 @@ export const DETECTION_ENGINE_RULES_BULK_CREATE =
 export const DETECTION_ENGINE_RULES_BULK_UPDATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 
+export const DEV_TOOL_PREBUILT_CONTENT =
+  `/internal/prebuilt_content/dev_tool/{console_id}` as const;
+export const devToolPrebuiltContentUrl = (spaceId: string, consoleId: string) =>
+  `/s/${spaceId}/internal/prebuilt_content/dev_tool/${consoleId}` as const;
+export const PREBUILT_SAVED_OBJECTS_BULK_CREATE =
+  '/internal/prebuilt_content/saved_objects/_bulk_create/{template_name}';
+export const prebuiltSavedObjectsBulkCreateUrl = (templateName: string) =>
+  `/internal/prebuilt_content/saved_objects/_bulk_create/${templateName}` as const;
+
 /**
  * Internal detection engine routes
  */
 export const INTERNAL_DETECTION_ENGINE_URL = '/internal/detection_engine' as const;
-export const DETECTION_ENGINE_RULE_EXECUTION_EVENTS_URL =
-  `${INTERNAL_DETECTION_ENGINE_URL}/rules/{ruleId}/execution/events` as const;
-export const detectionEngineRuleExecutionEventsUrl = (ruleId: string) =>
-  `${INTERNAL_DETECTION_ENGINE_URL}/rules/${ruleId}/execution/events` as const;
+export const INTERNAL_DETECTION_ENGINE_RULES_URL = '/internal/detection_engine/rules' as const;
 export const DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/fleet/integrations/installed` as const;
-
+export const DETECTION_ENGINE_ALERTS_INDEX_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/signal/index` as const;
+export const DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL =
+  `${INTERNAL_DETECTION_ENGINE_RULES_URL}/exceptions/_find_references` as const;
 /**
  * Telemetry detection endpoint for any previews requested of what data we are
  * providing through UI/UX and for e2e tests.
@@ -412,13 +433,19 @@ export const RULES_TABLE_MAX_PAGE_SIZE = 100;
 export const RULES_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50, RULES_TABLE_MAX_PAGE_SIZE];
 
 /**
- * A local storage key we use to store the state of the feature tour UI for the Rule Management page.
+ * Local storage keys we use to store the state of our new features tours we currently show in the app.
  *
- * NOTE: As soon as we want to show a new tour for features in the current Kibana version,
- * we will need to update this constant with the corresponding version.
+ * NOTE: As soon as we want to show tours for new features in the upcoming release,
+ * we will need to update these constants with the corresponding version.
  */
+export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
+  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.4',
+  RULE_CREATION_PAGE_DEFINE_STEP:
+    'securitySolution.ruleCreationPage.defineStep.newFeaturesTour.v8.4',
+};
+
 export const RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY =
-  'securitySolution.rulesManagementPage.newFeaturesTour.v8.2';
+  'securitySolution.rulesManagementPage.newFeaturesTour.v8.4';
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
   'securitySolution.ruleDetails.ruleExecutionLog.showMetrics.v8.2';
@@ -431,3 +458,6 @@ export enum BulkActionsDryRunErrCode {
   MACHINE_LEARNING_AUTH = 'MACHINE_LEARNING_AUTH',
   MACHINE_LEARNING_INDEX_PATTERN = 'MACHINE_LEARNING_INDEX_PATTERN',
 }
+
+export const RISKY_HOSTS_DOC_LINK =
+  'https://www.github.com/elastic/detection-rules/blob/main/docs/experimental-machine-learning/host-risk-score.md';

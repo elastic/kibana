@@ -348,14 +348,12 @@ describe('getCasesTelemetryData', () => {
             {
               type: 'literal',
               value: 'cases-comments.attributes.type',
+              isQuoted: false,
             },
             {
               type: 'literal',
               value: 'alert',
-            },
-            {
-              type: 'literal',
-              value: false,
+              isQuoted: false,
             },
           ],
           function: 'is',
@@ -395,14 +393,12 @@ describe('getCasesTelemetryData', () => {
             {
               type: 'literal',
               value: 'cases-user-actions.attributes.type',
+              isQuoted: false,
             },
             {
               type: 'literal',
               value: 'connector',
-            },
-            {
-              type: 'literal',
-              value: false,
+              isQuoted: false,
             },
           ],
           function: 'is',

@@ -21,7 +21,12 @@ import {
 
 import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './lib/send_email';
 import { portSchema } from './lib/schemas';
-import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
+import {
+  ActionType,
+  ActionTypeExecutorOptions,
+  ActionTypeExecutorResult,
+  ValidatorServices,
+} from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { renderMustacheString, renderMustacheObject } from '../lib/mustache_renderer';
 
@@ -65,16 +70,14 @@ const ConfigSchemaProps = {
 
 const ConfigSchema = schema.object(ConfigSchemaProps);
 
-function validateConfig(
-  configurationUtilities: ActionsConfigurationUtilities,
-  configObject: ActionTypeConfigType
-): string | void {
+function validateConfig(configObject: ActionTypeConfigType, validatorServices: ValidatorServices) {
   const config = configObject;
+  const { configurationUtilities } = validatorServices;
 
   const emails = [config.from];
   const invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails);
   if (!!invalidEmailsMessage) {
-    return `[from]: ${invalidEmailsMessage}`;
+    throw new Error(`[from]: ${invalidEmailsMessage}`);
   }
 
   // If service is set as JSON_TRANSPORT_SERVICE or EXCHANGE, host/port are ignored, when the email is sent.
@@ -85,41 +88,43 @@ function validateConfig(
     return;
   } else if (config.service === AdditionalEmailServices.EXCHANGE) {
     if (config.clientId == null && config.tenantId == null) {
-      return '[clientId]/[tenantId] is required';
+      throw new Error('[clientId]/[tenantId] is required');
     }
 
     if (config.clientId == null) {
-      return '[clientId] is required';
+      throw new Error('[clientId] is required');
     }
 
     if (config.tenantId == null) {
-      return '[tenantId] is required';
+      throw new Error('[tenantId] is required');
     }
   } else if (CUSTOM_HOST_PORT_SERVICES.indexOf(config.service) >= 0) {
     // If configured `service` requires custom host/port/secure settings, validate that they are set
     if (config.host == null && config.port == null) {
-      return '[host]/[port] is required';
+      throw new Error('[host]/[port] is required');
     }
 
     if (config.host == null) {
-      return '[host] is required';
+      throw new Error('[host] is required');
     }
 
     if (config.port == null) {
-      return '[port] is required';
+      throw new Error('[port] is required');
     }
 
     if (!configurationUtilities.isHostnameAllowed(config.host)) {
-      return `[host] value '${config.host}' is not in the allowedHosts configuration`;
+      throw new Error(`[host] value '${config.host}' is not in the allowedHosts configuration`);
     }
   } else {
     // Check configured `service` against nodemailer list of well known services + any custom ones allowed by Kibana
     const host = getServiceNameHost(config.service);
     if (host == null) {
-      return `[service] value '${config.service}' is not valid`;
+      throw new Error(`[service] value '${config.service}' is not valid`);
     }
     if (!configurationUtilities.isHostnameAllowed(host)) {
-      return `[service] value '${config.service}' resolves to host '${host}' which is not in the allowedHosts configuration`;
+      throw new Error(
+        `[service] value '${config.service}' resolves to host '${host}' which is not in the allowedHosts configuration`
+      );
     }
   }
 }
@@ -160,10 +165,9 @@ const ParamsSchemaProps = {
 
 const ParamsSchema = schema.object(ParamsSchemaProps);
 
-function validateParams(
-  configurationUtilities: ActionsConfigurationUtilities,
-  paramsObject: unknown
-): string | void {
+function validateParams(paramsObject: unknown, validatorServices: ValidatorServices) {
+  const { configurationUtilities } = validatorServices;
+
   // avoids circular reference ...
   const params = paramsObject as ActionParamsType;
 
@@ -171,7 +175,7 @@ function validateParams(
   const addrs = to.length + cc.length + bcc.length;
 
   if (addrs === 0) {
-    return 'no [to], [cc], or [bcc] entries';
+    throw new Error('no [to], [cc], or [bcc] entries');
   }
 
   const emails = withoutMustacheTemplate(to.concat(cc).concat(bcc));
@@ -179,7 +183,7 @@ function validateParams(
     treatMustacheTemplatesAsValid: true,
   });
   if (invalidEmailsMessage) {
-    return `[to/cc/bcc]: ${invalidEmailsMessage}`;
+    throw new Error(`[to/cc/bcc]: ${invalidEmailsMessage}`);
   }
 }
 
@@ -224,13 +228,17 @@ export function getActionType(params: GetActionTypeParams): EmailActionType {
       SecurityConnectorFeatureId,
     ],
     validate: {
-      config: schema.object(ConfigSchemaProps, {
-        validate: curry(validateConfig)(configurationUtilities),
-      }),
-      secrets: SecretsSchema,
-      params: schema.object(ParamsSchemaProps, {
-        validate: curry(validateParams)(configurationUtilities),
-      }),
+      config: {
+        schema: ConfigSchema,
+        customValidator: validateConfig,
+      },
+      secrets: {
+        schema: SecretsSchema,
+      },
+      params: {
+        schema: ParamsSchema,
+        customValidator: validateParams,
+      },
       connector: validateConnector,
     },
     renderParameterTemplates,

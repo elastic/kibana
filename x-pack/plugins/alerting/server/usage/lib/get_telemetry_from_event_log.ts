@@ -37,6 +37,8 @@ interface Opts {
 }
 
 interface GetExecutionsPerDayCountResults {
+  hasErrors: boolean;
+  errorMessage?: string;
   countTotalRuleExecutions: number;
   countRuleExecutionsByType: Record<string, number>;
   countTotalFailedExecutions: number;
@@ -55,6 +57,8 @@ interface GetExecutionsPerDayCountResults {
 }
 
 interface GetExecutionTimeoutsPerDayCountResults {
+  hasErrors: boolean;
+  errorMessage?: string;
   countExecutionTimeouts: number;
   countExecutionTimeoutsByType: Record<string, number>;
 }
@@ -167,12 +171,14 @@ export async function getExecutionsPerDayCount({
       aggregations.by_rule_type_id.buckets as GetExecutionCountsAggregationBucket[];
 
     return {
+      hasErrors: false,
       ...parseRuleTypeBucket(aggregationsByRuleTypeId),
       ...parseExecutionFailureByRuleType(aggregationsByRuleTypeId),
       ...parseExecutionCountAggregationResults(aggregations),
       countTotalRuleExecutions: totalRuleExecutions ?? 0,
     };
   } catch (err) {
+    const errorMessage = err && err.message ? err.message : err.toString();
     logger.warn(
       `Error executing alerting telemetry task: getExecutionsPerDayCount - ${JSON.stringify(err)}`,
       {
@@ -181,6 +187,8 @@ export async function getExecutionsPerDayCount({
       }
     );
     return {
+      hasErrors: true,
+      errorMessage,
       countTotalRuleExecutions: 0,
       countRuleExecutionsByType: {},
       countTotalFailedExecutions: 0,
@@ -235,10 +243,13 @@ export async function getExecutionTimeoutsPerDayCount({
       typeof results.hits.total === 'number' ? results.hits.total : results.hits.total?.value;
 
     return {
+      hasErrors: false,
       countExecutionTimeouts: totalTimedoutExecutionsCount ?? 0,
       countExecutionTimeoutsByType: parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
     };
   } catch (err) {
+    const errorMessage = err && err.message ? err.message : err.toString();
+
     logger.warn(
       `Error executing alerting telemetry task: getExecutionsTimeoutsPerDayCount - ${JSON.stringify(
         err
@@ -249,6 +260,8 @@ export async function getExecutionTimeoutsPerDayCount({
       }
     );
     return {
+      hasErrors: true,
+      errorMessage,
       countExecutionTimeouts: 0,
       countExecutionTimeoutsByType: {},
     };

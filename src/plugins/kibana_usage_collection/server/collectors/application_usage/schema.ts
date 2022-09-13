@@ -133,9 +133,9 @@ export const applicationUsageSchema = {
   // X-Pack
   apm: commonSchema,
   canvas: commonSchema,
-  csp: commonSchema,
   enterpriseSearch: commonSchema,
   enterpriseSearchContent: commonSchema,
+  enterpriseSearchAnalytics: commonSchema,
   elasticsearch: commonSchema,
   appSearch: commonSchema,
   workplaceSearch: commonSchema,

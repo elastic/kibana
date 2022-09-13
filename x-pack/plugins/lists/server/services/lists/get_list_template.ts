@@ -9,12 +9,19 @@ import listMappings from './list_mappings.json';
 
 export const getListTemplate = (index: string): Record<string, unknown> => ({
   index_patterns: [`${index}-*`],
-  mappings: listMappings,
-  settings: {
-    index: {
-      lifecycle: {
-        name: index,
-        rollover_alias: index,
+  template: {
+    mappings: listMappings,
+    settings: {
+      index: {
+        lifecycle: {
+          name: index,
+          rollover_alias: index,
+        },
+      },
+      mapping: {
+        total_fields: {
+          limit: 10000,
+        },
       },
     },
   },

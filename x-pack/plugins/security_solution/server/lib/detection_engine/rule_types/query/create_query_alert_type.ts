@@ -13,11 +13,11 @@ import type { QueryRuleParams } from '../../schemas/rule_schemas';
 import { queryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
-import { validateImmutable, validateIndexPatterns } from '../utils';
+import { validateIndexPatterns } from '../utils';
 export const createQueryAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<QueryRuleParams, {}, {}, 'default'> => {
-  const { eventsTelemetry, experimentalFeatures, logger, version } = createOptions;
+  const { eventsTelemetry, experimentalFeatures, version } = createOptions;
   return {
     id: QUERY_RULE_TYPE_ID,
     name: 'Custom Query Rule',
@@ -40,7 +40,6 @@ export const createQueryAlertType = (
          * @returns mutatedRuleParams
          */
         validateMutatedParams: (mutatedRuleParams) => {
-          validateImmutable(mutatedRuleParams.immutable);
           validateIndexPatterns(mutatedRuleParams.index);
 
           return mutatedRuleParams;
@@ -65,13 +64,13 @@ export const createQueryAlertType = (
         runOpts: {
           inputIndex,
           runtimeMappings,
-          buildRuleMessage,
-          bulkCreate,
+          completeRule,
+          tuple,
           exceptionItems,
           listClient,
-          completeRule,
+          ruleExecutionLogger,
           searchAfterSize,
-          tuple,
+          bulkCreate,
           wrapHits,
           primaryTimestamp,
           secondaryTimestamp,
@@ -81,18 +80,17 @@ export const createQueryAlertType = (
       } = execOptions;
 
       const result = await queryExecutor({
-        buildRuleMessage,
-        bulkCreate,
-        exceptionItems,
-        experimentalFeatures,
-        eventsTelemetry,
-        listClient,
-        logger,
         completeRule,
-        searchAfterSize,
-        services,
         tuple,
+        exceptionItems,
+        listClient,
+        experimentalFeatures,
+        ruleExecutionLogger,
+        eventsTelemetry,
+        services,
         version,
+        searchAfterSize,
+        bulkCreate,
         wrapHits,
         inputIndex,
         runtimeMappings,

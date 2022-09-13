@@ -2,7 +2,7 @@
 id: kibBestPractices
 slug: /kibana-dev-docs/contributing/best-practices
 title: Best practices
-summary: Best practices to follow when building a Kibana plugin.
+description: Best practices to follow when building a Kibana plugin.
 date: 2021-03-17
 tags: ['kibana', 'onboarding', 'dev', 'architecture']
 ---
@@ -56,7 +56,7 @@ Es-lint overrides on a per-plugin level are discouraged.
 
 ## Using the SavedObjectClient
 
-The <DocLink id="kibCoreSavedObjectsPluginApi" section="def-public.SavedObjectsClient" text="SavedObjectClient" /> should always be used for reading and writing saved objects that you manage. For saved objects managed by other plugins, their plugin APIs should be used instead.
+The SavedObjectClient should always be used for reading and writing saved objects that you manage. For saved objects managed by other plugins, their plugin APIs should be used instead.
 
 Good:
 ```
@@ -70,7 +70,7 @@ const dataView = savedObjectsClient.get(dataViewId) as DataView;
 
 ## Resusable react components
 
-Use [EUI](https://elastic.github.io/eui) for all your basic UI components to create a consistent UI experience. We also have generic UI components offered from the <DocLink id="kibKibanaReactPluginApi" text="kibana_react" /> plugin and the <DocLink id="kibSharedUXPluginApi" text="shared_ux" /> plugin.
+Use [EUI](https://elastic.github.io/eui) for all your basic UI components to create a consistent UI experience. We also have generic UI components offered from the <DocLink id="kibKibanaReactPluginApi" text="kibana_react" /> plugin.
 
 ## Don't export code that doesn't need to be public
 

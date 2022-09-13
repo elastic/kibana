@@ -14,6 +14,8 @@ import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { ApplicationStart, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 
+import { ProductAccess } from '../../../../common/types';
+
 import { HttpLogic } from '../http';
 import { createHref, CreateHrefOptions } from '../react_router_helpers';
 
@@ -22,6 +24,7 @@ type RequiredFieldsOnly<T> = {
 };
 interface KibanaLogicProps {
   config: { host?: string };
+  productAccess: ProductAccess;
   // Kibana core
   history: ScopedHistory;
   navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
@@ -36,8 +39,9 @@ interface KibanaLogicProps {
   cloud?: CloudSetup;
 }
 export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud'> {
-  navigateToUrl(path: string, options?: CreateHrefOptions): Promise<void>;
   cloud: Partial<CloudSetup>;
+  isCloud: boolean;
+  navigateToUrl(path: string, options?: CreateHrefOptions): Promise<void>;
 }
 
 export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
@@ -55,11 +59,15 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
       },
       {},
     ],
+    productAccess: [props.productAccess, {}],
+    renderHeaderActions: [props.renderHeaderActions, {}],
     security: [props.security, {}],
     setBreadcrumbs: [props.setBreadcrumbs, {}],
     setChromeIsVisible: [props.setChromeIsVisible, {}],
     setDocTitle: [props.setDocTitle, {}],
-    renderHeaderActions: [props.renderHeaderActions, {}],
+  }),
+  selectors: ({ selectors }) => ({
+    isCloud: [() => [selectors.cloud], (cloud?: Partial<CloudSetup>) => !!cloud?.isCloudEnabled],
   }),
 });
 
