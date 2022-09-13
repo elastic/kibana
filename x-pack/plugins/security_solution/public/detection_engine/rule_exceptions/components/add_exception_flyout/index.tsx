@@ -59,7 +59,7 @@ export interface AddExceptionFlyoutProps {
   rules: Rule[] | null;
   isBulkAction: boolean;
   showAlertCloseOptions: boolean;
-  exceptionListType?: ExceptionListTypeEnum;
+  isEndpointItem: boolean;
   alertData?: AlertData;
   /**
    * The components that use this may or may not define `alertData`
@@ -70,7 +70,11 @@ export interface AddExceptionFlyoutProps {
   isAlertDataLoading?: boolean;
   alertStatus?: Status;
   onCancel: (didRuleChange: boolean) => void;
-  onConfirm: (didRuleChange: boolean, didCloseAlert: boolean, didBulkCloseAlert: boolean) => void;
+  onConfirm: (
+    didRuleChange: boolean,
+    didCloseAlert: boolean,
+    didBulkCloseAlert: boolean
+  ) => Promise<void>;
 }
 
 const FlyoutBodySection = styled(EuiFlyoutBody)`
@@ -96,7 +100,7 @@ const FlyoutFooterGroup = styled(EuiFlexGroup)`
 export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   rules,
   isBulkAction,
-  exceptionListType,
+  isEndpointItem,
   alertData,
   showAlertCloseOptions,
   isAlertDataLoading,
@@ -150,7 +154,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       : rules !== null && rules.length === 1
       ? 'add_to_rule'
       : 'select_rules_to_add_to',
-    listType: exceptionListType ?? ExceptionListTypeEnum.RULE_DEFAULT,
+    listType: isEndpointItem ? ExceptionListTypeEnum.ENDPOINT : ExceptionListTypeEnum.RULE_DEFAULT,
     selectedRulesToAddTo: rules != null ? rules : [],
   });
 
@@ -311,7 +315,6 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         selectedOs: osTypesSelection,
         items: exceptionItems,
       });
-
       await submitNewExceptionItems({
         rules,
         itemsToAdd: items,
@@ -325,7 +328,9 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         addToSharedLists: addToRules && !isEmpty(exceptionListsToAddTo),
       });
 
-      onConfirm(true, closeSingleAlert, bulkCloseAlerts);
+      // Rule only would have been updated if we had to create a rule default list
+      // to attach to it, all shared lists would already be referenced on the rule
+      await onConfirm(addToRules, closeSingleAlert, bulkCloseAlerts);
     } catch (e) {
       onCancel(false);
     }

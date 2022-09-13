@@ -8,11 +8,11 @@
 import React, { useCallback, useMemo, useEffect, useReducer, useState } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   ExceptionListItemSchema,
   UseExceptionListItemsSuccess,
   Pagination,
-  ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { transformInput } from '@kbn/securitysolution-list-hooks';
 
@@ -57,6 +57,7 @@ const initialState: State = {
   exceptionToEdit: null,
   currenFlyout: null,
   viewerState: 'loading',
+  isEndpointOnly: false,
 };
 
 export interface GetExceptionItemProps {
@@ -67,13 +68,13 @@ export interface GetExceptionItemProps {
 
 interface ExceptionsViewerProps {
   rule: Rule | null;
-  listType: ExceptionListTypeEnum;
+  listTypes: ExceptionListTypeEnum[];
   onRuleChange?: () => void;
 }
 
 const ExceptionsViewerComponent = ({
   rule,
-  listType,
+  listTypes,
   onRuleChange,
 }: ExceptionsViewerProps): JSX.Element => {
   const { services } = useKibana();
@@ -84,16 +85,23 @@ const ExceptionsViewerComponent = ({
   const exceptionListsToQuery = useMemo(
     () =>
       rule != null && rule.exceptions_list != null
-        ? rule.exceptions_list.filter((list) => list.type === listType)
+        ? rule.exceptions_list.filter(({ type }) => listTypes.includes(type))
         : [],
-    [listType, rule]
+    [listTypes, rule]
+  );
+  const isEndpointSpecified = useMemo(
+    () => listTypes.length === 1 && listTypes[0] === ExceptionListTypeEnum.ENDPOINT,
+    [listTypes]
   );
 
   // Reducer state
-  const [{ exceptions, pagination, currenFlyout, exceptionToEdit, viewerState }, dispatch] =
-    useReducer(allExceptionItemsReducer(), {
-      ...initialState,
-    });
+  const [
+    { exceptions, pagination, currenFlyout, exceptionToEdit, viewerState, isEndpointOnly },
+    dispatch,
+  ] = useReducer(allExceptionItemsReducer(), {
+    ...initialState,
+    isEndpointOnly: isEndpointSpecified,
+  });
 
   // Reducer actions
   const setExceptions = useCallback(
@@ -269,12 +277,12 @@ const ExceptionsViewerComponent = ({
   );
 
   const handleConfirmExceptionFlyout = useCallback(
-    (didRuleChange: boolean): void => {
+    async (didRuleChange: boolean): Promise<void> => {
       setFlyoutType(null);
       if (didRuleChange && onRuleChange != null) {
         onRuleChange();
       }
-      handleGetExceptionListItems();
+      await handleGetExceptionListItems();
     },
     [setFlyoutType, handleGetExceptionListItems, onRuleChange]
   );
@@ -331,7 +339,7 @@ const ExceptionsViewerComponent = ({
           ruleId={rule.id}
           ruleIndices={rule.index ?? DEFAULT_INDEX_PATTERN}
           dataViewId={rule.data_view_id}
-          exceptionListType={listType}
+          exceptionListType={'detection'}
           exceptionItem={exceptionToEdit}
           onCancel={handleCancelExceptionItemFlyout}
           onConfirm={handleConfirmExceptionFlyout}
@@ -343,11 +351,11 @@ const ExceptionsViewerComponent = ({
         <AddExceptionFlyout
           rules={[rule]}
           isBulkAction={false}
-          exceptionListType={listType}
+          isEndpointItem={isEndpointOnly}
           onCancel={handleCancelExceptionItemFlyout}
           onConfirm={handleConfirmExceptionFlyout}
-          showAlertCloseOptions
           data-test-subj="addExceptionItemFlyout"
+          showAlertCloseOptions
         />
       )}
 
@@ -356,7 +364,7 @@ const ExceptionsViewerComponent = ({
           {!STATES_SEARCH_HIDDEN.includes(viewerState) && (
             <ExceptionsViewerSearchBar
               canAddException={isReadOnly}
-              listType={listType}
+              isEndpoint={isEndpointOnly}
               isSearching={viewerState === 'searching'}
               onSearch={handleSearch}
               onAddExceptionClick={handleAddException}
@@ -374,7 +382,7 @@ const ExceptionsViewerComponent = ({
             isReadOnly={isReadOnly}
             disableActions={isReadOnly || viewerState === 'deleting'}
             exceptions={exceptions}
-            listType={listType}
+            isEndpoint={isEndpointOnly}
             ruleReferences={allReferences}
             viewerState={viewerState}
             onDeleteException={handleDeleteException}

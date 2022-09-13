@@ -64,7 +64,11 @@ const ExceptionsAddToRulesOrListsComponent: React.FC<ExceptionsAddToRulesOrLists
   const rulesCount = useMemo(() => (rules != null ? rules.length : 0), [rules]);
 
   return (
-    <EuiPanel paddingSize="none" hasShadow={false}>
+    <EuiPanel
+      paddingSize="none"
+      hasShadow={false}
+      data-test-subj="exceptionItemAddToRuleOrListSection"
+    >
       <SectionHeader size="xs">
         <h3>{i18n.ADD_TO_LISTS_SECTION_TITLE}</h3>
       </SectionHeader>

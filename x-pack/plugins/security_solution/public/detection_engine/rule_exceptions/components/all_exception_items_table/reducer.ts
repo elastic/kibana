@@ -27,6 +27,7 @@ export interface State {
   // Flyout to be opened (edit vs add vs none)
   currenFlyout: ViewerFlyoutName;
   viewerState: ViewerState;
+  isEndpointOnly: boolean;
 }
 
 export type Action =

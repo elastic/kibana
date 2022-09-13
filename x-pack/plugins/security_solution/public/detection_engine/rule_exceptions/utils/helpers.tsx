@@ -841,10 +841,15 @@ export const enrichSharedExceptions = (
   lists: ExceptionListSchema[]
 ): ExceptionsBuilderReturnExceptionItem[] => {
   return lists.flatMap((list) => {
-    return exceptionItems.map((item) => ({
-      ...item,
-      list_id: list.list_id,
-      namespace_type: list.namespace_type,
-    }));
+    return exceptionItems.map((item) => {
+      const entries = item.entries.map(({ id, ...rest }) => ({ ...rest }));
+
+      return {
+        ...item,
+        entries,
+        list_id: list.list_id,
+        namespace_type: list.namespace_type,
+      };
+    });
   });
 };

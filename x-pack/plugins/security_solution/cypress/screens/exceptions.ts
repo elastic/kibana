@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-export const CLOSE_ALERTS_CHECKBOX =
-  '[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]';
+export const CLOSE_ALERTS_CHECKBOX = '[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]';
+
+export const CLOSE_SINGLE_ALERT_CHECKBOX = '[data-test-subj="closeAlertOnAddExceptionCheckbox"]';
 
 export const CONFIRM_BTN = '[data-test-subj="add-exception-confirm-button"]';
 
@@ -68,7 +69,7 @@ export const EXCEPTION_FLYOUT_LIST_DELETED_ERROR = '[data-test-subj="errorCallou
 
 // Exceptions all items view
 export const NO_EXCEPTIONS_EXIST_PROMPT =
-  '[data-test-subj="exceptionItemViewerEmptyPrompts-empty-detection"]';
+  '[data-test-subj="exceptionItemViewerEmptyPrompts-empty"]';
 
 export const ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN =
   '[data-test-subj="exceptionsEmptyPromptButton"]';
@@ -88,5 +89,15 @@ export const EXCEPTION_ITEM_NAME_INPUT = 'input[data-test-subj="exceptionFlyoutN
 
 export const ADD_TO_SHARED_LIST_RADIO_LABEL = '[data-test-subj="addToListsRadioOption"] label';
 
+export const ADD_TO_SHARED_LIST_RADIO_INPUT = 'input[id="add_to_lists"]';
+
 export const SHARED_LIST_CHECKBOX = '.euiTableRow .euiCheckbox__input';
 
+export const ADD_TO_RULE_RADIO_LABEL = 'label [data-test-subj="addToRuleRadioOption"]';
+
+export const ADD_TO_RULE_OR_LIST_SECTION = '[data-test-subj="exceptionItemAddToRuleOrListSection"]';
+
+export const OS_SELECTION_SECTION = '[data-test-subj="osSelectionDropdown"]';
+
+export const OS_INPUT =
+  '[data-test-subj="osSelectionDropdown"] [data-test-subj="comboBoxInput"]';

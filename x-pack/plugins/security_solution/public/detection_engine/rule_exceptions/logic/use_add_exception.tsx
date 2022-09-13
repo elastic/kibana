@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { useEffect, useRef, useState } from 'react';
+import type {
+  CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { useApi } from '@kbn/securitysolution-list-hooks';
-import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
+import { addExceptionListItem } from '@kbn/securitysolution-list-api';
 import { formatExceptionItemForUpdate } from '../utils/helpers';
 import { useKibana } from '../../../common/lib/kibana';
-import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import * as i18n from './translations';
 
 /**
  * Adds exception items to the list or updates exception if it's an existing one
@@ -25,8 +26,8 @@ import * as i18n from './translations';
  *
  */
 export type AddOrUpdateExceptionItemsFunc = (
-  exceptionItemsToAddOrUpdate: ExceptionsBuilderReturnExceptionItem[]
-) => Promise<void>;
+  exceptionItemsToAddOrUpdate: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
+) => Promise<ExceptionListItemSchema[]>;
 
 export type ReturnUseAddOrUpdateException = [boolean, AddOrUpdateExceptionItemsFunc | null];
 
@@ -35,32 +36,23 @@ export type ReturnUseAddOrUpdateException = [boolean, AddOrUpdateExceptionItemsF
  *
  */
 export const useAddOrUpdateException = (): ReturnUseAddOrUpdateException => {
-  const { services } = useKibana();
-  const { addSuccess, addError } = useAppToasts();
+  const {
+    services: { http },
+  } = useKibana();
   const [isLoading, setIsLoading] = useState(false);
   const addOrUpdateExceptionRef = useRef<AddOrUpdateExceptionItemsFunc | null>(null);
-  const { addExceptionListItem, updateExceptionListItem } = useApi(services.http);
-  const addOrUpdateException = useCallback<AddOrUpdateExceptionItemsFunc>(
-    async (exceptionItemsToAddOrUpdate) => {
-      if (addOrUpdateExceptionRef.current != null) {
-        addOrUpdateExceptionRef.current(exceptionItemsToAddOrUpdate);
-      }
-    },
-    []
-  );
+  const { updateExceptionListItem } = useApi(http);
 
   useEffect(() => {
-    let isSubscribed = true;
     const abortCtrl = new AbortController();
 
     const onUpdateExceptionItemsAndAlertStatus: AddOrUpdateExceptionItemsFunc = async (
       exceptionItemsToAddOrUpdate
     ) => {
-      const addOrUpdateItems = async (
-        exceptionListItems: ExceptionsBuilderReturnExceptionItem[]
-      ): Promise<ExceptionListItemSchema[]> => {
-        return Promise.all(
-          exceptionListItems.map((item: ExceptionsBuilderReturnExceptionItem) => {
+      setIsLoading(true);
+      const itemsAdded = await Promise.all(
+        exceptionItemsToAddOrUpdate.map(
+          (item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
             if ('id' in item && item.id != null) {
               const formattedExceptionItem = formatExceptionItemForUpdate(item);
               return updateExceptionListItem({
@@ -68,40 +60,26 @@ export const useAddOrUpdateException = (): ReturnUseAddOrUpdateException => {
               });
             } else {
               return addExceptionListItem({
+                http,
                 listItem: item,
+                signal: abortCtrl.signal,
               });
             }
-          })
-        );
-      };
+          }
+        )
+      );
 
-      try {
-        setIsLoading(true);
+      setIsLoading(false);
 
-        const itemsAdded = await addOrUpdateItems(exceptionItemsToAddOrUpdate);
-        if (isSubscribed) {
-          setIsLoading(false);
-          const sharedListNames = itemsAdded.map((item) => item.name);
-          console.log('SUCCESS!')
-          addSuccess({
-            title: i18n.ADD_EXCEPTION_SUCCESS,
-            text: i18n.ADD_EXCEPTION_SUCCESS_DETAILS(sharedListNames.join(',')),
-          });
-        }
-      } catch (error) {
-        if (isSubscribed) {
-          setIsLoading(false);
-          addError(error, { title: i18n.ADD_EXCEPTION_ERROR });
-        }
-      }
+      return itemsAdded;
     };
 
     addOrUpdateExceptionRef.current = onUpdateExceptionItemsAndAlertStatus;
     return (): void => {
-      isSubscribed = false;
+      setIsLoading(false);
       abortCtrl.abort();
     };
-  }, [addExceptionListItem, updateExceptionListItem, addSuccess, addError]);
+  }, [updateExceptionListItem, http]);
 
-  return [isLoading, addOrUpdateException];
+  return [isLoading, addOrUpdateExceptionRef.current];
 };

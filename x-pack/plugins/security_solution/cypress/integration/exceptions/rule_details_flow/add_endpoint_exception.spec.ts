@@ -1,0 +1,146 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { getException, getExceptionList } from '../../../objects/exception';
+import { getNewRule } from '../../../objects/rule';
+
+import { ALERTS_COUNT, EMPTY_ALERT_TABLE, NUMBER_OF_ALERTS } from '../../../screens/alerts';
+import { createCustomRule, createCustomRuleEnabled } from '../../../tasks/api_calls/rules';
+import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
+import { goToClosedAlerts, goToOpenedAlerts } from '../../../tasks/alerts';
+import {
+  esArchiverLoad,
+  esArchiverUnload,
+  esArchiverResetKibana,
+} from '../../../tasks/es_archiver';
+import { login, visitWithoutDateRange } from '../../../tasks/login';
+import {
+  addExceptionConditions,
+  addExceptionFlyoutFromViewerHeader,
+  addExceptionFlyoutItemName,
+  goToAlertsTab,
+  goToEndpointExceptionsTab,
+  goToExceptionsTab,
+  openExceptionFlyoutFromEmptyViewerPrompt,
+  removeException,
+  searchForExceptionItem,
+  selectAddToRuleRadio,
+  selectBulkCloseAlerts,
+  selectOs,
+  selectSharedListToAddExceptionTo,
+  submitNewExceptionItem,
+  waitForTheRuleToBeExecuted,
+} from '../../../tasks/rule_details';
+
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
+import { deleteAlertsAndRules } from '../../../tasks/common';
+import {
+  NO_EXCEPTIONS_EXIST_PROMPT,
+  EXCEPTION_ITEM_VIEWER_CONTAINER,
+  NO_EXCEPTIONS_SEARCH_RESULTS_PROMPT,
+  CLOSE_ALERTS_CHECKBOX,
+  CONFIRM_BTN,
+  ADD_TO_SHARED_LIST_RADIO_INPUT,
+  ADD_TO_RULE_OR_LIST_SECTION,
+  CLOSE_SINGLE_ALERT_CHECKBOX,
+  OS_SELECTION_SECTION,
+} from '../../../screens/exceptions';
+import {
+  createEndpointExceptionList,
+} from '../../../tasks/api_calls/exceptions';
+import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
+
+describe('Add endpoint exception from rule details', () => {
+  before(() => {
+    esArchiverResetKibana();
+    login();
+  });
+
+  beforeEach(() => {
+    deleteAlertsAndRules();
+    // create rule with exceptions
+    createEndpointExceptionList().then((response) => {
+      createCustomRule(
+        {
+          ...getNewRule(),
+          customQuery: 'agent.name:*',
+          dataSource: { index: ['exceptions*'], type: 'indexPatterns' },
+          exceptionLists: [
+            {
+              id: response.body.id,
+              list_id: response.body.list_id,
+              type: response.body.type,
+              namespace_type: response.body.namespace_type,
+            },
+          ],
+        },
+        '2'
+      );
+    });
+
+    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+    goToRuleDetails();
+    goToEndpointExceptionsTab();
+  });
+
+  it('Creates an exception item', () => {
+    // when no exceptions exist, empty component shows with action to add exception
+    cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
+
+    // open add exception modal
+    openExceptionFlyoutFromEmptyViewerPrompt();
+
+    // for endpoint exceptions, must specify OS
+    selectOs('windows');
+
+    // add exception item conditions
+    addExceptionConditions({
+      field: 'agent.name',
+      operator: 'is',
+      values: ['foo'],
+    });
+
+    // Name is required so want to check that submit is still disabled
+    cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
+
+    // add exception item name
+    addExceptionFlyoutItemName('My item name');
+
+    // Option to add to rule or add to list should NOT appear
+    cy.get(ADD_TO_RULE_OR_LIST_SECTION).should('not.exist');
+
+    // not testing close alert functionality here, just ensuring that the options appear as expected
+    cy.get(CLOSE_SINGLE_ALERT_CHECKBOX).should('not.exist');
+    cy.get(CLOSE_ALERTS_CHECKBOX).should('exist');
+    cy.get(CLOSE_ALERTS_CHECKBOX).should('not.have.attr', 'disabled');
+
+    // submit
+    submitNewExceptionItem();
+
+    // new exception item displays
+    cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+  });
+
+  // Trying to figure out with EUI why the search won't trigger
+  it('Can search for items', () => {
+    // displays existing exception items
+    cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
+    cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 2);
+
+    // can search for an exception value
+    searchForExceptionItem('foo');
+
+    // new exception item displays
+    cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+
+    // displays empty search result view if no matches found
+    searchForExceptionItem('abc');
+
+    // new exception item displays
+    cy.get(NO_EXCEPTIONS_SEARCH_RESULTS_PROMPT).should('exist');
+  });
+});

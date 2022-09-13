@@ -112,3 +112,29 @@ export const SUBMIT_ERROR_TITLE = i18n.translate(
     defaultMessage: 'Error adding exception item',
   }
 );
+
+export const ADD_EXCEPTION_SUCCESS = i18n.translate(
+  'xpack.securitySolution.exceptions.createExceptionItem.success',
+  {
+    defaultMessage: 'Rule exception added to shared exception list',
+  }
+);
+
+export const ADD_EXCEPTION_SUCCESS_DETAILS = (listNames: string) =>
+  i18n.translate('xpack.securitySolution.exceptions.closeAlerts.successDetails', {
+    values: { listNames },
+    defaultMessage: 'Rule exception has been added to shared lists: {listNames}.',
+  });
+
+export const ADD_RULE_EXCEPTION_SUCCESS_TITLE = i18n.translate(
+  'xpack.securitySolution.exceptions.addRuleExceptionToastSuccessTitle',
+  {
+    defaultMessage: 'Rule exception added',
+  }
+);
+
+export const ADD_RULE_EXCEPTION_SUCCESS_TEXT = (ruleName: string) =>
+  i18n.translate('xpack.securitySolution.exceptions.addRuleExceptionToastSuccessText', {
+    values: { ruleName },
+    defaultMessage: 'Exception has been added to rules - {ruleName}.',
+  });

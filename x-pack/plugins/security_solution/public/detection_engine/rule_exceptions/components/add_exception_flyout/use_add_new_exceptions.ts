@@ -6,7 +6,10 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  ExceptionListSchema,
+  ExceptionListTypeEnum,
+} from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
 import * as i18n from './translations';
@@ -28,6 +31,7 @@ export interface AddNewExceptionItemHookProps {
   bulkCloseIndex: string[] | undefined;
   addToSharedLists: boolean;
   addToRules: boolean;
+  sharedLists: ExceptionListSchema[];
 }
 
 export type AddNewExceptionItemHookFuncProps = (arg: AddNewExceptionItemHookProps) => Promise<void>;
@@ -61,17 +65,20 @@ export const useAddNewExceptionItems = (): ReturnUseAddNewExceptionItems => {
       bulkCloseIndex,
       addToRules,
       addToSharedLists,
+      sharedLists,
     }: AddNewExceptionItemHookProps) => {
       try {
         setIsLoading(true);
 
         if (addToRules && addRuleExceptions != null) {
-          // TODO: Update once bulk route is added
-          await Promise.all(
-            selectedRulesToAddTo.map(async (rule) => {
-              await addRuleExceptions(itemsToAdd, rule.id, rule.name);
-            })
-          );
+          await addRuleExceptions(itemsToAdd, selectedRulesToAddTo);
+
+          const ruleNames = selectedRulesToAddTo.map(({ name }) => name).join(', ');
+
+          addSuccess({
+            title: i18n.ADD_RULE_EXCEPTION_SUCCESS_TITLE,
+            text: i18n.ADD_RULE_EXCEPTION_SUCCESS_TEXT(ruleNames),
+          });
 
           if (closeAlerts != null && (bulkCloseAlerts || closeSingleAlert)) {
             const alertIdToClose = closeSingleAlert && alertData ? alertData._id : undefined;
@@ -83,6 +90,13 @@ export const useAddNewExceptionItems = (): ReturnUseAddNewExceptionItems => {
           }
         } else if (addToSharedLists && addSharedExceptions != null) {
           await addSharedExceptions(itemsToAdd);
+
+          const sharedListNames = sharedLists.map(({ name }) => name);
+
+          addSuccess({
+            title: i18n.ADD_EXCEPTION_SUCCESS,
+            text: i18n.ADD_EXCEPTION_SUCCESS_DETAILS(sharedListNames.join(',')),
+          });
 
           if (
             rules != null &&

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import type { CreateRuleExceptionListItemSchema } from '../../../../common/detection_engine/schemas/request';
 import { addRuleExceptions } from '../../../detections/containers/detection_engine/rules/api';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import * as i18n from './translations';
+import type { Rule } from '../../../detections/containers/detection_engine/rules/types';
 
 /**
  * Adds exception items to rules default exception list
@@ -21,8 +21,7 @@ import * as i18n from './translations';
  */
 export type AddRuleExceptionsFunc = (
   exceptions: CreateRuleExceptionListItemSchema[],
-  ruleId: string,
-  ruleName: string
+  rules: Rule[]
 ) => Promise<void>;
 
 export type ReturnUseAddRuleException = [boolean, AddRuleExceptionsFunc | null];
@@ -36,50 +35,36 @@ export const useAddRuleException = (): ReturnUseAddRuleException => {
 
   const [isLoading, setIsLoading] = useState(false);
   const addRuleExceptionFunc = useRef<AddRuleExceptionsFunc | null>(null);
-  const addException = useCallback<AddRuleExceptionsFunc>(async (exceptions, ruleId, ruleName) => {
-    if (addRuleExceptionFunc.current != null) {
-      addRuleExceptionFunc.current(exceptions, ruleId, ruleName);
-    }
-  }, []);
 
   useEffect(() => {
-    let isSubscribed = true;
     const abortCtrl = new AbortController();
 
     const addExceptionItemsToRule: AddRuleExceptionsFunc = async (
       exceptions: CreateRuleExceptionListItemSchema[],
-      ruleId: string,
-      ruleName: string
+      rules: Rule[]
     ) => {
-      try {
-        setIsLoading(true);
+      setIsLoading(true);
 
-        await addRuleExceptions({ items: exceptions, ruleId, signal: abortCtrl.signal });
+      // TODO: Update once bulk route is added
+      await Promise.all(
+        rules.map(async (rule) =>
+          addRuleExceptions({
+            items: exceptions,
+            ruleId: rule.id,
+            signal: abortCtrl.signal,
+          })
+        )
+      );
 
-        if (isSubscribed) {
-          setIsLoading(false);
-          addSuccess({
-            title: i18n.ADD_RULE_EXCEPTION_SUCCESS_TITLE,
-            text: i18n.ADD_RULE_EXCEPTION_SUCCESS_TEXT(ruleName),
-          });
-        }
-      } catch (error) {
-        if (isSubscribed) {
-          setIsLoading(false);
-          addError(error, {
-            title: i18n.ADD_RULE_EXCEPTION_ERROR_TITLE(ruleName),
-            toastMessage: error.message,
-          });
-        }
-      }
+      setIsLoading(false);
     };
 
     addRuleExceptionFunc.current = addExceptionItemsToRule;
     return (): void => {
-      isSubscribed = false;
+      setIsLoading(false);
       abortCtrl.abort();
     };
   }, [addError, addSuccess]);
 
-  return [isLoading, addException];
+  return [isLoading, addRuleExceptionFunc.current];
 };
