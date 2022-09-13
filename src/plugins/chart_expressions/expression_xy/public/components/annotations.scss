@@ -17,6 +17,53 @@
   transform-origin: center;
 }
 
+.xyAnnotationTooltip {
+  border-radius: 0 !important;
+}
+
+.xyAnnotationTooltip__rows {
+  // max-height: 60vh;
+  overflow-y: hidden;
+}
+
 .xyAnnotationTooltipDetail {
-  padding: $euiSizeXS ($euiSizeXS * 2);
+  padding: $euiSizeXS (
+    $euiSizeXS * 2
+  );
+}
+
+.xyAnnotationTooltip__row {
+  font-weight: $euiFontWeightMedium;
+  padding: $euiSizeS $euiSizeM $euiSizeS $euiSizeS;
+  border-radius: 0 !important;
+}
+
+.xyAnnotationTooltip__rowLabel {
+  font-weight: $euiFontWeightBold;
+}
+
+.xyAnnotationTooltip__rowTimestamp {
+  margin: $euiSizeXS 0;
+}
+
+.xyAnnotationTooltip__extraFields {
+  color: $euiColorDarkShade;
+}
+
+.xyAnnotationTooltip__extraFieldsKey {
+  word-break: break-word;
+  hyphens: auto;
+}
+
+.xyAnnotationTooltip__extraFieldsValue {
+  text-align: right;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+.xyAnnotationTooltip__skippedCount {
+  position: relative;
+  text-align: right;
+  box-shadow: 0 -24px 24px 2px $euiColorGhost;
+  font-weight: $euiFontWeightMedium;
 }

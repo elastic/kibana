@@ -9,3 +9,11 @@
 .lnsConfigPanelDate__label {
   min-width: 56px; // makes both labels ("from" and "to") the same width
 }
+
+.lnsConfigPanelAnnotations__noFieldsButton {
+  font-weight: $euiFontWeightRegular;
+}
+
+.lnsConfigPanelAnnotations__addButton {
+  margin-top: $euiSizeXS;
+}
