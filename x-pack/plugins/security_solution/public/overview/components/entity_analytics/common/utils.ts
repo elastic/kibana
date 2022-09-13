@@ -331,12 +331,6 @@ export const uninstallRiskScoreModule = async ({
     },
   });
 
-  await deleteStoredScripts({
-    http,
-    notifications,
-    ids: riskScoreEntity === RiskScoreEntity.user ? riskyUsersScriptIds : riskyHostsScriptIds,
-  });
-
   await deleteTransforms({
     http,
     notifications,
@@ -350,6 +344,7 @@ export const uninstallRiskScoreModule = async ({
       forceDelete: false,
     },
   });
+
   const names = utils.getIngestPipelineName(riskScoreEntity);
   const count = names.split(',').length;
 
@@ -358,6 +353,12 @@ export const uninstallRiskScoreModule = async ({
     notifications,
     errorMessage: `${UNINSTALLATION_ERROR} - ${INGEST_PIPELINE_DELETION_ERROR_MESSAGE(count)}`,
     names,
+  });
+
+  await deleteStoredScripts({
+    http,
+    notifications,
+    ids: riskScoreEntity === RiskScoreEntity.user ? riskyUsersScriptIds : riskyHostsScriptIds,
   });
 };
 

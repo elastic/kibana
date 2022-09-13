@@ -174,6 +174,17 @@ describe('UninstallRiskScoreModule - Host', () => {
       getIngestPipelineName(RiskScoreEntity.host)
     );
   });
+
+  it('Delete stored scripts', () => {
+    expect((api.deleteStoredScripts as jest.Mock).mock.calls[0][0].ids).toMatchInlineSnapshot(`
+      Array [
+        "ml_hostriskscore_levels_script",
+        "ml_hostriskscore_init_script",
+        "ml_hostriskscore_map_script",
+        "ml_hostriskscore_reduce_script",
+      ]
+    `);
+  });
 });
 
 describe('uninstallRiskScoreModule - User', () => {
@@ -206,6 +217,16 @@ describe('uninstallRiskScoreModule - User', () => {
     expect((api.deleteIngestPipelines as jest.Mock).mock.calls[0][0].names).toEqual(
       getIngestPipelineName(RiskScoreEntity.user)
     );
+  });
+
+  it('Delete stored scripts', () => {
+    expect((api.deleteStoredScripts as jest.Mock).mock.calls[0][0].ids).toMatchInlineSnapshot(`
+      Array [
+        "ml_userriskscore_levels_script",
+        "ml_userriskscore_map_script",
+        "ml_userriskscore_reduce_script",
+      ]
+    `);
   });
 });
 
