@@ -185,7 +185,7 @@ const GLOBAL_STATE_URL_KEY = '_g';
  */
 export function getState({ history, savedSearch, services }: GetStateParams): GetStateReturn {
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
-  const toasts = services.core.notifications.toasts
+  const toasts = services.core.notifications.toasts;
   const defaultAppState = getStateDefaults({
     savedSearch,
     services,
