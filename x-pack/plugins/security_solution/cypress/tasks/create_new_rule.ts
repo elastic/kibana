@@ -39,13 +39,14 @@ import {
   EQL_QUERY_VALIDATION_SPINNER,
   EQL_TYPE,
   FALSE_POSITIVES_INPUT,
+  getSavedQueryByName,
   IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK,
   INDICATOR_MATCH_TYPE,
   INPUT,
   INVALID_MATCH_CONTENT,
   INVESTIGATION_NOTES_TEXTAREA,
+  LOAD_QUERY_DYNAMICALLY_CHECKBOX,
   LOAD_SAVED_QUERIES_LIST_BUTTON,
-  getSavedQueryByName,
   LOOK_BACK_INTERVAL,
   LOOK_BACK_TIME_TYPE,
   MACHINE_LEARNING_DROPDOWN_INPUT,
@@ -598,10 +599,21 @@ export const waitForTheRuleToBeExecuted = () => {
 };
 
 export const loadSavedQuery = (savedQueryName: string, queryValue: string) => {
-  cy.get(SHOW_QUERY_BAR_BUTTON).eq(0).click();
+  cy.get('[data-test-subj="detectionEngineStepDefineRuleQueryBar"]')
+    .find(SHOW_QUERY_BAR_BUTTON)
+    .click();
+
   cy.get(LOAD_SAVED_QUERIES_LIST_BUTTON).click();
-  cy.get(getSavedQueryByName(savedQueryName)).eq(0).click();
+  cy.get(getSavedQueryByName(savedQueryName)).click();
   cy.get(APPLY_SELECTED_SAVED_QUERY_BUTTON).click();
 
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', queryValue);
+};
+
+export const checkLoadQueryDynamically = () => {
+  cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).click({ force: true }).should('be.checked');
+};
+
+export const uncheckLoadQueryDynamically = () => {
+  cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).click({ force: true }).should('not.be.checked');
 };
