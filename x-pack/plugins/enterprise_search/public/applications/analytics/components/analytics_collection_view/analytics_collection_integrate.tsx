@@ -65,11 +65,7 @@ export const AnalyticsCollectionIntegrate: React.FC<AnalyticsCollectionIntegrate
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiPanel hasShadow={false} color="subdued" paddingSize="xl" grow={false}>
-        <EuiDescriptionList
-          listItems={credentials}
-          type="column"
-          align="center"
-        />
+        <EuiDescriptionList listItems={credentials} type="column" align="center" />
       </EuiPanel>
 
       <EuiSpacer size="l" />
