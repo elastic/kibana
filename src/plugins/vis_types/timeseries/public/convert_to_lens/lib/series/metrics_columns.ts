@@ -12,7 +12,6 @@ import { getSeriesAgg } from './series_agg';
 import { SUPPORTED_METRICS } from '../metrics';
 import {
   Column,
-  convertMetricsToColumns,
   convertToPercentileColumns,
   convertToPercentileRankColumns,
   convertMathToFormulaColumn,
@@ -56,19 +55,19 @@ export const getMetricsColumns = (
   const columnsConverterArgs = { series, metrics, dataView };
   switch (aggregation) {
     case 'percentile': {
-      const percentileColumns = convertMetricsToColumns(
-        columnsConverterArgs,
-        convertToPercentileColumns,
+      const percentileColumns = convertToPercentileColumns(
+        { series, metric: metrics[metricIdx], dataView },
         reducedTimeRange
       );
+
       return getValidColumns(percentileColumns);
     }
     case 'percentile_rank': {
-      const percentileRankColumns = convertMetricsToColumns(
-        columnsConverterArgs,
-        convertToPercentileRankColumns,
+      const percentileRankColumns = convertToPercentileRankColumns(
+        { series, metric: metrics[metricIdx], dataView },
         reducedTimeRange
       );
+
       return getValidColumns(percentileRankColumns);
     }
     case 'math': {

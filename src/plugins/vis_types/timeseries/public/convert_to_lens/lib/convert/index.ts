@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { convertMetricsToColumns, isColumnWithMeta, excludeMetaFromColumn } from './column';
+export { isColumnWithMeta, excludeMetaFromColumn } from './column';
 export { convertToPercentileColumns, isPercentileColumnWithMeta } from './percentile';
 export { convertToPercentileRankColumns, isPercentileRanksColumnWithMeta } from './percentile_rank';
 export { convertMathToFormulaColumn, convertOtherAggsToFormulaColumn } from './formula';

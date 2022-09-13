@@ -12,7 +12,6 @@ import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { createSeries } from '../__mocks__';
 import { getMetricsColumns } from './metrics_columns';
 
-const mockConvertMetricsToColumns = jest.fn();
 const mockConvertMathToFormulaColumn = jest.fn();
 const mockConvertParentPipelineAggToColumns = jest.fn();
 const mockConvertToCumulativeSumColumns = jest.fn();
@@ -25,7 +24,6 @@ const mockConvertToStandartDeviationColumn = jest.fn();
 const mockConvertMetricAggregationColumnWithoutSpecialParams = jest.fn();
 
 jest.mock('../convert', () => ({
-  convertMetricsToColumns: jest.fn(() => mockConvertMetricsToColumns()),
   convertMathToFormulaColumn: jest.fn(() => mockConvertMathToFormulaColumn()),
   convertParentPipelineAggToColumns: jest.fn(() => mockConvertParentPipelineAggToColumns()),
   convertToCumulativeSumColumns: jest.fn(() => mockConvertToCumulativeSumColumns()),
@@ -66,20 +64,6 @@ describe('getMetricsColumns', () => {
         1,
       ],
       null,
-    ],
-    [
-      'call convertMetricsToColumns if metric type is percentile',
-      [createSeries({ metrics: [{ type: TSVB_METRIC_TYPES.PERCENTILE, id: '1' }] }), dataView, 1],
-      mockConvertMetricsToColumns,
-    ],
-    [
-      'call convertMetricsToColumns if metric type is percentile rank',
-      [
-        createSeries({ metrics: [{ type: TSVB_METRIC_TYPES.PERCENTILE_RANK, id: '1' }] }),
-        dataView,
-        1,
-      ],
-      mockConvertMetricsToColumns,
     ],
     [
       'call convertMathToFormulaColumn if metric type is math',

@@ -9,7 +9,6 @@
 import { NavigateToLensContext, XYConfiguration } from '@kbn/visualizations-plugin/common';
 import { TimeRange } from '@kbn/data-plugin/common';
 import type { Panel } from '../../common/types';
-import { Column, CommonColumnConverterArgs } from './lib/convert';
 
 export type ConvertTsvbToLensVisualization = (
   model: Panel,
@@ -20,11 +19,6 @@ export interface Filter {
   kql?: string | { [key: string]: any } | undefined;
   lucene?: string | { [key: string]: any } | undefined;
 }
-
-export type ConvertToColumnsFn<C extends Column> = (
-  { series: Series, metric: Metric, dataView: DataView }: CommonColumnConverterArgs,
-  reducedTimeRange?: string
-) => Array<C | null> | null;
 
 export interface AdditionalFormulaArgs {
   reducedTimeRange?: string;

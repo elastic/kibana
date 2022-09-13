@@ -17,9 +17,8 @@ import {
 import uuid from 'uuid';
 import type { Metric, Series } from '../../../../common/types';
 import { DATA_FORMATTERS } from '../../../../common/enums';
-import { ConvertToColumnsFn } from '../../types';
 import { getTimeScale } from '../metrics';
-import { ColumnWithMeta, Meta, Column, CommonColumnsConverterArgs } from './types';
+import { ColumnWithMeta, Meta, Column } from './types';
 
 type GeneralColumn = Omit<BaseColumn<Operation, unknown>, 'operationType' | 'params'>;
 type GeneralColumnWithMeta = GenericColumnWithMeta<GeneralColumn, Meta>;
@@ -69,12 +68,6 @@ export const createColumn = (
   timeScale: getTimeScale(metric),
   meta: { metricId: metric.id },
 });
-
-export const convertMetricsToColumns = <C extends Column>(
-  { series, metrics, dataView }: CommonColumnsConverterArgs,
-  convertToFn: ConvertToColumnsFn<C>,
-  reducedTimeRange?: string
-) => metrics.flatMap((metric) => convertToFn({ series, metric, dataView }, reducedTimeRange));
 
 export const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
   if ((column as ColumnWithMeta).meta) {
