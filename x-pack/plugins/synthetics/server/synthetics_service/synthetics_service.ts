@@ -465,7 +465,6 @@ export class SyntheticsService {
       )
     ).filter((monitor) => monitor !== null) as Array<SavedObject<SyntheticsMonitorWithSecrets>>;
 
-    console.warn('monitors', monitors);
 
     const end = performance.now();
     const duration = end - start;
