@@ -11,7 +11,7 @@ import { buildHostNamesFilter, buildUserNamesFilter } from '../../../../common/s
 import type { HostRisk, UserRisk } from '../../../risk_score/containers';
 import { useUserRiskScore, useHostRiskScore } from '../../../risk_score/containers';
 
-const ONLY_FIRST_ITEM_PAGINATION = {
+export const ONLY_FIRST_ITEM_PAGINATION = {
   cursorStart: 0,
   querySize: 1,
 };
