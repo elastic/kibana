@@ -20,8 +20,8 @@ import PageNotFound from '../../404';
 export function AlertDetails() {
   const { http } = useKibana<ObservabilityAppServices>().services;
   const { ObservabilityPageTemplate, config } = usePluginContext();
-  const isLoading = false; //To be updated
-  const alert: any = {}; //To be updated
+  const isLoading = false; // To be updated
+  const alert: any = {}; // To be updated
 
   useBreadcrumbs([
     {
