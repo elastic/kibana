@@ -15,8 +15,14 @@ import type {
 import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { pick } from 'lodash';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
+
+const ARIA_PLACEHOLDER_MESSAGE = i18n.translate(
+  'xpack.securitySolution.inputCapture.ariaPlaceHolder',
+  { defaultMessage: 'Enter a command' }
+);
 
 const InputCaptureContainer = styled.div`
   .invisible-input {
@@ -190,6 +196,8 @@ export const InputCapture = memo<InputCaptureProps>(
         onPaste={handleOnPaste}
       >
         <div
+          role="textbox"
+          aria-placeholder={ARIA_PLACEHOLDER_MESSAGE}
           tabIndex={0}
           ref={focusEleRef}
           className="invisible-input"
