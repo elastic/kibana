@@ -12,8 +12,6 @@ import {
   EuiSpacer,
   EuiPanel,
   EuiTitle,
-  EuiLink,
-  EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
