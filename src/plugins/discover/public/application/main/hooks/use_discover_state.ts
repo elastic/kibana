@@ -200,9 +200,9 @@ export function useDiscoverState({
          *  The following line of code catches this, but should be improved
          */
         const nextDataView = await loadDataView(
-          nextState.index,
           services.dataViews,
-          services.uiSettings
+          services.uiSettings,
+          nextState.index
         );
         savedSearch.searchSource.setField('index', nextDataView.loaded);
 
