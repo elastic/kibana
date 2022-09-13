@@ -6,6 +6,8 @@
  */
 
 import React, { FC, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import {
   EuiButton,
@@ -84,23 +86,27 @@ export const CategoryTable: FC<Props> = ({
   const columns = [
     {
       field: 'count',
-      name: 'Count',
+      name: i18n.translate('xpack.aiops.index.errorLoadingDataMessage', {
+        defaultMessage: 'Count',
+      }),
       sortable: true,
       width: '80px',
     },
     {
       field: 'count',
-      name: 'Sparkline',
+      name: i18n.translate('xpack.aiops.index.errorLoadingDataMessage', {
+        defaultMessage: 'Sparkline',
+      }),
       sortable: true,
       width: '100px',
       render: (_, { key }) => {
-        const gg = sparkLines[key];
-        if (gg === undefined) {
+        const sparkLine = sparkLines[key];
+        if (sparkLine === undefined) {
           return null;
         }
         const histogram = eventRate.map((e) => ({
           doc_count_overall: e.docCount,
-          doc_count_change_point: gg[e.key],
+          doc_count_change_point: sparkLine[e.key],
           key: e.key,
           key_as_string: `${e.key}`,
         }));
@@ -116,7 +122,9 @@ export const CategoryTable: FC<Props> = ({
     },
     {
       field: 'examples',
-      name: 'Examples',
+      name: i18n.translate('xpack.aiops.index.errorLoadingDataMessage', {
+        defaultMessage: 'Examples',
+      }),
       sortable: true,
       style: { display: 'block' },
       render: (examples: string[]) => (
@@ -139,19 +147,25 @@ export const CategoryTable: FC<Props> = ({
       width: 40,
       actions: [
         {
-          name: 'Show these in discover',
+          name: i18n.translate('xpack.aiops.index.errorLoadingDataMessage', {
+            defaultMessage: 'Show these in discover',
+          }),
           icon: 'filter',
           type: 'icon',
           onClick: (category) => openInDiscover(QUERY_MODE.INCLUDE, category),
         },
         {
-          name: 'Filter out in discover',
+          name: i18n.translate('xpack.aiops.index.errorLoadingDataMessage', {
+            defaultMessage: 'Filter out in discover',
+          }),
           icon: 'filter',
           type: 'icon',
           onClick: (category) => openInDiscover(QUERY_MODE.EXCLUDE, category),
         },
         {
-          name: 'Open in data visualizer',
+          name: i18n.translate('xpack.aiops.index.errorLoadingDataMessage', {
+            defaultMessage: 'Open in data visualizer',
+          }),
           icon: 'stats',
           type: 'icon',
           onClick: () => {},
@@ -198,12 +212,18 @@ export const CategoryTable: FC<Props> = ({
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiButton size="s" onClick={() => openInDiscover(QUERY_MODE.EXCLUDE)}>
-                Filter out in discover
+                <FormattedMessage
+                  id="xpack.aiops.correlations.failedTransactions.correlationsTable.logRateLabel"
+                  defaultMessage="Filter out in discover"
+                />
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton size="s" onClick={() => openInDiscover(QUERY_MODE.INCLUDE)}>
-                Show these in discover
+                <FormattedMessage
+                  id="xpack.aiops.correlations.failedTransactions.correlationsTable.logRateLabel"
+                  defaultMessage="Show these in discover"
+                />
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

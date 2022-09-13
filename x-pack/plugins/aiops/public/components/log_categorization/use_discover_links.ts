@@ -30,23 +30,14 @@ export function useDiscoverLinks() {
   ) => {
     const selectedRows = category === undefined ? selection : [category];
 
-    const from = moment(timefilterActiveBounds.min?.valueOf()).toISOString();
-    const to = moment(timefilterActiveBounds.max?.valueOf()).toISOString();
-
     const _g = rison.encode({
-      filters: [],
-      refreshInterval: {
-        pause: false,
-        value: 30000,
-      },
       time: {
-        from,
-        to,
+        from: moment(timefilterActiveBounds.min?.valueOf()).toISOString(),
+        to: moment(timefilterActiveBounds.max?.valueOf()).toISOString(),
       },
     });
 
     const _a = rison.encode({
-      columns: [],
       filters: [
         ...aiopsListState.filters,
         {
@@ -72,8 +63,6 @@ export function useDiscoverLinks() {
         language: aiopsListState.searchQueryLanguage,
         query: aiopsListState.searchString,
       },
-      sort: [['timestamp', 'desc']],
-      viewMode: 'documents',
     });
 
     let path = basePath.get();

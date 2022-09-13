@@ -6,4 +6,3 @@
  */
 
 export { defineExplainLogRateSpikesRoute } from './explain_log_rate_spikes';
-export { defineLogCategorizationRoute } from './log_categorization';

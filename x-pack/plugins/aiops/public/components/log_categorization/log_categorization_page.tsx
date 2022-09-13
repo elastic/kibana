@@ -9,6 +9,7 @@ import type { SavedSearch } from '@kbn/discover-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Filter, Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiSpacer,
@@ -32,7 +33,7 @@ import type {
   SearchQueryLanguage,
   SavedSearchSavedObject,
 } from '../../application/utils/search_utils';
-import { useUrlState /* , usePageUrlState, AppStateKey*/ } from '../../hooks/use_url_state';
+import { useUrlState } from '../../hooks/use_url_state';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { restorableDefaults } from '../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
 import { useCategorizeRequest } from './use_categorize_request';
@@ -216,7 +217,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
           <EuiPageContentHeader className="aiopsPageHeader">
             <EuiPageContentHeaderSection>
               <div className="dataViewTitleHeader">
-                <EuiTitle size={'s'}>
+                <EuiTitle size="s">
                   <h2>{dataView.getName()}</h2>
                 </EuiTitle>
               </div>
@@ -260,7 +261,11 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem grow={false} css={{ minWidth: '410px' }}>
-          <EuiFormRow label="Category field">
+          <EuiFormRow
+            label={i18n.translate('xpack.aiops.index.errorLoadingDataMessage', {
+              defaultMessage: 'Category field',
+            })}
+          >
             <EuiComboBox
               isDisabled={loading === true}
               options={fields}
@@ -278,7 +283,10 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
                 loadCategories();
               }}
             >
-              Run categorization
+              <FormattedMessage
+                id="xpack.aiops.correlations.failedTransactions.correlationsTable.logRateLabel"
+                defaultMessage="Run categorization"
+              />
             </EuiButton>
           ) : (
             <EuiButton onClick={() => cancelRequest()}>Cancel</EuiButton>
