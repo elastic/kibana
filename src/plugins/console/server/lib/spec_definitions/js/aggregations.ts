@@ -302,7 +302,7 @@ const rules = {
       time_zone: '00:00',
       missing: '',
       calendar_interval: {
-        __one_of: ['year', 'quarter', 'week', 'day', 'hour', 'minute', 'second']
+        __one_of: ['year', 'quarter', 'week', 'day', 'hour', 'minute', 'second'],
       },
     },
     geo_distance: {
