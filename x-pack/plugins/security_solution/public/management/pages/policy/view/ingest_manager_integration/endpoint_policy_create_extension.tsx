@@ -158,6 +158,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
         onChange({
           isValid: true,
           updatedPolicy: {
+            ...newPolicy,
             inputs: [
               {
                 ...newPolicy.inputs[0],
@@ -167,11 +168,11 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                 config: {
                   _config: {
                     value: {
-                      ...newPolicy.inputs[0].config._config.value,
+                      ...newPolicy?.inputs[0]?.config?._config?.value,
                       cloudConfig: {
-                        ...newPolicy.inputs[0].config._config.value.cloudConfig,
+                        ...newPolicy?.inputs[0]?.config?._config?.value?.cloudConfig,
                         preventions: {
-                          ...newPolicy.inputs[0].config._config.value.cloudConfig.preventions,
+                          ...newPolicy?.inputs[0]?.config._config?.value?.cloudConfig?.preventions,
                           behavior_protection: statusBehaviour,
                           malware: statusMalware,
                         },
@@ -184,7 +185,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
           },
         });
       },
-      [onChange, newPolicy.inputs]
+      [onChange, newPolicy]
     );
 
     const setPreset = useCallback(
@@ -192,6 +193,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
         onChange({
           isValid: true,
           updatedPolicy: {
+            ...newPolicy,
             inputs: [
               {
                 enabled: true,
@@ -200,7 +202,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                 config: {
                   _config: {
                     value: {
-                      ...newPolicy.inputs[0].config._config.value,
+                      ...newPolicy?.inputs[0]?.config._config.value,
                       endpointConfig: {
                         preset: presetValue,
                       },
@@ -212,7 +214,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
           },
         });
       },
-      [onChange, newPolicy.inputs]
+      [onChange, newPolicy]
     );
 
     const setInteractive = useCallback(
@@ -220,6 +222,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
         onChange({
           isValid: true,
           updatedPolicy: {
+            ...newPolicy,
             inputs: [
               {
                 enabled: true,
@@ -228,7 +231,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                 config: {
                   _config: {
                     value: {
-                      ...newPolicy.inputs[0].config._config.value,
+                      ...newPolicy?.inputs[0]?.config._config.value,
                       eventFilters: {
                         nonInteractiveSession: interactiveStatus,
                       },
@@ -240,7 +243,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
           },
         });
       },
-      [onChange, newPolicy.inputs]
+      [onChange, newPolicy]
     );
 
     useEffect(() => {
@@ -280,6 +283,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
           onChange({
             isValid: true,
             updatedPolicy: {
+              ...newPolicy,
               inputs: [
                 {
                   enabled: true,
@@ -310,6 +314,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
           onChange({
             isValid: true,
             updatedPolicy: {
+              ...newPolicy,
               inputs: [
                 {
                   enabled: true,
@@ -337,6 +342,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
         checkboxMaliciousChecked,
         checkboxMalwareChecked,
         radioComprehensiveSelected,
+        newPolicy,
       ]
     );
 
