@@ -78,7 +78,7 @@ function frameTypeToRGB(frameType: number, x: number): number {
   return frameTypeToColors[frameType][x % 4];
 }
 
-export function normalizeColorForFlamegraph(rgb: number): number[] {
+export function rgbToRGBA(rgb: number): number[] {
   return [
     Math.floor(rgb / 65536) / 255,
     (Math.floor(rgb / 256) % 256) / 255,
@@ -172,7 +172,7 @@ export class FlameGraph {
       Value: new Array<number>(numCallees),
       X: new Array<number>(numCallees),
       Y: new Array<number>(numCallees),
-      Color: new Array<number>(numCallees),
+      Color: new Array<number>(numCallees * 4),
       CountInclusive: new Array<number>(numCallees),
       CountExclusive: new Array<number>(numCallees),
       ID: new Array<string>(numCallees),
@@ -192,7 +192,13 @@ export class FlameGraph {
       columnar.Value[idx] = node.Samples;
       columnar.X[idx] = x;
       columnar.Y[idx] = depth;
-      columnar.Color[idx] = frameTypeToRGB(node.FrameType, x);
+
+      const [red, green, blue, alpha] = rgbToRGBA(frameTypeToRGB(node.FrameType, x));
+      const j = 4 * idx;
+      columnar.Color[j] = red;
+      columnar.Color[j + 1] = green;
+      columnar.Color[j + 2] = blue;
+      columnar.Color[j + 3] = alpha;
 
       columnar.CountInclusive[idx] = node.CountInclusive;
       columnar.CountExclusive[idx] = node.CountExclusive;
@@ -235,6 +241,7 @@ export class FlameGraph {
 
     graph.Label = columnar.Label;
     graph.Value = columnar.Value;
+    graph.Color = columnar.Color;
     graph.CountInclusive = columnar.CountInclusive;
     graph.CountExclusive = columnar.CountExclusive;
     graph.ID = columnar.ID;
@@ -249,10 +256,6 @@ export class FlameGraph {
     }
 
     graph.Size = graph.Value.map((n) => normalize(n, 0, maxX));
-
-    for (const color of columnar.Color) {
-      graph.Color.push(...normalizeColorForFlamegraph(color));
-    }
 
     return graph;
   }
