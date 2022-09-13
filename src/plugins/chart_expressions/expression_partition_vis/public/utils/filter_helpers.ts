@@ -52,19 +52,22 @@ export const getFilterClickData = (
   const originalRowIndex = Math.floor(rowIndex / numOriginalMetrics);
 
   data.push(
-    ...clickedLayers
+    ...(clickedLayers
       .map((clickedLayer, index) => {
         const currentColumn = visData.columns.find((col) => col.id === bucketColumns[index].id);
-        const currentColumnIndex = visData.columns.findIndex(
-          (col) => col.id === bucketColumns[index].id
-        );
+
+        if (!currentColumn) {
+          return undefined;
+        }
+
+        const currentColumnIndex = visData.columns.findIndex((col) => col === currentColumn);
 
         // this logic maps the indices of the elements in the
         // visualization's table to the indices in the table before
         // any multiple metrics were collapsed into one metric column
-        const originalColumnIndexes = currentColumn!.meta?.sourceParams?.consolidatedMetricsColumn
+        const originalColumnIndexes = currentColumn.meta?.sourceParams?.consolidatedMetricsColumn
           ? // if this is the special combined column, expand it into both original columns
-            currentColumn!.meta.sourceParams.combinedWithBucketColumn
+            currentColumn.meta.sourceParams.combinedWithBucketColumn
             ? [currentColumnIndex + 1 + (rowIndex % numOriginalMetrics), currentColumnIndex]
             : [currentColumnIndex + (rowIndex % numOriginalMetrics)]
           : [currentColumnIndex];
@@ -77,6 +80,7 @@ export const getFilterClickData = (
         }));
       })
       .flat()
+      .filter(Boolean) as ValueClickContext['data']['data'])
   );
 
   // Allows filtering with the small multiples value
