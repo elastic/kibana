@@ -15,6 +15,7 @@ export interface TimeScaleArgs {
   targetUnit: TimeScaleUnit;
   dateColumnId?: string;
   outputColumnName?: string;
+  reducedTimeRange?: string;
 }
 
 export type TimeScaleExpressionFunction = ExpressionFunctionDefinition<

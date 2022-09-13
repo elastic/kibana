@@ -39,6 +39,10 @@ export const getTimeScale = (
       help: '',
       required: true,
     },
+    reducedTimeRange: {
+      types: ['string'],
+      help: '',
+    },
   },
   inputTypes: ['datatable'],
   async fn(...args) {

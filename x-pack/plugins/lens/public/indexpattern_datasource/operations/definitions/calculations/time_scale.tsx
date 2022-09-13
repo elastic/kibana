@@ -77,6 +77,9 @@ export const timeScaleOperation: OperationDefinition<TimeScaleIndexPatternColumn
             outputColumnId: [columnId],
             outputColumnName: [currentColumn.label],
             targetUnit: [currentColumn.params.unit!],
+            reducedTimeRange: currentColumn.reducedTimeRange
+              ? [currentColumn.reducedTimeRange]
+              : [],
           },
         },
       ];

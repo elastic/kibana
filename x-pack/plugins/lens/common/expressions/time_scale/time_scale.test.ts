@@ -425,6 +425,36 @@ describe('time_scale', () => {
     expect(result.rows.map(({ scaledMetric }) => scaledMetric)).toEqual([75]);
   });
 
+  it('should apply fn for non-histogram fields (with Reduced time range)', async () => {
+    const result = await timeScaleWrapped(
+      {
+        ...emptyTable,
+        rows: [
+          {
+            date: moment('2010-01-04T00:00:00.000Z').valueOf(),
+            metric: 300,
+          },
+        ],
+      },
+      {
+        inputColumnId: 'metric',
+        outputColumnId: 'scaledMetric',
+        targetUnit: 'd',
+        reducedTimeRange: '4d',
+      },
+      {
+        getSearchContext: () => ({
+          timeRange: {
+            from: '2009-01-01T00:00:00.000Z',
+            to: '2010-01-05T00:00:00.000Z',
+          },
+        }),
+      } as unknown as ExecutionContext
+    );
+
+    expect(result.rows.map(({ scaledMetric }) => scaledMetric)).toEqual([75]);
+  });
+
   it('should be sync except for timezone getter to prevent timezone leakage', async () => {
     let resolveTimezonePromise: (value: string | PromiseLike<string>) => void;
     const timezonePromise = new Promise<string>((res) => {

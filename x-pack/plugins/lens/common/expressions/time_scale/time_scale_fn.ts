@@ -33,7 +33,14 @@ export const timeScaleFn =
   ): TimeScaleExpressionFunction['fn'] =>
   async (
     input,
-    { dateColumnId, inputColumnId, outputColumnId, outputColumnName, targetUnit }: TimeScaleArgs,
+    {
+      dateColumnId,
+      inputColumnId,
+      outputColumnId,
+      outputColumnName,
+      targetUnit,
+      reducedTimeRange,
+    }: TimeScaleArgs,
     context
   ) => {
     let timeBounds: TimeRangeBounds | undefined;
@@ -82,12 +89,22 @@ export const timeScaleFn =
       }
     } else {
       const timeRange = context.getSearchContext().timeRange as TimeRange;
+      const endOfBucket = moment.tz(timeRange.to, contextTimeZone);
+      let startOfBucket = moment.tz(timeRange.from, contextTimeZone);
+
+      if (reducedTimeRange) {
+        const reducedStartOfBucket = endOfBucket.clone().subtract(parseInterval(reducedTimeRange));
+
+        if (reducedStartOfBucket > startOfBucket) {
+          startOfBucket = reducedStartOfBucket;
+        }
+      }
 
       timeBounds = calculateBounds(timeRange);
 
       getStartEndOfBucketMeta = () => ({
-        startOfBucket: moment.tz(timeRange.from, contextTimeZone),
-        endOfBucket: moment.tz(timeRange.to, contextTimeZone),
+        startOfBucket,
+        endOfBucket,
       });
     }
 
