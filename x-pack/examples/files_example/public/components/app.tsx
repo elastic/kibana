@@ -13,7 +13,7 @@ import type { FilesClientResponses } from '@kbn/files-plugin/public';
 const names = ['foo', 'bar', 'baz'];
 
 import {
-  EuiPageTemplate,
+  EuiPageTemplate_Deprecated as EuiPageTemplate,
   EuiInMemoryTable,
   EuiInMemoryTableProps,
   EuiButton,

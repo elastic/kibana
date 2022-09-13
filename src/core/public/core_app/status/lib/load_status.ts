@@ -9,7 +9,11 @@
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { NotificationsSetup } from '@kbn/core-notifications-browser';
-import type { StatusResponse, ServiceStatus, ServiceStatusLevel } from '../../../../types/status';
+import type { ServiceStatusLevelId } from '@kbn/core-status-common';
+import type {
+  StatusResponse,
+  StatusInfoServiceStatus as ServiceStatus,
+} from '@kbn/core-status-common-internal';
 import type { DataType } from '.';
 
 interface MetricMeta {
@@ -18,6 +22,7 @@ interface MetricMeta {
   value?: number[];
   type?: DataType;
 }
+
 export interface Metric {
   name: string;
   value: number | number[];
@@ -32,7 +37,7 @@ export interface FormattedStatus {
 }
 
 export interface StatusState {
-  id: ServiceStatusLevel;
+  id: ServiceStatusLevelId;
   title: string;
   message: string;
   uiColor: string;
@@ -144,7 +149,7 @@ function formatStatus(id: string, status: ServiceStatus): FormattedStatus {
   };
 }
 
-export const STATUS_LEVEL_UI_ATTRS: Record<ServiceStatusLevel, StatusUIAttributes> = {
+export const STATUS_LEVEL_UI_ATTRS: Record<ServiceStatusLevelId, StatusUIAttributes> = {
   critical: {
     title: i18n.translate('core.status.redTitle', {
       defaultMessage: 'Red',

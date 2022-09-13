@@ -29,6 +29,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
@@ -42,6 +43,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
@@ -55,6 +57,7 @@
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -69,6 +72,7 @@
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -83,6 +87,7 @@
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -107,6 +112,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
@@ -120,6 +126,7 @@
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -146,6 +153,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
@@ -160,6 +168,7 @@
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -188,6 +197,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
@@ -202,6 +212,7 @@
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -216,6 +227,7 @@
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -242,6 +254,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
@@ -255,6 +268,7 @@
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -282,6 +296,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
@@ -302,6 +317,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
@@ -315,6 +331,7 @@
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -339,6 +356,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
@@ -352,6 +370,7 @@
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -376,6 +395,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
@@ -389,6 +409,7 @@
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -413,6 +434,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
@@ -426,6 +448,7 @@
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -452,6 +475,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
@@ -466,6 +490,7 @@
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],

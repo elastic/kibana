@@ -75,11 +75,14 @@ export const mockGlobalState: State = {
         },
         events: { activePage: 0, limit: 10 },
         uncommonProcesses: { activePage: 0, limit: 10 },
-        anomalies: null,
+        anomalies: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
         hostRisk: {
           activePage: 0,
           limit: 10,
-          sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+          sort: { field: RiskScoreFields.hostRiskScore, direction: Direction.desc },
           severitySelection: [],
         },
         sessions: { activePage: 0, limit: 10 },
@@ -96,11 +99,14 @@ export const mockGlobalState: State = {
         },
         events: { activePage: 0, limit: 10 },
         uncommonProcesses: { activePage: 0, limit: 10 },
-        anomalies: null,
+        anomalies: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
         hostRisk: {
           activePage: 0,
           limit: 10,
-          sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+          sort: { field: RiskScoreFields.hostRiskScore, direction: Direction.desc },
           severitySelection: [],
         },
         sessions: { activePage: 0, limit: 10 },
@@ -150,6 +156,10 @@ export const mockGlobalState: State = {
           activePage: 0,
           limit: 10,
         },
+        [networkModel.NetworkTableType.anomalies]: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
       },
     },
     details: {
@@ -190,6 +200,10 @@ export const mockGlobalState: State = {
           limit: 10,
           sort: { direction: Direction.desc },
         },
+        [networkModel.NetworkTableType.anomalies]: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
       },
     },
   },
@@ -205,7 +219,10 @@ export const mockGlobalState: State = {
           activePage: 0,
           limit: 10,
         },
-        [usersModel.UsersTableType.anomalies]: null,
+        [usersModel.UsersTableType.anomalies]: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
         [usersModel.UsersTableType.risk]: {
           activePage: 0,
           limit: 10,
@@ -220,7 +237,10 @@ export const mockGlobalState: State = {
     },
     details: {
       queries: {
-        [usersModel.UsersTableType.anomalies]: null,
+        [usersModel.UsersTableType.anomalies]: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
         [usersModel.UsersTableType.events]: { activePage: 0, limit: 10 },
       },
     },

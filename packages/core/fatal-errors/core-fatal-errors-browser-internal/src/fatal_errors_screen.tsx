@@ -14,7 +14,7 @@ import {
   EuiEmptyPrompt,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
 } from '@elastic/eui';
 import React from 'react';
 import { Observable, Subscription, merge, tap, fromEvent } from 'rxjs';

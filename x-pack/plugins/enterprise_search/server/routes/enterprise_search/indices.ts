@@ -15,7 +15,7 @@ import { deleteConnectorById } from '../../lib/connectors/delete_connector';
 import { fetchConnectorByIndexName, fetchConnectors } from '../../lib/connectors/fetch_connectors';
 import { fetchCrawlerByIndexName, fetchCrawlers } from '../../lib/crawler/fetch_crawlers';
 
-import { createApiIndex } from '../../lib/indices/create_index';
+import { createIndex } from '../../lib/indices/create_index';
 import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices } from '../../lib/indices/fetch_indices';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
@@ -25,7 +25,11 @@ import { createIndexPipelineDefinitions } from '../../utils/create_pipeline_defi
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
-export function registerIndexRoutes({ router, log }: RouteDependencies) {
+export function registerIndexRoutes({
+  router,
+  enterpriseSearchRequestHandler,
+  log,
+}: RouteDependencies) {
   router.get(
     { path: '/internal/enterprise_search/search_indices', validate: false },
     elasticsearchErrorHandler(log, async (context, _, response) => {
@@ -141,15 +145,21 @@ export function registerIndexRoutes({ router, log }: RouteDependencies) {
       const { client } = (await context.core).elasticsearch;
 
       try {
-        const connector = await fetchConnectorByIndexName(client, indexName);
         const crawler = await fetchCrawlerByIndexName(client, indexName);
+        const connector = await fetchConnectorByIndexName(client, indexName);
+
+        if (crawler) {
+          const crawlerRes = await enterpriseSearchRequestHandler.createRequest({
+            path: `/api/ent/v1/internal/indices/${indexName}`,
+          })(context, request, response);
+
+          if (crawlerRes.status !== 200) {
+            throw new Error(crawlerRes.payload.message);
+          }
+        }
 
         if (connector) {
           await deleteConnectorById(client, connector.id);
-        }
-
-        if (crawler) {
-          // do nothing for now because we don't have a way to delete a crawler yet
         }
 
         await client.asCurrentUser.indices.delete({ index: indexName });
@@ -319,7 +329,7 @@ export function registerIndexRoutes({ router, log }: RouteDependencies) {
         });
       }
 
-      const createIndexResponse = await createApiIndex(client, indexName, language);
+      const createIndexResponse = await createIndex(client, indexName, language, true);
 
       return response.ok({
         body: createIndexResponse,

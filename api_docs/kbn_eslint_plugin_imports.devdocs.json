@@ -28,6 +28,7 @@
         ],
         "path": "packages/kbn-eslint-plugin-imports/src/get_import_resolver.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/eslint-plugin-imports",
@@ -42,6 +43,7 @@
             ],
             "path": "packages/kbn-eslint-plugin-imports/src/get_import_resolver.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],

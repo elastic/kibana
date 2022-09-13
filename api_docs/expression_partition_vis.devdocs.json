@@ -18,6 +18,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -32,6 +33,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -56,6 +58,7 @@
       ],
       "path": "src/plugins/chart_expressions/expression_partition_vis/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -82,6 +85,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/expression_functions/mosaic_vis_function.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -142,6 +146,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/expression_functions/partition_labels_function.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -165,6 +170,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/expression_functions/pie_vis_function.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -188,6 +194,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/expression_functions/treemap_vis_function.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -211,6 +218,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/expression_functions/waffle_vis_function.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -226,6 +234,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionPartitionVis",
@@ -235,7 +244,8 @@
             "label": "accessor",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -258,7 +268,8 @@
               "> | undefined; }"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -272,6 +283,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionPartitionVis",
@@ -292,7 +304,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -313,7 +326,8 @@
               ")[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -334,7 +348,8 @@
               ")[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -355,7 +370,8 @@
               ")[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -369,6 +385,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionPartitionVis",
@@ -378,7 +395,8 @@
             "label": "show",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -397,7 +415,8 @@
               }
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -407,7 +426,8 @@
             "label": "values",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -426,7 +446,8 @@
               }
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -436,7 +457,8 @@
             "label": "percentDecimals",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -452,6 +474,7 @@
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
             "deprecated": true,
+            "trackAdoption": false,
             "references": [
               {
                 "plugin": "visTypePie",
@@ -477,6 +500,7 @@
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
             "deprecated": true,
+            "trackAdoption": false,
             "references": [
               {
                 "plugin": "visTypePie",
@@ -510,6 +534,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionPartitionVis",
@@ -530,7 +555,8 @@
               ")[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -540,7 +566,8 @@
             "label": "nestedLegend",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -564,6 +591,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionPartitionVis",
@@ -582,7 +610,8 @@
               }
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -601,7 +630,8 @@
               }
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -615,7 +645,8 @@
               "<{ [key: string]: unknown; }>"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -628,7 +659,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -641,7 +673,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -654,7 +687,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -674,7 +708,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -687,7 +722,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -700,7 +736,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -713,7 +750,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -737,6 +775,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionPartitionVis",
@@ -757,7 +796,8 @@
               ")[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -767,7 +807,8 @@
             "label": "isDonut",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -787,7 +828,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -800,7 +842,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -813,7 +856,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -826,7 +870,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -836,7 +881,8 @@
             "label": "nestedLegend",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -860,6 +906,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionPartitionVis",
@@ -880,7 +927,8 @@
               ")[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -890,7 +938,8 @@
             "label": "nestedLegend",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -914,6 +963,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionPartitionVis",
@@ -934,7 +984,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -944,7 +995,8 @@
             "label": "showValuesInLegend",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -960,6 +1012,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -971,6 +1024,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -982,6 +1036,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -993,6 +1048,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1025,6 +1081,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1039,6 +1096,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1104,6 +1162,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1118,6 +1177,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1132,6 +1192,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1146,6 +1207,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1211,6 +1273,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1225,6 +1288,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1239,6 +1303,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1253,6 +1318,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1318,6 +1384,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1332,6 +1399,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1397,6 +1465,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
