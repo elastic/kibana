@@ -12,7 +12,7 @@ import './jest.mocks';
 import React, { FunctionComponent } from 'react';
 import { merge } from 'lodash';
 
-import { defer } from 'rxjs';
+import { defer, BehaviorSubject } from 'rxjs';
 import { notificationServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsMock as fieldFormats } from '@kbn/field-formats-plugin/common/mocks';
@@ -21,6 +21,7 @@ import { FieldEditorProvider, Context } from '../../../public/components/field_e
 import { FieldPreviewProvider } from '../../../public/components/preview';
 import { initApi, ApiService } from '../../../public/lib';
 import { init as initHttpRequests } from './http_requests';
+import { RuntimeFieldSubFields } from '../../../public/shared_imports';
 
 const dataStart = dataPluginMock.createStartContract();
 const { search } = dataStart;
@@ -124,7 +125,7 @@ export const WithFieldEditorDependencies =
       uiSettings: uiSettingsServiceMock.createStartContract(),
       fieldTypeToProcess: 'runtime',
       existingConcreteFields: [],
-      namesNotAllowed: [],
+      namesNotAllowed: { fields: [], runtimeComposites: [] },
       links: {
         runtimePainless: 'https://elastic.co',
       },
@@ -138,6 +139,8 @@ export const WithFieldEditorDependencies =
         getById: () => undefined,
       },
       fieldFormats,
+      fieldName$: new BehaviorSubject(''),
+      subfields$: new BehaviorSubject<RuntimeFieldSubFields | undefined>(undefined),
     };
 
     const mergedDependencies = merge({}, dependencies, overridingDependencies);
