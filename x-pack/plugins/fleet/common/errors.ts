@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/* eslint-disable max-classes-per-file */
 
 import type { FleetErrorType } from './types';
 
-/* eslint-disable max-classes-per-file */
 export class IngestManagerError extends Error {
   attributes?: { type: FleetErrorType };
   constructor(message?: string, public readonly meta?: unknown) {
