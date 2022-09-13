@@ -67,8 +67,8 @@ const Template: ComponentStory<typeof UploadFile> = (props: Props) => (
 
 export const Basic = Template.bind({});
 
-export const BasicInfinteUploads = Template.bind({});
-BasicInfinteUploads.args = {
+export const BasicInfiniteUploads = Template.bind({});
+BasicInfiniteUploads.args = {
   allowRepeatedUploads: true,
 };
 
