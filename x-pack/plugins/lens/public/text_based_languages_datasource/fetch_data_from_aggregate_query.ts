@@ -12,7 +12,6 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { queryStateToExpressionAst } from '@kbn/data-plugin/common';
-// import { textBasedQueryStateToExpressionAst } from '@kbn/data-plugin/common';
 
 interface SQLErrorResponse {
   error: {
@@ -21,7 +20,7 @@ interface SQLErrorResponse {
   type: 'error';
 }
 
-export function fetchSql(
+export function fetchDataFromAggregateQuery(
   query: Query | AggregateQuery,
   dataViewsService: DataViewsContract,
   data: DataPublicPluginStart,

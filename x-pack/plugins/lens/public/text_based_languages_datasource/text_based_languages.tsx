@@ -11,9 +11,9 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { isOfAggregateQueryType, AggregateQuery } from '@kbn/es-query';
+import type { AggregateQuery } from '@kbn/es-query';
 import { EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
-import type { DatatableColumn, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
@@ -27,20 +27,19 @@ import {
 } from '../types';
 import { generateId } from '../id_generator';
 import { toExpression } from './to_expression';
-import { EsSQLDataPanel } from './datapanel';
-import { fetchSql } from './fetch_sql';
+import { TextBasedLanguagesDataPanel } from './datapanel';
 import { loadIndexPatternRefs } from './utils';
 import type {
-  EsSQLPrivateState,
-  EsSQLPersistedState,
+  TextBasedLanguagesPrivateState,
+  TextBasedLanguagesPersistedState,
   IndexPatternRef,
-  EsSQLLayerColumn,
+  TextBasedLanguagesLayerColumn,
   TextBasedLanguageField,
 } from './types';
 import { FieldSelect } from './field_select';
 import { Datasource } from '../types';
 
-export function getSQLDatasource({
+export function getTextBasedLanguagesDatasource({
   core,
   storage,
   data,
@@ -53,7 +52,7 @@ export function getSQLDatasource({
   expressions: ExpressionsStart;
   dataViews: DataViewsPublicPluginStart;
 }) {
-  const getSuggestionsForState = (state: EsSQLPrivateState) => {
+  const getSuggestionsForState = (state: TextBasedLanguagesPrivateState) => {
     return Object.entries(state.layers)?.map(([id, layer]) => {
       return {
         state: {
@@ -79,8 +78,11 @@ export function getSQLDatasource({
       };
     });
   };
-  const sqlDatasource: Datasource<EsSQLPrivateState, EsSQLPersistedState> = {
-    id: 'sql',
+  const TextBasedLanguagesDatasource: Datasource<
+    TextBasedLanguagesPrivateState,
+    TextBasedLanguagesPersistedState
+  > = {
+    id: 'textBasedLanguages',
 
     checkIntegrity: () => {
       return [];
@@ -110,21 +112,12 @@ export function getSQLDatasource({
       });
       return errors;
     },
-    async initialize(state?: EsSQLPersistedState) {
+    async initialize(state?: TextBasedLanguagesPersistedState) {
       const initState = state || { layers: {} };
       const indexPatternRefs: IndexPatternRef[] = await loadIndexPatternRefs(dataViews);
-      let fieldList: DatatableColumn[] = [];
-      if (state) {
-        const layer = Object.values(state?.layers)?.[0];
-        if (layer && layer.query && isOfAggregateQueryType(layer.query) && 'sql' in layer.query) {
-          const table = await fetchSql(layer.query, dataViews, data, expressions);
-          const columnsFromQuery = table?.columns ?? [];
-          fieldList = columnsFromQuery;
-        }
-      }
       return {
         ...initState,
-        fieldList,
+        fieldList: [],
         indexPatternRefs,
       };
     },
@@ -134,13 +127,13 @@ export function getSQLDatasource({
       return Object.values(state.layers).map(({ index }) => index);
     },
 
-    getPersistableState({ layers }: EsSQLPrivateState) {
+    getPersistableState({ layers }: TextBasedLanguagesPrivateState) {
       return { state: { layers }, savedObjectReferences: [] };
     },
     isValidColumn() {
       return true;
     },
-    insertLayer(state: EsSQLPrivateState, newLayerId: string) {
+    insertLayer(state: TextBasedLanguagesPrivateState, newLayerId: string) {
       const layer = Object.values(state?.layers)?.[0];
       const query = layer?.query;
       const columns = layer?.allColumns ?? [];
@@ -164,7 +157,7 @@ export function getSQLDatasource({
       };
     },
 
-    removeLayer(state: EsSQLPrivateState, layerId: string) {
+    removeLayer(state: TextBasedLanguagesPrivateState, layerId: string) {
       const newLayers = {
         ...state.layers,
         [layerId]: {
@@ -180,7 +173,7 @@ export function getSQLDatasource({
       };
     },
 
-    clearLayer(state: EsSQLPrivateState, layerId: string) {
+    clearLayer(state: TextBasedLanguagesPrivateState, layerId: string) {
       return {
         ...state,
         layers: {
@@ -190,10 +183,10 @@ export function getSQLDatasource({
       };
     },
 
-    getLayers(state: EsSQLPrivateState) {
+    getLayers(state: TextBasedLanguagesPrivateState) {
       return state && state.layers ? Object.keys(state?.layers) : [];
     },
-    getCurrentIndexPatternId(state: EsSQLPrivateState) {
+    getCurrentIndexPatternId(state: TextBasedLanguagesPrivateState) {
       const layers = Object.values(state.layers);
       return layers?.[0]?.index;
     },
@@ -207,7 +200,7 @@ export function getSQLDatasource({
         })
       );
     },
-    getUsedDataView: (state: EsSQLPrivateState, layerId: string) => {
+    getUsedDataView: (state: TextBasedLanguagesPrivateState, layerId: string) => {
       return state.layers[layerId].index;
     },
 
@@ -228,10 +221,18 @@ export function getSQLDatasource({
       return toExpression(state, layerId, timeRange);
     },
 
-    renderDataPanel(domElement: Element, props: DatasourceDataPanelProps<EsSQLPrivateState>) {
+    renderDataPanel(
+      domElement: Element,
+      props: DatasourceDataPanelProps<TextBasedLanguagesPrivateState>
+    ) {
       render(
         <I18nProvider>
-          <EsSQLDataPanel data={data} dataViews={dataViews} expressions={expressions} {...props} />
+          <TextBasedLanguagesDataPanel
+            data={data}
+            dataViews={dataViews}
+            expressions={expressions}
+            {...props}
+          />
         </I18nProvider>,
         domElement
       );
@@ -239,7 +240,7 @@ export function getSQLDatasource({
 
     renderDimensionTrigger: (
       domElement: Element,
-      props: DatasourceDimensionTriggerProps<EsSQLPrivateState>
+      props: DatasourceDimensionTriggerProps<TextBasedLanguagesPrivateState>
     ) => {
       const layer = props.state.layers[props.layerId];
       const selectedField = layer?.allColumns?.find(
@@ -253,13 +254,13 @@ export function getSQLDatasource({
       );
     },
 
-    getRenderEventCounters(state: EsSQLPrivateState): string[] {
+    getRenderEventCounters(state: TextBasedLanguagesPrivateState): string[] {
       return [];
     },
 
     renderDimensionEditor: (
       domElement: Element,
-      props: DatasourceDimensionEditorProps<EsSQLPrivateState>
+      props: DatasourceDimensionEditorProps<TextBasedLanguagesPrivateState>
     ) => {
       const fields = props.state.fieldList;
       const selectedField = props.state.layers[props.layerId]?.allColumns?.find(
@@ -326,7 +327,7 @@ export function getSQLDatasource({
 
     renderLayerPanel: (
       domElement: Element,
-      props: DatasourceLayerPanelProps<EsSQLPrivateState>
+      props: DatasourceLayerPanelProps<TextBasedLanguagesPrivateState>
     ) => {
       render(
         <span>
@@ -340,7 +341,7 @@ export function getSQLDatasource({
       );
     },
 
-    uniqueLabels(state: EsSQLPrivateState) {
+    uniqueLabels(state: TextBasedLanguagesPrivateState) {
       const layers = state?.layers;
       const columnLabelMap = {} as Record<string, string>;
 
@@ -400,7 +401,7 @@ export function getSQLDatasource({
       return false;
     },
 
-    getPublicAPI({ state, layerId }: PublicAPIProps<EsSQLPrivateState>) {
+    getPublicAPI({ state, layerId }: PublicAPIProps<TextBasedLanguagesPrivateState>) {
       return {
         datasourceId: 'sql',
 
@@ -509,10 +510,14 @@ export function getSQLDatasource({
     isEqual: () => true,
   };
 
-  return sqlDatasource;
+  return TextBasedLanguagesDatasource;
 }
 
-function blankLayer(index: string, query?: AggregateQuery, columns?: EsSQLLayerColumn[]) {
+function blankLayer(
+  index: string,
+  query?: AggregateQuery,
+  columns?: TextBasedLanguagesLayerColumn[]
+) {
   return {
     index,
     query,

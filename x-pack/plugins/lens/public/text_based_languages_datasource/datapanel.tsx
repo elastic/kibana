@@ -20,22 +20,25 @@ import { FieldButton } from '@kbn/react-field';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { generateId } from '../id_generator';
 import { DatasourceDataPanelProps, DataType } from '../types';
-import type { EsSQLPrivateState, IndexPatternRef, EsSQLLayerColumn } from './types';
-import { fetchSql } from './fetch_sql';
-import { loadIndexPatternRefs } from './utils';
+import type {
+  TextBasedLanguagesPrivateState,
+  IndexPatternRef,
+  TextBasedLanguagesLayerColumn,
+} from './types';
+import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
 import { DragDrop } from '../drag_drop';
 import { LensFieldIcon } from '../shared_components';
 import { ChildDragDropProvider } from '../drag_drop';
 
-export type Props = DatasourceDataPanelProps<EsSQLPrivateState> & {
+export type Props = DatasourceDataPanelProps<TextBasedLanguagesPrivateState> & {
   data: DataPublicPluginStart;
   expressions: ExpressionsStart;
   dataViews: DataViewsPublicPluginStart;
 };
-const htmlId = htmlIdGenerator('datapanel-sql');
+const htmlId = htmlIdGenerator('datapanel-text-based-languages');
 const fieldSearchDescriptionId = htmlId();
 
-export function EsSQLDataPanel({
+export function TextBasedLanguagesDataPanel({
   setState,
   state,
   dragDropContext,
@@ -52,18 +55,19 @@ export function EsSQLDataPanel({
   const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '' }));
   useEffect(() => {
     async function fetchData() {
+      // sql text based language
       if (query && isOfAggregateQueryType(query) && 'sql' in query && !isEqual(query, prevQuery)) {
-        const indexPatternRefs: IndexPatternRef[] = await loadIndexPatternRefs(dataViews);
+        const indexPatternRefs: IndexPatternRef[] = state.indexPatternRefs;
         const errors: Error[] = [];
         const layerIds = Object.keys(state.layers);
         const newLayerId = layerIds.length > 0 ? layerIds[0] : generateId();
         const indexPattern = getIndexPatternFromSQLQuery(query.sql);
         const index = indexPatternRefs.find((r) => r.title === indexPattern)?.id ?? '';
         let columnsFromQuery: DatatableColumn[] = [];
-        let unique: EsSQLLayerColumn[] = [];
+        let unique: TextBasedLanguagesLayerColumn[] = [];
         let timeFieldName;
         try {
-          const table = await fetchSql(query, dataViews, data, expressions);
+          const table = await fetchDataFromAggregateQuery(query, dataViews, data, expressions);
           const dataView = await dataViews.get(index);
           timeFieldName = dataView.timeFieldName;
           columnsFromQuery = table?.columns ?? [];
@@ -110,7 +114,7 @@ export function EsSQLDataPanel({
       }
     }
     fetchData();
-  }, [data, dataViews, expressions, prevQuery, query, setState, state.layers]);
+  }, [data, dataViews, expressions, prevQuery, query, setState, state]);
 
   const [openPopover, setOpenPopover] = useState('');
 

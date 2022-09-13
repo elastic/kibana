@@ -52,7 +52,7 @@ import type {
   IndexPatternDatasourceSetupPlugins,
   FormulaPublicApi,
 } from './indexpattern_datasource';
-import { SQLDatasource } from './sql_datasource';
+import { TextBasedLanguagesDatasource } from './text_based_languages_datasource';
 
 import type {
   XyVisualization as XyVisualizationType,
@@ -226,7 +226,7 @@ export class LensPlugin {
   private editorFrameSetup: EditorFrameSetup | undefined;
   private queuedVisualizations: Array<Visualization | (() => Promise<Visualization>)> = [];
   private indexpatternDatasource: IndexPatternDatasourceType | undefined;
-  private sqlDatasource: SQLDatasource | undefined;
+  private textBasedLanguagesDatasource: TextBasedLanguagesDatasource | undefined;
   private xyVisualization: XyVisualizationType | undefined;
   private legacyMetricVisualization: LegacyMetricVisualizationType | undefined;
   private metricVisualization: MetricVisualizationType | undefined;
@@ -427,7 +427,7 @@ export class LensPlugin {
     this.datatableVisualization = new DatatableVisualization();
     this.editorFrameService = new EditorFrameService();
     this.indexpatternDatasource = new IndexPatternDatasource();
-    this.sqlDatasource = new SQLDatasource();
+    this.textBasedLanguagesDatasource = new TextBasedLanguagesDatasource();
     this.xyVisualization = new XyVisualization();
     this.legacyMetricVisualization = new LegacyMetricVisualization();
     this.metricVisualization = new MetricVisualization();
@@ -451,7 +451,7 @@ export class LensPlugin {
       eventAnnotation,
     };
     this.indexpatternDatasource.setup(core, dependencies);
-    this.sqlDatasource.setup(core, dependencies);
+    this.textBasedLanguagesDatasource.setup(core, dependencies);
     this.xyVisualization.setup(core, dependencies);
     this.datatableVisualization.setup(core, dependencies);
     this.legacyMetricVisualization.setup(core, dependencies);

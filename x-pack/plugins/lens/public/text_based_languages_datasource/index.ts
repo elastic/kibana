@@ -10,28 +10,31 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { getSQLDatasource } from './sql';
+import { getTextBasedLanguagesDatasource } from './text_based_languages';
 import { Datasource, EditorFrameSetup } from '../types';
 
-export interface SQLDataSourceSetupPlugins {
+export interface TextBasedLanguageSetupPlugins {
   data: DataPublicPluginSetup;
   editorFrame: EditorFrameSetup;
 }
 
-export interface SQLDataSourceStartPlugins {
+export interface TextBasedLanguageStartPlugins {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
 }
 
-export class SQLDatasource {
+export class TextBasedLanguagesDatasource {
   constructor() {}
 
-  setup(core: CoreSetup<SQLDataSourceStartPlugins>, { editorFrame }: SQLDataSourceSetupPlugins) {
+  setup(
+    core: CoreSetup<TextBasedLanguageStartPlugins>,
+    { editorFrame }: TextBasedLanguageSetupPlugins
+  ) {
     editorFrame.registerDatasource(
       async () =>
         core.getStartServices().then(([coreStart, { data, dataViews, expressions }]) =>
-          getSQLDatasource({
+          getTextBasedLanguagesDatasource({
             core: coreStart,
             storage: new Storage(localStorage),
             data,

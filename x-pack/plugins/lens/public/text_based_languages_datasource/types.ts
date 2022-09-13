@@ -7,7 +7,7 @@
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 
-export interface EsSQLLayerColumn {
+export interface TextBasedLanguagesLayerColumn {
   columnId: string;
   fieldName: string;
   meta?: DatatableColumn['meta'];
@@ -19,20 +19,20 @@ export interface TextBasedLanguageField {
   field: string;
 }
 
-export interface EsSQLLayer {
+export interface TextBasedLanguagesLayer {
   index: string;
   query: AggregateQuery | undefined;
-  columns: EsSQLLayerColumn[];
-  allColumns: EsSQLLayerColumn[];
+  columns: TextBasedLanguagesLayerColumn[];
+  allColumns: TextBasedLanguagesLayerColumn[];
   timeField?: string;
   errors?: Error[];
 }
 
-export interface EsSQLPersistedState {
-  layers: Record<string, EsSQLLayer>;
+export interface TextBasedLanguagesPersistedState {
+  layers: Record<string, TextBasedLanguagesLayer>;
 }
 
-export type EsSQLPrivateState = EsSQLPersistedState & {
+export type TextBasedLanguagesPrivateState = TextBasedLanguagesPersistedState & {
   indexPatternRefs: IndexPatternRef[];
   fieldList: DatatableColumn[];
 };

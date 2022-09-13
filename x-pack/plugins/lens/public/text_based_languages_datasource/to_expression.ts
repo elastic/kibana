@@ -10,10 +10,10 @@ import type { TimeRange } from '@kbn/es-query';
 import { timerangeToAst, aggregateQueryToAst } from '@kbn/data-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import type { OriginalColumn } from '../../common/types';
-import { EsSQLPrivateState, EsSQLLayer, IndexPatternRef } from './types';
+import { TextBasedLanguagesPrivateState, TextBasedLanguagesLayer, IndexPatternRef } from './types';
 
 function getExpressionForLayer(
-  layer: EsSQLLayer,
+  layer: TextBasedLanguagesLayer,
   refs: IndexPatternRef[],
   timeRange?: TimeRange
 ): Ast | null {
@@ -41,17 +41,6 @@ function getExpressionForLayer(
     }
   });
 
-  // const idMap = layer.columns.reduce((currentIdMap, column, index) => {
-  //   return {
-  //     ...currentIdMap,
-  //     [column.fieldName]: [
-  //       {
-  //         id: column.columnId,
-  //       },
-  //     ],
-  //   };
-  // });
-
   const kibana = buildExpressionFunction('kibana', {});
   const kibanaContext = buildExpressionFunction('kibana_context', {
     timeRange: timeRange && timerangeToAst(timeRange),
@@ -76,7 +65,11 @@ function getExpressionForLayer(
   return ast;
 }
 
-export function toExpression(state: EsSQLPrivateState, layerId: string, timeRange?: TimeRange) {
+export function toExpression(
+  state: TextBasedLanguagesPrivateState,
+  layerId: string,
+  timeRange?: TimeRange
+) {
   if (state.layers[layerId]) {
     return getExpressionForLayer(state.layers[layerId], state.indexPatternRefs, timeRange);
   }

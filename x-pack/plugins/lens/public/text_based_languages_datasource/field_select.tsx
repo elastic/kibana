@@ -10,11 +10,11 @@ import { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { FieldPicker, FieldOptionValue, FieldOption } from '../shared_components/field_picker';
-import type { EsSQLLayerColumn } from './types';
+import type { TextBasedLanguagesLayerColumn } from './types';
 import type { DataType } from '../types';
 
 export interface FieldSelectProps extends EuiComboBoxProps<EuiComboBoxOptionOption['value']> {
-  selectedField?: EsSQLLayerColumn;
+  selectedField?: TextBasedLanguagesLayerColumn;
   onChoose: (choice: FieldOptionValue) => void;
   existingFields: DatatableColumn[];
 }
