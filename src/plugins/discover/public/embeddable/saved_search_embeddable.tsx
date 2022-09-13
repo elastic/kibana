@@ -484,6 +484,8 @@ export class SavedSearchEmbeddable
       ReactDOM.unmountComponentAtNode(this.node);
     }
     this.node = domNode;
+
+    this.renderReactComponent(this.node, this.searchProps!);
   }
 
   private renderReactComponent(domNode: HTMLElement, searchProps: SearchProps) {
