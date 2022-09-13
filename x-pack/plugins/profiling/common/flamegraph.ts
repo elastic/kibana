@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import objectHash from 'object-hash';
 import { CallerCalleeNode, createCallerCalleeDiagram } from './callercallee';
 import {
   describeFrameType,
@@ -186,7 +185,7 @@ export class FlameGraph {
       columnar.CountInclusive.push(node.CountInclusive);
       columnar.CountExclusive.push(node.CountExclusive);
 
-      const id = objectHash([parentID, node.FrameGroupID]);
+      const id = x + ',' + depth;
 
       columnar.ID.push(id);
 
