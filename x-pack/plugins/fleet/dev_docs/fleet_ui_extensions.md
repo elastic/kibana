@@ -44,6 +44,12 @@ export class Plugin {
         view: 'package-policy-response',
         Component: getLazyEndpointPolicyResponseExtension(core, plugins),
       });
+
+    registerExtension({
+        package: 'endpoint',
+        view: 'package-generic-errors-list',
+        Component: getLazyEndpointGenericErrorsListExtension(core, plugins),
+      });
   }
   //...
 }

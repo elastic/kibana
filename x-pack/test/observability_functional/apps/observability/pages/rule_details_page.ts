@@ -45,7 +45,6 @@ export default ({ getService }: FtrProviderContext) => {
     const logThresholdRuleName = 'error-log';
 
     before(async () => {
-      await observability.users.restoreDefaultTestUserRole();
       const uptimeRule = {
         params: {
           search: '',
@@ -82,6 +81,7 @@ export default ({ getService }: FtrProviderContext) => {
       uptimeRuleId = await createRule(uptimeRule);
       logThresholdRuleId = await createRule(logThresholdRule);
     });
+
     after(async () => {
       await deleteRuleById(uptimeRuleId);
       await deleteRuleById(logThresholdRuleId);
