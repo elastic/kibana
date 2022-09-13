@@ -19,7 +19,7 @@ import {
   waitForComponentToUpdate,
 } from '../../lib/test_utils';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public');
+jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('EmailActionConnectorFields', () => {

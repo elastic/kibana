@@ -19,7 +19,7 @@ import { ConnectorFormTestProvider } from '../../lib/test_utils';
 import { mount } from 'enzyme';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public');
+jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api');
 jest.mock('./api');
 
