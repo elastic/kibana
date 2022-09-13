@@ -129,10 +129,12 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     // Then remove duplicate values and create table items like { id: 1, group: {...}, doc_count: 1234 }
     const groupFieldValuesCountMap = mockData.reduce((countMap, current) => {
       // If field name/key exists, increase count else create it and set count to 1
-      Object.keys(current).forEach((fieldName) => {
+      const currentGroup = current.group;
+      currentGroup.forEach((group) => {
+        const fieldName = group.field;
         const fieldNameCountMap = countMap[fieldName];
-        // @ts-ignore // TODO: remove once we have real data
-        const fieldValue = current[fieldName];
+        const fieldValue = group.value;
+
         if (fieldNameCountMap === undefined) {
           countMap[fieldName] = { [fieldValue]: 1 };
         } else if (fieldNameCountMap[fieldValue] === undefined) {
@@ -141,18 +143,16 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           fieldNameCountMap[fieldValue] += 1;
         }
       });
-
       return countMap;
     }, {} as Record<string, Record<string, number>>);
 
-    const tableItems = mockData.map((group, index) => {
+    const tableItems = mockData.map(({ group, docCount }, index) => {
       const dedupedGroup = {};
       const repeatedValues = {};
 
-      for (const fieldName in group) {
-        if (fieldName === 'doc_count') continue;
-        // @ts-ignore // TODO: remove once we have real data
-        const fieldValue = group[fieldName];
+      group.forEach((pair) => {
+        const fieldName = pair.field;
+        const fieldValue = pair.value;
         if (groupFieldValuesCountMap[fieldName][fieldValue] <= 2) {
           // @ts-ignore // TODO: remove once we have real data
           dedupedGroup[fieldName] = fieldValue;
@@ -160,11 +160,11 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           // @ts-ignore // TODO: remove once we have real data
           repeatedValues[fieldName] = fieldValue;
         }
-      }
+      });
 
       return {
         id: index,
-        docCount: group.doc_count,
+        docCount,
         group: dedupedGroup,
         repeatedValues,
       };

@@ -54,7 +54,6 @@ interface SpikeAnalysisTableExpandedRowProps {
 }
 
 export const SpikeAnalysisTableExpandedRow: FC<SpikeAnalysisTableExpandedRowProps> = ({
-  // group,
   changePoints,
   dataViewId,
   loading,
