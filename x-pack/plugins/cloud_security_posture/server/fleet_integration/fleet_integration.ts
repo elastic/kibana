@@ -43,42 +43,6 @@ export const getBenchmarkInputType = (inputs: PackagePolicy['inputs']): Benchmar
   return getInputType(CLOUDBEAT_VANILLA);
 };
 
-async function UpdateCspRulesAccordingToCspRuleTemplates(
-  packagePolicy: PackagePolicy,
-  savedObjectsClient,
-  logger
-) {
-  const benchmarkType = getBenchmarkInputType(packagePolicy.inputs);
-
-  // Create csp-rules from the generic asset
-  const existingRuleTemplates: SavedObjectsFindResponse<CspRuleTemplate> =
-    await savedObjectsClient.find({
-      type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
-      perPage: 10000,
-      filter: getBenchmarkTypeFilter(benchmarkType),
-    });
-
-  if (existingRuleTemplates.total === 0) {
-    logger.warn(`expected CSP rule templates to exists for type: ${benchmarkType}`);
-    return;
-  }
-
-  const cspRules = generateRulesFromTemplates(
-    packagePolicy.id,
-    packagePolicy.policy_id,
-    existingRuleTemplates.saved_objects,
-    new Map()
-  );
-
-  try {
-    await savedObjectsClient.bulkCreate(cspRules);
-    logger.info(`Generated CSP rules for package ${packagePolicy.policy_id}`);
-  } catch (e) {
-    logger.error('failed to generate rules out of template');
-    logger.error(e);
-  }
-}
-
 /**
  * Callback to handle creation of PackagePolicies in Fleet
  */
@@ -95,18 +59,20 @@ export const OnPackagePolicyUpgradeCallback = async (
   packagePolicy: PackagePolicy,
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
-  debugger;
-  const benchmarkType = getBenchmarkInputType(packagePolicy.inputs);
+  // Need to be removed
   packagePolicy.id = `04f32290-b7cf-47ee-803a-8286565f2b4b`;
   // Create csp-rules from the generic asset
-  const existingRuleTemplates: SavedObjectsFindResponse<CspRuleTemplate> =
-    await savedObjectsClient.find({
-      type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
-      perPage: 10000,
-      filter: getBenchmarkTypeFilter(benchmarkType),
-    });
 
-  console.log('existing templates:', existingRuleTemplates);
+  await UpdateCspRulesAccordingToCspRuleTemplates(packagePolicy, savedObjectsClient, logger);
+};
+
+const UpdateCspRulesAccordingToCspRuleTemplates = async (
+  packagePolicy: PackagePolicy,
+  savedObjectsClient: SavedObjectsClientContract,
+  logger: Logger
+): Promise<void> => {
+  const benchmarkType = getBenchmarkInputType(packagePolicy.inputs);
+
   const oldCspRules: SavedObjectsFindResponse<CspRule> = await savedObjectsClient.find({
     type: CSP_RULE_SAVED_OBJECT_TYPE,
     perPage: 10000,
@@ -115,17 +81,23 @@ export const OnPackagePolicyUpgradeCallback = async (
       policyId: packagePolicy.policy_id,
     }),
   });
-  console.log('currentRules:', oldCspRules);
 
   const oldCspRulesDictionary: Map<string, SavedObjectsFindResult<CspRule>> = new Map(
     oldCspRules.saved_objects.map((rule) => [rule.attributes.metadata.rego_rule_id, rule])
   );
 
+  // Create csp-rules from the generic asset
+  const ruleTemplates: SavedObjectsFindResponse<CspRuleTemplate> = await savedObjectsClient.find({
+    type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+    perPage: 10000,
+    filter: getBenchmarkTypeFilter(benchmarkType),
+  });
+
   const cspRules = generateRulesFromTemplates(
     packagePolicy.id,
     packagePolicy.policy_id,
-    existingRuleTemplates.saved_objects,
-    oldCspRulesDictionary
+    ruleTemplates.saved_objects,
+    oldCspRulesDictionary ?? new Map()
   );
 
   try {
@@ -201,7 +173,7 @@ const generateRulesFromTemplates = (
         ...template.attributes,
         package_policy_id: packagePolicyId,
         policy_id: policyId,
-        enabled: cspRule?.attributes.enabled ?? false,
+        enabled: cspRule?.attributes.enabled ?? template.attributes.enabled,
       },
     };
     return response;

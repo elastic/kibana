@@ -15,7 +15,11 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { DeepReadonly } from 'utility-types';
-import { DeletePackagePoliciesResponse, PackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  DeletePackagePoliciesResponse,
+  PackagePolicy,
+  UpdatePackagePolicy,
+} from '@kbn/fleet-plugin/common';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -65,7 +69,6 @@ export class CspPlugin
     core: CoreSetup<CspServerPluginStartDeps, CspServerPluginStart>,
     plugins: CspServerPluginSetupDeps
   ): CspServerPluginSetup {
-    console.log('CspPlugin.setupDependencies:', plugins);
     setupSavedObjects(core.savedObjects);
 
     setupRoutes({
@@ -80,7 +83,6 @@ export class CspPlugin
   }
 
   public start(core: CoreStart, plugins: CspServerPluginStartDeps): CspServerPluginStart {
-    console.log('CspPlugin.startDependencies:', plugins);
     plugins.fleet.fleetSetupCompleted().then(async () => {
       const packageInfo = await plugins.fleet.packageService.asInternalUser.getInstallation(
         CLOUD_SECURITY_POSTURE_PACKAGE_NAME
@@ -99,7 +101,6 @@ export class CspPlugin
           context: RequestHandlerContext,
           request: KibanaRequest
         ): Promise<PackagePolicy> => {
-          console.log('packagePolicyPostCreate');
           if (packagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
             await this.initialize(core, plugins.taskManager);
 
@@ -124,7 +125,6 @@ export class CspPlugin
       plugins.fleet.registerExternalCallback(
         'postPackagePolicyDelete',
         async (deletedPackagePolicies: DeepReadonly<DeletePackagePoliciesResponse>) => {
-          console.log('postPackagePolicyDelete');
           for (const deletedPackagePolicy of deletedPackagePolicies) {
             if (deletedPackagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
               const soClient = core.savedObjects.createInternalRepository();
@@ -141,17 +141,15 @@ export class CspPlugin
     });
 
     plugins.fleet.registerExternalCallback(
-      'packagePolicyUpgrade',
+      `packagePolicyUpdate`,
       async (
-        updatePackagePolicy: PackagePolicy,
+        updatePackagePolicy: UpdatePackagePolicy,
         context: RequestHandlerContext,
         request: KibanaRequest
-      ): Promise<PackagePolicy> => {
+      ): Promise<UpdatePackagePolicy> => {
         if (updatePackagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
-          console.log('packagePolicyUpgrade');
           const soClient = (await context.core).savedObjects.client;
           const packagePolicy = updatePackagePolicy as PackagePolicy;
-          console.log('packagePolicy:' + packagePolicy);
           await OnPackagePolicyUpgradeCallback(this.logger, packagePolicy, soClient);
         }
         return updatePackagePolicy;
