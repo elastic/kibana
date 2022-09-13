@@ -53,9 +53,9 @@ export const useAdHocDataViews = ({
       const newDataView = await dataViews.create({ ...dataViewToUpdate.toSpec(), id: undefined });
 
       dataViews.clearInstanceCache(dataViewToUpdate.id);
-      setAdHocDataViewList((prev) => {
-        return [...prev.filter((d) => d.id && dataViewToUpdate.id && d.id !== dataViewToUpdate.id)];
-      });
+      setAdHocDataViewList((prev) =>
+        prev.filter((d) => d.id && dataViewToUpdate.id && d.id !== dataViewToUpdate.id)
+      );
 
       savedSearch.searchSource.setField('index', newDataView);
 

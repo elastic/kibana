@@ -24,11 +24,7 @@ export const useConfirmPersistencePrompt = (
       try {
         const updatedDataView = await updateAdHocDataViewId(dataView);
 
-        const response = await services.dataViews.createAndSave({
-          id: updatedDataView.id,
-          title: updatedDataView.title,
-          timeFieldName: updatedDataView.timeFieldName,
-        });
+        const response = await services.dataViews.createAndSave(updatedDataView.toSpec());
 
         const message = i18n.translate('discover.dataViewPersist.message', {
           defaultMessage: "Saved '{dataViewName}'",
@@ -49,15 +45,15 @@ export const useConfirmPersistencePrompt = (
     [services.dataViews, services.toastNotifications, updateAdHocDataViewId]
   );
 
-  const openConfirmSavePrompt: (dataView: DataView) => Promise<false | DataView> = useCallback(
+  const openConfirmSavePrompt: (dataView: DataView) => Promise<DataView | undefined> = useCallback(
     async (dataView) => {
       return new Promise((resolve) =>
         showConfirmPanel({
           onConfirm: () =>
             persistDataView(dataView)
               .then((createdDataView) => resolve(createdDataView))
-              .catch(() => resolve(false)),
-          onCancel: () => resolve(false),
+              .catch(() => resolve(undefined)),
+          onCancel: () => resolve(undefined),
         })
       );
     },
