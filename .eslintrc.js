@@ -9,7 +9,9 @@
 const Path = require('path');
 const Fs = require('fs');
 
-const globby = require('globby');
+const normalizePath = require('normalize-path');
+const { discoverPackageManifestPaths, Jsonc } = require('@kbn/bazel-packages');
+const { REPO_ROOT } = require('@kbn/utils');
 
 const APACHE_2_0_LICENSE_HEADER = `
 /*
@@ -119,15 +121,10 @@ const VENN_DIAGRAM_HEADER = `
   */
 `;
 
-const packagePkgJsons = globby.sync('*/package.json', {
-  cwd: Path.resolve(__dirname, 'packages'),
-  absolute: true,
-});
-
 /** Packages which should not be included within production code. */
-const DEV_PACKAGES = packagePkgJsons.flatMap((path) => {
-  const pkg = JSON.parse(Fs.readFileSync(path, 'utf8'));
-  return pkg.kibana && pkg.kibana.devOnly ? Path.dirname(Path.basename(path)) : [];
+const DEV_PACKAGE_DIRS = discoverPackageManifestPaths(REPO_ROOT).flatMap((path) => {
+  const manifest = Jsonc.parse(Fs.readFileSync(path, 'utf8'));
+  return !!manifest.devOnly ? normalizePath(Path.relative(REPO_ROOT, Path.dirname(path))) : [];
 });
 
 /** Directories (at any depth) which include dev-only code. */
@@ -145,6 +142,7 @@ const DEV_DIRECTORIES = [
   'integration_tests',
   'manual_tests',
   'mock',
+  'mocks',
   'storybook',
   'scripts',
   'test',
@@ -153,6 +151,7 @@ const DEV_DIRECTORIES = [
   'test_utilities',
   'test_helpers',
   'tests_client_integration',
+  'tsd_tests',
 ];
 
 /** File patterns for dev-only code. */
@@ -171,7 +170,7 @@ const DEV_FILE_PATTERNS = [
 
 /** Glob patterns which describe dev-only code. */
 const DEV_PATTERNS = [
-  ...DEV_PACKAGES.map((pkg) => `packages/${pkg}/**/*`),
+  ...DEV_PACKAGE_DIRS.map((pkg) => `${pkg}/**/*`),
   ...DEV_DIRECTORIES.map((dir) => `{packages,src,x-pack}/**/${dir}/**/*`),
   ...DEV_FILE_PATTERNS.map((file) => `{packages,src,x-pack}/**/${file}`),
   'packages/kbn-interpreter/tasks/**/*',
@@ -594,7 +593,6 @@ module.exports = {
         'test/*/config_open.ts',
         'test/*/*.config.ts',
         'test/*/{tests,test_suites,apis,apps}/**/*',
-        'test/visual_regression/tests/**/*',
         'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
         'x-pack/test/*/*config.*ts',
         'x-pack/test/saved_object_api_integration/*/apis/**/*',

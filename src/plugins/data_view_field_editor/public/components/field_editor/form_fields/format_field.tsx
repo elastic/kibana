@@ -7,9 +7,14 @@
  */
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import React, { useEffect, useRef, useState } from 'react';
-import { ES_FIELD_TYPES, UseField, useFormContext, useFormData } from '../../../shared_imports';
+import {
+  UseField,
+  useFormData,
+  ES_FIELD_TYPES,
+  useFormContext,
+  SerializedFieldFormat,
+} from '../../../shared_imports';
 import { useFieldEditorContext } from '../../field_editor_context';
 import { FormatSelectEditor } from '../../field_format_editor';
 import type { FieldFormInternal } from '../field_editor';

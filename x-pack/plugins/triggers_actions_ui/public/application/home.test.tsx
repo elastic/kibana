@@ -70,7 +70,7 @@ describe('home', () => {
     let home = mountWithIntl(<TriggersActionsUIHome {...props} />);
 
     // Just rules/connectors
-    expect(home.find('.euiTab__content').length).toBe(2);
+    expect(home.find('.euiTab__content').length).toBe(3);
 
     (getIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((feature: string) => {
       if (feature === 'internalAlertsTable') {
@@ -81,6 +81,6 @@ describe('home', () => {
 
     home = mountWithIntl(<TriggersActionsUIHome {...props} />);
     // alerts now too!
-    expect(home.find('.euiTab__content').length).toBe(3);
+    expect(home.find('.euiTab__content').length).toBe(4);
   });
 });
