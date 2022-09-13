@@ -11,15 +11,15 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualBuilder, visualize, visChart } = getPageObjects([
+  const { visualBuilder, visualize, visChart, common } = getPageObjects([
     'visualBuilder',
     'visualize',
     'visChart',
+    'common',
   ]);
   const retry = getService('retry');
-  const browser = getService('browser');
-  // const from = 'Sep 22, 2015 @ 06:00:00.000';
-  // const to = 'Sep 22, 2015 @ 11:00:00.000';
+  const from = 'Sep 22, 2015 @ 06:00:00.000';
+  const to = 'Sep 22, 2015 @ 11:00:00.000';
 
   async function cleanupMarkdownData(variableName: 'variable' | 'label', checkedValue: string) {
     await visualBuilder.markdownSwitchSubTab('data');
@@ -39,9 +39,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('markdown', () => {
       before(async () => {
         await visualize.initTests();
+        await common.setTime({ from, to });
         await visualBuilder.resetPage();
-        // await common.setTime({ from, to });
-        await browser.refresh();
         await visualBuilder.clickMarkdown();
         await visualBuilder.markdownSwitchSubTab('options');
         await visualBuilder.setMetricsDataTimerangeMode('Last value');
@@ -161,7 +160,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         it('should apply field formatting by default', async () => {
           const text = await visualBuilder.getMarkdownText();
-          // expect(text).to.be('5.588KB');
           expect(text).to.be('5.496KB');
         });
 
@@ -169,7 +167,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await visualBuilder.changeDataFormatter('percent');
 
           const text = await visualBuilder.getMarkdownText();
-          // expect(text).to.be('572,241.265%');
           expect(text).to.be('562,752.589%');
         });
       });

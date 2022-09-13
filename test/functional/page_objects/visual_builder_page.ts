@@ -32,7 +32,6 @@ export class VisualBuilderPageObject extends FtrService {
   private readonly elasticChart = this.ctx.getService('elasticChart');
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
-  private readonly timePicker = this.ctx.getPageObject('timePicker');
   private readonly visChart = this.ctx.getPageObject('visChart');
 
   public async resetPage(
@@ -45,7 +44,6 @@ export class VisualBuilderPageObject extends FtrService {
     this.log.debug('Wait for initializing TSVB editor');
     await this.checkVisualBuilderIsPresent();
     this.log.debug('Set absolute time range from "' + fromTime + '" to "' + toTime + '"');
-    await this.timePicker.setAbsoluteRange(fromTime, toTime);
     // 2 sec sleep until https://github.com/elastic/kibana/issues/46353 is fixed
     await this.common.sleep(2000);
   }
