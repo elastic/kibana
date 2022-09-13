@@ -179,7 +179,7 @@ export class FlameGraph {
     };
 
     const queue = [{ x: 0, depth: 1, node: root, parentID: 'root' }];
-    
+
     let idx = 0;
     while (queue.length > 0) {
       const { x, depth, node, parentID } = queue.pop()!;
