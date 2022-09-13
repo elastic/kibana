@@ -14,8 +14,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['header']);
   const esArchiver = getService('esArchiver');
 
-  // Failing: See https://github.com/elastic/kibana/issues/140507
-  describe.skip('Observability overview', function () {
+  describe('Observability overview', function () {
     this.tags('includeFirefox');
 
     const observability = getService('observability');
@@ -32,7 +31,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('Without alerts', function () {
       it('navigate and open alerts section', async () => {
         await observability.overview.common.navigateToOverviewPage();
-        await PageObjects.header.waitUntilLoadingHasFinished();
         await observability.overview.common.openAlertsSectionAndWaitToAppear();
       });
 
