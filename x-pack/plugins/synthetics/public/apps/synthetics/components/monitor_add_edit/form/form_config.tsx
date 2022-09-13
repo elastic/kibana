@@ -149,6 +149,7 @@ export const FORM_CONFIG: FieldConfig = {
       FIELD[ConfigKey.SCHEDULE],
       FIELD[ConfigKey.MAX_REDIRECTS],
       FIELD[ConfigKey.TIMEOUT],
+      FIELD[ConfigKey.ENABLED],
     ],
     advanced: [
       DEFAULT_DATA_OPTIONS,
@@ -166,6 +167,7 @@ export const FORM_CONFIG: FieldConfig = {
       FIELD[ConfigKey.LOCATIONS],
       FIELD[ConfigKey.SCHEDULE],
       FIELD[ConfigKey.TIMEOUT],
+      FIELD[ConfigKey.ENABLED],
     ],
     advanced: [
       DEFAULT_DATA_OPTIONS,
@@ -181,6 +183,7 @@ export const FORM_CONFIG: FieldConfig = {
       FIELD[ConfigKey.LOCATIONS],
       FIELD[ConfigKey.SCHEDULE],
       FIELD[ConfigKey.THROTTLING_CONFIG],
+      FIELD[ConfigKey.ENABLED],
     ],
     step3: [FIELD[ConfigKey.SOURCE_INLINE]],
     scriptEdit: [FIELD[ConfigKey.SOURCE_INLINE]],
@@ -205,6 +208,7 @@ export const FORM_CONFIG: FieldConfig = {
       FIELD[ConfigKey.LOCATIONS],
       FIELD[ConfigKey.SCHEDULE],
       FIELD[ConfigKey.THROTTLING_CONFIG],
+      FIELD[ConfigKey.ENABLED],
     ],
     advanced: [
       {
@@ -227,6 +231,7 @@ export const FORM_CONFIG: FieldConfig = {
       FIELD[ConfigKey.SCHEDULE],
       FIELD[ConfigKey.WAIT],
       FIELD[ConfigKey.TIMEOUT],
+      FIELD[ConfigKey.ENABLED],
     ],
     advanced: [DEFAULT_DATA_OPTIONS],
   },
