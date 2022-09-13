@@ -170,7 +170,7 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
       },
       async getExceptionListsItems({
         lists,
-        filterOptions,
+        filter,
         pagination,
         showDetectionsListsOnly,
         showEndpointListsOnly,
@@ -192,7 +192,7 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
               per_page: perPage,
               total,
             } = await Api.fetchExceptionListsItemsByListIds({
-              filterOptions,
+              filter,
               http,
               listIds: ids,
               namespaceTypes: namespaces,

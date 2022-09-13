@@ -41,6 +41,7 @@ export interface PreviewState {
   visualization: VisualizationState;
   datasourceStates: DatasourceStates;
   activeData?: TableInspectorAdapter;
+  requestWarnings?: string[];
 }
 export interface EditorFrameState extends PreviewState {
   activeDatasourceId: string | null;
