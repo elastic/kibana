@@ -42,7 +42,6 @@ import { InvestigationGuideView } from './investigation_guide_view';
 import { Overview } from './overview';
 import { Insights } from './insights/insights';
 import { useRiskScoreData } from './use_risk_score_data';
-import { useMlCapabilities } from '../ml/hooks/use_ml_capabilities';
 
 type EventViewTab = EuiTabbedContentTab;
 
@@ -146,9 +145,8 @@ const EventDetailsComponent: React.FC<Props> = ({
   }, [isEnrichmentsLoading, enrichmentsResponse, existingEnrichments]);
 
   const enrichmentCount = allEnrichments.length;
-  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
 
-  const { hostRisk, userRisk } = useRiskScoreData(data);
+  const { hostRisk, userRisk, isLicenseValid } = useRiskScoreData(data);
 
   const summaryTab: EventViewTab | undefined = useMemo(
     () =>
@@ -195,7 +193,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                   isReadOnly={isReadOnly}
                 />
 
-                {(enrichmentCount > 0 || isPlatinumOrTrialLicense) && (
+                {(enrichmentCount > 0 || isLicenseValid) && (
                   <ThreatSummaryView
                     isDraggable={isDraggable}
                     hostRisk={hostRisk}
@@ -236,7 +234,7 @@ const EventDetailsComponent: React.FC<Props> = ({
       handleOnEventClosed,
       isReadOnly,
       userRisk,
-      isPlatinumOrTrialLicense,
+      isLicenseValid,
     ]
   );
 

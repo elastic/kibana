@@ -24,12 +24,18 @@ export const useRiskScoreData = (data: TimelineEventsDetailsItem[]) => {
     [hostName]
   );
 
-  const [hostRiskLoading, { data: hostRiskData, isModuleEnabled: isHostRiskModuleEnabled }] =
-    useHostRiskScore({
-      filterQuery: hostNameFilterQuery,
-      pagination: ONLY_FIRST_ITEM_PAGINATION,
-      skip: !hostNameFilterQuery,
-    });
+  const [
+    hostRiskLoading,
+    {
+      data: hostRiskData,
+      isLicenseValid: isHostLicenseValid,
+      isModuleEnabled: isHostRiskModuleEnabled,
+    },
+  ] = useHostRiskScore({
+    filterQuery: hostNameFilterQuery,
+    pagination: ONLY_FIRST_ITEM_PAGINATION,
+    skip: !hostNameFilterQuery,
+  });
 
   const hostRisk: HostRisk = useMemo(
     () => ({
@@ -45,12 +51,18 @@ export const useRiskScoreData = (data: TimelineEventsDetailsItem[]) => {
     [userName]
   );
 
-  const [userRiskLoading, { data: userRiskData, isModuleEnabled: isUserRiskModuleEnabled }] =
-    useUserRiskScore({
-      filterQuery: userNameFilterQuery,
-      pagination: ONLY_FIRST_ITEM_PAGINATION,
-      skip: !userNameFilterQuery,
-    });
+  const [
+    userRiskLoading,
+    {
+      data: userRiskData,
+      isLicenseValid: isUserLicenseValid,
+      isModuleEnabled: isUserRiskModuleEnabled,
+    },
+  ] = useUserRiskScore({
+    filterQuery: userNameFilterQuery,
+    pagination: ONLY_FIRST_ITEM_PAGINATION,
+    skip: !userNameFilterQuery,
+  });
 
   const userRisk: UserRisk = useMemo(
     () => ({
@@ -58,8 +70,8 @@ export const useRiskScoreData = (data: TimelineEventsDetailsItem[]) => {
       isModuleEnabled: isUserRiskModuleEnabled,
       result: userRiskData,
     }),
-    [userRiskData, userRiskLoading, isUserRiskModuleEnabled]
+    [userRiskLoading, isUserRiskModuleEnabled, userRiskData]
   );
 
-  return { userRisk, hostRisk };
+  return { userRisk, hostRisk, isLicenseValid: isHostLicenseValid && isUserLicenseValid };
 };

@@ -27,12 +27,12 @@ export const enum HostRiskScoreQueryId {
 
 export interface HostRisk {
   loading: boolean;
-  isModuleEnabled?: boolean;
+  isModuleEnabled: boolean;
   result?: HostRiskScore[];
 }
 
 export interface UserRisk {
   loading: boolean;
-  isModuleEnabled?: boolean;
+  isModuleEnabled: boolean;
   result?: UserRiskScore[];
 }
