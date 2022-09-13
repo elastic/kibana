@@ -674,7 +674,7 @@ describe('suggestions', () => {
       ).toHaveLength(0);
     });
 
-    it('should reject when there are too many metrics', () => {
+    it('should accept multiple metrics if active visualization', () => {
       expect(
         suggestions({
           table: {
@@ -718,6 +718,42 @@ describe('suggestions', () => {
               },
             ],
           },
+          keptLayerIds: ['first'],
+        })
+      ).toHaveLength(2);
+    });
+
+    it('should reject multiple metrics if not active visualization', () => {
+      expect(
+        suggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [
+              {
+                columnId: 'a',
+                operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+              },
+              {
+                columnId: 'b',
+                operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+              },
+              {
+                columnId: 'c',
+                operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+              },
+              {
+                columnId: 'd',
+                operation: { label: 'Avg', dataType: 'number' as DataType, isBucketed: false },
+              },
+              {
+                columnId: 'e',
+                operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
+              },
+            ],
+            changeType: 'initial',
+          },
+          state: undefined,
           keptLayerIds: ['first'],
         })
       ).toHaveLength(0);
