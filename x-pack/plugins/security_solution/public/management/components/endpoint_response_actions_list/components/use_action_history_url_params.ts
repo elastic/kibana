@@ -56,29 +56,33 @@ export const actionsLogFiltersFromUrlParams = (
     users: [],
   };
 
-  const urlCommands = String(urlParams.commands)
-    .split(',')
-    .reduce<Required<ActionsLogFiltersFromUrlParams>['commands']>((acc, curr) => {
-      if (
-        RESPONSE_ACTION_COMMANDS.includes(curr as ResponseActions) ||
-        curr === 'release' ||
-        curr === 'processes'
-      ) {
-        acc.push(curr as Required<ActionsLogFiltersFromUrlParams>['commands'][number]);
-      }
-      return acc.sort();
-    }, []);
+  const urlCommands = urlParams.commands
+    ? String(urlParams.commands)
+        .split(',')
+        .reduce<Required<ActionsLogFiltersFromUrlParams>['commands']>((acc, curr) => {
+          if (
+            RESPONSE_ACTION_COMMANDS.includes(curr as ResponseActions) ||
+            curr === 'release' ||
+            curr === 'processes'
+          ) {
+            acc.push(curr as Required<ActionsLogFiltersFromUrlParams>['commands'][number]);
+          }
+          return acc.sort();
+        }, [])
+    : [];
 
   const urlHosts = urlParams.hosts ? String(urlParams.hosts).split(',').sort() : [];
 
-  const urlStatuses = (String(urlParams.statuses).split(',') as ResponseActionStatus[]).reduce<
-    ResponseActionStatus[]
-  >((acc, curr) => {
-    if (RESPONSE_ACTION_STATUS.includes(curr)) {
-      acc.push(curr);
-    }
-    return acc.sort();
-  }, []);
+  const urlStatuses = urlParams.statuses
+    ? (String(urlParams.statuses).split(',') as ResponseActionStatus[]).reduce<
+        ResponseActionStatus[]
+      >((acc, curr) => {
+        if (RESPONSE_ACTION_STATUS.includes(curr)) {
+          acc.push(curr);
+        }
+        return acc.sort();
+      }, [])
+    : [];
 
   const urlUsers = urlParams.hosts ? String(urlParams.users).split(',').sort() : [];
 
