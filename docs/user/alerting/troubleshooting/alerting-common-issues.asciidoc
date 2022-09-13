@@ -274,7 +274,7 @@ This error happens when the `xpack.encryptedSavedObjects.encryptionKey` value us
 *Problem*:
 
 Alerting rules that were created or edited in 8.2 stop running after you upgrade
-to later releases. The following error occurs:
+to 8.3.0 or 8.3.1. The following error occurs:
 
 [source,text]
 ----
