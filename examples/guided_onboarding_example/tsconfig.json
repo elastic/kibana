@@ -18,7 +18,7 @@
       "path": "../../src/core/tsconfig.json"
     },
     {
-      "path": "../../x-pack/plugins/guided_onboarding/tsconfig.json"
+      "path": "../../src/plugins/guided_onboarding/tsconfig.json"
     },
   ]
 }

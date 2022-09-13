@@ -6,13 +6,10 @@
     "name": "Journey Onboarding",
     "githubTeam": "platform-onboarding"
   },
-  "description": "Guided Onboarding",
+  "description": "Guided onboarding framework",
   "server": true,
   "ui": true,
-  "requiredBundles": [
-    "kibanaReact"
-  ],
-  "requiredPlugins": ["navigation"],
+  "requiredBundles": ["kibanaReact"],
   "optionalPlugins": [],
-  "configPath": ["xpack", "guided_onboarding"]
+  "configPath": ["guidedOnboarding"]
 }
