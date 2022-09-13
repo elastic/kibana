@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Component } from 'react';
 import { act } from 'react-dom/test-utils';
 import { registerTestBed } from '@kbn/test-jest-helpers';
 
@@ -48,7 +48,9 @@ describe('UploadFile', () => {
     const testSubjects = {
       base: baseTestSubj,
       uploadButton: `${baseTestSubj}.uploadButton`,
+      retryButton: `${baseTestSubj}.retryButton`,
       cancelButton: `${baseTestSubj}.cancelButton`,
+      errorMessage: `${baseTestSubj}.error`,
     };
 
     return {
@@ -60,9 +62,11 @@ describe('UploadFile', () => {
             await sleep(1);
             testBed.component.update();
           }),
-        upload: () =>
+        upload: (retry = false) =>
           act(async () => {
-            testBed.find(testSubjects.uploadButton).simulate('click');
+            testBed
+              .find(retry ? testSubjects.retryButton : testSubjects.uploadButton)
+              .simulate('click');
             await sleep(1);
             testBed.component.update();
           }),
@@ -74,6 +78,7 @@ describe('UploadFile', () => {
         wait: (ms: number) =>
           act(async () => {
             await sleep(ms);
+            testBed.component.update();
           }),
       },
       testSubjects,
@@ -127,5 +132,29 @@ describe('UploadFile', () => {
 
     expect(onDone).not.toHaveBeenCalled();
     expect(onError).toHaveBeenCalledWith(new Error('Abort!'));
+  });
+
+  it('does not show error messages while loading', async () => {
+    client.create.mockResolvedValue({ file: { id: 'test' } as FileJSON });
+    client.upload.mockImplementation(async () => {
+      await sleep(100);
+      throw new Error('stop!');
+    });
+
+    const { actions, exists, testSubjects } = await initTestBed();
+    expect(exists(testSubjects.errorMessage)).toBe(false);
+    await actions.addFiles([{ name: 'test', size: 1 } as File]);
+    expect(exists(testSubjects.errorMessage)).toBe(false);
+    await actions.upload();
+    expect(exists(testSubjects.errorMessage)).toBe(false);
+    await actions.wait(1000);
+    expect(exists(testSubjects.uploadButton)).toBe(false); // No upload button
+    expect(exists(testSubjects.errorMessage)).toBe(true);
+    await actions.upload(true);
+    expect(exists(testSubjects.errorMessage)).toBe(false);
+    await actions.wait(500);
+    expect(exists(testSubjects.errorMessage)).toBe(true);
+
+    expect(onDone).not.toHaveBeenCalled();
   });
 });

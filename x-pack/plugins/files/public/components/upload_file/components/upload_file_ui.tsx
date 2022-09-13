@@ -89,7 +89,7 @@ export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
         <EuiButtonEmpty
           key="retryButton"
           size="s"
-          data-data-test-subj="retryButton"
+          data-test-subj="retryButton"
           disabled={done || uploading}
           onClick={onUpload}
         >
@@ -156,7 +156,12 @@ export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
         <EuiFlexItem grow={false}>{renderControls()}</EuiFlexItem>
         {!done && !uploading && Boolean(errorMessage) && (
           <EuiFlexItem>
-            <EuiText className="filesUploadFile__errorMessage" size="s" color="danger">
+            <EuiText
+              data-test-subj="error"
+              className="filesUploadFile__errorMessage"
+              size="s"
+              color="danger"
+            >
               <span id={errorId}>{errorMessage}</span>
             </EuiText>
           </EuiFlexItem>
