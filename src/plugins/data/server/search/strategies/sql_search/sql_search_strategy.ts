@@ -60,6 +60,7 @@ export const sqlSearchStrategyProvider = (
             id,
           },
           {
+            ...options.transport,
             signal: options.abortSignal,
             meta: true,
           }
@@ -72,6 +73,7 @@ export const sqlSearchStrategyProvider = (
             ...params,
           },
           {
+            ...options.transport,
             signal: options.abortSignal,
             meta: true,
           }
