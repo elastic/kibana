@@ -6,13 +6,12 @@
  */
 
 import React, { FC } from 'react';
+import { XJsonMode } from '@kbn/ace';
 
-import {
-  expandLiteralStrings,
-  XJsonMode,
-  EuiCodeEditor,
-  EuiCodeEditorProps,
-} from '../../../../../../shared_imports';
+import { EuiCodeEditor, XJson } from '@kbn/es-ui-shared-plugin/public';
+import type { EuiCodeEditorProps } from '@kbn/es-ui-shared-plugin/public';
+
+const { expandLiteralStrings } = XJson;
 
 export const ML_EDITOR_MODE = { TEXT: 'text', JSON: 'json', XJSON: new XJsonMode() };
 
