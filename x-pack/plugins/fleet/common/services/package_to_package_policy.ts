@@ -19,12 +19,16 @@ import type {
 
 import { doesPackageHaveIntegrations } from '.';
 
+type PackagePolicyStream = RegistryStream & { release?: 'beta' | 'experimental' | 'ga' } & {
+  data_stream: { type: string; dataset: string };
+};
+
 export const getStreamsForInputType = (
   inputType: string,
   packageInfo: PackageInfo,
   dataStreamPaths: string[] = []
-): Array<RegistryStream & { data_stream: { type: string; dataset: string } }> => {
-  const streams: Array<RegistryStream & { data_stream: { type: string; dataset: string } }> = [];
+): PackagePolicyStream[] => {
+  const streams: PackagePolicyStream[] = [];
   const dataStreams = packageInfo.data_streams || [];
   const dataStreamsToSearch = dataStreamPaths.length
     ? dataStreams.filter((dataStream) => dataStreamPaths.includes(dataStream.path))
@@ -39,6 +43,7 @@ export const getStreamsForInputType = (
             type: dataStream.type,
             dataset: dataStream.dataset,
           },
+          release: dataStream.release,
         });
       }
     });
@@ -102,6 +107,7 @@ export const packageToPackagePolicyInputs = (
       const stream: NewPackagePolicyInputStream = {
         enabled: packageStream.enabled === false ? false : true,
         data_stream: packageStream.data_stream,
+        release: packageStream.release,
       };
       if (packageStream.vars && packageStream.vars.length) {
         stream.vars = packageStream.vars.reduce(varsReducer, {});
