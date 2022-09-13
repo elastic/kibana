@@ -32,6 +32,9 @@ interface UploadedFile {
   kind: string;
 }
 
+/**
+ * UploadFile component props
+ */
 export interface Props<Kind extends string = string> {
   /**
    * A file kind that should be registered during plugin startup. See {@link FileServiceStart}.
@@ -77,7 +80,7 @@ export interface Props<Kind extends string = string> {
 /**
  * In order to use this component you must register your file kind with {@link FileKindsRegistry}
  */
-export const UploadFile: FunctionComponent<Props> = ({
+const UploadFile: FunctionComponent<Props> = ({
   meta,
   client,
   onDone,
@@ -154,3 +157,6 @@ export const UploadFile: FunctionComponent<Props> = ({
     />
   );
 };
+
+/* eslint-disable import/no-default-export */
+export default UploadFile;
