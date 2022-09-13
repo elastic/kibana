@@ -53,6 +53,8 @@ export interface CloudConfigType {
     /** The URL to the remotely-hosted chat application. */
     chatURL: string;
   };
+  /** The Cloud Metadata provided via config */
+  metadata: Record<string, unknown>;
 }
 
 interface CloudSetupDependencies {
@@ -257,7 +259,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     security?: Pick<SecurityPluginSetup, 'authc'>,
     cloudId?: string
   ) {
-    registerCloudDeploymentIdAnalyticsContext(analytics, cloudId);
+    registerCloudDeploymentIdAnalyticsContext(analytics, of(this.config.metadata), cloudId);
 
     if (security) {
       analytics.registerContextProvider({

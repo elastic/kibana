@@ -47,6 +47,7 @@ const configSchema = schema.object({
   id: schema.maybe(schema.string()),
   organization_url: schema.maybe(schema.string()),
   profile_url: schema.maybe(schema.string()),
+  metadata: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
 });
 
 export type CloudConfigType = TypeOf<typeof configSchema>;
@@ -61,6 +62,7 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
     id: true,
     organization_url: true,
     profile_url: true,
+    metadata: true,
   },
   schema: configSchema,
 };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { map, type Observable } from 'rxjs';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
@@ -36,19 +37,23 @@ export interface CloudSetup {
 export class CloudPlugin implements Plugin<CloudSetup> {
   private readonly logger: Logger;
   private readonly config: CloudConfigType;
+  private readonly config$: Observable<CloudConfigType>;
   private readonly isDev: boolean;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
     this.config = this.context.config.get<CloudConfigType>();
+    this.config$ = this.context.config.create<CloudConfigType>();
     this.isDev = this.context.env.mode.dev;
   }
 
   public setup(core: CoreSetup, { usageCollection, security }: PluginsSetup): CloudSetup {
     this.logger.debug('Setting up Cloud plugin');
     const isCloudEnabled = getIsCloudEnabled(this.config.id);
-    registerCloudDeploymentIdAnalyticsContext(core.analytics, this.config.id);
-    registerCloudUsageCollector(usageCollection, { isCloudEnabled });
+    // We want to react to hot reloading updates to make sure we always use the latest metadata
+    const metadata$ = this.config$.pipe(map(({ metadata }) => metadata));
+    registerCloudDeploymentIdAnalyticsContext(core.analytics, metadata$, this.config.id);
+    registerCloudUsageCollector(usageCollection, { isCloudEnabled, metadata$ });
 
     if (isCloudEnabled) {
       security?.setIsElasticCloudDeployment();

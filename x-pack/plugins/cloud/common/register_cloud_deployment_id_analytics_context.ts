@@ -6,10 +6,11 @@
  */
 
 import type { AnalyticsClient } from '@kbn/analytics-client';
-import { of } from 'rxjs';
+import { map, type Observable, of } from 'rxjs';
 
 export function registerCloudDeploymentIdAnalyticsContext(
   analytics: Pick<AnalyticsClient, 'registerContextProvider'>,
+  metadata$: Observable<Record<string, unknown>>,
   cloudId?: string
 ) {
   if (!cloudId) {
@@ -22,6 +23,17 @@ export function registerCloudDeploymentIdAnalyticsContext(
       cloudId: {
         type: 'keyword',
         _meta: { description: 'The Cloud Deployment ID' },
+      },
+    },
+  });
+
+  analytics.registerContextProvider({
+    name: 'Cloud Deployment Metadata',
+    context$: metadata$.pipe(map((cloudMetadata) => ({ cloudMetadata }))),
+    schema: {
+      cloudMetadata: {
+        type: 'pass_through',
+        _meta: { description: 'The Cloud metadata' },
       },
     },
   });

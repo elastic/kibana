@@ -5,27 +5,37 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { firstValueFrom, type Observable } from 'rxjs';
+import { type UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 interface Config {
   isCloudEnabled: boolean;
+  metadata$: Observable<Record<string, unknown>>;
 }
 
 interface CloudUsage {
   isCloudEnabled: boolean;
+  metadata: Record<string, string>; // Using string instead of unknown because `telemetry-tools` will fail the validation otherwise
 }
 
 export function createCloudUsageCollector(usageCollection: UsageCollectionSetup, config: Config) {
-  const { isCloudEnabled } = config;
+  const { isCloudEnabled, metadata$ } = config;
   return usageCollection.makeUsageCollector<CloudUsage>({
     type: 'cloud',
     isReady: () => true,
     schema: {
-      isCloudEnabled: { type: 'boolean' },
+      isCloudEnabled: {
+        type: 'boolean',
+        _meta: { description: '`true` when the deployment is running on ESS' },
+      },
+      metadata: {
+        DYNAMIC_KEY: { type: 'keyword', _meta: { description: 'Cloud Deployment Metadata' } },
+      },
     },
-    fetch: () => {
+    fetch: async () => {
       return {
         isCloudEnabled,
+        metadata: (await firstValueFrom(metadata$)) as Record<string, string>,
       };
     },
   });
