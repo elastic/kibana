@@ -6,41 +6,83 @@
  * Side Public License, v 1.
  */
 
-import { Entity } from '../entity';
+import { generateLongId, generateShortId } from '../utils/generate_id';
 import { ApmFields } from './apm_fields';
-import { Instance } from './instance';
+import { BaseSpan } from './base_span';
+import { Metricset } from './metricset';
 
-export class Serverless extends Entity<ApmFields> {
-  instance(instanceName: string) {
-    return new Instance({
-      ...this.fields,
-      ['service.node.name']: instanceName,
-      'host.name': instanceName,
+export type FaasTriggerType = 'http' | 'pubsub' | 'datasource' | 'timer' | 'other';
+
+export class Serverless extends BaseSpan {
+  private readonly metric: Metricset<ApmFields>;
+
+  constructor(fields: ApmFields) {
+    const faasExection = generateLongId();
+    const triggerType = 'other';
+    super({
+      ...fields,
+      'processor.event': 'transaction',
+      'transaction.id': generateShortId(),
+      'transaction.sampled': true,
+      'faas.execution': faasExection,
+      'faas.trigger.type': triggerType,
+      'transaction.name': fields['transaction.name'] || fields['faas.name'],
+      'transaction.type': 'request',
+    });
+    this.metric = new Metricset<ApmFields>({
+      ...fields,
+      'metricset.name': 'app',
+      'faas.execution': faasExection,
+      'faas.id': fields['service.name'],
     });
   }
-}
 
-export function serverless({
-  serviceName,
-  environment,
-  agentName,
-  faasId,
-  coldStart,
-  faasTriggerType,
-}: {
-  serviceName: string;
-  environment: string;
-  agentName: string;
-  faasId: string;
-  coldStart: boolean;
-  faasTriggerType: string;
-}) {
-  return new Serverless({
-    'service.name': serviceName,
-    'service.environment': environment,
-    'agent.name': agentName,
-    'faas.id': faasId,
-    'faas.coldstart': coldStart,
-    'faas.trigger.type': faasTriggerType,
-  });
+  duration(duration: number) {
+    this.fields['transaction.duration.us'] = duration * 1000;
+    return this;
+  }
+
+  coldStart(coldstart: boolean) {
+    this.fields['faas.coldstart'] = coldstart;
+    this.metric.fields['faas.coldstart'] = coldstart;
+    return this;
+  }
+
+  billedDuration(billedDuration: number) {
+    this.metric.fields['faas.billed_duration'] = billedDuration;
+    return this;
+  }
+
+  faasTimeout(faasTimeout: number) {
+    this.metric.fields['faas.timeout'] = faasTimeout;
+    return this;
+  }
+
+  memory({ total, free }: { total: number; free: number }) {
+    this.metric.fields['system.memory.total'] = total;
+    this.metric.fields['system.memory.actual.free'] = free;
+    return this;
+  }
+
+  coldStartDuration(coldStartDuration: number) {
+    this.metric.fields['faas.coldstart_duration'] = coldStartDuration;
+    return this;
+  }
+
+  faasDuration(faasDuration: number) {
+    this.metric.fields['faas.duration'] = faasDuration;
+    return this;
+  }
+
+  timestamp(time: number): this {
+    super.timestamp(time);
+    this.metric.fields['@timestamp'] = time;
+    return this;
+  }
+
+  serialize(): ApmFields[] {
+    const transaction = super.serialize();
+    const metric = this.metric.serialize();
+    return [...transaction, ...metric];
+  }
 }

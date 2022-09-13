@@ -20,86 +20,77 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
       const range = timerange(from, to);
       const timestamps = range.ratePerMinute(180);
 
-      const instanceLambdaPython = apm
-        .serverless({
-          serviceName: 'lambda-python',
+      const cloudFields: ApmFields = {
+        'cloud.provider': 'aws',
+        'cloud.service.name': 'lambda',
+        'cloud.region': 'us-west-2',
+      };
+
+      const instanceALambdaPython = apm
+        .serverlessFunction({
+          serviceName: 'aws-lambdas',
           environment: ENVIRONMENT,
           agentName: 'python',
-          faasId: 'arn:aws:lambda:us-west-2:123456789012:function:lambda-python',
-          coldStart: true,
-          faasTriggerType: 'other',
+          functionName: 'fn-python-1',
         })
-        .instance('instance python');
+        .instance({ instanceName: 'instance_A', ...cloudFields });
 
-      const instanceLambdaNode = apm
-        .serverless({
-          serviceName: 'lambda-node',
+      const instanceALambdaNode = apm
+        .serverlessFunction({
+          serviceName: 'aws-lambdas',
           environment: ENVIRONMENT,
           agentName: 'nodejs',
-          faasId: 'arn:aws:lambda:us-west-2:123456789012:function:lambda-node',
-          coldStart: false,
-          faasTriggerType: 'other',
+          functionName: 'fn-node-1',
         })
-        .instance('instance node');
+        .instance({ instanceName: 'instance_A', ...cloudFields });
+
+      const instanceALambdaNode2 = apm
+        .serverlessFunction({
+          environment: ENVIRONMENT,
+          agentName: 'nodejs',
+          functionName: 'fn-node-2',
+        })
+        .instance({ instanceName: 'instance_A', ...cloudFields });
+
+      const memory = {
+        total: 536870912, // 0.5gb
+        free: 94371840, // ~0.08 gb
+      };
 
       const awsLambdaEvents = timestamps.generator((timestamp) => {
-        const cloudFields: ApmFields = {
-          'cloud.provider': 'aws',
-          'cloud.service.name': 'lambda',
-          'cloud.region': 'us-east-1',
-        };
         return [
-          instanceLambdaPython
-            .transaction('GET /order/{id}')
-            .defaults({
-              ...cloudFields,
-              'service.runtime.name': 'AWS_Lambda_python3.8',
-            })
-            .timestamp(timestamp)
+          instanceALambdaPython
+            .invocation()
             .duration(1000)
-            .success(),
-          instanceLambdaNode
-            .transaction('PUT /order/{id}')
-            .defaults({
-              ...cloudFields,
-              'service.runtime.name': 'AWS_Lambda_nodejs16.x',
-            })
             .timestamp(timestamp)
+            .coldStart(true)
+            .billedDuration(4000)
+            .faasTimeout(10000)
+            .memory(memory)
+            .coldStartDuration(4000)
+            .faasDuration(4000),
+          instanceALambdaNode
+            .invocation()
             .duration(1000)
-            .success(),
+            .timestamp(timestamp)
+            .coldStart(false)
+            .billedDuration(4000)
+            .faasTimeout(10000)
+            .memory(memory)
+            .faasDuration(4000),
+          instanceALambdaNode2
+            .invocation()
+            .duration(1000)
+            .timestamp(timestamp)
+            .coldStart(false)
+            .billedDuration(4000)
+            .faasTimeout(10000)
+            .memory(memory)
+            .faasDuration(4000),
         ];
       });
 
-      const metricsets = range
-        .interval('30s')
-        .rate(1)
-        .generator((timestamp) => {
-          const metrics: ApmFields = {
-            'system.memory.actual.free': 94371840, // ~0.08 gb
-            'system.memory.total': 94371840, // ~0.08 gb;
-            'system.cpu.total.norm.pct': 0.6,
-            'system.process.cpu.total.norm.pct': 0.7,
-            'faas.billed_duration': 4000,
-            'faas.timeout': 10000,
-            'faas.duration': 4000,
-          };
-          return [
-            instanceLambdaPython
-              .appMetrics({
-                ...metrics,
-                'faas.coldstart_duration': 4000,
-              })
-              .timestamp(timestamp),
-            instanceLambdaNode
-              .appMetrics({
-                ...metrics,
-                'faas.coldstart_duration': 0,
-              })
-              .timestamp(timestamp),
-          ];
-        });
-
-      return awsLambdaEvents.merge(metricsets);
+      return awsLambdaEvents;
     },
   };
 };

@@ -108,6 +108,7 @@ export type ApmFields = Fields &
     'cloud.region': string;
     'host.os.platform': string;
     'faas.id': string;
+    'faas.name': string;
     'faas.coldstart': boolean;
     'faas.execution': string;
     'faas.trigger.type': string;
