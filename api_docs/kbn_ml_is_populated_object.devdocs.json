@@ -25,6 +25,7 @@
         ],
         "path": "x-pack/packages/ml/is_populated_object/src/is_populated_object.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-is-populated-object",
@@ -38,6 +39,7 @@
             ],
             "path": "x-pack/packages/ml/is_populated_object/src/is_populated_object.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -52,6 +54,7 @@
             ],
             "path": "x-pack/packages/ml/is_populated_object/src/is_populated_object.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],

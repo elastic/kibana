@@ -34,28 +34,38 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       'Actions',
     ],
     [
-      'Host-ku5jy6j0pw',
+      'Host-nyierkw2gu',
       'x',
       'x',
-      'Unsupported',
+      'Failure',
       'Windows',
-      '10.12.215.130, 10.130.188.228,10.19.102.141',
-      '7.0.13',
+      '10.180.151.227, 10.44.18.210',
+      '7.1.9',
       'x',
       '',
     ],
     [
-      'Host-ntr4rkj24m',
+      'Host-rs9wp4o6l9',
       'x',
       'x',
-      'Success',
+      'Warning',
       'Windows',
-      '10.36.46.252, 10.222.152.110',
-      '7.4.13',
+      '10.218.38.118, 10.80.35.162',
+      '8.0.8',
       'x',
       '',
     ],
-    ['Host-q9qenwrl9k', 'x', 'x', 'Warning', 'Windows', '10.206.226.90', '7.11.10', 'x', ''],
+    [
+      'Host-u5jy6j0pwb',
+      'x',
+      'x',
+      'Warning',
+      'Linux',
+      '10.87.11.145, 10.117.106.109,10.242.136.97',
+      '7.13.1',
+      'x',
+      '',
+    ],
   ];
 
   const formattedTableData = async () => {
@@ -183,38 +193,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(tableData).to.eql(expectedDataFromQuery);
         });
 
-        it('for the kql filtering for united.endpoint.host.hostname : "Host-ku5jy6j0pw", table shows 1 item', async () => {
+        it('for the kql filtering for united.endpoint.host.hostname, table shows 1 item', async () => {
+          const expectedDataFromQuery = [...expectedData.slice(0, 2).map((row) => [...row])];
+          const hostName = expectedDataFromQuery[1][0];
           const adminSearchBar = await testSubjects.find('adminSearchBar');
           await adminSearchBar.clearValueWithKeyboard();
           await adminSearchBar.type(
-            'united.endpoint.host.hostname : "Host-ku5jy6j0pw" or host.hostname : "Host-ku5jy6j0pw" '
+            `united.endpoint.host.hostname : "${hostName}" or host.hostname : "${hostName}" `
           );
           const querySubmitButton = await testSubjects.find('querySubmitButton');
           await querySubmitButton.click();
-          const expectedDataFromQuery = [
-            [
-              'Endpoint',
-              'Agent status',
-              'Policy',
-              'Policy status',
-              'OS',
-              'IP address',
-              'Version',
-              'Last active',
-              'Actions',
-            ],
-            [
-              'Host-ku5jy6j0pw',
-              'x',
-              'x',
-              'Unsupported',
-              'Windows',
-              '10.12.215.130, 10.130.188.228,10.19.102.141',
-              '7.0.13',
-              'x',
-              '',
-            ],
-          ];
           await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
             'endpointListTable',
             1,

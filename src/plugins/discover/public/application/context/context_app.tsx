@@ -10,7 +10,12 @@ import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from '
 import './context_app.scss';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText, EuiPageContent, EuiPage, EuiSpacer } from '@elastic/eui';
+import {
+  EuiText,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPage,
+  EuiSpacer,
+} from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';

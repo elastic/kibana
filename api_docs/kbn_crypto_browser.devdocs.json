@@ -27,6 +27,7 @@
         "description": [],
         "path": "packages/kbn-crypto-browser/src/sha256.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/crypto-browser",
@@ -40,6 +41,7 @@
             ],
             "path": "packages/kbn-crypto-browser/src/sha256.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -62,6 +64,7 @@
             ],
             "path": "packages/kbn-crypto-browser/src/sha256.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/crypto-browser",
@@ -75,6 +78,7 @@
                 ],
                 "path": "packages/kbn-crypto-browser/src/sha256.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -89,6 +93,7 @@
                 ],
                 "path": "packages/kbn-crypto-browser/src/sha256.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -106,6 +111,7 @@
             ],
             "path": "packages/kbn-crypto-browser/src/sha256.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/crypto-browser",
@@ -119,6 +125,7 @@
                 ],
                 "path": "packages/kbn-crypto-browser/src/sha256.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -136,6 +143,7 @@
             ],
             "path": "packages/kbn-crypto-browser/src/sha256.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/crypto-browser",
@@ -149,6 +157,7 @@
                 ],
                 "path": "packages/kbn-crypto-browser/src/sha256.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -166,6 +175,7 @@
             ],
             "path": "packages/kbn-crypto-browser/src/sha256.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
