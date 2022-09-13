@@ -122,13 +122,13 @@ export const SearchIndexPipelines: React.FC = () => {
           >
             {inferencePipelines.length > 0 && (
               <EuiFlexGroup direction="column" gutterSize="s">
-                {inferencePipelines.map((item: IInferencePipeline, index: number) => (
+                {inferencePipelines.map((item: InferencePipeline, index: number) => (
                   <EuiFlexItem key={index}>
                     <InferencePipelineCard
                       trainedModelName={item.trainedModelName}
                       pipelineName={item.pipelineName}
                       isDeployed={item.isDeployed}
-                      modelTypes={item.modelTypes}
+                      modelType={item.modelType}
                     />
                   </EuiFlexItem>
                 ))}

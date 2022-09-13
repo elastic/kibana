@@ -9,5 +9,5 @@ export interface InferencePipeline {
   pipelineName: string;
   trainedModelName: string;
   isDeployed: boolean;
-  modelTypes: string;
+  modelType: string;
 }
