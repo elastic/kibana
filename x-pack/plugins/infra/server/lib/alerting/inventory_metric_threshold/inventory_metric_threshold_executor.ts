@@ -204,6 +204,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           ),
           threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
+          host: results && results.length > 0 ? results[0][group].host : {},
         };
         alert.scheduleActions(actionGroupId, context);
       }

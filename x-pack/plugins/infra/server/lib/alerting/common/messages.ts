@@ -214,3 +214,11 @@ export const viewInAppUrlActionVariableDescription = i18n.translate(
       'Link to the view or feature within Elastic that can be used to investigate the alert and its context further',
   }
 );
+
+export const hostActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.hostsActionVariableDescription',
+  {
+    defaultMessage:
+      'Additional context for Hosts',
+  }
+);

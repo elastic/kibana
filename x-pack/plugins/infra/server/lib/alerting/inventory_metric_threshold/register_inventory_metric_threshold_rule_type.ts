@@ -26,6 +26,7 @@ import { InfraBackendLibs } from '../../infra_types';
 import {
   alertStateActionVariableDescription,
   groupActionVariableDescription,
+  hostActionVariableDescription,
   metricActionVariableDescription,
   reasonActionVariableDescription,
   thresholdActionVariableDescription,
@@ -102,6 +103,7 @@ export async function registerMetricInventoryThresholdRuleType(
         { name: 'metric', description: metricActionVariableDescription },
         { name: 'threshold', description: thresholdActionVariableDescription },
         { name: 'viewInAppUrl', description: viewInAppUrlActionVariableDescription },
+        { name: 'host', description: hostActionVariableDescription },
       ],
     },
   });
