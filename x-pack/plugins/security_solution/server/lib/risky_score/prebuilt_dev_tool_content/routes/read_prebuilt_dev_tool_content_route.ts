@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import mustache from 'mustache';
 import path, { join, resolve } from 'path';
 import fs from 'fs';
 
@@ -15,6 +15,9 @@ import { DEV_TOOL_PREBUILT_CONTENT } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { consoleMappings } from '../console_mappings';
 import { ReadConsoleRequestSchema } from '../schema';
+
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { getView } from '../utils';
 
 const getReadables = (dataPath: string) => fs.promises.readFile(dataPath, { encoding: 'utf-8' });
 
@@ -68,9 +71,16 @@ export const readPrebuiltDevToolContentRoute = (router: SecuritySolutionPluginRo
         const dir = resolve(join(__dirname, filePath));
 
         const dataPath = path.join(dir, fileName);
-        const res = await getReadables(dataPath);
-        const regex = /{{space_name}}/g;
-        return response.ok({ body: res.replace(regex, spaceId) });
+        const template = await getReadables(dataPath);
+
+        const riskScoreEntity =
+          consoleId === 'enable_host_risk_score' ? RiskScoreEntity.host : RiskScoreEntity.user;
+        const view = getView({ spaceId, riskScoreEntity });
+
+        // override the mustache.js escape function to not escape special characters
+        mustache.escape = (text) => text;
+        const output = mustache.render(template, view);
+        return response.ok({ body: output });
       } catch (err) {
         const error = transformError(err);
 

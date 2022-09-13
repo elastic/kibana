@@ -6,14 +6,16 @@
  */
 import type { HttpSetup } from '@kbn/core/public';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import {
+  getIngestPipelineName,
+  getRiskScoreLatestTransformId,
+  getRiskScorePivotTransformId,
+} from '../../../../../common/utils/risky_score_modules';
 import { bulkCreatePrebuiltSavedObjects } from '../../../../common/components/create_prebuilt_saved_objects/apis/bulk_create_prebuilt_saved_objects';
 import { bulkDeletePrebuiltSavedObjects } from '../../../../common/components/create_prebuilt_saved_objects/apis/bulk_delete_prebuilt_saved_objects';
 
 import * as api from './api';
 import {
-  getIngestPipelineName,
-  getRiskScoreLatestTransformId,
-  getRiskScorePivotTransformId,
   installHostRiskScoreModule,
   installUserRiskScoreModule,
   restartRiskScoreTransforms,

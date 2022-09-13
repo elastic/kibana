@@ -11,7 +11,10 @@ export interface CreateIngestPipeline {
   errorMessage?: string;
   notifications?: NotificationsStart;
   signal?: AbortSignal;
-  options: { name: string; processors: Array<Record<string, unknown>> };
+  options: {
+    name: string;
+    processors: string | Array<Record<string, unknown>>;
+  };
 }
 
 export interface DeleteIngestPipeline {
@@ -27,7 +30,7 @@ export interface CreateIndices {
   notifications?: NotificationsStart;
   signal?: AbortSignal;
   errorMessage?: string;
-  options: { index: string; mappings: Record<string, unknown> };
+  options: { index: string; mappings: string | Record<string, unknown> };
 }
 
 export interface DeleteIndices {
@@ -77,7 +80,7 @@ export interface CreateTransforms {
   signal?: AbortSignal;
   errorMessage?: string;
   transformId: string;
-  options: Record<string, unknown>;
+  options: string | Record<string, unknown>;
 }
 
 export interface StartTransforms {
