@@ -18,7 +18,7 @@ import { RISKY_HOSTS_DOC_LINK } from '../../../../../common/constants';
 
 const HostRiskSummaryComponent: React.FC<{
   hostRisk: HostRisk;
-  originalHostRisk?: RiskSeverity;
+  originalHostRisk?: RiskSeverity | undefined;
 }> = ({ hostRisk, originalHostRisk }) => {
   const currentHostRiskScore = hostRisk?.result?.[0]?.host?.risk?.calculated_level;
   return (

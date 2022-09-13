@@ -108,3 +108,18 @@ export type EnrichEvents = <T extends BaseFieldsLatest>(
   alerts: Array<EventsForEnrichment<T>>,
   params: { spaceId: string }
 ) => Promise<Array<EventsForEnrichment<T>>>;
+
+interface Risk {
+  calculated_level: string;
+  calculated_score_norm: string;
+}
+export interface RiskEnrichmentFields {
+  host?: {
+    name?: string;
+    risk?: Risk;
+  };
+  user?: {
+    name?: string;
+    risk?: Risk;
+  };
+}

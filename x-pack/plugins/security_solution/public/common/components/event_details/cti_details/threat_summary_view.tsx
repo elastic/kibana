@@ -24,6 +24,7 @@ import type { CtiEnrichment } from '../../../../../common/search_strategy/securi
 import type {
   BrowserFields,
   TimelineEventsDetailsItem,
+  RiskSeverity,
 } from '../../../../../common/search_strategy';
 import { HostRiskSummary } from './host_risk_summary';
 import { UserRiskSummary } from './user_risk_summary';
@@ -143,7 +144,7 @@ const ThreatSummaryViewComponent: React.FC<{
 }) => {
   const originalHostRisk = data?.find(
     (eventDetail) => eventDetail?.field === 'host.risk.calculated_level'
-  )?.values?.[0];
+  )?.values?.[0] as RiskSeverity | undefined;
 
   return (
     <>
