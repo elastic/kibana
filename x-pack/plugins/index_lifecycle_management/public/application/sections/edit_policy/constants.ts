@@ -118,3 +118,42 @@ export const timeUnits = [
     }),
   },
 ];
+
+/*
+ * Labels for fixed intervals
+ */
+export const fixedIntervalUnits = [
+  {
+    value: 'd',
+    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.fixedIntervalUnits.daysLabel', {
+      defaultMessage: 'days',
+    }),
+  },
+  {
+    value: 'h',
+    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.fixedIntervalUnits.hoursLabel', {
+      defaultMessage: 'hours',
+    }),
+  },
+  {
+    value: 'm',
+    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.fixedIntervalUnits.minutesLabel', {
+      defaultMessage: 'minutes',
+    }),
+  },
+  {
+    value: 's',
+    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.fixedIntervalUnits.secondsLabel', {
+      defaultMessage: 'seconds',
+    }),
+  },
+  {
+    value: 'ms',
+    text: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.fixedIntervalUnits.millisecondsLabel',
+      {
+        defaultMessage: 'milliseconds',
+      }
+    ),
+  },
+];

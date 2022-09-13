@@ -29,6 +29,7 @@ import {
   SearchableSnapshotField,
   ReadonlyField,
   ShrinkField,
+  DownsampleField,
 } from '../shared_fields';
 import { Phase } from '../phase';
 
@@ -176,6 +177,7 @@ export const HotPhase: FunctionComponent = () => {
           <ShrinkField phase={'hot'} />
           {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase="hot" />}
           <ReadonlyField phase={'hot'} />
+          <DownsampleField phase="hot" />
         </>
       )}
       <IndexPriorityField phase={'hot'} />
