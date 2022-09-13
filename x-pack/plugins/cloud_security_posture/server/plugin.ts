@@ -6,13 +6,13 @@
  */
 
 import type {
-  KibanaRequest,
-  RequestHandlerContext,
-  PluginInitializerContext,
   CoreSetup,
   CoreStart,
-  Plugin,
+  KibanaRequest,
   Logger,
+  Plugin,
+  PluginInitializerContext,
+  RequestHandlerContext,
 } from '@kbn/core/server';
 import { DeepReadonly } from 'utility-types';
 import { DeletePackagePoliciesResponse, PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -22,8 +22,8 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import type {
   CspServerPluginSetup,
-  CspServerPluginStart,
   CspServerPluginSetupDeps,
+  CspServerPluginStart,
   CspServerPluginStartDeps,
   CspServerPluginStartServices,
 } from './types';
@@ -38,8 +38,8 @@ import {
 } from './fleet_integration/fleet_integration';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import {
-  updatePackagePolicyRuntimeCfgVar,
   getAllPackagePolicyCspRulesSO,
+  updatePackagePolicyRuntimeCfgVar,
 } from './routes/configuration/update_rules_configuration';
 
 import {
@@ -47,6 +47,7 @@ import {
   scheduleFindingsStatsTask,
   setupFindingsStatsTask,
 } from './tasks/findings_stats_task';
+import { registerIndicesCounterCollector } from './collectors/register';
 
 export class CspPlugin
   implements
@@ -67,6 +68,7 @@ export class CspPlugin
     core: CoreSetup<CspServerPluginStartDeps, CspServerPluginStart>,
     plugins: CspServerPluginSetupDeps
   ): CspServerPluginSetup {
+    console.log('*********************');
     setupSavedObjects(core.savedObjects);
 
     setupRoutes({
@@ -76,7 +78,8 @@ export class CspPlugin
 
     const coreStartServices = core.getStartServices();
     this.setupCspTasks(plugins.taskManager, coreStartServices, this.logger);
-
+    registerIndicesCounterCollector(plugins.usageCollection);
+    console.log('*********************');
     return {};
   }
 

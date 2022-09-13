@@ -2,7 +2,10 @@
   "id": "cloudSecurityPosture",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
-  "configPath": ["xpack", "cloudSecurityPosture"],
+  "configPath": [
+    "xpack",
+    "cloudSecurityPosture"
+  ],
   "owner": {
     "name": "Cloud Security Posture",
     "githubTeam": "cloud-posture-security"
@@ -10,6 +13,20 @@
   "description": "The cloud security posture plugin",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["navigation", "data", "fleet", "unifiedSearch", "taskManager", "security", "charts", "discover"],
-  "requiredBundles": ["kibanaReact"]
+  "requiredPlugins": [
+    "navigation",
+    "data",
+    "fleet",
+    "unifiedSearch",
+    "taskManager",
+    "security",
+    "charts",
+    "discover"
+  ],
+  "requiredBundles": [
+    "kibanaReact"
+  ],
+  "optionalPlugins": [
+    "usageCollection"
+  ]
 }
