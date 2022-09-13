@@ -48,8 +48,9 @@ import { Operator } from './lib/filter_operators';
 import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
+import { getFieldValidityAndErrorMessage } from './lib/helpers';
 
-export interface Props {
+export interface FilterEditorProps {
   filter: Filter;
   indexPatterns: DataView[];
   onSubmit: (filter: Filter) => void;
@@ -84,8 +85,8 @@ const updateButtonLabel = i18n.translate('unifiedSearch.filter.filterEditor.upda
   defaultMessage: 'Update filter',
 });
 
-class FilterEditorUI extends Component<Props, State> {
-  constructor(props: Props) {
+class FilterEditorUI extends Component<FilterEditorProps, State> {
+  constructor(props: FilterEditorProps) {
     super(props);
     this.state = {
       selectedIndexPattern: this.getIndexPatternFromFilter(),
@@ -356,32 +357,55 @@ class FilterEditorUI extends Component<Props, State> {
       return '';
     }
 
+    const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(
+      this.state.selectedField,
+      this.state.params
+    );
+
     switch (this.state.selectedOperator.type) {
       case 'exists':
         return '';
       case 'phrase':
         return (
-          <PhraseValueInput
-            indexPattern={indexPattern}
-            field={this.state.selectedField}
-            value={this.state.params}
-            onChange={this.onParamsChange}
-            data-test-subj="phraseValueInput"
-            timeRangeForSuggestionsOverride={this.props.timeRangeForSuggestionsOverride}
+          <EuiFormRow
             fullWidth
-          />
+            label={this.props.intl.formatMessage({
+              id: 'unifiedSearch.filter.filterEditor.valueInputLabel',
+              defaultMessage: 'Value',
+            })}
+            isInvalid={isInvalid}
+            error={errorMessage}
+          >
+            <PhraseValueInput
+              indexPattern={indexPattern}
+              field={this.state.selectedField}
+              value={this.state.params}
+              onChange={this.onParamsChange}
+              data-test-subj="phraseValueInput"
+              timeRangeForSuggestionsOverride={this.props.timeRangeForSuggestionsOverride}
+              fullWidth
+            />
+          </EuiFormRow>
         );
       case 'phrases':
         return (
-          <PhrasesValuesInput
-            indexPattern={indexPattern}
-            field={this.state.selectedField}
-            values={this.state.params}
-            onChange={this.onParamsChange}
-            onParamsUpdate={this.onParamsUpdate}
-            timeRangeForSuggestionsOverride={this.props.timeRangeForSuggestionsOverride}
+          <EuiFormRow
             fullWidth
-          />
+            label={this.props.intl.formatMessage({
+              id: 'unifiedSearch.filter.filterEditor.valuesSelectLabel',
+              defaultMessage: 'Values',
+            })}
+          >
+            <PhrasesValuesInput
+              indexPattern={indexPattern}
+              field={this.state.selectedField}
+              values={this.state.params}
+              onChange={this.onParamsChange}
+              onParamsUpdate={this.onParamsUpdate}
+              timeRangeForSuggestionsOverride={this.props.timeRangeForSuggestionsOverride}
+              fullWidth
+            />
+          </EuiFormRow>
         );
       case 'range':
         return (

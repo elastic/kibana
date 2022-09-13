@@ -27,7 +27,7 @@ import {
   getDisplayValueFromFilter,
   getFieldDisplayValueFromFilter,
 } from '@kbn/data-plugin/public';
-import { FilterEditor } from '../filter_editor';
+import { FilterEditor } from '../filter_editor/filter_editor';
 import { FilterView } from '../filter_view';
 import { getIndexPatterns } from '../../services';
 import { FilterPanelOption } from '../../types';
@@ -160,9 +160,8 @@ export function FilterItem(props: FilterItemProps) {
 
   function getDataTestSubj(labelConfig: LabelOptions) {
     const dataTestSubjKey = filter.meta.key ? `filter-key-${filter.meta.key}` : '';
-    const dataTestSubjValue = filter.meta.value
-      ? `filter-value-${isValidLabel(labelConfig) ? labelConfig.title : labelConfig.status}`
-      : '';
+    const valueLabel = isValidLabel(labelConfig) ? labelConfig.title : labelConfig.status;
+    const dataTestSubjValue = valueLabel ? `filter-value-${valueLabel}` : '';
     const dataTestSubjNegated = filter.meta.negate ? 'filter-negated' : '';
     const dataTestSubjDisabled = `filter-${isDisabled(labelConfig) ? 'disabled' : 'enabled'}`;
     const dataTestSubjPinned = `filter-${isFilterPinned(filter) ? 'pinned' : 'unpinned'}`;
