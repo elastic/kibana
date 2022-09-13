@@ -9,7 +9,7 @@ import { Subject } from 'rxjs';
 import { renderHook } from '@testing-library/react-hooks';
 import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import {savedSearchMock, savedSearchMockWithSQL} from '../../../__mocks__/saved_search';
+import { savedSearchMock, savedSearchMockWithSQL } from '../../../__mocks__/saved_search';
 import { RecordRawType, useSavedSearch } from './use_saved_search';
 import { getState } from '../services/discover_state';
 import { useDiscoverState } from './use_discover_state';
