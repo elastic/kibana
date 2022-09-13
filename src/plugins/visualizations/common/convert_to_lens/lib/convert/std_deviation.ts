@@ -73,5 +73,5 @@ export const convertToStdDeviationFormulaColumns = (
     return null;
   }
 
-  return createFormulaColumn(formula, agg);
+  return { ...createFormulaColumn(formula, agg), label: agg.label };
 };
