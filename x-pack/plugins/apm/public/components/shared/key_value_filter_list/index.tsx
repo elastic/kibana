@@ -24,7 +24,7 @@ import { isEmpty } from 'lodash';
 interface KeyValue {
   key: string;
   value: any | undefined;
-  showFilterByOption: boolean;
+  isFilterable: boolean;
 }
 
 const StyledEuiAccordion = styled(EuiAccordion)`
@@ -75,7 +75,7 @@ export function KeyValueFilterList({
       buttonClassName="buttonContentContainer"
     >
       <StyledEuiDescriptionList type="column">
-        {nonEmptyKeyValueList.map(({ key, value, showFilterByOption }) => {
+        {nonEmptyKeyValueList.map(({ key, value, isFilterable }) => {
           return (
             <Fragment key={key}>
               <EuiDescriptionListTitle
@@ -96,7 +96,7 @@ export function KeyValueFilterList({
                   gutterSize="none"
                 >
                   <EuiFlexItem style={{ minWidth: '32px' }} grow={false}>
-                    {showFilterByOption && (
+                    {isFilterable && (
                       <EuiButtonEmpty
                         onClick={() => {
                           onClickFilter({ key, value });

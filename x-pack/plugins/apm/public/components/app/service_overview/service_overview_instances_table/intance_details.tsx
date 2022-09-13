@@ -51,16 +51,16 @@ interface Props {
 function toKeyValuePairs({
   keys,
   data,
-  showFilterByOption = true,
+  isFilterable = true,
 }: {
   keys: string[];
   data: ServiceInstanceDetails;
-  showFilterByOption?: boolean;
+  isFilterable?: boolean;
 }) {
   return keys.map((key) => ({
     key,
     value: get(data, key),
-    showFilterByOption,
+    isFilterable,
   }));
 }
 
@@ -133,7 +133,7 @@ export function InstanceDetails({
   const metricsKubernetesKeyValuePairs = toKeyValuePairs({
     keys: metricsKubernetesDetailsKeys,
     data,
-    showFilterByOption: false,
+    isFilterable: false,
   });
   const cloudDetailsKeyValuePairs = toKeyValuePairs({
     keys: cloudDetailsKeys,

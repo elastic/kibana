@@ -28,8 +28,8 @@ describe('KeyValueFilterList', () => {
       <KeyValueFilterList
         title="title"
         keyValueList={[
-          { key: 'foo', value: 'foo value', showFilterByOption: true },
-          { key: 'bar', value: 'bar value', showFilterByOption: true },
+          { key: 'foo', value: 'foo value', isFilterable: true },
+          { key: 'bar', value: 'bar value', isFilterable: true },
         ]}
         onClickFilter={jest.fn}
       />
@@ -48,8 +48,8 @@ describe('KeyValueFilterList', () => {
         title="title"
         icon="alert"
         keyValueList={[
-          { key: 'foo', value: 'foo value', showFilterByOption: true },
-          { key: 'bar', value: 'bar value', showFilterByOption: true },
+          { key: 'foo', value: 'foo value', isFilterable: true },
+          { key: 'bar', value: 'bar value', isFilterable: true },
         ]}
         onClickFilter={jest.fn}
       />
@@ -62,8 +62,8 @@ describe('KeyValueFilterList', () => {
       <KeyValueFilterList
         title="title"
         keyValueList={[
-          { key: 'foo', value: 'foo value', showFilterByOption: true },
-          { key: 'bar', value: 'bar value', showFilterByOption: true },
+          { key: 'foo', value: 'foo value', isFilterable: true },
+          { key: 'bar', value: 'bar value', isFilterable: true },
         ]}
         onClickFilter={jest.fn}
       />
@@ -77,8 +77,8 @@ describe('KeyValueFilterList', () => {
       <KeyValueFilterList
         title="title"
         keyValueList={[
-          { key: 'foo', value: 'foo value', showFilterByOption: false },
-          { key: 'bar', value: 'bar value', showFilterByOption: true },
+          { key: 'foo', value: 'foo value', isFilterable: false },
+          { key: 'bar', value: 'bar value', isFilterable: true },
         ]}
         onClickFilter={jest.fn}
       />
@@ -92,8 +92,8 @@ describe('KeyValueFilterList', () => {
       <KeyValueFilterList
         title="title"
         keyValueList={[
-          { key: 'foo', value: 'foo value', showFilterByOption: true },
-          { key: 'bar', value: 'bar value', showFilterByOption: true },
+          { key: 'foo', value: 'foo value', isFilterable: true },
+          { key: 'bar', value: 'bar value', isFilterable: true },
         ]}
         onClickFilter={mockFilter}
       />
