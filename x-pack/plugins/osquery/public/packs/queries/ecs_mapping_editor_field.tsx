@@ -18,6 +18,8 @@ import {
   reduce,
   trim,
   get,
+  xorWith,
+  isEqual,
 } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
@@ -748,17 +750,19 @@ export const ECSMappingEditorField = React.memo(
       formState,
     } = useForm({
       mode: 'all',
+      shouldUnregister: true,
       defaultValues: {
         ecsMappingArray: convertECSMappingToArray(ecs_mapping),
       },
     });
-    const { fields, append, remove } = useFieldArray<{ ecsMappingArray: EcsMappingFormField[] }>({
+    const { fields, append, remove, replace } = useFieldArray<{
+      ecsMappingArray: EcsMappingFormField[];
+    }>({
       control,
       name: 'ecsMappingArray',
     });
 
     const ecsMappingArray = watch();
-
     const [osquerySchemaOptions, setOsquerySchemaOptions] = useState<OsquerySchemaOption[]>([]);
 
     useEffect(() => {
@@ -995,6 +999,14 @@ export const ECSMappingEditorField = React.memo(
         !deepEqual(prevValue, newOptions) ? newOptions : prevValue
       );
     }, [query]);
+
+    useEffect(() => {
+      const parsedMapping = convertECSMappingToArray(ecs_mapping);
+
+      if (xorWith(parsedMapping, ecsMappingArray.ecsMappingArray, isEqual).length > 1) {
+        replace(parsedMapping);
+      }
+    }, [ecsMappingArray.ecsMappingArray, ecs_mapping, replace]);
 
     useEffect(() => {
       const ecsList = ecsMappingArray.ecsMappingArray;

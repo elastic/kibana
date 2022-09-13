@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, map } from 'lodash';
+import { isEmpty } from 'lodash';
 import type { EuiAccordionProps } from '@elastic/eui';
 import { EuiCodeBlock, EuiFormRow, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -73,20 +73,7 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
       if (savedQuery) {
         formContext?.setValue('query', savedQuery.query);
         formContext?.setValue('savedQueryId', savedQuery.savedQueryId);
-        if (!isEmpty(savedQuery.ecs_mapping)) {
-          formContext?.setValue(
-            'ecs_mapping',
-            map(savedQuery.ecs_mapping, (ecsValue, key) => ({
-              key,
-              result: {
-                type: Object.keys(ecsValue)[0],
-                value: Object.values(ecsValue)[0] as string,
-              },
-            }))
-          );
-        } else {
-          formContext?.resetField('ecs_mapping');
-        }
+        formContext?.setValue('ecs_mapping', savedQuery.ecs_mapping);
 
         if (!isEmpty(savedQuery.ecs_mapping)) {
           setAdvancedContentState('open');
