@@ -42,8 +42,6 @@ import {
   HeartbeatConfig,
 } from '../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
-import { hydrateSavedObjects } from './hydrate_saved_object';
-import { DecryptedSyntheticsMonitorSavedObject } from '../../common/types';
 
 import { normalizeSecrets } from './utils/secrets';
 
@@ -474,14 +472,6 @@ export class SyntheticsService {
       },
       monitors: monitors.length,
     });
-
-    if (this.indexTemplateExists) {
-      // without mapping, querying won't make sense
-      hydrateSavedObjects({
-        monitors: monitors as unknown as DecryptedSyntheticsMonitorSavedObject[],
-        server: this.server,
-      });
-    }
 
     return (monitors ?? []).map((monitor) => {
       const attributes = monitor.attributes as unknown as MonitorFields;
