@@ -13,6 +13,7 @@ import {
   IdleTaskWithExpiredRunAt,
   RunningOrClaimingTaskWithExpiredRetryAt,
   SortByRunAtAndRetryAt,
+  EnabledTask,
 } from './mark_available_tasks_as_claimed';
 
 import { TaskTypeDictionary } from '../task_type_dictionary';
@@ -53,6 +54,8 @@ describe('mark_available_tasks_as_claimed', () => {
 
     expect({
       query: mustBeAllOf(
+        // Task must be enabled
+        EnabledTask,
         // Either a task with idle status and runAt <= now or
         // status running or claiming with a retryAt <= now.
         shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt)
@@ -72,6 +75,17 @@ describe('mark_available_tasks_as_claimed', () => {
       query: {
         bool: {
           must: [
+            {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      'task.enabled': true,
+                    },
+                  },
+                ],
+              },
+            },
             // Either a task with idle status and runAt <= now or
             // status running or claiming with a retryAt <= now.
             {
