@@ -129,7 +129,7 @@ describe('DataPanel', () => {
     });
 
     it('passes hasBorder', () => {
-      const wrapper = shallow(<DataPanel title={<h1>Test</h1>} />);
+      const wrapper = shallow(<DataPanel filled title={<h1>Test</h1>} />);
       expect(wrapper.prop('hasBorder')).toBeFalsy();
 
       wrapper.setProps({ hasBorder: true });
