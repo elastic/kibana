@@ -136,7 +136,7 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                     }}
                   />
                 )}
-                {packageInputStream.description ? (
+                {packageInfo.type !== 'input' && packageInputStream.description ? (
                   <Fragment>
                     <EuiSpacer size="s" />
                     <EuiText size="s" color="subdued">
