@@ -126,12 +126,12 @@ const DescriptionWrapper = styled(EuiFlexItem)`
 
 // align the icon to the inputs
 const StyledSemicolonWrapper = styled.div`
-  margin-top: 8px;
+  margin-top: 28px;
 `;
 
 // align the icon to the inputs
 const StyledButtonWrapper = styled.div`
-  margin-top: 11px;
+  margin-top: 28px;
   width: 24px;
 `;
 
