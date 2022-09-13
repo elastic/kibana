@@ -31,7 +31,7 @@ import { SaveModalContainer, runSaveLensVisualization } from './save_modal_conta
 import { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common';
 import { isLensEqual } from './lens_document_equality';
-import { IndexPatternServiceAPI, createIndexPatternService } from '../indexpattern_service/service';
+import { IndexPatternServiceAPI, createIndexPatternService } from '../data_views_service/service';
 import { replaceIndexpattern } from '../state_management/lens_slice';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
@@ -62,6 +62,9 @@ export function App({
 
   const {
     data,
+    dataViews,
+    uiActions,
+    uiSettings,
     chrome,
     inspector: lensInspector,
     application,
@@ -367,10 +370,10 @@ export function App({
   const indexPatternService = useMemo(
     () =>
       createIndexPatternService({
-        dataViews: lensAppServices.dataViews,
-        uiSettings: lensAppServices.uiSettings,
-        uiActions: lensAppServices.uiActions,
-        core: { http, notifications },
+        dataViews,
+        uiActions,
+        core: { http, notifications, uiSettings },
+        data,
         updateIndexPatterns: (newIndexPatternsState, options) => {
           dispatch(updateIndexPatterns(newIndexPatternsState));
           if (options?.applyImmediately) {
@@ -384,7 +387,7 @@ export function App({
           }
         },
       }),
-    [dispatch, http, notifications, lensAppServices]
+    [dataViews, uiActions, http, notifications, uiSettings, data, dispatch]
   );
 
   return (
@@ -400,6 +403,7 @@ export function App({
           setHeaderActionMenu={setHeaderActionMenu}
           indicateNoData={indicateNoData}
           datasourceMap={datasourceMap}
+          visualizationMap={visualizationMap}
           title={persistedDoc?.title}
           lensInspector={lensInspector}
           currentDoc={currentDoc}

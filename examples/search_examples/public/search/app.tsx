@@ -18,8 +18,8 @@ import {
   EuiFormLabel,
   EuiHorizontalRule,
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiProgress,
   EuiSpacer,
@@ -107,9 +107,9 @@ export const SearchExamplesApp = ({
   const [selectedBucketField, setSelectedBucketField] = useState<
     DataViewField | null | undefined
   >();
-  const [request, setRequest] = useState<Record<string, any>>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentAbortController, setAbortController] = useState<AbortController>();
+  const [request, setRequest] = useState<Record<string, any>>({});
   const [rawResponse, setRawResponse] = useState<Record<string, any>>({});
   const [warningContents, setWarningContents] = useState<SearchResponseWarning[]>([]);
   const [selectedTab, setSelectedTab] = useState(0);
@@ -202,6 +202,8 @@ export const SearchExamplesApp = ({
 
     // Submit the search request using the `data.search` service.
     setRequest(req.params.body);
+    setRawResponse({});
+    setWarningContents([]);
     setIsLoading(true);
 
     data.search
@@ -301,6 +303,8 @@ export const SearchExamplesApp = ({
         searchSource.setField('aggs', ac);
       }
       setRequest(searchSource.getSearchRequestBody());
+      setRawResponse({});
+      setWarningContents([]);
       const abortController = new AbortController();
 
       const inspector: Required<IInspectorInfo> = {
