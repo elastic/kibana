@@ -186,50 +186,7 @@ describe('create CSP rules with post package create callback', () => {
   });
 });
 
-describe('package update when csp rule exist should get the csp rule enabler from the old csp rule state ', () => {
-  // Setup if needed
-  it('bla bla', async () => {
-    const mockPackagePolicy = createPackagePolicyMock();
-    mockPackagePolicy.package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
-    const ruleId = `rule_1_1_1_id`;
-    const enable = mockSoClient.find.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          type: 'csp-rule-template',
-          id: ruleId,
-          attributes: {
-            ...ruleAttributes(ruleId),
-          },
-        },
-      ],
-      pit_id: undefined,
-    } as unknown as SavedObjectsFindResponse);
-
-    mockSoClient.find.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          type: 'csp_rule',
-          id: ruleId,
-          attributes: { ...ruleAttributes(ruleId), enabled: enable },
-        },
-      ],
-      pit_id: undefined,
-    } as unknown as SavedObjectsFindResponse);
-
-    await OnPackagePolicyUpgradeCallback(logger, mockPackagePolicy, mockSoClient);
-
-    expect(mockSoClient.bulkCreate.mock.calls[0][0]).toMatchObject([
-      {
-        type: 'csp_rule',
-        attributes: {
-          ...ruleAttributes(ruleId),
-          package_policy_id: mockPackagePolicy.id,
-          policy_id: mockPackagePolicy.policy_id,
-          enabled: enable,
-        },
-      },
-    ]);
-  });
+describe('create CSP rules with post package create callback', () => {
   it('package update when no csp rule exist should use the rule template default enabler', async () => {
     const mockPackagePolicy = createPackagePolicyMock();
     mockPackagePolicy.package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;

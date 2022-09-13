@@ -59,10 +59,6 @@ export const OnPackagePolicyUpgradeCallback = async (
   packagePolicy: PackagePolicy,
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
-  // Need to be removed
-  // packagePolicy.id = `04f32290-b7cf-47ee-803a-8286565f2b4b`;
-  // Create csp-rules from the generic asset
-
   await UpdateCspRulesAccordingToCspRuleTemplates(packagePolicy, savedObjectsClient, logger);
 };
 
