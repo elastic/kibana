@@ -9,15 +9,9 @@ import { Stream } from 'stream';
 import * as zlib from 'zlib';
 
 import type { Logger } from '@kbn/logging';
+import type { Headers, ResponseHeaders } from '@kbn/core-http-server';
 
 import { acceptCompression } from './accept_compression';
-
-/**
- * TODO: Replace these with kbn packaged versions once we have those available to us.
- * At the moment imports from runtime plugins into packages are not supported.
- * import type { Headers } from '@kbn/core/server';
- */
-type Headers = Record<string, string | string[] | undefined>;
 
 // We need this otherwise Kibana server will crash with a 'ERR_METHOD_NOT_IMPLEMENTED' error.
 class ResponseStream extends Stream.PassThrough {
@@ -35,9 +29,7 @@ interface StreamFactoryReturnType<T = unknown> {
   push: (d: T) => void;
   responseWithHeaders: {
     body: zlib.Gzip | ResponseStream;
-    // TODO: Replace these with kbn packaged versions once we have those available to us.
-    // At the moment imports from runtime plugins into packages are not supported.
-    headers?: any;
+    headers?: ResponseHeaders;
   };
 }
 

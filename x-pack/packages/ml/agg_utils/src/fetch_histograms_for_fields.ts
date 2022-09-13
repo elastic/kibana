@@ -9,6 +9,7 @@ import get from 'lodash/get';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { stringHash } from '@kbn/ml-string-hash';
@@ -18,7 +19,6 @@ import { fetchAggIntervals } from './fetch_agg_intervals';
 import { getSamplerAggregationsResponsePath } from './get_sampler_aggregations_response_path';
 import type {
   AggCardinality,
-  ElasticsearchClient,
   HistogramField,
   NumericColumnStats,
   NumericColumnStatsMap,
