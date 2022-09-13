@@ -1,4 +1,4 @@
-# Kibana Alerts and Actions UI
+# Kibana Alerts an3 Actions UI
 
 The Kibana alerts and actions UI plugin provides a user interface for managing alerts and actions. 
 As a developer you can reuse and extend built-in alerts and actions UI functionality:
@@ -35,6 +35,7 @@ Table of Contents
     - [Index](#index)
     - [Webhook](#webhook)
     - [PagerDuty](#pagerduty)
+    - [D3Security](#d3security)
   - [Action type model definition](#action-type-model-definition)
     - [CustomConnectorSelectionItem Properties](#customconnectorselectionitem-properties)
   - [Register action type model](#register-action-type-model)
@@ -863,7 +864,7 @@ Kibana ships with a set of built-in action types UI:
 | [Index](#index)           | `.index`     | Indexes document(s) into Elasticsearch                                 |
 | [Webhook](#webhook)       | `.webhook`   | Sends a payload to a web service using HTTP POST or PUT                |
 | [PagerDuty](#pagerduty)   | `.pagerduty` | Triggers, resolves, or acknowledges an incident to a PagerDuty service |
-
+| [D3Security](#d3security) | `.d3security`| Sends a payload to D3 web service using HTTP POST                      |
 Every action type should be registered server side, and can be optionally registered client side. 
 Only action types registered on both client and server will be displayed in the Alerts and Actions UI.
 Built-in action types UI is located under the folder `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types`
@@ -1088,6 +1089,36 @@ export function getActionType(): ActionTypeModel {
 
 and action params form available in Create Alert form:
 ![PagerDuty action form](https://i.imgur.com/xxXmhMK.png)
+
+
+### D3Security
+
+Action type model definition:
+```
+export function getActionType(): ActionTypeModel {
+  return {
+    id: '.d3security',
+    iconClass: lazy(() => import('./logo')),
+    selectMessage: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.d3securityAction.selectMessageText',
+      {
+        defaultMessage: 'Create event or trigger playbook workflow actions in D3 SOAR.',
+      }
+    ),
+    validateParams: (actionParams: D3SecurityActionParams): Promise<ValidationResult> => {
+      // validation of action params implementation
+    },
+    actionConnectorFields: D3SecurityActionConnectorFields,
+    actionParamsFields: D3ParamsFields,
+  };
+}
+```
+![D3Security connector card](https://i.imgur.com/pbmXBVy.png)
+
+![D3Security connector form](https://i.imgur.com/HEUF6qC.png)
+
+and action params form available in Create Alert form:
+![D3Security action form](https://i.imgur.com/TwioSA0.png)
 
 ## Action type model definition
 

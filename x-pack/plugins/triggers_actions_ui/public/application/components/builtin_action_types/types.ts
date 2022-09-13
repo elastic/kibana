@@ -178,3 +178,17 @@ export interface TeamsSecrets {
 export type TeamsActionConnector = UserConfiguredActionConnector<unknown, TeamsSecrets>;
 
 export type LogoProps = Omit<EuiIconProps, 'type'>;
+
+export interface D3ActionParams {
+  body?: string;
+}
+export interface D3Config {
+  url: string;
+}
+export interface D3Secrets {
+  token: string;
+}
+
+
+export type D3ActionConnector = UserConfiguredActionConnector<D3Config, D3Secrets>;
+

@@ -18,6 +18,7 @@ import { getActionType as getSlackActionType } from './slack';
 import { getActionType as getWebhookActionType } from './webhook';
 import { getActionType as getCasesWebhookActionType } from './cases_webhook';
 import { getActionType as getXmattersActionType } from './xmatters';
+import { getActionType as getD3ActionType } from './d3security';
 import {
   getServiceNowITSMActionType,
   getServiceNowSIRActionType,
@@ -43,6 +44,8 @@ export { ActionTypeId as WebhookActionTypeId } from './webhook';
 export type { ActionParamsType as XmattersActionParams } from './xmatters';
 export { ActionTypeId as XmattersActionTypeId } from './xmatters';
 export type { ActionParamsType as ServiceNowActionParams } from './servicenow';
+export { ActionTypeId as D3ActionTypeId } from './d3security';
+export type { ActionParamsType as D3ActionParams } from './d3security';
 export {
   ServiceNowITSMActionTypeId,
   ServiceNowSIRActionTypeId,
@@ -83,4 +86,5 @@ export function registerBuiltInActionTypes({
   actionTypeRegistry.register(getJiraActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getResilientActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getTeamsActionType({ logger, configurationUtilities }));
+  actionTypeRegistry.register(getD3ActionType({ logger, configurationUtilities }));
 }
