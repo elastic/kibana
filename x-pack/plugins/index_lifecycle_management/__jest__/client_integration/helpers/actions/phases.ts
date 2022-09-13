@@ -16,6 +16,7 @@ import {
   createNodeAllocationActions,
   createReplicasAction,
   createSnapshotPolicyActions,
+  createDownsampleActions,
 } from '.';
 
 export const createHotPhaseActions = (testBed: TestBed) => {
@@ -26,6 +27,7 @@ export const createHotPhaseActions = (testBed: TestBed) => {
       ...createReadonlyActions(testBed, 'hot'),
       ...createIndexPriorityActions(testBed, 'hot'),
       ...createSearchableSnapshotActions(testBed, 'hot'),
+      ...createDownsampleActions(testBed, 'hot'),
     },
   };
 };
@@ -39,6 +41,7 @@ export const createWarmPhaseActions = (testBed: TestBed) => {
       ...createIndexPriorityActions(testBed, 'warm'),
       ...createNodeAllocationActions(testBed, 'warm'),
       ...createReplicasAction(testBed, 'warm'),
+      ...createDownsampleActions(testBed, 'warm'),
     },
   };
 };
@@ -51,6 +54,7 @@ export const createColdPhaseActions = (testBed: TestBed) => {
       ...createIndexPriorityActions(testBed, 'cold'),
       ...createNodeAllocationActions(testBed, 'cold'),
       ...createSearchableSnapshotActions(testBed, 'cold'),
+      ...createDownsampleActions(testBed, 'cold'),
     },
   };
 };
