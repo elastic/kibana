@@ -27,8 +27,8 @@ export const getRowActions = (observabilityRuleTypeRegistry: ObservabilityRuleTy
       return (
         <ObservabilityActions
           data={buildData(alert)}
-          eventId={alert._id}
-          ecsData={{ _id: alert._id, _index: alert._index }}
+          eventId={alert._id[0]}
+          ecsData={{ _id: alert._id[0], _index: alert._index[0] }}
           id={id}
           observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
           setEventsDeleted={fakeSetEventsDeleted}
