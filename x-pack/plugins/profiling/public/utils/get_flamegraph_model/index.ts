@@ -7,11 +7,7 @@
 import { ColumnarViewModel } from '@elastic/charts';
 import d3 from 'd3';
 import { uniqueId } from 'lodash';
-import {
-  ElasticFlameGraph,
-  FlameGraphComparisonMode,
-  rgbToRGBA,
-} from '../../../common/flamegraph';
+import { ElasticFlameGraph, FlameGraphComparisonMode, rgbToRGBA } from '../../../common/flamegraph';
 import { getInterpolationValue } from './get_interpolation_value';
 
 const nullColumnarViewModel = {
