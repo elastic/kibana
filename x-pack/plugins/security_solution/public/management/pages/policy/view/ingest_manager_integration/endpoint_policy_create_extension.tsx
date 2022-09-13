@@ -150,8 +150,8 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
     const [checkboxMalwareChecked, setCheckboxMalwareChecked] = useState(false);
     const [checkboxMaliciousChecked, setCheckboxMaliciousChecked] = useState(false);
 
-    const [radioInteractiveSelected, setRadioInteractiveSelected] = useState(false);
-    const [radioComprehensiveSelected, setRadioComprehensiveSelected] = useState(true);
+    const [radioInteractiveSelected, setRadioInteractiveSelected] = useState(true);
+    const [radioComprehensiveSelected, setRadioComprehensiveSelected] = useState(false);
 
     const setPreventions = useCallback(
       (statusBehaviour: boolean, statusMalware: boolean) => {
@@ -296,12 +296,11 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                         cloudConfig: {
                           preventions: {
                             behavior_protection: checkboxMaliciousChecked,
-
                             malware: checkboxMalwareChecked,
                           },
                         },
                         eventFilters: {
-                          nonInteractiveSession: radioComprehensiveSelected,
+                          nonInteractiveSession: radioInteractiveSelected,
                         },
                       },
                     },
@@ -349,7 +348,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
     const onChangeRadio = useCallback(() => {
       setRadioInteractiveSelected(!radioInteractiveSelected);
       setRadioComprehensiveSelected(!radioComprehensiveSelected);
-      setInteractive(!radioComprehensiveSelected);
+      setInteractive(radioComprehensiveSelected);
     }, [radioInteractiveSelected, radioComprehensiveSelected, setInteractive]);
 
     const onChangeRadioEndpoint = useCallback(
