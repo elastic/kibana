@@ -7,7 +7,7 @@
 
 import type { Readable } from 'stream';
 
-import type { SavedObjectAttributes, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RulesClient, PartialRule } from '@kbn/alerting-plugin/server';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
@@ -43,7 +43,7 @@ export interface IRuleAssetSOAttributes extends Record<string, any> {
 export interface IRuleAssetSavedObject {
   type: string;
   id: string;
-  attributes: IRuleAssetSOAttributes & SavedObjectAttributes;
+  attributes: IRuleAssetSOAttributes;
 }
 
 export interface HapiReadableStream extends Readable {

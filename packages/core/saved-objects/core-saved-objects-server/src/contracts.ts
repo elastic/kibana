@@ -7,7 +7,6 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SavedObjectAttributes } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
@@ -124,9 +123,7 @@ export interface SavedObjectsServiceSetup {
    * }
    * ```
    */
-  registerType: <Attributes extends SavedObjectAttributes = any>(
-    type: SavedObjectsType<Attributes>
-  ) => void;
+  registerType: <Attributes = unknown>(type: SavedObjectsType<Attributes>) => void;
 
   /**
    * Returns the default index used for saved objects.

@@ -6,7 +6,6 @@
  */
 
 import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { SavedObjectAttributes } from '@kbn/core/public';
 import {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
@@ -77,7 +76,7 @@ export class EmbeddableEnhancedPlugin
         I extends EmbeddableInput = EmbeddableInput,
         O extends EmbeddableOutput = EmbeddableOutput,
         E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
-        T extends SavedObjectAttributes = SavedObjectAttributes
+        T = unknown
       >(
         def: EmbeddableFactoryDefinition<I, O, E, T>
       ): EmbeddableFactory<I, O, E, T> => {
