@@ -11,6 +11,7 @@ import {
   DEFINE_CONTINUE_BUTTON,
   CUSTOM_QUERY_BAR,
   LOAD_QUERY_DYNAMICALLY_CHECKBOX,
+  QUERY_BAR,
 } from '../../screens/create_new_rule';
 import { TOASTER } from '../../screens/alerts_detection_rules';
 import {
@@ -18,6 +19,7 @@ import {
   SAVED_QUERY_NAME_DETAILS,
   DEFINE_RULE_PANEL_PROGRESS,
   CUSTOM_QUERY_DETAILS,
+  FILTERS_DETAILS,
 } from '../../screens/rule_details';
 
 import { goToRuleDetails, editFirstRule } from '../../tasks/alerts_detection_rules';
@@ -28,7 +30,7 @@ import {
   createAndEnableRule,
   fillAboutRuleAndContinue,
   fillScheduleRuleAndContinue,
-  loadSavedQuery,
+  selectAndLoadSavedQuery,
   getCustomQueryInput,
   checkLoadQueryDynamically,
   uncheckLoadQueryDynamically,
@@ -42,6 +44,7 @@ import { RULE_CREATION, SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigat
 
 const savedQueryName = 'custom saved query';
 const savedQueryQuery = 'process.name: test';
+const savedQueryFilterKey = 'testAgent.value';
 
 describe('Custom query rules', () => {
   before(() => {
@@ -64,10 +67,10 @@ describe('Custom query rules', () => {
     });
 
     it('Creates saved query rule', function () {
-      createSavedQuery(savedQueryName, savedQueryQuery);
+      createSavedQuery(savedQueryName, savedQueryQuery, savedQueryFilterKey);
       visit(RULE_CREATION);
 
-      loadSavedQuery(savedQueryName, savedQueryQuery);
+      selectAndLoadSavedQuery(savedQueryName, savedQueryQuery);
 
       // edit loaded saved query
       getCustomQueryInput()
@@ -77,6 +80,7 @@ describe('Custom query rules', () => {
       // when clicking load query dynamically checkbox, saved query should be shown in query input and input should be disabled
       checkLoadQueryDynamically();
       getCustomQueryInput().should('have.value', savedQueryQuery).should('be.disabled');
+      cy.get(QUERY_BAR).should('contain', savedQueryFilterKey);
 
       cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
       cy.get(DEFINE_CONTINUE_BUTTON).should('not.exist');
@@ -99,6 +103,7 @@ describe('Custom query rules', () => {
 
       getDetails(SAVED_QUERY_NAME_DETAILS).should('contain', savedQueryName);
       getDetails(CUSTOM_QUERY_DETAILS).should('contain', savedQueryQuery);
+      getDetails(FILTERS_DETAILS).should('contain', savedQueryFilterKey);
     });
 
     context('Non existent saved query', () => {
@@ -129,7 +134,7 @@ describe('Custom query rules', () => {
 
         editFirstRule();
 
-        loadSavedQuery(savedQueryName, savedQueryQuery);
+        selectAndLoadSavedQuery(savedQueryName, savedQueryQuery);
         checkLoadQueryDynamically();
 
         cy.intercept('PUT', '/api/detection_engine/rules').as('editedRule');

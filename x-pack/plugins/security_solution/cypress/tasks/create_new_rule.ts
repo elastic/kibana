@@ -39,7 +39,6 @@ import {
   EQL_QUERY_VALIDATION_SPINNER,
   EQL_TYPE,
   FALSE_POSITIVES_INPUT,
-  getSavedQueryByName,
   IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK,
   INDICATOR_MATCH_TYPE,
   INPUT,
@@ -58,6 +57,7 @@ import {
   MITRE_ATTACK_TACTIC_DROPDOWN,
   MITRE_ATTACK_TECHNIQUE_DROPDOWN,
   MITRE_TACTIC,
+  QUERY_BAR,
   QUERY_PREVIEW_BUTTON,
   REFERENCE_URLS_INPUT,
   REFRESH_BUTTON,
@@ -72,6 +72,7 @@ import {
   RULES_CREATION_PREVIEW,
   RUNS_EVERY_INTERVAL,
   RUNS_EVERY_TIME_TYPE,
+  savedQueryByName,
   SCHEDULE_CONTINUE_BUTTON,
   SCHEDULE_EDIT_TAB,
   SEVERITY_DROPDOWN,
@@ -598,13 +599,11 @@ export const waitForTheRuleToBeExecuted = () => {
   });
 };
 
-export const loadSavedQuery = (savedQueryName: string, queryValue: string) => {
-  cy.get('[data-test-subj="detectionEngineStepDefineRuleQueryBar"]')
-    .find(SHOW_QUERY_BAR_BUTTON)
-    .click();
+export const selectAndLoadSavedQuery = (queryName: string, queryValue: string) => {
+  cy.get(QUERY_BAR).find(SHOW_QUERY_BAR_BUTTON).click();
 
   cy.get(LOAD_SAVED_QUERIES_LIST_BUTTON).click();
-  cy.get(getSavedQueryByName(savedQueryName)).click();
+  cy.get(savedQueryByName(queryName)).click();
   cy.get(APPLY_SELECTED_SAVED_QUERY_BUTTON).click();
 
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', queryValue);

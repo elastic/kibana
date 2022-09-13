@@ -24,6 +24,8 @@ export const CUSTOM_QUERY_DETAILS = 'Custom query';
 
 export const SAVED_QUERY_NAME_DETAILS = 'Saved query name';
 
+export const FILTERS_DETAILS = 'Filters';
+
 export const DATA_VIEW_DETAILS = 'Data View';
 
 export const DEFINITION_DETAILS =

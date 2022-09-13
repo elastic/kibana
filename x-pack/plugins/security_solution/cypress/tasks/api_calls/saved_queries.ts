@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export const createSavedQuery = (title: string, query: string) =>
+export const createSavedQuery = (
+  title: string,
+  query: string,
+  filterKey: string = 'agent.hostname'
+) =>
   cy.request({
     method: 'POST',
     url: '/api/saved_query/_create',
@@ -13,7 +17,19 @@ export const createSavedQuery = (title: string, query: string) =>
       title,
       description: '',
       query: { query, language: 'kuery' },
-      filters: [],
+      filters: [
+        {
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'phrase',
+            key: filterKey,
+            params: { query: 'localhost' },
+          },
+          query: { match_phrase: { [filterKey]: 'localhost' } },
+        },
+      ],
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
   });

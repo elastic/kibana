@@ -244,10 +244,12 @@ export const LOAD_QUERY_DYNAMICALLY_CHECKBOX =
 
 export const SHOW_QUERY_BAR_BUTTON = '[data-test-subj="showQueryBarMenu"]';
 
+export const QUERY_BAR = '[data-test-subj="detectionEngineStepDefineRuleQueryBar"]';
+
 export const LOAD_SAVED_QUERIES_LIST_BUTTON =
   '[data-test-subj="saved-query-management-load-button"]';
 
-export const getSavedQueryByName = (savedQueryName: string) =>
+export const savedQueryByName = (savedQueryName: string) =>
   `[data-test-subj="load-saved-query-${savedQueryName}-button"]`;
 
 export const APPLY_SELECTED_SAVED_QUERY_BUTTON =
