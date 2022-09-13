@@ -40,18 +40,7 @@ describe('delete analytics collection lib function', () => {
   });
 
   describe('deleting analytics collections', () => {
-    it('should delete an analytics collection and its events indices', async () => {
-      const indices = [
-        {
-          name: 'elastic_analytics-events-my-collection-12.12.12',
-        },
-        {
-          name: 'elastic_analytics-events-my-collection-13.12.12',
-        },
-      ];
-      (fetchIndices as jest.Mock).mockImplementationOnce(() => {
-        return Promise.resolve(indices);
-      });
+    it('should delete an analytics collection', async () => {
       (fetchAnalyticsCollectionByName as jest.Mock).mockImplementationOnce(() => {
         return Promise.resolve({
           event_retention_day_length: 180,
@@ -67,11 +56,6 @@ describe('delete analytics collection lib function', () => {
       expect(mockClient.asCurrentUser.delete).toHaveBeenCalledWith({
         id: 'example-id',
         index: ANALYTICS_COLLECTIONS_INDEX,
-      });
-
-      expect(mockClient.asCurrentUser.indices.delete).toHaveBeenCalledWith({
-        ignore_unavailable: true,
-        index: indices.map((index) => index.name),
       });
     });
 

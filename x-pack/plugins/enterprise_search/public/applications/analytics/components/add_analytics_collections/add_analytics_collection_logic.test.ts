@@ -110,7 +110,7 @@ describe('addAnalyticsCollectionLogic', () => {
         expect(flashSuccessToast).toHaveBeenCalled();
         jest.advanceTimersByTime(1000);
         await nextTick();
-        expect(navigateToUrl).toHaveBeenCalledWith('/collections/test');
+        expect(navigateToUrl).toHaveBeenCalledWith('/collections/test/events');
         jest.useRealTimers();
       });
     });
