@@ -83,6 +83,10 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   private allDataViews: DataView[] = [];
 
+  /** Services that are used in the Dashboard container code */
+  private analyticsService;
+  private theme$;
+
   /**
    * Gets all the dataviews that are actively being used in the dashboard
    * @returns An array of dataviews
@@ -136,6 +140,13 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       parent
     );
 
+    ({
+      analytics: this.analyticsService,
+      settings: {
+        theme: { theme$: this.theme$ },
+      },
+    } = pluginServices.getServices());
+
     if (
       controlGroup &&
       !isErrorEmbeddable(controlGroup) &&
@@ -170,10 +181,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   private onDataLoaded(data: DashboardLoadedInfo) {
-    const { analytics } = pluginServices.getServices();
-
-    if (analytics) {
-      reportPerformanceMetricEvent(analytics, {
+    if (this.analyticsService) {
+      reportPerformanceMetricEvent(this.analyticsService, {
         eventName: DASHBOARD_LOADED_EVENT,
         duration: data.timeToDone,
         key1: 'time_to_data',
@@ -309,15 +318,9 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     }
     this.domNode = dom;
 
-    const {
-      settings: {
-        theme: { theme$ },
-      },
-    } = pluginServices.getServices();
-
     ReactDOM.render(
       <I18nProvider>
-        <KibanaThemeProvider theme$={theme$}>
+        <KibanaThemeProvider theme$={this.theme$}>
           <DashboardViewport
             container={this}
             controlGroup={this.controlGroup}
