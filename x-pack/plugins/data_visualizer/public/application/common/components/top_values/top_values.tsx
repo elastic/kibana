@@ -10,9 +10,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiProgress,
-  EuiSpacer,
   EuiText,
   EuiButtonIcon,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -20,6 +20,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/public';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { useDataVisualizerKibana } from '../../../kibana_context';
 import { roundToDecimalPlace, kibanaFieldFormat } from '../utils';
 import { ExpandedRowFieldHeader } from '../stats_table/components/expanded_row_field_header';
 import { FieldVisStats } from '../../../../../common/types';
@@ -43,17 +45,73 @@ function getPercentLabel(docCount: number, topValuesSampleSize: number): string 
 }
 
 export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed, onAddFilter }) => {
+  const {
+    services: { data },
+  } = useDataVisualizerKibana();
+
+  const { fieldFormats } = data;
+
   if (stats === undefined || !stats.topValues) return null;
   const {
     topValues,
     topValuesSampleSize,
-    topValuesSamplerShardSize,
     count,
     isTopValuesSampled,
     fieldName,
+    sampleCount,
+    topValuesSamplerShardSize,
   } = stats;
+  const totalDocuments = stats.totalDocuments;
 
   const progressBarMax = isTopValuesSampled === true ? topValuesSampleSize : count;
+
+  const countsElement =
+    totalDocuments !== undefined ? (
+      <EuiText color="subdued" size="xs">
+        {isTopValuesSampled ? (
+          <FormattedMessage
+            id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleRecordsLabel"
+            defaultMessage="Calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
+            values={{
+              sampledDocuments: sampleCount,
+              sampledDocumentsFormatted: (
+                <strong>
+                  {fieldFormats
+                    .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                    .convert(sampleCount)}
+                </strong>
+              ),
+            }}
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromTotalRecordsLabel"
+            defaultMessage="Calculated from {totalDocumentsFormatted} {totalDocuments, plural, one {record} other {records}}."
+            values={{
+              totalDocuments,
+              totalDocumentsFormatted: (
+                <strong>
+                  {fieldFormats
+                    .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                    .convert(totalDocuments ?? 0)}
+                </strong>
+              ),
+            }}
+          />
+        )}
+      </EuiText>
+    ) : (
+      <EuiText size="xs" textAlign={'center'}>
+        <FormattedMessage
+          id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleDescription"
+          defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents per shard"
+          values={{
+            topValuesSamplerShardSize,
+          }}
+        />
+      </EuiText>
+    );
+
   return (
     <ExpandedRowPanel
       dataTestSubj={'dataVisualizerFieldDataTopValues'}
@@ -151,15 +209,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
         {isTopValuesSampled === true && (
           <Fragment>
             <EuiSpacer size="xs" />
-            <EuiText size="xs" textAlign={'center'}>
-              <FormattedMessage
-                id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleDescription"
-                defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents per shard"
-                values={{
-                  topValuesSamplerShardSize,
-                }}
-              />
-            </EuiText>
+            {countsElement}
           </Fragment>
         )}
       </div>

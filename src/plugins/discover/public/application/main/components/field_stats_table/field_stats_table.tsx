@@ -21,7 +21,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
 import type { GetStateReturn } from '../../services/discover_state';
-import { AvailableFields$, DataRefetch$ } from '../../hooks/use_saved_search';
+import { AvailableFields$, DataRefetch$, DataTotalHits$ } from '../../hooks/use_saved_search';
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   dataView: DataView;
@@ -36,6 +36,7 @@ export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   sessionId?: string;
   fieldsToFetch?: string[];
+  totalDocuments?: number;
 }
 export interface DataVisualizerGridEmbeddableOutput extends EmbeddableOutput {
   showDistributions?: boolean;
@@ -87,6 +88,7 @@ export interface FieldStatisticsTableProps {
   savedSearchRefetch$?: DataRefetch$;
   availableFields$?: AvailableFields$;
   searchSessionId?: string;
+  savedSearchDataTotalHits$: DataTotalHits$;
 }
 
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
@@ -102,6 +104,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     trackUiMetric,
     savedSearchRefetch$,
     searchSessionId,
+    savedSearchDataTotalHits$,
   } = props;
   const services = useDiscoverServices();
   const [embeddable, setEmbeddable] = useState<
@@ -155,6 +158,9 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         onAddFilter,
         sessionId: searchSessionId,
         fieldsToFetch: availableFields$?.getValue().fields,
+        totalDocuments: savedSearchDataTotalHits$
+          ? savedSearchDataTotalHits$.getValue()?.result
+          : undefined,
       });
       embeddable.reload();
     }
@@ -168,6 +174,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     onAddFilter,
     searchSessionId,
     availableFields$,
+    savedSearchDataTotalHits$,
   ]);
 
   useEffect(() => {

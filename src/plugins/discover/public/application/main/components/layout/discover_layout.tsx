@@ -379,6 +379,7 @@ export function DiscoverLayout({
                       onAddFilter={!isPlainRecord ? (onAddFilter as DocViewFilterFn) : undefined}
                       trackUiMetric={trackUiMetric}
                       savedSearchRefetch$={savedSearchRefetch$}
+                      savedSearchDataTotalHits$={totalHits$}
                     />
                   )}
                 </EuiFlexGroup>
