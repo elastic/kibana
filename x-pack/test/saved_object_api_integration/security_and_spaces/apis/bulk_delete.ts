@@ -78,7 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
     };
   };
 
-  describe('_bulk__delete', () => {
+  describe('_bulk_delete', () => {
     getTestScenarios().securityAndSpaces.forEach(({ spaceId, users }) => {
       const suffix = ` within the ${spaceId} space`;
       const { unauthorized, authorized, superuser } = createTests(spaceId);
@@ -87,21 +87,19 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       [
-        users.noAccess, // expect fail
-        users.legacyAll, // expect success
-        users.dualRead, // expect fail
-        users.readGlobally, // expect fail
-        users.readAtSpace, // expect fail
-        users.allAtOtherSpace, // expect fail if not within other_space
+        users.noAccess,
+        users.legacyAll,
+        users.dualRead,
+        users.readGlobally,
+        users.readAtSpace,
+        users.allAtOtherSpace,
       ].forEach((user) => {
-        _addTests(user, unauthorized); // expect fail
+        _addTests(user, unauthorized);
       });
-      // allAtSpace users only have access to a single space. If any multinamespace objects exist that are shared to some space they don't have access to, (or have legacy alias URLs in a space they don't have access to), I'd expect the request to get rejected.
       [users.dualAll, users.allGlobally, users.allAtSpace].forEach((user) => {
-        // expect fail for allAtSpace if not within that space
         _addTests(user, authorized);
       });
-      _addTests(users.superuser, superuser); // expect success
+      _addTests(users.superuser, superuser);
     });
   });
 }
