@@ -13,6 +13,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 import { saveSavedSearch } from './save_saved_searches';
 import type { SavedSearch } from './types';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
 describe('saveSavedSearch', () => {
   let savedObjectsClient: SavedObjectsStart['client'];
@@ -51,7 +52,8 @@ describe('saveSavedSearch', () => {
           onTitleDuplicate,
           copyOnSave: true,
         },
-        savedObjectsClient
+        savedObjectsClient,
+        undefined
       );
 
       expect(onTitleDuplicate).toHaveBeenCalled();
@@ -69,7 +71,8 @@ describe('saveSavedSearch', () => {
           onTitleDuplicate,
           copyOnSave: false,
         },
-        savedObjectsClient
+        savedObjectsClient,
+        undefined
       );
 
       expect(onTitleDuplicate).not.toHaveBeenCalled();
@@ -79,7 +82,7 @@ describe('saveSavedSearch', () => {
   test('should call savedObjectsClient.create for saving new search', async () => {
     delete savedSearch.id;
 
-    await saveSavedSearch(savedSearch, {}, savedObjectsClient);
+    await saveSavedSearch(savedSearch, {}, savedObjectsClient, undefined);
 
     expect(savedObjectsClient.create).toHaveBeenCalledWith(
       'search',
@@ -99,7 +102,7 @@ describe('saveSavedSearch', () => {
   });
 
   test('should call savedObjectsClient.update for saving existing search', async () => {
-    await saveSavedSearch(savedSearch, {}, savedObjectsClient);
+    await saveSavedSearch(savedSearch, {}, savedObjectsClient, undefined);
 
     expect(savedObjectsClient.update).toHaveBeenCalledWith(
       'search',
@@ -116,6 +119,41 @@ describe('saveSavedSearch', () => {
         timeRestore: false,
       },
       { references: [] }
+    );
+  });
+
+  test('should call savedObjectsTagging.ui.updateTagsReferences', async () => {
+    const savedObjectsTagging = {
+      ui: {
+        updateTagsReferences: jest.fn((_, tags) => tags),
+      },
+    } as unknown as SavedObjectsTaggingApi;
+    await saveSavedSearch(
+      { ...savedSearch, tags: ['tag-1', 'tag-2'] },
+      {},
+      savedObjectsClient,
+      savedObjectsTagging
+    );
+
+    expect(savedObjectsTagging.ui.updateTagsReferences).toHaveBeenCalledWith(
+      [],
+      ['tag-1', 'tag-2']
+    );
+    expect(savedObjectsClient.update).toHaveBeenCalledWith(
+      'search',
+      'id',
+      {
+        columns: [],
+        description: '',
+        grid: {},
+        isTextBasedQuery: false,
+        hideChart: false,
+        kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
+        sort: [],
+        title: 'title',
+        timeRestore: false,
+      },
+      { references: ['tag-1', 'tag-2'] }
     );
   });
 });

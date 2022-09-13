@@ -93,7 +93,7 @@ describe('test filtering endpoint hosts by agent status', () => {
       const status = ['healthy'];
       const kuery = buildStatusesKuery(status);
       const expected =
-        '(not (united.agent.last_checkin < now-300s AND not ((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded) AND not (((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*))) AND not ( ((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*) )) AND not ((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded) AND not (((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*))) AND not (((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*)))';
+        '(not (united.agent.last_checkin < now-300s AND not ((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded) AND not (((united.agent.upgrade_started_at:*) and not (united.agent.upgrade_status:completed)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*))) AND not ( ((united.agent.upgrade_started_at:*) and not (united.agent.upgrade_status:completed)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*) )) AND not ((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded) AND not (((united.agent.upgrade_started_at:*) and not (united.agent.upgrade_status:completed)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*))) AND not (((united.agent.upgrade_started_at:*) and not (united.agent.upgrade_status:completed)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*)))';
       expect(kuery).toEqual(expected);
     });
 
@@ -101,7 +101,7 @@ describe('test filtering endpoint hosts by agent status', () => {
       const status = ['offline'];
       const kuery = buildStatusesKuery(status);
       const expected =
-        '(united.agent.last_checkin < now-300s AND not ((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded) AND not (((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*))) AND not ( ((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*) ))';
+        '(united.agent.last_checkin < now-300s AND not ((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded) AND not (((united.agent.upgrade_started_at:*) and not (united.agent.upgrade_status:completed)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*))) AND not ( ((united.agent.upgrade_started_at:*) and not (united.agent.upgrade_status:completed)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*) ))';
       expect(kuery).toEqual(expected);
     });
 
@@ -109,7 +109,7 @@ describe('test filtering endpoint hosts by agent status', () => {
       const status = ['unhealthy'];
       const kuery = buildStatusesKuery(status);
       const expected =
-        '((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded) AND not (((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*)))';
+        '((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded) AND not (((united.agent.upgrade_started_at:*) and not (united.agent.upgrade_status:completed)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*)))';
       expect(kuery).toEqual(expected);
     });
 
@@ -117,7 +117,7 @@ describe('test filtering endpoint hosts by agent status', () => {
       const status = ['updating'];
       const kuery = buildStatusesKuery(status);
       const expected =
-        '(((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*))';
+        '(((united.agent.upgrade_started_at:*) and not (united.agent.upgrade_status:completed)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*))';
       expect(kuery).toEqual(expected);
     });
 
@@ -132,7 +132,7 @@ describe('test filtering endpoint hosts by agent status', () => {
       const statuses = ['offline', 'unhealthy'];
       const kuery = buildStatusesKuery(statuses);
       const expected =
-        '(united.agent.last_checkin < now-300s AND not ((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded) AND not (((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*))) AND not ( ((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*) ) OR (united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded) AND not (((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*)))';
+        '(united.agent.last_checkin < now-300s AND not ((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded) AND not (((united.agent.upgrade_started_at:*) and not (united.agent.upgrade_status:completed)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*))) AND not ( ((united.agent.upgrade_started_at:*) and not (united.agent.upgrade_status:completed)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*) ) OR (united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded) AND not (((united.agent.upgrade_started_at:*) and not (united.agent.upgrade_status:completed)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*)))';
       expect(kuery).toEqual(expected);
     });
   });

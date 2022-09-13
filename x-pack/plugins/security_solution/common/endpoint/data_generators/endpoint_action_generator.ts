@@ -19,7 +19,8 @@ import type {
   LogsEndpointActionResponse,
   ProcessesEntry,
 } from '../types';
-import { ActivityLogItemTypes, RESPONSE_ACTION_COMMANDS } from '../types';
+import { ActivityLogItemTypes } from '../types';
+import { RESPONSE_ACTION_COMMANDS } from '../service/response_actions/constants';
 
 export class EndpointActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action request (isolate or unisolate) */
@@ -111,12 +112,14 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       agents: ['agent-a'],
       command: 'isolate',
       completedAt: '2022-04-30T16:08:47.449Z',
+      hosts: { 'agent-a': { name: 'Host-agent-a' } },
       id: '123',
       isCompleted: true,
       isExpired: false,
       wasSuccessful: true,
       errors: undefined,
       startedAt: '2022-04-27T16:08:47.449Z',
+      status: 'successful',
       comment: 'thisisacomment',
       createdBy: 'auserid',
       parameters: undefined,

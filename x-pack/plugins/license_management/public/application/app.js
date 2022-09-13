@@ -11,7 +11,11 @@ import { LicenseDashboard, UploadLicense } from './sections';
 import { Switch, Route } from 'react-router-dom';
 import { APP_PERMISSION } from '../../common/constants';
 import { SectionLoading, useExecutionContext } from '../shared_imports';
-import { EuiPageContent, EuiPageBody, EuiEmptyPrompt } from '@elastic/eui';
+import {
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageBody,
+  EuiEmptyPrompt,
+} from '@elastic/eui';
 
 export const App = ({
   hasPermission,

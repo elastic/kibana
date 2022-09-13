@@ -88,6 +88,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
       fromPage,
       interval: swimlaneData?.interval,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [perPage, fromPage, swimlaneData]);
 
   const onCellsSelection = useCallback(
@@ -102,6 +103,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
         });
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [swimlaneData, perPage, fromPage, setSelectedCells]
   );
 

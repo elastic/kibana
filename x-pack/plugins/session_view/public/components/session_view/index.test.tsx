@@ -158,10 +158,10 @@ describe('SessionView component', () => {
           if (path === PROCESS_EVENTS_ROUTE) {
             return sessionViewProcessEventsMock;
           } else if (path === GET_TOTAL_IO_BYTES_ROUTE) {
-            return 1024;
+            return { total: 1024 };
           }
 
-          return 0;
+          return { total: 0 };
         });
 
         render();
@@ -180,10 +180,10 @@ describe('SessionView component', () => {
           if (path === PROCESS_EVENTS_ROUTE) {
             return sessionViewProcessEventsMock;
           } else if (path === GET_TOTAL_IO_BYTES_ROUTE) {
-            return 0;
+            return { total: 0 };
           }
 
-          return 0;
+          return { total: 0 };
         });
 
         render();

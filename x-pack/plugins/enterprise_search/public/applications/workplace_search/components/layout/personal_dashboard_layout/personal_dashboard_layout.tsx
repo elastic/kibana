@@ -12,9 +12,9 @@ import { useValues } from 'kea';
 
 import {
   EuiPage,
-  EuiPageSideBar,
+  EuiPageSideBar_Deprecated as EuiPageSideBar,
   EuiPageBody,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';

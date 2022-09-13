@@ -17,7 +17,8 @@ import { Router } from 'react-router-dom';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { ScopedHistory } from '@kbn/core/public';
+import type { ScopedHistory } from '@kbn/core/public';
+import { CoreScopedHistory } from '@kbn/core/public';
 
 import { FleetAppContext } from '../applications/fleet/app';
 import { IntegrationsAppContext } from '../applications/integrations/app';
@@ -61,7 +62,7 @@ export const createFleetTestRendererMock = (): TestRenderer => {
   const extensions: UIExtensionsStorage = {};
   const startServices = createStartServices(basePath);
   const history = createMemoryHistory({ initialEntries: [basePath] });
-  const mountHistory = new ScopedHistory(history, basePath);
+  const mountHistory = new CoreScopedHistory(history, basePath);
 
   ExperimentalFeaturesService.init({
     createPackagePolicyMultiPageLayout: true,
@@ -136,7 +137,10 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
   });
   const testRendererMocks: TestRenderer = {
     history: createMemoryHistory(),
-    mountHistory: new ScopedHistory(createMemoryHistory({ initialEntries: [basePath] }), basePath),
+    mountHistory: new CoreScopedHistory(
+      createMemoryHistory({ initialEntries: [basePath] }),
+      basePath
+    ),
     startServices,
     config: createConfigurationMock(),
     startInterface: createStartMock(extensions),
