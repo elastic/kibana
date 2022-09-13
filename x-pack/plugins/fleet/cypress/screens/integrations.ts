@@ -23,7 +23,12 @@ export const LATEST_VERSION = 'epmSettings.latestVersionTitle';
 export const INSTALLED_VERSION = 'epmSettings.installedVersionTitle';
 
 export const PACKAGE_VERSION = 'packageVersionText';
-export const INTEGRATIONS_SEARCHBAR_INPUT = 'epmList.searchBar';
+export const INTEGRATION_LIST = 'epmList.integrationCards';
+export const INTEGRATIONS_SEARCHBAR = {
+  INPUT: 'epmList.searchBar',
+  BADGE: 'epmList.categoryBadge',
+  REMOVE_BADGE_BUTTON: 'epmList.categoryBadge.closeBtn',
+};
 
 export const SETTINGS = {
   INSTALL_ASSETS_BTN: 'installAssetsButton',
@@ -33,3 +38,4 @@ export const SETTINGS = {
 export const INTEGRATION_POLICIES_UPGRADE_CHECKBOX = 'epmDetails.upgradePoliciesCheckbox';
 
 export const getIntegrationCard = (integration: string) => `integration-card:epr:${integration}`;
+export const getIntegrationCategories = (category: string) => `epmList.categories.${category}`;
