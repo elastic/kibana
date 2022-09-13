@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '@kbn/core/server';
 
 import { deleteMlInferencePipeline } from './delete_ml_inference_pipeline';
@@ -22,22 +23,29 @@ describe('deleteMlInferencePipeline lib function', () => {
     jest.clearAllMocks();
   });
 
+  const anyObject: any = {};
   const notFoundResponse = { meta: { statusCode: 404 } };
+  const notFoundError = new errors.ResponseError({
+    body: notFoundResponse,
+    statusCode: 404,
+    headers: {},
+    meta: anyObject,
+    warnings: [],
+  });
+  const mockGetPipeline = {
+    'my-index@ml-inference': {
+      id: 'my-index@ml-inference',
+      processors: [
+        {
+          pipeline: {
+            name: 'my-ml-pipeline',
+          },
+        },
+      ],
+    },
+  };
 
   it('should delete pipeline', async () => {
-    const mockGetPipeline = {
-      'my-index@ml-inference': {
-        id: 'my-index@ml-inference',
-        processors: [
-          {
-            pipeline: {
-              name: 'my-ml-pipeline',
-            },
-          },
-        ],
-      },
-    };
-
     mockClient.ingest.getPipeline.mockImplementation(() => Promise.resolve(mockGetPipeline));
     mockClient.ingest.putPipeline.mockImplementation(() => Promise.resolve({ acknowledged: true }));
     mockClient.ingest.deletePipeline.mockImplementation(() =>
@@ -64,7 +72,7 @@ describe('deleteMlInferencePipeline lib function', () => {
   });
 
   it('should succeed when parent pipeline is missing', async () => {
-    mockClient.ingest.getPipeline.mockImplementation(() => Promise.reject(notFoundResponse));
+    mockClient.ingest.getPipeline.mockImplementation(() => Promise.reject(notFoundError));
     mockClient.ingest.deletePipeline.mockImplementation(() =>
       Promise.resolve({ acknowledged: true })
     );
@@ -88,9 +96,8 @@ describe('deleteMlInferencePipeline lib function', () => {
   });
 
   it('should fail when pipeline is missing', async () => {
-    const mockGetPipeline = {};
     mockClient.ingest.getPipeline.mockImplementation(() => Promise.resolve(mockGetPipeline));
-    mockClient.ingest.deletePipeline.mockImplementation(() => Promise.reject(notFoundResponse));
+    mockClient.ingest.deletePipeline.mockImplementation(() => Promise.reject(notFoundError));
 
     await expect(
       deleteMlInferencePipeline(
@@ -100,7 +107,10 @@ describe('deleteMlInferencePipeline lib function', () => {
       )
     ).rejects.toThrow(Error);
 
-    expect(mockClient.ingest.putPipeline).toHaveBeenCalledTimes(0);
+    expect(mockClient.ingest.putPipeline).toHaveBeenCalledWith({
+      id: 'my-index@ml-inference',
+      processors: [],
+    });
     expect(mockClient.ingest.deletePipeline).toHaveBeenCalledWith({
       id: 'my-ml-pipeline',
     });
