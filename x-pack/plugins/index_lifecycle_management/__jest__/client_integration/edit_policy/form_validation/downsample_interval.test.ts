@@ -115,7 +115,7 @@ describe('<EditPolicy /> downsample interval validation', () => {
     // disable warm phase;
     await actions.togglePhase('warm');
     // TODO: there is a bug that disabling a phase doesn't trigger downsample validation in other phases,
-    // users can workaround it by changing the value
+    // users can work around it by changing the value
     await actions.cold.downsample.setDownsampleInterval('120', 'm');
     actions.errors.waitForValidation();
     actions.errors.expectMessages([], 'cold');
@@ -126,5 +126,5 @@ describe('<EditPolicy /> downsample interval validation', () => {
       ['Must be greater than and a multiple of the hot phase value (60m)'],
       'cold'
     );
-  }, /* increase a timeout of this test as it could fail on ci*/ 12000);
+  });
 });
