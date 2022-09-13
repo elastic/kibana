@@ -58,9 +58,9 @@ export const find = async (
      */
 
     if (queryParams.assignees) {
-      const hasPlatinumLicense = await licensingService.isAtLeastPlatinum();
+      const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
 
-      if (!hasPlatinumLicense) {
+      if (!hasPlatinumLicenseOrGreater) {
         throw Boom.forbidden(
           'In order to filter cases by assignees, you must be subscribed to an Elastic Platinum license'
         );

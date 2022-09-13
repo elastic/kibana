@@ -77,9 +77,9 @@ export const create = async (
      */
 
     if (query.assignees && query.assignees.length !== 0) {
-      const hasPlatinumLicense = await licensingService.isAtLeastPlatinum();
+      const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
 
-      if (!hasPlatinumLicense) {
+      if (!hasPlatinumLicenseOrGreater) {
         throw Boom.forbidden(
           'In order to assign users to cases, you must be subscribed to an Elastic Platinum license'
         );

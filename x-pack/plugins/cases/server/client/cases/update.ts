@@ -88,9 +88,9 @@ function throwIfTitleIsInvalid(requests: UpdateRequestWithOriginalCase[]) {
  */
 function throwIfUpdateAssigneesWithoutValidLicense(
   requests: UpdateRequestWithOriginalCase[],
-  hasPlatinumLicense: boolean
+  hasPlatinumLicenseOrGreater: boolean
 ) {
-  if (hasPlatinumLicense) {
+  if (hasPlatinumLicenseOrGreater) {
     return;
   }
 
@@ -100,7 +100,7 @@ function throwIfUpdateAssigneesWithoutValidLicense(
 
   if (requestsUpdatingAssignees.length > 0) {
     const ids = requestsUpdatingAssignees.map(({ updateReq }) => updateReq.id);
-    throw Boom.badRequest(
+    throw Boom.forbidden(
       `In order to assign users to cases, you must be subscribed to an Elastic Platinum license, ids: [${ids.join(
         ', '
       )}]`
