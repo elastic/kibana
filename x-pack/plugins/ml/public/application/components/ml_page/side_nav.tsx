@@ -234,7 +234,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             id: 'explainlogratespikes',
             pathId: ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT,
             name: i18n.translate('xpack.ml.navMenu.explainLogRateSpikesLinkText', {
-              defaultMessage: 'Explain log rate spikes',
+              defaultMessage: 'Explain Log Rate Spikes',
             }),
             disabled: disableLinks,
             testSubj: 'mlMainTab explainLogRateSpikes',
