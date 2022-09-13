@@ -13,12 +13,16 @@ import {
 } from '../../../../../common/constants';
 import { SelectField } from '../../../../shared_imports';
 
-export const THROTTLE_OPTIONS = [
-  { value: NOTIFICATION_THROTTLE_NO_ACTIONS, text: 'Perform no actions' },
+export const THROTTLE_OPTIONS_FOR_BULK_RULE_ACTIONS = [
   { value: NOTIFICATION_THROTTLE_RULE, text: 'On each rule execution' },
   { value: '1h', text: 'Hourly' },
   { value: '1d', text: 'Daily' },
   { value: '7d', text: 'Weekly' },
+];
+
+export const THROTTLE_OPTIONS = [
+  { value: NOTIFICATION_THROTTLE_NO_ACTIONS, text: 'Perform no actions' },
+  ...THROTTLE_OPTIONS_FOR_BULK_RULE_ACTIONS,
 ];
 
 export const DEFAULT_THROTTLE_OPTION = THROTTLE_OPTIONS[0];

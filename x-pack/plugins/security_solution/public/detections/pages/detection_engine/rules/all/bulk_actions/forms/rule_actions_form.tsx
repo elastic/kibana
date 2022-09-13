@@ -32,7 +32,7 @@ import { useKibana } from '../../../../../../../common/lib/kibana';
 
 import {
   ThrottleSelectField,
-  THROTTLE_OPTIONS,
+  THROTTLE_OPTIONS_FOR_BULK_RULE_ACTIONS,
 } from '../../../../../../components/rules/throttle_select_field';
 import { getAllActionMessageParams } from '../../../helpers';
 
@@ -121,7 +121,7 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
       dataTestSubj: 'bulkEditRulesRuleActionThrottle',
       hasNoInitialSelection: false,
       euiFieldProps: {
-        options: THROTTLE_OPTIONS,
+        options: THROTTLE_OPTIONS_FOR_BULK_RULE_ACTIONS,
       },
     }),
     []
