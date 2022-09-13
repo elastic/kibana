@@ -284,10 +284,10 @@ const getLegacyUrlConflictCallout = () => {
 return (
   <EuiPage>
     <EuiPageBody>
-      <EuiPageContent>
+      <EuiPageSection>
         {/* If we have a legacy URL conflict callout to display, show it at the top of the page */}
         {getLegacyUrlConflictCallout()}
-        <EuiPageContentHeader>
+        <EuiPageHeader>
 ...
 );
 ```

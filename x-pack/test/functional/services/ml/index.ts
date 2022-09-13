@@ -58,6 +58,7 @@ import { TrainedModelsTableProvider } from './trained_models_table';
 import { MachineLearningJobAnnotationsProvider } from './job_annotations_table';
 import { MlNodesPanelProvider } from './ml_nodes_list';
 import { MachineLearningCasesProvider } from './cases';
+import { AnomalyChartsProvider } from './anomaly_charts';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
@@ -65,7 +66,8 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const commonDataGrid = MachineLearningCommonDataGridProvider(context);
 
   const anomaliesTable = MachineLearningAnomaliesTableProvider(context);
-  const anomalyExplorer = MachineLearningAnomalyExplorerProvider(context);
+  const anomalyCharts = AnomalyChartsProvider(context);
+  const anomalyExplorer = MachineLearningAnomalyExplorerProvider(context, anomalyCharts);
   const api = MachineLearningAPIProvider(context);
   const commonConfig = MachineLearningCommonConfigsProvider(context);
   const customUrls = MachineLearningCustomUrlsProvider(context);
@@ -129,10 +131,11 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const trainedModelsTable = TrainedModelsTableProvider(context, commonUI);
   const mlNodesPanel = MlNodesPanelProvider(context);
 
-  const cases = MachineLearningCasesProvider(context, swimLane);
+  const cases = MachineLearningCasesProvider(context, swimLane, anomalyCharts);
 
   return {
     anomaliesTable,
+    anomalyCharts,
     anomalyExplorer,
     alerting,
     api,

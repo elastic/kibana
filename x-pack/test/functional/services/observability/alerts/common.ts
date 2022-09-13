@@ -19,11 +19,9 @@ const DATE_WITH_DATA = {
 
 const ALERTS_FLYOUT_SELECTOR = 'alertsFlyout';
 const FILTER_FOR_VALUE_BUTTON_SELECTOR = 'filterForValue';
-const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
+const ALERTS_TABLE_CONTAINER_SELECTOR = 'alertsTable';
 const VIEW_RULE_DETAILS_SELECTOR = 'viewRuleDetails';
 const VIEW_RULE_DETAILS_FLYOUT_SELECTOR = 'viewRuleDetailsFlyout';
-
-const ACTION_COLUMN_INDEX = 1;
 
 type WorkflowStatus = 'open' | 'acknowledged' | 'closed';
 
@@ -38,6 +36,7 @@ export function ObservabilityAlertsCommonProvider({
   const retry = getService('retry');
   const toasts = getService('toasts');
   const kibanaServer = getService('kibanaServer');
+  const retryOnStale = getService('retryOnStale');
 
   const navigateToTimeWithData = async () => {
     return await pageObjects.common.navigateToUrlWithBrowserHistory(
@@ -52,6 +51,15 @@ export function ObservabilityAlertsCommonProvider({
     return await pageObjects.common.navigateToUrlWithBrowserHistory(
       'observability',
       '/alerts/rules',
+      '',
+      { ensureCurrentUrl: false }
+    );
+  };
+
+  const navigateToAlertDetails = async (alertId: string) => {
+    return await pageObjects.common.navigateToUrlWithBrowserHistory(
+      'observability',
+      `/alerts/${alertId}`,
       '',
       { ensureCurrentUrl: false }
     );
@@ -101,14 +109,14 @@ export function ObservabilityAlertsCommonProvider({
     return await find.allByCssSelector('.euiDataGridRowCell input[type="checkbox"]:enabled');
   };
 
-  const getTableCellsInRows = async () => {
+  const getTableCellsInRows = retryOnStale.wrap(async () => {
     const columnHeaders = await getTableColumnHeaders();
     if (columnHeaders.length <= 0) {
       return [];
     }
     const cells = await getTableCells();
     return chunk(cells, columnHeaders.length);
-  };
+  });
 
   const getTableOrFail = async () => {
     return await testSubjects.existOrFail(ALERTS_TABLE_CONTAINER_SELECTOR);
@@ -119,7 +127,7 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   const getNoDataStateOrFail = async () => {
-    return await testSubjects.existOrFail('tGridEmptyState');
+    return await testSubjects.existOrFail('alertsStateTableEmptyState');
   };
 
   // Query Bar
@@ -127,37 +135,28 @@ export function ObservabilityAlertsCommonProvider({
     return await testSubjects.find('queryInput');
   };
 
-  const getQuerySubmitButton = async () => {
-    return await testSubjects.find('querySubmitButton');
-  };
-
-  const clearQueryBar = async () => {
+  const clearQueryBar = retryOnStale.wrap(async () => {
     return await (await getQueryBar()).clearValueWithKeyboard();
-  };
+  });
 
-  const typeInQueryBar = async (query: string) => {
+  const typeInQueryBar = retryOnStale.wrap(async (query: string) => {
     return await (await getQueryBar()).type(query);
-  };
+  });
 
   const submitQuery = async (query: string) => {
     await typeInQueryBar(query);
-    return await (await getQuerySubmitButton()).click();
+    await testSubjects.click('querySubmitButton');
   };
 
   // Flyout
-  const getViewAlertDetailsFlyoutButton = async () => {
+  const openAlertsFlyout = retryOnStale.wrap(async () => {
     await openActionsMenuForRow(0);
-
-    return await testSubjects.find('viewAlertDetails');
-  };
-
-  const openAlertsFlyout = async () => {
-    await (await getViewAlertDetailsFlyoutButton()).click();
+    await testSubjects.click('viewAlertDetailsFlyout');
     await retry.waitFor(
       'flyout open',
       async () => await testSubjects.exists(ALERTS_FLYOUT_SELECTOR, { timeout: 2500 })
     );
-  };
+  });
 
   const getAlertsFlyout = async () => {
     return await testSubjects.find(ALERTS_FLYOUT_SELECTOR);
@@ -183,15 +182,19 @@ export function ObservabilityAlertsCommonProvider({
     return await testSubjects.existOrFail('viewRuleDetailsFlyout');
   };
 
-  const getAlertsFlyoutDescriptionListTitles = async (): Promise<WebElementWrapper[]> => {
-    const flyout = await getAlertsFlyout();
-    return await testSubjects.findAllDescendant('alertsFlyoutDescriptionListTitle', flyout);
-  };
+  const getAlertsFlyoutDescriptionListTitles = retryOnStale.wrap(
+    async (): Promise<WebElementWrapper[]> => {
+      const flyout = await getAlertsFlyout();
+      return await testSubjects.findAllDescendant('alertsFlyoutDescriptionListTitle', flyout);
+    }
+  );
 
-  const getAlertsFlyoutDescriptionListDescriptions = async (): Promise<WebElementWrapper[]> => {
-    const flyout = await getAlertsFlyout();
-    return await testSubjects.findAllDescendant('alertsFlyoutDescriptionListDescription', flyout);
-  };
+  const getAlertsFlyoutDescriptionListDescriptions = retryOnStale.wrap(
+    async (): Promise<WebElementWrapper[]> => {
+      const flyout = await getAlertsFlyout();
+      return await testSubjects.findAllDescendant('alertsFlyoutDescriptionListDescription', flyout);
+    }
+  );
 
   // Cell actions
 
@@ -203,21 +206,19 @@ export function ObservabilityAlertsCommonProvider({
     return await testSubjects.find(FILTER_FOR_VALUE_BUTTON_SELECTOR);
   };
 
-  const openActionsMenuForRow = async (rowIndex: number) => {
-    const rows = await getTableCellsInRows();
-    const actionsOverflowButton = await testSubjects.findDescendant(
-      'alertsTableRowActionMore',
-      rows[rowIndex][ACTION_COLUMN_INDEX]
-    );
+  const openActionsMenuForRow = retryOnStale.wrap(async (rowIndex: number) => {
+    const actionsOverflowButton = await getActionsButtonByIndex(rowIndex);
     await actionsOverflowButton.click();
-  };
+  });
 
   const viewRuleDetailsButtonClick = async () => {
-    return await (await testSubjects.find(VIEW_RULE_DETAILS_SELECTOR)).click();
+    await testSubjects.click(VIEW_RULE_DETAILS_SELECTOR);
   };
+
   const viewRuleDetailsLinkClick = async () => {
-    return await (await testSubjects.find(VIEW_RULE_DETAILS_FLYOUT_SELECTOR)).click();
+    await testSubjects.click(VIEW_RULE_DETAILS_FLYOUT_SELECTOR);
   };
+
   // Workflow status
   const setWorkflowStatusForRow = async (rowIndex: number, workflowStatus: WorkflowStatus) => {
     await openActionsMenuForRow(rowIndex);
@@ -233,17 +234,14 @@ export function ObservabilityAlertsCommonProvider({
     await toasts.dismissAllToasts();
   };
 
-  const setWorkflowStatusFilter = async (workflowStatus: WorkflowStatus) => {
-    const buttonGroupButton = await testSubjects.find(
-      `workflowStatusFilterButton-${workflowStatus}`
-    );
-    await buttonGroupButton.click();
-  };
+  const setWorkflowStatusFilter = retryOnStale.wrap(async (workflowStatus: WorkflowStatus) => {
+    await testSubjects.click(`workflowStatusFilterButton-${workflowStatus}`);
+  });
 
-  const getWorkflowStatusFilterValue = async () => {
+  const getWorkflowStatusFilterValue = retryOnStale.wrap(async () => {
     const selectedWorkflowStatusButton = await find.byClassName('euiButtonGroupButton-isSelected');
     return await selectedWorkflowStatusButton.getVisibleText();
-  };
+  });
 
   // Alert status
   const setAlertStatusFilter = async (alertStatus?: AlertStatus) => {
@@ -254,8 +252,8 @@ export function ObservabilityAlertsCommonProvider({
     if (alertStatus === ALERT_STATUS_RECOVERED) {
       buttonSubject = 'alert-status-filter-recovered-button';
     }
-    const buttonGroupButton = await testSubjects.find(buttonSubject);
-    await buttonGroupButton.click();
+
+    await testSubjects.click(buttonSubject);
   };
 
   const alertDataIsBeingLoaded = async () => {
@@ -274,14 +272,12 @@ export function ObservabilityAlertsCommonProvider({
     const isAbsoluteRange = await testSubjects.exists('superDatePickerstartDatePopoverButton');
 
     if (isAbsoluteRange) {
-      const startButton = await testSubjects.find('superDatePickerstartDatePopoverButton');
-      const endButton = await testSubjects.find('superDatePickerendDatePopoverButton');
-      return `${await startButton.getVisibleText()} - ${await endButton.getVisibleText()}`;
+      const startText = await testSubjects.getVisibleText('superDatePickerstartDatePopoverButton');
+      const endText = await testSubjects.getVisibleText('superDatePickerendDatePopoverButton');
+      return `${startText} - ${endText}`;
     }
 
-    const datePickerButton = await testSubjects.find('superDatePickerShowDatesButton');
-    const buttonText = await datePickerButton.getVisibleText();
-    return buttonText;
+    return await testSubjects.getVisibleText('superDatePickerShowDatesButton');
   };
 
   const getActionsButtonByIndex = async (index: number) => {
@@ -291,14 +287,14 @@ export function ObservabilityAlertsCommonProvider({
     return actionsOverflowButtons[index] || null;
   };
 
-  const getRuleStatValue = async (testSubj: string) => {
+  const getRuleStatValue = retryOnStale.wrap(async (testSubj: string) => {
     const stat = await testSubjects.find(testSubj);
     const title = await stat.findByCssSelector('.euiStat__title');
     const count = await title.getVisibleText();
     const value = Number.parseInt(count, 10);
     expect(Number.isNaN(value)).to.be(false);
     return value;
-  };
+  });
 
   return {
     getQueryBar,
@@ -341,5 +337,6 @@ export function ObservabilityAlertsCommonProvider({
     getRuleStatValue,
     navigateToRulesPage,
     navigateToRuleDetailsByRuleId,
+    navigateToAlertDetails,
   };
 }

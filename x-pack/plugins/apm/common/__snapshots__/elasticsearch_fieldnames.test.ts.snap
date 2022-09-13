@@ -83,6 +83,8 @@ exports[`Error HTTP_REQUEST_METHOD 1`] = `undefined`;
 
 exports[`Error HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
 
+exports[`Error INDEX 1`] = `undefined`;
+
 exports[`Error KUBERNETES 1`] = `undefined`;
 
 exports[`Error LABEL_NAME 1`] = `undefined`;
@@ -205,6 +207,8 @@ exports[`Error SPAN_SUBTYPE 1`] = `undefined`;
 
 exports[`Error SPAN_TYPE 1`] = `undefined`;
 
+exports[`Error TIER 1`] = `undefined`;
+
 exports[`Error TRACE_ID 1`] = `"trace id"`;
 
 exports[`Error TRANSACTION_DURATION 1`] = `undefined`;
@@ -317,6 +321,8 @@ exports[`Span HOST_OS_PLATFORM 1`] = `undefined`;
 exports[`Span HTTP_REQUEST_METHOD 1`] = `undefined`;
 
 exports[`Span HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
+
+exports[`Span INDEX 1`] = `undefined`;
 
 exports[`Span KUBERNETES 1`] = `undefined`;
 
@@ -436,6 +442,8 @@ exports[`Span SPAN_SUBTYPE 1`] = `"my subtype"`;
 
 exports[`Span SPAN_TYPE 1`] = `"span type"`;
 
+exports[`Span TIER 1`] = `undefined`;
+
 exports[`Span TRACE_ID 1`] = `"trace id"`;
 
 exports[`Span TRANSACTION_DURATION 1`] = `undefined`;
@@ -552,6 +560,8 @@ exports[`Transaction HOST_OS_PLATFORM 1`] = `undefined`;
 exports[`Transaction HTTP_REQUEST_METHOD 1`] = `"GET"`;
 
 exports[`Transaction HTTP_RESPONSE_STATUS_CODE 1`] = `200`;
+
+exports[`Transaction INDEX 1`] = `undefined`;
 
 exports[`Transaction KUBERNETES 1`] = `
 Object {
@@ -680,6 +690,8 @@ exports[`Transaction SPAN_SELF_TIME_SUM 1`] = `undefined`;
 exports[`Transaction SPAN_SUBTYPE 1`] = `undefined`;
 
 exports[`Transaction SPAN_TYPE 1`] = `undefined`;
+
+exports[`Transaction TIER 1`] = `undefined`;
 
 exports[`Transaction TRACE_ID 1`] = `"trace id"`;
 

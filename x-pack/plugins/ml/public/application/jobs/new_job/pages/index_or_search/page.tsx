@@ -6,7 +6,7 @@
  */
 
 import React, { FC } from 'react';
-import { EuiPageBody, EuiPageContent } from '@elastic/eui';
+import { EuiPageBody, EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinderUi } from '@kbn/saved-objects-plugin/public';

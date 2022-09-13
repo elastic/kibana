@@ -180,6 +180,13 @@ export const BULK_ACTION_APPLY_TIMELINE_TEMPLATE = i18n.translate(
   }
 );
 
+export const BULK_ACTION_ADD_RULE_ACTIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.addRuleActionsTitle',
+  {
+    defaultMessage: 'Add rule actions',
+  }
+);
+
 export const BULK_ACTION_MENU_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.contextMenuTitle',
   {

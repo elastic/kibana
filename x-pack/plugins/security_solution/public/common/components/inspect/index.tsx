@@ -8,6 +8,7 @@
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import React from 'react';
 
+import { InputsModelId } from '../../store/inputs/constants';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 
 import { ModalInspectQuery } from './modal';
@@ -32,7 +33,7 @@ export const InspectButtonContainer: React.FC<InspectButtonContainerProps> = ({
 
 interface InspectButtonProps {
   compact?: boolean;
-  inputId?: 'global' | 'timeline';
+  inputId?: InputsModelId.global | InputsModelId.timeline;
   inspectIndex?: number;
   isDisabled?: boolean;
   multiple?: boolean;
@@ -44,7 +45,7 @@ interface InspectButtonProps {
 
 const InspectButtonComponent: React.FC<InspectButtonProps> = ({
   compact = false,
-  inputId = 'global',
+  inputId = InputsModelId.global,
   inspectIndex = 0,
   isDisabled,
   multiple = false, // If multiple = true we ignore the inspectIndex and pass all requests and responses to the inspect modal
@@ -74,7 +75,7 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
 
   return (
     <>
-      {inputId === 'timeline' && !compact && showInspectButton && (
+      {inputId === InputsModelId.timeline && !compact && showInspectButton && (
         <EuiButtonEmpty
           className={BUTTON_CLASS}
           aria-label={i18n.INSPECT}
@@ -89,7 +90,7 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
           {i18n.INSPECT}
         </EuiButtonEmpty>
       )}
-      {(inputId === 'global' || compact) && showInspectButton && (
+      {(inputId === InputsModelId.global || compact) && showInspectButton && (
         <EuiButtonIcon
           className={BUTTON_CLASS}
           aria-label={i18n.INSPECT}
