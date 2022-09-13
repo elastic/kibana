@@ -178,6 +178,24 @@ export default function ({ getService }: FtrProviderContext) {
         .then((response) => response.body);
     }
 
+    function bulkEnable(taskIds: string[]) {
+      return supertest
+        .post('/api/sample_tasks/bulk_enable')
+        .set('kbn-xsrf', 'xxx')
+        .send({ taskIds })
+        .expect(200)
+        .then((response) => response.body);
+    }
+
+    function bulkDisable(taskIds: string[]) {
+      return supertest
+        .post('/api/sample_tasks/bulk_disable')
+        .set('kbn-xsrf', 'xxx')
+        .send({ taskIds })
+        .expect(200)
+        .then((response) => response.body);
+    }
+
     function bulkUpdateSchedules(taskIds: string[], schedule: { interval: string }) {
       return supertest
         .post('/api/sample_tasks/bulk_update_schedules')
@@ -621,6 +639,43 @@ export default function ({ getService }: FtrProviderContext) {
       await provideParamsToTasksWaitingForParams(longRunningTask.id);
 
       expect(await successfulRunSoonResult).to.eql({ id: longRunningTask.id });
+    });
+
+    it('should disable and reenable task and run it', async () => {
+      const historyItem = random(1, 100);
+      const scheduledTask = await scheduleTask({
+        taskType: 'sampleTask',
+        schedule: { interval: '30m' },
+        params: { historyItem },
+      });
+
+      await retry.try(async () => {
+        expect((await historyDocs()).length).to.eql(1);
+        const tasks = (await currentTasks()).docs;
+
+        expect(getTaskById(tasks, scheduledTask.id).enabled).to.eql(true);
+      });
+
+      // disable the task
+      await bulkDisable([scheduledTask.id]);
+
+      await retry.try(async () => {
+        const tasks = (await currentTasks()).docs;
+
+        expect(getTaskById(tasks, scheduledTask.id).enabled).to.eql(false);
+      });
+
+      // re-enable the task
+      await bulkEnable([scheduledTask.id]);
+
+      await retry.try(async () => {
+        const tasks = (await currentTasks()).docs;
+
+        expect(getTaskById(tasks, scheduledTask.id).enabled).to.eql(true);
+
+        // should get a new document even tho original schedule interval was 30m
+        expect((await historyDocs()).length).to.eql(2);
+      });
     });
 
     function expectReschedule(

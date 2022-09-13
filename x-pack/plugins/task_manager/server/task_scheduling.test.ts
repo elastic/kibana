@@ -350,7 +350,7 @@ describe('TaskScheduling', () => {
       mockTaskStore.fetch.mockResolvedValue({ docs: [successfulTask, failedTask] });
 
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
-      const result = await taskScheduling.bulkDisable([successfulTask.id, failedTask.id], false);
+      const result = await taskScheduling.bulkDisable([successfulTask.id, failedTask.id]);
 
       expect(result).toEqual({
         tasks: [successfulTask],
