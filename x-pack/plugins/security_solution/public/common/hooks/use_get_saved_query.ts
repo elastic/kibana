@@ -8,8 +8,10 @@
 import { useEffect, useState } from 'react';
 
 import { useSavedQueryServices } from '../utils/saved_query_services';
-import { useAppToasts } from './use_app_toasts';
 import type { DefineStepRule } from '../../detections/pages/detection_engine/rules/types';
+
+import { SAVED_QUERY_LOAD_ERROR_TOAST } from './translations';
+import { useAppToasts } from './use_app_toasts';
 
 export const useGetSavedQuery = (savedQueryId: string | undefined) => {
   const savedQueryServices = useSavedQueryServices();
@@ -32,7 +34,7 @@ export const useGetSavedQuery = (savedQueryId: string | undefined) => {
           });
         })
         .catch((err) => {
-          addError(err, { title: 'Failed to load the saved query' });
+          addError(err, { title: SAVED_QUERY_LOAD_ERROR_TOAST });
         })
         .finally(() => setIsSavedQueryLoading(false));
     }
