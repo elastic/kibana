@@ -65,7 +65,9 @@ export const DiscoverTopNav = ({
     () =>
       dataView.isTimeBased() &&
       dataView.type !== DataViewType.ROLLUP &&
-      (!query.query || (isOfAggregateQueryType(query) && getAggregateQueryMode(query) === 'sql')),
+      (!query ||
+        !isOfAggregateQueryType(query) ||
+        (isOfAggregateQueryType(query) && getAggregateQueryMode(query) === 'sql')),
     [dataView, query]
   );
   const services = useDiscoverServices();

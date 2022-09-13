@@ -18,9 +18,8 @@ import type {
 import { zipObject } from 'lodash';
 import { Observable, defer, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
-import type { NowProviderPublicContract } from '../../../public';
-import { UiSettingsCommon } from '../..';
-import { ESQL_SEARCH_STRATEGY, ISearchGeneric, KibanaContext } from '..';
+import { ESQL_SEARCH_STRATEGY, IKibanaSearchRequest, ISearchGeneric, KibanaContext } from '..';
+import { IKibanaSearchResponse } from '../types';
 
 type Input = KibanaContext | null;
 type Output = Observable<Datatable>;
@@ -31,20 +30,18 @@ interface Arguments {
 }
 
 export type EsqlExpressionFunctionDefinition = ExpressionFunctionDefinition<
-  'essql',
+  'esql',
   Input,
   Arguments,
   Output
 >;
 
 interface EsqlFnArguments {
-  getStartDependencies(getKibanaRequest: () => KibanaRequest): Promise<EssqlStartDependencies>;
+  getStartDependencies(getKibanaRequest: () => KibanaRequest): Promise<EsqlStartDependencies>;
 }
 
 interface EsqlStartDependencies {
-  nowProvider?: NowProviderPublicContract;
   search: ISearchGeneric;
-  uiSettings: UiSettingsCommon;
 }
 
 function normalizeType(type: string): DatatableColumnType {
@@ -66,7 +63,20 @@ function sanitize(value: string) {
   return value.replace(/[\(\)]/g, '_');
 }
 
-export const getEsqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
+interface ESQLSearchParams {
+  time_zone?: string;
+  query: string;
+}
+
+interface ESQLSearchReponse {
+  columns?: Array<{
+    name: string;
+    type: string;
+  }>;
+  values: unknown[][];
+}
+
+export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
   const essql: EsqlExpressionFunctionDefinition = {
     name: 'esql',
     type: 'datatable',
@@ -92,11 +102,7 @@ export const getEsqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
         }),
       },
     },
-    fn(
-      input,
-      { count, parameter, query, timeField, timezone, lang },
-      { abortSignal, inspectorAdapters, getKibanaRequest }
-    ) {
+    fn(input, { query, timezone }, { abortSignal, inspectorAdapters, getKibanaRequest }) {
       return defer(() =>
         getStartDependencies(() => {
           const request = getKibanaRequest?.();
@@ -110,13 +116,16 @@ export const getEsqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
           return request;
         })
       ).pipe(
-        switchMap(({ nowProvider, search, uiSettings }) => {
-          const params: any = {
+        switchMap(({ search }) => {
+          const params: ESQLSearchParams = {
             query,
             time_zone: timezone,
           };
 
-          return search<any, any>({ params }, { abortSignal, strategy: ESQL_SEARCH_STRATEGY }).pipe(
+          return search<
+            IKibanaSearchRequest<ESQLSearchParams>,
+            IKibanaSearchResponse<ESQLSearchReponse>
+          >({ params }, { abortSignal, strategy: ESQL_SEARCH_STRATEGY }).pipe(
             catchError((error) => {
               if (!error.err) {
                 error.message = `Unexpected error from Elasticsearch: ${error.message}`;
