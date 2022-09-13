@@ -27,7 +27,7 @@ import {
   getDisplayValueFromFilter,
   getFieldDisplayValueFromFilter,
 } from '@kbn/data-plugin/public';
-import { FilterEditor } from '../filter_editor';
+import { FilterEditor } from '../filter_editor/filter_editor';
 import { FilterView } from '../filter_view';
 import { getIndexPatterns } from '../../services';
 import { FilterPanelOption } from '../../types';

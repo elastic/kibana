@@ -11,7 +11,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { UPDATE_FILTER_REFERENCES_TRIGGER, updateFilterReferencesTrigger } from './triggers';
 import { ConfigSchema } from '../config';
-import { setIndexPatterns, setTheme, setOverlays, setAutocomplete } from './services';
+import { setIndexPatterns, setTheme, setOverlays } from './services';
 import { AutocompleteService } from './autocomplete/autocomplete_service';
 import { createSearchBar } from './search_bar';
 import { createIndexPatternSelect } from './index_pattern_select';
@@ -70,7 +70,6 @@ export class UnifiedSearchPublicPlugin
     setOverlays(core.overlays);
     setIndexPatterns(dataViews);
     const autocompleteStart = this.autocomplete.start();
-    setAutocomplete(autocompleteStart);
 
     const SearchBar = createSearchBar({
       core,
@@ -78,6 +77,9 @@ export class UnifiedSearchPublicPlugin
       storage: this.storage,
       usageCollection: this.usageCollection,
       isScreenshotMode: Boolean(screenshotMode?.isScreenshotMode()),
+      unifiedSearch: {
+        autocomplete: autocompleteStart,
+      },
     });
 
     uiActions.addTriggerAction(

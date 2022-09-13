@@ -9,7 +9,6 @@
 import React, { useRef, memo, useEffect, useState, useCallback } from 'react';
 import classNames from 'classnames';
 import { EsqlLang, monaco } from '@kbn/monaco';
-import { IDataPluginServices } from '@kbn/data-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -47,6 +46,7 @@ import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
 
 import './overwrite.scss';
+import { IUnifiedSearchPluginServices } from '../../types';
 
 export interface TextBasedLanguagesEditorProps {
   query: AggregateQuery;
@@ -106,7 +106,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     Array<{ startLineNumber: number; message: string }>
   >([]);
   const [documentationSections, setDocumentationSections] = useState<DocumentationSections>();
-  const kibana = useKibana<IDataPluginServices>();
+  const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { uiSettings } = kibana.services;
 
   const styles = textBasedLanguagedEditorStyles(

@@ -20,7 +20,6 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { setAutocomplete } from '../services';
 import { unifiedSearchPluginMock } from '../mocks';
 
 const startMock = coreMock.createStart();
@@ -96,6 +95,7 @@ function wrapQueryBarTopRowInContext(testProps: any) {
 
   const services = {
     ...startMock,
+    unifiedSearch: unifiedSearchPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
     appName: 'discover',
     storage: createMockStorage(),
@@ -118,11 +118,6 @@ describe('QueryBarTopRowTopRow', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  beforeEach(() => {
-    const autocompleteStart = unifiedSearchPluginMock.createStartContract();
-    setAutocomplete(autocompleteStart.autocomplete);
   });
 
   it('Should render query and time picker', () => {

@@ -19,8 +19,6 @@ import {
 import { act } from 'react-dom/test-utils';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { setAutocomplete } from '@kbn/unified-search-plugin/public/services';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider, InjectedIntl } from '@kbn/i18n-react';
 
@@ -105,11 +103,6 @@ describe('search_bar', () => {
       });
     },
   };
-
-  beforeEach(() => {
-    const autocompleteStart = unifiedSearchPluginMock.createStartContract();
-    setAutocomplete(autocompleteStart.autocomplete);
-  });
 
   beforeEach(() => {
     store = createMockGraphStore({

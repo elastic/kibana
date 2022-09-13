@@ -291,7 +291,6 @@ export function plugin(initializerContext: PluginInitializerContext<ConfigSchema
 export type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
-  IDataPluginServices,
   DataPublicPluginStartActions,
 } from './types';
 

@@ -6,13 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { onRaf } from './on_raf';
-export { shallowEqual } from './shallow_equal';
-
-export type { FilterItem } from './or_filter';
-export {
-  ConditionTypes,
-  isOrFilter,
-  getConditionalOperationType,
-  buildOrFilter,
-} from './or_filter';
+export { FilterItem } from './filters_builder_filter_item';
