@@ -172,7 +172,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                       cloudConfig: {
                         ...newPolicy?.inputs[0]?.config?._config?.value?.cloudConfig,
                         preventions: {
-                          ...newPolicy?.inputs[0]?.config._config?.value?.cloudConfig?.preventions,
+                          ...newPolicy?.inputs[0]?.config?._config?.value?.cloudConfig?.preventions,
                           behavior_protection: statusBehaviour,
                           malware: statusMalware,
                         },
@@ -202,7 +202,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                 config: {
                   _config: {
                     value: {
-                      ...newPolicy?.inputs[0]?.config._config.value,
+                      ...newPolicy?.inputs[0]?.config?._config?.value,
                       endpointConfig: {
                         preset: presetValue,
                       },
@@ -231,7 +231,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                 config: {
                   _config: {
                     value: {
-                      ...newPolicy?.inputs[0]?.config._config.value,
+                      ...newPolicy?.inputs[0]?.config?._config?.value,
                       eventFilters: {
                         nonInteractiveSession: interactiveStatus,
                       },
