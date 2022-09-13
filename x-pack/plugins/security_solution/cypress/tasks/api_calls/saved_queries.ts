@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-export const createSavedQuery = (
-  title: string,
-  query: string
-): Cypress.Chainable<Cypress.Response<unknown>> =>
+export const createSavedQuery = (title: string, query: string) =>
   cy.request({
     method: 'POST',
     url: '/api/saved_query/_create',
