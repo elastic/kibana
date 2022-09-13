@@ -76,7 +76,7 @@ interface ExtendedNavigator {
   connection?: {
     effectiveType?: string;
   };
-  // Estimated RAN
+  // Estimated RAM
   deviceMemory?: number;
   // Number of cores
   hardwareConcurrency?: number;
