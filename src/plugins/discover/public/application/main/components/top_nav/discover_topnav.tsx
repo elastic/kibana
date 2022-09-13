@@ -74,10 +74,10 @@ export const DiscoverTopNav = ({
       if (savedSearch.id && savedSearch.id === newSavedSearchId) {
         resetSavedSearch();
       } else {
-        history.push(`/view/${encodeURIComponent(newSavedSearchId)}`);
+        navigateTo(`/view/${encodeURIComponent(newSavedSearchId)}`);
       }
     },
-    [history, resetSavedSearch, savedSearch.id]
+    [navigateTo, resetSavedSearch, savedSearch.id]
   );
 
   useEffect(() => {

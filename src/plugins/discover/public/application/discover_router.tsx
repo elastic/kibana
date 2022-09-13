@@ -17,6 +17,7 @@ import { DiscoverMainRoute } from './main';
 import { NotFoundRoute } from './not_found';
 import { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
+import { DiscoverLogExplorerRoute } from './log_explorer';
 
 export const discoverRouter = (services: DiscoverServices, history: History, isDev: boolean) => (
   <KibanaContextProvider services={services}>
@@ -40,6 +41,12 @@ export const discoverRouter = (services: DiscoverServices, history: History, isD
           </Route>
           <Route path="/view/:id">
             <DiscoverMainRoute isDev={isDev} />
+          </Route>
+          <Route path="/log-explorer/view/:id">
+            <DiscoverLogExplorerRoute isDev={isDev} />
+          </Route>
+          <Route path="/log-explorer">
+            <DiscoverLogExplorerRoute isDev={isDev} />
           </Route>
           <Route path="/" exact>
             <DiscoverMainRoute isDev={isDev} />
