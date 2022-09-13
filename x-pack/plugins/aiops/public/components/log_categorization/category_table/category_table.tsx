@@ -83,7 +83,7 @@ export const CategoryTable: FC<Props> = ({
     );
   };
 
-  const columns = [
+  const columns: Array<EuiBasicTableColumn<Category>> = [
     {
       field: 'count',
       name: i18n.translate('xpack.aiops.logCategorization.column.count', {
@@ -143,14 +143,17 @@ export const CategoryTable: FC<Props> = ({
       ),
     },
     {
-      name: '',
-      width: 40,
+      name: 'Actions',
+      width: 60,
       actions: [
         {
           name: i18n.translate('xpack.aiops.logCategorization.showInDiscover', {
             defaultMessage: 'Show these in discover',
           }),
-          icon: 'filter',
+          description: i18n.translate('xpack.aiops.logCategorization.showInDiscover', {
+            defaultMessage: 'Show these in discover',
+          }),
+          icon: 'discoverApp',
           type: 'icon',
           onClick: (category) => openInDiscover(QUERY_MODE.INCLUDE, category),
         },
@@ -158,18 +161,22 @@ export const CategoryTable: FC<Props> = ({
           name: i18n.translate('xpack.aiops.logCategorization.filterOutInDiscover', {
             defaultMessage: 'Filter out in discover',
           }),
+          description: i18n.translate('xpack.aiops.logCategorization.filterOutInDiscover', {
+            defaultMessage: 'Filter out in discover',
+          }),
           icon: 'filter',
           type: 'icon',
           onClick: (category) => openInDiscover(QUERY_MODE.EXCLUDE, category),
         },
-        {
-          name: i18n.translate('xpack.aiops.logCategorization.openInDataViz', {
-            defaultMessage: 'Open in data visualizer',
-          }),
-          icon: 'stats',
-          type: 'icon',
-          onClick: () => {},
-        },
+        // Disabled for now
+        // {
+        //   name: i18n.translate('xpack.aiops.logCategorization.openInDataViz', {
+        //     defaultMessage: 'Open in data visualizer',
+        //   }),
+        //   icon: 'stats',
+        //   type: 'icon',
+        //   onClick: () => {},
+        // },
       ],
     },
   ] as Array<EuiBasicTableColumn<Category>>;
