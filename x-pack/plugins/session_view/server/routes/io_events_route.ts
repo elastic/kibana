@@ -142,18 +142,20 @@ export const registerIOEventsRoute = (router: IRouter) => {
 export const searchProcessWithIOEvents = async (
   client: ElasticsearchClient,
   sessionEntityId: string,
-  range?: string[],
+  range?: string[]
 ) => {
-  const rangeFilter = range ? [
-    {
-      range: {
-        '@timestamp': {
-          gte: range[0],
-          lte: range[1],
+  const rangeFilter = range
+    ? [
+        {
+          range: {
+            '@timestamp': {
+              gte: range[0],
+              lte: range[1],
+            },
+          },
         },
-      },
-    },
-  ]: [];
+      ]
+    : [];
 
   const search = await client.search({
     index: [PROCESS_EVENTS_INDEX],
@@ -199,4 +201,4 @@ export const searchProcessWithIOEvents = async (
       },
     },
   }));
-}
+};

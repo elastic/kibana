@@ -61,7 +61,7 @@ describe('io_events_route.ts', () => {
         expect(event._source?.event?.action).toBe(EventAction.text_output);
         expect(event._source?.event?.kind).toBe(EventKind.event);
         expect(event._source?.process?.entity_id).toBe('mockId');
-      })
+      });
     });
 
     it('takes a range', async () => {
