@@ -12,8 +12,8 @@ import { EuiPopover, EuiLink } from '@elastic/eui';
 import { createMockedIndexPattern } from '../../../mocks';
 import { FilterPopover } from './filter_popover';
 import { LabelInput } from '../shared_components';
-import { QueryInput } from '../../../query_input';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
+import { QueryInput } from '../../../../shared_components';
 
 jest.mock('.', () => ({
   isQueryValid: () => true,
