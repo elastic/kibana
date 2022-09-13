@@ -492,6 +492,7 @@ const rules = {
         gamma: 0.5,
         period: 7,
       },
+      script: '',
     },
     cumulative_sum: {
       __template: {
