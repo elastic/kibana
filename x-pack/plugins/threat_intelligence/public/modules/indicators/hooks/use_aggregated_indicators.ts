@@ -15,23 +15,42 @@ import {
   isErrorResponse,
   TimeRangeBounds,
 } from '@kbn/data-plugin/common';
-import { useFilters } from './use_filters';
+import { useFilters } from '../../query_bar/hooks/use_filters';
 import { convertAggregationToChartSeries } from '../../../common/utils/barchart';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { THREAT_QUERY_BASE } from '../../../../common/constants';
 import { calculateBarchartColumnTimeInterval } from '../../../common/utils/dates';
 import { useKibana } from '../../../hooks/use_kibana';
-import { DEFAULT_TIME_RANGE } from './use_filters/utils';
+import { DEFAULT_TIME_RANGE } from '../../query_bar/hooks/use_filters/utils';
 import { useSourcererDataView } from './use_sourcerer_data_view';
+import { threatIndicatorNamesOriginScript, threatIndicatorNamesScript } from '../lib/display_name';
 
 export interface UseAggregatedIndicatorsParam {
+  /**
+   * From and To values passed to the {@link }useAggregatedIndicators} hook
+   * to query indicators for the Indicators barchart.
+   */
   timeRange?: TimeRange;
 }
 
 export interface UseAggregatedIndicatorsValue {
+  /**
+   * Array of {@link ChartSeries}, ready to be used in the Indicators barchart.
+   */
   indicators: ChartSeries[];
+  /**
+   * Callback used by the IndicatorsFieldSelector component to query a new set of
+   * aggregated indicators.
+   * @param field the selected Indicator field
+   */
   onFieldChange: (field: string) => void;
+  /**
+   * The min and max times returned by the aggregated Indicators query.
+   */
   dateRange: TimeRangeBounds;
+  /**
+   * Indicator field used to query the aggregated Indicators.
+   */
   selectedField: string;
 }
 
@@ -155,6 +174,20 @@ export const useAggregatedIndicators = ({
               fields: [TIMESTAMP_FIELD, field], // limit the response to only the fields we need
               size: 0, // we don't need hits, just aggregations
               query: queryToExecute,
+              runtime_mappings: {
+                'threat.indicator.name': {
+                  type: 'keyword',
+                  script: {
+                    source: threatIndicatorNamesScript(),
+                  },
+                },
+                'threat.indicator.name_origin': {
+                  type: 'keyword',
+                  script: {
+                    source: threatIndicatorNamesOriginScript(),
+                  },
+                },
+              },
             },
           },
         },

@@ -23,6 +23,7 @@ export type ControlInput = EmbeddableInput & {
   query?: Query;
   filters?: Filter[];
   timeRange?: TimeRange;
+  timeslice?: [number, number];
   controlStyle?: ControlStyle;
   ignoreParentSettings?: ParentIgnoreSettings;
 };

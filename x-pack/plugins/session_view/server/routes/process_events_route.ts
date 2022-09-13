@@ -79,11 +79,17 @@ export const fetchEventsAndScopedAlerts = async (
     body: {
       query: {
         bool: {
-          must: [{ term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } }],
-          should: [
-            { term: { [EVENT_ACTION]: 'fork' } },
-            { term: { [EVENT_ACTION]: 'exec' } },
-            { term: { [EVENT_ACTION]: 'end' } },
+          must: [
+            { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
+            {
+              bool: {
+                should: [
+                  { term: { [EVENT_ACTION]: 'fork' } },
+                  { term: { [EVENT_ACTION]: 'exec' } },
+                  { term: { [EVENT_ACTION]: 'end' } },
+                ],
+              },
+            },
           ],
         },
       },

@@ -42,7 +42,11 @@ export async function runKibanaServer({
 }: {
   procs: ProcRunner;
   config: Config;
-  options: { installDir?: string; extraKbnOpts?: string[] };
+  options: {
+    installDir?: string;
+    extraKbnOpts?: string[];
+    logsDir?: string;
+  };
   onEarlyExit?: (msg: string) => void;
 }) {
   const runOptions = config.get('kbnTestServer.runOptions');
@@ -84,10 +88,14 @@ export async function runKibanaServer({
     ...(options.extraKbnOpts ?? []),
   ]);
 
+  const mainName = useTaskRunner ? 'kbn-ui' : 'kibana';
   const promises = [
     // main process
-    procs.run(useTaskRunner ? 'kbn-ui' : 'kibana', {
+    procs.run(mainName, {
       ...procRunnerOpts,
+      writeLogsToPath: options.logsDir
+        ? Path.resolve(options.logsDir, `${mainName}.log`)
+        : undefined,
       args: [
         ...prefixArgs,
         ...parseRawFlags([
@@ -110,6 +118,9 @@ export async function runKibanaServer({
     promises.push(
       procs.run('kbn-tasks', {
         ...procRunnerOpts,
+        writeLogsToPath: options.logsDir
+          ? Path.resolve(options.logsDir, 'kbn-tasks.log')
+          : undefined,
         args: [
           ...prefixArgs,
           ...parseRawFlags([

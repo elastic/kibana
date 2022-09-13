@@ -8,7 +8,7 @@
 
 import { random } from 'lodash';
 
-import { apm, timerange } from '..';
+import { apm, timerange } from '../..';
 import { Instance } from '../lib/apm/instance';
 import { Scenario } from '../cli/scenario';
 import { getLogger } from '../cli/utils/get_common_services';
@@ -29,7 +29,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
     generate: ({ from, to }) => {
       const range = timerange(from, to);
 
-      const successfulTimestamps = range.interval('1s').rate(3);
+      const successfulTimestamps = range.ratePerMinute(180);
 
       const instances = [...Array(numServices).keys()].map((index) =>
         apm
@@ -38,7 +38,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
             ENVIRONMENT,
             languages[index % languages.length]
           )
-          .instance('instance')
+          .instance(`instance-${index}`)
       );
 
       const urls = ['GET /order/{id}', 'POST /basket/{id}', 'DELETE /basket', 'GET /products'];

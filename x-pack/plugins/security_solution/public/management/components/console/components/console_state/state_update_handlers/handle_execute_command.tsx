@@ -189,7 +189,11 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   if (parsedInput.hasArgs) {
     // Show command help
     if (parsedInput.hasArg('help')) {
-      if (Object.keys(parsedInput.args).length > 1 || parsedInput.args.help.length) {
+      if (
+        Object.keys(parsedInput.args).length > 1 ||
+        parsedInput.args.help.length > 1 ||
+        parsedInput.args.help[0] !== true
+      ) {
         return updateStateWithNewCommandHistoryItem(
           state,
           createCommandHistoryEntry(

@@ -52,7 +52,9 @@ const stories: Meta<Args> = {
 
       return (
         <MemoryRouter
-          initialEntries={['/service-map?rangeFrom=now-15m&rangeTo=now']}
+          initialEntries={[
+            '/service-map?rangeFrom=now-15m&rangeTo=now&comparisonEnabled=true&offset=1d',
+          ]}
         >
           <KibanaReactContext.Provider>
             <MockUrlParamsContextProvider>

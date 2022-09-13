@@ -15,7 +15,7 @@ import {
   EuiHorizontalRule,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

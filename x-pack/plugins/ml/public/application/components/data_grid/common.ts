@@ -404,6 +404,7 @@ export const useRenderCellValue = (
 
       return cellValue;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indexPattern?.fields, pagination.pageIndex, pagination.pageSize, tableItems]);
   return renderCellValue;
 };

@@ -24,6 +24,7 @@ import styled from 'styled-components';
 import { FormattedRelative } from '@kbn/i18n-react';
 
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import {
   TimelineStatus,
@@ -172,7 +173,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
                   <InspectButton
                     compact
                     queryId={`${timelineId}-${activeTab}`}
-                    inputId="timeline"
+                    inputId={InputsModelId.timeline}
                     inspectIndex={0}
                     isDisabled={!isDataInTimeline || combinedQueries?.filterQuery === undefined}
                     title={i18n.INSPECT_TIMELINE_TITLE}
