@@ -22,6 +22,7 @@ import {
 } from '../../common/constants';
 import { ProcessEvent } from '../../common/types/process_tree';
 import { searchAlerts } from './alerts_route';
+import { searchProcessWithIOEvents } from './io_events_route';
 
 export const registerProcessEventsRoute = (
   router: IRouter,
@@ -127,7 +128,9 @@ export const fetchEventsAndScopedAlerts = async (
       range
     );
 
-    events = [...events, ...alertsBody.events];
+    const processesWithIOEvents = await searchProcessWithIOEvents(client, sessionEntityId, range);
+
+    events = [...events, ...alertsBody.events, ...processesWithIOEvents];
   }
 
   return {

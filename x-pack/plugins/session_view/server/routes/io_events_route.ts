@@ -8,7 +8,8 @@ import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { EVENT_ACTION, TIMESTAMP } from '@kbn/rule-data-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { ProcessEvent } from '../../common/types/process_tree';
+import { Aggregate } from '../../common/types/aggregate';
+import { EventAction, EventKind, ProcessEvent } from '../../common/types/process_tree';
 import {
   IO_EVENTS_ROUTE,
   IO_EVENTS_PER_PAGE,
@@ -17,6 +18,8 @@ import {
   TTY_CHAR_DEVICE_MAJOR_PROPERTY,
   TTY_CHAR_DEVICE_MINOR_PROPERTY,
   HOST_BOOT_ID_PROPERTY,
+  PROCESS_ENTITY_ID_PROPERTY,
+  PROCESS_EVENTS_PER_PAGE,
 } from '../../common/constants';
 
 /**
@@ -134,4 +137,68 @@ export const registerIOEventsRoute = (router: IRouter) => {
       }
     }
   );
+};
+
+export const searchProcessWithIOEvents = async (
+  client: ElasticsearchClient,
+  sessionEntityId: string,
+  range?: string[]
+) => {
+  const rangeFilter = range
+    ? [
+        {
+          range: {
+            '@timestamp': {
+              gte: range[0],
+              lte: range[1],
+            },
+          },
+        },
+      ]
+    : [];
+
+  const search = await client.search({
+    index: [PROCESS_EVENTS_INDEX],
+    body: {
+      query: {
+        bool: {
+          must: [
+            { term: { [EVENT_ACTION]: 'text_output' } },
+            { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
+            ...rangeFilter,
+          ],
+        },
+      },
+      size: 0,
+      aggs: {
+        custom_agg: {
+          terms: {
+            field: PROCESS_ENTITY_ID_PROPERTY,
+          },
+          aggs: {
+            bucket_sort: {
+              bucket_sort: {
+                size: PROCESS_EVENTS_PER_PAGE,
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const agg: any = search.aggregations?.custom_agg;
+  const buckets: Aggregate[] = agg?.buckets || [];
+
+  return buckets.map((bucket) => ({
+    _source: {
+      event: {
+        kind: EventKind.event,
+        action: EventAction.text_output,
+      },
+      process: {
+        entity_id: bucket.key,
+      },
+    },
+  }));
 };

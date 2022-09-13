@@ -254,6 +254,23 @@ describe('ProcessTreeNode component', () => {
         expect(renderResult.queryByTestId('sessionView:sessionViewAlertDetails')).toBeFalsy();
       });
     });
+
+    describe('Output', () => {
+      it('renders Output button when process has output', async () => {
+        const processMockWithOutput = {
+          ...sessionViewAlertProcessMock,
+          hasOutput: () => true,
+        };
+        renderResult = mockedContext.render(
+          <ProcessTreeNode {...props} process={processMockWithOutput} />
+        );
+
+        expect(renderResult.queryByTestId('processTreeNodeOutpuButton')).toBeTruthy();
+        expect(renderResult.queryByTestId('processTreeNodeOutpuButton')?.textContent).toBe(
+          'Output'
+        );
+      });
+    });
     describe('Child processes', () => {
       it('renders Child processes button when process has Child processes', async () => {
         const processMockWithChildren: typeof processMock = {

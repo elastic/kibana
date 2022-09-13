@@ -48,11 +48,13 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/session_view/process_events');
       await esArchiver.load('x-pack/test/functional/es_archives/session_view/alerts');
+      await esArchiver.load('x-pack/test/functional/es_archives/session_view/io_events');
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/session_view/process_events');
       await esArchiver.unload('x-pack/test/functional/es_archives/session_view/alerts');
+      await esArchiver.unload('x-pack/test/functional/es_archives/session_view/io_events');
     });
 
     it(`${PROCESS_EVENTS_ROUTE} returns a page of process events`, async () => {

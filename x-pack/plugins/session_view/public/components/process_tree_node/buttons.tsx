@@ -64,3 +64,26 @@ export const AlertButton = ({
     </EuiButton>
   );
 };
+
+export const OutputButton = ({
+  isExpanded,
+  onToggle,
+}: {
+  isExpanded: boolean;
+  onToggle: () => void;
+}) => {
+  const { outputButton, buttonArrow } = useButtonStyles();
+
+  return (
+    <EuiButton
+      className={isExpanded ? 'isExpanded' : ''}
+      key="output-button"
+      css={outputButton}
+      onClick={onToggle}
+      data-test-subj="processTreeNodeOutpuButton"
+    >
+      <FormattedMessage id="xpack.sessionView.output" defaultMessage="Output" />
+      <EuiIcon css={buttonArrow} size="s" type="arrowDown" />
+    </EuiButton>
+  );
+};

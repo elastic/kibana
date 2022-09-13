@@ -27,7 +27,7 @@ import { Process } from '../../../common/types/process_tree';
 import { dataOrDash } from '../../utils/data_or_dash';
 import { useVisible } from '../../hooks/use_visible';
 import { ProcessTreeAlerts } from '../process_tree_alerts';
-import { AlertButton, ChildrenProcessesButton } from './buttons';
+import { AlertButton, ChildrenProcessesButton, OutputButton } from './buttons';
 import { useButtonStyles } from './use_button_styles';
 import { useStyles } from './styles';
 import { SplitText } from './split_text';
@@ -75,6 +75,7 @@ export function ProcessTreeNode({
 }: ProcessDeps) {
   const [childrenExpanded, setChildrenExpanded] = useState(isSessionLeader || process.autoExpand);
   const [alertsExpanded, setAlertsExpanded] = useState(false);
+  const [outputExpanded, setOutputExpanded] = useState(false);
   const { searchMatched } = process;
 
   const dateFormat = useDateFormat();
@@ -94,6 +95,7 @@ export function ProcessTreeNode({
 
   const alerts = process.getAlerts();
   const hasAlerts = useMemo(() => !!alerts.length, [alerts]);
+  const hasOutputs = useMemo(() => process.hasOutput(), [process]);
   const hasInvestigatedAlert = useMemo(
     () =>
       !!(
@@ -139,6 +141,10 @@ export function ProcessTreeNode({
   const onAlertsToggle = useCallback(() => {
     setAlertsExpanded(!alertsExpanded);
   }, [alertsExpanded]);
+
+  const onOutputToggle = useCallback(() => {
+    setOutputExpanded(!outputExpanded);
+  }, [outputExpanded]);
 
   const onProcessClicked = useCallback(
     (e: MouseEvent) => {
@@ -286,13 +292,14 @@ export function ProcessTreeNode({
           {!isSessionLeader && children.length > 0 && (
             <ChildrenProcessesButton isExpanded={childrenExpanded} onToggle={onChildrenToggle} />
           )}
-          {alerts.length > 0 && (
+          {hasAlerts && (
             <AlertButton
               onToggle={onAlertsToggle}
               isExpanded={alertsExpanded}
               alertsCount={alerts.length}
             />
           )}
+          {hasOutputs && <OutputButton onToggle={onOutputToggle} isExpanded={outputExpanded} />}
         </div>
       </div>
 
