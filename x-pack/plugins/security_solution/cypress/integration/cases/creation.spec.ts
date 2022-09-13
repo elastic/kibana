@@ -17,8 +17,6 @@ import {
   ALL_CASES_OPEN_CASES_STATS,
   ALL_CASES_OPENED_ON,
   ALL_CASES_PAGE_TITLE,
-  ALL_CASES_REPORTER,
-  ALL_CASES_REPORTERS_COUNT,
   ALL_CASES_SERVICE_NOW_INCIDENT,
   ALL_CASES_TAGS,
   ALL_CASES_TAGS_COUNT,
@@ -85,10 +83,8 @@ describe('Cases', () => {
     cy.get(ALL_CASES_CLOSED_CASES_STATS).should('have.text', '0');
     cy.get(ALL_CASES_IN_PROGRESS_CASES_STATS).should('have.text', '0');
     cy.get(ALL_CASES_OPEN_CASES_COUNT).should('have.text', 'Open (1)');
-    cy.get(ALL_CASES_REPORTERS_COUNT).should('have.text', 'Reporter1');
     cy.get(ALL_CASES_TAGS_COUNT).should('have.text', 'Tags2');
     cy.get(ALL_CASES_NAME).should('have.text', this.mycase.name);
-    cy.get(ALL_CASES_REPORTER).should('have.text', 'e');
     (this.mycase as TestCase).tags.forEach((tag) => {
       cy.get(ALL_CASES_TAGS(tag)).should('have.text', tag);
     });

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { loadDataView, getFallbackDataViewId, DataViewSavedObject } from './resolve_data_view';
+import { loadDataView, getFallbackDataViewId } from './resolve_data_view';
 import { dataViewsMock } from '../../../__mocks__/data_views';
 import { dataViewMock } from '../../../__mocks__/data_view';
 import { configMock } from '../../../__mocks__/config';
@@ -31,8 +31,8 @@ describe('Resolve data view tests', () => {
     expect(result).toBe('');
   });
   test('getFallbackDataViewId with an dataViews array', async () => {
-    const list = await dataViewsMock.getCache();
-    const result = await getFallbackDataViewId(list as unknown as DataViewSavedObject[], '');
+    const list = await dataViewsMock.getIdsWithTitle();
+    const result = await getFallbackDataViewId(list, '');
     expect(result).toBe('the-data-view-id');
   });
 });
