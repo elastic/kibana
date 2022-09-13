@@ -9,11 +9,11 @@ import { TestProviders } from '../../../common/mock';
 
 import { useRiskScoreDeprecated } from '.';
 import { RiskQueries } from '../../../../common/search_strategy';
-import { useQuery } from '../../../common/hooks/use_query';
+import { useFetch } from '../../../common/hooks/use_fetch';
 import { RiskEntity } from './api';
-jest.mock('../../../common/hooks/use_query');
+jest.mock('../../../common/hooks/use_fetch');
 
-const mockUseFetch = useQuery as jest.Mock;
+const mockUseFetch = useFetch as jest.Mock;
 const mockFetch = jest.fn();
 const mockRefetch = jest.fn();
 
@@ -49,7 +49,7 @@ describe(`is risk score deprecated hook`, () => {
     mockUseFetch.mockReturnValue({
       data: undefined,
       error: undefined,
-      query: mockFetch,
+      fetch: mockFetch,
       isLoading: false,
       refetch: mockRefetch,
     });
@@ -75,7 +75,7 @@ describe(`is risk score deprecated hook`, () => {
     mockUseFetch.mockReturnValue({
       data: undefined,
       error: undefined,
-      query: mockFetch,
+      fetch: mockFetch,
       isLoading: false,
       refetch: mockRefetch,
     });
@@ -98,7 +98,7 @@ describe(`is risk score deprecated hook`, () => {
         isEnabled: true,
       },
       error: undefined,
-      query: mockFetch,
+      fetch: mockFetch,
       isLoading: false,
       refetch: mockRefetch,
     });

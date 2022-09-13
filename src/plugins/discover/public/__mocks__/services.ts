@@ -29,6 +29,8 @@ import { dataViewsMock } from './data_views';
 const dataPlugin = dataPluginMock.createStartContract();
 const expressionsPlugin = expressionsPluginMock.createStartContract();
 
+dataPlugin.query.filterManager.getFilters = jest.fn(() => []);
+
 export const discoverServiceMock = {
   core: coreMock.createStart(),
   chrome: chromeServiceMock.createStartContract(),
@@ -53,6 +55,9 @@ export const discoverServiceMock = {
   },
   fieldFormats: fieldFormatsMock,
   filterManager: dataPlugin.query.filterManager,
+  inspector: {
+    open: jest.fn(),
+  },
   uiSettings: {
     get: jest.fn((key: string) => {
       if (key === 'fields:popularLimit') {

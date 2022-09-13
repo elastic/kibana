@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo } from 'react';
-import { QUERY_NAMES, useQuery } from '../../../common/hooks/use_query';
+import { REQUEST_NAMES, useFetch } from '../../../common/hooks/use_fetch';
 import { RiskQueries } from '../../../../common/search_strategy';
 import type { Params, Response } from './api';
 import { getRiskScoreDeprecated, RiskEntity } from './api';
@@ -29,8 +29,8 @@ export const useRiskScoreDeprecated = (
     [factoryQueryType]
   );
 
-  const { query, data, isLoading, error } = useQuery<Params, Response>(
-    QUERY_NAMES.GET_RISK_SCORE_DEPRECATED,
+  const { fetch, data, isLoading, error } = useFetch<Params, Response, unknown>(
+    REQUEST_NAMES.GET_RISK_SCORE_DEPRECATED,
     getRiskScoreDeprecated
   );
 
@@ -45,11 +45,11 @@ export const useRiskScoreDeprecated = (
 
   const searchDeprecated = useCallback(
     (indexName: string) => {
-      query({
+      fetch({
         query: { indexName, entity },
       });
     },
-    [entity, query]
+    [entity, fetch]
   );
 
   useEffect(() => {

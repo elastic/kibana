@@ -14,7 +14,7 @@ import { getSecurityDashboards } from './utils';
 import { LinkAnchor } from '../../components/links';
 import { useKibana, useNavigateTo } from '../../lib/kibana';
 import * as i18n from './translations';
-import { useQuery, QUERY_NAMES } from '../../hooks/use_query';
+import { useFetch, REQUEST_NAMES } from '../../hooks/use_fetch';
 
 export interface DashboardTableItem extends SavedObject<SavedObjectAttributes> {
   title?: string;
@@ -28,16 +28,16 @@ export const useSecurityDashboardsTableItems = () => {
     savedObjects: { client: savedObjectsClient },
   } = useKibana().services;
 
-  const { query, data, isLoading, error } = useQuery(
-    QUERY_NAMES.SECURITY_DASHBOARDS,
+  const { fetch, data, isLoading, error } = useFetch(
+    REQUEST_NAMES.SECURITY_DASHBOARDS,
     getSecurityDashboards
   );
 
   useEffect(() => {
     if (savedObjectsClient) {
-      query(savedObjectsClient);
+      fetch(savedObjectsClient);
     }
-  }, [query, savedObjectsClient]);
+  }, [fetch, savedObjectsClient]);
 
   const items = useMemo(() => {
     if (!data) {
