@@ -7,6 +7,7 @@
 
 import type { FleetErrorType } from './types';
 
+/* eslint-disable max-classes-per-file */
 export class IngestManagerError extends Error {
   attributes?: { type: FleetErrorType };
   constructor(message?: string, public readonly meta?: unknown) {
