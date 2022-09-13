@@ -12,9 +12,7 @@ import { useValues } from 'kea';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiSteps } from '@elastic/eui';
 
 import { isConnectorIndex } from '../../../../utils/indices';
-
 import { IndexViewLogic } from '../../index_view_logic';
-
 import { NATIVE_CONNECTORS } from '../constants';
 
 import { ConnectorNameAndDescription } from './connector_name_and_description';
@@ -59,10 +57,7 @@ export const NativeConnectorConfiguration: React.FC = () => {
                 },
                 {
                   children: (
-                    <NativeConnectorConfigurationConfig
-                      configuration={indexData.connector.configuration}
-                      nativeConnector={nativeConnector}
-                    />
+                    <NativeConnectorConfigurationConfig nativeConnector={nativeConnector} />
                   ),
                   status: 'incomplete',
                   title: 'Configuration',
