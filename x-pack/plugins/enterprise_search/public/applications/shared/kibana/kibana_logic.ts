@@ -11,7 +11,12 @@ import { kea, MakeLogicType } from 'kea';
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
-import { ApplicationStart, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
+import {
+  ApplicationStart,
+  ChromeBreadcrumb,
+  ScopedHistory,
+  IUiSettingsClient,
+} from '@kbn/core/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 
 import { ProductAccess } from '../../../../common/types';
@@ -35,6 +40,7 @@ interface KibanaLogicProps {
   // Required plugins
   charts: ChartsPluginStart;
   security: SecurityPluginStart;
+  uiSettings: IUiSettingsClient;
   // Optional plugins
   cloud?: CloudSetup;
 }
@@ -65,6 +71,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     setBreadcrumbs: [props.setBreadcrumbs, {}],
     setChromeIsVisible: [props.setChromeIsVisible, {}],
     setDocTitle: [props.setDocTitle, {}],
+    uiSettings: [props.uiSettings, {}],
   }),
   selectors: ({ selectors }) => ({
     isCloud: [() => [selectors.cloud], (cloud?: Partial<CloudSetup>) => !!cloud?.isCloudEnabled],

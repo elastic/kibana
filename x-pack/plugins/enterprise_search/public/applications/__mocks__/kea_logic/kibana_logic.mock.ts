@@ -25,6 +25,9 @@ export const mockKibanaValues = {
     hasAppSearchAccess: true,
     hasWorkplaceSearchAccess: true,
   },
+  uiSettings: {
+    get: jest.fn(),
+  },
   security: securityMock.createStart(),
   setBreadcrumbs: jest.fn(),
   setChromeIsVisible: jest.fn(),
