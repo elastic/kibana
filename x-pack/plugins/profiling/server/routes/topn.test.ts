@@ -6,7 +6,6 @@
  */
 
 import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
-import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ProfilingESField } from '../../common/elasticsearch';
@@ -52,7 +51,7 @@ describe('TopN data from Elasticsearch', () => {
 
   describe('when fetching Stack Traces', () => {
     it('should search first then skip mget', async () => {
-      const response = await topNElasticSearchQuery({
+      await topNElasticSearchQuery({
         client,
         logger,
         timeFrom: 456,
@@ -60,16 +59,11 @@ describe('TopN data from Elasticsearch', () => {
         searchField: ProfilingESField.StacktraceID,
         highCardinality: false,
         kuery: '',
-        response: kibanaResponseFactory,
       });
 
       // Calls to mget are skipped since data doesn't exist
       expect(client.search).toHaveBeenCalledTimes(2);
       expect(client.mget).toHaveBeenCalledTimes(0);
-
-      expect(response.status).toEqual(200);
-      expect(response.payload).toHaveProperty('TopN');
-      expect(response.payload).toHaveProperty('Metadata');
     });
   });
 });

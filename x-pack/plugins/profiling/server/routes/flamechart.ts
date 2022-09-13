@@ -15,11 +15,11 @@ import { getClient } from './compat';
 import { getExecutablesAndStackTraces } from './get_executables_and_stacktraces';
 import { createCommonFilter } from './query';
 
-export function registerFlameChartElasticSearchRoute({ router, logger }: RouteRegisterParameters) {
+export function registerFlameChartSearchRoute({ router, logger }: RouteRegisterParameters) {
   const paths = getRoutePaths();
   router.get(
     {
-      path: paths.FlamechartElastic,
+      path: paths.Flamechart,
       validate: {
         query: schema.object({
           timeFrom: schema.number(),
@@ -40,24 +40,18 @@ export function registerFlameChartElasticSearchRoute({ router, logger }: RouteRe
           kuery,
         });
 
-        const {
-          stackTraces,
-          executables,
-          stackFrames,
-          eventsIndex,
-          downsampledTotalCount,
-          stackTraceEvents,
-        } = await getExecutablesAndStackTraces({
-          logger,
-          client: createProfilingEsClient({ request, esClient }),
-          filter,
-          sampleSize: targetSampleSize,
-        });
+        const { stackTraces, executables, stackFrames, eventsIndex, totalCount, stackTraceEvents } =
+          await getExecutablesAndStackTraces({
+            logger,
+            client: createProfilingEsClient({ request, esClient }),
+            filter,
+            sampleSize: targetSampleSize,
+          });
 
         const flamegraph = await withProfilingSpan('collect_flamegraph', async () => {
           return new FlameGraph({
             sampleRate: eventsIndex.sampleRate,
-            totalCount: downsampledTotalCount,
+            totalCount,
             events: stackTraceEvents,
             stackTraces,
             stackFrames,

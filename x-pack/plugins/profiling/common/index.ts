@@ -15,7 +15,7 @@ export const INDEX_TRACES = 'profiling-stacktraces';
 export const INDEX_FRAMES = 'profiling-stackframes';
 export const INDEX_EXECUTABLES = 'profiling-executables';
 
-const BASE_ROUTE_PATH = '/api/prodfiler/v2';
+const BASE_ROUTE_PATH = '/api/profiling/v1';
 
 export function getRoutePaths() {
   return {
@@ -26,7 +26,7 @@ export function getRoutePaths() {
     TopNHosts: `${BASE_ROUTE_PATH}/topn/hosts`,
     TopNThreads: `${BASE_ROUTE_PATH}/topn/threads`,
     TopNTraces: `${BASE_ROUTE_PATH}/topn/traces`,
-    FlamechartElastic: `${BASE_ROUTE_PATH}/flamechart/elastic`,
+    Flamechart: `${BASE_ROUTE_PATH}/flamechart`,
     FrameInformation: `${BASE_ROUTE_PATH}/frame_information`,
   };
 }

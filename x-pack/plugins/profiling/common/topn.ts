@@ -10,6 +10,7 @@ import { InferSearchResponseOf } from '@kbn/core/types/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import { ProfilingESField } from './elasticsearch';
+import { StackFrameMetadata } from './profiling';
 
 export const OTHER_BUCKET_LABEL = i18n.translate('xpack.profiling.topn.otherBucketLabel', {
   defaultMessage: 'Other',
@@ -30,6 +31,7 @@ export interface TopNSamples {
 
 export interface TopNResponse extends TopNSamples {
   TotalCount: number;
+  Metadata: Record<string, StackFrameMetadata[]>;
 }
 
 export interface TopNSamplesHistogramResponse {
@@ -179,9 +181,18 @@ export interface TopNSubchart {
   Series: CountPerTime[];
   Color: string;
   Index: number;
+  Metadata: StackFrameMetadata[];
 }
 
-export function groupSamplesByCategory(samples: TopNSample[], totalCount: number): TopNSubchart[] {
+export function groupSamplesByCategory({
+  samples,
+  totalCount,
+  metadata,
+}: {
+  samples: TopNSample[];
+  totalCount: number;
+  metadata: Record<string, StackFrameMetadata[]>;
+}): TopNSubchart[] {
   const seriesByCategory = new Map<string, CountPerTime[]>();
 
   for (let i = 0; i < samples.length; i++) {
@@ -202,6 +213,7 @@ export function groupSamplesByCategory(samples: TopNSample[], totalCount: number
       Category: category,
       Percentage: (totalPerCategory / totalCount) * 100,
       Series: series,
+      Metadata: metadata[category] ?? [],
     });
   }
 

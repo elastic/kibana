@@ -82,6 +82,8 @@ export interface StackFrameMetadata {
   FunctionOffset: number;
   // should this be StackFrame.SourceID?
   SourceID: FileID;
+  // StackFrame.Filename
+  SourceFilename: string;
   // StackFrame.LineNumber
   SourceLine: number;
 
@@ -92,8 +94,6 @@ export interface StackFrameMetadata {
   CommitHash: string;
   // unused atm due to lack of symbolization metadata
   SourceCodeURL: string;
-  // unused atm due to lack of symbolization metadata
-  SourceFilename: string;
   // unused atm due to lack of symbolization metadata
   SourcePackageHash: string;
   // unused atm due to lack of symbolization metadata
@@ -151,7 +151,7 @@ export function getCalleeSource(frame: StackFrameMetadata): string {
     return frame.SourceFilename;
   }
 
-  return frame.SourceFilename + (frame.FunctionOffset !== 0 ? `#${frame.FunctionOffset}` : '');
+  return frame.SourceFilename + (frame.SourceLine !== 0 ? `#${frame.SourceLine}` : '');
 }
 
 // groupStackFrameMetadataByStackTrace collects all of the per-stack-frame
@@ -181,6 +181,7 @@ export function groupStackFrameMetadataByStackTrace(
         FunctionName: frame.FunctionName,
         FunctionOffset: frame.FunctionOffset,
         SourceLine: frame.LineNumber,
+        SourceFilename: frame.FileName,
         ExeFileName: executable.FileName,
       });
 
