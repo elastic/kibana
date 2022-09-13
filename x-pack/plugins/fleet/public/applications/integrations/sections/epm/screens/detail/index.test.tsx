@@ -553,7 +553,6 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         namespace: 'default',
         policy_id: '521c1b70-3976-11eb-ad1c-3baa423084d9',
         enabled: true,
-        output_id: '',
         inputs: [
           {
             type: 'logfile',
@@ -632,7 +631,6 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         namespace: 'default',
         policy_id: '125c1b70-3976-11eb-ad1c-3baa423085y6',
         enabled: true,
-        output_id: '',
         inputs: [
           {
             type: 'logfile',

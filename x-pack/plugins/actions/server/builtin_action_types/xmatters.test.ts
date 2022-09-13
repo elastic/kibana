@@ -23,6 +23,7 @@ import {
   getActionType,
   XmattersActionType,
 } from './xmatters';
+import { ActionsConfigurationUtilities } from '../actions_config';
 
 const postxMattersMock = postXmatters as jest.Mock;
 
@@ -32,6 +33,7 @@ const services: Services = actionsMock.createServices();
 
 let actionType: XmattersActionType;
 let mockedLogger: jest.Mocked<Logger>;
+let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
 
 beforeAll(() => {
   const { logger, actionTypeRegistry } = createActionTypeRegistry();
@@ -44,9 +46,10 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
+  configurationUtilities = actionsConfigMock.create();
   actionType = getActionType({
     logger: mockedLogger,
-    configurationUtilities: actionsConfigMock.create(),
+    configurationUtilities,
   });
 });
 
@@ -63,7 +66,7 @@ describe('secrets validation', () => {
       user: 'bob',
       password: 'supersecret',
     };
-    expect(validateSecrets(actionType, secrets)).toEqual({
+    expect(validateSecrets(actionType, secrets, { configurationUtilities })).toEqual({
       ...secrets,
       secretsUrl: null,
     });
@@ -73,7 +76,7 @@ describe('secrets validation', () => {
     const secrets: Record<string, string> = {
       secretsUrl: 'http://mylisteningserver:9200/endpoint?apiKey=someKey',
     };
-    expect(validateSecrets(actionType, secrets)).toEqual({
+    expect(validateSecrets(actionType, secrets, { configurationUtilities })).toEqual({
       ...secrets,
       user: null,
       password: null,
@@ -86,7 +89,7 @@ describe('secrets validation', () => {
       secretsUrl: 'http://mylisteningserver:9200/endpoint?apiKey=someKey',
     };
     expect(() => {
-      validateSecrets(actionType, secrets);
+      validateSecrets(actionType, secrets, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: Cannot use user/password for URL authentication. Provide valid secretsUrl or use Basic Authentication."`
     );
@@ -98,7 +101,7 @@ describe('secrets validation', () => {
       secretsUrl: 'http://mylisteningserver:9200/endpoint?apiKey=someKey',
     };
     expect(() => {
-      validateSecrets(actionType, secrets);
+      validateSecrets(actionType, secrets, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: Cannot use user/password for URL authentication. Provide valid secretsUrl or use Basic Authentication."`
     );
@@ -111,7 +114,7 @@ describe('secrets validation', () => {
       secretsUrl: 'http://mylisteningserver:9200/endpoint?apiKey=someKey',
     };
     expect(() => {
-      validateSecrets(actionType, secrets);
+      validateSecrets(actionType, secrets, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: Cannot use user/password for URL authentication. Provide valid secretsUrl or use Basic Authentication."`
     );
@@ -119,7 +122,7 @@ describe('secrets validation', () => {
 
   test('fails when secret user is provided, but password is omitted', () => {
     expect(() => {
-      validateSecrets(actionType, { user: 'bob' });
+      validateSecrets(actionType, { user: 'bob' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: Both user and password must be specified."`
     );
@@ -127,7 +130,7 @@ describe('secrets validation', () => {
 
   test('fails when password is provided, but user is omitted', () => {
     expect(() => {
-      validateSecrets(actionType, { password: 'supersecret' });
+      validateSecrets(actionType, { password: 'supersecret' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: Both user and password must be specified."`
     );
@@ -135,7 +138,7 @@ describe('secrets validation', () => {
 
   test('fails when user, password, and secretsUrl are omitted', () => {
     expect(() => {
-      validateSecrets(actionType, {});
+      validateSecrets(actionType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: Provide either secretsUrl link or user/password to authenticate"`
     );
@@ -146,28 +149,29 @@ describe('secrets validation', () => {
       secretsUrl: 'example.com/do-something?apiKey=someKey',
     };
     expect(() => {
-      validateSecrets(actionType, secrets);
+      validateSecrets(actionType, secrets, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       '"error validating action type secrets: Invalid secretsUrl: TypeError: Invalid URL: example.com/do-something?apiKey=someKey"'
     );
   });
 
   test('fails when url host is not in allowedHosts', () => {
+    const configUtils = {
+      ...actionsConfigMock.create(),
+      ensureUriAllowed: (_: string) => {
+        throw new Error(`target url is not present in allowedHosts`);
+      },
+    };
     actionType = getActionType({
       logger: mockedLogger,
-      configurationUtilities: {
-        ...actionsConfigMock.create(),
-        ensureUriAllowed: (_) => {
-          throw new Error(`target url is not present in allowedHosts`);
-        },
-      },
+      configurationUtilities: configUtils,
     });
     const secrets: Record<string, string> = {
       secretsUrl: 'http://mylisteningserver.com:9200/endpoint',
     };
 
     expect(() => {
-      validateSecrets(actionType, secrets);
+      validateSecrets(actionType, secrets, { configurationUtilities: configUtils });
     }).toThrowErrorMatchingInlineSnapshot(
       '"error validating action type secrets: target url is not present in allowedHosts"'
     );
@@ -180,7 +184,7 @@ describe('config validation', () => {
       configUrl: 'http://mylisteningserver:9200/endpoint',
       usesBasic: true,
     };
-    expect(validateConfig(actionType, config)).toEqual(config);
+    expect(validateConfig(actionType, config, { configurationUtilities })).toEqual(config);
   });
 
   test('config validation failed when a url is invalid', () => {
@@ -189,21 +193,22 @@ describe('config validation', () => {
       usesBasic: true,
     };
     expect(() => {
-      validateConfig(actionType, config);
+      validateConfig(actionType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       '"error validating action type config: Error configuring xMatters action: unable to parse url: TypeError: Invalid URL: example.com/do-something"'
     );
   });
 
   test('config validation returns an error if the specified URL isnt added to allowedHosts', () => {
+    const configUtils = {
+      ...actionsConfigMock.create(),
+      ensureUriAllowed: (_: string) => {
+        throw new Error(`target url is not present in allowedHosts`);
+      },
+    };
     actionType = getActionType({
       logger: mockedLogger,
-      configurationUtilities: {
-        ...actionsConfigMock.create(),
-        ensureUriAllowed: (_) => {
-          throw new Error(`target url is not present in allowedHosts`);
-        },
-      },
+      configurationUtilities: configUtils,
     });
 
     const config: Record<string, string | boolean> = {
@@ -212,7 +217,7 @@ describe('config validation', () => {
     };
 
     expect(() => {
-      validateConfig(actionType, config);
+      validateConfig(actionType, config, { configurationUtilities: configUtils });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: Error configuring xMatters action: target url is not present in allowedHosts"`
     );
@@ -224,7 +229,7 @@ describe('config validation', () => {
       usesBasic: false,
     };
 
-    expect(validateConfig(actionType, config)).toEqual(config);
+    expect(validateConfig(actionType, config, { configurationUtilities })).toEqual(config);
   });
 });
 
@@ -233,7 +238,7 @@ describe('params validation', () => {
     const params: Record<string, string> = {
       severity: 'high',
     };
-    expect(validateParams(actionType, params)).toEqual({
+    expect(validateParams(actionType, params, { configurationUtilities })).toEqual({
       severity: 'high',
     });
   });
@@ -248,7 +253,7 @@ describe('params validation', () => {
       spaceId: 'default',
       tags: 'test1, test2',
     };
-    expect(validateParams(actionType, params)).toEqual({
+    expect(validateParams(actionType, params, { configurationUtilities })).toEqual({
       ...params,
     });
   });

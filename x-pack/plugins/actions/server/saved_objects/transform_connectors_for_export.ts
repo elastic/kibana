@@ -6,6 +6,7 @@
  */
 
 import { SavedObject } from '@kbn/core/server';
+import { ActionsConfigurationUtilities } from '../actions_config';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { validateSecrets } from '../lib';
 import { RawAction, ActionType } from '../types';
@@ -18,20 +19,22 @@ export function transformConnectorsForExport(
     const connector = c as SavedObject<RawAction>;
     return transformConnectorForExport(
       connector,
-      actionTypeRegistry.get(connector.attributes.actionTypeId)
+      actionTypeRegistry.get(connector.attributes.actionTypeId),
+      actionTypeRegistry.getUtils()
     );
   });
 }
 
 function transformConnectorForExport(
   connector: SavedObject<RawAction>,
-  actionType: ActionType
+  actionType: ActionType,
+  configurationUtilities: ActionsConfigurationUtilities
 ): SavedObject<RawAction> {
   let isMissingSecrets = false;
 
   try {
     // If connector requires secrets, this will throw an error
-    validateSecrets(actionType, {});
+    validateSecrets(actionType, {}, { configurationUtilities });
 
     // If connector has optional (or no) secrets, set isMissingSecrets value to value of hasAuth
     // If connector doesn't have hasAuth value, default to isMissingSecrets: false

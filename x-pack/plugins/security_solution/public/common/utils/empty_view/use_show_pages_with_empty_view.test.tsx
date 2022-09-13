@@ -13,9 +13,7 @@ jest.mock('../route/use_route_spy', () => ({
     .fn()
     .mockImplementationOnce(() => [{ pageName: 'hosts' }])
     .mockImplementationOnce(() => [{ pageName: 'rules' }])
-    .mockImplementationOnce(() => [{ pageName: 'network' }])
-    .mockImplementationOnce(() => [{ pageName: 'get_started' }])
-    .mockImplementationOnce(() => [{ pageName: 'get_started' }]),
+    .mockImplementationOnce(() => [{ pageName: 'network' }]),
 }));
 jest.mock('../../containers/sourcerer', () => ({
   useSourcererDataView: jest
@@ -45,24 +43,6 @@ describe('use show pages with empty view', () => {
     });
   });
   it('shows empty view when on an elligible page and indices do exist', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useShowPagesWithEmptyView());
-      await waitForNextUpdate();
-      const emptyResult = result.current;
-      expect(emptyResult).toEqual(true);
-    });
-  });
-
-  it('apply empty view for the landing page if indices do not exist', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useShowPagesWithEmptyView());
-      await waitForNextUpdate();
-      const emptyResult = result.current;
-      expect(emptyResult).toEqual(true);
-    });
-  });
-
-  it('apply empty view for the landing page if indices exist', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useShowPagesWithEmptyView());
       await waitForNextUpdate();

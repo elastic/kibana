@@ -40,13 +40,14 @@ import { isInCodePath } from './is_in_code_path';
 import { LegacyRequest, Cluster } from '../../types';
 import { RulesByType } from '../../../common/types/alerts';
 import { getClusterRuleDataForClusters, getInstanceRuleDataForClusters } from '../kibana/rules';
+import { Globals } from '../../static_globals';
+import { getNewIndexPatterns } from './get_index_patterns';
 
 /**
  * Get all clusters or the cluster associated with {@code clusterUuid} when it is defined.
  */
 export async function getClustersFromRequest(
   req: LegacyRequest,
-  indexPatterns: { [x: string]: string },
   {
     clusterUuid,
     start,
@@ -54,7 +55,12 @@ export async function getClustersFromRequest(
     codePaths,
   }: { clusterUuid?: string; start?: number; end?: number; codePaths: string[] }
 ) {
-  const { filebeatIndexPattern } = indexPatterns;
+  const logsIndexPattern = getNewIndexPatterns({
+    config: Globals.app.config,
+    type: 'logs',
+    moduleType: 'elasticsearch',
+    ccs: CCS_REMOTE_PATTERN,
+  });
 
   const isStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
 
@@ -100,7 +106,7 @@ export async function getClustersFromRequest(
 
     cluster.logs =
       start && end && isInCodePath(codePaths, [CODE_PATH_LOGS])
-        ? await getLogTypes(req, filebeatIndexPattern, {
+        ? await getLogTypes(req, logsIndexPattern, {
             clusterUuid: get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid),
             start,
             end,

@@ -21,6 +21,7 @@ import { ActionsClient } from './actions_client';
 import { ActionTypeExecutorResult } from '../common';
 import { TaskInfo } from './lib/action_executor';
 import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
+import { ActionsConfigurationUtilities } from './actions_config';
 
 export type { ActionTypeExecutorResult, ActionTypeExecutorRawResult } from '../common';
 export type { GetFieldsByIssueTypeResponse as JiraGetFieldsResponse } from './builtin_action_types/jira/types';
@@ -94,7 +95,14 @@ export type ExecutorType<Config, Secrets, Params, ResultData> = (
 ) => Promise<ActionTypeExecutorResult<ResultData>>;
 
 interface ValidatorType<Type> {
-  validate(value: unknown): Type;
+  schema: {
+    validate(value: unknown): Type;
+  };
+  customValidator?: (value: Type, validatorServices: ValidatorServices) => void;
+}
+
+export interface ValidatorServices {
+  configurationUtilities: ActionsConfigurationUtilities;
 }
 
 export interface ActionValidationService {

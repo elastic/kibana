@@ -12,8 +12,8 @@ import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { mockCreateOrUpgradeSavedConfig } from './ui_settings_client.test.mock';
 
-import { SavedObjectsClient } from '../saved_objects';
-import { savedObjectsClientMock } from '../saved_objects/service/saved_objects_client.mock';
+import { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { UiSettingsClient } from './ui_settings_client';
 import { CannotOverrideError } from './ui_settings_errors';
 

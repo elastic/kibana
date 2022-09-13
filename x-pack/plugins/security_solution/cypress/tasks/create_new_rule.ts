@@ -65,7 +65,8 @@ import {
   RULE_STATUS,
   RULE_TIMESTAMP_OVERRIDE,
   RULES_CREATION_FORM,
-  RULES_CREATION_PREVIEW,
+  RULES_CREATION_PREVIEW_BUTTON,
+  RULES_CREATION_PREVIEW_REFRESH_BUTTON,
   RUNS_EVERY_INTERVAL,
   RUNS_EVERY_TIME_TYPE,
   SCHEDULE_CONTINUE_BUTTON,
@@ -83,7 +84,6 @@ import {
   THREAT_MATCH_INDICATOR_INDICATOR_INDEX,
   THREAT_MATCH_OR_BUTTON,
   THREAT_MATCH_QUERY_INPUT,
-  EUI_FILTER_SELECT_ITEM,
   THRESHOLD_INPUT_AREA,
   THRESHOLD_TYPE,
   CONNECTOR_NAME_INPUT,
@@ -105,6 +105,7 @@ import { TOAST_ERROR } from '../screens/shared';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
 import { refreshPage } from './security_header';
+import { EUI_FILTER_SELECT_ITEM } from '../screens/common/controls';
 
 export const createAndEnableRule = () => {
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
@@ -336,15 +337,13 @@ export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.customQuery);
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
-  cy.get(RULES_CREATION_PREVIEW)
-    .find(QUERY_PREVIEW_BUTTON)
-    .should('not.be.disabled')
-    .click({ force: true });
+  cy.get(RULES_CREATION_PREVIEW_BUTTON).should('not.be.disabled').click({ force: true });
+  cy.get(RULES_CREATION_PREVIEW_REFRESH_BUTTON).should('not.be.disabled').click({ force: true });
   cy.get(PREVIEW_HISTOGRAM)
     .invoke('text')
     .then((text) => {
       if (text !== 'Rule Preview') {
-        cy.get(RULES_CREATION_PREVIEW).find(QUERY_PREVIEW_BUTTON).click({ force: true });
+        cy.get(RULES_CREATION_PREVIEW_REFRESH_BUTTON).click({ force: true });
         cy.get(PREVIEW_HISTOGRAM).should('contain.text', 'Rule Preview');
       }
     });
@@ -360,6 +359,7 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRule) => {
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
   cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).click().type(rule.newTermsFields[0], { delay: 35 });
   cy.get(EUI_FILTER_SELECT_ITEM).click({ force: true });
+  cy.focused().type('{esc}'); // Close combobox dropdown so next inputs can be interacted with
   cy.get(NEW_TERMS_INPUT_AREA)
     .find(NEW_TERMS_HISTORY_SIZE)
     .type('{selectAll}')

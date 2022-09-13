@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // expect the button is shown and enabled
 
-      await testSubjects.clickWhenNotDisabled(`lnsApp_openInDiscover`);
+      await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsApp_openInDiscover`);
 
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.waitForVisualization('xyVisChart');
       // expect the button is shown and enabled
 
-      await testSubjects.clickWhenNotDisabled(`lnsApp_openInDiscover`);
+      await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsApp_openInDiscover`);
 
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.waitForVisualization('xyVisChart');
 
-      await testSubjects.clickWhenNotDisabled(`lnsApp_openInDiscover`);
+      await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsApp_openInDiscover`);
 
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
@@ -134,7 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.waitForVisualization('xyVisChart');
       // expect the button is shown and enabled
-      await testSubjects.clickWhenNotDisabled(`lnsApp_openInDiscover`);
+      await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsApp_openInDiscover`);
 
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
@@ -169,7 +169,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.waitForVisualization('xyVisChart');
       // expect the button is shown and enabled
-      await testSubjects.clickWhenNotDisabled(`lnsApp_openInDiscover`);
+      await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsApp_openInDiscover`);
 
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);

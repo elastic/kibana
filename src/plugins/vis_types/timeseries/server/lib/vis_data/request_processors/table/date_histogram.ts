@@ -31,7 +31,7 @@ export const dateHistogram: TableRequestProcessorsFunction =
 
     const overwriteDateHistogramForLastBucketMode = () => {
       const { intervalString } = getBucketSize(req, interval, capabilities, barTargetUiSettings);
-      const { timezone } = capabilities;
+      const { timezone, forceFixedInterval } = capabilities;
 
       panel.series.forEach((column) => {
         const aggRoot = calculateAggRoot(doc, column);
@@ -44,7 +44,7 @@ export const dateHistogram: TableRequestProcessorsFunction =
             min: from.valueOf(),
             max: to.valueOf(),
           },
-          ...dateHistogramInterval(intervalString),
+          ...dateHistogramInterval(intervalString, forceFixedInterval),
         });
 
         overwrite(doc, aggRoot.replace(/\.aggs$/, '.meta'), {

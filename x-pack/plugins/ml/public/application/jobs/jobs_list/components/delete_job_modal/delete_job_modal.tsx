@@ -52,6 +52,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
         unsetShowFunction();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const showModal = useCallback((jobs: MlSummaryJob[]) => {
@@ -74,6 +75,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
       closeModal();
       refreshJobs();
     }, DELETING_JOBS_REFRESH_INTERVAL_MS);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobIds, refreshJobs]);
 
   if (modalVisible === false || jobIds.length === 0) {

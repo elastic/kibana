@@ -193,6 +193,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
           },
         });
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [rowIndex, columnId, setCellProps]);
 
     let cellContent = columnId === ACTUAL_CLASS_ID ? cellValue : accuracy;

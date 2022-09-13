@@ -4,9 +4,36 @@
     "id": "_aZE5nwBOpWiDweSth_E",
     "index": "exceptions-0002",
     "source": {
-      "@timestamp": "2019-09-02T00:41:06.527Z",
+      "@timestamp": "2019-09-02T00:45:06.527Z",
       "agent": {
         "name": "foo"
+      },
+      "unique_value": {
+        "test": "test field 2"
+      },
+      "user" : [ 
+        {
+          "name" : "foo",
+          "id" :  "123"
+        },
+        {
+          "name" : "bar",
+          "id" :  "456"
+        }
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_aZE5nwBOpWiDweSth_F",
+    "index": "exceptions-0002",
+    "source": {
+      "@timestamp": "2019-09-02T00:46:06.527Z",
+      "agent": {
+        "name": "bar"
       },
       "unique_value": {
         "test": "test field 2"

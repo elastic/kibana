@@ -170,7 +170,9 @@ export const RISK_OVERRIDE =
 
 export const RULES_CREATION_FORM = '[data-test-subj="stepDefineRule"]';
 
-export const RULES_CREATION_PREVIEW = '[data-test-subj="rule-preview"]';
+export const RULES_CREATION_PREVIEW_BUTTON = '[data-test-subj="preview-flyout"]';
+
+export const RULES_CREATION_PREVIEW_REFRESH_BUTTON = '[data-test-subj="previewSubmitButton"]';
 
 export const RULE_DESCRIPTION_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleDescription"] [data-test-subj="input"]';
@@ -222,8 +224,6 @@ export const TAGS_INPUT =
 
 export const TAGS_CLEAR_BUTTON =
   '[data-test-subj="detectionEngineStepAboutRuleTags"] [data-test-subj="comboBoxClearButton"]';
-
-export const EUI_FILTER_SELECT_ITEM = '.euiFilterSelectItem';
 
 export const THRESHOLD_INPUT_AREA = '[data-test-subj="thresholdInput"]';
 

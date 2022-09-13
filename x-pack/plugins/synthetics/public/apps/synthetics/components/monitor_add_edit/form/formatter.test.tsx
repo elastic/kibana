@@ -8,81 +8,85 @@
 import { format } from './formatter';
 
 describe('format', () => {
-  const formValues = {
-    type: 'http',
-    form_monitor_type: 'http',
-    enabled: true,
-    schedule: {
-      number: '3',
-      unit: 'm',
-    },
-    'service.name': '',
-    tags: [],
-    timeout: '16',
-    name: 'Sample name',
-    locations: [
-      {
-        id: 'us_central',
-        isServiceManaged: true,
+  let formValues: Record<string, unknown>;
+  beforeEach(() => {
+    formValues = {
+      type: 'http',
+      form_monitor_type: 'http',
+      enabled: true,
+      schedule: {
+        number: '3',
+        unit: 'm',
       },
-    ],
-    namespace: 'default',
-    origin: 'ui',
-    __ui: {
-      is_tls_enabled: false,
-    },
-    urls: 'sample url',
-    max_redirects: '0',
-    password: '',
-    proxy_url: '',
-    'check.response.body.negative': [],
-    'check.response.body.positive': [],
-    'response.include_body': 'on_error',
-    'check.response.headers': {},
-    'response.include_headers': true,
-    'check.response.status': [],
-    'check.request.body': {
-      value: '',
-      type: 'text',
-    },
-    'check.request.headers': {},
-    'check.request.method': 'GET',
-    username: '',
-    'ssl.certificate_authorities': '',
-    'ssl.certificate': '',
-    'ssl.key': '',
-    'ssl.key_passphrase': '',
-    'ssl.verification_mode': 'full',
-    'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
-    isTLSEnabled: false,
-    service: {
-      name: '',
-    },
-    check: {
-      request: {
-        method: 'GET',
-        headers: {},
-        body: {
-          type: 'text',
-          value: '',
+      'service.name': '',
+      tags: [],
+      timeout: '16',
+      name: 'Sample name',
+      locations: [
+        {
+          id: 'us_central',
+          isServiceManaged: true,
+        },
+      ],
+      namespace: 'default',
+      origin: 'ui',
+      __ui: {
+        is_tls_enabled: false,
+      },
+      urls: 'sample url',
+      max_redirects: '0',
+      password: '',
+      proxy_url: '',
+      'check.response.body.negative': [],
+      'check.response.body.positive': [],
+      'response.include_body': 'on_error',
+      'check.response.headers': {},
+      'response.include_headers': true,
+      'check.response.status': [],
+      'check.request.body': {
+        value: '',
+        type: 'text',
+      },
+      'check.request.headers': {},
+      'check.request.method': 'GET',
+      username: '',
+      'ssl.certificate_authorities': '',
+      'ssl.certificate': '',
+      'ssl.key': '',
+      'ssl.key_passphrase': '',
+      'ssl.verification_mode': 'full',
+      'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+      isTLSEnabled: false,
+      service: {
+        name: '',
+      },
+      check: {
+        request: {
+          method: 'GET',
+          headers: {},
+          body: {
+            type: 'text',
+            value: '',
+          },
+        },
+        response: {
+          status: [],
+          headers: {},
+          body: {
+            positive: [],
+            negative: [],
+          },
         },
       },
       response: {
-        status: [],
-        headers: {},
-        body: {
-          positive: [],
-          negative: [],
-        },
+        include_headers: true,
+        include_body: 'on_error',
       },
-    },
-    response: {
-      include_headers: true,
-      include_body: 'on_error',
-    },
-  };
+    };
+  });
 
-  it('correctly formats form fields to monitor type', () => {
+  it.each([[true], [false]])('correctly formats form fields to monitor type', (enabled) => {
+    formValues.enabled = enabled;
     expect(format(formValues)).toEqual({
       __ui: {
         is_tls_enabled: false,
@@ -98,7 +102,7 @@ describe('format', () => {
       'check.response.body.positive': [],
       'check.response.headers': {},
       'check.response.status': [],
-      enabled: true,
+      enabled,
       form_monitor_type: 'http',
       locations: [
         {

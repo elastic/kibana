@@ -25,6 +25,8 @@ export const OVERVIEW = '[data-test-subj="groupedNavPanelLink-overview"]';
 
 export const DETECTION_RESPONSE = '[data-test-subj="groupedNavPanelLink-detection_response"]';
 
+export const ENTITY_ANALYTICS = '[data-test-subj="groupedNavPanelLink-entity-analytics"]';
+
 export const KUBERNETES = '[data-test-subj="groupedNavPanelLink-kubernetes"]';
 
 export const CSP_DASHBOARD =
@@ -71,6 +73,7 @@ export const openNavigationPanelFor = (page: string) => {
     case OVERVIEW:
     case DETECTION_RESPONSE:
     case KUBERNETES:
+    case ENTITY_ANALYTICS:
     case CSP_DASHBOARD: {
       panel = DASHBOARDS;
       break;

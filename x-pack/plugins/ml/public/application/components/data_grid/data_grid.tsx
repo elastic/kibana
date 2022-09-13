@@ -176,6 +176,7 @@ export const DataGrid: FC<Props> = memo(
           return <DefaultCellPopover {...popoverProps} />;
         }
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [baseline, data]
     );
 

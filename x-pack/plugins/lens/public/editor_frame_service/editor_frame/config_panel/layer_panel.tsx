@@ -18,7 +18,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IndexPatternServiceAPI } from '../../../indexpattern_service/service';
+import { IndexPatternServiceAPI } from '../../../data_views_service/service';
 import { NativeRenderer } from '../../../native_renderer';
 import {
   StateSetter,
@@ -370,26 +370,36 @@ export function LayerPanel(
           </header>
 
           {groups.map((group, groupIndex) => {
-            let isMissing = false;
+            let errorText: string = '';
 
             if (!isEmptyLayer) {
               if (group.requiredMinDimensionCount) {
-                isMissing = group.accessors.length < group.requiredMinDimensionCount;
-              } else if (group.required) {
-                isMissing = group.accessors.length === 0;
-              }
-            }
-
-            const isMissingError = group.requiredMinDimensionCount
-              ? i18n.translate('xpack.lens.editorFrame.requiresTwoOrMoreFieldsWarningLabel', {
-                  defaultMessage: 'Requires {requiredMinDimensionCount} fields',
-                  values: {
-                    requiredMinDimensionCount: group.requiredMinDimensionCount,
-                  },
-                })
-              : i18n.translate('xpack.lens.editorFrame.requiresFieldWarningLabel', {
+                errorText = i18n.translate(
+                  'xpack.lens.editorFrame.requiresTwoOrMoreFieldsWarningLabel',
+                  {
+                    defaultMessage: 'Requires {requiredMinDimensionCount} fields',
+                    values: {
+                      requiredMinDimensionCount: group.requiredMinDimensionCount,
+                    },
+                  }
+                );
+              } else if (group.required && group.accessors.length === 0) {
+                errorText = i18n.translate('xpack.lens.editorFrame.requiresFieldWarningLabel', {
                   defaultMessage: 'Requires field',
                 });
+              } else if (group.dimensionsTooMany && group.dimensionsTooMany > 0) {
+                errorText = i18n.translate(
+                  'xpack.lens.editorFrame.tooManyDimensionsSingularWarningLabel',
+                  {
+                    defaultMessage:
+                      'Please remove {dimensionsTooMany, plural, one {a dimension} other {{dimensionsTooMany} dimensions}}',
+                    values: {
+                      dimensionsTooMany: group.dimensionsTooMany,
+                    },
+                  }
+                );
+              }
+            }
             const isOptional = !group.required && !group.suggestedValue;
             return (
               <EuiFormRow
@@ -425,8 +435,8 @@ export function LayerPanel(
                 }
                 labelType="legend"
                 key={group.groupId}
-                isInvalid={isMissing}
-                error={isMissing ? isMissingError : []}
+                isInvalid={Boolean(errorText)}
+                error={errorText}
               >
                 <>
                   {group.accessors.length ? (
@@ -524,8 +534,13 @@ export function LayerPanel(
                                       columnId,
                                       label: columnLabelMap?.[columnId] ?? '',
                                       hideTooltip,
-                                      invalid: group.invalid,
-                                      invalidMessage: group.invalidMessage,
+                                      ...(activeVisualization?.validateColumn?.(
+                                        visualizationState,
+                                        { dataViews },
+                                        layerId,
+                                        columnId,
+                                        group
+                                      ) || { invalid: false }),
                                     })}
                                   </>
                                 )}
