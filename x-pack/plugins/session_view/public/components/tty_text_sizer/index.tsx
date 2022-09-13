@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useEffect } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { Teletype } from '../../../common/types/process_tree';
 import { DEFAULT_TTY_FONT_SIZE } from '../../../common/constants';
@@ -15,6 +15,7 @@ export interface TTYTextSizerDeps {
   tty?: Teletype;
   containerHeight: number;
   fontSize: number;
+  isFullscreen: boolean;
   onFontSizeChanged(newSize: number): void;
 }
 
@@ -26,6 +27,7 @@ export const TTYTextSizer = ({
   tty,
   containerHeight,
   fontSize,
+  isFullscreen,
   onFontSizeChanged,
 }: TTYTextSizerDeps) => {
   const styles = useStyles();
@@ -33,14 +35,14 @@ export const TTYTextSizer = ({
     if (tty?.rows && containerHeight) {
       const lineHeight = DEFAULT_TTY_FONT_SIZE * LINE_HEIGHT_SCALE_RATIO;
       const desiredHeight = tty.rows * lineHeight;
-      return DEFAULT_TTY_FONT_SIZE * (containerHeight / desiredHeight);
+      return Math.floor(DEFAULT_TTY_FONT_SIZE * (containerHeight / desiredHeight));
     }
 
     return DEFAULT_TTY_FONT_SIZE;
   }, [containerHeight, tty?.rows]);
 
   const onFit = useCallback(() => {
-    if (fontSize === onFitFontSize || onFitFontSize > DEFAULT_TTY_FONT_SIZE) {
+    if (fontSize === onFitFontSize) {
       onFontSizeChanged(DEFAULT_TTY_FONT_SIZE);
     } else {
       onFontSizeChanged(onFitFontSize);
@@ -54,6 +56,14 @@ export const TTYTextSizer = ({
   const onZoomIn = useCallback(() => {
     onFontSizeChanged(Math.min(MAXIMUM_FONT_SIZE, fontSize + 1));
   }, [fontSize, onFontSizeChanged]);
+
+  useEffect(() => {
+    if (isFullscreen) {
+      onFontSizeChanged(onFitFontSize);
+    } else {
+      onFontSizeChanged(DEFAULT_TTY_FONT_SIZE);
+    }
+  }, [isFullscreen, onFitFontSize, onFontSizeChanged]);
 
   return (
     <EuiFlexGroup

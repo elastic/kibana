@@ -5,23 +5,19 @@
  * 2.0.
  */
 import React, { useRef, useState, useCallback } from 'react';
-import {
-  EuiBetaBadge,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiButton,
-} from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiButton } from '@elastic/eui';
 import { ProcessEvent } from '../../../common/types/process_tree';
 import { TTYSearchBar } from '../tty_search_bar';
 import { TTYTextSizer } from '../tty_text_sizer';
 import { useStyles } from './styles';
-import { DEFAULT_TTY_ROWS, DEFAULT_TTY_COLS, DEFAULT_TTY_FONT_SIZE } from '../../../common/constants';
+import {
+  DEFAULT_TTY_ROWS,
+  DEFAULT_TTY_COLS,
+  DEFAULT_TTY_FONT_SIZE,
+} from '../../../common/constants';
 import { useFetchIOEvents, useIOLines, useXtermPlayer } from './hooks';
 import { TTYPlayerControls } from '../tty_player_controls';
-import { BETA, TOGGLE_TTY_PLAYER, DETAIL_PANEL } from '../session_view/translations';
-import { useStyles: useSessionViewStyles } from '../session_view/styles';
+import { TOGGLE_TTY_PLAYER, DETAIL_PANEL } from '../session_view/translations';
 
 export interface TTYPlayerDeps {
   sessionEntityId: string;
@@ -64,7 +60,6 @@ export const TTYPlayer = ({
   }
 
   const styles = useStyles(tty);
-  const sessionViewStyles = useSessionViewStyles();
 
   const onSeekLine = useCallback(
     (line: number) => {
@@ -80,11 +75,8 @@ export const TTYPlayer = ({
 
   return (
     <div css={styles.container}>
-      <EuiPanel hasShadow={false} borderRadius="none" className="sessionViewerToolbar">
+      <EuiPanel hasShadow={false} borderRadius="none" hasBorder={false} css={styles.header}>
         <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge label={BETA} size="s" css={sessionViewStyles.betaBadge} />
-          </EuiFlexItem>
           <EuiFlexItem data-test-subj="sessionView:TTYSearch">
             <TTYSearchBar lines={lines} seekToLine={seekToLine} xTermSearchFn={search} />
           </EuiFlexItem>
@@ -138,6 +130,7 @@ export const TTYPlayer = ({
             containerHeight={scrollRef?.current?.offsetHeight || 0}
             fontSize={fontSize}
             onFontSizeChanged={setFontSize}
+            isFullscreen={isFullscreen}
           />
         }
       />

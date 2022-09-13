@@ -12,7 +12,7 @@ import { useEuiTheme } from '../../hooks';
 import { Teletype } from '../../../common/types/process_tree';
 
 export const useStyles = (tty?: Teletype) => {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, euiVars } = useEuiTheme();
   const cached = useMemo(() => {
     const { size, font, colors, border } = euiTheme;
 
@@ -23,8 +23,6 @@ export const useStyles = (tty?: Teletype) => {
       height: '100%',
       overflow: 'hidden',
       zIndex: 10,
-//      borderRadius: size.s,
-      backgroundColor: colors.ink,
       '.euiRangeLevel--warning': {
         backgroundColor: transparentize(colors.warning, 0.8),
       },
@@ -34,6 +32,11 @@ export const useStyles = (tty?: Teletype) => {
       '.euiRangeTick,.euiRangeLevel': {
         transition: 'left 500ms',
       },
+    };
+
+    const header: CSSObject = {
+      backgroundColor: `${euiVars.euiFormBackgroundDisabledColor}`,
+      padding: `${size.m} ${size.base}`,
     };
 
     const windowBoundsColor = transparentize(colors.ghost, 0.6);
@@ -66,17 +69,18 @@ export const useStyles = (tty?: Teletype) => {
 
     const scrollPane: CSSObject = {
       width: '100%',
-      height: 'calc(100% - 126px)',
-      border: border.thin,
+      height: 'calc(100% - 120px)',
       overflow: 'auto',
+      backgroundColor: colors.ink,
     };
 
     return {
       container,
+      header,
       terminal,
       scrollPane,
     };
-  }, [tty, euiTheme]);
+  }, [tty, euiVars, euiTheme]);
 
   return cached;
 };
