@@ -360,6 +360,10 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
         macos_system_ext: `${SECURITY_SOLUTION_DOCS}deploy-elastic-endpoint.html#system-extension-endpoint`,
         linux_deadlock: `${SECURITY_SOLUTION_DOCS}ts-management.html#linux-deadlock`,
       },
+      packageActionTroubleshooting: {
+        // TODO: Pending to be updated when docs are ready
+        es_connection: '',
+      },
       responseActions: `${SECURITY_SOLUTION_DOCS}response-actions.html`,
     },
     query: {
