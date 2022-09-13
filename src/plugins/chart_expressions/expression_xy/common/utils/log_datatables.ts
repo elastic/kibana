@@ -66,6 +66,7 @@ const getLogAnnotationTable = (data: Datatable, layer: AnnotationLayerConfigResu
     [['label'], strings.getLabelLabel()],
     [['time'], strings.getTimeLabel()],
   ];
+  const layerAnnotationsId = layer.annotations.map((annotation) => annotation.id);
   layer.annotations
     .filter((a): a is QueryPointEventAnnotationOutput => a.type === 'query_point_event_annotation')
     .forEach((annotation) => {
@@ -76,7 +77,11 @@ const getLogAnnotationTable = (data: Datatable, layer: AnnotationLayerConfigResu
       layerDimensions.push(...dynamicDimensions);
     });
 
-  return prepareLogTable(data, layerDimensions, true);
+  return prepareLogTable(
+    { ...data, rows: data.rows.filter((row) => layerAnnotationsId.includes(row.id)) },
+    layerDimensions,
+    true
+  );
 };
 
 export const logDatatable = (
