@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`installHostRiskScoreModule Create Index: ml_host_risk_score_{spaceId} 1`] = `
+exports[`installHostRiskScoreModule Create Index: ml_host_risk_score_customSpace 1`] = `
 Object {
   "index": "ml_host_risk_score_customSpace",
   "mappings": Object {
@@ -54,7 +54,7 @@ Object {
 }
 `;
 
-exports[`installHostRiskScoreModule Create Index: ml_host_risk_score_latest_{spaceId} 1`] = `
+exports[`installHostRiskScoreModule Create Index: ml_host_risk_score_latest_customSpace 1`] = `
 Object {
   "index": "ml_host_risk_score_latest_customSpace",
   "mappings": Object {
@@ -140,7 +140,7 @@ Object {
 }
 `;
 
-exports[`installHostRiskScoreModule Create Transform: ml_hostriskscore_latest_transform_{spaceId} 1`] = `
+exports[`installHostRiskScoreModule Create Transform: ml_hostriskscore_latest_transform_customSpace 1`] = `
 Object {
   "dest": Object {
     "index": "ml_host_risk_score_latest_customSpace",
@@ -166,7 +166,7 @@ Object {
 }
 `;
 
-exports[`installHostRiskScoreModule Create Transform: ml_hostriskscore_pivot_transform_{spaceId} 1`] = `
+exports[`installHostRiskScoreModule Create Transform: ml_hostriskscore_pivot_transform_customSpace 1`] = `
 Object {
   "dest": Object {
     "index": "ml_host_risk_score_customSpace",
@@ -414,7 +414,7 @@ Array [
 ]
 `;
 
-exports[`installUserRiskScoreModule Create Index: ml_user_risk_score_{spaceId} 1`] = `
+exports[`installUserRiskScoreModule Create Index: ml_user_risk_score_customSpace 1`] = `
 Object {
   "index": "ml_user_risk_score_customSpace",
   "mappings": Object {
@@ -468,7 +468,7 @@ Object {
 }
 `;
 
-exports[`installUserRiskScoreModule Create Index: ml_user_risk_score_latest_{spaceId} 1`] = `
+exports[`installUserRiskScoreModule Create Index: ml_user_risk_score_latest_customSpace 1`] = `
 Object {
   "index": "ml_user_risk_score_latest_customSpace",
   "mappings": Object {
@@ -554,7 +554,7 @@ Object {
 }
 `;
 
-exports[`installUserRiskScoreModule Create Transform: ml_userriskscore_latest_transform_{spaceId} 1`] = `
+exports[`installUserRiskScoreModule Create Transform: ml_userriskscore_latest_transform_customSpace 1`] = `
 Object {
   "dest": Object {
     "index": "ml_user_risk_score_latest_customSpace",
@@ -580,7 +580,7 @@ Object {
 }
 `;
 
-exports[`installUserRiskScoreModule Create Transform: ml_userriskscore_pivot_transform_{spaceId} 1`] = `
+exports[`installUserRiskScoreModule Create Transform: ml_userriskscore_pivot_transform_customSpace 1`] = `
 Object {
   "dest": Object {
     "index": "ml_user_risk_score_customSpace",

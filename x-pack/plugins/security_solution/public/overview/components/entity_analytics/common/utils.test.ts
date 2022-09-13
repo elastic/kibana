@@ -6,117 +6,142 @@
  */
 import type { HttpSetup } from '@kbn/core/public';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { bulkCreatePrebuiltSavedObjects } from '../../../../common/components/create_prebuilt_saved_objects/apis/bulk_create_prebuilt_saved_objects';
+import { bulkDeletePrebuiltSavedObjects } from '../../../../common/components/create_prebuilt_saved_objects/apis/bulk_delete_prebuilt_saved_objects';
 
 import * as api from './api';
 import {
+  getIngestPipelineName,
+  getRiskScoreLatestTransformId,
+  getRiskScorePivotTransformId,
   installHostRiskScoreModule,
   installUserRiskScoreModule,
   restartRiskScoreTransforms,
   uninstallRiskScoreModule,
 } from './utils';
+
 jest.mock('./api');
+jest.mock(
+  '../../../../common/components/create_prebuilt_saved_objects/apis/bulk_create_prebuilt_saved_objects'
+);
+jest.mock(
+  '../../../../common/components/create_prebuilt_saved_objects/apis/bulk_delete_prebuilt_saved_objects'
+);
 
 const mockHttp = {
   post: jest.fn(),
 } as unknown as HttpSetup;
+const mockSpaceId = 'customSpace';
 
 describe('installHostRiskScoreModule', () => {
   beforeAll(async () => {
-    await installHostRiskScoreModule({ http: mockHttp, spaceId: 'customSpace' });
+    await installHostRiskScoreModule({ http: mockHttp, spaceId: mockSpaceId });
   });
 
   afterAll(() => {
     jest.clearAllMocks();
   });
 
-  it('Create script: ml_hostriskscore_levels_script', async () => {
+  it(`Create script: ml_${RiskScoreEntity.host}riskscore_levels_script`, async () => {
     expect((api.createStoredScript as jest.Mock).mock.calls[0][0].options).toMatchSnapshot();
   });
 
-  it('Create script: ml_hostriskscore_init_script', async () => {
+  it(`Create script: ml_${RiskScoreEntity.host}riskscore_init_script`, async () => {
     expect((api.createStoredScript as jest.Mock).mock.calls[1][0].options).toMatchSnapshot();
   });
 
-  it('Create script: ml_hostriskscore_map_script', async () => {
+  it(`Create script: ml_${RiskScoreEntity.host}riskscore_map_script`, async () => {
     expect((api.createStoredScript as jest.Mock).mock.calls[2][0].options).toMatchSnapshot();
   });
 
-  it('Create script: ml_hostriskscore_reduce_script', async () => {
+  it(`Create script: ml_${RiskScoreEntity.host}riskscore_reduce_script`, async () => {
     expect((api.createStoredScript as jest.Mock).mock.calls[3][0].options).toMatchSnapshot();
   });
 
-  it('Create IngestPipeline: ml_hostriskscore_ingest_pipeline', async () => {
+  it(`Create IngestPipeline: ml_${RiskScoreEntity.host}riskscore_ingest_pipeline`, async () => {
     expect((api.createIngestPipeline as jest.Mock).mock.calls[0][0].options).toMatchSnapshot();
   });
 
-  it('Create Index: ml_host_risk_score_{spaceId}', async () => {
+  it(`Create Index: ml_${RiskScoreEntity.host}_risk_score_${mockSpaceId}`, async () => {
     expect((api.createIndices as jest.Mock).mock.calls[0][0].options).toMatchSnapshot();
   });
 
-  it('Create Index: ml_host_risk_score_latest_{spaceId}', async () => {
+  it(`Create Index: ml_${RiskScoreEntity.host}_risk_score_latest_${mockSpaceId}`, async () => {
     expect((api.createIndices as jest.Mock).mock.calls[1][0].options).toMatchSnapshot();
   });
 
-  it('Create Transform: ml_hostriskscore_pivot_transform_{spaceId}', async () => {
+  it(`Create Transform: ml_${RiskScoreEntity.host}riskscore_pivot_transform_${mockSpaceId}`, async () => {
     expect((api.createTransform as jest.Mock).mock.calls[0][0].options).toMatchSnapshot();
   });
 
-  it('Create Transform: ml_hostriskscore_latest_transform_{spaceId}', async () => {
+  it(`Create Transform: ml_${RiskScoreEntity.host}riskscore_latest_transform_${mockSpaceId}`, async () => {
     expect((api.createTransform as jest.Mock).mock.calls[1][0].options).toMatchSnapshot();
   });
 
-  it('Start Transforms', () => {
+  it(`Start Transforms`, () => {
     expect((api.startTransforms as jest.Mock).mock.calls[0][0].transformIds).toMatchSnapshot();
+  });
+
+  it(`Create Hosts dashboards`, () => {
+    expect(
+      (bulkCreatePrebuiltSavedObjects as jest.Mock).mock.calls[0][0].options.templateName
+    ).toEqual(`${RiskScoreEntity.host}RiskScoreDashboards`);
   });
 });
 
-describe('installUserRiskScoreModule', () => {
+describe(`installUserRiskScoreModule`, () => {
   beforeAll(async () => {
-    await installUserRiskScoreModule({ http: mockHttp, spaceId: 'customSpace' });
+    await installUserRiskScoreModule({ http: mockHttp, spaceId: `customSpace` });
   });
 
   afterAll(() => {
     jest.clearAllMocks();
   });
 
-  it('Create script: ml_userriskscore_levels_script', async () => {
+  it(`Create script: ml_${RiskScoreEntity.user}riskscore_levels_script`, async () => {
     expect((api.createStoredScript as jest.Mock).mock.calls[0][0].options).toMatchSnapshot();
   });
 
-  it('Create script: ml_userriskscore_map_script', async () => {
+  it(`Create script: ml_${RiskScoreEntity.user}riskscore_map_script`, async () => {
     expect((api.createStoredScript as jest.Mock).mock.calls[1][0].options).toMatchSnapshot();
   });
 
-  it('Create script: ml_userriskscore_reduce_script', async () => {
+  it(`Create script: ml_${RiskScoreEntity.user}riskscore_reduce_script`, async () => {
     expect((api.createStoredScript as jest.Mock).mock.calls[2][0].options).toMatchSnapshot();
   });
 
-  it('Create IngestPipeline: ml_userriskscore_ingest_pipeline', async () => {
+  it(`Create IngestPipeline: ml_${RiskScoreEntity.user}riskscore_ingest_pipeline`, async () => {
     expect((api.createIngestPipeline as jest.Mock).mock.calls[0][0].options).toMatchSnapshot();
   });
 
-  it('Create Index: ml_user_risk_score_{spaceId}', async () => {
+  it(`Create Index: ml_${RiskScoreEntity.user}_risk_score_${mockSpaceId}`, async () => {
     expect((api.createIndices as jest.Mock).mock.calls[0][0].options).toMatchSnapshot();
   });
 
-  it('Create Index: ml_user_risk_score_latest_{spaceId}', async () => {
+  it(`Create Index: ml_${RiskScoreEntity.user}_risk_score_latest_${mockSpaceId}`, async () => {
     expect((api.createIndices as jest.Mock).mock.calls[1][0].options).toMatchSnapshot();
   });
 
-  it('Create Transform: ml_userriskscore_pivot_transform_{spaceId}', async () => {
+  it(`Create Transform: ml_${RiskScoreEntity.user}riskscore_pivot_transform_${mockSpaceId}`, async () => {
     expect((api.createTransform as jest.Mock).mock.calls[0][0].options).toMatchSnapshot();
   });
 
-  it('Create Transform: ml_userriskscore_latest_transform_{spaceId}', async () => {
+  it(`Create Transform: ml_${RiskScoreEntity.user}riskscore_latest_transform_${mockSpaceId}`, async () => {
     expect((api.createTransform as jest.Mock).mock.calls[1][0].options).toMatchSnapshot();
   });
 
-  it('Start Transforms', () => {
+  it(`Start Transforms`, () => {
     expect((api.startTransforms as jest.Mock).mock.calls[0][0].transformIds).toMatchSnapshot();
+  });
+
+  it(`Create Users dashboards`, () => {
+    expect(
+      (bulkCreatePrebuiltSavedObjects as jest.Mock).mock.calls[0][0].options.templateName
+    ).toEqual(`${RiskScoreEntity.user}RiskScoreDashboards`);
   });
 });
 
-describe('uninstallRiskScoreModule - Host', () => {
+describe('UninstallRiskScoreModule - Host', () => {
   beforeAll(async () => {
     await uninstallRiskScoreModule({
       http: mockHttp,
@@ -129,16 +154,22 @@ describe('uninstallRiskScoreModule - Host', () => {
     jest.clearAllMocks();
   });
 
+  it('Delete Hosts dashboards', () => {
+    expect(
+      (bulkDeletePrebuiltSavedObjects as jest.Mock).mock.calls[0][0].options.templateName
+    ).toEqual(`${RiskScoreEntity.host}RiskScoreDashboards`);
+  });
+
   it('Delete Transforms', () => {
     expect((api.deleteTransforms as jest.Mock).mock.calls[0][0].transformIds).toEqual([
-      `ml_hostriskscore_pivot_transform_customSpace`,
-      `ml_hostriskscore_latest_transform_customSpace`,
+      getRiskScorePivotTransformId(RiskScoreEntity.host, mockSpaceId),
+      getRiskScoreLatestTransformId(RiskScoreEntity.host, mockSpaceId),
     ]);
   });
 
   it('Delete ingest pipelines', () => {
     expect((api.deleteIngestPipelines as jest.Mock).mock.calls[0][0].names).toEqual(
-      `ml_hostriskscore_ingest_pipeline`
+      getIngestPipelineName(RiskScoreEntity.host)
     );
   });
 });
@@ -156,16 +187,22 @@ describe('uninstallRiskScoreModule - User', () => {
     jest.clearAllMocks();
   });
 
+  it('Delete Users dashboards', () => {
+    expect(
+      (bulkDeletePrebuiltSavedObjects as jest.Mock).mock.calls[0][0].options.templateName
+    ).toEqual(`${RiskScoreEntity.user}RiskScoreDashboards`);
+  });
+
   it('Delete Transforms', () => {
     expect((api.deleteTransforms as jest.Mock).mock.calls[0][0].transformIds).toEqual([
-      `ml_userriskscore_pivot_transform_customSpace`,
-      `ml_userriskscore_latest_transform_customSpace`,
+      getRiskScorePivotTransformId(RiskScoreEntity.user, mockSpaceId),
+      getRiskScoreLatestTransformId(RiskScoreEntity.user, mockSpaceId),
     ]);
   });
 
   it('Delete ingest pipelines', () => {
     expect((api.deleteIngestPipelines as jest.Mock).mock.calls[0][0].names).toEqual(
-      `ml_userriskscore_ingest_pipeline`
+      getIngestPipelineName(RiskScoreEntity.user)
     );
   });
 });
@@ -185,13 +222,13 @@ describe('Restart Transforms - Host', () => {
 
   it('Restart Transforms with correct Ids', () => {
     expect((api.stopTransforms as jest.Mock).mock.calls[0][0].transformIds).toEqual([
-      `ml_hostriskscore_pivot_transform_customSpace`,
-      `ml_hostriskscore_latest_transform_customSpace`,
+      getRiskScorePivotTransformId(RiskScoreEntity.host, mockSpaceId),
+      getRiskScoreLatestTransformId(RiskScoreEntity.host, mockSpaceId),
     ]);
 
     expect((api.startTransforms as jest.Mock).mock.calls[0][0].transformIds).toEqual([
-      `ml_hostriskscore_pivot_transform_customSpace`,
-      `ml_hostriskscore_latest_transform_customSpace`,
+      getRiskScorePivotTransformId(RiskScoreEntity.host, mockSpaceId),
+      getRiskScoreLatestTransformId(RiskScoreEntity.host, mockSpaceId),
     ]);
   });
 });
@@ -211,13 +248,13 @@ describe('Restart Transforms - User', () => {
 
   it('Restart Transforms with correct Ids', () => {
     expect((api.stopTransforms as jest.Mock).mock.calls[0][0].transformIds).toEqual([
-      `ml_userriskscore_pivot_transform_customSpace`,
-      `ml_userriskscore_latest_transform_customSpace`,
+      getRiskScorePivotTransformId(RiskScoreEntity.user, mockSpaceId),
+      getRiskScoreLatestTransformId(RiskScoreEntity.user, mockSpaceId),
     ]);
 
     expect((api.startTransforms as jest.Mock).mock.calls[0][0].transformIds).toEqual([
-      `ml_userriskscore_pivot_transform_customSpace`,
-      `ml_userriskscore_latest_transform_customSpace`,
+      getRiskScorePivotTransformId(RiskScoreEntity.user, mockSpaceId),
+      getRiskScoreLatestTransformId(RiskScoreEntity.user, mockSpaceId),
     ]);
   });
 });
