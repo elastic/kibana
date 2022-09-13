@@ -38,6 +38,7 @@ import type {
 } from './types';
 import { FieldSelect } from './field_select';
 import { Datasource } from '../types';
+import { LayerPanel } from './layerpanel';
 
 export function getTextBasedLanguagesDatasource({
   core,
@@ -130,7 +131,11 @@ export function getTextBasedLanguagesDatasource({
     getPersistableState({ layers }: TextBasedLanguagesPrivateState) {
       return { state: { layers }, savedObjectReferences: [] };
     },
-    isValidColumn() {
+    isValidColumn(state, indexPatterns, layerId, columnId) {
+      const layer = state.layers[layerId];
+      const column = layer.columns.find((c) => c.columnId === columnId);
+      const indexPattern = indexPatterns[layer.index];
+      if (!column || !indexPattern) return false;
       return true;
     },
     insertLayer(state: TextBasedLanguagesPrivateState, newLayerId: string) {
@@ -330,13 +335,9 @@ export function getTextBasedLanguagesDatasource({
       props: DatasourceLayerPanelProps<TextBasedLanguagesPrivateState>
     ) => {
       render(
-        <span>
-          {
-            props.state.indexPatternRefs.find(
-              (r) => r.id === props.state.layers[props.layerId].index
-            )?.title
-          }
-        </span>,
+        <I18nProvider>
+          <LayerPanel {...props} />
+        </I18nProvider>,
         domElement
       );
     },
@@ -372,8 +373,8 @@ export function getTextBasedLanguagesDatasource({
 
       if (dropType === 'field_add') {
         Object.keys(layers).forEach((layerId) => {
-          const field = layers[layerId].allColumns.find((f) => f.columnId === source.id);
-          const currentLayer = props.state.layers[layerId];
+          const currentLayer = layers[layerId];
+          const field = currentLayer.allColumns.find((f) => f.columnId === source.id);
           const columnExists = currentLayer.allColumns.some((c) => c.columnId === source.columnId);
           const numCols = currentLayer.allColumns.filter((c) => c.fieldName === field?.fieldName);
           const newColumn = {
@@ -384,14 +385,20 @@ export function getTextBasedLanguagesDatasource({
             fieldName: field?.fieldName ?? '',
             meta: field?.meta,
           };
+          const columns = currentLayer.columns.filter((c) => c.columnId !== target.columnId);
+          columns.push(newColumn);
+
+          const allColumns = currentLayer.allColumns.filter((c) => c.columnId !== target.columnId);
+          allColumns.push(newColumn);
+
           props.setState({
             ...props.state,
             layers: {
               ...props.state.layers,
               [layerId]: {
                 ...props.state.layers[layerId],
-                columns: [...currentLayer.columns, newColumn],
-                allColumns: [...currentLayer.allColumns, newColumn],
+                columns,
+                allColumns,
               },
             },
           });
@@ -403,7 +410,7 @@ export function getTextBasedLanguagesDatasource({
 
     getPublicAPI({ state, layerId }: PublicAPIProps<TextBasedLanguagesPrivateState>) {
       return {
-        datasourceId: 'sql',
+        datasourceId: 'textBasedLanguages',
 
         getTableSpec: () => {
           return (

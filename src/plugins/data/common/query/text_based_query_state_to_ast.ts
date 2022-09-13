@@ -18,7 +18,7 @@ import {
 } from '..';
 
 interface Args extends QueryState {
-  timeFieldName: string;
+  timeFieldName?: string;
   inputQuery?: Query;
 }
 

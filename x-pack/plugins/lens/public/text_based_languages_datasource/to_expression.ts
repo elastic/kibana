@@ -7,8 +7,7 @@
 
 import { Ast } from '@kbn/interpreter';
 import type { TimeRange } from '@kbn/es-query';
-import { timerangeToAst, aggregateQueryToAst } from '@kbn/data-plugin/common';
-import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
+import { textBasedQueryStateToExpressionAst } from '@kbn/data-plugin/common';
 import type { OriginalColumn } from '../../common/types';
 import { TextBasedLanguagesPrivateState, TextBasedLanguagesLayer, IndexPatternRef } from './types';
 
@@ -41,28 +40,21 @@ function getExpressionForLayer(
     }
   });
 
-  const kibana = buildExpressionFunction('kibana', {});
-  const kibanaContext = buildExpressionFunction('kibana_context', {
-    timeRange: timeRange && timerangeToAst(timeRange),
-  });
-  const ast = buildExpression([kibana, kibanaContext]).toAst();
   const timeFieldName = refs.find((r) => r.id === layer.index)?.timeField;
-  if (layer.query) {
-    const essql = aggregateQueryToAst(layer.query, timeFieldName);
+  const textBasedQueryToAst = textBasedQueryStateToExpressionAst({
+    query: layer.query,
+    time: timeRange,
+    timeFieldName,
+  });
 
-    if (essql) {
-      ast.chain.push(essql);
-    }
-  }
-
-  ast.chain.push({
+  textBasedQueryToAst.chain.push({
     type: 'function',
     function: 'lens_map_to_columns',
     arguments: {
       idMap: [JSON.stringify(idMapper)],
     },
   });
-  return ast;
+  return textBasedQueryToAst;
 }
 
 export function toExpression(
