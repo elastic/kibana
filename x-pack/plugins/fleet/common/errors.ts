@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FleetErrorType } from './types';
+import type { FleetErrorType } from './types';
 
 export class IngestManagerError extends Error {
   attributes?: { type: FleetErrorType };
