@@ -100,7 +100,9 @@ export const hydrateSavedObjects = async ({
           }
         });
 
-      await server.authSavedObjectsClient?.bulkUpdate(updatedObjects);
+      await server.authSavedObjectsClient?.bulkUpdate<DecryptedSyntheticsMonitorSavedObject>(
+        updatedObjects
+      );
     }
   } catch (e) {
     server.logger.error(e);

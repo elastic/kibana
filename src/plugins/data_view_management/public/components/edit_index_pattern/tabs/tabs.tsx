@@ -29,6 +29,7 @@ import {
   DataViewField,
   DataViewsPublicPluginStart,
   META_FIELDS,
+  RuntimeField,
 } from '@kbn/data-views-plugin/public';
 import {
   SavedObjectRelation,
@@ -57,6 +58,7 @@ interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   refreshFields: () => void;
   relationships: SavedObjectRelation[];
   allowedTypes: SavedObjectManagementTypeInfo[];
+  compositeRuntimeFields: Record<string, RuntimeField>;
 }
 
 interface FilterItems {
@@ -144,6 +146,7 @@ export function Tabs({
   refreshFields,
   relationships,
   allowedTypes,
+  compositeRuntimeFields,
 }: TabsProps) {
   const {
     uiSettings,
@@ -462,6 +465,7 @@ export function Tabs({
                 {(deleteField) => (
                   <IndexedFieldsTable
                     fields={fields}
+                    compositeRuntimeFields={compositeRuntimeFields}
                     indexPattern={indexPattern}
                     fieldFilter={fieldFilter}
                     fieldWildcardMatcher={fieldWildcardMatcherDecorated}
@@ -554,6 +558,7 @@ export function Tabs({
       overlays,
       theme,
       dataViews,
+      compositeRuntimeFields,
       http,
       application,
       savedObjectsManagement,
