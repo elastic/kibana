@@ -70,9 +70,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Top dependency spans when data is loaded',
     { config: 'basic', archives: [] },
     () => {
-      const javaInstance = apm.service('java', 'production', 'java').instance('instance-a');
+      const javaInstance = apm
+        .service({ name: 'java', environment: 'production', agentName: 'java' })
+        .instance('instance-a');
 
-      const goInstance = apm.service('go', 'development', 'go').instance('instance-a');
+      const goInstance = apm
+        .service({ name: 'go', environment: 'development', agentName: 'go' })
+        .instance('instance-a');
 
       before(async () => {
         await synthtraceEsClient.index([
@@ -81,40 +85,48 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(1)
             .generator((timestamp) => [
               javaInstance
-                .span('without transaction', 'db', 'elasticsearch')
+                .span({
+                  spanName: 'without transaction',
+                  spanType: 'db',
+                  spanSubtype: 'elasticsearch',
+                })
                 .destination('elasticsearch')
                 .duration(200)
                 .timestamp(timestamp),
               javaInstance
-                .transaction('GET /api/my-endpoint')
+                .transaction({ transactionName: 'GET /api/my-endpoint' })
                 .duration(100)
                 .timestamp(timestamp)
                 .children(
                   javaInstance
-                    .span('/_search', 'db', 'elasticsearch')
+                    .span({ spanName: '/_search', spanType: 'db', spanSubtype: 'elasticsearch' })
                     .destination('elasticsearch')
                     .duration(100)
                     .success()
                     .timestamp(timestamp)
                 ),
               goInstance
-                .transaction('GET /api/my-other-endpoint')
+                .transaction({ transactionName: 'GET /api/my-other-endpoint' })
                 .duration(100)
                 .timestamp(timestamp)
                 .children(
                   goInstance
-                    .span('/_search', 'db', 'elasticsearch')
+                    .span({ spanName: '/_search', spanType: 'db', spanSubtype: 'elasticsearch' })
                     .destination('elasticsearch')
                     .duration(50)
                     .timestamp(timestamp)
                 ),
               goInstance
-                .transaction('GET /api/my-other-endpoint')
+                .transaction({ transactionName: 'GET /api/my-other-endpoint' })
                 .duration(100)
                 .timestamp(timestamp)
                 .children(
                   goInstance
-                    .span('/_search', 'db', 'fake-elasticsearch')
+                    .span({
+                      spanName: '/_search',
+                      spanType: 'db',
+                      spanSubtype: 'fake-elasticsearch',
+                    })
                     .destination('fake-elasticsearch')
                     .duration(50)
                     .timestamp(timestamp)

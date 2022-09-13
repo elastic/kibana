@@ -19,7 +19,11 @@ export function generateMultipleServicesData({
     .fill(0)
     .map((_, idx) =>
       apm
-        .service(`${idx}`, 'production', 'nodejs')
+        .service({
+          name: `${idx}`,
+          environment: 'production',
+          agentName: 'nodejs',
+        })
         .instance('opbeans-node-prod-1')
     );
 
@@ -29,7 +33,7 @@ export function generateMultipleServicesData({
     .generator((timestamp, index) =>
       services.map((service) =>
         service
-          .transaction('GET /foo')
+          .transaction({ transactionName: 'GET /foo' })
           .timestamp(timestamp)
           .duration(500)
           .success()

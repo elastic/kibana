@@ -33,14 +33,16 @@ export async function generateData({
   const { serviceName, agentName, rate, cloud, transaction } = dataConfig;
   const { provider, serviceName: cloudServiceName } = cloud;
 
-  const instance = apm.service(serviceName, 'production', agentName).instance('instance-a');
+  const instance = apm
+    .service({ name: serviceName, environment: 'production', agentName })
+    .instance('instance-a');
 
   const traceEvents = timerange(start, end)
     .interval('30s')
     .rate(rate)
     .generator((timestamp) =>
       instance
-        .transaction(transaction.name)
+        .transaction({ transactionName: transaction.name })
         .defaults({
           'kubernetes.pod.uid': 'test',
           'cloud.provider': provider,

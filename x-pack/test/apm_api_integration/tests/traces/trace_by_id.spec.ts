@@ -55,25 +55,31 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when('Trace exists', { config: 'basic', archives: [] }, () => {
     let serviceATraceId: string;
     before(async () => {
-      const instanceJava = apm.service('synth-apple', 'production', 'java').instance('instance-b');
+      const instanceJava = apm
+        .service({ name: 'synth-apple', environment: 'production', agentName: 'java' })
+        .instance('instance-b');
       const events = timerange(start, end)
         .interval('1m')
         .rate(1)
         .generator((timestamp) => {
           return [
             instanceJava
-              .transaction('GET /apple 🍏')
+              .transaction({ transactionName: 'GET /apple 🍏' })
               .timestamp(timestamp)
               .duration(1000)
               .failure()
               .errors(
                 instanceJava
-                  .error('[ResponseError] index_not_found_exception')
+                  .error({ message: '[ResponseError] index_not_found_exception' })
                   .timestamp(timestamp + 50)
               )
               .children(
                 instanceJava
-                  .span('get_green_apple_🍏', 'db', 'elasticsearch')
+                  .span({
+                    spanName: 'get_green_apple_🍏',
+                    spanType: 'db',
+                    spanSubtype: 'elasticsearch',
+                  })
                   .timestamp(timestamp + 50)
                   .duration(900)
                   .success()

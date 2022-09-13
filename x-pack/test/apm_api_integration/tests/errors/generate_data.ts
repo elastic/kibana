@@ -31,7 +31,9 @@ export async function generateData({
   start: number;
   end: number;
 }) {
-  const serviceGoProdInstance = apm.service(serviceName, 'production', 'go').instance('instance-a');
+  const serviceGoProdInstance = apm
+    .service({ name: serviceName, environment: 'production', agentName: 'go' })
+    .instance('instance-a');
 
   const interval = '1m';
 
@@ -43,7 +45,7 @@ export async function generateData({
       .rate(transaction.successRate)
       .generator((timestamp) =>
         serviceGoProdInstance
-          .transaction(transaction.name)
+          .transaction({ transactionName: transaction.name })
           .timestamp(timestamp)
           .duration(1000)
           .success()
@@ -54,9 +56,11 @@ export async function generateData({
           .rate(transaction.failureRate)
           .generator((timestamp) =>
             serviceGoProdInstance
-              .transaction(transaction.name)
+              .transaction({ transactionName: transaction.name })
               .errors(
-                serviceGoProdInstance.error(`Error ${index}`, transaction.name).timestamp(timestamp)
+                serviceGoProdInstance
+                  .error({ message: `Error ${index}`, type: transaction.name })
+                  .timestamp(timestamp)
               )
               .duration(1000)
               .timestamp(timestamp)

@@ -53,11 +53,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   // FLAKY: https://github.com/elastic/kibana/issues/127939
   registry.when.skip('Sorted and filtered services', { config: 'trial', archives: [] }, () => {
     before(async () => {
-      const serviceA = apm.service(SERVICE_NAME_PREFIX + 'a', 'production', 'java').instance('a');
+      const serviceA = apm
+        .service({ name: SERVICE_NAME_PREFIX + 'a', environment: 'production', agentName: 'java' })
+        .instance('a');
 
-      const serviceB = apm.service(SERVICE_NAME_PREFIX + 'b', 'development', 'go').instance('b');
+      const serviceB = apm
+        .service({ name: SERVICE_NAME_PREFIX + 'b', environment: 'development', agentName: 'go' })
+        .instance('b');
 
-      const serviceC = apm.service(SERVICE_NAME_PREFIX + 'c', 'development', 'go').instance('c');
+      const serviceC = apm
+        .service({ name: SERVICE_NAME_PREFIX + 'c', environment: 'development', agentName: 'go' })
+        .instance('c');
 
       const spikeStart = new Date('2021-01-07T12:00:00.000Z').getTime();
       const spikeEnd = new Date('2021-01-07T14:00:00.000Z').getTime();
@@ -69,11 +75,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const isInSpike = spikeStart <= timestamp && spikeEnd >= timestamp;
           return [
             serviceA
-              .transaction('GET /api')
+              .transaction({ transactionName: 'GET /api' })
               .duration(isInSpike ? 1000 : 1100)
               .timestamp(timestamp),
             serviceB
-              .transaction('GET /api')
+              .transaction({ transactionName: 'GET /api' })
               .duration(isInSpike ? 1000 : 4000)
               .timestamp(timestamp),
           ];
@@ -86,7 +92,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         .interval('15m')
         .rate(1)
         .generator((timestamp) => {
-          return serviceC.transaction('GET /api', 'custom').duration(1000).timestamp(timestamp);
+          return serviceC
+            .transaction({ transactionName: 'GET /api', transactionType: 'custom' })
+            .duration(1000)
+            .timestamp(timestamp);
         });
 
       await synthtraceClient.index(eventsWithinTimerange.merge(eventsOutsideOfTimerange));

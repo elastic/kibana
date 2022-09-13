@@ -27,7 +27,7 @@ This library can currently be used in two ways:
 ```ts
 import { service, timerange, toElasticsearchOutput } from '@kbn/apm-synthtrace';
 
-const instance = service('synth-go', 'production', 'go').instance('instance-a');
+const instance = service({name: 'synth-go', environment: 'production', agentName: 'go'}).instance('instance-a');
 
 const from = new Date('2021-01-01T12:00:00.000Z').getTime();
 const to = new Date('2021-01-01T12:00:00.000Z').getTime();
@@ -37,7 +37,7 @@ const traceEvents = timerange(from, to)
   .rate(10)
   .flatMap((timestamp) =>
     instance
-      .transaction('GET /api/product/list')
+      .transaction({transactionName: 'GET /api/product/list'})
       .timestamp(timestamp)
       .duration(1000)
       .success()

@@ -101,9 +101,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const NORMAL_RATE = 1;
 
       before(async () => {
-        const serviceA = apm.service('a', 'production', 'java').instance('a');
+        const serviceA = apm
+          .service({ name: 'a', environment: 'production', agentName: 'java' })
+          .instance('a');
 
-        const serviceB = apm.service('b', 'development', 'go').instance('b');
+        const serviceB = apm
+          .service({ name: 'b', environment: 'development', agentName: 'go' })
+          .instance('b');
 
         const events = timerange(new Date(start).getTime(), new Date(end).getTime())
           .interval('1m')
@@ -117,13 +121,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             return [
               ...range(0, count).flatMap((_) =>
                 serviceA
-                  .transaction('tx', 'request')
+                  .transaction({ transactionName: 'tx', transactionType: 'request' })
                   .timestamp(timestamp)
                   .duration(duration)
                   .outcome(outcome)
               ),
               serviceB
-                .transaction('tx', 'Worker')
+                .transaction({ transactionName: 'tx', transactionType: 'Worker' })
                 .timestamp(timestamp)
                 .duration(duration)
                 .success(),

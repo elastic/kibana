@@ -68,7 +68,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const GO_PROD_ID_ERROR_RATE = 50;
       before(async () => {
         const serviceGoProdInstance = apm
-          .service(serviceName, 'production', 'go')
+          .service({ name: serviceName, environment: 'production', agentName: 'go' })
           .instance('instance-a');
 
         const transactionNameProductList = 'GET /api/product/list';
@@ -80,7 +80,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(GO_PROD_LIST_RATE)
             .generator((timestamp) =>
               serviceGoProdInstance
-                .transaction(transactionNameProductList, 'Worker')
+                .transaction({
+                  transactionName: transactionNameProductList,
+                  transactionType: 'Worker',
+                })
                 .timestamp(timestamp)
                 .duration(1000)
                 .success()
@@ -90,7 +93,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(GO_PROD_LIST_ERROR_RATE)
             .generator((timestamp) =>
               serviceGoProdInstance
-                .transaction(transactionNameProductList, 'Worker')
+                .transaction({
+                  transactionName: transactionNameProductList,
+                  transactionType: 'Worker',
+                })
                 .duration(1000)
                 .timestamp(timestamp)
                 .failure()
@@ -100,7 +106,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(GO_PROD_ID_RATE)
             .generator((timestamp) =>
               serviceGoProdInstance
-                .transaction(transactionNameProductId)
+                .transaction({ transactionName: transactionNameProductId })
                 .timestamp(timestamp)
                 .duration(1000)
                 .success()
@@ -110,7 +116,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(GO_PROD_ID_ERROR_RATE)
             .generator((timestamp) =>
               serviceGoProdInstance
-                .transaction(transactionNameProductId)
+                .transaction({ transactionName: transactionNameProductId })
                 .duration(1000)
                 .timestamp(timestamp)
                 .failure()

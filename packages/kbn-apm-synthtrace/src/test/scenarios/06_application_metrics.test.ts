@@ -14,7 +14,9 @@ describe('application metrics', () => {
   const timestamp = new Date('2021-01-01T00:00:00.000Z').getTime();
 
   beforeEach(() => {
-    instance = apm.service('opbeans-java', 'production', 'java').instance('instance');
+    instance = apm
+      .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
+      .instance('instance');
   });
   it('generates application metricsets', () => {
     const events = instance

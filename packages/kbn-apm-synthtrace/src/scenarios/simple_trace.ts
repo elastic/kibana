@@ -31,24 +31,30 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
       const failedTimestamps = range.ratePerMinute(180);
 
       const instances = [...Array(numServices).keys()].map((index) =>
-        apm.service(`opbeans-go-${index}`, ENVIRONMENT, 'go').instance('instance')
+        apm
+          .service({ name: `opbeans-go-${index}`, environment: ENVIRONMENT, agentName: 'go' })
+          .instance('instance')
       );
       const instanceSpans = (instance: Instance) => {
         const successfulTraceEvents = successfulTimestamps.generator((timestamp) =>
           instance
-            .transaction(transactionName)
+            .transaction({ transactionName })
             .timestamp(timestamp)
             .duration(1000)
             .success()
             .children(
               instance
-                .span('GET apm-*/_search', 'db', 'elasticsearch')
+                .span({
+                  spanName: 'GET apm-*/_search',
+                  spanType: 'db',
+                  spanSubtype: 'elasticsearch',
+                })
                 .duration(1000)
                 .success()
                 .destination('elasticsearch')
                 .timestamp(timestamp),
               instance
-                .span('custom_operation', 'custom')
+                .span({ spanName: 'custom_operation', spanType: 'custom' })
                 .duration(100)
                 .success()
                 .timestamp(timestamp)
@@ -57,12 +63,14 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
 
         const failedTraceEvents = failedTimestamps.generator((timestamp) =>
           instance
-            .transaction(transactionName)
+            .transaction({ transactionName })
             .timestamp(timestamp)
             .duration(1000)
             .failure()
             .errors(
-              instance.error('[ResponseError] index_not_found_exception').timestamp(timestamp + 50)
+              instance
+                .error({ message: '[ResponseError] index_not_found_exception' })
+                .timestamp(timestamp + 50)
             )
         );
 

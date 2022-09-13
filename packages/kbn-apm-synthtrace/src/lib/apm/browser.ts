@@ -12,7 +12,13 @@ import { RumSpan } from './rum_span';
 import { RumTransaction } from './rum_transaction';
 
 export class Browser extends Entity<ApmFields> {
-  transaction(transactionName: string, transactionType: string = 'page-load') {
+  transaction({
+    transactionName,
+    transactionType = 'page-load',
+  }: {
+    transactionName: string;
+    transactionType?: string;
+  }) {
     return new RumTransaction({
       ...this.fields,
       'transaction.name': transactionName,
@@ -20,7 +26,15 @@ export class Browser extends Entity<ApmFields> {
     });
   }
 
-  span(spanName: string, spanType: string, spanSubtype: string) {
+  span({
+    spanName,
+    spanType,
+    spanSubtype,
+  }: {
+    spanName: string;
+    spanType: string;
+    spanSubtype: string;
+  }) {
     return new RumSpan({
       ...this.fields,
       'span.name': spanName,
@@ -30,11 +44,19 @@ export class Browser extends Entity<ApmFields> {
   }
 }
 
-export function browser(serviceName: string, production: string, userAgent: ApmUserAgentFields) {
+export function browser({
+  serviceName,
+  environment,
+  userAgent,
+}: {
+  serviceName: string;
+  environment: string;
+  userAgent: ApmUserAgentFields;
+}) {
   return new Browser({
     'agent.name': 'rum-js',
     'service.name': serviceName,
-    'service.environment': production,
+    'service.environment': environment,
     ...userAgent,
   });
 }

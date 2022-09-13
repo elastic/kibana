@@ -29,12 +29,20 @@ function generateData({
   const range = timerange(from, to);
 
   const service1 = apm
-    .service(serviceName, 'production', 'java')
+    .service({
+      name: serviceName,
+      environment: 'production',
+      agentName: 'java',
+    })
     .instance('service-1-prod-1')
     .podId('service-1-prod-1-pod');
 
   const service2 = apm
-    .service(serviceName, 'development', 'nodejs')
+    .service({
+      name: serviceName,
+      environment: 'development',
+      agentName: 'nodejs',
+    })
     .instance('opbeans-node-prod-1');
 
   return range
@@ -42,12 +50,12 @@ function generateData({
     .rate(1)
     .generator((timestamp, index) => [
       service1
-        .transaction('GET /apple 🍎 ')
+        .transaction({ transactionName: 'GET /apple 🍎 ' })
         .timestamp(timestamp)
         .duration(1000)
         .success(),
       service2
-        .transaction('GET /banana 🍌')
+        .transaction({ transactionName: 'GET /banana 🍌' })
         .timestamp(timestamp)
         .duration(500)
         .success(),
