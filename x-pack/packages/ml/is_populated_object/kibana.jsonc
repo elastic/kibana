@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ml-is-populated-object",
+  "owner": "@elastic/ml-ui",
+  "runtimeDeps": [],
+  "typeDeps": []
+}

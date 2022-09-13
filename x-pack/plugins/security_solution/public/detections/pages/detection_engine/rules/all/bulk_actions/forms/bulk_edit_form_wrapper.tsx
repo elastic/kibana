@@ -7,6 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
+import type { EuiFlyoutSize } from '@elastic/eui';
 import {
   useGeneratedHtmlId,
   EuiFlyout,
@@ -32,6 +33,7 @@ interface BulkEditFormWrapperProps {
   children: React.ReactNode;
   onClose: () => void;
   onSubmit: () => void;
+  flyoutSize?: EuiFlyoutSize;
 }
 
 const BulkEditFormWrapperComponent: FC<BulkEditFormWrapperProps> = ({
@@ -41,6 +43,7 @@ const BulkEditFormWrapperComponent: FC<BulkEditFormWrapperProps> = ({
   children,
   onClose,
   onSubmit,
+  flyoutSize = 's',
 }) => {
   const simpleFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'RulesBulkEditForm',
@@ -48,7 +51,7 @@ const BulkEditFormWrapperComponent: FC<BulkEditFormWrapperProps> = ({
 
   const { isValid } = form;
   return (
-    <EuiFlyout ownFocus onClose={onClose} aria-labelledby={simpleFlyoutTitleId} size="s">
+    <EuiFlyout ownFocus onClose={onClose} aria-labelledby={simpleFlyoutTitleId} size={flyoutSize}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m" data-test-subj="rulesBulkEditFormTitle">
           <h2 id={simpleFlyoutTitleId}>{title}</h2>

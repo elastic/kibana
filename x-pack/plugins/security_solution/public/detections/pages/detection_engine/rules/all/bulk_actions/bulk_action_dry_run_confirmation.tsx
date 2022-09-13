@@ -10,7 +10,7 @@ import { EuiConfirmModal } from '@elastic/eui';
 
 import * as i18n from '../../translations';
 import { BulkActionRuleErrorsList } from './bulk_action_rule_errors_list';
-import { BulkAction } from '../../../../../../../common/detection_engine/schemas/common/schemas';
+import { BulkAction } from '../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 
 import type { BulkActionForConfirmation, DryRunResult } from './types';

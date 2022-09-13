@@ -22,6 +22,9 @@ import {
   VisState810,
   VisState820,
   VisState830,
+  LensDocShape850,
+  XYVisStatePre850,
+  VisState850,
 } from './types';
 import { layerTypes, LegacyMetricState } from '../../common';
 import { Filter } from '@kbn/es-query';
@@ -2288,6 +2291,44 @@ describe('Lens migrations', () => {
       ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       const visState = result.attributes.state.visualization as VisState830;
       expect(visState.valueLabels).toBe('hide');
+    });
+  });
+
+  describe('8.5.0 Add Annotation event type and dataView references', () => {
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
+    const example = {
+      type: 'lens',
+      id: 'mocked-saved-object-id',
+      attributes: {
+        savedObjectId: '1',
+        title: 'MyRenamedOps',
+        description: '',
+        visualizationType: 'lnsXY',
+        state: {
+          visualization: {
+            layers: [
+              { layerType: 'data' },
+              {
+                layerType: 'annotations',
+                annotations: [{ id: 'annotation-id' }],
+              },
+            ],
+          },
+        },
+      },
+    } as unknown as SavedObjectUnsanitizedDoc<LensDocShape850<XYVisStatePre850>>;
+
+    it('migrates existing annotation events as manual type', () => {
+      const result = migrations['8.5.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      const visState = result.attributes.state.visualization as VisState850;
+      const [dataLayer, annotationLayer] = visState.layers;
+      expect(dataLayer).toEqual({ layerType: 'data' });
+      expect(annotationLayer).toEqual({
+        layerType: 'annotations',
+        annotations: [{ id: 'annotation-id', type: 'manual' }],
+      });
     });
   });
 

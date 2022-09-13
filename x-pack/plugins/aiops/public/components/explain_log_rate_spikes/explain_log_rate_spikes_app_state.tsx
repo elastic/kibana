@@ -32,7 +32,9 @@ import {
   isRisonSerializationRequired,
   getNestedProperty,
   SetUrlState,
-} from '../../hooks/url_state';
+} from '../../hooks/use_url_state';
+import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
+import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import { ExplainLogRateSpikesPage } from './explain_log_rate_spikes_page';
 
@@ -41,6 +43,8 @@ export interface ExplainLogRateSpikesAppStateProps {
   dataView: DataView;
   /** The saved search to analyze. */
   savedSearch: SavedSearch | SavedSearchSavedObject | null;
+  /** App dependencies */
+  appDependencies: AiopsAppDependencies;
 }
 
 const defaultSearchQuery = {
@@ -69,6 +73,7 @@ export const restorableDefaults = getDefaultAiOpsListState();
 export const ExplainLogRateSpikesAppState: FC<ExplainLogRateSpikesAppStateProps> = ({
   dataView,
   savedSearch,
+  appDependencies,
 }) => {
   const history = useHistory();
   const { search: urlSearchString } = useLocation();
@@ -157,8 +162,10 @@ export const ExplainLogRateSpikesAppState: FC<ExplainLogRateSpikesAppStateProps>
   }
 
   return (
-    <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
-      <ExplainLogRateSpikesPage dataView={dataView} savedSearch={savedSearch} />
-    </UrlStateContextProvider>
+    <AiopsAppContext.Provider value={appDependencies}>
+      <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
+        <ExplainLogRateSpikesPage dataView={dataView} savedSearch={savedSearch} />
+      </UrlStateContextProvider>
+    </AiopsAppContext.Provider>
   );
 };

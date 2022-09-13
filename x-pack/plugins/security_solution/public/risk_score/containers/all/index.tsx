@@ -67,6 +67,7 @@ export const useHostRiskScore = (params?: UseRiskScoreParams) => {
   const spaceId = useSpaceId();
   const defaultIndex = spaceId ? getHostRiskIndex(spaceId, onlyLatest) : undefined;
   const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
+
   return useRiskScore({
     timerange,
     onlyLatest,
@@ -133,10 +134,10 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
       inspect,
       refetch,
       totalCount: response.totalCount,
-      isModuleEnabled: response.data != null,
+      isModuleEnabled: skip ? featureEnabled : featureEnabled && response.data != null,
       isInspected: false,
     }),
-    [inspect, refetch, response]
+    [featureEnabled, inspect, refetch, response.data, response.totalCount, skip]
   );
 
   const riskScoreRequest = useMemo(
