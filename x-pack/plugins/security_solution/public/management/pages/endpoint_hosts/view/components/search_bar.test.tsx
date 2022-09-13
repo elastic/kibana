@@ -16,8 +16,7 @@ import { fireEvent } from '@testing-library/dom';
 import { uiQueryParams } from '../../store/selectors';
 import type { EndpointIndexUIQueryParams } from '../../types';
 
-// FLAKY: https://github.com/elastic/kibana/issues/132398
-describe.skip('when rendering the endpoint list `AdminSearchBar`', () => {
+describe('when rendering the endpoint list `AdminSearchBar`', () => {
   let render: (
     urlParams?: EndpointIndexUIQueryParams
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
@@ -85,7 +84,8 @@ describe.skip('when rendering the endpoint list `AdminSearchBar`', () => {
     expect(getQueryParamsFromStore().admin_query).toBe("(language:kuery,query:'host.name: foo')");
   });
 
-  it.each([
+  // FLAKY: https://github.com/elastic/kibana/issues/132398
+  it.skip.each([
     ['nothing', ''],
     ['spaces', '  '],
   ])(

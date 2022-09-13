@@ -88,7 +88,10 @@ export const getPreloadedState = ({
 };
 
 export const setState = createAction<Partial<LensAppState>>('lens/setState');
-export const onActiveDataChange = createAction<TableInspectorAdapter>('lens/onActiveDataChange');
+export const onActiveDataChange = createAction<{
+  activeData: TableInspectorAdapter;
+  requestWarnings?: string[];
+}>('lens/onActiveDataChange');
 export const setSaveable = createAction<boolean>('lens/setSaveable');
 export const enableAutoApply = createAction<void>('lens/enableAutoApply');
 export const disableAutoApply = createAction<void>('lens/disableAutoApply');
@@ -222,10 +225,16 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         ...payload,
       };
     },
-    [onActiveDataChange.type]: (state, { payload }: PayloadAction<TableInspectorAdapter>) => {
+    [onActiveDataChange.type]: (
+      state,
+      {
+        payload: { activeData, requestWarnings },
+      }: PayloadAction<{ activeData: TableInspectorAdapter; requestWarnings?: string[] }>
+    ) => {
       return {
         ...state,
-        activeData: payload,
+        activeData,
+        requestWarnings,
       };
     },
     [setSaveable.type]: (state, { payload }: PayloadAction<boolean>) => {
@@ -279,6 +288,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       }
     ) => {
       const activeVisualization = visualizationMap[visualizationId];
+      const activeDataSource = datasourceMap[state.activeDatasourceId!];
       const isOnlyLayer =
         getRemoveOperation(
           activeVisualization,
@@ -300,9 +310,13 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         }
       );
       state.stagedPreview = undefined;
+      // reuse the activeDatasource current dataView id for the moment
+      const currentDataViewsId = activeDataSource.getCurrentIndexPatternId(
+        state.datasourceStates[state.activeDatasourceId!].state
+      );
       state.visualization.state =
         isOnlyLayer || !activeVisualization.removeLayer
-          ? activeVisualization.clearLayer(state.visualization.state, layerId)
+          ? activeVisualization.clearLayer(state.visualization.state, layerId, currentDataViewsId)
           : activeVisualization.removeLayer(state.visualization.state, layerId);
     },
     [changeIndexPattern.type]: (
@@ -343,15 +357,15 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         for (const visualizationId of visualizationIds) {
           const activeVisualization =
             visualizationId &&
-            state.visualization.activeId !== visualizationId &&
+            state.visualization.activeId === visualizationId &&
             visualizationMap[visualizationId];
           if (activeVisualization && layerId && activeVisualization?.onIndexPatternChange) {
             newState.visualization = {
               ...state.visualization,
               state: activeVisualization.onIndexPatternChange(
                 state.visualization.state,
-                layerId,
-                indexPatternId
+                indexPatternId,
+                layerId
               ),
             };
           }
@@ -797,15 +811,20 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       }
 
       const activeVisualization = visualizationMap[state.visualization.activeId];
+      const activeDatasource = datasourceMap[state.activeDatasourceId];
+      // reuse the active datasource dataView id for the new layer
+      const currentDataViewsId = activeDatasource.getCurrentIndexPatternId(
+        state.datasourceStates[state.activeDatasourceId!].state
+      );
       const visualizationState = activeVisualization.appendLayer!(
         state.visualization.state,
         layerId,
-        layerType
+        layerType,
+        currentDataViewsId
       );
 
       const framePublicAPI = selectFramePublicAPI({ lens: current(state) }, datasourceMap);
 
-      const activeDatasource = datasourceMap[state.activeDatasourceId];
       const { noDatasource } =
         activeVisualization
           .getSupportedLayers(visualizationState, framePublicAPI)

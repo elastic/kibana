@@ -55,6 +55,7 @@ export interface TextBasedLanguagesEditorProps {
   expandCodeEditor: (status: boolean) => void;
   isCodeEditorExpanded: boolean;
   errors?: Error[];
+  isDisabled?: boolean;
 }
 
 const MAX_COMPACT_VIEW_LENGTH = 250;
@@ -88,6 +89,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   expandCodeEditor,
   isCodeEditorExpanded,
   errors,
+  isDisabled,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
   const language = getAggregateQueryMode(query);
@@ -344,6 +346,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       horizontal: 'hidden',
     },
     overviewRulerBorder: false,
+    readOnly: isDisabled,
   };
 
   if (isCompactFocused) {

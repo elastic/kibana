@@ -23,6 +23,7 @@
         ],
         "path": "packages/kbn-jest-serializers/src/absolute_path_serializer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/jest-serializers",
@@ -36,6 +37,7 @@
             ],
             "path": "packages/kbn-jest-serializers/src/absolute_path_serializer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -50,6 +52,7 @@
             ],
             "path": "packages/kbn-jest-serializers/src/absolute_path_serializer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -68,6 +71,7 @@
         ],
         "path": "packages/kbn-jest-serializers/src/any_instance_serizlizer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/jest-serializers",
@@ -81,6 +85,7 @@
             ],
             "path": "packages/kbn-jest-serializers/src/any_instance_serizlizer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -95,6 +100,7 @@
             ],
             "path": "packages/kbn-jest-serializers/src/any_instance_serizlizer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -113,6 +119,7 @@
         ],
         "path": "packages/kbn-jest-serializers/src/recursive_serializer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/jest-serializers",
@@ -126,6 +133,7 @@
             ],
             "path": "packages/kbn-jest-serializers/src/recursive_serializer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -140,6 +148,7 @@
             ],
             "path": "packages/kbn-jest-serializers/src/recursive_serializer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -158,6 +167,7 @@
         ],
         "path": "packages/kbn-jest-serializers/src/replace_serializer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/jest-serializers",
@@ -171,6 +181,7 @@
             ],
             "path": "packages/kbn-jest-serializers/src/replace_serializer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -185,6 +196,7 @@
             ],
             "path": "packages/kbn-jest-serializers/src/replace_serializer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -203,6 +215,7 @@
         ],
         "path": "packages/kbn-jest-serializers/src/strip_ansi_serializer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false

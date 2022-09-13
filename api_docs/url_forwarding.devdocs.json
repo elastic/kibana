@@ -11,6 +11,7 @@
         "description": [],
         "path": "src/plugins/url_forwarding/public/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "urlForwarding",
@@ -40,6 +41,7 @@
             ],
             "path": "src/plugins/url_forwarding/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "urlForwarding",
@@ -68,6 +70,7 @@
                 ],
                 "path": "src/plugins/url_forwarding/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -101,6 +104,7 @@
             ],
             "path": "src/plugins/url_forwarding/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "urlForwarding",
@@ -120,6 +124,7 @@
                 ],
                 "path": "src/plugins/url_forwarding/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -140,6 +145,7 @@
         "description": [],
         "path": "src/plugins/url_forwarding/public/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "urlForwarding",
@@ -149,7 +155,8 @@
             "label": "legacyAppId",
             "description": [],
             "path": "src/plugins/url_forwarding/public/plugin.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "urlForwarding",
@@ -159,7 +166,8 @@
             "label": "newAppId",
             "description": [],
             "path": "src/plugins/url_forwarding/public/plugin.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "urlForwarding",
@@ -173,6 +181,7 @@
             ],
             "path": "src/plugins/url_forwarding/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "urlForwarding",
@@ -186,6 +195,7 @@
                 ],
                 "path": "src/plugins/url_forwarding/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -209,6 +219,7 @@
         ],
         "path": "src/plugins/url_forwarding/public/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -231,6 +242,7 @@
         ],
         "path": "src/plugins/url_forwarding/public/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
