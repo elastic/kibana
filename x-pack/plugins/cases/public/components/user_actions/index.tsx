@@ -67,7 +67,7 @@ const MyEuiCommentList = styled(EuiCommentList)`
       flex-grow: 1;
     }
 
-    & .comment-action.empty-comment [class*="euiCommentEvent-regular] {
+    & .comment-action.empty-comment [class*="euiCommentEvent-regular"] {
       box-shadow: none;
       .euiCommentEvent__header {
         padding: ${theme.eui.euiSizeM} ${theme.eui.euiSizeS};

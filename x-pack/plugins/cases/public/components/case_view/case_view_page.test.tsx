@@ -32,6 +32,7 @@ import {
   defaultUseGetCaseUserActions,
 } from './mocks';
 import { CaseViewPageProps, CASE_VIEW_PAGE_TABS } from './types';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_update_case');
@@ -100,12 +101,18 @@ describe('CaseViewPage', () => {
     useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
     useGetTagsMock.mockReturnValue({ data: [], isLoading: false });
     useBulkGetUserProfilesMock.mockReturnValue({ data: new Map(), isLoading: false });
-
-    appMockRenderer = createAppMockRenderer();
+    const license = licensingMock.createLicense({
+      license: { type: 'platinum' },
+    });
+    appMockRenderer = createAppMockRenderer({ license });
   });
 
   it('should render CaseViewPage', async () => {
-    appMockRenderer = createAppMockRenderer({ features: { metrics: ['alerts.count'] } });
+    const license = licensingMock.createLicense({
+      license: { type: 'platinum' },
+    });
+
+    appMockRenderer = createAppMockRenderer({ features: { metrics: ['alerts.count'] }, license });
     const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
     expect(result.getByTestId('header-page-title')).toHaveTextContent(data.title);

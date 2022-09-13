@@ -24,9 +24,6 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { registerConnectorsToMockActionRegistry } from '../../mock/register_connectors';
 import { connectorsMock } from '../../mock/connectors';
 
-// export const createLicense = (type: LicenseType) =>
-//   licensingMock.createLicense({ license: { type, mode: type } });
-
 interface StartServiceArgs {
   license?: ILicense | null;
 }
