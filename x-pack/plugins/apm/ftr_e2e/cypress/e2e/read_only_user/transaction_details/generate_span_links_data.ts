@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, EntityArrayIterable, timerange } from '@kbn/apm-synthtrace';
+import { apm, SignalArrayIterable, timerange } from '@kbn/apm-synthtrace';
 import { synthtrace } from '../../../../synthtrace';
 import { SpanLink } from '../../../../../typings/es_schemas/raw/fields/span_links';
 
@@ -346,10 +346,10 @@ export function generateSpanLinksData() {
   });
 
   synthtrace.index(
-    new EntityArrayIterable(producerInternalOnly.apmFields).merge(
-      new EntityArrayIterable(producerExternalOnly.apmFields),
-      new EntityArrayIterable(producerConsumer.apmFields),
-      new EntityArrayIterable(producerMultiple.apmFields)
+    new SignalArrayIterable(producerInternalOnly.apmFields).merge(
+      new SignalArrayIterable(producerExternalOnly.apmFields),
+      new SignalArrayIterable(producerConsumer.apmFields),
+      new SignalArrayIterable(producerMultiple.apmFields)
     )
   );
 

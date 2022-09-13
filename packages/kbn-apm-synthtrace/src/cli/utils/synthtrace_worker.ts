@@ -7,16 +7,15 @@
  */
 // import pLimit from 'p-limit';
 import { workerData, parentPort } from 'worker_threads';
-import { RunOptions } from './parse_run_cli_flags';
+import { ScenarioOptions } from './get_scenario_options';
 import { getScenario } from './get_scenario';
-import { StreamToBulkOptions } from '../../lib/apm/client/apm_synthtrace_es_client';
+import { StreamToBulkOptions } from '../../lib/client/synthtrace_es_client';
 import { getCommonServices } from './get_common_services';
 import { LogLevel } from '../../lib/utils/create_logger';
-import { StreamProcessor } from '../../lib/stream_processor';
-import { Scenario } from '../scenario';
-import { EntityIterable, Fields } from '../../..';
-import { StreamAggregator } from '../../lib/stream_aggregator';
-import { ServicMetricsAggregator } from '../../lib/apm/aggregators/service_metrics_aggregator';
+import { StreamProcessor } from '../../lib/streaming/stream_processor';
+import { ScenarioDescriptor } from '../scenario';
+import { SignalIterable, Fields } from '../../..';
+import { getStreamProcessorOptions } from './get_stream_processor_options';
 
 // logging proxy to main thread, ensures we see real time logging
 const l = {
@@ -31,29 +30,28 @@ const l = {
 export interface WorkerData {
   bucketFrom: Date;
   bucketTo: Date;
-  runOptions: RunOptions;
+  options: ScenarioOptions;
   workerIndex: number;
   version: string;
 }
 
-const { bucketFrom, bucketTo, runOptions, workerIndex, version } = workerData as WorkerData;
+const { bucketFrom, bucketTo, options, workerIndex, version } = workerData as WorkerData;
 
-const { logger, apmEsClient, apmIntakeClient } = getCommonServices(runOptions, l);
-const file = runOptions.file;
-let scenario: Scenario<Fields>;
-let events: EntityIterable<Fields>;
-let streamToBulkOptions: StreamToBulkOptions;
-let streamProcessor: StreamProcessor;
+const { logger, apmEsClient, apmIntakeClient } = getCommonServices(options, l);
+let scenario: ScenarioDescriptor<Fields>;
+let events: SignalIterable<Fields>;
+let streamToBulkOptions: StreamToBulkOptions<Fields>;
+let streamProcessor: StreamProcessor<Fields>;
 
 async function setup() {
-  scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
-  const { generate, mapToIndex } = await scenario(runOptions);
+  scenario = await getScenario({ logger, options });
+  const { generate, mapToIndex } = scenario;
 
   events = logger.perf('generate_scenario', () => generate({ from: bucketFrom, to: bucketTo }));
   streamToBulkOptions = {
-    maxDocs: runOptions.maxDocs,
+    maxDocs: options.maxDocs,
     mapToIndex,
-    dryRun: !!runOptions.dryRun,
+    dryRun: !!options.dryRun,
   };
   streamToBulkOptions.itemStartStopCallback = (item, done) => {
     if (!item) return;
@@ -63,27 +61,26 @@ async function setup() {
       parentPort?.postMessage({ workerIndex, lastTimestamp: item['@timestamp'] });
     }
   };
-  const aggregators: StreamAggregator[] = [new ServicMetricsAggregator()];
   // If we are sending data to apm-server we do not have to create any aggregates in the stream processor
-  streamProcessor = new StreamProcessor({
+  const streamProcessorOptions = getStreamProcessorOptions(
+    `Worker ${workerIndex}`,
+    logger,
     version,
-    processors: apmIntakeClient ? [] : StreamProcessor.apmProcessors,
-    streamAggregators: apmIntakeClient ? [] : aggregators,
-    maxSourceEvents: runOptions.maxDocs,
-    logger: l,
-    processedCallback: (processedDocuments) => {
-      parentPort!.postMessage({ workerIndex, processedDocuments });
-    },
-    name: `Worker ${workerIndex}`,
-  });
+    options,
+    scenario
+  );
+  streamProcessorOptions.processedCallback = (processedDocuments) => {
+    parentPort!.postMessage({ workerIndex, processedDocuments });
+  };
+  streamProcessor = new StreamProcessor(streamProcessorOptions);
 }
 
 async function doWork() {
   await logger.perf('index_scenario', async () => {
     if (apmIntakeClient) {
-      await apmIntakeClient.index(events, streamToBulkOptions, streamProcessor);
+      await apmIntakeClient.index(events, streamProcessor, streamToBulkOptions);
     } else {
-      await apmEsClient.index(events, streamToBulkOptions, streamProcessor);
+      await apmEsClient.index(events, streamProcessor, streamToBulkOptions);
     }
   });
 }

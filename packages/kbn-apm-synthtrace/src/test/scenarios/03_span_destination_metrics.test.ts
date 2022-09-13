@@ -7,10 +7,10 @@
  */
 
 import { apm } from '../../lib/apm';
-import { timerange } from '../../lib/timerange';
+import { timerange } from '../../dsl/timerange';
 import { getSpanDestinationMetrics } from '../../lib/apm/processors/get_span_destination_metrics';
-import { StreamProcessor } from '../../lib/stream_processor';
-import { ApmFields } from '../../lib/apm/apm_fields';
+import { StreamProcessor } from '../../lib/streaming/stream_processor';
+import { ApmFields } from '../../dsl/apm/apm_fields';
 
 describe('span destination metrics', () => {
   let events: Array<Record<string, any>>;

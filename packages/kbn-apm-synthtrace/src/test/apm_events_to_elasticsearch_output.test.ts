@@ -6,29 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { ApmFields } from '../lib/apm/apm_fields';
-import { StreamProcessor } from '../lib/stream_processor';
+import { Transaction } from '../dsl/apm/transaction';
 
 describe('output apm events to elasticsearch', () => {
-  let event: ApmFields;
-  const streamProcessor = new StreamProcessor({ processors: [], version: '8.0.0' });
+  let event: Transaction;
 
   beforeEach(() => {
-    event = {
+    event = new Transaction({
       '@timestamp': new Date('2020-12-31T23:00:00.000Z').getTime(),
       'processor.event': 'transaction',
       'processor.name': 'transaction',
       'service.node.name': 'instance-a',
-    };
+    });
   });
 
   it('properly formats @timestamp', () => {
-    const doc = streamProcessor.toDocument(event);
+    const doc = event.toDocument();
     expect(doc['@timestamp']).toEqual('2020-12-31T23:00:00.000Z');
   });
 
   it('formats a nested object', () => {
-    const doc = streamProcessor.toDocument(event);
+    const doc = event.toDocument();
 
     expect(doc.processor).toEqual({
       event: 'transaction',
@@ -37,13 +35,19 @@ describe('output apm events to elasticsearch', () => {
   });
 
   it('formats all fields consistently', () => {
-    const doc = streamProcessor.toDocument(event);
-
+    // StreamProcessor will call enrichWithVersionInformation on all signals.
+    const doc = event.enrichWithVersionInformation('8.0.0', 8).toDocument();
+    // These are not stable (generated from incremental global id).
+    delete doc.trace;
+    delete doc.transaction;
     expect(doc).toMatchInlineSnapshot(`
       Object {
         "@timestamp": "2020-12-31T23:00:00.000Z",
         "ecs": Object {
           "version": "1.4",
+        },
+        "event": Object {
+          "outcome": "unknown",
         },
         "observer": Object {
           "type": "synthtrace",

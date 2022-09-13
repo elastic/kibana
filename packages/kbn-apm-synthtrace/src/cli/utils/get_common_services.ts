@@ -8,16 +8,16 @@
 
 import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { ApmSynthtraceApmClient } from '../../lib/apm/client/apm_synthtrace_apm_client';
-import { ApmSynthtraceEsClient } from '../../lib/apm/client/apm_synthtrace_es_client';
+import { SynthtraceEsClient } from '../../lib/client/synthtrace_es_client';
 import { createLogger, Logger } from '../../lib/utils/create_logger';
-import { RunOptions } from './parse_run_cli_flags';
+import { ScenarioOptions } from './get_scenario_options';
 
-export function getLogger({ logLevel }: RunOptions) {
+export function getLogger({ logLevel }: ScenarioOptions) {
   return createLogger(logLevel);
 }
 
 export function getCommonServices(
-  { target, cloudId, apm, username, password, logLevel, forceLegacyIndices }: RunOptions,
+  { target, cloudId, apm, username, password, logLevel }: ScenarioOptions,
   logger?: Logger
 ) {
   if (!target && !cloudId) {
@@ -41,8 +41,7 @@ export function getCommonServices(
 
   logger = logger ?? createLogger(logLevel);
 
-  const apmEsClient = new ApmSynthtraceEsClient(client, logger, {
-    forceLegacyIndices,
+  const apmEsClient = new SynthtraceEsClient(client, logger, {
     refreshAfterIndex: false,
   });
   const apmIntakeClient = apm ? new ApmSynthtraceApmClient(apm, logger) : null;

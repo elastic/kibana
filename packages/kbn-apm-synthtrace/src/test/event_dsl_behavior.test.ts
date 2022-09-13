@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EntityArrayIterable } from '../lib/entity_iterable';
+import { SignalArrayIterable } from '../lib/streaming/signal_iterable';
 import { apm } from '../lib/apm';
-import { timerange } from '../lib/timerange';
-import { ApmFields } from '../lib/apm/apm_fields';
+import { timerange } from '../dsl/timerange';
+import { ApmFields } from '../dsl/apm/apm_fields';
 
 describe('DSL invocations', () => {
-  let arrayIterable: EntityArrayIterable<ApmFields>;
+  let arrayIterable: SignalArrayIterable<ApmFields>;
   let eventsCopy: Array<Record<string, any>>;
 
   const range = timerange(
@@ -48,7 +48,7 @@ describe('DSL invocations', () => {
 
   beforeEach(() => {
     eventsCopy = iterable.toArray();
-    arrayIterable = new EntityArrayIterable(events);
+    arrayIterable = new SignalArrayIterable(events);
   });
   it('to array on iterable reads to completion', () => {
     expect(events.length).toBe(15 * 2);

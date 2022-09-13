@@ -7,10 +7,10 @@
  */
 import { sumBy } from 'lodash';
 import { apm } from '../../lib/apm';
-import { timerange } from '../../lib/timerange';
+import { timerange } from '../../dsl/timerange';
 import { getBreakdownMetrics } from '../../lib/apm/processors/get_breakdown_metrics';
-import { ApmFields } from '../../lib/apm/apm_fields';
-import { StreamProcessor } from '../../lib/stream_processor';
+import { ApmFields } from '../../dsl/apm/apm_fields';
+import { StreamProcessor } from '../../lib/streaming/stream_processor';
 
 describe('breakdown metrics', () => {
   let events: ApmFields[];

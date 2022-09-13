@@ -11,13 +11,16 @@ import { Argv } from 'yargs';
 import { intervalToMs } from './utils/interval_to_ms';
 import { startHistoricalDataUpload } from './utils/start_historical_data_upload';
 import { startLiveDataUpload } from './utils/start_live_data_upload';
-import { parseRunCliFlags } from './utils/parse_run_cli_flags';
+import { getScenarioOptions } from './utils/get_scenario_options';
 import { getCommonServices } from './utils/get_common_services';
-import { ApmSynthtraceKibanaClient } from '../lib/apm/client/apm_synthtrace_kibana_client';
-import { StreamAggregator } from '../lib/stream_aggregator';
-import { ServicMetricsAggregator } from '../lib/apm/aggregators/service_metrics_aggregator';
+import { SynthtraceKibanaClient } from '../lib/client/synthtrace_kibana_client';
+import { StreamAggregator } from '../lib/streaming/stream_aggregator';
+import { ServiceMetricsAggregator } from '../lib/apm/aggregators/service_metrics_aggregator';
+import { Fields } from '../dsl/fields';
+import { getScenario } from './utils/get_scenario';
+import { dataStream } from '../dsl/write_target';
 
-function options(y: Argv) {
+function commandLineOptions(y: Argv) {
   return y
     .positional('file', {
       describe: 'File that contains the trace scenario',
@@ -99,10 +102,6 @@ function options(y: Argv) {
       describe: 'Log level',
       default: 'info',
     })
-    .option('forceLegacyIndices', {
-      describe: 'Force writing to legacy indices',
-      boolean: true,
-    })
     .option('skipPackageInstall', {
       describe: 'Skip automatically installing the package',
       boolean: true,
@@ -132,14 +131,14 @@ function options(y: Argv) {
     .conflicts('local', 'cloudId');
 }
 
-export type RunCliFlags = ReturnType<typeof options>['argv'];
+export type RunCliFlags = ReturnType<typeof commandLineOptions>['argv'];
 
 export function runSynthtrace() {
   yargs(process.argv.slice(2))
     .command(
       '*',
       'Generate data and index into Elasticsearch',
-      options,
+      commandLineOptions,
       async (argv: RunCliFlags) => {
         if (argv.local) {
           argv.target = 'http://localhost:9200';
@@ -152,13 +151,15 @@ export function runSynthtrace() {
           }
         }
 
-        const runOptions = parseRunCliFlags(argv);
+        const options = getScenarioOptions(argv);
 
-        const { logger, apmEsClient, apmIntakeClient } = getCommonServices(runOptions);
+        const { logger, apmEsClient, apmIntakeClient } = getCommonServices(options);
+
+        const scenario = await getScenario({ logger, options });
 
         const toMs = datemath.parse(String(argv.to ?? 'now'))!.valueOf();
         const to = new Date(toMs);
-        const defaultTimeRange = !runOptions.maxDocs ? '15m' : '520w';
+        const defaultTimeRange = !options.maxDocs ? '15m' : '520w';
         const fromMs = argv.from
           ? datemath.parse(String(argv.from))!.valueOf()
           : toMs - intervalToMs(defaultTimeRange);
@@ -166,8 +167,8 @@ export function runSynthtrace() {
 
         const live = argv.live;
 
-        if (runOptions.dryRun) {
-          await startHistoricalDataUpload(apmEsClient, logger, runOptions, from, to, '8.0.0');
+        if (options.dryRun) {
+          await startHistoricalDataUpload(apmEsClient, logger, options, from, to, '8.0.0');
           return;
         }
 
@@ -177,13 +178,13 @@ export function runSynthtrace() {
         version = version.replace('-SNAPSHOT', '');
 
         // We automatically set up managed APM either by migrating on cloud or installing the package locally
-        if (runOptions.cloudId || argv.local || argv.kibana) {
-          const kibanaClient = new ApmSynthtraceKibanaClient(logger);
-          if (runOptions.cloudId) {
+        if (options.cloudId || argv.local || argv.kibana) {
+          const kibanaClient = new SynthtraceKibanaClient(logger);
+          if (options.cloudId) {
             await kibanaClient.migrateCloudToManagedApm(
-              runOptions.cloudId,
-              runOptions.username,
-              runOptions.password
+              options.cloudId,
+              options.username,
+              options.password
             );
           } else {
             let kibanaUrl: string | null = argv.kibana ?? null;
@@ -195,22 +196,22 @@ export function runSynthtrace() {
               await kibanaClient.installApmPackage(
                 kibanaUrl,
                 version,
-                runOptions.username,
-                runOptions.password
+                options.username,
+                options.password
               );
             }
           }
         }
 
-        if (runOptions.cloudId && runOptions.numShards && runOptions.numShards > 0) {
-          await apmEsClient.updateComponentTemplates(runOptions.numShards);
+        if (options.cloudId && options.numShards && options.numShards > 0) {
+          await apmEsClient.updateComponentTemplates(options.numShards);
         }
-        const aggregators: StreamAggregator[] = [];
-        const registry = new Map<string, () => StreamAggregator[]>([
-          ['service', () => [new ServicMetricsAggregator()]],
+        const aggregators: Array<StreamAggregator<Fields, Fields>> = [];
+        const registry = new Map<string, () => Array<StreamAggregator<Fields, Fields>>>([
+          ['service', () => [new ServiceMetricsAggregator()]],
         ]);
-        if (runOptions.streamProcessors && runOptions.streamProcessors.length > 0) {
-          for (const processorName of runOptions.streamProcessors) {
+        if (options.streamProcessors && options.streamProcessors.length > 0) {
+          for (const processorName of options.streamProcessors) {
             const factory = registry.get(processorName);
             if (factory) {
               aggregators.push(...factory());
@@ -222,20 +223,26 @@ export function runSynthtrace() {
           }
         }
         if (argv.clean) {
+          const involvedWriteTargets = scenario.writeTargets.concat(
+            aggregators.map((a) => dataStream(a.getDataStreamName() + '-*'))
+          );
+
           if (argv.apm) {
-            await apmEsClient.clean(['metrics-apm.service-*']);
+            await apmEsClient.clean(
+              involvedWriteTargets.concat([dataStream('metrics-apm.service-*')])
+            );
           } else {
-            await apmEsClient.clean(aggregators.map((a) => a.getDataStreamName() + '-*'));
+            await apmEsClient.clean(involvedWriteTargets);
           }
         }
-        if (runOptions.gcpRepository) {
-          await apmEsClient.registerGcpRepository(runOptions.gcpRepository);
+        if (options.gcpRepository) {
+          await apmEsClient.registerGcpRepository(options.gcpRepository);
         }
 
         logger.info(
           `Starting data generation\n: ${JSON.stringify(
             {
-              ...runOptions,
+              ...options,
               from: from.toISOString(),
               to: to.toISOString(),
             },
@@ -246,11 +253,11 @@ export function runSynthtrace() {
 
         for (const aggregator of aggregators) await apmEsClient.createDataStream(aggregator);
 
-        if (runOptions.maxDocs !== 0)
-          await startHistoricalDataUpload(apmEsClient, logger, runOptions, from, to, version);
+        if (options.maxDocs !== 0)
+          await startHistoricalDataUpload(apmEsClient, logger, options, from, to, version);
 
         if (live) {
-          await startLiveDataUpload(apmEsClient, apmIntakeClient, logger, runOptions, to, version);
+          await startLiveDataUpload(apmEsClient, apmIntakeClient, logger, options, to, version);
         }
       }
     )

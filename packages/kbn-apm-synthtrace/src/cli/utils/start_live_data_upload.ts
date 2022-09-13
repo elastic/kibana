@@ -8,28 +8,27 @@
 
 import { partition } from 'lodash';
 import { getScenario } from './get_scenario';
-import { RunOptions } from './parse_run_cli_flags';
-import { ApmFields } from '../../lib/apm/apm_fields';
-import { ApmSynthtraceEsClient } from '../../lib/apm';
+import { ScenarioOptions } from './get_scenario_options';
+import { SynthtraceEsClient } from '../../lib/apm';
 import { Logger } from '../../lib/utils/create_logger';
-import { EntityArrayIterable } from '../../lib/entity_iterable';
-import { StreamProcessor } from '../../lib/stream_processor';
+import { SignalArrayIterable } from '../../lib/streaming/signal_iterable';
+import { StreamProcessor } from '../../lib/streaming/stream_processor';
 import { ApmSynthtraceApmClient } from '../../lib/apm/client/apm_synthtrace_apm_client';
+import { Fields } from '../../dsl/fields';
+import { getStreamProcessorOptions } from './get_stream_processor_options';
 
 export async function startLiveDataUpload(
-  esClient: ApmSynthtraceEsClient,
+  esClient: SynthtraceEsClient,
   apmIntakeClient: ApmSynthtraceApmClient | null,
   logger: Logger,
-  runOptions: RunOptions,
+  options: ScenarioOptions,
   start: Date,
   version: string
 ) {
-  const file = runOptions.file;
+  const scenario = await getScenario({ logger, options });
+  const { generate, mapToIndex } = scenario;
 
-  const scenario = await getScenario({ file, logger });
-  const { generate, mapToIndex } = await scenario(runOptions);
-
-  let queuedEvents: ApmFields[] = [];
+  let queuedEvents: Fields[] = [];
   let requestedUntil: Date = start;
   const bucketSizeInMs = 1000 * 60;
 
@@ -60,25 +59,26 @@ export async function startLiveDataUpload(
     logger.info(`Uploading until ${new Date(end).toISOString()}, events: ${eventsToUpload.length}`);
 
     queuedEvents = eventsToRemainInQueue;
-    const streamProcessor = new StreamProcessor({
-      version,
+    const streamProcessorOptions = getStreamProcessorOptions(
+      `Live index`,
       logger,
-      processors: StreamProcessor.apmProcessors,
-      maxSourceEvents: runOptions.maxDocs,
-      name: `Live index`,
-    });
+      version,
+      options,
+      scenario
+    );
+    const streamProcessor = new StreamProcessor(streamProcessorOptions);
     await logger.perf('index_live_scenario', async () => {
-      const events = new EntityArrayIterable(eventsToUpload);
+      const events = new SignalArrayIterable(eventsToUpload);
       const streamToBulkOptions = {
-        concurrency: runOptions.workers,
-        maxDocs: runOptions.maxDocs,
+        concurrency: options.workers,
+        maxDocs: options.maxDocs,
         mapToIndex,
         dryRun: false,
       };
       if (apmIntakeClient) {
-        await apmIntakeClient.index(events, streamToBulkOptions, streamProcessor);
+        await apmIntakeClient.index(events, streamProcessor, streamToBulkOptions);
       } else {
-        await esClient.index(events, streamToBulkOptions, streamProcessor);
+        await esClient.index(events, streamProcessor, streamToBulkOptions);
       }
     });
   }

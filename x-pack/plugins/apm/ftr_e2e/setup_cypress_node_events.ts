@@ -7,8 +7,10 @@
 import {
   apm,
   createLogger,
-  EntityArrayIterable,
+  SignalArrayIterable,
   LogLevel,
+  StreamProcessor,
+  ApmFields,
 } from '@kbn/apm-synthtrace';
 import { createEsClientForTesting } from '@kbn/test';
 import { some } from 'lodash';
@@ -24,14 +26,16 @@ export function setupNodeEvents(
     isCloud: !!config.env.TEST_CLOUD,
   });
 
-  const synthtraceEsClient = new apm.ApmSynthtraceEsClient(
-    client,
-    createLogger(LogLevel.info),
-    {
-      forceLegacyIndices: false,
-      refreshAfterIndex: true,
-    }
-  );
+  const logger = createLogger(LogLevel.info);
+  const streamProcessor = new StreamProcessor<ApmFields>({
+    logger,
+    processors: apm.defaults.processors,
+    streamAggregators: apm.defaults.streamAggregators,
+  });
+  const synthtraceEsClient = new apm.SynthtraceEsClient(client, logger, {
+    refreshAfterIndex: true,
+    streamProcessor,
+  });
 
   on('task', {
     // send logs to node process
@@ -42,7 +46,7 @@ export function setupNodeEvents(
     },
 
     'synthtrace:index': async (events: Array<Record<string, any>>) => {
-      await synthtraceEsClient.index(new EntityArrayIterable(events));
+      await synthtraceEsClient.index(new SignalArrayIterable(events));
       return null;
     },
     'synthtrace:clean': async () => {

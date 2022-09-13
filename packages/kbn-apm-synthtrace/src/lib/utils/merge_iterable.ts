@@ -7,20 +7,20 @@
  */
 
 import { range } from 'lodash';
-import { ApmFields } from '../apm/apm_fields';
-import { Fields } from '../entity';
-import { EntityIterable } from '../entity_iterable';
+import { SignalIterable } from '../streaming/signal_iterable';
+import { Fields } from '../../dsl/fields';
+import { Signal } from '../../dsl/signal';
 
 export function merge<TField extends Fields>(
-  iterables: Array<EntityIterable<TField>>
-): Iterable<TField> {
+  iterables: Array<SignalIterable<TField>>
+): Iterable<Signal<TField>> {
   if (iterables.length === 1) return iterables[0];
 
-  const iterators = iterables.map<{ it: Iterator<ApmFields>; weight: number }>((i) => {
+  const iterators = iterables.map<{ it: Iterator<Signal<TField>>; weight: number }>((i) => {
     return { it: i[Symbol.iterator](), weight: Math.max(1, i.estimatedRatePerMinute()) };
   });
   let done = false;
-  const myIterable: Iterable<TField> = {
+  const myIterable: Iterable<Signal<TField>> = {
     *[Symbol.iterator]() {
       do {
         const items = iterators.flatMap((i) => range(0, i.weight).map(() => i.it.next()));

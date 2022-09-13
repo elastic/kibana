@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { timerange } from '../lib/timerange';
-import { Serializable } from '../lib/serializable';
-import { Fields } from '../lib/entity';
+import { timerange } from '../dsl/timerange';
+import { Fields } from '../dsl/fields';
+import { Signal } from '../dsl/signal';
 
 export type DocFields = Fields & Partial<{ type: string }>;
 
-class Doc extends Serializable<DocFields> {
+class Doc extends Signal<DocFields> {
   constructor(type: string) {
     super({
       type,

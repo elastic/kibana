@@ -8,9 +8,10 @@
 
 import { random } from 'lodash';
 import { Client } from '@elastic/elasticsearch';
-import { ApmFields } from '../apm_fields';
-import { Fields } from '../../entity';
-import { StreamAggregator } from '../../stream_aggregator';
+import { ApmFields } from '../../../dsl/apm/apm_fields';
+import { StreamAggregator } from '../../streaming/stream_aggregator';
+import { Signal } from '../../../dsl/signal';
+import { ServiceMetricsFields, ServiceMetrics } from './service_metrics_fields';
 
 type AggregationState = {
   count: number;
@@ -22,35 +23,7 @@ type AggregationState = {
   success_count: number;
 } & Pick<ApmFields, 'service.name' | 'service.environment' | 'transaction.type'>;
 
-export type ServiceFields = Fields &
-  Pick<
-    ApmFields,
-    | 'timestamp.us'
-    | 'ecs.version'
-    | 'metricset.name'
-    | 'observer'
-    | 'processor.event'
-    | 'processor.name'
-    | 'service.name'
-    | 'service.version'
-    | 'service.environment'
-  > &
-  Partial<{
-    _doc_count: number;
-    transaction: {
-      failure_count: number;
-      success_count: number;
-      type: string;
-      'duration.summary': {
-        min: number;
-        max: number;
-        sum: number;
-        value_count: number;
-      };
-    };
-  }>;
-
-export class ServicMetricsAggregator implements StreamAggregator<ApmFields> {
+export class ServiceMetricsAggregator implements StreamAggregator<ApmFields, ServiceMetricsFields> {
   public readonly name;
 
   constructor() {
@@ -106,17 +79,11 @@ export class ServicMetricsAggregator implements StreamAggregator<ApmFields> {
     return ['service.name', 'service.environment', 'transaction.type'];
   }
 
-  getWriteTarget(document: Record<string, any>): string | null {
-    const eventType = document.metricset?.name;
-    if (eventType === 'service') return 'metrics-apm.service-default';
-    return null;
-  }
-
   private state: Record<string, AggregationState> = {};
 
   private processedComponent: number = 0;
 
-  process(event: ApmFields): Fields[] | null {
+  process(event: ApmFields): Array<Signal<ServiceMetricsFields>> | null {
     if (!event['@timestamp']) return null;
     const service = event['service.name']!;
     const environment = event['service.environment'] ?? 'production';
@@ -167,7 +134,7 @@ export class ServicMetricsAggregator implements StreamAggregator<ApmFields> {
         const fields = this.createServiceFields(key);
         delete this.state[key];
         addToState(event['@timestamp']);
-        return [fields];
+        return [new ServiceMetrics(fields)];
       }
     }
 
@@ -180,13 +147,13 @@ export class ServicMetricsAggregator implements StreamAggregator<ApmFields> {
     return null;
   }
 
-  flush(): Fields[] {
+  flush(): Array<Signal<ServiceMetricsFields>> {
     const fields = Object.keys(this.state).map((key) => this.createServiceFields(key));
     this.state = {};
-    return fields;
+    return fields.map((f) => new ServiceMetrics(f));
   }
 
-  private createServiceFields(key: string): ServiceFields {
+  private createServiceFields(key: string): ServiceMetricsFields {
     this.processedComponent = ++this.processedComponent % 1000;
     const component = Date.now() % 100;
     const state = this.state[key];

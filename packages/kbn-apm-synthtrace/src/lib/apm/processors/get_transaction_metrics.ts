@@ -7,8 +7,20 @@
  */
 
 import { sortBy } from 'lodash';
-import { ApmFields } from '../apm_fields';
+import { ApmFields } from '../../../dsl/apm/apm_fields';
 import { aggregate } from '../utils/aggregate';
+import { BaseApmSignal } from '../../../dsl/apm/base_apm_signal';
+
+export type TransactionMetricFields = ApmFields &
+  Partial<{
+    _doc_count: number;
+  }>;
+
+export class TransactionMetrics extends BaseApmSignal<TransactionMetricFields> {
+  constructor(fields: TransactionMetricFields) {
+    super(fields);
+  }
+}
 
 function sortAndCompressHistogram(histogram?: { values: number[]; counts: number[] }) {
   return sortBy(histogram?.values).reduce(
@@ -78,11 +90,11 @@ export function getTransactionMetrics(events: ApmFields[]) {
       histogram.counts.push(1);
       histogram.values.push(Number(transaction['transaction.duration.us']));
     }
-    return {
+    return new TransactionMetrics({
       ...metricset.key,
       'metricset.name': 'transaction',
       'transaction.duration.histogram': sortAndCompressHistogram(histogram),
       _doc_count: metricset.events.length,
-    };
+    });
   });
 }

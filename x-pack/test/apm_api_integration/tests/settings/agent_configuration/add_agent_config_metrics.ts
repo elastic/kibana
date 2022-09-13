@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { timerange, observer } from '@kbn/apm-synthtrace';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { timerange, observer, SynthtraceEsClient } from '@kbn/apm-synthtrace';
 
 export async function addAgentConfigMetrics({
   synthtraceEsClient,
@@ -13,7 +12,7 @@ export async function addAgentConfigMetrics({
   end,
   etag,
 }: {
-  synthtraceEsClient: ApmSynthtraceEsClient;
+  synthtraceEsClient: SynthtraceEsClient;
   start: number;
   end: number;
   etag?: string;

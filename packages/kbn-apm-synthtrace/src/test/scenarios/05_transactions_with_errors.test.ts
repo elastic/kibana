@@ -7,7 +7,7 @@
  */
 import { pick } from 'lodash';
 import { apm } from '../../lib/apm';
-import { Instance } from '../../lib/apm/instance';
+import { Instance } from '../../dsl/apm/instance';
 
 describe('transactions with errors', () => {
   let instance: Instance;
@@ -23,7 +23,8 @@ describe('transactions with errors', () => {
       .transaction({ transactionName: 'GET /api' })
       .timestamp(timestamp)
       .errors(instance.error({ message: 'test error' }).timestamp(timestamp))
-      .serialize();
+      .yieldSignals()
+      .map((s) => s.fields);
 
     const errorEvents = events.filter((event) => event['processor.event'] === 'error');
 
@@ -44,7 +45,8 @@ describe('transactions with errors', () => {
       .transaction({ transactionName: 'GET /api' })
       .timestamp(timestamp)
       .errors(instance.error({ message: 'test error' }).timestamp(timestamp))
-      .serialize();
+      .yieldSignals()
+      .map((s) => s.fields);
 
     const keys = ['transaction.id', 'trace.id', 'transaction.type'];
 
@@ -60,7 +62,8 @@ describe('transactions with errors', () => {
       .transaction({ transactionName: 'GET /api' })
       .timestamp(timestamp)
       .errors(instance.error({ message: 'test error' }).timestamp(timestamp))
-      .serialize();
+      .yieldSignals()
+      .map((s) => s.fields);
 
     expect(error['error.grouping_name']).toEqual('test error');
     expect(error['error.grouping_key']).toMatchInlineSnapshot(`"0000000000000000000000test error"`);

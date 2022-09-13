@@ -9,29 +9,30 @@
 import Client from 'elastic-apm-http-client';
 import Util from 'util';
 import { Logger } from '../../utils/create_logger';
-import { ApmFields } from '../apm_fields';
-import { EntityIterable } from '../../entity_iterable';
-import { StreamProcessor } from '../../stream_processor';
-import { EntityStreams } from '../../entity_streams';
-import { Fields } from '../../entity';
+import { ApmFields } from '../../../dsl/apm/apm_fields';
+import { SignalIterable } from '../../streaming/signal_iterable';
+import { StreamProcessor } from '../../streaming/stream_processor';
+import { MergedSignalsStream } from '../../streaming/merged_signals_stream';
 import { Span } from './intake_v2/span';
 import { Error } from './intake_v2/error';
 import { Metadata } from './intake_v2/metadata';
 import { Transaction } from './intake_v2/transaction';
+import { Fields } from '../../../dsl/fields';
+import { Signal } from '../../../dsl/signal';
+import { WriteTarget } from '../../../dsl/write_target';
 
-export interface StreamToBulkOptions<TFields extends Fields = ApmFields> {
+export interface StreamToBulkOptions<TFields extends Fields = Fields> {
   concurrency?: number;
   // the maximum number of documents to process
   maxDocs?: number;
   // the number of documents to flush the bulk operation defaults to 10k
   flushInterval?: number;
-  mapToIndex?: (document: Record<string, any>) => string;
+  mapToIndex?: (document: Signal<TFields>) => WriteTarget | undefined;
   dryRun: boolean;
   itemStartStopCallback?: (item: TFields | null, done: boolean) => void;
 }
 
 export interface ApmSynthtraceApmClientOptions {
-  forceLegacyIndices?: boolean;
   // defaults to true if unspecified
   refreshAfterIndex?: boolean;
 }
@@ -199,27 +200,21 @@ export class ApmSynthtraceApmClient {
   }
 
   async index<TFields>(
-    events: EntityIterable<TFields> | Array<EntityIterable<TFields>>,
-    options?: StreamToBulkOptions,
-    streamProcessor?: StreamProcessor
+    events: SignalIterable<TFields> | Array<SignalIterable<TFields>>,
+    streamProcessor: StreamProcessor<TFields>,
+    options?: StreamToBulkOptions
   ) {
-    const dataStream = Array.isArray(events) ? new EntityStreams(events) : events;
-    const sp =
-      streamProcessor != null
-        ? streamProcessor
-        : new StreamProcessor({
-            processors: [],
-            maxSourceEvents: options?.maxDocs,
-            logger: this.logger,
-          });
+    const dataStream = Array.isArray(events) ? new MergedSignalsStream(events) : events;
+    // TODO ensure its always passed an empty processors
+    const sp = streamProcessor;
 
     let yielded = 0;
     let fields: ApmFields | null = null;
     // intentionally leaks `fields` so it can be pushed to callback events
     const sideEffectYield = () =>
       sp.streamToDocumentAsync((e) => {
-        fields = e;
-        return this.map(e);
+        fields = e.fields;
+        return this.map(e.fields);
       }, dataStream);
 
     if (options?.dryRun) {

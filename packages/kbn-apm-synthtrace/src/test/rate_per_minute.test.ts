@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { EntityArrayIterable, EntityIterable } from '../lib/entity_iterable';
+import { SignalArrayIterable, SignalIterable } from '../lib/streaming/signal_iterable';
 import { apm } from '../lib/apm';
-import { timerange } from '../lib/timerange';
-import { ApmFields } from '../lib/apm/apm_fields';
+import { timerange } from '../dsl/timerange';
+import { ApmFields } from '../dsl/apm/apm_fields';
 
 const range = timerange(new Date('2021-01-01T00:00:00.000Z'), new Date('2021-01-01T00:15:00.000Z'));
 
 describe('rate per minute calculations', () => {
-  let iterable: EntityIterable<ApmFields>;
-  let arrayIterable: EntityArrayIterable<ApmFields>;
+  let iterable: SignalIterable<ApmFields>;
+  let arrayIterable: SignalArrayIterable<ApmFields>;
   let events: Array<Record<string, any>>;
 
   beforeEach(() => {
@@ -44,7 +44,7 @@ describe('rate per minute calculations', () => {
           )
       );
     events = iterable.toArray();
-    arrayIterable = new EntityArrayIterable(events);
+    arrayIterable = new SignalArrayIterable(events);
   });
 
   it('array iterable returns exact rate per minute', () => {

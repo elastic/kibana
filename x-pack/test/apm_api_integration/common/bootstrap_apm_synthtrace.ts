@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { apm, createLogger, LogLevel } from '@kbn/apm-synthtrace';
+import { apm, ApmFields, createLogger, LogLevel, StreamProcessor } from '@kbn/apm-synthtrace';
 import { esTestConfig } from '@kbn/test';
 import { APM_TEST_PASSWORD } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import { InheritedFtrProviderContext } from './ftr_provider_context';
@@ -17,7 +17,7 @@ export async function bootstrapApmSynthtrace(
   const es = context.getService('es');
   const kibanaVersion = esTestConfig.getVersion();
 
-  const kibanaClient = new apm.ApmSynthtraceKibanaClient(createLogger(LogLevel.info));
+  const kibanaClient = new apm.SynthtraceKibanaClient(createLogger(LogLevel.info));
   await kibanaClient.installApmPackage(
     kibanaServerUrl,
     kibanaVersion,
@@ -25,9 +25,16 @@ export async function bootstrapApmSynthtrace(
     APM_TEST_PASSWORD
   );
 
-  const esClient = new apm.ApmSynthtraceEsClient(es, createLogger(LogLevel.info), {
-    forceLegacyIndices: false,
+  const logger = createLogger(LogLevel.info);
+  const streamProcessor = new StreamProcessor<ApmFields>({
+    version: kibanaVersion,
+    logger,
+    processors: apm.defaults.processors,
+    streamAggregators: apm.defaults.streamAggregators,
+  });
+  const esClient = new apm.SynthtraceEsClient(es, logger, {
     refreshAfterIndex: true,
+    streamProcessor,
   });
 
   return esClient;

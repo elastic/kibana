@@ -6,8 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { ApmFields } from '../apm_fields';
+import { ApmFields } from '../../../dsl/apm/apm_fields';
 import { aggregate } from '../utils/aggregate';
+import { BaseApmSignal } from '../../../dsl/apm/base_apm_signal';
+
+export class SpanDestinationMetrics extends BaseApmSignal<ApmFields> {
+  constructor(fields: ApmFields) {
+    super(fields);
+  }
+}
 
 export function getSpanDestinationMetrics(events: ApmFields[]) {
   const exitSpans = events.filter((event) => !!event['span.destination.service.resource']);
@@ -30,11 +37,11 @@ export function getSpanDestinationMetrics(events: ApmFields[]) {
       sum += event['span.duration.us']!;
     }
 
-    return {
+    return new SpanDestinationMetrics({
       ...metricset.key,
       ['metricset.name']: 'service_destination',
       'span.destination.service.response_time.sum.us': sum,
       'span.destination.service.response_time.count': count,
-    };
+    });
   });
 }

@@ -7,7 +7,7 @@
  */
 import { pick } from 'lodash';
 import { apm } from '../../lib/apm';
-import { Instance } from '../../lib/apm/instance';
+import { Instance } from '../../dsl/apm/instance';
 
 describe('application metrics', () => {
   let instance: Instance;
@@ -25,7 +25,8 @@ describe('application metrics', () => {
         'system.memory.total': 100,
       })
       .timestamp(timestamp)
-      .serialize();
+      .yieldSignals()
+      .map((s) => s.fields);
 
     const appMetrics = events.filter((event) => event['processor.event'] === 'metric');
 

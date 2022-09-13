@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { apm, timerange } from '@kbn/apm-synthtrace';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { SynthtraceEsClient } from '@kbn/apm-synthtrace';
 
 export const generateOperationDataConfig = {
   ES_SEARCH_DURATION: 100,
@@ -25,7 +25,7 @@ export async function generateOperationData({
 }: {
   start: number;
   end: number;
-  synthtraceEsClient: ApmSynthtraceEsClient;
+  synthtraceEsClient: SynthtraceEsClient;
 }) {
   const synthGoInstance = apm
     .service({ name: 'synth-go', environment: 'production', agentName: 'go' })

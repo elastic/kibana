@@ -5,30 +5,32 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { service } from './service';
-import { browser } from './browser';
-import { serverlessFunction } from './serverless_function';
-import { getTransactionMetrics } from './processors/get_transaction_metrics';
-import { getSpanDestinationMetrics } from './processors/get_span_destination_metrics';
-import { getChromeUserAgentDefaults } from './defaults/get_chrome_user_agent_defaults';
-import { getBreakdownMetrics } from './processors/get_breakdown_metrics';
-import { getApmWriteTargets } from './utils/get_apm_write_targets';
-import { ApmSynthtraceEsClient } from './client/apm_synthtrace_es_client';
-import { ApmSynthtraceKibanaClient } from './client/apm_synthtrace_kibana_client';
+import { service } from '../../dsl/apm/service';
+import { browser } from '../../dsl/apm/browser';
+import { SynthtraceEsClient } from '../client/synthtrace_es_client';
+import { SynthtraceKibanaClient } from '../client/synthtrace_kibana_client';
+import { serverlessFunction } from '../../dsl/apm/serverless/serverless_function';
 
-import type { ApmException } from './apm_fields';
+import type { ApmException, ApmFields } from '../../dsl/apm/apm_fields';
+import { ApmScenarioDefaults } from './apm_scenario_defaults';
+import { ScenarioDescriptor } from '../../cli/scenario';
 
-export const apm = {
+// explicitly typed because ApmScenarioDefaults because type definition file eats the generics
+// e.g. Omit<ScenarioDescriptorApmFields>, 'generate' | 'mapToIndex'>
+export const apm: {
+  defaults: Omit<ScenarioDescriptor<ApmFields>, 'generate' | 'mapToIndex'>;
+  service: typeof service;
+  browser: typeof browser;
+  SynthtraceEsClient: typeof SynthtraceEsClient;
+  SynthtraceKibanaClient: typeof SynthtraceKibanaClient;
+  serverlessFunction: typeof serverlessFunction;
+} = {
+  defaults: ApmScenarioDefaults,
   service,
   browser,
-  getTransactionMetrics,
-  getSpanDestinationMetrics,
-  getChromeUserAgentDefaults,
-  getBreakdownMetrics,
-  getApmWriteTargets,
-  ApmSynthtraceEsClient,
-  ApmSynthtraceKibanaClient,
+  SynthtraceEsClient,
+  SynthtraceKibanaClient,
   serverlessFunction,
 };
 
-export type { ApmSynthtraceEsClient, ApmException };
+export type { ApmFields, SynthtraceEsClient, ApmException };

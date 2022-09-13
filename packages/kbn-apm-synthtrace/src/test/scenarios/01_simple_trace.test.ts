@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EntityIterable } from '../../..';
+import { SignalIterable } from '../../..';
 import { apm } from '../../lib/apm';
-import { ApmFields } from '../../lib/apm/apm_fields';
-import { timerange } from '../../lib/timerange';
+import { ApmFields } from '../../dsl/apm/apm_fields';
+import { timerange } from '../../dsl/timerange';
 
 describe('simple trace', () => {
-  let iterable: EntityIterable<ApmFields>;
+  let iterable: SignalIterable<ApmFields>;
   let events: Array<Record<string, any>>;
 
   beforeEach(() => {

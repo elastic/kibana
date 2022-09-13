@@ -5,14 +5,20 @@
  * 2.0.
  */
 
-import { apm, createLogger, LogLevel } from '@kbn/apm-synthtrace';
+import { apm, ApmFields, createLogger, LogLevel, StreamProcessor } from '@kbn/apm-synthtrace';
 import { InheritedFtrProviderContext } from './ftr_provider_context';
 
 export async function synthtraceEsClientService(context: InheritedFtrProviderContext) {
   const es = context.getService('es');
 
-  return new apm.ApmSynthtraceEsClient(es, createLogger(LogLevel.info), {
-    forceLegacyIndices: true,
+  const logger = createLogger(LogLevel.info);
+  const streamProcessor = new StreamProcessor<ApmFields>({
+    logger,
+    processors: apm.defaults.processors,
+    streamAggregators: apm.defaults.streamAggregators,
+  });
+  return new apm.SynthtraceEsClient(es, createLogger(LogLevel.info), {
     refreshAfterIndex: true,
+    streamProcessor,
   });
 }

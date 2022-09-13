@@ -7,8 +7,9 @@
  */
 import objectHash from 'object-hash';
 import { groupBy, pickBy } from 'lodash';
-import { ApmFields } from '../apm_fields';
+import { ApmFields } from '../../../dsl/apm/apm_fields';
 import { createPicker } from '../utils/create_picker';
+import { BaseApmSignal } from '../../../dsl/apm/base_apm_signal';
 
 const instanceFields = [
   'container.*',
@@ -28,6 +29,12 @@ const metricsetPicker = createPicker([
   'span.type',
   'span.subtype',
 ]);
+
+export class BreakdownMetrics extends BaseApmSignal<ApmFields> {
+  constructor(fields: ApmFields) {
+    super(fields);
+  }
+}
 
 export function getBreakdownMetrics(events: ApmFields[]) {
   const txWithSpans = groupBy(
@@ -144,5 +151,5 @@ export function getBreakdownMetrics(events: ApmFields[]) {
     }
   });
 
-  return Array.from(metricsets.values());
+  return Array.from(metricsets.values()).map((m) => new BreakdownMetrics(m));
 }

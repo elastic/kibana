@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, EntityArrayIterable, timerange } from '@kbn/apm-synthtrace';
+import { apm, SignalArrayIterable, timerange } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
@@ -89,7 +89,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const entities = events.toArray();
       serviceATraceId = entities.slice(0, 1)[0]['trace.id']!;
 
-      await synthtraceEsClient.index(new EntityArrayIterable(entities));
+      await synthtraceEsClient.index(new SignalArrayIterable(entities));
     });
 
     after(() => synthtraceEsClient.clean());

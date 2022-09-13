@@ -6,15 +6,18 @@
  * Side Public License, v 1.
  */
 
-export { timerange } from './src/lib/timerange';
+export { timerange } from './src/dsl/timerange';
 export { apm } from './src/lib/apm';
-export { stackMonitoring } from './src/lib/stack_monitoring';
-export { observer } from './src/lib/agent_config';
-export { cleanWriteTargets } from './src/lib/utils/clean_write_targets';
+export type { ApmFields, ApmException, SynthtraceEsClient } from './src/lib/apm';
+
+export { stackMonitoring } from './src/dsl/stack_monitoring';
+export { observer } from './src/dsl/apm/agent_config';
 export { createLogger, LogLevel } from './src/lib/utils/create_logger';
 
-export type { Fields } from './src/lib/entity';
-export type { ApmFields } from './src/lib/apm/apm_fields';
-export type { ApmException, ApmSynthtraceEsClient } from './src/lib/apm';
-export type { EntityIterable } from './src/lib/entity_iterable';
-export { EntityArrayIterable } from './src/lib/entity_iterable';
+export type { Fields } from './src/dsl/fields';
+
+export type { SignalIterable } from './src/lib/streaming/signal_iterable';
+export { SignalArrayIterable } from './src/lib/streaming/signal_iterable';
+
+export { StreamProcessor } from './src/lib/streaming/stream_processor';
+export type { StreamProcessorOptions } from './src/lib/streaming/stream_processor';

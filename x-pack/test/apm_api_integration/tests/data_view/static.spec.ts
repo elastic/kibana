@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { apm, ApmSynthtraceEsClient, timerange } from '@kbn/apm-synthtrace';
+import { apm, SynthtraceEsClient, timerange } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { APM_STATIC_DATA_VIEW_ID } from '@kbn/apm-plugin/common/data_view_constants';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -197,7 +197,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 }
 
-function generateApmData(synthtrace: ApmSynthtraceEsClient) {
+function generateApmData(synthtrace: SynthtraceEsClient) {
   const range = timerange(
     new Date('2021-10-01T00:00:00.000Z').getTime(),
     new Date('2021-10-01T00:01:00.000Z').getTime()

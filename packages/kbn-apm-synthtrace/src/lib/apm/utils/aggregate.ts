@@ -8,7 +8,7 @@
 import moment from 'moment';
 import { pickBy } from 'lodash';
 import objectHash from 'object-hash';
-import { ApmFields } from '../apm_fields';
+import { ApmFields } from '../../../dsl/apm/apm_fields';
 import { createPicker } from './create_picker';
 
 export function aggregate(events: ApmFields[], fields: string[]) {

@@ -11,25 +11,24 @@ import Path from 'path';
 import { range } from 'lodash';
 import pLimit from 'p-limit';
 import { cpus } from 'os';
-import { RunOptions } from './parse_run_cli_flags';
+import { ScenarioOptions } from './get_scenario_options';
 import { getScenario } from './get_scenario';
-import { ApmSynthtraceEsClient, LogLevel } from '../../..';
+import { SynthtraceEsClient, LogLevel } from '../../..';
 import { Logger } from '../../lib/utils/create_logger';
 
 export async function startHistoricalDataUpload(
-  esClient: ApmSynthtraceEsClient,
+  esClient: SynthtraceEsClient,
   logger: Logger,
-  runOptions: RunOptions,
+  options: ScenarioOptions,
   from: Date,
   to: Date,
   version: string
 ) {
   // if we want to generate a maximum number of documents reverse generation to descend.
-  [from, to] = runOptions.maxDocs ? [to, from] : [from, to];
+  [from, to] = options.maxDocs ? [to, from] : [from, to];
 
-  const file = runOptions.file;
-  const scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
-  const { generate } = await scenario(runOptions);
+  const scenario = await getScenario({ logger, options });
+  const { generate } = scenario;
 
   const cores = cpus().length;
   // settle on a reasonable max concurrency arbitrarily capping at 10.
@@ -43,9 +42,9 @@ export async function startHistoricalDataUpload(
   );
 
   // if --workers N is specified it should take precedence over inferred maximum workers
-  if (runOptions.workers) {
+  if (options.workers) {
     // ensure maxWorkers is at least 1
-    maxWorkers = Math.max(1, runOptions.workers);
+    maxWorkers = Math.max(1, options.workers);
     // ensure max concurrency is at least 1 or the ceil of --workers N / 2
     maxConcurrency = Math.ceil(Math.max(1, maxWorkers / 2));
     logger.info(
@@ -59,13 +58,13 @@ export async function startHistoricalDataUpload(
     `Scenario is generating ${ratePerMinute.toLocaleString()} events per minute interval`
   );
   let rangeEnd = to;
-  if (runOptions.maxDocs) {
+  if (options.maxDocs) {
     // estimate a more accurate range end for when --maxDocs is specified
     rangeEnd = moment(from)
       // estimatedRatePerMinute() is not exact if the generator is yielding variable documents
       // the rate is calculated by peeking the first yielded event and its children.
       // for real complex cases manually specifying --to is encouraged.
-      .subtract((runOptions.maxDocs / ratePerMinute) * runOptions.maxDocsConfidence, 'm')
+      .subtract((options.maxDocs / ratePerMinute) * options.maxDocsConfidence, 'm')
       .toDate();
   }
   const diff = moment(from).diff(rangeEnd);
@@ -79,9 +78,9 @@ export async function startHistoricalDataUpload(
   if (minNumberOfRanges < maxWorkers) {
     maxWorkers = Math.max(1, Math.floor(minNumberOfRanges));
     maxConcurrency = Math.max(1, maxWorkers / 2);
-    if (runOptions.workers) {
+    if (options.workers) {
       logger.info(
-        `Ignoring --workers ${runOptions.workers} since each worker would not see enough data`
+        `Ignoring --workers ${options.workers} since each worker would not see enough data`
       );
     }
     logger.info(
@@ -139,18 +138,18 @@ export async function startHistoricalDataUpload(
   }) {
     return new Promise((resolve, reject) => {
       logger.info(`Setting up Worker: ${workerIndex}`);
-      if (runOptions.maxDocs && totalProcessed >= runOptions.maxDocs + 10000) {
+      if (options.maxDocs && totalProcessed >= options.maxDocs + 10000) {
         logger.info(
           `Worker ${workerIndex} has no need to run since ${totalProcessed} documents were already processed `
         );
         return resolve(null);
       }
-      const progressToConsole = runOptions?.maxDocs
-        ? Math.min(2000000, runOptions.maxDocs / 20)
+      const progressToConsole = options?.maxDocs
+        ? Math.min(2000000, options.maxDocs / 20)
         : 2000000;
       const worker = new Worker(Path.join(__dirname, './worker.js'), {
         workerData: {
-          runOptions,
+          options,
           bucketFrom,
           bucketTo,
           workerIndex,
@@ -210,8 +209,8 @@ export async function startHistoricalDataUpload(
   const workers = range(0, intervals.length).map((index) => () => runService(intervals[index]));
   return Promise.all(workers.map((worker) => limiter(() => worker())))
     .then(async () => {
-      if (!runOptions.dryRun) {
-        await esClient.refresh(runOptions.apm ? ['metrics-apm.service-*'] : []);
+      if (!options.dryRun) {
+        await esClient.refresh(options.apm ? ['metrics-apm.service-*'] : []);
       }
     })
     .then(() => {

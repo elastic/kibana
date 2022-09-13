@@ -40,7 +40,7 @@ export async function cypressTestRunner({ getService }: FtrProviderContext) {
   });
 
   const esRequestTimeout = config.get('timeouts.esRequestTimeout');
-  const kibanaClient = new apm.ApmSynthtraceKibanaClient(
+  const kibanaClient = new apm.SynthtraceKibanaClient(
     createLogger(LogLevel.info)
   );
 

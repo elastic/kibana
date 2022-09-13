@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { apm, timerange } from '@kbn/apm-synthtrace';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { SynthtraceEsClient } from '@kbn/apm-synthtrace';
 
 export const config = {
   PROD_LIST_RATE: 75,
@@ -22,7 +22,7 @@ export async function generateData({
   start,
   end,
 }: {
-  synthtraceEsClient: ApmSynthtraceEsClient;
+  synthtraceEsClient: SynthtraceEsClient;
   serviceName: string;
   start: number;
   end: number;
