@@ -42,7 +42,6 @@ import {
   HeartbeatConfig,
 } from '../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
-import { DecryptedSyntheticsMonitorSavedObject } from '../../common/types';
 
 import { normalizeSecrets } from './utils/secrets';
 
