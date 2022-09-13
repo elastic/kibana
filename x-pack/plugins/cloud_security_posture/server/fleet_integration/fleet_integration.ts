@@ -43,15 +43,11 @@ export const getBenchmarkInputType = (inputs: PackagePolicy['inputs']): Benchmar
   return getInputType(CLOUDBEAT_VANILLA);
 };
 
-/**
- * Callback to handle creation of PackagePolicies in Fleet
- */
-export const onPackagePolicyPostCreateCallback = async (
-  logger: Logger,
+async function UpdateCspRulesAccordingToCspRuleTemplates(
   packagePolicy: PackagePolicy,
-  savedObjectsClient: SavedObjectsClientContract
-): Promise<void> => {
-  console.log('OnPackagePolicyPostCreateCallback');
+  savedObjectsClient,
+  logger
+) {
   const benchmarkType = getBenchmarkInputType(packagePolicy.inputs);
 
   // Create csp-rules from the generic asset
@@ -81,6 +77,17 @@ export const onPackagePolicyPostCreateCallback = async (
     logger.error('failed to generate rules out of template');
     logger.error(e);
   }
+}
+
+/**
+ * Callback to handle creation of PackagePolicies in Fleet
+ */
+export const onPackagePolicyPostCreateCallback = async (
+  logger: Logger,
+  packagePolicy: PackagePolicy,
+  savedObjectsClient: SavedObjectsClientContract
+): Promise<void> => {
+  await UpdateCspRulesAccordingToCspRuleTemplates(packagePolicy, savedObjectsClient, logger);
 };
 
 export const OnPackagePolicyUpgradeCallback = async (
@@ -88,6 +95,7 @@ export const OnPackagePolicyUpgradeCallback = async (
   packagePolicy: PackagePolicy,
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
+  debugger;
   const benchmarkType = getBenchmarkInputType(packagePolicy.inputs);
   packagePolicy.id = `04f32290-b7cf-47ee-803a-8286565f2b4b`;
   // Create csp-rules from the generic asset
