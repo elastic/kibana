@@ -22,7 +22,7 @@ import { ResultFieldProps } from './types';
 import './result.scss';
 
 const iconMap: Record<string, string> = {
-  boolean: 'tokenBoolen',
+  boolean: 'tokenBoolean',
   date: 'tokenDate',
   date_range: 'tokenDate',
   double: 'tokenNumber',
