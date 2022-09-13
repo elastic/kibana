@@ -12,18 +12,9 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SLO, StoredSLO } from '../../types/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { KibanaSavedObjectsSLORepository } from './slo_repository';
-import { createSLO } from './fixtures/slo';
+import { createAPMTransactionDurationIndicator, createSLO } from './fixtures/slo';
 
-const anSLO = createSLO({
-  type: 'slo.apm.transaction_duration',
-  params: {
-    environment: 'irrelevant',
-    service: 'irrelevant',
-    transaction_type: 'irrelevant',
-    transaction_name: 'irrelevant',
-    'threshold.us': 200000,
-  },
-});
+const SOME_SLO = createSLO(createAPMTransactionDurationIndicator());
 
 function aStoredSLO(slo: SLO): SavedObject<StoredSLO> {
   return {
@@ -46,37 +37,38 @@ describe('KibanaSavedObjectsSLORepository', () => {
   });
 
   it('saves the SLO', async () => {
-    soClientMock.create.mockResolvedValueOnce(aStoredSLO(anSLO));
+    soClientMock.create.mockResolvedValueOnce(aStoredSLO(SOME_SLO));
     const repository = new KibanaSavedObjectsSLORepository(soClientMock);
 
-    const savedSLO = await repository.save(anSLO);
+    const savedSLO = await repository.save(SOME_SLO);
 
-    expect(savedSLO).toEqual(anSLO);
+    expect(savedSLO).toEqual(SOME_SLO);
     expect(soClientMock.create).toHaveBeenCalledWith(
       SO_SLO_TYPE,
       expect.objectContaining({
-        ...anSLO,
+        ...SOME_SLO,
         updated_at: expect.anything(),
         created_at: expect.anything(),
-      })
+      }),
+      { id: SOME_SLO.id }
     );
   });
 
   it('finds an existing SLO', async () => {
     const repository = new KibanaSavedObjectsSLORepository(soClientMock);
-    soClientMock.get.mockResolvedValueOnce(aStoredSLO(anSLO));
+    soClientMock.get.mockResolvedValueOnce(aStoredSLO(SOME_SLO));
 
-    const foundSLO = await repository.findById(anSLO.id);
+    const foundSLO = await repository.findById(SOME_SLO.id);
 
-    expect(foundSLO).toEqual(anSLO);
-    expect(soClientMock.get).toHaveBeenCalledWith(SO_SLO_TYPE, anSLO.id);
+    expect(foundSLO).toEqual(SOME_SLO);
+    expect(soClientMock.get).toHaveBeenCalledWith(SO_SLO_TYPE, SOME_SLO.id);
   });
 
-  it('removes an SLO', async () => {
+  it('deletes an SLO', async () => {
     const repository = new KibanaSavedObjectsSLORepository(soClientMock);
 
-    await repository.deleteById(anSLO.id);
+    await repository.deleteById(SOME_SLO.id);
 
-    expect(soClientMock.delete).toHaveBeenCalledWith(SO_SLO_TYPE, anSLO.id);
+    expect(soClientMock.delete).toHaveBeenCalledWith(SO_SLO_TYPE, SOME_SLO.id);
   });
 });

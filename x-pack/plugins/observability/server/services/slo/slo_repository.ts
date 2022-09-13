@@ -9,6 +9,7 @@ import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 import { StoredSLO, SLO } from '../../types/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 
 export interface SLORepository {
   save(slo: SLO): Promise<SLO>;
@@ -21,11 +22,15 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
 
   async save(slo: SLO): Promise<SLO> {
     const now = new Date().toISOString();
-    const savedSLO = await this.soClient.create<StoredSLO>(SO_SLO_TYPE, {
-      ...slo,
-      created_at: now,
-      updated_at: now,
-    });
+    const savedSLO = await this.soClient.create<StoredSLO>(
+      SO_SLO_TYPE,
+      {
+        ...slo,
+        created_at: now,
+        updated_at: now,
+      },
+      { id: slo.id }
+    );
 
     return toSLOModel(savedSLO.attributes);
   }
@@ -36,7 +41,14 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
   }
 
   async deleteById(id: string): Promise<void> {
-    await this.soClient.delete(SO_SLO_TYPE, id);
+    try {
+      await this.soClient.delete(SO_SLO_TYPE, id);
+    } catch (err) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        return;
+      }
+      throw err;
+    }
   }
 }
 
