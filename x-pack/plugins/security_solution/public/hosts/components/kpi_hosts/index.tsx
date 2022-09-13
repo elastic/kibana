@@ -15,16 +15,14 @@ import { CallOutSwitcher } from '../../../common/components/callouts';
 import * as i18n from './translations';
 import { useHostRiskScore } from '../../../risk_score/containers';
 import { RISKY_HOSTS_DOC_LINK } from '../../../../common/constants';
-import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 
 export const HostsKpiComponent = React.memo<HostsKpiProps>(
   ({ filterQuery, from, indexNames, to, setQuery, skip, updateDateRange }) => {
-    const [loading, { isModuleEnabled }] = useHostRiskScore();
-    const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
+    const [loading, { isLicenseValid, isModuleEnabled }] = useHostRiskScore();
 
     return (
       <>
-        {isPlatinumOrTrialLicense && !isModuleEnabled && !loading && (
+        {isLicenseValid && !isModuleEnabled && !loading && (
           <>
             <CallOutSwitcher
               namespace="hosts"

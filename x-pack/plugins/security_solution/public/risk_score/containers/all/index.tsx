@@ -31,7 +31,8 @@ export interface RiskScoreState<T extends RiskQueries.hostsRiskScore | RiskQueri
   isInspected: boolean;
   refetch: inputsModel.Refetch;
   totalCount: number;
-  isModuleEnabled: boolean | undefined;
+  isModuleEnabled: boolean;
+  isLicenseValid: boolean;
 }
 
 export interface UseRiskScoreParams {
@@ -51,7 +52,6 @@ export interface UseRiskScoreParams {
 interface UseRiskScore<T> extends UseRiskScoreParams {
   defaultIndex: string | undefined;
   factoryQueryType: T;
-  featureEnabled: boolean;
 }
 
 export const initialResult: Omit<
@@ -66,7 +66,6 @@ export const useHostRiskScore = (params?: UseRiskScoreParams) => {
   const { timerange, onlyLatest, filterQuery, sort, skip = false, pagination } = params ?? {};
   const spaceId = useSpaceId();
   const defaultIndex = spaceId ? getHostRiskIndex(spaceId, onlyLatest) : undefined;
-  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
 
   return useRiskScore({
     timerange,
@@ -75,7 +74,6 @@ export const useHostRiskScore = (params?: UseRiskScoreParams) => {
     sort,
     skip,
     pagination,
-    featureEnabled: isPlatinumOrTrialLicense,
     defaultIndex,
     factoryQueryType: RiskQueries.hostsRiskScore,
   });
@@ -85,7 +83,6 @@ export const useUserRiskScore = (params?: UseRiskScoreParams) => {
   const { timerange, onlyLatest, filterQuery, sort, skip = false, pagination } = params ?? {};
   const spaceId = useSpaceId();
   const defaultIndex = spaceId ? getUserRiskIndex(spaceId, onlyLatest) : undefined;
-  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
 
   return useRiskScore({
     timerange,
@@ -94,7 +91,6 @@ export const useUserRiskScore = (params?: UseRiskScoreParams) => {
     sort,
     skip,
     pagination,
-    featureEnabled: isPlatinumOrTrialLicense,
     defaultIndex,
     factoryQueryType: RiskQueries.usersRiskScore,
   });
@@ -106,7 +102,6 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
   sort,
   skip = false,
   pagination,
-  featureEnabled,
   defaultIndex,
   factoryQueryType,
 }: UseRiskScore<T>): [boolean, RiskScoreState<T>] => {
@@ -127,6 +122,7 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
     abort: skip,
     showErrorToast: false,
   });
+  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
 
   const riskScoreResponse = useMemo(
     () => ({
@@ -134,10 +130,13 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
       inspect,
       refetch,
       totalCount: response.totalCount,
-      isModuleEnabled: skip ? featureEnabled : featureEnabled && response.data != null,
+      isLicenseValid: isPlatinumOrTrialLicense,
+      isModuleEnabled: skip
+        ? isPlatinumOrTrialLicense
+        : isPlatinumOrTrialLicense && response.data != null,
       isInspected: false,
     }),
-    [featureEnabled, inspect, refetch, response.data, response.totalCount, skip]
+    [isPlatinumOrTrialLicense, inspect, refetch, response.data, response.totalCount, skip]
   );
 
   const riskScoreRequest = useMemo(
@@ -172,10 +171,10 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
   }, [addError, error]);
 
   useEffect(() => {
-    if (!skip && riskScoreRequest != null && featureEnabled) {
+    if (!skip && riskScoreRequest != null && isPlatinumOrTrialLicense) {
       search(riskScoreRequest);
     }
-  }, [featureEnabled, riskScoreRequest, search, skip]);
+  }, [isPlatinumOrTrialLicense, riskScoreRequest, search, skip]);
 
   return [loading, riskScoreResponse];
 };

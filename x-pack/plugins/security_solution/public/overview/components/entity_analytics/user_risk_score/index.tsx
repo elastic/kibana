@@ -37,7 +37,6 @@ import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirec
 import { RISKY_USERS_DOC_LINK } from '../../../../users/components/constants';
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
-import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 
 const TABLE_QUERY_ID = 'userRiskDashboardTable';
 
@@ -53,7 +52,6 @@ export const EntityAnalyticsUserRiskScores = () => {
   const [selectedSeverity, setSelectedSeverity] = useState<RiskSeverity[]>([]);
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
   const dispatch = useDispatch();
-  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
 
   const severityFilter = useMemo(() => {
     const [filter] = generateSeverityFilter(selectedSeverity, RiskScoreEntity.user);
@@ -66,14 +64,15 @@ export const EntityAnalyticsUserRiskScores = () => {
     skip: !toggleStatus,
   });
 
-  const [isTableLoading, { data, inspect, refetch, isModuleEnabled }] = useUserRiskScore({
-    filterQuery: severityFilter,
-    skip: !toggleStatus,
-    pagination: {
-      cursorStart: 0,
-      querySize: 5,
-    },
-  });
+  const [isTableLoading, { data, inspect, refetch, isLicenseValid, isModuleEnabled }] =
+    useUserRiskScore({
+      filterQuery: severityFilter,
+      skip: !toggleStatus,
+      pagination: {
+        cursorStart: 0,
+        querySize: 5,
+      },
+    });
 
   useQueryInspector({
     queryId: TABLE_QUERY_ID,
@@ -120,7 +119,7 @@ export const EntityAnalyticsUserRiskScores = () => {
     );
   }, []);
 
-  if (!isPlatinumOrTrialLicense) {
+  if (!isLicenseValid) {
     return null;
   }
 

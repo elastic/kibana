@@ -76,13 +76,12 @@ export const UserOverview = React.memo<UserSummaryProps>(
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
-    const isPlatinumOrTrialLicense = capabilities.isPlatinumOrTrialLicense;
     const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
     const filterQuery = useMemo(
       () => (userName ? buildUserNamesFilter([userName]) : undefined),
       [userName]
     );
-    const [_, { data: userRisk }] = useUserRiskScore({
+    const [_, { data: userRisk, isLicenseValid }] = useUserRiskScore({
       filterQuery,
       skip: userName == null,
     });
@@ -253,7 +252,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
             )}
           </OverviewWrapper>
         </InspectButtonContainer>
-        {isPlatinumOrTrialLicense && (
+        {isLicenseValid && (
           <UserRiskOverviewWrapper
             gutterSize={isInDetailsSidePanel ? 'm' : 'none'}
             direction={isInDetailsSidePanel ? 'column' : 'row'}

@@ -77,14 +77,13 @@ export const HostOverview = React.memo<HostSummaryProps>(
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
-    const isPlatinumOrTrialLicense = capabilities.isPlatinumOrTrialLicense;
     const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
     const filterQuery = useMemo(
       () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
       [hostName]
     );
 
-    const [_, { data: hostRisk }] = useHostRiskScore({
+    const [_, { data: hostRisk, isLicenseValid }] = useHostRiskScore({
       filterQuery,
       skip: hostName == null,
     });
@@ -267,7 +266,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
             )}
           </OverviewWrapper>
         </InspectButtonContainer>
-        {isPlatinumOrTrialLicense && (
+        {isLicenseValid && (
           <HostRiskOverviewWrapper
             gutterSize={isInDetailsSidePanel ? 'm' : 'none'}
             direction={isInDetailsSidePanel ? 'column' : 'row'}

@@ -10,7 +10,6 @@ import type { TimelineEventsDetailsItem } from '../../../../common/search_strate
 import { buildHostNamesFilter, buildUserNamesFilter } from '../../../../common/search_strategy';
 import type { HostRisk, UserRisk } from '../../../risk_score/containers';
 import { useUserRiskScore, useHostRiskScore } from '../../../risk_score/containers';
-import { useMlCapabilities } from '../ml/hooks/use_ml_capabilities';
 
 const ONLY_FIRST_ITEM_PAGINATION = {
   cursorStart: 0,
@@ -18,7 +17,6 @@ const ONLY_FIRST_ITEM_PAGINATION = {
 };
 
 export const useRiskScoreData = (data: TimelineEventsDetailsItem[]) => {
-  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
   const { hostName, userName } = useBasicDataFromDetailsData(data);
 
   const hostNameFilterQuery = useMemo(
@@ -30,7 +28,7 @@ export const useRiskScoreData = (data: TimelineEventsDetailsItem[]) => {
     useHostRiskScore({
       filterQuery: hostNameFilterQuery,
       pagination: ONLY_FIRST_ITEM_PAGINATION,
-      skip: !hostNameFilterQuery || !isPlatinumOrTrialLicense,
+      skip: !hostNameFilterQuery,
     });
 
   const hostRisk: HostRisk = useMemo(
@@ -51,7 +49,7 @@ export const useRiskScoreData = (data: TimelineEventsDetailsItem[]) => {
     useUserRiskScore({
       filterQuery: userNameFilterQuery,
       pagination: ONLY_FIRST_ITEM_PAGINATION,
-      skip: !userNameFilterQuery || !isPlatinumOrTrialLicense,
+      skip: !userNameFilterQuery,
     });
 
   const userRisk: UserRisk = useMemo(
