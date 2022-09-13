@@ -76,6 +76,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                     packagePolicy={packagePolicy}
                     packageInputStreams={packageInputStreams}
                     packagePolicyInput={packagePolicyInput}
+                    updatePackagePolicy={updatePackagePolicy}
                     updatePackagePolicyInput={(updatedInput: Partial<NewPackagePolicyInput>) => {
                       const indexOfUpdatedInput = packagePolicy.inputs.findIndex(
                         (input) =>

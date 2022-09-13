@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/analytics-shippers-elastic-v3-browser",
+  "owner": "@elastic/kibana-core",
+  "runtimeDeps": [],
+  "typeDeps": []
+}
