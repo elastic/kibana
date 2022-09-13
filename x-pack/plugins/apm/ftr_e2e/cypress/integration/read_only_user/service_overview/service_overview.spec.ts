@@ -226,7 +226,9 @@ describe('Service Overview', () => {
         'suggestionsRequest'
       );
 
-      cy.get('[data-test-subj="environmentFilter"]').type('production');
+      cy.get('[data-test-subj="environmentFilter"] input').type('production', {
+        force: true,
+      });
 
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: ['@suggestionsRequest'],

@@ -25,6 +25,7 @@ import {
   extendedAnnotationLayerFunction,
 } from '../common/expression_functions';
 import { SetupDeps } from './types';
+import { eventAnnotationsResult } from '../common/expression_functions/event_annotations_result';
 
 export class ExpressionXyPlugin
   implements Plugin<ExpressionXyPluginSetup, ExpressionXyPluginStart>
@@ -39,6 +40,7 @@ export class ExpressionXyPlugin
     expressions.registerFunction(axisExtentConfigFunction);
     expressions.registerFunction(annotationLayerFunction);
     expressions.registerFunction(extendedAnnotationLayerFunction);
+    expressions.registerFunction(eventAnnotationsResult);
     expressions.registerFunction(referenceLineFunction);
     expressions.registerFunction(referenceLineLayerFunction);
     expressions.registerFunction(xyVisFunction);

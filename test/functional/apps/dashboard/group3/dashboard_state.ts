@@ -40,7 +40,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
   };
 
-  describe('dashboard state', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/139762
+  describe.skip('dashboard state', function describeIndexTests() {
     // Used to track flag before and after reset
     let isNewChartsLibraryEnabled = true;
 
