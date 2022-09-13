@@ -601,7 +601,7 @@ export const createCaseWithConnector = async ({
   serviceNowSimulatorURL: string;
   actionsRemover: ActionsRemover;
   configureReq?: Record<string, unknown>;
-  auth?: { user: User; space: string | null };
+  auth?: { user: User; space: string | null } | null;
   createCaseReq?: CasePostRequest;
   headers?: Record<string, unknown>;
 }): Promise<{
@@ -615,10 +615,10 @@ export const createCaseWithConnector = async ({
       ...getServiceNowConnector(),
       config: { apiUrl: serviceNowSimulatorURL },
     },
-    auth,
+    auth: auth ?? undefined,
   });
 
-  actionsRemover.add(auth.space ?? 'default', connector.id, 'action', 'actions');
+  actionsRemover.add(auth?.space ?? 'default', connector.id, 'action', 'actions');
   const configuration = await createConfiguration(
     supertest,
     {
@@ -630,7 +630,7 @@ export const createCaseWithConnector = async ({
       ...configureReq,
     },
     200,
-    auth
+    auth ?? undefined
   );
 
   const postedCase = await createCase(
@@ -662,12 +662,16 @@ export const createCase = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   params: CasePostRequest,
   expectedHttpCode: number = 200,
-  auth: { user: User; space: string | null } = { user: superUser, space: null },
+  auth: { user: User; space: string | null } | null = { user: superUser, space: null },
   headers: Record<string, unknown> = {}
 ): Promise<CaseResponse> => {
-  const { body: theCase } = await supertest
-    .post(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}`)
-    .auth(auth.user.username, auth.user.password)
+  const apiCall = supertest.post(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}`);
+
+  if (!Object.hasOwn(headers, 'Cookie') && auth != null) {
+    apiCall.auth(auth.user.username, auth.user.password);
+  }
+
+  const { body: theCase } = await apiCall
     .set('kbn-xsrf', 'true')
     .set(headers)
     .send(params)

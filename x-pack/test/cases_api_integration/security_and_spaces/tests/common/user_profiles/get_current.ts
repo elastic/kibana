@@ -17,6 +17,7 @@ import { getUserInfo } from '../../../../common/lib/authentication';
 export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
+  const security = getService('security');
 
   describe('user_profiles', () => {
     describe('get_current', () => {
@@ -25,6 +26,16 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('sets the profile uid for a case', async () => {
+        const superUserInfo = getUserInfo(superUser);
+
+        // ensure the user's information is what we expect
+        await security.user.create(superUser.username, {
+          password: superUser.password,
+          roles: superUser.roles,
+          full_name: superUserInfo.full_name,
+          email: superUserInfo.email,
+        });
+
         const cookies = await loginUsers({ supertest: supertestWithoutAuth, users: [superUser] });
 
         const profiles = await suggestUserProfiles({
@@ -37,13 +48,9 @@ export default function ({ getService }: FtrProviderContext) {
           auth: { user: superUser, space: null },
         });
 
-        const caseInfo = await createCase(
-          supertestWithoutAuth,
-          getPostCaseRequest(),
-          200,
-          { user: superUser, space: null },
-          { Cookie: cookies[0].cookieString() }
-        );
+        const caseInfo = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, null, {
+          Cookie: cookies[0].cookieString(),
+        });
 
         expect(caseInfo.created_by).to.eql({
           ...getUserInfo(superUser),

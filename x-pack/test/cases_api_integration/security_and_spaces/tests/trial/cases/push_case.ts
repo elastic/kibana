@@ -85,6 +85,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           serviceNowSimulatorURL,
           actionsRemover,
+          auth: null,
           headers: { Cookie: cookies[0].cookieString() },
         });
 
