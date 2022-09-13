@@ -154,7 +154,7 @@ export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
         gutterSize="m"
       >
         <EuiFlexItem grow={false}>{renderControls()}</EuiFlexItem>
-        {!done && Boolean(errorMessage) && (
+        {!done && !uploading && Boolean(errorMessage) && (
           <EuiFlexItem>
             <EuiText className="filesUploadFile__errorMessage" size="s" color="danger">
               <span id={errorId}>{errorMessage}</span>
