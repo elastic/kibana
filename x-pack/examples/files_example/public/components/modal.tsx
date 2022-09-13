@@ -7,7 +7,7 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { EuiModal, EuiModalHeader, EuiModalBody } from '@elastic/eui';
+import { EuiModal, EuiModalHeader, EuiModalBody, EuiText } from '@elastic/eui';
 import { exampleFileKind } from '../../common';
 import { FilesClient, UploadFile } from '../imports';
 
@@ -20,7 +20,11 @@ interface Props {
 export const Modal: FunctionComponent<Props> = ({ onDismiss, onUploaded, client }) => {
   return (
     <EuiModal onClose={onDismiss}>
-      <EuiModalHeader>Upload file</EuiModalHeader>
+      <EuiModalHeader>
+        <EuiText>
+          <h2>Upload image</h2>
+        </EuiText>
+      </EuiModalHeader>
       <EuiModalBody>
         <UploadFile kind={exampleFileKind.id} client={client} onDone={onUploaded} />
       </EuiModalBody>
