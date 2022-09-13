@@ -127,8 +127,7 @@ export const getXyVisualization = ({
   },
 
   cloneLayer(state, layerId, newLayerId) {
-    console.log('cloneLayer456');
-
+    // @todo: wip
     return state;
   },
 

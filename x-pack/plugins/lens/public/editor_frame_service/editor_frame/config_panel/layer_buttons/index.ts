@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { LayerButtonsProps, LayerButtons } from './layer_buttons';
+export { LayerButtons } from './layer_buttons';
+
+export type { LayerButtonsProps } from './layer_buttons';
