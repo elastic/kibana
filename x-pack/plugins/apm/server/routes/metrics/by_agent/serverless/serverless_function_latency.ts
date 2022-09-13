@@ -41,7 +41,7 @@ const chartBase: ChartBase = {
   ),
 };
 
-async function getTransactionDurationSeries({
+async function getServerlessLantecySeries({
   environment,
   kuery,
   setup,
@@ -62,8 +62,6 @@ async function getTransactionDurationSeries({
     environment,
     kuery,
     serviceName,
-    transactionType: undefined,
-    transactionName: undefined,
     setup,
     searchAggregatedTransactions,
     latencyAggregationType: LatencyAggregationType.avg,
@@ -86,7 +84,7 @@ async function getTransactionDurationSeries({
   ];
 }
 
-export async function getDuration({
+export async function getServerlessFunctionLatency({
   environment,
   kuery,
   setup,
@@ -112,7 +110,7 @@ export async function getDuration({
     end,
   };
 
-  const [billedDurationMetrics, transactionDurationSeries] = await Promise.all([
+  const [billedDurationMetrics, serverlessDurationSeries] = await Promise.all([
     fetchAndTransformMetrics({
       ...options,
       chartBase: { ...chartBase, series: { billedDurationAvg } },
@@ -122,11 +120,11 @@ export async function getDuration({
       additionalFilters: [{ exists: { field: FAAS_BILLED_DURATION } }],
       operationName: 'get_billed_duration',
     }),
-    getTransactionDurationSeries({ ...options, searchAggregatedTransactions }),
+    getServerlessLantecySeries({ ...options, searchAggregatedTransactions }),
   ]);
 
   return {
     ...billedDurationMetrics,
-    series: [...billedDurationMetrics.series, ...transactionDurationSeries],
+    series: [...billedDurationMetrics.series, ...serverlessDurationSeries],
   };
 }
