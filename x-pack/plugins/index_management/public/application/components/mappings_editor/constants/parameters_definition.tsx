@@ -1086,8 +1086,6 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     schema: t.union([
       t.literal('gauge'),
       t.literal('counter'),
-      t.literal('histogram'),
-      t.literal('summary'),
       t.null,
     ]),
   },
