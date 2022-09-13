@@ -46,13 +46,13 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                 <h5>
                   <FormattedMessage
                     id="xpack.observability.pages.alertDetails.alertSummary.alertName"
-                    defaultMessage="Alert"
+                    defaultMessage="Alert ID"
                   />
                 </h5>
               </EuiTitle>
               <EuiSpacer size="s" />
               <EuiText size="s" color="subdued">
-                {alert['kibana.alert.uuid']}
+                {alert['kibana.alert.uuid'] ?? '-'}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -110,18 +110,18 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                 <h5>
                   <FormattedMessage
                     id="xpack.observability.pages.alertDetails.alertSummary.runbook"
-                    defaultMessage="Runbook"
+                    defaultMessage="Relation"
                   />
                 </h5>
               </EuiTitle>
-              <EuiLink>
-                ...
-                <EuiButtonEmpty
-                  data-test-subj="runBookEditButton"
-                  iconType={'pencil'}
-                  onClick={() => {}}
-                />
-              </EuiLink>
+              <EuiSpacer size="s" />
+              <div>
+                <EuiSpacer size="s" />
+                {triggersActionsUi.getRuleTagBadge<'tagsOutPopover'>({
+                  tagsOutPopover: true,
+                  tags: ['Kibana'],
+                })}
+              </div>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle size="xxs">
