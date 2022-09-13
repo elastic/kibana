@@ -18,7 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useForm as useHookForm, FormProvider } from 'react-hook-form';
-import { isEmpty, map, find, pickBy } from 'lodash';
+import { isEmpty, find, pickBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
