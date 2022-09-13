@@ -38,7 +38,7 @@ describe('<FilterInOut />', () => {
     const mockComponent: FunctionComponent = () => <EuiButtonIcon iconType="plusInCircle" />;
 
     const component = render(
-      <FilterInOut data={mockIndicator} field={mockField} Component={mockComponent} />
+      <FilterInOut data={mockIndicator} field={mockField} as={mockComponent} />
     );
 
     expect(component).toMatchSnapshot();
