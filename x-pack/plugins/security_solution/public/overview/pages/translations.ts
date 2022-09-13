@@ -57,6 +57,13 @@ export const ENTITY_ANALYTICS_TITLE = i18n.translate(
   }
 );
 
+export const ENTITY_ANALYTICS_LICENSE_DESC = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.pageDesc',
+  {
+    defaultMessage: 'Entity Analytics features',
+  }
+);
+
 export const NO_PERMISSIONS_MSG = i18n.translate(
   'xpack.securitySolution.detectionResponse.noPagePermissionsMessage',
   {

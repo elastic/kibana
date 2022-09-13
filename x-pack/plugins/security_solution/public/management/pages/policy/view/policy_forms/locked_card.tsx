@@ -30,8 +30,8 @@ const LockedPolicyDiv = styled.div`
   }
 `;
 
-export const LockedPolicyCard = memo(({ title }: { title: string }) => {
-  return (
+export const LockedPolicyCard = memo(
+  ({ title, description }: { title: string; description?: string }) => (
     <LockedPolicyDiv>
       <EuiCard
         data-test-subj="lockedPolicyCard"
@@ -65,7 +65,7 @@ export const LockedPolicyCard = memo(({ title }: { title: string }) => {
               <p>
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.policy.details.lockedCardUpgradeMessage"
-                  defaultMessage="To turn on this protection, you must upgrade your license to Platinum, start a
+                  defaultMessage="To turn on {description}, you must upgrade your license to Platinum, start a
               free 30-day trial, or spin up a {cloudDeploymentLink} on AWS, GCP, or Azure."
                   values={{
                     cloudDeploymentLink: (
@@ -76,6 +76,7 @@ export const LockedPolicyCard = memo(({ title }: { title: string }) => {
                         />
                       </EuiLink>
                     ),
+                    description: description ? description : 'this protection',
                   }}
                 />
               </p>
@@ -84,6 +85,6 @@ export const LockedPolicyCard = memo(({ title }: { title: string }) => {
         </EuiFlexGroup>
       </EuiCard>
     </LockedPolicyDiv>
-  );
-});
+  )
+);
 LockedPolicyCard.displayName = 'LockedPolicyCard';
