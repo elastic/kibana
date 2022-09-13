@@ -8,7 +8,6 @@
 import React, { useEffect, useState, memo, useCallback } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { SavedObject } from '@kbn/data-plugin/public';
-import { ISearchSource } from '@kbn/data-plugin/public';
 import {
   DataViewAttributes,
   DataViewSavedObjectConflictError,
@@ -73,7 +72,7 @@ export function DiscoverMainRoute(props: Props) {
   });
 
   const loadDefaultOrCurrentDataView = useCallback(
-    async (searchSource: ISearchSource) => {
+    async (nextSavedSearch: SavedSearch) => {
       try {
         const hasUserDataViewValue = await data.dataViews.hasData
           .hasUserDataView()
@@ -95,12 +94,12 @@ export function DiscoverMainRoute(props: Props) {
           return;
         }
 
-        const { appStateContainer } = getState({ history, uiSettings: config });
+        const { appStateContainer } = getState({ history, savedSearch: nextSavedSearch, services });
         const { index } = appStateContainer.getState();
         const ip = await loadDataView(index || '', data.dataViews, config);
 
         const ipList = ip.list as Array<SavedObject<DataViewAttributes>>;
-        const dataViewData = resolveDataView(ip, searchSource, toastNotifications);
+        const dataViewData = resolveDataView(ip, nextSavedSearch.searchSource, toastNotifications);
         await data.dataViews.refreshFields(dataViewData);
         setDataViewList(ipList);
 
@@ -109,7 +108,7 @@ export function DiscoverMainRoute(props: Props) {
         setError(e);
       }
     },
-    [config, data.dataViews, history, isDev, toastNotifications]
+    [config, data.dataViews, history, isDev, toastNotifications, services]
   );
 
   const loadSavedSearch = useCallback(async () => {
@@ -121,7 +120,7 @@ export function DiscoverMainRoute(props: Props) {
         savedObjectsTagging: services.savedObjectsTagging,
       });
 
-      const currentDataView = await loadDefaultOrCurrentDataView(currentSavedSearch.searchSource);
+      const currentDataView = await loadDefaultOrCurrentDataView(currentSavedSearch);
 
       if (!currentDataView) {
         return;
