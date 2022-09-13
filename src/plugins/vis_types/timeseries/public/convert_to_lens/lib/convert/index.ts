@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { convertMetricsToColumns, isColumnWithMeta, excludeMetaFromColumn } from './column';
+export { isColumnWithMeta, excludeMetaFromColumn } from './column';
 export { convertToPercentileColumns, isPercentileColumnWithMeta } from './percentile';
 export { convertToPercentileRankColumns, isPercentileRanksColumnWithMeta } from './percentile_rank';
 export { convertMathToFormulaColumn, convertOtherAggsToFormulaColumn } from './formula';
@@ -20,8 +20,8 @@ export { convertToLastValueColumn } from './last_value';
 export { convertToStaticValueColumn } from './static_value';
 export { convertToFiltersColumn } from './filters';
 export { convertToDateHistogramColumn } from './date_histogram';
-export { converToTermsColumn } from './terms';
-export { convertToCounterRateFormulaColumn } from './counter_rate';
+export { convertToTermsColumn } from './terms';
+export { convertToCounterRateColumn } from './counter_rate';
 export { convertToStandartDeviationColumn } from './std_deviation';
 
 export * from './types';

@@ -235,7 +235,7 @@ describe('getBucketsColumns', () => {
             params: {},
             sourceField: 'document',
           }),
-          orderBy: expect.objectContaining({ type: 'column' }),
+          orderBy: expect.objectContaining({ type: 'custom' }),
           orderDirection: 'desc',
           otherBucket: false,
           parentFormat: { id: 'terms' },
@@ -248,8 +248,5 @@ describe('getBucketsColumns', () => {
     const params = result?.[0].params as TermsParams;
     expect(params.orderAgg).not.toBeNull();
     expect(typeof params.orderAgg === 'object').toBeTruthy();
-    expect(params.orderAgg?.columnId).toEqual(
-      (params.orderBy as { columnId: string; type: 'column' }).columnId
-    );
   });
 });

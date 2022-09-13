@@ -13,7 +13,7 @@ import {
   TermsParams,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { createSeries } from '../__mocks__';
-import { converToTermsColumn, convertToTermsParams } from './terms';
+import { convertToTermsColumn, convertToTermsParams } from './terms';
 import { Column } from './types';
 
 describe('convertToTermsParams', () => {
@@ -208,7 +208,7 @@ describe('converToTermsColumn', () => {
   test.each<
     [
       string,
-      Parameters<typeof converToTermsColumn>,
+      Parameters<typeof convertToTermsColumn>,
       Partial<
         Omit<TermsColumn, 'params'> & {
           params: Partial<Omit<TermsColumn['params'], 'orderAgg'>> & {
@@ -275,9 +275,9 @@ describe('converToTermsColumn', () => {
     ],
   ])('should return %s', (_, input, expected) => {
     if (expected === null) {
-      expect(converToTermsColumn(...input)).toBeNull();
+      expect(convertToTermsColumn(...input)).toBeNull();
     } else {
-      expect(converToTermsColumn(...input)).toEqual(
+      expect(convertToTermsColumn(...input)).toEqual(
         expect.objectContaining({
           ...expected,
           params: expect.objectContaining({

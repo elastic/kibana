@@ -15,7 +15,10 @@ export const convertFilterRatioToFormulaColumn = (
   reducedTimeRange?: string
 ): FormulaColumn | null => {
   const metric = metrics[metrics.length - 1];
-  const formula = getFilterRatioFormula(metric, reducedTimeRange);
+  const formula = getFilterRatioFormula(metric, {
+    reducedTimeRange,
+    timeShift: series.offset_time,
+  });
 
   if (!formula) {
     return null;

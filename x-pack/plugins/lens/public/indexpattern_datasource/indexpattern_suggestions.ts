@@ -233,7 +233,8 @@ function getParams(column: Column) {
 function getIncompleteParams(column: Column) {
   return {
     filter: column.filter,
-    shift: column.timeShift,
+    timeShift: column.timeShift,
+    timeScale: column.timeScale,
     dataType: column.dataType,
     ...(column.reducedTimeRange && { reducedTimeRange: column.reducedTimeRange }),
   };
@@ -326,7 +327,7 @@ function createNewLayerWithMetricAggregationFromVizEditor(
         {
           previousColumn: {
             ...previousColumn,
-            label: previousColumn?.label || '',
+            label: previousColumn?.label || (column.columnParams?.formula as string) || '',
           },
           indexPattern,
           layer: newLayer,
@@ -345,7 +346,13 @@ function createNewLayerWithMetricAggregationFromVizEditor(
   });
   let updatedLayer = newLayer;
   layer.columns.forEach(({ columnId, label: customLabel }) => {
-    updatedLayer = updateColumnLabel({ layer: updatedLayer, columnId, customLabel });
+    if (customLabel) {
+      updatedLayer = updateColumnLabel({
+        layer: updatedLayer,
+        columnId,
+        customLabel: isReferenced(updatedLayer, columnId) ? '' : customLabel,
+      });
+    }
   });
   return updatedLayer;
 }

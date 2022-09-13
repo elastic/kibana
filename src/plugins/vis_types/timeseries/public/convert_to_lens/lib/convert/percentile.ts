@@ -8,6 +8,7 @@
 
 import { Operations, PercentileParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type { Percentile } from '../../../../common/types';
+import { AdditionalArgs } from '../../types';
 import { createColumn, getFormat } from './column';
 import {
   PercentileColumnWithExtendedMeta,
@@ -32,7 +33,11 @@ export const convertToPercentileParams = (value?: string | number): PercentilePa
 export const convertToPercentileColumn = (
   percentile: Percentile['value'],
   { series, metric, dataView }: CommonColumnConverterArgs,
-  { index, reducedTimeRange }: { index?: number; reducedTimeRange?: string } = {}
+  {
+    index,
+    reducedTimeRange,
+    timeShift,
+  }: { index?: number; reducedTimeRange?: string; timeShift?: string } = {}
 ): PercentileColumn | null => {
   const params = convertToPercentileParams(percentile);
   if (!params) {
@@ -43,7 +48,7 @@ export const convertToPercentileColumn = (
   if (!field) {
     return null;
   }
-  const commonColumnParams = createColumn(series, metric, field, { reducedTimeRange });
+  const commonColumnParams = createColumn(series, metric, field, { reducedTimeRange, timeShift });
   return {
     operationType: 'percentile',
     sourceField: field.name,
@@ -61,7 +66,7 @@ export const convertToPercentileColumn = (
 
 export const convertToPercentileColumns = (
   columnConverterArgs: CommonColumnConverterArgs,
-  reducedTimeRange?: string
+  additionalArgs: AdditionalArgs
 ): Array<PercentileColumn | null> | null => {
   const { percentiles } = columnConverterArgs.metric;
 
@@ -70,6 +75,6 @@ export const convertToPercentileColumns = (
   }
 
   return percentiles.map((p, index) =>
-    convertToPercentileColumn(p.value, columnConverterArgs, { index, reducedTimeRange })
+    convertToPercentileColumn(p.value, columnConverterArgs, { index, ...additionalArgs })
   );
 };

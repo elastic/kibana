@@ -147,7 +147,7 @@ describe('convertToPercentileColumns', () => {
       Array<Partial<PercentileColumnWithExtendedMeta> | null> | null
     ]
   >([
-    ['null if values arr is empty', [{ series, metric, dataView }], null],
+    ['null if values arr is empty', [{ series, metric, dataView }, {}], null],
     [
       'array with null if values arr contains empty value',
       [
@@ -156,6 +156,7 @@ describe('convertToPercentileColumns', () => {
           metric: { ...metric, percentiles: [{ id: 'some-id', mode: 'line', value: undefined }] },
           dataView,
         },
+        {},
       ],
       [null],
     ],
@@ -170,6 +171,7 @@ describe('convertToPercentileColumns', () => {
           },
           dataView,
         },
+        {},
       ],
       [null],
     ],
@@ -185,6 +187,7 @@ describe('convertToPercentileColumns', () => {
           },
           dataView,
         },
+        {},
       ],
       [
         {
@@ -207,7 +210,7 @@ describe('convertToPercentileColumns', () => {
           },
           dataView,
         },
-        '50m',
+        { reducedTimeRange: '50m' },
       ],
       [
         {

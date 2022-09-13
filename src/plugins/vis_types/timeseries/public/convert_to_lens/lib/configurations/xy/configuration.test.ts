@@ -28,6 +28,8 @@ describe('getConfigurationForTimeseries', () => {
       },
       yLeftExtent: { mode: 'full' },
       yRightExtent: { mode: 'full' },
+      yLeftScale: 'linear',
+      yRightScale: 'linear',
     });
   });
 });

@@ -27,7 +27,7 @@
       "matchPackageNames": ["@elastic/charts"],
       "reviewers": ["team:datavis", "markov00", "nickofthyme"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "auto-backport", "Team:DataVis"],
+      "labels": ["release_note:skip", "backport:skip", "Team:DataVis"],
       "draftPR": true,
       "enabled": true,
       "assignAutomerge": true,

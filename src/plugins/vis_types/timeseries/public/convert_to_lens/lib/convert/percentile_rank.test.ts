@@ -155,20 +155,23 @@ describe('convertToPercentileRankColumns', () => {
       Array<Partial<PercentileRanksColumnWithExtendedMeta> | null> | null
     ]
   >([
-    ['null if values arr is empty', [{ series, metric, dataView }], null],
+    ['null if values arr is empty', [{ series, metric, dataView }, {}], null],
     [
       'array with null if values arr contains empty value',
-      [{ series, metric: { ...metric, values: [undefined as unknown as string] }, dataView }],
+      [{ series, metric: { ...metric, values: [undefined as unknown as string] }, dataView }, {}],
       [null],
     ],
     [
       'array with null if values arr contains NaN value',
-      [{ series, metric: { ...metric, values: ['unvalid value'] }, dataView }],
+      [{ series, metric: { ...metric, values: ['unvalid value'] }, dataView }, {}],
       [null],
     ],
     [
       'percentile rank columns',
-      [{ series, metric: { ...metric, field: dataView.fields[0].name, values: ['75'] }, dataView }],
+      [
+        { series, metric: { ...metric, field: dataView.fields[0].name, values: ['75'] }, dataView },
+        {},
+      ],
       [
         {
           meta: { metricId: 'some-id', reference: 'some-id.0' },
@@ -182,7 +185,7 @@ describe('convertToPercentileRankColumns', () => {
       'percentile rank columns with reducedTimeRange',
       [
         { series, metric: { ...metric, field: dataView.fields[0].name, values: ['75'] }, dataView },
-        '50m',
+        { reducedTimeRange: '50m' },
       ],
       [
         {

@@ -35,11 +35,15 @@ describe('convertMetricAggregationColumnWithoutSpecialParams', () => {
     [SUPPORTED_METRICS.positive_rate.name, SUPPORTED_METRICS.positive_rate],
   ])('should return null for metric %s', (_, operation) => {
     expect(
-      convertMetricAggregationColumnWithoutSpecialParams(operation, {
-        series,
-        dataView,
-        metrics: [{ type: operation.name as MetricType, id: 'some-id' }],
-      })
+      convertMetricAggregationColumnWithoutSpecialParams(
+        operation,
+        {
+          series,
+          dataView,
+          metrics: [{ type: operation.name as MetricType, id: 'some-id' }],
+        },
+        {}
+      )
     ).toBeNull();
   });
 
@@ -52,11 +56,15 @@ describe('convertMetricAggregationColumnWithoutSpecialParams', () => {
     [SUPPORTED_METRICS.std_deviation.name, SUPPORTED_METRICS.std_deviation],
   ])('should return null for metric %s without valid field', (_, operation) => {
     expect(
-      convertMetricAggregationColumnWithoutSpecialParams(operation, {
-        series,
-        dataView,
-        metrics: [{ type: operation.name as MetricType, id: 'some-id' }],
-      })
+      convertMetricAggregationColumnWithoutSpecialParams(
+        operation,
+        {
+          series,
+          dataView,
+          metrics: [{ type: operation.name as MetricType, id: 'some-id' }],
+        },
+        {}
+      )
     ).toBeNull();
   });
 
@@ -73,11 +81,15 @@ describe('convertMetricAggregationColumnWithoutSpecialParams', () => {
     ],
   ])('should return column for metric %s without valid field', (_, operation, expected) => {
     expect(
-      convertMetricAggregationColumnWithoutSpecialParams(operation, {
-        series,
-        dataView,
-        metrics: [{ type: operation.name as MetricType, id: 'some-id' }],
-      })
+      convertMetricAggregationColumnWithoutSpecialParams(
+        operation,
+        {
+          series,
+          dataView,
+          metrics: [{ type: operation.name as MetricType, id: 'some-id' }],
+        },
+        {}
+      )
     ).toEqual(expect.objectContaining(expected));
   });
 
@@ -138,13 +150,17 @@ describe('convertMetricAggregationColumnWithoutSpecialParams', () => {
     ],
   ])('should return column for metric %s with valid field', (_, operation, expected) => {
     expect(
-      convertMetricAggregationColumnWithoutSpecialParams(operation, {
-        series,
-        dataView,
-        metrics: [
-          { type: operation.name as MetricType, id: 'some-id', field: dataView.fields[0].name },
-        ],
-      })
+      convertMetricAggregationColumnWithoutSpecialParams(
+        operation,
+        {
+          series,
+          dataView,
+          metrics: [
+            { type: operation.name as MetricType, id: 'some-id', field: dataView.fields[0].name },
+          ],
+        },
+        {}
+      )
     ).toEqual(expect.objectContaining(expected));
   });
 });
@@ -266,26 +282,6 @@ describe('convertMetricAggregationToColumn', () => {
         operationType: 'percentile_rank',
         params: { value: 50 },
         reducedTimeRange: '10m',
-      },
-    ],
-    [
-      'null for counter rate if field in metric is empty',
-      [
-        SUPPORTED_METRICS.positive_rate,
-        { series, metric: { id, type: TSVB_METRIC_TYPES.POSITIVE_RATE }, dataView },
-      ],
-      null,
-    ],
-    [
-      'formula column for counter rate',
-      [
-        SUPPORTED_METRICS.positive_rate,
-        { series, metric: { id, field, type: TSVB_METRIC_TYPES.POSITIVE_RATE }, dataView },
-      ],
-      {
-        meta: { metricId: 'some-id' },
-        operationType: 'formula',
-        params: { formula: 'pick_max(differences(max(bytes)), 0)' },
       },
     ],
     [
@@ -423,7 +419,7 @@ describe('computeParentPipelineColumns', () => {
         {
           meta: { metricId: 'some-id' },
           operationType: 'moving_average',
-          params: { window: 0 },
+          params: { window: 5 },
         },
       ],
     ],
@@ -487,8 +483,8 @@ describe('convertParentPipelineAggToColumns', () => {
           series,
           metrics: [
             { id, field, type: METRIC_TYPES.MAX },
-            { id: id1, field: `${id}[75]`, type: METRIC_TYPES.AVG },
-            { id: id2, field: `${id1}[50]`, type: TSVB_METRIC_TYPES.MOVING_AVERAGE },
+            { id: id1, field: `${id}`, type: METRIC_TYPES.DERIVATIVE },
+            { id: id2, field: `${id1}`, type: TSVB_METRIC_TYPES.MOVING_AVERAGE },
           ],
           dataView,
         },
@@ -496,7 +492,7 @@ describe('convertParentPipelineAggToColumns', () => {
       {
         meta: { metricId: 'some-id-2' },
         operationType: 'formula',
-        params: { formula: 'moving_average(average(max(bytes)))' },
+        params: { formula: 'moving_average(differences(max(bytes)), window=5)' },
       },
     ],
     [
@@ -506,8 +502,8 @@ describe('convertParentPipelineAggToColumns', () => {
           series,
           metrics: [
             { id, field, type: METRIC_TYPES.MAX },
-            { id: id1, field: `${id}[75]`, type: METRIC_TYPES.AVG },
-            { id: id2, field: `${id1}[50]`, type: METRIC_TYPES.DERIVATIVE },
+            { id: id1, field: `${id}`, type: TSVB_METRIC_TYPES.MOVING_AVERAGE },
+            { id: id2, field: `${id1}`, type: METRIC_TYPES.DERIVATIVE },
           ],
           dataView,
         },
@@ -515,7 +511,7 @@ describe('convertParentPipelineAggToColumns', () => {
       {
         meta: { metricId: 'some-id-2' },
         operationType: 'formula',
-        params: { formula: 'differences(average(max(bytes)))' },
+        params: { formula: 'differences(moving_average(max(bytes), window=5))' },
       },
     ],
     [
@@ -589,7 +585,7 @@ describe('createParentPipelineAggregationColumn', () => {
       {
         meta: { metricId: 'some-id-0' },
         operationType: 'moving_average',
-        params: { window: 0 },
+        params: { window: 5 },
       },
     ],
     [

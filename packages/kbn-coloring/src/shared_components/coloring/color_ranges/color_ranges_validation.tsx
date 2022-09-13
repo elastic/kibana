@@ -12,7 +12,11 @@ import { isValidColor } from '../utils';
 import type { ColorRange, ColorRangeAccessor } from './types';
 
 /** @internal **/
-type ColorRangeValidationErrors = 'invalidColor' | 'invalidValue' | 'greaterThanMaxValue';
+type ColorRangeValidationErrors =
+  | 'invalidColor'
+  | 'invalidValue'
+  | 'greaterThanMaxValue'
+  | 'percentOutOfBounds';
 
 /** @internal **/
 export interface ColorRangeValidation {
@@ -38,6 +42,10 @@ export const getErrorMessages = (colorRangesValidity: Record<string, ColorRangeV
               return i18n.translate('coloring.dynamicColoring.customPalette.invalidMaxValue', {
                 defaultMessage: 'Maximum value must be greater than preceding values',
               });
+            case 'percentOutOfBounds':
+              return i18n.translate('coloring.dynamicColoring.customPalette.invalidPercentValue', {
+                defaultMessage: 'Percent values must be between 0 and 100',
+              });
             default:
               return '';
           }
@@ -47,10 +55,16 @@ export const getErrorMessages = (colorRangesValidity: Record<string, ColorRangeV
 };
 
 /** @internal **/
-export const validateColorRange = (colorRange: ColorRange, accessor: ColorRangeAccessor) => {
+export const validateColorRange = (
+  colorRange: ColorRange,
+  accessor: ColorRangeAccessor,
+  isPercent: boolean
+) => {
   const errors: ColorRangeValidationErrors[] = [];
 
-  if (Number.isNaN(colorRange[accessor])) {
+  const value = colorRange[accessor];
+
+  if (Number.isNaN(value)) {
     errors.push('invalidValue');
   }
 
@@ -62,6 +76,12 @@ export const validateColorRange = (colorRange: ColorRange, accessor: ColorRangeA
     errors.push('invalidColor');
   }
 
+  if (isPercent) {
+    if (![-Infinity, Infinity].includes(value) && (value < 0 || value > 100)) {
+      errors.push('percentOutOfBounds');
+    }
+  }
+
   return {
     isValid: !errors.length,
     errors,
@@ -69,22 +89,25 @@ export const validateColorRange = (colorRange: ColorRange, accessor: ColorRangeA
 };
 
 export const validateColorRanges = (
-  colorRanges: ColorRange[]
+  colorRanges: ColorRange[],
+  isPercent: boolean
 ): Record<string, ColorRangeValidation> => {
   const validations = colorRanges.reduce<Record<string, ColorRangeValidation>>(
     (acc, item, index) => ({
       ...acc,
-      [index]: validateColorRange(item, 'start'),
+      [index]: validateColorRange(item, 'start', isPercent),
     }),
     {}
   );
 
   return {
     ...validations,
-    last: validateColorRange(colorRanges[colorRanges.length - 1], 'end'),
+    last: validateColorRange(colorRanges[colorRanges.length - 1], 'end', isPercent),
   };
 };
 
-export const isAllColorRangesValid = (colorRanges: ColorRange[]) => {
-  return Object.values(validateColorRanges(colorRanges)).every((colorRange) => colorRange.isValid);
+export const allRangesValid = (colorRanges: ColorRange[], isPercent: boolean) => {
+  return Object.values(validateColorRanges(colorRanges, isPercent)).every(
+    (colorRange) => colorRange.isValid
+  );
 };

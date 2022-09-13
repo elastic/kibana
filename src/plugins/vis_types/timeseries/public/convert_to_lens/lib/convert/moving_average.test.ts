@@ -19,7 +19,7 @@ describe('convertToMovingAverageParams', () => {
   const window = 10;
 
   test.each<[string, Parameters<typeof convertToMovingAverageParams>, MovingAverageParams]>([
-    ['params with default window if no window is specified in metric', [metric], { window: 0 }],
+    ['params with default window if no window is specified in metric', [metric], { window: 5 }],
     ['params with window', [{ ...metric, window }], { window }],
   ])('should return %s', (_, input, expected) => {
     expect(convertToMovingAverageParams(...input)).toEqual(expect.objectContaining(expected));

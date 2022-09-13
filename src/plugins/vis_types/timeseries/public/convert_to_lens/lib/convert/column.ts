@@ -17,9 +17,8 @@ import {
 import uuid from 'uuid';
 import type { Metric, Series } from '../../../../common/types';
 import { DATA_FORMATTERS } from '../../../../common/enums';
-import { ConvertToColumnsFn } from '../../types';
 import { getTimeScale } from '../metrics';
-import { ColumnWithMeta, Meta, Column, CommonColumnsConverterArgs } from './types';
+import { ColumnWithMeta, Meta, Column } from './types';
 
 type GeneralColumn = Omit<BaseColumn<Operation, unknown>, 'operationType' | 'params'>;
 type GeneralColumnWithMeta = GenericColumnWithMeta<GeneralColumn, Meta>;
@@ -27,6 +26,7 @@ interface ExtraColumnFields {
   isBucketed?: boolean;
   isSplit?: boolean;
   reducedTimeRange?: string;
+  timeShift?: string;
 }
 
 const isSupportedFormat = (format: string) => ['bytes', 'number', 'percent'].includes(format);
@@ -34,7 +34,7 @@ const isSupportedFormat = (format: string) => ['bytes', 'number', 'percent'].inc
 export const getFormat = (series: Series): FormatParams => {
   let suffix;
 
-  if (!series.formatter) {
+  if (!series.formatter || series.formatter === 'default') {
     return {};
   }
 
@@ -45,18 +45,18 @@ export const getFormat = (series: Series): FormatParams => {
   // not supported formatters should be converted to number
   if (!isSupportedFormat(series.formatter)) {
     return {
-      format: { id: DATA_FORMATTERS.NUMBER, ...(suffix && { params: { suffix, decimals: 0 } }) },
+      format: { id: DATA_FORMATTERS.NUMBER, ...(suffix && { params: { suffix, decimals: 2 } }) },
     };
   }
 
-  return { format: { id: series.formatter, ...(suffix && { params: { suffix, decimals: 0 } }) } };
+  return { format: { id: series.formatter, ...(suffix && { params: { suffix, decimals: 2 } }) } };
 };
 
 export const createColumn = (
   series: Series,
   metric: Metric,
   field?: DataViewField,
-  { isBucketed = false, isSplit = false, reducedTimeRange }: ExtraColumnFields = {}
+  { isBucketed = false, isSplit = false, reducedTimeRange, timeShift }: ExtraColumnFields = {}
 ): GeneralColumnWithMeta => ({
   columnId: uuid(),
   dataType: (field?.type as DataType) ?? undefined,
@@ -65,15 +65,10 @@ export const createColumn = (
   isSplit,
   reducedTimeRange,
   filter: series.filter,
+  timeShift,
   timeScale: getTimeScale(metric),
   meta: { metricId: metric.id },
 });
-
-export const convertMetricsToColumns = <C extends Column>(
-  { series, metrics, dataView }: CommonColumnsConverterArgs,
-  convertToFn: ConvertToColumnsFn<C>,
-  reducedTimeRange?: string
-) => metrics.flatMap((metric) => convertToFn({ series, metric, dataView }, reducedTimeRange));
 
 export const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
   if ((column as ColumnWithMeta).meta) {

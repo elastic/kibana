@@ -12,7 +12,6 @@ import { getSeriesAgg } from './series_agg';
 import { SUPPORTED_METRICS } from '../metrics';
 import {
   Column,
-  convertMetricsToColumns,
   convertToPercentileColumns,
   convertToPercentileRankColumns,
   convertMathToFormulaColumn,
@@ -23,7 +22,7 @@ import {
   convertToLastValueColumn,
   convertToStaticValueColumn,
   convertMetricAggregationColumnWithoutSpecialParams,
-  convertToCounterRateFormulaColumn,
+  convertToCounterRateColumn,
   convertToStandartDeviationColumn,
 } from '../convert';
 import { getValidColumns } from './columns';
@@ -56,19 +55,19 @@ export const getMetricsColumns = (
   const columnsConverterArgs = { series, metrics, dataView };
   switch (aggregation) {
     case 'percentile': {
-      const percentileColumns = convertMetricsToColumns(
-        columnsConverterArgs,
-        convertToPercentileColumns,
-        reducedTimeRange
+      const percentileColumns = convertToPercentileColumns(
+        { series, metric: metrics[metricIdx], dataView },
+        { reducedTimeRange, timeShift: series.offset_time }
       );
+
       return getValidColumns(percentileColumns);
     }
     case 'percentile_rank': {
-      const percentileRankColumns = convertMetricsToColumns(
-        columnsConverterArgs,
-        convertToPercentileRankColumns,
-        reducedTimeRange
+      const percentileRankColumns = convertToPercentileRankColumns(
+        { series, metric: metrics[metricIdx], dataView },
+        { reducedTimeRange, timeShift: series.offset_time }
       );
+
       return getValidColumns(percentileRankColumns);
     }
     case 'math': {
@@ -98,7 +97,7 @@ export const getMetricsColumns = (
       return getValidColumns(formulaColumn);
     }
     case 'positive_rate': {
-      const formulaColumn = convertToCounterRateFormulaColumn(columnsConverterArgs);
+      const formulaColumn = convertToCounterRateColumn(columnsConverterArgs);
       return getValidColumns(formulaColumn);
     }
     case 'positive_only':
@@ -132,7 +131,7 @@ export const getMetricsColumns = (
       const column = convertMetricAggregationColumnWithoutSpecialParams(
         aggregationMap,
         columnsConverterArgs,
-        reducedTimeRange
+        { reducedTimeRange, timeShift: series.offset_time }
       );
       return getValidColumns(column);
     }

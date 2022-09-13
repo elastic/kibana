@@ -17,7 +17,10 @@ const createStandartDeviationFormulaColumn = (
   metrics: Metric[],
   reducedTimeRange?: string
 ) => {
-  const script = getFormulaEquivalent(metric, metrics, { reducedTimeRange });
+  const script = getFormulaEquivalent(metric, metrics, {
+    reducedTimeRange,
+    timeShift: series.offset_time,
+  });
   if (!script) return null;
   return createFormulaColumn(script, { series, metric, dataView });
 };
@@ -57,7 +60,7 @@ export const convertToStandartDeviationColumn = (
       convertMetricAggregationColumnWithoutSpecialParams(
         SUPPORTED_METRICS.std_deviation,
         { series, metrics: [metric], dataView },
-        reducedTimeRange
+        { reducedTimeRange, timeShift: series.offset_time }
       )
     );
   }

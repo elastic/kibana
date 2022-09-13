@@ -37,10 +37,10 @@ import {
   type InternalApplicationSetup,
   type InternalApplicationStart,
 } from '@kbn/core-application-browser-internal';
+import { RenderingService } from '@kbn/core-rendering-browser-internal';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import { CoreSetup, CoreStart } from '.';
 import { PluginsService } from './plugins';
-import { RenderingService } from './rendering';
 import { CoreApp } from './core_app';
 
 import {

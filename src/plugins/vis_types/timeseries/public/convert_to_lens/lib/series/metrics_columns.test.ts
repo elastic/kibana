@@ -12,12 +12,11 @@ import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { createSeries } from '../__mocks__';
 import { getMetricsColumns } from './metrics_columns';
 
-const mockConvertMetricsToColumns = jest.fn();
 const mockConvertMathToFormulaColumn = jest.fn();
 const mockConvertParentPipelineAggToColumns = jest.fn();
 const mockConvertToCumulativeSumColumns = jest.fn();
 const mockConvertFilterRatioToFormulaColumn = jest.fn();
-const mockConvertToCounterRateFormulaColumn = jest.fn();
+const mockConvertToCounterRateColumn = jest.fn();
 const mockConvertOtherAggsToFormulaColumn = jest.fn();
 const mockConvertToLastValueColumn = jest.fn();
 const mockConvertToStaticValueColumn = jest.fn();
@@ -25,12 +24,11 @@ const mockConvertToStandartDeviationColumn = jest.fn();
 const mockConvertMetricAggregationColumnWithoutSpecialParams = jest.fn();
 
 jest.mock('../convert', () => ({
-  convertMetricsToColumns: jest.fn(() => mockConvertMetricsToColumns()),
   convertMathToFormulaColumn: jest.fn(() => mockConvertMathToFormulaColumn()),
   convertParentPipelineAggToColumns: jest.fn(() => mockConvertParentPipelineAggToColumns()),
   convertToCumulativeSumColumns: jest.fn(() => mockConvertToCumulativeSumColumns()),
   convertFilterRatioToFormulaColumn: jest.fn(() => mockConvertFilterRatioToFormulaColumn()),
-  convertToCounterRateFormulaColumn: jest.fn(() => mockConvertToCounterRateFormulaColumn()),
+  convertToCounterRateColumn: jest.fn(() => mockConvertToCounterRateColumn()),
   convertOtherAggsToFormulaColumn: jest.fn(() => mockConvertOtherAggsToFormulaColumn()),
   convertToLastValueColumn: jest.fn(() => mockConvertToLastValueColumn()),
   convertToStaticValueColumn: jest.fn(() => mockConvertToStaticValueColumn()),
@@ -68,20 +66,6 @@ describe('getMetricsColumns', () => {
       null,
     ],
     [
-      'call convertMetricsToColumns if metric type is percentile',
-      [createSeries({ metrics: [{ type: TSVB_METRIC_TYPES.PERCENTILE, id: '1' }] }), dataView, 1],
-      mockConvertMetricsToColumns,
-    ],
-    [
-      'call convertMetricsToColumns if metric type is percentile rank',
-      [
-        createSeries({ metrics: [{ type: TSVB_METRIC_TYPES.PERCENTILE_RANK, id: '1' }] }),
-        dataView,
-        1,
-      ],
-      mockConvertMetricsToColumns,
-    ],
-    [
       'call convertMathToFormulaColumn if metric type is math',
       [createSeries({ metrics: [{ type: TSVB_METRIC_TYPES.MATH, id: '1' }] }), dataView, 1],
       mockConvertMathToFormulaColumn,
@@ -111,13 +95,13 @@ describe('getMetricsColumns', () => {
       mockConvertFilterRatioToFormulaColumn,
     ],
     [
-      'call convertToCounterRateFormulaColumn if metric type is positive rate',
+      'call convertToCounterRateColumn if metric type is positive rate',
       [
         createSeries({ metrics: [{ type: TSVB_METRIC_TYPES.POSITIVE_RATE, id: '1' }] }),
         dataView,
         1,
       ],
-      mockConvertToCounterRateFormulaColumn,
+      mockConvertToCounterRateColumn,
     ],
     [
       'call convertOtherAggsToFormulaColumn if metric type is positive only',

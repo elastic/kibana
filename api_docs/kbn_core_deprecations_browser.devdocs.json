@@ -31,6 +31,7 @@
         ],
         "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-browser",
@@ -48,6 +49,7 @@
             ],
             "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -67,6 +69,7 @@
             ],
             "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-deprecations-browser",
@@ -80,6 +83,7 @@
                 ],
                 "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -101,6 +105,7 @@
             ],
             "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-deprecations-browser",
@@ -114,6 +119,7 @@
                 ],
                 "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -143,6 +149,7 @@
             ],
             "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-deprecations-browser",
@@ -156,6 +163,7 @@
                 ],
                 "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -181,6 +189,7 @@
         ],
         "path": "packages/core/deprecations/core-deprecations-browser/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

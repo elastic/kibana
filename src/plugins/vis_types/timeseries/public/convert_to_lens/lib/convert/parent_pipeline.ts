@@ -31,16 +31,15 @@ import { Metric } from '../../../../common/types';
 import {
   getFilterRatioFormula,
   getFormulaFromMetric,
-  getParentPipelineSeriesFormula,
   SupportedMetric,
   SUPPORTED_METRICS,
+  getPipelineSeriesFormula,
 } from '../metrics';
 import { createColumn, getFormat } from './column';
 import { createFormulaColumn } from './formula';
 import { convertToMovingAverageParams } from './moving_average';
 import { convertToPercentileColumn } from './percentile';
 import { convertToPercentileRankColumn } from './percentile_rank';
-import { convertToCounterRateFormulaColumn } from './counter_rate';
 
 type MetricAggregationWithoutParams =
   | typeof Operations.AVERAGE
@@ -92,6 +91,7 @@ const SUPPORTED_METRICS_AGGS_WITHOUT_PARAMS: MetricAggregationWithoutParams[] = 
   Operations.MIN,
   Operations.SUM,
   Operations.STANDARD_DEVIATION,
+  Operations.COUNTER_RATE,
 ];
 
 const SUPPORTED_METRIC_AGGS: MetricAggregation[] = [
@@ -115,7 +115,7 @@ const isSupportedAggregationWithoutParams = (
 export const convertMetricAggregationColumnWithoutSpecialParams = (
   aggregation: SupportedMetric,
   { series, metrics, dataView }: CommonColumnsConverterArgs,
-  reducedTimeRange?: string
+  additionalArgs: { reducedTimeRange?: string; timeShift?: string }
 ): MetricAggregationColumnWithoutSpecialParams | null => {
   if (!isSupportedAggregationWithoutParams(aggregation.name)) {
     return null;
@@ -131,7 +131,7 @@ export const convertMetricAggregationColumnWithoutSpecialParams = (
   return {
     operationType: aggregation.name,
     sourceField,
-    ...createColumn(series, metric, field, { reducedTimeRange }),
+    ...createColumn(series, metric, field, additionalArgs),
     params: { ...getFormat(series) },
   } as MetricAggregationColumnWithoutSpecialParams;
 };
@@ -159,9 +159,6 @@ export const convertMetricAggregationToColumn = (
       reducedTimeRange,
     });
   }
-  if (aggregation.name === Operations.COUNTER_RATE) {
-    return convertToCounterRateFormulaColumn({ series, metrics: [metric], dataView });
-  }
 
   if (aggregation.name === Operations.LAST_VALUE) {
     return null;
@@ -170,7 +167,7 @@ export const convertMetricAggregationToColumn = (
   return convertMetricAggregationColumnWithoutSpecialParams(
     aggregation,
     { series, metrics: [metric], dataView },
-    reducedTimeRange
+    { reducedTimeRange }
   );
 };
 
@@ -189,7 +186,10 @@ export const computeParentPipelineColumns = (
   const aggFormula = getFormulaFromMetric(agg);
 
   if (subFunctionMetric.type === 'filter_ratio') {
-    const script = getFilterRatioFormula(subFunctionMetric, reducedTimeRange);
+    const script = getFilterRatioFormula(subFunctionMetric, {
+      reducedTimeRange,
+      timeShift: series.offset_time,
+    });
     if (!script) {
       return null;
     }
@@ -237,14 +237,12 @@ const convertMovingAvgOrDerivativeToColumns = (
   const [nestedFieldId, _] = subMetricField?.split('[') ?? [];
   // support nested aggs with formula
   const additionalSubFunction = metrics.find(({ id }) => id === nestedFieldId);
-  if (additionalSubFunction) {
-    const formula = getParentPipelineSeriesFormula(
-      metrics,
-      subFunctionMetric,
-      pipelineAgg,
-      metric.type,
-      { metaValue, reducedTimeRange }
-    );
+  if (additionalSubFunction || pipelineAgg.name === 'counter_rate') {
+    const formula = getPipelineSeriesFormula(metric, metrics, subFunctionMetric, {
+      metaValue,
+      reducedTimeRange,
+      timeShift: series.offset_time,
+    });
     if (!formula) {
       return null;
     }
@@ -294,7 +292,7 @@ export const createParentPipelineAggregationColumn = (
   return {
     operationType: aggregation,
     references,
-    ...createColumn(series, metric),
+    ...createColumn(series, metric, undefined, { timeShift: series.offset_time }),
     params,
   } as ParentPipelineAggColumn;
 };

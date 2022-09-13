@@ -37,7 +37,10 @@ export const convertToLastValueColumn = (
   return {
     operationType: 'last_value',
     sourceField: field.name ?? 'document',
-    ...createColumn(series, currentMetric, undefined, { reducedTimeRange }),
+    ...createColumn(series, currentMetric, undefined, {
+      reducedTimeRange,
+      timeShift: series.offset_time,
+    }),
     params: {
       ...convertToLastValueParams(currentMetric),
       ...getFormat(series),

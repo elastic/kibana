@@ -23,6 +23,7 @@
         ],
         "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "telemetryManagementSection",
@@ -32,7 +33,8 @@
             "label": "_isMounted",
             "description": [],
             "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "telemetryManagementSection",
@@ -43,6 +45,7 @@
             "description": [],
             "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "telemetryManagementSection",
@@ -55,7 +58,8 @@
                   "null"
                 ],
                 "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "telemetryManagementSection",
@@ -68,7 +72,8 @@
                   "true"
                 ],
                 "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "telemetryManagementSection",
@@ -81,7 +86,8 @@
                   "false"
                 ],
                 "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -97,6 +103,7 @@
             ],
             "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -112,6 +119,7 @@
             ],
             "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -127,6 +135,7 @@
             ],
             "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "telemetryManagementSection",
@@ -140,6 +149,7 @@
                 ],
                 "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -157,6 +167,7 @@
             ],
             "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }

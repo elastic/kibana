@@ -13,7 +13,7 @@ import {
   Column,
   convertToFiltersColumn,
   convertToDateHistogramColumn,
-  converToTermsColumn,
+  convertToTermsColumn,
 } from '../convert';
 import { getValidColumns } from './columns';
 
@@ -68,7 +68,7 @@ export const getBucketsColumns = (
       return null;
     }
 
-    const termsColumn = converToTermsColumn(
+    const termsColumn = convertToTermsColumn(
       splitFields as [string, ...string[]],
       series,
       columns,

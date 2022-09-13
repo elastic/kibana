@@ -360,6 +360,7 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRule) => {
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
   cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).click().type(rule.newTermsFields[0], { delay: 35 });
   cy.get(EUI_FILTER_SELECT_ITEM).click({ force: true });
+  cy.focused().type('{esc}'); // Close combobox dropdown so next inputs can be interacted with
   cy.get(NEW_TERMS_INPUT_AREA)
     .find(NEW_TERMS_HISTORY_SIZE)
     .type('{selectAll}')

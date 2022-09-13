@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import negate from 'lodash/negate';
 import { RawIndicatorFieldId } from '../../../../../../common/types/indicator';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { ComputedIndicatorFieldId } from '../cell_renderer';
 
 const DEFAULT_COLUMNS: EuiDataGridColumn[] = [
   {
@@ -21,7 +20,7 @@ const DEFAULT_COLUMNS: EuiDataGridColumn[] = [
     }),
   },
   {
-    id: ComputedIndicatorFieldId.DisplayName,
+    id: RawIndicatorFieldId.Name,
     displayAsText: i18n.translate('xpack.threatIntelligence.indicator.table.indicatorColumTitle', {
       defaultMessage: 'Indicator',
     }),

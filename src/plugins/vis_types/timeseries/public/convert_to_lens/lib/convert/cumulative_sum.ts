@@ -7,7 +7,7 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
-import { SUPPORTED_METRICS, getParentPipelineSeriesFormula } from '../metrics';
+import { SUPPORTED_METRICS, getPipelineSeriesFormula } from '../metrics';
 import { createFormulaColumn } from './formula';
 import { computeParentPipelineColumns } from './parent_pipeline';
 import { CommonColumnsConverterArgs } from './types';
@@ -31,11 +31,12 @@ export const convertToCumulativeSumColumns = (
   let formula;
   // lens supports cumulative sum for count and sum as quick function
   // and everything else as formula
-  if (pipelineAgg.name !== 'count' && pipelineAgg.name !== 'sum') {
+  if (subFunctionMetric.type !== 'count' && pipelineAgg.name !== 'sum') {
     const metaValue = Number(meta?.replace(']', ''));
-    formula = getParentPipelineSeriesFormula(metrics, subFunctionMetric, pipelineAgg, metric.type, {
+    formula = getPipelineSeriesFormula(metric, metrics, subFunctionMetric, {
       metaValue,
       reducedTimeRange,
+      timeShift: series.offset_time,
     });
     if (!formula) {
       return null;

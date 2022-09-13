@@ -7,8 +7,6 @@
 
 import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_logic';
 
-import { nextTick } from '@kbn/test-jest-helpers';
-
 import { HttpError, Status } from '../../../../../common/types/api';
 
 import { AnalyticsCollectionsLogic } from './analytics_collections_logic';
@@ -79,11 +77,8 @@ describe('analyticsCollectionsLogic', () => {
     });
 
     it('calls makeRequest on fetchAnalyticsCollections', async () => {
-      jest.useFakeTimers();
       AnalyticsCollectionsLogic.actions.makeRequest = jest.fn();
       AnalyticsCollectionsLogic.actions.fetchAnalyticsCollections();
-      jest.advanceTimersByTime(150);
-      await nextTick();
       expect(AnalyticsCollectionsLogic.actions.makeRequest).toHaveBeenCalledWith({});
     });
   });

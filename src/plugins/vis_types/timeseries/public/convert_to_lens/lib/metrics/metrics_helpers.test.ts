@@ -6,14 +6,6 @@
  * Side Public License, v 1.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
-
 import { TimeRange } from '@kbn/data-plugin/common';
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import type { Metric, Series, Panel } from '../../../../common/types';
@@ -41,7 +33,6 @@ describe('getFormulaEquivalent', () => {
   const countMetric: Metric = {
     id: 'some-random-value',
     type: METRIC_TYPES.COUNT,
-    field: 'test-1',
   };
 
   const staticValue: Metric = {
@@ -131,7 +122,7 @@ describe('getFormulaEquivalent', () => {
     [
       'correct formula if metric is parent pipeline agg',
       [parentPipelineMetric[1], parentPipelineMetric, {}],
-      'moving_average(average(test-field-1))',
+      'moving_average(average(test-field-1), window=5)',
     ],
     ['correct formula if metric is count agg', [countMetric, [countMetric], {}], 'count()'],
     ['correct formula if metric is static value', [staticValue, [staticValue], {}], '100'],

@@ -17,7 +17,7 @@ import {
 import { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { AlertStates, MetricAnomalyParams } from '../../../../common/alerting/metrics';
-import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
+import { getIntervalInSeconds } from '../../../../common/utils/get_interval_in_seconds';
 import { MappedAnomalyHit } from '../../infra_ml';
 import { InfraBackendLibs } from '../../infra_types';
 import { stateToAlertMessage } from '../common/messages';

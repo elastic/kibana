@@ -58,7 +58,7 @@ export interface Indicator {
 /**
  * Used as a base to create Indicators of a specific type. Mocks are used in Jest tests and storybooks
  */
-export const generateMockBaseIndicator = (): Indicator => ({
+const generateMockBaseIndicator = (): Indicator => ({
   fields: {
     '@timestamp': ['2022-01-01T01:01:01.000Z'],
     'threat.indicator.first_seen': ['2022-01-01T01:01:01.000Z'],
@@ -73,9 +73,41 @@ export const generateMockBaseIndicator = (): Indicator => ({
 export const generateMockIndicator = (): Indicator => {
   const indicator = generateMockBaseIndicator();
 
-  indicator.fields['threat.indicator.type'] = ['ipv4-addr'];
-  indicator.fields['threat.indicator.ip'] = ['12.68.554.87'];
-  indicator.fields['threat.indicator.name'] = ['12.68.554.87'];
+  indicator.fields['threat.indicator.type'] = ['type'];
+  indicator.fields['threat.indicator.ip'] = ['0.0.0.0'];
+  indicator.fields['threat.indicator.name'] = ['0.0.0.0'];
+
+  return indicator;
+};
+
+/**
+ * Used to create a Url Indicator.
+ */
+export const generateMockUrlIndicator = (): Indicator => {
+  const indicator = generateMockBaseIndicator();
+
+  indicator.fields['threat.indicator.type'] = ['url'];
+  indicator.fields['threat.indicator.ip'] = ['0.0.0.0'];
+  indicator.fields['threat.indicator.url.full'] = ['https://0.0.0.0/test'];
+  indicator.fields['threat.indicator.url.original'] = ['https://0.0.0.0/test'];
+  indicator.fields['threat.indicator.name'] = ['https://0.0.0.0/test'];
+  indicator.fields['threat.indicator.name_origin'] = ['threat.indicator.url.original'];
+
+  return indicator;
+};
+
+/**
+ * Used to create a File Indicator.
+ */
+export const generateMockFileIndicator = (): Indicator => {
+  const indicator = generateMockBaseIndicator();
+
+  indicator.fields['threat.indicator.type'] = ['file'];
+  indicator.fields['threat.indicator.file.hash.sha256'] = ['sample_sha256_hash'];
+  indicator.fields['threat.indicator.file.hash.md5'] = ['sample_md5_hash'];
+  indicator.fields['threat.indicator.file.hash.sha1'] = ['sample_sha1_hash'];
+  indicator.fields['threat.indicator.name'] = ['sample_sha256_hash'];
+  indicator.fields['threat.indicator.name_origin'] = ['threat.indicator.file.hash.sha256'];
 
   return indicator;
 };

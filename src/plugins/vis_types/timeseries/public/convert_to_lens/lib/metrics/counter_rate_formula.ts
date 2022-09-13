@@ -6,27 +6,24 @@
  * Side Public License, v 1.
  */
 
-import type { Metric } from '../../../../common/types';
-import { TimeScaleValue, isTimeScaleValue } from './metrics_helpers';
+import { addAdditionalArgs } from '.';
+import { AdditionalArgs } from '../../types';
 
-const buildMaxFormula = (selector: string) => {
-  return `max(${selector})`;
+const buildMaxFormula = (selector: string, additionalArgs: AdditionalArgs) => {
+  return `max(${selector}${addAdditionalArgs(additionalArgs)})`;
 };
 
-const buildPickMaxPositiveFormula = (selector: string) => {
-  return `pick_max(${selector}, 0)`;
+const buildСounterRateFormula = (aggFormula: string, selector: string) => {
+  return `${aggFormula}(${selector})`;
 };
 
-const buildDifferencesFormula = (selector: string, shift?: TimeScaleValue) => {
-  return `differences(${selector}${shift ? `, shift=${shift}` : ''})`;
-};
+export const buildCounterRateFormula = (
+  aggFormula: string,
+  fieldName: string,
+  additionalArgs: AdditionalArgs
+) => {
+  const maxFormula = buildMaxFormula(fieldName, additionalArgs);
 
-export const buildCounterRateFormula = (metric: Metric, fieldName: string) => {
-  const maxFormula = buildMaxFormula(fieldName);
-
-  const unit = metric.unit && isTimeScaleValue(metric.unit) ? metric.unit : undefined;
-  const diffOfMaxFormula = buildDifferencesFormula(maxFormula, unit);
-
-  const counterRateFormula = buildPickMaxPositiveFormula(diffOfMaxFormula);
+  const counterRateFormula = buildСounterRateFormula(aggFormula, maxFormula);
   return counterRateFormula;
 };

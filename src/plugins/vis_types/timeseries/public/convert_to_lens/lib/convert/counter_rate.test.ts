@@ -10,8 +10,8 @@ import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.st
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import type { Metric } from '../../../../common/types';
 import { createSeries } from '../__mocks__';
-import { convertToCounterRateFormulaColumn } from './counter_rate';
-import { CommonColumnsConverterArgs, FormulaColumn } from './types';
+import { convertToCounterRateColumn } from './counter_rate';
+import { CommonColumnsConverterArgs, CounterRateColumn, MaxColumn } from './types';
 
 describe('convertToCounterRateFormulaColumn', () => {
   const dataView = stubLogstashDataView;
@@ -21,33 +21,32 @@ describe('convertToCounterRateFormulaColumn', () => {
     type: TSVB_METRIC_TYPES.POSITIVE_RATE,
   };
 
-  test.each<[string, CommonColumnsConverterArgs, Partial<FormulaColumn> | null]>([
+  test.each<
+    [string, CommonColumnsConverterArgs, [Partial<MaxColumn>, Partial<CounterRateColumn>] | null]
+  >([
     ['null if metric contains empty field param', { series, metrics: [metric], dataView }, null],
     [
-      'formula column if metric contains field param',
+      'max and cpunter rate columns if metric contains field param',
       { series, metrics: [{ ...metric, field: dataView.fields[0].name }], dataView },
-      {
-        operationType: 'formula',
-        params: { formula: 'pick_max(differences(max(bytes)), 0)' },
-        meta: { metricId: 'some-id' },
-      },
-    ],
-    [
-      'differences formula with shift if metric contains unit',
-      { series, metrics: [{ ...metric, field: dataView.fields[0].name, unit: '1h' }], dataView },
-      {
-        operationType: 'formula',
-        params: {
-          formula: 'pick_max(differences(max(bytes), shift=1h), 0)',
+      [
+        {
+          operationType: 'max',
+          sourceField: dataView.fields[0].name,
         },
-        meta: { metricId: 'some-id' },
-      },
+        {
+          operationType: 'counter_rate',
+        },
+      ],
     ],
   ])('should return %s', (_, input, expected) => {
     if (expected === null) {
-      expect(convertToCounterRateFormulaColumn(input)).toBeNull();
+      expect(convertToCounterRateColumn(input)).toBeNull();
+    } else if (Array.isArray(expected)) {
+      const results = convertToCounterRateColumn(input);
+      expect(results).toEqual(expected.map(expect.objectContaining));
+      expect(results?.[1].references[0]).toEqual(results?.[0].columnId);
     } else {
-      expect(convertToCounterRateFormulaColumn(input)).toEqual(expect.objectContaining(expected));
+      expect(convertToCounterRateColumn(input)).toEqual(expect.objectContaining(expected));
     }
   });
 });
