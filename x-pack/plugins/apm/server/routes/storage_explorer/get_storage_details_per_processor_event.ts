@@ -133,7 +133,7 @@ export async function getStorageDetailsPerProcessorEvent({
       );
 
     return {
-      processorEvent: processorEvent,
+      processorEvent,
       docs:
         bucketForProcessorEvent?.number_of_metric_docs_for_processor_event
           .value ?? 0,
