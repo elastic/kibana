@@ -18,6 +18,7 @@
 /src/plugins/saved_search/ @elastic/kibana-data-discovery
 /x-pack/plugins/discover_enhanced/ @elastic/kibana-data-discovery
 /test/functional/apps/discover/ @elastic/kibana-data-discovery
+/test/functional/apps/context/ @elastic/kibana-data-discovery
 /test/api_integration/apis/unified_field_list/ @elastic/kibana-data-discovery
 /x-pack/plugins/graph/ @elastic/kibana-data-discovery
 /x-pack/test/functional/apps/graph @elastic/kibana-data-discovery
@@ -106,6 +107,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 # For now, if you're changing these pages, get a review from someone who understand the changes
 
 # /x-pack/plugins/observability/public/context @elastic/unified-observability
+# /x-pack/test/observability_functional @elastic/unified-observability
 
 # Home/Overview/Landing Pages
 
@@ -118,9 +120,10 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/plugins/observability/common/rules @elastic/actionable-observability
 /x-pack/plugins/observability/public/rules @elastic/actionable-observability
 /x-pack/plugins/observability/public/pages/alerts @elastic/actionable-observability
-/x-pack/plugins/observability/public/pages/cases @elastic/actionable-observability
-/x-pack/plugins/observability/public/pages/rules @elastic/actionable-observability
-/x-pack/plugins/observability/public/pages/rule_details @elastic/actionable-observability
+/x-pack/plugins/observability/public/pages/cases  @elastic/actionable-observability
+/x-pack/plugins/observability/public/pages/rules  @elastic/actionable-observability
+/x-pack/plugins/observability/public/pages/rule_details  @elastic/actionable-observability
+/x-pack/test/observability_functional @elastic/actionable-observability
 
 # Infra Monitoring
 
@@ -240,7 +243,6 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/test/api_integration/apis/maps/ @elastic/kibana-gis
 /x-pack/test/functional/apps/maps/ @elastic/kibana-gis
 /x-pack/test/functional/es_archives/maps/ @elastic/kibana-gis
-/x-pack/test/visual_regression/tests/maps/index.js @elastic/kibana-gis
 /x-pack/plugins/stack_alerts/server/alert_types/geo_containment @elastic/kibana-gis
 /x-pack/plugins/stack_alerts/public/alert_types/geo_containment @elastic/kibana-gis
 #CC# /x-pack/plugins/file_upload @elastic/kibana-gis
