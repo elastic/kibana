@@ -29,6 +29,8 @@ describe('HoverableUserWithAvatarResolver', () => {
     const user: ElasticUser = {
       username: 'some_user',
       profileUid: '123',
+      fullName: null,
+      email: null,
     };
 
     render(<HoverableUserWithAvatarResolver user={user} />);
@@ -41,6 +43,8 @@ describe('HoverableUserWithAvatarResolver', () => {
     const user: ElasticUser = {
       username: userProfiles[0].user.username,
       profileUid: userProfiles[0].uid,
+      fullName: null,
+      email: null,
     };
 
     render(<HoverableUserWithAvatarResolver user={user} userProfiles={userProfilesMap} />);
@@ -53,6 +57,8 @@ describe('HoverableUserWithAvatarResolver', () => {
     const user: ElasticUser = {
       username: userProfiles[0].user.username,
       profileUid: userProfiles[0].uid,
+      fullName: null,
+      email: null,
     };
 
     render(<HoverableUserWithAvatarResolver user={user} userProfiles={userProfilesMap} />);

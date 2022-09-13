@@ -418,7 +418,7 @@ describe(`UserActions`, () => {
       };
 
       appMockRender.render(<UserActions {...props} />);
-      // there are two because one is for the
+
       expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
       expect(screen.getByText('DR')).toBeInTheDocument();
       expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
