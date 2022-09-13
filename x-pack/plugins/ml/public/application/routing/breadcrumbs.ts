@@ -63,14 +63,14 @@ export const AIOPS_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
 });
 
 export const EXPLAIN_LOG_RATE_SPIKES: ChromeBreadcrumb = Object.freeze({
-  text: i18n.translate('xpack.ml.aiopsBreadcrumbLabel', {
+  text: i18n.translate('xpack.ml.aiops.explainLogRateSpikesBreadcrumbLabel', {
     defaultMessage: 'Explain Log Rate Spikes',
   }),
   href: '/aiops/explain_log_rate_spikes_index_select',
 });
 
 export const LOG_PATTERN_ANALYSIS: ChromeBreadcrumb = Object.freeze({
-  text: i18n.translate('xpack.ml.aiopsBreadcrumbLabel', {
+  text: i18n.translate('xpack.ml.aiops.logPatternAnalysisBreadcrumbLabel', {
     defaultMessage: 'Log Pattern Analysis',
   }),
   href: '/aiops/log_categorization_index_select',
