@@ -62,10 +62,9 @@ export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
 
     const hostNames = edges.map((edge) => getOr('', 'node.host.name[0]', edge));
 
-    const enhancedEdges =
-      deps?.spaceId && deps?.endpointContext.experimentalFeatures.riskyHostsEnabled
-        ? await enhanceEdges(edges, hostNames, deps.spaceId, deps.esClient)
-        : edges;
+    const enhancedEdges = deps?.spaceId
+      ? await enhanceEdges(edges, hostNames, deps.spaceId, deps.esClient)
+      : edges;
 
     return {
       ...response,

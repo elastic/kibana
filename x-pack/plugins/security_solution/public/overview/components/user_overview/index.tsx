@@ -85,7 +85,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
 
     const { from, to } = useGlobalTime();
 
-    const [_, { data: userRisk, isModuleEnabled }] = useUserRiskScore({
+    const [_, { data: userRisk, isLicenseValid }] = useUserRiskScore({
       filterQuery,
       skip: userName == null,
       timerange: { to, from },
@@ -104,38 +104,35 @@ export const UserOverview = React.memo<UserSummaryProps>(
     );
 
     const [userRiskScore, userRiskLevel] = useMemo(() => {
-      if (isModuleEnabled) {
-        const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
-        return [
-          {
-            title: i18n.USER_RISK_SCORE,
-            description: (
-              <>
-                {userRiskData
-                  ? Math.round(userRiskData.user.risk.calculated_score_norm)
-                  : getEmptyTagValue()}
-              </>
-            ),
-          },
-          {
-            title: i18n.USER_RISK_CLASSIFICATION,
-            description: (
-              <>
-                {userRiskData ? (
-                  <RiskScore
-                    severity={userRiskData.user.risk.calculated_level as RiskSeverity}
-                    hideBackgroundColor
-                  />
-                ) : (
-                  getEmptyTagValue()
-                )}
-              </>
-            ),
-          },
-        ];
-      }
-      return [undefined, undefined];
-    }, [userRisk, isModuleEnabled]);
+      const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
+      return [
+        {
+          title: i18n.USER_RISK_SCORE,
+          description: (
+            <>
+              {userRiskData
+                ? Math.round(userRiskData.user.risk.calculated_score_norm)
+                : getEmptyTagValue()}
+            </>
+          ),
+        },
+        {
+          title: i18n.USER_RISK_CLASSIFICATION,
+          description: (
+            <>
+              {userRiskData ? (
+                <RiskScore
+                  severity={userRiskData.user.risk.calculated_level as RiskSeverity}
+                  hideBackgroundColor
+                />
+              ) : (
+                getEmptyTagValue()
+              )}
+            </>
+          ),
+        },
+      ];
+    }, [userRisk]);
 
     const column = useMemo(
       () => [
@@ -260,7 +257,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
             )}
           </OverviewWrapper>
         </InspectButtonContainer>
-        {userRiskScore && userRiskLevel && (
+        {isLicenseValid && (
           <UserRiskOverviewWrapper
             gutterSize={isInDetailsSidePanel ? 'm' : 'none'}
             direction={isInDetailsSidePanel ? 'column' : 'row'}

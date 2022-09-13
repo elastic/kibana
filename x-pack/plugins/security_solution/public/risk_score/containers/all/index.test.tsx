@@ -24,6 +24,11 @@ jest.mock('../../../common/hooks/use_space_id', () => ({
 jest.mock('../../../common/hooks/use_app_toasts');
 jest.mock('../deprecated');
 
+const mockUseMlCapabilities = jest.fn();
+jest.mock('../../../common/components/ml/hooks/use_ml_capabilities', () => ({
+  useMlCapabilities: () => mockUseMlCapabilities(),
+}));
+
 const mockUseRiskScoreDeprecated = useRiskScoreDeprecated as jest.Mock;
 const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
 const mockSearch = jest.fn();
@@ -46,6 +51,7 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
       });
     });
     test('does not search if feature is not enabled', () => {
+      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: false });
       mockUseRiskScoreDeprecated.mockReturnValue({
         isLoading: false,
         isDeprecated: false,
@@ -73,6 +79,7 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
           data: undefined,
           inspect: {},
           isInspected: false,
+          isLicenseValid: false,
           isModuleEnabled: false,
           isDeprecated: false,
           refetch: result.current[1].refetch,
@@ -82,6 +89,7 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
     });
 
     test('if index is deprecated, isDeprecated should be true & search if feature is not enabled', () => {
+      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
       mockUseRiskScoreDeprecated.mockReturnValue({
         isLoading: false,
         isDeprecated: true,
@@ -109,6 +117,7 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
           data: undefined,
           inspect: {},
           isInspected: false,
+          isLicenseValid: true,
           isModuleEnabled: true,
           isDeprecated: true,
           refetch: result.current[1].refetch,
@@ -118,6 +127,8 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
     });
 
     test('handle index not found error', () => {
+      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
+
       mockUseRiskScoreDeprecated.mockReturnValue({
         isLoading: false,
         isDeprecated: false,
@@ -150,6 +161,7 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
           data: undefined,
           inspect: {},
           isInspected: false,
+          isLicenseValid: true,
           isModuleEnabled: false,
           isDeprecated: false,
           refetch: result.current[1].refetch,
@@ -159,6 +171,8 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
     });
 
     test('show error toast', () => {
+      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
+
       const error = new Error();
       mockUseSearchStrategy.mockReturnValue({
         loading: false,
@@ -180,6 +194,7 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
     });
 
     test('runs search if feature is enabled and not deprecated', () => {
+      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
       mockUseSearchStrategy.mockReturnValue({
         loading: false,
         result: {
@@ -205,6 +220,7 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
     });
 
     test('return result', async () => {
+      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
       mockUseSearchStrategy.mockReturnValue({
         loading: false,
         result: {
@@ -227,6 +243,7 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
             inspect: {},
             isDeprecated: false,
             isInspected: false,
+            isLicenseValid: true,
             isModuleEnabled: true,
             refetch: result.current[1].refetch,
             totalCount: 0,

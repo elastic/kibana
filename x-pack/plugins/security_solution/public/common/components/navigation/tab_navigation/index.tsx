@@ -23,6 +23,7 @@ const TabNavigationItemComponent = ({
   name,
   isSelected,
   isBeta,
+  betaOptions,
 }: TabNavigationItemProps) => {
   const { getAppUrl, navigateTo } = useNavigation();
 
@@ -47,7 +48,7 @@ const TabNavigationItemComponent = ({
       isSelected={isSelected}
       href={appHref}
       onClick={handleClick}
-      append={isBeta && <EuiBetaBadge label={BETA} size="s" />}
+      append={isBeta && <EuiBetaBadge label={betaOptions?.text ?? BETA} size="s" />}
     >
       {name}
     </EuiTab>
@@ -92,6 +93,7 @@ export const TabNavigationComponent: React.FC<TabNavigationProps> = ({ navTabs, 
             disabled={tab.disabled}
             isSelected={isSelected}
             isBeta={tab.isBeta}
+            betaOptions={tab.betaOptions}
           />
         );
       }),

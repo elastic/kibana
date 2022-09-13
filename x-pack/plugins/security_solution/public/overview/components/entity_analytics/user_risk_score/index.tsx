@@ -39,7 +39,6 @@ import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirec
 import { RISKY_USERS_DOC_LINK } from '../../../../users/components/constants';
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const TABLE_QUERY_ID = 'userRiskDashboardTable';
 
@@ -55,7 +54,6 @@ export const EntityAnalyticsUserRiskScores = () => {
   const [selectedSeverity, setSelectedSeverity] = useState<RiskSeverity[]>([]);
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
   const dispatch = useDispatch();
-  const riskyUsersFeatureEnabled = useIsExperimentalFeatureEnabled('riskyUsersEnabled');
 
   const severityFilter = useMemo(() => {
     const [filter] = generateSeverityFilter(selectedSeverity, RiskScoreEntity.user);
@@ -68,7 +66,7 @@ export const EntityAnalyticsUserRiskScores = () => {
     skip: !toggleStatus,
   });
 
-  const [isTableLoading, { data, inspect, refetch, isModuleEnabled, isDeprecated }] =
+  const [isTableLoading, { data, inspect, refetch, isLicenseValid, isDeprecated, isModuleEnabled }] =
     useUserRiskScore({
       filterQuery: severityFilter,
       skip: !toggleStatus,
@@ -124,7 +122,7 @@ export const EntityAnalyticsUserRiskScores = () => {
     );
   }, []);
 
-  if (!riskyUsersFeatureEnabled) {
+  if (!isLicenseValid) {
     return null;
   }
 
