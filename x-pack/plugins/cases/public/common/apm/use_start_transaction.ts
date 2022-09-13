@@ -13,7 +13,7 @@
 
 import { useCallback } from 'react';
 import type { TransactionOptions } from '@elastic/apm-rum';
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana } from '../lib/kibana';
 
 export type CasesApmTransactionName = `Cases [${string}] ${string}`;
 

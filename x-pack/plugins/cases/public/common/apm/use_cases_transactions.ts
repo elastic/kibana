@@ -7,8 +7,8 @@
 
 import { Transaction } from '@elastic/apm-rum';
 import { useCallback } from 'react';
-import { CommentType } from '../../../../common/api/cases/comment';
-import { CaseAttachmentsWithoutOwner } from '../../../types';
+import { CommentType } from '../../../common';
+import { CaseAttachmentsWithoutOwner } from '../../types';
 import { useStartTransaction } from './use_start_transaction';
 
 const CREATE_CASE = 'createCase' as const;

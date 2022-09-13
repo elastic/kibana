@@ -15,7 +15,7 @@ import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
 import { CaseAttachmentsWithoutOwner } from '../../../types';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
-import { useAddAttachmentToExistingCaseTransaction } from '../../../client/helpers/apm/use_cases_transactions';
+import { useAddAttachmentToExistingCaseTransaction } from '../../../common/apm/use_cases_transactions';
 
 type AddToExistingFlyoutProps = AllCasesSelectorModalProps & {
   toastTitle?: string;

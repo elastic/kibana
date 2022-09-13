@@ -23,7 +23,7 @@ import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { getConnectorById } from '../utils';
 import { CaseAttachmentsWithoutOwner } from '../../types';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
-import { useCreateCaseWithAttachmentsTransaction } from '../../client/helpers/apm/use_cases_transactions';
+import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_cases_transactions';
 
 const initialCaseValue: FormProps = {
   description: '',

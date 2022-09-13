@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { CaseAttachmentsWithoutOwner } from '../../../types';
+import { CaseAttachmentsWithoutOwner } from '../../types';
 import {
   StartAddAttachmentToExistingCaseTransaction,
   StartCreateCaseWithAttachmentsTransaction,
