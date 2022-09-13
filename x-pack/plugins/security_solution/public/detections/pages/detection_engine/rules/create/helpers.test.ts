@@ -128,7 +128,7 @@ describe('helpers', () => {
     });
 
     describe('saved_query and query rule types', () => {
-      test('returns query rule type if savedId provided but shouldLoadQueryDynamically != true', () => {
+      test('returns query rule if savedId provided but shouldLoadQueryDynamically != true', () => {
         const mockStepData: DefineStepRule = {
           ...mockData,
           queryBar: {
