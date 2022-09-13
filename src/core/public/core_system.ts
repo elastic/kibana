@@ -71,13 +71,12 @@ export interface InternalCoreStart extends Omit<CoreStart, 'application'> {
   injectedMetadata: InternalInjectedMetadataStart;
 }
 
-
 // Expands the definition of navigator to include experimental features
 interface ExtendedNavigator {
   connection?: {
     effectiveType?: string;
-  }
-  // Estimated RAN
+  };
+  // Estimated RAM
   deviceMemory?: number;
   // Number of cores
   hardwareConcurrency?: number;
@@ -183,11 +182,11 @@ export class CoreSystem {
 
     const navigatorExt = navigator as ExtendedNavigator;
     const navigatorInfo: Record<string, string> = {};
-    if (navigatorExt.deviceMemory) {
-      navigatorInfo['deviceMemory'] = String(navigatorExt.deviceMemory);
+   if (navigatorExt.deviceMemory) {
+      navigatorInfo.deviceMemory = String(navigatorExt.deviceMemory);
     }
     if (navigatorExt.hardwareConcurrency) {
-      navigatorInfo['hardwareConcurrency'] = String(navigatorExt.hardwareConcurrency);
+      navigatorInfo.hardwareConcurrency = String(navigatorExt.hardwareConcurrency);
     }
 
     reportPerformanceMetricEvent(analytics, {
