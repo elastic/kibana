@@ -12,7 +12,6 @@ import { ElasticsearchClient } from '@kbn/core/server';
  * Response for deleting sub-pipeline from @ml-inference pipeline.
  * If sub-pipeline was deleted successfully, 'deleted' field contains its name.
  * If parent pipeline was updated successfully, 'updated' field contains its name.
- * If any errors happened, 'errors' will be populated.
  */
 export interface DeleteMlInferencePipelineResponse {
   deleted?: string;
