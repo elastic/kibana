@@ -15025,7 +15025,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.repositoryHelpText": "各フェーズは同じスナップショットリポジトリを使用します。",
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.storageHelpText": "検索可能なスナップショットにマウントされたスナップショットのタイプ。これは高度なオプションです。作業内容を理解している場合にのみ変更してください。",
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.storageLabel": "ストレージ",
-    "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutBody": "このフェーズでデータを完全にマウントされたインデックスに変換するときには、強制マージ、縮小、読み取り専用アクションは許可されません。",
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotLicenseCalloutBody": "検索可能なスナップショットを作成するには、エンタープライズライセンスが必要です。",
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotLicenseCalloutTitle": "エンタープライズライセンスが必要です",
     "xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotRepoFieldLabel": "スナップショットリポジトリ",
