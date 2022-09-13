@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { TimelineId } from '../../../../common/types/timeline';
 import { SessionsView } from '../../../common/components/sessions_viewer';
 import { hostNameExistsFilter } from '../../../common/components/visualization_actions/utils';
-import { useLicense } from '../../../common/hooks/use_license'
+import { useLicense } from '../../../common/hooks/use_license';
 import type { AlertsComponentQueryProps } from './types';
 
 export const SessionsTabBody = React.memo((alertsProps: AlertsComponentQueryProps) => {
@@ -20,7 +20,7 @@ export const SessionsTabBody = React.memo((alertsProps: AlertsComponentQueryProp
   );
   const isEnterprisePlus = useLicense().isEnterprise();
 
-  return (isEnterprisePlus ?(
+  return isEnterprisePlus ? (
     <SessionsView
       entityType="sessions"
       timelineId={TimelineId.hostsPageSessions}
@@ -28,7 +28,7 @@ export const SessionsTabBody = React.memo((alertsProps: AlertsComponentQueryProp
       pageFilters={hostPageFilters}
       filterQuery={filterQuery}
     />
-  ):null);
+  ) : null;
 });
 
 SessionsTabBody.displayName = 'SessionsTabBody';

@@ -35,7 +35,6 @@ import {
 } from '../../../store/timeline/actions';
 import { detectionsTimelineIds } from '../../../containers/helpers';
 import * as i18n from './translations';
-import { useLicense } from '../../../../common/hooks/use_license'
 
 export interface SessionViewConfig {
   sessionEntityId: string;
