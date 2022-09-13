@@ -6,8 +6,8 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import _useObservable from 'react-use/lib/useObservable';
+import useObservable from 'react-use/lib/useObservable';
 
 export function useBehaviorSubject<T>(o$: BehaviorSubject<T>) {
-  return _useObservable(o$, o$.getValue());
+  return useObservable(o$, o$.getValue());
 }
