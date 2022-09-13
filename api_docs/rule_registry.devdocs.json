@@ -401,6 +401,77 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.AlertsClient.getBrowserFields",
+            "type": "Function",
+            "tags": [],
+            "label": "getBrowserFields",
+            "description": [],
+            "signature": [
+              "({ indices, metaFields, allowNoIndex, }: { indices: string[]; metaFields: string[]; allowNoIndex: boolean; }) => Promise<",
+              "BrowserFields",
+              ">"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.AlertsClient.getBrowserFields.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    indices,\n    metaFields,\n    allowNoIndex,\n  }",
+                "description": [],
+                "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.AlertsClient.getBrowserFields.$1.indices",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "indices",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.AlertsClient.getBrowserFields.$1.metaFields",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "metaFields",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.AlertsClient.getBrowserFields.$1.allowNoIndex",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "allowNoIndex",
+                    "description": [],
+                    "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

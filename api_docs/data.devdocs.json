@@ -20274,7 +20274,7 @@
                 "section": "def-common.RuntimeFieldSpec",
                 "text": "RuntimeFieldSpec"
               },
-              " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
+              " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false,
@@ -24594,7 +24594,7 @@
             "section": "def-common.RuntimeFieldSpec",
             "text": "RuntimeFieldSpec"
           },
-          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
+          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
