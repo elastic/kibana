@@ -88,11 +88,11 @@ unique, a distinctive name can help you identify a rule.
 +
 --
 
-* `onActionGroupChange`: Actions run only when the alert status changes.
-* `onActiveAlert`: Actions run when the alert becomes active. If the alert
-remains active, actions run at each check interval.
-* `onThrottleInterval`: Actions run only when the alert remains active longer
-than the interval specified in the `throttle` property. 
+* `onActionGroupChange`: Actions run when the alert status changes.
+* `onActiveAlert`: Actions run when the alert becomes active and at each check
+interval while the rule conditions are met.
+* `onThrottleInterval`: Actions run when the alert becomes active and at the
+interval specified in the `throttle` property while the rule conditions are met.
 
 --
 

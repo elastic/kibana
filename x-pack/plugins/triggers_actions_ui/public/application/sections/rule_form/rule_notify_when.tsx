@@ -34,7 +34,7 @@ export const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>
     inputDisplay: i18n.translate(
       'xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActionGroupChange.display',
       {
-        defaultMessage: 'Only on status change',
+        defaultMessage: 'On status changes',
       }
     ),
     'data-test-subj': 'onActionGroupChange',
@@ -42,7 +42,7 @@ export const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>
       <>
         <strong>
           <FormattedMessage
-            defaultMessage="Only on status change"
+            defaultMessage="On status changes"
             id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActionGroupChange.label"
           />
         </strong>
@@ -62,7 +62,7 @@ export const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>
     inputDisplay: i18n.translate(
       'xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActiveAlert.display',
       {
-        defaultMessage: 'Every time alert is active',
+        defaultMessage: 'On check intervals',
       }
     ),
     'data-test-subj': 'onActiveAlert',
@@ -70,14 +70,14 @@ export const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>
       <>
         <strong>
           <FormattedMessage
-            defaultMessage="Every time alert is active"
+            defaultMessage="On check intervals"
             id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActiveAlert.label"
           />
         </strong>
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
-              defaultMessage="Actions run at each check interval."
+              defaultMessage="Actions run if rule conditions are met."
               id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActiveAlert.description"
             />
           </p>
@@ -90,7 +90,7 @@ export const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>
     inputDisplay: i18n.translate(
       'xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onThrottleInterval.display',
       {
-        defaultMessage: 'On a custom action interval',
+        defaultMessage: 'On custom action intervals',
       }
     ),
     'data-test-subj': 'onThrottleInterval',
@@ -98,14 +98,14 @@ export const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>
       <>
         <strong>
           <FormattedMessage
-            defaultMessage="On a custom action interval"
+            defaultMessage="On custom action intervals"
             id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onThrottleInterval.label"
           />
         </strong>
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
-              defaultMessage="Actions run if the alert is active longer than this interval."
+              defaultMessage="Actions run if rule conditions are met."
               id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onThrottleInterval.description"
             />
           </p>
