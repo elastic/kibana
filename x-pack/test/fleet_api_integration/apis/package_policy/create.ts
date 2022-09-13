@@ -7,11 +7,14 @@
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { Installation } from '@kbn/fleet-plugin/common';
+import uuid from 'uuid/v4';
+
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
+
   const es: Client = getService('es');
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
@@ -20,10 +23,10 @@ export default function (providerContext: FtrProviderContext) {
     const { body } = await supertest.get(`/api/fleet/package_policies/${id}`);
     return body;
   };
+
   // use function () {} and not () => {} here
   // because `this` has to point to the Mocha context
   // see https://mochajs.org/#arrow-functions
-
   describe('Package Policy - create', async function () {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
@@ -45,9 +48,10 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'Test policy',
+          name: `Test policy ${uuid()}`,
           namespace: 'default',
-        });
+        })
+        .expect(200);
       agentPolicyId = agentPolicyResponse.item.id;
     });
 
@@ -69,7 +73,8 @@ export default function (providerContext: FtrProviderContext) {
           name: `Hosted policy from ${Date.now()}`,
           namespace: 'default',
           is_managed: true,
-        });
+        })
+        .expect(200);
 
       // try to add an integration to the hosted policy
       const { body: responseWithoutForce } = await supertest
@@ -291,7 +296,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'Test policy 2',
+          name: `Test policy ${uuid()}`,
           namespace: 'default',
         });
       const otherAgentPolicyId = agentPolicyResponse.item.id;
