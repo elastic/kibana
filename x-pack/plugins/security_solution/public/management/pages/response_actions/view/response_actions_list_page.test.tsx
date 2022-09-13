@@ -145,6 +145,18 @@ describe('Action history page', () => {
   });
 
   describe('Read from URL params', () => {
+    it('should read and set paging values from URL params', () => {
+      reactTestingLibrary.act(() => {
+        history.push('/administration/action_history?page=3&pageSize=20');
+      });
+      render();
+      const { getByTestId } = renderResult;
+
+      expect(history.location.search).toEqual('?page=3&pageSize=20');
+      expect(getByTestId('tablePaginationPopoverButton').textContent).toContain('20');
+      expect(getByTestId('pagination-button-2').getAttribute('aria-current')).toStrictEqual('true');
+    });
+
     it('should read and set command filter values from URL params', () => {
       const filterPrefix = 'actions-filter';
       reactTestingLibrary.act(() => {
@@ -191,7 +203,7 @@ describe('Action history page', () => {
       expect(history.location.search).toEqual('?statuses=pending,failed');
     });
 
-    // TODO: add tests for hosts and user when those filters are added
+    // TODO: add tests for hosts and users when those filters are added
 
     it('should read and set relative date ranges filter values from URL params', () => {
       reactTestingLibrary.act(() => {
@@ -210,8 +222,7 @@ describe('Action history page', () => {
       expect(history.location.search).toEqual('?startDate=now-23m&endDate=now-1m');
     });
 
-    // FIXME: the UI time should be local time
-    it.skip('should read and set absolute date ranges filter values from URL params', () => {
+    it('should read and set absolute date ranges filter values from URL params', () => {
       const startDate = '2022-09-12T11:00:00.000Z';
       const endDate = '2022-09-12T11:30:33.000Z';
       reactTestingLibrary.act(() => {
@@ -221,48 +232,69 @@ describe('Action history page', () => {
       const { getByTestId } = render();
 
       expect(getByTestId('superDatePickerstartDatePopoverButton').textContent).toEqual(
-        'Sep 12, 2022 @ 13:00:00:000'
+        'Sep 12, 2022 @ 07:00:00.000'
       );
       expect(getByTestId('superDatePickerendDatePopoverButton').textContent).toEqual(
-        'Sep 12, 2022 @ 13:30:33:000'
+        'Sep 12, 2022 @ 07:30:33.000'
       );
-      expect(history.location.search).toEqual('?startDate=now-23m&endDate=now-1m');
+      expect(history.location.search).toEqual(`?startDate=${startDate}&endDate=${endDate}`);
     });
   });
 
   describe('Set selected/set values to URL params', () => {
-    // FIXME: select options by clicking
-    it.skip('should set selected command filter options to URL params ', () => {
+    it('should set selected page number to URL params', () => {
+      render();
+      const { getByTestId } = renderResult;
+
+      userEvent.click(getByTestId('pagination-button-1'));
+      expect(history.location.search).toEqual('?page=2&pageSize=10');
+    });
+
+    it('should set selected pageSize value to URL params', () => {
+      render();
+      const { getByTestId } = renderResult;
+
+      userEvent.click(getByTestId('tablePaginationPopoverButton'));
+      const pageSizeOption = getByTestId('tablePagination-20-rows');
+      pageSizeOption.style.pointerEvents = 'all';
+      userEvent.click(pageSizeOption);
+
+      expect(history.location.search).toEqual('?page=1&pageSize=20');
+    });
+
+    it('should set selected command filter options to URL params ', () => {
       const filterPrefix = 'actions-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
       userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
-      // FIXME
-      // test error:  unable to click element as it has or inherits pointer-events set to "none".
-      allFilterOptions.forEach((option) => userEvent.click(option));
+      allFilterOptions.forEach((option) => {
+        option.style.pointerEvents = 'all';
+        userEvent.click(option);
+      });
 
       expect(history.location.search).toEqual(
-        '?commands=isolate,release,kill-process,suspend-process,processes'
+        '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses'
       );
     });
 
-    it.skip('should set selected status filter options to URL params ', () => {
+    it('should set selected status filter options to URL params ', () => {
       const filterPrefix = 'statuses-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
       userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
-      // FIXME
-      // test error:  unable to click element as it has or inherits pointer-events set to "none".
-      allFilterOptions.forEach((option) => userEvent.click(option));
+      allFilterOptions.forEach((option) => {
+        option.style.pointerEvents = 'all';
+        userEvent.click(option);
+      });
 
-      expect(history.location.search).toEqual('?commands=failed,pending,successful');
+      expect(history.location.search).toEqual('?statuses=failed%2Cpending%2Csuccessful');
     });
 
-    // TODO: add tests for hosts and user when those filters are added
+    // TODO: add tests for hosts and users when those filters are added
 
     it('should set selected relative date range filter options to URL params ', async () => {
       const { getByTestId } = render();
