@@ -23,7 +23,7 @@ export const useStyles = (tty?: Teletype) => {
       height: '100%',
       overflow: 'hidden',
       zIndex: 10,
-      borderRadius: size.s,
+//      borderRadius: size.s,
       backgroundColor: colors.ink,
       '.euiRangeLevel--warning': {
         backgroundColor: transparentize(colors.warning, 0.8),

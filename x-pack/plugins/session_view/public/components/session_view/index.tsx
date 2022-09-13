@@ -39,7 +39,7 @@ import {
   useFetchGetTotalIOBytes,
 } from './hooks';
 import { LOCAL_STORAGE_DISPLAY_OPTIONS_KEY } from '../../../common/constants';
-import { BETA, REFRESH_SESSION, OPEN_TTY_PLAYER } from './translations';
+import { BETA, REFRESH_SESSION, TOGGLE_TTY_PLAYER, DETAIL_PANEL } from './translations';
 
 /**
  * The main wrapper component for the session view.
@@ -265,6 +265,20 @@ export const SessionView = ({
             />
           </EuiFlexItem>
 
+          {hasTTYOutput && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                isSelected={showTTY}
+                display={showTTY ? 'fill' : 'empty'}
+                iconType="apmTrace"
+                onClick={onToggleTTY}
+                size="m"
+                aria-label={TOGGLE_TTY_PLAYER}
+                data-test-subj="sessionView:TTYPlayerToggle"
+              />
+            </EuiFlexItem>
+          )}
+
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
               iconType="refresh"
@@ -276,20 +290,6 @@ export const SessionView = ({
               isLoading={isFetching}
             />
           </EuiFlexItem>
-
-          {hasTTYOutput && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                isSelected={showTTY}
-                display={showTTY ? 'fill' : 'empty'}
-                iconType="apmTrace"
-                onClick={onToggleTTY}
-                size="m"
-                aria-label={OPEN_TTY_PLAYER}
-                data-test-subj="sessionView:TTYPlayerToggle"
-              />
-            </EuiFlexItem>
-          )}
 
           <EuiFlexItem grow={false}>
             <SessionViewDisplayOptions
@@ -304,12 +304,9 @@ export const SessionView = ({
               onClick={toggleDetailPanel}
               iconType="list"
               data-test-subj="sessionView:sessionViewDetailPanelToggle"
-              fill={isDetailOpen}
+              fill={!isDetailOpen}
             >
-              <FormattedMessage
-                id="xpack.sessionView.buttonOpenDetailPanel"
-                defaultMessage="Detail panel"
-              />
+              {DETAIL_PANEL}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

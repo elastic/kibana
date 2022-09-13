@@ -5,23 +5,30 @@
  * 2.0.
  */
 import React, { useRef, useState, useCallback } from 'react';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiButton,
+} from '@elastic/eui';
 import { ProcessEvent } from '../../../common/types/process_tree';
 import { TTYSearchBar } from '../tty_search_bar';
 import { TTYTextSizer } from '../tty_text_sizer';
 import { useStyles } from './styles';
-import { DEFAULT_TTY_ROWS, DEFAULT_TTY_COLS } from '../../../common/constants';
+import { DEFAULT_TTY_ROWS, DEFAULT_TTY_COLS, DEFAULT_TTY_FONT_SIZE } from '../../../common/constants';
 import { useFetchIOEvents, useIOLines, useXtermPlayer } from './hooks';
 import { TTYPlayerControls } from '../tty_player_controls';
+import { BETA, TOGGLE_TTY_PLAYER, DETAIL_PANEL } from '../session_view/translations';
+import { useStyles: useSessionViewStyles } from '../session_view/styles';
 
 export interface TTYPlayerDeps {
-  sessionEntityId: string; // TODO: we should not load by session id, but instead a combo of process.tty.major+minor, session time range, and host.boot_id (see Rabbitholes section of epic).
+  sessionEntityId: string;
   onClose(): void;
   isFullscreen: boolean;
   onJumpToEvent(event: ProcessEvent): void;
 }
-
-const DEFAULT_FONT_SIZE = 11;
 
 export const TTYPlayer = ({
   sessionEntityId,
@@ -35,7 +42,7 @@ export const TTYPlayer = ({
   const { data, fetchNextPage, hasNextPage } = useFetchIOEvents(sessionEntityId);
   const { lines, processIdLineMap } = useIOLines(data?.pages);
 
-  const [fontSize, setFontSize] = useState(DEFAULT_FONT_SIZE);
+  const [fontSize, setFontSize] = useState(DEFAULT_TTY_FONT_SIZE);
   const [isPlaying, setIsPlaying] = useState(false);
 
   const { search, currentLine, seekToLine } = useXtermPlayer({
@@ -57,6 +64,7 @@ export const TTYPlayer = ({
   }
 
   const styles = useStyles(tty);
+  const sessionViewStyles = useSessionViewStyles();
 
   const onSeekLine = useCallback(
     (line: number) => {
@@ -72,21 +80,39 @@ export const TTYPlayer = ({
 
   return (
     <div css={styles.container}>
-      <EuiPanel hasShadow={false} borderRadius="none">
+      <EuiPanel hasShadow={false} borderRadius="none" className="sessionViewerToolbar">
         <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiBetaBadge label={BETA} size="s" css={sessionViewStyles.betaBadge} />
+          </EuiFlexItem>
           <EuiFlexItem data-test-subj="sessionView:TTYSearch">
             <TTYSearchBar lines={lines} seekToLine={seekToLine} xTermSearchFn={search} />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
-              iconType="cross"
-              display="empty"
-              size="m"
-              aria-label="TTY Output Close Button"
-              data-test-subj="sessionView:TTYCloseBtn"
+              isSelected={true}
+              display="fill"
+              iconType="apmTrace"
               onClick={onClose}
+              size="m"
+              aria-label={TOGGLE_TTY_PLAYER}
+              data-test-subj="sessionView:TTYPlayerClose"
             />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon iconType="refresh" display="empty" size="m" disabled={true} />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon iconType="eye" disabled={true} size="m" />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiButton iconType="list" disabled={true}>
+              {DETAIL_PANEL}
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
