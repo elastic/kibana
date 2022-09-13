@@ -18,7 +18,11 @@ const dataConfig = {
 export function generateData({ start, end }: { start: number; end: number }) {
   const { rate, transaction, serviceName } = dataConfig;
   const instance = apm
-    .service(serviceName, 'production', 'python')
+    .service({
+      name: serviceName,
+      environment: 'production',
+      agentName: 'python',
+    })
     .instance('instance-a');
 
   const traceEvents = timerange(start, end)
@@ -26,7 +30,7 @@ export function generateData({ start, end }: { start: number; end: number }) {
     .rate(rate)
     .generator((timestamp) =>
       instance
-        .transaction(transaction.name)
+        .transaction({ transactionName: transaction.name })
         .defaults({
           'service.runtime.name': 'AWS_Lambda_python3.8',
           'faas.coldstart': true,
