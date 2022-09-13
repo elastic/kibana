@@ -11,9 +11,7 @@ import type { Draft } from 'immer';
 import produce from 'immer';
 import { useMemo } from 'react';
 import type { ECSMapping } from '../../../common/schemas/common';
-import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
 import type { EcsMappingFormField } from '../../packs/queries/ecs_mapping_editor_field';
-import { defaultEcsFormData } from '../../packs/queries/ecs_mapping_editor_field';
 import { useSavedQueries } from '../use_saved_queries';
 
 export interface SavedQuerySOFormData {
