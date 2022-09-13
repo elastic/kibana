@@ -34,7 +34,7 @@ interface ThreatMatchInputProps {
   threatIndexPatternsLoading: boolean;
   threatIndexModified: boolean;
   handleResetThreatIndices: () => void;
-  onValidityChange: (isValid: boolean) => void;
+  onValidityChange?: (isValid: boolean) => void;
 }
 
 const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
@@ -54,7 +54,9 @@ const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
   const [isThreatIndexPatternValid, setIsThreatIndexPatternValid] = useState(false);
 
   useEffect(() => {
-    onValidityChange(!isThreatMappingInvalid && isThreatIndexPatternValid);
+    if (onValidityChange) {
+      onValidityChange(!isThreatMappingInvalid && isThreatIndexPatternValid);
+    }
   }, [isThreatIndexPatternValid, isThreatMappingInvalid, onValidityChange]);
 
   const handleBuilderOnChange = useCallback(
