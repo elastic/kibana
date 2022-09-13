@@ -216,11 +216,11 @@ export class SavedSearchEmbeddable
 
     const query = this.savedSearch.searchSource.getField('query');
     const recordRawType = getRawRecordType(query);
-    const useSql = recordRawType === RecordRawType.PLAIN;
+    const useTextbased = recordRawType === RecordRawType.PLAIN;
 
     try {
-      // Request SQL data
-      if (useSql && query) {
+      // Request text based data
+      if (useTextbased && query) {
         const result = await fetchTextBased(
           this.savedSearch.searchSource.getField('query')!,
           this.services.dataViews,
