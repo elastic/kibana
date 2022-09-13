@@ -25,14 +25,14 @@ import {
 } from './errors';
 import { renderApp as renderStatusApp } from './status';
 
-export interface CoreAppsServiceSetupDeps {
+export interface SetupDeps {
   application: InternalApplicationSetup;
   http: HttpSetup;
   injectedMetadata: InternalInjectedMetadataSetup;
   notifications: NotificationsSetup;
 }
 
-export interface CoreAppsServiceStartDeps {
+export interface StartDeps {
   application: InternalApplicationStart;
   docLinks: DocLinksStart;
   http: HttpStart;
@@ -40,12 +40,12 @@ export interface CoreAppsServiceStartDeps {
   uiSettings: IUiSettingsClient;
 }
 
-export class CoreAppsService {
+export class CoreApp {
   private stopHistoryListening?: UnregisterCallback;
 
   constructor(private readonly coreContext: CoreContext) {}
 
-  public setup({ application, http, injectedMetadata, notifications }: CoreAppsServiceSetupDeps) {
+  public setup({ application, http, injectedMetadata, notifications }: SetupDeps) {
     application.register(this.coreContext.coreId, {
       id: 'error',
       title: 'App Error',
@@ -73,13 +73,7 @@ export class CoreAppsService {
     });
   }
 
-  public start({
-    application,
-    docLinks,
-    http,
-    notifications,
-    uiSettings,
-  }: CoreAppsServiceStartDeps) {
+  public start({ application, docLinks, http, notifications, uiSettings }: StartDeps) {
     if (!application.history) {
       return;
     }
