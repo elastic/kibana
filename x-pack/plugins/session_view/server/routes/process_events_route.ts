@@ -88,7 +88,6 @@ export const fetchEventsAndScopedAlerts = async (
                   { term: { [EVENT_ACTION]: 'fork' } },
                   { term: { [EVENT_ACTION]: 'exec' } },
                   { term: { [EVENT_ACTION]: 'end' } },
-                  { term: { [EVENT_ACTION]: 'text_output' } },
                 ],
               },
             },
