@@ -7,39 +7,25 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { IndicatorField } from './indicator_field';
+import { IndicatorFieldValue } from './indicator_field_value';
 import { generateMockIndicator } from '../../../../../common/types/indicator';
 import { EMPTY_VALUE } from '../../../../../common/constants';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
-import { generateFieldTypeMap } from '../../../../common/mocks/mock_field_type_map';
 
 const mockIndicator = generateMockIndicator();
-const mockFieldTypesMap = generateFieldTypeMap();
 
 describe('<IndicatorField />', () => {
   beforeEach(() => {});
 
   it('should return non formatted value', () => {
     const mockField = 'threat.indicator.ip';
-    const component = render(
-      <IndicatorField
-        indicator={mockIndicator}
-        field={mockField}
-        fieldTypesMap={mockFieldTypesMap}
-      />
-    );
+    const component = render(<IndicatorFieldValue indicator={mockIndicator} field={mockField} />);
     expect(component).toMatchSnapshot();
   });
 
   it(`should return ${EMPTY_VALUE}`, () => {
     const mockField = 'abc';
-    const component = render(
-      <IndicatorField
-        indicator={mockIndicator}
-        field={mockField}
-        fieldTypesMap={mockFieldTypesMap}
-      />
-    );
+    const component = render(<IndicatorFieldValue indicator={mockIndicator} field={mockField} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -47,11 +33,7 @@ describe('<IndicatorField />', () => {
     const mockField = 'threat.indicator.first_seen';
     const component = render(
       <TestProvidersComponent>
-        <IndicatorField
-          indicator={mockIndicator}
-          field={mockField}
-          fieldTypesMap={mockFieldTypesMap}
-        />
+        <IndicatorFieldValue indicator={mockIndicator} field={mockField} />
       </TestProvidersComponent>
     );
     expect(component).toMatchSnapshot();

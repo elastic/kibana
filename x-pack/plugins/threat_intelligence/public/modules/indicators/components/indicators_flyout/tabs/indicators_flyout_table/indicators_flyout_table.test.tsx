@@ -7,28 +7,23 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
+import { TestProvidersComponent } from '../../../../../../common/mocks/test_providers';
 import {
   generateMockIndicator,
   Indicator,
   RawIndicatorFieldId,
-} from '../../../../../common/types/indicator';
-import { generateFieldTypeMap } from '../../../../common/mocks/mock_field_type_map';
-import {
-  EMPTY_PROMPT_TEST_ID,
-  IndicatorsFlyoutTable,
-  TABLE_TEST_ID,
-} from './indicators_flyout_table';
-import { unwrapValue } from '../../lib/unwrap_value';
+} from '../../../../../../../common/types/indicator';
+import { IndicatorsFlyoutTable, TABLE_TEST_ID } from './indicators_flyout_table';
+import { unwrapValue } from '../../../../lib/unwrap_value';
+import { EMPTY_PROMPT_TEST_ID } from '../../components/indicator_empty_prompt';
 
 const mockIndicator: Indicator = generateMockIndicator();
-const mockFieldTypesMap = generateFieldTypeMap();
 
 describe('<IndicatorsFlyoutTable />', () => {
   it('should render fields and values in table', () => {
     const { getByTestId, getByText, getAllByText } = render(
       <TestProvidersComponent>
-        <IndicatorsFlyoutTable indicator={mockIndicator} fieldTypesMap={mockFieldTypesMap} />
+        <IndicatorsFlyoutTable indicator={mockIndicator} />
       </TestProvidersComponent>
     );
 
@@ -49,7 +44,7 @@ describe('<IndicatorsFlyoutTable />', () => {
   it('should render error message on invalid indicator', () => {
     const { getByTestId, getByText } = render(
       <TestProvidersComponent>
-        <IndicatorsFlyoutTable indicator={{ fields: {} }} fieldTypesMap={{}} />
+        <IndicatorsFlyoutTable indicator={{ fields: {} }} />
       </TestProvidersComponent>
     );
 

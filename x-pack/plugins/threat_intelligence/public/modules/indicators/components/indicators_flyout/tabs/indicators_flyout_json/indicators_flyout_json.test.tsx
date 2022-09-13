@@ -7,16 +7,13 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
-import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
-import {
-  CODE_BLOCK_TEST_ID,
-  EMPTY_PROMPT_TEST_ID,
-  IndicatorsFlyoutJson,
-} from './indicators_flyout_json';
+import { TestProvidersComponent } from '../../../../../../common/mocks/test_providers';
+import { generateMockIndicator, Indicator } from '../../../../../../../common/types/indicator';
+import { CODE_BLOCK_TEST_ID, IndicatorsFlyoutJson } from './indicators_flyout_json';
 
 const mockIndicator: Indicator = generateMockIndicator();
 
+import { EMPTY_PROMPT_TEST_ID } from '../../components/indicator_empty_prompt';
 describe('<IndicatorsFlyoutJson />', () => {
   it('should render code block component on valid indicator', () => {
     const { getByTestId } = render(

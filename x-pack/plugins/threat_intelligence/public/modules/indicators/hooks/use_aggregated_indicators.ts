@@ -197,12 +197,12 @@ export const useAggregatedIndicators = ({
       )
       .subscribe({
         next: (response) => {
-          const aggregations: Aggregation[] =
-            response.rawResponse.aggregations[AGGREGATION_NAME]?.buckets;
-          const chartSeries: ChartSeries[] = convertAggregationToChartSeries(aggregations);
-          setIndicators(chartSeries);
-
           if (isCompleteResponse(response)) {
+            const aggregations: Aggregation[] =
+              response.rawResponse.aggregations[AGGREGATION_NAME]?.buckets;
+            const chartSeries: ChartSeries[] = convertAggregationToChartSeries(aggregations);
+            setIndicators(chartSeries);
+
             searchSubscription$.current.unsubscribe();
           } else if (isErrorResponse(response)) {
             searchSubscription$.current.unsubscribe();

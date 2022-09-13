@@ -42,13 +42,13 @@ export interface FilterInOutProps {
   /**
    * Display component for when the FilterIn component is used within a DataGrid
    */
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+  as?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
 }
 
 /**
  * Retrieves the indicator's field and value, then creates a new {@link Filter} and adds it to the {@link FilterManager}.
  */
-export const FilterInOut: VFC<FilterInOutProps> = ({ data, field, Component }) => {
+export const FilterInOut: VFC<FilterInOutProps> = ({ data, field, as: Component }) => {
   const styles = useStyles();
 
   const { filterManager } = useIndicatorsFiltersContext();

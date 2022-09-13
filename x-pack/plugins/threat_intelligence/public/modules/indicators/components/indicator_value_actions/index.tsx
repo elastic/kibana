@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './indicator_field';
+export * from './indicator_value_actions';

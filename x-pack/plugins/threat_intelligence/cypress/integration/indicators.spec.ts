@@ -78,12 +78,16 @@ describe('Indicators', () => {
 
       cy.get(TOGGLE_FLYOUT_BUTTON).first().click({ force: true });
 
-      cy.get(FLYOUT_TITLE).should('contain', 'Indicator:');
+      cy.get(FLYOUT_TITLE).should('contain', 'Indicator details');
+
+      cy.get(FLYOUT_TABS).should('exist').children().should('have.length', 3);
+
+      cy.get(FLYOUT_TABS).should('exist');
+      cy.get(`${FLYOUT_TABS} button:nth-child(2)`).click();
 
       cy.get(FLYOUT_TABLE).should('exist').and('contain.text', 'threat.indicator.type');
 
-      cy.get(FLYOUT_TABS).should('exist').children().should('have.length', 2).last().click();
-
+      cy.get(`${FLYOUT_TABS} button:nth-child(3)`).click();
       cy.get(FLYOUT_JSON).should('exist').and('contain.text', 'threat.indicator.type');
     });
   });

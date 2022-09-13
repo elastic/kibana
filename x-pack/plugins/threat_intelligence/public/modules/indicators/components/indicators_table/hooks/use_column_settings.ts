@@ -7,52 +7,22 @@
 
 import { EuiDataGridColumn } from '@elastic/eui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import negate from 'lodash/negate';
 import { RawIndicatorFieldId } from '../../../../../../common/types/indicator';
 import { useKibana } from '../../../../../hooks/use_kibana';
+import { translateFieldLabel } from '../../indicator_field_label';
 
 const DEFAULT_COLUMNS: EuiDataGridColumn[] = [
-  {
-    id: RawIndicatorFieldId.TimeStamp,
-    displayAsText: i18n.translate('xpack.threatIntelligence.indicator.table.timestampColumnTitle', {
-      defaultMessage: '@timestamp',
-    }),
-  },
-  {
-    id: RawIndicatorFieldId.Name,
-    displayAsText: i18n.translate('xpack.threatIntelligence.indicator.table.indicatorColumTitle', {
-      defaultMessage: 'Indicator',
-    }),
-  },
-  {
-    id: RawIndicatorFieldId.Type,
-    displayAsText: i18n.translate(
-      'xpack.threatIntelligence.indicator.table.indicatorTypeColumTitle',
-      {
-        defaultMessage: 'Indicator type',
-      }
-    ),
-  },
-  {
-    id: RawIndicatorFieldId.Feed,
-    displayAsText: i18n.translate('xpack.threatIntelligence.indicator.table.FeedColumTitle', {
-      defaultMessage: 'Feed',
-    }),
-  },
-  {
-    id: RawIndicatorFieldId.FirstSeen,
-    displayAsText: i18n.translate('xpack.threatIntelligence.indicator.table.firstSeenColumTitle', {
-      defaultMessage: 'First seen',
-    }),
-  },
-  {
-    id: RawIndicatorFieldId.LastSeen,
-    displayAsText: i18n.translate('xpack.threatIntelligence.indicator.table.lastSeenColumTitle', {
-      defaultMessage: 'Last seen',
-    }),
-  },
-];
+  RawIndicatorFieldId.TimeStamp,
+  RawIndicatorFieldId.Name,
+  RawIndicatorFieldId.Type,
+  RawIndicatorFieldId.Feed,
+  RawIndicatorFieldId.FirstSeen,
+  RawIndicatorFieldId.LastSeen,
+].map((field) => ({
+  id: field,
+  displayAsText: translateFieldLabel(field),
+}));
 
 const DEFAULT_VISIBLE_COLUMNS = DEFAULT_COLUMNS.map((column) => column.id);
 
