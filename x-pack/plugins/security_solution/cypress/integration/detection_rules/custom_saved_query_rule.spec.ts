@@ -180,7 +180,7 @@ describe('Custom query rules', () => {
         getDetails(CUSTOM_QUERY_DETAILS).should('contain', expectedCustomTestQuery);
       });
 
-      it('Allows to update saved_query rule with non-existent query', () => {
+      it('Allows to update saved_query rule with non-existent query by adding custom query', () => {
         const expectedCustomTestQuery = 'random test query';
         createSavedQueryRule({ ...getNewRule(), savedId: 'non-existent' });
 
@@ -201,6 +201,35 @@ describe('Custom query rules', () => {
         });
 
         getDetails(CUSTOM_QUERY_DETAILS).should('contain', expectedCustomTestQuery);
+      });
+
+      it('Allows to update saved_query rule with non-existent query by selecting another saved query', () => {
+        createSavedQuery(savedQueryName, savedQueryQuery);
+        createSavedQueryRule({ ...getNewRule(), savedId: 'non-existent' });
+
+        cy.visit(SECURITY_DETECTIONS_RULES_URL);
+
+        editFirstRule();
+
+        // select another saved query, edit query input, which later should be dismissed once Load query dynamically checkbox checked
+        selectAndLoadSavedQuery(savedQueryName, savedQueryQuery);
+        getCustomQueryInput().type('AND this part wil be dismissed');
+
+        checkLoadQueryDynamically();
+        getCustomQueryInput().should('have.value', savedQueryQuery);
+
+        cy.intercept('PUT', '/api/detection_engine/rules').as('editedRule');
+        saveEditedRule();
+
+        cy.wait('@editedRule').then(({ response }) => {
+          // updated rule type shouldn't change
+          cy.wrap(response?.body.type).should('equal', 'saved_query');
+        });
+
+        cy.get(DEFINE_RULE_PANEL_PROGRESS).should('not.exist');
+
+        getDetails(SAVED_QUERY_NAME_DETAILS).should('contain', savedQueryName);
+        getDetails(CUSTOM_QUERY_DETAILS).should('contain', savedQueryQuery);
       });
     });
   });

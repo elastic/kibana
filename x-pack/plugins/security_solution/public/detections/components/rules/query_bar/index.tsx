@@ -213,6 +213,7 @@ export const QueryBarDefineRule = ({
     (newSavedQuery: SavedQuery | undefined) => {
       if (newSavedQuery != null) {
         const { saved_id: savedId } = fieldValue;
+        setIsSavedQueryFailedToLoad(false);
         setSavedQuery(newSavedQuery);
         if (newSavedQuery.id !== savedId) {
           const newFiledValue = savedQueryToFieldValue(newSavedQuery);
@@ -222,7 +223,7 @@ export const QueryBarDefineRule = ({
         }
       }
     },
-    [fieldValue, setFieldValue]
+    [fieldValue, setFieldValue, setIsSavedQueryFailedToLoad]
   );
 
   const onCloseTimelineModal = useCallback(() => {
