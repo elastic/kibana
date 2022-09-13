@@ -10,18 +10,16 @@ import { TestProviders } from '../../../common/mock';
 import { useRiskScoreFeatureStatus } from '.';
 import { RiskQueries } from '../../../../common/search_strategy';
 import { useFetch } from '../../../common/hooks/use_fetch';
+import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { RiskEntity } from './api';
 jest.mock('../../../common/hooks/use_fetch');
+jest.mock('../../../common/components/ml/hooks/use_ml_capabilities');
 
-const mockUseFetch = useFetch as jest.Mock;
 const mockFetch = jest.fn();
-const mockRefetch = jest.fn();
-const mockUseMlCapabilities = jest.fn();
-jest.mock('../../../common/components/ml/hooks/use_ml_capabilities', () => ({
-  useMlCapabilities: () => mockUseMlCapabilities(),
-}));
+const mockUseMlCapabilities = useMlCapabilities as jest.Mock;
+const mockUseFetch = useFetch as jest.Mock;
 
-describe(`is risk score deprecated hook`, () => {
+describe(`risk score feature status`, () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
@@ -33,7 +31,7 @@ describe(`is risk score deprecated hook`, () => {
     error: undefined,
     fetch: mockFetch,
     isLoading: false,
-    refetch: mockRefetch,
+    refetch: () => {},
   };
   const defaultResult = {
     error: undefined,
