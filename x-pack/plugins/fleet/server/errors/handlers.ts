@@ -29,6 +29,7 @@ import {
   RegistryError,
   RegistryResponseError,
   PackageFailedVerificationError,
+  PackagePolicyNotFoundError,
   FleetUnauthorizedError,
 } from '.';
 
@@ -53,7 +54,7 @@ const getHTTPResponseCode = (error: IngestManagerError): number => {
     // Connection errors (ie. RegistryConnectionError) / fallback  (RegistryError) from EPR
     return 502; // Bad Gateway
   }
-  if (error instanceof PackageNotFoundError) {
+  if (error instanceof PackageNotFoundError || error instanceof PackagePolicyNotFoundError) {
     return 404; // Not Found
   }
   if (error instanceof AgentPolicyNameExistsError) {
