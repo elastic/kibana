@@ -77,44 +77,79 @@ describe('deletePrebuiltSavedObjects', () => {
       `"visualization"`
     );
 
+    expect(response.status).toEqual(200);
+  });
+
+  it('should delete userRiskScoreDashboards', async () => {
+    const response = await server.inject(
+      deletePrebuiltSavedObjectsRequest('userRiskScoreDashboards'),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(clients.savedObjectsClient.delete.mock.calls[0][1]).toMatchInlineSnapshot(
+      `"ml-user-risk-score-latest-default-index-pattern"`
+    );
+    expect(clients.savedObjectsClient.delete.mock.calls[0][0]).toMatchInlineSnapshot(
+      `"index-pattern"`
+    );
+
+    expect(clients.savedObjectsClient.delete.mock.calls[1][1]).toMatchInlineSnapshot(
+      `"54dadd60-1a57-11ed-bb53-ad8c26f4d942"`
+    );
+    expect(clients.savedObjectsClient.delete.mock.calls[1][0]).toMatchInlineSnapshot(`"lens"`);
+
+    expect(clients.savedObjectsClient.delete.mock.calls[2][1]).toMatchInlineSnapshot(
+      `"ml-user-risk-score-default-index-pattern"`
+    );
+    expect(clients.savedObjectsClient.delete.mock.calls[2][0]).toMatchInlineSnapshot(
+      `"index-pattern"`
+    );
+
+    expect(clients.savedObjectsClient.delete.mock.calls[3][1]).toMatchInlineSnapshot(
+      `"60454070-9a5d-11ec-9633-5f782d122340"`
+    );
+    expect(clients.savedObjectsClient.delete.mock.calls[3][0]).toMatchInlineSnapshot(`"lens"`);
+
     expect(clients.savedObjectsClient.delete.mock.calls[4][1]).toMatchInlineSnapshot(
-      `"a62d3ed0-cf92-11eb-a0ff-1763d16cbda7"`
+      `"alerts-default-index-pattern"`
     );
     expect(clients.savedObjectsClient.delete.mock.calls[4][0]).toMatchInlineSnapshot(
-      `"visualization"`
+      `"index-pattern"`
     );
 
     expect(clients.savedObjectsClient.delete.mock.calls[5][1]).toMatchInlineSnapshot(
-      `"b2dbc9b0-cf94-11eb-bd37-7bb50422e346"`
+      `"a62d3ed0-cf92-11eb-a0ff-1763d16cbda7"`
     );
     expect(clients.savedObjectsClient.delete.mock.calls[5][0]).toMatchInlineSnapshot(
       `"visualization"`
     );
 
     expect(clients.savedObjectsClient.delete.mock.calls[6][1]).toMatchInlineSnapshot(
-      `"1d00ebe0-f3b2-11eb-beb2-b91666445a94"`
+      `"42371d00-cf7a-11eb-9a96-05d89f94ad96"`
     );
-    expect(clients.savedObjectsClient.delete.mock.calls[6][0]).toMatchInlineSnapshot(`"tag"`);
+    expect(clients.savedObjectsClient.delete.mock.calls[6][0]).toMatchInlineSnapshot(
+      `"visualization"`
+    );
 
     expect(clients.savedObjectsClient.delete.mock.calls[7][1]).toMatchInlineSnapshot(
-      `"6f05c8c0-cf77-11eb-9a96-05d89f94ad96"`
+      `"183d32f0-9a5e-11ec-90d3-1109ed409ab5"`
     );
-    expect(clients.savedObjectsClient.delete.mock.calls[7][0]).toMatchInlineSnapshot(`"dashboard"`);
+    expect(clients.savedObjectsClient.delete.mock.calls[7][0]).toMatchInlineSnapshot(
+      `"visualization"`
+    );
 
     expect(clients.savedObjectsClient.delete.mock.calls[8][1]).toMatchInlineSnapshot(
-      `"ml-host-risk-score-latest-default-index-pattern"`
+      `"93fc0f00-1a57-11ed-bb53-ad8c26f4d942"`
     );
-    expect(clients.savedObjectsClient.delete.mock.calls[8][0]).toMatchInlineSnapshot(
-      `"index-pattern"`
-    );
+    expect(clients.savedObjectsClient.delete.mock.calls[8][0]).toMatchInlineSnapshot(`"tag"`);
 
     expect(clients.savedObjectsClient.delete.mock.calls[9][1]).toMatchInlineSnapshot(
-      `"dc289c10-d4ff-11eb-a0ff-1763d16cbda7"`
+      `"1355b030-ca2b-11ec-962f-a3a018b7d10f"`
     );
-    expect(clients.savedObjectsClient.delete.mock.calls[9][0]).toMatchInlineSnapshot(`"lens"`);
+    expect(clients.savedObjectsClient.delete.mock.calls[9][0]).toMatchInlineSnapshot(`"dashboard"`);
 
     expect(clients.savedObjectsClient.delete.mock.calls[10][1]).toMatchInlineSnapshot(
-      `"27b483b0-d500-11eb-a0ff-1763d16cbda7"`
+      `"8ac3ad30-1a57-11ed-bb53-ad8c26f4d942"`
     );
     expect(clients.savedObjectsClient.delete.mock.calls[10][0]).toMatchInlineSnapshot(
       `"dashboard"`
