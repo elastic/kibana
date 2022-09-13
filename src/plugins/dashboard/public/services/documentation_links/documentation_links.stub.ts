@@ -16,6 +16,7 @@ export const documentationLinksServiceFactory: DocumentationLinksServiceFactory 
   const corePluginMock = coreMock.createStart();
 
   return {
+    indexPatternsDocLink: corePluginMock.docLinks.links.indexPatterns.introduction,
     kibanaGuideDocLink: corePluginMock.docLinks.links.kibana.guide,
   };
 };

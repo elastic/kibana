@@ -10,7 +10,6 @@ import React from 'react';
 import {
   AnalyticsNoDataPageKibanaProvider,
   AnalyticsNoDataPage,
-  AnalyticsNoDataPageKibanaDependencies,
 } from '@kbn/shared-ux-page-analytics-no-data';
 
 import { pluginServices } from '../services/plugin_services';
@@ -25,18 +24,23 @@ export const DashboardAppNoDataPage = ({
     data: { dataViews },
     dataViewEditor,
     http: { basePath },
-    documentationLinks: { kibanaGuideDocLink },
+    documentationLinks: { indexPatternsDocLink, kibanaGuideDocLink },
   } = pluginServices.getServices();
 
   const analyticsServices = {
     coreStart: {
-      docLinks: { links: { kibana: { guide: kibanaGuideDocLink } } },
+      docLinks: {
+        links: {
+          kibana: { guide: kibanaGuideDocLink },
+          indexPatterns: { introduction: indexPatternsDocLink },
+        },
+      },
       application,
       http: { basePath },
     },
     dataViews,
     dataViewEditor,
-  } as unknown as AnalyticsNoDataPageKibanaDependencies;
+  };
   return (
     <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
       <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />
