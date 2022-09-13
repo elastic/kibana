@@ -141,7 +141,9 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
                   color="hollow"
                 >
                   <span>{`${fieldName}: `}</span>
-                  <span style={{ color: euiTheme.euiCodeBlockStringColor }}>{`${group[fieldName]}`}</span>
+                  <span
+                    style={{ color: euiTheme.euiCodeBlockStringColor }}
+                  >{`${group[fieldName]}`}</span>
                 </EuiBadge>
                 <EuiSpacer size="xs" />
               </>
