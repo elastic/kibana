@@ -182,7 +182,7 @@ export class CoreSystem {
 
     const navigatorExt = navigator as ExtendedNavigator;
     const navigatorInfo: Record<string, string> = {};
-   if (navigatorExt.deviceMemory) {
+    if (navigatorExt.deviceMemory) {
       navigatorInfo.deviceMemory = String(navigatorExt.deviceMemory);
     }
     if (navigatorExt.hardwareConcurrency) {
