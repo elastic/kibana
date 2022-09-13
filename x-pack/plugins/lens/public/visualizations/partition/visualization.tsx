@@ -250,11 +250,11 @@ export const getPieVisualization = ({
 
     const getMetricGroupConfig = (): VisualizationDimensionGroupConfig => ({
       groupId: 'metric',
-      groupLabel: i18n.translate('xpack.lens.pie.groupsizeLabel', {
-        defaultMessage: 'Size by',
+      groupLabel: i18n.translate('xpack.lens.pie.groupMetricLabel', {
+        defaultMessage: 'Metrics',
       }),
-      dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.groupSizeLabel', {
-        defaultMessage: 'Size',
+      dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.groupMetricLabel', {
+        defaultMessage: 'Metrics',
       }),
       paramEditorCustomProps: {
         headingLabel: i18n.translate('xpack.lens.pie.headingLabel', {
