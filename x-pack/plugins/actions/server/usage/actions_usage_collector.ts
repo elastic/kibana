@@ -23,6 +23,8 @@ export function createActionsUsageCollector(
       return true;
     },
     schema: {
+      has_errors: { type: 'boolean' },
+      error_messages: { type: 'array', items: { type: 'text' } },
       alert_history_connector_enabled: {
         type: 'boolean',
         _meta: { description: 'Indicates if preconfigured alert history connector is enabled.' },
@@ -51,13 +53,16 @@ export function createActionsUsageCollector(
         const doc = await getLatestTaskState(await taskManager);
         // get the accumulated state from the recurring task
         const { runs, ...state } = get(doc, 'state') as ActionsUsage & { runs: number };
-
         return {
           ...state,
           alert_history_connector_enabled: config.preconfiguredAlertHistoryEsIndex,
         };
       } catch (err) {
+        const errMessage = err && err.message ? err.message : err.toString();
+
         return {
+          has_errors: true,
+          error_messages: [errMessage],
           alert_history_connector_enabled: false,
           count_total: 0,
           count_by_type: {},

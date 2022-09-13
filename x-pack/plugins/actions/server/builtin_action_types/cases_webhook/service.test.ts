@@ -8,15 +8,15 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 
 import { createExternalService } from './service';
-import { request, createAxiosResponse } from '../lib/axios_utils';
+import { request, createAxiosResponse } from '../../lib/axios_utils';
 import { CasesWebhookMethods, CasesWebhookPublicConfigurationType, ExternalService } from './types';
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
-jest.mock('../lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('../lib/axios_utils');
+jest.mock('../../lib/axios_utils', () => {
+  const originalUtils = jest.requireActual('../../lib/axios_utils');
   return {
     ...originalUtils,
     request: jest.fn(),
@@ -30,30 +30,28 @@ const configurationUtilities = actionsConfigMock.create();
 const config: CasesWebhookPublicConfigurationType = {
   createCommentJson: '{"body":{{{case.comment}}}}',
   createCommentMethod: CasesWebhookMethods.POST,
-  createCommentUrl:
-    'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}/comment',
+  createCommentUrl: 'https://coolsite.net/issue/{{{external.system.id}}}/comment',
   createIncidentJson:
     '{"fields":{"title":{{{case.title}}},"description":{{{case.description}}},"tags":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
   createIncidentMethod: CasesWebhookMethods.POST,
   createIncidentResponseKey: 'id',
-  createIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue',
-  getIncidentResponseCreatedDateKey: 'fields.created',
+  createIncidentUrl: 'https://coolsite.net/issue',
   getIncidentResponseExternalTitleKey: 'key',
-  getIncidentResponseUpdatedDateKey: 'fields.updated',
   hasAuth: true,
   headers: { ['content-type']: 'application/json' },
-  incidentViewUrl: 'https://siem-kibana.atlassian.net/browse/{{{external.system.title}}}',
-  getIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}',
+  viewIncidentUrl: 'https://coolsite.net/browse/{{{external.system.title}}}',
+  getIncidentUrl: 'https://coolsite.net/issue/{{{external.system.id}}}',
   updateIncidentJson:
     '{"fields":{"title":{{{case.title}}},"description":{{{case.description}}},"tags":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
   updateIncidentMethod: CasesWebhookMethods.PUT,
-  updateIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}',
+  updateIncidentUrl: 'https://coolsite.net/issue/{{{external.system.id}}}',
 };
 const secrets = {
   user: 'user',
   password: 'pass',
 };
 const actionId = '1234';
+const mockTime = new Date('2021-10-20T19:41:02.754+0300');
 describe('Cases webhook service', () => {
   let service: ExternalService;
 
@@ -67,8 +65,13 @@ describe('Cases webhook service', () => {
       logger,
       configurationUtilities
     );
+    jest.useFakeTimers('modern');
+    jest.setSystemTime(mockTime);
   });
 
+  afterAll(() => {
+    jest.useRealTimers();
+  });
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -76,7 +79,7 @@ describe('Cases webhook service', () => {
   describe('createExternalService', () => {
     const requiredUrls = [
       'createIncidentUrl',
-      'incidentViewUrl',
+      'viewIncidentUrl',
       'getIncidentUrl',
       'updateIncidentUrl',
     ];
@@ -131,8 +134,6 @@ describe('Cases webhook service', () => {
         fields: {
           title: 'title',
           description: 'description',
-          created: '2021-10-20T19:41:02.754+0300',
-          updated: '2021-10-20T19:41:02.754+0300',
         },
       },
     };
@@ -143,8 +144,6 @@ describe('Cases webhook service', () => {
       expect(res).toEqual({
         id: '1',
         title: 'CK-1',
-        createdAt: '2021-10-20T19:41:02.754+0300',
-        updatedAt: '2021-10-20T19:41:02.754+0300',
       });
     });
 
@@ -154,7 +153,7 @@ describe('Cases webhook service', () => {
       await service.getIncident('1');
       expect(requestMock).toHaveBeenCalledWith({
         axios,
-        url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/1',
+        url: 'https://coolsite.net/issue/1',
         logger,
         configurationUtilities,
       });
@@ -187,7 +186,7 @@ describe('Cases webhook service', () => {
       );
 
       await expect(service.getIncident('1')).rejects.toThrow(
-        '[Action][Webhook - Case Management]: Unable to get case with id 1. Error: Response is missing the expected fields: fields.created, key, fields.updated'
+        '[Action][Webhook - Case Management]: Unable to get case with id 1. Error: Response is missing the expected field: key'
       );
     });
   });
@@ -216,7 +215,6 @@ describe('Cases webhook service', () => {
           data: {
             id: '1',
             key: 'CK-1',
-            fields: { created: '2020-04-27T10:59:46.202Z', updated: '2020-04-27T10:59:46.202Z' },
           },
         })
       );
@@ -230,8 +228,8 @@ describe('Cases webhook service', () => {
       expect(res).toEqual({
         title: 'CK-1',
         id: '1',
-        pushedDate: '2020-04-27T10:59:46.202Z',
-        url: 'https://siem-kibana.atlassian.net/browse/CK-1',
+        pushedDate: mockTime.toISOString(),
+        url: 'https://coolsite.net/browse/CK-1',
       });
     });
 
@@ -241,7 +239,6 @@ describe('Cases webhook service', () => {
           data: {
             id: '1',
             key: 'CK-1',
-            fields: { created: '2020-04-27T10:59:46.202Z' },
           },
         })
       );
@@ -251,7 +248,6 @@ describe('Cases webhook service', () => {
           data: {
             id: '1',
             key: 'CK-1',
-            fields: { created: '2020-04-27T10:59:46.202Z', updated: '2020-04-27T10:59:46.202Z' },
           },
         })
       );
@@ -260,7 +256,7 @@ describe('Cases webhook service', () => {
 
       expect(requestMock.mock.calls[0][0]).toEqual({
         axios,
-        url: 'https://siem-kibana.atlassian.net/rest/api/2/issue',
+        url: 'https://coolsite.net/issue',
         logger,
         method: CasesWebhookMethods.POST,
         configurationUtilities,
@@ -315,7 +311,6 @@ describe('Cases webhook service', () => {
           data: {
             id: '1',
             key: 'CK-1',
-            fields: { created: '2020-04-27T10:59:46.202Z', updated: '2020-04-27T10:59:46.202Z' },
           },
         })
       );
@@ -325,8 +320,8 @@ describe('Cases webhook service', () => {
       expect(res).toEqual({
         title: 'CK-1',
         id: '1',
-        pushedDate: '2020-04-27T10:59:46.202Z',
-        url: 'https://siem-kibana.atlassian.net/browse/CK-1',
+        pushedDate: mockTime.toISOString(),
+        url: 'https://coolsite.net/browse/CK-1',
       });
     });
 
@@ -336,7 +331,6 @@ describe('Cases webhook service', () => {
           data: {
             id: '1',
             key: 'CK-1',
-            fields: { created: '2020-04-27T10:59:46.202Z', updated: '2020-04-27T10:59:46.202Z' },
           },
         })
       );
@@ -348,7 +342,7 @@ describe('Cases webhook service', () => {
         logger,
         method: CasesWebhookMethods.PUT,
         configurationUtilities,
-        url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/1',
+        url: 'https://coolsite.net/issue/1',
         data: JSON.stringify({
           fields: {
             title: 'title',
@@ -398,7 +392,6 @@ describe('Cases webhook service', () => {
           data: {
             id: '1',
             key: 'CK-1',
-            created: '2020-04-27T10:59:46.202Z',
           },
         })
       );
@@ -414,7 +407,6 @@ describe('Cases webhook service', () => {
           data: {
             id: '1',
             key: 'CK-1',
-            created: '2020-04-27T10:59:46.202Z',
           },
         })
       );
@@ -426,7 +418,7 @@ describe('Cases webhook service', () => {
         logger,
         method: CasesWebhookMethods.POST,
         configurationUtilities,
-        url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/1/comment',
+        url: 'https://coolsite.net/issue/1/comment',
         data: `{"body":"comment"}`,
       });
     });
@@ -649,10 +641,6 @@ describe('Cases webhook service', () => {
           data: {
             id: '../../malicious-app/malicious-endpoint/',
             key: '../../malicious-app/malicious-endpoint/',
-            fields: {
-              updated: '2020-04-27T10:59:46.202Z',
-              created: '2020-04-27T10:59:46.202Z',
-            },
           },
         })
       );
@@ -664,7 +652,7 @@ describe('Cases webhook service', () => {
     test('getIncident- escapes url', async () => {
       await service.getIncident('../../malicious-app/malicious-endpoint/');
       expect(requestMock.mock.calls[0][0].url).toEqual(
-        'https://siem-kibana.atlassian.net/rest/api/2/issue/..%2F..%2Fmalicious-app%2Fmalicious-endpoint%2F'
+        'https://coolsite.net/issue/..%2F..%2Fmalicious-app%2Fmalicious-endpoint%2F'
       );
     });
 
@@ -681,7 +669,7 @@ describe('Cases webhook service', () => {
       };
       const res = await service.createIncident(incident);
       expect(res.url).toEqual(
-        'https://siem-kibana.atlassian.net/browse/..%2F..%2Fmalicious-app%2Fmalicious-endpoint%2F'
+        'https://coolsite.net/browse/..%2F..%2Fmalicious-app%2Fmalicious-endpoint%2F'
       );
     });
 
@@ -700,7 +688,7 @@ describe('Cases webhook service', () => {
 
       await service.updateIncident(incident);
       expect(requestMock.mock.calls[0][0].url).toEqual(
-        'https://siem-kibana.atlassian.net/rest/api/2/issue/..%2F..%2Fmalicious-app%2Fmalicious-endpoint%2F'
+        'https://coolsite.net/issue/..%2F..%2Fmalicious-app%2Fmalicious-endpoint%2F'
       );
     });
     test('createComment- escapes url', async () => {
@@ -714,7 +702,7 @@ describe('Cases webhook service', () => {
 
       await service.createComment(commentReq);
       expect(requestMock.mock.calls[0][0].url).toEqual(
-        'https://siem-kibana.atlassian.net/rest/api/2/issue/..%2F..%2Fmalicious-app%2Fmalicious-endpoint%2F/comment'
+        'https://coolsite.net/issue/..%2F..%2Fmalicious-app%2Fmalicious-endpoint%2F/comment'
       );
     });
   });

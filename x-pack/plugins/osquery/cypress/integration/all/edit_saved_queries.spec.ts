@@ -26,15 +26,15 @@ describe('ALL - Edit saved query', () => {
   });
 
   it('by changing ecs mappings and platforms', () => {
+    cy.getBySel('pagination-button-next').click();
     cy.react('CustomItemAction', {
       props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
     }).click();
     cy.contains('Custom key/value pairs.').should('exist');
     cy.contains('Hours of uptime').should('exist');
-    cy.react('ECSComboboxFieldComponent', { props: { field: { value: 'labels' } } })
-      .parents('[data-test-subj="ECSMappingEditorForm"]')
-      .react('EuiButtonIcon', { props: { iconType: 'trash' } })
-      .click();
+    cy.react('ECSMappingEditorForm').within(() => {
+      cy.react('EuiButtonIcon', { props: { iconType: 'trash' } }).click();
+    });
 
     cy.react('PlatformCheckBoxGroupField').within(() => {
       cy.react('EuiCheckbox', {

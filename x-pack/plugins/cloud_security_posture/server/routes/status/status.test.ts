@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { defineGetCspSetupStatusRoute, INDEX_TIMEOUT_IN_MINUTES } from './status';
+import { defineGetCspStatusRoute, INDEX_TIMEOUT_IN_MINUTES } from './status';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { ESSearchResponse } from '@kbn/core/types/elasticsearch';
 import {
@@ -79,7 +79,7 @@ describe('CspSetupStatus route', () => {
   });
 
   it('validate the API route path', async () => {
-    defineGetCspSetupStatusRoute(router);
+    defineGetCspStatusRoute(router);
     const [config, _] = router.get.mock.calls[0];
 
     expect(config.path).toEqual('/internal/cloud_security_posture/status');
@@ -101,7 +101,7 @@ describe('CspSetupStatus route', () => {
     });
 
     // Act
-    defineGetCspSetupStatusRoute(router);
+    defineGetCspStatusRoute(router);
     const [_, handler] = router.get.mock.calls[0];
 
     const mockResponse = httpServerMock.createResponseFactory();
@@ -116,7 +116,7 @@ describe('CspSetupStatus route', () => {
     await expect(body).toEqual({
       status: 'indexed',
       latestPackageVersion: '0.0.14',
-      installedIntegrations: 0,
+      installedPackagePolicies: 0,
       healthyAgents: 0,
       installedPackageVersion: undefined,
     });
@@ -140,7 +140,7 @@ describe('CspSetupStatus route', () => {
     });
 
     // Act
-    defineGetCspSetupStatusRoute(router);
+    defineGetCspStatusRoute(router);
     const [_, handler] = router.get.mock.calls[0];
 
     const mockResponse = httpServerMock.createResponseFactory();
@@ -156,7 +156,7 @@ describe('CspSetupStatus route', () => {
     await expect(body).toEqual({
       status: 'indexed',
       latestPackageVersion: '0.0.14',
-      installedIntegrations: 3,
+      installedPackagePolicies: 3,
       healthyAgents: 0,
       installedPackageVersion: '0.0.14',
     });
@@ -188,7 +188,7 @@ describe('CspSetupStatus route', () => {
     } as unknown as GetAgentStatusResponse['results']);
 
     // Act
-    defineGetCspSetupStatusRoute(router);
+    defineGetCspStatusRoute(router);
     const [_, handler] = router.get.mock.calls[0];
 
     const mockResponse = httpServerMock.createResponseFactory();
@@ -204,7 +204,7 @@ describe('CspSetupStatus route', () => {
     await expect(body).toEqual({
       status: 'indexed',
       latestPackageVersion: '0.0.14',
-      installedIntegrations: 3,
+      installedPackagePolicies: 3,
       healthyAgents: 1,
       installedPackageVersion: '0.0.14',
     });
@@ -224,13 +224,13 @@ describe('CspSetupStatus route', () => {
       page: 1,
       perPage: 100,
     });
-
-    // Act
-    defineGetCspSetupStatusRoute(router);
+    defineGetCspStatusRoute(router);
     const [_, handler] = router.get.mock.calls[0];
 
     const mockResponse = httpServerMock.createResponseFactory();
     const mockRequest = httpServerMock.createKibanaRequest();
+
+    // Act
     await handler(mockContext, mockRequest, mockResponse);
 
     // Assert
@@ -242,7 +242,7 @@ describe('CspSetupStatus route', () => {
     await expect(body).toMatchObject({
       status: 'not-installed',
       latestPackageVersion: '0.0.14',
-      installedIntegrations: 0,
+      installedPackagePolicies: 0,
       healthyAgents: 0,
     });
   });
@@ -273,7 +273,7 @@ describe('CspSetupStatus route', () => {
     } as unknown as GetAgentStatusResponse['results']);
 
     // Act
-    defineGetCspSetupStatusRoute(router);
+    defineGetCspStatusRoute(router);
 
     const [_, handler] = router.get.mock.calls[0];
 
@@ -290,7 +290,7 @@ describe('CspSetupStatus route', () => {
     await expect(body).toMatchObject({
       status: 'not-deployed',
       latestPackageVersion: '0.0.14',
-      installedIntegrations: 1,
+      installedPackagePolicies: 1,
       healthyAgents: 0,
       installedPackageVersion: '0.0.14',
     });
@@ -327,7 +327,7 @@ describe('CspSetupStatus route', () => {
     } as unknown as GetAgentStatusResponse['results']);
 
     // Act
-    defineGetCspSetupStatusRoute(router);
+    defineGetCspStatusRoute(router);
 
     const [_, handler] = router.get.mock.calls[0];
 
@@ -346,7 +346,7 @@ describe('CspSetupStatus route', () => {
     await expect(body).toMatchObject({
       status: 'indexing',
       latestPackageVersion: '0.0.14',
-      installedIntegrations: 1,
+      installedPackagePolicies: 1,
       healthyAgents: 1,
       installedPackageVersion: '0.0.14',
     });
@@ -383,7 +383,7 @@ describe('CspSetupStatus route', () => {
     } as unknown as GetAgentStatusResponse['results']);
 
     // Act
-    defineGetCspSetupStatusRoute(router);
+    defineGetCspStatusRoute(router);
 
     const [_, handler] = router.get.mock.calls[0];
 
@@ -401,7 +401,7 @@ describe('CspSetupStatus route', () => {
     await expect(body).toMatchObject({
       status: 'index-timeout',
       latestPackageVersion: '0.0.14',
-      installedIntegrations: 1,
+      installedPackagePolicies: 1,
       healthyAgents: 1,
       installedPackageVersion: '0.0.14',
     });

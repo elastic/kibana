@@ -8,7 +8,7 @@ Array [
 }
 
 <dt
-    class="euiDescriptionList__title c0"
+    class="euiDescriptionList__title c0 emotion-euiDescriptionList__title-row-normal"
   >
     TLS Certificate
   </dt>,
@@ -27,7 +27,7 @@ Array [
 }
 
 <dd
-    class="euiDescriptionList__description c0"
+    class="euiDescriptionList__description c0 emotion-euiDescriptionList__description-row-normal"
   >
     <a
       class="eui-displayInline"
@@ -63,7 +63,7 @@ Array [
 }
 
 <dt
-    class="euiDescriptionList__title c0"
+    class="euiDescriptionList__title c0 emotion-euiDescriptionList__title-row-normal"
   >
     TLS Certificate
   </dt>,
@@ -76,7 +76,7 @@ Array [
 }
 
 <dd
-    class="euiDescriptionList__description c0"
+    class="euiDescriptionList__description c0 emotion-euiDescriptionList__description-row-normal"
   >
     <a
       class="eui-displayInline"

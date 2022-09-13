@@ -49,12 +49,13 @@ handlebars.registerHelper(
 
 handlebars.registerHelper('date', (...args) => {
   const values = args.slice(0, -1) as [string | Date, string | undefined];
+  const { hash } = args.slice(-1)[0] as Handlebars.HelperOptions;
   // eslint-disable-next-line prefer-const
   let [date, format] = values;
   if (typeof date === 'undefined') throw new Error(`[date]: unknown variable`);
   let momentDate: Moment | undefined;
   if (typeof date === 'string') {
-    momentDate = dateMath.parse(date);
+    momentDate = dateMath.parse(date, { roundUp: hash.roundUp === true });
     if (!momentDate || !momentDate.isValid()) {
       const ts = Number(date);
       if (!Number.isNaN(ts)) {

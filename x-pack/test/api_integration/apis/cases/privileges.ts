@@ -10,10 +10,6 @@ import { APP_ID as CASES_APP_ID } from '@kbn/cases-plugin/common/constants';
 import { APP_ID as SECURITY_SOLUTION_APP_ID } from '@kbn/security-solution-plugin/common/constants';
 import { observabilityFeatureId as OBSERVABILITY_APP_ID } from '@kbn/observability-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import {
-  createUsersAndRoles,
-  deleteUsersAndRoles,
-} from '../../../cases_api_integration/common/lib/authentication';
 
 import {
   createCase,
@@ -37,9 +33,7 @@ import {
   secReadCasesNoneUser,
   secReadCasesReadUser,
   secReadUser,
-  users,
 } from './common/users';
-import { roles } from './common/roles';
 import { getPostCaseRequest } from '../../../cases_api_integration/common/lib/mock';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -47,14 +41,6 @@ export default ({ getService }: FtrProviderContext): void => {
     const es = getService('es');
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     const supertest = getService('supertest');
-
-    before(async () => {
-      await createUsersAndRoles(getService, users, roles);
-    });
-
-    after(async () => {
-      await deleteUsersAndRoles(getService, users, roles);
-    });
 
     afterEach(async () => {
       await deleteAllCaseItems(es);

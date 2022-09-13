@@ -84,7 +84,7 @@ export function RulesHelper({ getPageObjects, getService }: FtrProviderContext) 
         'statusDropdown' + status + 'Item'
       );
       await actionsMenuItemElem.click();
-      await actionsDropdown.findByClassName('euiLoadingSpinner euiLoadingSpinner--small');
+      await actionsDropdown.waitForDeletedByCssSelector('.euiLoadingSpinner');
       await retry.try(async () => {
         await this.getRulesList();
         expect(await this.isStatus(status)).to.eql(true);

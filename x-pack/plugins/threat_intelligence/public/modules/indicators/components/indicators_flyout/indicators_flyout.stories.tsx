@@ -7,27 +7,54 @@
 
 import React from 'react';
 import { Story } from '@storybook/react';
+import { CoreStart } from '@kbn/core/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { mockIndicatorsFiltersContext } from '../../../../common/mocks/mock_indicators_filters_context';
+import { generateFieldTypeMap } from '../../../../common/mocks/mock_field_type_map';
+import { mockUiSettingsService } from '../../../../common/mocks/mock_kibana_ui_settings_service';
+import { mockKibanaTimelinesService } from '../../../../common/mocks/mock_kibana_timelines_service';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { IndicatorsFlyout } from './indicators_flyout';
+import { IndicatorsFiltersContext } from '../../context';
 
 export default {
   component: IndicatorsFlyout,
   title: 'IndicatorsFlyout',
 };
 
-const mockIndicator: Indicator = generateMockIndicator();
+const coreMock = {
+  uiSettings: mockUiSettingsService(),
+  timelines: mockKibanaTimelinesService,
+} as unknown as CoreStart;
+const KibanaReactContext = createKibanaReactContext(coreMock);
 
 export const Default: Story<void> = () => {
-  // eslint-disable-next-line no-console
-  return <IndicatorsFlyout indicator={mockIndicator} closeFlyout={() => console.log('closing')} />;
+  const mockIndicator: Indicator = generateMockIndicator();
+  const mockFieldTypesMap = generateFieldTypeMap();
+
+  return (
+    <KibanaReactContext.Provider>
+      <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
+        <IndicatorsFlyout
+          indicator={mockIndicator}
+          fieldTypesMap={mockFieldTypesMap}
+          closeFlyout={() => window.alert('Closing flyout')}
+        />
+      </IndicatorsFiltersContext.Provider>
+    </KibanaReactContext.Provider>
+  );
 };
 
-export const EmtpyIndicator: Story<void> = () => {
+export const EmptyIndicator: Story<void> = () => {
   return (
-    <IndicatorsFlyout
-      indicator={{ fields: {} } as Indicator}
-      // eslint-disable-next-line no-console
-      closeFlyout={() => console.log('closing')}
-    />
+    <KibanaReactContext.Provider>
+      <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
+        <IndicatorsFlyout
+          indicator={{ fields: {} } as Indicator}
+          fieldTypesMap={{}}
+          closeFlyout={() => window.alert('Closing flyout')}
+        />
+      </IndicatorsFiltersContext.Provider>
+    </KibanaReactContext.Provider>
   );
 };

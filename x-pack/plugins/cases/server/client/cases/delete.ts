@@ -22,10 +22,8 @@ import { Operations, OwnerEntity } from '../../authorization';
 export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): Promise<void> {
   const {
     unsecuredSavedObjectsClient,
-    caseService,
-    attachmentService,
     user,
-    userActionService,
+    services: { caseService, attachmentService, userActionService },
     logger,
     authorization,
   } = clientArgs;

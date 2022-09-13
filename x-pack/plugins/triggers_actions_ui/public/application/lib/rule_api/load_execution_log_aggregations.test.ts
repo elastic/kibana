@@ -84,7 +84,7 @@ describe('loadExecutionLogAggregations', () => {
           "query": Object {
             "date_end": "2022-03-23T16:17:53.482Z",
             "date_start": "2022-03-23T16:17:53.482Z",
-            "filter": "event.provider: alerting AND event.outcome: success or unknown",
+            "filter": "event.outcome: success or unknown",
             "page": 1,
             "per_page": 10,
             "sort": "[{\\"timestamp\\":{\\"order\\":\\"asc\\"}}]",

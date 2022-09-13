@@ -7,7 +7,6 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
-import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { JsonObject } from '@kbn/utility-types';
 import type { EventStats, ResolverSchema } from '../../../../../../common/endpoint/types';
 import type { NodeID, TimeRange } from '../utils';
@@ -197,9 +196,7 @@ export class StatsQuery {
         },
       ])
     );
-    const alertIdsRaw: Array<string | undefined> = alertsBody.hits.hits.map((hit) => {
-      return hit._source && hit._source[ALERT_RULE_UUID];
-    });
+    const alertIdsRaw: Array<string | undefined> = alertsBody.hits.hits.map((hit) => hit._id);
     const alertIds = alertIdsRaw.flatMap((id) => (!id ? [] : [id]));
 
     const eventAggStats = [...eventsWithAggs.values()];
@@ -214,7 +211,7 @@ export class StatsQuery {
               [id]: {
                 total: alertCount + otherEvents.total,
                 byCategory: {
-                  alerts: alertCount,
+                  alert: alertCount,
                   ...otherEvents.byCategory,
                 },
               },
@@ -225,7 +222,7 @@ export class StatsQuery {
               [id]: {
                 total: alertCount,
                 byCategory: {
-                  alerts: alertCount,
+                  alert: alertCount,
                 },
               },
             };

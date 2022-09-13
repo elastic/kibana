@@ -40,7 +40,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
 }));
 
 describe('NewTimeline', () => {
-  const mockGetButton = jest.fn();
+  const mockGetButton = jest.fn().mockReturnValue('<></>');
 
   const props: NewTimelineProps = {
     closeGearMenu: jest.fn(),

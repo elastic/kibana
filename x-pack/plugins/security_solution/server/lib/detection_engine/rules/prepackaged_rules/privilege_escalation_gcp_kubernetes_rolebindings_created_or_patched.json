@@ -12,15 +12,44 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "GCP Kubernetes Rolebindings Created or Patched",
-  "note": "## Config\n\nThe GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:(io.k8s.authorization.rbac.v*.clusterrolebindings.create or \nio.k8s.authorization.rbac.v*.rolebindings.create or io.k8s.authorization.rbac.v*.clusterrolebindings.patch or \nio.k8s.authorization.rbac.v*.rolebindings.patch) and event.outcome:success and\nnot gcp.audit.authentication_info.principal_email:\"system:addon-manager\"\n",
+  "note": "",
+  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:(io.k8s.authorization.rbac.v*.clusterrolebindings.create or\nio.k8s.authorization.rbac.v*.rolebindings.create or io.k8s.authorization.rbac.v*.clusterrolebindings.patch or\nio.k8s.authorization.rbac.v*.rolebindings.patch) and event.outcome:success and\nnot gcp.audit.authentication_info.principal_email:\"system:addon-manager\"\n",
   "references": [
     "https://cloud.google.com/kubernetes-engine/docs/how-to/audit-logging",
     "https://unofficial-kubernetes.readthedocs.io/en/latest/admin/authorization/rbac/",
     "https://cloud.google.com/kubernetes-engine/docs/how-to/role-based-access-control"
   ],
+  "related_integrations": [
+    {
+      "package": "gcp",
+      "version": "1.10.0"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.outcome",
+      "type": "keyword"
+    },
+    {
+      "ecs": false,
+      "name": "gcp.audit.authentication_info.principal_email",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "2f0bae2d-bf20-4465-be86-1311addebaa3",
+  "setup": "The GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -43,5 +72,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 4
 }

@@ -11,13 +11,36 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Sublime Plugin or Application Script Modification",
-  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
-  "query": "file where event.type in (\"change\", \"creation\") and file.extension : \"py\" and\n  file.path : \n    (\n      \"/Users/*/Library/Application Support/Sublime Text*/Packages/*.py\", \n      \"/Applications/Sublime Text.app/Contents/MacOS/sublime.py\"\n    ) and\n  not process.executable : \n    (\n      \"/Applications/Sublime Text*.app/Contents/MacOS/Sublime Text*\", \n      \"/usr/local/Cellar/git/*/bin/git\", \n      \"/usr/libexec/xpcproxy\", \n      \"/System/Library/PrivateFrameworks/DesktopServicesPriv.framework/Versions/A/Resources/DesktopServicesHelper\", \n      \"/Applications/Sublime Text.app/Contents/MacOS/plugin_host\"\n    )\n",
+  "note": "",
+  "query": "file where event.type in (\"change\", \"creation\") and file.extension : \"py\" and\n  file.path :\n    (\n      \"/Users/*/Library/Application Support/Sublime Text*/Packages/*.py\",\n      \"/Applications/Sublime Text.app/Contents/MacOS/sublime.py\"\n    ) and\n  not process.executable :\n    (\n      \"/Applications/Sublime Text*.app/Contents/*\",\n      \"/usr/local/Cellar/git/*/bin/git\",\n      \"/Library/Developer/CommandLineTools/usr/bin/git\",\n      \"/usr/libexec/xpcproxy\",\n      \"/System/Library/PrivateFrameworks/DesktopServicesPriv.framework/Versions/A/Resources/DesktopServicesHelper\"\n    )\n",
   "references": [
     "https://posts.specterops.io/persistent-jxa-66e1c3cd1cf5"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "file.extension",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "file.path",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.executable",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 21,
   "rule_id": "88817a33-60d3-411f-ba79-7c905d865b2a",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "low",
   "tags": [
     "Elastic",
@@ -45,5 +68,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 4
 }

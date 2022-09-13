@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -183,6 +184,18 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
               })}
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+            <EuiFlexItem>
+              <EuiText textAlign="left" size="xs" color="subdued">
+                {i18n.translate(
+                  'xpack.triggersActionsUI.sections.rulesList.addScheduleDescription',
+                  {
+                    defaultMessage: 'Silence actions immediately or schedule downtimes.',
+                  }
+                )}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPopoverTitle>
       )}
       <EuiFlexGroup data-test-subj="snoozePanel" gutterSize="xs">
@@ -286,19 +299,6 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
                   defaultMessage: 'Add schedule',
                 })}
               </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiFlexGroup gutterSize="m">
-            <EuiFlexItem>
-              <EuiText textAlign="center" size="xs" color="subdued">
-                {i18n.translate(
-                  'xpack.triggersActionsUI.sections.rulesList.addScheduleDescription',
-                  {
-                    defaultMessage:
-                      'Create recurring schedules to silence actions during expected downtimes',
-                  }
-                )}
-              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         </>
@@ -406,12 +406,15 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
       <EuiSpacer size="s" />
       {isRemoveAllModalVisible && (
         <EuiConfirmModal
-          title={i18n.translate(
-            'xpack.triggersActionsUI.sections.rulesList.removeAllSnoozeSchedules',
-            {
-              defaultMessage: 'Remove all schedules',
-            }
-          )}
+          title={
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.rulesList.removeAllSnoozeSchedules"
+              defaultMessage="Remove {count, plural, one {schedule} other {# schedules}}?"
+              values={{
+                count: scheduledSnoozes.length,
+              }}
+            />
+          }
           onCancel={() => setIsRemoveAllModalVisible(false)}
           onConfirm={onClickRemoveAllSchedules}
           buttonColor="danger"
@@ -424,21 +427,10 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
           confirmButtonText={i18n.translate(
             'xpack.triggersActionsUI.sections.rulesList.removeConfirmButton',
             {
-              defaultMessage: 'Remove all',
+              defaultMessage: 'Remove',
             }
           )}
-        >
-          <EuiText>
-            {i18n.translate(
-              'xpack.triggersActionsUI.sections.rulesList.removeAllSnoozeSchedulesConfirmText',
-              {
-                defaultMessage:
-                  'This will remove {count, plural, one {# scheduled snooze} other {# scheduled snoozes}} from this rule. Are you sure?',
-                values: { count: scheduledSnoozes?.length ?? 0 },
-              }
-            )}
-          </EuiText>
-        </EuiConfirmModal>
+        />
       )}
       {isCancelModalVisible && (
         <EuiConfirmModal

@@ -16,3 +16,12 @@ export const CASE_LIST_CACHE_KEY = 'case-list';
 export const CASE_CONNECTORS_CACHE_KEY = 'case-connectors';
 export const CASE_LICENSE_CACHE_KEY = 'case-license-action';
 export const CASE_TAGS_CACHE_KEY = 'case-tags';
+
+/**
+ * User profiles
+ */
+
+export const USER_PROFILES_CACHE_KEY = 'user-profiles';
+export const USER_PROFILES_SUGGEST_CACHE_KEY = 'suggest';
+export const USER_PROFILES_BULK_GET_CACHE_KEY = 'bulk-get';
+export const USER_PROFILES_GET_CURRENT_CACHE_KEY = 'get-current';

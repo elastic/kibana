@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { savedSearch } from '../../../canvas_plugin_src/functions/external/saved_search';
+import type { savedSearch } from '../../../canvas_plugin_src/functions/external/saved_search';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 

@@ -7,7 +7,7 @@
 
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 
 import { fromExpression, toExpression } from '@kbn/interpreter';
 

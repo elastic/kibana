@@ -1,0 +1,13 @@
+- name: "--help"
+  become: true
+  command:
+    cmd: /usr/share/kibana/bin/kibana-setup --help
+  register: kibana_setup_help
+
+- debug:
+    msg: "{{ kibana_setup_help }}"
+
+- name: assert kibana-setup provides help text
+  assert:
+    that:
+      - kibana_setup_help.failed == false

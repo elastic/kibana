@@ -186,7 +186,6 @@ export interface MapsAppRegionMapLocatorParams extends SerializableRecord {
   termsSize?: number;
   colorSchema: string;
   indexPatternId?: string;
-  indexPatternTitle?: string;
   metricAgg: string;
   metricFieldName?: string;
   timeRange?: TimeRange;
@@ -219,7 +218,6 @@ export class MapsAppRegionMapLocatorDefinition
       termsSize,
       colorSchema,
       indexPatternId,
-      indexPatternTitle,
       metricAgg,
       metricFieldName,
       filters,
@@ -237,7 +235,6 @@ export class MapsAppRegionMapLocatorDefinition
       termsSize,
       colorSchema,
       indexPatternId,
-      indexPatternTitle,
       metricAgg,
       metricFieldName,
     });

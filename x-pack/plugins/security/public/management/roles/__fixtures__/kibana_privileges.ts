@@ -6,15 +6,11 @@
  */
 
 import type { KibanaFeature } from '@kbn/features-plugin/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { LicenseType } from '@kbn/licensing-plugin/server';
 
 import type { SecurityLicenseFeatures } from '../../../../common/licensing';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Actions } from '../../../../server/authorization';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { privilegesFactory } from '../../../../server/authorization/privileges';
 import { KibanaPrivileges } from '../model';
 

@@ -59,7 +59,6 @@ const getSingleAlertUserAction = ({
         />
       ),
       className: 'comment-alert',
-      type: 'update',
       event: (
         <SingleAlertCommentEvent
           actionId={userAction.actionId}
@@ -72,7 +71,7 @@ const getSingleAlertUserAction = ({
       ),
       'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
       timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-      timelineIcon: 'bell',
+      timelineAvatar: 'bell',
       actions: (
         <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>
@@ -116,7 +115,6 @@ const getMultipleAlertsUserAction = ({
         />
       ),
       className: 'comment-alert',
-      type: 'update',
       event: (
         <MultipleAlertsCommentEvent
           actionId={userAction.actionId}
@@ -130,7 +128,7 @@ const getMultipleAlertsUserAction = ({
       ),
       'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
       timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-      timelineIcon: 'bell',
+      timelineAvatar: 'bell',
       actions: (
         <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>

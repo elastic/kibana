@@ -16,6 +16,7 @@ import { login, visit, waitForPageWithoutDateRange } from '../../tasks/login';
 
 import { ALERTS_URL } from '../../urls/navigation';
 import { ATTACH_ALERT_TO_CASE_BUTTON, TIMELINE_CONTEXT_MENU_BTN } from '../../screens/alerts';
+import { LOADING_INDICATOR } from '../../screens/security_header';
 
 const loadDetectionsPage = (role: ROLES) => {
   waitForPageWithoutDateRange(ALERTS_URL, role);
@@ -49,7 +50,7 @@ describe('Alerts timeline', () => {
     beforeEach(() => {
       login(ROLES.platform_engineer);
       loadDetectionsPage(ROLES.platform_engineer);
-      waitForPageToBeLoaded();
+      cy.get(LOADING_INDICATOR).should('not.exist'); // on CI, waitForPageToBeLoaded fails because the loading icon can't be found
     });
 
     it('should allow a user with crud privileges to attach alerts to cases', () => {

@@ -73,7 +73,7 @@ const InstallFleetServerStepContent: React.FunctionComponent<{
         fleetServerPolicyId,
         fleetServerHost,
         deploymentMode === 'production',
-        commandOutput?.ca_trusted_fingerprint,
+        commandOutput?.ca_trusted_fingerprint ?? undefined,
         kibanaVersion
       );
 

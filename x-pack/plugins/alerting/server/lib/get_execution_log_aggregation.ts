@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { KueryNode } from '@kbn/core-saved-objects-api-server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
 import { flatMap, get } from 'lodash';
 import { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { parseDuration } from '.';
 import { IExecutionLog, IExecutionLogResult } from '../../common';
 
 const DEFAULT_MAX_BUCKETS_LIMIT = 1000; // do not retrieve more than this number of executions
 
+const RULE_ID_FIELD = 'rule.id';
 const PROVIDER_FIELD = 'event.provider';
 const START_FIELD = 'event.start';
 const ACTION_FIELD = 'event.action';
@@ -74,9 +77,12 @@ export interface ExecutionUuidAggResult<TBucket = IExecutionUuidAggBucket>
 
 interface ExcludeExecuteStartAggResult extends estypes.AggregationsAggregateBase {
   executionUuid: ExecutionUuidAggResult;
-  executionUuidCardinality: estypes.AggregationsCardinalityAggregate;
+  executionUuidCardinality: {
+    executionUuidCardinality: estypes.AggregationsCardinalityAggregate;
+  };
 }
 export interface IExecutionLogAggOptions {
+  filter?: string | KueryNode;
   page: number;
   perPage: number;
   sort: estypes.Sort;
@@ -95,7 +101,12 @@ const ExecutionLogSortFields: Record<string, string> = {
   num_new_alerts: 'ruleExecution>numNewAlerts',
 };
 
-export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLogAggOptions) {
+export function getExecutionLogAggregation({
+  filter,
+  page,
+  perPage,
+  sort,
+}: IExecutionLogAggOptions) {
   // Check if valid sort fields
   const sortFields = flatMap(sort as estypes.SortCombinations[], (s) => Object.keys(s));
   for (const field of sortFields) {
@@ -118,6 +129,14 @@ export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLo
     throw Boom.badRequest(`Invalid perPage field "${perPage}" - must be greater than 0`);
   }
 
+  let dslFilterQuery: estypes.QueryDslBoolQuery['filter'];
+  try {
+    const filterKueryNode = typeof filter === 'string' ? fromKueryExpression(filter) : filter;
+    dslFilterQuery = filter ? toElasticsearchQuery(filterKueryNode) : undefined;
+  } catch (err) {
+    throw Boom.badRequest(`Invalid kuery syntax for filter ${filter}`);
+  }
+
   return {
     excludeExecuteStart: {
       filter: {
@@ -134,8 +153,18 @@ export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLo
       aggs: {
         // Get total number of executions
         executionUuidCardinality: {
-          cardinality: {
-            field: EXECUTION_UUID_FIELD,
+          filter: {
+            bool: {
+              ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
+              must: [getProviderAndActionFilter('alerting', 'execute')],
+            },
+          },
+          aggs: {
+            executionUuidCardinality: {
+              cardinality: {
+                field: EXECUTION_UUID_FIELD,
+              },
+            },
           },
         },
         executionUuid: {
@@ -169,7 +198,12 @@ export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLo
             },
             // Filter by rule execute doc and get information from this event
             ruleExecution: {
-              filter: getProviderAndActionFilter('alerting', 'execute'),
+              filter: {
+                bool: {
+                  ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
+                  must: [getProviderAndActionFilter('alerting', 'execute')],
+                },
+              },
               aggs: {
                 executeStartTime: {
                   min: {
@@ -225,7 +259,13 @@ export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLo
                   top_hits: {
                     size: 1,
                     _source: {
-                      includes: [OUTCOME_FIELD, MESSAGE_FIELD, ERROR_MESSAGE_FIELD, VERSION_FIELD],
+                      includes: [
+                        OUTCOME_FIELD,
+                        MESSAGE_FIELD,
+                        ERROR_MESSAGE_FIELD,
+                        VERSION_FIELD,
+                        RULE_ID_FIELD,
+                      ],
                     },
                   },
                 },
@@ -234,6 +274,17 @@ export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLo
             // If there was a timeout, this filter will return non-zero doc count
             timeoutMessage: {
               filter: getProviderAndActionFilter('alerting', 'execute-timeout'),
+            },
+            // Filter out execution UUID buckets where ruleExecution doc count is 0
+            minExecutionUuidBucket: {
+              bucket_selector: {
+                buckets_path: {
+                  count: 'ruleExecution._count',
+                },
+                script: {
+                  source: 'params.count > 0',
+                },
+              },
             },
           },
         },
@@ -283,6 +334,8 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
       ? `${outcomeAndMessage?.message ?? ''} - ${outcomeAndMessage?.error?.message ?? ''}`
       : outcomeAndMessage?.message ?? '';
   const version = outcomeAndMessage ? outcomeAndMessage?.kibana?.version ?? '' : '';
+
+  const ruleId = outcomeAndMessage ? outcomeAndMessage?.rule?.id ?? '' : '';
   return {
     id: bucket?.key ?? '',
     timestamp: bucket?.ruleExecution?.executeStartTime.value_as_string ?? '',
@@ -301,6 +354,7 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     es_search_duration_ms: bucket?.ruleExecution?.esSearchDuration?.value ?? 0,
     schedule_delay_ms: scheduleDelayUs / Millis2Nanos,
     timed_out: timedOut,
+    rule_id: ruleId,
   };
 }
 
@@ -315,7 +369,7 @@ export function formatExecutionLogResult(
 
   const aggs = aggregations.excludeExecuteStart as ExcludeExecuteStartAggResult;
 
-  const total = aggs.executionUuidCardinality.value;
+  const total = aggs.executionUuidCardinality.executionUuidCardinality.value;
   const buckets = aggs.executionUuid.buckets;
 
   return {

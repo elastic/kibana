@@ -9,7 +9,8 @@ import { KibanaRequest, Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
-import { AuthFilterHelpers, GetSpaceFn, OwnerEntity } from './types';
+import { Space, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { AuthFilterHelpers, OwnerEntity } from './types';
 import { getOwnersFilter } from './utils';
 import { AuthorizationAuditLogger, OperationDetails } from '.';
 import { createCaseError } from '../common/error';
@@ -47,22 +48,26 @@ export class Authorization {
   static async create({
     request,
     securityAuth,
-    getSpace,
+    spaces,
     features,
     auditLogger,
     logger,
   }: {
     request: KibanaRequest;
     securityAuth?: SecurityPluginStart['authz'];
-    getSpace: GetSpaceFn;
+    spaces: SpacesPluginStart;
     features: FeaturesPluginStart;
     auditLogger: AuthorizationAuditLogger;
     logger: Logger;
   }): Promise<Authorization> {
+    const getSpace = async (): Promise<Space> => {
+      return spaces.spacesService.getActiveSpace(request);
+    };
+
     // Since we need to do async operations, this static method handles that before creating the Auth class
     let caseOwners: Set<string>;
     try {
-      const disabledFeatures = new Set((await getSpace(request))?.disabledFeatures ?? []);
+      const disabledFeatures = new Set((await getSpace()).disabledFeatures ?? []);
 
       caseOwners = new Set(
         features
@@ -87,7 +92,7 @@ export class Authorization {
   }
 
   /**
-   * Checks that the user making the request for the passed in owners and operation has the correct authorization. This
+   * Checks that the user making the request for the passed in owner, saved object, and operation has the correct authorization. This
    * function will throw if the user is not authorized for the requested operation and owners.
    *
    * @param entities an array of entities describing the case owners in conjunction with the saved object ID attempting

@@ -1,0 +1,47 @@
+{
+  "anomaly_threshold": 75,
+  "author": [
+    "Elastic"
+  ],
+  "description": "A machine learning job detected a user logging in from an IP address that is unusual for the user. This can be due to credentialed access via a compromised account when the user and the threat actor are in different locations. An unusual source IP address for a username could also be due to lateral movement when a compromised account is used to pivot between hosts.",
+  "false_positives": [
+    "Business travelers who roam to new locations may trigger this alert."
+  ],
+  "from": "now-30m",
+  "interval": "15m",
+  "license": "Elastic License v2",
+  "machine_learning_job_id": "auth_rare_source_ip_for_a_user",
+  "name": "Unusual Source IP for a User to Logon from",
+  "references": [
+    "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "d4b73fa0-9d43-465e-b8bf-50230da6718b",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Authentication",
+    "Threat Detection",
+    "ML",
+    "Initial Access"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0001",
+        "name": "Initial Access",
+        "reference": "https://attack.mitre.org/tactics/TA0001/"
+      },
+      "technique": [
+        {
+          "id": "T1078",
+          "name": "Valid Accounts",
+          "reference": "https://attack.mitre.org/techniques/T1078/"
+        }
+      ]
+    }
+  ],
+  "type": "machine_learning",
+  "version": 2
+}

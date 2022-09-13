@@ -176,11 +176,11 @@ Array [
       class="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        class="euiPopover euiPopover--anchorDownCenter"
+        class="euiPopover emotion-euiPopover"
         id="inspectorDownloadData"
       >
         <div
-          class="euiPopover__anchor"
+          class="euiPopover__anchor css-16vtueo-render"
         >
           <button
             class="euiButton euiButton--primary euiButton--small"
@@ -229,10 +229,10 @@ Array [
               class="euiTableSortMobile"
             >
               <div
-                class="euiPopover euiPopover--anchorDownRight"
+                class="euiPopover emotion-euiPopover"
               >
                 <div
-                  class="euiPopover__anchor"
+                  class="euiPopover__anchor css-16vtueo-render"
                 >
                   <button
                     class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
@@ -343,10 +343,10 @@ Array [
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPopover euiPopover--anchorUpRight"
+            class="euiPopover emotion-euiPopover"
           >
             <div
-              class="euiPopover__anchor"
+              class="euiPopover__anchor css-16vtueo-render"
             >
               <button
                 class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"
@@ -486,11 +486,11 @@ Array [
           class="euiFlexItem"
         >
           <div
-            class="euiPopover euiPopover--anchorDownLeft"
+            class="euiPopover emotion-euiPopover"
             id="inspectorTableChooser"
           >
             <div
-              class="euiPopover__anchor"
+              class="euiPopover__anchor css-16vtueo-render"
             >
               <button
                 class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
@@ -521,11 +521,11 @@ Array [
       class="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        class="euiPopover euiPopover--anchorDownCenter"
+        class="euiPopover emotion-euiPopover"
         id="inspectorDownloadData"
       >
         <div
-          class="euiPopover__anchor"
+          class="euiPopover__anchor css-16vtueo-render"
         >
           <button
             class="euiButton euiButton--primary euiButton--small"
@@ -574,10 +574,10 @@ Array [
               class="euiTableSortMobile"
             >
               <div
-                class="euiPopover euiPopover--anchorDownRight"
+                class="euiPopover emotion-euiPopover"
               >
                 <div
-                  class="euiPopover__anchor"
+                  class="euiPopover__anchor css-16vtueo-render"
                 >
                   <button
                     class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
@@ -689,10 +689,10 @@ Array [
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPopover euiPopover--anchorUpRight"
+            class="euiPopover emotion-euiPopover"
           >
             <div
-              class="euiPopover__anchor"
+              class="euiPopover__anchor css-16vtueo-render"
             >
               <button
                 class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"

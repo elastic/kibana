@@ -10,18 +10,19 @@ interface Aggregate {
   doc_count: number;
 }
 
-interface Buckets extends Aggregate {
+interface Bucket extends Aggregate {
   key_as_string?: string;
-  count_by_aggs: {
+  count_by_aggs?: {
     value: number;
   };
 }
+
 export interface AggregateResult {
-  buckets: Buckets[];
+  buckets: Bucket[];
   hasNextPage: boolean;
 }
 
 export interface AggregateBucketPaginationResult {
-  buckets: Aggregate[];
+  buckets: Bucket[];
   hasNextPage: boolean;
 }

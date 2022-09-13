@@ -29,12 +29,13 @@ export interface NewAgentPolicy {
   data_output_id?: string | null;
   monitoring_output_id?: string | null;
   download_source_id?: string | null;
+  schema_version?: string;
 }
 
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   id: string;
   status: ValueOf<AgentPolicyStatus>;
-  package_policies: string[] | PackagePolicy[];
+  package_policies?: PackagePolicy[];
   is_managed: boolean; // required for created policy
   updated_at: string;
   updated_by: string;
@@ -60,6 +61,7 @@ export interface FullAgentPolicyInput {
   type: string;
   data_stream: { namespace: string };
   use_output: string;
+  package_policy_id: string;
   meta?: {
     package?: Pick<PackagePolicyPackage, 'name' | 'version'>;
     [key: string]: unknown;

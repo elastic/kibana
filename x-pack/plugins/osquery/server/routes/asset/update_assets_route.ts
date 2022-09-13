@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import { filter, omit } from 'lodash';
+import { filter, omit, some } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { asyncForEach } from '@kbn/std';
 import deepmerge from 'deepmerge';
@@ -102,9 +102,14 @@ export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppCon
               filter: `${packSavedObjectType}.attributes.name: "${packAssetSavedObject.attributes.name}"`,
             });
 
-            const name = conflictingEntries.saved_objects.length
-              ? `${packAssetSavedObject.attributes.name}-elastic`
-              : packAssetSavedObject.attributes.name;
+            const name =
+              conflictingEntries.saved_objects.length &&
+              some(conflictingEntries.saved_objects, [
+                'attributes.name',
+                packAssetSavedObject.attributes.name,
+              ])
+                ? `${packAssetSavedObject.attributes.name}-elastic`
+                : packAssetSavedObject.attributes.name;
 
             await savedObjectsClient.create(
               packSavedObjectType,

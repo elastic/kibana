@@ -121,7 +121,7 @@ The API returns the following:
       },
       "actions": [],
       "tags": [],
-      "name": "test rule",
+      "name": "my test rule",
       "enabled": true,
       "throttle": null,
       "api_key_owner": "elastic",

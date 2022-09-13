@@ -148,12 +148,13 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.labels.ciBuildJobId (string)',
         'telemetry.labels.ciBuildNumber (number)',
         'telemetry.labels.ftrConfig (string)',
-        'telemetry.labels.git_rev (string)',
+        'telemetry.labels.gitRev (string)',
         'telemetry.labels.isPr (boolean)',
         'telemetry.labels.journeyName (string)',
-        'telemetry.labels.prId (string)',
+        'telemetry.labels.prId (number)',
         'telemetry.labels.testBuildId (string)',
         'telemetry.labels.testJobId (string)',
+        'telemetry.labels.ciBuildName (string)',
         'telemetry.hidePrivacyStatement (boolean)',
         'telemetry.optIn (boolean)',
         'telemetry.sendUsageFrom (alternatives)',
@@ -220,6 +221,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.trigger_actions_ui.enableGeoTrackingThresholdAlert (boolean)',
         'xpack.upgrade_assistant.readonly (boolean)',
         'xpack.upgrade_assistant.ui.enabled (boolean)',
+        'xpack.observability.unsafe.alertDetails.enabled (boolean)',
+        'xpack.observability.unsafe.slo.enabled (boolean)',
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
       // arrays are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's

@@ -113,7 +113,7 @@ function mockIndicesStatsResponseFactory(
 
   listOfIndicesWithCount.forEach((indexPair) => {
     result!.indices![indexPair.name] = {
-      primaries: { docs: { count: indexPair.count } },
+      total: { docs: { count: indexPair.count } },
     };
   });
 

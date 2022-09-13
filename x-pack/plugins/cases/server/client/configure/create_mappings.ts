@@ -16,7 +16,11 @@ export const createMappings = async (
   { connector, owner, refresh }: CreateMappingsArgs,
   clientArgs: CasesClientArgs
 ): Promise<ConnectorMappingsAttributes[]> => {
-  const { unsecuredSavedObjectsClient, connectorMappingsService, logger } = clientArgs;
+  const {
+    unsecuredSavedObjectsClient,
+    services: { connectorMappingsService },
+    logger,
+  } = clientArgs;
 
   try {
     const mappings = casesConnectors.get(connector.type)?.getMapping() ?? [];

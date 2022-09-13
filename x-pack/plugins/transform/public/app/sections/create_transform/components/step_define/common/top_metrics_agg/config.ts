@@ -6,8 +6,10 @@
  */
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  isPivotAggsConfigWithUiSupport,
+  isPivotAggsConfigWithUiBase,
   isSpecialSortField,
   isValidSortDirection,
   isValidSortMode,
@@ -28,7 +30,7 @@ export function getTopMetricsAggConfig(
     ...commonConfig,
     isSubAggsSupported: false,
     isMultiField: true,
-    field: isPivotAggsConfigWithUiSupport(commonConfig) ? commonConfig.field : '',
+    field: isPivotAggsConfigWithUiBase(commonConfig) ? commonConfig.field : '',
     AggFormComponent: TopMetricsAggForm,
     aggConfig: {},
     getEsAggConfig() {
@@ -56,23 +58,34 @@ export function getTopMetricsAggConfig(
             },
           };
         } else {
-          sort = { [sortField!]: sortSettings.order };
+          sort = { [sortField!]: sortSettings.order as estypes.SortOrder };
         }
       }
 
       return {
-        metrics: (Array.isArray(this.field) ? this.field : [this.field]).map((f) => ({ field: f })),
-        sort,
+        metrics: (Array.isArray(this.field) ? this.field : [this.field]).map((f) => ({
+          field: f as string,
+        })),
+        sort: sort!,
         ...(unsupportedConfig ?? {}),
       };
     },
     setUiConfigFromEs(esAggDefinition) {
       const { metrics, sort, ...unsupportedConfig } = esAggDefinition;
 
-      this.field = (Array.isArray(metrics) ? metrics : [metrics]).map((v) => v.field);
+      this.field = (Array.isArray(metrics) ? metrics : [metrics]).map((v) => v!.field);
 
       if (isSpecialSortField(sort)) {
         this.aggConfig.sortField = sort;
+        return;
+      }
+
+      if (!sort) {
+        this.aggConfig = {
+          ...this.aggConfig,
+          ...(unsupportedConfig ?? {}),
+        };
+
         return;
       }
 

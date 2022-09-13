@@ -20,7 +20,6 @@ import * as i18n from './translations';
 import {
   BrowserField,
   BrowserFields,
-  DocValueFields,
   IndexField,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
@@ -29,10 +28,8 @@ import { useAppToasts } from '../../hooks/use_app_toasts';
 
 const DEFAULT_BROWSER_FIELDS = {};
 const DEFAULT_INDEX_PATTERNS = { fields: [], title: '' };
-const DEFAULT_DOC_VALUE_FIELDS: DocValueFields[] = [];
 interface FetchIndexReturn {
   browserFields: BrowserFields;
-  docValueFields: DocValueFields[];
   indexes: string[];
   indexExists: boolean;
   indexPatterns: DataViewBase;
@@ -67,26 +64,6 @@ export const getBrowserFields = memoizeOne(
   (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
 );
 
-export const getDocValueFields = memoizeOne(
-  (_title: string, fields: IndexField[]): DocValueFields[] =>
-    fields && fields.length > 0
-      ? fields.reduce<DocValueFields[]>((accumulator: DocValueFields[], field: IndexField) => {
-          if (field.readFromDocValues && accumulator.length < 100) {
-            return [
-              ...accumulator,
-              {
-                field: field.name,
-                format: field.format ? field.format : undefined,
-              },
-            ];
-          }
-          return accumulator;
-        }, [])
-      : [],
-  // Update the value only if _title has changed
-  (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
-);
-
 export const getIndexFields = memoizeOne(
   (title: string, fields: IndexField[]): DataViewBase =>
     fields && fields.length > 0
@@ -112,7 +89,6 @@ export const useFetchIndex = (
 
   const [state, setState] = useState<FetchIndexReturn>({
     browserFields: DEFAULT_BROWSER_FIELDS,
-    docValueFields: DEFAULT_DOC_VALUE_FIELDS,
     indexes: indexNames,
     indexExists: true,
     indexPatterns: DEFAULT_INDEX_PATTERNS,
@@ -142,7 +118,6 @@ export const useFetchIndex = (
 
                 setState({
                   browserFields: getBrowserFields(stringifyIndices, response.indexFields),
-                  docValueFields: getDocValueFields(stringifyIndices, response.indexFields),
                   indexes: response.indicesExist,
                   indexExists: response.indicesExist.length > 0,
                   indexPatterns: getIndexFields(stringifyIndices, response.indexFields),

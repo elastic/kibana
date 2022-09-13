@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { tail } from '../../../canvas_plugin_src/functions/common/tail';
+import type { tail } from '../../../canvas_plugin_src/functions/common/tail';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { DATATABLE } from '../../constants';

@@ -150,6 +150,7 @@ export default ({ getService }: FtrProviderContext): void => {
             owner: postedCase.owner,
             status: CaseStatuses.open,
             severity: CaseSeverity.LOW,
+            assignees: [],
           },
         });
       });

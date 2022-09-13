@@ -5,17 +5,36 @@
  * 2.0.
  */
 
-import React, { useState, VFC } from 'react';
+import React, { VFC } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Indicator } from '../../../../../common/types/indicator';
-import { IndicatorsFlyout } from '../indicators_flyout/indicators_flyout';
 
 export const BUTTON_TEST_ID = 'tiToggleIndicatorFlyoutButton';
 
-export const OpenIndicatorFlyoutButton: VFC<{ indicator: Indicator }> = ({ indicator }) => {
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+export interface OpenIndicatorFlyoutButtonProps {
+  /**
+   * {@link Indicator} passed to the flyout component.
+   */
+  indicator: Indicator;
+  /**
+   * Method called by the onClick event to open/close the flyout.
+   */
+  onOpen: (indicator: Indicator) => void;
+  /**
+   * Boolean used to change the color and type of icon depending on the state of the flyout.
+   */
+  isOpen: boolean;
+}
 
+/**
+ * Button added to the actions column of the indicators table to open/close the IndicatorFlyout component.
+ */
+export const OpenIndicatorFlyoutButton: VFC<OpenIndicatorFlyoutButtonProps> = ({
+  indicator,
+  onOpen,
+  isOpen,
+}) => {
   const buttonLabel: string = i18n.translate(
     'xpack.threatIntelligence.indicator.table.viewDetailsButton',
     {
@@ -24,21 +43,16 @@ export const OpenIndicatorFlyoutButton: VFC<{ indicator: Indicator }> = ({ indic
   );
 
   return (
-    <>
-      <EuiToolTip content={buttonLabel} delay="long">
-        <EuiButtonIcon
-          data-test-subj={BUTTON_TEST_ID}
-          color={isFlyoutOpen ? 'primary' : 'text'}
-          iconType={isFlyoutOpen ? 'minimize' : 'expand'}
-          isSelected={isFlyoutOpen}
-          iconSize="s"
-          aria-label={buttonLabel}
-          onClick={() => setIsFlyoutOpen(!isFlyoutOpen)}
-        />
-      </EuiToolTip>
-      {isFlyoutOpen && (
-        <IndicatorsFlyout indicator={indicator} closeFlyout={() => setIsFlyoutOpen(false)} />
-      )}
-    </>
+    <EuiToolTip content={buttonLabel} delay="long">
+      <EuiButtonIcon
+        data-test-subj={BUTTON_TEST_ID}
+        color={isOpen ? 'text' : 'primary'}
+        iconType={isOpen ? 'minimize' : 'expand'}
+        isSelected={isOpen}
+        iconSize="s"
+        aria-label={buttonLabel}
+        onClick={() => onOpen(indicator)}
+      />
+    </EuiToolTip>
   );
 };

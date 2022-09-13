@@ -9,12 +9,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
+import { Subscription } from 'rxjs';
 import uuid from 'uuid';
 import { CoreStart, IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
 import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 
 import { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { Filter, TimeRange } from '@kbn/es-query';
+import { DataView } from '@kbn/data-views-plugin/public';
+
 import { UiActionsStart } from '../../services/ui_actions';
 import { RefreshInterval, Query } from '../../services/data';
 import {
@@ -31,7 +35,7 @@ import {
 } from '../../services/embeddable';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import { createPanelState } from './panel';
-import { DashboardLoadedEvent, DashboardPanelState } from './types';
+import { DashboardPanelState } from './types';
 import { DashboardViewport } from './viewport/dashboard_viewport';
 import {
   KibanaContextProvider,
@@ -40,6 +44,7 @@ import {
   KibanaThemeProvider,
 } from '../../services/kibana_react';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
+import { DASHBOARD_LOADED_EVENT } from '../../events';
 import { DashboardAppCapabilities, DashboardContainerInput } from '../../types';
 import { PresentationUtilPluginStart } from '../../services/presentation_util';
 import type { ScreenshotModePluginStart } from '../../services/screenshot_mode';
@@ -66,6 +71,13 @@ export interface DashboardContainerServices {
   analytics?: CoreStart['analytics'];
 }
 
+export interface DashboardLoadedInfo {
+  timeToData: number;
+  timeToDone: number;
+  numOfPanels: number;
+  status: string;
+}
+
 interface IndexSignature {
   [key: string]: unknown;
 }
@@ -74,6 +86,7 @@ export interface InheritedChildInput extends IndexSignature {
   filters: Filter[];
   query: Query;
   timeRange: TimeRange;
+  timeslice?: [number, number];
   refreshConfig?: RefreshInterval;
   viewMode: ViewMode;
   hidePanelTitles?: boolean;
@@ -102,8 +115,28 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
   private onDestroyControlGroup?: () => void;
+  private subscriptions: Subscription = new Subscription();
+
   public controlGroup?: ControlGroupContainer;
   private domNode?: HTMLElement;
+
+  private allDataViews: DataView[] = [];
+
+  /**
+   * Gets all the dataviews that are actively being used in the dashboard
+   * @returns An array of dataviews
+   */
+  public getAllDataViews = () => {
+    return this.allDataViews;
+  };
+
+  /**
+   * Use this to set the dataviews that are used in the dashboard when they change/update
+   * @param newDataViews The new array of dataviews that will overwrite the old dataviews array
+   */
+  public setAllDataViews = (newDataViews: DataView[]) => {
+    this.allDataViews = newDataViews;
+  };
 
   public getPanelCount = () => {
     return Object.keys(this.getInput().panels).length;
@@ -153,12 +186,36 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         }
       );
     }
+
+    this.subscriptions.add(
+      this.getAnyChildOutputChange$().subscribe(() => {
+        if (!this.controlGroup) {
+          return;
+        }
+
+        for (const child of Object.values(this.children)) {
+          const isLoading = child.getOutput().loading;
+          if (isLoading) {
+            this.controlGroup.anyControlOutputConsumerLoading$.next(true);
+            return;
+          }
+        }
+        this.controlGroup.anyControlOutputConsumerLoading$.next(false);
+      })
+    );
   }
 
-  private onDataLoaded(data: DashboardLoadedEvent) {
-    this.services.analytics?.reportEvent('dashboard-data-loaded', {
-      ...data,
-    });
+  private onDataLoaded(data: DashboardLoadedInfo) {
+    if (this.services.analytics) {
+      reportPerformanceMetricEvent(this.services.analytics, {
+        eventName: DASHBOARD_LOADED_EVENT,
+        duration: data.timeToDone,
+        key1: 'time_to_data',
+        value1: data.timeToData,
+        key2: 'num_of_panels',
+        value2: data.numOfPanels,
+      });
+    }
   }
 
   protected createNewPanelState<
@@ -309,6 +366,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   public destroy() {
     super.destroy();
+    this.subscriptions.unsubscribe();
     this.onDestroyControlGroup?.();
     if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }
@@ -318,6 +376,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       viewMode,
       refreshConfig,
       timeRange,
+      timeslice,
       query,
       hidePanelTitles,
       filters,
@@ -326,6 +385,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       syncTooltips,
       executionContext,
     } = this.input;
+
     let combinedFilters = filters;
     if (this.controlGroup) {
       combinedFilters = combineDashboardFiltersWithControlGroupFilters(filters, this.controlGroup);
@@ -335,6 +395,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       hidePanelTitles,
       query,
       timeRange,
+      timeslice,
       refreshConfig,
       viewMode,
       id,

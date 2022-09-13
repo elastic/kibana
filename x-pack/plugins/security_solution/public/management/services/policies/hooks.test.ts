@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UseQueryOptions } from 'react-query';
+import type { UseQueryOptions } from '@tanstack/react-query';
 import type { IHttpFetchError, HttpSetup } from '@kbn/core-http-browser';
 import type { GetPackagesResponse } from '@kbn/fleet-plugin/common';
 import { useGetEndpointSecurityPackage } from './hooks';

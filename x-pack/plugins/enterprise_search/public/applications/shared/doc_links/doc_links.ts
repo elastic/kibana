@@ -8,6 +8,7 @@
 import { DocLinksStart } from '@kbn/core/public';
 
 class DocLinks {
+  public apiKeys: string;
   public appSearchAdaptiveRelevance: string;
   public appSearchApiClients: string;
   public appSearchApiKeys: string;
@@ -56,6 +57,7 @@ class DocLinks {
   public clientsRubyOverview: string;
   public clientsRustOverview: string;
   public cloudIndexManagement: string;
+  public connectors: string;
   public crawlerGettingStarted: string;
   public crawlerManaging: string;
   public crawlerOverview: string;
@@ -68,6 +70,7 @@ class DocLinks {
   public enterpriseSearchUsersAccess: string;
   public kibanaSecurity: string;
   public languageAnalyzers: string;
+  public languageClients: string;
   public licenseManagement: string;
   public pluginsIngestAttachment: string;
   public queryDsl: string;
@@ -111,6 +114,7 @@ class DocLinks {
   public workplaceSearchZoom: string;
 
   constructor() {
+    this.apiKeys = '';
     this.appSearchAdaptiveRelevance = '';
     this.appSearchApis = '';
     this.appSearchApiClients = '';
@@ -159,6 +163,7 @@ class DocLinks {
     this.clientsRubyOverview = '';
     this.clientsRustOverview = '';
     this.cloudIndexManagement = '';
+    this.connectors = '';
     this.crawlerGettingStarted = '';
     this.crawlerManaging = '';
     this.crawlerOverview = '';
@@ -171,6 +176,7 @@ class DocLinks {
     this.enterpriseSearchUsersAccess = '';
     this.kibanaSecurity = '';
     this.languageAnalyzers = '';
+    this.languageClients = '';
     this.licenseManagement = '';
     this.pluginsIngestAttachment = '';
     this.queryDsl = '';
@@ -215,6 +221,7 @@ class DocLinks {
   }
 
   public setDocLinks(docLinks: DocLinksStart): void {
+    this.apiKeys = docLinks.links.enterpriseSearch.apiKeys;
     this.appSearchAdaptiveRelevance = docLinks.links.appSearch.adaptiveRelevance;
     this.appSearchApis = docLinks.links.appSearch.apiRef;
     this.appSearchApiClients = docLinks.links.appSearch.apiClients;
@@ -264,6 +271,7 @@ class DocLinks {
     this.clientsRubyOverview = docLinks.links.clients.rubyOverview;
     this.clientsRustOverview = docLinks.links.clients.rustOverview;
     this.cloudIndexManagement = docLinks.links.cloud.indexManagement;
+    this.connectors = docLinks.links.enterpriseSearch.connectors;
     this.crawlerGettingStarted = docLinks.links.enterpriseSearch.crawlerGettingStarted;
     this.crawlerManaging = docLinks.links.enterpriseSearch.crawlerManaging;
     this.crawlerOverview = docLinks.links.enterpriseSearch.crawlerOverview;
@@ -276,6 +284,7 @@ class DocLinks {
     this.enterpriseSearchUsersAccess = docLinks.links.enterpriseSearch.usersAccess;
     this.kibanaSecurity = docLinks.links.kibana.xpackSecurity;
     this.languageAnalyzers = docLinks.links.enterpriseSearch.languageAnalyzers;
+    this.languageClients = docLinks.links.enterpriseSearch.languageClients;
     this.licenseManagement = docLinks.links.enterpriseSearch.licenseManagement;
     this.pluginsIngestAttachment = docLinks.links.plugins.ingestAttachment;
     this.queryDsl = docLinks.links.query.queryDsl;

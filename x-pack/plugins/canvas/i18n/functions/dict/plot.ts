@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { plotFunctionFactory } from '../../../public/functions/plot';
+import type { plotFunctionFactory } from '../../../public/functions/plot';
 import { FunctionFactoryHelp } from '../function_help';
 import { Legend } from '../../../types';
 import { CSS, FONT_FAMILY, FONT_WEIGHT, BOOLEAN_FALSE } from '../../constants';

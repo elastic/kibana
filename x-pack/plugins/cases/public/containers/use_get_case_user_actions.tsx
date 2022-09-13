@@ -8,7 +8,7 @@
 import { isEmpty, uniqBy } from 'lodash/fp';
 import deepEqual from 'fast-deep-equal';
 
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { CaseUserActions, CaseExternalService } from '../../common/ui/types';
 import { ActionTypes, CaseConnector, NONE_CONNECTOR_ID } from '../../common/api';
 import { getCaseUserActions } from './api';
@@ -208,6 +208,21 @@ export const getPushedInfo = (
   };
 };
 
+export const getProfileUids = (userActions: CaseUserActions[]) => {
+  const uids = userActions.reduce<Set<string>>((acc, userAction) => {
+    if (userAction.type === ActionTypes.assignees) {
+      const uidsFromPayload = userAction.payload.assignees.map((assignee) => assignee.uid);
+      for (const uid of uidsFromPayload) {
+        acc.add(uid);
+      }
+    }
+
+    return acc;
+  }, new Set());
+
+  return uids;
+};
+
 export const useGetCaseUserActions = (caseId: string, caseConnectorId: string) => {
   const toasts = useToasts();
   const abortCtrlRef = new AbortController();
@@ -221,9 +236,12 @@ export const useGetCaseUserActions = (caseId: string, caseConnectorId: string) =
 
       const caseUserActions = !isEmpty(response) ? response : [];
       const pushedInfo = getPushedInfo(caseUserActions, caseConnectorId);
+      const profileUids = getProfileUids(caseUserActions);
+
       return {
         caseUserActions,
         participants,
+        profileUids,
         ...pushedInfo,
       };
     },

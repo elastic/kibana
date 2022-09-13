@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
 import { act, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { ConnectorTypes } from '../../../common/api';
 import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 import '../../common/mock/match_media';
@@ -20,6 +21,7 @@ import { useGetCaseUserActions } from '../../containers/use_get_case_user_action
 import { useGetTags } from '../../containers/use_get_tags';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { useUpdateCase } from '../../containers/use_update_case';
+import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { CaseViewPage } from './case_view_page';
 import {
   caseData,
@@ -39,7 +41,10 @@ jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/use_get_case');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/use_post_push_to_service');
-jest.mock('../user_actions/timestamp');
+jest.mock('../../containers/user_profiles/use_bulk_get_user_profiles');
+jest.mock('../user_actions/timestamp', () => ({
+  UserActionTimestamp: () => <></>,
+}));
 jest.mock('../../common/navigation/hooks');
 jest.mock('../../common/hooks');
 jest.mock('../connectors/resilient/api');
@@ -53,6 +58,7 @@ const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
 const useGetTagsMock = useGetTags as jest.Mock;
+const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
 
 const mockGetCase = (props: Partial<UseGetCase> = {}) => {
   const data = {
@@ -93,6 +99,7 @@ describe('CaseViewPage', () => {
     usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
     useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
     useGetTagsMock.mockReturnValue({ data: [], isLoading: false });
+    useBulkGetUserProfilesMock.mockReturnValue({ data: new Map(), isLoading: false });
 
     appMockRenderer = createAppMockRenderer();
   });
@@ -141,6 +148,7 @@ describe('CaseViewPage', () => {
 
     const dropdown = result.getByTestId('case-view-status-dropdown');
     userEvent.click(dropdown.querySelector('button')!);
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('case-view-status-dropdown-closed'));
 
     await waitFor(() => {
@@ -251,6 +259,7 @@ describe('CaseViewPage', () => {
     );
     userEvent.click(result.getByTestId('connector-edit').querySelector('button')!);
     userEvent.click(result.getByTestId('dropdown-connectors'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('dropdown-connector-resilient-2'));
 
     await waitFor(() => {
@@ -371,6 +380,38 @@ describe('CaseViewPage', () => {
   });
 
   describe('Tabs', () => {
+    jest.mock('@kbn/kibana-react-plugin/public', () => ({
+      useKibana: () => ({
+        services: {
+          application: {
+            capabilities: {
+              fakeCases: {
+                create_cases: true,
+                read_cases: true,
+                update_cases: true,
+                delete_cases: true,
+                push_cases: true,
+              },
+            },
+          },
+          cases: {
+            ui: {
+              getCasesContext: () => null,
+            },
+            helpers: {
+              getUICapabilities: () => ({
+                all: true,
+                read: true,
+                create: true,
+                update: true,
+                delete: true,
+                push: true,
+              }),
+            },
+          },
+        },
+      }),
+    }));
     it('renders tabs correctly', async () => {
       const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
       await act(async () => {

@@ -12,13 +12,31 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Control Panel Process with Unusual Arguments",
-  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n process.executable : (\"?:\\\\Windows\\\\SysWOW64\\\\control.exe\", \"?:\\\\Windows\\\\System32\\\\control.exe\") and\n process.command_line :\n          (\"*.jpg*\",\n           \"*.png*\",\n           \"*.gif*\",\n           \"*.bmp*\",\n           \"*.jpeg*\",\n           \"*.TIFF*\",\n           \"*.inf*\",\n           \"*.dat*\",\n           \"*.cpl:*/*\",\n           \"*../../..*\",\n           \"*/AppData/Local/*\",\n           \"*:\\\\Users\\\\Public\\\\*\",\n           \"*\\\\AppData\\\\Local\\\\*\")\n",
+  "note": "",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n process.executable : (\"?:\\\\Windows\\\\SysWOW64\\\\control.exe\", \"?:\\\\Windows\\\\System32\\\\control.exe\") and\n process.command_line :\n          (\"*.jpg*\",\n           \"*.png*\",\n           \"*.gif*\",\n           \"*.bmp*\",\n           \"*.jpeg*\",\n           \"*.TIFF*\",\n           \"*.inf*\",\n           \"*.cpl:*/*\",\n           \"*../../..*\",\n           \"*/AppData/Local/*\",\n           \"*:\\\\Users\\\\Public\\\\*\",\n           \"*\\\\AppData\\\\Local\\\\*\")\n",
   "references": [
     "https://www.joesandbox.com/analysis/476188/1/html"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.command_line",
+      "type": "wildcard"
+    },
+    {
+      "ecs": true,
+      "name": "process.executable",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 73,
   "rule_id": "416697ae-e468-4093-a93d-59661fa619ec",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "high",
   "tags": [
     "Elastic",
@@ -38,7 +56,7 @@
       "technique": [
         {
           "id": "T1218",
-          "name": "Signed Binary Proxy Execution",
+          "name": "System Binary Proxy Execution",
           "reference": "https://attack.mitre.org/techniques/T1218/",
           "subtechnique": [
             {
@@ -53,5 +71,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 5
 }

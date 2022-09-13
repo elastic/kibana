@@ -228,6 +228,8 @@ export const basicCase: Case = {
   settings: {
     syncAlerts: true,
   },
+  // damaged_raccoon uid
+  assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
 };
 
 export const caseWithAlerts = {
@@ -329,6 +331,7 @@ export const mockCase: Case = {
   settings: {
     syncAlerts: true,
   },
+  assignees: [],
 };
 
 export const basicCasePost: Case = {
@@ -551,13 +554,6 @@ export const pushedCaseSnake = {
   external_service: { ...basicPushSnake, connector_id: pushConnectorId },
 };
 
-export const reporters: string[] = ['alexis', 'kim', 'maria', 'steph'];
-export const respReporters = [
-  { username: 'alexis', full_name: null, email: null },
-  { username: 'kim', full_name: null, email: null },
-  { username: 'maria', full_name: null, email: null },
-  { username: 'steph', full_name: null, email: null },
-];
 export const casesSnake: CasesResponse = [
   basicCaseSnake,
   { ...pushedCaseSnake, id: '1', totalComment: 0, comments: [] },
@@ -631,6 +627,7 @@ export const getUserAction = (
           tags: ['a tag'],
           settings: { syncAlerts: true },
           owner: SECURITY_SOLUTION_OWNER,
+          assignees: [],
         },
         ...overrides,
       };
@@ -683,6 +680,19 @@ export const getUserAction = (
         ...commonProperties,
         type: ActionTypes.title,
         payload: { title: 'a title' },
+        ...overrides,
+      };
+    case ActionTypes.assignees:
+      return {
+        ...commonProperties,
+        type: ActionTypes.assignees,
+        payload: {
+          assignees: [
+            // These values map to uids in x-pack/plugins/cases/public/containers/user_profiles/api.mock.ts
+            { uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' },
+            { uid: 'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0' },
+          ],
+        },
         ...overrides,
       };
 
@@ -858,9 +868,8 @@ export const getExternalReferenceAttachment = (
   icon: 'casesApp',
   displayName: 'Test',
   getAttachmentViewObject: () => ({
-    type: 'update',
     event: 'added a chart',
-    timelineIcon: 'casesApp',
+    timelineAvatar: 'casesApp',
     ...viewObject,
   }),
 });
@@ -889,9 +898,8 @@ export const getPersistableStateAttachment = (
   icon: 'casesApp',
   displayName: 'Test',
   getAttachmentViewObject: () => ({
-    type: 'update',
     event: 'added an embeddable',
-    timelineIcon: 'casesApp',
+    timelineAvatar: 'casesApp',
     ...viewObject,
   }),
 });

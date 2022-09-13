@@ -6,7 +6,6 @@
  */
 
 import { get } from 'lodash';
-import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
 import { CCS_REMOTE_PATTERN } from '../../../../../common/constants';
 import {
   postElasticsearchIndexDetailRequestParamsRT,
@@ -14,6 +13,7 @@ import {
   postElasticsearchIndexDetailResponsePayloadRT,
 } from '../../../../../common/http_api/elasticsearch';
 import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
+import { getNewIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { getIndexSummary } from '../../../../lib/elasticsearch/indices';
@@ -43,11 +43,14 @@ export function esIndexRoute(server: MonitoringCore) {
         const indexUuid = req.params.id;
         const start = req.payload.timeRange.min;
         const end = req.payload.timeRange.max;
-        const filebeatIndexPattern = prefixIndexPatternWithCcs(
+
+        const logsIndexPattern = getNewIndexPatterns({
           config,
-          config.ui.logs.index,
-          CCS_REMOTE_PATTERN
-        );
+          type: 'logs',
+          moduleType: 'elasticsearch',
+          ccs: CCS_REMOTE_PATTERN,
+        });
+
         const isAdvanced = req.payload.is_advanced;
         const metricSet = isAdvanced ? metricSetAdvanced : metricSetOverview;
 
@@ -93,7 +96,7 @@ export function esIndexRoute(server: MonitoringCore) {
           };
           const shards = await getShardAllocation(req, allocationOptions);
 
-          logs = await getLogs(config, req, filebeatIndexPattern, {
+          logs = await getLogs(config, req, logsIndexPattern, {
             clusterUuid,
             indexUuid,
             start,

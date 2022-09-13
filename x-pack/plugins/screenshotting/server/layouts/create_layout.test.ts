@@ -17,7 +17,6 @@ describe('Create Layout', () => {
     const layout = createLayout(preserveParams);
     expect(layout).toMatchInlineSnapshot(`
       PreserveLayout {
-        "groupCount": 1,
         "hasFooter": true,
         "hasHeader": true,
         "height": 16,
@@ -47,7 +46,6 @@ describe('Create Layout', () => {
     const layout = createLayout(printParams);
     expect(layout).toMatchInlineSnapshot(`
       PrintLayout {
-        "groupCount": 2,
         "hasFooter": true,
         "hasHeader": true,
         "id": "print",
@@ -76,7 +74,6 @@ describe('Create Layout', () => {
     const layout = createLayout(canvasParams);
     expect(layout).toMatchInlineSnapshot(`
       CanvasLayout {
-        "groupCount": 1,
         "hasFooter": false,
         "hasHeader": false,
         "height": 18,

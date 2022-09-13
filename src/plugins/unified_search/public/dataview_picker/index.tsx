@@ -8,6 +8,7 @@
 
 import React from 'react';
 import type { EuiButtonProps, EuiSelectableProps } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { ChangeDataView } from './change_dataview';
 
@@ -45,6 +46,10 @@ export interface DataViewPickerProps {
    */
   currentDataViewId?: string;
   /**
+   * The adHocDataviews.
+   */
+  adHocDataViews?: DataView[];
+  /**
    * EuiSelectable properties.
    */
   selectableProps?: EuiSelectableProps;
@@ -59,10 +64,6 @@ export interface DataViewPickerProps {
    */
   onDataViewCreated?: () => void;
   /**
-   * Flag to show the tour component for the first time.
-   */
-  showNewMenuTour?: boolean;
-  /**
    * List of the supported text based languages (SQL, ESQL) etc.
    * Defined per application, if not provided, no text based languages
    * will be available.
@@ -72,6 +73,11 @@ export interface DataViewPickerProps {
    * Callback that is called when the user clicks the Save and switch transition modal button
    */
   onSaveTextLanguageQuery?: ({ onSave, onCancel }: OnSaveTextLanguageQueryProps) => void;
+
+  /**
+   * Makes the picker disabled by disabling the popover trigger
+   */
+  isDisabled?: boolean;
 }
 
 export interface DataViewPickerPropsExtended extends DataViewPickerProps {
@@ -88,16 +94,17 @@ export interface DataViewPickerPropsExtended extends DataViewPickerProps {
 export const DataViewPicker = ({
   isMissingCurrent,
   currentDataViewId,
+  adHocDataViews,
   onChangeDataView,
   onAddField,
   onDataViewCreated,
   trigger,
   selectableProps,
-  showNewMenuTour,
   textBasedLanguages,
   onSaveTextLanguageQuery,
   onTextLangQuerySubmit,
   textBasedLanguage,
+  isDisabled,
 }: DataViewPickerPropsExtended) => {
   return (
     <ChangeDataView
@@ -107,12 +114,13 @@ export const DataViewPicker = ({
       onAddField={onAddField}
       onDataViewCreated={onDataViewCreated}
       trigger={trigger}
+      adHocDataViews={adHocDataViews}
       selectableProps={selectableProps}
-      showNewMenuTour={showNewMenuTour}
       textBasedLanguages={textBasedLanguages}
       onSaveTextLanguageQuery={onSaveTextLanguageQuery}
       onTextLangQuerySubmit={onTextLangQuerySubmit}
       textBasedLanguage={textBasedLanguage}
+      isDisabled={isDisabled}
     />
   );
 };

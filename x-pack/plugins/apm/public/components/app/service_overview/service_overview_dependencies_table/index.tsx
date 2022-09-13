@@ -170,6 +170,7 @@ export function ServiceOverviewDependenciesTable({
       status={status}
       link={link}
       showPerPageOptions={showPerPageOptions}
+      initialPageSize={5}
     />
   );
 }

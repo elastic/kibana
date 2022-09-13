@@ -12,6 +12,7 @@ import {
   createKbnUrlStateStorage,
   syncState,
   INullableBaseStateContainer,
+  // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 } from '../../public/state_sync';
 
 const tick = () => new Promise((resolve) => setTimeout(resolve));

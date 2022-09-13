@@ -6,7 +6,7 @@
  */
 
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { SearchInput } from '@kbn/discover-plugin/public';
+import type { SearchInput } from '@kbn/discover-plugin/public';
 import { SavedObjectReference } from '@kbn/core/types';
 import {
   EmbeddableTypes,

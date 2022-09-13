@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
-import { apm, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace';
 import { omit, uniq } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
@@ -68,7 +68,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'Top dependency spans when data is loaded',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
+    { config: 'basic', archives: [] },
     () => {
       const javaInstance = apm.service('java', 'production', 'java').instance('instance-a');
 

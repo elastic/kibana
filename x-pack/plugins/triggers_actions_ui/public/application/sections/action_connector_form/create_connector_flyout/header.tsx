@@ -19,14 +19,13 @@ import {
   EuiBetaBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getConnectorFeatureName } from '@kbn/actions-plugin/common';
 import { betaBadgeProps } from '../beta_badge_props';
 
 interface Props {
   icon?: IconType | null;
   actionTypeName?: string | null;
   actionTypeMessage?: string | null;
-  featureIds?: string[] | null;
+  compatibility?: string[] | null;
   isExperimental?: boolean;
 }
 
@@ -34,7 +33,7 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
   icon,
   actionTypeName,
   actionTypeMessage,
-  featureIds,
+  compatibility,
   isExperimental,
 }) => {
   return (
@@ -45,40 +44,52 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
             <EuiIcon type={icon} size="xl" />
           </EuiFlexItem>
         ) : null}
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           {actionTypeName && actionTypeMessage ? (
             <>
-              <EuiTitle size="s">
-                <h3 id="flyoutTitle">
-                  <FormattedMessage
-                    defaultMessage="{actionTypeName} connector"
-                    id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutTitle"
-                    values={{
-                      actionTypeName,
-                    }}
-                  />
-                </h3>
-              </EuiTitle>
+              <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
+                <EuiFlexItem>
+                  <EuiTitle size="s">
+                    <h3 id="flyoutTitle">
+                      <FormattedMessage
+                        defaultMessage="{actionTypeName} connector"
+                        id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutTitle"
+                        values={{
+                          actionTypeName,
+                        }}
+                      />
+                    </h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                {actionTypeName && isExperimental && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBetaBadge
+                      label={betaBadgeProps.label}
+                      tooltipContent={betaBadgeProps.tooltipContent}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
               <EuiText size="s" color="subdued">
                 {actionTypeMessage}
               </EuiText>
-              {featureIds && featureIds.length > 0 && (
+              {compatibility && compatibility.length > 0 && (
                 <>
                   <EuiSpacer size="m" />
                   <EuiFlexGroup
-                    data-test-subj="create-connector-flyout-header-availability"
+                    data-test-subj="create-connector-flyout-header-compatibility"
                     wrap
                     responsive={false}
                     gutterSize="xs"
                     alignItems="center"
                   >
                     <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutHeaderAvailability"
-                      defaultMessage="Availability:"
+                      id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutHeaderCompatibility"
+                      defaultMessage="Compatibility:"
                     />{' '}
-                    {featureIds.map((featureId: string) => (
-                      <EuiFlexItem grow={false} key={featureId}>
-                        <EuiBadge color="default">{getConnectorFeatureName(featureId)}</EuiBadge>
+                    {compatibility.map((compatibilityItem: string) => (
+                      <EuiFlexItem grow={false} key={compatibilityItem}>
+                        <EuiBadge color="default">{compatibilityItem}</EuiBadge>
                       </EuiFlexItem>
                     ))}
                   </EuiFlexGroup>
@@ -96,14 +107,6 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
             </EuiTitle>
           )}
         </EuiFlexItem>
-        {actionTypeName && isExperimental && (
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge
-              label={betaBadgeProps.label}
-              tooltipContent={betaBadgeProps.tooltipContent}
-            />
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
     </EuiFlyoutHeader>
   );

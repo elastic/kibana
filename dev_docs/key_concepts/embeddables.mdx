@@ -1,0 +1,52 @@
+---
+id: kibDevDocsEmbeddables
+slug: /kibana-dev-docs/key-concepts/embeddables
+title: Embeddables
+description: Embeddables provide a way to expose a reusable widget.
+date: 2022-07-27
+tags: ['kibana', 'dev', 'contributor', 'api docs']
+---
+
+The Embeddables Plugin provides an opportunity to expose reusable interactive widgets that can be embedded outside the original plugin.
+
+If you are planning to integrate with the plugin, please get in touch with the App Services team to get to know all the limitations.
+
+## Capabilities
+- Framework-agnostic API.
+- Out-of-the-box React support.
+- Integration with Redux.
+- Integration with the [UI Actions](https://github.com/elastic/kibana/tree/HEAD/src/plugins/ui_actions) plugin.
+- Hierarchical structure to enclose multiple widgets.
+- Error handling.
+
+## Key Concepts
+### Embeddable
+Embeddable is a re-usable widget that can be rendered on a dashboard as well as in other applications.
+Developers are free to embed them directly in their plugins.
+End users can dynamically select an embeddable to add to a _container_.
+Dashboard container powers the grid of panels on the Dashboard app.
+
+### Container
+Container is a special type of embeddable that can hold other embeddable items.
+Embeddables can be added dynamically to the containers, but that should be implemented on the end plugin side.
+Currently, the dashboard plugin provides such functionality.
+
+### Input
+Every embeddable has an input which is a serializable set of data.
+This data can be used to update the state of the embeddable widget.
+The input can be updated later so that the embeddable should be capable of reacting to those changes.
+
+### Output
+Every embeddable may expose some data to the external interface.
+Usually, it is diverged from the input and not necessarily serializable.
+Output data can also be updated, but that should always be done inside the embeddable.
+
+## Documentation
+<DocCallOut>
+  Check the plugin documentation [here](https://github.com/elastic/kibana/tree/HEAD/src/plugins/embeddable) to get to know all the capabilities better.
+</DocCallOut>
+
+## API
+<DocCallOut>
+  Check the complete API reference <DocLink id="kibEmbeddablePluginApi" text="here" />.
+</DocCallOut>

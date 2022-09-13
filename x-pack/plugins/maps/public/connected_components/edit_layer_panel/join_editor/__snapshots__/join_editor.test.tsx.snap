@@ -48,7 +48,6 @@ exports[`Should render join editor 1`] = `
         "right": Object {
           "id": "673ff994-fc75-4c67-909b-69fcb0e1060e",
           "indexPatternId": "abcde",
-          "indexPatternTitle": "kibana_sample_data_logs",
           "metrics": Array [
             Object {
               "label": "web logs count",

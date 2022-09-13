@@ -618,7 +618,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   }
 
   render() {
-    const { close } = this.props;
+    const { close, allowedTypes } = this.props;
 
     let confirmOverwriteModal: ReactNode;
     const { conflictingRecord } = this.state;
@@ -626,7 +626,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       const { conflict } = conflictingRecord;
       const onFinish = (overwrite: boolean, destinationId?: string) =>
         conflictingRecord.done([overwrite, destinationId]);
-      confirmOverwriteModal = <OverwriteModal {...{ conflict, onFinish }} />;
+      confirmOverwriteModal = <OverwriteModal {...{ conflict, onFinish, allowedTypes }} />;
     }
 
     return (

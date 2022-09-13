@@ -10,28 +10,37 @@ import moment from 'moment';
 
 import {
   Axis,
-  BarSeries,
   BrushEndListener,
   Chart,
   ElementClickListener,
+  HistogramBarSeries,
   Position,
   ScaleType,
   Settings,
   XYChartElementEvent,
   XYBrushEvent,
 } from '@elastic/charts';
-import { EuiBadge } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { DualBrush, DualBrushAnnotation } from '@kbn/aiops-components';
-import { getWindowParameters } from '@kbn/aiops-utils';
+import { getSnappedWindowParameters, getWindowParameters } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 
-import { useAiOpsKibana } from '../../../kibana_context';
+import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
+
+import { BrushBadge } from './brush_badge';
+
+declare global {
+  interface Window {
+    /**
+     * Flag used to enable debugState on elastic charts
+     */
+    _echDebugStateFlag?: boolean;
+  }
+}
 
 export interface DocumentCountChartPoint {
   time: number | string;
@@ -52,6 +61,9 @@ interface DocumentCountChartProps {
 
 const SPEC_ID = 'document_count';
 
+const BADGE_HEIGHT = 20;
+const BADGE_WIDTH = 75;
+
 enum VIEW_MODE {
   ZOOM = 'zoom',
   BRUSH = 'brush',
@@ -67,6 +79,19 @@ function getTimezone(uiSettings: IUiSettingsClient) {
   }
 }
 
+function getBaselineBadgeOverflow(
+  windowParametersAsPixels: WindowParameters,
+  baselineBadgeWidth: number
+) {
+  const { baselineMin, baselineMax, deviationMin } = windowParametersAsPixels;
+
+  const baselineBrushWidth = baselineMax - baselineMin;
+  const baselineBadgeActualMax = baselineMin + baselineBadgeWidth;
+  return deviationMin < baselineBadgeActualMax
+    ? Math.max(0, baselineBadgeWidth - baselineBrushWidth)
+    : 0;
+}
+
 export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   brushSelectionUpdateHandler,
   width,
@@ -78,9 +103,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   changePoint,
   isBrushCleared,
 }) => {
-  const {
-    services: { data, uiSettings, fieldFormats, charts },
-  } = useAiOpsKibana();
+  const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
 
   const chartTheme = charts.theme.useChartsTheme();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
@@ -106,11 +129,6 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
 
   // TODO Let user choose between ZOOM and BRUSH mode.
   const [viewMode] = useState<VIEW_MODE>(VIEW_MODE.BRUSH);
-
-  const xDomain = {
-    min: timeRangeEarliest,
-    max: timeRangeLatest,
-  };
 
   const adjustedChartPoints = useMemo(() => {
     // Display empty chart when no data in range
@@ -147,6 +165,18 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
     return chartPointsSplit;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartPointsSplit, timeRangeEarliest, timeRangeLatest, interval]);
+
+  const snapTimestamps = useMemo(() => {
+    const timestamps: number[] = [];
+    let n = timeRangeEarliest;
+
+    while (n <= timeRangeLatest + interval) {
+      timestamps.push(n);
+      n += interval;
+    }
+
+    return timestamps;
+  }, [timeRangeEarliest, timeRangeLatest, interval]);
 
   const timefilterUpdateHandler = useCallback(
     (ranges: { from: number; to: number }) => {
@@ -186,12 +216,13 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
       ) {
         const wp = getWindowParameters(
           startRange + interval / 2,
-          xDomain.min,
-          xDomain.max + interval
+          timeRangeEarliest,
+          timeRangeLatest + interval
         );
-        setOriginalWindowParameters(wp);
-        setWindowParameters(wp);
-        brushSelectionUpdateHandler(wp, true);
+        const wpSnap = getSnappedWindowParameters(wp, snapTimestamps);
+        setOriginalWindowParameters(wpSnap);
+        setWindowParameters(wpSnap);
+        brushSelectionUpdateHandler(wpSnap, true);
       }
     }
   };
@@ -230,47 +261,45 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   }, [viewMode]);
 
   const isBrushVisible =
-    originalWindowParameters && mlBrushMarginLeft && mlBrushWidth && mlBrushWidth > 0;
+    originalWindowParameters &&
+    windowParameters &&
+    mlBrushMarginLeft &&
+    mlBrushWidth &&
+    mlBrushWidth > 0;
+
+  // Avoid overlap of brush badges when the brushes are quite narrow.
+  const baselineBadgeOverflow = windowParametersAsPixels
+    ? getBaselineBadgeOverflow(windowParametersAsPixels, BADGE_WIDTH)
+    : 0;
+  const baselineBadgeMarginLeft =
+    (mlBrushMarginLeft ?? 0) + (windowParametersAsPixels?.baselineMin ?? 0);
 
   return (
     <>
       {isBrushVisible && (
-        <div className="aiopsHistogramBrushes">
-          <div
-            css={{
-              position: 'absolute',
-              'margin-left': `${
-                mlBrushMarginLeft + (windowParametersAsPixels?.baselineMin ?? 0)
-              }px`,
-            }}
-          >
-            <EuiBadge>
-              <FormattedMessage
-                id="xpack.aiops.documentCountChart.baselineBadgeContent"
-                defaultMessage="Baseline"
-              />
-            </EuiBadge>
+        <div className="aiopsHistogramBrushes" data-test-subj="aiopsHistogramBrushes">
+          <div css={{ height: BADGE_HEIGHT }}>
+            <BrushBadge
+              label={i18n.translate('xpack.aiops.documentCountChart.baselineBadgeLabel', {
+                defaultMessage: 'Baseline',
+              })}
+              marginLeft={baselineBadgeMarginLeft - baselineBadgeOverflow}
+              timestampFrom={windowParameters.baselineMin}
+              timestampTo={windowParameters.baselineMax}
+              width={BADGE_WIDTH}
+            />
+            <BrushBadge
+              label={i18n.translate('xpack.aiops.documentCountChart.deviationBadgeLabel', {
+                defaultMessage: 'Deviation',
+              })}
+              marginLeft={mlBrushMarginLeft + (windowParametersAsPixels?.deviationMin ?? 0)}
+              timestampFrom={windowParameters.deviationMin}
+              timestampTo={windowParameters.deviationMax}
+              width={BADGE_WIDTH}
+            />
           </div>
           <div
             css={{
-              position: 'absolute',
-              'margin-left': `${
-                mlBrushMarginLeft + (windowParametersAsPixels?.deviationMin ?? 0)
-              }px`,
-            }}
-          >
-            <EuiBadge>
-              <FormattedMessage
-                id="xpack.aiops.documentCountChart.deviationBadgeContent"
-                defaultMessage="Deviation"
-              />
-            </EuiBadge>
-          </div>
-          <div
-            css={{
-              position: 'relative',
-              clear: 'both',
-              'padding-top': '20px',
               'margin-bottom': '-4px',
             }}
           >
@@ -280,6 +309,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
               max={timeRangeLatest + interval}
               onChange={onWindowParametersChange}
               marginLeft={mlBrushMarginLeft}
+              snapTimestamps={snapTimestamps}
               width={mlBrushWidth}
             />
           </div>
@@ -293,7 +323,6 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
           }}
         >
           <Settings
-            xDomain={xDomain}
             onBrushEnd={viewMode !== VIEW_MODE.BRUSH ? (onBrushEnd as BrushEndListener) : undefined}
             onElementClick={onElementClick}
             onProjectionAreaChange={({ projection }) => {
@@ -302,17 +331,22 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
             }}
             theme={chartTheme}
             baseTheme={chartBaseTheme}
+            debugState={window._echDebugStateFlag ?? false}
+            showLegend={false}
+            showLegendExtra={false}
           />
+          <Axis id="aiops-histogram-left-axis" position={Position.Left} ticks={2} integersOnly />
           <Axis
-            id="bottom"
+            id="aiops-histogram-bottom-axis"
             position={Position.Bottom}
             showOverlappingTicks={true}
             tickFormat={(value) => xAxisFormatter.convert(value)}
+            // temporary fix to reduce horizontal chart margin until fixed in Elastic Charts itself
+            labelFormat={useLegacyTimeAxis ? undefined : () => ''}
             timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
             style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
           />
-          <Axis id="left" position={Position.Left} />
-          <BarSeries
+          <HistogramBarSeries
             id={SPEC_ID}
             name={chartPointsSplit ? overallSeriesNameWithSplit : overallSeriesName}
             xScaleType={ScaleType.Time}
@@ -320,11 +354,11 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
             xAccessor="time"
             yAccessors={['value']}
             data={adjustedChartPoints}
-            stackAccessors={[0]}
             timeZone={timeZone}
+            yNice
           />
           {chartPointsSplit && (
-            <BarSeries
+            <HistogramBarSeries
               id={`${SPEC_ID}_split`}
               name={splitSeriesName}
               xScaleType={ScaleType.Time}
@@ -332,9 +366,9 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
               xAccessor="time"
               yAccessors={['value']}
               data={adjustedChartPointsSplit}
-              stackAccessors={[0]}
               timeZone={timeZone}
               color={['orange']}
+              yNice
             />
           )}
           {windowParameters && (
@@ -342,12 +376,12 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
               <DualBrushAnnotation
                 id="aiopsBaseline"
                 min={windowParameters.baselineMin}
-                max={windowParameters.baselineMax - interval}
+                max={windowParameters.baselineMax}
               />
               <DualBrushAnnotation
                 id="aiopsDeviation"
                 min={windowParameters.deviationMin}
-                max={windowParameters.deviationMax - interval}
+                max={windowParameters.deviationMax}
               />
             </>
           )}

@@ -10,7 +10,11 @@ import { get } from 'lodash';
 import { LegacyRequest } from '../../types';
 import { standaloneClusterFilter } from '.';
 import { Globals } from '../../static_globals';
-import { getLegacyIndexPattern, getNewIndexPatterns } from '../cluster/get_index_patterns';
+import {
+  getLegacyIndexPattern,
+  getNewIndexPatterns,
+  getLogstashDataset,
+} from '../cluster/get_index_patterns';
 
 export async function hasStandaloneClusters(req: LegacyRequest, ccs: string) {
   const lsIndexPatterns = getNewIndexPatterns({
@@ -47,7 +51,7 @@ export async function hasStandaloneClusters(req: LegacyRequest, ccs: string) {
           },
           {
             terms: {
-              'data_stream.dataset': ['node', 'node_stats', 'stats', 'state'],
+              'data_stream.dataset': [getLogstashDataset('node'), getLogstashDataset('node_stats')],
             },
           },
         ],

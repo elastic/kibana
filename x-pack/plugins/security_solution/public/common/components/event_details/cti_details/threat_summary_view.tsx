@@ -127,7 +127,17 @@ const ThreatSummaryViewComponent: React.FC<{
   timelineId: string;
   hostRisk: HostRisk | null;
   isDraggable?: boolean;
-}> = ({ browserFields, data, enrichments, eventId, timelineId, hostRisk, isDraggable }) => {
+  isReadOnly?: boolean;
+}> = ({
+  browserFields,
+  data,
+  enrichments,
+  eventId,
+  timelineId,
+  hostRisk,
+  isDraggable,
+  isReadOnly,
+}) => {
   if (!hostRisk && enrichments.length === 0) {
     return null;
   }
@@ -155,6 +165,7 @@ const ThreatSummaryViewComponent: React.FC<{
           timelineId={timelineId}
           eventId={eventId}
           isDraggable={isDraggable}
+          isReadOnly={isReadOnly}
         />
       </EuiFlexGroup>
     </>

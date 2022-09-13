@@ -9,6 +9,7 @@
 import { of } from 'rxjs';
 import type { AnalyticsClient } from '@kbn/analytics-client';
 import { createAnalytics } from '@kbn/analytics-client';
+import { registerPerformanceMetricEventType } from '@kbn/ebt-tools';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
@@ -34,6 +35,7 @@ export class AnalyticsService {
     });
 
     this.registerBuildInfoAnalyticsContext(core);
+    registerPerformanceMetricEventType(this.analyticsClient);
 
     // We may eventually move the following to the client's package since they are not Kibana-specific
     // and can benefit other consumers of the client.

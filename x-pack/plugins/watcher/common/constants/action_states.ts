@@ -15,17 +15,12 @@ export const ACTION_STATES: { [key: string]: string } = {
 
   // Action has been acknowledged by user
   ACKNOWLEDGED: i18n.translate('xpack.watcher.constants.actionStates.acknowledgedStateText', {
-    defaultMessage: 'Acked',
+    defaultMessage: 'Acknowledged',
   }),
 
   // Action has been throttled (time-based) by the system
   THROTTLED: i18n.translate('xpack.watcher.constants.actionStates.throttledStateText', {
     defaultMessage: 'Throttled',
-  }),
-
-  // Action has been completed
-  FIRING: i18n.translate('xpack.watcher.constants.actionStates.firingStateText', {
-    defaultMessage: 'Firing',
   }),
 
   // Action has failed

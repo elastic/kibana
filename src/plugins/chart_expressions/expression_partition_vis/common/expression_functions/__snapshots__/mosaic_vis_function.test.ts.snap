@@ -177,6 +177,6 @@ Object {
 }
 `;
 
-exports[`interpreter/functions#mosaicVis throws error if provided more than 2 buckets 1`] = `"More than 2 buckets are not supported"`;
+exports[`interpreter/functions#mosaicVis throws error if provided more than 2 buckets 1`] = `"More than 2 buckets are not supported."`;
 
 exports[`interpreter/functions#mosaicVis throws error if provided split row and split column at once 1`] = `"A split row and column are specified. Expression is supporting only one of them at once."`;

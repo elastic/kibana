@@ -13,7 +13,7 @@ export interface NetworkKpiProps {
   from: string;
   indexNames: string[];
   to: string;
-  narrowDateRange: UpdateDateRange;
+  updateDateRange: UpdateDateRange;
   setQuery: GlobalTimeArgs['setQuery'];
   skip: boolean;
 }

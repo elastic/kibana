@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getUptimeESMockClient } from './helper';
+import { getUptimeESMockClient } from './test_helpers';
 import { getNetworkEvents, secondsToMillis } from './get_network_events';
 
 describe('getNetworkEvents', () => {

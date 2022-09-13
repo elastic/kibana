@@ -12,7 +12,7 @@ import { UsersTableType } from '../../store/model';
 import { USERS_PATH } from '../../../../common/constants';
 
 const getTabsOnUsersDetailsUrl = (userName: string, tabName: UsersTableType) =>
-  `${USERS_PATH}/${userName}/${tabName}`;
+  `${USERS_PATH}/name/${userName}/${tabName}`;
 
 export const navTabsUsersDetails = (
   userName: string,

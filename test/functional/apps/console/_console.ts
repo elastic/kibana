@@ -28,6 +28,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const toasts = getService('toasts');
+  const security = getService('security');
+  const testSubjects = getService('testSubjects');
 
   describe('console app', function describeIndexTests() {
     this.tags('includeFirefox');
@@ -151,7 +153,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.clickPlay();
       };
 
+      before(async () => {
+        await security.testUser.setRoles(['kibana_admin', 'test_index']);
+      });
+
+      after(async () => {
+        await security.testUser.restoreDefaults();
+      });
+
       beforeEach(async () => {
+        // Welcome fly out exists sometimes
+        const flyOutExists = await testSubjects.exists('euiFlyoutCloseButton');
+        if (flyOutExists) {
+          await testSubjects.click('euiFlyoutCloseButton');
+        }
         await PageObjects.console.clearTextArea();
       });
 
@@ -160,8 +175,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           const response = await PageObjects.console.getResponse();
           log.debug(response);
-          expect(response).to.contain('# PUT test-index 200 OK');
-          expect(response).to.contain('# DELETE test-index 200 OK');
+          expect(response).to.contain('# PUT test-index 200');
+          expect(response).to.contain('# DELETE test-index 200');
         });
       });
 

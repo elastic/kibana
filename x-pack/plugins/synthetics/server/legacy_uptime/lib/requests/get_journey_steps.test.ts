@@ -7,7 +7,7 @@
 
 import { JourneyStep } from '../../../../common/runtime_types/ping/synthetics';
 import { getJourneySteps, formatSyntheticEvents } from './get_journey_steps';
-import { getUptimeESMockClient } from './helper';
+import { getUptimeESMockClient } from './test_helpers';
 
 describe('getJourneySteps request module', () => {
   describe('formatStepTypes', () => {

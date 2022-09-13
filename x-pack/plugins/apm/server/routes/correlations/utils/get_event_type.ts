@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
-import { ProcessorEvent } from '../../../../common/processor_event';
 
 const {
   transactionLatency,

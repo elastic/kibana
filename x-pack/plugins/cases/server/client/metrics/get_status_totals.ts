@@ -27,7 +27,11 @@ export async function getStatusTotalsByType(
   params: CasesStatusRequest,
   clientArgs: CasesClientArgs
 ): Promise<CasesStatusResponse> {
-  const { caseService, logger, authorization } = clientArgs;
+  const {
+    services: { caseService },
+    logger,
+    authorization,
+  } = clientArgs;
 
   try {
     const queryParams = pipe(

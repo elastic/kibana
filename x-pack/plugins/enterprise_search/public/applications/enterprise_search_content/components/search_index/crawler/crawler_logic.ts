@@ -22,15 +22,6 @@ import {
 } from '../../../api/crawler/types';
 import { IndexNameLogic } from '../index_name_logic';
 
-const POLLING_DURATION = 1000;
-const POLLING_DURATION_ON_FAILURE = 5000;
-const ACTIVE_STATUSES = [
-  CrawlerStatus.Pending,
-  CrawlerStatus.Starting,
-  CrawlerStatus.Running,
-  CrawlerStatus.Canceling,
-];
-
 export interface CrawlRequestOverrides {
   domain_allowlist?: string[];
   max_crawl_depth?: number;
@@ -53,7 +44,6 @@ export type CrawlerActions = Pick<
   Actions<GetCrawlerArgs, CrawlerData>,
   'apiError' | 'apiSuccess'
 > & {
-  clearTimeoutId(): void;
   createNewTimeoutForCrawlerData(duration: number): { duration: number };
   fetchCrawlerData(): void;
   onCreateNewTimeout(timeoutId: NodeJS.Timeout): { timeoutId: NodeJS.Timeout };
@@ -63,73 +53,24 @@ export type CrawlerActions = Pick<
 };
 
 export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
-  path: ['enterprise_search', 'crawler_logic'],
-  connect: {
-    actions: [GetCrawlerApiLogic, ['apiError', 'apiSuccess']],
-    values: [GetCrawlerApiLogic, ['status', 'data']],
-  },
   actions: {
-    clearTimeoutId: true,
-    createNewTimeoutForCrawlerData: (duration) => ({ duration }),
     fetchCrawlerData: true,
-    onCreateNewTimeout: (timeoutId) => ({ timeoutId }),
     reApplyCrawlRules: (domain) => ({ domain }),
     startCrawl: (overrides) => ({ overrides }),
     stopCrawl: () => null,
   },
-  reducers: {
-    dataLoading: [
-      true,
-      {
-        apiError: () => false,
-        apiSuccess: () => false,
-      },
-    ],
-    timeoutId: [
-      null,
-      {
-        apiError: () => null,
-        apiSuccess: () => null,
-        onCreateNewTimeout: (_, { timeoutId }) => timeoutId,
-      },
-    ],
+  connect: {
+    actions: [GetCrawlerApiLogic, ['apiError', 'apiSuccess']],
+    values: [GetCrawlerApiLogic, ['status', 'data']],
   },
-  selectors: ({ selectors }) => ({
-    domains: [() => [selectors.data], (data: CrawlerValues['data']) => data?.domains ?? []],
-    events: [() => [selectors.data], (data: CrawlerValues['data']) => data?.events ?? []],
-    mostRecentCrawlRequest: [
-      () => [selectors.data],
-      (data: CrawlerValues['data']) => data?.mostRecentCrawlRequest ?? null,
-    ],
-    mostRecentCrawlRequestStatus: [
-      () => [selectors.mostRecentCrawlRequest],
-      (crawlRequest: CrawlerValues['mostRecentCrawlRequest']) => crawlRequest?.status ?? null,
-    ],
-  }),
-  listeners: ({ actions, values }) => ({
+  listeners: ({ actions }) => ({
     apiError: (error) => {
       flashAPIErrors(error);
-      actions.createNewTimeoutForCrawlerData(POLLING_DURATION_ON_FAILURE);
     },
-    apiSuccess: ({ mostRecentCrawlRequest }) => {
-      const continuePoll =
-        mostRecentCrawlRequest && ACTIVE_STATUSES.includes(mostRecentCrawlRequest.status);
+    fetchCrawlerData: () => {
+      const { indexName } = IndexNameLogic.values;
 
-      if (continuePoll) {
-        actions.createNewTimeoutForCrawlerData(POLLING_DURATION);
-      }
-    },
-
-    createNewTimeoutForCrawlerData: ({ duration }) => {
-      if (values.timeoutId) {
-        clearTimeout(values.timeoutId);
-      }
-
-      const timeoutIdId = setTimeout(() => {
-        actions.fetchCrawlerData();
-      }, duration);
-
-      actions.onCreateNewTimeout(timeoutIdId);
+      GetCrawlerApiLogic.actions.makeRequest({ indexName });
     },
     reApplyCrawlRules: async ({ domain }) => {
       const { indexName } = IndexNameLogic.values;
@@ -159,14 +100,6 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
         flashAPIErrors(e);
       }
     },
-    fetchCrawlerData: () => {
-      const { indexName } = IndexNameLogic.values;
-
-      if (values.timeoutId) {
-        clearTimeout(values.timeoutId);
-      }
-      GetCrawlerApiLogic.actions.makeRequest({ indexName });
-    },
     startCrawl: async ({ overrides = {} }) => {
       const { indexName } = IndexNameLogic.values;
       const { http } = HttpLogic.values;
@@ -194,14 +127,26 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
       }
     },
   }),
-  events: ({ actions, values }) => ({
-    afterMount: () => {
-      actions.fetchCrawlerData();
-    },
-    beforeUnmount: () => {
-      if (values.timeoutId) {
-        clearTimeout(values.timeoutId);
-      }
-    },
+  path: ['enterprise_search', 'crawler_logic'],
+  reducers: {
+    dataLoading: [
+      true,
+      {
+        apiError: () => false,
+        apiSuccess: () => false,
+      },
+    ],
+  },
+  selectors: ({ selectors }) => ({
+    domains: [() => [selectors.data], (data: CrawlerValues['data']) => data?.domains ?? []],
+    events: [() => [selectors.data], (data: CrawlerValues['data']) => data?.events ?? []],
+    mostRecentCrawlRequest: [
+      () => [selectors.data],
+      (data: CrawlerValues['data']) => data?.mostRecentCrawlRequest ?? null,
+    ],
+    mostRecentCrawlRequestStatus: [
+      () => [selectors.mostRecentCrawlRequest],
+      (crawlRequest: CrawlerValues['mostRecentCrawlRequest']) => crawlRequest?.status ?? null,
+    ],
   }),
 });

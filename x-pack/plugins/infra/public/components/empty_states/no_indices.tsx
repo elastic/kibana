@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { PageTemplate } from '../page_template';
 
@@ -20,7 +20,7 @@ interface NoIndicesProps {
 export const NoIndices: React.FC<NoIndicesProps> = ({ actions, message, title, ...rest }) => {
   return (
     <PageTemplate isEmptyState={true}>
-      <EuiEmptyPrompt
+      <KibanaPageTemplate.EmptyPrompt
         title={<h2>{title}</h2>}
         body={<p>{message}</p>}
         actions={actions}

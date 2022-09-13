@@ -25,6 +25,13 @@ export const NAVIGATION_DNS_TITLE = i18n.translate(
   }
 );
 
+export const NAVIGATION_USERS_TITLE = i18n.translate(
+  'xpack.securitySolution.network.navigation.usersTitle',
+  {
+    defaultMessage: 'Users',
+  }
+);
+
 export const NAVIGATION_TLS_TITLE = i18n.translate(
   'xpack.securitySolution.network.navigation.tlsTitle',
   {

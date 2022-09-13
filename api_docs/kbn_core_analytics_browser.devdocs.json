@@ -34,7 +34,7 @@
         "signature": [
           "{ optIn: (optInConfig: ",
           "OptInConfig",
-          ") => void; reportEvent: <EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+          ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
           "Observable",
           "<",
           "TelemetryCounter",
@@ -52,6 +52,7 @@
         ],
         "path": "packages/core/analytics/core-analytics-browser/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -66,7 +67,7 @@
         "signature": [
           "{ optIn: (optInConfig: ",
           "OptInConfig",
-          ") => void; reportEvent: <EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+          ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
           "Observable",
           "<",
           "TelemetryCounter",
@@ -74,6 +75,7 @@
         ],
         "path": "packages/core/analytics/core-analytics-browser/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

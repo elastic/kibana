@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { alterColumn } from '../../../canvas_plugin_src/functions/common/alterColumn';
+import type { alterColumn } from '../../../canvas_plugin_src/functions/common/alterColumn';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { DATATABLE_COLUMN_TYPES } from '../../../common/lib/constants';

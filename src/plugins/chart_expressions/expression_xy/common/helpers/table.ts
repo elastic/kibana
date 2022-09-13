@@ -15,7 +15,10 @@ export function normalizeTable(data: Datatable, xAccessor?: string | ExpressionV
   const xColumn = xAccessor && getColumnByAccessor(xAccessor, data.columns);
   if (xColumn && xColumn?.meta.type === 'date') {
     const xColumnId = xColumn.id;
-    if (!data.rows.some((row) => typeof row[xColumnId] === 'string')) return data;
+    if (
+      !data.rows.some((row) => typeof row[xColumnId] === 'string' && row[xColumnId] !== '__other__')
+    )
+      return data;
     const rows = data.rows.map((row) => {
       return typeof row[xColumnId] !== 'string'
         ? row

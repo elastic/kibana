@@ -29,7 +29,7 @@ Expand-Archive .\elastic-agent-${kibanaVersion}-windows-x86_64.zip -DestinationP
 cd elastic-agent-${kibanaVersion}-windows-x86_64
 .\\elastic-agent.exe install`;
 
-  const k8sCommand = 'kubectl apply -f elastic-agent-standalone-kubernetes.yaml';
+  const k8sCommand = 'kubectl apply -f elastic-agent-standalone-kubernetes.yml';
 
   return {
     linux: linuxCommand,

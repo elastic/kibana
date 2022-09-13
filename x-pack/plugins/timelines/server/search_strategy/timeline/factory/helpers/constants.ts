@@ -130,6 +130,7 @@ export const TIMELINE_EVENTS_FIELDS = [
   'file.Ext.code_signature.trusted',
   'file.hash.sha256',
   'host.os.family',
+  'host.os.name',
   'host.id',
   'host.ip',
   'registry.key',

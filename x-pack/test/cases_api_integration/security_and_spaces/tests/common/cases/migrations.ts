@@ -427,5 +427,54 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         });
       });
     });
+
+    describe('8.5.0', () => {
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_duration.json'
+        );
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_assignees.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_duration.json'
+        );
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_assignees.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
+      describe('assignees', () => {
+        it('adds the assignees field for existing documents', async () => {
+          const caseInfo = await getCase({
+            supertest,
+            // This case exists in the 8.2.0 cases_duration.json file and does not contain an assignees field
+            caseId: '4537b380-a512-11ec-b92f-859b9e89e434',
+          });
+
+          expect(caseInfo).to.have.property('assignees');
+          expect(caseInfo.assignees).to.eql([]);
+        });
+
+        it('does not overwrite the assignees field if it already exists', async () => {
+          const caseInfo = await getCase({
+            supertest,
+            // This case exists in the 8.5.0 cases_assignees.json file and does contain an assignees field
+            caseId: '063d5820-1284-11ed-81af-63a2bdfb2bf9',
+          });
+
+          expect(caseInfo).to.have.property('assignees');
+          expect(caseInfo.assignees).to.eql([
+            {
+              uid: 'abc',
+            },
+          ]);
+        });
+      });
+    });
   });
 }

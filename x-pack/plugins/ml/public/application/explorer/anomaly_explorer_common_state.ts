@@ -6,7 +6,7 @@
  */
 
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged, map, shareReplay, skipWhile } from 'rxjs/operators';
+import { distinctUntilChanged, map, shareReplay, filter } from 'rxjs/operators';
 import { isEqual } from 'lodash';
 import type { ExplorerJob } from './explorer_utils';
 import type { InfluencersFilterQuery } from '../../../common/types/es_client';
@@ -68,7 +68,7 @@ export class AnomalyExplorerCommonStateService extends StateService {
 
   public getSelectedJobs$(): Observable<ExplorerJob[]> {
     return this._selectedJobs$.pipe(
-      skipWhile((v) => !v || !v.length),
+      filter((v) => Array.isArray(v) && v.length > 0),
       distinctUntilChanged(isEqual),
       shareReplay(1)
     );

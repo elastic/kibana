@@ -19,6 +19,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { VisTypePieDependencies } from '../plugin';
 import { PARTITION_VIS_RENDERER_NAME } from '../../common/constants';
 import { ChartTypes, RenderValue } from '../../common/types';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { extractContainerType, extractVisualizationType } from '../../../common';
 
 export const strings = {

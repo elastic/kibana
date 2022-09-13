@@ -15,11 +15,12 @@ import { EncryptionErrorOperation } from '../crypto/encryption_error';
 import { encryptedSavedObjectsServiceMock } from '../crypto/index.mock';
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
 
-jest.mock('@kbn/core/server/saved_objects/service/lib/utils', () => {
-  const { SavedObjectsUtils } = jest.requireActual(
-    '@kbn/core/server/saved_objects/service/lib/utils'
+jest.mock('@kbn/core-saved-objects-utils-server', () => {
+  const { SavedObjectsUtils, ...actual } = jest.requireActual(
+    '@kbn/core-saved-objects-utils-server'
   );
   return {
+    ...actual,
     SavedObjectsUtils: {
       namespaceStringToId: SavedObjectsUtils.namespaceStringToId,
       isRandomId: SavedObjectsUtils.isRandomId,
@@ -699,6 +700,7 @@ describe('#bulkUpdate', () => {
       expectOptionsNamespaceInDescriptor: boolean;
       expectObjectNamespaceInDescriptor: boolean;
     }
+
     const doTest = async ({
       optionsNamespace,
       objectNamespace,

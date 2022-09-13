@@ -6,7 +6,10 @@
  */
 
 import React, { FC, useEffect, Fragment, useMemo } from 'react';
-import { EuiPageContentHeader, EuiPageContentHeaderSection } from '@elastic/eui';
+import {
+  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
+  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Wizard } from './wizard';
@@ -54,6 +57,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
         mlContext.currentSavedSearch,
         mlContext.combinedQuery
       ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [jobType]
   );
 
@@ -185,6 +189,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
   const chartLoader = useMemo(
     () => new ChartLoader(mlContext.currentDataView, jobCreator.query),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
@@ -192,6 +197,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
   const resultsLoader = useMemo(
     () => new ResultsLoader(jobCreator, chartInterval, chartLoader),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
@@ -216,7 +222,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
             <FormattedMessage
               id="xpack.ml.newJob.page.createJob.dataViewName"
               defaultMessage="Using data view {dataViewName}"
-              values={{ dataViewName: jobCreator.indexPatternTitle }}
+              values={{ dataViewName: jobCreator.indexPatternDisplayName }}
             />
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>

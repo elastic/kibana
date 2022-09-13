@@ -30,7 +30,8 @@ import { ResourceTab } from './resource_tab';
 import { JsonTab } from './json_tab';
 import { OverviewTab } from './overview_tab';
 import { RuleTab } from './rule_tab';
-import k8sLogoIcon from '../../../assets/icons/k8s_logo.svg';
+import type { BenchmarkId } from '../../../../common/types';
+import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 
 const tabs = [
   {
@@ -74,13 +75,13 @@ export const Markdown: React.FC<PropsOf<typeof EuiMarkdownFormat>> = (props) => 
   <EuiMarkdownFormat textSize="s" {...props} />
 );
 
-export const CisKubernetesIcons = () => (
+export const CisKubernetesIcons = ({ benchmarkId }: { benchmarkId: BenchmarkId }) => (
   <EuiFlexGroup gutterSize="s">
     <EuiFlexItem grow={false}>
       <EuiIcon type={cisLogoIcon} size="xxl" />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiIcon type={k8sLogoIcon} size="xxl" />
+      <CISBenchmarkIcon type={benchmarkId} />
     </EuiFlexItem>
   </EuiFlexGroup>
 );

@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { KubernetesCollection, TreeNavSelection } from '../../types';
+import type { KubernetesCollectionMap } from '../../types';
 import { addTimerangeAndDefaultFilterToQuery } from '../../utils/add_timerange_and_default_filter_to_query';
 import { addTreeNavSelectionToFilterQuery } from './helpers';
 import { IndexPattern, GlobalFilter } from '../../types';
@@ -18,7 +18,8 @@ export type UseTreeViewProps = {
 
 export const useTreeView = ({ globalFilter, indexPattern }: UseTreeViewProps) => {
   const [noResults, setNoResults] = useState(false);
-  const [treeNavSelection, setTreeNavSelection] = useState<TreeNavSelection>({});
+  const [treeNavSelection, setTreeNavSelection] = useState<Partial<KubernetesCollectionMap>>({});
+  const [hasSelection, setHasSelection] = useState(false);
 
   const filterQueryWithTimeRange = useMemo(() => {
     return JSON.parse(
@@ -30,14 +31,10 @@ export const useTreeView = ({ globalFilter, indexPattern }: UseTreeViewProps) =>
     );
   }, [globalFilter.filterQuery, globalFilter.startDate, globalFilter.endDate]);
 
-  const onTreeNavSelect = useCallback((selection: TreeNavSelection) => {
+  const onTreeNavSelect = useCallback((selection: Partial<KubernetesCollectionMap>) => {
+    setHasSelection(false);
     setTreeNavSelection(selection);
   }, []);
-
-  const hasSelection = useMemo(
-    () => !!treeNavSelection[KubernetesCollection.cluster],
-    [treeNavSelection]
-  );
 
   const sessionViewFilter = useMemo(
     () => addTreeNavSelectionToFilterQuery(globalFilter.filterQuery, treeNavSelection),
@@ -49,6 +46,13 @@ export const useTreeView = ({ globalFilter, indexPattern }: UseTreeViewProps) =>
     setNoResults(false);
     setTreeNavSelection({});
   }, [filterQueryWithTimeRange]);
+
+  useEffect(() => {
+    if (!!treeNavSelection.clusterId) {
+      setHasSelection(true);
+      setTreeNavSelection(treeNavSelection);
+    }
+  }, [treeNavSelection]);
 
   return {
     noResults,

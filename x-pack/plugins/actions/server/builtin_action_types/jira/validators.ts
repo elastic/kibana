@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ActionsConfigurationUtilities } from '../../actions_config';
 import {
   JiraPublicConfigurationType,
   JiraSecretConfigurationType,
@@ -13,21 +12,23 @@ import {
 } from './types';
 
 import * as i18n from './translations';
+import { ValidatorServices } from '../../types';
 
 export const validateCommonConfig = (
-  configurationUtilities: ActionsConfigurationUtilities,
-  configObject: JiraPublicConfigurationType
+  configObject: JiraPublicConfigurationType,
+  validatorServices: ValidatorServices
 ) => {
+  const { configurationUtilities } = validatorServices;
   try {
     configurationUtilities.ensureUriAllowed(configObject.apiUrl);
   } catch (allowedListError) {
-    return i18n.ALLOWED_HOSTS_ERROR(allowedListError.message);
+    throw new Error(i18n.ALLOWED_HOSTS_ERROR(allowedListError.message));
   }
 };
 
 export const validateCommonSecrets = (
-  configurationUtilities: ActionsConfigurationUtilities,
-  secrets: JiraSecretConfigurationType
+  secrets: JiraSecretConfigurationType,
+  validatorServices: ValidatorServices
 ) => {};
 
 export const validate: ExternalServiceValidation = {

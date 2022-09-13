@@ -35,28 +35,6 @@ export const ConnectorConfigurationConfig: React.FC = () => {
     title: label,
   }));
 
-  const display = (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem>
-        <EuiDescriptionList listItems={displayList} />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiButton onClick={() => setIsEditing(!isEditing)}>
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.configurationConnector.config.editButton.title',
-                {
-                  defaultMessage: 'Edit configuration',
-                }
-              )}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
@@ -130,7 +108,31 @@ export const ConnectorConfigurationConfig: React.FC = () => {
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
-        {isEditing ? <ConnectorConfigurationForm /> : displayList.length > 0 && display}
+        {isEditing ? (
+          <ConnectorConfigurationForm />
+        ) : (
+          displayList.length > 0 && (
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem>
+                <EuiDescriptionList listItems={displayList} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton onClick={() => setIsEditing(!isEditing)}>
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.content.indices.configurationConnector.config.editButton.title',
+                        {
+                          defaultMessage: 'Edit configuration',
+                        }
+                      )}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

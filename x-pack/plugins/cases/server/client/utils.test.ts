@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { buildRangeFilter, constructQueryOptions, sortToSnake } from './utils';
+import {
+  arraysDifference,
+  buildNestedFilter,
+  buildRangeFilter,
+  constructQueryOptions,
+  sortToSnake,
+} from './utils';
 import { toElasticsearchQuery } from '@kbn/es-query';
 import { CaseStatuses } from '../../common';
 import { CaseSeverity } from '../../common/api';
@@ -487,6 +493,340 @@ describe('utils', () => {
           "type": "function",
         }
       `);
+    });
+  });
+
+  describe('buildNestedFilter', () => {
+    it('returns undefined if filters is undefined', () => {
+      expect(buildNestedFilter({ field: '', nestedField: '', operator: 'or' })).toBeUndefined();
+    });
+
+    it('returns undefined when the filters array is empty', () => {
+      expect(
+        buildNestedFilter({ filters: [], field: '', nestedField: '', operator: 'or' })
+      ).toBeUndefined();
+    });
+
+    it('returns a KueryNode for a single filter', () => {
+      expect(
+        toElasticsearchQuery(
+          buildNestedFilter({
+            filters: ['hello'],
+            field: 'uid',
+            nestedField: 'nestedField',
+            operator: 'or',
+          })!
+        )
+      ).toMatchInlineSnapshot(`
+        Object {
+          "nested": Object {
+            "path": "cases.attributes.nestedField",
+            "query": Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match": Object {
+                      "cases.attributes.nestedField.uid": "hello",
+                    },
+                  },
+                ],
+              },
+            },
+            "score_mode": "none",
+          },
+        }
+      `);
+    });
+
+    it("returns a KueryNode for multiple filters or'd together", () => {
+      expect(
+        toElasticsearchQuery(
+          buildNestedFilter({
+            filters: ['uid1', 'uid2'],
+            field: 'uid',
+            nestedField: 'nestedField',
+            operator: 'or',
+          })!
+        )
+      ).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "nested": Object {
+                  "path": "cases.attributes.nestedField",
+                  "query": Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "match": Object {
+                            "cases.attributes.nestedField.uid": "uid1",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  "score_mode": "none",
+                },
+              },
+              Object {
+                "nested": Object {
+                  "path": "cases.attributes.nestedField",
+                  "query": Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "match": Object {
+                            "cases.attributes.nestedField.uid": "uid2",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  "score_mode": "none",
+                },
+              },
+            ],
+          },
+        }
+      `);
+    });
+
+    it("returns a KueryNode for multiple filters and'ed together", () => {
+      expect(
+        toElasticsearchQuery(
+          buildNestedFilter({
+            filters: ['uid1', 'uid2'],
+            field: 'uid',
+            nestedField: 'nestedField',
+            operator: 'and',
+          })!
+        )
+      ).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "nested": Object {
+                  "path": "cases.attributes.nestedField",
+                  "query": Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "match": Object {
+                            "cases.attributes.nestedField.uid": "uid1",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  "score_mode": "none",
+                },
+              },
+              Object {
+                "nested": Object {
+                  "path": "cases.attributes.nestedField",
+                  "query": Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "match": Object {
+                            "cases.attributes.nestedField.uid": "uid2",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  "score_mode": "none",
+                },
+              },
+            ],
+          },
+        }
+      `);
+    });
+  });
+
+  describe('arraysDifference', () => {
+    it('returns null if originalValue is null', () => {
+      expect(arraysDifference(null, [])).toBeNull();
+    });
+
+    it('returns null if originalValue is undefined', () => {
+      expect(arraysDifference(undefined, [])).toBeNull();
+    });
+
+    it('returns null if originalValue is not an array', () => {
+      // @ts-expect-error passing a string instead of an array
+      expect(arraysDifference('a string', [])).toBeNull();
+    });
+
+    it('returns null if updatedValue is null', () => {
+      expect(arraysDifference([], null)).toBeNull();
+    });
+
+    it('returns null if updatedValue is undefined', () => {
+      expect(arraysDifference([], undefined)).toBeNull();
+    });
+
+    it('returns null if updatedValue is not an array', () => {
+      expect(arraysDifference([], 'a string' as unknown as string[])).toBeNull();
+    });
+
+    it('returns null if the arrays are both empty', () => {
+      expect(arraysDifference([], [])).toBeNull();
+    });
+
+    describe('object arrays', () => {
+      it('returns null if the arrays are both equal with single string', () => {
+        expect(arraysDifference([{ uid: 'a' }], [{ uid: 'a' }])).toBeNull();
+      });
+
+      it('returns null if the arrays are both equal with multiple strings', () => {
+        expect(
+          arraysDifference([{ uid: 'a' }, { uid: 'b' }], [{ uid: 'a' }, { uid: 'b' }])
+        ).toBeNull();
+      });
+
+      it("returns 'b' in the added items when the updated value contains an added value", () => {
+        expect(arraysDifference([{ uid: 'a' }], [{ uid: 'a' }, { uid: 'b' }]))
+          .toMatchInlineSnapshot(`
+          Object {
+            "addedItems": Array [
+              Object {
+                "uid": "b",
+              },
+            ],
+            "deletedItems": Array [],
+          }
+        `);
+      });
+
+      it("returns 'b' in the deleted items when the updated value removes an item", () => {
+        expect(arraysDifference([{ uid: 'a' }, { uid: 'b' }], [{ uid: 'a' }]))
+          .toMatchInlineSnapshot(`
+          Object {
+            "addedItems": Array [],
+            "deletedItems": Array [
+              Object {
+                "uid": "b",
+              },
+            ],
+          }
+        `);
+      });
+
+      it("returns 'a' and 'b' in the added items when the updated value adds both", () => {
+        expect(arraysDifference([], [{ uid: 'a' }, { uid: 'b' }])).toMatchInlineSnapshot(`
+          Object {
+            "addedItems": Array [
+              Object {
+                "uid": "a",
+              },
+              Object {
+                "uid": "b",
+              },
+            ],
+            "deletedItems": Array [],
+          }
+        `);
+      });
+
+      it("returns 'a' and 'b' in the deleted items when the updated value removes both", () => {
+        expect(arraysDifference([{ uid: 'a' }, { uid: 'b' }], [])).toMatchInlineSnapshot(`
+          Object {
+            "addedItems": Array [],
+            "deletedItems": Array [
+              Object {
+                "uid": "a",
+              },
+              Object {
+                "uid": "b",
+              },
+            ],
+          }
+        `);
+      });
+
+      it('returns the added and deleted values if the type of objects are different', () => {
+        expect(arraysDifference([{ uid: 'a' }], [{ uid: 'a', hi: '1' }])).toMatchInlineSnapshot(`
+          Object {
+            "addedItems": Array [
+              Object {
+                "hi": "1",
+                "uid": "a",
+              },
+            ],
+            "deletedItems": Array [
+              Object {
+                "uid": "a",
+              },
+            ],
+          }
+        `);
+      });
+    });
+
+    describe('string arrays', () => {
+      it('returns null if the arrays are both equal with single string', () => {
+        expect(arraysDifference(['a'], ['a'])).toBeNull();
+      });
+
+      it('returns null if the arrays are both equal with multiple strings', () => {
+        expect(arraysDifference(['a', 'b'], ['a', 'b'])).toBeNull();
+      });
+
+      it("returns 'b' in the added items when the updated value contains an added value", () => {
+        expect(arraysDifference(['a'], ['a', 'b'])).toMatchInlineSnapshot(`
+          Object {
+            "addedItems": Array [
+              "b",
+            ],
+            "deletedItems": Array [],
+          }
+        `);
+      });
+
+      it("returns 'b' in the deleted items when the updated value removes an item", () => {
+        expect(arraysDifference(['a', 'b'], ['a'])).toMatchInlineSnapshot(`
+          Object {
+            "addedItems": Array [],
+            "deletedItems": Array [
+              "b",
+            ],
+          }
+        `);
+      });
+
+      it("returns 'a' and 'b' in the added items when the updated value adds both", () => {
+        expect(arraysDifference([], ['a', 'b'])).toMatchInlineSnapshot(`
+          Object {
+            "addedItems": Array [
+              "a",
+              "b",
+            ],
+            "deletedItems": Array [],
+          }
+        `);
+      });
+
+      it("returns 'a' and 'b' in the deleted items when the updated value removes both", () => {
+        expect(arraysDifference(['a', 'b'], [])).toMatchInlineSnapshot(`
+          Object {
+            "addedItems": Array [],
+            "deletedItems": Array [
+              "a",
+              "b",
+            ],
+          }
+        `);
+      });
     });
   });
 });

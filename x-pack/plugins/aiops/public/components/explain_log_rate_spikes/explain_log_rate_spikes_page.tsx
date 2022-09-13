@@ -12,9 +12,9 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiPageBody,
-  EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
+  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
   EuiPanel,
   EuiTitle,
 } from '@elastic/eui';
@@ -22,13 +22,13 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
-import { Filter, Query } from '@kbn/es-query';
+import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedSearch } from '@kbn/discover-plugin/public';
 
-import { useAiOpsKibana } from '../../kibana_context';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { SearchQueryLanguage, SavedSearchSavedObject } from '../../application/utils/search_utils';
-import { useUrlState, usePageUrlState, AppStateKey } from '../../hooks/url_state';
+import { useUrlState, usePageUrlState, AppStateKey } from '../../hooks/use_url_state';
 import { useData } from '../../hooks/use_data';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { DocumentCountContent } from '../document_count_content/document_count_content';
@@ -55,8 +55,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
   dataView,
   savedSearch,
 }) => {
-  const { services } = useAiOpsKibana();
-  const { data: dataService } = services;
+  const { data: dataService } = useAiopsAppContext();
 
   const [aiopsListState, setAiopsListState] = usePageUrlState(AppStateKey, restorableDefaults);
   const [globalState, setGlobalState] = useUrlState('_g');
@@ -106,8 +105,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
   }, [pinnedChangePoint, selectedChangePoint]);
 
   const {
-    overallDocStats,
-    selectedDocStats,
+    documentStats,
     timefilter,
     earliest,
     latest,
@@ -121,18 +119,22 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
     currentSelectedChangePoint
   );
 
-  const totalCount = currentSelectedChangePoint
-    ? overallDocStats.totalCount + selectedDocStats.totalCount
-    : overallDocStats.totalCount;
+  const { totalCount, documentCountStats, documentCountStatsCompare } = documentStats;
 
-  useEffect(() => {
-    return () => {
-      // When navigating away from the index pattern
-      // Reset all previously set filters
-      // to make sure new page doesn't have unrelated filters
-      dataService.query.filterManager.removeAll();
-    };
-  }, [dataView.id, dataService.query.filterManager]);
+  useEffect(
+    // TODO: Consolidate this hook/function with with Data visualizer's
+    function clearFiltersOnLeave() {
+      return () => {
+        // We want to clear all filters that have not been pinned globally
+        // when navigating to other pages
+        dataService.query.filterManager
+          .getFilters()
+          .filter((f) => f.$state?.store === FilterStateStore.APP_STATE)
+          .forEach((f) => dataService.query.filterManager.removeFilter(f));
+      };
+    },
+    [dataService.query.filterManager]
+  );
 
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
 
@@ -168,7 +170,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
   }
 
   return (
-    <EuiPageBody data-test-subj="aiopsIndexPage" paddingSize="none" panelled={false}>
+    <EuiPageBody data-test-subj="aiopsExplainLogRateSpikesPage" paddingSize="none" panelled={false}>
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
           <EuiPageContentHeader className="aiopsPageHeader">
@@ -215,15 +217,15 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
               setSearchParams={setSearchParams}
             />
           </EuiFlexItem>
-          {overallDocStats?.totalCount !== undefined && (
+          {documentCountStats !== undefined && (
             <EuiFlexItem>
               <EuiPanel paddingSize="m">
                 <DocumentCountContent
                   brushSelectionUpdateHandler={setWindowParameters}
                   clearSelectionHandler={clearSelection}
-                  documentCountStats={overallDocStats.documentCountStats}
+                  documentCountStats={documentCountStats}
                   documentCountStatsSplit={
-                    currentSelectedChangePoint ? selectedDocStats.documentCountStats : undefined
+                    currentSelectedChangePoint ? documentCountStatsCompare : undefined
                   }
                   totalCount={totalCount}
                   changePoint={currentSelectedChangePoint}
@@ -265,6 +267,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
                       />
                     </p>
                   }
+                  data-test-subj="aiopsNoWindowParametersEmptyPrompt"
                 />
               )}
             </EuiPanel>

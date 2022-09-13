@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   TRACE_ID,
   PARENT_ID,
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../../lib/helpers/setup_request';
-import { ProcessorEvent } from '../../../../common/processor_event';
 
 export async function getRootTransactionByTraceId(
   traceId: string,

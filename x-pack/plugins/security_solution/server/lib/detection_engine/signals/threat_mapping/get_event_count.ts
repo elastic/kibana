@@ -11,7 +11,7 @@ import { getQueryFilter } from '../../../../../common/detection_engine/get_query
 import { singleSearchAfter } from '../single_search_after';
 import { buildEventsSearchQuery } from '../build_events_query';
 
-export const MAX_PER_PAGE = 9000;
+export const MAX_PER_PAGE = 3000;
 
 export const getEventList = async ({
   services,
@@ -47,7 +47,7 @@ export const getEventList = async ({
     services,
     ruleExecutionLogger,
     filter,
-    pageSize: Math.ceil(Math.min(tuple.maxSignals, calculatedPerPage)),
+    pageSize: calculatedPerPage,
     primaryTimestamp,
     secondaryTimestamp,
     sortOrder: 'desc',

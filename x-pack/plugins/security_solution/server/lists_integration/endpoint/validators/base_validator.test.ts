@@ -144,12 +144,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
   });
 
   it('should throw if policy ids for by policy artifacts are not valid', async () => {
-    packagePolicyService.getByIDs.mockResolvedValue([
-      {
-        id: '123',
-        version: undefined,
-      } as PackagePolicy,
-    ]);
+    packagePolicyService.getByIDs.mockResolvedValue([]);
 
     await expect(initValidator()._validateByPolicyItem(exceptionLikeItem)).rejects.toBeInstanceOf(
       EndpointArtifactExceptionValidationError

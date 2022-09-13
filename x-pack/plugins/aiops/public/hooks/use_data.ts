@@ -16,7 +16,7 @@ import type { SavedSearch } from '@kbn/discover-plugin/public';
 
 import { TimeBuckets } from '../../common/time_buckets';
 
-import { useAiOpsKibana } from '../kibana_context';
+import { useAiopsAppContext } from './use_aiops_app_context';
 import { aiopsRefresh$ } from '../application/services/timefilter_refresh_service';
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
 import type { AiOpsIndexBasedAppState } from '../components/explain_log_rate_spikes/explain_log_rate_spikes_app_state';
@@ -27,7 +27,7 @@ import {
 
 import { useTimefilter } from './use_time_filter';
 import { useDocumentCountStats } from './use_document_count_stats';
-import type { Dictionary } from './url_state';
+import type { Dictionary } from './use_url_state';
 
 export const useData = (
   {
@@ -38,8 +38,12 @@ export const useData = (
   onUpdate: (params: Dictionary<unknown>) => void,
   selectedChangePoint?: ChangePoint
 ) => {
-  const { services } = useAiOpsKibana();
-  const { uiSettings, data } = services;
+  const {
+    uiSettings,
+    data: {
+      query: { filterManager },
+    },
+  } = useAiopsAppContext();
   const [lastRefresh, setLastRefresh] = useState(0);
   const [fieldStatsRequest, setFieldStatsRequest] = useState<
     DocumentStatsSearchStrategyParams | undefined
@@ -51,12 +55,15 @@ export const useData = (
       dataView: currentDataView,
       uiSettings,
       savedSearch: currentSavedSearch,
-      filterManager: data.query.filterManager,
+      filterManager,
     });
 
     if (searchData === undefined || aiopsListState.searchString !== '') {
       if (aiopsListState.filters) {
-        services.data.query.filterManager.setFilters(aiopsListState.filters);
+        const globalFilters = filterManager?.getGlobalFilters();
+
+        if (filterManager) filterManager.setFilters(aiopsListState.filters);
+        if (globalFilters) filterManager?.addFilters(globalFilters);
       }
       return {
         searchQuery: aiopsListState.searchQuery,
@@ -104,13 +111,13 @@ export const useData = (
   }, [fieldStatsRequest, selectedChangePoint]);
 
   const selectedChangePointStatsRequest = useMemo(() => {
-    return fieldStatsRequest
+    return fieldStatsRequest && selectedChangePoint
       ? { ...fieldStatsRequest, selectedChangePoint, includeSelectedChangePoint: true }
       : undefined;
   }, [fieldStatsRequest, selectedChangePoint]);
 
-  const { docStats: overallDocStats } = useDocumentCountStats(overallStatsRequest, lastRefresh);
-  const { docStats: selectedDocStats } = useDocumentCountStats(
+  const documentStats = useDocumentCountStats(
+    overallStatsRequest,
     selectedChangePointStatsRequest,
     lastRefresh
   );
@@ -173,8 +180,7 @@ export const useData = (
   }, [searchString, JSON.stringify(searchQuery)]);
 
   return {
-    overallDocStats,
-    selectedDocStats,
+    documentStats,
     timefilter,
     /** Start timestamp filter */
     earliest: fieldStatsRequest?.earliest,

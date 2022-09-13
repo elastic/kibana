@@ -143,7 +143,20 @@ export function SyntheticsIntegrationPageProvider({
     async confirmAndSave(isEditPage?: boolean) {
       await this.ensureIsOnPackagePage();
       const saveButton = await this.findSaveButton(isEditPage);
-      saveButton.click();
+      await saveButton.click();
+      await this.maybeForceInstall();
+    },
+
+    /**
+     * If the force install modal opens, click force install
+     */
+    async maybeForceInstall() {
+      const confirmForceInstallModalOpen = await testSubjects.exists('confirmForceInstallModal');
+
+      if (confirmForceInstallModalOpen) {
+        const forceInstallBtn = await testSubjects.find('confirmModalConfirmButton');
+        return forceInstallBtn.click();
+      }
     },
 
     /**

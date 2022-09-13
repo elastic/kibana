@@ -35,6 +35,7 @@ import {
   setAddingNewPrivateLocation,
   setManageFlyoutOpen,
 } from '../../../state/private_locations';
+import { PrivateLocation } from '../../../../../common/runtime_types';
 
 export const ManageLocationsFlyout = () => {
   const dispatch = useDispatch();
@@ -69,10 +70,15 @@ export const ManageLocationsFlyout = () => {
     dispatch(getServiceLocations());
   };
 
+  const handleSubmit = (formData: PrivateLocation) => {
+    onSubmit(formData);
+    setIsAddingNew(false);
+  };
+
   const flyout = (
     <EuiFlyout onClose={closeFlyout} size="m" style={{ width: 540 }}>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
+        <EuiTitle size="m">
           <h2>{PRIVATE_LOCATIONS}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -127,7 +133,7 @@ export const ManageLocationsFlyout = () => {
       {isAddingNew ? (
         <AddLocationFlyout
           setIsOpen={setIsAddingNew}
-          onSubmit={onSubmit}
+          onSubmit={handleSubmit}
           privateLocations={privateLocations}
         />
       ) : null}

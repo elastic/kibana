@@ -21,8 +21,6 @@ import type { ContextMenuItemNavByRouterProps } from '../../../../components/con
 import { isEndpointHostIsolated } from '../../../../../common/utils/validators';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { isIsolationSupported } from '../../../../../../common/endpoint/service/host_isolation/utils';
-import { useDoesEndpointSupportResponder } from '../../../../../common/hooks/endpoint/use_does_endpoint_support_responder';
-import { UPGRADE_ENDPOINT_FOR_RESPONDER } from '../../../../../common/translations';
 
 interface Options {
   isEndpointList: boolean;
@@ -45,7 +43,6 @@ export const useEndpointActionItems = (
     'responseActionsConsoleEnabled'
   );
   const canAccessResponseConsole = useUserPrivileges().endpointPrivileges.canAccessResponseConsole;
-  const isResponderCapabilitiesEnabled = useDoesEndpointSupportResponder(endpointMetadata);
 
   return useMemo<ContextMenuItemNavByRouterProps[]>(() => {
     if (endpointMetadata) {
@@ -128,7 +125,6 @@ export const useEndpointActionItems = (
                 'data-test-subj': 'console',
                 icon: 'console',
                 key: 'consoleLink',
-                disabled: !isResponderCapabilitiesEnabled,
                 onClick: (ev: React.MouseEvent) => {
                   ev.preventDefault();
                   showEndpointResponseActionsConsole(endpointMetadata);
@@ -136,12 +132,9 @@ export const useEndpointActionItems = (
                 children: (
                   <FormattedMessage
                     id="xpack.securitySolution.endpoint.actions.console"
-                    defaultMessage="Launch responder"
+                    defaultMessage="Respond"
                   />
                 ),
-                toolTipContent: !isResponderCapabilitiesEnabled
-                  ? UPGRADE_ENDPOINT_FOR_RESPONDER
-                  : '',
               },
             ]
           : []),
@@ -264,6 +257,5 @@ export const useEndpointActionItems = (
     isResponseActionsConsoleEnabled,
     showEndpointResponseActionsConsole,
     options?.isEndpointList,
-    isResponderCapabilitiesEnabled,
   ]);
 };

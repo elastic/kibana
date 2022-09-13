@@ -26,6 +26,7 @@
         ],
         "path": "packages/core/http/core-http-server-mocks/src/test_utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
@@ -41,6 +42,7 @@
             ],
             "path": "packages/core/http/core-http-server-mocks/src/test_utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -64,6 +66,7 @@
         ],
         "path": "packages/core/http/core-http-server-mocks/src/test_utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
@@ -79,6 +82,7 @@
             ],
             "path": "packages/core/http/core-http-server-mocks/src/test_utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -113,6 +117,7 @@
         ],
         "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -147,12 +152,13 @@
           "OnPreResponseHandler",
           "]>; } & Omit<",
           "HttpServiceSetup",
-          "<ContextType>, \"basePath\" | \"createRouter\"> & { basePath: BasePathMocked; createRouter: jest.MockedFunction<() => ",
+          "<ContextType>, \"createRouter\" | \"basePath\"> & { basePath: BasePathMocked; createRouter: jest.MockedFunction<() => ",
           "RouterMock",
           ">; }"
         ],
         "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -175,6 +181,7 @@
         ],
         "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -209,6 +216,7 @@
         ],
         "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -255,7 +263,7 @@
           "RequestHandlerContextBase",
           ">) => void]>; } & Omit<",
           "InternalHttpServiceSetup",
-          ", \"basePath\" | \"auth\" | \"createRouter\" | \"authRequestHeaders\"> & { auth: AuthMocked; basePath: BasePathMocked; createRouter: jest.MockedFunction<(path: string) => ",
+          ", \"createRouter\" | \"basePath\" | \"auth\" | \"authRequestHeaders\"> & { auth: AuthMocked; basePath: BasePathMocked; createRouter: jest.MockedFunction<(path: string) => ",
           "RouterMock",
           ">; authRequestHeaders: jest.Mocked<",
           "IAuthHeadersStorage",
@@ -263,6 +271,7 @@
         ],
         "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -285,6 +294,7 @@
         ],
         "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -298,6 +308,7 @@
         "description": [],
         "path": "packages/core/http/core-http-server-mocks/src/http_server.mocks.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
@@ -315,6 +326,7 @@
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_server.mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -329,7 +341,8 @@
                   "<P, Q, B> | undefined"
                 ],
                 "path": "node_modules/@types/kbn__core-http-router-server-mocks/index.d.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -350,6 +363,7 @@
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_server.mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -366,7 +380,8 @@
                   "> | undefined"
                 ],
                 "path": "node_modules/@types/kbn__hapi-mocks/index.d.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -384,6 +399,7 @@
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_server.mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -401,6 +417,7 @@
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_server.mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -416,6 +433,7 @@
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_server.mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }
@@ -431,6 +449,7 @@
         "description": [],
         "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
@@ -444,6 +463,7 @@
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -459,6 +479,7 @@
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -469,7 +490,8 @@
                 "label": "serverBasePath",
                 "description": [],
                 "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/core-http-server-mocks",
@@ -479,7 +501,8 @@
                 "label": "publicBaseUrl",
                 "description": [],
                 "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -495,6 +518,7 @@
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -517,6 +541,7 @@
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -539,6 +564,7 @@
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -561,6 +587,7 @@
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -588,6 +615,7 @@
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -610,6 +638,7 @@
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -632,6 +661,7 @@
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -649,6 +679,7 @@
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -666,6 +697,7 @@
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -683,6 +715,7 @@
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -700,6 +733,7 @@
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -717,6 +751,7 @@
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -734,6 +769,7 @@
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -750,6 +786,7 @@
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -763,7 +800,8 @@
                   "{ routerPath?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/@types/kbn__core-http-router-server-mocks/index.d.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -779,6 +817,7 @@
         "description": [],
         "path": "packages/core/http/core-http-server-mocks/src/cookie_session_storage.mocks.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
@@ -794,6 +833,7 @@
             ],
             "path": "packages/core/http/core-http-server-mocks/src/cookie_session_storage.mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -811,6 +851,7 @@
             ],
             "path": "packages/core/http/core-http-server-mocks/src/cookie_session_storage.mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }

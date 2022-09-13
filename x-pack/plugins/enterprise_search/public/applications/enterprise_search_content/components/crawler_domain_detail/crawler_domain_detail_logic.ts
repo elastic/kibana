@@ -7,13 +7,11 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-
 import { HttpError, Status } from '../../../../../common/types/api';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 
-import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
+import { flashAPIErrors } from '../../../shared/flash_messages';
 
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
@@ -125,16 +123,8 @@ export const CrawlerDomainDetailLogic = kea<
         });
       }
     },
-    deleteApiSuccess: ({ domain }) => {
+    deleteApiSuccess: () => {
       const { indexName } = IndexNameLogic.values;
-      flashSuccessToast(
-        i18n.translate('xpack.enterpriseSearch.crawler.action.deleteDomain.successMessage', {
-          defaultMessage: "Domain '{domainUrl}' was deleted",
-          values: {
-            domainUrl: domain?.url,
-          },
-        })
-      );
       KibanaLogic.values.navigateToUrl(
         generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
           indexName,

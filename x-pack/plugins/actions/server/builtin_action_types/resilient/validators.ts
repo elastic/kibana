@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ActionsConfigurationUtilities } from '../../actions_config';
 import {
   ResilientPublicConfigurationType,
   ResilientSecretConfigurationType,
@@ -13,21 +12,23 @@ import {
 } from './types';
 
 import * as i18n from './translations';
+import { ValidatorServices } from '../../types';
 
 export const validateCommonConfig = (
-  configurationUtilities: ActionsConfigurationUtilities,
-  configObject: ResilientPublicConfigurationType
+  configObject: ResilientPublicConfigurationType,
+  validatorServices: ValidatorServices
 ) => {
+  const { configurationUtilities } = validatorServices;
   try {
     configurationUtilities.ensureUriAllowed(configObject.apiUrl);
   } catch (allowedListError) {
-    return i18n.ALLOWED_HOSTS_ERROR(allowedListError.message);
+    throw new Error(i18n.ALLOWED_HOSTS_ERROR(allowedListError.message));
   }
 };
 
 export const validateCommonSecrets = (
-  configurationUtilities: ActionsConfigurationUtilities,
-  secrets: ResilientSecretConfigurationType
+  secrets: ResilientSecretConfigurationType,
+  validatorServices: ValidatorServices
 ) => {};
 
 export const validate: ExternalServiceValidation = {

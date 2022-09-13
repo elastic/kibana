@@ -7,7 +7,7 @@
 
 import { chunk } from 'lodash';
 import { resolve } from 'path';
-import glob from 'glob';
+import globby from 'globby';
 
 import Url from 'url';
 
@@ -26,7 +26,7 @@ const retrieveIntegrations = (chunksTotal: number, chunkIndex: number) => {
     __dirname,
     '../../plugins/threat_intelligence/cypress/integration/**/*.spec.ts'
   );
-  const integrationsPaths = glob.sync(pattern);
+  const integrationsPaths = globby.sync(pattern);
   const chunkSize = Math.ceil(integrationsPaths.length / chunksTotal);
 
   return chunk(integrationsPaths, chunkSize)[chunkIndex - 1];
@@ -39,7 +39,6 @@ export async function ThreatIntelligenceConfigurableCypressTestRunner(
 ) {
   const log = getService('log');
   const config = getService('config');
-  const esArchiver = getService('esArchiver');
   const es = getService('es');
 
   const pipelines = [tiAbusechMalware, tiAbusechMalwareBazaar, tiAbusechUrl];
@@ -58,8 +57,6 @@ export async function ThreatIntelligenceConfigurableCypressTestRunner(
 
     log.info(`PUT pipeline ${pipeline.name}: ${res.statusCode}`);
   }
-
-  await esArchiver.load('x-pack/test/threat_intelligence_cypress/es_archives/threat_intelligence');
 
   await withProcRunner(log, async (procs) => {
     await procs.run('cypress', {

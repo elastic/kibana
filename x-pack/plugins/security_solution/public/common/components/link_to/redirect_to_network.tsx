@@ -7,6 +7,7 @@
 
 import type { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
+import { NetworkDetailsRouteType } from '../../../network/pages/details/types';
 
 import { appendSearch } from './helpers';
 
@@ -15,5 +16,6 @@ export const getNetworkUrl = (search?: string) => `${appendSearch(search)}`;
 export const getNetworkDetailsUrl = (
   detailName: string,
   flowTarget?: FlowTarget | FlowTargetSourceDest,
-  search?: string
-) => `/ip/${detailName}/${flowTarget || FlowTarget.source}${appendSearch(search)}`;
+  search?: string,
+  tabName = NetworkDetailsRouteType.flows
+) => `/ip/${detailName}/${flowTarget || FlowTarget.source}/${tabName}${appendSearch(search)}`;

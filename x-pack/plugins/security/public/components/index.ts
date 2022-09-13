@@ -13,5 +13,3 @@ export {
   useUserProfile,
   useCurrentUser,
 } from './use_current_user';
-export { UserAvatar } from './user_avatar';
-export type { UserAvatarProps } from './user_avatar';

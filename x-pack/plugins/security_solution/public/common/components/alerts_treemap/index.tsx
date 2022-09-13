@@ -28,6 +28,7 @@ import {
 import { getLayersMultiDimensional, getLayersOneDimension } from './lib/layers';
 import { getFirstGroupLegendItems } from './lib/legend';
 import { NoData } from './no_data';
+import { NO_DATA_REASON_LABEL } from './translations';
 import type { AlertsTreeMapAggregation, FlattenedBucket, RawBucket } from './types';
 
 export const DEFAULT_MIN_CHART_HEIGHT = 370; // px
@@ -68,7 +69,7 @@ const AlertsTreemapComponent: React.FC<Props> = ({
           fillLabel: { valueFont: { fontWeight: 700 } },
           idealFontSizeJump: 1.15,
           maxFontSize: 16,
-          minFontSize: 8,
+          minFontSize: 4,
           sectorLineStroke: fillColor, // draws the light or dark "lines" between partitions
           sectorLineWidth: 1.5,
         },
@@ -167,21 +168,25 @@ const AlertsTreemapComponent: React.FC<Props> = ({
     <div data-test-subj="treemap">
       <EuiFlexGroup gutterSize="none">
         <ChartFlexItem grow={true} $minChartHeight={minChartHeight}>
-          <Chart>
-            <Settings
-              baseTheme={theme}
-              showLegend={false}
-              theme={treemapTheme}
-              onElementClick={onElementClick}
-            />
-            <Partition
-              data={normalizedData}
-              id="spec_1"
-              layers={layers}
-              layout={PartitionLayout.treemap}
-              valueAccessor={valueAccessor}
-            />
-          </Chart>
+          {stackByField1 != null && !isEmpty(stackByField1) && normalizedData.length === 0 ? (
+            <NoData reason={NO_DATA_REASON_LABEL(stackByField1)} />
+          ) : (
+            <Chart>
+              <Settings
+                baseTheme={theme}
+                showLegend={false}
+                theme={treemapTheme}
+                onElementClick={onElementClick}
+              />
+              <Partition
+                data={normalizedData}
+                id="spec_1"
+                layers={layers}
+                layout={PartitionLayout.treemap}
+                valueAccessor={valueAccessor}
+              />
+            </Chart>
+          )}
         </ChartFlexItem>
 
         <EuiFlexItem grow={false}>

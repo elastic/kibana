@@ -19,7 +19,12 @@ export const mockKibanaValues = {
     deployment_url: 'https://cloud.elastic.co/deployments/some-id',
   },
   history: mockHistory,
+  isCloud: false,
   navigateToUrl: jest.fn(),
+  productAccess: {
+    hasAppSearchAccess: true,
+    hasWorkplaceSearchAccess: true,
+  },
   security: securityMock.createStart(),
   setBreadcrumbs: jest.fn(),
   setChromeIsVisible: jest.fn(),

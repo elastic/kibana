@@ -41,121 +41,255 @@ describe('connector_add_flyout', () => {
       },
     };
   });
-
-  it('renders action type menu with proper EuiCards for registered action types', async () => {
-    const onActionTypeChange = jest.fn();
-    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
-      id: 'my-action-type',
-      iconClass: 'test',
-      selectMessage: 'test',
-      validateParams: (): Promise<GenericValidationResult<unknown>> => {
-        const validationResult = { errors: {} };
-        return Promise.resolve(validationResult);
-      },
-      actionConnectorFields: null,
-    });
-    actionTypeRegistry.get.mockReturnValueOnce(actionType);
-    loadActionTypes.mockResolvedValueOnce([
-      {
-        id: actionType.id,
-        enabled: true,
-        name: 'Test',
-        enabledInConfig: true,
-        enabledInLicense: true,
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-      },
-    ]);
-
-    const wrapper = mountWithIntl(
-      <ActionTypeMenu
-        onActionTypeChange={onActionTypeChange}
-        actionTypeRegistry={actionTypeRegistry}
-      />
-    );
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(wrapper.find('[data-test-subj="my-action-type-card"]').exists()).toBeTruthy();
+  afterEach(() => {
+    actionTypeRegistry.get.mockReset();
+    jest.clearAllMocks();
   });
 
-  it(`doesn't renders action types that are disabled via config`, async () => {
-    const onActionTypeChange = jest.fn();
-    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
-      id: 'my-action-type',
-      iconClass: 'test',
-      selectMessage: 'test',
-      validateParams: (): Promise<GenericValidationResult<unknown>> => {
-        const validationResult = { errors: {} };
-        return Promise.resolve(validationResult);
-      },
-      actionConnectorFields: null,
-    });
-    actionTypeRegistry.get.mockReturnValueOnce(actionType);
-    loadActionTypes.mockResolvedValueOnce([
-      {
-        id: actionType.id,
-        enabled: false,
-        name: 'Test',
-        enabledInConfig: false,
-        enabledInLicense: true,
-        minimumLicenseRequired: 'gold',
-        supportedFeatureIds: ['alerting'],
-      },
-    ]);
+  describe('rendering', () => {
+    it('renders action type menu with proper EuiCards for registered action types', async () => {
+      const onActionTypeChange = jest.fn();
+      const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+        id: 'my-action-type',
+        iconClass: 'test',
+        selectMessage: 'test',
+        validateParams: (): Promise<GenericValidationResult<unknown>> => {
+          const validationResult = { errors: {} };
+          return Promise.resolve(validationResult);
+        },
+        actionConnectorFields: null,
+      });
+      actionTypeRegistry.get.mockReturnValueOnce(actionType);
+      loadActionTypes.mockResolvedValueOnce([
+        {
+          id: actionType.id,
+          enabled: true,
+          name: 'Test',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+        },
+      ]);
 
-    const wrapper = mountWithIntl(
-      <ActionTypeMenu
-        onActionTypeChange={onActionTypeChange}
-        actionTypeRegistry={actionTypeRegistry}
-      />
-    );
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+      const wrapper = mountWithIntl(
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      );
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find('[data-test-subj="my-action-type-card"]').exists()).toBeTruthy();
     });
 
-    expect(wrapper.find('[data-test-subj="my-action-type-card"]').exists()).toBeFalsy();
+    it(`doesn't renders action types that are disabled via config`, async () => {
+      const onActionTypeChange = jest.fn();
+      const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+        id: 'my-action-type',
+        iconClass: 'test',
+        selectMessage: 'test',
+        validateParams: (): Promise<GenericValidationResult<unknown>> => {
+          const validationResult = { errors: {} };
+          return Promise.resolve(validationResult);
+        },
+        actionConnectorFields: null,
+      });
+      actionTypeRegistry.get.mockReturnValueOnce(actionType);
+      loadActionTypes.mockResolvedValueOnce([
+        {
+          id: actionType.id,
+          enabled: false,
+          name: 'Test',
+          enabledInConfig: false,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'gold',
+          supportedFeatureIds: ['alerting'],
+        },
+      ]);
+
+      const wrapper = mountWithIntl(
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      );
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find('[data-test-subj="my-action-type-card"]').exists()).toBeFalsy();
+    });
+
+    it(`renders action types as disabled when disabled by license`, async () => {
+      const onActionTypeChange = jest.fn();
+      const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+        id: 'my-action-type',
+        iconClass: 'test',
+        selectMessage: 'test',
+        validateParams: (): Promise<GenericValidationResult<unknown>> => {
+          const validationResult = { errors: {} };
+          return Promise.resolve(validationResult);
+        },
+        actionConnectorFields: null,
+      });
+      actionTypeRegistry.get.mockReturnValueOnce(actionType);
+      loadActionTypes.mockResolvedValueOnce([
+        {
+          id: actionType.id,
+          enabled: false,
+          name: 'Test',
+          enabledInConfig: true,
+          enabledInLicense: false,
+          minimumLicenseRequired: 'gold',
+          supportedFeatureIds: ['alerting'],
+        },
+      ]);
+
+      const wrapper = mountWithIntl(
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      );
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(
+        wrapper.find('EuiToolTip [data-test-subj="my-action-type-card"]').exists()
+      ).toBeTruthy();
+    });
   });
 
-  it(`renders action types as disabled when disabled by license`, async () => {
-    const onActionTypeChange = jest.fn();
-    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
-      id: 'my-action-type',
-      iconClass: 'test',
-      selectMessage: 'test',
-      validateParams: (): Promise<GenericValidationResult<unknown>> => {
-        const validationResult = { errors: {} };
-        return Promise.resolve(validationResult);
-      },
-      actionConnectorFields: null,
-    });
-    actionTypeRegistry.get.mockReturnValueOnce(actionType);
-    loadActionTypes.mockResolvedValueOnce([
-      {
-        id: actionType.id,
-        enabled: false,
-        name: 'Test',
-        enabledInConfig: true,
-        enabledInLicense: false,
-        minimumLicenseRequired: 'gold',
-        supportedFeatureIds: ['alerting'],
-      },
-    ]);
+  describe('beta badge', () => {
+    it(`does not render beta badge when isExperimental=undefined`, async () => {
+      const onActionTypeChange = jest.fn();
+      const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+        id: 'my-action-type',
+        iconClass: 'test',
+        selectMessage: 'test',
+        validateParams: (): Promise<GenericValidationResult<unknown>> => {
+          const validationResult = { errors: {} };
+          return Promise.resolve(validationResult);
+        },
+        actionConnectorFields: null,
+      });
+      actionTypeRegistry.get.mockReturnValueOnce(actionType);
+      loadActionTypes.mockResolvedValueOnce([
+        {
+          id: actionType.id,
+          enabled: false,
+          name: 'Test',
+          enabledInConfig: true,
+          enabledInLicense: false,
+          minimumLicenseRequired: 'gold',
+          supportedFeatureIds: ['alerting'],
+        },
+      ]);
 
-    const wrapper = mountWithIntl(
-      <ActionTypeMenu
-        onActionTypeChange={onActionTypeChange}
-        actionTypeRegistry={actionTypeRegistry}
-      />
-    );
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+      const wrapper = mountWithIntl(
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      );
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(
+        wrapper.find('EuiToolTip [data-test-subj="my-action-type-card"] EuiBetaBadge').exists()
+      ).toBeFalsy();
+    });
+    it(`does not render beta badge when isExperimental=false`, async () => {
+      const onActionTypeChange = jest.fn();
+      const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+        id: 'my-action-type',
+        iconClass: 'test',
+        selectMessage: 'test',
+        validateParams: (): Promise<GenericValidationResult<unknown>> => {
+          const validationResult = { errors: {} };
+          return Promise.resolve(validationResult);
+        },
+        actionConnectorFields: null,
+        isExperimental: false,
+      });
+      actionTypeRegistry.get.mockReturnValueOnce(actionType);
+      loadActionTypes.mockResolvedValueOnce([
+        {
+          id: actionType.id,
+          enabled: false,
+          name: 'Test',
+          enabledInConfig: true,
+          enabledInLicense: false,
+          minimumLicenseRequired: 'gold',
+          supportedFeatureIds: ['alerting'],
+        },
+      ]);
+
+      const wrapper = mountWithIntl(
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      );
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(
+        wrapper.find('EuiToolTip [data-test-subj="my-action-type-card"] EuiBetaBadge').exists()
+      ).toBeFalsy();
     });
 
-    expect(wrapper.find('EuiToolTip [data-test-subj="my-action-type-card"]').exists()).toBeTruthy();
+    it(`renders beta badge when isExperimental=true`, async () => {
+      const onActionTypeChange = jest.fn();
+      const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+        id: 'my-action-type',
+        iconClass: 'test',
+        selectMessage: 'test',
+        validateParams: (): Promise<GenericValidationResult<unknown>> => {
+          const validationResult = { errors: {} };
+          return Promise.resolve(validationResult);
+        },
+        actionConnectorFields: null,
+        isExperimental: true,
+      });
+      actionTypeRegistry.get.mockReturnValueOnce(actionType);
+      loadActionTypes.mockResolvedValueOnce([
+        {
+          id: actionType.id,
+          enabled: false,
+          name: 'Test',
+          enabledInConfig: true,
+          enabledInLicense: false,
+          minimumLicenseRequired: 'gold',
+          supportedFeatureIds: ['alerting'],
+        },
+      ]);
+
+      const wrapper = mountWithIntl(
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      );
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(
+        wrapper.find('EuiToolTip [data-test-subj="my-action-type-card"] EuiBetaBadge').exists()
+      ).toBeTruthy();
+    });
   });
 });

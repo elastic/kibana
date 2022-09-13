@@ -6,11 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { getSectionsFromFields } from '../helper';
 import { MetadataTable } from '..';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { ProcessorEvent } from '../../../../../common/processor_event';
 
 interface Props {
   error: APMError;

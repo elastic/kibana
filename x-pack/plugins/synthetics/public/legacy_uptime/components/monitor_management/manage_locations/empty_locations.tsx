@@ -26,10 +26,11 @@ export const EmptyLocations = ({
     <EuiEmptyPrompt
       hasBorder
       title={<h2>{ADD_FIRST_LOCATION}</h2>}
+      titleSize="s"
       body={
-        <p>
+        <EuiText size="s">
           {!inFlyout ? FIRST_MONITOR : ''} {START_ADDING_LOCATIONS_DESCRIPTION}
-        </p>
+        </EuiText>
       }
       actions={
         <EuiButton
@@ -48,7 +49,10 @@ export const EmptyLocations = ({
       footer={
         <EuiText size="s">
           {LEARN_MORE}{' '}
-          <EuiLink href="#" target="_blank">
+          <EuiLink
+            href="https://www.elastic.co/guide/en/observability/current/uptime-set-up-choose-agent.html#private-locations"
+            target="_blank"
+          >
             {READ_DOCS}
           </EuiLink>
         </EuiText>

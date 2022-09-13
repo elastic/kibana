@@ -27,6 +27,7 @@ import {
   getUISettings,
 } from '../services';
 import { getTimeZone } from '../utils/get_timezone';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { extractContainerType, extractVisualizationType } from '../../../common';
 
 interface ExpressioHeatmapRendererDependencies {

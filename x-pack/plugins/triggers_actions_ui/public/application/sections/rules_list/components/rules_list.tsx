@@ -569,6 +569,7 @@ export const RulesList = ({
                   setIsPerformingAction(false);
                 }}
                 setRulesToDelete={setRulesToDelete}
+                setRulesToUpdateAPIKey={setRulesToUpdateAPIKey}
               />
             </BulkOperationPopover>
           </EuiFlexItem>

@@ -242,11 +242,11 @@ exports[`Canvas Shareable Workpad API Placed successfully with default propertie
                   class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <div
-                    class="euiPopover euiPopover--anchorUpRight"
+                    class="euiPopover emotion-euiPopover"
                     id="settings"
                   >
                     <div
-                      class="euiPopover__anchor"
+                      class="euiPopover__anchor css-16vtueo-render"
                     >
                       <button
                         aria-label="Settings"
@@ -516,11 +516,11 @@ exports[`Canvas Shareable Workpad API Placed successfully with height specified 
                   class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <div
-                    class="euiPopover euiPopover--anchorUpRight"
+                    class="euiPopover emotion-euiPopover"
                     id="settings"
                   >
                     <div
-                      class="euiPopover__anchor"
+                      class="euiPopover__anchor css-16vtueo-render"
                     >
                       <button
                         aria-label="Settings"
@@ -790,11 +790,11 @@ exports[`Canvas Shareable Workpad API Placed successfully with page specified 2`
                   class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <div
-                    class="euiPopover euiPopover--anchorUpRight"
+                    class="euiPopover emotion-euiPopover"
                     id="settings"
                   >
                     <div
-                      class="euiPopover__anchor"
+                      class="euiPopover__anchor css-16vtueo-render"
                     >
                       <button
                         aria-label="Settings"
@@ -1065,11 +1065,11 @@ exports[`Canvas Shareable Workpad API Placed successfully with width and height 
                   class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <div
-                    class="euiPopover euiPopover--anchorUpRight"
+                    class="euiPopover emotion-euiPopover"
                     id="settings"
                   >
                     <div
-                      class="euiPopover__anchor"
+                      class="euiPopover__anchor css-16vtueo-render"
                     >
                       <button
                         aria-label="Settings"
@@ -1339,11 +1339,11 @@ exports[`Canvas Shareable Workpad API Placed successfully with width specified 2
                   class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <div
-                    class="euiPopover euiPopover--anchorUpRight"
+                    class="euiPopover emotion-euiPopover"
                     id="settings"
                   >
                     <div
-                      class="euiPopover__anchor"
+                      class="euiPopover__anchor css-16vtueo-render"
                     >
                       <button
                         aria-label="Settings"
