@@ -39,9 +39,10 @@ const InContextMenuActions = (
     actions: LayerButtonsAction[];
   }
 ) => {
+  const dataTestSubject = 'lnsLayerSplitButton';
   const [isPopoverOpen, setPopover] = useState(false);
   const splitButtonPopoverId = useGeneratedHtmlId({
-    prefix: 'splitButtonPopover',
+    prefix: dataTestSubject,
   });
 
   const onButtonClick = useCallback(() => {
@@ -57,7 +58,7 @@ const InContextMenuActions = (
   const items = props.actions.map((i) => (
     <EuiContextMenuItem
       icon={<EuiIcon type={i.icon} title={i.displayName} color={i.color} />}
-      data-test-subj="lnsLayerClone"
+      data-test-subj={i['data-test-subj']}
       aria-label={i.displayName}
       title={i.displayName}
       onClick={() => {
@@ -83,6 +84,7 @@ const InContextMenuActions = (
               defaultMessage: `Layer actions`,
             })}
             onClick={onButtonClick}
+            data-test-subj={dataTestSubject}
           />
         }
         ownFocus={true}
@@ -124,13 +126,19 @@ export const LayerButtons = (props: LayerButtonsProps) => {
     if (compatibleActions.length > 1) {
       return <InContextMenuActions {...props} actions={compatibleActions} />;
     } else {
-      const { displayName, execute, icon, color } = compatibleActions[0];
+      const {
+        displayName,
+        execute,
+        icon,
+        color,
+        'data-test-subj': dataTestSubj,
+      } = compatibleActions[0];
       return (
         <EuiButtonIcon
           size="xs"
           iconType={icon}
           color={color}
-          data-test-subj="lnsLayerRemove"
+          data-test-subj={dataTestSubj}
           aria-label={displayName}
           title={displayName}
           onClick={execute}

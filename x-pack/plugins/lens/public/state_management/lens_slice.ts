@@ -296,6 +296,8 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         };
       }
     ) => {
+      // @todo: wip
+
       if (!state.activeDatasourceId || !state.visualization.activeId) {
         return state;
       }
@@ -303,9 +305,9 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       const activeVisualization = visualizationMap[state.visualization.activeId];
       const activeDatasource = datasourceMap[state.activeDatasourceId];
       // reuse the active datasource dataView id for the new layer
-      const currentDataViewsId = activeDatasource.getCurrentIndexPatternId(
-        state.datasourceStates[state.activeDatasourceId!].state
-      );
+      // const currentDataViewsId = activeDatasource.getCurrentIndexPatternId(
+      //   state.datasourceStates[state.activeDatasourceId!].state
+      // );
 
       const layerType = getLayerType(activeVisualization, state.visualization.state, layerId);
 
@@ -320,8 +322,6 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         }
       );
 
-      console.log(state.datasourceStates);
-
       const { activeDatasourceState, activeVisualizationState } = addInitialValueIfAvailable({
         datasourceState: state.datasourceStates[state.activeDatasourceId].state,
         visualizationState: state.visualization.state,
@@ -330,17 +330,6 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         activeDatasource,
         layerId,
         layerType,
-      });
-
-      console.log({
-        activeDatasourceState,
-        activeVisualizationState,
-        activeVisualization,
-        currentDataViewsId,
-        visualizationId,
-        layerId,
-        state,
-        newLayerId,
       });
 
       state.visualization.state = activeVisualizationState;

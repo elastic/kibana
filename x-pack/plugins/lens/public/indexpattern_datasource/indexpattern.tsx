@@ -190,7 +190,7 @@ export function getIndexPatternDatasource({
     },
 
     cloneLayer(state: IndexPatternPrivateState, layerId: string, newLayerId: string) {
-      console.log('data source: clone layer');
+      // @todo: wip
       return {
         ...state,
         layers: {
