@@ -6,3 +6,4 @@
  */
 
 export { AgentActivityFlyout } from './agent_activity_flyout';
+export { AgentActivityButton } from './agent_activity_button';

@@ -12926,7 +12926,6 @@
     "xpack.fleet.currentUpgrade.abortRequestError": "中止升级时发生错误",
     "xpack.fleet.currentUpgrade.abortUpgradeButtom": "中止升级",
     "xpack.fleet.currentUpgrade.confirmTitle": "是否中止升级？",
-    "xpack.fleet.currentUpgrade.fetchRequestError": "提取当前升级时出错",
     "xpack.fleet.currentUpgrade.guideLink": "Fleet 和 Elastic 代理指南",
     "xpack.fleet.dataStreamList.actionsColumnTitle": "操作",
     "xpack.fleet.dataStreamList.datasetColumnTitle": "数据集",

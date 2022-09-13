@@ -8,7 +8,6 @@
 import React, { useState } from 'react';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFilterSelectItem,
@@ -31,6 +30,7 @@ import { MAX_TAG_DISPLAY_LENGTH, truncateTag } from '../utils';
 
 import { AgentBulkActions } from './bulk_actions';
 import type { SelectionMode } from './types';
+import { AgentActivityButton } from './agent_activity_button';
 
 const statusFilters = [
   {
@@ -93,6 +93,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   onClickAddFleetServer: () => void;
   visibleAgents: Agent[];
   onClickAgentActivity: () => void;
+  showAgentActivityTour: { isOpen: boolean };
 }> = ({
   agentPolicies,
   draftKuery,
@@ -117,6 +118,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   onClickAddFleetServer,
   visibleAgents,
   onClickAgentActivity,
+  showAgentActivityTour,
 }) => {
   // Policies state for filtering
   const [isAgentPoliciesFilterOpen, setIsAgentPoliciesFilterOpen] = useState<boolean>(false);
@@ -327,16 +329,10 @@ export const SearchAndFilterBar: React.FunctionComponent<{
               </EuiFilterGroup>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiButtonEmpty
-                onClick={onClickAgentActivity}
-                data-test-subj="agentActivityButton"
-                iconType="clock"
-              >
-                <FormattedMessage
-                  id="xpack.fleet.agentList.agentActivityButton"
-                  defaultMessage="Agent activity"
-                />
-              </EuiButtonEmpty>
+              <AgentActivityButton
+                onClickAgentActivity={onClickAgentActivity}
+                showAgentActivityTour={showAgentActivityTour}
+              />
             </EuiFlexItem>
             {selectedAgents.length === 0 && (
               <>

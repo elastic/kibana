@@ -211,6 +211,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [totalAgents, setTotalAgents] = useState(0);
   const [totalInactiveAgents, setTotalInactiveAgents] = useState(0);
+  const [showAgentActivityTour, setShowAgentActivityTour] = useState({ isOpen: false });
 
   const getSortFieldForAPI = (field: keyof Agent): string => {
     if ([VERSION_FIELD, HOSTNAME_FIELD].includes(field as string)) {
@@ -649,13 +650,15 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         selectionMode={selectionMode}
         currentQuery={kuery}
         selectedAgents={selectedAgents}
-        refreshAgents={({ refreshTags = false }: { refreshTags?: boolean } = {}) =>
-          Promise.all([fetchData({ refreshTags })])
-        }
+        refreshAgents={({ refreshTags = false }: { refreshTags?: boolean } = {}) => {
+          Promise.all([fetchData({ refreshTags })]);
+          setShowAgentActivityTour({ isOpen: true });
+        }}
         onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}
         onClickAddFleetServer={onClickAddFleetServer}
         visibleAgents={agents}
         onClickAgentActivity={onClickAgentActivity}
+        showAgentActivityTour={showAgentActivityTour}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}

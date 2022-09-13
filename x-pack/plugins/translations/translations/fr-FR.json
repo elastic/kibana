@@ -12921,7 +12921,6 @@
     "xpack.fleet.currentUpgrade.abortRequestError": "Une erreur s'est produite lors de l'abandon de la mise à niveau",
     "xpack.fleet.currentUpgrade.abortUpgradeButtom": "Abandonner la mise à niveau",
     "xpack.fleet.currentUpgrade.confirmTitle": "Abandonner la mise à niveau ?",
-    "xpack.fleet.currentUpgrade.fetchRequestError": "Une erreur s'est produite lors de la récupération des mises à niveau actuelles",
     "xpack.fleet.currentUpgrade.guideLink": "Guide de Fleet et d'Elastic Agent",
     "xpack.fleet.dataStreamList.actionsColumnTitle": "Actions",
     "xpack.fleet.dataStreamList.datasetColumnTitle": "Ensemble de données",

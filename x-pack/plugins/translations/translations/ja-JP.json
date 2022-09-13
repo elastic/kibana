@@ -12909,7 +12909,6 @@
     "xpack.fleet.currentUpgrade.abortRequestError": "アップグレードの中断中にエラーが発生しました",
     "xpack.fleet.currentUpgrade.abortUpgradeButtom": "アップグレードの中断",
     "xpack.fleet.currentUpgrade.confirmTitle": "アップグレードを中断しますか?",
-    "xpack.fleet.currentUpgrade.fetchRequestError": "最新のアップグレードの取得中にエラーが発生しました",
     "xpack.fleet.currentUpgrade.guideLink": "FleetおよびElasticエージェントガイド",
     "xpack.fleet.dataStreamList.actionsColumnTitle": "アクション",
     "xpack.fleet.dataStreamList.datasetColumnTitle": "データセット",

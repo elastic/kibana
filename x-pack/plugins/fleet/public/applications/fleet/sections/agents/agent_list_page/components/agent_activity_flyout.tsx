@@ -337,7 +337,7 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
               <EuiText color={inProgressTitleColor}>
                 {isScheduled && action.startTime ? (
                   <FormattedMessage
-                    id="xpack.fleet.currentUpgrade.scheduleCalloutTitle"
+                    id="xpack.fleet.agentActivityFlyout.scheduleTitle"
                     defaultMessage="{nbAgents} agents scheduled to upgrade to version {version}"
                     values={{
                       nbAgents: action.nbAgentsActioned - action.nbAgentsAck,
@@ -346,7 +346,7 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
                   />
                 ) : (
                   <FormattedMessage
-                    id="xpack.fleet.currentUpgrade.calloutTitle"
+                    id="xpack.fleet.agentActivityFlyout.upgradeTitle"
                     defaultMessage="Upgrading {nbAgents, plural, one {# agent} other {# agents}} to version {version}"
                     values={{
                       nbAgents: action.nbAgentsActioned - action.nbAgentsAck,
@@ -370,7 +370,7 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
                 ) : null}
                 {'Agents may also be configured to upgrade automatically. '}
                 <FormattedMessage
-                  id="xpack.fleet.currentUpgrade.calloutDescription"
+                  id="xpack.fleet.agentActivityFlyout.calloutDescription"
                   defaultMessage="{guideLink}."
                   values={{
                     guideLink: (
@@ -380,7 +380,7 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
                         external
                       >
                         <FormattedMessage
-                          id="xpack.fleet.currentUpgrade.guideLink"
+                          id="xpack.fleet.agentActivityFlyout.guideLink"
                           defaultMessage="Learn more."
                         />
                       </EuiLink>
@@ -397,7 +397,7 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
                 data-test-subj="currentBulkUpgrade.sbortBtn"
               >
                 <FormattedMessage
-                  id="xpack.fleet.currentUpgrade.abortUpgradeButtom"
+                  id="xpack.fleet.agentActivityFlyout.abortUpgradeButtom"
                   defaultMessage="Abort upgrade"
                 />
               </EuiButton>
