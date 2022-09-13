@@ -97,7 +97,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
           ...exceptionItem,
           entries: updatedEntries,
         };
-        console.log({updatedExceptionItem})
+        console.log({ updatedExceptionItem });
         onChangeExceptionItem(updatedExceptionItem, exceptionItemIndex);
       },
       [onChangeExceptionItem, exceptionItem, exceptionItemIndex]

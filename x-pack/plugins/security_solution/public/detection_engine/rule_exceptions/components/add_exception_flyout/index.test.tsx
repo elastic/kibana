@@ -103,48 +103,48 @@ describe('When the add exception modal is opened', () => {
   });
 
   describe('exception list type of "endpoint"', () => {
-    it('displays proper flyout title', () => {})
+    it('displays proper flyout title', () => {});
 
-    it('renders OS selection options', () => {})
+    it('renders OS selection options', () => {});
 
-    it('does not render options to add exception to a rule or shared list', () => {})
-  })
+    it('does not render options to add exception to a rule or shared list', () => {});
+  });
 
   describe('behaviors that are not dependent on the number of rules present', () => {
     it('should show the loading spinner', () => {
       expect(wrapper.find('[data-test-subj="loadingAddExceptionFlyout"]').exists()).toBeTruthy();
     });
 
-    it('allows user to add an item name', () => {})
+    it('allows user to add an item name', () => {});
 
-    it('does not render OS selection options for exception list type of "detection"', () => {})
+    it('does not render OS selection options for exception list type of "detection"', () => {});
 
-    it('does not render OS selection options for exception list type of "rule_default"', () => {})
+    it('does not render OS selection options for exception list type of "rule_default"', () => {});
 
-    it('renders options to add exception to a rule or shared list when exception list type is not "endpoint"', () => {})
+    it('renders options to add exception to a rule or shared list when exception list type is not "endpoint"', () => {});
 
-    it('allows user to add a comment', () => {})
+    it('allows user to add a comment', () => {});
 
-    it('displays alert close actions if "showAlertCloseOptions" is "true"', () => {})
-  })
+    it('displays alert close actions if "showAlertCloseOptions" is "true"', () => {});
+  });
 
   describe('when no rules are passed in', () => {
-    it('allows large value lists', () => {})
+    it('allows large value lists', () => {});
 
     it('defaults to selecting add to rule option, displaying rules selection table', () => {});
 
     it('allows user to change selection from add to rules to add to shared lists option', () => {
       // check that it updates the listType
     });
-  })
+  });
 
   describe('when a single rule is passed in', () => {
-    it('does not allow large value list selection for query rule', () => {})
-    it('does not allow large value list selection if EQL rule', () => {})
-    it('does not allow large value list selection if threshold rule', () => {})
-    it('does not allow large value list selection if new trems rule', () => {})
+    it('does not allow large value list selection for query rule', () => {});
+    it('does not allow large value list selection if EQL rule', () => {});
+    it('does not allow large value list selection if threshold rule', () => {});
+    it('does not allow large value list selection if new trems rule', () => {});
     it('defaults to selecting add to rule radio option', () => {});
-    it('disables add to shared lists option if rule has no shared exception lists attached already', () => {})
+    it('disables add to shared lists option if rule has no shared exception lists attached already', () => {});
     it('allows user to change selection from add to rule to add to shared lists option', () => {
       // check that it updates the listType
     });
@@ -152,8 +152,8 @@ describe('When the add exception modal is opened', () => {
 
   describe('when multiple rules are passed in', () => {
     it('allows large value lists', () => {});
-    it('defaults to selecting add to rules radio option', () => {})
-    it('disables add to shared lists option if rules have no shared lists in common', () => { })
+    it('defaults to selecting add to rules radio option', () => {});
+    it('disables add to shared lists option if rules have no shared lists in common', () => {});
     it('allows user to change selection from add to rule to add to shared lists option', () => {
       // check that it updates the listType
     });

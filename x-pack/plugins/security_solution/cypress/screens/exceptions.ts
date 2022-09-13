@@ -99,5 +99,4 @@ export const ADD_TO_RULE_OR_LIST_SECTION = '[data-test-subj="exceptionItemAddToR
 
 export const OS_SELECTION_SECTION = '[data-test-subj="osSelectionDropdown"]';
 
-export const OS_INPUT =
-  '[data-test-subj="osSelectionDropdown"] [data-test-subj="comboBoxInput"]';
+export const OS_INPUT = '[data-test-subj="osSelectionDropdown"] [data-test-subj="comboBoxInput"]';
