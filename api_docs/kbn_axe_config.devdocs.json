@@ -32,6 +32,7 @@
         "description": [],
         "path": "packages/kbn-axe-config/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/axe-config",
@@ -44,7 +45,8 @@
               "{ id: string; selector: string; }[]"
             ],
             "path": "packages/kbn-axe-config/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -58,6 +60,7 @@
         "description": [],
         "path": "packages/kbn-axe-config/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/axe-config",
@@ -70,7 +73,8 @@
               "\"raw\" | \"v2\" | \"v1\" | \"raw-env\" | \"no-passes\""
             ],
             "path": "packages/kbn-axe-config/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/axe-config",
@@ -83,7 +87,8 @@
               "string[]"
             ],
             "path": "packages/kbn-axe-config/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/axe-config",
@@ -94,6 +99,7 @@
             "description": [],
             "path": "packages/kbn-axe-config/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/axe-config",
@@ -104,6 +110,7 @@
                 "description": [],
                 "path": "packages/kbn-axe-config/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/axe-config",
@@ -113,7 +120,8 @@
                     "label": "enabled",
                     "description": [],
                     "path": "packages/kbn-axe-config/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -126,6 +134,7 @@
                 "description": [],
                 "path": "packages/kbn-axe-config/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/axe-config",
@@ -135,7 +144,8 @@
                     "label": "enabled",
                     "description": [],
                     "path": "packages/kbn-axe-config/index.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }

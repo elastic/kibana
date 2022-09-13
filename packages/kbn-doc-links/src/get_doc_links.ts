@@ -126,6 +126,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       crawlerManaging: `${ENTERPRISE_SEARCH_DOCS}crawler-managing.html`,
       crawlerOverview: `${ENTERPRISE_SEARCH_DOCS}crawler.html`,
       languageAnalyzers: `${ELASTICSEARCH_DOCS}analysis-lang-analyzer.html`,
+      languageClients: `${ENTERPRISE_SEARCH_DOCS}programming-language-clients.html`,
       licenseManagement: `${ENTERPRISE_SEARCH_DOCS}license-management.html`,
       mailService: `${ENTERPRISE_SEARCH_DOCS}mailer-configuration.html`,
       start: `${ENTERPRISE_SEARCH_DOCS}start.html`,
@@ -358,6 +359,10 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
         full_disk_access: `${SECURITY_SOLUTION_DOCS}deploy-elastic-endpoint.html#enable-fda-endpoint`,
         macos_system_ext: `${SECURITY_SOLUTION_DOCS}deploy-elastic-endpoint.html#system-extension-endpoint`,
         linux_deadlock: `${SECURITY_SOLUTION_DOCS}ts-management.html#linux-deadlock`,
+      },
+      packageActionTroubleshooting: {
+        // TODO: Pending to be updated when docs are ready
+        es_connection: '',
       },
       responseActions: `${SECURITY_SOLUTION_DOCS}response-actions.html`,
     },

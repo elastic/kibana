@@ -112,6 +112,7 @@ export interface DocLinks {
     readonly crawlerManaging: string;
     readonly crawlerOverview: string;
     readonly languageAnalyzers: string;
+    readonly languageClients: string;
     readonly licenseManagement: string;
     readonly mailService: string;
     readonly start: string;
@@ -262,6 +263,9 @@ export interface DocLinks {
       full_disk_access: string;
       macos_system_ext: string;
       linux_deadlock: string;
+    };
+    readonly packageActionTroubleshooting: {
+      es_connection: string;
     };
     readonly threatIntelInt: string;
     readonly responseActions: string;

@@ -45,8 +45,6 @@ disabled:
   - x-pack/plugins/observability/e2e/synthetics_run.ts
 
   # Configs that exist but weren't running in CI when this file was introduced
-  - test/visual_regression/config.ts
-  - x-pack/test/visual_regression/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group2/tests/actions/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group2/tests/telemetry/config.ts
   - x-pack/test/alerting_api_integration/spaces_only_legacy/config.ts
@@ -142,6 +140,7 @@ enabled:
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group7/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group8/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group9/config.ts
+  - x-pack/test/detection_engine_api_integration/security_and_spaces/group10/config.ts
   - x-pack/test/encrypted_saved_objects_api_integration/config.ts
   - x-pack/test/endpoint_api_integration_no_ingest/config.ts
   - x-pack/test/examples/config.ts
@@ -183,7 +182,9 @@ enabled:
   - x-pack/test/functional/apps/maps/group2/config.ts
   - x-pack/test/functional/apps/maps/group3/config.ts
   - x-pack/test/functional/apps/maps/group4/config.ts
-  - x-pack/test/functional/apps/ml/anomaly_detection/config.ts
+  - x-pack/test/functional/apps/ml/anomaly_detection_jobs/config.ts
+  - x-pack/test/functional/apps/ml/anomaly_detection_integrations/config.ts
+  - x-pack/test/functional/apps/ml/anomaly_detection_result_views/config.ts
   - x-pack/test/functional/apps/ml/data_frame_analytics/config.ts
   - x-pack/test/functional/apps/ml/data_visualizer/config.ts
   - x-pack/test/functional/apps/ml/permissions/config.ts

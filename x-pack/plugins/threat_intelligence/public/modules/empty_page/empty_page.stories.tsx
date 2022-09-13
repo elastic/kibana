@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { CoreStart } from '@kbn/core/public';
 import { EmptyPage } from '.';
+import { StoryProvidersComponent } from '../../common/mocks/story_providers';
 
 export default {
   component: BasicEmptyPage,
@@ -16,7 +15,7 @@ export default {
 };
 
 export function BasicEmptyPage() {
-  const KibanaReactContext = createKibanaReactContext({
+  const kibana = {
     http: {
       basePath: {
         get: () => '',
@@ -29,10 +28,11 @@ export function BasicEmptyPage() {
         },
       },
     },
-  } as unknown as Partial<CoreStart>);
+  };
+
   return (
-    <KibanaReactContext.Provider>
+    <StoryProvidersComponent kibana={kibana as any}>
       <EmptyPage />
-    </KibanaReactContext.Provider>
+    </StoryProvidersComponent>
   );
 }
