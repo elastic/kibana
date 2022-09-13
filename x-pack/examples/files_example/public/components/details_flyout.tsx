@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import type { FileJSON } from '@kbn/files-plugin/common';
 import { FileClients } from '../types';
+import { Image } from '../imports';
 
 interface Props {
   file: FileJSON;
@@ -69,7 +70,7 @@ export const DetailsFlyout: FunctionComponent<Props> = ({ files, file, onDismiss
           ]}
         />
         <EuiSpacer size="xl" />
-        <img
+        <Image
           css={css`
             height: 400px;
           `}
