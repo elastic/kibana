@@ -7,7 +7,7 @@
 
 import { withApmSpan } from '../../../../utils/with_apm_span';
 import { Setup } from '../../../../lib/helpers/setup_request';
-import { getDuration } from './duration';
+import { getServerlessFunctionLatency } from './serverless_function_latency';
 import { getColdStartDuration } from './cold_start_duration';
 import { getMemoryChartData } from '../shared/memory';
 import { getComputeUsage } from './compute_usage';
@@ -47,7 +47,10 @@ export function getServerlessAgentMetricCharts({
       end,
     };
     return await Promise.all([
-      getDuration({ ...options, searchAggregatedTransactions }),
+      getServerlessFunctionLatency({
+        ...options,
+        searchAggregatedTransactions,
+      }),
       getColdStartDuration(options),
       getColdStartCount(options),
       getMemoryChartData(options),
