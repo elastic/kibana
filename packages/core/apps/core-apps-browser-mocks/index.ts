@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { CoreApp } from './core_app';
-export { URL_MAX_LENGTH } from './errors';
+export { coreAppsMock } from './src';
