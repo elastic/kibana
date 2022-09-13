@@ -7,20 +7,20 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
+import Fsp from 'fs/promises';
 
 import { REPO_ROOT } from '../../lib/paths.mjs';
 import { maybeRealpath, isFile, isDirectory } from '../../lib/fs.mjs';
 
 // yarn integrity file checker
-export function removeYarnIntegrityFileIfExists() {
+export async function removeYarnIntegrityFileIfExists() {
   try {
     const nodeModulesRealPath = maybeRealpath(Path.resolve(REPO_ROOT, 'node_modules'));
     const yarnIntegrityFilePath = Path.resolve(nodeModulesRealPath, '.yarn-integrity');
 
     // check if the file exists and delete it in that case
     if (isFile(yarnIntegrityFilePath)) {
-      Fs.unlinkSync(yarnIntegrityFilePath);
+      await Fsp.unlink(yarnIntegrityFilePath);
     }
   } catch {
     // no-op
