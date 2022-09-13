@@ -51,3 +51,8 @@ if [[ "$BAZEL_CACHE_MODE" != @(gcs|populate-local-gcs|buildbuddy|none|) ]]; then
   echo "invalid value for BAZEL_CACHE_MODE received ($BAZEL_CACHE_MODE), expected one of [gcs,populate-local-gcs|buildbuddy,none]"
   exit 1
 fi
+
+if [[ -n "$EXECUTION_LOG_BINARY_FILE" ]]; then
+  echo "[bazel] logging the executed spawns"
+  echo "build --execution_log_binary_file=${EXECUTION_LOG_BINARY_FILE}" >> $KIBANA_DIR/.bazelrc
+fi

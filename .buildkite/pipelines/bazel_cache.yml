@@ -36,6 +36,8 @@ steps:
         agents:
           queue: macos-arm
         timeout_in_minutes: 60
+        artifact_paths:
+          - "/bazel_logs/*"
         retry:
           automatic:
           - exit_status: '*'
