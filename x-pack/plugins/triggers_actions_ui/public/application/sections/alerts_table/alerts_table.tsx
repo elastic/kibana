@@ -212,7 +212,10 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     columnId: string;
   }) => {
     const value = data.find((d) => d.field === columnId)?.value ?? [];
-    return <>{value.length ? value.join() : '--'}</>;
+    if (Array.isArray(value)) {
+      return <>{value.length ? value.join() : '--'}</>;
+    }
+    return <>{value}</>;
   };
 
   const renderCellValue = useCallback(
