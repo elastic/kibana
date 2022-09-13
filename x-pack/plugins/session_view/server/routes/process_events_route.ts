@@ -128,11 +128,7 @@ export const fetchEventsAndScopedAlerts = async (
       range
     );
 
-    const processesWithIOEvents = await searchProcessWithIOEvents(
-      client,
-      sessionEntityId,
-      range
-    );
+    const processesWithIOEvents = await searchProcessWithIOEvents(client, sessionEntityId, range);
 
     events = [...events, ...alertsBody.events, ...processesWithIOEvents];
   }
