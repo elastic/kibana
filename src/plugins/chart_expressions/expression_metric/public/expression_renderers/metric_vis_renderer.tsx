@@ -18,8 +18,13 @@ import type { IInterpreterRenderHandlers, Datatable } from '@kbn/expressions-plu
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { ExpressionMetricPluginStart } from '../plugin';
 import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig, VisParams } from '../../common';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { extractContainerType, extractVisualizationType } from '../../../common';
+
+import {
+  CustomErrorBoundary,
+  extractContainerType,
+  extractVisualizationType,
+  // eslint-disable-next-line @kbn/imports/no_boundary_crossing
+} from '../../../common';
 
 async function metricFilterable(
   dimensions: VisParams['dimensions'],
@@ -84,27 +89,29 @@ export const getMetricVisRenderer = (
 
       const { MetricVis } = await import('../components/metric_vis');
       render(
-        <KibanaThemeProvider theme$={core.theme.theme$}>
-          <div
-            data-test-subj="mtrVis"
-            css={css`
-              height: 100%;
-              width: 100%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            `}
-          >
-            <MetricVis
-              data={visData}
-              config={visConfig}
-              renderComplete={renderComplete}
-              fireEvent={handlers.event}
-              renderMode={handlers.getRenderMode()}
-              filterable={filterable}
-            />
-          </div>
-        </KibanaThemeProvider>,
+        <CustomErrorBoundary onError={(error) => handlers.error(domNode, error)}>
+          <KibanaThemeProvider theme$={core.theme.theme$}>
+            <div
+              data-test-subj="mtrVis"
+              css={css`
+                height: 100%;
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              `}
+            >
+              <MetricVis
+                data={visData}
+                config={visConfig}
+                renderComplete={renderComplete}
+                fireEvent={handlers.event}
+                renderMode={handlers.getRenderMode()}
+                filterable={filterable}
+              />
+            </div>
+          </KibanaThemeProvider>
+        </CustomErrorBoundary>,
         domNode
       );
     },

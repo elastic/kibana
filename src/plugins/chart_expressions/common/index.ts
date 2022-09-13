@@ -7,3 +7,4 @@
  */
 
 export { extractContainerType, extractVisualizationType } from './utils';
+export { CustomErrorBoundary } from './custom_error_boundary';

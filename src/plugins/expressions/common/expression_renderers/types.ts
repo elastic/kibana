@@ -81,6 +81,7 @@ export interface IInterpreterRenderHandlers {
   done(): void;
   onDestroy(fn: () => void): void;
   reload(): void;
+  error(domNode: HTMLElement, error: Error): void;
   update(params: IInterpreterRenderUpdateParams): void;
   event(event: IInterpreterRenderEvent): void;
   hasCompatibleActions?(event: IInterpreterRenderEvent): Promise<boolean>;

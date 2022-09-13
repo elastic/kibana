@@ -88,6 +88,9 @@ export class ExpressionRenderHandler {
       reload: () => {
         this.updateSubject.next(null);
       },
+      error: (domNode: HTMLElement, error: Error) => {
+        this.onRenderError(domNode, error, this.handlers);
+      },
       getExecutionContext() {
         return executionContext;
       },
