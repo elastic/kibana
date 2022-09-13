@@ -5,25 +5,24 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 import { deleteMlInferencePipeline } from './delete_ml_inference_pipeline';
 
 describe('deleteMlInferencePipeline lib function', () => {
   const mockClient = {
-    asCurrentUser: {
-      ingest: {
-        deletePipeline: jest.fn(),
-        getPipeline: jest.fn(),
-        putPipeline: jest.fn(),
-      },
+    ingest: {
+      deletePipeline: jest.fn(),
+      getPipeline: jest.fn(),
+      putPipeline: jest.fn(),
     },
-    asInternalUser: {},
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
+  const notFoundResponse = { meta: { statusCode: 404 } };
 
   it('should delete pipeline', async () => {
     const mockGetPipeline = {
@@ -39,31 +38,70 @@ describe('deleteMlInferencePipeline lib function', () => {
       },
     };
 
-    mockClient.asCurrentUser.ingest.getPipeline.mockImplementation(() =>
-      Promise.resolve(mockGetPipeline)
-    );
-    mockClient.asCurrentUser.ingest.putPipeline.mockImplementation(() =>
-      Promise.resolve({ acknowledged: true })
-    );
-    mockClient.asCurrentUser.ingest.deletePipeline.mockImplementation(() =>
+    mockClient.ingest.getPipeline.mockImplementation(() => Promise.resolve(mockGetPipeline));
+    mockClient.ingest.putPipeline.mockImplementation(() => Promise.resolve({ acknowledged: true }));
+    mockClient.ingest.deletePipeline.mockImplementation(() =>
       Promise.resolve({ acknowledged: true })
     );
 
     const expectedResponse = { deleted: 'my-ml-pipeline', updated: 'my-index@ml-inference' };
 
     const response = await deleteMlInferencePipeline(
-      mockClient as unknown as IScopedClusterClient,
       'my-index',
-      'my-ml-pipeline'
+      'my-ml-pipeline',
+      mockClient as unknown as ElasticsearchClient
     );
 
     expect(response).toEqual(expectedResponse);
 
-    expect(mockClient.asCurrentUser.ingest.putPipeline).toHaveBeenCalledWith({
+    expect(mockClient.ingest.putPipeline).toHaveBeenCalledWith({
       id: 'my-index@ml-inference',
       processors: [],
     });
-    expect(mockClient.asCurrentUser.ingest.deletePipeline).toHaveBeenCalledWith({
+    expect(mockClient.ingest.deletePipeline).toHaveBeenCalledWith({
+      id: 'my-ml-pipeline',
+    });
+  });
+
+  it('should succeed when parent pipeline is missing', async () => {
+    mockClient.ingest.getPipeline.mockImplementation(() => Promise.reject(notFoundResponse));
+    mockClient.ingest.deletePipeline.mockImplementation(() =>
+      Promise.resolve({ acknowledged: true })
+    );
+
+    const expectedResponse = {
+      deleted: 'my-ml-pipeline',
+    };
+
+    const response = await deleteMlInferencePipeline(
+      'my-index',
+      'my-ml-pipeline',
+      mockClient as unknown as ElasticsearchClient
+    );
+
+    expect(response).toEqual(expectedResponse);
+
+    expect(mockClient.ingest.putPipeline).toHaveBeenCalledTimes(0);
+    expect(mockClient.ingest.deletePipeline).toHaveBeenCalledWith({
+      id: 'my-ml-pipeline',
+    });
+  });
+
+  it('should fail when pipeline is missing', async () => {
+    const mockGetPipeline = {};
+    mockClient.ingest.getPipeline.mockImplementation(() => Promise.resolve(mockGetPipeline));
+    mockClient.ingest.deletePipeline.mockImplementation(() => Promise.reject(notFoundResponse));
+
+    await expect(
+      deleteMlInferencePipeline(
+        'my-index',
+        'my-ml-pipeline',
+        mockClient as unknown as ElasticsearchClient
+      )
+    ).rejects.toThrow(Error);
+
+    expect(mockClient.ingest.putPipeline).toHaveBeenCalledTimes(0);
+    expect(mockClient.ingest.deletePipeline).toHaveBeenCalledWith({
       id: 'my-ml-pipeline',
     });
   });

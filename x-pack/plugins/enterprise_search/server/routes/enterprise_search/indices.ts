@@ -16,6 +16,7 @@ import { fetchConnectorByIndexName, fetchConnectors } from '../../lib/connectors
 import { fetchCrawlerByIndexName, fetchCrawlers } from '../../lib/crawler/fetch_crawlers';
 
 import { createIndex } from '../../lib/indices/create_index';
+import { deleteMlInferencePipeline } from '../../lib/indices/delete_ml_inference_pipeline';
 import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices } from '../../lib/indices/fetch_indices';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
@@ -333,6 +334,34 @@ export function registerIndexRoutes({
 
       return response.ok({
         body: createIndexResponse,
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  router.delete(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/pipelines/ml-inference/{pipelineName}',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+          pipelineName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
+      const pipelineName = decodeURIComponent(request.params.pipelineName);
+      const { client } = (await context.core).elasticsearch;
+
+      const deleteResult = await deleteMlInferencePipeline(
+        indexName,
+        pipelineName,
+        client.asCurrentUser
+      );
+
+      return response.ok({
+        body: deleteResult,
         headers: { 'content-type': 'application/json' },
       });
     })
