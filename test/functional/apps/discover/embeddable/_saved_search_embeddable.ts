@@ -77,5 +77,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dataGrid.checkCurrentRowsPerPageToBe(10);
     });
+
+    it('should render duplicate saved search embeddables', async () => {
+      await PageObjects.dashboard.switchToEditMode();
+      await addSearchEmbeddableToDashboard();
+      const [firstGridCell, secondGridCell] = await dataGrid.getAllCellElements();
+      const firstGridCellContent = await firstGridCell.getVisibleText();
+      const secondGridCellContent = await secondGridCell.getVisibleText();
+
+      expect(firstGridCellContent).to.be.equal(secondGridCellContent);
+    });
   });
 }

@@ -42,6 +42,10 @@ describe('When entering data into the Console input', () => {
     return renderResult.getByTestId('test-footer').textContent;
   };
 
+  const typeKeyboardKey = (key: string) => {
+    enterCommand(key, { inputOnly: true, useKeyboard: true });
+  };
+
   beforeEach(() => {
     const testSetup = getConsoleTestSetup();
 
@@ -57,6 +61,20 @@ describe('When entering data into the Console input', () => {
 
     enterCommand('m', { inputOnly: true });
     expect(getUserInputText()).toEqual('cm');
+  });
+
+  it('should repeat letters if the user holds letter key down on the keyboard', () => {
+    render();
+    enterCommand('{a>5/}', { inputOnly: true, useKeyboard: true });
+    expect(getUserInputText()).toEqual('aaaaa');
+  });
+
+  it('should not display command key names in the input, when command keys are used', () => {
+    render();
+    enterCommand('{Meta>}', { inputOnly: true, useKeyboard: true });
+    expect(getUserInputText()).toEqual('');
+    enterCommand('{Shift>}A{/Shift}', { inputOnly: true, useKeyboard: true });
+    expect(getUserInputText()).toEqual('A');
   });
 
   it('should display placeholder text when input area is blank', () => {
@@ -105,6 +123,23 @@ describe('When entering data into the Console input', () => {
 
   it('should show the arrow button as disabled if input area is blank', () => {
     render();
+
+    const arrowButton = renderResult.getByTestId('test-inputTextSubmitButton');
+    expect(arrowButton).toBeDisabled();
+  });
+
+  it('should show the arrow button as disabled if input has only whitespace entered and it is left to the cursor', () => {
+    render();
+    enterCommand(' ', { inputOnly: true });
+
+    const arrowButton = renderResult.getByTestId('test-inputTextSubmitButton');
+    expect(arrowButton).toBeDisabled();
+  });
+
+  it('should show the arrow button as disabled if input has only whitespace entered and it is right to the cursor', () => {
+    render();
+    enterCommand(' ', { inputOnly: true });
+    typeKeyboardKey('{ArrowLeft}');
 
     const arrowButton = renderResult.getByTestId('test-inputTextSubmitButton');
     expect(arrowButton).toBeDisabled();
@@ -186,10 +221,6 @@ describe('When entering data into the Console input', () => {
       return renderResult.getByTestId('test-cmdInput-rightOfCursor').textContent;
     };
 
-    const typeKeyboardKey = (key: string) => {
-      enterCommand(key, { inputOnly: true, useKeyboard: true });
-    };
-
     beforeEach(() => {
       render();
       enterCommand('isolate', { inputOnly: true });
@@ -199,6 +230,11 @@ describe('When entering data into the Console input', () => {
       typeKeyboardKey('{backspace}');
       expect(getUserInputText()).toEqual('isolat');
       expect(getRightOfCursorText()).toEqual('');
+    });
+
+    it('should clear the input if the user holds down the delete/backspace key', () => {
+      typeKeyboardKey('{backspace>7/}');
+      expect(getUserInputText()).toEqual('');
     });
 
     it('should move cursor to the left', () => {

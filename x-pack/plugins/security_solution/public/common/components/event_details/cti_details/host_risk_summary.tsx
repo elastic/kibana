@@ -9,10 +9,10 @@ import React from 'react';
 import { EuiLoadingSpinner, EuiPanel, EuiSpacer, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
-import { RISKY_HOSTS_DOC_LINK } from '../../../../overview/components/overview_risky_host_links/risky_hosts_disabled_module';
 import { EnrichedDataRow, ThreatSummaryPanelHeader } from './threat_summary_view';
 import { RiskScore } from '../../severity/common';
 import type { HostRisk } from '../../../../risk_score/containers';
+import { RISKY_HOSTS_DOC_LINK } from '../../../../../common/constants';
 
 const HostRiskSummaryComponent: React.FC<{
   hostRisk: HostRisk;

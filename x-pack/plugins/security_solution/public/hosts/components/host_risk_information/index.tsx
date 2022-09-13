@@ -27,12 +27,11 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
-import { RISKY_HOSTS_DOC_LINK } from '../../../overview/components/overview_risky_host_links/risky_hosts_disabled_module';
-
 import * as i18n from './translations';
 import { useOnOpenCloseHandler } from '../../../helper_hooks';
 import { RiskScore } from '../../../common/components/severity/common';
 import { RiskSeverity } from '../../../../common/search_strategy';
+import { RISKY_HOSTS_DOC_LINK } from '../../../../common/constants';
 
 const tableColumns: Array<EuiBasicTableColumn<TableItem>> = [
   {
