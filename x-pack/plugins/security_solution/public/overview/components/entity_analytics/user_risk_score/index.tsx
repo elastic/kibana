@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import { RiskEntity } from '../../../../risk_score/containers/deprecated/api';
 import { RiskScoresDeprecated } from '../../../../common/components/risk_score_deprecated';
 import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
@@ -132,7 +133,7 @@ export const EntityAnalyticsUserRiskScores = () => {
   }
 
   if (isDeprecated) {
-    return <RiskScoresDeprecated entityType="user" />;
+    return <RiskScoresDeprecated entityType={RiskEntity.user} />;
   }
 
   return (

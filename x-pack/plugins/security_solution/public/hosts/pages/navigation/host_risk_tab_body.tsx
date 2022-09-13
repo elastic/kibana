@@ -10,6 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { last } from 'lodash/fp';
+import { RiskEntity } from '../../../risk_score/containers/deprecated/api';
 import { RiskScoresDeprecated } from '../../../common/components/risk_score_deprecated';
 import type { HostsComponentsQueryProps } from './types';
 import * as i18n from '../translations';
@@ -91,7 +92,7 @@ const HostRiskTabBodyComponent: React.FC<
   const lastHostRiskItem = last(data);
 
   if (isDeprecated) {
-    return <RiskScoresDeprecated entityType="host" />;
+    return <RiskScoresDeprecated entityType={RiskEntity.host} />;
   }
 
   return (

@@ -17,6 +17,7 @@ import {
 
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import { RiskEntity } from '../../../../risk_score/containers/deprecated/api';
 import { RiskScoresDeprecated } from '../../../../common/components/risk_score_deprecated';
 import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
@@ -136,7 +137,7 @@ export const EntityAnalyticsHostRiskScores = () => {
   }
 
   if (isDeprecated) {
-    return <RiskScoresDeprecated entityType="host" />;
+    return <RiskScoresDeprecated entityType={RiskEntity.host} />;
   }
 
   return (

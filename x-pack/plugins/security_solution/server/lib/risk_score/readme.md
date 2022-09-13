@@ -16,6 +16,7 @@ The risk score API has one route with one method
     ```typescript
       {
           isDeprecated: boolean;
+          isEnabled: boolean;
        }
       ```
 4. This route is called from `useRiskScore` hook.

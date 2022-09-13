@@ -7,6 +7,8 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { noop } from 'lodash/fp';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { RiskEntity } from '../../../risk_score/containers/deprecated/api';
 import { RiskScoresDeprecated } from '../../../common/components/risk_score_deprecated';
 import type { HostsComponentsQueryProps } from './types';
 import { manageQuery } from '../../../common/components/page/manage_query';
@@ -50,13 +52,14 @@ export const HostRiskScoreQueryTabBody = ({
   useEffect(() => {
     setQuerySkip(!toggleStatus);
   }, [toggleStatus]);
-
+  const { from, to } = useGlobalTime();
   const [loading, { data, totalCount, inspect, isInspected, isDeprecated, refetch }] =
     useHostRiskScore({
       filterQuery,
       skip: querySkip,
       pagination,
       sort,
+      timerange: { from, to },
     });
 
   const { severityCount, loading: isKpiLoading } = useHostRiskScoreKpi({
@@ -65,7 +68,7 @@ export const HostRiskScoreQueryTabBody = ({
   });
 
   if (isDeprecated) {
-    return <RiskScoresDeprecated entityType="host" />;
+    return <RiskScoresDeprecated entityType={RiskEntity.host} />;
   }
 
   return (

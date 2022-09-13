@@ -10,6 +10,7 @@ import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
 import type { RiskSeverity } from '../../../../common/search_strategy';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
@@ -81,9 +82,13 @@ export const UserOverview = React.memo<UserSummaryProps>(
       () => (userName ? buildUserNamesFilter([userName]) : undefined),
       [userName]
     );
+
+    const { from, to } = useGlobalTime();
+
     const [_, { data: userRisk, isModuleEnabled }] = useUserRiskScore({
       filterQuery,
       skip: userName == null,
+      timerange: { to, from },
     });
 
     const getDefaultRenderer = useCallback(

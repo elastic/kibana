@@ -8,6 +8,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { noop } from 'lodash/fp';
 
+import { RiskEntity } from '../../../risk_score/containers/deprecated/api';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { RiskScoresDeprecated } from '../../../common/components/risk_score_deprecated';
 import type { UsersComponentsQueryProps } from './types';
 import { manageQuery } from '../../../common/components/page/manage_query';
@@ -44,6 +46,7 @@ export const UserRiskScoreQueryTabBody = ({
     }),
     [activePage, limit]
   );
+  const { from, to } = useGlobalTime();
 
   const { toggleStatus } = useQueryToggle(UserRiskScoreQueryId.USERS_BY_RISK);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
@@ -57,6 +60,7 @@ export const UserRiskScoreQueryTabBody = ({
       skip: querySkip,
       pagination,
       sort,
+      timerange: { to, from },
     });
 
   const { severityCount, loading: isKpiLoading } = useUserRiskScoreKpi({
@@ -65,7 +69,7 @@ export const UserRiskScoreQueryTabBody = ({
   });
 
   if (isDeprecated) {
-    return <RiskScoresDeprecated entityType="user" />;
+    return <RiskScoresDeprecated entityType={RiskEntity.user} />;
   }
 
   return (

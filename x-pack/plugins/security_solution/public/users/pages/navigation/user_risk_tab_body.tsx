@@ -9,6 +9,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { RiskEntity } from '../../../risk_score/containers/deprecated/api';
 import { RiskScoresDeprecated } from '../../../common/components/risk_score_deprecated';
 import * as i18n from '../translations';
 
@@ -89,7 +90,7 @@ const UserRiskTabBodyComponent: React.FC<
   );
 
   if (isDeprecated) {
-    return <RiskScoresDeprecated entityType="user" />;
+    return <RiskScoresDeprecated entityType={RiskEntity.user} />;
   }
 
   const lastUsertRiskItem: UserRiskScore | null =
