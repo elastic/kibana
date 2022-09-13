@@ -13,20 +13,23 @@ export type MlAnomalyCharts = ProvidedType<typeof AnomalyChartsProvider>;
 
 export function AnomalyChartsProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   return {
     async assertAnomalyExplorerChartsCount(
       chartsContainerSubj: string,
       expectedChartsCount: number
     ) {
-      const chartsContainer = await testSubjects.find(chartsContainerSubj);
-      const actualChartsCount = (
-        await chartsContainer.findAllByClassName('ml-explorer-chart-container', 3000)
-      ).length;
-      expect(actualChartsCount).to.eql(
-        expectedChartsCount,
-        `Expect ${expectedChartsCount} charts to appear, got ${actualChartsCount}`
-      );
+      await retry.tryForTime(5000, async () => {
+        const chartsContainer = await testSubjects.find(chartsContainerSubj);
+        const actualChartsCount = (
+          await chartsContainer.findAllByClassName('ml-explorer-chart-container', 3000)
+        ).length;
+        expect(actualChartsCount).to.eql(
+          expectedChartsCount,
+          `Expect ${expectedChartsCount} charts to appear, got ${actualChartsCount}`
+        );
+      });
     },
   };
 }
