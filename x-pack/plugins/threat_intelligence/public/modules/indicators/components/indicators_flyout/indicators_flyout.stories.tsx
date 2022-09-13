@@ -10,7 +10,6 @@ import { Story } from '@storybook/react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { mockIndicatorsFiltersContext } from '../../../../common/mocks/mock_indicators_filters_context';
-import { generateFieldTypeMap } from '../../../../common/mocks/mock_field_type_map';
 import { mockUiSettingsService } from '../../../../common/mocks/mock_kibana_ui_settings_service';
 import { mockKibanaTimelinesService } from '../../../../common/mocks/mock_kibana_timelines_service';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
@@ -30,14 +29,12 @@ const KibanaReactContext = createKibanaReactContext(coreMock);
 
 export const Default: Story<void> = () => {
   const mockIndicator: Indicator = generateMockIndicator();
-  const mockFieldTypesMap = generateFieldTypeMap();
 
   return (
     <KibanaReactContext.Provider>
       <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
         <IndicatorsFlyout
           indicator={mockIndicator}
-          fieldTypesMap={mockFieldTypesMap}
           closeFlyout={() => window.alert('Closing flyout')}
         />
       </IndicatorsFiltersContext.Provider>
@@ -51,7 +48,6 @@ export const EmptyIndicator: Story<void> = () => {
       <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
         <IndicatorsFlyout
           indicator={{ fields: {} } as Indicator}
-          fieldTypesMap={{}}
           closeFlyout={() => window.alert('Closing flyout')}
         />
       </IndicatorsFiltersContext.Provider>
