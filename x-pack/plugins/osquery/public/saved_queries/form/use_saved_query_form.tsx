@@ -47,15 +47,7 @@ const deserializer = (payload: SavedQuerySOFormData): SavedQueryFormData => ({
   interval: payload.interval ? parseInt(payload.interval, 10) : 3600,
   platform: payload.platform,
   version: payload.version ? [payload.version] : [],
-  ecs_mapping: !isEmpty(payload.ecs_mapping)
-    ? (map(payload.ecs_mapping, (value, key: string) => ({
-        key,
-        result: {
-          type: Object.keys(value)[0],
-          value: Object.values(value)[0],
-        },
-      })) as unknown as EcsMappingFormField[])
-    : [defaultEcsFormData],
+  ecs_mapping: !isEmpty(payload.ecs_mapping) ? payload.ecs_mapping : {},
 });
 
 export const savedQueryDataSerializer = (payload: SavedQueryFormData): SavedQuerySOFormData =>
@@ -72,8 +64,6 @@ export const savedQueryDataSerializer = (payload: SavedQueryFormData): SavedQuer
     if (isArray(draft.platform) && !draft.platform.length) {
       delete draft.platform;
     }
-
-    draft.ecs_mapping = convertECSMappingToObject(payload.ecs_mapping);
 
     if (draft.interval) {
       draft.interval = draft.interval + '';

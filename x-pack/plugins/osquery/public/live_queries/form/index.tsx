@@ -26,8 +26,6 @@ import type {
   EcsMappingFormField,
   EcsMappingSerialized,
 } from '../../packs/queries/ecs_mapping_editor_field';
-import { defaultEcsFormData } from '../../packs/queries/ecs_mapping_editor_field';
-import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
 import { useKibana } from '../../common/lib/kibana';
 import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import { SavedQueryFlyout } from '../../saved_queries';
@@ -124,11 +122,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     [permissions]
   );
 
-  const hooksForm = useHookForm<LiveQueryFormFields>({
-    defaultValues: {
-      ecs_mapping: [defaultEcsFormData],
-    },
-  });
+  const hooksForm = useHookForm<LiveQueryFormFields>();
   const {
     handleSubmit,
     watch,
@@ -202,9 +196,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           saved_query_id: values.savedQueryId,
           query: values.query,
           pack_id: values?.packId?.length ? values?.packId[0] : undefined,
-          ...(values.ecs_mapping
-            ? { ecs_mapping: convertECSMappingToObject(values.ecs_mapping) }
-            : {}),
+          ecs_mapping: values.ecs_mapping,
         },
         (value) => !isEmpty(value)
       );
@@ -320,18 +312,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       if (defaultValue?.query && canRunSingleQuery) {
         setValue('query', defaultValue.query);
         setValue('savedQueryId', defaultValue.savedQueryId);
-        setValue(
-          'ecs_mapping',
-          !isEmpty(defaultValue.ecs_mapping)
-            ? map(defaultValue.ecs_mapping, (value, key) => ({
-                key,
-                result: {
-                  type: Object.keys(value)[0],
-                  value: Object.values(value)[0],
-                },
-              }))
-            : [defaultEcsFormData]
-        );
+        setValue('ecs_mapping', defaultValue.ecs_mapping);
 
         return;
       }

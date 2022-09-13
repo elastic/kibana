@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { isArray, isEmpty, map, xor } from 'lodash';
+import { isArray, isEmpty, xor } from 'lodash';
 
 import { useForm as useHookForm } from 'react-hook-form';
 import type { Draft } from 'immer';
 import { produce } from 'immer';
 import { useMemo } from 'react';
-import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
 import type { EcsMappingFormField } from './ecs_mapping_editor_field';
-import { defaultEcsFormData } from './ecs_mapping_editor_field';
 
 export interface UsePackQueryFormProps {
   uniqueQueryIds: string[];
@@ -48,17 +46,7 @@ const deserializer = (payload: PackSOQueryFormData): PackQueryFormData =>
     interval: payload.interval ? parseInt(payload.interval, 10) : 3600,
     platform: payload.platform,
     version: payload.version ? [payload.version] : [],
-    ecs_mapping: !isEmpty(payload.ecs_mapping)
-      ? !isArray(payload.ecs_mapping)
-        ? map(payload.ecs_mapping as unknown as PackQuerySOECSMapping, (value, key) => ({
-            key,
-            result: {
-              type: Object.keys(value)[0],
-              value: Object.values(value)[0],
-            },
-          }))
-        : payload.ecs_mapping
-      : [defaultEcsFormData],
+    ecs_mapping: payload.ecs_mapping,
   } as PackQueryFormData);
 
 const serializer = (payload: PackQueryFormData): PackSOQueryFormData =>
@@ -86,9 +74,6 @@ const serializer = (payload: PackQueryFormData): PackSOQueryFormData =>
 
     if (isEmpty(draft.ecs_mapping)) {
       delete draft.ecs_mapping;
-    } else {
-      // @ts-expect-error update types
-      draft.ecs_mapping = convertECSMappingToObject(payload.ecs_mapping);
     }
 
     return draft;
@@ -110,7 +95,6 @@ export const usePackQueryForm = ({ uniqueQueryIds, defaultValue }: UsePackQueryF
             id: '',
             query: '',
             interval: 3600,
-            ecs_mapping: [defaultEcsFormData],
           },
     }),
   };
