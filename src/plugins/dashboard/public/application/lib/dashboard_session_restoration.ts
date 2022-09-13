@@ -110,7 +110,7 @@ function getLocatorParams({
   return {
     timeRange: shouldRestoreSearchSession ? timefilter.getAbsoluteTime() : timefilter.getTime(),
     searchSessionId: shouldRestoreSearchSession ? data.search.session.getSessionId() : undefined,
-    panels: getDashboardId() ? undefined : appState.panels,
+    panels: getDashboardId() ? undefined : (appState.panels as DashboardAppLocatorParams['panels']),
     query: queryString.formatQuery(appState.query) as Query,
     filters: filterManager.getFilters(),
     savedQuery: appState.savedQuery,

@@ -127,7 +127,10 @@ export function ShowShareModal({
       savedQuery: unsavedDashboardState.savedQuery,
       controlGroupInput: unsavedDashboardState.controlGroupInput as SerializableControlGroupInput,
       panels: unsavedDashboardState.panels
-        ? convertPanelMapToSavedPanels(unsavedDashboardState.panels, kibanaVersion)
+        ? (convertPanelMapToSavedPanels(
+            unsavedDashboardState.panels,
+            kibanaVersion
+          ) as DashboardAppLocatorParams['panels'])
         : undefined,
     };
   }

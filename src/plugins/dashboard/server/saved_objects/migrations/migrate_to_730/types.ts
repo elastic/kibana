@@ -7,7 +7,7 @@
  */
 
 import type { Serializable } from '@kbn/utility-types';
-import { SavedObjectReference } from '@kbn/core/public';
+import { SavedObjectReference } from '@kbn/core/server';
 
 import type {
   GridData,
