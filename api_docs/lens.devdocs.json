@@ -3596,6 +3596,20 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.SharedPieLayerState.collapseFns",
+            "type": "Object",
+            "tags": [],
+            "label": "collapseFns",
+            "description": [],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.SharedPieLayerState.numberDisplay",
             "type": "CompoundType",
             "tags": [],
@@ -10961,6 +10975,20 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.SharedPieLayerState.collapseFns",
+            "type": "Object",
+            "tags": [],
+            "label": "collapseFns",
+            "description": [],
+            "signature": [
+              "Record<string, string> | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
