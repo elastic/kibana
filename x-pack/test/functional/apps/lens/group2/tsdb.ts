@@ -142,10 +142,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           },
           wait_for_active_shards: 1,
         });
-        await queryBar.clickQuerySubmitButton();
         await retry.try(async () => {
+          await queryBar.clickQuerySubmitButton();
           expect(
-            await (await testSubjects.find('euiToastHeader__title')).getVisibleText()
+            await (await testSubjects.find('euiToastHeader__title', 1000)).getVisibleText()
           ).to.equal('1 of 3 shards failed');
         });
         // as the rollup index is gone, there is no inline warning left
