@@ -27,8 +27,12 @@ import {
   getUISettings,
 } from '../services';
 import { getTimeZone } from '../utils/get_timezone';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { extractContainerType, extractVisualizationType } from '../../../common';
+import {
+  CustomErrorBoundary,
+  extractContainerType,
+  extractVisualizationType,
+  // eslint-disable-next-line @kbn/imports/no_boundary_crossing
+} from '../../../common';
 
 interface ExpressioHeatmapRendererDependencies {
   getStartDeps: StartServicesGetter<ExpressionHeatmapPluginStart>;
@@ -74,23 +78,25 @@ export const heatmapRenderer: (
     const { isInteractive } = handlers;
 
     render(
-      <KibanaThemeProvider theme$={core.theme.theme$}>
-        <div className="heatmap-container" data-test-subj="heatmapChart">
-          <HeatmapComponent
-            {...config}
-            onClickValue={onClickValue}
-            onSelectRange={onSelectRange}
-            timeZone={timeZone}
-            datatableUtilities={getDatatableUtilities()}
-            formatFactory={getFormatService().deserialize}
-            chartsThemeService={plugins.charts.theme}
-            paletteService={getPaletteService()}
-            renderComplete={renderComplete}
-            uiState={handlers.uiState as PersistedState}
-            interactive={isInteractive()}
-          />
-        </div>
-      </KibanaThemeProvider>,
+      <CustomErrorBoundary onError={(error) => handlers.error(domNode, error)}>
+        <KibanaThemeProvider theme$={core.theme.theme$}>
+          <div className="heatmap-container" data-test-subj="heatmapChart">
+            <HeatmapComponent
+              {...config}
+              onClickValue={onClickValue}
+              onSelectRange={onSelectRange}
+              timeZone={timeZone}
+              datatableUtilities={getDatatableUtilities()}
+              formatFactory={getFormatService().deserialize}
+              chartsThemeService={plugins.charts.theme}
+              paletteService={getPaletteService()}
+              renderComplete={renderComplete}
+              uiState={handlers.uiState as PersistedState}
+              interactive={isInteractive()}
+            />
+          </div>
+        </KibanaThemeProvider>
+      </CustomErrorBoundary>,
       domNode
     );
   },

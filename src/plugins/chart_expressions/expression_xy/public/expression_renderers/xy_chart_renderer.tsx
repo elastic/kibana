@@ -26,8 +26,12 @@ import { isDataLayer } from '../../common/utils/layer_types_guards';
 import { LayerTypes, SeriesTypes } from '../../common/constants';
 import type { CommonXYLayerConfig, XYChartProps } from '../../common';
 import type { BrushEvent, FilterEvent } from '../types';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { extractContainerType, extractVisualizationType } from '../../../common';
+import {
+  CustomErrorBoundary,
+  extractContainerType,
+  extractVisualizationType,
+  // eslint-disable-next-line @kbn/imports/no_boundary_crossing
+} from '../../../common';
 
 export type GetStartDepsFn = () => Promise<{
   data: DataPublicPluginStart;
@@ -103,7 +107,7 @@ export const getXyChartRenderer = ({
   }),
   validate: () => undefined,
   reuseDomNode: true,
-  render: async (domNode: Element, config: XYChartProps, handlers) => {
+  render: async (domNode: HTMLElement, config: XYChartProps, handlers) => {
     const deps = await getStartDeps();
 
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
@@ -142,32 +146,34 @@ export const getXyChartRenderer = ({
     });
 
     ReactDOM.render(
-      <KibanaThemeProvider theme$={deps.kibanaTheme.theme$}>
-        <I18nProvider>
-          <div css={chartContainerStyle} data-test-subj="xyVisChart">
-            <XYChartReportable
-              {...config}
-              data={deps.data}
-              formatFactory={deps.formatFactory}
-              chartsActiveCursorService={deps.activeCursor}
-              chartsThemeService={deps.theme}
-              paletteService={deps.paletteService}
-              timeZone={deps.timeZone}
-              eventAnnotationService={deps.eventAnnotationService}
-              useLegacyTimeAxis={deps.useLegacyTimeAxis}
-              minInterval={calculateMinInterval(deps.data.datatableUtilities, config)}
-              interactive={handlers.isInteractive()}
-              onClickValue={onClickValue}
-              onSelectRange={onSelectRange}
-              renderMode={handlers.getRenderMode()}
-              syncColors={handlers.isSyncColorsEnabled()}
-              syncTooltips={handlers.isSyncTooltipsEnabled()}
-              uiState={handlers.uiState as PersistedState}
-              renderComplete={renderComplete}
-            />
-          </div>{' '}
-        </I18nProvider>
-      </KibanaThemeProvider>,
+      <CustomErrorBoundary onError={(error) => handlers.error(domNode, error)}>
+        <KibanaThemeProvider theme$={deps.kibanaTheme.theme$}>
+          <I18nProvider>
+            <div css={chartContainerStyle} data-test-subj="xyVisChart">
+              <XYChartReportable
+                {...config}
+                data={deps.data}
+                formatFactory={deps.formatFactory}
+                chartsActiveCursorService={deps.activeCursor}
+                chartsThemeService={deps.theme}
+                paletteService={deps.paletteService}
+                timeZone={deps.timeZone}
+                eventAnnotationService={deps.eventAnnotationService}
+                useLegacyTimeAxis={deps.useLegacyTimeAxis}
+                minInterval={calculateMinInterval(deps.data.datatableUtilities, config)}
+                interactive={handlers.isInteractive()}
+                onClickValue={onClickValue}
+                onSelectRange={onSelectRange}
+                renderMode={handlers.getRenderMode()}
+                syncColors={handlers.isSyncColorsEnabled()}
+                syncTooltips={handlers.isSyncTooltipsEnabled()}
+                uiState={handlers.uiState as PersistedState}
+                renderComplete={renderComplete}
+              />
+            </div>{' '}
+          </I18nProvider>
+        </KibanaThemeProvider>
+      </CustomErrorBoundary>,
       domNode
     );
   },

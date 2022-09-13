@@ -16,8 +16,12 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { ExpressionGaugePluginStart } from '../plugin';
 import { EXPRESSION_GAUGE_NAME, GaugeExpressionProps, GaugeShapes } from '../../common';
 import { getFormatService, getPaletteService } from '../services';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { extractContainerType, extractVisualizationType } from '../../../common';
+import {
+  CustomErrorBoundary,
+  extractContainerType,
+  extractVisualizationType,
+  // eslint-disable-next-line @kbn/imports/no_boundary_crossing
+} from '../../../common';
 
 interface ExpressionGaugeRendererDependencies {
   getStartDeps: StartServicesGetter<ExpressionGaugePluginStart>;
@@ -67,18 +71,20 @@ export const gaugeRenderer: (
 
     const { GaugeComponent } = await import('../components/gauge_component');
     render(
-      <KibanaThemeProvider theme$={core.theme.theme$}>
-        <div className="gauge-container" data-test-subj="gaugeChart">
-          <GaugeComponent
-            {...config}
-            formatFactory={getFormatService().deserialize}
-            chartsThemeService={plugins.charts.theme}
-            paletteService={getPaletteService()}
-            renderComplete={renderComplete}
-            uiState={handlers.uiState as PersistedState}
-          />
-        </div>
-      </KibanaThemeProvider>,
+      <CustomErrorBoundary onError={(error) => handlers.error(domNode, error)}>
+        <KibanaThemeProvider theme$={core.theme.theme$}>
+          <div className="gauge-container" data-test-subj="gaugeChart">
+            <GaugeComponent
+              {...config}
+              formatFactory={getFormatService().deserialize}
+              chartsThemeService={plugins.charts.theme}
+              paletteService={getPaletteService()}
+              renderComplete={renderComplete}
+              uiState={handlers.uiState as PersistedState}
+            />
+          </div>
+        </KibanaThemeProvider>
+      </CustomErrorBoundary>,
       domNode
     );
   },

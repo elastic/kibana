@@ -19,8 +19,12 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { VisTypePieDependencies } from '../plugin';
 import { PARTITION_VIS_RENDERER_NAME } from '../../common/constants';
 import { ChartTypes, RenderValue } from '../../common/types';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { extractContainerType, extractVisualizationType } from '../../../common';
+import {
+  CustomErrorBoundary,
+  extractContainerType,
+  extractVisualizationType,
+  // eslint-disable-next-line @kbn/imports/no_boundary_crossing
+} from '../../../common';
 
 export const strings = {
   getDisplayName: () =>
@@ -72,24 +76,26 @@ export const getPartitionVisRenderer: (
     const palettesRegistry = await plugins.charts.palettes.getPalettes();
 
     render(
-      <I18nProvider>
-        <KibanaThemeProvider theme$={core.theme.theme$}>
-          <div css={partitionVisRenderer}>
-            <PartitionVisComponent
-              chartsThemeService={plugins.charts.theme}
-              palettesRegistry={palettesRegistry}
-              visParams={visConfig}
-              visData={visData}
-              visType={visConfig.isDonut ? ChartTypes.DONUT : visType}
-              renderComplete={renderComplete}
-              fireEvent={handlers.event}
-              uiState={handlers.uiState as PersistedState}
-              services={{ data: plugins.data, fieldFormats: plugins.fieldFormats }}
-              syncColors={syncColors}
-            />
-          </div>
-        </KibanaThemeProvider>
-      </I18nProvider>,
+      <CustomErrorBoundary onError={(error) => handlers.error(domNode, error)}>
+        <I18nProvider>
+          <KibanaThemeProvider theme$={core.theme.theme$}>
+            <div css={partitionVisRenderer}>
+              <PartitionVisComponent
+                chartsThemeService={plugins.charts.theme}
+                palettesRegistry={palettesRegistry}
+                visParams={visConfig}
+                visData={visData}
+                visType={visConfig.isDonut ? ChartTypes.DONUT : visType}
+                renderComplete={renderComplete}
+                fireEvent={handlers.event}
+                uiState={handlers.uiState as PersistedState}
+                services={{ data: plugins.data, fieldFormats: plugins.fieldFormats }}
+                syncColors={syncColors}
+              />
+            </div>
+          </KibanaThemeProvider>
+        </I18nProvider>
+      </CustomErrorBoundary>,
       domNode
     );
   },

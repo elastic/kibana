@@ -23,8 +23,12 @@ import { Datatable } from '@kbn/expressions-plugin/common';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { ExpressionLegacyMetricPluginStart } from '../plugin';
 import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig, VisParams } from '../../common';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { extractContainerType, extractVisualizationType } from '../../../common';
+import {
+  CustomErrorBoundary,
+  extractContainerType,
+  extractVisualizationType,
+  // eslint-disable-next-line @kbn/imports/no_boundary_crossing
+} from '../../../common';
 
 // @ts-ignore
 const MetricVisComponent = lazy(() => import('../components/metric_component'));
@@ -91,23 +95,25 @@ export const getMetricVisRenderer: (
     };
 
     render(
-      <KibanaThemeProvider theme$={core.theme.theme$}>
-        <VisualizationContainer
-          data-test-subj="legacyMtrVis"
-          className="legacyMtrVis"
-          showNoResult={!visData.rows?.length}
-          renderComplete={renderComplete}
-          handlers={handlers}
-        >
-          <MetricVisComponent
-            visData={visData}
-            visParams={visConfig}
+      <CustomErrorBoundary onError={(error) => handlers.error(domNode, error)}>
+        <KibanaThemeProvider theme$={core.theme.theme$}>
+          <VisualizationContainer
+            data-test-subj="legacyMtrVis"
+            className="legacyMtrVis"
+            showNoResult={!visData.rows?.length}
             renderComplete={renderComplete}
-            fireEvent={handlers.event}
-            filterable={filterable}
-          />
-        </VisualizationContainer>
-      </KibanaThemeProvider>,
+            handlers={handlers}
+          >
+            <MetricVisComponent
+              visData={visData}
+              visParams={visConfig}
+              renderComplete={renderComplete}
+              fireEvent={handlers.event}
+              filterable={filterable}
+            />
+          </VisualizationContainer>
+        </KibanaThemeProvider>
+      </CustomErrorBoundary>,
       domNode
     );
   },
