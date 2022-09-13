@@ -20,7 +20,6 @@ import {
   SyntheticsMonitorWithSecrets,
   SyntheticsMonitor,
   ConfigKey,
-  FormMonitorType,
 } from '../../../common/runtime_types';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
