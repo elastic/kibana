@@ -93,7 +93,7 @@ export async function setupIntegrationEnvironment() {
    * Register a test file type
    */
   const testHttpConfig = { tags: ['access:myapp'] };
-  getFileKindsRegistry().register({
+  const myFileKind = {
     id: fileKind,
     blobStoreSettings: {
       esFixedSizeIndex: { index: testIndex },
@@ -107,7 +107,8 @@ export async function setupIntegrationEnvironment() {
       list: testHttpConfig,
       share: testHttpConfig,
     },
-  });
+  };
+  getFileKindsRegistry().register(myFileKind);
   const coreStart = await root.start();
   const esClient = coreStart.elasticsearch.client.asInternalUser;
 

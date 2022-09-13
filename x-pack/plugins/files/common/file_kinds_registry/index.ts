@@ -29,7 +29,7 @@ export interface FileKindsRegistry {
  * @internal
  */
 export class FileKindsRegistryImpl implements FileKindsRegistry {
-  constructor() {}
+  constructor(private readonly onRegister?: (fileKind: FileKind) => void) {}
 
   private readonly fileKinds = new Map<string, FileKind>();
 
@@ -45,6 +45,7 @@ export class FileKindsRegistryImpl implements FileKindsRegistry {
     }
 
     this.fileKinds.set(fileKind.id, fileKind);
+    this.onRegister?.(fileKind);
   }
 
   get(id: string): FileKind {

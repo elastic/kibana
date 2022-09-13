@@ -59,7 +59,11 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
 
     const router: FilesRouter = core.http.createRouter();
     registerRoutes(router);
-    setFileKindsRegistry(new FileKindsRegistryImpl());
+    setFileKindsRegistry(
+      new FileKindsRegistryImpl((fk) => {
+        registerFileKindRoutes(router, fk);
+      })
+    );
     registerUsageCollector({
       usageCollection,
       getFileService: () => this.fileServiceFactory?.asInternal(),
@@ -68,7 +72,6 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
     return {
       registerFileKind(fileKind) {
         getFileKindsRegistry().register(fileKind);
-        registerFileKindRoutes(router, fileKind);
       },
     };
   }
