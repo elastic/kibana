@@ -103,14 +103,17 @@ export const GENERAL_CASES_OWNER = APP_ID;
 
 export const OWNER_INFO = {
   [SECURITY_SOLUTION_OWNER]: {
+    appId: 'securitySolutionUI',
     label: 'Security',
     iconType: 'logoSecurity',
   },
   [OBSERVABILITY_OWNER]: {
+    appId: 'observability-overview',
     label: 'Observability',
     iconType: 'logoObservability',
   },
   [GENERAL_CASES_OWNER]: {
+    appId: 'management',
     label: 'Stack',
     iconType: 'casesApp',
   },
@@ -163,3 +166,8 @@ export const PUSH_CASES_CAPABILITY = 'push_cases' as const;
  */
 
 export const DEFAULT_USER_SIZE = 10;
+
+/**
+ * Delays
+ */
+export const SEARCH_DEBOUNCE_MS = 500;
