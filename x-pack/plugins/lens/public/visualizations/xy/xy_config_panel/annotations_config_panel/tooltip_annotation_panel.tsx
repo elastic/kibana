@@ -198,6 +198,7 @@ export function TooltipSection({
                         onFieldSelectChange(choice, index);
                       }}
                       fieldIsInvalid={!fieldIsValid}
+                      autoFocus={isNew && value == null}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>

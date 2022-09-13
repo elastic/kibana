@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import type { AppContextTestRender } from '../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import {
+  createAppRootMockRenderer,
+  type AppContextTestRender,
+} from '../../../common/mock/endpoint';
 import { ResponseActionsLog } from './response_actions_log';
 import type { ActionListApiResponse } from '../../../../common/endpoint/types';
-import type { ResponseActionStatus } from '../../../../common/endpoint/service/response_actions/constants';
 import { MANAGEMENT_PATH } from '../../../../common/constants';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
+import { getActionListMock } from './mocks';
 
 let mockUseGetEndpointActionList: {
   isFetched?: boolean;
@@ -488,7 +488,31 @@ describe('Response Actions Log', () => {
       expect(filterList.querySelectorAll('ul>li').length).toEqual(5);
       expect(
         Array.from(filterList.querySelectorAll('ul>li')).map((option) => option.textContent)
-      ).toEqual(['isolate', 'release', 'kill-process', 'suspend-process', 'running-processes']);
+      ).toEqual(['isolate', 'release', 'kill-process', 'suspend-process', 'processes']);
+    });
+
+    it('should have `clear all` button `disabled` when no selected values', () => {
+      render();
+      userEvent.click(renderResult.getByTestId(`${testPrefix}${filterPrefix}-popoverButton`));
+      const clearAllButton = renderResult.getByTestId(
+        `${testPrefix}${filterPrefix}-clearAllButton`
+      );
+      expect(clearAllButton.hasAttribute('disabled')).toBeTruthy();
+    });
+  });
+
+  describe('Statuses filter', () => {
+    const filterPrefix = '-statuses-filter';
+
+    it('should show a list of statuses when opened', () => {
+      render();
+      userEvent.click(renderResult.getByTestId(`${testPrefix}${filterPrefix}-popoverButton`));
+      const filterList = renderResult.getByTestId(`${testPrefix}${filterPrefix}-popoverList`);
+      expect(filterList).toBeTruthy();
+      expect(filterList.querySelectorAll('ul>li').length).toEqual(3);
+      expect(
+        Array.from(filterList.querySelectorAll('ul>li')).map((option) => option.textContent)
+      ).toEqual(['Failed', 'Pending', 'Successful']);
     });
 
     it('should have `clear all` button `disabled` when no selected values', () => {
@@ -501,68 +525,3 @@ describe('Response Actions Log', () => {
     });
   });
 });
-
-// mock API response
-const getActionListMock = async ({
-  agentIds: _agentIds,
-  commands,
-  actionCount = 0,
-  endDate,
-  page = 1,
-  pageSize = 10,
-  startDate,
-  userIds,
-  isCompleted = true,
-  isExpired = false,
-  wasSuccessful = true,
-  status = 'successful',
-}: {
-  agentIds?: string[];
-  commands?: string[];
-  actionCount?: number;
-  endDate?: string;
-  page?: number;
-  pageSize?: number;
-  startDate?: string;
-  userIds?: string[];
-  isCompleted?: boolean;
-  isExpired?: boolean;
-  wasSuccessful?: boolean;
-  status?: ResponseActionStatus;
-}): Promise<ActionListApiResponse> => {
-  const endpointActionGenerator = new EndpointActionGenerator('seed');
-
-  const agentIds = _agentIds ?? [uuid.v4()];
-
-  const data: ActionListApiResponse['data'] = agentIds.map((id) => {
-    const actionIds = Array(actionCount)
-      .fill(1)
-      .map(() => uuid.v4());
-
-    const actionDetails: ActionListApiResponse['data'] = actionIds.map((actionId) => {
-      return endpointActionGenerator.generateActionDetails({
-        agents: [id],
-        id: actionId,
-        isCompleted,
-        isExpired,
-        wasSuccessful,
-        status,
-        completedAt: isExpired ? undefined : new Date().toISOString(),
-      });
-    });
-    return actionDetails;
-  })[0];
-
-  return {
-    page,
-    pageSize,
-    startDate,
-    endDate,
-    elasticAgentIds: agentIds,
-    commands,
-    data,
-    userIds,
-    statuses: undefined,
-    total: data.length ?? 0,
-  };
-};
