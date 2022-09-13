@@ -13,15 +13,15 @@ interface InferencePipeline {
   isDeployed: boolean;
   modelType: string;
   pipelineName: string;
-  tags: string[];
   trainedModelName: string;
 }
 
-const fetchMlInferencePipelineProcessorNames = async (
+export const fetchMlInferencePipelineProcessorNames = async (
   client: ElasticsearchClient,
-  mlInferencePipelineName: string
+  indexName: string
 ): Promise<string[]> => {
   try {
+    const mlInferencePipelineName = `${indexName}@ml-inference`;
     const {
       [mlInferencePipelineName]: { processors: mlInferencePipelineProcessors = [] },
     } = await client.ingest.getPipeline({
@@ -37,7 +37,7 @@ const fetchMlInferencePipelineProcessorNames = async (
   }
 };
 
-const fetchPipelineProcessorInferenceData = async (
+export const fetchPipelineProcessorInferenceData = async (
   client: ElasticsearchClient,
   mlInferencePipelineProcessorNames: string[]
 ): Promise<Record<string, InferencePipeline>> => {
@@ -60,7 +60,6 @@ const fetchPipelineProcessorInferenceData = async (
           isDeployed: false,
           modelType: 'unknown',
           pipelineName: pipelineProcessorName,
-          tags: [],
           trainedModelName,
         };
 
@@ -70,7 +69,7 @@ const fetchPipelineProcessorInferenceData = async (
   );
 };
 
-const fetchAndAddTrainedModelData = async (
+export const fetchAndAddTrainedModelData = async (
   client: ElasticsearchClient,
   pipelineProcessorData: Record<string, InferencePipeline>
 ): Promise<Record<string, InferencePipeline>> => {
@@ -85,7 +84,6 @@ const fetchAndAddTrainedModelData = async (
     const trainedModelName = trainedModelData.model_id;
 
     if (trainedModelName in pipelineProcessorData) {
-      pipelineProcessorData[trainedModelName].tags = trainedModelData.tags;
       pipelineProcessorData[trainedModelName].modelType = trainedModelData.model_type || 'unknown';
     }
   });
@@ -105,10 +103,9 @@ export const fetchMlInferencePipelineProcessors = async (
   client: ElasticsearchClient,
   indexName: string
 ): Promise<InferencePipeline[]> => {
-  const mlInferencePipelineName = `${indexName}@ml-inference`;
   const mlInferencePipelineProcessorNames = await fetchMlInferencePipelineProcessorNames(
     client,
-    mlInferencePipelineName
+    indexName
   );
 
   // Elasticsearch's GET pipelines API call will return all of the pipeline data if no ids are
