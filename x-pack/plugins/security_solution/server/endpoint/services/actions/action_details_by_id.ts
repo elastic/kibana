@@ -14,6 +14,7 @@ import {
   getActionCompletionInfo,
   mapToNormalizedActionRequest,
   getAgentHostNamesWithIds,
+  getActionStatus,
 } from './utils';
 import type {
   ActionDetails,
@@ -119,6 +120,12 @@ export const getActionDetailsById = async (
   const { isCompleted, completedAt, wasSuccessful, errors, outputs, agentState } =
     getActionCompletionInfo(normalizedActionRequest.agents, actionResponses);
 
+  const { isExpired, status } = getActionStatus({
+    expirationDate: normalizedActionRequest.expiration,
+    isCompleted,
+    wasSuccessful,
+  });
+
   const actionDetails: ActionDetails = {
     id: actionId,
     agents: normalizedActionRequest.agents,
@@ -132,7 +139,8 @@ export const getActionDetailsById = async (
     completedAt,
     wasSuccessful,
     errors,
-    isExpired: !isCompleted && normalizedActionRequest.expiration < new Date().toISOString(),
+    isExpired,
+    status,
     outputs,
     agentState,
     createdBy: normalizedActionRequest.createdBy,
