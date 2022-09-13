@@ -284,7 +284,7 @@ const {
   patch: threatMatchPatchParams,
   response: threatMatchResponseParams,
 } = buildAPISchemas(threatMatchRuleParams);
-export { threatMatchCreateParams };
+export { threatMatchCreateParams, threatMatchResponseParams };
 
 const queryRuleParams = {
   required: {
@@ -307,7 +307,7 @@ const {
   response: queryResponseParams,
 } = buildAPISchemas(queryRuleParams);
 
-export { queryCreateParams };
+export { queryCreateParams, queryResponseParams };
 
 const savedQueryRuleParams = {
   required: {
@@ -332,7 +332,7 @@ const {
   response: savedQueryResponseParams,
 } = buildAPISchemas(savedQueryRuleParams);
 
-export { savedQueryCreateParams };
+export { savedQueryCreateParams, savedQueryResponseParams };
 
 const thresholdRuleParams = {
   required: {
@@ -356,7 +356,7 @@ const {
   response: thresholdResponseParams,
 } = buildAPISchemas(thresholdRuleParams);
 
-export { thresholdCreateParams };
+export { thresholdCreateParams, thresholdResponseParams };
 
 const machineLearningRuleParams = {
   required: {
@@ -373,7 +373,7 @@ const {
   response: machineLearningResponseParams,
 } = buildAPISchemas(machineLearningRuleParams);
 
-export { machineLearningCreateParams };
+export { machineLearningCreateParams, machineLearningResponseParams };
 
 const newTermsRuleParams = {
   required: {
@@ -397,7 +397,7 @@ const {
   response: newTermsResponseParams,
 } = buildAPISchemas(newTermsRuleParams);
 
-export { newTermsCreateParams };
+export { newTermsCreateParams, newTermsResponseParams };
 // ---------------------------------------
 // END type specific parameter definitions
 
@@ -503,13 +503,26 @@ const responseOptionalFields = {
   execution_summary: RuleExecutionSummary,
 };
 
-export const fullResponseSchema = t.intersection([
+const sharedResponseSchema = t.intersection([
   baseResponseParams,
-  responseTypeSpecific,
   t.exact(t.type(responseRequiredFields)),
   t.exact(t.partial(responseOptionalFields)),
 ]);
+export type SharedResponseSchema = t.TypeOf<typeof sharedResponseSchema>;
+export const fullResponseSchema = t.intersection([sharedResponseSchema, responseTypeSpecific]);
 export type FullResponseSchema = t.TypeOf<typeof fullResponseSchema>;
+
+// Convenience types for type specific responses
+type ResponseSchema<T> = SharedResponseSchema & T;
+export type EqlResponseSchema = ResponseSchema<t.TypeOf<typeof eqlResponseParams>>;
+export type ThreatMatchResponseSchema = ResponseSchema<t.TypeOf<typeof threatMatchResponseParams>>;
+export type QueryResponseSchema = ResponseSchema<t.TypeOf<typeof queryResponseParams>>;
+export type SavedQueryResponseSchema = ResponseSchema<t.TypeOf<typeof savedQueryResponseParams>>;
+export type ThresholdResponseSchema = ResponseSchema<t.TypeOf<typeof thresholdResponseParams>>;
+export type MachineLearningResponseSchema = ResponseSchema<
+  t.TypeOf<typeof machineLearningResponseParams>
+>;
+export type NewTermsResponseSchema = ResponseSchema<t.TypeOf<typeof newTermsResponseParams>>;
 
 export interface RulePreviewLogs {
   errors: string[];

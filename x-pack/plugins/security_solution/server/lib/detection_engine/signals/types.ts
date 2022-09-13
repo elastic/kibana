@@ -19,7 +19,6 @@ import type { ListClient } from '@kbn/lists-plugin/server';
 import type { EcsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import type { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import type {
   BaseHit,
   RuleAlertAction,
@@ -42,6 +41,7 @@ import type {
   WrappedFieldsLatest,
 } from '../../../../common/detection_engine/schemas/alerts';
 import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
+import type { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
 
 export interface ThresholdResult {
   terms?: Array<{
@@ -192,7 +192,7 @@ export interface Signal {
   _meta?: {
     version: number;
   };
-  rule: RulesSchema;
+  rule: FullResponseSchema;
   /**
    * @deprecated Use "parents" instead of "parent"
    */

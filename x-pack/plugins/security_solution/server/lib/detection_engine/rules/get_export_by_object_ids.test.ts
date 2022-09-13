@@ -213,6 +213,13 @@ describe('get_export_by_object_ids', () => {
             version: 1,
             exceptions_list: getListArrayMock(),
             execution_summary: undefined,
+            outcome: undefined,
+            alias_target_id: undefined,
+            alias_purpose: undefined,
+            timestamp_override: undefined,
+            timestamp_override_fallback_disabled: undefined,
+            namespace: undefined,
+            data_view_id: undefined,
           },
         ],
       };
