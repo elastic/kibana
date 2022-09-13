@@ -6,5 +6,16 @@
  * Side Public License, v 1.
  */
 
-export { CoreAppsService, URL_MAX_LENGTH } from './src';
-export type { CoreAppsServiceSetupDeps, CoreAppsServiceStartDeps } from './src';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { CoreApp } from './core_app';
+
+type CoreAppContract = PublicMethodsOf<CoreApp>;
+const createMock = (): jest.Mocked<CoreAppContract> => ({
+  setup: jest.fn(),
+  start: jest.fn(),
+  stop: jest.fn(),
+});
+
+export const coreAppMock = {
+  create: createMock,
+};
