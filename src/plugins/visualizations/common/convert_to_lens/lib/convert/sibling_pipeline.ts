@@ -15,7 +15,7 @@ export const convertToSiblingPipelineColumns = (
   columnConverterArgs: CommonColumnConverterArgs<SiblingPipelineMetric>,
   reducedTimeRange?: string
 ): Column | null => {
-  const { aggParams } = columnConverterArgs.agg;
+  const { aggParams, label } = columnConverterArgs.agg;
   if (!aggParams) {
     return null;
   }
@@ -25,7 +25,7 @@ export const convertToSiblingPipelineColumns = (
   }
 
   const customMetricColumn = convertMetricToColumns(
-    convertToSchemaConfig(aggParams.customMetric),
+    { ...convertToSchemaConfig(aggParams.customMetric), label },
     columnConverterArgs.dataView
   );
 

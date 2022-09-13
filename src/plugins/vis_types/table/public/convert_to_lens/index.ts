@@ -78,6 +78,7 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
       return null;
     }
     result.columns.push(percentageColumn);
+    result.columnsWithoutReferenced.push(percentageColumn);
   }
 
   const layerId = uuid();
