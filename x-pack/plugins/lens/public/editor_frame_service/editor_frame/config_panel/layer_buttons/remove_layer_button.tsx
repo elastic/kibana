@@ -5,26 +5,38 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
+import type { CoreStart } from '@kbn/core/public';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiCheckbox,
+  EuiCheckboxProps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiContextMenuItem,
-  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { LayerButtonsAction } from './types';
 import { Visualization } from '../../../../types';
-import { LocalStorageLens, LOCAL_STORAGE_LENS_KEY } from '../../../../settings_storage';
+import { LOCAL_STORAGE_LENS_KEY } from '../../../../settings_storage';
 import { LayerType, layerTypes } from '../../../..';
+
+interface RemoveLayerAction {
+  execute: () => void;
+  layerIndex: number;
+  activeVisualization: Visualization;
+  layerType?: LayerType;
+  isOnlyLayer: boolean;
+  core: Pick<CoreStart, 'overlays' | 'theme'>;
+}
+
+const SKIP_DELETE_MODAL_KEY = 'skipDeleteModal';
 
 const modalDescClear = i18n.translate('xpack.lens.layer.confirmModal.clearVis', {
   defaultMessage: `Clearing this layer removes the visualization and its configurations. `,
@@ -104,106 +116,39 @@ const getButtonCopy = (
   };
 };
 
-export function RemoveLayerButton({
-  onRemoveLayer,
-  layerIndex,
-  isOnlyLayer,
-  activeVisualization,
-  layerType,
-  closeContextMenu,
-}: {
-  onRemoveLayer: () => void;
-  layerIndex: number;
-  isOnlyLayer: boolean;
-  activeVisualization: Visualization;
-  layerType?: LayerType;
-  closeContextMenu: () => void;
-}) {
-  const { ariaLabel, modalTitle, modalDesc } = getButtonCopy(
-    layerIndex,
-    layerType || layerTypes.DATA,
-    !!activeVisualization.removeLayer,
-    isOnlyLayer
-  );
-
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [lensLocalStorage, setLensLocalStorage] = useLocalStorage<LocalStorageLens>(
-    LOCAL_STORAGE_LENS_KEY,
-    {}
-  );
-
-  const onChangeShouldShowModal = useCallback(
-    () =>
-      setLensLocalStorage({
-        ...lensLocalStorage,
-        skipDeleteModal: !lensLocalStorage?.skipDeleteModal,
-      }),
-    [lensLocalStorage, setLensLocalStorage]
-  );
-
-  const closeModal = useCallback(() => setIsModalVisible(false), []);
-  const showModal = useCallback(() => setIsModalVisible(true), []);
-
-  const removeLayer = useCallback(() => {
-    closeContextMenu();
-    onRemoveLayer();
-  }, [closeContextMenu, onRemoveLayer]);
-
-  const onCloseModal = useCallback(() => {
-    closeContextMenu();
-    closeModal();
-  }, [closeContextMenu, closeModal]);
-
-  return (
-    <>
-      <EuiContextMenuItem
-        icon={<EuiIcon color="danger" type={isOnlyLayer ? 'eraser' : 'trash'} title={ariaLabel} />}
-        data-test-subj={`lnsLayerRemove--${layerIndex}`}
-        aria-label={ariaLabel}
-        title={ariaLabel}
-        onClick={() => {
-          if (lensLocalStorage?.skipDeleteModal) {
-            return removeLayer();
-          }
-          return showModal();
-        }}
-      >
-        {ariaLabel}
-      </EuiContextMenuItem>
-      {isModalVisible ? (
-        <RemoveConfirmModal
-          modalTitle={modalTitle}
-          isDeletable={!!activeVisualization.removeLayer && !isOnlyLayer}
-          modalDesc={modalDesc}
-          closeModal={onCloseModal}
-          skipDeleteModal={lensLocalStorage?.skipDeleteModal}
-          onChangeShouldShowModal={onChangeShouldShowModal}
-          removeLayer={removeLayer}
-        />
-      ) : null}
-    </>
-  );
-}
-
 const RemoveConfirmModal = ({
   modalTitle,
   modalDesc,
-  closeModal,
   skipDeleteModal,
-  onChangeShouldShowModal,
   isDeletable,
-  removeLayer,
+  execute,
+  closeModal,
+  updateLensLocalStorage,
 }: {
   modalTitle: string;
   modalDesc: string;
-  closeModal: () => void;
-  skipDeleteModal?: boolean;
+  skipDeleteModal: boolean;
   isDeletable?: boolean;
-  onChangeShouldShowModal: () => void;
-  removeLayer: () => void;
+  execute: () => void;
+  closeModal: () => void;
+  updateLensLocalStorage: (partial: Record<string, unknown>) => void;
 }) => {
+  const [skipDeleteModalLocal, setSkipDeleteModalLocal] = useState(skipDeleteModal);
+  const onChangeShouldShowModal: EuiCheckboxProps['onChange'] = useCallback(
+    ({ target }) => setSkipDeleteModalLocal(target.checked),
+    []
+  );
+
+  const onRemove = useCallback(() => {
+    updateLensLocalStorage({
+      [SKIP_DELETE_MODAL_KEY]: skipDeleteModalLocal,
+    });
+    closeModal();
+    execute();
+  }, [closeModal, execute, skipDeleteModalLocal, updateLensLocalStorage]);
+
   return (
-    <EuiModal data-test-subj="lnsLayerRemoveModal" onClose={closeModal}>
+    <>
       <EuiModalHeader>
         <EuiModalHeaderTitle>{modalTitle}</EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -224,7 +169,7 @@ const RemoveConfirmModal = ({
               label={i18n.translate('xpack.lens.layer.confirmModal.dontAskAgain', {
                 defaultMessage: `Don't ask me again`,
               })}
-              indeterminate={skipDeleteModal}
+              checked={skipDeleteModalLocal}
               onChange={onChangeShouldShowModal}
             />
           </EuiFlexItem>
@@ -240,13 +185,10 @@ const RemoveConfirmModal = ({
               <EuiFlexItem grow={false}>
                 <EuiButton
                   data-test-subj="lnsLayerRemoveConfirmButton"
-                  onClick={() => {
-                    closeModal();
-                    removeLayer();
-                  }}
-                  fill
+                  onClick={onRemove}
                   color="danger"
                   iconType={isDeletable ? 'trash' : 'eraser'}
+                  fill
                 >
                   {isDeletable
                     ? i18n.translate('xpack.lens.layer.confirmDelete', {
@@ -261,6 +203,57 @@ const RemoveConfirmModal = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalFooter>
-    </EuiModal>
+    </>
   );
+};
+
+export const getRemoveLayerAction = (props: RemoveLayerAction): LayerButtonsAction => {
+  const { ariaLabel, modalTitle, modalDesc } = getButtonCopy(
+    props.layerIndex,
+    props.layerType || layerTypes.DATA,
+    !!props.activeVisualization.removeLayer,
+    props.isOnlyLayer
+  );
+
+  return {
+    execute: async () => {
+      const storage = new Storage(localStorage);
+      const lensLocalStorage = storage.get(LOCAL_STORAGE_LENS_KEY) ?? {};
+
+      const updateLensLocalStorage = (partial: Record<string, unknown>) => {
+        storage.set(LOCAL_STORAGE_LENS_KEY, {
+          ...lensLocalStorage,
+          ...partial,
+        });
+      };
+
+      if (!lensLocalStorage.skipDeleteModal) {
+        const modal = props.core.overlays.openModal(
+          toMountPoint(
+            <RemoveConfirmModal
+              modalTitle={modalTitle}
+              isDeletable={!!props.activeVisualization.removeLayer && !props.isOnlyLayer}
+              modalDesc={modalDesc}
+              skipDeleteModal={lensLocalStorage[LOCAL_STORAGE_LENS_KEY] ?? false}
+              execute={props.execute}
+              closeModal={() => modal.close()}
+              updateLensLocalStorage={updateLensLocalStorage}
+            />,
+            { theme$: props.core.theme.theme$ }
+          ),
+          {
+            'data-test-subj': 'lnsLayerRemoveModal',
+          }
+        );
+        await modal.onClose;
+      } else {
+        props.execute();
+      }
+    },
+    displayName: ariaLabel,
+    isCompatible: true,
+    icon: props.isOnlyLayer ? 'eraser' : 'trash',
+    color: 'danger',
+    'data-test-subj': `lnsLayerRemove--${props.layerIndex}`,
+  };
 };

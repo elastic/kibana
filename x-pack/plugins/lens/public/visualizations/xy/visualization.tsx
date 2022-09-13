@@ -126,6 +126,12 @@ export const getXyVisualization = ({
     };
   },
 
+  cloneLayer(state, layerId, newLayerId) {
+    console.log('cloneLayer456');
+
+    return state;
+  },
+
   appendLayer(state, layerId, layerType, indexPatternId) {
     const firstUsedSeriesType = getDataLayers(state.layers)?.[0]?.seriesType;
     return {

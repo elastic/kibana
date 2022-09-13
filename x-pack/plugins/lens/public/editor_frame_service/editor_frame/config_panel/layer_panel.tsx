@@ -97,7 +97,7 @@ export function LayerPanel(
     updateDatasourceAsync,
     visualizationState,
     onChangeIndexPattern,
-    core: { overlays },
+    core,
   } = props;
 
   const datasourceStates = useLensSelector(selectDatasourceStates);
@@ -337,7 +337,7 @@ export function LayerPanel(
                   layerType={activeVisualization.getLayerType(layerId, visualizationState)}
                   onRemoveLayer={onRemoveLayer}
                   onCloneLayer={onCloneLayer}
-                  overlays={overlays}
+                  core={core}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

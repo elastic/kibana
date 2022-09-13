@@ -15,12 +15,13 @@ import {
   useGeneratedHtmlId,
   EuiContextMenuItem,
   EuiIcon,
+  EuiOutsideClickDetector,
 } from '@elastic/eui';
 import type { LayerType, Visualization } from '../../../..';
 import type { LayerButtonsAction } from './types';
 
-import { getCloneLayerButtonAction } from './clone_layer_button';
-// import { RemoveLayerButton } from './remove_layer_button';
+import { getCloneLayerAction } from './clone_layer_button';
+import { getRemoveLayerAction } from './remove_layer_button';
 
 export interface LayerButtonsProps {
   onRemoveLayer: () => void;
@@ -29,7 +30,7 @@ export interface LayerButtonsProps {
   isOnlyLayer: boolean;
   activeVisualization: Visualization;
   layerType?: LayerType;
-  overlays: CoreStart['overlays'];
+  core: Pick<CoreStart, 'overlays' | 'theme'>;
 }
 
 /** @internal **/
@@ -48,8 +49,10 @@ const InContextMenuActions = (
   }, [isPopoverOpen]);
 
   const closePopover = useCallback(() => {
-    setPopover(false);
-  }, []);
+    if (isPopoverOpen) {
+      setPopover(false);
+    }
+  }, [isPopoverOpen]);
 
   const items = props.actions.map((i) => (
     <EuiContextMenuItem
@@ -57,35 +60,40 @@ const InContextMenuActions = (
       data-test-subj="lnsLayerClone"
       aria-label={i.displayName}
       title={i.displayName}
-      onClick={i.execute}
+      onClick={() => {
+        closePopover();
+        i.execute();
+      }}
     >
       {i.displayName}
     </EuiContextMenuItem>
   ));
 
   return (
-    <EuiPopover
-      id={splitButtonPopoverId}
-      button={
-        <EuiButtonIcon
-          display="empty"
-          color="text"
-          size="s"
-          iconType="boxesVertical"
-          aria-label={i18n.translate('xpack.lens.layer.actions.contextMenuAriaLabel', {
-            defaultMessage: `Layer actions`,
-          })}
-          onClick={onButtonClick}
-        />
-      }
-      ownFocus={true}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
-      anchorPosition="downLeft"
-    >
-      <EuiContextMenuPanel size="s" items={items} />
-    </EuiPopover>
+    <EuiOutsideClickDetector onOutsideClick={closePopover}>
+      <EuiPopover
+        id={splitButtonPopoverId}
+        button={
+          <EuiButtonIcon
+            display="empty"
+            color="text"
+            size="s"
+            iconType="boxesVertical"
+            aria-label={i18n.translate('xpack.lens.layer.actions.contextMenuAriaLabel', {
+              defaultMessage: `Layer actions`,
+            })}
+            onClick={onButtonClick}
+          />
+        }
+        ownFocus={true}
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+      >
+        <EuiContextMenuPanel size="s" items={items} />
+      </EuiPopover>
+    </EuiOutsideClickDetector>
   );
 };
 
@@ -93,10 +101,18 @@ export const LayerButtons = (props: LayerButtonsProps) => {
   const compatibleActions = useMemo(
     () =>
       [
-        getCloneLayerButtonAction({
+        getCloneLayerAction({
           execute: props.onCloneLayer,
           layerIndex: props.layerIndex,
           activeVisualization: props.activeVisualization,
+        }),
+        getRemoveLayerAction({
+          execute: props.onRemoveLayer,
+          layerIndex: props.layerIndex,
+          activeVisualization: props.activeVisualization,
+          layerType: props.layerType,
+          isOnlyLayer: props.isOnlyLayer,
+          core: props.core,
         }),
       ].filter((i) => i.isCompatible),
     [props]

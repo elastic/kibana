@@ -8,8 +8,9 @@ import type { IconType, EuiButtonIconColor } from '@elastic/eui';
 
 export interface LayerButtonsAction {
   displayName: string;
-  execute: () => void;
+  execute: () => void | Promise<void>;
   icon: IconType;
   color?: EuiButtonIconColor;
   isCompatible: boolean;
+  'data-test-subj'?: string;
 }

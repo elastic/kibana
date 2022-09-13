@@ -492,7 +492,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   dragDropContext: DragContextState;
   setState: StateSetter<T, { applyImmediately?: boolean }>;
   showNoDataPopover: () => void;
-  core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings' | 'overlays'>;
+  core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme'>;
   query: Query;
   dateRange: DateRange;
   filters: Filter[];
@@ -546,7 +546,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
       forceRender?: boolean;
     }
   >;
-  core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings' | 'overlays'>;
+  core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme'>;
   dateRange: DateRange;
   dimensionGroups: VisualizationDimensionGroupConfig[];
   toggleFullscreen: () => void;
