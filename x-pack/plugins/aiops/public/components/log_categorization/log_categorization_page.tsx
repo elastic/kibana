@@ -40,7 +40,6 @@ import { useCategorizeRequest } from './use_categorize_request';
 import type { EventRate, Category, SparkLinesPerCategory } from './use_categorize_request';
 import { CategoryTable } from './category_table';
 import { DocumentCountChart } from './document_count_chart';
-import { extractErrorMessage } from '../../application/utils/error_utils';
 
 export interface LogCategorizationPageProps {
   dataView: DataView;
@@ -186,9 +185,6 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
       toasts.addError(error, {
         title: i18n.translate('xpack.aiops.logCategorization.errorLoadingCategories', {
           defaultMessage: 'Error loading categories',
-          values: {
-            message: extractErrorMessage(error),
-          },
         }),
       });
     }
