@@ -13,6 +13,7 @@
         "description": [],
         "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "unifiedSearch",
@@ -22,7 +23,8 @@
             "label": "language",
             "description": [],
             "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -42,7 +44,8 @@
               "[]"
             ],
             "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -52,7 +55,8 @@
             "label": "query",
             "description": [],
             "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -62,7 +66,8 @@
             "label": "selectionStart",
             "description": [],
             "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -72,7 +77,8 @@
             "label": "selectionEnd",
             "description": [],
             "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -85,7 +91,8 @@
               "AbortSignal | undefined"
             ],
             "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -98,7 +105,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -111,7 +119,8 @@
               "any"
             ],
             "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedSearch",
@@ -131,7 +140,8 @@
               " | undefined"
             ],
             "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -147,6 +157,7 @@
         "description": [],
         "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -173,6 +184,7 @@
         ],
         "path": "src/plugins/unified_search/public/autocomplete/autocomplete_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -189,6 +201,7 @@
         ],
         "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -219,6 +232,7 @@
         ],
         "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -238,7 +252,8 @@
               }
             ],
             "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

@@ -9,8 +9,8 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 
 import {
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageBody,
   EuiPageHeader,
   EuiPageHeaderSection,

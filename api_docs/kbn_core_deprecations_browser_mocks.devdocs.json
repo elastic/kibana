@@ -32,6 +32,7 @@
         "description": [],
         "path": "packages/core/deprecations/core-deprecations-browser-mocks/src/deprecations_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-browser-mocks",
@@ -49,6 +50,7 @@
             ],
             "path": "packages/core/deprecations/core-deprecations-browser-mocks/src/deprecations_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -64,6 +66,7 @@
             ],
             "path": "packages/core/deprecations/core-deprecations-browser-mocks/src/deprecations_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -81,6 +84,7 @@
             ],
             "path": "packages/core/deprecations/core-deprecations-browser-mocks/src/deprecations_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }

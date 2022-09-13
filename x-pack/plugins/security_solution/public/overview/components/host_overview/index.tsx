@@ -10,7 +10,7 @@ import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import type { HostItem, RiskSeverity } from '../../../../common/search_strategy';
+import type { HostItem } from '../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../common/search_strategy';
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import type { DescriptionList } from '../../../../common/utility_types';
@@ -108,7 +108,9 @@ export const HostOverview = React.memo<HostSummaryProps>(
             title: i18n.HOST_RISK_SCORE,
             description: (
               <>
-                {hostRiskData ? Math.round(hostRiskData.risk_stats.risk_score) : getEmptyTagValue()}
+                {hostRiskData
+                  ? Math.round(hostRiskData.host.risk.calculated_score_norm)
+                  : getEmptyTagValue()}
               </>
             ),
           },
@@ -118,7 +120,10 @@ export const HostOverview = React.memo<HostSummaryProps>(
             description: (
               <>
                 {hostRiskData ? (
-                  <RiskScore severity={hostRiskData.risk as RiskSeverity} hideBackgroundColor />
+                  <RiskScore
+                    severity={hostRiskData.host.risk.calculated_level}
+                    hideBackgroundColor
+                  />
                 ) : (
                   getEmptyTagValue()
                 )}

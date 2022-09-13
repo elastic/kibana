@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ace",
+  "owner": "@elastic/platform-deployment-management",
+  "runtimeDeps": [],
+  "typeDeps": []
+}

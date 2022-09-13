@@ -295,7 +295,6 @@ export async function mountApp(
                 initCallback();
               }}
             />
-            ;
           </AnalyticsNoDataPageKibanaProvider>
         );
       }
