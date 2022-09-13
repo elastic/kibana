@@ -39,15 +39,15 @@ describe('AlertsTable.BulkActions', () => {
       [AlertsField.name]: ['one'],
       [AlertsField.reason]: ['two'],
       [AlertsField.uuid]: ['uuidone'],
-      _id: 'alert0',
-      _index: 'idx0',
+      _id: ['alert0'],
+      _index: ['idx0'],
     },
     {
       [AlertsField.name]: ['three'],
       [AlertsField.reason]: ['four'],
       [AlertsField.uuid]: ['uuidtwo'],
-      _id: 'alert1',
-      _index: 'idx1',
+      _id: ['alert1'],
+      _index: ['idx1'],
     },
   ] as unknown as EcsFieldsResponse[];
 
@@ -96,6 +96,11 @@ describe('AlertsTable.BulkActions', () => {
     visibleColumns: columns.map((c) => c.id),
     'data-test-subj': 'testTable',
     updatedAt: Date.now(),
+    onToggleColumn: () => {},
+    onResetColumns: () => {},
+    onColumnsChange: () => {},
+    onChangeVisibleColumns: () => {},
+    browserFields: {},
   };
 
   const tablePropsWithBulkActions = {
@@ -219,7 +224,7 @@ describe('AlertsTable.BulkActions', () => {
             {
               [AlertsField.name]: ['five'],
               [AlertsField.reason]: ['six'],
-              _id: 'alert2',
+              _id: ['alert2'],
             },
           ] as unknown as EcsFieldsResponse[];
           const props = {
