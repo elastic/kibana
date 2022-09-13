@@ -55,7 +55,7 @@ export const AgentActivityButton: React.FC<{
       content={
         <EuiText>
           <FormattedMessage
-            id="xpack.fleet.agentList.agentActivityTourContent"
+            id="xpack.fleet.agentActivityButton.tourContent"
             defaultMessage="Review in progress, completed, and scheduled agent action activity history here anytime."
           />
         </EuiText>
@@ -66,7 +66,12 @@ export const AgentActivityButton: React.FC<{
       maxWidth={360}
       step={1}
       stepsTotal={1}
-      title="Agent activity history"
+      title={
+        <FormattedMessage
+          id="xpack.fleet.agentActivityButton.tourTitle"
+          defaultMessage="Agent activity history"
+        />
+      }
       anchorPosition="upCenter"
       footerAction={<EuiButtonEmpty onClick={onFinish}>OK</EuiButtonEmpty>}
     >

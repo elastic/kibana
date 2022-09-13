@@ -117,6 +117,13 @@ async function _getActions(
             },
           },
         ],
+        must: [
+          {
+            exists: {
+              field: 'agents',
+            },
+          },
+        ],
       },
     },
     body: {

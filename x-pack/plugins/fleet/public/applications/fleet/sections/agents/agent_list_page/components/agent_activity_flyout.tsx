@@ -28,6 +28,8 @@ import { useActionStatus } from '../hooks';
 import { useGetAgentPolicies, useStartServices } from '../../../../hooks';
 import { SO_SEARCH_LIMIT } from '../../../../constants';
 
+import { getTodayActions, getOtherDaysActions } from './agent_activity_helper';
+
 export const AgentActivityFlyout: React.FunctionComponent<{
   onClose: () => void;
   onAbortSuccess: () => void;
@@ -52,20 +54,8 @@ export const AgentActivityFlyout: React.FunctionComponent<{
 
   const completedActions = currentActionsEnriched.filter((a) => a.status !== 'in progress');
 
-  const todayActions = completedActions.filter((a) =>
-    a.creationTime.startsWith(new Date().toISOString().substring(0, 10))
-  );
-
-  const otherDays: { [day: string]: ActionStatus[] } = {};
-  completedActions
-    .filter((a) => !todayActions.includes(a))
-    .forEach((action) => {
-      const day = action.creationTime.substring(0, 10);
-      if (!otherDays[day]) {
-        otherDays[day] = [];
-      }
-      otherDays[day].push(action);
-    });
+  const todayActions = getTodayActions(completedActions);
+  const otherDays = getOtherDaysActions(completedActions);
 
   return (
     <>
@@ -119,13 +109,27 @@ export const AgentActivityFlyout: React.FunctionComponent<{
           ) : null}
           {inProgressActions.length > 0 ? (
             <ActivitySection
-              title="In progress"
+              title={
+                <FormattedMessage
+                  id="xpack.fleet.agentActivityFlyout.inProgressTitle"
+                  defaultMessage="In progress"
+                />
+              }
               actions={inProgressActions}
               abortUpgrade={abortUpgrade}
             />
           ) : null}
           {todayActions.length > 0 ? (
-            <ActivitySection title="Today" actions={todayActions} abortUpgrade={abortUpgrade} />
+            <ActivitySection
+              title={
+                <FormattedMessage
+                  id="xpack.fleet.agentActivityFlyout.todayTitle"
+                  defaultMessage="Today"
+                />
+              }
+              actions={todayActions}
+              abortUpgrade={abortUpgrade}
+            />
           ) : null}
           {Object.keys(otherDays).map((day) => (
             <ActivitySection
@@ -141,7 +145,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
 };
 
 const ActivitySection: React.FunctionComponent<{
-  title: string | ReactNode;
+  title: ReactNode;
   actions: ActionStatus[];
   abortUpgrade: (action: ActionStatus) => Promise<void>;
 }> = ({ title, actions, abortUpgrade }) => {
@@ -210,6 +214,16 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
     </EuiText>
   );
 
+  const completedDescription = (
+    <FormattedMessage
+      id="xpack.fleet.agentActivityFlyout.completedDescription"
+      defaultMessage="Completed {date}"
+      values={{
+        date: formattedTime(action.completionTime),
+      }}
+    />
+  );
+
   const displayByStatus: {
     [key: string]: {
       icon: ReactNode;
@@ -246,36 +260,86 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
       description:
         action.type === 'POLICY_REASSIGN' && action.newPolicyId ? (
           <EuiText color="subdued">
-            Assigned to {action.newPolicyId}. <br />
-            Completed {formattedTime(action.completionTime)}
+            <p>
+              <FormattedMessage
+                id="xpack.fleet.agentActivityFlyout.reassignCompletedDescription"
+                defaultMessage="Assigned to {policy}."
+                values={{
+                  policy: action.newPolicyId,
+                }}
+              />
+            </p>
+            <p>{completedDescription}</p>
           </EuiText>
         ) : (
-          <EuiText color="subdued">Completed {formattedTime(action.completionTime)}</EuiText>
+          <EuiText color="subdued">{completedDescription}</EuiText>
         ),
     },
     failed: {
       icon: <EuiIcon size="m" type="alert" color="red" />,
       title: completeTitle,
       titleColor: 'red',
-      description: <EuiText color="subdued">A problem occured during this operation.</EuiText>,
+      description: (
+        <EuiText color="subdued">
+          {' '}
+          <FormattedMessage
+            id="xpack.fleet.agentActivityFlyout.failureDescription"
+            defaultMessage=" A problem occured during this operation."
+          />
+        </EuiText>
+      ),
     },
     cancelled: {
       icon: <EuiIcon size="m" type="alert" color="grey" />,
       titleColor: 'grey',
       title: (
-        <EuiText>{`Agent ${actionNames[action.type ?? 'ACTION'].cancelledText} cancelled`}</EuiText>
+        <EuiText>
+          <FormattedMessage
+            id="xpack.fleet.agentActivityFlyout.cancelledTitle"
+            defaultMessage="Agent {cancelledText} cancelled"
+            values={{
+              cancelledText: actionNames[action.type ?? 'ACTION'].cancelledText,
+            }}
+          />
+        </EuiText>
       ),
       description: (
-        <EuiText color="subdued">Cancelled on {formattedTime(action.cancellationTime)}</EuiText>
+        <EuiText color="subdued">
+          <FormattedMessage
+            id="xpack.fleet.agentActivityFlyout.cancelledDescription"
+            defaultMessage="Cancelled on {date}"
+            values={{
+              date: formattedTime(action.cancellationTime),
+            }}
+          />
+        </EuiText>
       ),
     },
     expired: {
       icon: <EuiIcon size="m" type="alert" color="grey" />,
       titleColor: 'grey',
       title: (
-        <EuiText>{`Agent ${actionNames[action.type ?? 'ACTION'].cancelledText} expired`}</EuiText>
+        <EuiText>
+          <FormattedMessage
+            id="xpack.fleet.agentActivityFlyout.expiredTitle"
+            defaultMessage="Agent {expiredText} expired"
+            values={{
+              expiredText: actionNames[action.type ?? 'ACTION'].cancelledText,
+            }}
+          />
+        </EuiText>
       ),
-      description: <EuiText color="subdued">Expired on {formattedTime(action.expiration)}</EuiText>,
+      description: (
+        <EuiText color="subdued">
+          <FormattedMessage
+            id="xpack.fleet.agentActivityFlyout.expiredDescription"
+            defaultMessage="Expired on {date}"
+            values={{
+              date: formattedTime(action.expiration),
+            }}
+          />
+        </EuiText>
+      ),
     },
   };
 
@@ -363,30 +427,26 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
             <EuiFlexItem>
               <EuiText color="subdued">
                 {isScheduled && action.startTime ? (
-                  <>
-                    Scheduled for <b>{formattedTime(action.startTime)}</b>
-                    .<br />
-                  </>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.fleet.agentActivityFlyout.scheduledDescription"
+                      defaultMessage="Scheduled for "
+                    />
+                    <b>{formattedTime(action.startTime)}</b>.
+                  </p>
                 ) : null}
-                {'Agents may also be configured to upgrade automatically. '}
-                <FormattedMessage
-                  id="xpack.fleet.agentActivityFlyout.calloutDescription"
-                  defaultMessage="{guideLink}."
-                  values={{
-                    guideLink: (
-                      <EuiLink
-                        href={docLinks.links.fleet.upgradeElasticAgent}
-                        target="_blank"
-                        external
-                      >
-                        <FormattedMessage
-                          id="xpack.fleet.agentActivityFlyout.guideLink"
-                          defaultMessage="Learn more."
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
+                <p>
+                  <FormattedMessage
+                    id="xpack.fleet.agentActivityFlyout.upgradeDescription"
+                    defaultMessage="Agents may also be configured to upgrade automatically. "
+                  />
+                  <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank" external>
+                    <FormattedMessage
+                      id="xpack.fleet.agentActivityFlyout.guideLink"
+                      defaultMessage="Learn more."
+                    />
+                  </EuiLink>
+                </p>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -394,7 +454,7 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
                 size="s"
                 onClick={onClickAbortUpgrade}
                 isLoading={isAborting}
-                data-test-subj="currentBulkUpgrade.sbortBtn"
+                data-test-subj="currentBulkUpgrade.abortBtn"
               >
                 <FormattedMessage
                   id="xpack.fleet.agentActivityFlyout.abortUpgradeButtom"
