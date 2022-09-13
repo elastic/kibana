@@ -43,7 +43,6 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 
 import type { inputsModel } from '../../../../common/store';
 import { useCheckSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_check_signal_index';
-import { useEnableRiskScoreViaDevTools } from '../../../../common/hooks/use_enable_risk_score_via_dev_tools';
 import { RiskyScoreRestartButton } from '../common/risky_score_restart_button';
 import { RiskyScoreEnableButton } from '../common/risky_score_enable_button';
 
@@ -210,7 +209,6 @@ export const EntityAnalyticsUserRiskScores = () => {
 
 const EntityAnalyticsUserRiskScoresDisable = ({ refetch }: { refetch: inputsModel.Refetch }) => {
   const { signalIndexExists } = useCheckSignalIndex();
-  const enableViaDevToolsUrl = useEnableRiskScoreViaDevTools(RiskScoreEntity.user);
 
   return (
     <EuiPanel hasBorder>
@@ -226,28 +224,13 @@ const EntityAnalyticsUserRiskScoresDisable = ({ refetch }: { refetch: inputsMode
           </>
         }
         actions={
-          <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="m">
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={!signalIndexExists ? i18n.ENABLE_RISK_SCORE_POPOVER : null}>
-                <EuiButtonEmpty
-                  href={enableViaDevToolsUrl}
-                  isDisabled={!signalIndexExists}
-                  data-test-subj="enable_user_risk_score_via_devtools"
-                >
-                  {i18n.ENABLE_VIA_DEV_TOOLS}
-                </EuiButtonEmpty>
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={!signalIndexExists ? i18n.ENABLE_RISK_SCORE_POPOVER : null}>
-                <RiskyScoreEnableButton
-                  refetch={refetch}
-                  riskScoreEntity={RiskScoreEntity.user}
-                  disabled={!signalIndexExists}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiToolTip content={!signalIndexExists ? i18n.ENABLE_RISK_SCORE_POPOVER : null}>
+            <RiskyScoreEnableButton
+              refetch={refetch}
+              riskScoreEntity={RiskScoreEntity.user}
+              disabled={!signalIndexExists}
+            />
+          </EuiToolTip>
         }
       />
     </EuiPanel>
