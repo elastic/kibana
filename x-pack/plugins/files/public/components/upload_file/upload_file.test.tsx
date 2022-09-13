@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { registerTestBed } from '@kbn/test-jest-helpers';
 
