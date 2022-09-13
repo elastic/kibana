@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
 const translateUnit = (totalCount: number) =>
   i18n.translate('xpack.triggersActionsUI.alertsTable.alertsCountUnit', {
@@ -26,13 +27,13 @@ export const AlertsCount = ({ count }: { count: number }) => {
   return (
     <span
       data-test-subj="toolbar-alerts-count"
-      style={{
-        fontSize: euiTheme.size.m,
-        fontWeight: euiTheme.font.weight.semiBold,
-        borderRight: euiTheme.border.thin,
-        marginRight: euiTheme.size.s,
-        paddingRight: euiTheme.size.m,
-      }}
+      css={css`
+        font-size: ${euiTheme.size.m};
+        font-weight: ${euiTheme.font.weight.semiBold};
+        border-right: ${euiTheme.border.thin};
+        margin-right: ${euiTheme.size.s};
+        padding-right: ${euiTheme.size.m};
+      `}
     >
       {alertCountText}
     </span>
