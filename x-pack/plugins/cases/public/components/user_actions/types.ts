@@ -6,6 +6,7 @@
  */
 
 import { EuiCommentProps } from '@elastic/eui';
+import { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { SnakeToCamelCase } from '../../../common/types';
 import { ActionTypes, UserActionWithResponse } from '../../../common/api';
 import { Case, CaseUserActions, Comment, UseFetchAlertData } from '../../containers/types';
@@ -17,10 +18,13 @@ import { UNSUPPORTED_ACTION_TYPES } from './constants';
 import type { OnUpdateFields } from '../case_view/types';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
+import { CurrentUserProfile } from '../types';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;
   caseUserActions: CaseUserActions[];
+  userProfiles: Map<string, UserProfileWithAvatar>;
+  currentUserProfile: CurrentUserProfile;
   data: Case;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
   actionsNavigation?: ActionsNavigation;
@@ -38,6 +42,8 @@ export type SupportedUserActionTypes = keyof Omit<typeof ActionTypes, Unsupporte
 
 export interface UserActionBuilderArgs {
   caseData: Case;
+  userProfiles: Map<string, UserProfileWithAvatar>;
+  currentUserProfile: CurrentUserProfile;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   userAction: CaseUserActions;
