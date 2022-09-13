@@ -7,7 +7,7 @@
 
 import React, { memo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
-import type { IDataPluginServices } from '@kbn/data-plugin/public';
+import type { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { EuiSuperDatePickerRecentRange } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -16,7 +16,6 @@ import type {
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useActionHistoryUrlParams } from './use_action_history_url_params';
 
@@ -52,7 +51,7 @@ export const ActionLogDateRangePicker = memo(
   }) => {
     const { startDate: startDateFromUrl, endDate: endDateFromUrl } = useActionHistoryUrlParams();
     const getTestId = useTestIdGenerator('response-actions-list');
-    const kibana = useKibana<IDataPluginServices>();
+    const kibana = useKibana<IUnifiedSearchPluginServices>();
     const { uiSettings } = kibana.services;
     const [commonlyUsedRanges] = useState(() => {
       return (
