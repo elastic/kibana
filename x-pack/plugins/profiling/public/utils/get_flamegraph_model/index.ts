@@ -10,7 +10,7 @@ import { uniqueId } from 'lodash';
 import {
   ElasticFlameGraph,
   FlameGraphComparisonMode,
-  normalizeColorForFlamegraph,
+  rgbToRGBA,
 } from '../../../common/flamegraph';
 import { getInterpolationValue } from './get_interpolation_value';
 
@@ -89,7 +89,7 @@ export function getFlamegraphModel({
           ? positiveChangeInterpolator(interpolationValue)
           : negativeChangeInterpolator(Math.abs(interpolationValue));
 
-      colors!.push(...normalizeColorForFlamegraph(Number(nodeColor.replace('#', '0x'))));
+      colors!.push(...rgbToRGBA(Number(nodeColor.replace('#', '0x'))));
     });
   }
 
