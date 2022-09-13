@@ -24,6 +24,7 @@ describe('successful migrations', () => {
     jest.resetAllMocks();
     encryptedSavedObjectsSetup.createMigration.mockImplementation(({ migration }) => migration);
   });
+
   describe('7.10.0', () => {
     test('marks alerts as legacy', () => {
       const migration710 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.10.0'];
@@ -2736,6 +2737,7 @@ describe('handles errors during migrations', () => {
   });
 });
 
+
 function getUpdatedAt(): string {
   const updatedAt = new Date();
   updatedAt.setHours(updatedAt.getHours() + 2);
@@ -2782,3 +2784,4 @@ function getMockData(
     type: 'alert',
   };
 }
+
