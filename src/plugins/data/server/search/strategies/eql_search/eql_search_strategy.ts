@@ -57,7 +57,7 @@ export const eqlSearchStrategyProvider = (
           ? await client.get(
               { ...params, id },
               {
-                ...request.options, // deprecated
+                ...request.options,
                 ...options.transport,
                 signal: options.abortSignal,
                 meta: true,
@@ -65,7 +65,7 @@ export const eqlSearchStrategyProvider = (
             )
           : // @ts-expect-error optional key cannot be used since search doesn't expect undefined
             await client.search(params as EqlSearchStrategyRequest['params'], {
-              ...request.options, // deprecated
+              ...request.options,
               ...options.transport,
               signal: options.abortSignal,
               meta: true,

@@ -206,14 +206,31 @@ describe('EQL search strategy', () => {
         expect(requestOptions).toEqual(expect.objectContaining({ ignore: [400] }));
       });
 
+      it('passes abort signal', async () => {
+        const eqlSearch = eqlSearchStrategyProvider(mockLogger);
+        const eql: EqlSearchStrategyRequest = { id: 'my-search-id' };
+        const abortController = new AbortController();
+        await firstValueFrom(
+          eqlSearch.search(eql, { abortSignal: abortController.signal }, mockDeps)
+        );
+        const [[_params, requestOptions]] = mockEqlGet.mock.calls;
+
+        expect(requestOptions).toEqual({ meta: true, signal: expect.any(AbortSignal) });
+      });
+
       it('passes transport options for search with id', async () => {
         const eqlSearch = eqlSearchStrategyProvider(mockLogger);
         const eql: EqlSearchStrategyRequest = { id: 'my-search-id' };
-        await firstValueFrom(eqlSearch.search(eql, { transport: { ignore: [400] } }, mockDeps));
+        await firstValueFrom(
+          eqlSearch.search(eql, { transport: { maxResponseSize: 13131313 } }, mockDeps)
+        );
         const [[_params, requestOptions]] = mockEqlGet.mock.calls;
 
-        expect(mockEqlSearch).not.toHaveBeenCalled();
-        expect(requestOptions).toEqual(expect.objectContaining({ ignore: [400] }));
+        expect(requestOptions).toEqual({
+          maxResponseSize: 13131313,
+          meta: true,
+          signal: undefined,
+        });
       });
 
       it('passes transport options for search without id', async () => {
@@ -222,8 +239,7 @@ describe('EQL search strategy', () => {
         await firstValueFrom(eqlSearch.search(eql, { transport: { ignore: [400] } }, mockDeps));
         const [[_params, requestOptions]] = mockEqlSearch.mock.calls;
 
-        expect(mockEqlGet).not.toHaveBeenCalled();
-        expect(requestOptions).toEqual(expect.objectContaining({ ignore: [400] }));
+        expect(requestOptions).toEqual({ ignore: [400], meta: true, signal: undefined });
       });
     });
 

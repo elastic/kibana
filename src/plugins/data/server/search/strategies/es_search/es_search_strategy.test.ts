@@ -53,7 +53,7 @@ describe('ES search strategy', () => {
   const mockConfig$ = pluginInitializerContextConfigMock<any>({}).legacy.globalConfig$;
 
   it('returns a strategy with `search`', async () => {
-    const esSearch = esSearchStrategyProvider(mockConfig$, mockLogger);
+    const esSearch = await esSearchStrategyProvider(mockConfig$, mockLogger);
 
     expect(typeof esSearch.search).toBe('function');
   });
@@ -61,7 +61,7 @@ describe('ES search strategy', () => {
   it('calls the API caller with the params with defaults', async (done) => {
     const params = { index: 'logstash-*' };
 
-    esSearchStrategyProvider(mockConfig$, mockLogger)
+    await esSearchStrategyProvider(mockConfig$, mockLogger)
       .search({ params }, {}, getMockedDeps())
       .subscribe(() => {
         expect(esClient.search).toBeCalled();
@@ -77,7 +77,7 @@ describe('ES search strategy', () => {
   it('calls the API caller with overridden defaults', async (done) => {
     const params = { index: 'logstash-*', ignore_unavailable: false, timeout: '1000ms' };
 
-    esSearchStrategyProvider(mockConfig$, mockLogger)
+    await esSearchStrategyProvider(mockConfig$, mockLogger)
       .search({ params }, {}, getMockedDeps())
       .subscribe(() => {
         expect(esClient.search).toBeCalled();
@@ -90,7 +90,7 @@ describe('ES search strategy', () => {
   });
 
   it('has all response parameters', async (done) =>
-    esSearchStrategyProvider(mockConfig$, mockLogger)
+    await esSearchStrategyProvider(mockConfig$, mockLogger)
       .search(
         {
           params: { index: 'logstash-*' },
