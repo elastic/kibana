@@ -14,7 +14,7 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
 export const allowedExperimentalValues = Object.freeze({
   createPackagePolicyMultiPageLayout: true,
   packageVerification: true,
-  showDevtoolsRequest: false,
+  showDevtoolsRequest: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

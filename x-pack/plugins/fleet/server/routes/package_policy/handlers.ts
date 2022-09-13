@@ -39,9 +39,9 @@ import { installationStatuses } from '../../../common/constants';
 import { defaultIngestErrorHandler, PackagePolicyNotFoundError } from '../../errors';
 import { getInstallations, getPackageInfo } from '../../services/epm/packages';
 import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
-import { simplifiedPackagePolicytoNewPackagePolicy } from '../../services/package_policies/simplified_package_policy_helper';
+import { simplifiedPackagePolicytoNewPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
-import type { SimplifiedPackagePolicy } from '../../services/package_policies/simplified_package_policy_helper';
+import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
 export const getPackagePoliciesHandler: RequestHandler<
   undefined,

@@ -7,7 +7,14 @@
 
 import React, { useCallback, useRef } from 'react';
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBetaBadge,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { EuiButtonEmptyProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -58,7 +65,7 @@ export const DevtoolsRequestFlyoutButton: React.FunctionComponent<
     <EuiButtonEmpty onClick={onClick} isDisabled={isDisabled} {...btnProps}>
       <FormattedMessage
         id="xpack.fleet.apiRequestFlyout.openFlyoutButton"
-        defaultMessage="See API request"
+        defaultMessage="Preview API request"
       />
     </EuiButtonEmpty>
   );
@@ -75,7 +82,7 @@ export interface ApiRequestFlyoutProps {
 export const ApiRequestFlyout: React.FunctionComponent<ApiRequestFlyoutProps> = ({
   closeFlyout,
   title = i18n.translate('xpack.fleet.apiRequestFlyout.title', {
-    defaultMessage: 'Request',
+    defaultMessage: 'Kibana API Request',
   }),
   request,
   description = i18n.translate('xpack.fleet.apiRequestFlyout.description', {
@@ -86,7 +93,15 @@ export const ApiRequestFlyout: React.FunctionComponent<ApiRequestFlyoutProps> = 
 
   return (
     <ViewApiRequestFlyout
-      title={title}
+      // @ts-expect-error ViewApiRequestFlyout title type only allow string
+      title={
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>{title}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBetaBadge label="beta" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
       description={description}
       request={request}
       closeFlyout={closeFlyout}
