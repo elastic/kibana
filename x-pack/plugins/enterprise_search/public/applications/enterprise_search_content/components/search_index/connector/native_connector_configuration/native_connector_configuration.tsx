@@ -9,8 +9,19 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiSteps } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiSpacer,
+  EuiSteps,
+  EuiTitle,
+} from '@elastic/eui';
 
+import { NATIVE_CONNECTOR_ICONS } from '../../../../../../assets/source_icons/native_connector_icons';
+
+import { hasConfiguredConfiguration } from '../../../../utils/has_configured_configuration';
 import { isConnectorIndex } from '../../../../utils/indices';
 import { IndexViewLogic } from '../../index_view_logic';
 import { NATIVE_CONNECTORS } from '../constants';
@@ -35,23 +46,40 @@ export const NativeConnectorConfiguration: React.FC = () => {
     return <></>;
   }
 
+  const hasName = !!indexData.connector.name;
+  const hasConfigured = hasConfiguredConfiguration(indexData.connector.configuration);
+  const hasConfiguredAdvanced =
+    indexData.connector.last_synced || indexData.connector.scheduling.enabled;
+  const hasResearched = hasName || hasConfigured || hasConfiguredAdvanced;
+
   return (
     <>
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem grow={2}>
           <EuiPanel hasShadow={false} hasBorder>
+            <EuiFlexGroup gutterSize="m" direction="row" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiIcon size="xl" type={NATIVE_CONNECTOR_ICONS[nativeConnector.serviceType]} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="m">
+                  <h3>{nativeConnector.name}</h3>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer />
             <EuiSteps
               steps={[
                 {
                   children: <ResearchConfiguration nativeConnector={nativeConnector} />,
-                  status: 'incomplete',
+                  status: hasResearched ? 'complete' : 'incomplete',
                   title: 'Research configuration requirements',
                   titleSize: 'xs',
                 },
                 {
                   children: <ConnectorNameAndDescription nativeConnector={nativeConnector} />,
-                  status: 'incomplete',
+                  status: hasName ? 'complete' : 'incomplete',
                   title: 'Name and description',
                   titleSize: 'xs',
                 },
@@ -59,13 +87,13 @@ export const NativeConnectorConfiguration: React.FC = () => {
                   children: (
                     <NativeConnectorConfigurationConfig nativeConnector={nativeConnector} />
                   ),
-                  status: 'incomplete',
+                  status: hasConfigured ? 'complete' : 'incomplete',
                   title: 'Configuration',
                   titleSize: 'xs',
                 },
                 {
                   children: <NativeConnectorAdvancedConfiguration />,
-                  status: 'incomplete',
+                  status: hasConfiguredAdvanced ? 'complete' : 'incomplete',
                   title: 'Advanced configuration',
                   titleSize: 'xs',
                 },

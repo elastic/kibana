@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { useValues } from 'kea';
+
 import {
   EuiButton,
   EuiFieldText,
@@ -18,6 +20,8 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 
+import { isConnectorIndex } from '../../../../utils/indices';
+import { IndexViewLogic } from '../../index_view_logic';
 import { NativeConnector } from '../types';
 
 interface ConnectorNameAndDescriptionProps {
@@ -27,6 +31,7 @@ interface ConnectorNameAndDescriptionProps {
 export const ConnectorNameAndDescription: React.FC<ConnectorNameAndDescriptionProps> = ({
   nativeConnector,
 }) => {
+  const { index: indexData } = useValues(IndexViewLogic);
   const { name } = nativeConnector;
   return (
     <EuiForm component="form">
@@ -39,7 +44,11 @@ export const ConnectorNameAndDescription: React.FC<ConnectorNameAndDescriptionPr
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow label="Name">
-            <EuiFieldText placeholder={`${name} connector`} disabled />
+            <EuiFieldText
+              value={isConnectorIndex(indexData) ? indexData.connector.name : ''}
+              placeholder={`${name} connector`}
+              disabled
+            />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>

@@ -19,6 +19,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { NATIVE_CONNECTOR_ICONS } from '../../../../../../assets/source_icons/native_connector_icons';
+
+import './connector_checkable.scss';
+
 export type ConnectorCheckableProps = Omit<
   EuiCheckableCardProps,
   'id' | 'label' | 'name' | 'value'
@@ -38,10 +42,11 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
     <EuiCheckableCard
       {...props}
       id={`checkableCard-${serviceType}`}
+      className="connectorCheckable"
       label={
-        <EuiFlexGroup alignItems="flexStart" gutterSize="s">
+        <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiIcon type={serviceType} />
+            <EuiIcon type={NATIVE_CONNECTOR_ICONS[serviceType]} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
@@ -53,17 +58,19 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
       name={name}
       value={serviceType}
     >
-      <EuiText size="s" color="subdued">
-        Search over your {name} content with Enterprise Search.
-      </EuiText>
-      <EuiSpacer size="s" />
-      <EuiText size="s" color="subdued">
-        Basic authentication
-      </EuiText>
-      <EuiSpacer size="s" />
-      <EuiLink target="_blank" href={documentationUrl}>
-        Documentation
-      </EuiLink>
+      <div className="connectorCheckableContent">
+        <EuiText size="s" color="subdued">
+          Search over your {name} content with Enterprise Search.
+        </EuiText>
+        <EuiSpacer size="s" />
+        <EuiText size="s" color="subdued">
+          Basic authentication
+        </EuiText>
+        <EuiSpacer size="s" />
+        <EuiLink target="_blank" href={documentationUrl}>
+          Documentation
+        </EuiLink>
+      </div>
     </EuiCheckableCard>
   );
 };
