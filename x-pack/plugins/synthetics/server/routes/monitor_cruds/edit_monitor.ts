@@ -99,7 +99,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         await savedObjectsClient.update<MonitorFields>(
           syntheticsMonitorType,
           monitorId,
-          formattedMonitor
+          monitor.type === 'browser' ? { ...formattedMonitor, urls: '' } : formattedMonitor
         );
 
       const errors = await syncEditedMonitor({
