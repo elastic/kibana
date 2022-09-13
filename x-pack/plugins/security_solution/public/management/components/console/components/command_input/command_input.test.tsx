@@ -10,7 +10,7 @@ import type { ConsoleTestSetup } from '../../mocks';
 import { getConsoleTestSetup } from '../../mocks';
 import type { ConsoleProps } from '../../types';
 import { INPUT_DEFAULT_PLACEHOLDER_TEXT } from '../console_state/state_update_handlers/handle_input_area_state';
-import { act, waitFor } from '@testing-library/react';
+import { act, waitFor, createEvent, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 describe('When entering data into the Console input', () => {
@@ -319,6 +319,27 @@ describe('When entering data into the Console input', () => {
       typeKeyboardKey('a');
 
       expect(getLeftOfCursorText()).toEqual('a');
+      expect(getRightOfCursorText()).toEqual('ate');
+    });
+
+    it('should replace selected text with content pasted', () => {
+      typeKeyboardKey('{ArrowLeft>3/}'); // Press left arrow for 3 times
+      selectLeftOfCursorText();
+
+      const inputCaptureEle = renderResult.getByTestId('test-keyCapture-input');
+
+      // Mocking the `DataTransfer` class since its not available in Jest test setup
+      const clipboardData = {
+        getData: () => 'I pasted this',
+      } as unknown as DataTransfer;
+
+      const pasteEvent = createEvent.paste(inputCaptureEle, {
+        clipboardData,
+      });
+
+      fireEvent(inputCaptureEle, pasteEvent);
+
+      expect(getLeftOfCursorText()).toEqual('I pasted this');
       expect(getRightOfCursorText()).toEqual('ate');
     });
 
