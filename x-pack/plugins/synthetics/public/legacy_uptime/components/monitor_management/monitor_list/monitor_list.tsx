@@ -163,7 +163,7 @@ export const MonitorManagementList = ({
       align: 'left' as const,
       field: ConfigKey.PROJECT_ID,
       name: PROJECT_LABEL,
-      render: (value: string) => (value ? <EuiText>{value}</EuiText> : null),
+      render: (value: string) => (value ? <EuiText size="s">{value}</EuiText> : null),
     },
     {
       align: 'left' as const,
