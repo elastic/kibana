@@ -10,6 +10,7 @@ import { EVENT_ACTION, TIMESTAMP } from '@kbn/rule-data-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { Aggregate } from '../../common/types/aggregate';
 import { EventAction, EventKind, ProcessEvent } from '../../common/types/process_tree';
+import { parse } from '@kbn/datemath';
 import {
   IO_EVENTS_ROUTE,
   IO_EVENTS_PER_PAGE,
@@ -55,9 +56,15 @@ export const getTTYQueryPredicates = async (
 
   if (lastEventHits.length > 0) {
     const lastEvent: ProcessEvent = lastEventHits[0]._source as ProcessEvent;
-    const range = [lastEvent?.process?.entry_leader?.start, lastEvent[TIMESTAMP]];
+    const sessionEnded = lastEvent.event?.action === EventAction.end && lastEvent['@timestamp'];
+    const lastEventTime = lastEvent['@timestamp'];
+    const rangeEnd =
+      sessionEnded && lastEventTime
+        ? parse(lastEventTime)?.add(30, 'second').toISOString()
+        : new Date().toISOString();
+    const range = [lastEvent?.process?.entry_leader?.start, rangeEnd];
     const tty = lastEvent?.process?.entry_leader?.tty;
-    const bootId = lastEvent?.host?.boot?.id;
+    const bootId = lastEvent?.host?.boot?.id || ' ';
 
     if (tty?.char_device?.major !== undefined && tty?.char_device?.minor !== undefined && bootId) {
       return {
@@ -103,13 +110,13 @@ export const registerIOEventsRoute = (router: IRouter) => {
                 must: [
                   { term: { [TTY_CHAR_DEVICE_MAJOR_PROPERTY]: ttyPredicates.ttyMajor } },
                   { term: { [TTY_CHAR_DEVICE_MINOR_PROPERTY]: ttyPredicates.ttyMinor } },
-                  { term: { [HOST_BOOT_ID_PROPERTY]: ttyPredicates.bootId } },
+//                  { term: { [HOST_BOOT_ID_PROPERTY]: ttyPredicates.bootId } },
                   { term: { [EVENT_ACTION]: 'text_output' } },
                   {
                     range: {
                       [TIMESTAMP]: {
-                        gte: ttyPredicates.range[0],
-                        lte: ttyPredicates.range[1],
+                        gte: ttyPredicates.range[0]?.toString(),
+                        lte: ttyPredicates.range[1]?.toString(),
                       },
                     },
                   },

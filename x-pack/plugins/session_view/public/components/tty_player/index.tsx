@@ -10,6 +10,7 @@ import { ProcessEvent } from '../../../common/types/process_tree';
 import { TTYSearchBar } from '../tty_search_bar';
 import { TTYTextSizer } from '../tty_text_sizer';
 import { useStyles } from './styles';
+import { DEFAULT_TTY_ROWS, DEFAULT_TTY_COLS } from '../../../common/constants';
 import { useFetchIOEvents, useIOLines, useXtermPlayer } from './hooks';
 import { TTYPlayerControls } from '../tty_player_controls';
 
@@ -49,6 +50,12 @@ export const TTYPlayer = ({
 
   const tty = lines?.[currentLine]?.event?.process?.tty;
   const currentProcessEvent = lines[currentLine]?.event;
+
+  if (tty && !tty.rows) {
+    tty.rows = DEFAULT_TTY_ROWS;
+    tty.columns = DEFAULT_TTY_COLS;
+  }
+
   const styles = useStyles(tty);
 
   const onSeekLine = useCallback(

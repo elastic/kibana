@@ -132,10 +132,15 @@ export const SessionView = ({
     refetch: refetchAlerts,
   } = useFetchSessionViewAlerts(sessionEntityId, investigatedAlertId);
 
+  const { data: totalTTYOutputBytes, refetch: refetchTotalTTYOutput } =
+    useFetchGetTotalIOBytes(sessionEntityId);
+  const hasTTYOutput = !!totalTTYOutputBytes?.total;
+
   const handleRefresh = useCallback(() => {
     refetch({ refetchPage: (_page, index, allPages) => allPages.length - 1 === index });
     refetchAlerts({ refetchPage: (_page, index, allPages) => allPages.length - 1 === index });
-  }, [refetch, refetchAlerts]);
+    refetchTotalTTYOutput();
+  }, [refetch, refetchAlerts, refetchTotalTTYOutput]);
 
   const alerts = useMemo(() => {
     let events: ProcessEvent[] = [];
@@ -161,9 +166,6 @@ export const SessionView = ({
     updatedAlertsStatus,
     fetchAlertStatus[0] ?? ''
   );
-
-  const { data: totalTTYOutputBytes } = useFetchGetTotalIOBytes(sessionEntityId);
-  const hasTTYOutput = !!totalTTYOutputBytes?.total;
 
   useEffect(() => {
     if (newUpdatedAlertsStatus) {

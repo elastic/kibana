@@ -29,6 +29,8 @@ import {
   QUERY_KEY_IO_EVENTS,
   DEFAULT_TTY_PLAYSPEED_MS,
   DEFAULT_TTY_FONT_SIZE,
+  DEFAULT_TTY_ROWS,
+  DEFAULT_TTY_COLS,
   TTY_LINE_SPLITTER_REGEX,
 } from '../../../common/constants';
 
@@ -169,6 +171,8 @@ export const useXtermPlayer = ({
       fontSize: DEFAULT_TTY_FONT_SIZE,
       scrollback: 0,
       convertEol: true,
+      rows: DEFAULT_TTY_ROWS,
+      cols: DEFAULT_TTY_COLS,
     });
 
     const searchInstance = new SearchAddon();
@@ -229,12 +233,12 @@ export const useXtermPlayer = ({
   useEffect(() => {
     if (isPlaying) {
       const timer = setTimeout(() => {
-        if (!isPlaying) {
-          return;
-        }
-
         if (currentLine < lines.length - 1) {
           setCurrentLine(currentLine + 1);
+        }
+
+        if (!isPlaying) {
+          return;
         }
 
         render(currentLine, false);
