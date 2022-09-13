@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { formatMlPipelineBody } from './create_pipeline_definitions';
-
-export interface MlInferencePipeline extends IngestPipeline {
-  version?: number;
-}
 
 export interface CreatedPipeline {
   created: string;
 }
 
+// TODO: document
 export const createMlInferencePipeline = async (
   pipelineName: string,
   modelId: string,
@@ -24,21 +20,23 @@ export const createMlInferencePipeline = async (
   destinationField: string,
   esClient: ElasticsearchClient
 ): Promise<CreatedPipeline> => {
-  // TODO: check if it exists getPipeline() -> if so, error
   const inferencePipelineGeneratedName = `ml-inference-${pipelineName}`;
 
-  // TODO: use formatMlPipelineBody()
+  // Check for existing pipeline
+  let exists = false;
+  try {
+    await esClient.ingest.getPipeline({ id: inferencePipelineGeneratedName });
+    exists = true;
+  } catch (err) {
+    // NOP
+  }
+  if (exists) {
+    throw new Error(`Pipeline ${inferencePipelineGeneratedName} already exists`);
+  }
+
+  // Generate pipeline with default processors
   const mlInferencePipeline = await formatMlPipelineBody(modelId, sourceField, destinationField, esClient);
-  // const inferenceProcessorDefinition = {
-  //   inference: {
-  //     model_id: modelId,
-  //     // source_field: sourceField,
-  //     target_field: 'targetField',
-  //   }
-  // }
 
-
-  // PUT _ingest/pipeline/ml-inference-{pipeline_name}
   await esClient.ingest.putPipeline({
     id: inferencePipelineGeneratedName,
     ...mlInferencePipeline,

@@ -284,13 +284,9 @@ export function registerIndexRoutes({
 
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-
-      console.log("inside /internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors");
-
-
       const {
-        pipeline_name: pipelineName,
         model_id: modelId,
+        pipeline_name: pipelineName,
         source_field: sourceField,
         destination_field: destinationField,
       } = request.body;
