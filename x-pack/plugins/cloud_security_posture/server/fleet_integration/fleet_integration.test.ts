@@ -20,15 +20,18 @@ import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../common/constants';
 import {
   getBenchmarkInputType,
   onPackagePolicyPostCreateCallback,
+  OnPackagePolicyUpgradeCallback,
   removeCspRulesInstancesCallback,
 } from './fleet_integration';
 
-describe('create CSP rules with post package create callback', () => {
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  let mockSoClient: jest.Mocked<SavedObjectsClientContract>;
-  let savedObjectRepositoryMock: jest.Mocked<ISavedObjectsRepository>;
-  const ruleAttributes = {
-    id: '41308bcdaaf665761478bb6f0d745a5c',
+let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+let mockSoClient: jest.Mocked<SavedObjectsClientContract>;
+let savedObjectRepositoryMock: jest.Mocked<ISavedObjectsRepository>;
+
+const ruleAttributes = (id: string = `41308bcdaaf665761478bb6f0d745a5c`) => ({
+  enabled: true,
+  metadata: {
+    id,
     name: 'Ensure that the API server pod specification file permissions are set to 644 or more restrictive (Automated)',
     tags: ['CIS', 'Kubernetes', 'CIS 1.1.1', 'Master Node Configuration Files'],
     description:
@@ -44,14 +47,16 @@ describe('create CSP rules with post package create callback', () => {
       version: 'v1.0.0',
       id: 'cis_k8s',
     },
-    enabled: true,
     rego_rule_id: 'cis_1_2_2',
-  };
+  },
+});
 
-  beforeEach(() => {
-    logger = loggingSystemMock.createLogger();
-    mockSoClient = savedObjectsClientMock.create();
-  });
+beforeEach(() => {
+  logger = loggingSystemMock.createLogger();
+  mockSoClient = savedObjectsClientMock.create();
+});
+
+describe('create CSP rules with post package create callback', () => {
   it('should create stateful rules based on rule template', async () => {
     const mockPackagePolicy = createPackagePolicyMock();
     mockPackagePolicy.package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
@@ -60,9 +65,14 @@ describe('create CSP rules with post package create callback', () => {
         {
           type: 'csp-rule-template',
           id: 'csp_rule_template-41308bcdaaf665761478bb6f0d745a5c',
-          attributes: { ...ruleAttributes },
+          attributes: { ...ruleAttributes() },
         },
       ],
+      pit_id: undefined,
+    } as unknown as SavedObjectsFindResponse);
+
+    mockSoClient.find.mockResolvedValueOnce({
+      saved_objects: [],
       pit_id: undefined,
     } as unknown as SavedObjectsFindResponse);
 
@@ -75,6 +85,7 @@ describe('create CSP rules with post package create callback', () => {
           ...ruleAttributes,
           package_policy_id: mockPackagePolicy.id,
           policy_id: mockPackagePolicy.policy_id,
+          enabled: ruleAttributes().enabled,
         },
       },
     ]);
@@ -88,11 +99,17 @@ describe('create CSP rules with post package create callback', () => {
         {
           type: 'csp-rule-template',
           id: 'csp_rule_template-41308bcdaaf665761478bb6f0d745a5c',
-          attributes: { ...ruleAttributes },
+          attributes: { ...ruleAttributes() },
         },
       ],
       pit_id: undefined,
     } as unknown as SavedObjectsFindResponse);
+
+    mockSoClient.find.mockResolvedValueOnce({
+      saved_objects: [],
+      pit_id: undefined,
+    } as unknown as SavedObjectsFindResponse);
+
     await onPackagePolicyPostCreateCallback(logger, mockPackagePolicy, mockSoClient);
 
     expect(mockSoClient.find.mock.calls[0][0]).toMatchObject({ perPage: 10000 });
@@ -106,7 +123,7 @@ describe('create CSP rules with post package create callback', () => {
         {
           type: 'csp-rule-template',
           id: 'csp_rule_template-41308bcdaaf665761478bb6f0d745a5c',
-          attributes: { ...ruleAttributes },
+          attributes: { ...ruleAttributes() },
         },
       ],
       pit_id: undefined,
@@ -167,4 +184,178 @@ describe('create CSP rules with post package create callback', () => {
     const typeK8s = getBenchmarkInputType(mockPackagePolicy.inputs);
     expect(typeK8s).toMatch('cis_k8s');
   });
+});
+
+describe('package update when csp rule exist should get the csp rule enabler from the old csp rule state ', () => {
+  // Setup if needed
+  it('bla bla', async () => {
+    const mockPackagePolicy = createPackagePolicyMock();
+    mockPackagePolicy.package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
+    const ruleId = `rule_1_1_1_id`;
+    const enable = mockSoClient.find.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          type: 'csp-rule-template',
+          id: ruleId,
+          attributes: {
+            ...ruleAttributes(ruleId),
+          },
+        },
+      ],
+      pit_id: undefined,
+    } as unknown as SavedObjectsFindResponse);
+
+    mockSoClient.find.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          type: 'csp_rule',
+          id: ruleId,
+          attributes: { ...ruleAttributes(ruleId), enabled: enable },
+        },
+      ],
+      pit_id: undefined,
+    } as unknown as SavedObjectsFindResponse);
+
+    await OnPackagePolicyUpgradeCallback(logger, mockPackagePolicy, mockSoClient);
+
+    expect(mockSoClient.bulkCreate.mock.calls[0][0]).toMatchObject([
+      {
+        type: 'csp_rule',
+        attributes: {
+          ...ruleAttributes(ruleId),
+          package_policy_id: mockPackagePolicy.id,
+          policy_id: mockPackagePolicy.policy_id,
+          enabled: enable,
+        },
+      },
+    ]);
+  });
+  it('package update when no csp rule exist should use the rule template default enabler', async () => {
+    const mockPackagePolicy = createPackagePolicyMock();
+    mockPackagePolicy.package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
+    mockSoClient.find.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          type: 'csp-rule-template',
+          id: 'csp_rule_template-41308bcdaaf665761478bb6f0d745a5c',
+          attributes: { ...ruleAttributes() },
+        },
+      ],
+      pit_id: undefined,
+    } as unknown as SavedObjectsFindResponse);
+
+    mockSoClient.find.mockResolvedValueOnce({
+      saved_objects: [],
+      pit_id: undefined,
+    } as unknown as SavedObjectsFindResponse);
+
+    await OnPackagePolicyUpgradeCallback(logger, mockPackagePolicy, mockSoClient);
+
+    expect(mockSoClient.bulkCreate.mock.calls[0][0]).toMatchObject([
+      {
+        type: 'csp_rule',
+        attributes: {
+          ...ruleAttributes(),
+          package_policy_id: mockPackagePolicy.id,
+          policy_id: mockPackagePolicy.policy_id,
+          enabled: ruleAttributes().enabled,
+        },
+      },
+    ]);
+  });
+  test.each([true, false])(
+    'package upgrade when old csp rule exist should use the old csp rule state',
+    async (enable) => {
+      const mockPackagePolicy = createPackagePolicyMock();
+      mockPackagePolicy.package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
+      const ruleId = `rule_1_1_1_id`;
+      mockSoClient.find.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            type: 'csp-rule-template',
+            id: ruleId,
+            attributes: {
+              ...ruleAttributes(ruleId),
+            },
+          },
+        ],
+        pit_id: undefined,
+      } as unknown as SavedObjectsFindResponse);
+
+      mockSoClient.find.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            type: 'csp_rule',
+            id: ruleId,
+            attributes: { ...ruleAttributes(ruleId), enabled: enable },
+          },
+        ],
+        pit_id: undefined,
+      } as unknown as SavedObjectsFindResponse);
+
+      await OnPackagePolicyUpgradeCallback(logger, mockPackagePolicy, mockSoClient);
+
+      expect(mockSoClient.bulkCreate.mock.calls[0][0]).toMatchObject([
+        {
+          type: 'csp_rule',
+          attributes: {
+            ...ruleAttributes(ruleId),
+            package_policy_id: mockPackagePolicy.id,
+            policy_id: mockPackagePolicy.policy_id,
+            enabled: enable,
+          },
+        },
+      ]);
+    }
+  );
+  test.each([true, false])(
+    'package update when a different csp rule id exist should use the rule template default enabler',
+    async (enabled) => {
+      const mockPackagePolicy = createPackagePolicyMock();
+      mockPackagePolicy.package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
+      const templateRuleId = `first_id`;
+      const oldCspRuleId = `second_id`;
+
+      mockSoClient.find.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            type: templateRuleId,
+            id: 'csp_rule_template-41308bcdaaf665761478bb6f0d745a5c',
+            attributes: {
+              ...ruleAttributes(templateRuleId),
+            },
+          },
+        ],
+        pit_id: undefined,
+      } as unknown as SavedObjectsFindResponse);
+
+      mockSoClient.find.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            type: 'csp_rule',
+            id: oldCspRuleId,
+            attributes: {
+              ...ruleAttributes(templateRuleId),
+              enable: enabled,
+            },
+          },
+        ],
+        pit_id: undefined,
+      } as unknown as SavedObjectsFindResponse);
+
+      await OnPackagePolicyUpgradeCallback(logger, mockPackagePolicy, mockSoClient);
+
+      expect(mockSoClient.bulkCreate.mock.calls[0][0]).toMatchObject([
+        {
+          type: 'csp_rule',
+          attributes: {
+            ...ruleAttributes(templateRuleId),
+            package_policy_id: mockPackagePolicy.id,
+            policy_id: mockPackagePolicy.policy_id,
+            enabled: ruleAttributes().enabled,
+          },
+        },
+      ]);
+    }
+  );
 });

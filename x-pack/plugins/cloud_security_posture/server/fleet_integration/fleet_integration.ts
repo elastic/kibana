@@ -60,7 +60,7 @@ export const OnPackagePolicyUpgradeCallback = async (
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
   // Need to be removed
-  packagePolicy.id = `04f32290-b7cf-47ee-803a-8286565f2b4b`;
+  // packagePolicy.id = `04f32290-b7cf-47ee-803a-8286565f2b4b`;
   // Create csp-rules from the generic asset
 
   await UpdateCspRulesAccordingToCspRuleTemplates(packagePolicy, savedObjectsClient, logger);
@@ -73,6 +73,13 @@ const UpdateCspRulesAccordingToCspRuleTemplates = async (
 ): Promise<void> => {
   const benchmarkType = getBenchmarkInputType(packagePolicy.inputs);
 
+  // Create csp-rules from the generic asset
+  const ruleTemplates: SavedObjectsFindResponse<CspRuleTemplate> = await savedObjectsClient.find({
+    type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+    perPage: 10000,
+    filter: getBenchmarkTypeFilter(benchmarkType),
+  });
+
   const oldCspRules: SavedObjectsFindResponse<CspRule> = await savedObjectsClient.find({
     type: CSP_RULE_SAVED_OBJECT_TYPE,
     perPage: 10000,
@@ -81,17 +88,9 @@ const UpdateCspRulesAccordingToCspRuleTemplates = async (
       policyId: packagePolicy.policy_id,
     }),
   });
-
   const oldCspRulesDictionary: Map<string, SavedObjectsFindResult<CspRule>> = new Map(
-    oldCspRules.saved_objects.map((rule) => [rule.attributes.metadata.rego_rule_id, rule])
+    oldCspRules.saved_objects.map((rule) => [rule.attributes.metadata.id, rule])
   );
-
-  // Create csp-rules from the generic asset
-  const ruleTemplates: SavedObjectsFindResponse<CspRuleTemplate> = await savedObjectsClient.find({
-    type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
-    perPage: 10000,
-    filter: getBenchmarkTypeFilter(benchmarkType),
-  });
 
   const cspRules = generateRulesFromTemplates(
     packagePolicy.id,
@@ -131,6 +130,7 @@ export const removeCspRulesInstancesCallback = async (
       }),
       perPage: 10000,
     });
+
     await Promise.all(cspRules.map((rule) => soClient.delete(CSP_RULE_SAVED_OBJECT_TYPE, rule.id)));
   } catch (e) {
     logger.error(`Failed to delete CSP rules after delete package ${deletedPackagePolicy.id}`);
@@ -166,7 +166,7 @@ const generateRulesFromTemplates = (
   oldCspRules: Map<string, SavedObjectsFindResult<CspRule>>
 ): Array<SavedObjectsBulkCreateObject<CspRule>> =>
   cspRuleTemplates.map((template) => {
-    const cspRule = oldCspRules.get(template.attributes.metadata.rego_rule_id);
+    const cspRule = oldCspRules.get(template.attributes.metadata.id);
     const response = {
       type: CSP_RULE_SAVED_OBJECT_TYPE,
       attributes: {
