@@ -9,13 +9,12 @@ import React from 'react';
 import { Story } from '@storybook/react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { mockIndicatorsFiltersContext } from '../../../../common/mocks/mock_indicators_filters_context';
-import { generateFieldTypeMap } from '../../../../common/mocks/mock_field_type_map';
-import { mockUiSettingsService } from '../../../../common/mocks/mock_kibana_ui_settings_service';
-import { mockKibanaTimelinesService } from '../../../../common/mocks/mock_kibana_timelines_service';
-import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
+import { mockIndicatorsFiltersContext } from '../../../../../../common/mocks/mock_indicators_filters_context';
+import { mockUiSettingsService } from '../../../../../../common/mocks/mock_kibana_ui_settings_service';
+import { mockKibanaTimelinesService } from '../../../../../../common/mocks/mock_kibana_timelines_service';
+import { generateMockIndicator, Indicator } from '../../../../../../../common/types/indicator';
 import { IndicatorsFlyoutTable } from './indicators_flyout_table';
-import { IndicatorsFiltersContext } from '../../context';
+import { IndicatorsFiltersContext } from '../../../../context';
 
 export default {
   component: IndicatorsFlyoutTable,
@@ -24,7 +23,6 @@ export default {
 
 export const Default: Story<void> = () => {
   const mockIndicator: Indicator = generateMockIndicator();
-  const mockFieldTypesMap = generateFieldTypeMap();
 
   const KibanaReactContext = createKibanaReactContext({
     uiSettings: mockUiSettingsService(),
@@ -34,14 +32,12 @@ export const Default: Story<void> = () => {
   return (
     <KibanaReactContext.Provider>
       <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
-        <IndicatorsFlyoutTable indicator={mockIndicator} fieldTypesMap={mockFieldTypesMap} />
+        <IndicatorsFlyoutTable indicator={mockIndicator} />
       </IndicatorsFiltersContext.Provider>
     </KibanaReactContext.Provider>
   );
 };
 
 export const EmptyIndicator: Story<void> = () => {
-  return (
-    <IndicatorsFlyoutTable indicator={{ fields: {} } as unknown as Indicator} fieldTypesMap={{}} />
-  );
+  return <IndicatorsFlyoutTable indicator={{ fields: {} } as unknown as Indicator} />;
 };
