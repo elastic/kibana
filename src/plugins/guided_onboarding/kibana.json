@@ -11,5 +11,5 @@
   "ui": true,
   "requiredBundles": ["kibanaReact"],
   "optionalPlugins": [],
-  "configPath": ["xpack", "guided_onboarding"]
+  "configPath": ["guidedOnboarding"]
 }

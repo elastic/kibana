@@ -9,7 +9,7 @@
 import { PluginConfigDescriptor } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 
-// By default, hide any guided onboarding UI. Change it with xpack.guided_onboarding.ui:true in kibana.dev.yml
+// By default, hide any guided onboarding UI. Change it with guidedOnboarding.ui:true in kibana.dev.yml
 const configSchema = schema.object({
   ui: schema.boolean({ defaultValue: false }),
 });
