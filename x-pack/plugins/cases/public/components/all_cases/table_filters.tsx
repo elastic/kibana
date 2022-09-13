@@ -72,7 +72,7 @@ const CasesTableFiltersComponent = ({
   const [selectedOwner, setSelectedOwner] = useState(initial.owner);
   const [selectedAssignees, setSelectedAssignees] = useState<UserProfileWithAvatar[]>([]);
   const { data: tags = [], refetch: fetchTags } = useGetTags(CASE_LIST_CACHE_KEY);
-  const { isAssignEnabled } = useCasesFeatures();
+  const { allowCaseAssignment } = useCasesFeatures();
 
   const refetch = useCallback(() => {
     fetchTags();
@@ -196,7 +196,7 @@ const CasesTableFiltersComponent = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
-          {isAssignEnabled ? (
+          {allowCaseAssignment ? (
             <AssigneesFilterPopover
               selectedAssignees={selectedAssignees}
               currentUserProfile={currentUserProfile}

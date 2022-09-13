@@ -170,7 +170,7 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
   }, [isPopoverOpen, needToUpdateAssignees, onAssigneesChanged, selectedAssignees]);
 
   return (
-    <EuiFlexItem grow={false}>
+    <EuiFlexItem grow={false} data-test-subj="case-view-assignees">
       <EuiFlexGroup
         alignItems="center"
         gutterSize="xs"

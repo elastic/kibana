@@ -15,7 +15,11 @@ const CaseCalloutsComponent: React.FC = () => {
   const { isAtLeastPlatinum } = useLicense();
 
   return (
-    <EuiFlexGroup gutterSize="none" css={{ marginBottom: euiTheme.size.l }}>
+    <EuiFlexGroup
+      gutterSize="none"
+      css={{ marginBottom: euiTheme.size.l }}
+      data-test-subj="case-callouts"
+    >
       <EuiFlexItem>{!isAtLeastPlatinum() ? <PlatinumLicenseCallout /> : null}</EuiFlexItem>
     </EuiFlexGroup>
   );

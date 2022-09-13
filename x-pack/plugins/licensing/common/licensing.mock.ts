@@ -35,6 +35,7 @@ function createLicense({
       isAvailable: true,
     },
   };
+
   return new License({
     license: Object.assign(defaultLicense, license),
     features: Object.assign(defaultFeatures, features),
