@@ -326,6 +326,18 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                 </EuiFilterButton>
               </EuiFilterGroup>
             </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiButtonEmpty
+                onClick={onClickAgentActivity}
+                data-test-subj="agentActivityButton"
+                iconType="clock"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.agentList.agentActivityButton"
+                  defaultMessage="Agent activity"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
             {selectedAgents.length === 0 && (
               <>
                 <EuiFlexItem>
@@ -347,18 +359,6 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                       />
                     </EuiButton>
                   </EuiToolTip>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiButtonEmpty
-                    onClick={onClickAgentActivity}
-                    data-test-subj="agentActivityButton"
-                    iconType="clock"
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.agentList.agentActivityButton"
-                      defaultMessage="Agent activity"
-                    />
-                  </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiToolTip

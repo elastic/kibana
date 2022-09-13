@@ -10,6 +10,7 @@ import { SO_SEARCH_LIMIT } from '../../constants';
 
 import type { FleetServerAgentAction, ActionStatus, ListWithKuery } from '../../types';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
+import { appContextService } from '..';
 
 /**
  * Return current bulk actions
@@ -20,26 +21,36 @@ export async function getActionStatuses(
 ): Promise<ActionStatus[]> {
   const actions = await _getActions(esClient, options);
   const cancelledActions = await _getCancelledActions(esClient);
+  let acks: any;
 
-  const acks = await esClient.search({
-    index: AGENT_ACTIONS_RESULTS_INDEX,
-    query: {
-      bool: {
-        // There's some perf/caching advantages to using filter over must
-        // See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-filter-context.html#filter-context
-        filter: [{ terms: { action_id: actions.map((a) => a.actionId) } }],
-      },
-    },
-    size: 0,
-    aggs: {
-      ack_counts: {
-        terms: { field: 'action_id' },
-        aggs: {
-          max_timestamp: { max: { field: '@timestamp' } },
+  try {
+    acks = await esClient.search({
+      index: AGENT_ACTIONS_RESULTS_INDEX,
+      query: {
+        bool: {
+          // There's some perf/caching advantages to using filter over must
+          // See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-filter-context.html#filter-context
+          filter: [{ terms: { action_id: actions.map((a) => a.actionId) } }],
         },
       },
-    },
-  });
+      size: 0,
+      aggs: {
+        ack_counts: {
+          terms: { field: 'action_id' },
+          aggs: {
+            max_timestamp: { max: { field: '@timestamp' } },
+          },
+        },
+      },
+    });
+  } catch (err) {
+    if (err.statusCode === 404) {
+      // .fleet-actions-results not yet exists
+      appContextService.getLogger().debug(err);
+    } else {
+      throw err;
+    }
+  }
 
   return actions.map((action) => {
     const matchingBucket = (acks.aggregations?.ack_counts as any).buckets?.find(
@@ -95,8 +106,8 @@ async function _getActions(
   const res = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
-    from: options.page ?? 1,
-    size: options.perPage ?? 10,
+    from: options.page ?? 0,
+    size: options.perPage ?? 20,
     query: {
       bool: {
         must_not: [

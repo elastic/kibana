@@ -58,6 +58,7 @@ import { Tags } from './components/tags';
 import { TagsAddRemove } from './components/tags_add_remove';
 import { TableRowActions } from './components/table_row_actions';
 import { EmptyPrompt } from './components/empty_prompt';
+import { AgentActivityFlyout } from './components';
 
 const REFRESH_INTERVAL_MS = 30000;
 
@@ -133,6 +134,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   }>({
     isOpen: false,
   });
+
+  const [isAgentActivityFlyoutOpen, setAgentActivityFlyoutOpen] = useState(false);
 
   const flyoutContext = useFlyoutContext();
 
@@ -401,11 +404,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   }, [flyoutContext]);
 
   const onClickAgentActivity = useCallback(() => {
-    flyoutContext.openAgentActivityFlyout();
-  }, [flyoutContext]);
-
-  // Current upgrades
-  // const { abortUpgrade, currentUpgrades, refreshUpgrades } = useCurrentUpgrades(fetchData);
+    setAgentActivityFlyoutOpen(true);
+  }, [setAgentActivityFlyoutOpen]);
 
   const columns = [
     {
@@ -548,6 +548,14 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   return (
     <>
+      {isAgentActivityFlyoutOpen ? (
+        <EuiPortal>
+          <AgentActivityFlyout
+            onAbortSuccess={fetchData}
+            onClose={() => setAgentActivityFlyoutOpen(false)}
+          />
+        </EuiPortal>
+      ) : null}
       {enrollmentFlyout.isOpen ? (
         <EuiPortal>
           <AgentEnrollmentFlyout
@@ -593,7 +601,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             onClose={() => {
               setAgentToUpgrade(undefined);
               fetchData();
-              // refreshUpgrades();
             }}
           />
         </EuiPortal>
@@ -643,9 +650,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         currentQuery={kuery}
         selectedAgents={selectedAgents}
         refreshAgents={({ refreshTags = false }: { refreshTags?: boolean } = {}) =>
-          Promise.all([
-            fetchData({ refreshTags }), // refreshUpgrades()
-          ])
+          Promise.all([fetchData({ refreshTags })])
         }
         onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}
         onClickAddFleetServer={onClickAddFleetServer}

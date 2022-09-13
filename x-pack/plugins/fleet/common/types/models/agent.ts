@@ -121,6 +121,7 @@ export interface ActionStatus {
   completionTime?: string;
   cancellationTime?: string;
   newPolicyId?: string;
+  creationTime: string;
 }
 
 // Generated from FleetServer schema.json

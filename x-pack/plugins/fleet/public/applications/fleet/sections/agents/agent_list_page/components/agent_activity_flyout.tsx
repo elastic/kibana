@@ -28,14 +28,15 @@ import { useActionStatus } from '../hooks';
 import { useGetAgentPolicies, useStartServices } from '../../../../hooks';
 import { SO_SEARCH_LIMIT } from '../../../../constants';
 
-export const AgentActivityFlyout: React.FunctionComponent<{ onClose: () => {} }> = ({
-  onClose,
-}) => {
+export const AgentActivityFlyout: React.FunctionComponent<{
+  onClose: () => void;
+  onAbortSuccess: () => void;
+}> = ({ onClose, onAbortSuccess }) => {
   const { data: agentPoliciesData } = useGetAgentPolicies({
     perPage: SO_SEARCH_LIMIT,
   });
 
-  const { currentActions, abortUpgrade } = useActionStatus(() => {}); // TODO refresh agent list
+  const { currentActions, abortUpgrade } = useActionStatus(onAbortSuccess);
 
   const getAgentPolicyName = (policyId: string) => {
     const policy = agentPoliciesData?.items.find((item) => item.id === policyId);
@@ -97,12 +98,35 @@ export const AgentActivityFlyout: React.FunctionComponent<{ onClose: () => {} }>
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
-          <ActivitySection
-            title="In progress"
-            actions={inProgressActions}
-            abortUpgrade={abortUpgrade}
-          />
-          <ActivitySection title="Today" actions={todayActions} abortUpgrade={abortUpgrade} />
+          {currentActionsEnriched.length === 0 ? (
+            <EuiPanel hasBorder={true} borderRadius="none">
+              <EuiFlexGroup
+                direction="column"
+                gutterSize="m"
+                justifyContent={'center'}
+                alignItems={'center'}
+              >
+                <EuiFlexItem>
+                  <EuiText color="subdued">
+                    <FormattedMessage
+                      id="xpack.fleet.agentActivityFlyout.noActivityText"
+                      defaultMessage="No recent agent activity."
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          ) : null}
+          {inProgressActions.length > 0 ? (
+            <ActivitySection
+              title="In progress"
+              actions={inProgressActions}
+              abortUpgrade={abortUpgrade}
+            />
+          ) : null}
+          {todayActions.length > 0 ? (
+            <ActivitySection title="Today" actions={todayActions} abortUpgrade={abortUpgrade} />
+          ) : null}
           {Object.keys(otherDays).map((day) => (
             <ActivitySection
               title={<FormattedDate value={day} year="numeric" month="short" day="2-digit" />}

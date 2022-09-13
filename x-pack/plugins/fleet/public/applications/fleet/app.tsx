@@ -59,7 +59,6 @@ import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_
 import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list_page';
 import { SettingsApp } from './sections/settings';
 import { DebugPage } from './sections/debug';
-import { AgentActivityFlyout } from './sections/agents/agent_list_page/components';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
@@ -377,12 +376,6 @@ export const AppRoutes = memo(
         {flyoutContext.isFleetServerFlyoutOpen && (
           <EuiPortal>
             <FleetServerFlyout onClose={() => flyoutContext.closeFleetServerFlyout()} />
-          </EuiPortal>
-        )}
-
-        {flyoutContext.isAgentActivityOpen && (
-          <EuiPortal>
-            <AgentActivityFlyout onClose={() => flyoutContext.closeAgentActivityFlyout()} />
           </EuiPortal>
         )}
       </>
