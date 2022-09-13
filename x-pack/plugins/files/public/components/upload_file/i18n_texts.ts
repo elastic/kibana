@@ -23,6 +23,9 @@ export const i18nTexts = {
   cancel: i18n.translate('xpack.files.uploadFile.cancelButtonLabel', {
     defaultMessage: 'Cancel',
   }),
+  uploadDone: i18n.translate('xpack.files.uploadFile.uploadDoneToolTipContent', {
+    defaultMessage: 'File uploaded successfully!',
+  }),
   fileTooLarge: (expectedSize: string) =>
     i18n.translate('xpack.files.uploadFile.fileTooLargeErrorMessage', {
       defaultMessage: 'File is too large. Maximum size is {expectedSize} bytes.',

@@ -67,18 +67,18 @@ const Template: ComponentStory<typeof UploadFile> = (props: Props) => (
 
 export const Basic = Template.bind({});
 
-export const BasicSmall = Template.bind({});
-BasicSmall.args = {
-  compressed: true,
+export const BasicInfinteUploads = Template.bind({});
+BasicInfinteUploads.args = {
+  allowRepeatedUploads: true,
 };
 
-export const ErrorUX = Template.bind({});
-ErrorUX.args = {
+export const LongErrorUX = Template.bind({});
+LongErrorUX.args = {
   client: {
     create: async () => ({ file: { id: 'test' } }),
     upload: async () => {
       await sleep(1000);
-      throw new Error('Something went wrong while uploading!');
+      throw new Error('Something went wrong while uploading!'.repeat(10));
     },
     delete: async () => {},
   } as unknown as FilesClient,

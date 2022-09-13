@@ -8,7 +8,8 @@
 import React, { useMemo } from 'react';
 import classNames from 'classnames';
 import {
-  EuiFormRow,
+  EuiIcon,
+  EuiText,
   EuiButton,
   EuiSpacer,
   EuiFlexItem,
@@ -16,6 +17,7 @@ import {
   EuiFilePicker,
   EuiButtonEmpty,
   type EuiFilePickerProps,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18nTexts } from '../i18n_texts';
 
@@ -63,72 +65,117 @@ export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
   } = props;
 
   const cn = useMemo(() => classNames({ filesUploadFile: true }, className), [className]);
+  const id = useGeneratedHtmlId({ prefix: 'filesUploadFile' });
+  const errorId = `${id}_error`;
+
+  const renderControls = () => {
+    if (uploading) {
+      return (
+        <EuiButtonEmpty
+          key="cancelButton"
+          size="s"
+          data-test-subj="cancelButton"
+          disabled={!uploading}
+          onClick={onCancel}
+          color="danger"
+        >
+          {i18nTexts.cancel}
+        </EuiButtonEmpty>
+      );
+    }
+
+    if (retry) {
+      return (
+        <EuiButtonEmpty
+          key="retryButton"
+          size="s"
+          data-data-test-subj="retryButton"
+          disabled={done || uploading}
+          onClick={onUpload}
+        >
+          {i18nTexts.retry}
+        </EuiButtonEmpty>
+      );
+    }
+
+    if (!done && !immediate) {
+      return (
+        <EuiButton
+          key="uploadButton"
+          color={done ? 'success' : 'primary'}
+          disabled={done || uploading || !ready || isInvalid}
+          onClick={onUpload}
+          size="s"
+          data-test-subj="uploadButton"
+        >
+          {uploading ? i18nTexts.uploading : i18nTexts.upload}
+        </EuiButton>
+      );
+    }
+    if (done) {
+      return (
+        <EuiFlexGroup alignItems="center" gutterSize="none">
+          <EuiIcon
+            className="filesUploadFile__successCheck"
+            data-test-subj="uploadSuccessIcon"
+            type="checkInCircleFilled"
+            color="success"
+            aria-label={i18nTexts.uploadDone}
+          />
+        </EuiFlexGroup>
+      );
+    }
+  };
 
   return (
     <div data-test-subj="filesUploadFile" className={cn} style={style}>
-      <EuiFormRow isInvalid={isInvalid} label={label} error={errorMessage}>
-        <EuiFilePicker
-          {...rest}
-          ref={ref}
-          onChange={(files) => {
-            onChange(Array.from(files ?? []));
-          }}
-          multiple={false}
-          initialPromptText={initialFilePromptText}
-          isLoading={uploading}
-          isInvalid={isInvalid}
-          accept={accept}
-          disabled={done || uploading}
-        />
-      </EuiFormRow>
+      <EuiFilePicker
+        {...rest}
+        id={id}
+        ref={ref}
+        onChange={(files) => {
+          onChange(Array.from(files ?? []));
+        }}
+        multiple={false}
+        initialPromptText={initialFilePromptText}
+        isLoading={uploading}
+        isInvalid={isInvalid}
+        accept={accept}
+        disabled={done || uploading}
+        aria-describedby={errorMessage ? errorId : undefined}
+      />
+
       <EuiSpacer size="s" />
 
       <EuiFlexGroup
         justifyContent="flexStart"
-        alignItems="center"
+        alignItems="flexStart"
         direction="rowReverse"
         gutterSize="m"
       >
-        <EuiFlexItem grow={false}>
-          {!immediate && !retry && (
-            <EuiButton
-              color={done ? 'success' : 'primary'}
-              disabled={done || uploading || !ready || isInvalid}
-              onClick={onUpload}
-              size="s"
-              data-test-subj="uploadButton"
-            >
-              {uploading ? i18nTexts.uploading : i18nTexts.upload}
-            </EuiButton>
-          )}
-          {retry && (
-            <EuiButton
-              data-data-test-subj="retryButton"
-              disabled={done || uploading}
-              onClick={onUpload}
-              size="s"
-            >
-              {i18nTexts.retry}
-            </EuiButton>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {uploading || !done || !allowClear ? (
-            <EuiButtonEmpty
-              data-test-subj="cancelButton"
-              size="s"
-              disabled={!uploading}
-              onClick={onCancel}
-              color="danger"
-            >
-              {i18nTexts.cancel}
-            </EuiButtonEmpty>
-          ) : (
-            <EuiButtonEmpty data-test-subj="clearButton" size="s" onClick={onClear} color="primary">
-              {i18nTexts.clear}
-            </EuiButtonEmpty>
-          )}
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{renderControls()}</EuiFlexItem>
+        {!done && Boolean(errorMessage) && (
+          <EuiFlexItem>
+            <EuiText className="filesUploadFile__errorMessage" size="s" color="danger">
+              <span id={errorId}>{errorMessage}</span>
+            </EuiText>
+          </EuiFlexItem>
+        )}
+        {done && allowClear && (
+          <>
+            <EuiFlexItem />
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                data-test-subj="clearButton"
+                onClick={onClear}
+                color="primary"
+              >
+                {i18nTexts.clear}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </>
+        )}
       </EuiFlexGroup>
     </div>
   );

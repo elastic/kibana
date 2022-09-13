@@ -8,6 +8,7 @@
 import { EuiFilePicker } from '@elastic/eui';
 import React, { type FunctionComponent, useState, useRef, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { finalize } from 'rxjs';
 import { FileKind } from '../../../common';
 import { FilesClient } from '../../types';
 
@@ -17,8 +18,28 @@ import { useBehaviorSubject } from '../use_behavior_subject';
 import { UploadFileUI } from './components';
 import { createUploadState } from './upload_state';
 
+/**
+ * An object representing an uploadded file
+ */
+interface UploadedFile {
+  /**
+   * The ID that was generated for the uploaded file
+   */
+  id: string;
+  /**
+   * The kind of the file that was passed in to this component
+   */
+  kind: string;
+}
+
 export interface Props<Kind extends string = string> {
+  /**
+   * A file kind that should be registered during plugin startup. See {@link FileServiceStart}.
+   */
   kind: Kind;
+  /**
+   * A files client that will be used process uploads.
+   */
   client: FilesClient;
   /**
    * Allow users to clear a file after uploading.
@@ -35,9 +56,21 @@ export interface Props<Kind extends string = string> {
    * Metadata that you want to associate with any uploaded files
    */
   meta?: Record<string, unknown>;
-  compressed?: boolean;
+  /**
+   * Whether this component should display a "done" state after processing an
+   * upload or return to the initial state to allow for another upload.
+   *
+   * @default false
+   */
+  allowRepeatedUploads?: boolean;
+  /**
+   * Called when the an upload process fully completes
+   */
+  onDone: (files: UploadedFile[]) => void;
 
-  onDone: (files: Array<{ id: string; kind: string }>) => void;
+  /**
+   * Called when an error occurs during upload
+   */
   onError?: (e: Error) => void;
 }
 
@@ -50,9 +83,9 @@ export const UploadFile: FunctionComponent<Props> = ({
   onDone,
   onError,
   allowClear,
-  compressed,
   kind: kindId,
   immediate = false,
+  allowRepeatedUploads = false,
 }) => {
   const { registry } = useFilesContext();
 
@@ -66,11 +99,6 @@ export const UploadFile: FunctionComponent<Props> = ({
     })
   );
 
-  const clearFiles = () => {
-    ref.current?.removeFiles();
-    uploadState.setFiles([]);
-  };
-
   const uploading = useBehaviorSubject(uploadState.uploading$);
   const files = useObservable(uploadState.files$, []);
 
@@ -80,18 +108,31 @@ export const UploadFile: FunctionComponent<Props> = ({
 
   const hasErrors = Boolean(errors.length);
 
+  const clearFiles = useCallback(() => {
+    ref.current?.removeFiles();
+    uploadState.setFiles([]);
+  }, [uploadState]);
+
   const upload = useCallback(() => {
-    uploadState.upload(meta).subscribe({
-      complete: () => {
-        onDone(files.map(({ id }) => ({ id: id!, kind: kindId })));
-      },
-      error: onError,
-    });
-  }, [onDone, onError, uploadState, files, kindId, meta]);
+    uploadState
+      .upload(meta)
+      .pipe(
+        finalize(() => {
+          if (allowRepeatedUploads) clearFiles();
+        })
+      )
+      .subscribe({
+        complete: () => {
+          onDone(files.map(({ id }) => ({ id: id!, kind: kindId })));
+        },
+        error: onError,
+      });
+  }, [onDone, onError, uploadState, files, kindId, meta, allowRepeatedUploads, clearFiles]);
 
   return (
     <UploadFileUI
       ref={ref}
+      ready={Boolean(files.length)}
       immediate={immediate}
       onCancel={() => {
         uploadState.abort();
@@ -101,7 +142,7 @@ export const UploadFile: FunctionComponent<Props> = ({
         uploadState.setFiles(fs);
         if (immediate) upload();
       }}
-      ready={Boolean(files.length)}
+      onUpload={upload}
       onClear={clearFiles}
       done={done}
       uploading={!done && uploading}
@@ -110,8 +151,6 @@ export const UploadFile: FunctionComponent<Props> = ({
       isInvalid={!uploading && hasErrors}
       allowClear={allowClear}
       errorMessage={errors[0]?.error?.message}
-      display={compressed ? 'default' : 'large'}
-      onUpload={upload}
     />
   );
 };
