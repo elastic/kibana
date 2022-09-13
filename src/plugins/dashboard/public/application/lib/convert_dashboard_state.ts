@@ -111,15 +111,14 @@ export const stateToDashboardContainerInput = ({
 
   return {
     refreshConfig: timefilter.getRefreshInterval(),
-    filters: filterManager
-      .getFilters()
-      .filter(
-        (filter) =>
-          isFilterPinned(filter) ||
-          dashboardFilters.some((dashboardFilter) =>
-            filtersAreEqual(migrateFilter(_.cloneDeep(dashboardFilter)), filter)
-          )
-      ),
+    filters: filterManager.getFilters().filter((filter) => {
+      return (
+        isFilterPinned(filter) ||
+        dashboardFilters.some((dashboardFilter) =>
+          filtersAreEqual(migrateFilter(_.cloneDeep(dashboardFilter)), migrateFilter(filter))
+        )
+      );
+    }),
     isFullScreenMode: fullScreenMode,
     id: savedDashboard.id || '',
     isEmbeddedExternally,
