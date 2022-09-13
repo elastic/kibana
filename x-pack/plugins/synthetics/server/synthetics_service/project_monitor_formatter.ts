@@ -278,7 +278,10 @@ export class ProjectMonitorFormatter {
         await this.savedObjectsClient.update<MonitorFields>(
           syntheticsMonitorType,
           previousMonitor.id,
-          monitorWithRevision
+          {
+            ...monitorWithRevision,
+            urls: '',
+          }
         );
 
       await syncEditedMonitor({
