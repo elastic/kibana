@@ -7,9 +7,9 @@
 
 import { useEffect, useState } from 'react';
 
-import { useSavedQueryServices } from '../../../../../common/utils/saved_query_services';
-import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
-import type { DefineStepRule } from '../types';
+import { useSavedQueryServices } from '../utils/saved_query_services';
+import { useAppToasts } from './use_app_toasts';
+import type { DefineStepRule } from '../../detections/pages/detection_engine/rules/types';
 
 export const useGetSavedQuery = (savedQueryId: string | undefined) => {
   const savedQueryServices = useSavedQueryServices();

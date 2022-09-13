@@ -112,7 +112,7 @@ import { ExecutionLogTable } from './execution_log_table/execution_log_table';
 import * as detectionI18n from '../../translations';
 import * as ruleI18n from '../translations';
 import { RuleDetailsContextProvider } from './rule_details_context';
-import { useGetSavedQuery } from './use_get_saved_query';
+import { useGetSavedQuery } from '../../../../../common/hooks/use_get_saved_query';
 import * as i18n from './translations';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../../../components/callouts/missing_privileges_callout';
