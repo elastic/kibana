@@ -260,7 +260,9 @@ In addition to the documented configurations, several built in action type offer
 
 ## ServiceNow ITSM
 
-The [ServiceNow ITSM user documentation `params`](https://www.elastic.co/guide/en/kibana/master/servicenow-action-type.html) lists configuration properties for the `pushToService` subaction. In addition, several other subaction types are available.
+Refer to the [Run connector API documentation](https://www.elastic.co/guide/en/kibana/master/execute-connector-api.html#execute-connector-api-request-body)
+for the full list of properties.
+
 ### `params`
 
 | Property        | Description                                                                                        | Type   |
@@ -311,7 +313,8 @@ No parameters for the `getFields` subaction. Provide an empty object `{}`.
 
 ## ServiceNow Sec Ops
 
-The [ServiceNow SecOps user documentation `params`](https://www.elastic.co/guide/en/kibana/master/servicenow-sir-action-type.html) lists configuration properties for the `pushToService` subaction. In addition, several other subaction types are available.
+Refer to the [Run connector API documentation](https://www.elastic.co/guide/en/kibana/master/execute-connector-api.html#execute-connector-api-request-body)
+for the full list of properties.
 
 ### `params`
 
@@ -364,7 +367,9 @@ No parameters for the `getFields` subaction. Provide an empty object `{}`.
 ---
 ## ServiceNow ITOM
 
-The [ServiceNow ITOM user documentation `params`](https://www.elastic.co/guide/en/kibana/master/servicenow-itom-action-type.html) lists configuration properties for the `addEvent` subaction. In addition, several other subaction types are available.
+Refer to the [Run connector API documentation](https://www.elastic.co/guide/en/kibana/master/execute-connector-api.html#execute-connector-api-request-body)
+for the full list of properties.
+
 ### `params`
 
 | Property        | Description                                                       | Type   |
