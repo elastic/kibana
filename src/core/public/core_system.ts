@@ -183,9 +183,6 @@ export class CoreSystem {
 
     const navigatorExt = navigator as ExtendedNavigator;
     const navigatorInfo: Record<string, string> = {};
-    if (navigatorExt.connection?.effectiveType) {
-      navigatorInfo['effectiveNetworkType'] = navigatorExt.connection.effectiveType;
-    }
     if (navigatorExt.deviceMemory) {
       navigatorInfo['deviceMemory'] = String(navigatorExt.deviceMemory);
     }
