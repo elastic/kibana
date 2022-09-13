@@ -188,7 +188,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                         loaderContext,
                         Path.resolve(
                           worker.repoRoot,
-                          `src/core/public/core_app/styles/_globals_${theme}.scss`
+                          `src/core/public/styles/core_app/_globals_${theme}.scss`
                         )
                       )};\n${content}`;
                     },
@@ -246,7 +246,10 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       extensions: ['.js', '.ts', '.tsx', '.json'],
       mainFields: ['browser', 'main'],
       alias: {
-        core_app_image_assets: Path.resolve(worker.repoRoot, 'src/core/public/core_app/images'),
+        core_app_image_assets: Path.resolve(
+          worker.repoRoot,
+          'src/core/public/styles/core_app/images'
+        ),
         vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
       },
       symlinks: false,
