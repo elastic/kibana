@@ -26,7 +26,7 @@ import type {
   TimelineEventsDetailsItem,
 } from '../../../../../common/search_strategy';
 import { HostRiskSummary } from './host_risk_summary';
-import { UsertRiskSummary } from './user_risk_summary';
+import { UserRiskSummary } from './user_risk_summary';
 import { EnrichmentSummary } from './enrichment_summary';
 import type { HostRisk, UserRisk } from '../../../../risk_score/containers';
 
@@ -156,7 +156,7 @@ const ThreatSummaryViewComponent: React.FC<{
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <UsertRiskSummary userRisk={userRisk} />
+          <UserRiskSummary userRisk={userRisk} />
         </EuiFlexItem>
 
         <EnrichmentSummary

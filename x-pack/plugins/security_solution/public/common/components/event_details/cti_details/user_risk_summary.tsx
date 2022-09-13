@@ -16,7 +16,7 @@ import type { UserRisk } from '../../../../risk_score/containers';
 import { getEmptyValue } from '../../empty_value';
 import { RISKY_USERS_DOC_LINK } from '../../../../users/components/constants';
 
-const UsertRiskSummaryComponent: React.FC<{
+const UserRiskSummaryComponent: React.FC<{
   userRisk: UserRisk;
 }> = ({ userRisk }) => (
   <>
@@ -64,4 +64,4 @@ const UsertRiskSummaryComponent: React.FC<{
   </>
 );
 
-export const UsertRiskSummary = React.memo(UsertRiskSummaryComponent);
+export const UserRiskSummary = React.memo(UserRiskSummaryComponent);
