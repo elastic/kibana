@@ -27,7 +27,7 @@ export interface AddToTimelineProps {
   /**
    * Only used with `EuiDataGrid` (see {@link AddToTimelineButtonProps}).
    */
-  component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+  as?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   /**
    * Used as `data-test-subj` value for e2e tests.
    */
@@ -42,7 +42,7 @@ export interface AddToTimelineProps {
  *
  * @returns add to timeline button or an empty component.
  */
-export const AddToTimeline: VFC<AddToTimelineProps> = ({ data, field, component, testId }) => {
+export const AddToTimeline: VFC<AddToTimelineProps> = ({ data, field, as, testId }) => {
   const styles = useStyles();
 
   const addToTimelineButton =
@@ -78,7 +78,7 @@ export const AddToTimeline: VFC<AddToTimelineProps> = ({ data, field, component,
     field: key,
     ownFocus: false,
   };
-  if (component) addToTimelineProps.Component = component;
+  if (as) addToTimelineProps.Component = as;
 
   return (
     <div data-test-subj={testId} css={styles.button}>
