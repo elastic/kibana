@@ -1,7 +1,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "ml_host_risk_score_latest_ecs_default",
+    "index": "ml_host_risk_score_latest_default",
     "id": "1",
     "source": {
       "host": {
@@ -22,7 +22,7 @@
   "type": "doc",
   "value": {
     "id": "2",
-    "index": "ml_host_risk_score_latest_ecs_default",
+    "index": "ml_host_risk_score_latest_default",
     "source": {
       "host": {
         "name": "suricata-sensor-london",
@@ -42,7 +42,7 @@
   "type": "doc",
   "value": {
     "id": "3",
-    "index": "ml_host_risk_score_latest_ecs_default",
+    "index": "ml_host_risk_score_latest_default",
     "source": {
       "host": {
         "name": "zeek-newyork-sha-aa8df15",
@@ -62,7 +62,7 @@
   "type": "doc",
   "value": {
     "id": "4",
-    "index": "ml_host_risk_score_latest_ecs_default",
+    "index": "ml_host_risk_score_latest_default",
     "source": {
       "host": {
         "name": "zeek-sensor-amsterdam",
@@ -82,7 +82,7 @@
   "type": "doc",
   "value": {
     "id": "5",
-    "index": "ml_host_risk_score_latest_ecs_default",
+    "index": "ml_host_risk_score_latest_default",
     "source": {
       "host": {
         "name": "mothra",

@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "a4cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f",
-    "index": "ml_host_risk_score_latest_ecs_default",
+    "index": "ml_host_risk_score_latest_default",
     "source": {
       "@timestamp": "2021-03-10T14:51:05.766Z",
       "host": {
@@ -27,7 +27,7 @@
   "type": "doc",
   "value": {
     "id": "a2cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb71f",
-    "index": "ml_host_risk_score_latest_ecs_default",
+    "index": "ml_host_risk_score_latest_default",
     "source": {
       "@timestamp": "2021-03-10T14:51:05.766Z",
       "host": {
@@ -52,7 +52,7 @@
   "type": "doc",
   "value": {
     "id": "a2cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb72f",
-    "index": "ml_host_risk_score_latest_ecs_default",
+    "index": "ml_host_risk_score_latest_default",
     "source": {
       "@timestamp": "2021-03-10T14:51:05.766Z",
       "host": {
@@ -77,7 +77,7 @@
   "type": "doc",
   "value": {
     "id": "a2cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb73f",
-    "index": "ml_host_risk_score_latest_ecs_default",
+    "index": "ml_host_risk_score_latest_default",
     "source": {
       "@timestamp": "2021-03-10T14:51:05.766Z",
       "host": {
@@ -102,7 +102,7 @@
   "type": "doc",
   "value": {
     "id": "a2cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f",
-    "index": "ml_host_risk_score_latest_ecs_default",
+    "index": "ml_host_risk_score_latest_default",
     "source": {
       "@timestamp": "2021-03-10T14:51:05.766Z",
       "host": {
@@ -127,7 +127,7 @@
   "type": "doc",
   "value": {
     "id": "a2cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb75f",
-    "index": "ml_host_risk_score_latest_ecs_default",
+    "index": "ml_host_risk_score_latest_default",
     "source": {
       "@timestamp": "2021-03-10T14:51:05.766Z",
       "host": {

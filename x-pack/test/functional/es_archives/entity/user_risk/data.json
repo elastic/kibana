@@ -1,7 +1,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "ml_user_risk_score_latest_ecs_default",
+    "index": "ml_user_risk_score_latest_default",
     "id": "1",
     "source": {
       "user": {
@@ -22,7 +22,7 @@
   "type": "doc",
   "value": {
     "id": "2",
-    "index": "ml_user_risk_score_latest_ecs_default",
+    "index": "ml_user_risk_score_latest_default",
     "source": {
       "host": {
         "name": "User name 1",

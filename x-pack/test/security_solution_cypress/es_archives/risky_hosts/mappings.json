@@ -1,7 +1,7 @@
 {
   "type": "index",
   "value": {
-    "index": "ml_host_risk_score_latest_ecs_default",
+    "index": "ml_host_risk_score_latest_default",
     "mappings": {
       "properties": {
         "@timestamp": {
