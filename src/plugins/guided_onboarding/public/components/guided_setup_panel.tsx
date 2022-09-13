@@ -15,15 +15,10 @@ import {
   EuiButton,
   EuiText,
   EuiProgress,
-  EuiAccordion,
   EuiHorizontalRule,
   EuiSpacer,
   EuiTextColor,
   htmlIdGenerator,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  useEuiTheme,
   EuiButtonEmpty,
   EuiTitle,
 } from '@elastic/eui';
@@ -35,11 +30,17 @@ import { guidesConfig } from '../constants';
 import type { GuideConfig, StepStatus, GuidedOnboardingState, StepConfig } from '../types';
 import type { ApiService } from '../services/api';
 
+import { GuidedSetupStep } from './guided_setup_panel_step';
+
 interface Props {
   api: ApiService;
   application: ApplicationStart;
   http: HttpStart;
 }
+
+const guidedPanelContainerCss = css`
+  width: 400px;
+`;
 
 const getConfig = (state?: GuidedOnboardingState): GuideConfig | undefined => {
   if (state?.activeGuide && state.activeGuide !== 'unset') {
@@ -70,68 +71,58 @@ const getStepStatus = (steps: StepConfig[], stepIndex: number, activeStep?: stri
   return 'complete';
 };
 
-export const GuidedOnboardingButton = ({ api, application, http }: Props) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  const [guidedOnboardingState, setGuidedOnboardingState] = useState<
-    GuidedOnboardingState | undefined
-  >(undefined);
-
-  const firstRender = useRef(true);
+export const GuidedSetupPanel = ({ api, application, http }: Props) => {
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const [guidedSetupState, setGuidedSetupState] = useState<GuidedOnboardingState | undefined>(
+    undefined
+  );
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
     const subscription = api.fetchGuideState$().subscribe((newState) => {
       if (
-        guidedOnboardingState?.activeGuide !== newState.activeGuide ||
-        guidedOnboardingState?.activeStep !== newState.activeStep
+        guidedSetupState?.activeGuide !== newState.activeGuide ||
+        guidedSetupState?.activeStep !== newState.activeStep
       ) {
-        if (firstRender.current) {
-          firstRender.current = false;
+        if (isFirstRender.current) {
+          isFirstRender.current = false;
         } else {
-          setIsPopoverOpen(true);
+          setIsGuideOpen(true);
         }
       }
-      setGuidedOnboardingState(newState);
+      setGuidedSetupState(newState);
     });
     return () => subscription.unsubscribe();
-  }, [api, guidedOnboardingState?.activeGuide, guidedOnboardingState?.activeStep]);
+  }, [api, guidedSetupState?.activeGuide, guidedSetupState?.activeStep]);
 
-  const { euiTheme } = useEuiTheme();
-
-  const togglePopover = () => {
-    setIsPopoverOpen((prevIsPopoverOpen) => !prevIsPopoverOpen);
+  const toggleGuide = () => {
+    setIsGuideOpen((prevIsGuideOpen) => !prevIsGuideOpen);
   };
 
-  const popoverContainerCss = css`
-    width: 400px;
-  `;
-
-  const statusCircleCss = ({ status }: { status: StepStatus }) => css`
-    width: 24px;
-    height: 24px;
-    border-radius: 32px;
-    ${(status === 'complete' || status === 'in_progress') &&
-    `background-color: ${euiTheme.colors.success};`}
-    ${status === 'incomplete' &&
-    `
-      border: 2px solid ${euiTheme.colors.lightShade};
-    `}
-  `;
-
-  const guideConfig = getConfig(guidedOnboardingState);
-  const stepLabel = getStepLabel(guideConfig?.steps, guidedOnboardingState);
+  const guideConfig = getConfig(guidedSetupState);
+  const stepLabel = getStepLabel(guideConfig?.steps, guidedSetupState);
 
   const navigateToStep = (step: StepConfig) => {
-    setIsPopoverOpen(false);
+    setIsGuideOpen(false);
     if (step.location) {
       application.navigateToApp(step.location.appID, { path: step.location.path });
     }
   };
 
-  return guideConfig ? (
+  if (!guideConfig) {
+    return (
+      <EuiButton onClick={toggleGuide} color="success" fill isDisabled={true}>
+        {i18n.translate('guidedOnboarding.disabledGuidedSetupButtonLabel', {
+          defaultMessage: 'Guided setup',
+        })}
+      </EuiButton>
+    );
+  }
+
+  return (
     <EuiPopover
       button={
-        <EuiButton onClick={togglePopover} color="success" fill>
+        <EuiButton onClick={toggleGuide} color="success" fill>
           {i18n.translate('guidedOnboarding.guidedSetupButtonLabel', {
             defaultMessage: 'Guided setup{stepLabel}',
             values: {
@@ -140,8 +131,8 @@ export const GuidedOnboardingButton = ({ api, application, http }: Props) => {
           })}
         </EuiButton>
       }
-      isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
+      isOpen={isGuideOpen}
+      closePopover={() => setIsGuideOpen(false)}
       anchorPosition="downRight"
       hasArrow={false}
       offset={10}
@@ -164,60 +155,33 @@ export const GuidedOnboardingButton = ({ api, application, http }: Props) => {
         </EuiTitle>
       </EuiPopoverTitle>
 
-      <div css={popoverContainerCss}>
+      <div css={guidedPanelContainerCss}>
         <EuiText>
           <p>{guideConfig?.description}</p>
         </EuiText>
         <EuiSpacer />
         <EuiHorizontalRule />
-        <EuiProgress label="Progress" value={40} max={100} size="l" valueText />
+        <EuiProgress
+          label={i18n.translate('guidedOnboarding.dropdownPanel.progressLabel', {
+            defaultMessage: 'Progress',
+          })}
+          value={40}
+          max={100}
+          size="l"
+          valueText
+        />
         <EuiSpacer size="xl" />
         {guideConfig?.steps.map((step, index, steps) => {
           const accordionId = htmlIdGenerator(`accordion${index}`)();
-
-          const stepStatus = getStepStatus(steps, index, guidedOnboardingState?.activeStep);
-          const buttonContent = (
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <span css={statusCircleCss({ status: stepStatus })} className="eui-textCenter">
-                  <span className="euiScreenReaderOnly">{stepStatus}</span>
-                  {stepStatus === 'complete' && <EuiIcon type="check" color="white" />}
-                </span>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>{step.title}</EuiFlexItem>
-            </EuiFlexGroup>
-          );
+          const stepStatus = getStepStatus(steps, index, guidedSetupState?.activeStep);
 
           return (
-            <div>
-              <EuiAccordion
-                id={accordionId}
-                buttonContent={buttonContent}
-                arrowDisplay="right"
-                forceState={stepStatus === 'in_progress' ? 'open' : 'closed'}
-              >
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiText size="s">{step.description}</EuiText>
-                  <EuiSpacer />
-                  {stepStatus === 'in_progress' && (
-                    <EuiFlexGroup justifyContent="flexEnd">
-                      <EuiFlexItem grow={false}>
-                        <EuiButton onClick={() => navigateToStep(step)} fill>
-                          {/* TODO: Support for conditional "Continue" button label if user revists a step  */}
-                          {i18n.translate('guidedOnboarding.dropdownPanel.startStepButtonLabel', {
-                            defaultMessage: 'Start',
-                          })}
-                        </EuiButton>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  )}
-                </>
-              </EuiAccordion>
-
-              {/* Do not show horizontal rule for last item */}
-              {guideConfig.steps.length - 1 !== index && <EuiHorizontalRule margin="m" />}
-            </div>
+            <GuidedSetupStep
+              accordionId={accordionId}
+              stepStatus={stepStatus}
+              step={step}
+              navigateToStep={navigateToStep}
+            />
           );
         })}
         <EuiPopoverFooter>
@@ -233,9 +197,5 @@ export const GuidedOnboardingButton = ({ api, application, http }: Props) => {
         </EuiPopoverFooter>
       </div>
     </EuiPopover>
-  ) : (
-    <EuiButton onClick={togglePopover} color="success" fill isDisabled={true}>
-      Guided setup
-    </EuiButton>
   );
 };
