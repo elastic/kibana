@@ -147,7 +147,9 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     }, {} as Record<string, Record<string, number>>);
 
     const tableItems = mockData.map(({ group, docCount }, index) => {
-      const sortedGroup = group.sort((a, b) => (a.field > b.field) ? 1 : ((b.field > a.field) ? -1 : 0));
+      const sortedGroup = group.sort((a, b) =>
+        a.field > b.field ? 1 : b.field > a.field ? -1 : 0
+      );
       const dedupedGroup = {};
       const repeatedValues = {};
 
