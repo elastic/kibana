@@ -10,13 +10,9 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'settings', 'home', 'header']);
+  const PageObjects = getPageObjects(['settings']);
   const a11y = getService('a11y');
-  const browser = getService('browser');
-
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
-  const toasts = getService('toasts');
   const kibanaServer = getService('kibanaServer');
 
   describe('Kibana Alerts - rules tab accessibility tests', () => {
