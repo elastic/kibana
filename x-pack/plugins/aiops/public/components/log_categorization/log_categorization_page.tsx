@@ -184,7 +184,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
       setSparkLines(resp.sparkLinesPerCategory);
     } catch (error) {
       toasts.addError(error, {
-        title: i18n.translate('xpack.aiops.index.errorLoadingDataMessage', {
+        title: i18n.translate('xpack.aiops.logCategorization.errorLoadingCategories', {
           defaultMessage: 'Error loading categories',
           values: {
             message: extractErrorMessage(error),
@@ -262,7 +262,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem grow={false} css={{ minWidth: '410px' }}>
           <EuiFormRow
-            label={i18n.translate('xpack.aiops.index.errorLoadingDataMessage', {
+            label={i18n.translate('xpack.aiops.logCategorization.categoryFieldSelect', {
               defaultMessage: 'Category field',
             })}
           >
@@ -284,7 +284,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
               }}
             >
               <FormattedMessage
-                id="xpack.aiops.correlations.failedTransactions.correlationsTable.logRateLabel"
+                id="xpack.aiops.logCategorization.runButton"
                 defaultMessage="Run categorization"
               />
             </EuiButton>

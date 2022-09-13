@@ -86,7 +86,7 @@ export const CategoryTable: FC<Props> = ({
   const columns = [
     {
       field: 'count',
-      name: i18n.translate('xpack.aiops.index.errorLoadingDataMessage', {
+      name: i18n.translate('xpack.aiops.logCategorization.column.count', {
         defaultMessage: 'Count',
       }),
       sortable: true,
@@ -94,8 +94,8 @@ export const CategoryTable: FC<Props> = ({
     },
     {
       field: 'count',
-      name: i18n.translate('xpack.aiops.index.errorLoadingDataMessage', {
-        defaultMessage: 'Sparkline',
+      name: i18n.translate('xpack.aiops.logCategorization.column.logRate', {
+        defaultMessage: 'Log rate',
       }),
       sortable: true,
       width: '100px',
@@ -122,7 +122,7 @@ export const CategoryTable: FC<Props> = ({
     },
     {
       field: 'examples',
-      name: i18n.translate('xpack.aiops.index.errorLoadingDataMessage', {
+      name: i18n.translate('xpack.aiops.logCategorization.column.examples', {
         defaultMessage: 'Examples',
       }),
       sortable: true,
@@ -147,7 +147,7 @@ export const CategoryTable: FC<Props> = ({
       width: 40,
       actions: [
         {
-          name: i18n.translate('xpack.aiops.index.errorLoadingDataMessage', {
+          name: i18n.translate('xpack.aiops.logCategorization.showInDiscover', {
             defaultMessage: 'Show these in discover',
           }),
           icon: 'filter',
@@ -155,7 +155,7 @@ export const CategoryTable: FC<Props> = ({
           onClick: (category) => openInDiscover(QUERY_MODE.INCLUDE, category),
         },
         {
-          name: i18n.translate('xpack.aiops.index.errorLoadingDataMessage', {
+          name: i18n.translate('xpack.aiops.logCategorization.filterOutInDiscover', {
             defaultMessage: 'Filter out in discover',
           }),
           icon: 'filter',
@@ -163,7 +163,7 @@ export const CategoryTable: FC<Props> = ({
           onClick: (category) => openInDiscover(QUERY_MODE.EXCLUDE, category),
         },
         {
-          name: i18n.translate('xpack.aiops.index.errorLoadingDataMessage', {
+          name: i18n.translate('xpack.aiops.logCategorization.openInDataViz', {
             defaultMessage: 'Open in data visualizer',
           }),
           icon: 'stats',
@@ -211,18 +211,18 @@ export const CategoryTable: FC<Props> = ({
         <>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <EuiButton size="s" onClick={() => openInDiscover(QUERY_MODE.EXCLUDE)}>
+              <EuiButton size="s" onClick={() => openInDiscover(QUERY_MODE.INCLUDE)}>
                 <FormattedMessage
-                  id="xpack.aiops.correlations.failedTransactions.correlationsTable.logRateLabel"
-                  defaultMessage="Filter out in discover"
+                  id="xpack.aiops.logCategorization.showInDiscover"
+                  defaultMessage="Show these in discover"
                 />
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton size="s" onClick={() => openInDiscover(QUERY_MODE.INCLUDE)}>
+              <EuiButton size="s" onClick={() => openInDiscover(QUERY_MODE.EXCLUDE)}>
                 <FormattedMessage
-                  id="xpack.aiops.correlations.failedTransactions.correlationsTable.logRateLabel"
-                  defaultMessage="Show these in discover"
+                  id="xpack.aiops.logCategorization.filterOutInDiscover"
+                  defaultMessage="Filter out in discover"
                 />
               </EuiButton>
             </EuiFlexItem>
