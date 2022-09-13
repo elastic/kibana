@@ -5,14 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import {
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiPanel,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
