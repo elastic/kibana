@@ -46,21 +46,25 @@ export class ComplexityReportGenerator {
     { rule: ComplexityRule.MaxStatements, data: 'count', metric: 'statements' },
   ];
 
-  private esLint = new ESLint({
-    overrideConfig: {
-      noInlineConfig: true,
-      rules: {
-        ...ComplexityReportGenerator.mappings.reduce(
-          (rules, { rule }) => set(rules, rule, ['error', 0]),
-          {}
-        ),
-        [ComplexityRule.MaxLinesPerFunction]: ['error', { max: 0 }],
-      },
-    },
-  });
+  private esLint: ESLint;
   private linter = new Linter();
   private count!: ComplexityReport;
   private total!: ComplexityReport;
+
+  constructor(threshold: Partial<ComplexityReport> = {}) {
+    this.esLint = new ESLint({
+      overrideConfig: {
+        noInlineConfig: true,
+        rules: {
+          ...ComplexityReportGenerator.mappings.reduce(
+            (rules, { metric, rule }) => set(rules, rule, ['error', threshold[metric] ?? 0]),
+            {}
+          ),
+          [ComplexityRule.MaxLinesPerFunction]: ['error', { max: threshold.linesPerFunction ?? 0 }],
+        },
+      },
+    });
+  }
 
   private patch() {
     const rules = this.linter.getRules();
@@ -136,7 +140,7 @@ export class ComplexityReportGenerator {
 }
 
 export function generateComplexityReport() {
-  const complexityReportGenerator = new ComplexityReportGenerator();
+  const complexityReportGenerator = new ComplexityReportGenerator({ complexity: 1 });
 
   return complexityReportGenerator.generate(process.argv.slice(2));
 }
