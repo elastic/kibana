@@ -77,35 +77,36 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
         const closeFieldEditor = dataViewFieldEditor.openEditor({
           ctx: { dataView },
           fieldName,
-          onSave: async (savedField: DataViewField) => {
+          onSave: async (savedFields: DataViewField[]) => {
             startTransaction({ name: FIELD_BROWSER_ACTIONS.FIELD_SAVED });
-
             // Fetch the updated list of fields
             // Using cleanCache since the number of fields might have not changed, but we need to update the state anyway
             await indexFieldsSearch({ dataViewId: selectedDataViewId, cleanCache: true });
 
-            if (fieldName && fieldName !== savedField.name) {
-              // Remove old field from event table when renaming a field
+            for (const savedField of savedFields) {
+              if (fieldName && fieldName !== savedField.name) {
+                // Remove old field from event table when renaming a field
+                dispatch(
+                  removeColumn({
+                    columnId: fieldName,
+                    id: timelineId,
+                  })
+                );
+              }
+
+              // Add the saved column field to the table in any case
               dispatch(
-                removeColumn({
-                  columnId: fieldName,
+                upsertColumn({
+                  column: {
+                    columnHeaderType: defaultColumnHeaderType,
+                    id: savedField.name,
+                    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+                  },
                   id: timelineId,
+                  index: 0,
                 })
               );
             }
-
-            // Add the saved column field to the table in any case
-            dispatch(
-              upsertColumn({
-                column: {
-                  columnHeaderType: defaultColumnHeaderType,
-                  id: savedField.name,
-                  initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-                },
-                id: timelineId,
-                index: 0,
-              })
-            );
             if (editorActionsRef) {
               editorActionsRef.current = null;
             }

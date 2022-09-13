@@ -1,0 +1,197 @@
+{
+  "attributes": {
+    "title": "Copy to Space index pattern 1 from space_1 space"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "cts_ip_1_space_1",
+  "migrationVersion": {
+    "index-pattern": "8.0.0"
+  },
+  "originId": "cts_ip_1",
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzUyOSwxXQ=="
+}
+
+{
+  "attributes": {
+    "description": "AreaChart",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "title": "CTS vis 1 from space_1 space",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "cts_vis_1_space_1",
+  "migrationVersion": {
+    "visualization": "8.3.0"
+  },
+  "references": [
+    {
+      "id": "cts_ip_1_space_1",
+      "name": "CTS IP 1",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzUyMSwxXQ=="
+}
+
+{
+  "attributes": {
+    "description": "AreaChart",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "title": "CTS vis 2 from space_1 space",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{},\"legendSize\":\"auto\"},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "cts_vis_2_space_1",
+  "migrationVersion": {
+    "visualization": "8.3.0"
+  },
+  "references": [
+    {
+      "id": "cts_ip_1_space_1",
+      "name": "CTS IP 1",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzUyNiwxXQ=="
+}
+
+{
+  "attributes": {
+    "description": "AreaChart",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "title": "CTS vis 3 from space_1 space",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{},\"legendSize\":\"auto\"},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "cts_vis_3_space_1",
+  "migrationVersion": {
+    "visualization": "8.3.0"
+  },
+  "originId": "cts_vis_3",
+  "references": [
+    {
+      "id": "cts_ip_1_space_1",
+      "name": "CTS IP 1",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzUyNywxXQ=="
+}
+
+{
+  "attributes": {
+    "description": "Copy to Space Dashboard from space_1 space",
+    "title": "This is the space_1 test space CTS dashboard"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "cts_dashboard_space_1",
+  "migrationVersion": {
+    "dashboard": "8.4.0"
+  },
+  "originId": "cts_dashboard",
+  "references": [
+    {
+      "id": "cts_vis_1_space_1",
+      "name": "CTS Vis 1",
+      "type": "visualization"
+    },
+    {
+      "id": "cts_vis_2_space_1",
+      "name": "CTS Vis 2",
+      "type": "visualization"
+    },
+    {
+      "id": "cts_vis_3_space_1",
+      "name": "CTS Vis 3",
+      "type": "visualization"
+    }
+  ],
+  "type": "dashboard",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzUyNCwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object in one space"
+  },
+  "id": "conflict_2_space_1",
+  "originId": "conflict_2",
+  "references": [],
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzUxMCwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "This is used to test an inexact match conflict for an originId -> id match"
+  },
+  "id": "conflict_1b_space_1",
+  "originId": "conflict_1b_space_2",
+  "references": [],
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzUwNCwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "This is used to test an inexact match conflict for an originId -> originId match"
+  },
+  "id": "conflict_1a_space_1",
+  "originId": "conflict_1a",
+  "references": [],
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzUwMSwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object in one space"
+  },
+  "id": "space_1_only",
+  "references": [
+    {
+      "id": "each_space",
+      "name": "refname",
+      "type": "sharedtype"
+    }
+  ],
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzQ4OSwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "Some title"
+  },
+  "id": "my_isolated_object",
+  "references": [],
+  "type": "isolatedtype",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzQ4NywxXQ=="
+}
