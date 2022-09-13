@@ -94,6 +94,23 @@ describe('Condition entry input', () => {
     expect(onVisitedMock).toHaveBeenCalledWith(baseEntry);
   });
 
+  it('should not call on visited for field change if value is empty', () => {
+    const emptyEntry = { ...baseEntry, value: '' };
+    const element = shallow(
+      getElement('testOnVisited', OperatingSystem.WINDOWS, false, emptyEntry)
+    );
+    expect(onVisitedMock).toHaveBeenCalledTimes(0);
+    element.find('[data-test-subj="testOnVisited-field"]').first().simulate('change');
+    expect(onVisitedMock).toHaveBeenCalledTimes(0);
+  });
+
+  it('should call on visited for field change if value is not empty', () => {
+    const element = shallow(getElement('testOnVisited'));
+    expect(onVisitedMock).toHaveBeenCalledTimes(0);
+    element.find('[data-test-subj="testOnVisited-field"]').first().simulate('change');
+    expect(onVisitedMock).toHaveBeenCalledTimes(1);
+  });
+
   it('should change value for field input', () => {
     const element = shallow(getElement('testOnChange'));
     expect(onChangeMock).toHaveBeenCalledTimes(0);
