@@ -6,6 +6,7 @@
     "declaration": true,
     "declarationMap": true
   },
+  "exclude": ["cypress.config.ts"],
   "include": [
     // add all the folders contains files to be compiled
     "common/**/*",
@@ -13,6 +14,7 @@
     "scripts/**/*",
     "scripts/**/**.json",
     "server/**/*",
+    "cypress.config.ts",
     "../../../typings/**/*",
     // ECS and Osquery schema files
     "public/common/schemas/*/**.json",

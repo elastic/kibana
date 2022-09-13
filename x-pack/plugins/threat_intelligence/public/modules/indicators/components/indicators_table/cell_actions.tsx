@@ -50,11 +50,11 @@ export const CellActions: VFC<CellActionsProps> = ({
 
   return (
     <>
-      <FilterInOut Component={Component} data={indicator} field={key} />
+      <FilterInOut as={Component} data={indicator} field={key} />
       <AddToTimeline
         data={indicator}
         field={key}
-        component={Component}
+        as={Component}
         testId={CELL_TIMELINE_BUTTON_TEST_ID}
       />
     </>
