@@ -49,6 +49,10 @@ export interface QueryBarDefineRuleProps {
    * if saved query selected, reset query and filters to saved query values
    */
   resetToSavedQuery?: boolean;
+  /**
+   * called when fetching of saved query fails
+   */
+  onSavedQueryError?: () => void;
 }
 
 const actionTimelineToHide: ActionTimelineToShow[] = ['duplicate', 'createFrom'];
@@ -81,11 +85,13 @@ export const QueryBarDefineRule = ({
   onValidityChange,
   isDisabled,
   resetToSavedQuery,
+  onSavedQueryError,
 }: QueryBarDefineRuleProps) => {
   const { value: fieldValue, setValue: setFieldValue } = field as FieldHook<FieldValueQueryBar>;
   const [originalHeight, setOriginalHeight] = useState(-1);
   const [loadingTimeline, setLoadingTimeline] = useState(false);
   const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(undefined);
+  const [isSavedQueryFailedToLoad, setIsSavedQueryFailedToLoad] = useState(false);
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   const { uiSettings } = useKibana().services;
@@ -144,8 +150,10 @@ export const QueryBarDefineRule = ({
           if (isSubscribed && mySavedQuery != null) {
             setSavedQuery(mySavedQuery);
           }
+          setIsSavedQueryFailedToLoad(false);
         } catch (err) {
           setSavedQuery(undefined);
+          setIsSavedQueryFailedToLoad(true);
         }
       } else if (savedId == null && savedQuery != null) {
         setSavedQuery(undefined);
@@ -155,7 +163,20 @@ export const QueryBarDefineRule = ({
     return () => {
       isSubscribed = false;
     };
-  }, [fieldValue, filterManager, savedQuery, savedQueryServices]);
+  }, [
+    fieldValue,
+    filterManager,
+    savedQuery,
+    savedQueryServices,
+    setIsSavedQueryFailedToLoad,
+    setFieldValue,
+  ]);
+
+  useEffect(() => {
+    if (isSavedQueryFailedToLoad) {
+      onSavedQueryError?.();
+    }
+  }, [onSavedQueryError, isSavedQueryFailedToLoad]);
 
   useEffect(() => {
     if (resetToSavedQuery && savedQuery) {
@@ -178,10 +199,13 @@ export const QueryBarDefineRule = ({
     (newQuery: Query) => {
       const { query } = fieldValue;
       if (!deepEqual(query, newQuery)) {
-        setFieldValue({ ...fieldValue, query: newQuery });
+        // if saved query failed to load, delete saved_id, when user types custom query
+        const savedId = isSavedQueryFailedToLoad ? null : fieldValue.saved_id;
+
+        setFieldValue({ ...fieldValue, query: newQuery, saved_id: savedId });
       }
     },
-    [fieldValue, setFieldValue]
+    [fieldValue, setFieldValue, isSavedQueryFailedToLoad]
   );
 
   const onSavedQuery = useCallback(

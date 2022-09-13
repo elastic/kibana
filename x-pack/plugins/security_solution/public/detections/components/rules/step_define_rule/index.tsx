@@ -388,13 +388,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     }
   }, [ruleType, previousRuleType, getFields]);
 
-  useEffect(() => {
-    // if query bar is not valid, reset shouldLoadFormDynamically to false,
-    // as invalid query cannot be used for loading and execution
+  // if saved query failed to load:
+  // - reset shouldLoadFormDynamically to false, as non existent query cannot be used for loading and execution
+  const handleSavedQueryError = useCallback(() => {
     if (!isQueryBarValid) {
       form.setFieldValue('shouldLoadQueryDynamically', false);
     }
-  }, [form, isQueryBarValid]);
+  }, [isQueryBarValid, form]);
 
   const handleSubmit = useCallback(() => {
     if (onSubmit) {
@@ -639,6 +639,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             openTimelineSearch,
             onValidityChange: setIsQueryBarValid,
             onCloseTimelineSearch: handleCloseTimelineSearch,
+            onSavedQueryError: handleSavedQueryError,
           } as QueryBarDefineRuleProps
         }
       />
@@ -652,6 +653,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       isLoading,
       openTimelineSearch,
       formShouldLoadQueryDynamically,
+      handleSavedQueryError,
     ]
   );
   const onOptionsChange = useCallback((field: FieldsEqlOptions, value: string | undefined) => {
