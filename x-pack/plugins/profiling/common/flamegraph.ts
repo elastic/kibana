@@ -78,7 +78,7 @@ function frameTypeToRGB(frameType: number, x: number): number {
   return frameTypeToColors[frameType][x % 4];
 }
 
-export function normalizeColorForFlamegraph(rgb: number): number[] {
+export function rgbToRGBA(rgb: number): number[] {
   return [
     Math.floor(rgb / 65536) / 255,
     (Math.floor(rgb / 256) % 256) / 255,
@@ -154,41 +154,58 @@ export class FlameGraph {
     this.executables = executables;
   }
 
+  private countCallees(root: CallerCalleeNode): number {
+    let numCallees = 1;
+    for (const callee of root.Callees) {
+      numCallees += this.countCallees(callee);
+    }
+    return numCallees;
+  }
+
   // createColumnarCallerCallee flattens the intermediate representation of the diagram
   // into a columnar format that is more compact than JSON. This representation will later
   // need to be normalized into the response ultimately consumed by the flamegraph.
   private createColumnarCallerCallee(root: CallerCalleeNode): ColumnarCallerCallee {
+    const numCallees = this.countCallees(root);
     const columnar: ColumnarCallerCallee = {
-      Label: [],
-      Value: [],
-      X: [],
-      Y: [],
-      Color: [],
-      CountInclusive: [],
-      CountExclusive: [],
-      ID: [],
+      Label: new Array<string>(numCallees),
+      Value: new Array<number>(numCallees),
+      X: new Array<number>(numCallees),
+      Y: new Array<number>(numCallees),
+      Color: new Array<number>(numCallees * 4),
+      CountInclusive: new Array<number>(numCallees),
+      CountExclusive: new Array<number>(numCallees),
+      ID: new Array<string>(numCallees),
     };
+
     const queue = [{ x: 0, depth: 1, node: root, parentID: 'root' }];
 
+    let idx = 0;
     while (queue.length > 0) {
       const { x, depth, node, parentID } = queue.pop()!;
 
       if (x === 0 && depth === 1) {
-        columnar.Label.push('root: Represents 100% of CPU time.');
+        columnar.Label[idx] = 'root: Represents 100% of CPU time.';
       } else {
-        columnar.Label.push(getLabel(node));
+        columnar.Label[idx] = getLabel(node);
       }
-      columnar.Value.push(node.Samples);
-      columnar.X.push(x);
-      columnar.Y.push(depth);
-      columnar.Color.push(frameTypeToRGB(node.FrameType, x));
+      columnar.Value[idx] = node.Samples;
+      columnar.X[idx] = x;
+      columnar.Y[idx] = depth;
 
-      columnar.CountInclusive.push(node.CountInclusive);
-      columnar.CountExclusive.push(node.CountExclusive);
+      const [red, green, blue, alpha] = rgbToRGBA(frameTypeToRGB(node.FrameType, x));
+      const j = 4 * idx;
+      columnar.Color[j] = red;
+      columnar.Color[j + 1] = green;
+      columnar.Color[j + 2] = blue;
+      columnar.Color[j + 3] = alpha;
+
+      columnar.CountInclusive[idx] = node.CountInclusive;
+      columnar.CountExclusive[idx] = node.CountExclusive;
 
       const id = objectHash([parentID, node.FrameGroupID]);
 
-      columnar.ID.push(id);
+      columnar.ID[idx] = id;
 
       node.Callees.sort((a: CallerCalleeNode, b: CallerCalleeNode) => b.Samples - a.Samples);
 
@@ -201,6 +218,8 @@ export class FlameGraph {
         delta -= node.Callees[i].Samples;
         queue.push({ x: x + delta, depth: depth + 1, node: node.Callees[i], parentID: id });
       }
+
+      idx++;
     }
 
     return columnar;
@@ -222,6 +241,7 @@ export class FlameGraph {
 
     graph.Label = columnar.Label;
     graph.Value = columnar.Value;
+    graph.Color = columnar.Color;
     graph.CountInclusive = columnar.CountInclusive;
     graph.CountExclusive = columnar.CountExclusive;
     graph.ID = columnar.ID;
@@ -236,10 +256,6 @@ export class FlameGraph {
     }
 
     graph.Size = graph.Value.map((n) => normalize(n, 0, maxX));
-
-    for (const color of columnar.Color) {
-      graph.Color.push(...normalizeColorForFlamegraph(color));
-    }
 
     return graph;
   }
