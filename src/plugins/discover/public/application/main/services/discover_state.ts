@@ -42,6 +42,7 @@ import { handleSourceColumnState } from '../../../utils/state_helpers';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../locator';
 import { VIEW_MODE } from '../../../components/view_mode_toggle';
 import { cleanupUrlState } from '../utils/cleanup_url_state';
+import { getValidFilters } from '../../../utils/get_valid_filters';
 
 export interface AppState {
   /**
@@ -318,6 +319,14 @@ export function getState({
         data.query,
         stateStorage
       );
+
+      // some filters may not be valid for this context, so update
+      // the filter manager with a modified list of valid filters
+      const currentFilters = filterManager.getFilters();
+      const validFilters = getValidFilters(dataView, currentFilters);
+      if (!isEqual(currentFilters, validFilters)) {
+        filterManager.setFilters(validFilters);
+      }
 
       const { start, stop } = syncAppState();
 
