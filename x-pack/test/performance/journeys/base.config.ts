@@ -60,7 +60,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
-        `--telemetry.optIn=true`,
+        `--telemetry.optIn=${process.env.TEST_PERFORMANCE_PHASE === 'TEST'}`,
         `--telemetry.labels=${JSON.stringify(telemetryLabels)}`,
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',

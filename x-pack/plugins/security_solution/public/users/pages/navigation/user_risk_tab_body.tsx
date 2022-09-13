@@ -16,6 +16,7 @@ import { RiskScoreOverTime } from '../../../common/components/risk_score_over_ti
 import { TopRiskScoreContributors } from '../../../common/components/top_risk_score_contributors';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { UserRiskScoreQueryId, useUserRiskScore } from '../../../risk_score/containers';
+import type { UserRiskScore } from '../../../../common/search_strategy';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import type { UsersComponentsQueryProps } from './types';
 import { UserRiskInformationButtonEmpty } from '../../components/user_risk_information';
@@ -86,7 +87,9 @@ const UserRiskTabBodyComponent: React.FC<
     [setOverTimeToggleStatus]
   );
 
-  const rules = data && data.length > 0 ? data[data.length - 1].risk_stats.rule_risks : [];
+  const lastUsertRiskItem: UserRiskScore | null =
+    data && data.length > 0 ? data[data.length - 1] : null;
+  const rules = lastUsertRiskItem ? lastUsertRiskItem.user.risk.rule_risks : [];
 
   return (
     <>

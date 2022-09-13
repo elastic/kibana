@@ -463,7 +463,7 @@ export class SavedSearchEmbeddable
       this.prevSort = this.input.sort;
       this.searchProps = searchProps;
       await this.fetch();
-    } else {
+    } else if (this.searchProps && this.node) {
       this.searchProps = searchProps;
     }
   }
@@ -478,7 +478,8 @@ export class SavedSearchEmbeddable
     }
 
     this.node = domNode;
-    this.renderReactComponent(domNode, this.searchProps);
+
+    this.renderReactComponent(this.node, this.searchProps!);
   }
 
   private renderReactComponent(domNode: HTMLElement, searchProps: SearchProps) {
