@@ -35,6 +35,7 @@ import {
 } from '../../../store/timeline/actions';
 import { detectionsTimelineIds } from '../../../containers/helpers';
 import * as i18n from './translations';
+import { useLicense } from '../../../../common/hooks/use_license'
 
 export interface SessionViewConfig {
   sessionEntityId: string;
@@ -251,6 +252,10 @@ export const useSessionView = ({
   });
 
   const sessionViewComponent = useMemo(() => {
+    const isEnterprisePlus = useLicense().isEnterprise();
+    if(!isEnterprisePlus){
+      return null;
+    }
     const sessionViewSearchBarHeight = 118;
     const heightMinusSearchBar = height ? height - sessionViewSearchBarHeight : undefined;
     return sessionViewConfig !== null

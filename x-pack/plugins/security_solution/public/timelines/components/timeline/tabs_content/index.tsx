@@ -34,6 +34,7 @@ import {
 } from './selectors';
 import * as i18n from './translations';
 import { BETA } from '../../../../common/translations';
+import { useLicense } from '../../../../common/hooks/use_license'
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
   ({ $isVisible = false, isOverflowYScroll = false }) => ({
@@ -261,6 +262,8 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   );
   const appNotes = useDeepEqualSelector((state) => getAppNotes(state));
 
+  const isEnterprisePlus = useLicense().isEnterprise();
+
   const allTimelineNoteIds = useMemo(() => {
     const eventNoteIds = Object.values(eventIdToNoteIds).reduce<string[]>(
       (acc, v) => [...acc, ...v],
@@ -348,16 +351,15 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
           >
             {i18n.ANALYZER_TAB}
           </EuiTab>
-          <EuiTab
+          {isEnterprisePlus && (<EuiTab
             data-test-subj={`timelineTabs-${TimelineTabs.session}`}
             onClick={setSessionAsActiveTab}
             isSelected={activeTab === TimelineTabs.session}
             disabled={sessionViewConfig === null}
             key={TimelineTabs.session}
-            append={<EuiBetaBadge label={BETA} size="s" />}
           >
             {i18n.SESSION_TAB}
-          </EuiTab>
+          </EuiTab>)}
           <StyledEuiTab
             data-test-subj={`timelineTabs-${TimelineTabs.notes}`}
             onClick={setNotesAsActiveTab}

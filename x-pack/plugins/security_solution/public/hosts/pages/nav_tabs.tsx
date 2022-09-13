@@ -10,6 +10,7 @@ import * as i18n from './translations';
 import { HostsTableType } from '../store/model';
 import type { HostsNavTab } from './navigation/types';
 import { HOSTS_PATH } from '../../../common/constants';
+import { useLicense } from '../../common/hooks/use_license'
 
 const getTabsOnHostsUrl = (tabName: HostsTableType) => `${HOSTS_PATH}/${tabName}`;
 
@@ -20,6 +21,8 @@ export const navTabsHosts = ({
   hasMlUserPermissions: boolean;
   isRiskyHostsEnabled: boolean;
 }): HostsNavTab => {
+  const isEnterprisePlus = useLicense().isEnterprise();
+
   const hiddenTabs = [];
   const hostsNavTabs = {
     [HostsTableType.hosts]: {
@@ -57,7 +60,7 @@ export const navTabsHosts = ({
       name: i18n.NAVIGATION_SESSIONS_TITLE,
       href: getTabsOnHostsUrl(HostsTableType.sessions),
       disabled: false,
-      isBeta: true,
+      isBeta: false,
     },
   };
 
@@ -67,6 +70,10 @@ export const navTabsHosts = ({
 
   if (!isRiskyHostsEnabled) {
     hiddenTabs.push(HostsTableType.risk);
+  }
+
+  if(!isEnterprisePlus){
+    hiddenTabs.push(HostsTableType.sessions);
   }
 
   return omit(hiddenTabs, hostsNavTabs);
