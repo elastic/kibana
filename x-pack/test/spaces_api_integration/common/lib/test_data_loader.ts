@@ -116,7 +116,7 @@ export function getTestDataLoader({ getService }: FtrProviderContext) {
         ...(await spacesService.getAll()).map((space) => space.id),
         'non_existent_space',
       ];
-      log.debug(`Removing data the following spaces: ${allSpacesIds.join(', ')}`);
+      log.debug(`Removing data from the following spaces: ${allSpacesIds.join(', ')}`);
       await Promise.all(
         allSpacesIds.flatMap((spaceId) => [
           kbnServer.savedObjects.cleanStandardList({ space: spaceId }),

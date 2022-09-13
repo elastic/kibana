@@ -53,7 +53,7 @@ export default function spaceSelectorFunctionalTests({
     });
 
     after(async () => {
-      log.debug('Removing data the following spaces: default, sales');
+      log.debug('Removing data from the following spaces: default, sales');
       await Promise.all(
         ['default', 'sales'].map((spaceId) =>
           kbnServer.savedObjects.cleanStandardList({ space: spaceId })
