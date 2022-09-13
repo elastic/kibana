@@ -140,7 +140,16 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
           onDismiss={() => setSelectedItem(undefined)}
         />
       )}
-      {showUploadModal && <Modal onDismiss={() => setShowUploadModal(false)} />}
+      {showUploadModal && (
+        <Modal
+          client={files.unscoped}
+          onDismiss={() => setShowUploadModal(false)}
+          onUploaded={() => {
+            notifications.toasts.addSuccess('Uploaded file!');
+            setShowUploadModal(false);
+          }}
+        />
+      )}
     </>
   );
 };
