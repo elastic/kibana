@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { IndicatorsFlyout, SUBTITLE_TEST_ID, TITLE_TEST_ID } from './indicators_flyout';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
