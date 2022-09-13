@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiDataGrid,
   EuiDataGridRefProps,
   EuiDataGridColumn,
   EuiDataGridCellValueElementProps,
@@ -39,8 +38,9 @@ import styled, { ThemeContext } from 'styled-components';
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { Filter } from '@kbn/es-query';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
+import { FieldBrowserOptions, FetchAlertData } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import {
   TGridCellAction,
   BulkActionsProp,
@@ -85,7 +85,6 @@ import { REMOVE_COLUMN } from './column_headers/translations';
 import { TimelinesStartPlugins } from '../../../types';
 import { TGridComponentStateProvider } from '../../../methods/context';
 import { ALERT_TABLE_CONFIGURATION_KEY } from '../config';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 
 const StatefulAlertBulkActions = lazy(() => import('../toolbar/bulk_actions/alert_bulk_actions'));
 
@@ -792,69 +791,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       ]
     );
 
-    const renderTGridCellValue = useMemo(() => {
-      const Cell: React.FC<EuiDataGridCellValueElementProps> = ({
-        columnId,
-        rowIndex,
-        colIndex,
-        setCellProps,
-        isDetails,
-      }): React.ReactElement | null => {
-        const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
-        const rowData = pageRowIndex < data.length ? data[pageRowIndex].data : null;
-        const header = columnHeaders.find((h) => h.id === columnId);
-        const eventId = pageRowIndex < data.length ? data[pageRowIndex]._id : null;
-        const ecs = pageRowIndex < data.length ? data[pageRowIndex].ecs : null;
-
-        useEffect(() => {
-          const defaultStyles = { overflow: 'hidden' };
-          setCellProps({ style: { ...defaultStyles } });
-          if (ecs && rowData) {
-            addBuildingBlockStyle(ecs, theme, setCellProps, defaultStyles);
-          } else {
-            // disable the cell when it has no data
-            setCellProps({ style: { display: 'none' } });
-          }
-        }, [rowIndex, setCellProps, ecs, rowData]);
-
-        if (rowData == null || header == null || eventId == null || ecs === null) {
-          return null;
-        }
-
-        return renderCellValue({
-          browserFields,
-          columnId: header.id,
-          data: rowData,
-          ecsData: ecs,
-          eventId,
-          globalFilters: filters,
-          header,
-          isDetails,
-          isDraggable: false,
-          isExpandable: true,
-          isExpanded: false,
-          linkValues: getOr([], header.linkField ?? '', ecs),
-          rowIndex,
-          colIndex,
-          rowRenderers,
-          setCellProps,
-          timelineId: id,
-          truncate: isDetails ? false : true,
-        }) as React.ReactElement;
-      };
-      return Cell;
-    }, [
-      browserFields,
-      columnHeaders,
-      data,
-      filters,
-      id,
-      pageSize,
-      renderCellValue,
-      rowRenderers,
-      theme,
-    ]);
-
     const onChangeItemsPerPage = useCallback(
       (itemsChangedPerPage) => {
         dispatch(tGridActions.updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage }));
@@ -878,11 +814,18 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     });
 
     const useFetchAlertsData = () => {
+      // TimelineItem -> EcsFieldsResponse
+      // TODO: we're mangling the data into EcsFieldsResponse[] here, but when cells are rendered
+      // we're getting TimelineNonEcsData[] from the renderer. I don't think we're responsible
+      // for that unnecessary transformation. It might be something in triggers-actions-ui.
       const alerts: EcsFieldsResponse[] = data.map((alert) => {
-        return alert.data.reduce((acc, curr) => {
-          acc[curr.field] = curr.value as string[];
-          return acc;
-        }, {} as EcsFieldsResponse);
+        return alert.data.reduce(
+          (acc, curr) => {
+            acc[curr.field] = curr.value as string[];
+            return acc;
+          },
+          { _id: alert._id, _index: alert._index ? alert._index : '' } as EcsFieldsResponse
+        );
       });
 
       return {
@@ -893,7 +836,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         isInitializing: false,
         isLoading,
         // TODO: get actual data for this
-        getInspectQuery: () => ({ request: {}, respons: {} }),
+        getInspectQuery: () => ({ request: {}, response: {} }),
         onColumnsChange: (columns: EuiDataGridColumn[], vc: string[]) => {
           onSetVisibleColumns(vc);
         },
@@ -904,12 +847,13 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         // TODO: check what refresh refers to
         refresh: () => console.log('refresh'),
         sort: sortingColumns,
-      };
+      } as FetchAlertData;
     };
 
     const config = triggersActionsUi.alertsTableConfigurationRegistry.get(
       ALERT_TABLE_CONFIGURATION_KEY
     );
+
     const alertsTableProps = {
       alertsTableConfiguration: config,
       // TODO: why do we have to pass columns here again even though they're already part of the config?
@@ -926,7 +870,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       showExpandToDetails: true,
       trailingControlColumns: [],
       useFetchAlertsData,
-      visibleColumns: config.columns,
+      visibleColumns,
       'data-test-subj': 'body-data-grid',
       updatedAt: Date.now(),
     };
@@ -934,6 +878,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     return (
       <>
         <TGridComponentStateProvider
+          browserFields={browserFields}
+          columnHeaders={columnHeaders}
           customBulkActions={additionalBulkActions}
           filterStatus={filterStatus}
           filterQuery={filterQuery}
@@ -949,6 +895,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             width: leadingTGridControlColumns[1].width,
           }}
           timelineId={id}
+          renderCellValue={renderCellValue}
+          rowRenderers={rowRenderers}
           showAlertStatusActions={showAlertStatusActions}
         >
           <StatefulEventContext.Provider value={activeStatefulEventContext}>

@@ -5,26 +5,10 @@
  * 2.0.
  */
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
 import type { GetTGridProps, TimelinesStartPlugins } from '../../../types';
-import type { CellValueElementProps } from '../../../../common/types/timeline/cells';
 import { useBulkActions } from './use_bulk_actions';
 import { useActionItems } from './use_action_items';
-
-const useRenderCellValue = ({
-  browserFields,
-  renderCellValue,
-}: Pick<GetTGridProps<'embedded'>, 'browserFields' | 'renderCellValue'>) => {
-  const CellRenderer = (cellProps: CellValueElementProps) => {
-    if (!browserFields) {
-      return null;
-    }
-
-    return renderCellValue(cellProps);
-  };
-
-  return CellRenderer;
-};
+import { useRenderCellValue } from './use_render_cell_value';
 
 export const ALERT_TABLE_CONFIGURATION_KEY = 'timelinesAlertsTableConfiguration';
 
@@ -46,7 +30,7 @@ export function useAlertsTableConfiguration({
     casesFeatureId: '',
     columns,
     // TODO: Is that correct?
-    getRenderCellValue: useRenderCellValue as GetRenderCellValue,
+    getRenderCellValue: useRenderCellValue,
     useBulkActions,
     useActionsColumn: useActionItems,
   });

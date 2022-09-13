@@ -11,14 +11,27 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 
 import { ViewSelection } from '../components/t_grid/event_rendered_view/selector';
-import type { ControlColumnProps } from '../../common/types/timeline';
-import { AlertStatus, CustomBulkActionProp } from '../../common/types/timeline/actions';
+import type { AlertStatus, CustomBulkActionProp } from '../../common/types/timeline/actions';
+import type { BrowserFields } from '../../common/search_strategy/index_fields';
 import {
   ALERTS_TABLE_VIEW_SELECTION_KEY,
   getDefaultViewSelection,
 } from '../components/t_grid/helpers';
 
+import type {
+  CellValueElementProps,
+  ColumnHeaderOptions,
+  ControlColumnProps,
+  RowRenderer,
+} from '../../common/types/timeline';
+
 export interface TGridComponentState {
+  /** The browser fields */
+  browserFields: BrowserFields;
+
+  /** The column headers */
+  columnHeaders: ColumnHeaderOptions[];
+
   /** The actions column */
   customActionsColum?: {
     renderer: (props: EuiDataGridCellValueElementProps) => ReactNode;
@@ -40,6 +53,12 @@ export interface TGridComponentState {
   /** Row action itmes */
   leadingControlColumns?: ControlColumnProps[];
 
+  /** Renders a cell */
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+
+  /** The row renderers */
+  rowRenderers: RowRenderer[];
+
   /** Whether to show alert status bulk actions */
   showAlertStatusActions: boolean;
 
@@ -52,9 +71,13 @@ export interface TGridComponentState {
 }
 
 const TGridComponentStateContext = createContext<TGridComponentState>({
+  browserFields: {},
+  columnHeaders: [],
   customBulkActions: [],
   filterStatus: 'open',
   indexName: '',
+  renderCellValue: () => null,
+  rowRenderers: [],
   showAlertStatusActions: false,
   viewSelection: 'gridView',
   setViewSelection: () => {},
@@ -69,21 +92,29 @@ const storage = new Storage(localStorage);
 export const TGridComponentStateProvider: React.FC<
   Pick<
     TGridComponentState,
+    | 'browserFields'
+    | 'columnHeaders'
     | 'customActionsColum'
     | 'customBulkActions'
     | 'filterStatus'
     | 'filterQuery'
     | 'indexName'
+    | 'renderCellValue'
+    | 'rowRenderers'
     | 'showAlertStatusActions'
     | 'timelineId'
   >
 > = ({
   children,
+  browserFields,
+  columnHeaders,
   customActionsColum,
   customBulkActions,
   filterStatus,
   filterQuery,
   indexName,
+  renderCellValue,
+  rowRenderers,
   showAlertStatusActions,
   timelineId,
 }) => {
@@ -96,22 +127,30 @@ export const TGridComponentStateProvider: React.FC<
 
   const providerValue: TGridComponentState = useMemo(() => {
     return {
+      browserFields,
+      columnHeaders,
       customActionsColum,
       customBulkActions,
       filterStatus,
       filterQuery,
       indexName,
+      renderCellValue,
+      rowRenderers,
       showAlertStatusActions,
       timelineId,
       viewSelection,
       setViewSelection,
     };
   }, [
+    browserFields,
+    columnHeaders,
     customActionsColum,
     customBulkActions,
     filterStatus,
     filterQuery,
     indexName,
+    renderCellValue,
+    rowRenderers,
     showAlertStatusActions,
     timelineId,
     viewSelection,
