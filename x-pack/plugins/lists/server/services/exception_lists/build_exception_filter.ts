@@ -131,7 +131,6 @@ export const buildExceptionItemFilter = async <
   exceptionItem: T,
   listClient: ListClient
 ): Promise<Array<BooleanFilter | NestedFilter> | undefined> => {
-  let isUnprocessable = false;
   const { entries, os_types: osTypes } = exceptionItem;
   if (osTypes != null && osTypes.length > 0) {
     return buildExceptionItemFilterWithOsType(osTypes, entries, listClient);
@@ -147,22 +146,18 @@ export const buildExceptionItemFilter = async <
       return [filter];
     } else {
       const esFilter: Array<BooleanFilter | NestedFilter> = [];
-      await Promise.all(
-        entries.map(async (entry) => {
-          const filter = await createInnerAndClauses({
-            entry,
-            listClient,
-          });
-          if (!filter) {
-            isUnprocessable = true;
-            return;
-          }
-          esFilter.push(filter);
-        })
-      );
-      if (isUnprocessable) {
-        return undefined;
+
+      for (const entry of entries) {
+        const filter = await createInnerAndClauses({
+          entry,
+          listClient,
+        });
+        if (!filter) {
+          return undefined;
+        }
+        esFilter.push(filter);
       }
+
       return [
         {
           bool: {
@@ -176,27 +171,48 @@ export const buildExceptionItemFilter = async <
 
 export const createOrClauses = async <
   T extends ExceptionListItemSchema | CreateExceptionListItemSchema
->(
-  exceptionItems: T[],
-  listClient: ListClient
-): Promise<{
+>({
+  exceptionsWithoutValueLists,
+  exceptionsWithValueLists,
+  chunkSize,
+  listClient,
+}: {
+  exceptionsWithoutValueLists: T[];
+  exceptionsWithValueLists: T[];
+  chunkSize: number;
+  listClient: ListClient;
+}): Promise<{
   orClauses: Array<BooleanFilter | NestedFilter>;
   unprocessableExceptionItems: T[];
 }> => {
   const unprocessableExceptionItems: T[] = [];
   const orClauses: Array<Array<BooleanFilter | NestedFilter>> = [];
-  await Promise.all(
-    exceptionItems.map(async (exceptionItem) => {
-      const filter = await buildExceptionItemFilter(exceptionItem, listClient);
-      if (!filter) {
-        unprocessableExceptionItems.push(exceptionItem);
-        return;
-      }
+
+  for (const exceptionItem of exceptionsWithoutValueLists) {
+    const filter = await buildExceptionItemFilter(exceptionItem, listClient);
+    if (!filter) {
+      unprocessableExceptionItems.push(exceptionItem);
+    } else {
       orClauses.push(filter);
-    })
-  );
-  const clauses = orClauses.filter((clause) => clause !== undefined);
-  return { orClauses: clauses.flat(), unprocessableExceptionItems };
+    }
+  }
+
+  // Chunk the exceptions that will require list client requests
+  const chunks = chunkExceptions(exceptionsWithValueLists, chunkSize);
+  for (const exceptionsChunk of chunks) {
+    await Promise.all(
+      exceptionsChunk.map(async (exceptionItem) => {
+        const filter = await buildExceptionItemFilter(exceptionItem, listClient);
+        if (!filter) {
+          unprocessableExceptionItems.push(exceptionItem);
+          return;
+        }
+        orClauses.push(filter);
+      })
+    );
+  }
+
+  return { orClauses: orClauses.flat(), unprocessableExceptionItems };
 };
 
 const isListTypeProcessable = (type: Type): boolean =>
@@ -275,16 +291,22 @@ export const buildExceptionFilter = async <
     (item): item is T => !hasLargeValueList(item.entries)
   );
 
-  // Exceptions that we will convert into Filters and put into an ES request
-  const exceptionsWithoutLargeValueLists: T[] = [...exceptionsWithoutValueLists];
-
   // Exceptions that contain large value list exceptions and will be processed later on in rule execution
   const unprocessedExceptions: T[] = [];
 
-  const { filteredExceptions, unprocessableValueListExceptions } =
+  const { filteredExceptions: exceptionsWithValueLists, unprocessableValueListExceptions } =
     await filterOutUnprocessableValueLists<T>(valueListExceptions, listClient);
-  exceptionsWithoutLargeValueLists.push(...filteredExceptions);
   unprocessedExceptions.push(...unprocessableValueListExceptions);
+
+  if (exceptionsWithoutValueLists.length === 0 && exceptionsWithValueLists.length === 0) {
+    return { filter: undefined, unprocessedExceptions };
+  }
+  const { orClauses, unprocessableExceptionItems } = await createOrClauses<T>({
+    chunkSize,
+    exceptionsWithValueLists,
+    exceptionsWithoutValueLists,
+    listClient,
+  });
 
   const exceptionFilter: Filter = {
     meta: {
@@ -294,64 +316,12 @@ export const buildExceptionFilter = async <
     },
     query: {
       bool: {
-        should: undefined,
+        should: orClauses,
       },
     },
   };
-
-  if (exceptionsWithoutLargeValueLists.length === 0) {
-    return { filter: undefined, unprocessedExceptions };
-  } else if (exceptionsWithoutLargeValueLists.length <= chunkSize) {
-    const { orClauses: clause, unprocessableExceptionItems } = await createOrClauses<T>(
-      exceptionsWithoutLargeValueLists,
-      listClient
-    );
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    exceptionFilter.query!.bool!.should = clause;
-    unprocessedExceptions.concat(unprocessableExceptionItems);
-    return { filter: exceptionFilter, unprocessedExceptions };
-  } else {
-    const chunks = chunkExceptions(exceptionsWithoutLargeValueLists, chunkSize);
-
-    const filters = await Promise.all(
-      chunks.map(async (exceptionsChunk) => {
-        const { orClauses, unprocessableExceptionItems } = await createOrClauses<T>(
-          exceptionsChunk,
-          listClient
-        );
-        unprocessedExceptions.concat(unprocessableExceptionItems);
-
-        return {
-          meta: {
-            alias: null,
-            disabled: false,
-            negate: false,
-          },
-          query: {
-            bool: {
-              should: orClauses,
-            },
-          },
-        };
-      })
-    );
-
-    const clauses = filters.map<BooleanFilter>(({ query }) => query);
-
-    const filter = {
-      meta: {
-        alias,
-        disabled: false,
-        negate: excludeExceptions,
-      },
-      query: {
-        bool: {
-          should: clauses,
-        },
-      },
-    };
-    return { filter, unprocessedExceptions };
-  }
+  unprocessedExceptions.concat(unprocessableExceptionItems);
+  return { filter: exceptionFilter, unprocessedExceptions };
 };
 
 export const buildExclusionClause = (booleanFilter: BooleanFilter): BooleanFilter => {

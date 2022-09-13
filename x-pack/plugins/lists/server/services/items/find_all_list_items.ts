@@ -67,6 +67,10 @@ export const findAllListItems = async ({
       seq_no_primary_term: true,
     });
 
+    if (count > 100000) {
+      throw new TypeError('API route only supports up to 100,000 items');
+    }
+
     while (response.hits.hits.length !== 0) {
       allListItems.push(...transformElasticToListItem({ response, type: list.type }));
 
