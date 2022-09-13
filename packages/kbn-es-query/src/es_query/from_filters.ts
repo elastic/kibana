@@ -82,7 +82,7 @@ export const buildQueryFromFilters = (
       .filter((f) => !!f)
       .filter(filterNegate(negate))
       .filter((filter) => {
-        const indexPattern = findIndexPattern(filter.meta.index);
+        const indexPattern = findIndexPattern(filter.meta?.index);
         return !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern)
       })
       .map((filter) => {
