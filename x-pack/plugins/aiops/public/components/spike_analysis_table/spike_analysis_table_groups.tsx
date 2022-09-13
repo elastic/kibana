@@ -9,17 +9,19 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import { sortBy } from 'lodash';
 
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiButtonIcon,
-  EuiCodeBlock,
   EuiScreenReaderOnly,
+  EuiSpacer,
   EuiTableSortingType,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
+import { useEuiTheme } from '../../hooks/use_eui_theme';
 import { SpikeAnalysisTableExpandedRow } from './spike_analysis_table_expanded_row';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
@@ -58,6 +60,8 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
+
+  const euiTheme = useEuiTheme();
 
   const toggleDetails = (item: GroupTableItem) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
@@ -125,22 +129,44 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
         'xpack.aiops.correlations.failedTransactions.correlationsTable.groupLabel',
         { defaultMessage: 'Group' }
       ),
-      render: (_, { group }) => (
-        <EuiCodeBlock
-          aria-label={i18n.translate('xpack.aiops.correlations.correlationsTable.groupJsonPane', {
-            defaultMessage: 'JSON of groups',
-          })}
-          style={{ width: '100%' }}
-          language="json"
-          fontSize="s"
-          paddingSize="s"
-          isCopyable
-          data-test-subj={`aiopsSpikeAnalysisTableColumnGroupJSON`}
-        >
-          {JSON.stringify(group, null, 2)}
-        </EuiCodeBlock>
-      ),
+      render: (_, { group }) => {
+        const valuesBadges = [];
+        for (const fieldName in group) {
+          if (group.hasOwnProperty(fieldName)) {
+            valuesBadges.push(
+              <>
+                <EuiBadge
+                  key={`${fieldName}-id`}
+                  data-test-subj="aiopsSpikeAnalysisTableColumnGroupBadge"
+                  color="hollow"
+                >
+                  <span>{`${fieldName}: `}</span>
+                  <span style={{ color: euiTheme.euiCodeBlockStringColor }}>{`${group[fieldName]}`}</span>
+                </EuiBadge>
+                <EuiSpacer size="xs" />
+              </>
+            );
+          }
+        }
+        return valuesBadges;
+      },
+      // render: (_, { group }) => (
+      //   <EuiCodeBlock
+      //     aria-label={i18n.translate('xpack.aiops.correlations.correlationsTable.groupJsonPane', {
+      //       defaultMessage: 'JSON of groups',
+      //     })}
+      //     style={{ width: '100%' }}
+      //     language="json"
+      //     fontSize="s"
+      //     paddingSize="s"
+      //     isCopyable
+      //     data-test-subj={`aiopsSpikeAnalysisTableColumnGroupJSON`}
+      //   >
+      //     {JSON.stringify(group, null, 2)}
+      //   </EuiCodeBlock>
+      // ),
       sortable: false,
+      textOnly: true,
     },
     {
       'data-test-subj': 'aiopsSpikeAnalysisTableColumnDocCount',
