@@ -130,7 +130,7 @@ export const replaceVariables = (
       });
     }
 
-    if (req.data.length) {
+    if (req.data && req.data.length) {
       if (bodyRegex.test(req.data[0])) {
         const data = req.data[0].replaceAll(bodyRegex, (match) => {
           // Sanitize variable name
