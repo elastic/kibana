@@ -151,7 +151,7 @@ export const QueryBarDefineRule = ({
             setSavedQuery(mySavedQuery);
           }
           setIsSavedQueryFailedToLoad(false);
-        } catch (err) {
+        } catch {
           setSavedQuery(undefined);
           setIsSavedQueryFailedToLoad(true);
         }
