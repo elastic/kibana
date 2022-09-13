@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { DocLinks } from '@kbn/doc-links';
 
-type PackageActions = 'es_connection';
+type PackageActions = 'es_connection' | 'policy_failure';
 
 export const titles = Object.freeze(
   new Map<PackageActions, string>([
@@ -17,6 +17,15 @@ export const titles = Object.freeze(
       i18n.translate('xpack.securitySolution.endpoint.details.packageActions.es_connection.title', {
         defaultMessage: 'Elasticsearch connection failure',
       }),
+    ],
+    [
+      'policy_failure',
+      i18n.translate(
+        'xpack.securitySolution.endpoint.details.packageActions.policy_failure.title',
+        {
+          defaultMessage: 'Policy response failure',
+        }
+      ),
     ],
   ])
 );
@@ -30,6 +39,16 @@ export const descriptions = Object.freeze(
         {
           defaultMessage:
             "The endpoint's connection to Elasticsearch is either down or misconfigured. Make sure it is configured correctly.",
+        }
+      ),
+    ],
+    [
+      'policy_failure',
+      i18n.translate(
+        'xpack.securitySolution.endpoint.details.packageActions.policy_failure.description',
+        {
+          defaultMessage:
+            'The Endpoint did not apply the Policy correctly. Expand the Policy response above for more details.',
         }
       ),
     ],
@@ -68,12 +87,16 @@ export class PackageActionFormatter {
   }
 
   public get linkUrl(): string {
-    return this.docLinks[this.key];
+    return this.docLinks[
+      this.key as keyof DocLinks['securitySolution']['packageActionTroubleshooting']
+    ];
   }
 
   private getKeyFromErrorCode(code: number): PackageActions {
     if (code === 123) {
       return 'es_connection';
+    } else if (code === 124) {
+      return 'policy_failure';
     } else {
       throw new Error(`Invalid error code ${code}`);
     }
