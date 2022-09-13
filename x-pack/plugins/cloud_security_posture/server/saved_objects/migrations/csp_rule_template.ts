@@ -19,7 +19,6 @@ function migrateCspRuleMetadata(
   doc: SavedObjectUnsanitizedDoc<CspRuleTemplateV830>,
   context: SavedObjectMigrationContext
 ): SavedObjectUnsanitizedDoc<CspRuleTemplateV840> {
-  console.log("migrateCspRuleMetadata");
   const { enabled, muted, benchmark, ...metadata } = doc.attributes;
   return {
     ...doc,
