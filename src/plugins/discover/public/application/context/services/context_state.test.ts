@@ -133,7 +133,7 @@ describe('Test Discover Context State', () => {
               "query": "jpg",
             },
             "type": "phrase",
-            "value": [Function],
+            "value": undefined,
           },
           "query": Object {
             "match_phrase": Object {
@@ -157,7 +157,7 @@ describe('Test Discover Context State', () => {
               "query": "png",
             },
             "type": "phrase",
-            "value": [Function],
+            "value": undefined,
           },
           "query": Object {
             "match_phrase": Object {
