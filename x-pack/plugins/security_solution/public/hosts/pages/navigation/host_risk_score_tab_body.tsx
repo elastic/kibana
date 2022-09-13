@@ -8,7 +8,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { noop } from 'lodash/fp';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { RiskEntity } from '../../../risk_score/containers/deprecated/api';
+import { RiskEntity } from '../../../risk_score/containers/feature_status/api';
 import { RiskScoresDeprecated } from '../../../common/components/risk_score_deprecated';
 import type { HostsComponentsQueryProps } from './types';
 import { manageQuery } from '../../../common/components/page/manage_query';

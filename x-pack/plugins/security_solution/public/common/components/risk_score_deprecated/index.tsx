@@ -7,7 +7,7 @@
 
 import { EuiButton, EuiEmptyPrompt, EuiPanel, EuiToolTip } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { RiskEntity } from '../../../risk_score/containers/deprecated/api';
+import { RiskEntity } from '../../../risk_score/containers/feature_status/api';
 import { useCheckSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_check_signal_index';
 import { HeaderSection } from '../header_section';
 import * as i18n from './translations';

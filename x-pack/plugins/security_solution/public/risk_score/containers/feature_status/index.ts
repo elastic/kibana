@@ -6,44 +6,49 @@
  */
 
 import { useCallback, useEffect, useMemo } from 'react';
+import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { REQUEST_NAMES, useFetch } from '../../../common/hooks/use_fetch';
 import { RiskQueries } from '../../../../common/search_strategy';
-import type { Params, Response } from './api';
-import { getRiskScoreDeprecated, RiskEntity } from './api';
+import { getRiskScoreIndexStatus, RiskEntity } from './api';
 
-interface RiskScoresDeprecated {
+interface RiskScoresFeatureStatus {
   error: unknown;
+  // Is transform index an old version?
   isDeprecated: boolean;
+  // does the transform index exist?
   isEnabled: boolean;
+  // is the user's license platinum?
+  isLicenseValid: boolean;
   isLoading: boolean;
   refetch: (indexName: string) => void;
 }
 
-export const useRiskScoreDeprecated = (
-  isFeatureEnabled: boolean,
+export const useRiskScoreFeatureStatus = (
   factoryQueryType: RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore,
   defaultIndex?: string
-): RiskScoresDeprecated => {
+): RiskScoresFeatureStatus => {
+  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
   const entity = useMemo(
     () => (factoryQueryType === RiskQueries.hostsRiskScore ? RiskEntity.host : RiskEntity.user),
     [factoryQueryType]
   );
 
-  const { fetch, data, isLoading, error } = useFetch<Params, Response, unknown>(
+  const { fetch, data, isLoading, error } = useFetch(
     REQUEST_NAMES.GET_RISK_SCORE_DEPRECATED,
-    getRiskScoreDeprecated
+    getRiskScoreIndexStatus
   );
 
   const response = useMemo(
-    // if feature is enabled, let isDeprecated = true so the actual
+    // if license is enabled, let isDeprecated = true so the actual
     // risk score fetch is not called until this check is complete
-    () => (data ? data : { isDeprecated: isFeatureEnabled, isEnabled: isFeatureEnabled }),
-    // isFeatureEnabled is initial state, not update requirement
+    () =>
+      data ? data : { isDeprecated: isPlatinumOrTrialLicense, isEnabled: isPlatinumOrTrialLicense },
+    // isPlatinumOrTrialLicense is initial state, not update requirement
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [data]
   );
 
-  const searchDeprecated = useCallback(
+  const searchIndexStatus = useCallback(
     (indexName: string) => {
       fetch({
         query: { indexName, entity },
@@ -53,10 +58,16 @@ export const useRiskScoreDeprecated = (
   );
 
   useEffect(() => {
-    if (isFeatureEnabled && defaultIndex != null) {
-      searchDeprecated(defaultIndex);
+    if (isPlatinumOrTrialLicense && defaultIndex != null) {
+      searchIndexStatus(defaultIndex);
     }
-  }, [isFeatureEnabled, defaultIndex, searchDeprecated]);
+  }, [isPlatinumOrTrialLicense, defaultIndex, searchIndexStatus]);
 
-  return { error, isLoading, refetch: searchDeprecated, ...response };
+  return {
+    error,
+    isLoading,
+    refetch: searchIndexStatus,
+    isLicenseValid: isPlatinumOrTrialLicense,
+    ...response,
+  };
 };

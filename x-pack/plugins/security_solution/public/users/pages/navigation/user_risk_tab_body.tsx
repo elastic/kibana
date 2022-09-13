@@ -9,7 +9,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { RiskEntity } from '../../../risk_score/containers/deprecated/api';
+import { RiskEntity } from '../../../risk_score/containers/feature_status/api';
 import { RiskScoresDeprecated } from '../../../common/components/risk_score_deprecated';
 import * as i18n from '../translations';
 

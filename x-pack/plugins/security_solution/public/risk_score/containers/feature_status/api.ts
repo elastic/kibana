@@ -6,7 +6,7 @@
  */
 
 import { KibanaServices } from '../../../common/lib/kibana';
-import { RISK_SCORE_DEPRECATION_API_URL } from '../../../../common/constants';
+import { RISK_SCORE_INDEX_STATUS_API_URL } from '../../../../common/constants';
 
 // TODO: Future PR, make this a hard type everywhere relevant
 export const enum RiskEntity {
@@ -14,22 +14,19 @@ export const enum RiskEntity {
   'host' = 'host',
 }
 
-export interface Params {
+export const getRiskScoreIndexStatus = async (params: {
   query: {
     indexName: string;
     entity: RiskEntity;
   };
   signal?: AbortSignal;
-}
-export interface Response {
+}): Promise<{
   isDeprecated: boolean;
   isEnabled: boolean;
-}
-
-export const getRiskScoreDeprecated = async (params: Params): Promise<Response> => {
+}> => {
   const { indexName, entity } = params.query;
   return KibanaServices.get().http.fetch<{ isDeprecated: boolean; isEnabled: boolean }>(
-    RISK_SCORE_DEPRECATION_API_URL,
+    RISK_SCORE_INDEX_STATUS_API_URL,
     {
       method: 'GET',
       query: { indexName, entity },

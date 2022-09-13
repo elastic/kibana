@@ -17,7 +17,7 @@ import {
 
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import { RiskEntity } from '../../../../risk_score/containers/deprecated/api';
+import { RiskEntity } from '../../../../risk_score/containers/feature_status/api';
 import { RiskScoresDeprecated } from '../../../../common/components/risk_score_deprecated';
 import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
@@ -69,16 +69,18 @@ export const EntityAnalyticsHostRiskScores = () => {
     skip: !toggleStatus,
   });
 
-  const [isTableLoading, { data, inspect, refetch, isLicenseValid, isModuleEnabled }] =
-    useHostRiskScore({
-      filterQuery: severityFilter,
-      skip: !toggleStatus,
-      pagination: {
-        cursorStart: 0,
-        querySize: 5,
-      },
-      timerange: { to, from },
-    });
+  const [
+    isTableLoading,
+    { data, inspect, refetch, isDeprecated, isLicenseValid, isModuleEnabled },
+  ] = useHostRiskScore({
+    filterQuery: severityFilter,
+    skip: !toggleStatus,
+    pagination: {
+      cursorStart: 0,
+      querySize: 5,
+    },
+    timerange: { to, from },
+  });
 
   useQueryInspector({
     queryId: TABLE_QUERY_ID,

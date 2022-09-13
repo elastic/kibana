@@ -7,7 +7,7 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../common/mock';
 
-import { useRiskScoreDeprecated } from '.';
+import { useRiskScoreFeatureStatus } from '.';
 import { RiskQueries } from '../../../../common/search_strategy';
 import { useFetch } from '../../../common/hooks/use_fetch';
 import { RiskEntity } from './api';
@@ -16,45 +16,54 @@ jest.mock('../../../common/hooks/use_fetch');
 const mockUseFetch = useFetch as jest.Mock;
 const mockFetch = jest.fn();
 const mockRefetch = jest.fn();
+const mockUseMlCapabilities = jest.fn();
+jest.mock('../../../common/components/ml/hooks/use_ml_capabilities', () => ({
+  useMlCapabilities: () => mockUseMlCapabilities(),
+}));
 
 describe(`is risk score deprecated hook`, () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
+    mockUseFetch.mockReturnValue(defaultFetch);
   });
-  test('does not search if feature is not enabled, and initial isDeprecated state is false', () => {
-    mockUseFetch.mockReturnValue({
-      data: undefined,
-      error: undefined,
-      fetch: mockFetch,
-      isLoading: false,
-      refetch: mockRefetch,
-    });
+
+  const defaultFetch = {
+    data: undefined,
+    error: undefined,
+    fetch: mockFetch,
+    isLoading: false,
+    refetch: mockRefetch,
+  };
+  const defaultResult = {
+    error: undefined,
+    isDeprecated: true,
+    isLicenseValid: true,
+    isEnabled: true,
+    isLoading: false,
+  };
+
+  test('does not search if license is not valid, and initial isDeprecated state is false', () => {
+    mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: false });
     const { result } = renderHook(
-      () => useRiskScoreDeprecated(false, RiskQueries.hostsRiskScore, 'the_right_one'),
+      () => useRiskScoreFeatureStatus(RiskQueries.hostsRiskScore, 'the_right_one'),
       {
         wrapper: TestProviders,
       }
     );
     expect(mockFetch).not.toHaveBeenCalled();
     expect(result.current).toEqual({
-      error: undefined,
+      ...defaultResult,
+      isLicenseValid: false,
       isDeprecated: false,
       isEnabled: false,
-      isLoading: false,
       refetch: result.current.refetch,
     });
   });
 
   test('runs search if feature is enabled, and initial isDeprecated state is true', () => {
-    mockUseFetch.mockReturnValue({
-      data: undefined,
-      error: undefined,
-      fetch: mockFetch,
-      isLoading: false,
-      refetch: mockRefetch,
-    });
     const { result } = renderHook(
-      () => useRiskScoreDeprecated(true, RiskQueries.hostsRiskScore, 'the_right_one'),
+      () => useRiskScoreFeatureStatus(RiskQueries.hostsRiskScore, 'the_right_one'),
       {
         wrapper: TestProviders,
       }
@@ -63,51 +72,33 @@ describe(`is risk score deprecated hook`, () => {
       query: { entity: RiskEntity.host, indexName: 'the_right_one' },
     });
     expect(result.current).toEqual({
-      error: undefined,
-      isDeprecated: true,
-      isEnabled: true,
-      isLoading: false,
+      ...defaultResult,
       refetch: result.current.refetch,
     });
   });
 
   test('updates state after search returns isDeprecated = false', () => {
-    mockUseFetch.mockReturnValue({
-      data: undefined,
-      error: undefined,
-      fetch: mockFetch,
-      isLoading: false,
-      refetch: mockRefetch,
-    });
     const { result, rerender } = renderHook(
-      () => useRiskScoreDeprecated(true, RiskQueries.hostsRiskScore, 'the_right_one'),
+      () => useRiskScoreFeatureStatus(RiskQueries.hostsRiskScore, 'the_right_one'),
       {
         wrapper: TestProviders,
       }
     );
     expect(result.current).toEqual({
-      error: undefined,
-      isDeprecated: true,
-      isEnabled: true,
-      isLoading: false,
+      ...defaultResult,
       refetch: result.current.refetch,
     });
     mockUseFetch.mockReturnValue({
+      ...defaultFetch,
       data: {
         isDeprecated: false,
         isEnabled: true,
       },
-      error: undefined,
-      fetch: mockFetch,
-      isLoading: false,
-      refetch: mockRefetch,
     });
     act(() => rerender());
     expect(result.current).toEqual({
-      error: undefined,
+      ...defaultResult,
       isDeprecated: false,
-      isEnabled: true,
-      isLoading: false,
       refetch: result.current.refetch,
     });
   });

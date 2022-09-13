@@ -11,7 +11,7 @@ import { TestProviders } from '../../../common/mock';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../common/hooks/use_app_toasts.mock';
-import { useRiskScoreDeprecated } from '../deprecated';
+import { useRiskScoreFeatureStatus } from '../feature_status';
 
 jest.mock('../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
@@ -22,52 +22,56 @@ jest.mock('../../../common/hooks/use_space_id', () => ({
 }));
 
 jest.mock('../../../common/hooks/use_app_toasts');
-jest.mock('../deprecated');
+jest.mock('../feature_status');
 
-const mockUseMlCapabilities = jest.fn();
-jest.mock('../../../common/components/ml/hooks/use_ml_capabilities', () => ({
-  useMlCapabilities: () => mockUseMlCapabilities(),
-}));
-
-const mockUseRiskScoreDeprecated = useRiskScoreDeprecated as jest.Mock;
+const mockUseRiskScoreFeatureStatus = useRiskScoreFeatureStatus as jest.Mock;
 const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
 const mockSearch = jest.fn();
-const mockRefetch = jest.fn();
 
 let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
 [useHostRiskScore, useUserRiskScore].forEach((fn) => {
   const riskEntity = fn.name === 'useHostRiskScore' ? 'host' : 'user';
+  const defaultFeatureStatus = {
+    isLoading: false,
+    isDeprecated: false,
+    isLicenseValid: true,
+    isEnabled: true,
+    refetch: () => {},
+  };
+  const defaultRisk = {
+    data: undefined,
+    inspect: {},
+    isInspected: false,
+    isLicenseValid: true,
+    isModuleEnabled: true,
+    isDeprecated: false,
+    totalCount: 0,
+  };
+  const defaultSearchResponse = {
+    loading: false,
+    result: {
+      data: undefined,
+      totalCount: 0,
+    },
+    search: mockSearch,
+    refetch: () => {},
+    inspect: {},
+    error: undefined,
+  };
   describe(`${fn.name}`, () => {
     beforeEach(() => {
       jest.clearAllMocks();
       appToastsMock = useAppToastsMock.create();
       (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
-      mockUseRiskScoreDeprecated.mockReturnValue({
-        isLoading: false,
-        isDeprecated: false,
-        isEnabled: true,
-        refetch: () => {},
-      });
+      mockUseRiskScoreFeatureStatus.mockReturnValue(defaultFeatureStatus);
+      mockUseSearchStrategy.mockReturnValue(defaultSearchResponse);
     });
-    test('does not search if feature is not enabled', () => {
-      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: false });
-      mockUseRiskScoreDeprecated.mockReturnValue({
-        isLoading: false,
-        isDeprecated: false,
-        isEnabled: false,
-        refetch: () => {},
-      });
-      mockUseSearchStrategy.mockReturnValue({
-        loading: false,
-        result: {
-          data: undefined,
-          totalCount: 0,
-        },
-        search: mockSearch,
-        refetch: mockRefetch,
-        inspect: {},
-        error: undefined,
+
+    test('does not search if license is not valid', () => {
+      mockUseRiskScoreFeatureStatus.mockReturnValue({
+        ...defaultFeatureStatus,
+        isLicenseValid: false,
       });
       const { result } = renderHook(() => fn(), {
         wrapper: TestProviders,
@@ -76,36 +80,36 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
       expect(result.current).toEqual([
         false,
         {
-          data: undefined,
-          inspect: {},
-          isInspected: false,
+          ...defaultRisk,
           isLicenseValid: false,
-          isModuleEnabled: false,
-          isDeprecated: false,
           refetch: result.current[1].refetch,
-          totalCount: 0,
+        },
+      ]);
+    });
+    test('does not search if feature is not enabled', () => {
+      mockUseRiskScoreFeatureStatus.mockReturnValue({
+        ...defaultFeatureStatus,
+        isEnabled: false,
+      });
+
+      const { result } = renderHook(() => fn(), {
+        wrapper: TestProviders,
+      });
+      expect(mockSearch).not.toHaveBeenCalled();
+      expect(result.current).toEqual([
+        false,
+        {
+          ...defaultRisk,
+          isModuleEnabled: false,
+          refetch: result.current[1].refetch,
         },
       ]);
     });
 
-    test('if index is deprecated, isDeprecated should be true & search if feature is not enabled', () => {
-      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
-      mockUseRiskScoreDeprecated.mockReturnValue({
-        isLoading: false,
+    test('does not search if index is deprecated ', () => {
+      mockUseRiskScoreFeatureStatus.mockReturnValue({
+        ...defaultFeatureStatus,
         isDeprecated: true,
-        isEnabled: true,
-        refetch: () => {},
-      });
-      mockUseSearchStrategy.mockReturnValue({
-        loading: false,
-        result: {
-          data: undefined,
-          totalCount: 0,
-        },
-        search: mockSearch,
-        refetch: mockRefetch,
-        inspect: {},
-        error: undefined,
       });
       const { result } = renderHook(() => fn({ skip: true }), {
         wrapper: TestProviders,
@@ -114,36 +118,21 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
       expect(result.current).toEqual([
         false,
         {
-          data: undefined,
-          inspect: {},
-          isInspected: false,
-          isLicenseValid: true,
-          isModuleEnabled: true,
+          ...defaultRisk,
           isDeprecated: true,
           refetch: result.current[1].refetch,
-          totalCount: 0,
         },
       ]);
     });
 
     test('handle index not found error', () => {
-      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
-
-      mockUseRiskScoreDeprecated.mockReturnValue({
-        isLoading: false,
+      mockUseRiskScoreFeatureStatus.mockReturnValue({
+        ...defaultFeatureStatus,
         isDeprecated: false,
         isEnabled: false,
-        refetch: () => {},
       });
       mockUseSearchStrategy.mockReturnValue({
-        loading: false,
-        result: {
-          data: undefined,
-          totalCount: 0,
-        },
-        search: mockSearch,
-        refetch: mockRefetch,
-        inspect: {},
+        ...defaultSearchResponse,
         error: {
           attributes: {
             caused_by: {
@@ -157,32 +146,14 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
       });
       expect(result.current).toEqual([
         false,
-        {
-          data: undefined,
-          inspect: {},
-          isInspected: false,
-          isLicenseValid: true,
-          isModuleEnabled: false,
-          isDeprecated: false,
-          refetch: result.current[1].refetch,
-          totalCount: 0,
-        },
+        { ...defaultRisk, isModuleEnabled: false, refetch: result.current[1].refetch },
       ]);
     });
 
     test('show error toast', () => {
-      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
-
       const error = new Error();
       mockUseSearchStrategy.mockReturnValue({
-        loading: false,
-        result: {
-          data: undefined,
-          totalCount: 0,
-        },
-        search: mockSearch,
-        refetch: mockRefetch,
-        inspect: {},
+        ...defaultSearchResponse,
         error,
       });
       renderHook(() => fn(), {
@@ -194,43 +165,22 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
     });
 
     test('runs search if feature is enabled and not deprecated', () => {
-      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
-      mockUseSearchStrategy.mockReturnValue({
-        loading: false,
-        result: {
-          data: [],
-          totalCount: 0,
-        },
-        search: mockSearch,
-        refetch: mockRefetch,
-        inspect: {},
-        error: undefined,
-      });
       renderHook(() => fn(), {
         wrapper: TestProviders,
       });
       expect(mockSearch).toHaveBeenCalledWith({
         defaultIndex: [`ml_${riskEntity}_risk_score_latest_default`],
         factoryQueryType: `${riskEntity}sRiskScore`,
-        filterQuery: undefined,
-        pagination: undefined,
-        timerange: undefined,
-        sort: undefined,
       });
     });
 
     test('return result', async () => {
-      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
       mockUseSearchStrategy.mockReturnValue({
-        loading: false,
+        ...defaultSearchResponse,
         result: {
           data: [],
           totalCount: 0,
         },
-        search: mockSearch,
-        refetch: mockRefetch,
-        inspect: {},
-        error: undefined,
       });
       const { result, waitFor } = renderHook(() => fn(), {
         wrapper: TestProviders,
@@ -239,14 +189,9 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
         expect(result.current).toEqual([
           false,
           {
+            ...defaultRisk,
             data: [],
-            inspect: {},
-            isDeprecated: false,
-            isInspected: false,
-            isLicenseValid: true,
-            isModuleEnabled: true,
             refetch: result.current[1].refetch,
-            totalCount: 0,
           },
         ]);
       });

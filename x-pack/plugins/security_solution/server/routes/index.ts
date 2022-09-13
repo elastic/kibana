@@ -8,7 +8,7 @@
 import type { StartServicesAccessor, Logger } from '@kbn/core/server';
 import type { IRuleDataClient, RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 
-import { getRiskScoreDeprecatedRoute } from '../lib/risk_score/routes';
+import { getRiskScoreIndexStatusRoute } from '../lib/risk_score/routes';
 import type { SecuritySolutionPluginRouter } from '../types';
 
 import { createRulesRoute } from '../lib/detection_engine/routes/rules/create_rules_route';
@@ -188,6 +188,6 @@ export const initRoutes = (
   }
 
   if (riskyHostsEnabled || riskyUsersEnabled) {
-    getRiskScoreDeprecatedRoute(router);
+    getRiskScoreIndexStatusRoute(router);
   }
 };

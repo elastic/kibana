@@ -7,18 +7,18 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { RISK_SCORE_DEPRECATION_API_URL } from '../../../../common/constants';
+import { RISK_SCORE_INDEX_STATUS_API_URL } from '../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
-import { indexDeprecatedSchema } from './schema';
+import { indexStatusSchema } from './schema';
 
-export const getRiskScoreDeprecatedRoute = (router: SecuritySolutionPluginRouter) => {
+export const getRiskScoreIndexStatusRoute = (router: SecuritySolutionPluginRouter) => {
   router.get(
     {
-      path: RISK_SCORE_DEPRECATION_API_URL,
+      path: RISK_SCORE_INDEX_STATUS_API_URL,
       validate: {
-        query: buildRouteValidation(indexDeprecatedSchema),
+        query: buildRouteValidation(indexStatusSchema),
       },
       options: {
         tags: ['access:securitySolution'],

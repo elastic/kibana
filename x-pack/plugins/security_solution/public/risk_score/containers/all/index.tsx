@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useMemo } from 'react';
 
-import { useRiskScoreDeprecated } from '../deprecated';
+import { useRiskScoreFeatureStatus } from '../feature_status';
 import { createFilter } from '../../../common/containers/helpers';
 import type { RiskScoreSortField, StrategyResponseType } from '../../../../common/search_strategy';
 import {
@@ -24,7 +24,6 @@ import { isIndexNotFoundError } from '../../../common/utils/exceptions';
 import type { inputsModel } from '../../../common/store';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
-import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 
 export interface RiskScoreState<T extends RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore> {
   data: undefined | StrategyResponseType<T>['data'];
@@ -111,14 +110,13 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
 
   const { addError } = useAppToasts();
 
-  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
-
   const {
     isDeprecated,
     isEnabled,
+    isLicenseValid,
     isLoading: isDeprecatedLoading,
     refetch: refetchDeprecated,
-  } = useRiskScoreDeprecated(isPlatinumOrTrialLicense, factoryQueryType, defaultIndex);
+  } = useRiskScoreFeatureStatus(factoryQueryType, defaultIndex);
 
   const {
     loading,
@@ -153,12 +151,20 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
       inspect,
       refetch: refetchAll,
       totalCount: response.totalCount,
-      isLicenseValid: isPlatinumOrTrialLicense,
+      isLicenseValid,
       isDeprecated,
       isModuleEnabled: isEnabled,
       isInspected: false,
     }),
-    [inspect, isDeprecated, isEnabled, isPlatinumOrTrialLicense, refetchAll, response]
+    [
+      inspect,
+      isDeprecated,
+      isEnabled,
+      isLicenseValid,
+      refetchAll,
+      response.data,
+      response.totalCount,
+    ]
   );
 
   const riskScoreRequest = useMemo(
@@ -190,10 +196,10 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
   }, [addError, error]);
 
   useEffect(() => {
-    if (!skip && riskScoreRequest != null && isPlatinumOrTrialLicense && isEnabled && !isDeprecated) {
+    if (!skip && riskScoreRequest != null && isLicenseValid && isEnabled && !isDeprecated) {
       search(riskScoreRequest);
     }
-  }, [isEnabled, isDeprecated, isPlatinumOrTrialLicense, riskScoreRequest, search, skip]);
+  }, [isEnabled, isDeprecated, isLicenseValid, riskScoreRequest, search, skip]);
 
   return [loading || isDeprecatedLoading, riskScoreResponse];
 };

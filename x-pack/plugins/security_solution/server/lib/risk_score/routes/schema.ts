@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 
-export const indexDeprecatedSchema = t.type({
+export const indexStatusSchema = t.type({
   indexName: t.string,
   entity: t.string,
 });

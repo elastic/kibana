@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { getRiskScoreDeprecatedRoute } from '.';
+import { getRiskScoreIndexStatusRoute } from '.';
 import {
   requestMock,
   serverMock,
   requestContextMock,
 } from '../../detection_engine/routes/__mocks__';
 
-import { RISK_SCORE_DEPRECATION_API_URL } from '../../../../common/constants';
+import { RISK_SCORE_INDEX_STATUS_API_URL } from '../../../../common/constants';
 
 const fieldCaps = {
   indices: ['not_important'],
@@ -27,13 +27,13 @@ const fieldCaps = {
     },
   },
 };
-describe('risk score deprecated route', () => {
+describe('risk score index status route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  const getDeprecatedRequest = (entity: string) =>
+  const getRequest = (entity: string) =>
     requestMock.create({
       method: 'get',
-      path: RISK_SCORE_DEPRECATION_API_URL,
+      path: RISK_SCORE_INDEX_STATUS_API_URL,
       query: { indexName: 'hi', entity },
     });
 
@@ -44,18 +44,18 @@ describe('risk score deprecated route', () => {
 
   test('If new fields are not available, isDeprecated = true', async () => {
     clients.clusterClient.asCurrentUser.fieldCaps.mockResolvedValue(fieldCaps);
-    getRiskScoreDeprecatedRoute(server.router);
+    getRiskScoreIndexStatusRoute(server.router);
     const response = await server.inject(
-      getDeprecatedRequest('user'),
+      getRequest('user'),
       requestContextMock.convertContext(context)
     );
     expect(response.body).toEqual({ isDeprecated: true, isEnabled: true });
   });
   test('If new fields are available, isDeprecated = false', async () => {
     clients.clusterClient.asCurrentUser.fieldCaps.mockResolvedValue(fieldCaps);
-    getRiskScoreDeprecatedRoute(server.router);
+    getRiskScoreIndexStatusRoute(server.router);
     const response = await server.inject(
-      getDeprecatedRequest('host'),
+      getRequest('host'),
       requestContextMock.convertContext(context)
     );
     expect(response.body).toEqual({ isDeprecated: false, isEnabled: true });
@@ -65,9 +65,9 @@ describe('risk score deprecated route', () => {
     const notFoundError: Error & { statusCode?: number } = new Error('not found');
     notFoundError.statusCode = 404;
     clients.clusterClient.asCurrentUser.fieldCaps.mockRejectedValue(notFoundError);
-    getRiskScoreDeprecatedRoute(server.router);
+    getRiskScoreIndexStatusRoute(server.router);
     const response = await server.inject(
-      getDeprecatedRequest('host'),
+      getRequest('host'),
       requestContextMock.convertContext(context)
     );
     expect(response.body).toEqual({ isDeprecated: false, isEnabled: false });
@@ -75,9 +75,9 @@ describe('risk score deprecated route', () => {
 
   test('any other error throws', async () => {
     clients.clusterClient.asCurrentUser.fieldCaps.mockRejectedValue(new Error('any other error'));
-    getRiskScoreDeprecatedRoute(server.router);
+    getRiskScoreIndexStatusRoute(server.router);
     const response = await server.inject(
-      getDeprecatedRequest('host'),
+      getRequest('host'),
       requestContextMock.convertContext(context)
     );
     expect(response.body).toEqual({ message: 'any other error', status_code: 500 });

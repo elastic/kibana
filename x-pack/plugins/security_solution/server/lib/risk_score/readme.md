@@ -4,10 +4,10 @@
 
 The risk score API has one route with one method
 
-1. GET - `getRiskScoreDeprecatedRoute`
+1. GET - `getRiskScoreIndexStatusRoute`
 2. REQUEST:
     ```typescript
-      GET /internal/risk_score/deprecated
+      GET /internal/risk_score/index_status
       {
         indexName: 'ml_host_risk_score_latest'
       }
