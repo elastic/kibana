@@ -1083,11 +1083,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
       defaultValue: null,
       type: FIELD_TYPES.SELECT,
     },
-    schema: t.union([
-      t.literal('gauge'),
-      t.literal('counter'),
-      t.null,
-    ]),
+    schema: t.union([t.literal('gauge'), t.literal('counter'), t.null]),
   },
   time_series_dimension: {
     fieldConfig: {
