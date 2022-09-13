@@ -146,6 +146,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
           onDismiss={() => setShowUploadModal(false)}
           onUploaded={() => {
             notifications.toasts.addSuccess('Uploaded file!');
+            refetch();
             setShowUploadModal(false);
           }}
         />

@@ -133,6 +133,7 @@ export class UploadState {
             id: uploadTarget.id,
             kind: this.fileKind.id,
             abortSignal,
+            contentType: mime,
           })
         );
       }),
