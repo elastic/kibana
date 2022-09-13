@@ -129,19 +129,21 @@ describe('ES search strategy', () => {
           esSearch.search({ params }, { transport: transportOptions }, mockDeps)
         );
 
-        const [request, searchOptions] = mockSubmitCaller.mock.calls[0];
-        expect(request).toEqual({
-          batched_reduce_size: 64,
-          body: { query: {} },
-          ignore_unavailable: true,
-          index: 'logstash-*',
-          keep_alive: '1m',
-          keep_on_completion: false,
-          max_concurrent_shard_requests: undefined,
-          track_total_hits: true,
-          wait_for_completion_timeout: '100ms',
-        });
-        expect(searchOptions).toEqual({ maxRetries: 1, meta: true, signal: undefined });
+        expect(mockSubmitCaller).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            batched_reduce_size: 64,
+            body: { query: {} },
+            ignore_unavailable: true,
+            index: 'logstash-*',
+            keep_alive: '1m',
+            keep_on_completion: false,
+            max_concurrent_shard_requests: undefined,
+            track_total_hits: true,
+            wait_for_completion_timeout: '100ms',
+          }),
+          expect.objectContaining({ maxRetries: 1, meta: true, signal: undefined })
+        );
       });
 
       it('sets transport options on GET requests', async () => {
@@ -153,13 +155,15 @@ describe('ES search strategy', () => {
           esSearch.search({ id: 'foo', params }, { transport: { maxRetries: 1 } }, mockDeps)
         );
 
-        const [request, searchOptions] = mockGetCaller.mock.calls[0];
-        expect(request).toEqual({
-          id: 'foo',
-          keep_alive: '1m',
-          wait_for_completion_timeout: '100ms',
-        });
-        expect(searchOptions).toEqual({ maxRetries: 1, meta: true, signal: undefined });
+        expect(mockGetCaller).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            id: 'foo',
+            keep_alive: '1m',
+            wait_for_completion_timeout: '100ms',
+          }),
+          expect.objectContaining({ maxRetries: 1, meta: true, signal: undefined })
+        );
       });
 
       it('sets wait_for_completion_timeout and keep_alive in the request', async () => {
