@@ -1,18 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import type { GuideConfig } from '../types';
 
-export const observabilityConfig: GuideConfig = {
-  title: 'Observe my infrastructure',
-  description:
-    'The foundation of seeing Elastic in action, is adding you own data. Follow links to our documents below to learn more.',
+export const searchConfig: GuideConfig = {
+  title: 'Search my data',
+  description: `We'll help you build world-class search experiences with your data.`,
   docs: {
-    text: 'Observability 101 Documentation',
+    text: 'Enterprise Search 101 Documentation',
     url: 'example.com',
   },
   steps: [
@@ -21,34 +21,30 @@ export const observabilityConfig: GuideConfig = {
       title: 'Add data',
       description:
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+      location: {
+        appID: 'guidedOnboardingExample',
+        path: 'stepOne',
+      },
     },
     {
-      id: 'rules',
-      title: 'Customize your alerting rules',
+      id: 'search_experience',
+      title: 'Build a search experience',
+      description:
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+      location: {
+        appID: 'guidedOnboardingExample',
+        path: 'stepTwo?showTour=true',
+      },
+    },
+    {
+      id: 'optimize',
+      title: 'Optimize your search relevance',
       description:
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
     },
     {
-      id: 'infrastructure',
-      title: 'View infrastructure details',
-      description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-    },
-    {
-      id: 'explore',
-      title: 'Explore Discover and Dashboards',
-      description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-    },
-    {
-      id: 'tour',
-      title: 'Tour Observability',
-      description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-    },
-    {
-      id: 'do_more',
-      title: 'Do more with Observability',
+      id: 'review',
+      title: 'Review your search analytics',
       description:
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
     },
