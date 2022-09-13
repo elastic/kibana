@@ -51,19 +51,17 @@ export function defineRoutes(router: IRouter) {
       path: '/api/guided_onboarding/state',
       validate: {
         body: schema.object({
-          active_guide: schema.maybe(schema.string()),
-          active_step: schema.maybe(schema.string()),
+          activeGuide: schema.maybe(schema.string()),
+          activeStep: schema.maybe(schema.string()),
         }),
       },
     },
     async (context, request, response) => {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      const active_guide = request.body.active_guide;
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      const active_step = request.body.active_step;
+      const activeGuide = request.body.activeGuide;
+      const activeStep = request.body.activeStep;
       const attributes = {
-        active_guide: active_guide ?? 'unset',
-        active_step: active_step ?? 'unset',
+        activeGuide: activeGuide ?? 'unset',
+        activeStep: activeStep ?? 'unset',
       };
       const coreContext = await context.core;
       const soClient = coreContext.savedObjects.client as SavedObjectsClient;

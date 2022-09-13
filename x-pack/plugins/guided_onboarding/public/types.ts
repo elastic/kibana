@@ -44,8 +44,8 @@ export interface GuideConfig {
 }
 
 export interface GuidedOnboardingState {
-  active_guide: UseCase | 'unset';
-  active_step: string | 'unset';
+  activeGuide: UseCase | 'unset';
+  activeStep: string | 'unset';
 }
 
 export interface ClientConfigType {

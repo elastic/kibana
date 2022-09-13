@@ -44,11 +44,11 @@ export const Main = (props: MainProps) => {
   const [guideState, setGuideState] = useState<GuidedOnboardingState | undefined>(undefined);
 
   const [selectedGuide, setSelectedGuide] = useState<
-    GuidedOnboardingState['active_guide'] | undefined
+    GuidedOnboardingState['activeGuide'] | undefined
   >(undefined);
-  const [selectedStep, setSelectedStep] = useState<
-    GuidedOnboardingState['active_step'] | undefined
-  >(undefined);
+  const [selectedStep, setSelectedStep] = useState<GuidedOnboardingState['activeStep'] | undefined>(
+    undefined
+  );
 
   useEffect(() => {
     const subscription = guidedOnboardingApi?.fetchGuideState$().subscribe((newState) => {
@@ -59,8 +59,8 @@ export const Main = (props: MainProps) => {
 
   const startGuide = async (guide: UseCase) => {
     const response = await guidedOnboardingApi?.updateGuideState({
-      active_guide: guide,
-      active_step: 'add_data',
+      activeGuide: guide,
+      activeStep: 'add_data',
     });
 
     if (response) {
@@ -74,8 +74,8 @@ export const Main = (props: MainProps) => {
 
   const updateGuideState = async () => {
     const response = await guidedOnboardingApi?.updateGuideState({
-      active_guide: selectedGuide!,
-      active_step: selectedStep!,
+      activeGuide: selectedGuide!,
+      activeStep: selectedStep!,
     });
 
     if (response) {
@@ -122,7 +122,7 @@ export const Main = (props: MainProps) => {
                   defaultMessage="Active guide"
                 />
               </dt>
-              <dd>{guideState.active_guide ?? 'undefined'}</dd>
+              <dd>{guideState.activeGuide ?? 'undefined'}</dd>
 
               <dt>
                 <FormattedMessage
@@ -130,7 +130,7 @@ export const Main = (props: MainProps) => {
                   defaultMessage="Active step"
                 />
               </dt>
-              <dd>{guideState.active_step ?? 'undefined'}</dd>
+              <dd>{guideState.activeStep ?? 'undefined'}</dd>
             </dl>
           ) : undefined}
         </EuiText>

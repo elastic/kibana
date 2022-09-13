@@ -41,16 +41,16 @@ interface Props {
 }
 
 const getConfig = (state?: GuidedOnboardingState): GuideConfig | undefined => {
-  if (state?.active_guide && state.active_guide !== 'unset') {
-    return guidesConfig[state.active_guide];
+  if (state?.activeGuide && state.activeGuide !== 'unset') {
+    return guidesConfig[state.activeGuide];
   }
 
   return undefined;
 };
 
 const getStepLabel = (steps?: StepConfig[], state?: GuidedOnboardingState): string => {
-  if (steps && state?.active_step) {
-    const activeStepIndex = steps.findIndex((step: StepConfig) => step.id === state.active_step);
+  if (steps && state?.activeStep) {
+    const activeStepIndex = steps.findIndex((step: StepConfig) => step.id === state.activeStep);
     if (activeStepIndex > -1) {
       return `: Step ${activeStepIndex + 1}`;
     }
@@ -81,8 +81,8 @@ export const GuidedOnboardingButton = ({ api, application, http }: Props) => {
   useEffect(() => {
     const subscription = api.fetchGuideState$().subscribe((newState) => {
       if (
-        guidedOnboardingState?.active_guide !== newState.active_guide ||
-        guidedOnboardingState?.active_step !== newState.active_step
+        guidedOnboardingState?.activeGuide !== newState.activeGuide ||
+        guidedOnboardingState?.activeStep !== newState.activeStep
       ) {
         if (firstRender.current) {
           firstRender.current = false;
@@ -93,7 +93,7 @@ export const GuidedOnboardingButton = ({ api, application, http }: Props) => {
       setGuidedOnboardingState(newState);
     });
     return () => subscription.unsubscribe();
-  }, [api, guidedOnboardingState?.active_guide, guidedOnboardingState?.active_step]);
+  }, [api, guidedOnboardingState?.activeGuide, guidedOnboardingState?.activeStep]);
 
   const { euiTheme } = useEuiTheme();
 
@@ -174,7 +174,7 @@ export const GuidedOnboardingButton = ({ api, application, http }: Props) => {
         {guideConfig?.steps.map((step, index, steps) => {
           const accordionId = htmlIdGenerator(`accordion${index}`)();
 
-          const stepStatus = getStepStatus(steps, index, guidedOnboardingState?.active_step);
+          const stepStatus = getStepStatus(steps, index, guidedOnboardingState?.activeStep);
           const buttonContent = (
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={false}>

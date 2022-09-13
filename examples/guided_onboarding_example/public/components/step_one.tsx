@@ -30,7 +30,7 @@ export const StepOne = ({ guidedOnboarding }: GuidedOnboardingExampleAppDeps) =>
   const [isTourStepOpen, setIsTourStepOpen] = useState<boolean>(false);
   useEffect(() => {
     const subscription = guidedOnboardingApi?.fetchGuideState$().subscribe((newState) => {
-      const { active_guide: guide, active_step: step } = newState;
+      const { activeGuide: guide, activeStep: step } = newState;
 
       if (guide === 'search' && step === 'add_data') {
         setIsTourStepOpen(true);
@@ -80,8 +80,8 @@ export const StepOne = ({ guidedOnboarding }: GuidedOnboardingExampleAppDeps) =>
           <EuiButton
             onClick={async () => {
               await guidedOnboardingApi?.updateGuideState({
-                active_guide: 'search',
-                active_step: 'search_experience',
+                activeGuide: 'search',
+                activeStep: 'search_experience',
               });
             }}
           >

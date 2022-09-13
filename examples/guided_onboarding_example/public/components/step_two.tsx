@@ -81,8 +81,8 @@ export const StepTwo = (props: StepTwoProps) => {
           <EuiButton
             onClick={async () => {
               await guidedOnboardingApi?.updateGuideState({
-                active_guide: 'search',
-                active_step: 'optimize',
+                activeGuide: 'search',
+                activeStep: 'optimize',
               });
             }}
           >
