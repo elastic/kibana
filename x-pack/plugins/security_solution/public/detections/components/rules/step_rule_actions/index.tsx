@@ -20,6 +20,7 @@ import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { ResponseActionsForm } from '../../response_actions/response_actions_form';
 import type { RuleStepProps, ActionsStepRule } from '../../../pages/detection_engine/rules/types';
 import { RuleStep } from '../../../pages/detection_engine/rules/types';
@@ -81,6 +82,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       triggersActionsUi: { actionTypeRegistry },
     },
   } = useKibana();
+  const responseActionsEnabled = useIsExperimentalFeatureEnabled('responseActionsEnabled');
   const kibanaAbsoluteUrl = useMemo(
     () =>
       application.getUrlForApp(`${APP_UI_ID}`, {
@@ -209,7 +211,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
           componentProps={throttleFieldComponentProps}
         />
         {displayActionsOptions}
-        {displayResponseActionsOptions}
+        {responseActionsEnabled && displayResponseActionsOptions}
 
         <UseField path="kibanaSiemAppUrl" component={GhostFormField} />
         <UseField path="enabled" component={GhostFormField} />
@@ -231,6 +233,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     application.capabilities.actions.show,
     displayActionsOptions,
     displayResponseActionsOptions,
+    responseActionsEnabled,
     throttleFieldComponentProps,
   ]);
 

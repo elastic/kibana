@@ -68,8 +68,6 @@ export const scheduleNotificationResponseActions = (
             id: queryId,
             query: query.query,
             ecs_mapping: query.ecs_mapping,
-            version: '',
-            platform: '',
           };
         }) as unknown as OsqueryQuery[],
         ...rest,

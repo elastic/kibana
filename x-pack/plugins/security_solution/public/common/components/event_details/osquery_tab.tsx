@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { RESPONSE_ACTION_TYPES } from '../../../detections/components/response_actions/constants';
 import { useKibana } from '../../lib/kibana';
 import type { AlertRawEventData } from './event_details';
@@ -31,8 +32,8 @@ export const useOsqueryTab = ({
     services: { osquery },
   } = useKibana();
   const handleAddToTimeline = useHandleAddToTimeline();
-
-  if (!osquery || !rawEventData) {
+  const responseActionsEnabled = useIsExperimentalFeatureEnabled('responseActionsEnabled');
+  if (!osquery || !rawEventData || !responseActionsEnabled) {
     return;
   }
 
