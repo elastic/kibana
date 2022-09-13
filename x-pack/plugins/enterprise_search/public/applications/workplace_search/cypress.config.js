@@ -13,16 +13,15 @@ export default defineConfig({
   defaultCommandTimeout: 120000,
   e2e: {
     baseUrl: 'http://localhost:5601',
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line no-unused-vars
     setupNodeEvents(on, config) {},
-    supportFile: false,
+    supportFile: './cypress/support/commands.ts',
   },
   env: {
     password: 'changeme',
     username: 'elastic',
   },
   execTimeout: 120000,
-  fixturesFolder: false,
   pageLoadTimeout: 180000,
   retries: {
     runMode: 2,
