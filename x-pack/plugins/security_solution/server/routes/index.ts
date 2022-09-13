@@ -180,14 +180,11 @@ export const initRoutes = (
   createSourcererDataViewRoute(router, getStartServices);
   getSourcererDataViewRoute(router, getStartServices);
 
-  const { previewTelemetryUrlEnabled, riskyHostsEnabled, riskyUsersEnabled } =
-    config.experimentalFeatures;
+  const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
   if (previewTelemetryUrlEnabled) {
     // telemetry preview endpoint for e2e integration tests only at the moment.
     telemetryDetectionRulesPreviewRoute(router, logger, previewTelemetryReceiver, telemetrySender);
   }
 
-  if (riskyHostsEnabled || riskyUsersEnabled) {
-    getRiskScoreIndexStatusRoute(router);
-  }
+  getRiskScoreIndexStatusRoute(router);
 };
