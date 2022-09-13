@@ -10,7 +10,10 @@ import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
-import type { ResponseActionStatus } from '../../../../../common/endpoint/service/response_actions/constants';
+import type {
+  ResponseActions,
+  ResponseActionStatus,
+} from '../../../../../common/endpoint/service/response_actions/constants';
 import {
   RESPONSE_ACTION_COMMANDS,
   RESPONSE_ACTION_STATUS,
@@ -111,6 +114,11 @@ export const getActionStatus = (status: ResponseActionStatus): string => {
   return '';
 };
 
+export const getCommand = (
+  command: ResponseActions
+): Exclude<ResponseActions, 'unisolate' | 'running-processes'> | 'release' | 'processes' =>
+  command === 'unisolate' ? 'release' : command === 'running-processes' ? 'processes' : command;
+
 // TODO: add more filter names here
 export type FilterName = keyof typeof FILTER_NAMES;
 export const useActionsLogFilter = (
@@ -139,7 +147,7 @@ export const useActionsLogFilter = (
         }))
       : RESPONSE_ACTION_COMMANDS.map((filter) => ({
           key: filter,
-          label: filter === 'unisolate' ? 'release' : filter,
+          label: getCommand(filter),
           checked: undefined,
         }))
   );
