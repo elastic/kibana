@@ -58,7 +58,7 @@ describe('Test discover state', () => {
   test('URL navigation to url without _a, state should not change', async () => {
     history.push('/#?_a=(index:modified)');
     history.push('/');
-    expect(state.appStateContainer.getState()).equal({
+    expect(state.appStateContainer.getState()).toEqual({
       index: 'modified',
     });
   });
@@ -210,7 +210,7 @@ describe('createSearchSessionRestorationDataProvider', () => {
     test('restoreState has paused autoRefresh', async () => {
       const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
       expect(initialState.refreshInterval).toBe(undefined);
-      expect(restoreState.refreshInterval).equal({
+      expect(restoreState.refreshInterval).toEqual({
         pause: true,
         value: 0,
       });
