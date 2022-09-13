@@ -58,10 +58,10 @@ export const ResponseActionsList = React.memo(
       }
     }, [context, items.length]);
     return (
-      <>
+      <div data-test-subj={'response-actions-list'}>
         {items.map((actionItem, index) => {
           return (
-            <div key={actionItem.id}>
+            <div key={actionItem.id} data-test-subj={`response-actions-list-item-${index}`}>
               <EuiSpacer size="m" />
               <ResponseActionTypeForm
                 item={actionItem}
@@ -73,9 +73,8 @@ export const ResponseActionsList = React.memo(
             </div>
           );
         })}
-
         {renderButton}
-      </>
+      </div>
     );
   }
 );

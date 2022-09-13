@@ -14,7 +14,12 @@ import React from 'react';
 export const ResponseActionsHeader = () => {
   return (
     <>
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        responsive={false}
+        data-test-subj={'response-actions-header'}
+      >
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
             <h4>

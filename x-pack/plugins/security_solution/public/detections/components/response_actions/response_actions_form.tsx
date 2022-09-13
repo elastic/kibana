@@ -70,7 +70,7 @@ export const ResponseActionsForm = ({ items, addItem, removeItem, saveClickRef }
 
   return (
     <>
-      <EuiSpacer size="xxl" />
+      <EuiSpacer size="xxl" data-test-subj={'response-actions-form'} />
       <ResponseActionsHeader />
       {form}
     </>
