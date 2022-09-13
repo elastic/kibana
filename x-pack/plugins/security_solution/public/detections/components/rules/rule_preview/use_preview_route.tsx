@@ -59,10 +59,6 @@ export const usePreviewRoute = ({
   }, [setRule]);
 
   useEffect(() => {
-    clearPreview();
-  }, [clearPreview, defineRuleData, aboutRuleData, scheduleRuleData]);
-
-  useEffect(() => {
     if (!defineRuleData || !aboutRuleData || !scheduleRuleData) {
       return;
     }

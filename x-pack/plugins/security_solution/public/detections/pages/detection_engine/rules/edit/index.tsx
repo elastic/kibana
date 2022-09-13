@@ -190,6 +190,8 @@ const EditRulePageComponent: FC = () => {
     }
   }, [activeStep]);
 
+  const onPreviewClose = useCallback(() => setIsRulePreviewVisible(false), []);
+
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
 
@@ -527,7 +529,7 @@ const EditRulePageComponent: FC = () => {
                 aboutStepData={aboutStep.data}
                 scheduleStepData={scheduleStep.data}
                 exceptionsList={rule?.exceptions_list}
-                onClose={() => setIsRulePreviewVisible(false)}
+                onClose={onPreviewClose}
               />
             )}
           </MaxWidthEuiFlexItem>

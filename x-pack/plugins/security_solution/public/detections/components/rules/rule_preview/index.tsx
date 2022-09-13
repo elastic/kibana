@@ -96,6 +96,8 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   const [timeframeStart, setTimeframeStart] = useState(moment().subtract(1, 'hour'));
   const [timeframeEnd, setTimeframeEnd] = useState(moment());
 
+  const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
+
   useEffect(() => {
     const { start, end } = refreshedTimeframe(startDate, endDate);
     setTimeframeStart(start);
@@ -157,6 +159,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
 
   const onTimeChange = useCallback(
     ({ start: newStart, end: newEnd, isInvalid }: OnTimeChangeProps) => {
+      setIsDateRangeInvalid(isInvalid);
       if (!isInvalid) {
         setStartDate(newStart);
         setEndDate(newEnd);
@@ -240,7 +243,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
           />
           <EuiFlexItem grow={false}>
             <EuiSuperUpdateButton
-              isDisabled={isDisabled}
+              isDisabled={isDateRangeInvalid || isDisabled}
               iconType={isDirty ? 'kqlFunction' : 'refresh'}
               onClick={onTimeframeRefresh}
               color={isDirty ? 'success' : 'primary'}
