@@ -16,7 +16,7 @@ import {
 } from '@kbn/es-query';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
-import { ENABLE_SQL } from '../../../../../common';
+import { ENABLE_TEXT_BASED } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverLayoutProps } from '../layout/types';
 import { getTopNavLinks } from './get_top_nav_links';
@@ -185,7 +185,7 @@ export const DiscoverTopNav = ({
   const setMenuMountPoint = useMemo(() => {
     return getHeaderActionMenuMounter();
   }, []);
-  const isSQLModeEnabled = uiSettings.get(ENABLE_SQL);
+  const isSQLModeEnabled = uiSettings.get(ENABLE_TEXT_BASED);
   const supportedTextBasedLanguages = [];
   if (isSQLModeEnabled) {
     supportedTextBasedLanguages.push('SQL');
