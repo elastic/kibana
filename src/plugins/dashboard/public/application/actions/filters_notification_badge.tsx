@@ -32,8 +32,19 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
 
   private displayName = dashboardFilterNotificationBadge.getDisplayName();
   private icon = 'filter';
+  private applicationService;
+  private embeddableService;
+  private settingsService;
+  private openModal;
 
-  constructor() {}
+  constructor() {
+    ({
+      application: this.applicationService,
+      embeddable: this.embeddableService,
+      overlays: { openModal: this.openModal },
+      settings: this.settingsService,
+    } = pluginServices.getServices());
+  }
 
   public getDisplayName({ embeddable }: FiltersNotificationActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
@@ -78,28 +89,24 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
     }
 
     const {
-      application,
-      embeddable: { getEmbeddableFactory, getStateTransfer },
-      overlays: { openModal },
-      settings: {
-        uiSettings,
-        theme: { theme$ },
-      },
-    } = pluginServices.getServices();
+      uiSettings,
+      theme: { theme$ },
+    } = this.settingsService;
+    const { getEmbeddableFactory, getStateTransfer } = this.embeddableService;
 
     const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
       uiSettings,
     });
     const editPanelAction = new EditPanelAction(
       getEmbeddableFactory,
-      application as unknown as ApplicationStart,
+      this.applicationService as unknown as ApplicationStart,
       getStateTransfer()
     );
     const FiltersNotificationModal = await import('./filters_notification_modal').then(
       (m) => m.FiltersNotificationModal
     );
 
-    const session = openModal(
+    const session = this.openModal(
       toMountPoint(
         <KibanaReactContextProvider>
           <FiltersNotificationModal

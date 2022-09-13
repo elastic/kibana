@@ -31,7 +31,13 @@ export class UnlinkFromLibraryAction implements Action<UnlinkFromLibraryActionCo
   public readonly id = ACTION_UNLINK_FROM_LIBRARY;
   public order = 15;
 
-  constructor() {}
+  private toastsService;
+
+  constructor() {
+    ({
+      notifications: { toasts: this.toastsService },
+    } = pluginServices.getServices());
+  }
 
   public getDisplayName({ embeddable }: UnlinkFromLibraryActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
@@ -64,10 +70,6 @@ export class UnlinkFromLibraryAction implements Action<UnlinkFromLibraryActionCo
       throw new IncompatibleActionError();
     }
 
-    const {
-      notifications: { toasts },
-    } = pluginServices.getServices();
-
     const newInput = await embeddable.getInputAsValueType();
     embeddable.updateInput(newInput);
 
@@ -88,7 +90,7 @@ export class UnlinkFromLibraryAction implements Action<UnlinkFromLibraryActionCo
       embeddable.getTitle() ? `'${embeddable.getTitle()}'` : ''
     );
 
-    toasts.addSuccess({
+    this.toastsService.addSuccess({
       title,
       'data-test-subj': 'unlinkPanelSuccess',
     });

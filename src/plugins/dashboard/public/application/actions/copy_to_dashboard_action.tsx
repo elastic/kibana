@@ -38,7 +38,19 @@ export class CopyToDashboardAction implements Action<CopyToDashboardActionContex
   public readonly id = ACTION_COPY_TO_DASHBOARD;
   public order = 1;
 
-  constructor(private PresentationUtilContext: PresentationUtilPluginStart['ContextProvider']) {}
+  private dashboardCapabilities;
+  private theme$;
+  private openModal;
+
+  constructor(private PresentationUtilContext: PresentationUtilPluginStart['ContextProvider']) {
+    ({
+      dashboardCapabilities: this.dashboardCapabilities,
+      overlays: { openModal: this.openModal },
+      settings: {
+        theme: { theme$: this.theme$ },
+      },
+    } = pluginServices.getServices());
+  }
 
   public getDisplayName({ embeddable }: CopyToDashboardActionContext) {
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
@@ -56,9 +68,8 @@ export class CopyToDashboardAction implements Action<CopyToDashboardActionContex
   }
 
   public async isCompatible({ embeddable }: CopyToDashboardActionContext) {
-    const {
-      dashboardCapabilities: { createNew: canCreateNew, showWriteControls: canEditExisting },
-    } = pluginServices.getServices();
+    const { createNew: canCreateNew, showWriteControls: canEditExisting } =
+      this.dashboardCapabilities;
 
     return Boolean(
       embeddable.parent && isDashboard(embeddable.parent) && (canCreateNew || canEditExisting)
@@ -70,14 +81,7 @@ export class CopyToDashboardAction implements Action<CopyToDashboardActionContex
       throw new IncompatibleActionError();
     }
 
-    const {
-      overlays: { openModal },
-      settings: {
-        theme: { theme$ },
-      },
-    } = pluginServices.getServices();
-
-    const session = openModal(
+    const session = this.openModal(
       toMountPoint(
         <CopyToDashboardModal
           PresentationUtilContext={this.PresentationUtilContext}
@@ -85,7 +89,7 @@ export class CopyToDashboardAction implements Action<CopyToDashboardActionContex
           dashboardId={(embeddable.parent as DashboardContainer).getInput().id}
           embeddable={embeddable}
         />,
-        { theme$ }
+        { theme$: this.theme$ }
       ),
       {
         maxWidth: 400,

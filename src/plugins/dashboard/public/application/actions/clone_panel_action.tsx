@@ -42,7 +42,13 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
   public readonly id = ACTION_CLONE_PANEL;
   public order = 45;
 
-  constructor(private savedObjects: SavedObjectsStart) {}
+  private toastsService;
+
+  constructor(private savedObjects: SavedObjectsStart) {
+    ({
+      notifications: { toasts: this.toastsService },
+    } = pluginServices.getServices());
+  }
 
   public getDisplayName({ embeddable }: ClonePanelActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
@@ -164,10 +170,6 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
     panelToClone: DashboardPanelState,
     embeddable: IEmbeddable
   ): Promise<Partial<PanelState>> {
-    const {
-      notifications: { toasts },
-    } = pluginServices.getServices();
-
     let panelState: PanelState<EmbeddableInput>;
     if (isReferenceOrValueEmbeddable(embeddable)) {
       const newTitle = await this.getCloneTitle(embeddable, embeddable.getTitle() || '');
@@ -197,7 +199,7 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
           clonedSavedObjectId;
       }
     }
-    toasts.addSuccess({
+    this.toastsService.addSuccess({
       title: dashboardClonePanelAction.getSuccessMessage(),
       'data-test-subj': 'addObjectToContainerSuccess',
     });

@@ -33,7 +33,15 @@ export class LibraryNotificationAction implements Action<LibraryNotificationActi
   public readonly type = ACTION_LIBRARY_NOTIFICATION;
   public readonly order = 1;
 
-  constructor(private unlinkAction: UnlinkFromLibraryAction) {}
+  private theme$;
+
+  constructor(private unlinkAction: UnlinkFromLibraryAction) {
+    ({
+      settings: {
+        theme: { theme$: this.theme$ },
+      },
+    } = pluginServices.getServices());
+  }
 
   private displayName = dashboardLibraryNotification.getDisplayName();
 
@@ -45,14 +53,8 @@ export class LibraryNotificationAction implements Action<LibraryNotificationActi
     context: LibraryNotificationActionContext;
   }) => {
     const { embeddable } = context;
-    const {
-      settings: {
-        theme: { theme$ },
-      },
-    } = pluginServices.getServices();
-
     return (
-      <KibanaThemeProvider theme$={theme$}>
+      <KibanaThemeProvider theme$={this.theme$}>
         <LibraryNotificationPopover
           unlinkAction={this.unlinkAction}
           displayName={this.displayName}

@@ -30,12 +30,18 @@ export interface ExportContext {
  */
 export class ExportCSVAction implements Action<ExportContext> {
   public readonly id = ACTION_EXPORT_CSV;
-
   public readonly type = ACTION_EXPORT_CSV;
-
   public readonly order = 5;
 
-  constructor() {}
+  private fieldFormats;
+  private uiSettings;
+
+  constructor() {
+    ({
+      data: { fieldFormats: this.fieldFormats },
+      settings: { uiSettings: this.uiSettings },
+    } = pluginServices.getServices());
+  }
 
   public getIconType() {
     return 'exportAction';
@@ -53,12 +59,8 @@ export class ExportCSVAction implements Action<ExportContext> {
   };
 
   private getFormatter = (): FormatFactory | undefined => {
-    const {
-      data: { fieldFormats },
-    } = pluginServices.getServices();
-
-    if (fieldFormats) {
-      return fieldFormats.deserialize;
+    if (this.fieldFormats) {
+      return this.fieldFormats.deserialize;
     }
   };
 
@@ -76,10 +78,6 @@ export class ExportCSVAction implements Action<ExportContext> {
       return;
     }
 
-    const {
-      settings: { uiSettings },
-    } = pluginServices.getServices();
-
     const tableAdapters = this.getDataTableContent(
       context?.embeddable?.getInspectorAdapters()
     ) as Record<string, Datatable>;
@@ -95,8 +93,8 @@ export class ExportCSVAction implements Action<ExportContext> {
 
             memo[`${context!.embeddable!.getTitle() || untitledFilename}${postFix}.csv`] = {
               content: exporters.datatableToCSV(datatable, {
-                csvSeparator: uiSettings.get('csv:separator', ','),
-                quoteValues: uiSettings.get('csv:quoteValues', true),
+                csvSeparator: this.uiSettings.get('csv:separator', ','),
+                quoteValues: this.uiSettings.get('csv:quoteValues', true),
                 formatFactory,
                 escapeFormulaValues: false,
               }),

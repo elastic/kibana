@@ -32,7 +32,15 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
   public readonly id = ACTION_ADD_TO_LIBRARY;
   public order = 15;
 
-  constructor() {}
+  private applicationCapabilities;
+  private toastsService;
+
+  constructor() {
+    ({
+      application: { capabilities: this.applicationCapabilities },
+      notifications: { toasts: this.toastsService },
+    } = pluginServices.getServices());
+  }
 
   public getDisplayName({ embeddable }: AddToLibraryActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
@@ -49,13 +57,8 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
   }
 
   public async isCompatible({ embeddable }: AddToLibraryActionContext) {
-    const {
-      application: {
-        capabilities: { maps, visualize },
-      },
-    } = pluginServices.getServices();
-
     // TODO: Fix this, potentially by adding a 'canSave' function to embeddable interface
+    const { maps, visualize } = this.applicationCapabilities;
     const canSave = embeddable.type === 'map' ? maps.save : visualize.save;
 
     return Boolean(
@@ -74,11 +77,6 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
     if (!isReferenceOrValueEmbeddable(embeddable)) {
       throw new IncompatibleActionError();
     }
-
-    const {
-      notifications: { toasts },
-    } = pluginServices.getServices();
-
     const newInput = await embeddable.getInputAsRefType();
 
     embeddable.updateInput(newInput);
@@ -98,7 +96,7 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
     const title = dashboardAddToLibraryAction.getSuccessMessage(
       embeddable.getTitle() ? `'${embeddable.getTitle()}'` : ''
     );
-    toasts.addSuccess({
+    this.toastsService.addSuccess({
       title,
       'data-test-subj': 'addPanelToLibrarySuccess',
     });
