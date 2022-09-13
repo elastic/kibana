@@ -164,7 +164,6 @@ describe('EventDetails', () => {
     });
   });
 
-  // TODO adjust to response_actions
   describe('osquery tab', () => {
     it('should not be rendered if not provided with specific raw data', () => {
       expect(alertsWrapper.find('[data-test-subj="osqueryViewTab"]').exists()).toEqual(false);
