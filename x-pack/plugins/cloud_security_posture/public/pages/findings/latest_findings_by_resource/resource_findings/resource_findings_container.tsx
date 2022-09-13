@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiSpacer,
   EuiButtonEmpty,
@@ -20,7 +20,11 @@ import { CloudPosturePageTitle } from '../../../../components/cloud_posture_page
 import * as TEST_SUBJECTS from '../../test_subjects';
 import { PageTitle, PageTitleText } from '../../layout/findings_layout';
 import { findingsNavigation } from '../../../../common/navigation/constants';
-import { ResourceFindingsQuery, useResourceFindings } from './use_resource_findings';
+import {
+  ResourceFindingsQuery,
+  ResourceFindingsResponseAggs,
+  useResourceFindings,
+} from './use_resource_findings';
 import { useUrlQuery } from '../../../../common/hooks/use_url_query';
 import type { FindingsBaseURLQuery, FindingsBaseProps, CspFinding } from '../../types';
 import {
@@ -81,6 +85,28 @@ const getResourceFindingSharedValues = (
   },
 ];
 
+const getSharedValues = (
+  resourceFindingsAggs?: ResourceFindingsResponseAggs<
+    'clusterId' | 'resourceId' | 'resourceSubType' | 'resourceName'
+  >
+) => {
+  if (
+    !resourceFindingsAggs ||
+    !Array.isArray(resourceFindingsAggs?.clusterId.buckets) ||
+    !Array.isArray(resourceFindingsAggs?.resourceId.buckets) ||
+    !Array.isArray(resourceFindingsAggs?.resourceSubType.buckets) ||
+    !Array.isArray(resourceFindingsAggs?.resourceName.buckets)
+  )
+    return;
+
+  return {
+    clusterId: resourceFindingsAggs.clusterId.buckets[0].key,
+    resourceId: resourceFindingsAggs.resourceId.buckets[0].key,
+    resourceSubType: resourceFindingsAggs.resourceSubType.buckets[0].key,
+    resourceName: resourceFindingsAggs.resourceName.buckets[0].key,
+  };
+};
+
 export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   const params = useParams<{ resourceId: string }>();
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
@@ -123,15 +149,10 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
     },
   });
 
-  const sharedValues = {
-    clusterId: resourceFindings.data?.aggs.clusterId.buckets[0].key,
-    resourceId: resourceFindings.data?.aggs.resourceId.buckets[0].key,
-    resourceSubType: resourceFindings.data?.aggs.resourceSubType.buckets[0].key,
-    resourceName: resourceFindings.data?.aggs.resourceName.buckets[0].key,
-  };
-
-  console.log(sharedValues);
-
+  const sharedValues = useMemo(
+    () => getSharedValues(resourceFindings.data?.aggs),
+    [resourceFindings.data?.aggs]
+  );
   const error = resourceFindings.error || baseEsQuery.error;
 
   return (
@@ -153,7 +174,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
                 'xpack.csp.findings.resourceFindings.resourceFindingsPageTitle',
                 {
                   defaultMessage: '{resourceName} - Findings',
-                  values: { resourceName: sharedValues.resourceName },
+                  values: { resourceName: sharedValues?.resourceName },
                 }
               )}
             />

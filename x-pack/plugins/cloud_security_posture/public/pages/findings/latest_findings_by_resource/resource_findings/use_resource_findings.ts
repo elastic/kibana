@@ -18,13 +18,13 @@ import { useKibana } from '../../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../latest_findings/use_latest_findings';
 import type { CspFinding, FindingsBaseEsQuery, Sort } from '../../types';
 
-interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
+interface UseResourceFindingsOptions<TAggs extends string> extends FindingsBaseEsQuery {
   resourceId: string;
   from: NonNullable<estypes.SearchRequest['from']>;
   size: NonNullable<estypes.SearchRequest['size']>;
   sort: Sort<CspFinding>;
   enabled: boolean;
-  aggs: Record<string, estypes.AggregationsAggregationContainer>;
+  aggs: Record<TAggs, estypes.AggregationsAggregationContainer>;
 }
 
 export interface ResourceFindingsQuery {
@@ -34,13 +34,14 @@ export interface ResourceFindingsQuery {
 }
 
 type ResourceFindingsRequest = IKibanaSearchRequest<estypes.SearchRequest>;
-type ResourceFindingsResponse = IKibanaSearchResponse<
-  estypes.SearchResponse<CspFinding, CountAggs>
+type ResourceFindingsResponse<TAggs extends string> = IKibanaSearchResponse<
+  estypes.SearchResponse<CspFinding, ResourceFindingsResponseAggs<TAggs>>
 >;
 
-interface CountAggs {
-  count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
-}
+export type ResourceFindingsResponseAggs<TAggs extends string> = Record<
+  'count' | TAggs,
+  estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>
+>;
 
 const getResourceFindingsQuery = ({
   query,
@@ -50,7 +51,7 @@ const getResourceFindingsQuery = ({
   pitId,
   sort,
   aggs,
-}: UseResourceFindingsOptions & { pitId: string }): estypes.SearchRequest => ({
+}: UseResourceFindingsOptions<string> & { pitId: string }): estypes.SearchRequest => ({
   from,
   size,
   body: {
@@ -68,7 +69,9 @@ const getResourceFindingsQuery = ({
   ignore_unavailable: false,
 });
 
-export const useResourceFindings = (options: UseResourceFindingsOptions) => {
+export const useResourceFindings = <TAggs extends string>(
+  options: UseResourceFindingsOptions<TAggs>
+) => {
   const {
     data,
     notifications: { toasts },
@@ -81,7 +84,7 @@ export const useResourceFindings = (options: UseResourceFindingsOptions) => {
     ['csp_resource_findings', { params }],
     () =>
       lastValueFrom(
-        data.search.search<ResourceFindingsRequest, ResourceFindingsResponse>({
+        data.search.search<ResourceFindingsRequest, ResourceFindingsResponse<TAggs>>({
           params: getResourceFindingsQuery(params),
         })
       ),
@@ -90,7 +93,7 @@ export const useResourceFindings = (options: UseResourceFindingsOptions) => {
       keepPreviousData: true,
       select: ({
         rawResponse: { hits, pit_id: newPitId, aggregations },
-      }: ResourceFindingsResponse) => {
+      }: ResourceFindingsResponse<TAggs>) => {
         if (!aggregations) throw new Error('expected aggregations to exists');
 
         if (!Array.isArray(aggregations?.count.buckets))
