@@ -22,6 +22,7 @@ import { generateApiKey } from '../../lib/indices/generate_api_key';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import { createIndexPipelineDefinitions } from '../../utils/create_pipeline_definitions';
+import { createMlInferencePipeline } from '../../utils/create_ml_inference_pipeline';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
@@ -257,6 +258,55 @@ export function registerIndexRoutes({
       const { client } = (await context.core).elasticsearch;
 
       const createResult = await createIndexPipelineDefinitions(indexName, client.asCurrentUser);
+
+      return response.ok({
+        body: createResult,
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  // {
+  //   "pipeline_name": "{string)",
+  //   "model_id": "(string)",
+  //   "source_field": "(string)",
+  //   "destination_field": "(string)" // optional
+  // }
+  router.post(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+        body: schema.object({
+          pipeline_name: schema.string(),
+          model_id: schema.string(),
+          source_field: schema.string(),
+          destination_field: schema.maybe(schema.nullable(schema.string())),
+        }),
+      },
+    },
+
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+
+      console.log("inside /internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors");
+
+
+      const {
+        pipeline_name: pipelineName,
+        model_id: modelId,
+        source_field: sourceField,
+        destination_field: destinationField,
+      } = request.body;
+
+      const createResult = await createMlInferencePipeline(
+        pipelineName,
+        modelId,
+        sourceField,
+        destinationField || `{$modelId}`,
+        client.asCurrentUser);
 
       return response.ok({
         body: createResult,
