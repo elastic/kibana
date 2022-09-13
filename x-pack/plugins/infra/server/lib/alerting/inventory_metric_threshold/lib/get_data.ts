@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AggregationsAggregate, SearchHit, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
