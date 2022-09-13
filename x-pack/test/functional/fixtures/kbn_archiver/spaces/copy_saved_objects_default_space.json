@@ -4,7 +4,6 @@
     "timeFieldName": "@timestamp",
     "title": "logstash-*"
   },
-  "coreMigrationVersion": "8.5.0",
   "id": "logstash-*",
   "migrationVersion": {
     "index-pattern": "8.0.0"
@@ -26,10 +25,9 @@
     "version": 1,
     "visState": "{\"title\":\"A Pie\",\"type\":\"pie\",\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":false,\"values\":true,\"last_level\":true,\"truncate\":100},\"dimensions\":{\"metric\":{\"accessor\":0,\"format\":{\"id\":\"number\"},\"params\":{},\"aggType\":\"count\"}},\"palette\":{\"type\":\"palette\",\"name\":\"kibana_palette\"},\"distinctColors\":true,\"legendDisplay\":\"show\",\"legendSize\":\"auto\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"geo.src\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"}}]}"
   },
-  "coreMigrationVersion": "8.5.0",
   "id": "75c3e060-1e7c-11e9-8488-65449e65d0ed",
   "migrationVersion": {
-    "visualization": "8.5.0"
+    "visualization": "8.3.0"
   },
   "references": [
     {
@@ -56,10 +54,9 @@
     "title": "A Dashboard",
     "version": 1
   },
-  "coreMigrationVersion": "8.5.0",
   "id": "my-dashboard",
   "migrationVersion": {
-    "dashboard": "8.5.0"
+    "dashboard": "8.4.0"
   },
   "references": [
     {
@@ -86,10 +83,9 @@
     "title": "Dashboard Bar",
     "version": 1
   },
-  "coreMigrationVersion": "8.5.0",
   "id": "dashboard-bar",
   "migrationVersion": {
-    "dashboard": "8.5.0"
+    "dashboard": "8.4.0"
   },
   "references": [
     {
@@ -116,10 +112,9 @@
     "title": "Dashboard Foo",
     "version": 1
   },
-  "coreMigrationVersion": "8.5.0",
   "id": "dashboard-foo",
   "migrationVersion": {
-    "dashboard": "8.5.0"
+    "dashboard": "8.4.0"
   },
   "references": [
     {
