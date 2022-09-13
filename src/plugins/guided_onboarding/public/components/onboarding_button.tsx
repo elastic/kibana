@@ -132,7 +132,7 @@ export const GuidedOnboardingButton = ({ api, application, http }: Props) => {
     <EuiPopover
       button={
         <EuiButton onClick={togglePopover} color="success" fill>
-          {i18n.translate('xpack.guidedOnboarding.guidedSetupButtonLabel', {
+          {i18n.translate('guidedOnboarding.guidedSetupButtonLabel', {
             defaultMessage: 'Guided setup{stepLabel}',
             values: {
               stepLabel,
@@ -155,7 +155,7 @@ export const GuidedOnboardingButton = ({ api, application, http }: Props) => {
           isDisabled={true}
           flush="left"
         >
-          {i18n.translate('xpack.guidedOnboarding.dropdownPanel.backToGuidesLink', {
+          {i18n.translate('guidedOnboarding.dropdownPanel.backToGuidesLink', {
             defaultMessage: 'Back to guides',
           })}
         </EuiButtonEmpty>
@@ -205,12 +205,9 @@ export const GuidedOnboardingButton = ({ api, application, http }: Props) => {
                       <EuiFlexItem grow={false}>
                         <EuiButton onClick={() => navigateToStep(step)} fill>
                           {/* TODO: Support for conditional "Continue" button label if user revists a step  */}
-                          {i18n.translate(
-                            'xpack.guidedOnboarding.dropdownPanel.startStepButtonLabel',
-                            {
-                              defaultMessage: 'Start',
-                            }
-                          )}
+                          {i18n.translate('guidedOnboarding.dropdownPanel.startStepButtonLabel', {
+                            defaultMessage: 'Start',
+                          })}
                         </EuiButton>
                       </EuiFlexItem>
                     </EuiFlexGroup>
@@ -227,7 +224,7 @@ export const GuidedOnboardingButton = ({ api, application, http }: Props) => {
           <EuiText size="xs" textAlign="center">
             <EuiTextColor color="subdued">
               <p>
-                {i18n.translate('xpack.guidedOnboarding.dropdownPanel.footerDescription', {
+                {i18n.translate('guidedOnboarding.dropdownPanel.footerDescription', {
                   defaultMessage: `Got questions? We're here to help.`,
                 })}
               </p>
