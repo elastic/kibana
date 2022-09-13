@@ -29,7 +29,6 @@ import {
 } from '@kbn/data-plugin/public';
 import { FilterEditor } from '../filter_editor/filter_editor';
 import { FilterView } from '../filter_view';
-import { getIndexPatterns } from '../../services';
 import { FilterPanelOption } from '../../types';
 
 export interface FilterItemProps {
@@ -67,7 +66,6 @@ export const FILTER_EDITOR_WIDTH = 800;
 
 export function FilterItem(props: FilterItemProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
-  const [indexPatternExists, setIndexPatternExists] = useState<boolean | undefined>(undefined);
   const [renderedComponent, setRenderedComponent] = useState('menu');
   const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false } = props;
 
@@ -76,31 +74,6 @@ export function FilterItem(props: FilterItemProps) {
       setRenderedComponent('menu');
     }
   }, [isPopoverOpen]);
-
-  useEffect(() => {
-    const index = props.filter.meta.index;
-    let isSubscribed = true;
-    if (index) {
-      getIndexPatterns()
-        .get(index)
-        .then((indexPattern) => {
-          if (isSubscribed) {
-            setIndexPatternExists(!!indexPattern);
-          }
-        })
-        .catch(() => {
-          if (isSubscribed) {
-            setIndexPatternExists(false);
-          }
-        });
-    } else if (isSubscribed) {
-      // Allow filters without an index pattern and don't validate them.
-      setIndexPatternExists(true);
-    }
-    return () => {
-      isSubscribed = false;
-    };
-  }, [props.filter.meta.index]);
 
   function handleBadgeClick(e: MouseEvent<HTMLInputElement>) {
     if (e.shiftKey) {
@@ -297,22 +270,7 @@ export function FilterItem(props: FilterItemProps) {
       return label;
     }
 
-    if (indexPatternExists === false) {
-      label.status = FILTER_ITEM_ERROR;
-      label.title = props.intl.formatMessage({
-        id: 'unifiedSearch.filter.filterBar.labelErrorText',
-        defaultMessage: `Error`,
-      });
-      label.message = props.intl.formatMessage(
-        {
-          id: 'unifiedSearch.filter.filterBar.labelErrorInfo',
-          defaultMessage: 'Index pattern {indexPattern} not found',
-        },
-        {
-          indexPattern: filter.meta.index,
-        }
-      );
-    } else if (isFilterApplicable()) {
+    if (isFilterApplicable()) {
       try {
         label.title = getDisplayValueFromFilter(filter, indexPatterns);
       } catch (e) {
@@ -343,8 +301,6 @@ export function FilterItem(props: FilterItemProps) {
     return label;
   }
 
-  // Don't render until we know if the index pattern is valid
-  if (indexPatternExists === undefined) return null;
   const valueLabelConfig = getValueLabel();
 
   // Disable errored filters and re-render
