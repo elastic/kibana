@@ -49,9 +49,15 @@ export class DashboardContainerFactoryDefinition
   public inject: EmbeddablePersistableStateService['inject'];
   public extract: EmbeddablePersistableStateService['extract'];
 
+  private getEmbeddableFactory;
+
   constructor(private readonly persistableStateService: EmbeddablePersistableStateService) {
     this.inject = createInject(this.persistableStateService);
     this.extract = createExtract(this.persistableStateService);
+
+    ({
+      embeddable: { getEmbeddableFactory: this.getEmbeddableFactory },
+    } = pluginServices.getServices());
   }
 
   public isEditable = async () => {
@@ -80,11 +86,7 @@ export class DashboardContainerFactoryDefinition
     initialInput: DashboardContainerInput,
     parent?: Container
   ): Promise<DashboardContainer | ErrorEmbeddable> => {
-    const {
-      embeddable: { getEmbeddableFactory },
-    } = pluginServices.getServices();
-
-    const controlsGroupFactory = getEmbeddableFactory<
+    const controlsGroupFactory = this.getEmbeddableFactory<
       ControlGroupInput,
       ControlGroupOutput,
       ControlGroupContainer

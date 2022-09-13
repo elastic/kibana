@@ -305,7 +305,7 @@ export const useDashboardAppState = ({
                 setDashboardAppState((s) => ({ ...s, hasUnsavedChanges }));
 
                 unsavedChanges.viewMode = current.viewMode; // always push view mode into session store.
-                dashboardSessionStorage.setState(unsavedChanges, savedDashboardId);
+                dashboardSessionStorage.setState(savedDashboardId, unsavedChanges);
               });
             });
           })

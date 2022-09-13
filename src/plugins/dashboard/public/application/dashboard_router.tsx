@@ -55,6 +55,8 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
   const { DashboardMountContext } = await import('./hooks/dashboard_mount_context');
 
   const {
+    chrome: { setBadge, docTitle },
+    dashboardCapabilities: { showWriteControls },
     data: dataStart,
     embeddable,
     settings: { uiSettings },
@@ -119,10 +121,6 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
   };
 
   const renderListingPage = (routeProps: RouteComponentProps) => {
-    const {
-      chrome: { docTitle },
-    } = pluginServices.getServices();
-
     docTitle.change(getDashboardPageTitle());
     const routeParams = parse(routeProps.history.location.search);
     const title = (routeParams.title as string) || undefined;
@@ -195,11 +193,7 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
 
   addHelpMenuToAppChrome();
 
-  if (!pluginServices.getServices().dashboardCapabilities.showWriteControls) {
-    const {
-      chrome: { setBadge },
-    } = pluginServices.getServices();
-
+  if (!showWriteControls) {
     setBadge({
       text: dashboardReadonlyBadge.getText(),
       tooltip: dashboardReadonlyBadge.getTooltip(),

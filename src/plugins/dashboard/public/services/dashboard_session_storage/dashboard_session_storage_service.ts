@@ -79,7 +79,7 @@ class DashboardSessionStorageService implements DashboardSessionStorageServiceTy
     }
   }
 
-  public setState(newState: Partial<DashboardState>, id = DASHBOARD_PANELS_UNSAVED_ID) {
+  public setState(id = DASHBOARD_PANELS_UNSAVED_ID, newState: Partial<DashboardState>) {
     try {
       const sessionStateStorage = this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY) || {};
       set(sessionStateStorage, [this.activeSpaceId, id], newState);

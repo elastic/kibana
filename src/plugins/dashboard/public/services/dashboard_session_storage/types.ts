@@ -10,8 +10,8 @@ import { DashboardState } from '../../types';
 
 export interface DashboardSessionStorageServiceType {
   clearState: (id?: string) => void;
-  getState: (id?: string) => Partial<DashboardState> | undefined;
-  setState: (newState: Partial<DashboardState>, id?: string) => void;
+  getState: (id: string | undefined) => Partial<DashboardState> | undefined;
+  setState: (id: string | undefined, newState: Partial<DashboardState>) => void;
   getDashboardIdsWithUnsavedChanges: () => string[];
   dashboardHasUnsavedEdits: (id?: string) => boolean;
 }
