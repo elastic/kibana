@@ -8,13 +8,13 @@
 import React from 'react';
 import { Story } from '@storybook/react';
 import { mockIndicatorsFiltersContext } from '../../../../common/mocks/mock_indicators_filters_context';
-import { FilterInOut } from './filter_in_out';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { IndicatorsFiltersContext } from '../../../indicators/context';
+import { FilterIn } from '.';
 
 export default {
-  component: FilterInOut,
-  title: 'FilterInOut',
+  component: FilterIn,
+  title: 'FilterIn',
 };
 
 export const Default: Story<void> = () => {
@@ -23,7 +23,7 @@ export const Default: Story<void> = () => {
 
   return (
     <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
-      <FilterInOut data={mockIndicator} field={mockField} />
+      <FilterIn data={mockIndicator} field={mockField} />
     </IndicatorsFiltersContext.Provider>
   );
 };

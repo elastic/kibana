@@ -31,7 +31,7 @@ const highLevelFields = [
   RawIndicatorFieldId.Confidence,
 ];
 
-export const TI_FLYOUT_OVERVIEW_TABLE = 'tiFlyoutOverviewTable';
+export const TI_FLYOUT_OVERVIEW_TABLE = 'tiFlyoutOverviewTableRow';
 export const TI_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS = 'tiFlyoutOverviewHighLevelBlocks';
 
 export interface IndicatorsFlyoutOverviewProps {
@@ -50,7 +50,11 @@ export const IndicatorsFlyoutOverview: VFC<IndicatorsFlyoutOverviewProps> = ({
       <EuiFlexGroup data-test-subj={TI_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS}>
         {highLevelFields.map((field) => (
           <EuiFlexItem key={field}>
-            <IndicatorBlock indicator={indicator} field={field} />
+            <IndicatorBlock
+              indicator={indicator}
+              field={field}
+              data-test-subj={TI_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS}
+            />
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>

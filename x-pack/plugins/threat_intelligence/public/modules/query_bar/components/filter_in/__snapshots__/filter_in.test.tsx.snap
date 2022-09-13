@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<FilterInOut /> should render an empty component (wrong data input) 1`] = `
+exports[`<FilterIn /> should render an empty component (wrong data input) 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
@@ -61,7 +61,7 @@ Object {
 }
 `;
 
-exports[`<FilterInOut /> should render an empty component (wrong field input) 1`] = `
+exports[`<FilterIn /> should render an empty component (wrong field input) 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
@@ -122,30 +122,13 @@ Object {
 }
 `;
 
-exports[`<FilterInOut /> should render two Component (for DataGrid use) 1`] = `
+exports[`<FilterIn /> should render one Component (for EuiDataGrid use) 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
     <div>
       <div
         css="[object Object]"
-        data-test-subj="tiFilterInComponent"
-      >
-        <button
-          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-          type="button"
-        >
-          <span
-            aria-hidden="true"
-            class="euiButtonIcon__icon"
-            color="inherit"
-            data-euiicon-type="plusInCircle"
-          />
-        </button>
-      </div>
-      <div
-        css="[object Object]"
-        data-test-subj="tiFilterOutComponent"
       >
         <button
           class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
@@ -164,23 +147,6 @@ Object {
   "container": <div>
     <div
       css="[object Object]"
-      data-test-subj="tiFilterInComponent"
-    >
-      <button
-        class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-        type="button"
-      >
-        <span
-          aria-hidden="true"
-          class="euiButtonIcon__icon"
-          color="inherit"
-          data-euiicon-type="plusInCircle"
-        />
-      </button>
-    </div>
-    <div
-      css="[object Object]"
-      data-test-subj="tiFilterOutComponent"
     >
       <button
         class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
@@ -249,7 +215,7 @@ Object {
 }
 `;
 
-exports[`<FilterInOut /> should render two EuiButtonIcon 1`] = `
+exports[`<FilterIn /> should render one EuiButtonIcon 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
@@ -257,7 +223,7 @@ Object {
       <button
         aria-label="Filter In"
         class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-        data-test-subj="tiFilterInIcon"
+        data-test-subj="abc"
         type="button"
       >
         <span
@@ -267,26 +233,13 @@ Object {
           data-euiicon-type="plusInCircle"
         />
       </button>
-      <button
-        aria-label="Filter Out"
-        class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-        data-test-subj="tiFilterOutIcon"
-        type="button"
-      >
-        <span
-          aria-hidden="true"
-          class="euiButtonIcon__icon"
-          color="inherit"
-          data-euiicon-type="minusInCircle"
-        />
-      </button>
     </div>
   </body>,
   "container": <div>
     <button
       aria-label="Filter In"
       class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-      data-test-subj="tiFilterInIcon"
+      data-test-subj="abc"
       type="button"
     >
       <span
@@ -296,18 +249,106 @@ Object {
         data-euiicon-type="plusInCircle"
       />
     </button>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`<FilterIn /> should render one EuiContextMenuItem (for EuiContextMenu use) 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <button
+        class="euiContextMenuItem euiContextMenuItem--small"
+        type="button"
+      >
+        <span
+          class="euiContextMenu__itemLayout"
+        >
+          <span
+            class="euiContextMenu__icon"
+            color="inherit"
+            data-euiicon-type="plusInCircle"
+          />
+          <span
+            class="euiContextMenuItem__text"
+          >
+            Filter In
+          </span>
+        </span>
+      </button>
+    </div>
+  </body>,
+  "container": <div>
     <button
-      aria-label="Filter Out"
-      class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-      data-test-subj="tiFilterOutIcon"
+      class="euiContextMenuItem euiContextMenuItem--small"
       type="button"
     >
       <span
-        aria-hidden="true"
-        class="euiButtonIcon__icon"
-        color="inherit"
-        data-euiicon-type="minusInCircle"
-      />
+        class="euiContextMenu__itemLayout"
+      >
+        <span
+          class="euiContextMenu__icon"
+          color="inherit"
+          data-euiicon-type="plusInCircle"
+        />
+        <span
+          class="euiContextMenuItem__text"
+        >
+          Filter In
+        </span>
+      </span>
     </button>
   </div>,
   "debug": [Function],

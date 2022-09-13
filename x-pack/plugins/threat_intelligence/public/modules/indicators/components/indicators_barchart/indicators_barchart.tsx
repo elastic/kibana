@@ -9,11 +9,9 @@ import React, { VFC } from 'react';
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 import { EuiThemeProvider } from '@elastic/eui';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
-import { AddToTimeline } from '../../../timeline/components/add_to_timeline';
+import { IndicatorBarchartLegendAction } from '../indicator_barchart_legend_action/indicator_barchart_legend_action';
 import { barChartTimeAxisLabelFormatter } from '../../../../common/utils/dates';
 import { ChartSeries } from '../../hooks/use_aggregated_indicators';
-
-export const TIMELINE_BUTTON_TEST_ID = 'tiTimelineButton';
 
 const ID = 'tiIndicator';
 const DEFAULT_CHART_HEIGHT = '200px';
@@ -54,9 +52,7 @@ export const IndicatorsBarChart: VFC<IndicatorsBarChartProps> = ({
           showLegend
           showLegendExtra
           legendPosition={Position.Right}
-          legendAction={({ label }) => (
-            <AddToTimeline data={label} field={field} testId={TIMELINE_BUTTON_TEST_ID} />
-          )}
+          legendAction={({ label }) => <IndicatorBarchartLegendAction field={field} data={label} />}
         />
         <Axis
           id={`${ID}TimeAxis`}

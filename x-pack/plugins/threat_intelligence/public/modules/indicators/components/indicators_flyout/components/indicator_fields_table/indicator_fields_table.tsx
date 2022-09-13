@@ -49,14 +49,14 @@ export const IndicatorFieldsTable: VFC<IndicatorFieldsTableProps> = ({
           actions: [
             {
               render: (field: string) => (
-                <IndicatorValueActions field={field} indicator={indicator} />
+                <IndicatorValueActions field={field} indicator={indicator} {...rest} />
               ),
               width: '72px',
             },
           ],
         },
       ] as Array<EuiBasicTableColumn<string>>,
-    [indicator]
+    [indicator, rest]
   );
 
   return <EuiInMemoryTable items={fields} columns={columns} sorting={true} {...rest} />;
