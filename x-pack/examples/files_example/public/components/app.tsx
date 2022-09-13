@@ -13,7 +13,7 @@ import type { FilesClientResponses } from '@kbn/files-plugin/public';
 const names = ['foo', 'bar', 'baz'];
 
 import {
-  EuiPageTemplate_Deprecated as EuiPageTemplate,
+  EuiPageTemplate,
   EuiInMemoryTable,
   EuiInMemoryTableProps,
   EuiButton,
@@ -26,8 +26,9 @@ import { CoreStart } from '@kbn/core/public';
 import { DetailsFlyout } from './details_flyout';
 import type { FileClients } from '../types';
 import { ConfirmButtonIcon } from './confirm_button';
+import { Modal } from './modal';
 // @ts-ignore
-import imageBase64 from '!!raw-loader!../assets/image.png.base64';
+// import imageBase64 from '!!raw-loader!../assets/image.png.base64';
 
 interface FilesExampleAppDeps {
   files: FileClients;
@@ -40,37 +41,15 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
   const { data, isLoading, error, refetch } = useQuery<ListResponse>(['files'], () =>
     files.example.list()
   );
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const [isDeletingFile, setIsDeletingFile] = useState(false);
   const [selectedItem, setSelectedItem] = useState<undefined | FileJSON>();
-
-  const uploadImage = async () => {
-    try {
-      setIsUploadingImage(true);
-      const { file } = await files.example.create({
-        name: names[Math.floor(Math.random() * names.length)],
-        alt: 'My image',
-        meta: { myValue: 'test' },
-        mimeType: 'image/png',
-      });
-      await refetch();
-      const blob = new Blob([Uint8Array.from(atob(imageBase64), (c) => c.charCodeAt(0))], {
-        type: 'image/png',
-      });
-      await files.example.upload({ id: file.id, body: blob });
-      await refetch();
-      notifications.toasts.addSuccess('Sucessfully uploaded image');
-    } finally {
-      setIsUploadingImage(false);
-    }
-  };
 
   const renderToolsRight = () => {
     return [
       <EuiButton
-        onClick={uploadImage}
-        isDisabled={isUploadingImage || isLoading || isDeletingFile}
-        isLoading={isUploadingImage}
+        onClick={() => setShowUploadModal(true)}
+        isDisabled={isLoading || isDeletingFile}
         iconType="exportAction"
       >
         Upload image
@@ -139,23 +118,22 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
 
   return (
     <>
-      <EuiPageTemplate
-        pageHeader={{
-          pageTitle: 'Files example',
-        }}
-      >
-        <EuiInMemoryTable
-          columns={columns}
-          items={items}
-          itemId="id"
-          loading={isLoading || isDeletingFile}
-          error={error ? JSON.stringify(error) : undefined}
-          sorting
-          search={{
-            toolsRight: renderToolsRight(),
-          }}
-          pagination
-        />
+      <EuiPageTemplate restrictWidth>
+        <EuiPageTemplate.Header pageTitle="Files example" />
+        <EuiPageTemplate.Section>
+          <EuiInMemoryTable
+            columns={columns}
+            items={items}
+            itemId="id"
+            loading={isLoading || isDeletingFile}
+            error={error ? JSON.stringify(error) : undefined}
+            sorting
+            search={{
+              toolsRight: renderToolsRight(),
+            }}
+            pagination
+          />
+        </EuiPageTemplate.Section>
       </EuiPageTemplate>
       {selectedItem && (
         <DetailsFlyout
@@ -164,6 +142,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
           onDismiss={() => setSelectedItem(undefined)}
         />
       )}
+      {showUploadModal && <Modal onDismiss={() => setShowUploadModal(false)} />}
     </>
   );
 };
