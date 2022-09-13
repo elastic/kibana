@@ -17,6 +17,7 @@ import { IExecutionLog, IExecutionLogResult } from '../../common';
 const DEFAULT_MAX_BUCKETS_LIMIT = 1000; // do not retrieve more than this number of executions
 
 const RULE_ID_FIELD = 'rule.id';
+const RULE_NAME_FIELD = 'rule.name';
 const PROVIDER_FIELD = 'event.provider';
 const START_FIELD = 'event.start';
 const ACTION_FIELD = 'event.action';
@@ -265,6 +266,7 @@ export function getExecutionLogAggregation({
                         ERROR_MESSAGE_FIELD,
                         VERSION_FIELD,
                         RULE_ID_FIELD,
+                        RULE_NAME_FIELD,
                       ],
                     },
                   },
@@ -336,6 +338,7 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
   const version = outcomeAndMessage ? outcomeAndMessage?.kibana?.version ?? '' : '';
 
   const ruleId = outcomeAndMessage ? outcomeAndMessage?.rule?.id ?? '' : '';
+  const ruleName = outcomeAndMessage ? outcomeAndMessage?.rule?.name ?? '' : '';
   return {
     id: bucket?.key ?? '',
     timestamp: bucket?.ruleExecution?.executeStartTime.value_as_string ?? '',
@@ -355,6 +358,7 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     schedule_delay_ms: scheduleDelayUs / Millis2Nanos,
     timed_out: timedOut,
     rule_id: ruleId,
+    rule_name: ruleName,
   };
 }
 

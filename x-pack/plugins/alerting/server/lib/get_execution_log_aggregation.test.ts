@@ -278,6 +278,7 @@ describe('getExecutionLogAggregation', () => {
                           'error.message',
                           'kibana.version',
                           'rule.id',
+                          'rule.name',
                         ],
                       },
                     },
@@ -482,6 +483,7 @@ describe('getExecutionLogAggregation', () => {
                           'error.message',
                           'kibana.version',
                           'rule.id',
+                          'rule.name',
                         ],
                       },
                     },
@@ -686,6 +688,7 @@ describe('getExecutionLogAggregation', () => {
                           'error.message',
                           'kibana.version',
                           'rule.id',
+                          'rule.name',
                         ],
                       },
                     },
@@ -776,7 +779,7 @@ describe('formatExecutionLogResult', () => {
                           _id: 'S4wIZX8B8TGQpG7XQZns',
                           _score: 1.0,
                           _source: {
-                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef', name: 'rule_name' },
                             event: {
                               outcome: 'success',
                             },
@@ -860,7 +863,7 @@ describe('formatExecutionLogResult', () => {
                           _id: 'a4wIZX8B8TGQpG7Xwpnz',
                           _score: 1.0,
                           _source: {
-                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef', name: 'rule_name' },
 
                             event: {
                               outcome: 'success',
@@ -940,6 +943,7 @@ describe('formatExecutionLogResult', () => {
           timed_out: false,
           schedule_delay_ms: 3074,
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
+          rule_name: 'rule_name',
         },
         {
           id: '41b2755e-765a-4044-9745-b03875d5e79a',
@@ -961,6 +965,7 @@ describe('formatExecutionLogResult', () => {
           timed_out: false,
           schedule_delay_ms: 3126,
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
+          rule_name: 'rule_name',
         },
       ],
     });
@@ -1015,7 +1020,7 @@ describe('formatExecutionLogResult', () => {
                           _id: 'S4wIZX8B8TGQpG7XQZns',
                           _score: 1.0,
                           _source: {
-                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef', name: 'rule_name' },
                             event: {
                               outcome: 'failure',
                             },
@@ -1102,7 +1107,7 @@ describe('formatExecutionLogResult', () => {
                           _id: 'a4wIZX8B8TGQpG7Xwpnz',
                           _score: 1.0,
                           _source: {
-                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef', name: 'rule_name' },
                             event: {
                               outcome: 'success',
                             },
@@ -1181,6 +1186,7 @@ describe('formatExecutionLogResult', () => {
           timed_out: false,
           schedule_delay_ms: 3074,
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
+          rule_name: 'rule_name',
         },
         {
           id: '41b2755e-765a-4044-9745-b03875d5e79a',
@@ -1202,6 +1208,7 @@ describe('formatExecutionLogResult', () => {
           timed_out: false,
           schedule_delay_ms: 3126,
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
+          rule_name: 'rule_name',
         },
       ],
     });
@@ -1256,7 +1263,7 @@ describe('formatExecutionLogResult', () => {
                           _id: 'dJkWa38B1ylB1EvsAckB',
                           _score: 1.0,
                           _source: {
-                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef', name: 'rule_name' },
                             event: {
                               outcome: 'success',
                             },
@@ -1335,7 +1342,7 @@ describe('formatExecutionLogResult', () => {
                           _id: 'a4wIZX8B8TGQpG7Xwpnz',
                           _score: 1.0,
                           _source: {
-                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef', name: 'rule_name' },
                             event: {
                               outcome: 'success',
                             },
@@ -1414,6 +1421,7 @@ describe('formatExecutionLogResult', () => {
           timed_out: true,
           schedule_delay_ms: 3074,
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
+          rule_name: 'rule_name',
         },
         {
           id: '41b2755e-765a-4044-9745-b03875d5e79a',
@@ -1435,6 +1443,7 @@ describe('formatExecutionLogResult', () => {
           timed_out: false,
           schedule_delay_ms: 3126,
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
+          rule_name: 'rule_name',
         },
       ],
     });
@@ -1489,7 +1498,7 @@ describe('formatExecutionLogResult', () => {
                           _id: '7xKcb38BcntAq5ycFwiu',
                           _score: 1.0,
                           _source: {
-                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef', name: 'rule_name' },
                             event: {
                               outcome: 'success',
                             },
@@ -1573,7 +1582,7 @@ describe('formatExecutionLogResult', () => {
                           _id: 'zRKbb38BcntAq5ycOwgk',
                           _score: 1.0,
                           _source: {
-                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef', name: 'rule_name' },
                             event: {
                               outcome: 'success',
                             },
@@ -1652,6 +1661,7 @@ describe('formatExecutionLogResult', () => {
           timed_out: false,
           schedule_delay_ms: 3126,
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
+          rule_name: 'rule_name',
         },
         {
           id: '61bb867b-661a-471f-bf92-23471afa10b3',
@@ -1673,6 +1683,7 @@ describe('formatExecutionLogResult', () => {
           timed_out: false,
           schedule_delay_ms: 3133,
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
+          rule_name: 'rule_name',
         },
       ],
     });

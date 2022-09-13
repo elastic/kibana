@@ -944,32 +944,7 @@ export class RulesClient {
         }
       );
 
-      const formattedResult = formatExecutionLogResult(aggResult);
-      const ruleIds = [...new Set(formattedResult.data.map((l) => l.rule_id))].filter(
-        Boolean
-      ) as string[];
-      const ruleNameIdEntries = await Promise.all(
-        ruleIds.map(async (id) => {
-          try {
-            const result = await this.get({ id });
-            return [id, result.name];
-          } catch (e) {
-            return [id, id];
-          }
-        })
-      );
-      const ruleNameIdMap: Record<string, string> = ruleNameIdEntries.reduce(
-        (result, [key, val]) => ({ ...result, [key]: val }),
-        {}
-      );
-
-      return {
-        ...formattedResult,
-        data: formattedResult.data.map((entry) => ({
-          ...entry,
-          rule_name: ruleNameIdMap[entry.rule_id!],
-        })),
-      };
+      return formatExecutionLogResult(aggResult);
     } catch (err) {
       this.logger.debug(
         `rulesClient.getGlobalExecutionLogWithAuth(): error searching global event log: ${err.message}`
