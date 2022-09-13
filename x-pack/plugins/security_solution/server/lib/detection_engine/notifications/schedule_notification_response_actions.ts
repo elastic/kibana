@@ -6,9 +6,9 @@
  */
 
 import { map, uniq } from 'lodash';
-import type { EcsMappingFormValueArray } from '../../../../common/detection_engine/transform_actions';
-import { convertECSMappingToObject } from '../../../../common/detection_engine/transform_actions';
+import type { EcsMappingFormValueArray } from '../../../../common/detection_engine/utils';
 import type { SetupPlugins } from '../../../plugin_contract';
+import { convertECSMappingToObject } from '../../../../common/detection_engine/utils';
 
 interface OsqueryQuery {
   id: string;
