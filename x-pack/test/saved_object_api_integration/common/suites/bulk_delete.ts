@@ -58,7 +58,7 @@ export function bulkDeleteTestSuiteFactory(es: Client, esArchiver: any, supertes
             const { type, id } = testCase;
             expect(object.type).to.eql(type);
             expect(object.id).to.eql(id);
-            await expectResponses.permitted(object, testCase); // takes the object (record) we're asserting against and uses the testCase's failure entry value to return the appropriate error. Asserts that the object is the expected error
+            await expectResponses.permitted(object, testCase);
           } else {
             await es.indices.refresh({ index: '.kibana' }); // alias deletion uses refresh: false, so we need to manually refresh the index before searching
             const searchResponse = await es.search({
@@ -70,17 +70,14 @@ export function bulkDeleteTestSuiteFactory(es: Client, esArchiver: any, supertes
               },
             });
 
-            const numberOfAliasesDeleted = [ALIAS_DELETE_INCLUSIVE, ALIAS_DELETE_EXCLUSIVE].find(
+            const expectAliasWasDeleted = !![ALIAS_DELETE_INCLUSIVE, ALIAS_DELETE_EXCLUSIVE].find(
               ({ type, id }) => testCase.type === type && testCase.id === id
             );
-            // use a conditional check to guard against future exclusion of these test cases
-            // we also use a dynamically calculated numberic value to allow for changing the fixtures the tests run against.
-            if (Array.isArray(numberOfAliasesDeleted)) {
-              // Eight aliases exist and they are all deleted in the bulk operation since the delete behavior when using force is to delete the object from all spaces it exists in
-              expect((searchResponse.hits.total as SearchTotalHits).value).to.eql(
-                numberOfAliasesDeleted.length
-              );
-            }
+            // Eight aliases exist and they are all deleted in the bulk operation.
+            // The delete behavior for multinamespace objects shared to more than one space when using force is to delete the object from all the spaces it is shared to.
+            expect((searchResponse.hits.total as SearchTotalHits).value).to.eql(
+              expectAliasWasDeleted ? 8 : 8
+            );
           }
         }
       }
