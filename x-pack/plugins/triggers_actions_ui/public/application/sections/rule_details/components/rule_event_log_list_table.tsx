@@ -30,13 +30,15 @@ import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filte
 import { RuleEventLogDataGrid } from './rule_event_log_data_grid';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { RuleActionErrorLogFlyout } from './rule_action_error_log_flyout';
-
+import { RuleSummary, RuleType } from '../../../../types';
 import { RefineSearchPrompt } from '../refine_search_prompt';
 import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
+import { RuleEventLogListKPIWithApi as RuleEventLogListKPI } from './rule_event_log_list_kpi';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
+import { RuleExecutionSummaryAndChartWithApi } from './rule_execution_summary_and_chart';
 
 const getParsedDate = (date: string) => {
   if (date.includes('now')) {
@@ -84,6 +86,13 @@ export type RuleEventLogListCommonProps = {
   overrideLoadExecutionLogAggregations?: RuleApis['loadExecutionLogAggregations'];
   overrideLoadGlobalExecutionLogAggregations?: RuleApis['loadGlobalExecutionLogAggregations'];
   hasRuleNames?: boolean;
+  ruleType: RuleType;
+  ruleSummary: RuleSummary;
+  numberOfExecutions: number;
+  isLoadingRuleSummary?: boolean;
+  onChangeDuration?: (duration: number) => void;
+  requestRefresh?: () => Promise<void>;
+  fetchRuleSummary?: boolean;
 } & Pick<RuleApis, 'loadExecutionLogAggregations' | 'loadGlobalExecutionLogAggregations'>;
 
 export type RuleEventLogListTableProps<T extends RuleEventLogListOptions = 'default'> =
@@ -98,6 +107,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
 ) => {
   const {
     ruleId,
+    ruleType,
     localStorageKey = RULE_EVENT_LOG_LIST_STORAGE_KEY,
     refreshToken,
     loadGlobalExecutionLogAggregations,
@@ -105,7 +115,13 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     overrideLoadGlobalExecutionLogAggregations,
     overrideLoadExecutionLogAggregations,
     initialPageSize = 10,
+    requestRefresh,
+    fetchRuleSummary = true,
     hasRuleNames = false,
+    ruleSummary,
+    numberOfExecutions,
+    onChangeDuration,
+    isLoadingRuleSummary = false,
   } = props;
 
   const { uiSettings, notifications } = useKibana().services;
@@ -150,7 +166,13 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     );
   });
 
+  const [internalRefreshToken, setInternalRefreshToken] = useState<number>(refreshToken || 0);
+
   const isInitialized = useRef(false);
+
+  useEffect(() => {
+    setInternalRefreshToken(refreshToken || 0);
+  }, [refreshToken]);
 
   const isOnLastPage = useMemo(() => {
     const { pageIndex, pageSize } = pagination;
@@ -243,6 +265,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   );
 
   const onRefresh = () => {
+    setInternalRefreshToken(Math.random());
     loadEventLogs();
   };
 
@@ -370,6 +393,24 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer />
+      <RuleEventLogListKPI
+        ruleId={ruleId}
+        dateStart={getParsedDate(dateStart)}
+        dateEnd={getParsedDate(dateEnd)}
+        refreshToken={refreshToken}
+      />
+      <EuiSpacer />
+      <RuleExecutionSummaryAndChartWithApi
+        ruleId={ruleId}
+        ruleType={ruleType}
+        numberOfExecutions={numberOfExecutions}
+        isLoadingRuleSummary={isLoadingRuleSummary}
+        refreshToken={internalRefreshToken}
+        onChangeDuration={onChangeDuration}
+        requestRefresh={requestRefresh}
+        fetchRuleSummary={true}
+      />
       <EuiSpacer />
       {renderList()}
       {isOnLastPage && (

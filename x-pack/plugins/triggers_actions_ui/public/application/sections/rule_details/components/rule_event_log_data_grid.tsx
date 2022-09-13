@@ -380,10 +380,6 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
       },
       {
         id: 'num_errored_actions',
-        actions: {
-          showSortAsc: false,
-          showSortDesc: false,
-        },
         displayAsText: numErroredActionsDisplay,
         display: <ColumnHeaderWithToolTip id="num_errored_actions" />,
         isSortable: getIsColumnSortable('num_errored_actions'),

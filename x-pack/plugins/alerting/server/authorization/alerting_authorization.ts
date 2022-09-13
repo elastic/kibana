@@ -35,6 +35,7 @@ export enum ReadOperations {
   Find = 'find',
   GetAuthorizedAlertsIndices = 'getAuthorizedAlertsIndices',
   RunSoon = 'runSoon',
+  GetExecutionKPI = 'getExecutionKPI',
 }
 
 export enum WriteOperations {

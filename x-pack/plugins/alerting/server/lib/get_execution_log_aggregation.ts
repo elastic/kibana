@@ -100,7 +100,153 @@ const ExecutionLogSortFields: Record<string, string> = {
   num_active_alerts: 'ruleExecution>numActiveAlerts',
   num_recovered_alerts: 'ruleExecution>numRecoveredAlerts',
   num_new_alerts: 'ruleExecution>numNewAlerts',
+  num_errored_actions: 'numErroredActions>_count',
 };
+
+export const getExecutionKPIAggregation = () => {
+  return {
+    excludeExecuteStart: {
+      filter: {
+        bool: {
+          must_not: [
+            {
+              term: {
+                [ACTION_FIELD]: 'execute-start',
+              },
+            },
+          ],
+        },
+      },
+      aggs: {
+        // Get total number of executions
+        executionUuidCardinality: {
+          filter: {
+            bool: {
+              must: [getProviderAndActionFilter('alerting', 'execute')],
+            },
+          },
+          aggs: {
+            executionUuidCardinality: {
+              cardinality: {
+                field: EXECUTION_UUID_FIELD,
+              },
+            },
+          },
+        },
+        executionUuid: {
+          // Bucket by execution UUID
+          terms: {
+            field: EXECUTION_UUID_FIELD,
+            size: DEFAULT_MAX_BUCKETS_LIMIT,
+          },
+          aggs: {
+            // Filter by action execute doc and get information from this event
+            actionExecution: {
+              filter: getProviderAndActionFilter('actions', 'execute'),
+              aggs: {
+                actionOutcomes: {
+                  terms: {
+                    field: OUTCOME_FIELD,
+                    size: 2,
+                  },
+                },
+              },
+            },
+            // Filter by rule execute doc and get information from this event
+            ruleExecution: {
+              filter: {
+                bool: {
+                  must: [getProviderAndActionFilter('alerting', 'execute')],
+                },
+              },
+              aggs: {
+                executeStartTime: {
+                  min: {
+                    field: START_FIELD,
+                  },
+                },
+                scheduleDelay: {
+                  max: {
+                    field: SCHEDULE_DELAY_FIELD,
+                  },
+                },
+                totalSearchDuration: {
+                  max: {
+                    field: TOTAL_SEARCH_DURATION_FIELD,
+                  },
+                },
+                esSearchDuration: {
+                  max: {
+                    field: ES_SEARCH_DURATION_FIELD,
+                  },
+                },
+                numTriggeredActions: {
+                  max: {
+                    field: NUMBER_OF_TRIGGERED_ACTIONS_FIELD,
+                  },
+                },
+                numGeneratedActions: {
+                  max: {
+                    field: NUMBER_OF_GENERATED_ACTIONS_FIELD,
+                  },
+                },
+                numActiveAlerts: {
+                  max: {
+                    field: NUMBER_OF_ACTIVE_ALERTS_FIELD,
+                  },
+                },
+                numRecoveredAlerts: {
+                  max: {
+                    field: NUMBER_OF_RECOVERED_ALERTS_FIELD,
+                  },
+                },
+                numNewAlerts: {
+                  max: {
+                    field: NUMBER_OF_NEW_ALERTS_FIELD,
+                  },
+                },
+                executionDuration: {
+                  max: {
+                    field: DURATION_FIELD,
+                  },
+                },
+                outcomeAndMessage: {
+                  top_hits: {
+                    size: 1,
+                    _source: {
+                      includes: [
+                        OUTCOME_FIELD,
+                        MESSAGE_FIELD,
+                        ERROR_MESSAGE_FIELD,
+                        VERSION_FIELD,
+                        RULE_ID_FIELD,
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+            // If there was a timeout, this filter will return non-zero doc count
+            timeoutMessage: {
+              filter: getProviderAndActionFilter('alerting', 'execute-timeout'),
+            },
+            // Filter out execution UUID buckets where ruleExecution doc count is 0
+            minExecutionUuidBucket: {
+              bucket_selector: {
+                buckets_path: {
+                  count: 'ruleExecution._count',
+                },
+                script: {
+                  source: 'params.count > 0',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+}
 
 export function getExecutionLogAggregation({
   filter,
@@ -138,6 +284,16 @@ export function getExecutionLogAggregation({
     throw Boom.badRequest(`Invalid kuery syntax for filter ${filter}`);
   }
 
+  const termSort = (sort as estypes.SortCombinations[]).filter((s) => !Object.keys(s).includes('num_errored_actions'));
+
+  if (!termSort.length) {
+    termSort.push({
+      timestamp: {
+        order: 'desc',
+      },
+    });
+  }
+
   return {
     excludeExecuteStart: {
       filter: {
@@ -173,7 +329,7 @@ export function getExecutionLogAggregation({
           terms: {
             field: EXECUTION_UUID_FIELD,
             size: DEFAULT_MAX_BUCKETS_LIMIT,
-            order: formatSortForTermSort(sort),
+            order: formatSortForTermSort(termSort),
           },
           aggs: {
             // Bucket sort to allow paging through executions
@@ -188,6 +344,37 @@ export function getExecutionLogAggregation({
             // Filter by action execute doc and get information from this event
             actionExecution: {
               filter: getProviderAndActionFilter('actions', 'execute'),
+              aggs: {
+                actionOutcomes: {
+                  terms: {
+                    field: OUTCOME_FIELD,
+                    size: 2,
+                  },
+                },
+              },
+            },
+            numErroredActions: {
+              filter: {
+                bool: {
+                  must: [
+                    {
+                      match: {
+                        [ACTION_FIELD]: 'execute',
+                      },
+                    },
+                    {
+                      match: {
+                        [PROVIDER_FIELD]: 'actions',
+                      },
+                    },
+                    {
+                      match: {
+                        [OUTCOME_FIELD]: 'failure',
+                      },
+                    },
+                  ],
+                },
+              },
               aggs: {
                 actionOutcomes: {
                   terms: {
@@ -360,6 +547,60 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     rule_id: ruleId,
     rule_name: ruleName,
   };
+}
+
+function formatExecutionKPIAggBuckets(buckets: IExecutionUuidAggBucket[] = []) {
+  const initialResponse = {
+    success: 0,
+    unknown: 0,
+    failure: 0,
+    activeAlerts: 0,
+    newAlerts: 0,
+    recoveredAlerts: 0,
+    erroredActions: 0,
+    triggeredActions: 0,
+  }
+
+  if (!buckets?.length) {
+    return initialResponse;
+  }
+
+  buckets.forEach((bucket) => {
+    const outcomeAndMessage = bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source;
+    const status = outcomeAndMessage ? outcomeAndMessage?.event?.outcome ?? '' : '';
+
+    const actionExecutionOutcomes = bucket?.actionExecution?.actionOutcomes?.buckets ?? [];
+    const actionExecutionError =
+      actionExecutionOutcomes.find((subBucket) => subBucket?.key === 'failure')?.doc_count ?? 0;
+
+    initialResponse.activeAlerts += bucket?.ruleExecution?.numActiveAlerts?.value ?? 0;
+    initialResponse.newAlerts += bucket?.ruleExecution?.numNewAlerts?.value ?? 0;
+    initialResponse.recoveredAlerts += bucket?.ruleExecution?.numRecoveredAlerts?.value ?? 0;
+    initialResponse.erroredActions += actionExecutionError;
+    initialResponse.triggeredActions += bucket?.ruleExecution?.numTriggeredActions?.value ?? 0;
+
+    if (status === 'success') {
+      initialResponse.success += 1;
+    } else if (status === 'failure') {
+      initialResponse.failure += 1;
+    } else {
+      initialResponse.unknown += 1;
+    }
+  });
+  return initialResponse;
+}
+
+export function formatExecutionKPIResult(
+  results: AggregateEventsBySavedObjectResult
+) {
+  const { aggregations } = results;
+  if (!aggregations || !aggregations.excludeExecuteStart) {
+    return EMPTY_EXECUTION_LOG_RESULT;
+  }
+  const aggs = aggregations.excludeExecuteStart as ExcludeExecuteStartAggResult;
+  const buckets = aggs.executionUuid.buckets;
+
+  return formatExecutionKPIAggBuckets(buckets);
 }
 
 export function formatExecutionLogResult(

@@ -43,6 +43,8 @@ import {
   LoadActionErrorLogProps,
   snoozeRule,
   unsnoozeRule,
+  loadExecutionKPIAggregations,
+  LoadExecutionKPIAggregationsProps,
 } from '../../../lib/rule_api';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -69,6 +71,7 @@ export interface ComponentOpts {
   loadRuleState: (id: Rule['id']) => Promise<RuleTaskState>;
   loadRuleSummary: (id: Rule['id'], numberOfExecutions?: number) => Promise<RuleSummary>;
   loadRuleTypes: () => Promise<RuleType[]>;
+  loadExecutionKPIAggregations: (props: LoadExecutionKPIAggregationsProps) => Promise<any>;
   loadExecutionLogAggregations: (
     props: LoadExecutionLogAggregationsProps
   ) => Promise<IExecutionLogResult>;
@@ -167,6 +170,12 @@ export function withBulkRuleOperations<T>(
         loadActionErrorLog={async (loadProps: LoadActionErrorLogProps) =>
           loadActionErrorLog({
             ...loadProps,
+            http,
+          })
+        }
+        loadExecutionKPIAggregations={async (loadExecutionKPIAggregationProps: LoadExecutionKPIAggregationsProps) => 
+          loadExecutionKPIAggregations({
+            ...loadExecutionKPIAggregationProps,
             http,
           })
         }

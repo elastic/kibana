@@ -27,6 +27,7 @@ export enum RuleAuditAction {
   GET_EXECUTION_LOG = 'rule_get_execution_log',
   GET_GLOBAL_EXECUTION_LOG = 'rule_get_global_execution_log',
   GET_ACTION_ERROR_LOG = 'rule_get_action_error_log',
+  GET_EXECUTION_KPI = 'rule_get_execution_kpi',
   SNOOZE = 'rule_snooze',
   UNSNOOZE = 'rule_unsnooze',
   RUN_SOON = 'rule_run_soon',
@@ -68,6 +69,7 @@ const eventVerbs: Record<RuleAuditAction, VerbsTuple> = {
   rule_snooze: ['snooze', 'snoozing', 'snoozed'],
   rule_unsnooze: ['unsnooze', 'unsnoozing', 'unsnoozed'],
   rule_run_soon: ['run', 'running', 'ran'],
+  rule_get_execution_kpi: ['access execution KPI for', 'accessing execution KPI for', 'accessed execution KPI for']
 };
 
 const eventTypes: Record<RuleAuditAction, EcsEventType> = {
@@ -91,7 +93,11 @@ const eventTypes: Record<RuleAuditAction, EcsEventType> = {
   rule_get_action_error_log: 'access',
   rule_snooze: 'change',
   rule_unsnooze: 'change',
+<<<<<<< HEAD
   rule_run_soon: 'access',
+=======
+  rule_get_execution_kpi: 'access',
+>>>>>>> WIP
 };
 
 export interface RuleAuditEventParams {
