@@ -436,30 +436,36 @@ export class SyntheticsService {
 
     const monitors: Array<SavedObject<SyntheticsMonitorWithSecrets>> = (
       await Promise.all(
-        encryptedMonitors.map((monitor) => {
-          try {
-            return encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
-              syntheticsMonitor.name,
-              monitor.id,
-              {
-                namespace: monitor.namespaces?.[0],
-              }
-            );
-          } catch (e) {
-            this.logger.error(e);
-            sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
-              reason: 'Failed to decrypt monitor',
-              message: e?.message,
-              type: 'runTaskError',
-              code: e?.code,
-              status: e.status,
-              kibanaVersion: this.server.kibanaVersion,
-            });
-            return null;
-          }
-        })
+        encryptedMonitors.map(
+          (monitor) =>
+            new Promise((resolve) => {
+              encryptedClient
+                .getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
+                  syntheticsMonitor.name,
+                  monitor.id,
+                  {
+                    namespace: monitor.namespaces?.[0],
+                  }
+                )
+                .then((decryptedMonitor) => resolve(decryptedMonitor))
+                .catch((e) => {
+                  this.logger.error(e);
+                  sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
+                    reason: 'Failed to decrypt monitor',
+                    message: e?.message,
+                    type: 'runTaskError',
+                    code: e?.code,
+                    status: e.status,
+                    kibanaVersion: this.server.kibanaVersion,
+                  });
+                  resolve(null);
+                });
+            })
+        )
       )
     ).filter((monitor) => monitor !== null) as Array<SavedObject<SyntheticsMonitorWithSecrets>>;
+
+    console.warn('monitors', monitors);
 
     const end = performance.now();
     const duration = end - start;
