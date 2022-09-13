@@ -39,7 +39,7 @@ function getStaticAlertData() {
 
   return {
     isLoading: false,
-    alert
+    alert,
   };
 }
 
