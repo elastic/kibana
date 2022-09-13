@@ -27,7 +27,7 @@ import {
 } from './metric';
 import { SUPPORTED_METRICS } from './supported_metrics';
 import { CommonColumnConverterArgs, OtherParentPipelineAggs } from './types';
-import { PIPELINE_AGGS } from './constants';
+import { PIPELINE_AGGS, SIBLING_PIPELINE_AGGS } from './constants';
 
 export type ParentPipelineAggColumn = MovingAverageColumn | DerivativeColumn | CumulativeSumColumn;
 
@@ -63,6 +63,10 @@ export const convertToOtherParentPipelineAggColumns = (
   }
 
   const metric = convertToSchemaConfig(customMetric) as SchemaConfig<MetricsWithoutSpecialParams>;
+
+  if (SIBLING_PIPELINE_AGGS.includes(metric.aggType)) {
+    return null;
+  }
 
   if (PIPELINE_AGGS.includes(metric.aggType)) {
     const formula = getFormulaForPipelineAgg(agg, reducedTimeRange);
@@ -113,9 +117,13 @@ export const convertToCumulativeSumAggColumn = (
   if (!subAgg) {
     return null;
   }
+  const metric = convertToSchemaConfig(customMetric) as SchemaConfig<MetricsWithoutSpecialParams>;
+
+  if (SIBLING_PIPELINE_AGGS.includes(metric.aggType)) {
+    return null;
+  }
 
   if ((!customMetric.getField() && subAgg.name === 'count') || subAgg.name === 'sum') {
-    const metric = convertToSchemaConfig(customMetric) as SchemaConfig<MetricsWithoutSpecialParams>;
     // create column for sum or count
     const subMetric = convertMetricAggregationColumnWithoutSpecialParams(
       subAgg,

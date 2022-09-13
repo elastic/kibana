@@ -102,7 +102,7 @@ export const convertMetricAggregationColumnWithoutSpecialParams = (
     ...createColumn(agg, field, {
       reducedTimeRange,
     }),
-    params: { ...getFormat(agg.format) },
+    params: { ...getFormat() },
     timeShift: agg.aggParams?.timeShift,
   };
 };

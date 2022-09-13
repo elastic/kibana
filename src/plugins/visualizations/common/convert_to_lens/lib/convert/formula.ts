@@ -20,7 +20,7 @@ export const createFormulaColumn = (formula: string, agg: SchemaConfig): Formula
     operationType: 'formula',
     references: [],
     ...createColumn(agg),
-    params: { ...params, ...getFormat(agg.format) },
+    params: { ...params, ...getFormat() },
     timeShift: agg.aggParams?.timeShift,
   };
 };

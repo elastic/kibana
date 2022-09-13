@@ -26,7 +26,7 @@ export const convertToLastValueColumn = (
   { agg, dataView }: CommonColumnConverterArgs<METRIC_TYPES.TOP_HITS | METRIC_TYPES.TOP_METRICS>,
   reducedTimeRange?: string
 ): LastValueColumn | null => {
-  const { aggParams, format } = agg;
+  const { aggParams } = agg;
 
   if (
     (aggParams?.size && Number(aggParams?.size) !== 1) ||
@@ -55,7 +55,7 @@ export const convertToLastValueColumn = (
     ...createColumn(agg, field, { reducedTimeRange }),
     params: {
       ...convertToLastValueParams(agg),
-      ...getFormat(format),
+      ...getFormat(),
     },
   };
 };

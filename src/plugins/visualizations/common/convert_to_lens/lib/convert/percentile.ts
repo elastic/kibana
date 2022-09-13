@@ -93,7 +93,7 @@ export const convertToPercentileColumn = (
     operationType: 'percentile',
     sourceField: field.name,
     ...commonColumnParams,
-    params: { ...params, ...getFormat(agg.format) },
+    params: { ...params, ...getFormat() },
     label: getLabelForPercentile(agg),
     meta:
       index !== undefined
