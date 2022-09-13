@@ -7,6 +7,7 @@
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { orderBy } from 'lodash';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import {
   SERVICE_NAME,
@@ -18,7 +19,6 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { Setup } from '../../../lib/helpers/setup_request';
-import { orderBy } from 'lodash';
 
 const TRACE_SAMPLES_SIZE = 500;
 
