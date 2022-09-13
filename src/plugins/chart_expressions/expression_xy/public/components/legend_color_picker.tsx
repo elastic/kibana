@@ -15,6 +15,7 @@ import {
   DatatablesWithFormatInfo,
   getMetaFromSeriesId,
   getSeriesName,
+  hasMultipleLayersWithSplits,
   LayersAccessorsTitles,
   LayersFieldFormats,
 } from '../helpers';
@@ -90,6 +91,7 @@ export const LegendColorPickerWrapper: LegendColorPicker = ({
           splitAccessorsFormats: fieldFormats[layer.layerId].splitSeriesAccessors,
           alreadyFormattedColumns: formattedDatatables[layer.layerId].formattedColumns,
           columnToLabelMap: layer.columnToLabel ? JSON.parse(layer.columnToLabel) : {},
+          multipleLayersWithSplits: hasMultipleLayersWithSplits(dataLayers),
         },
         titles[layer.layerId]
       )?.toString() || ''

@@ -15,6 +15,7 @@ import { LegendActionPopover } from './legend_action_popover';
 import {
   DatatablesWithFormatInfo,
   getSeriesName,
+  hasMultipleLayersWithSplits,
   LayersAccessorsTitles,
   LayersFieldFormats,
 } from '../helpers';
@@ -85,6 +86,7 @@ export const getLegendAction = (
               splitAccessorsFormats: fieldFormats[layer.layerId].splitSeriesAccessors,
               alreadyFormattedColumns: formattedDatatables[layer.layerId].formattedColumns,
               columnToLabelMap: layer.columnToLabel ? JSON.parse(layer.columnToLabel) : {},
+              multipleLayersWithSplits: hasMultipleLayersWithSplits(dataLayers),
             },
             titles
           )?.toString() || ''
