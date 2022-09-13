@@ -8,6 +8,8 @@
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { registerDeploymentMetadataRoute } from './routes/deployment_metadata';
+import { EssMetadataService } from './ess_metadata_service';
 import { registerCloudDeploymentIdAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { CloudConfigType } from './config';
 import { registerCloudUsageCollector } from './collectors';
@@ -37,18 +39,46 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   private readonly logger: Logger;
   private readonly config: CloudConfigType;
   private readonly isDev: boolean;
+  private readonly essMetadataService?: EssMetadataService;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
     this.config = this.context.config.get<CloudConfigType>();
     this.isDev = this.context.env.mode.dev;
+
+    const deploymentId = parseDeploymentIdFromDeploymentUrl(this.config.deployment_url);
+    if (this.config.ess_api && deploymentId) {
+      this.essMetadataService = new EssMetadataService(
+        {
+          cache_ttl: this.config.cache_ttl.asMilliseconds(),
+          ess_api: this.config.ess_api,
+          deploymentId,
+        },
+        this.logger.get('ess-metadata')
+      );
+    }
   }
 
   public setup(core: CoreSetup, { usageCollection, security }: PluginsSetup): CloudSetup {
     this.logger.debug('Setting up Cloud plugin');
     const isCloudEnabled = getIsCloudEnabled(this.config.id);
-    registerCloudDeploymentIdAnalyticsContext(core.analytics, this.config.id);
-    registerCloudUsageCollector(usageCollection, { isCloudEnabled });
+    const deploymentId = parseDeploymentIdFromDeploymentUrl(this.config.deployment_url);
+    registerCloudDeploymentIdAnalyticsContext(
+      core.analytics,
+      this.config.id,
+      this.essMetadataService?.cachedMetadata$
+    );
+    registerCloudUsageCollector(usageCollection, {
+      isCloudEnabled,
+      deploymentMetadata$: this.essMetadataService?.cachedMetadata$,
+    });
+
+    if (this.essMetadataService) {
+      registerDeploymentMetadataRoute({
+        httpRouter: core.http.createRouter(),
+        deploymentMetadata$: this.essMetadataService.cachedMetadata$,
+      });
+    }
 
     if (isCloudEnabled) {
       security?.setIsElasticCloudDeployment();
@@ -73,7 +103,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     return {
       cloudId: this.config.id,
       instanceSizeMb: readInstanceSizeMb(),
-      deploymentId: parseDeploymentIdFromDeploymentUrl(this.config.deployment_url),
+      deploymentId,
       isCloudEnabled,
       apm: {
         url: this.config.apm?.url,
@@ -83,4 +113,8 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   }
 
   public start() {}
+
+  public stop() {
+    this.essMetadataService?.stop();
+  }
 }

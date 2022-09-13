@@ -5,15 +5,4 @@
  * 2.0.
  */
 
-export interface GetChatUserDataResponseBody {
-  token: string;
-  email: string;
-  id: string;
-}
-
-export interface EssDeploymentMetadata {
-  deploymentId: string;
-  organizationId?: string;
-  inTrial?: boolean;
-  isElasticStaffOrganization?: boolean;
-}
+export { EssMetadataService, type EssDeploymentMetadata } from './ess_metadata_service';

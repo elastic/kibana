@@ -47,6 +47,22 @@ const configSchema = schema.object({
   id: schema.maybe(schema.string()),
   organization_url: schema.maybe(schema.string()),
   profile_url: schema.maybe(schema.string()),
+  /**
+   * How often do we cache the ESS information to avoid performing extra requests.
+   */
+  cache_ttl: schema.duration({ defaultValue: '1h' }),
+  /**
+   * Optional settings from Cloud to let Kibana fetch information from their Public APIs.
+   * Documentation on the API is https://www.elastic.co/guide/en/cloud/current/ec-restful-api.html
+   */
+  ess_api: schema.maybe(
+    schema.object({
+      host: schema.string({ defaultValue: 'https://api.elastic-cloud.com' }),
+      auth: schema.object({
+        api_key: schema.string(),
+      }),
+    })
+  ),
 });
 
 export type CloudConfigType = TypeOf<typeof configSchema>;

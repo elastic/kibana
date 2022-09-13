@@ -11,13 +11,14 @@ import type {
   CoreStart,
   Plugin,
   PluginInitializerContext,
+  HttpSetup,
   HttpStart,
   IBasePath,
   AnalyticsServiceSetup,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, catchError, from, map, of } from 'rxjs';
+import { BehaviorSubject, catchError, defer, from, map, Observable, of } from 'rxjs';
 
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
@@ -29,7 +30,7 @@ import {
   CLOUD_SNAPSHOTS_PATH,
   GET_CHAT_USER_DATA_ROUTE_PATH,
 } from '../common/constants';
-import type { GetChatUserDataResponseBody } from '../common/types';
+import type { EssDeploymentMetadata, GetChatUserDataResponseBody } from '../common/types';
 import { createUserMenuLinks } from './user_menu_links';
 import { getFullCloudUrl } from './utils';
 import { ChatConfig, ServicesProvider } from './services';
@@ -102,7 +103,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   }
 
   public setup(core: CoreSetup, { home, security }: CloudSetupDependencies) {
-    this.setupTelemetryContext(core.analytics, security, this.config.id);
+    this.setupTelemetryContext(core.analytics, core.http, security, this.config.id);
 
     this.setupFullStory({ analytics: core.analytics, basePath: core.http.basePath }).catch((e) =>
       // eslint-disable-next-line no-console
@@ -248,16 +249,22 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   /**
    * Set up the Analytics context providers.
    * @param analytics Core's Analytics service. The Setup contract.
+   * @param http Core's Http service. The Setup contract.
    * @param security The security plugin.
    * @param cloudId The Cloud Org ID.
    * @private
    */
   private setupTelemetryContext(
     analytics: AnalyticsServiceSetup,
+    http: HttpSetup,
     security?: Pick<SecurityPluginSetup, 'authc'>,
     cloudId?: string
   ) {
-    registerCloudDeploymentIdAnalyticsContext(analytics, cloudId);
+    const deploymentMetadata$: Observable<EssDeploymentMetadata> = defer(() =>
+      http.get<EssDeploymentMetadata>('/internal/cloud/deployment_metadata')
+    );
+
+    registerCloudDeploymentIdAnalyticsContext(analytics, cloudId, deploymentMetadata$);
 
     if (security) {
       analytics.registerContextProvider({
