@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
+/* eslint-disable complexity */
+
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { isEqual, uniq } from 'lodash';
+import { useCasesFeatures } from '../../../common/use_cases_features';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetConnectors } from '../../../containers/configure/use_connectors';
@@ -29,7 +32,6 @@ import { getConnectorById } from '../../utils';
 import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
 import { useGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
 import { AssignUsers } from './assign_users';
-import { SidebarSection } from './sidebar_section';
 import { Assignee } from '../../user_profiles/types';
 
 export const CaseViewActivity = ({
@@ -47,6 +49,7 @@ export const CaseViewActivity = ({
 }) => {
   const { permissions } = useCasesContext();
   const { getCaseViewUrl } = useCaseViewNavigation();
+  const { caseAssignmentAuthorized, pushToServiceAuthorized } = useCasesFeatures();
 
   const { data: userActionsData, isLoading: isLoadingUserActions } = useGetCaseUserActions(
     caseData.id,
@@ -186,15 +189,18 @@ export const CaseViewActivity = ({
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
-        <SidebarSection>
-          <AssignUsers
-            caseAssignees={caseData.assignees}
-            currentUserProfile={currentUserProfile}
-            onAssigneesChanged={onUpdateAssignees}
-            isLoading={isLoadingAssigneeData}
-            userProfiles={userProfiles ?? new Map()}
-          />
-        </SidebarSection>
+        {caseAssignmentAuthorized ? (
+          <>
+            <AssignUsers
+              caseAssignees={caseData.assignees}
+              currentUserProfile={currentUserProfile}
+              onAssigneesChanged={onUpdateAssignees}
+              isLoading={isLoadingAssigneeData}
+              userProfiles={userProfiles ?? new Map()}
+            />
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
         <SeveritySidebarSelector
           isDisabled={!permissions.update}
           isLoading={isLoading}
@@ -206,6 +212,7 @@ export const CaseViewActivity = ({
           email={emailContent}
           headline={i18n.REPORTER}
           users={[caseData.createdBy]}
+          userProfiles={userProfiles}
         />
         {userActionsData?.participants ? (
           <UserList
@@ -214,6 +221,7 @@ export const CaseViewActivity = ({
             headline={i18n.PARTICIPANTS}
             loading={isLoadingUserActions}
             users={userActionsData.participants}
+            userProfiles={userProfiles}
           />
         ) : null}
         <EditTags
@@ -221,7 +229,7 @@ export const CaseViewActivity = ({
           onSubmit={onSubmitTags}
           isLoading={isLoading && loadingKey === 'tags'}
         />
-        {userActionsData ? (
+        {pushToServiceAuthorized && userActionsData ? (
           <EditConnector
             caseData={caseData}
             caseServices={userActionsData.caseServices}

@@ -35,14 +35,15 @@ export const isPanelVersionTooOld = (panels: RawDashboardState['panels']) => {
 export const syncDashboardUrlState = ({
   dispatchDashboardStateChange,
   getLatestDashboardState,
-  query: queryService,
   kbnUrlStateStorage,
-  notifications,
 }: SyncDashboardUrlStateProps) => {
   /**
    * Loads any dashboard state from the URL, and removes the state from the URL.
    */
   const loadAndRemoveDashboardState = (): Partial<DashboardState> => {
+    const {
+      notifications: { toasts },
+    } = pluginServices.getServices();
     const rawAppStateInUrl = kbnUrlStateStorage.get<RawDashboardState>(DASHBOARD_STATE_STORAGE_KEY);
     if (!rawAppStateInUrl) return {};
 
@@ -85,7 +86,6 @@ export const syncDashboardUrlState = ({
       applyDashboardFilterState({
         currentDashboardState: updatedDashboardState,
         kbnUrlStateStorage,
-        queryService,
       });
 
       if (Object.keys(stateFromUrl).length === 0) return;

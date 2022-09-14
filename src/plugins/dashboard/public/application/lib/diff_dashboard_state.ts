@@ -9,12 +9,11 @@
 import { xor, omit, isEmpty } from 'lodash';
 import fastIsEqual from 'fast-deep-equal';
 import { compareFilters, COMPARE_ALL_OPTIONS, type Filter, isFilterPinned } from '@kbn/es-query';
+import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import { persistableControlGroupInputIsEqual } from '@kbn/controls-plugin/common';
 import { DashboardContainerInput } from '../..';
-import { DashboardOptions, DashboardState } from '../../types';
-import { IEmbeddable } from '../../services/embeddable';
-import { DashboardPanelMap } from '../embeddable';
+import { DashboardOptions, DashboardPanelMap, DashboardState } from '../../types';
 
 const stateKeystoIgnore = [
   'expandedPanelId',

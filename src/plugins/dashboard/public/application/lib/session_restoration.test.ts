@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { createSessionRestorationDataProvider } from '.';
-import { DashboardState } from '../../types';
+import { getSavedDashboardMock } from '../test_helpers';
+import { createSessionRestorationDataProvider, savedObjectToDashboardState } from '.';
+import { pluginServices } from '../../services/plugin_services';
 
 describe('createSessionRestorationDataProvider', () => {
-  const mockDataPlugin = dataPluginMock.createStartContract();
-  const version = '8.0.0';
   const searchSessionInfoProvider = createSessionRestorationDataProvider({
     kibanaVersion: version,
     data: mockDataPlugin,
@@ -24,9 +22,9 @@ describe('createSessionRestorationDataProvider', () => {
   describe('session state', () => {
     test('restoreState has sessionId and initialState has not', async () => {
       const searchSessionId = 'id';
-      (mockDataPlugin.search.session.getSessionId as jest.Mock).mockImplementation(
-        () => searchSessionId
-      );
+      (
+        pluginServices.getServices().data.search.session.getSessionId as jest.Mock
+      ).mockImplementation(() => searchSessionId);
       const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
       expect(initialState.searchSessionId).toBeUndefined();
       expect(restoreState.searchSessionId).toBe(searchSessionId);
@@ -35,12 +33,12 @@ describe('createSessionRestorationDataProvider', () => {
     test('restoreState has absoluteTimeRange', async () => {
       const relativeTime = 'relativeTime';
       const absoluteTime = 'absoluteTime';
-      (mockDataPlugin.query.timefilter.timefilter.getTime as jest.Mock).mockImplementation(
-        () => relativeTime
-      );
-      (mockDataPlugin.query.timefilter.timefilter.getAbsoluteTime as jest.Mock).mockImplementation(
-        () => absoluteTime
-      );
+      (
+        pluginServices.getServices().data.query.timefilter.timefilter.getTime as jest.Mock
+      ).mockImplementation(() => relativeTime);
+      (
+        pluginServices.getServices().data.query.timefilter.timefilter.getAbsoluteTime as jest.Mock
+      ).mockImplementation(() => absoluteTime);
       const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
       expect(initialState.timeRange).toBe(relativeTime);
       expect(restoreState.timeRange).toBe(absoluteTime);

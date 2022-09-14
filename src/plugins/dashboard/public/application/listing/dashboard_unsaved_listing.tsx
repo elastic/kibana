@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import React, { useCallback, useEffect, useState } from 'react';
+
 import {
   EuiButtonEmpty,
   EuiCallOut,
@@ -18,12 +20,10 @@ import {
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { dashboardUnsavedListingStrings, getNewDashboardTitle } from '../../dashboard_strings';
-import { findDashboardSavedObjectsByIds } from '../../dashboard_saved_object';
-import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
-import { DashboardAppServices, DashboardRedirect } from '../../types';
+import type { DashboardAppServices, DashboardRedirect } from '../../types';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
-import { useKibana } from '../../services/kibana_react';
-import { DashboardAttributes } from '../embeddable';
+import { pluginServices } from '../../services/plugin_services';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../../services/dashboard_session_storage/dashboard_session_storage_service';
 
 const DashboardUnsavedItem = ({
   id,
@@ -116,12 +116,9 @@ export const DashboardUnsavedListing = ({
   refreshUnsavedDashboards,
 }: DashboardUnsavedListingProps) => {
   const {
-    services: {
-      savedObjectsClient,
-      core: { overlays },
-      dashboardSessionStorage,
-    },
-  } = useKibana<DashboardAppServices>();
+    dashboardSessionStorage,
+    savedObjects: { client: savedObjectsClient },
+  } = pluginServices.getServices();
 
   const [items, setItems] = useState<UnsavedItemMap>({});
 
@@ -134,12 +131,12 @@ export const DashboardUnsavedListing = ({
 
   const onDiscard = useCallback(
     (id?: string) => {
-      confirmDiscardUnsavedChanges(overlays, () => {
+      confirmDiscardUnsavedChanges(() => {
         dashboardSessionStorage.clearState(id);
         refreshUnsavedDashboards();
       });
     },
-    [overlays, refreshUnsavedDashboards, dashboardSessionStorage]
+    [refreshUnsavedDashboards, dashboardSessionStorage]
   );
 
   useEffect(() => {

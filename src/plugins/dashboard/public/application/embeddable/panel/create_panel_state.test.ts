@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableInput } from '../../../services/embeddable';
+import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { CONTACT_CARD_EMBEDDABLE } from '@kbn/embeddable-plugin/public/lib/test_samples';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../dashboard_constants';
 import { DashboardPanelState } from '../types';

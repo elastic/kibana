@@ -24,11 +24,16 @@ import {
   ContainerOutput,
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
-} from '../../services/embeddable';
+} from '@kbn/embeddable-plugin/public';
+
 import { DashboardContainerInput } from '../..';
-import { createExtract, createInject } from '../../../common';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
-import type { DashboardContainer, DashboardContainerServices } from './dashboard_container';
+import type { DashboardContainer } from './dashboard_container';
+import {
+  createExtract,
+  createInject,
+} from '../../../common/embeddable/dashboard_container_persistable_state';
+import { pluginServices } from '../../services/plugin_services';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,
@@ -45,10 +50,7 @@ export class DashboardContainerFactoryDefinition
   public inject: EmbeddablePersistableStateService['inject'];
   public extract: EmbeddablePersistableStateService['extract'];
 
-  constructor(
-    private readonly getStartServices: () => Promise<DashboardContainerServices>,
-    private readonly persistableStateService: EmbeddablePersistableStateService
-  ) {
+  constructor(private readonly persistableStateService: EmbeddablePersistableStateService) {
     this.inject = createInject(this.persistableStateService);
     this.extract = createExtract(this.persistableStateService);
   }
@@ -79,8 +81,11 @@ export class DashboardContainerFactoryDefinition
     initialInput: DashboardContainerInput,
     parent?: Container
   ): Promise<DashboardContainer | ErrorEmbeddable> => {
-    const services = await this.getStartServices();
-    const controlsGroupFactory = services.embeddable.getEmbeddableFactory<
+    const {
+      embeddable: { getEmbeddableFactory },
+    } = pluginServices.getServices();
+
+    const controlsGroupFactory = getEmbeddableFactory<
       ControlGroupInput,
       ControlGroupOutput,
       ControlGroupContainer
@@ -95,10 +100,11 @@ export class DashboardContainerFactoryDefinition
       filters,
       query,
     });
+
     const { DashboardContainer: DashboardContainerEmbeddable } = await import(
       './dashboard_container'
     );
 
-    return new DashboardContainerEmbeddable(initialInput, services, parent, controlGroup);
+    return Promise.resolve(new DashboardContainerEmbeddable(initialInput, parent, controlGroup));
   };
 }

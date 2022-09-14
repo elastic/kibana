@@ -12,7 +12,9 @@ import { debounceTime, tap } from 'rxjs/operators';
 
 import { compareFilters, COMPARE_ALL_OPTIONS } from '@kbn/es-query';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
-import { DashboardContainer } from '../embeddable';
+import type { Query } from '@kbn/es-query';
+
+import type { DashboardContainer } from '../embeddable';
 import { DashboardConstants } from '../..';
 import {
   setControlGroupState,
@@ -24,12 +26,13 @@ import {
   setTimeslice,
 } from '../state';
 import { diffDashboardContainerInput } from './diff_dashboard_state';
-import { DashboardBuildContext, DashboardContainerInput } from '../../types';
+import type { DashboardBuildContext, DashboardContainerInput } from '../../types';
 import {
   getSearchSessionIdFromURL,
   getSessionURLObservable,
   stateToDashboardContainerInput,
 } from '.';
+import { pluginServices } from '../../services/plugin_services';
 
 type SyncDashboardContainerCommon = DashboardBuildContext & {
   dashboardContainer: DashboardContainer;
@@ -88,11 +91,14 @@ export const syncDashboardContainerInput = (
 };
 
 export const applyContainerChangesToState = ({
-  query,
   dashboardContainer,
   getLatestDashboardState,
   dispatchDashboardStateChange,
 }: ApplyContainerChangesToStateProps) => {
+  const {
+    data: { query },
+  } = pluginServices.getServices();
+
   const input = dashboardContainer.getInput();
   const latestState = getLatestDashboardState();
   if (Object.keys(latestState).length === 0) {
@@ -132,15 +138,16 @@ export const applyContainerChangesToState = ({
 
 export const applyStateChangesToContainer = ({
   force,
-  search,
   history,
   dashboardContainer,
   kbnUrlStateStorage,
-  query: queryService,
   isEmbeddedExternally,
-  dashboardCapabilities,
   getLatestDashboardState,
 }: ApplyStateChangesToContainerProps) => {
+  const {
+    data: { search },
+  } = pluginServices.getServices();
+
   const latestState = getLatestDashboardState();
   if (Object.keys(latestState).length === 0) {
     return;
@@ -148,8 +155,6 @@ export const applyStateChangesToContainer = ({
   const currentDashboardStateAsInput = stateToDashboardContainerInput({
     dashboardState: latestState,
     isEmbeddedExternally,
-    dashboardCapabilities,
-    query: queryService,
   });
   const differences = diffDashboardContainerInput(
     dashboardContainer.getInput(),

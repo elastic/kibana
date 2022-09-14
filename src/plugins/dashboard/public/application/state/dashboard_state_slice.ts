@@ -8,11 +8,11 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 
-import { Filter, Query, TimeRange } from '../../services/data';
-import { ViewMode } from '../../services/embeddable';
-import { DashboardOptions, DashboardState } from '../../types';
 import { DashboardPanelMap } from '../../../common';
+import type { DashboardOptions, DashboardState } from '../../types';
 
 export const dashboardStateSlice = createSlice({
   name: 'dashboardState',

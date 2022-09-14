@@ -7,42 +7,23 @@
  */
 import { ReactElement } from 'react';
 
-import type {
-  AppMountParameters,
-  CoreStart,
-  SavedObjectsClientContract,
-  ScopedHistory,
-  ChromeStart,
-  IUiSettingsClient,
-  PluginInitializerContext,
-  KibanaExecutionContext,
-} from '@kbn/core/public';
 import { History } from 'history';
-import type { Filter } from '@kbn/es-query';
 import { AnyAction, Dispatch } from 'redux';
 import { BehaviorSubject, Subject } from 'rxjs';
 
-import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
-import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
-import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { DataView } from './services/data_views';
-import { SharePluginStart } from './services/share';
-import { EmbeddableStart } from './services/embeddable';
-import { DashboardSessionStorage } from './application/lib';
-import { UsageCollectionSetup } from './services/usage_collection';
-import { NavigationPublicPluginStart } from './services/navigation';
-import { Query, RefreshInterval, TimeRange } from './services/data';
-import { DashboardPanelMap, DashboardPanelState, SavedDashboardPanel } from '../common';
-import { SavedObjectsTaggingApi } from './services/saved_objects_tagging_oss';
-import { DataPublicPluginStart, DataViewsContract } from './services/data';
-import { ContainerInput, EmbeddableInput, ViewMode } from './services/embeddable';
-import { SavedObjectsStart } from './services/saved_objects';
-import type { ScreenshotModePluginStart } from './services/screenshot_mode';
-import { IKbnUrlStateStorage } from './services/kibana_utils';
+import type { AppMountParameters, ScopedHistory, KibanaExecutionContext } from '@kbn/core/public';
+import type { Filter } from '@kbn/es-query';
+import type { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
+import { type EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/common';
+import type { ContainerInput } from '@kbn/embeddable-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { RefreshInterval } from '@kbn/data-plugin/public';
+import type { Query, TimeRange } from '@kbn/es-query';
+
 import type { DashboardContainer } from '.';
-import { DashboardAppLocatorParams } from './locator';
-import { SpacesPluginStart } from './services/spaces';
+import type { DashboardAppLocatorParams } from './locator';
+import type { DashboardPanelMap, DashboardPanelState, SavedDashboardPanel } from '../common';
 
 export type { SavedDashboardPanel };
 
@@ -78,7 +59,6 @@ export interface DashboardState {
 export type RawDashboardState = Omit<DashboardState, 'panels'> & { panels: SavedDashboardPanel[] };
 
 export interface DashboardContainerInput extends ContainerInput {
-  dashboardCapabilities?: DashboardAppCapabilities;
   controlGroupInput?: PersistableControlGroupInput;
   refreshConfig?: RefreshInterval;
   isEmbeddedExternally?: boolean;
@@ -120,23 +100,9 @@ export interface DashboardAppState {
 /**
  * The shared services and tools used to build a dashboard from a saved object ID.
  */
-export type DashboardBuildContext = Pick<
-  DashboardAppServices,
-  | 'embeddable'
-  | 'dataViews'
-  | 'usageCollection'
-  | 'initializerContext'
-  | 'savedObjectsTagging'
-  | 'dashboardCapabilities'
-> & {
-  query: DashboardAppServices['data']['query'];
-  search: DashboardAppServices['data']['search'];
-  notifications: DashboardAppServices['core']['notifications'];
-
+export type DashboardBuildContext = {
   locatorState?: DashboardAppLocatorParams;
-
   history: History;
-  kibanaVersion: string;
   isEmbeddedExternally: boolean;
   kbnUrlStateStorage: IKbnUrlStateStorage;
   $checkForUnsavedChanges: Subject<unknown>;
@@ -177,42 +143,9 @@ export interface DashboardSaveOptions {
   isTitleDuplicateConfirmed: boolean;
 }
 
-export interface DashboardAppCapabilities {
-  show: boolean;
-  createNew: boolean;
-  saveQuery: boolean;
-  createShortUrl: boolean;
-  showWriteControls: boolean;
-  storeSearchSession: boolean;
-  mapsCapabilities: { save: boolean };
-  visualizeCapabilities: { save: boolean };
-}
-
-export interface DashboardAppServices {
-  core: CoreStart;
-  chrome: ChromeStart;
-  share?: SharePluginStart;
-  embeddable: EmbeddableStart;
-  data: DataPublicPluginStart;
-  uiSettings: IUiSettingsClient;
+export interface DashboardMountContextProps {
   restorePreviousUrl: () => void;
-  savedObjects: SavedObjectsStart;
-  allowByValueEmbeddables: boolean;
-  urlForwarding: UrlForwardingStart;
   scopedHistory: () => ScopedHistory;
-  visualizations: VisualizationsStart;
-  dataViewEditor: DataViewEditorStart;
-  dataViews: DataViewsContract;
-  usageCollection?: UsageCollectionSetup;
-  navigation: NavigationPublicPluginStart;
-  dashboardCapabilities: DashboardAppCapabilities;
-  initializerContext: PluginInitializerContext;
   onAppLeave: AppMountParameters['onAppLeave'];
-  savedObjectsTagging?: SavedObjectsTaggingApi;
-  savedObjectsClient: SavedObjectsClientContract;
-  screenshotModeService: ScreenshotModePluginStart;
-  dashboardSessionStorage: DashboardSessionStorage;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  savedQueryService: DataPublicPluginStart['query']['savedQueries'];
-  spacesService?: SpacesPluginStart;
 }
