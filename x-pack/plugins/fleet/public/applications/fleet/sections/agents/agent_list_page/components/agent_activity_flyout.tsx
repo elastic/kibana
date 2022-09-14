@@ -21,7 +21,9 @@ import {
   EuiPanel,
   EuiButton,
   EuiLink,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
+import styled from 'styled-components';
 
 import type { ActionStatus } from '../../../../types';
 import { useActionStatus } from '../hooks';
@@ -29,6 +31,12 @@ import { useGetAgentPolicies, useStartServices } from '../../../../hooks';
 import { SO_SEARCH_LIMIT } from '../../../../constants';
 
 import { getTodayActions, getOtherDaysActions } from './agent_activity_helper';
+
+const FullHeightFlyoutBody = styled(EuiFlyoutBody)`
+  .euiFlyoutBody__overflowContent {
+    height: 100%;
+  }
+`;
 
 export const AgentActivityFlyout: React.FunctionComponent<{
   onClose: () => void;
@@ -61,7 +69,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
     <>
       <EuiFlyout data-test-subj="agentActivityFlyout" onClose={onClose} size="m" paddingSize="none">
         <EuiFlyoutHeader aria-labelledby="FleetAgentActivityFlyoutTitle">
-          <EuiPanel borderRadius="none">
+          <EuiPanel borderRadius="none" hasShadow={false} hasBorder={true}>
             <EuiFlexGroup direction="column" gutterSize="m">
               <EuiFlexItem>
                 <EuiTitle size="l">
@@ -87,25 +95,37 @@ export const AgentActivityFlyout: React.FunctionComponent<{
           </EuiPanel>
         </EuiFlyoutHeader>
 
-        <EuiFlyoutBody>
+        <FullHeightFlyoutBody>
           {currentActionsEnriched.length === 0 ? (
-            <EuiPanel hasBorder={true} borderRadius="none">
-              <EuiFlexGroup
-                direction="column"
-                gutterSize="m"
-                justifyContent={'center'}
-                alignItems={'center'}
-              >
-                <EuiFlexItem>
-                  <EuiText color="subdued">
+            <EuiFlexGroup
+              direction="column"
+              justifyContent={'center'}
+              alignItems={'center'}
+              className="eui-fullHeight"
+            >
+              <EuiFlexItem>
+                <EuiEmptyPrompt
+                  iconType="clock"
+                  iconColor="default"
+                  title={
+                    <h2>
+                      {' '}
+                      <FormattedMessage
+                        id="xpack.fleet.agentActivityFlyout.noActivityText"
+                        defaultMessage="No activity to display"
+                      />
+                    </h2>
+                  }
+                  titleSize="m"
+                  body={
                     <FormattedMessage
-                      id="xpack.fleet.agentActivityFlyout.noActivityText"
-                      defaultMessage="No recent agent activity."
+                      id="xpack.fleet.agentActivityFlyout.noActivityDescription"
+                      defaultMessage="Activity feed will appear here as agents get enrolled, upgraded, or configured."
                     />
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
+                  }
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           ) : null}
           {inProgressActions.length > 0 ? (
             <ActivitySection
@@ -138,7 +158,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
               abortUpgrade={abortUpgrade}
             />
           ))}
-        </EuiFlyoutBody>
+        </FullHeightFlyoutBody>
       </EuiFlyout>
     </>
   );
@@ -442,11 +462,7 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
                     defaultMessage="{guideLink} about agent upgrades."
                     values={{
                       guideLink: (
-                        <EuiLink
-                          href={docLinks.links.fleet.upgradeElasticAgent}
-                          target="_blank"
-                          external
-                        >
+                        <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">
                           <FormattedMessage
                             id="xpack.fleet.agentActivityFlyout.guideLink"
                             defaultMessage="Learn more"
