@@ -37,7 +37,7 @@ export const formatters: Formatters = {
 };
 
 /* Formats kibana space id into a valid Fleet-compliant datastream namespace */
-export const formatKibanaNamespace = (spaceId) => {
+export const formatKibanaNamespace = (spaceId: string) => {
   const namespaceRegExp = new RegExp(INVALID_NAMESPACE_CHARACTERS, 'g');
   const kibanaNamespace = spaceId.replace(namespaceRegExp, '_');
   return kibanaNamespace;
