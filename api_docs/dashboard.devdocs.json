@@ -348,9 +348,7 @@
                 "section": "def-public.EmbeddableFactory",
                 "text": "EmbeddableFactory"
               },
-              "<TEmbeddableInput, any, TEmbeddable, ",
-              "SavedObjectAttributes",
-              ">, partial?: Partial<TEmbeddableInput>) => ",
+              "<TEmbeddableInput, any, TEmbeddable, unknown>, partial?: Partial<TEmbeddableInput>) => ",
               "DashboardPanelState",
               "<TEmbeddableInput>"
             ],
@@ -373,9 +371,7 @@
                     "section": "def-public.EmbeddableFactory",
                     "text": "EmbeddableFactory"
                   },
-                  "<TEmbeddableInput, any, TEmbeddable, ",
-                  "SavedObjectAttributes",
-                  ">"
+                  "<TEmbeddableInput, any, TEmbeddable, unknown>"
                 ],
                 "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
                 "deprecated": false,
@@ -829,9 +825,7 @@
             "section": "def-public.DashboardContainer",
             "text": "DashboardContainer"
           },
-          ", ",
-          "SavedObjectAttributes",
-          ">"
+          ", unknown>"
         ],
         "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
         "deprecated": false,
