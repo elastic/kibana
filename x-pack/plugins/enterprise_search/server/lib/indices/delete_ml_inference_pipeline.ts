@@ -42,10 +42,10 @@ export const deleteMlInferencePipeline = async (
         );
         // only update if we changed something
         if (updatedProcessors.length !== parentPipeline.processors.length) {
-          const updatedPipeline = {
+          const updatedPipeline: IngestPutPipelineRequest = {
             ...parentPipeline,
-            ...{ processors: updatedProcessors },
-          } as IngestPutPipelineRequest;
+            processors: updatedProcessors,
+          };
 
           const updateResponse = await client.ingest.putPipeline(updatedPipeline);
           if (updateResponse.acknowledged === true) {
