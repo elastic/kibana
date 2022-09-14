@@ -37,6 +37,7 @@ import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import type { QueryTabBodyProps as UserQueryTabBodyProps } from '../../../users/pages/navigation/types';
 import type { QueryTabBodyProps as HostQueryTabBodyProps } from '../../../hosts/pages/navigation/types';
 import type { QueryTabBodyProps as NetworkQueryTabBodyProps } from '../../../network/pages/navigation/types';
+import { useLicense } from '../../hooks/use_license';
 
 import { useUiSetting$ } from '../../lib/kibana';
 import { defaultAlertsFilters } from '../events_viewer/external_alerts_filter';
@@ -66,12 +67,16 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   startDate,
   timelineId,
 }) => {
+  const isEnterprisePlus = useLicense().isEnterprise();
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const [showExternalAlerts, setShowExternalAlerts] = useState(false);
-  const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
+  const leadingControlColumns = useMemo(
+    () => getDefaultControlColumn(isEnterprisePlus ? ACTION_BUTTON_COUNT : 4),
+    [isEnterprisePlus]
+  );
 
   const toggleExternalAlerts = useCallback(() => setShowExternalAlerts((s) => !s), []);
   const getHistogramSubtitle = useMemo(
