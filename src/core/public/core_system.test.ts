@@ -52,6 +52,8 @@ import {
 } from './events';
 
 jest.spyOn(CoreSystem.prototype, 'stop');
+(global.navigator as any).deviceMemory = 5;
+jest.spyOn(global.navigator as any, 'hardwareConcurrency', 'get').mockReturnValue(4);
 
 const defaultCoreSystemParams = {
   rootDomElement: document.createElement('div'),
@@ -292,6 +294,8 @@ describe('#start()', () => {
       meta: {
         kibana_version: '1.2.3',
         protocol: 'http:',
+        deviceMemory: '5',
+        hardwareConcurrency: '4',
       },
       key1: LOAD_START,
       key2: LOAD_BOOTSTRAP_START,
@@ -325,6 +329,8 @@ describe('#start()', () => {
       meta: {
         kibana_version: '1.2.3',
         protocol: 'http:',
+        deviceMemory: '5',
+        hardwareConcurrency: '4',
         ...performanceMemory,
       },
       key1: LOAD_START,
