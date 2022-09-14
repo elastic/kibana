@@ -162,6 +162,12 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
 
   const showSpikeAnalysisTable = data?.changePoints.length > 0;
 
+  const groupItemCount = groupTableItems.reduce((p, c) => {
+    return p + Object.keys(c.group).length;
+  }, 0);
+  const foundGroups =
+    groupTableItems.length === 0 || (groupTableItems.length > 0 && groupItemCount > 0);
+
   return (
     <div data-test-subj="aiopsExplainLogRateSpikesAnalysis">
       <ProgressControls
@@ -172,15 +178,17 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         onCancel={cancel}
         shouldRerunAnalysis={shouldRerunAnalysis}
       />
-      <EuiFormRow display="columnCompressedSwitch" label={showUngroupedMessage}>
-        <EuiSwitch
-          showLabel={false}
-          label={''}
-          checked={showUngrouped}
-          onChange={onSwitchToggle}
-          compressed
-        />
-      </EuiFormRow>
+      {showSpikeAnalysisTable && foundGroups && (
+        <EuiFormRow display="columnCompressedSwitch" label={showUngroupedMessage}>
+          <EuiSwitch
+            showLabel={false}
+            label={''}
+            checked={showUngrouped}
+            onChange={onSwitchToggle}
+            compressed
+          />
+        </EuiFormRow>
+      )}
       <EuiSpacer size="xs" />
       {!isRunning && !showSpikeAnalysisTable && (
         <EuiEmptyPrompt
@@ -231,7 +239,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           <EuiSpacer size="xs" />
         </>
       )}
-      {showSpikeAnalysisTable && !showUngrouped ? (
+      {showSpikeAnalysisTable && !showUngrouped && foundGroups ? (
         <SpikeAnalysisGroupsTable
           changePoints={data.changePoints}
           groupTableItems={groupTableItems}
@@ -242,7 +250,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           dataViewId={dataView.id}
         />
       ) : null}
-      {showSpikeAnalysisTable && showUngrouped ? (
+      {showSpikeAnalysisTable && (showUngrouped || !foundGroups) ? (
         <SpikeAnalysisTable
           changePoints={data.changePoints}
           loading={isRunning}
