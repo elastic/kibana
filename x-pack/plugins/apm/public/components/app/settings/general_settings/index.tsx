@@ -41,12 +41,22 @@ export function GeneralSettings() {
   } = useApmEditableSettings(apmSettingsKeys);
 
   async function handleSave() {
-    const reloadPage = Object.keys(unsavedChanges).some((key) => {
-      return settingsEditableConfig[key].requiresPageReload;
-    });
-    await saveAll();
-    if (reloadPage) {
-      window.location.reload();
+    try {
+      const reloadPage = Object.keys(unsavedChanges).some((key) => {
+        return settingsEditableConfig[key].requiresPageReload;
+      });
+      await saveAll();
+      if (reloadPage) {
+        window.location.reload();
+      }
+    } catch (e) {
+      const error = e as Error;
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.apm.apmSettings.save.error', {
+          defaultMessage: 'An error occurred while saving the settings',
+        }),
+        text: error.message,
+      });
     }
   }
 

@@ -49,16 +49,26 @@ export function LabsFlyout({ onClose }: Props) {
   } = useApmEditableSettings(labsItems);
 
   async function handleSave() {
-    const reloadPage = Object.keys(unsavedChanges).some((key) => {
-      return settingsEditableConfig[key].requiresPageReload;
-    });
+    try {
+      const reloadPage = Object.keys(unsavedChanges).some((key) => {
+        return settingsEditableConfig[key].requiresPageReload;
+      });
 
-    await saveAll();
+      await saveAll();
 
-    if (reloadPage) {
-      window.location.reload();
-    } else {
-      onClose();
+      if (reloadPage) {
+        window.location.reload();
+      } else {
+        onClose();
+      }
+    } catch (e) {
+      const error = e as Error;
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.apm.apmSettings.save.error', {
+          defaultMessage: 'An error occurred while saving the settings',
+        }),
+        text: error.message,
+      });
     }
   }
 

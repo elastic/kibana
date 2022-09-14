@@ -10,6 +10,8 @@ import { FieldState } from '@kbn/advanced-settings-plugin/public';
 import { toEditableConfig } from '@kbn/advanced-settings-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { isEmpty } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 
 function getEditableConfig({
   settingsKeys,
@@ -41,6 +43,9 @@ function getEditableConfig({
 }
 
 export function useApmEditableSettings(settingsKeys: string[]) {
+  const {
+    core: { notifications },
+  } = useApmPluginContext();
   const { services } = useKibana();
   const { uiSettings } = services;
   const [isSaving, setIsSaving] = useState(false);
@@ -88,7 +93,7 @@ export function useApmEditableSettings(settingsKeys: string[]) {
         setForceReloadSettings((state) => ++state);
         cleanUnsavedChanges();
       } catch (e) {
-        // TODO: do something here
+        throw e;
       } finally {
         setIsSaving(false);
       }
