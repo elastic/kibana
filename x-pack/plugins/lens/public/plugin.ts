@@ -52,7 +52,7 @@ import type {
   IndexPatternDatasourceSetupPlugins,
   FormulaPublicApi,
 } from './indexpattern_datasource';
-import { TextBasedLanguagesDatasource } from './text_based_languages_datasource';
+import type { TextBasedLanguagesDatasource as TextBasedLanguagesDatasourceType } from './text_based_languages_datasource';
 
 import type {
   XyVisualization as XyVisualizationType,
@@ -226,7 +226,7 @@ export class LensPlugin {
   private editorFrameSetup: EditorFrameSetup | undefined;
   private queuedVisualizations: Array<Visualization | (() => Promise<Visualization>)> = [];
   private indexpatternDatasource: IndexPatternDatasourceType | undefined;
-  private textBasedLanguagesDatasource: TextBasedLanguagesDatasource | undefined;
+  private textBasedLanguagesDatasource: TextBasedLanguagesDatasourceType | undefined;
   private xyVisualization: XyVisualizationType | undefined;
   private legacyMetricVisualization: LegacyMetricVisualizationType | undefined;
   private metricVisualization: MetricVisualizationType | undefined;
@@ -423,6 +423,7 @@ export class LensPlugin {
       PieVisualization,
       HeatmapVisualization,
       GaugeVisualization,
+      TextBasedLanguagesDatasource,
     } = await import('./async_services');
     this.datatableVisualization = new DatatableVisualization();
     this.editorFrameService = new EditorFrameService();

@@ -33,6 +33,7 @@ export * from './indexpattern_datasource/indexpattern';
 export { getTextBasedLanguagesDatasource } from './text_based_languages_datasource/text_based_languages';
 export { createFormulaPublicApi } from './indexpattern_datasource/operations/definitions/formula/formula_public_api';
 
+export * from './text_based_languages_datasource';
 export * from './indexpattern_datasource';
 export * from './lens_ui_telemetry';
 export * from './lens_ui_errors';
