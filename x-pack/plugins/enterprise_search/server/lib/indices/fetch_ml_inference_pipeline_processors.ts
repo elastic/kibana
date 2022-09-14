@@ -45,7 +45,7 @@ export const fetchPipelineProcessorInferenceData = async (
         mlInferencePipelineProcessorConfigs[pipelineProcessorName].processors || [];
 
       // Find the inference processor, which we can assume there will only be one.
-      const inferenceProcessor = subProcessors.find((obj) => 'inference' in obj);
+      const inferenceProcessor = subProcessors.find(obj => obj.hasOwnProperty('inference'));
 
       const trainedModelName = inferenceProcessor?.inference?.model_id;
       if (trainedModelName)
@@ -76,14 +76,14 @@ export const fetchAndAddTrainedModelData = async (
   trainedModels.trained_model_configs.forEach((trainedModelData) => {
     const trainedModelName = trainedModelData.model_id;
 
-    if (trainedModelName in pipelineProcessorData) {
+    if (pipelineProcessorData.hasOwnProperty(trainedModelName)) {
       pipelineProcessorData[trainedModelName].modelType = trainedModelData.model_type || 'unknown';
     }
   });
 
   trainedModelsStats.trained_model_stats.forEach((trainedModelStats) => {
     const trainedModelName = trainedModelStats.model_id;
-    if (trainedModelName in pipelineProcessorData) {
+    if (pipelineProcessorData.hasOwnProperty(trainedModelName)) {
       const isDeployed = trainedModelStats.deployment_stats?.state === 'started';
       pipelineProcessorData[trainedModelName].isDeployed = isDeployed;
     }
