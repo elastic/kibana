@@ -55,7 +55,7 @@ import { ServiceHealthStatus } from '../../../common/service_health_status';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
-import { getMetricIndices } from '../../lib/helpers/get_metric_indices';
+import { getInfraMetricIndices } from '../../lib/helpers/get_infra_metric_indices';
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
   params: t.type({
@@ -273,13 +273,15 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
       end,
     });
 
+    console.log('---serviceMetadataDetails', serviceMetadataDetails);
+
     if (serviceMetadataDetails?.container?.ids) {
       const {
         savedObjects: { client: savedObjectsClient },
         elasticsearch: { client: esClient },
       } = await context.core;
 
-      const indexName = await getMetricIndices({
+      const indexName = await getInfraMetricIndices({
         infraPlugin: plugins.infra,
         savedObjectsClient,
       });
@@ -909,7 +911,7 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
         elasticsearch: { client: esClient },
       } = await context.core;
 
-      const indexName = await getMetricIndices({
+      const indexName = await getInfraMetricIndices({
         infraPlugin: plugins.infra,
         savedObjectsClient,
       });

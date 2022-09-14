@@ -8,7 +8,7 @@
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { APMRouteHandlerResources } from '../../routes/typings';
 
-export async function getMetricIndices({
+export async function getInfraMetricIndices({
   infraPlugin,
   savedObjectsClient,
 }: {
@@ -16,7 +16,7 @@ export async function getMetricIndices({
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<string> {
   const infra = await infraPlugin.start();
-  const metricIndices = await infra.getMetricIndices(savedObjectsClient);
+  const infraMetricIndices = await infra.getMetricIndices(savedObjectsClient);
 
-  return metricIndices;
+  return infraMetricIndices;
 }
