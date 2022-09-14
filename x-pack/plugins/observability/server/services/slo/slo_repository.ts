@@ -6,10 +6,11 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+
 import { StoredSLO, SLO } from '../../types/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
+import { SLONotFound } from '../../errors';
 
 export interface SLORepository {
   save(slo: SLO): Promise<SLO>;
@@ -45,7 +46,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       await this.soClient.delete(SO_SLO_TYPE, id);
     } catch (err) {
       if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        return;
+        throw new SLONotFound(`SLO ${id} not found`);
       }
       throw err;
     }
