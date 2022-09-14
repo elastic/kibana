@@ -16,9 +16,9 @@ import {
   EuiPopover,
   EuiCallOut,
   EuiFormControlLayout,
-  EuiIcon,
   EuiFilterButton,
   EuiScreenReaderOnly,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EsQueryConfig, Query, Filter } from '@kbn/es-query';
@@ -47,7 +47,7 @@ import { LensFieldIcon } from '../shared_components/field_picker/lens_field_icon
 import { getFieldType } from './pure_utils';
 import { FieldGroups, FieldList } from './field_list';
 import { fieldContainsData, fieldExists } from '../shared_components';
-import { IndexPatternServiceAPI } from '../indexpattern_service/service';
+import { IndexPatternServiceAPI } from '../data_views_service/service';
 
 export type Props = Omit<
   DatasourceDataPanelProps<IndexPatternPrivateState>,
@@ -143,15 +143,16 @@ export function IndexPatternDataPanel({
   indexPatternService,
   frame,
   onIndexPatternRefresh,
+  usedIndexPatterns,
 }: Props) {
   const { indexPatterns, indexPatternRefs, existingFields, isFirstExistenceFetch } =
     frame.dataViews;
   const { currentIndexPatternId } = state;
 
   const indexPatternList = uniq(
-    Object.values(state.layers)
-      .map((l) => l.indexPatternId)
-      .concat(currentIndexPatternId)
+    (
+      usedIndexPatterns ?? Object.values(state.layers).map(({ indexPatternId }) => indexPatternId)
+    ).concat(currentIndexPatternId)
   )
     .filter((id) => !!indexPatterns[id])
     .sort()
@@ -283,7 +284,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   onIndexPatternRefresh,
 }: Omit<
   DatasourceDataPanelProps,
-  'state' | 'setState' | 'showNoDataPopover' | 'core' | 'onChangeIndexPattern'
+  'state' | 'setState' | 'showNoDataPopover' | 'core' | 'onChangeIndexPattern' | 'usedIndexPatterns'
 > & {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
@@ -311,12 +312,12 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const visualizeGeoFieldTrigger = uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER);
   const allFields = useMemo(
     () =>
-      visualizeGeoFieldTrigger && !currentIndexPattern.spec
+      visualizeGeoFieldTrigger && currentIndexPattern.isPersisted
         ? currentIndexPattern.fields
         : currentIndexPattern.fields.filter(
             ({ type }) => type !== 'geo_point' && type !== 'geo_shape'
           ),
-    [currentIndexPattern.fields, currentIndexPattern.spec, visualizeGeoFieldTrigger]
+    [currentIndexPattern.fields, currentIndexPattern.isPersisted, visualizeGeoFieldTrigger]
   );
   const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '', typeFilter: [] }));
   const availableFieldTypes = uniq([

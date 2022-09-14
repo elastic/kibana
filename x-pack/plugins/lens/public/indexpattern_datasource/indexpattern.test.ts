@@ -156,6 +156,8 @@ const expectedIndexPatterns = {
     hasRestrictions: false,
     fields: fieldsOne,
     getFieldByName: getFieldByNameFactory(fieldsOne),
+    spec: {},
+    isPersisted: true,
   },
   2: {
     id: '2',
@@ -164,6 +166,8 @@ const expectedIndexPatterns = {
     hasRestrictions: true,
     fields: fieldsTwo,
     getFieldByName: getFieldByNameFactory(fieldsTwo),
+    spec: {},
+    isPersisted: true,
   },
 };
 
@@ -2543,7 +2547,12 @@ describe('IndexPattern Data Source', () => {
       );
 
     it('should return mismatched time shifts', () => {
-      const warnings = indexPatternDatasource.getWarningMessages!(state, framePublicAPI, () => {});
+      const warnings = indexPatternDatasource.getWarningMessages!(
+        state,
+        framePublicAPI,
+        {},
+        () => {}
+      );
 
       expect(extractTranslationIdsFromWarnings(warnings)).toMatchInlineSnapshot(`
         Array [
@@ -2556,7 +2565,12 @@ describe('IndexPattern Data Source', () => {
     it('should show different types of warning messages', () => {
       framePublicAPI.activeData!.first.columns[1].meta.sourceParams!.hasPrecisionError = true;
 
-      const warnings = indexPatternDatasource.getWarningMessages!(state, framePublicAPI, () => {});
+      const warnings = indexPatternDatasource.getWarningMessages!(
+        state,
+        framePublicAPI,
+        {},
+        () => {}
+      );
 
       expect(extractTranslationIdsFromWarnings(warnings)).toMatchInlineSnapshot(`
         Array [

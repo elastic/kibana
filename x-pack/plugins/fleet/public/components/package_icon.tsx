@@ -17,7 +17,10 @@ import { usePackageIconType } from '../hooks';
 // this collides with some EuiText (+img) CSS from the EuiIcon component
 // which  makes the button large, wide, and poorly layed out
 // override those styles until the bug is fixed or we find a better approach
-const Icon = styled(EuiIcon)``;
+const Icon = styled(EuiIcon)`
+  width: '16px';
+  margin-block-end: unset !important;
+`;
 
 export const PackageIcon: React.FunctionComponent<
   UsePackageIconType & Omit<EuiIconProps, 'type'>

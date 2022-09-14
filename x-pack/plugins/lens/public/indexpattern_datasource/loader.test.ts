@@ -14,7 +14,7 @@ import {
 } from './loader';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 import { DateHistogramIndexPatternColumn, TermsIndexPatternColumn } from './operations';
-import { sampleIndexPatterns } from '../indexpattern_service/mocks';
+import { sampleIndexPatterns } from '../data_views_service/mocks';
 
 const createMockStorage = (lastData?: Record<string, string>) => {
   return {
@@ -124,7 +124,7 @@ describe('loader', () => {
       const state = loadInitialState({
         storage,
         initialContext: {
-          indexPatternId: '1',
+          dataViewSpec: { id: '1' },
           fieldName: '',
         },
         indexPatternRefs,
