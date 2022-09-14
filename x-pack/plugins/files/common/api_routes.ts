@@ -28,16 +28,16 @@ export interface EndpointInputs<
   Q extends Type<unknown> = Type<unknown>,
   B extends Type<unknown> = Type<unknown>
 > {
-  params: P;
-  query: Q;
-  body: B;
+  params?: P;
+  query?: Q;
+  body?: B;
 }
 
 export interface CreateRouteDefinition<Inputs extends EndpointInputs, R> {
   inputs: {
-    params: TypeOf<Inputs['params']>;
-    query: TypeOf<Inputs['query']>;
-    body: TypeOf<Inputs['body']>;
+    params: TypeOf<NonNullable<Inputs['params']>>;
+    query: TypeOf<NonNullable<Inputs['query']>>;
+    body: TypeOf<NonNullable<Inputs['body']>>;
   };
   output: R;
 }
@@ -64,17 +64,7 @@ export interface HttpApiInterfaceEntryDefinition<
   output: R;
 }
 
-export type CreateFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
-  unknown,
-  unknown,
-  {
-    name: string;
-    alt?: string;
-    meta?: Record<string, unknown>;
-    mimeType?: string;
-  },
-  { file: FileJSON }
->;
+export type { Endpoint as CreateFileKindHttpEndpoint } from '../server/routes/file_kind/create';
 
 export type DeleteFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
   {
