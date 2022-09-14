@@ -236,24 +236,36 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       force?: true;
     }
   ): Promise<PackagePolicy[]> {
-    const agentPolicyIds = new Set(packagePolicies.map((pkgPol) => pkgPol.policy_id));
+    const agentPolicyIds = new Set(packagePolicies.map((pkgPolicy) => pkgPolicy.policy_id));
 
     for (const agentPolicyId of agentPolicyIds) {
       await validateIsNotHostedPolicy(soClient, agentPolicyId, options?.force);
     }
 
+    const packageInfos = await getPackageInfoForPackagePolicies(packagePolicies, soClient);
+
     const isoDate = new Date().toISOString();
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { saved_objects } = await soClient.bulkCreate<PackagePolicySOAttributes>(
-      packagePolicies.map((packagePolicy) => {
+      await pMap(packagePolicies, async (packagePolicy) => {
         const packagePolicyId = packagePolicy.id ?? uuid.v4();
         const agentPolicyId = packagePolicy.policy_id;
 
-        const inputs = packagePolicy.inputs.map((input) =>
+        let inputs = packagePolicy.inputs.map((input) =>
           assignStreamIdToInput(packagePolicyId, input)
         );
 
         const { id, ...pkgPolicyWithoutId } = packagePolicy;
+
+        if (packagePolicy.package) {
+          const pkgInfo = packageInfos.get(
+            `${packagePolicy.package.name}-${packagePolicy.package.version}`
+          );
+
+          inputs = pkgInfo
+            ? await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs)
+            : inputs;
+        }
 
         return {
           type: SAVED_OBJECT_TYPE,
@@ -1516,6 +1528,36 @@ export interface PackagePolicyServiceInterface {
 export const packagePolicyService: PackagePolicyServiceInterface = new PackagePolicyService();
 
 export type { PackagePolicyService };
+
+async function getPackageInfoForPackagePolicies(
+  packagePolicies: NewPackagePolicyWithId[],
+  soClient: SavedObjectsClientContract
+) {
+  const pkgInfoMap = new Map<string, PackagePolicyPackage>();
+
+  packagePolicies.forEach(({ package: pkg }) => {
+    if (pkg) {
+      pkgInfoMap.set(`${pkg.name}-${pkg.version}`, pkg);
+    }
+  });
+
+  const resultMap = new Map<string, PackageInfo>();
+
+  await pMap(pkgInfoMap.keys(), async (pkgKey) => {
+    const pkgInfo = pkgInfoMap.get(pkgKey);
+    if (pkgInfo) {
+      const pkgInfoData = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: pkgInfo.name,
+        pkgVersion: pkgInfo.version,
+      });
+
+      resultMap.set(pkgKey, pkgInfoData);
+    }
+  });
+
+  return resultMap;
+}
 
 export function updatePackageInputs(
   basePackagePolicy: NewPackagePolicy,
