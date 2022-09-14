@@ -113,7 +113,7 @@ function getUsedIndexPatterns({
         indexPatternIds.push(indexPatternId);
       }
     } else {
-      indexPatternIds.push(initialContext.indexPatternId);
+      indexPatternIds.push(initialContext.dataViewSpec.id!);
     }
   }
   const usedPatterns = (
