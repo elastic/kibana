@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
-import { LockedPolicyCard as Paywall } from '../../management/pages/policy/view/policy_forms/locked_card';
+import { Paywall } from '../../common/components/paywall';
 import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
