@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiBadge, EuiFlexGroup, useEuiPaddingSize } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
@@ -21,41 +21,42 @@ export interface FilterBadgeProps {
   onClick: () => void;
 }
 
-const cursor = css`
-  padding: 7px;
-`;
-
 const rootLevelConditionType = ConditionTypes.AND;
 
 function FilterBadge({ filters, dataView, iconOnClick, onClick }: FilterBadgeProps) {
+  const sPaddingSize = useEuiPaddingSize('s');
+
+  const badgePadiing = useMemo(
+    () => css`
+      padding: ${sPaddingSize};
+    `,
+    [sPaddingSize]
+  );
+
   if (!dataView) {
     return null;
   }
 
   return (
-    <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-      <EuiFlexItem grow={false}>
-        <EuiBadge
-          className={cursor}
-          color="hollow"
-          iconType="cross"
-          iconSide="right"
-          iconOnClick={() => iconOnClick()}
-          onClickAriaLabel="Filter actions"
-          iconOnClickAriaLabel="Remove filter"
-          onClick={() => onClick()}
-          title=""
-        >
-          <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-            <FilterBadgeGroup
-              filters={filters}
-              dataView={dataView}
-              conditionType={rootLevelConditionType}
-            />
-          </EuiFlexGroup>
-        </EuiBadge>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiBadge
+      className={badgePadiing}
+      color="hollow"
+      iconType="cross"
+      iconSide="right"
+      iconOnClick={iconOnClick}
+      onClickAriaLabel="Filter actions"
+      iconOnClickAriaLabel="Remove filter"
+      onClick={onClick}
+      title=""
+    >
+      <EuiFlexGroup wrap responsive={false} gutterSize="xs">
+        <FilterBadgeGroup
+          filters={filters}
+          dataView={dataView}
+          conditionType={rootLevelConditionType}
+        />
+      </EuiFlexGroup>
+    </EuiBadge>
   );
 }
 
