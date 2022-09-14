@@ -7,14 +7,22 @@
 
 import { uniq, uniqWith, pick, isEqual } from 'lodash';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
+
+interface FrequentItemsAggregation extends estypes.AggregationsSamplerAggregation {
+  fi: {
+    buckets: Array<{ key: Record<string, string[]>; doc_count: number; support: number }>;
+  };
+}
 
 function dropDuplicates(cp: ChangePoint[], uniqueFields: string[]) {
   return uniqWith(cp, (a, b) => isEqual(pick(a, uniqueFields), pick(b, uniqueFields)));
 }
 
-export async function generateItemsets(
+export async function fetchFrequentItems(
   client: ElasticsearchClient,
   index: string,
   changePoints: ChangePoint[],
@@ -30,12 +38,11 @@ export async function generateItemsets(
     'total_doc_count',
     'total_bg_count',
   ]);
-  // console.log('changePoints-length', changePoints.length);
-  // console.log('terms-length', terms.length);
 
   // get unique fields that are left
   const fields = [...new Set(terms.map((t) => t.fieldName))];
 
+  // TODO add query params
   const query = {
     bool: {
       filter: [
@@ -48,18 +55,17 @@ export async function generateItemsets(
           },
         },
       ],
+      should: terms.map((t) => {
+        return { term: { [t.fieldName]: t.fieldValue } };
+      }),
     },
   };
-
-  const condition = 'should';
-  query.bool[condition] = terms.map((t) => {
-    return { term: { [t.fieldName]: t.fieldValue } };
-  });
 
   const aggFields = fields.map((field) => ({
     field,
   }));
 
+  // TODO add real totalDocCount
   // total_doc_count = terms['total_doc_count'][0]
   const totalDocCount = 1;
   const minDocCount = 50000;
@@ -70,13 +76,14 @@ export async function generateItemsets(
   }
 
   // frequent items can be slow, so sample and use 10% min_support
-  const agg = {
+  const aggs: Record<string, estypes.AggregationsAggregationContainer> = {
     sample: {
       random_sampler: {
         probability: sampleProbability,
       },
       aggs: {
         fi: {
+          // @ts-expect-error `frequent_items` is not yet part of `AggregationsAggregationContainer`
           frequent_items: {
             size: 200,
             minimum_support: 0.1,
@@ -87,13 +94,13 @@ export async function generateItemsets(
     },
   };
 
-  const body = await client.search(
+  const body = await client.search<unknown, { sample: FrequentItemsAggregation }>(
     {
       index,
       size: 0,
       body: {
         query,
-        aggs: agg,
+        aggs,
         size: 0,
         track_total_hits: true,
       },
@@ -101,7 +108,11 @@ export async function generateItemsets(
     { maxRetries: 0 }
   );
 
-  const totalDocCountFi = body.hits.total?.value;
+  const totalDocCountFi = (body.hits.total as estypes.SearchTotalHits).value;
+
+  if (body.aggregations === undefined) {
+    throw new Error('fetchFrequentItems failed, did not return aggregations.');
+  }
 
   const shape = body.aggregations.sample.fi.buckets.length;
   let maximum = shape;
