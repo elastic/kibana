@@ -78,6 +78,9 @@ export interface Props<Kind extends string = string> {
 }
 
 /**
+ * This component is intended as a wrapper around EuiFilePicker with some opinions
+ * about upload UX. It is optimised for use in modals, flyouts or forms.
+ *
  * In order to use this component you must register your file kind with {@link FileKindsRegistry}
  */
 export const UploadFile: FunctionComponent<Props> = ({
