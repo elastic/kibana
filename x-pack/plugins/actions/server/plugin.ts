@@ -121,6 +121,7 @@ export interface PluginSetupContract {
   isPreconfiguredConnector(connectorId: string): boolean;
   getSubActionConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
   getCaseConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
+  getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
 }
 
 export interface PluginStartContract {
@@ -375,6 +376,11 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       },
       getSubActionConnectorClass: () => SubActionConnector,
       getCaseConnectorClass: () => CaseConnector,
+      getActionsHealth: () => {
+        return {
+          hasPermanentEncryptionKey: plugins.encryptedSavedObjects.canEncrypt,
+        };
+      },
     };
   }
 
