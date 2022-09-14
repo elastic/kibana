@@ -6,7 +6,11 @@
  */
 
 import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import type { AnomalyChartsEmbeddableInput } from '@kbn/ml-plugin/public/embeddables';
+import type {
+  AnomalyChartsEmbeddableInput,
+  AnomalySwimlaneEmbeddableInput,
+} from '@kbn/ml-plugin/public/embeddables';
+import { stringHash } from '@kbn/ml-string-hash';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 
