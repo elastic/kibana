@@ -39,6 +39,7 @@ const getLabelTitle = (userAction: UserActionResponse<StatusUserAction>) => {
 
 export const createStatusUserActionBuilder: UserActionBuilder = ({
   userAction,
+  userProfiles,
   handleOutlineComment,
 }) => ({
   build: () => {
@@ -46,6 +47,7 @@ export const createStatusUserActionBuilder: UserActionBuilder = ({
     const label = getLabelTitle(statusUserAction);
     const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,
+      userProfiles,
       handleOutlineComment,
       label,
       icon: 'folderClosed',

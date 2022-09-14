@@ -263,6 +263,7 @@ export interface DiscoverFieldProps {
    * Optionally show or hide field stats in the popover
    */
   showFieldStats?: boolean;
+  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
 }
 
 function DiscoverFieldComponent({
@@ -279,6 +280,7 @@ function DiscoverFieldComponent({
   onEditField,
   onDeleteField,
   showFieldStats,
+  persistDataView,
 }: DiscoverFieldProps) {
   const [infoIsOpen, setOpen] = useState(false);
   const isDocumentRecord = !!onAddFilter;
@@ -438,6 +440,7 @@ function DiscoverFieldComponent({
           multiFields={rawMultiFields}
           trackUiMetric={trackUiMetric}
           details={details}
+          persistDataView={persistDataView}
         />
       </>
     );

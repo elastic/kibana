@@ -20,6 +20,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DistributiveOmit } from '@elastic/eui';
 import type { ApmBase } from '@elastic/apm-rum';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type {
   CasesByAlertId,
   CasesByAlertIDRequest,
@@ -55,6 +56,7 @@ export interface CasesPluginSetup {
 export interface CasesPluginStart {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
+  licensing?: LicensingPluginStart;
   lens: LensPublicStart;
   storage: Storage;
   triggersActionsUi: TriggersActionsStart;
