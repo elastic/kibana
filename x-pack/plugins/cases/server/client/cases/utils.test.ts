@@ -34,11 +34,11 @@ import {
   transformers,
   transformFields,
 } from './utils';
-import { Actions, CaseStatuses, User } from '../../../common/api';
+import { Actions, CaseStatuses } from '../../../common/api';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { casesConnectors } from '../../connectors';
-import { userProfiles, userProfilesMap } from '../test_utils';
+import { userProfiles, userProfilesMap } from '../user_profiles.mock';
 
 const formatComment = {
   commentId: commentObj.id,
@@ -1012,8 +1012,8 @@ describe('utils', () => {
       expect(
         getEntity({
           createdAt: '',
-          // the type expects this to be defined but we'll leave it as null just in case
-          createdBy: null as unknown as User,
+          // @ts-expect-error createdBy should be defined but for testing purposes we want to make sure the function handles null
+          createdBy: null,
           updatedAt: '',
           updatedBy: null,
         })

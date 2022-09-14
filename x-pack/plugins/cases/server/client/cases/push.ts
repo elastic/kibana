@@ -323,7 +323,7 @@ export const push = async (
 
 const getProfiles = async (
   caseInfo: ICaseResponse,
-  securityStartPlugin?: SecurityPluginStart
+  securityStartPlugin: SecurityPluginStart
 ): Promise<Map<string, UserProfile> | undefined> => {
   const uids = new Set([
     ...(caseInfo.updated_by?.profile_uid != null ? [caseInfo.updated_by.profile_uid] : []),
@@ -335,7 +335,7 @@ const getProfiles = async (
   }
 
   const userProfiles =
-    (await securityStartPlugin?.userProfiles.bulkGet({
+    (await securityStartPlugin.userProfiles.bulkGet({
       uids,
     })) ?? [];
 

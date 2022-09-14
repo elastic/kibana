@@ -279,7 +279,6 @@ const getDisplayName = (
     }
   }
 
-  // TODO: if username isn't defined should we fallback to the next field (aka createdBy)? That's different than how it was before
   return validOrUndefined(user.full_name) ?? validOrUndefined(user.username) ?? '';
 };
 

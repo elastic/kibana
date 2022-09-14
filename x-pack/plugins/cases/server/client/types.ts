@@ -46,7 +46,7 @@ export interface CasesClientArgs {
   readonly actionsClient: PublicMethodsOf<ActionsClient>;
   readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   readonly externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
-  readonly securityStartPlugin?: SecurityPluginStart;
+  readonly securityStartPlugin: SecurityPluginStart;
 }
 
 export interface ConstructQueryParams {

@@ -35,8 +35,8 @@ import { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework
 import { CasesServices } from './types';
 
 interface CasesClientFactoryArgs {
-  securityPluginSetup?: SecurityPluginSetup;
-  securityPluginStart?: SecurityPluginStart;
+  securityPluginSetup: SecurityPluginSetup;
+  securityPluginStart: SecurityPluginStart;
   spacesPluginStart: SpacesPluginStart;
   featuresPluginStart: FeaturesPluginStart;
   actionsPluginStart: ActionsPluginStart;
@@ -52,7 +52,10 @@ interface CasesClientFactoryArgs {
 export class CasesClientFactory {
   private isInitialized = false;
   private readonly logger: Logger;
-  private options?: CasesClientFactoryArgs;
+  // The reason this is protected is because we'll get type collisions otherwise because we're using a type guard assert
+  // to ensure the options member is instantiated before using it in various places
+  // See for more info: https://stackoverflow.com/questions/66206180/typescript-typeguard-attribut-with-method
+  protected options?: CasesClientFactoryArgs;
 
   constructor(logger: Logger) {
     this.logger = logger;
@@ -82,11 +85,9 @@ export class CasesClientFactory {
     savedObjectsService: SavedObjectsServiceStart;
     scopedClusterClient: ElasticsearchClient;
   }): Promise<CasesClient> {
-    if (!this.isInitialized || !this.options) {
-      throw new Error('CasesClientFactory must be initialized before calling create');
-    }
+    this.validateInitialization();
 
-    const auditLogger = this.options.securityPluginSetup?.audit.asScoped(request);
+    const auditLogger = this.options.securityPluginSetup.audit.asScoped(request);
 
     const auth = await Authorization.create({
       request,
@@ -125,6 +126,12 @@ export class CasesClientFactory {
     });
   }
 
+  private validateInitialization(): asserts this is this & { options: CasesClientFactoryArgs } {
+    if (!this.isInitialized || this.options == null) {
+      throw new Error('CasesClientFactory must be initialized before calling create');
+    }
+  }
+
   private createServices({
     unsecuredSavedObjectsClient,
     esClient,
@@ -132,9 +139,7 @@ export class CasesClientFactory {
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     esClient: ElasticsearchClient;
   }): CasesServices {
-    if (!this.isInitialized || !this.options) {
-      throw new Error('CasesClientFactory must be initialized before calling create');
-    }
+    this.validateInitialization();
 
     const attachmentService = new AttachmentService(
       this.logger,
@@ -176,12 +181,10 @@ export class CasesClientFactory {
     email: string | null;
     profile_uid?: string;
   }> {
-    if (!this.isInitialized || !this.options) {
-      throw new Error('CasesClientFactory must be initialized before calling create');
-    }
+    this.validateInitialization();
 
     try {
-      const userProfile = await this.options.securityPluginStart?.userProfiles.getCurrent({
+      const userProfile = await this.options.securityPluginStart.userProfiles.getCurrent({
         request,
       });
 
@@ -198,7 +201,7 @@ export class CasesClientFactory {
     }
 
     try {
-      const user = this.options.securityPluginStart?.authc.getCurrentUser(request);
+      const user = this.options.securityPluginStart.authc.getCurrentUser(request);
 
       if (user != null) {
         return {

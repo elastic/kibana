@@ -15,6 +15,8 @@ import { UserProfileService } from '@kbn/cases-plugin/server/services';
 import { superUser } from './authentication/users';
 import { User } from './authentication/types';
 import { getSpaceUrlPrefix } from './utils';
+import { FtrProviderContext as CommonFtrProviderContext } from '../ftr_provider_context';
+import { getUserInfo } from './authentication';
 
 type BulkGetUserProfilesParams = Omit<UserProfileBulkGetParams, 'uids'> & { uids: string[] };
 
@@ -88,4 +90,49 @@ export const loginUsers = async ({
   }
 
   return cookies;
+};
+
+export const setupSuperUserProfile = async (getService: CommonFtrProviderContext['getService']) => {
+  const security = getService('security');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+
+  const superUserInfo = getUserInfo(superUser);
+
+  // ensure the user's information is what we expect
+  await security.user.create(superUser.username, {
+    password: superUser.password,
+    roles: superUser.roles,
+    full_name: superUserInfo.full_name,
+    email: superUserInfo.email,
+  });
+
+  const cookies = await loginUsers({
+    supertest: supertestWithoutAuth,
+    users: [superUser],
+  });
+
+  const headers = {
+    Cookie: cookies[0].cookieString(),
+  };
+
+  const profiles = await suggestUserProfiles({
+    supertest: supertestWithoutAuth,
+    req: {
+      name: 'superUser',
+      owners: ['securitySolutionFixture'],
+      size: 1,
+    },
+    auth: { user: superUser, space: null },
+  });
+
+  const superUserWithProfile = {
+    ...getUserInfo(superUser),
+    profile_uid: profiles[0].uid,
+  };
+
+  return {
+    headers,
+    superUserWithProfile,
+    superUserInfo,
+  };
 };

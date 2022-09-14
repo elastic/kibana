@@ -10,7 +10,7 @@
 import http from 'http';
 
 import expect from '@kbn/expect';
-import { CaseConnector, CaseStatuses, CommentType } from '@kbn/cases-plugin/common/api';
+import { CaseConnector, CaseStatuses, CommentType, User } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
@@ -39,6 +39,7 @@ import {
   delay,
   calculateDuration,
   getRecordingServiceNowSimulatorServer,
+  getComment,
 } from '../../../../common/lib/utils';
 import {
   globalRead,
@@ -50,7 +51,7 @@ import {
   superUser,
 } from '../../../../common/lib/authentication/users';
 import { RecordingServiceNowSimulator } from '../../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/servicenow_simulation';
-import { loginUsers } from '../../../../common/lib/user_profiles';
+import { loginUsers, setupSuperUserProfile } from '../../../../common/lib/user_profiles';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -353,6 +354,80 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
           connectorId: connector.id,
           expectedHttpCode: 409,
+        });
+      });
+
+      describe('user profile uid', () => {
+        let headers: Record<string, string>;
+        let superUserWithProfile: User;
+        let superUserInfo: User;
+
+        before(async () => {
+          ({ headers, superUserInfo, superUserWithProfile } = await setupSuperUserProfile(
+            getService
+          ));
+        });
+
+        it('sets the closed by profile uid in the case and comment', async () => {
+          const { postedCase, connector } = await createCaseWithConnector({
+            supertest: supertestWithoutAuth,
+            serviceNowSimulatorURL,
+            actionsRemover,
+            auth: null,
+            headers,
+          });
+
+          const patchedCase = await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: postCommentUserReq,
+          });
+
+          const pushedCase = await pushCase({
+            supertest: supertestWithoutAuth,
+            caseId: patchedCase.id,
+            connectorId: connector.id,
+            auth: null,
+            headers,
+          });
+
+          const pushedComment = await getComment({
+            supertest,
+            caseId: patchedCase.id,
+            commentId: patchedCase.comments![0].id,
+          });
+
+          expect(pushedCase.external_service?.pushed_by).to.eql(superUserWithProfile);
+          expect(pushedComment.pushed_by).to.eql(superUserWithProfile);
+        });
+
+        it('falls back to authc to get the user information when the profile uid is not available', async () => {
+          const { postedCase, connector } = await createCaseWithConnector({
+            supertest: supertestWithoutAuth,
+            serviceNowSimulatorURL,
+            actionsRemover,
+          });
+
+          const patchedCase = await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: postCommentUserReq,
+          });
+
+          const theCase = await pushCase({
+            supertest: supertestWithoutAuth,
+            caseId: patchedCase.id,
+            connectorId: connector.id,
+          });
+
+          const pushedComment = await getComment({
+            supertest,
+            caseId: patchedCase.id,
+            commentId: patchedCase.comments![0].id,
+          });
+
+          expect(theCase.external_service?.pushed_by).to.eql(superUserInfo);
+          expect(pushedComment.pushed_by).to.eql(superUserInfo);
         });
       });
 

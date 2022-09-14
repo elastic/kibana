@@ -23,13 +23,13 @@ const MAX_PROFILES_SIZE = 100;
 const MIN_PROFILES_SIZE = 0;
 
 interface UserProfileOptions {
-  securityPluginSetup?: SecurityPluginSetup;
-  securityPluginStart?: SecurityPluginStart;
+  securityPluginSetup: SecurityPluginSetup;
+  securityPluginStart: SecurityPluginStart;
   spaces: SpacesPluginStart;
 }
 
 export class UserProfileService {
-  private options?: UserProfileOptions;
+  protected options?: UserProfileOptions;
 
   constructor(private readonly logger: Logger) {}
 
@@ -76,30 +76,21 @@ export class UserProfileService {
     const { name, size, owners } = params;
 
     try {
-      if (this.options === undefined) {
-        throw new Error('UserProfileService must be initialized before calling suggest');
-      }
+      this.validateInitialization();
 
       const { spaces } = this.options;
 
-      const securityPluginFields = {
-        securityPluginSetup: this.options.securityPluginSetup,
-        securityPluginStart: this.options.securityPluginStart,
-      };
-
       UserProfileService.validateSizeParam(size);
 
-      if (!UserProfileService.isSecurityEnabled(securityPluginFields) || owners.length <= 0) {
+      if (!this.isSecurityEnabled() || owners.length <= 0) {
         return [];
       }
-
-      const { securityPluginStart } = securityPluginFields;
 
       return UserProfileService.suggestUsers({
         searchTerm: name,
         size,
         owners,
-        securityPluginStart,
+        securityPluginStart: this.options.securityPluginStart,
         spaceId: spaces.spacesService.getSpaceId(request),
       });
     } catch (error) {
@@ -108,6 +99,12 @@ export class UserProfileService {
         message: `Failed to retrieve suggested user profiles in service for name: ${name} owners: [${owners}]: ${error}`,
         error,
       });
+    }
+  }
+
+  private validateInitialization(): asserts this is this & { options: UserProfileOptions } {
+    if (this.options == null) {
+      throw new Error('UserProfileService must be initialized before calling suggest');
     }
   }
 
@@ -120,20 +117,10 @@ export class UserProfileService {
     }
   }
 
-  private static isSecurityEnabled(fields: {
-    securityPluginSetup?: SecurityPluginSetup;
-    securityPluginStart?: SecurityPluginStart;
-  }): fields is {
-    securityPluginSetup: SecurityPluginSetup;
-    securityPluginStart: SecurityPluginStart;
-  } {
-    const { securityPluginSetup, securityPluginStart } = fields;
+  private isSecurityEnabled() {
+    this.validateInitialization();
 
-    return (
-      securityPluginStart !== undefined &&
-      securityPluginSetup !== undefined &&
-      securityPluginSetup.license.isEnabled()
-    );
+    return this.options.securityPluginSetup.license.isEnabled();
   }
 
   /**

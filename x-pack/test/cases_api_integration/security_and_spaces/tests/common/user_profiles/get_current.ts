@@ -6,65 +6,391 @@
  */
 
 import expect from '@kbn/expect';
-import { loginUsers, suggestUserProfiles } from '../../../../common/lib/user_profiles';
+import { CaseStatuses, CommentType } from '@kbn/cases-plugin/common';
+import { CreateCaseUserAction, User } from '@kbn/cases-plugin/common/api';
+import { setupSuperUserProfile } from '../../../../common/lib/user_profiles';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { superUser } from '../../../../common/lib/authentication/users';
-import { createCase, deleteAllCaseItems } from '../../../../common/lib/utils';
-import { getPostCaseRequest } from '../../../../common/lib/mock';
-import { getUserInfo } from '../../../../common/lib/authentication';
+import {
+  createCase,
+  createComment,
+  createConfiguration,
+  deleteAllCaseItems,
+  getComment,
+  updateCase,
+  updateComment,
+  getConfigurationRequest,
+  updateConfiguration,
+  getCaseUserActions,
+} from '../../../../common/lib/utils';
+import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
-  const security = getService('security');
 
   describe('user_profiles', () => {
     describe('get_current', () => {
+      let headers: Record<string, string>;
+      let superUserWithProfile: User;
+      let superUserInfo: User;
+
+      before(async () => {
+        ({ headers, superUserInfo, superUserWithProfile } = await setupSuperUserProfile(
+          getService
+        ));
+      });
+
       afterEach(async () => {
         await deleteAllCaseItems(es);
       });
 
-      it('sets the profile uid for a case', async () => {
-        const superUserInfo = getUserInfo(superUser);
+      describe('user actions', () => {
+        describe('createdBy', () => {
+          it('sets the profile uid for a case', async () => {
+            const caseInfo = await createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest(),
+              200,
+              null,
+              headers
+            );
 
-        // ensure the user's information is what we expect
-        await security.user.create(superUser.username, {
-          password: superUser.password,
-          roles: superUser.roles,
-          full_name: superUserInfo.full_name,
-          email: superUserInfo.email,
-        });
+            const userActions = await getCaseUserActions({
+              supertest: supertestWithoutAuth,
+              caseID: caseInfo.id,
+            });
 
-        const cookies = await loginUsers({ supertest: supertestWithoutAuth, users: [superUser] });
+            const createCaseUserAction = userActions[0] as CreateCaseUserAction;
+            expect(createCaseUserAction.created_by).to.eql(superUserWithProfile);
+          });
 
-        const profiles = await suggestUserProfiles({
-          supertest: supertestWithoutAuth,
-          req: {
-            name: 'superUser',
-            owners: ['securitySolutionFixture'],
-            size: 1,
-          },
-          auth: { user: superUser, space: null },
-        });
+          it('falls back to authc to get the user information when the profile is not available', async () => {
+            const caseInfo = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
+              user: superUser,
+              space: null,
+            });
 
-        const caseInfo = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, null, {
-          Cookie: cookies[0].cookieString(),
-        });
+            const userActions = await getCaseUserActions({
+              supertest: supertestWithoutAuth,
+              caseID: caseInfo.id,
+            });
 
-        expect(caseInfo.created_by).to.eql({
-          ...getUserInfo(superUser),
-          profile_uid: profiles[0].uid,
+            const createCaseUserAction = userActions[0] as CreateCaseUserAction;
+            expect(createCaseUserAction.created_by).to.eql(superUserInfo);
+          });
         });
       });
 
-      it('falls back to authc to get the user information when the profile is not available', async () => {
-        const caseInfo = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
-          user: superUser,
-          space: null,
+      describe('configure', () => {
+        describe('createdBy', () => {
+          it('sets the profile uid', async () => {
+            const configuration = await createConfiguration(
+              supertestWithoutAuth,
+              getConfigurationRequest({ id: 'connector-2' }),
+              200,
+              null,
+              headers
+            );
+
+            expect(configuration.created_by).to.eql(superUserWithProfile);
+          });
+
+          it('falls back to authc to get the user information when the profile is not available', async () => {
+            const configuration = await createConfiguration(
+              supertestWithoutAuth,
+              getConfigurationRequest({ id: 'connector-2' })
+            );
+
+            expect(configuration.created_by).to.eql(superUserInfo);
+          });
         });
 
-        expect(caseInfo.created_by).to.eql(getUserInfo(superUser));
+        describe('updatedBy', () => {
+          it('sets the profile uid', async () => {
+            const configuration = await createConfiguration(
+              supertestWithoutAuth,
+              getConfigurationRequest({ id: 'connector-2' }),
+              200,
+              null,
+              headers
+            );
+
+            const newConfiguration = await updateConfiguration(
+              supertestWithoutAuth,
+              configuration.id,
+              {
+                closure_type: 'close-by-pushing',
+                version: configuration.version,
+              },
+              200,
+              null,
+              headers
+            );
+
+            expect(newConfiguration.updated_by).to.eql(superUserWithProfile);
+          });
+
+          it('falls back to authc to get the user information when the profile is not available', async () => {
+            const configuration = await createConfiguration(
+              supertestWithoutAuth,
+              getConfigurationRequest({ id: 'connector-2' })
+            );
+
+            const newConfiguration = await updateConfiguration(
+              supertestWithoutAuth,
+              configuration.id,
+              {
+                closure_type: 'close-by-pushing',
+                version: configuration.version,
+              }
+            );
+
+            expect(newConfiguration.updated_by).to.eql(superUserInfo);
+          });
+        });
+      });
+
+      describe('comment', () => {
+        describe('createdBy', () => {
+          it('sets the profile uid', async () => {
+            const caseInfo = await createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest(),
+              200,
+              null,
+              headers
+            );
+
+            const patchedCase = await createComment({
+              supertest: supertestWithoutAuth,
+              caseId: caseInfo.id,
+              params: postCommentUserReq,
+              auth: null,
+              headers,
+            });
+
+            expect(patchedCase.comments![0].created_by).to.eql(superUserWithProfile);
+          });
+
+          it('falls back to authc to get the user information when the profile is not available', async () => {
+            const caseInfo = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
+              user: superUser,
+              space: null,
+            });
+
+            const patchedCase = await createComment({
+              supertest: supertestWithoutAuth,
+              caseId: caseInfo.id,
+              params: postCommentUserReq,
+            });
+
+            expect(patchedCase.comments![0].created_by).to.eql(superUserInfo);
+          });
+        });
+
+        describe('updatedBy', () => {
+          it('sets the profile uid', async () => {
+            const caseInfo = await createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest(),
+              200,
+              null,
+              headers
+            );
+
+            const patchedCase = await createComment({
+              supertest: supertestWithoutAuth,
+              caseId: caseInfo.id,
+              params: postCommentUserReq,
+              auth: null,
+              headers,
+            });
+
+            const updatedCase = await updateComment({
+              supertest: supertestWithoutAuth,
+              caseId: caseInfo.id,
+              req: {
+                id: patchedCase.comments![0].id,
+                version: patchedCase.comments![0].version,
+                comment: 'a new comment',
+                type: CommentType.user,
+                owner: 'securitySolutionFixture',
+              },
+              auth: null,
+              headers,
+            });
+
+            const patchedComment = await getComment({
+              supertest: supertestWithoutAuth,
+              caseId: updatedCase.id,
+              commentId: patchedCase.comments![0].id,
+            });
+
+            expect(patchedComment.updated_by).to.eql(superUserWithProfile);
+          });
+
+          it('falls back to authc to get the user information when the profile is not available', async () => {
+            const caseInfo = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
+              user: superUser,
+              space: null,
+            });
+
+            const patchedCase = await createComment({
+              supertest: supertestWithoutAuth,
+              caseId: caseInfo.id,
+              params: postCommentUserReq,
+            });
+
+            const updatedCase = await updateComment({
+              supertest: supertestWithoutAuth,
+              caseId: caseInfo.id,
+              req: {
+                id: patchedCase.comments![0].id,
+                version: patchedCase.comments![0].version,
+                comment: 'a new comment',
+                type: CommentType.user,
+                owner: 'securitySolutionFixture',
+              },
+            });
+
+            const patchedComment = await getComment({
+              supertest: supertestWithoutAuth,
+              caseId: updatedCase.id,
+              commentId: patchedCase.comments![0].id,
+            });
+
+            expect(patchedComment.updated_by).to.eql(superUserInfo);
+          });
+        });
+      });
+
+      describe('case', () => {
+        describe('closedBy', () => {
+          it('sets the profile uid', async () => {
+            const caseInfo = await createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest(),
+              200,
+              null,
+              headers
+            );
+
+            const patchedCases = await updateCase({
+              supertest: supertestWithoutAuth,
+              params: {
+                cases: [
+                  {
+                    id: caseInfo.id,
+                    version: caseInfo.version,
+                    status: CaseStatuses.closed,
+                  },
+                ],
+              },
+              headers,
+              auth: null,
+            });
+
+            expect(patchedCases[0].closed_by).to.eql(superUserWithProfile);
+          });
+
+          it('falls back to authc to get the user information when the profile is not available', async () => {
+            const caseInfo = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
+              user: superUser,
+              space: null,
+            });
+
+            const patchedCases = await updateCase({
+              supertest: supertestWithoutAuth,
+              params: {
+                cases: [
+                  {
+                    id: caseInfo.id,
+                    version: caseInfo.version,
+                    status: CaseStatuses.closed,
+                  },
+                ],
+              },
+            });
+
+            expect(patchedCases[0].closed_by).to.eql(superUserInfo);
+          });
+        });
+
+        describe('updatedBy', () => {
+          it('sets the profile uid', async () => {
+            const caseInfo = await createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest(),
+              200,
+              null,
+              headers
+            );
+
+            const patchedCases = await updateCase({
+              supertest: supertestWithoutAuth,
+              params: {
+                cases: [
+                  {
+                    id: caseInfo.id,
+                    version: caseInfo.version,
+                    title: 'hello',
+                  },
+                ],
+              },
+              headers,
+              auth: null,
+            });
+
+            expect(patchedCases[0].updated_by).to.eql(superUserWithProfile);
+          });
+
+          it('falls back to authc to get the user information when the profile is not available', async () => {
+            const caseInfo = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
+              user: superUser,
+              space: null,
+            });
+
+            const patchedCases = await updateCase({
+              supertest: supertestWithoutAuth,
+              params: {
+                cases: [
+                  {
+                    id: caseInfo.id,
+                    version: caseInfo.version,
+                    title: 'hello',
+                  },
+                ],
+              },
+            });
+
+            expect(patchedCases[0].updated_by).to.eql(superUserInfo);
+          });
+        });
+
+        describe('createdBy', () => {
+          it('sets the profile uid for a case', async () => {
+            const caseInfo = await createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest(),
+              200,
+              null,
+              headers
+            );
+
+            expect(caseInfo.created_by).to.eql(superUserWithProfile);
+          });
+
+          it('falls back to authc to get the user information when the profile is not available', async () => {
+            const caseInfo = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
+              user: superUser,
+              space: null,
+            });
+
+            expect(caseInfo.created_by).to.eql(superUserInfo);
+          });
+        });
       });
     });
   });
