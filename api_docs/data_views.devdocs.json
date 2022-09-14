@@ -1705,7 +1705,7 @@
                 "section": "def-common.RuntimeFieldSpec",
                 "text": "RuntimeFieldSpec"
               },
-              " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
+              " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false,
@@ -5938,6 +5938,70 @@
       },
       {
         "parentPluginId": "dataViews",
+        "id": "def-public.RuntimeField",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuntimeField",
+        "description": [
+          "\nThis is the RuntimeField interface enhanced with Data view field\nconfiguration: field format definition, customLabel or popularity."
+        ],
+        "signature": [
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.RuntimeField",
+            "text": "RuntimeField"
+          },
+          " extends ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.RuntimeFieldBase",
+            "text": "RuntimeFieldBase"
+          },
+          ",",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldConfiguration",
+            "text": "FieldConfiguration"
+          }
+        ],
+        "path": "src/plugins/data_views/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.RuntimeField.fields",
+            "type": "Object",
+            "tags": [],
+            "label": "fields",
+            "description": [
+              "\nSubfields of composite field"
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.RuntimeFieldSubFields",
+                "text": "RuntimeFieldSubFields"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
         "id": "def-public.SavedObjectsClientCommon",
         "type": "Interface",
         "tags": [],
@@ -6454,7 +6518,7 @@
             "section": "def-common.RuntimeFieldSpec",
             "text": "RuntimeFieldSpec"
           },
-          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
+          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -6536,7 +6600,7 @@
         "tags": [],
         "label": "RuntimeType",
         "description": [
-          "\nRuntime field - type of value returned"
+          "\nRuntime field types"
         ],
         "signature": [
           "\"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"geo_point\" | \"long\" | \"double\" | \"composite\""
@@ -10667,7 +10731,9 @@
               "\nA record of capabilities (aggregations) for an index rollup job"
             ],
             "signature": [
-              "[index: string]:  { aggs?: _.Dictionary<",
+              "[index: string]:  { aggs?: ",
+              "Dictionary",
+              "<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -11114,7 +11180,7 @@
             "section": "def-common.RuntimeFieldSpec",
             "text": "RuntimeFieldSpec"
           },
-          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
+          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -14365,7 +14431,7 @@
                 "section": "def-common.RuntimeFieldSpec",
                 "text": "RuntimeFieldSpec"
               },
-              " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
+              " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false,
@@ -19607,15 +19673,14 @@
               "\nSubfields of composite field"
             ],
             "signature": [
-              "Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.RuntimeFieldSubField",
-                "text": "RuntimeFieldSubField"
+                "section": "def-common.RuntimeFieldSubFields",
+                "text": "RuntimeFieldSubFields"
               },
-              "> | undefined"
+              " | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
@@ -19660,9 +19725,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "type",
-            "description": [
-              "\nType of runtime field, can only be primitive type"
-            ],
+            "description": [],
             "signature": [
               "\"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"geo_point\" | \"long\" | \"double\""
             ],
@@ -19768,7 +19831,7 @@
             "tags": [],
             "label": "attributes",
             "description": [
-              "{@inheritdoc SavedObjectAttributes}"
+              "The data for a Saved Object is stored as an object in the `attributes` property."
             ],
             "signature": [
               "T"
@@ -21094,7 +21157,7 @@
             "section": "def-common.RuntimeFieldSpec",
             "text": "RuntimeFieldSpec"
           },
-          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
+          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -21336,10 +21399,50 @@
             "pluginId": "dataViews",
             "scope": "common",
             "docId": "kibDataViewsPluginApi",
-            "section": "def-common.RuntimeTypeExceptComposite",
-            "text": "RuntimeTypeExceptComposite"
+            "section": "def-common.RuntimePrimitiveTypes",
+            "text": "RuntimePrimitiveTypes"
           },
           "; }> | undefined; }"
+        ],
+        "path": "src/plugins/data_views/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-common.RuntimeFieldSubFields",
+        "type": "Type",
+        "tags": [],
+        "label": "RuntimeFieldSubFields",
+        "description": [],
+        "signature": [
+          "{ [x: string]: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.RuntimeFieldSubField",
+            "text": "RuntimeFieldSubField"
+          },
+          "; }"
+        ],
+        "path": "src/plugins/data_views/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-common.RuntimePrimitiveTypes",
+        "type": "Type",
+        "tags": [],
+        "label": "RuntimePrimitiveTypes",
+        "description": [
+          "\nRuntime field primitive types - excluding composite"
+        ],
+        "signature": [
+          "\"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"geo_point\" | \"long\" | \"double\""
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -21353,27 +21456,10 @@
         "tags": [],
         "label": "RuntimeType",
         "description": [
-          "\nRuntime field - type of value returned"
+          "\nRuntime field types"
         ],
         "signature": [
           "\"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"geo_point\" | \"long\" | \"double\" | \"composite\""
-        ],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataViews",
-        "id": "def-common.RuntimeTypeExceptComposite",
-        "type": "Type",
-        "tags": [],
-        "label": "RuntimeTypeExceptComposite",
-        "description": [
-          "\nPrimitive runtime field types"
-        ],
-        "signature": [
-          "\"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"geo_point\" | \"long\" | \"double\""
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,

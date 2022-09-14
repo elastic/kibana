@@ -29,7 +29,7 @@ export const FilterItems = (props: React.ComponentProps<typeof LazyFilterItems>)
   </React.Suspense>
 );
 
-const LazyFilterLabel = React.lazy(() => import('./filter_editor/lib/filter_label'));
+const LazyFilterLabel = React.lazy(() => import('./filter_label/filter_label'));
 /**
  * Renders the label for a single filter pill
  */
