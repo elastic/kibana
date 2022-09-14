@@ -16,7 +16,7 @@ import { ITagsCache } from '../../services';
 import { byNameTagSorter } from '../../utils';
 
 interface SavedObjectTagListProps {
-  object: SavedObject;
+  object: { references: SavedObject['references'] };
   tags: Tag[];
 }
 
