@@ -107,13 +107,15 @@ export const deleteMonitor = async ({
 
     normalizedMonitor = normalizeSecrets(monitor);
 
-    const deleteSyncPromise = syntheticsMonitorClient.deleteMonitor(
-      {
-        ...normalizedMonitor.attributes,
-        id:
-          (normalizedMonitor.attributes as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID] ||
-          monitorId,
-      },
+    const deleteSyncPromise = syntheticsMonitorClient.deleteMonitors(
+      [
+        {
+          ...normalizedMonitor.attributes,
+          id:
+            (normalizedMonitor.attributes as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID] ||
+            monitorId,
+        },
+      ],
       request,
       savedObjectsClient
     );

@@ -10,9 +10,9 @@ import { formatSyntheticsPolicy } from '../../../common/formatters/format_synthe
 import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
 import {
   ConfigKey,
+  HeartbeatConfig,
   MonitorFields,
   PrivateLocation,
-  HeartbeatConfig,
   SourceType,
 } from '../../../common/runtime_types';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
@@ -260,58 +260,54 @@ export class SyntheticsPrivateLocation {
 
   async getMonitor(id: string, savedObjectsClient: SavedObjectsClientContract) {
     try {
-      const soClient = savedObjectsClient;
-      return await this.server.fleet.packagePolicyService.get(soClient!, id);
+      return await this.server.fleet.packagePolicyService.get(savedObjectsClient!, id);
     } catch (e) {
       this.server.logger.debug(e);
       return null;
     }
   }
 
-  async deleteMonitor(
-    config: HeartbeatConfig,
+  async deleteMonitors(
+    configs: HeartbeatConfig[],
     request: KibanaRequest,
     savedObjectsClient: SavedObjectsClientContract
   ) {
     const soClient = savedObjectsClient;
     const esClient = this.server.uptimeEsClient.baseESClient;
 
+    const allPrivateLocations: PrivateLocation[] = await getSyntheticsPrivateLocations(soClient);
+
+    await this.checkPermissions(
+      request,
+      `Unable to delete Synthetics package policy for monitor. Fleet write permissions are needed to use Synthetics private locations.`
+    );
+
     if (soClient && esClient) {
-      const { locations } = config;
+      const policyIdsToDelete = [];
+      for (const config of configs) {
+        const { locations } = config;
 
-      const allPrivateLocations: PrivateLocation[] = await getSyntheticsPrivateLocations(soClient);
+        const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
 
-      const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
-
-      for (const privateLocation of monitorPrivateLocations) {
-        const location = allPrivateLocations?.find((loc) => loc.id === privateLocation.id);
-        if (location) {
-          await this.checkPermissions(
-            request,
-            `Unable to delete Synthetics package policy for monitor ${
-              config[ConfigKey.NAME]
-            }. Fleet write permissions are needed to use Synthetics private locations.`
-          );
-
-          try {
-            await this.server.fleet.packagePolicyService.delete(
-              soClient,
-              esClient,
-              [this.getPolicyId(config, location, request)],
-              {
-                force: true,
-              }
-            );
-          } catch (e) {
-            this.server.logger.error(e);
-            throw new Error(
-              `Unable to delete Synthetics package policy for monitor ${
-                config[ConfigKey.NAME]
-              } with private location ${location.label}`
-            );
+        for (const privateLocation of monitorPrivateLocations) {
+          const location = allPrivateLocations?.find((loc) => loc.id === privateLocation.id);
+          if (location) {
+            try {
+              policyIdsToDelete.push(this.getPolicyId(config, location, request));
+            } catch (e) {
+              this.server.logger.error(e);
+              throw new Error(
+                `Unable to delete Synthetics package policy for monitor ${
+                  config[ConfigKey.NAME]
+                } with private location ${location.label}`
+              );
+            }
           }
         }
       }
+      await this.server.fleet.packagePolicyService.delete(soClient, esClient, policyIdsToDelete, {
+        force: true,
+      });
     }
   }
 
