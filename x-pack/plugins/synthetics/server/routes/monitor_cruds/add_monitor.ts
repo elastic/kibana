@@ -41,6 +41,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     body: schema.any(),
     query: schema.object({
       id: schema.maybe(schema.string()),
+      preserve_namespace: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({
@@ -120,9 +121,9 @@ export const createNewSavedObjectMonitor = async ({
     }),
     id
       ? {
-          id,
-          overwrite: true,
-        }
+        id,
+        overwrite: true,
+      }
       : undefined
   );
 };
@@ -145,15 +146,17 @@ export const syncNewMonitor = async ({
   request: KibanaRequest;
 }) => {
   const newMonitorId = id ?? uuidV4();
+  const { preserve_namespace: preserveNamespace } = request.query as Record<
+    string,
+    { preserve_namespace?: boolean }
+  >;
 
   let monitorSavedObject: SavedObject<EncryptedSyntheticsMonitor> | null = null;
   const monitorWithNamespace = {
     ...normalizedMonitor,
-    [ConfigKey.NAMESPACE]: getMonitorNamespace(
-      server,
-      request,
-      normalizedMonitor[ConfigKey.NAMESPACE]
-    ),
+    [ConfigKey.NAMESPACE]: preserveNamespace
+      ? normalizedMonitor[ConfigKey.NAMESPACE]
+      : getMonitorNamespace(server, request, normalizedMonitor[ConfigKey.NAMESPACE]),
   };
 
   try {
@@ -199,7 +202,7 @@ export const syncNewMonitor = async ({
         request,
       });
     }
-    this.logger.error(e);
+    server.logger.error(e);
 
     throw e;
   }
@@ -213,9 +216,7 @@ export const getMonitorNamespace = (
   const spaceId = server.spaces.spacesService.getSpaceId(request);
   const kibanaNamespace = formatKibanaNamespace(spaceId);
   const namespace =
-    configuredNamespace !== DEFAULT_NAMESPACE_STRING
-      ? monitor[ConfigKey.NAMESPACE]
-      : kibanaNamespace;
+    configuredNamespace !== DEFAULT_NAMESPACE_STRING ? configuredNamespace : kibanaNamespace;
   const { error } = isValidNamespace(namespace);
   if (error) {
     throw new Error(`Cannot save monitor. Monitor namespace is invalid: ${error}`);
