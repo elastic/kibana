@@ -6,13 +6,13 @@
  */
 
 import type {
+  KibanaRequest,
+  RequestHandlerContext,
+  PluginInitializerContext,
   CoreSetup,
   CoreStart,
-  KibanaRequest,
-  Logger,
   Plugin,
-  PluginInitializerContext,
-  RequestHandlerContext,
+  Logger,
 } from '@kbn/core/server';
 import { DeepReadonly } from 'utility-types';
 import { DeletePackagePoliciesResponse, PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -22,8 +22,8 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import type {
   CspServerPluginSetup,
-  CspServerPluginSetupDeps,
   CspServerPluginStart,
+  CspServerPluginSetupDeps,
   CspServerPluginStartDeps,
   CspServerPluginStartServices,
 } from './types';
@@ -68,7 +68,6 @@ export class CspPlugin
     core: CoreSetup<CspServerPluginStartDeps, CspServerPluginStart>,
     plugins: CspServerPluginSetupDeps
   ): CspServerPluginSetup {
-    console.log('*********************');
     setupSavedObjects(core.savedObjects);
 
     setupRoutes({
@@ -79,7 +78,7 @@ export class CspPlugin
     const coreStartServices = core.getStartServices();
     this.setupCspTasks(plugins.taskManager, coreStartServices, this.logger);
     registerIndicesCounterCollector(plugins.usageCollection);
-    console.log('*********************');
+
     return {};
   }
 
