@@ -130,9 +130,6 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
       }
     },
     startCrawl: async ({ overrides = {} }) => {
-      const { indexName } = IndexNameLogic.values;
-      const { http } = HttpLogic.values;
-
       try {
         if (isCrawlerIndex(values.indexData)) {
           actions.makeStartSyncRequest({ connectorId: values.indexData.connector.id, nextSyncConfig: JSON.stringify(overrides)});
