@@ -9,9 +9,11 @@
 import { ConnectionOptions as TlsConnectionOptions } from 'tls';
 import { URL } from 'url';
 import { Duration } from 'moment';
-import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
+import type { ClientOptions, HttpAgentOptions } from '@elastic/elasticsearch';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { DEFAULT_HEADERS } from './headers';
+
+export type ParsedClientOptions = Omit<ClientOptions, 'agent'> & { agent: HttpAgentOptions };
 
 /**
  * Parse the client options from given client config and `scoped` flag.
@@ -23,8 +25,8 @@ import { DEFAULT_HEADERS } from './headers';
 export function parseClientOptions(
   config: ElasticsearchClientConfig,
   scoped: boolean
-): ClientOptions {
-  const clientOptions: ClientOptions = {
+): ParsedClientOptions {
+  const clientOptions: ParsedClientOptions = {
     sniffOnStart: config.sniffOnStart,
     sniffOnConnectionFault: config.sniffOnConnectionFault,
     headers: {

@@ -13,7 +13,7 @@ import { merge } from 'lodash';
 import { kibanaPackageJson } from '@kbn/utils';
 
 import { Logger } from '@kbn/core/server';
-import { ClusterClient } from '@kbn/core-elasticsearch-client-server-internal';
+import { AgentManager, ClusterClient } from '@kbn/core-elasticsearch-client-server-internal';
 import { configSchema } from '@kbn/core-elasticsearch-server-internal';
 import { ElasticsearchService } from '@kbn/interactive-setup-plugin/server/elasticsearch_service';
 import { KibanaConfigWriter } from '@kbn/interactive-setup-plugin/server/kibana_config_writer';
@@ -47,6 +47,8 @@ export const elasticsearch = new ElasticsearchService(logger, kibanaPackageJson.
         ),
         logger,
         type,
+        // we use an independent AgentManager for cli_setup, no need to track performance of this one
+        agentManager: new AgentManager(),
       });
     },
   },
