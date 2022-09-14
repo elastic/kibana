@@ -61,7 +61,7 @@ export function useCategorizeRequest() {
     ): Promise<{ categories: Category[]; sparkLinesPerCategory: SparkLinesPerCategory }> => {
       return new Promise((resolve, reject) => {
         data.search
-          .search<any, CatResponse>(
+          .search<ReturnType<typeof createCategoryRequest>, CatResponse>(
             createCategoryRequest(index, field, timeField, from, to, query, intervalMs),
             { abortSignal: abortController.current.signal }
           )
