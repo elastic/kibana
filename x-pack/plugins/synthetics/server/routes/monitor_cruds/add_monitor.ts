@@ -12,7 +12,7 @@ import {
   KibanaRequest,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
-import { isValidNamespace, INVALID_NAMESPACE_CHARACTERS } from '@kbn/fleet-plugin/common';
+import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import {
   ConfigKey,
@@ -20,6 +20,7 @@ import {
   SyntheticsMonitor,
   EncryptedSyntheticsMonitor,
 } from '../../../common/runtime_types';
+import { formatKibanaNamespace } from '../../../common/formatters';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
 import {
@@ -210,8 +211,7 @@ export const getMonitorNamespace = (
   configuredNamespace: string
 ) => {
   const spaceId = server.spaces.spacesService.getSpaceId(request);
-  const invalidCharacters = new RegExp(INVALID_NAMESPACE_CHARACTERS, 'g');
-  const kibanaNamespace = spaceId.replace(invalidCharacters, '_');
+  const kibanaNamespace = formatKibanaNamespace(spaceId);
   const namespace =
     configuredNamespace !== DEFAULT_NAMESPACE_STRING
       ? monitor[ConfigKey.NAMESPACE]
