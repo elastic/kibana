@@ -15,8 +15,11 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiText,
+  EuiLink,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import type { EuiInMemoryTableProps } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type {
   PackageInfo,
@@ -24,17 +27,47 @@ import type {
   RegistryStream,
   RegistryInput,
 } from '../../../../../types';
+import { useStartServices } from '../../../../../../..//hooks';
 import { getStreamsForInputType } from '../../../../../../../../common/services';
 
 interface Props {
   packageInfo: PackageInfo;
+  integration?: string | null;
 }
 
-export const DocumentationPage: React.FunctionComponent<Props> = ({ packageInfo }) => {
+export const DocumentationPage: React.FunctionComponent<Props> = ({ packageInfo, integration }) => {
+  const { docLinks } = useStartServices();
+
   const content = (
     <>
+      <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
+        <EuiFlexItem grow={6}>
+          <EuiText>
+            <FormattedMessage
+              id="xpack.fleet.epm.packageDetails.apiReference.description"
+              defaultMessage="This document all the inputs, streams and variables available to use programmatically that integration via the Fleet Kibana API. {learnMore}"
+              values={{
+                learnMore: (
+                  <EuiLink href={docLinks.links.fleet.guide}>
+                    <FormattedMessage
+                      id="xpack.fleet.epm.packageDetails.apiReference.learnMoreLink"
+                      defaultMessage="Learn more"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBetaBadge label="beta" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <PackageVars vars={packageInfo.vars} />
-      <PolicyTemplates packageInfo={packageInfo} />
+
+      <Inputs packageInfo={packageInfo} integration={integration} />
+      <EuiSpacer size="m" />
     </>
   );
 
@@ -51,13 +84,16 @@ type RegistryInputWithStreams = RegistryInput & {
   streams: Array<RegistryStream & { data_stream: { type: string; dataset: string } }>;
 };
 
-const PolicyTemplates: React.FunctionComponent<{ packageInfo: PackageInfo }> = ({
-  packageInfo,
-}) => {
+const Inputs: React.FunctionComponent<{
+  packageInfo: PackageInfo;
+  integration?: string | null;
+}> = ({ packageInfo, integration }) => {
   const inputs = useMemo(
     () =>
       packageInfo.policy_templates?.reduce((acc, policyTemplate) => {
-        // TODO support integration
+        if (integration && policyTemplate.name !== integration) {
+          return acc;
+        }
         if (policyTemplate.inputs) {
           return [
             ...acc,
@@ -74,13 +110,14 @@ const PolicyTemplates: React.FunctionComponent<{ packageInfo: PackageInfo }> = (
   );
   return (
     <>
-      <EuiText>
-        That tab document all the inputs and datastreams available to programatically create a
-        package policy from that integration using Fleet Rest API, see doc for more info.
-      </EuiText>
       <EuiSpacer size="m" />
       <EuiTitle size="xs">
-        <h4>Inputs</h4>
+        <h4>
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetails.apiReference.inputsTitle"
+            defaultMessage="Inputs"
+          />
+        </h4>
       </EuiTitle>
       <EuiSpacer size="s" />
       {inputs?.map((input) => {
@@ -89,11 +126,11 @@ const PolicyTemplates: React.FunctionComponent<{ packageInfo: PackageInfo }> = (
             key={input.key}
             id={input.key}
             buttonContent={
-              <>
+              <EuiText>
                 <EuiCode>{input.key}</EuiCode>({input.title})
-              </>
+              </EuiText>
             }
-            initialIsOpen={true}
+            initialIsOpen={false}
             paddingSize={'m'}
           >
             <EuiText>{input.description}</EuiText>
@@ -105,7 +142,12 @@ const PolicyTemplates: React.FunctionComponent<{ packageInfo: PackageInfo }> = (
             ) : null}
             <EuiSpacer size="m" />
             <EuiTitle size="xs">
-              <h6>Datastreams</h6>
+              <h6>
+                <FormattedMessage
+                  id="xpack.fleet.epm.packageDetails.apiReference.streamsTitle"
+                  defaultMessage="Streams"
+                />
+              </h6>
             </EuiTitle>
             <EuiSpacer size="m" />
             {input.streams.map((dataStream) => (
@@ -113,11 +155,11 @@ const PolicyTemplates: React.FunctionComponent<{ packageInfo: PackageInfo }> = (
                 key={dataStream.data_stream.type + dataStream.data_stream.dataset}
                 id={dataStream.data_stream.type + dataStream.data_stream.dataset}
                 buttonContent={
-                  <>
+                  <EuiText>
                     <EuiCode>{dataStream.data_stream.dataset}</EuiCode>({dataStream.title})
-                  </>
+                  </EuiText>
                 }
-                initialIsOpen={true}
+                initialIsOpen={false}
                 paddingSize={'m'}
               >
                 <EuiText>{dataStream.description}</EuiText>
@@ -129,8 +171,6 @@ const PolicyTemplates: React.FunctionComponent<{ packageInfo: PackageInfo }> = (
                 ) : null}
               </EuiAccordion>
             ))}
-            {/* {JSON.stringify(dataStreams)} */}
-            {/* {packageInfo.data_streams?.filter(ds => ds.)} */}
           </EuiAccordion>
         );
       }) ?? null}
@@ -145,9 +185,15 @@ const PackageVars: React.FunctionComponent<{ vars: PackageInfo['vars'] }> = ({ v
 
   return (
     <>
-      <EuiTitle size="s">
-        <h4>Package variables</h4>
+      <EuiTitle size="xs">
+        <h4>
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetails.apiReference.globalVariablesTitle"
+            defaultMessage="Package variables"
+          />
+        </h4>
       </EuiTitle>
+      <EuiSpacer size="m" />
       <VarsTable vars={vars} />
       <EuiSpacer size="m" />
     </>
@@ -159,24 +205,51 @@ const VarsTable: React.FunctionComponent<{ vars: RegistryVarsEntry[] }> = ({ var
     return [
       {
         field: 'name',
-        name: 'key',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetails.apiReference.columnKeyName"
+            defaultMessage="Key"
+          />
+        ),
         render: (name: string) => <EuiCode>{name}</EuiCode>,
       },
       {
         field: 'title',
-        name: 'title',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetails.apiReference.columnTitleName"
+            defaultMessage="Title"
+          />
+        ),
       },
       {
         field: 'type',
-        name: 'type',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetails.apiReference.columnTypeName"
+            defaultMessage="Type"
+          />
+        ),
       },
       {
         field: 'required',
-        name: 'required',
+        width: '70px',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetails.apiReference.columnRequiredName"
+            defaultMessage="Required"
+          />
+        ),
       },
       {
         field: 'multi',
-        name: 'multi',
+        width: '70px',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetails.apiReference.columnMultidName"
+            defaultMessage="Multi"
+          />
+        ),
       },
     ];
   }, []);
@@ -184,7 +257,12 @@ const VarsTable: React.FunctionComponent<{ vars: RegistryVarsEntry[] }> = ({ var
   return (
     <>
       <EuiTitle size="xxs">
-        <h6>Variables</h6>
+        <h6>
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetails.apiReference.variableTableTitle"
+            defaultMessage="Variables"
+          />
+        </h6>
       </EuiTitle>
       <EuiBasicTable columns={columns} items={vars} />
     </>

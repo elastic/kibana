@@ -54,7 +54,7 @@ export type DetailViewPanelName =
   | 'assets'
   | 'settings'
   | 'custom'
-  | 'documentation';
+  | 'api-reference';
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AgentAssetType = typeof agentAssetTypes;
 export type DocAssetType = 'doc' | 'notice';

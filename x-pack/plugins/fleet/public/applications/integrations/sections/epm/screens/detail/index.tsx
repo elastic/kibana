@@ -491,16 +491,16 @@ export function Detail() {
     }
 
     tabs.push({
-      id: 'documentation',
+      id: 'api-reference',
       name: (
         <FormattedMessage
           id="xpack.fleet.epm.packageDetailsNav.documentationLinkText"
-          defaultMessage="Policy reference"
+          defaultMessage="API reference"
         />
       ),
-      isSelected: panel === 'documentation',
-      'data-test-subj': `tab-documentation`,
-      href: getHref('integration_details_documentation', {
+      isSelected: panel === 'api-reference',
+      'data-test-subj': `tab-api-reference`,
+      href: getHref('integration_details_api_reference', {
         pkgkey: packageInfoKey,
         ...(integration ? { integration } : {}),
       }),
@@ -592,8 +592,8 @@ export function Detail() {
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_custom}>
             <CustomViewPage packageInfo={packageInfo} />
           </Route>
-          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_documentation}>
-            <DocumentationPage packageInfo={packageInfo} />
+          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_api_reference}>
+            <DocumentationPage packageInfo={packageInfo} integration={integrationInfo?.name} />
           </Route>
           <Redirect to={INTEGRATIONS_ROUTING_PATHS.integration_details_overview} />
         </Switch>
