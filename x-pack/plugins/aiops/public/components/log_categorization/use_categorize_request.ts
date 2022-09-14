@@ -72,7 +72,8 @@ export function useCategorizeRequest() {
                 reject(result);
               } else {
                 // partial results
-                // console.log(result);
+                // Ignore partial results for now.
+                // An issue with the search function means partial results are not being returned correctly.
               }
             },
             error: (error) => {
