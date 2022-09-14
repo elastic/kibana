@@ -362,9 +362,9 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
     value: string,
     ecsMappingFormData: EcsMappingFormField[]
   ): string | undefined => {
-    const currentMapping = ecsMappingFormData[index];
+    const currentMapping = ecsMappingFormData && ecsMappingFormData[index];
 
-    if (!value.length && currentMapping.key.length) {
+    if (!value?.length && currentMapping?.key?.length) {
       return i18n.translate(
         'xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldRequiredErrorMessage',
         {
@@ -373,7 +373,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
       );
     }
 
-    if (!value.length || currentMapping.result.type !== 'field') return;
+    if (!value?.length || currentMapping?.result?.type !== 'field') return;
 
     const osqueryColumnExists = find(euiFieldProps.options, [
       'label',
@@ -396,6 +396,12 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   const { ecsMappingArray: watchedEcsMapping } = watch() as unknown as {
     ecsMappingArray: EcsMappingFormField[];
   };
+
+  const { field: resultTypeField, fieldState: resultTyoeFieldTypState } = useController({
+    control,
+    name: `ecsMappingArray.${index}.result.type`,
+    defaultValue: 'field',
+  });
 
   const { field: resultField, fieldState: resultFieldState } = useController({
     control,
@@ -617,9 +623,9 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
   setValue,
 }) => {
   const ecsFieldValidator = (value: string, ecsMapping: EcsMappingFormField[]) => {
-    const ecsCurrentMapping = ecsMapping[index].result?.value;
+    const ecsCurrentMapping = ecsMapping && ecsMapping[index].result?.value;
 
-    return !value.length && ecsCurrentMapping.length
+    return !value?.length && ecsCurrentMapping?.length
       ? i18n.translate('xpack.osquery.pack.queryFlyoutForm.ecsFieldRequiredErrorMessage', {
           defaultMessage: 'ECS field is required.',
         })
@@ -733,230 +739,253 @@ interface OsqueryColumn {
   index: boolean;
 }
 
-export const ECSMappingEditorField = React.memo(
-  ({ euiFieldProps }: ECSMappingEditorFieldProps) => {
-    const { setValue, setError, clearErrors } = useFormContext();
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { query, ecs_mapping } = useWatch() as unknown as {
-      query: string;
-      ecs_mapping: EcsMappingSerialized;
-    };
+export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEditorFieldProps) => {
+  const {
+    setValue,
+    setError,
+    clearErrors,
+    formState: formStateRoot,
+    getFieldState,
+  } = useFormContext();
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { query, ecs_mapping } = useWatch() as unknown as {
+    query: string;
+    ecs_mapping: EcsMappingSerialized;
+  };
 
-    const {
-      control,
-      trigger,
-      watch,
-      setValue: setArrayValue,
-      formState,
-    } = useForm({
-      mode: 'all',
-      shouldUnregister: true,
-      defaultValues: {
-        ecsMappingArray: convertECSMappingToArray(ecs_mapping),
-      },
-    });
-    const { fields, append, remove, replace } = useFieldArray<{
-      ecsMappingArray: EcsMappingFormField[];
-    }>({
-      control,
-      name: 'ecsMappingArray',
-    });
+  const ecsMappingFieldState = getFieldState('ecs_mapping', formStateRoot);
 
-    const ecsMappingArray = watch();
-    const [osquerySchemaOptions, setOsquerySchemaOptions] = useState<OsquerySchemaOption[]>([]);
+  const {
+    control,
+    trigger,
+    watch,
+    setValue: setArrayValue,
+    formState,
+    resetField,
+  } = useForm({
+    mode: 'all',
+    shouldUnregister: true,
+    defaultValues: {
+      ecsMappingArray: !isEmpty(convertECSMappingToArray(ecs_mapping))
+        ? [...convertECSMappingToArray(ecs_mapping), defaultEcsFormData]
+        : [defaultEcsFormData],
+    },
+  });
+  const { fields, append, remove, replace } = useFieldArray<{
+    ecsMappingArray: EcsMappingFormField[];
+  }>({
+    control,
+    name: 'ecsMappingArray',
+  });
 
-    useEffect(() => {
-      setTimeout(() => trigger('ecsMappingArray'), 0);
-    }, [query, trigger]);
+  const { ecsMappingArray } = watch();
+  const ecsMappingArrayState = getFieldState('ecsMappingArray', formState);
+  const [osquerySchemaOptions, setOsquerySchemaOptions] = useState<OsquerySchemaOption[]>([]);
 
-    useEffect(() => {
-      if (!query?.length) {
-        return;
+  useEffect(() => {
+    const subscription = watch((data) => {
+      const lastEcs = last(data.ecsMappingArray);
+
+      if (lastEcs?.key?.length && lastEcs?.result?.value?.length) {
+        return append(defaultEcsFormData);
       }
+    });
 
-      const oneLineQuery = removeMultilines(query);
+    return () => subscription.unsubscribe();
+  }, [watch, append]);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let ast: Record<string, any> | undefined;
+  useEffect(() => {
+    setTimeout(() => trigger('ecsMappingArray'), 0);
+  }, [query, trigger]);
 
-      try {
-        ast = sqliteParser(oneLineQuery)?.statement?.[0];
-      } catch (e) {
-        return;
+  useEffect(() => {
+    if (!query?.length) {
+      return;
+    }
+
+    const oneLineQuery = removeMultilines(query);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let ast: Record<string, any> | undefined;
+
+    try {
+      ast = sqliteParser(oneLineQuery)?.statement?.[0];
+    } catch (e) {
+      return;
+    }
+
+    const astOsqueryTables: Record<
+      string,
+      {
+        columns: OsqueryColumn[];
+        order: number;
       }
+    > =
+      reduce(
+        ast,
+        (acc, data) => {
+          // select * from uptime
+          if (data?.type === 'identifier' && data?.variant === 'table') {
+            const osqueryTable = find(osquerySchema, ['name', data.name]);
 
-      const astOsqueryTables: Record<
-        string,
-        {
-          columns: OsqueryColumn[];
-          order: number;
-        }
-      > =
-        reduce(
-          ast,
-          (acc, data) => {
-            // select * from uptime
-            if (data?.type === 'identifier' && data?.variant === 'table') {
-              const osqueryTable = find(osquerySchema, ['name', data.name]);
+            if (osqueryTable) {
+              acc[data.alias || data.name] = {
+                columns: osqueryTable.columns,
+                order: Object.keys(acc).length,
+              };
+            }
+          }
+
+          // select * from uptime, routes
+          if (data?.type === 'map' && data?.variant === 'join') {
+            if (data?.source?.type === 'identifier' && data?.source?.variant === 'table') {
+              const osqueryTable = find(osquerySchema, ['name', data?.source?.name]);
 
               if (osqueryTable) {
-                acc[data.alias || data.name] = {
+                acc[data?.source?.alias || data?.source?.name] = {
                   columns: osqueryTable.columns,
                   order: Object.keys(acc).length,
                 };
               }
             }
 
-            // select * from uptime, routes
-            if (data?.type === 'map' && data?.variant === 'join') {
-              if (data?.source?.type === 'identifier' && data?.source?.variant === 'table') {
-                const osqueryTable = find(osquerySchema, ['name', data?.source?.name]);
+            if (data?.source?.type === 'statement' && data?.source?.variant === 'compound') {
+              if (
+                data?.source?.statement.from.type === 'identifier' &&
+                data?.source?.statement.from.variant === 'table'
+              ) {
+                const osqueryTable = find(osquerySchema, [
+                  'name',
+                  data?.source?.statement.from.name,
+                ]);
 
                 if (osqueryTable) {
-                  acc[data?.source?.alias || data?.source?.name] = {
+                  acc[data?.source?.statement.from.alias || data?.source?.statement.from.name] = {
                     columns: osqueryTable.columns,
                     order: Object.keys(acc).length,
                   };
                 }
               }
+            }
 
-              if (data?.source?.type === 'statement' && data?.source?.variant === 'compound') {
-                if (
-                  data?.source?.statement.from.type === 'identifier' &&
-                  data?.source?.statement.from.variant === 'table'
-                ) {
-                  const osqueryTable = find(osquerySchema, [
-                    'name',
-                    data?.source?.statement.from.name,
-                  ]);
+            each(
+              data?.map,
+              (mapValue: {
+                type: string;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                source: { type: string; variant: string; name: any | string; alias: any };
+              }) => {
+                if (mapValue?.type === 'join') {
+                  if (
+                    mapValue?.source?.type === 'identifier' &&
+                    mapValue?.source?.variant === 'table'
+                  ) {
+                    const osqueryTable = find(osquerySchema, ['name', mapValue?.source?.name]);
 
-                  if (osqueryTable) {
-                    acc[data?.source?.statement.from.alias || data?.source?.statement.from.name] = {
-                      columns: osqueryTable.columns,
-                      order: Object.keys(acc).length,
-                    };
-                  }
-                }
-              }
-
-              each(
-                data?.map,
-                (mapValue: {
-                  type: string;
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  source: { type: string; variant: string; name: any | string; alias: any };
-                }) => {
-                  if (mapValue?.type === 'join') {
-                    if (
-                      mapValue?.source?.type === 'identifier' &&
-                      mapValue?.source?.variant === 'table'
-                    ) {
-                      const osqueryTable = find(osquerySchema, ['name', mapValue?.source?.name]);
-
-                      if (osqueryTable) {
-                        acc[mapValue?.source?.alias || mapValue?.source?.name] = {
-                          columns: osqueryTable.columns,
-                          order: Object.keys(acc).length,
-                        };
-                      }
+                    if (osqueryTable) {
+                      acc[mapValue?.source?.alias || mapValue?.source?.name] = {
+                        columns: osqueryTable.columns,
+                        order: Object.keys(acc).length,
+                      };
                     }
                   }
                 }
-              );
-            }
+              }
+            );
+          }
 
-            return acc;
-          },
-          {} as Record<
-            string,
-            {
-              columns: OsqueryColumn[];
-              order: number;
-            }
-          >
-        ) ?? {};
+          return acc;
+        },
+        {} as Record<
+          string,
+          {
+            columns: OsqueryColumn[];
+            order: number;
+          }
+        >
+      ) ?? {};
 
-      // Table doesn't exist in osquery schema
-      if (isEmpty(astOsqueryTables)) {
-        return;
-      }
+    // Table doesn't exist in osquery schema
+    if (isEmpty(astOsqueryTables)) {
+      return;
+    }
 
-      const suggestions = isArray(ast?.result)
-        ? ast?.result
-            ?.map((selectItem: { type: string; name: string; alias?: string }) => {
-              if (selectItem.type === 'identifier') {
-                /*
+    const suggestions = isArray(ast?.result)
+      ? ast?.result
+          ?.map((selectItem: { type: string; name: string; alias?: string }) => {
+            if (selectItem.type === 'identifier') {
+              /*
                   select * from routes, uptime;
                 */
-                if (ast?.result.length === 1 && selectItem.name === '*') {
-                  return reduce(
-                    astOsqueryTables,
-                    (acc, { columns: osqueryColumns, order: tableOrder }, table) => {
-                      acc.push(
-                        ...osqueryColumns.map((osqueryColumn) => ({
-                          label: osqueryColumn.name,
-                          value: {
-                            name: osqueryColumn.name,
-                            description: osqueryColumn.description,
-                            table,
-                            tableOrder,
-                            suggestion_label: osqueryColumn.name,
-                          },
-                        }))
-                      );
-
-                      return acc;
-                    },
-                    [] as OsquerySchemaOption[]
-                  );
-                }
-
-                /*
-                  select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
-                */
-
-                const [table, column] = selectItem.name.includes('.')
-                  ? selectItem.name?.split('.')
-                  : [Object.keys(astOsqueryTables)[0], selectItem.name];
-
-                if (column === '*' && astOsqueryTables[table]) {
-                  const { columns: osqueryColumns, order: tableOrder } = astOsqueryTables[table];
-
-                  return osqueryColumns.map((osqueryColumn) => ({
-                    label: osqueryColumn.name,
-                    value: {
-                      name: osqueryColumn.name,
-                      description: osqueryColumn.description,
-                      table,
-                      tableOrder,
-                      suggestion_label: `${osqueryColumn.name}`,
-                    },
-                  }));
-                }
-
-                if (astOsqueryTables[table]) {
-                  const osqueryColumn = find(astOsqueryTables[table].columns, ['name', column]);
-
-                  if (osqueryColumn) {
-                    const label = selectItem.alias ?? column;
-
-                    return [
-                      {
-                        label,
+              if (ast?.result.length === 1 && selectItem.name === '*') {
+                return reduce(
+                  astOsqueryTables,
+                  (acc, { columns: osqueryColumns, order: tableOrder }, table) => {
+                    acc.push(
+                      ...osqueryColumns.map((osqueryColumn) => ({
+                        label: osqueryColumn.name,
                         value: {
                           name: osqueryColumn.name,
                           description: osqueryColumn.description,
                           table,
-                          tableOrder: astOsqueryTables[table].order,
-                          suggestion_label: `${label}`,
+                          tableOrder,
+                          suggestion_label: osqueryColumn.name,
                         },
-                      },
-                    ];
-                  }
-                }
+                      }))
+                    );
+
+                    return acc;
+                  },
+                  [] as OsquerySchemaOption[]
+                );
               }
 
               /*
+                  select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
+                */
+
+              const [table, column] = selectItem.name.includes('.')
+                ? selectItem.name?.split('.')
+                : [Object.keys(astOsqueryTables)[0], selectItem.name];
+
+              if (column === '*' && astOsqueryTables[table]) {
+                const { columns: osqueryColumns, order: tableOrder } = astOsqueryTables[table];
+
+                return osqueryColumns.map((osqueryColumn) => ({
+                  label: osqueryColumn.name,
+                  value: {
+                    name: osqueryColumn.name,
+                    description: osqueryColumn.description,
+                    table,
+                    tableOrder,
+                    suggestion_label: `${osqueryColumn.name}`,
+                  },
+                }));
+              }
+
+              if (astOsqueryTables[table]) {
+                const osqueryColumn = find(astOsqueryTables[table].columns, ['name', column]);
+
+                if (osqueryColumn) {
+                  const label = selectItem.alias ?? column;
+
+                  return [
+                    {
+                      label,
+                      value: {
+                        name: osqueryColumn.name,
+                        description: osqueryColumn.description,
+                        table,
+                        tableOrder: astOsqueryTables[table].order,
+                        suggestion_label: `${label}`,
+                      },
+                    },
+                  ];
+                }
+              }
+            }
+
+            /*
                 SELECT pid, uid, name, ROUND((
                   (user_time + system_time) / (cpu_time.tsb - cpu_time.itsb)
                 ) * 100, 2) AS percentage
@@ -970,137 +999,132 @@ export const ECSMappingEditorField = React.memo(
                 LIMIT 5;
               */
 
-              if (selectItem.type === 'function' && selectItem.alias) {
-                return [
-                  {
-                    label: selectItem.alias,
-                    value: {
-                      name: selectItem.alias,
-                      description: '',
-                      table: '',
-                      tableOrder: -1,
-                      suggestion_label: selectItem.alias,
-                    },
+            if (selectItem.type === 'function' && selectItem.alias) {
+              return [
+                {
+                  label: selectItem.alias,
+                  value: {
+                    name: selectItem.alias,
+                    description: '',
+                    table: '',
+                    tableOrder: -1,
+                    suggestion_label: selectItem.alias,
                   },
-                ];
-              }
+                },
+              ];
+            }
 
-              return [];
-            })
-            .flat()
-        : [];
+            return [];
+          })
+          .flat()
+      : [];
 
-      // Remove column duplicates by keeping the column from the table that appears last in the query
-      const newOptions = sortedUniqBy(
-        orderBy(suggestions, ['value.suggestion_label', 'value.tableOrder'], ['asc', 'desc']),
-        'label'
-      );
-      setOsquerySchemaOptions((prevValue) =>
-        !deepEqual(prevValue, newOptions) ? newOptions : prevValue
-      );
-    }, [query]);
-
-    useEffect(() => {
-      const parsedMapping = convertECSMappingToArray(ecs_mapping);
-
-      if (xorWith(parsedMapping, ecsMappingArray.ecsMappingArray, isEqual).length > 1) {
-        replace(parsedMapping);
-      }
-    }, [ecsMappingArray.ecsMappingArray, ecs_mapping, replace]);
-
-    useEffect(() => {
-      const ecsList = ecsMappingArray.ecsMappingArray;
-      const lastEcs = last(ecsList);
-
-      // we skip appending on remove
-      if (fields?.length < ecsList?.length) {
-        return;
-      }
-
-      // list contains ecs already, and the last item has values provided
-      if (
-        (ecsList?.length === fields.length &&
-          lastEcs?.key?.length &&
-          lastEcs?.result?.value?.length) ||
-        !fields?.length
-      ) {
-        return append(defaultEcsFormData);
-      }
-    }, [append, fields, ecsMappingArray]);
-
-    useEffect(() => {
-      setValue('ecs_mapping', convertECSMappingToObject(ecsMappingArray.ecsMappingArray));
-    }, [ecsMappingArray.ecsMappingArray, setValue]);
-
-    useEffect(() => {
-      if (!formState.isValid) {
-        setError('ecs_mapping', {});
-      } else {
-        clearErrors('ecs_mapping');
-      }
-    }, [clearErrors, formState.isValid, setError]);
-
-    return (
-      <>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h5>
-                <FormattedMessage
-                  id="xpack.osquery.pack.form.ecsMappingSection.title"
-                  defaultMessage="ECS mapping"
-                />
-              </h5>
-            </EuiTitle>
-            <EuiText color="subdued">
-              <FormattedMessage
-                id="xpack.osquery.pack.form.ecsMappingSection.description"
-                defaultMessage="Use the fields below to map results from this query to ECS fields."
-              />
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem>
-            <EuiFormLabel>
-              <FormattedMessage
-                id="xpack.osquery.pack.queryFlyoutForm.mappingEcsFieldLabel"
-                defaultMessage="ECS field"
-              />
-            </EuiFormLabel>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormLabel>
-              <FormattedMessage
-                id="xpack.osquery.pack.queryFlyoutForm.mappingValueFieldLabel"
-                defaultMessage="Value"
-              />
-            </EuiFormLabel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-
-        {fields.map((item, index, array) => (
-          <div key={item.id}>
-            <ECSMappingEditorForm
-              osquerySchemaOptions={osquerySchemaOptions}
-              item={item}
-              index={index}
-              isLastItem={index === array.length - 1}
-              onDelete={remove}
-              isDisabled={!!euiFieldProps?.isDisabled}
-              control={control}
-              watch={watch}
-              setValue={setArrayValue}
-            />
-          </div>
-        ))}
-      </>
+    // Remove column duplicates by keeping the column from the table that appears last in the query
+    const newOptions = sortedUniqBy(
+      orderBy(suggestions, ['value.suggestion_label', 'value.tableOrder'], ['asc', 'desc']),
+      'label'
     );
-  },
-  (prevProps, nextProps) => deepEqual(prevProps.euiFieldProps, nextProps.euiFieldProps)
-);
+    setOsquerySchemaOptions((prevValue) =>
+      !deepEqual(prevValue, newOptions) ? newOptions : prevValue
+    );
+  }, [query]);
+
+  useEffect(() => {
+    const parsedMapping = convertECSMappingToArray(ecs_mapping);
+
+    if (
+      !ecsMappingFieldState.isTouched &&
+      xorWith(parsedMapping, ecsMappingArray, isEqual).length > 1
+    ) {
+      resetField('ecsMappingArray', { defaultValue: [...parsedMapping, defaultEcsFormData] });
+    }
+  }, [
+    ecsMappingArray,
+    ecsMappingArrayState.isTouched,
+    ecsMappingFieldState.isTouched,
+    ecs_mapping,
+    replace,
+    resetField,
+    setArrayValue,
+    setValue,
+  ]);
+
+  useEffect(() => {
+    const parsedMapping = convertECSMappingToObject(ecsMappingArray);
+    if (!isEmpty(parsedMapping) && !deepEqual(parsedMapping, ecs_mapping)) {
+      setValue('ecs_mapping', parsedMapping, {
+        shouldTouch: true,
+      });
+    }
+  }, [ecsMappingArray, ecsMappingFieldState.isTouched, ecs_mapping, setValue]);
+
+  useEffect(() => {
+    if (!formState.isValid) {
+      setError('ecs_mapping', {});
+    } else {
+      clearErrors('ecs_mapping');
+    }
+  }, [clearErrors, formState.isValid, setError]);
+
+  return (
+    <>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h5>
+              <FormattedMessage
+                id="xpack.osquery.pack.form.ecsMappingSection.title"
+                defaultMessage="ECS mapping"
+              />
+            </h5>
+          </EuiTitle>
+          <EuiText color="subdued">
+            <FormattedMessage
+              id="xpack.osquery.pack.form.ecsMappingSection.description"
+              defaultMessage="Use the fields below to map results from this query to ECS fields."
+            />
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormLabel>
+            <FormattedMessage
+              id="xpack.osquery.pack.queryFlyoutForm.mappingEcsFieldLabel"
+              defaultMessage="ECS field"
+            />
+          </EuiFormLabel>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormLabel>
+            <FormattedMessage
+              id="xpack.osquery.pack.queryFlyoutForm.mappingValueFieldLabel"
+              defaultMessage="Value"
+            />
+          </EuiFormLabel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+
+      {fields.map((item, index, array) => (
+        <div key={item.id}>
+          <ECSMappingEditorForm
+            osquerySchemaOptions={osquerySchemaOptions}
+            item={item}
+            index={index}
+            isLastItem={index === array.length - 1}
+            onDelete={remove}
+            isDisabled={!!euiFieldProps?.isDisabled}
+            control={control}
+            watch={watch}
+            setValue={setArrayValue}
+          />
+        </div>
+      ))}
+    </>
+  );
+});
 
 // eslint-disable-next-line import/no-default-export
 export default ECSMappingEditorField;
