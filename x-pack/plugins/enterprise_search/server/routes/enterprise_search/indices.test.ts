@@ -19,7 +19,7 @@ import { registerIndexRoutes } from './indices';
 describe('Enterprise Search Managed Indices', () => {
   let mockRouter: MockRouter;
   const mockClient = {
-    asCurrentUser: 'testuser'
+    asCurrentUser: 'testuser',
   };
 
   beforeEach(() => {
