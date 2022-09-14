@@ -10,6 +10,7 @@ import React, { useReducer, useCallback, useEffect, useRef, useMemo, ReactNode }
 import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiBasicTableColumn,
+  EuiTableFieldDataColumnType,
   EuiButton,
   EuiCallOut,
   EuiEmptyPrompt,
@@ -127,7 +128,6 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   const {
     canEditAdvancedSettings,
     getListingLimitSettingsUrl,
-    getTagsColumnDefinition,
     searchQueryParser,
     notifyError,
     DateFormatterComp,
@@ -209,12 +209,8 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         // will insert the custom column before the udpatedAt col
         columns.splice(indexUpdatedAtCol, 0, customTableColumn);
       } else {
-      columns.push(customTableColumn);
-    }
-
-    const tagsColumnDef = getTagsColumnDefinition ? getTagsColumnDefinition() : undefined;
-    if (tagsColumnDef) {
-      columns.push(tagsColumnDef);
+        columns.push(customTableColumn);
+      }
     }
 
     // Add "Actions" column
@@ -252,7 +248,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     }
 
     return columns;
-  }, [stateTableColumns, customTableColumn, getTagsColumnDefinition, editItem]);
+  }, [stateTableColumns, customTableColumn, editItem]);
 
   const itemsById = useMemo(() => {
     return keyBy(items, 'id');
