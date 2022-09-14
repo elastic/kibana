@@ -21,7 +21,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { InferencePipeline } from './types';
+import { InferencePipeline } from '../../../../../../common/types/pipelines';
 
 export const InferencePipelineCard: React.FC<InferencePipeline> = ({
   pipelineName,
