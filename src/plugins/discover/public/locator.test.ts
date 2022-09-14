@@ -11,6 +11,10 @@ import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item
 import { FilterStateStore } from '@kbn/es-query';
 import { DiscoverAppLocatorDefinition } from './locator';
 import { SerializableRecord } from '@kbn/utility-types';
+import { DiscoverStart, DiscoverStartPlugins } from './plugin';
+import { CoreSetup } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { dataViewsMock } from './__mocks__/data_views';
 
 const dataViewId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';
 const savedSearchId: string = '571aaf70-4c88-11e8-b3d7-01146121b73d';
@@ -19,9 +23,21 @@ interface SetupParams {
   useHash?: boolean;
 }
 
+const coreMock = {
+  getStartServices: jest.fn(() =>
+    Promise.resolve([
+      {},
+      {
+        data: { dataViews: dataViewsMock },
+      },
+    ])
+  ),
+} as unknown as CoreSetup<DiscoverStartPlugins, DiscoverStart>;
+
 const setup = async ({ useHash = false }: SetupParams = {}) => {
   const locator = new DiscoverAppLocatorDefinition({
     useHash,
+    core: coreMock,
   });
 
   return {
@@ -228,6 +244,21 @@ describe('Discover url generator', () => {
     const { path: legacyParamsPath } = await locator.getLocation({ indexPatternId: dataViewId });
 
     expect(path).toEqual(legacyParamsPath);
+  });
+
+  test('should create data view when dataViewSpec is used', async () => {
+    const dataViewSpecMock = {
+      id: 'mock-id',
+      title: 'mock-title',
+      timeFieldName: 'mock-time-field-name',
+    };
+    dataViewsMock.create.mockResolvedValue({ id: 'mock-adhoc-data-view-id' } as DataView);
+    const { locator } = await setup();
+    const { path } = await locator.getLocation({ dataViewSpec: dataViewSpecMock });
+
+    expect(coreMock.getStartServices).toHaveBeenCalled();
+    expect(dataViewsMock.create).toHaveBeenCalled();
+    expect(path).toMatchInlineSnapshot(`"#/?_g=()&_a=(index:mock-adhoc-data-view-id)"`);
   });
 
   describe('useHash property', () => {
