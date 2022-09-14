@@ -7,23 +7,16 @@
 
 import React from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useActions } from 'kea';
 
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
-import { CrawlerAuth } from '../../../api/crawler/types';
-import { CrawlerDomainDetailLogic } from '../crawler_domain_detail_logic';
 
 import { AuthenticationPanelLogic } from './authentication_panel_logic';
-import { AUTHENTICATION_LABELS } from './constants';
 
 export const AuthenticationPanelDeleteConfirmationModal: React.FC = () => {
-  const { domain } = useValues(CrawlerDomainDetailLogic);
-
-  const currentAuth: CrawlerAuth = domain?.auth ?? null;
-
   const { deleteCredentials, setIsModalVisible } = useActions(AuthenticationPanelLogic);
 
   return (
@@ -31,10 +24,7 @@ export const AuthenticationPanelDeleteConfirmationModal: React.FC = () => {
       title={i18n.translate(
         'xpack.enterpriseSearch.crawler.authenticationPanel.deleteConfirmationModal.title',
         {
-          defaultMessage: 'Are you sure you want to delete {authType} credentials?',
-          values: {
-            authType: currentAuth ? AUTHENTICATION_LABELS[currentAuth?.type] : '',
-          },
+          defaultMessage: 'Are you sure you want to delete these settings?',
         }
       )}
       onCancel={(event) => {
@@ -49,7 +39,7 @@ export const AuthenticationPanelDeleteConfirmationModal: React.FC = () => {
       confirmButtonText={i18n.translate(
         'xpack.enterpriseSearch.crawler.authenticationPanel.deleteConfirmationModal.deleteButtonLabel',
         {
-          defaultMessage: 'Delete credentials',
+          defaultMessage: 'Delete',
         }
       )}
       defaultFocusedButton="confirm"
@@ -59,7 +49,7 @@ export const AuthenticationPanelDeleteConfirmationModal: React.FC = () => {
         'xpack.enterpriseSearch.crawler.authenticationPanel.deleteConfirmationModal.description',
         {
           defaultMessage:
-            'Deleting these credentials might prevent the crawler from indexing protected areas of the domain. This can not be undone.',
+            'Deleting these settings might prevent the crawler from indexing protected areas of the domain. This can not be undone.',
         }
       )}
     </EuiConfirmModal>

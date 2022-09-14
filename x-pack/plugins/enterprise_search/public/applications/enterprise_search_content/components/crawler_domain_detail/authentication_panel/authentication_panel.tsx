@@ -41,7 +41,7 @@ export const AuthenticationPanel: React.FC = () => {
         subtitle={
           <FormattedMessage
             id="xpack.enterpriseSearch.crawler.authenticationPanel.description"
-            defaultMessage="Credentials are used when requests originate from crawlers."
+            defaultMessage="Setup authentication to enable crawling protected content for this domain."
           />
         }
       >

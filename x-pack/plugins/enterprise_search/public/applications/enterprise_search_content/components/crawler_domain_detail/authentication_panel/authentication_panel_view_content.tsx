@@ -7,130 +7,73 @@
 
 import React from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues } from 'kea';
 
-import { EuiEmptyPrompt, EuiBasicTable } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { USERNAME_LABEL, PASSWORD_LABEL, TYPE_LABEL } from '../../../../shared/constants';
-import { CrawlerAuth, BasicCrawlerAuth, RawCrawlerAuth } from '../../../api/crawler/types';
-import { isBasicCrawlerAuth, isRawCrawlerAuth } from '../../../api/crawler/utils';
+import { CrawlerAuth } from '../../../api/crawler/types';
 import { CrawlerDomainDetailLogic } from '../crawler_domain_detail_logic';
 
-import { AuthenticationPanelLogic } from './authentication_panel_logic';
-import { AUTHENTICATION_LABELS } from './constants';
-
 import './authentication_panel.scss';
-
-const TOGGLE_VISIBILITY_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.crawler.authenticationPanel.toggleVisibilityLabel',
-  { defaultMessage: 'Toggle credential visibility' }
-);
 
 export const AuthenticationPanelViewContent: React.FC = () => {
   const { domain } = useValues(CrawlerDomainDetailLogic);
 
   const currentAuth: CrawlerAuth = domain?.auth ?? null;
 
-  const { toggleCredentialVisibility } = useActions(AuthenticationPanelLogic);
-
-  const { areCredentialsVisible } = useValues(AuthenticationPanelLogic);
-
   return currentAuth === undefined ? (
     <EuiEmptyPrompt
       title={
         <h4>
           {i18n.translate('xpack.enterpriseSearch.crawler.authenticationPanel.emptyPrompt.title', {
-            defaultMessage: 'There are no credentials for this domain',
+            defaultMessage: 'No authentication configured',
           })}
         </h4>
       }
-      body={i18n.translate(
-        'xpack.enterpriseSearch.crawler.authenticationPanel.emptyPrompt.description',
-        {
-          defaultMessage: 'Add credentials to requests originating from crawlers',
-        }
-      )}
+      body={
+        <FormattedMessage
+          id="xpack.enterpriseSearch.crawler.authenticationPanel.emptyPrompt.description"
+          defaultMessage="Click {addAuthenticationButtonLabel} to provide the credentials needed to crawl protected content"
+          values={{
+            addAuthenticationButtonLabel: (
+              <strong>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.crawler.authenticationPanel.emptyPrompt.addAuthenticationButtonLabel',
+                  {
+                    defaultMessage: 'Add authentication',
+                  }
+                )}
+              </strong>
+            ),
+          }}
+        />
+      }
       titleSize="s"
     />
   ) : (
-    <>
-      {currentAuth !== undefined && isBasicCrawlerAuth(currentAuth) && (
-        <EuiBasicTable
-          items={[currentAuth]}
-          columns={[
+    <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
+      <EuiTitle size="s">
+        <h3>
+          {i18n.translate(
+            'xpack.enterpriseSearch.crawler.authenticationPanel.configurationSavePanel.title',
             {
-              name: TYPE_LABEL,
-              render: () => AUTHENTICATION_LABELS.basic,
-            },
-            {
-              name: USERNAME_LABEL,
-              field: 'username',
-            },
-            {
-              name: PASSWORD_LABEL,
-              render: (item: BasicCrawlerAuth) =>
-                areCredentialsVisible
-                  ? item.password
-                  : item.password
-                      .split('')
-                      .map(() => '•')
-                      .join(''),
-            },
-            {
-              actions: [
-                {
-                  name: '',
-                  description: TOGGLE_VISIBILITY_LABEL,
-                  type: 'icon',
-                  icon: 'eye',
-                  color: 'primary',
-                  onClick: () => {
-                    toggleCredentialVisibility();
-                  },
-                },
-              ],
-            },
-          ]}
-        />
-      )}
-      {currentAuth !== undefined && isRawCrawlerAuth(currentAuth) && (
-        <EuiBasicTable
-          items={[currentAuth]}
-          columns={[
-            {
-              name: i18n.translate('xpack.enterpriseSearch.crawler.authenticationPanel.typeLabel', {
-                defaultMessage: 'Type',
-              }),
-              render: () => AUTHENTICATION_LABELS.raw,
-            },
-            {
-              name: PASSWORD_LABEL,
-              render: (item: RawCrawlerAuth) =>
-                areCredentialsVisible
-                  ? item.header
-                  : item.header
-                      .split('')
-                      .map(() => '•')
-                      .join(''),
-            },
-            {
-              actions: [
-                {
-                  name: '',
-                  description: TOGGLE_VISIBILITY_LABEL,
-                  type: 'icon',
-                  icon: 'eye',
-                  color: 'primary',
-                  onClick: () => {
-                    toggleCredentialVisibility();
-                  },
-                },
-              ],
-            },
-          ]}
-        />
-      )}
-    </>
+              defaultMessage: 'Configuration settings saved',
+            }
+          )}
+        </h3>
+      </EuiTitle>
+      <EuiSpacer />
+      <EuiText size="s">
+        {i18n.translate(
+          'xpack.enterpriseSearch.crawler.authenticationPanel.configurationSavePanel.description',
+          {
+            defaultMessage:
+              'The authentication settings to crawl this domain have been securely saved. Delete and re-add an authentication mechanism to update these settings.',
+          }
+        )}
+      </EuiText>
+    </EuiPanel>
   );
 };
