@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { TypeOf, Type } from '@kbn/config-schema';
 import { PLUGIN_ID } from './constants';
 import type {
   FileJSON,
@@ -21,6 +22,27 @@ export const FILES_API_BASE_PATH = `${API_BASE_PATH}/files`;
 export const FILES_SHARE_API_BASE_PATH = `${API_BASE_PATH}/shares`;
 
 export const FILES_PUBLIC_API_BASE_PATH = `${API_BASE_PATH}/public`;
+
+export interface EndpointInputs<
+  P extends Type<unknown> = Type<unknown>,
+  Q extends Type<unknown> = Type<unknown>,
+  B extends Type<unknown> = Type<unknown>
+> {
+  params: P;
+  query: Q;
+  body: B;
+}
+
+export interface CreateRouteDefinition<Inputs extends EndpointInputs, R> {
+  inputs: {
+    params: TypeOf<Inputs['params']>;
+    query: TypeOf<Inputs['query']>;
+    body: TypeOf<Inputs['body']>;
+  };
+  output: R;
+}
+
+export type AnyEndpoint = CreateRouteDefinition<EndpointInputs, unknown>;
 
 /**
  * Abstract type definition for API route inputs and outputs.
@@ -96,15 +118,7 @@ export type UpdateFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
   { file: FileJSON }
 >;
 
-export type UploadFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
-  { id: string },
-  { selfDestructOnAbort?: boolean },
-  { body: unknown },
-  {
-    ok: true;
-    size: number;
-  }
->;
+export type { Endpoint as UploadFileKindHttpEndpoint } from '../server/routes/file_kind/upload';
 
 export type FindFilesHttpEndpoint = HttpApiInterfaceEntryDefinition<
   unknown,

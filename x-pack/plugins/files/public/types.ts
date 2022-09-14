@@ -96,7 +96,16 @@ export interface FilesClient extends GlobalEndpoints {
    *
    * @param args - upload file args
    */
-  upload: ClientMethodFrom<UploadFileKindHttpEndpoint>;
+  upload: (
+    args: UploadFileKindHttpEndpoint['inputs']['params'] &
+      UploadFileKindHttpEndpoint['inputs']['query'] & {
+        /**
+         * Should be blob or ReadableStream of some kind.
+         */
+        body: unknown;
+        kind: string;
+      }
+  ) => Promise<UploadFileKindHttpEndpoint['output']>;
   /**
    * Stream a download of the file object's content.
    *
