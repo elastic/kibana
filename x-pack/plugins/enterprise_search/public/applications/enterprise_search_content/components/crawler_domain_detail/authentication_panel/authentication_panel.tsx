@@ -16,14 +16,13 @@ import { DataPanel } from '../../../../shared/data_panel/data_panel';
 
 import { AuthenticationPanelActions } from './authentication_panel_actions';
 import { AuthenticationPanelDeleteConfirmationModal } from './authentication_panel_delete_confirmation_modal';
-import { AuthenticationPanelEditContent } from './authentication_panel_edit_content';
 import { AuthenticationPanelLogic } from './authentication_panel_logic';
 import { AuthenticationPanelViewContent } from './authentication_panel_view_content';
 
 import './authentication_panel.scss';
 
 export const AuthenticationPanel: React.FC = () => {
-  const { isEditing, isModalVisible } = useValues(AuthenticationPanelLogic);
+  const { isModalVisible } = useValues(AuthenticationPanelLogic);
 
   return (
     <>
@@ -45,7 +44,7 @@ export const AuthenticationPanel: React.FC = () => {
           />
         }
       >
-        {isEditing ? <AuthenticationPanelEditContent /> : <AuthenticationPanelViewContent />}
+        <AuthenticationPanelViewContent />
       </DataPanel>
       {isModalVisible && <AuthenticationPanelDeleteConfirmationModal />}
     </>

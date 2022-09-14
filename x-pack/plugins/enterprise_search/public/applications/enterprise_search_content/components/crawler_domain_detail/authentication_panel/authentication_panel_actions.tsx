@@ -16,7 +16,6 @@ import { i18n } from '@kbn/i18n';
 import {
   SAVE_BUTTON_LABEL,
   CANCEL_BUTTON_LABEL,
-  EDIT_BUTTON_LABEL,
   DELETE_BUTTON_LABEL,
 } from '../../../../shared/constants';
 import { CrawlerAuth } from '../../../api/crawler/types';
@@ -72,23 +71,14 @@ export const AuthenticationPanelActions: React.FC = () => {
       )}
     </EuiButton>
   ) : (
-    <EuiFlexGroup gutterSize="s">
-      <EuiFlexItem>
-        <EuiButtonEmpty color="primary" size="s" onClick={() => enableEditing(currentAuth)}>
-          {EDIT_BUTTON_LABEL}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiButtonEmpty
-          color="primary"
-          size="s"
-          onClick={() => {
-            setIsModalVisible(true);
-          }}
-        >
-          {DELETE_BUTTON_LABEL}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiButtonEmpty
+      color="primary"
+      size="s"
+      onClick={() => {
+        setIsModalVisible(true);
+      }}
+    >
+      {DELETE_BUTTON_LABEL}
+    </EuiButtonEmpty>
   );
 };
