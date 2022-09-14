@@ -7,7 +7,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { QueryDslQueryContainer, SearchHit, Sort } from '@elastic/elasticsearch/lib/api/types';
 import { SearchRequest, MsearchRequestItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ToolingLog } from '@kbn/tooling-log';
 
@@ -39,7 +39,12 @@ interface Transaction {
   span_count: { started: number };
 }
 
-export interface Document {
+interface Filter {
+  field: string;
+  value: string;
+}
+
+export interface Doc {
   '@timestamp': string;
   labels?: { journeyName: string; maxUsersCount: string };
   parent?: { id: string };
@@ -48,7 +53,7 @@ export interface Document {
   transaction: Transaction;
 }
 
-export interface SpanDocument extends Omit<Document, 'transaction'> {
+export interface SpanDoc extends Omit<Doc, 'transaction'> {
   transaction: { id: string };
   span: {
     id: string;
@@ -59,7 +64,7 @@ export interface SpanDocument extends Omit<Document, 'transaction'> {
   };
 }
 
-export interface TransactionDocument extends Omit<Document, 'service'> {
+export interface TransactionDoc extends Omit<Doc, 'service'> {
   service: { name: string; environment: string; version: string };
   processor: string;
   url: { path: string; query?: string };
@@ -67,6 +72,16 @@ export interface TransactionDocument extends Omit<Document, 'service'> {
     request: Request;
     response: Response;
   };
+}
+
+export interface Step {
+  name: string;
+  startTime: string;
+  endTime: string;
+}
+
+export interface StepTransactions extends Step {
+  transactions: Array<SearchHit<TransactionDoc>>;
 }
 
 const addBooleanFilter = (filter: { field: string; value: string }): QueryDslQueryContainer => {
@@ -96,10 +111,36 @@ const addRangeFilter = (range: { startTime: string; endTime: string }): QueryDsl
   };
 };
 
+const getQuery = (queryFilters: QueryDslQueryContainer[]): QueryDslQueryContainer => {
+  return {
+    bool: {
+      filter: [
+        {
+          bool: {
+            filter: queryFilters,
+          },
+        },
+      ],
+    },
+  };
+};
+
+const getSort = (): Sort => {
+  return [
+    {
+      '@timestamp': {
+        order: 'asc',
+        unmapped_type: 'boolean',
+      },
+    },
+  ];
+};
+
 export class ESClient {
   client: Client;
   log: ToolingLog;
   tracesIndex: string = '.ds-traces-apm-default*';
+  defaultDocSize: number = 1000;
 
   constructor(options: ClientOptions, log: ToolingLog) {
     this.client = new Client({
@@ -116,26 +157,9 @@ export class ESClient {
     const searchRequest: SearchRequest = {
       index: this.tracesIndex,
       body: {
-        sort: [
-          {
-            '@timestamp': {
-              order: 'asc',
-              unmapped_type: 'boolean',
-            },
-          },
-        ],
-        size: 10000,
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  filter: queryFilters,
-                },
-              },
-            ],
-          },
-        },
+        sort: getSort(),
+        size: this.defaultDocSize,
+        query: getQuery(queryFilters),
       },
     };
 
@@ -145,51 +169,61 @@ export class ESClient {
     return result?.hits?.hits;
   }
 
-  async getFtrServiceTransactions(buildId: string, journeyName: string) {
+  async getFtrServiceDocs<T>(
+    buildId: string,
+    journeyName: string,
+    extraFilters?: Filter[]
+  ): Promise<Array<SearchHit<T>>> {
     const filters = [
       { field: 'service.name', value: 'functional test runner' },
-      { field: 'processor.event', value: 'transaction' },
       { field: 'labels.testBuildId', value: buildId },
       { field: 'labels.journeyName', value: journeyName },
       { field: 'labels.performancePhase', value: 'TEST' },
     ];
+    if (extraFilters && extraFilters.length > 0) {
+      filters.push(...extraFilters);
+    }
     const queryFilters = filters.map((filter) => addBooleanFilter(filter));
-    return await this.getTransactions<Document>(queryFilters);
+    return await this.getTransactions<T>(queryFilters);
   }
 
-  async getKibanaServerTransactions(
-    buildId: string,
-    journeyName: string,
-    range?: { startTime: string; endTime: string }
-  ) {
-    const filters = [
-      { field: 'transaction.type', value: 'request' },
-      { field: 'processor.event', value: 'transaction' },
-      { field: 'labels.testBuildId', value: buildId },
-      { field: 'labels.journeyName', value: journeyName },
+  async getJourneyTransactions(buildId: string, journeyName: string) {
+    const extraFilters = [{ field: 'processor.event', value: 'transaction' }];
+    return await this.getFtrServiceDocs<Doc>(buildId, journeyName, extraFilters);
+  }
+
+  async getJourneySteps(buildId: string, journeyName: string) {
+    const extraFilters = [
+      { field: 'processor.event', value: 'span' },
+      { field: 'span.type', value: 'step' },
     ];
-    const queryFilters = filters.map((filter) => addBooleanFilter(filter));
-    if (range) {
-      queryFilters.push(addRangeFilter(range));
-    }
-    return await this.getTransactions<TransactionDocument>(queryFilters);
+    return await this.getFtrServiceDocs<SpanDoc>(buildId, journeyName, extraFilters);
   }
 
   getMsearchRequestItem = (queryFilters: QueryDslQueryContainer[]): MsearchRequestItem => {
     return {
-      query: {
-        bool: {
-          filter: [
-            {
-              bool: {
-                filter: queryFilters,
-              },
-            },
-          ],
-        },
-      },
+      sort: getSort(),
+      size: this.defaultDocSize,
+      query: getQuery(queryFilters),
     };
   };
+
+  async mSearch<T>(searches: MsearchRequestItem[]): Promise<Array<Array<SearchHit<T>>>> {
+    this.log.debug(`Msearch request: ${JSON.stringify(searches)}`);
+    const result = await this.client.msearch<T>({
+      searches,
+    });
+    this.log.debug(`Msearch result: ${JSON.stringify(result)}`);
+    return result.responses.map((response) => {
+      if ('error' in response) {
+        throw new Error(`Msearch failure: ${JSON.stringify(response.error)}`);
+      } else if (response.hits.hits.length > 0) {
+        return response.hits.hits;
+      } else {
+        return [];
+      }
+    });
+  }
 
   async getSpans(transactionIds: string[]) {
     const searches = new Array<MsearchRequestItem>();
@@ -200,19 +234,39 @@ export class ESClient {
       const requestItem = this.getMsearchRequestItem(queryFilters);
       searches.push({ index: this.tracesIndex }, requestItem);
     }
-    this.log.debug(`Msearch request: ${JSON.stringify(searches)}`);
-    const result = await this.client.msearch<SpanDocument>({
-      searches,
-    });
-    this.log.debug(`Msearch result: ${JSON.stringify(result)}`);
-    return result.responses.flatMap((response) => {
-      if ('error' in response) {
-        throw new Error(`Msearch failure: ${JSON.stringify(response.error)}`);
-      } else if (response.hits.hits.length > 0) {
-        return response.hits.hits;
-      } else {
-        return [];
-      }
+
+    const responses = await this.mSearch<SpanDoc>(searches);
+
+    return responses.flatMap((response) => response);
+  }
+
+  async getKibanaServerTransactions(
+    buildId: string,
+    journeyName: string,
+    steps: Step[]
+  ): Promise<StepTransactions[]> {
+    const filters = [
+      { field: 'transaction.type', value: 'request' },
+      { field: 'processor.event', value: 'transaction' },
+      { field: 'labels.testBuildId', value: buildId },
+      { field: 'labels.journeyName', value: journeyName },
+    ];
+    const searches = new Array<MsearchRequestItem>();
+
+    for (const step of steps) {
+      const queryFilters = filters.map((filter) => addBooleanFilter(filter));
+      queryFilters.push(addRangeFilter({ startTime: step.startTime, endTime: step.endTime }));
+      const requestItem = this.getMsearchRequestItem(queryFilters);
+      searches.push({ index: this.tracesIndex }, requestItem);
+    }
+
+    const responses = await this.mSearch<TransactionDoc>(searches);
+
+    return steps.map((step, index) => {
+      return {
+        ...step,
+        transactions: responses[index],
+      };
     });
   }
 }
