@@ -123,27 +123,6 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   }, []);
 
   const groupTableItems = useMemo(() => {
-    // First, create map of field value counts e.g. { log.logger.keyword: { request: 3, publisher_pipeline_output: 1 }, ... }
-    // Then remove duplicate values and create table items like { id: 1, group: {...}, doc_count: 1234 }
-    const groupFieldValuesCountMap = data.changePointsGroups.reduce((countMap, current) => {
-      // If field name/key exists, increase count else create it and set count to 1
-      const currentGroup = current.group;
-      currentGroup.forEach((group) => {
-        const fieldName = group.fieldName;
-        const fieldNameCountMap = countMap[fieldName];
-        const fieldValue = group.fieldValue;
-
-        if (fieldNameCountMap === undefined) {
-          countMap[fieldName] = { [fieldValue]: 1 };
-        } else if (fieldNameCountMap[fieldValue] === undefined) {
-          fieldNameCountMap[fieldValue] = 1;
-        } else {
-          fieldNameCountMap[fieldValue] += 1;
-        }
-      });
-      return countMap;
-    }, {} as Record<string, Record<string, number>>);
-
     const tableItems = data.changePointsGroups.map(({ group, docCount }, index) => {
       const sortedGroup = group.sort((a, b) =>
         a.fieldName > b.fieldName ? 1 : b.fieldName > a.fieldName ? -1 : 0
