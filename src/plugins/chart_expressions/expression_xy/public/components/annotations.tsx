@@ -120,7 +120,7 @@ const createCustomTooltip =
       <EuiPanel
         color="plain"
         hasShadow={false}
-        hasBorder={true}
+        hasBorder={false}
         paddingSize="none"
         borderRadius="none"
         className="xyAnnotationTooltip"
