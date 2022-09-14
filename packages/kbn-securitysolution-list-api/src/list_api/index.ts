@@ -29,8 +29,8 @@ import {
   importListItemSchema,
   listItemIndexExistSchema,
   listSchema,
-  FoundSmallListSchema,
-  foundSmallListSchema,
+  foundListsBySizeSchema,
+  FoundListsBySizeSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   LIST_INDEX,
@@ -114,7 +114,7 @@ const findListsBySize = async ({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   per_page,
   signal,
-}: ApiParams & FindListSchemaEncoded): Promise<FoundSmallListSchema> => {
+}: ApiParams & FindListSchemaEncoded): Promise<FoundListsBySizeSchema> => {
   return http.fetch(`${FIND_LISTS_BY_SIZE}`, {
     method: 'GET',
     query: {
@@ -132,7 +132,7 @@ const findListsBySizeWithValidation = async ({
   pageIndex,
   pageSize,
   signal,
-}: FindListsParams): Promise<FoundSmallListSchema> =>
+}: FindListsParams): Promise<FoundListsBySizeSchema> =>
   pipe(
     {
       cursor: cursor != null ? cursor.toString() : undefined,
@@ -141,7 +141,7 @@ const findListsBySizeWithValidation = async ({
     },
     (payload) => fromEither(validateEither(findListSchema, payload)),
     chain((payload) => tryCatch(() => findListsBySize({ http, signal, ...payload }), toError)),
-    chain((response) => fromEither(validateEither(foundSmallListSchema, response))),
+    chain((response) => fromEither(validateEither(foundListsBySizeSchema, response))),
     flow(toPromise)
   );
 

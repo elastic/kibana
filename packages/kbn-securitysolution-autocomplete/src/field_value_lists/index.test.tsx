@@ -16,7 +16,7 @@ import { getField } from '../fields/index.mock';
 import { AutocompleteFieldListsComponent } from '.';
 import {
   getListResponseMock,
-  getFoundSmallListSchemaMock,
+  getFoundListsBySizeSchemaMock,
   DATE_NOW,
   IMMUTABLE,
   VERSION,
@@ -34,7 +34,7 @@ const mockKeywordList: ListSchema = {
   name: 'keyword list',
   type: 'keyword',
 };
-const mockResult = { ...getFoundSmallListSchemaMock() };
+const mockResult = { ...getFoundListsBySizeSchemaMock() };
 mockResult.smallLists = [...mockResult.smallLists, mockKeywordList];
 mockResult.largeLists = [];
 jest.mock('@kbn/securitysolution-list-hooks', () => {

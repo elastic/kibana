@@ -9,7 +9,7 @@
 import { FoundListsBySizeSchema } from '.';
 import { getListResponseMock } from '../list_schema/index.mock';
 
-export const getFoundSmallListSchemaMock = (): FoundListsBySizeSchema => ({
+export const getFoundListsBySizeSchemaMock = (): FoundListsBySizeSchema => ({
   smallLists: [getListResponseMock()],
   largeLists: [getListResponseMock()],
 });

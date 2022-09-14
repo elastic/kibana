@@ -28,7 +28,7 @@ import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks
 import { waitFor } from '@testing-library/dom';
 import { ReactWrapper, mount } from 'enzyme';
 
-import { getFoundSmallListSchemaMock } from '../../../../common/schemas/response/found_small_list_schema.mock';
+import { getFoundListsBySizeSchemaMock } from '../../../../common/schemas/response/found_lists_by_size_schema.mock';
 
 import { BuilderEntryItem } from './entry_renderer';
 
@@ -37,7 +37,7 @@ jest.mock('@kbn/securitysolution-utils');
 
 const mockKibanaHttpService = coreMock.createStart().http;
 const { autocomplete: autocompleteStartMock } = unifiedSearchPluginMock.createStartContract();
-const mockResult = getFoundSmallListSchemaMock();
+const mockResult = getFoundListsBySizeSchemaMock();
 mockResult.largeLists = [];
 
 describe('BuilderEntryItem', () => {

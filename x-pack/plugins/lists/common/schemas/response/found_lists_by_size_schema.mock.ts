@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FoundSmallListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { FoundListsBySizeSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getListResponseMock } from './list_schema.mock';
 
-export const getFoundSmallListSchemaMock = (): FoundSmallListSchema => ({
+export const getFoundListsBySizeSchemaMock = (): FoundListsBySizeSchema => ({
   largeLists: [getListResponseMock()],
   smallLists: [getListResponseMock()],
 });

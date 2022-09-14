@@ -8,8 +8,8 @@
 
 import {
   FoundListSchema,
-  FoundSmallListSchema,
   ListSchema,
+  FoundListsBySizeSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 // TODO: Once this mock is available within packages, use it instead, https://github.com/elastic/kibana/issues/100715
@@ -22,7 +22,7 @@ export const getFoundListSchemaMock = (): FoundListSchema => ({
   total: 1,
 });
 
-export const getFoundSmallListSchemaMock = (): FoundSmallListSchema => ({
+export const getFoundListsBySizeSchemaMock = (): FoundListsBySizeSchema => ({
   smallLists: [getListResponseMock()],
   largeLists: [getListResponseMock()],
 });

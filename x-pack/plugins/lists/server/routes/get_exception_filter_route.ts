@@ -9,6 +9,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
+  FoundExceptionListItemSchema,
   getExceptionFilterSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_FILTER } from '@kbn/securitysolution-list-constants';
@@ -46,27 +47,30 @@ export const getExceptionFilterRoute = (router: ListsPluginRouter): void => {
           chunk_size: chunkSize = 10,
         } = request.body;
         if (type === 'exception_list_ids') {
-          for (const {
-            exception_list_id: exceptionListId,
-            namespace_type: namespaceType,
-          } of request.body.exception_list_ids) {
-            const exceptionList = await exceptionListClient?.findExceptionListItem({
-              filter: undefined,
-              listId: exceptionListId,
-              namespaceType,
-              page: undefined,
-              perPage: undefined,
-              sortField: undefined,
-              sortOrder: undefined,
-            });
-            if (!exceptionList) {
-              return siemResponse.error({
-                body: `Cannot find exception list: ${exceptionListId}`,
-                statusCode: 500,
-              });
-            }
-            exceptionItems.push(...exceptionList.data);
-          }
+          const listIds = request.body.exception_list_ids.map(
+            ({ exception_list_id: listId }) => listId
+          );
+          const namespaceTypes = request.body.exception_list_ids.map(
+            ({ namespace_type: namespaceType }) => namespaceType
+          );
+
+          // Stream the results from the Point In Time (PIT) finder into this array
+          let items: ExceptionListItemSchema[] = [];
+          const executeFunctionOnStream = (responseBody: FoundExceptionListItemSchema): void => {
+            items = [...items, ...responseBody.data];
+          };
+
+          await exceptionListClient?.findExceptionListsItemPointInTimeFinder({
+            executeFunctionOnStream,
+            filter: [],
+            listId: listIds,
+            maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
+            namespaceType: namespaceTypes,
+            perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
+            sortField: undefined,
+            sortOrder: undefined,
+          });
+          exceptionItems.push(...items);
         } else {
           const { exceptions } = request.body;
           exceptionItems.push(...exceptions);
