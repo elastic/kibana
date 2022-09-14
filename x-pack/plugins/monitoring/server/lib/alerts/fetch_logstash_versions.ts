@@ -10,7 +10,7 @@ import { AlertCluster, AlertVersions } from '../../../common/types/alerts';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
-import { getNewIndexPatterns, getLogstashDataset } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getLogstashDataset } from '../cluster/get_index_patterns';
 
 interface ESAggResponse {
   key: string;
@@ -22,7 +22,7 @@ export async function fetchLogstashVersions(
   size: number,
   filterQuery?: string
 ): Promise<AlertVersions[]> {
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     moduleType: 'logstash',
     dataset: 'node_stats',

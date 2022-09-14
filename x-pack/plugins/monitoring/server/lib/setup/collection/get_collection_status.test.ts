@@ -12,7 +12,6 @@ import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/m
 import { configSchema, createConfig } from '../../../config';
 import { monitoringPluginMock } from '../../../mocks';
 import { LegacyRequest } from '../../../types';
-import { getIndexPatterns } from '../../cluster/get_index_patterns';
 import { getCollectionStatus } from './get_collection_status';
 
 const liveClusterUuid = 'a12';
@@ -136,7 +135,7 @@ describe('getCollectionStatus', () => {
       },
     });
 
-    const result = await getCollectionStatus(req, getIndexPatterns(req.server.config));
+    const result = await getCollectionStatus(req);
 
     expect(result.kibana.totalUniqueInstanceCount).toBe(1);
     expect(result.kibana.totalUniqueFullyMigratedCount).toBe(0);
@@ -185,7 +184,7 @@ describe('getCollectionStatus', () => {
       },
     });
 
-    const result = await getCollectionStatus(req, getIndexPatterns(req.server.config));
+    const result = await getCollectionStatus(req);
 
     expect(result.kibana.totalUniqueInstanceCount).toBe(1);
     expect(result.kibana.totalUniqueFullyMigratedCount).toBe(1);
@@ -241,7 +240,7 @@ describe('getCollectionStatus', () => {
       },
     });
 
-    const result = await getCollectionStatus(req, getIndexPatterns(req.server.config));
+    const result = await getCollectionStatus(req);
 
     expect(result.kibana.totalUniqueInstanceCount).toBe(2);
     expect(result.kibana.totalUniqueFullyMigratedCount).toBe(1);
@@ -263,11 +262,7 @@ describe('getCollectionStatus', () => {
 
   it('should detect products based on other indices', async () => {
     const req = mockReq({ hits: { total: { value: 1 } } });
-    const result = await getCollectionStatus(
-      req,
-      getIndexPatterns(req.server.config),
-      liveClusterUuid
-    );
+    const result = await getCollectionStatus(req, liveClusterUuid);
 
     expect(result.kibana.detected.doesExist).toBe(true);
     expect(result.elasticsearch.detected.doesExist).toBe(true);
@@ -277,21 +272,13 @@ describe('getCollectionStatus', () => {
 
   it('should work properly when security is disabled', async () => {
     const req = mockReq({ hits: { total: { value: 1 } } }, false);
-    const result = await getCollectionStatus(
-      req,
-      getIndexPatterns(req.server.config),
-      liveClusterUuid
-    );
+    const result = await getCollectionStatus(req, liveClusterUuid);
     expect(result.kibana.detected.doesExist).toBe(true);
   });
 
   it('should work properly with an unknown security message', async () => {
     const req = mockReq({ hits: { total: { value: 1 } } }, true, true, 'foobar');
-    const result = await getCollectionStatus(
-      req,
-      getIndexPatterns(req.server.config),
-      liveClusterUuid
-    );
+    const result = await getCollectionStatus(req, liveClusterUuid);
     expect(result._meta.hasPermissions).toBe(false);
   });
 
@@ -302,11 +289,7 @@ describe('getCollectionStatus', () => {
       true,
       'no handler found for uri [/_security/user/_has_privileges] and method [POST]'
     );
-    const result = await getCollectionStatus(
-      req,
-      getIndexPatterns(req.server.config),
-      liveClusterUuid
-    );
+    const result = await getCollectionStatus(req, liveClusterUuid);
     expect(result.kibana.detected.doesExist).toBe(true);
   });
 
@@ -317,21 +300,13 @@ describe('getCollectionStatus', () => {
       true,
       'Invalid index name [_security]'
     );
-    const result = await getCollectionStatus(
-      req,
-      getIndexPatterns(req.server.config),
-      liveClusterUuid
-    );
+    const result = await getCollectionStatus(req, liveClusterUuid);
     expect(result.kibana.detected.doesExist).toBe(true);
   });
 
   it('should not work if the user does not have the necessary permissions', async () => {
     const req = mockReq({ hits: { total: { value: 1 } } }, true, false);
-    const result = await getCollectionStatus(
-      req,
-      getIndexPatterns(req.server.config),
-      liveClusterUuid
-    );
+    const result = await getCollectionStatus(req, liveClusterUuid);
     expect(result._meta.hasPermissions).toBe(false);
   });
 });

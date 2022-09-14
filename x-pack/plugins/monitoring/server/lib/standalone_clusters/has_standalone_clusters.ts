@@ -12,12 +12,12 @@ import { standaloneClusterFilter } from '.';
 import { Globals } from '../../static_globals';
 import {
   getLegacyIndexPattern,
-  getNewIndexPatterns,
+  getIndexPatterns,
   getLogstashDataset,
 } from '../cluster/get_index_patterns';
 
 export async function hasStandaloneClusters(req: LegacyRequest, ccs: string) {
-  const lsIndexPatterns = getNewIndexPatterns({
+  const lsIndexPatterns = getIndexPatterns({
     config: Globals.app.config,
     moduleType: 'logstash',
     ccs,

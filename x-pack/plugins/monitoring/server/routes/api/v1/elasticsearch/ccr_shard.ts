@@ -13,7 +13,7 @@ import {
 import { TimeRange } from '../../../../../common/http_api/shared';
 import { ElasticsearchResponse } from '../../../../../common/types/es';
 import {
-  getNewIndexPatterns,
+  getIndexPatterns,
   getElasticsearchDataset,
 } from '../../../../lib/cluster/get_index_patterns';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
@@ -100,7 +100,7 @@ export function ccrShardRoute(server: MonitoringCore) {
       const shardId = req.params.shardId;
       const moduleType = 'elasticsearch';
       const dataset = 'ccr';
-      const esIndexPattern = getNewIndexPatterns({
+      const esIndexPattern = getIndexPatterns({
         config: Globals.app.config,
         ccs: req.payload.ccs,
         moduleType,

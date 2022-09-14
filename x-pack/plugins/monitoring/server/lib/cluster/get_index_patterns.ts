@@ -12,12 +12,10 @@ import {
   INDEX_PATTERN_KIBANA,
   INDEX_PATTERN_LOGSTASH,
   INDEX_PATTERN_BEATS,
-  INDEX_ALERTS,
   DS_INDEX_PATTERN_LOGS,
   DS_INDEX_PATTERN_METRICS,
   INDEX_PATTERN_TYPES,
   INDEX_PATTERN_ENTERPRISE_SEARCH,
-  CCS_REMOTE_PATTERN,
 } from '../../../common/constants';
 import { MonitoringConfig } from '../../config';
 
@@ -43,39 +41,6 @@ interface LogsIndexPatternArgs extends CommonIndexPatternArgs {
 
 type IndexPatternArgs = MetricIndexPatternArgs | LogsIndexPatternArgs;
 
-export function getIndexPatterns(
-  config: MonitoringConfig,
-  additionalPatterns: Record<string, string> = {},
-  ccs: string = CCS_REMOTE_PATTERN
-) {
-  const esIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
-  const kbnIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_KIBANA, ccs);
-  const lsIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_LOGSTASH, ccs);
-  const beatsIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_BEATS, ccs);
-  const apmIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_BEATS, ccs);
-  const alertsIndex = prefixIndexPatternWithCcs(config, INDEX_ALERTS, ccs);
-  const enterpriseSearchIndexPattern = prefixIndexPatternWithCcs(
-    config,
-    INDEX_PATTERN_ENTERPRISE_SEARCH,
-    ccs
-  );
-  const indexPatterns = {
-    esIndexPattern,
-    kbnIndexPattern,
-    lsIndexPattern,
-    beatsIndexPattern,
-    apmIndexPattern,
-    alertsIndex,
-    enterpriseSearchIndexPattern,
-    ...Object.keys(additionalPatterns).reduce((accum, varName) => {
-      return {
-        ...accum,
-        [varName]: prefixIndexPatternWithCcs(config, additionalPatterns[varName], ccs),
-      };
-    }, {}),
-  };
-  return indexPatterns;
-}
 // calling legacy index patterns those that are .monitoring
 export function getLegacyIndexPattern({
   moduleType,
@@ -100,10 +65,11 @@ export function getLegacyIndexPattern({
     case 'logstash':
       indexPattern = INDEX_PATTERN_LOGSTASH;
       break;
+    case 'apm':
     case 'beats':
       indexPattern = INDEX_PATTERN_BEATS;
       break;
-    case 'enterprisesearch':
+    case 'enterprise_search':
       indexPattern = INDEX_PATTERN_ENTERPRISE_SEARCH;
       break;
     case 'filebeat':
@@ -131,7 +97,7 @@ export function getDsIndexPattern({
   return prefixIndexPatternWithCcs(config, `${type}-${datasetsPattern}-${namespace ?? '*'}`, ccs);
 }
 
-export function getNewIndexPatterns(indexPattern: IndexPatternArgs): string {
+export function getIndexPatterns(indexPattern: IndexPatternArgs): string {
   const legacyModuleType = isLogIndexPattern(indexPattern) ? 'filebeat' : indexPattern.moduleType;
   const { config, ccs, dataset, ecsLegacyOnly, moduleType, namespace, type } = indexPattern;
 

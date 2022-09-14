@@ -8,7 +8,7 @@
 import type { LegacyRequest, MonitoringCore } from '../../../../types';
 import type { MonitoringConfig } from '../../../../config';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
-import { getNewIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
+import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 import { getHealthRequestQueryRT } from '../../../../../common/http_api/_health';
 import type { TimeRange } from '../../../../../common/http_api/shared';
 
@@ -48,12 +48,12 @@ export function registerV1HealthRoute(server: MonitoringCore) {
       };
 
       const monitoringIndex = [
-        getNewIndexPatterns({ config, moduleType: 'elasticsearch' }),
-        getNewIndexPatterns({ config, moduleType: 'kibana' }),
-        getNewIndexPatterns({ config, moduleType: 'logstash' }),
-        getNewIndexPatterns({ config, moduleType: 'beats' }),
+        getIndexPatterns({ config, moduleType: 'elasticsearch' }),
+        getIndexPatterns({ config, moduleType: 'kibana' }),
+        getIndexPatterns({ config, moduleType: 'logstash' }),
+        getIndexPatterns({ config, moduleType: 'beats' }),
       ].join(',');
-      const entSearchIndex = getNewIndexPatterns({ config, moduleType: 'enterprisesearch' });
+      const entSearchIndex = getIndexPatterns({ config, moduleType: 'enterprise_search' });
 
       const monitoredClustersFn = () =>
         fetchMonitoredClusters({
