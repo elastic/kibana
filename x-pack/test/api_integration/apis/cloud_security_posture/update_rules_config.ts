@@ -37,11 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
-<<<<<<< HEAD
-    it(`returns 404 when package policy id does not exist`, async () => {
-=======
     it('returns a 404 response when package policy id does not exist', async () => {
->>>>>>> upstream/main
       const packagePolicyId = chance.guid();
 
       const { body: response } = await supertest
@@ -54,12 +50,6 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(404);
 
       expect(response.error).to.be('Not Found');
-<<<<<<< HEAD
-      expect(response.message).to.be(
-        `Saved object [ingest-package-policies/${packagePolicyId}] not found`
-      );
-=======
->>>>>>> upstream/main
     });
 
     it(`Should return 200 for existing package policy id`, async () => {

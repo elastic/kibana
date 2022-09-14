@@ -13,37 +13,27 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type {
+  IRouter,
   CoreStart,
   CustomRequestHandlerContext,
-  IRouter,
-  IScopedClusterClient,
-  KibanaResponseFactory,
   Logger,
-  RequestHandler,
-  RouteMethod,
   SavedObjectsClientContract,
-<<<<<<< HEAD
-=======
   IScopedClusterClient,
   KibanaResponseFactory,
   RequestHandler,
   RouteMethod,
->>>>>>> upstream/main
 } from '@kbn/core/server';
 import type {
-  AgentPolicyServiceInterface,
   AgentService,
-  FleetRequestHandlerContext,
-  FleetStartContract,
-  PackagePolicyServiceInterface,
   PackageService,
+  AgentPolicyServiceInterface,
+  PackagePolicyServiceInterface,
 } from '@kbn/fleet-plugin/server';
+import type { FleetStartContract, FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CspServerPluginSetup {}
-
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CspServerPluginStart {}
 
@@ -53,7 +43,6 @@ export interface CspServerPluginSetupDeps {
   taskManager: TaskManagerSetupContract;
   security: SecurityPluginSetup;
   // optional
-  usageCollection?: UsageCollectionSetup;
 }
 
 export interface CspServerPluginStartDeps {
