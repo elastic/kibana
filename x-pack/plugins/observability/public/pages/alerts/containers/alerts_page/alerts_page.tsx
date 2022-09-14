@@ -14,7 +14,6 @@ import useAsync from 'react-use/lib/useAsync';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers, AlertStatus } from '@kbn/rule-data-utils';
-import { buildEsQuery } from './helpers';
 import { AlertStatusFilterButton } from '../../../../../common/typings';
 import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { observabilityFeatureId } from '../../../../../common';
@@ -23,6 +22,7 @@ import { useAlertIndexNames } from '../../../../hooks/use_alert_index_names';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { getNoDataConfig } from '../../../../utils/no_data_config';
+import { buildEsQuery } from '../../../../utils/build_es_query';
 import { LoadingObservability } from '../../../overview';
 import {
   Provider,
@@ -35,6 +35,7 @@ import { renderRuleStats } from '../../components/rule_stats';
 import { ObservabilityAppServices } from '../../../../application/types';
 import {
   ALERT_STATUS_REGEX,
+  ALERTS_PER_PAGE,
   ALERTS_TABLE_ID,
   BASE_ALERT_REGEX,
   NO_INDEX_PATTERNS,
@@ -143,11 +144,6 @@ function AlertsPage() {
       },
     ];
   }, [indexNames]);
-
-  const timeRange = {
-    to: rangeTo,
-    from: rangeFrom,
-  };
 
   const onRefresh = () => {
     setRefreshNow(new Date().getTime());
@@ -264,9 +260,15 @@ function AlertsPage() {
                 AlertConsumers.LOGS,
                 AlertConsumers.UPTIME,
               ]}
-              query={buildEsQuery(timeRange, kuery)}
+              query={buildEsQuery(
+                {
+                  to: rangeTo,
+                  from: rangeFrom,
+                },
+                kuery
+              )}
               showExpandToDetails={false}
-              pageSize={50}
+              pageSize={ALERTS_PER_PAGE}
               refreshNow={refreshNow}
             />
           </CasesContext>
