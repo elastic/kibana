@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type {
   HttpSetup,
   NotificationsStart,
@@ -11,17 +12,23 @@ import type {
   SavedObjectAttributes,
   ThemeServiceStart,
 } from '@kbn/core/public';
-
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import {
+  prebuiltSavedObjectsBulkCreateUrl,
+  prebuiltSavedObjectsBulkDeleteUrl,
+} from '../../../../../../common/constants';
 
-import { prebuiltSavedObjectsBulkCreateUrl } from '../../../../../common/constants';
+import { RiskScoreEntity } from '../../../../../../common/search_strategy';
 import {
   RISKY_HOSTS_DASHBOARD_TITLE,
   RISKY_USERS_DASHBOARD_TITLE,
-} from '../../../../hosts/pages/navigation/constants';
-import { IMPORT_SAVED_OBJECTS_FAILURE, IMPORT_SAVED_OBJECTS_SUCCESS } from '../translations';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
+} from '../../../../../hosts/pages/navigation/constants';
+import {
+  DELETE_SAVED_OBJECTS_FAILURE,
+  IMPORT_SAVED_OBJECTS_FAILURE,
+  IMPORT_SAVED_OBJECTS_SUCCESS,
+} from './translations';
 
 const toastLifeTimeMs = 600000;
 
@@ -112,6 +119,29 @@ export const bulkCreatePrebuiltSavedObjects = async ({
         title: errorMessage ?? IMPORT_SAVED_OBJECTS_FAILURE,
         toastMessage: renderDocLink ? renderDocLink(e?.body?.message) : e?.body?.message,
         toastLifeTimeMs,
+      });
+    });
+
+  return res;
+};
+
+export const bulkDeletePrebuiltSavedObjects = async ({
+  http,
+  notifications,
+  errorMessage,
+  options,
+}: {
+  http: HttpSetup;
+  notifications?: NotificationsStart;
+  errorMessage?: string;
+  options: Options;
+}) => {
+  const res = await http
+    .post(prebuiltSavedObjectsBulkDeleteUrl(options.templateName))
+    .catch((e) => {
+      notifications?.toasts?.addDanger({
+        title: errorMessage ?? DELETE_SAVED_OBJECTS_FAILURE,
+        text: e?.body?.message,
       });
     });
 

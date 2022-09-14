@@ -99,3 +99,23 @@ export const UNINSTALLATION_ERROR = i18n.translate(
     defaultMessage: 'Uninstallation error',
   }
 );
+
+export const IMPORT_SAVED_OBJECTS_SUCCESS = (totalCount: number) =>
+  i18n.translate('xpack.securitySolution.riskyScore.savedObjects.bulkCreateSuccessTitle', {
+    values: { totalCount },
+    defaultMessage: `{totalCount} {totalCount, plural, =1 {saved object} other {saved objects}} imported successfully`,
+  });
+
+export const IMPORT_SAVED_OBJECTS_FAILURE = i18n.translate(
+  'xpack.securitySolution.riskyScore.savedObjects.bulkCreateFailureTitle',
+  {
+    defaultMessage: `Failed to import saved objects`,
+  }
+);
+
+export const DELETE_SAVED_OBJECTS_FAILURE = i18n.translate(
+  'xpack.securitySolution.riskyScore.savedObjects.bulkDeleteFailureTitle',
+  {
+    defaultMessage: `Failed to delete saved objects`,
+  }
+);

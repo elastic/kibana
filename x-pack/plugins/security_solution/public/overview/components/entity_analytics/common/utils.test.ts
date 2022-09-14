@@ -11,8 +11,7 @@ import {
   getRiskScoreLatestTransformId,
   getRiskScorePivotTransformId,
 } from '../../../../../common/utils/risky_score_modules';
-import { bulkCreatePrebuiltSavedObjects } from '../../../../common/components/create_prebuilt_saved_objects/apis/bulk_create_prebuilt_saved_objects';
-import { bulkDeletePrebuiltSavedObjects } from '../../../../common/components/create_prebuilt_saved_objects/apis/bulk_delete_prebuilt_saved_objects';
+import { bulkDeletePrebuiltSavedObjects, bulkCreatePrebuiltSavedObjects } from './api';
 
 import * as api from './api';
 import {
@@ -23,12 +22,6 @@ import {
 } from './utils';
 
 jest.mock('./api');
-jest.mock(
-  '../../../../common/components/create_prebuilt_saved_objects/apis/bulk_create_prebuilt_saved_objects'
-);
-jest.mock(
-  '../../../../common/components/create_prebuilt_saved_objects/apis/bulk_delete_prebuilt_saved_objects'
-);
 
 const mockHttp = {
   post: jest.fn(),

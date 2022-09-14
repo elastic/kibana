@@ -8,8 +8,7 @@ import type { HttpSetup, NotificationsStart, ThemeServiceStart } from '@kbn/core
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import * as utils from '../../../../../common/utils/risky_score_modules';
-import { bulkCreatePrebuiltSavedObjects } from '../../../../common/components/create_prebuilt_saved_objects/apis/bulk_create_prebuilt_saved_objects';
-import { bulkDeletePrebuiltSavedObjects } from '../../../../common/components/create_prebuilt_saved_objects/apis/bulk_delete_prebuilt_saved_objects';
+
 import {
   createIngestPipeline,
   createIndices,
@@ -20,6 +19,8 @@ import {
   deleteTransforms,
   deleteIngestPipelines,
   stopTransforms,
+  bulkCreatePrebuiltSavedObjects,
+  bulkDeletePrebuiltSavedObjects,
 } from './api';
 import {
   INGEST_PIPELINE_DELETION_ERROR_MESSAGE,
