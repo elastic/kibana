@@ -85,6 +85,7 @@ const UpdateCspRulesAccordingToCspRuleTemplates = async (
       policyId: packagePolicy.policy_id,
     }),
   });
+
   const oldCspRulesDictionary: Map<string, SavedObjectsFindResult<CspRule>> = new Map(
     oldCspRules.saved_objects.map((rule) => [rule.attributes.metadata.id, rule])
   );
