@@ -9,7 +9,11 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiSwitch, EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import {
+  buildExpressionFunction,
+  ExpressionAstExpressionBuilder,
+  buildExpression,
+} from '@kbn/expressions-plugin/public';
 import { OperationDefinition, ParamEditorProps } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -205,6 +209,87 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         ...aggConfigParams,
       }).toAst();
     },
+    optimizeEsAggs: (_aggs, _esAggsIdMap, aggExpressionToEsAggsIdMap) => {
+      let aggs = [..._aggs];
+      const esAggsIdMap = { ..._esAggsIdMap };
+
+      const metricExpressionsByArgs: Record<string, ExpressionAstExpressionBuilder[]> = {};
+
+      aggs.forEach((expressionBuilder) => {
+        const {
+          functions: [fnBuilder],
+        } = expressionBuilder;
+        if (fnBuilder.name === typeToFn[type]) {
+          const groupByKey = `${fnBuilder.getArgument('field')?.[0]}-${
+            fnBuilder.getArgument('timeShift')?.[0]
+          }`;
+          if (!(groupByKey in metricExpressionsByArgs)) {
+            metricExpressionsByArgs[groupByKey] = [];
+          }
+
+          metricExpressionsByArgs[groupByKey].push(expressionBuilder);
+        }
+      });
+
+      // collapse them into a single expression builders
+      Object.values(metricExpressionsByArgs).forEach((expressionBuilders) => {
+        if (expressionBuilders.length <= 1) {
+          // don't need to optimize if there aren't more than one
+          return;
+        }
+
+        // we're going to merge these expression builders into a single builder, so
+        // remove them from the aggs array
+        aggs = aggs.filter((aggBuilder) => !expressionBuilders.includes(aggBuilder));
+
+        const [firstExpressionBuilder, ...restExpressionBuilders] = expressionBuilders;
+
+        const {
+          functions: [firstFnBuilder],
+        } = firstExpressionBuilder;
+
+        const esAggsColumnId = firstFnBuilder.getArgument('id')![0];
+
+        const aggConfig = {
+          id: esAggsColumnId,
+          enabled: firstFnBuilder.getArgument('enabled')?.[0],
+          schema: firstFnBuilder.getArgument('schema')?.[0],
+          field: firstFnBuilder.getArgument('field')?.[0],
+          timeShift: firstFnBuilder.getArgument('timeShift')?.[0],
+          emptyAsNull: firstFnBuilder.getArgument('emptyAsNull')?.[0],
+          ...aggConfigParams,
+        };
+
+        // TODO - tighten the typing
+        const ast = buildExpressionFunction(typeToFn[type], aggConfig).toAst();
+
+        aggs.push(
+          buildExpression({
+            type: 'expression',
+            chain: [ast],
+          })
+        );
+
+        const firstEsAggsId = aggExpressionToEsAggsIdMap.get(firstExpressionBuilder);
+        if (firstEsAggsId === undefined) {
+          throw new Error('Could not find current column ID for expression builder');
+        }
+
+        restExpressionBuilders.forEach((expressionBuilder) => {
+          const currentEsAggsId = aggExpressionToEsAggsIdMap.get(expressionBuilder);
+          if (currentEsAggsId === undefined) {
+            throw new Error('Could not find current column ID for expression builder');
+          }
+
+          esAggsIdMap[firstEsAggsId].push(...esAggsIdMap[currentEsAggsId]);
+
+          delete esAggsIdMap[currentEsAggsId];
+        });
+      });
+
+      return { aggs, esAggsIdMap };
+    },
+
     getErrorMessage: (layer, columnId, indexPattern) =>
       combineErrorMessages([
         getInvalidFieldMessage(
