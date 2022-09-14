@@ -63,15 +63,15 @@ export function buildKueryForUnenrollingAgents(path: string = ''): string {
 }
 
 export function buildKueryForOnlineAgents(path: string = ''): string {
-  return `not (${buildKueryForOfflineAgents(path)}) ${addExclusiveKueryFilter(
-    buildKueryForOnlineAgents,
+  return `${path}last_checkin:* ${addExclusiveKueryFilter(
+    [buildKueryForOfflineAgents, buildKueryForUpdatingAgents, buildKueryForErrorAgents],
     path
   )}`;
 }
 
 export function buildKueryForErrorAgents(path: string = ''): string {
   return `(${path}last_checkin_status:error or ${path}last_checkin_status:degraded) ${addExclusiveKueryFilter(
-    buildKueryForErrorAgents,
+    [buildKueryForOfflineAgents, buildKueryForUnenrollingAgents],
     path
   )}`;
 }
@@ -79,7 +79,7 @@ export function buildKueryForErrorAgents(path: string = ''): string {
 export function buildKueryForOfflineAgents(path: string = ''): string {
   return `${path}last_checkin < now-${
     (offlineTimeoutIntervalCount * AGENT_POLLING_THRESHOLD_MS) / 1000
-  }s ${addExclusiveKueryFilter(buildKueryForOfflineAgents, path)}`;
+  }s`;
 }
 
 export function buildKueryForUpgradingAgents(path: string = ''): string {
@@ -92,7 +92,7 @@ export function buildKueryForUpdatingAgents(path: string = ''): string {
   )}) or (${buildKueryForUnenrollingAgents(
     path
   )}) or (not ${path}policy_revision_idx:*)) ${addExclusiveKueryFilter(
-    buildKueryForUpdatingAgents,
+    [buildKueryForOfflineAgents, buildKueryForErrorAgents],
     path
   )}`;
 }
@@ -101,23 +101,8 @@ export function buildKueryForInactiveAgents(path: string = '') {
   return `${path}active:false`;
 }
 
-const ORDERED_KUERY_BUILDER = [
-  buildKueryForInactiveAgents,
-  buildKueryForOfflineAgents,
-  buildKueryForErrorAgents,
-  buildKueryForUpdatingAgents,
-  buildKueryForOnlineAgents,
-];
-
-function addExclusiveKueryFilter(currentKueryBuilder: (path?: string) => string, path?: string) {
-  if (ORDERED_KUERY_BUILDER.indexOf(currentKueryBuilder) === 0) {
-    return '';
-  }
-
-  const previousKueryBuilderIndex =
-    ORDERED_KUERY_BUILDER.indexOf(currentKueryBuilder) > 0
-      ? ORDERED_KUERY_BUILDER.indexOf(currentKueryBuilder) - 1
-      : ORDERED_KUERY_BUILDER.length - 1;
-
-  return ` AND not (${ORDERED_KUERY_BUILDER[previousKueryBuilderIndex](path)})`;
+function addExclusiveKueryFilter(kueryBuilders: Array<(path?: string) => string>, path?: string) {
+  return ` AND not (${kueryBuilders
+    .map((kueryBuilder) => `(${kueryBuilder(path)})`)
+    .join(' or ')})`;
 }
