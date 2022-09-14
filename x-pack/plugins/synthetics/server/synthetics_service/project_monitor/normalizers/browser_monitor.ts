@@ -5,25 +5,21 @@
  * 2.0.
  */
 
-import { DEFAULT_COMMON_FIELDS, DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
-
 import {
   BrowserFields,
-  CommonFields,
   ConfigKey,
   DataStream,
   FormMonitorType,
-  HTTPFields,
-  ICMPFields,
   Locations,
-  MonitorFields,
   ProjectBrowserMonitor,
-  ScheduleUnit,
-  SourceType,
-  TCPFields,
-} from '../../../common/runtime_types/monitor_management';
+} from '../../../../common/runtime_types/monitor_management';
+import { getNormalizeCommonFields } from './common_fields';
+import { getNormalizeICMPFields } from './icmp_monitor';
+import { getNormalizeTCPFields } from './tcp_monitor';
+import { getNormalizeHTTPFields } from './http_monitor';
+import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 
-interface NormalizedProjectProps {
+export interface NormalizedProjectProps {
   locations: Locations;
   privateLocations: Locations;
   monitor: ProjectBrowserMonitor;
@@ -31,7 +27,7 @@ interface NormalizedProjectProps {
   namespace: string;
 }
 
-export const normalizeProjectMonitor = (props: NormalizedProjectProps): MonitorFields => {
+export const normalizeProjectMonitor = (props: NormalizedProjectProps) => {
   const { monitor } = props;
 
   switch (monitor.type) {
@@ -49,44 +45,6 @@ export const normalizeProjectMonitor = (props: NormalizedProjectProps): MonitorF
     default:
       throw new Error(`Unsupported monitor type ${monitor.type}`);
   }
-};
-
-const getNormalizeCommonFields = ({
-  locations = [],
-  privateLocations = [],
-  monitor,
-  projectId,
-  namespace,
-}: NormalizedProjectProps): CommonFields => {
-  const defaultFields = DEFAULT_COMMON_FIELDS;
-
-  const normalizedFields = {
-    [ConfigKey.MONITOR_TYPE]: monitor.type as DataStream,
-    [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
-    [ConfigKey.NAME]: monitor.name || '',
-    [ConfigKey.SCHEDULE]: {
-      number: `${monitor.schedule}`,
-      unit: ScheduleUnit.MINUTES,
-    },
-    [ConfigKey.PROJECT_ID]: projectId,
-    [ConfigKey.LOCATIONS]: getMonitorLocations({
-      monitor,
-      privateLocations,
-      publicLocations: locations,
-    }),
-    [ConfigKey.APM_SERVICE_NAME]:
-      monitor.apmServiceName || defaultFields[ConfigKey.APM_SERVICE_NAME],
-    [ConfigKey.TAGS]: monitor.tags || defaultFields[ConfigKey.TAGS],
-    [ConfigKey.NAMESPACE]: namespace || defaultFields[ConfigKey.NAMESPACE],
-    [ConfigKey.ORIGINAL_SPACE]: namespace || defaultFields[ConfigKey.NAMESPACE],
-    [ConfigKey.CUSTOM_HEARTBEAT_ID]: `${monitor.id}-${projectId}-${namespace}`,
-    [ConfigKey.TIMEOUT]: null,
-    [ConfigKey.ENABLED]: monitor.enabled ?? defaultFields[ConfigKey.ENABLED],
-  };
-  return {
-    ...defaultFields,
-    ...normalizedFields,
-  };
 };
 
 const getNormalizeBrowserFields = ({
@@ -134,105 +92,6 @@ const getNormalizeBrowserFields = ({
       : defaultFields[ConfigKey.PARAMS],
     [ConfigKey.JOURNEY_FILTERS_MATCH]:
       monitor.filter?.match || defaultFields[ConfigKey.JOURNEY_FILTERS_MATCH],
-    [ConfigKey.TIMEOUT]: null,
-    ...commonFields,
-  };
-  return {
-    ...defaultFields,
-    ...normalizedFields,
-  };
-};
-
-const getNormalizeHTTPFields = ({
-  locations = [],
-  privateLocations = [],
-  monitor,
-  projectId,
-  namespace,
-}: NormalizedProjectProps): HTTPFields => {
-  const defaultFields = DEFAULT_FIELDS[DataStream.HTTP];
-
-  const commonFields = getNormalizeCommonFields({
-    locations,
-    privateLocations,
-    monitor,
-    projectId,
-    namespace,
-  });
-
-  const normalizedFields = {
-    [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.SINGLE,
-    [ConfigKey.URLS]: monitor.urls?.[0] || defaultFields[ConfigKey.URLS],
-    [ConfigKey.MAX_REDIRECTS]:
-      monitor[ConfigKey.MAX_REDIRECTS] || defaultFields[ConfigKey.MAX_REDIRECTS],
-
-    [ConfigKey.TIMEOUT]: null,
-    ...commonFields,
-  };
-  return {
-    ...defaultFields,
-    ...normalizedFields,
-  };
-};
-
-const getNormalizeTCPFields = ({
-  locations = [],
-  privateLocations = [],
-  monitor,
-  projectId,
-  namespace,
-}: NormalizedProjectProps): TCPFields => {
-  const defaultFields = DEFAULT_FIELDS[DataStream.TCP];
-
-  const commonFields = getNormalizeCommonFields({
-    locations,
-    privateLocations,
-    monitor,
-    projectId,
-    namespace,
-  });
-
-  const normalizedFields = {
-    [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.SINGLE,
-    [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
-
-    [ConfigKey.PROJECT_ID]: projectId,
-    [ConfigKey.JOURNEY_ID]: monitor.id,
-    [ConfigKey.CUSTOM_HEARTBEAT_ID]: `${monitor.id}-${projectId}-${namespace}`,
-    [ConfigKey.TIMEOUT]: null,
-    [ConfigKey.HOSTS]: monitor[ConfigKey.HOSTS] || defaultFields[ConfigKey.HOSTS],
-
-    ...commonFields,
-  };
-  return {
-    ...defaultFields,
-    ...normalizedFields,
-  };
-};
-
-const getNormalizeICMPFields = ({
-  locations = [],
-  privateLocations = [],
-  monitor,
-  projectId,
-  namespace,
-}: NormalizedProjectProps): ICMPFields => {
-  const defaultFields = DEFAULT_FIELDS[DataStream.ICMP];
-
-  const commonFields = getNormalizeCommonFields({
-    locations,
-    privateLocations,
-    monitor,
-    projectId,
-    namespace,
-  });
-
-  const normalizedFields = {
-    [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.SINGLE,
-
-    [ConfigKey.PROJECT_ID]: projectId,
-    [ConfigKey.JOURNEY_ID]: monitor.id,
-    [ConfigKey.CUSTOM_HEARTBEAT_ID]: `${monitor.id}-${projectId}-${namespace}`,
     [ConfigKey.TIMEOUT]: null,
     ...commonFields,
   };

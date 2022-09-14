@@ -11,9 +11,9 @@ import {
   Locations,
   LocationStatus,
   ProjectBrowserMonitor,
-} from '../../../common/runtime_types';
-import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
-import { normalizeProjectMonitors } from './browser';
+} from '../../../../common/runtime_types';
+import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
+import { normalizeProjectMonitors } from './browser_monitor';
 
 describe('browser normalizers', () => {
   describe('normalize push monitors', () => {

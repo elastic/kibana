@@ -13,7 +13,8 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { SyntheticsMonitorClient } from './synthetics_monitor/synthetics_monitor_client';
+import { normalizeProjectMonitor } from './normalizers/browser_monitor';
+import { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
 import {
   BrowserFields,
   ConfigKey,
@@ -22,18 +23,18 @@ import {
   ServiceLocationErrors,
   ProjectBrowserMonitor,
   Locations,
-} from '../../common/runtime_types';
+  MonitorFields,
+} from '../../../common/runtime_types';
 import {
   syntheticsMonitorType,
   syntheticsMonitor,
-} from '../legacy_uptime/lib/saved_objects/synthetics_monitor';
-import { normalizeProjectMonitor } from './normalizers/browser';
-import { formatSecrets, normalizeSecrets } from './utils/secrets';
-import { syncNewMonitor } from '../routes/monitor_cruds/add_monitor';
-import { syncEditedMonitor } from '../routes/monitor_cruds/edit_monitor';
-import { deleteMonitor } from '../routes/monitor_cruds/delete_monitor';
-import { validateProjectMonitor } from '../routes/monitor_cruds/monitor_validation';
-import type { UptimeServerSetup } from '../legacy_uptime/lib/adapters/framework';
+} from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
+import { formatSecrets, normalizeSecrets } from '../utils/secrets';
+import { syncNewMonitor } from '../../routes/monitor_cruds/add_monitor';
+import { syncEditedMonitor } from '../../routes/monitor_cruds/edit_monitor';
+import { deleteMonitor } from '../../routes/monitor_cruds/delete_monitor';
+import { validateProjectMonitor } from '../../routes/monitor_cruds/monitor_validation';
+import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters/framework';
 
 interface StaleMonitor {
   stale: boolean;
@@ -228,7 +229,7 @@ export class ProjectMonitorFormatter {
     return savedObjects?.[0];
   };
 
-  private createMonitor = async (normalizedMonitor: BrowserFields) => {
+  private createMonitor = async (normalizedMonitor: MonitorFields) => {
     await syncNewMonitor({
       normalizedMonitor,
       monitor: normalizedMonitor,
@@ -241,7 +242,7 @@ export class ProjectMonitorFormatter {
 
   private updateMonitor = async (
     previousMonitor: SavedObjectsFindResult<EncryptedSyntheticsMonitor>,
-    normalizedMonitor: BrowserFields
+    normalizedMonitor: MonitorFields
   ): Promise<{
     editedMonitor: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>;
     errors: ServiceLocationErrors;

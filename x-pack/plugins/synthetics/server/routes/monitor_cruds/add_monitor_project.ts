@@ -11,7 +11,7 @@ import { ProjectBrowserMonitor } from '../../../common/runtime_types';
 import { SyntheticsStreamingRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';
-import { ProjectMonitorFormatter } from '../../synthetics_service/project_monitor_formatter';
+import { ProjectMonitorFormatter } from '../../synthetics_service/project_monitor/project_monitor_formatter';
 
 export const addSyntheticsProjectMonitorRoute: SyntheticsStreamingRouteFactory = (
   libs: UMServerLibs
