@@ -23,6 +23,7 @@ import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { getConnectorById } from '../utils';
 import { CaseAttachmentsWithoutOwner } from '../../types';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_cases_transactions';
 
 const initialCaseValue: FormProps = {
   description: '',
@@ -53,11 +54,12 @@ export const FormContext: React.FC<Props> = ({
   attachments,
 }) => {
   const { data: connectors = [], isLoading: isLoadingConnectors } = useGetConnectors();
-  const { owner } = useCasesContext();
+  const { owner, appId } = useCasesContext();
   const { isSyncAlertsEnabled } = useCasesFeatures();
   const { postCase } = usePostCase();
   const { createAttachments } = useCreateAttachments();
   const { pushCaseToExternalService } = usePostPushToService();
+  const { startTransaction } = useCreateCaseWithAttachmentsTransaction();
 
   const submitCase = useCallback(
     async (
@@ -72,6 +74,8 @@ export const FormContext: React.FC<Props> = ({
       if (isValid) {
         const { selectedOwner, ...userFormData } = dataWithoutConnectorId;
         const caseConnector = getConnectorById(dataConnectorId, connectors);
+
+        startTransaction({ appId, attachments });
 
         const connectorToUpdate = caseConnector
           ? normalizeActionConnector(caseConnector, fields)
@@ -110,6 +114,8 @@ export const FormContext: React.FC<Props> = ({
       }
     },
     [
+      appId,
+      startTransaction,
       isSyncAlertsEnabled,
       connectors,
       postCase,
