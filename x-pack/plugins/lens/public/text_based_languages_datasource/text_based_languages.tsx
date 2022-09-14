@@ -28,11 +28,9 @@ import {
 import { generateId } from '../id_generator';
 import { toExpression } from './to_expression';
 import { TextBasedLanguagesDataPanel } from './datapanel';
-import { loadIndexPatternRefs } from './utils';
 import type {
   TextBasedLanguagesPrivateState,
   TextBasedLanguagesPersistedState,
-  IndexPatternRef,
   TextBasedLanguagesLayerColumn,
   TextBasedLanguageField,
 } from './types';
@@ -113,13 +111,12 @@ export function getTextBasedLanguagesDatasource({
       });
       return errors;
     },
-    async initialize(state?: TextBasedLanguagesPersistedState) {
+    initialize(state?: TextBasedLanguagesPersistedState) {
       const initState = state || { layers: {} };
-      const indexPatternRefs: IndexPatternRef[] = await loadIndexPatternRefs(dataViews);
       return {
         ...initState,
         fieldList: [],
-        indexPatternRefs,
+        indexPatternRefs: [],
       };
     },
     onRefreshIndexPattern() {},

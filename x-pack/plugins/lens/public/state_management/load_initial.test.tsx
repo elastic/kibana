@@ -203,7 +203,7 @@ describe('Initializing the store', () => {
           },
           activeDatasourceId: 'testDatasource2', // resets to first on the list
           datasourceStates: {
-            testDatasource: { isLoading: false, state: {} },
+            testDatasource: { isLoading: false, state: undefined }, // state resets to undefined
             testDatasource2: {
               state: {}, // initializes first in the map
             },

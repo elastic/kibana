@@ -53,7 +53,6 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
   const externalContext = useLensSelector(selectExecutionContext);
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const datasourceStates = useLensSelector(selectDatasourceStates);
-  const { query } = useLensSelector((state) => state.lens);
   const visualizationState = useLensSelector(selectVisualizationState);
 
   const datasourceIsLoading = activeDatasourceId
@@ -89,7 +88,6 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
           initialContext: undefined,
           storage: new Storage(localStorage),
           defaultIndexPatternId: props.core.uiSettings.get('defaultIndex'),
-          query,
         },
         {
           isFullEditor: true,
@@ -129,7 +127,6 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     dispatchLens,
     props.plugins.dataViews,
     props.core.uiSettings,
-    query,
   ]);
 
   const onChangeIndexPattern = useCallback(

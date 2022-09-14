@@ -401,7 +401,7 @@ describe('editor_frame', () => {
 
   describe('datasource public api communication', () => {
     it('should give access to the datasource state in the datasource factory function', async () => {
-      const datasourceState = Promise.resolve({});
+      const datasourceState = {};
       mockDatasource.initialize.mockReturnValue(datasourceState);
       mockDatasource.getLayers.mockReturnValue(['first']);
 
@@ -421,7 +421,7 @@ describe('editor_frame', () => {
           datasourceStates: {
             testDatasource: {
               isLoading: false,
-              state: Promise.resolve({}),
+              state: {},
             },
           },
         },

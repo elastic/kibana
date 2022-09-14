@@ -26,6 +26,7 @@ import type {
   TextBasedLanguagesLayerColumn,
 } from './types';
 import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
+import { loadIndexPatternRefs } from './utils';
 import { DragDrop } from '../drag_drop';
 import { LensFieldIcon } from '../shared_components';
 import { ChildDragDropProvider } from '../drag_drop';
@@ -57,7 +58,7 @@ export function TextBasedLanguagesDataPanel({
     async function fetchData() {
       // sql text based language
       if (query && isOfAggregateQueryType(query) && 'sql' in query && !isEqual(query, prevQuery)) {
-        const indexPatternRefs: IndexPatternRef[] = state.indexPatternRefs;
+        const indexPatternRefs: IndexPatternRef[] = await loadIndexPatternRefs(dataViews);
         const errors: Error[] = [];
         const layerIds = Object.keys(state.layers);
         const newLayerId = layerIds.length > 0 ? layerIds[0] : generateId();

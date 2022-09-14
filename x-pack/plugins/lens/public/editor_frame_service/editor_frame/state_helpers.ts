@@ -7,7 +7,6 @@
 
 import { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import { Ast } from '@kbn/interpreter';
-import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { difference } from 'lodash';
@@ -167,7 +166,6 @@ export async function initializeSources(
     references,
     initialContext,
     adHocDataViews,
-    query,
   }: {
     dataViews: DataViewsContract;
     datasourceMap: DatasourceMap;
@@ -179,7 +177,6 @@ export async function initializeSources(
     references?: SavedObjectReference[];
     initialContext?: VisualizeFieldContext | VisualizeEditorContext;
     adHocDataViews?: Record<string, DataViewSpec>;
-    query?: Query;
   },
   options?: InitializationOptions
 ) {
@@ -199,14 +196,13 @@ export async function initializeSources(
   return {
     indexPatterns,
     indexPatternRefs,
-    datasourceStates: await initializeDatasources({
+    datasourceStates: initializeDatasources({
       datasourceMap,
       datasourceStates,
       initialContext,
       indexPatternRefs,
       indexPatterns,
       references,
-      query,
     }),
     visualizationState: initializeVisualization({
       visualizationMap,
@@ -236,14 +232,13 @@ export function initializeVisualization({
   return visualizationState.state;
 }
 
-export async function initializeDatasources({
+export function initializeDatasources({
   datasourceMap,
   datasourceStates,
   indexPatternRefs,
   indexPatterns,
   references,
   initialContext,
-  query,
 }: {
   datasourceMap: DatasourceMap;
   datasourceStates: DatasourceStates;
@@ -251,13 +246,12 @@ export async function initializeDatasources({
   indexPatternRefs: IndexPatternRef[];
   references?: SavedObjectReference[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
-  query?: Query;
 }) {
   // init datasources
   const states: DatasourceStates = {};
   for (const [datasourceId, datasource] of Object.entries(datasourceMap)) {
     if (datasourceStates[datasourceId]) {
-      const state = await datasource.initialize(
+      const state = datasource.initialize(
         datasourceStates[datasourceId].state || undefined,
         references,
         initialContext,
@@ -355,7 +349,7 @@ export async function persistedStateToExpression(
     },
     { isFullEditor: false }
   );
-  const datasourceStates = await initializeDatasources({
+  const datasourceStates = initializeDatasources({
     datasourceMap,
     datasourceStates: datasourceStatesFromSO,
     references: [...references, ...(internalReferences || [])],

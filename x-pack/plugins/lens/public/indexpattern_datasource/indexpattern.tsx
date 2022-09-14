@@ -153,7 +153,7 @@ export function getIndexPatternDatasource({
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
     id: DATASOURCE_ID,
 
-    async initialize(
+    initialize(
       persistedState?: IndexPatternPersistedState,
       references?: SavedObjectReference[],
       initialContext?: VisualizeFieldContext | VisualizeEditorContext,

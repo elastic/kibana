@@ -277,7 +277,7 @@ export interface Datasource<T = unknown, P = unknown> {
     initialContext?: VisualizeFieldContext | VisualizeEditorContext,
     indexPatternRefs?: IndexPatternRef[],
     indexPatterns?: IndexPatternMap
-  ) => Promise<T>;
+  ) => T;
 
   // Given the current state, which parts should be saved?
   getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };

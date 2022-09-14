@@ -13,11 +13,11 @@ Object {
     "datasourceStates": Object {
       "testDatasource": Object {
         "isLoading": false,
-        "state": Object {},
+        "state": undefined,
       },
       "testDatasource2": Object {
         "isLoading": false,
-        "state": Object {},
+        "state": undefined,
       },
     },
     "filters": Array [],

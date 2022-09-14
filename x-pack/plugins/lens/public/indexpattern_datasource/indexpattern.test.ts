@@ -292,7 +292,7 @@ describe('IndexPattern Data Source', () => {
 
   describe('#toExpression', () => {
     it('should generate an empty expression when no columns are selected', async () => {
-      const state = await indexPatternDatasource.initialize();
+      const state = indexPatternDatasource.initialize();
       expect(indexPatternDatasource.toExpression(state, 'first', indexPatterns)).toEqual(null);
     });
 
