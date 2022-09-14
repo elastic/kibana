@@ -58,7 +58,6 @@ import { ID } from '../containers/hosts';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 import { LandingPageComponent } from '../../common/components/landing_page';
-import { Loader } from '../../common/components/loader';
 import { hostNameExistsFilter } from '../../common/components/visualization_actions/utils';
 
 /**
@@ -125,7 +124,7 @@ const HostsComponent = () => {
     },
     [dispatch]
   );
-  const { indicesExist, indexPattern, selectedPatterns, loading } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
@@ -174,10 +173,6 @@ const HostsComponent = () => {
     },
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
-
-  if (loading) {
-    return <Loader data-test-subj="loadingPanelExploreHosts" overlay size="xl" />;
-  }
 
   return (
     <>

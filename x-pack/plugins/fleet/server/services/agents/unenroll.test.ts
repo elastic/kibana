@@ -12,7 +12,8 @@ import type { AgentPolicy } from '../../types';
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import { invalidateAPIKeys } from '../api_keys';
 
-import { invalidateAPIKeysForAgents, unenrollAgent, unenrollAgents } from './unenroll';
+import { unenrollAgent, unenrollAgents } from './unenroll';
+import { invalidateAPIKeysForAgents } from './unenroll_action_runner';
 
 jest.mock('../api_keys');
 
