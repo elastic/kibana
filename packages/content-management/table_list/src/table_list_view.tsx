@@ -196,6 +196,19 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     const columns = stateTableColumns.slice();
 
     if (customTableColumn) {
+      const indexUpdatedAtCol = columns.reduce((acc, column, index) => {
+        if (acc >= 0) {
+          return acc;
+        }
+        const field = (column as EuiTableFieldDataColumnType<T>).field;
+        return field === 'updatedAt' ? index : acc;
+      }, -1);
+
+      if (indexUpdatedAtCol >= 0) {
+        // We want to keep the "updatedAt" column next to the actions so we
+        // will insert the custom column before the udpatedAt col
+        columns.splice(indexUpdatedAtCol, 0, customTableColumn);
+      } else {
       columns.push(customTableColumn);
     }
 
