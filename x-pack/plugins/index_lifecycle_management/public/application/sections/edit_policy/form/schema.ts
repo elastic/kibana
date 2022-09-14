@@ -7,17 +7,22 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { PhaseExceptDelete, PhaseWithTiming } from '../../../../../common/types';
-import { FormSchema, fieldValidators } from '../../../../shared_imports';
+import {
+  PhaseExceptDelete,
+  PhaseWithDownsample,
+  PhaseWithTiming,
+} from '../../../../../common/types';
+import { fieldValidators, FormSchema } from '../../../../shared_imports';
 import { defaultIndexPriority } from '../../../constants';
-import { ROLLOVER_FORM_PATHS, CLOUD_DEFAULT_REPO } from '../constants';
+import { CLOUD_DEFAULT_REPO, ROLLOVER_FORM_PATHS } from '../constants';
 import { i18nTexts } from '../i18n_texts';
 import {
   ifExistsNumberGreaterThanZero,
   ifExistsNumberNonNegative,
-  rolloverThresholdsValidator,
   integerValidator,
   minAgeGreaterThanPreviousPhase,
+  rolloverThresholdsValidator,
+  downsampleIntervalMultipleOfPreviousOne,
 } from './validations';
 
 const rolloverFormPaths = Object.values(ROLLOVER_FORM_PATHS);
@@ -156,6 +161,54 @@ const getMinAgeField = (phase: PhaseWithTiming, defaultValue?: string) => ({
   ],
 });
 
+const getDownsampleFieldsToValidateOnChange = (
+  p: PhaseWithDownsample,
+  includeCurrentPhase = true
+) => {
+  const allPhases: PhaseWithDownsample[] = ['hot', 'warm', 'cold'];
+  const getIntervalSizePath = (currentPhase: PhaseWithDownsample) =>
+    `_meta.${currentPhase}.downsample.fixedIntervalSize`;
+  const omitPreviousPhases = (currentPhase: PhaseWithDownsample) =>
+    allPhases.slice(allPhases.indexOf(currentPhase) + (includeCurrentPhase ? 0 : 1));
+  // when a phase is validated, need to also validate all downsample intervals in the next phases
+  return omitPreviousPhases(p).map(getIntervalSizePath);
+};
+const getDownsampleSchema = (phase: PhaseWithDownsample): FormSchema['downsample'] => {
+  return {
+    enabled: {
+      defaultValue: false,
+      label: i18nTexts.editPolicy.downsampleEnabledFieldLabel,
+      fieldsToValidateOnChange: getDownsampleFieldsToValidateOnChange(
+        phase,
+        /* don't trigger validation on the current validation to prevent showing error state on pristine input */
+        false
+      ),
+    },
+    fixedIntervalSize: {
+      label: i18nTexts.editPolicy.downsampleIntervalFieldLabel,
+      fieldsToValidateOnChange: getDownsampleFieldsToValidateOnChange(phase),
+      validations: [
+        {
+          validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
+        },
+        {
+          validator: ifExistsNumberGreaterThanZero,
+        },
+        {
+          validator: integerValidator,
+        },
+        {
+          validator: downsampleIntervalMultipleOfPreviousOne(phase),
+        },
+      ],
+    },
+    fixedIntervalUnits: {
+      defaultValue: 'd',
+      fieldsToValidateOnChange: getDownsampleFieldsToValidateOnChange(phase),
+    },
+  };
+};
+
 export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
   _meta: {
     hot: {
@@ -197,6 +250,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
           defaultValue: 'gb',
         },
       },
+      downsample: getDownsampleSchema('hot'),
     },
     warm: {
       enabled: {
@@ -239,6 +293,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
           defaultValue: 'gb',
         },
       },
+      downsample: getDownsampleSchema('warm'),
     },
     cold: {
       enabled: {
@@ -269,6 +324,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
       allocationNodeAttribute: {
         label: i18nTexts.editPolicy.allocationNodeAttributeFieldLabel,
       },
+      downsample: getDownsampleSchema('cold'),
     },
     frozen: {
       enabled: {
