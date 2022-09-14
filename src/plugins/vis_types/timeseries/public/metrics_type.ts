@@ -169,7 +169,7 @@ export const metricsVisDefinition: VisTypeDefinition<
     }
     return [];
   },
-  getExpressionVariables: async (vis?: Vis<VisParams>, timeFilter?: TimefilterContract) => {
+  getExpressionVariables: async (vis, timeFilter) => {
     return {
       canNavigateToLens: Boolean(
         vis?.params

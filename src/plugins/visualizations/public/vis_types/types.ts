@@ -117,7 +117,7 @@ export interface VisTypeDefinition<TVisParams> {
    * Every visualization that wants to add variables for expression params should have this method.
    */
   readonly getExpressionVariables?: (
-    vis?: Vis<VisParams>,
+    vis?: Vis<TVisParams>,
     timeFilter?: TimefilterContract
   ) => Promise<Record<string, unknown>>;
 
