@@ -29,13 +29,15 @@ const getDefaultVisibility = (
     options: {},
   };
 
+  const hasBrowserFields = Object.keys(fieldBrowserProps.browserFields).length > 0;
+
   return {
     showColumnSelector: true,
     showSortSelector: true,
     additionalControls: {
       right: <LastUpdatedAt updatedAt={updatedAt} />,
       left: {
-        append: <FieldBrowser {...fieldBrowserProps} />,
+        append: hasBrowserFields ? <FieldBrowser {...fieldBrowserProps} /> : undefined,
       },
     },
   };

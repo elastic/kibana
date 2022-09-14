@@ -54,9 +54,13 @@ export const useFetchBrowserFieldCapabilities = ({
   const getBrowserFieldInfo = useCallback(async () => {
     if (!http) return Promise.resolve({});
 
-    return await http.get<BrowserFields>(`${BASE_RAC_ALERTS_API_PATH}/browser_fields`, {
-      query: { featureIds },
-    });
+    try {
+      return await http.get<BrowserFields>(`${BASE_RAC_ALERTS_API_PATH}/browser_fields`, {
+        query: { featureIds },
+      });
+    } catch (e) {
+      return {};
+    }
   }, [featureIds, http]);
 
   useEffect(() => {
