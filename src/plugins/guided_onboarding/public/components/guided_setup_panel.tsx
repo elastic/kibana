@@ -27,7 +27,7 @@ import { ApplicationStart } from '@kbn/core-application-browser';
 import { HttpStart } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { guidesConfig } from '../constants';
-import type { GuideConfig, StepStatus, GuidedOnboardingState, StepConfig } from '../types';
+import type { GuideConfig, StepStatus, GuidedSetupState, StepConfig } from '../types';
 import type { ApiService } from '../services/api';
 
 import { GuidedSetupStep } from './guided_setup_panel_step';
@@ -42,7 +42,7 @@ const guidedPanelContainerCss = css`
   width: 400px;
 `;
 
-const getConfig = (state?: GuidedOnboardingState): GuideConfig | undefined => {
+const getConfig = (state?: GuidedSetupState): GuideConfig | undefined => {
   if (state?.activeGuide && state.activeGuide !== 'unset') {
     return guidesConfig[state.activeGuide];
   }
@@ -50,14 +50,15 @@ const getConfig = (state?: GuidedOnboardingState): GuideConfig | undefined => {
   return undefined;
 };
 
-const getStepLabel = (steps?: StepConfig[], state?: GuidedOnboardingState): string => {
+const getCurrentStep = (steps?: StepConfig[], state?: GuidedSetupState): number | undefined => {
   if (steps && state?.activeStep) {
     const activeStepIndex = steps.findIndex((step: StepConfig) => step.id === state.activeStep);
     if (activeStepIndex > -1) {
-      return `: Step ${activeStepIndex + 1}`;
+      return activeStepIndex + 1;
     }
+
+    return undefined;
   }
-  return '';
 };
 
 const getStepStatus = (steps: StepConfig[], stepIndex: number, activeStep?: string): StepStatus => {
@@ -73,9 +74,7 @@ const getStepStatus = (steps: StepConfig[], stepIndex: number, activeStep?: stri
 
 export const GuidedSetupPanel = ({ api, application, http }: Props) => {
   const [isGuideOpen, setIsGuideOpen] = useState(false);
-  const [guidedSetupState, setGuidedSetupState] = useState<GuidedOnboardingState | undefined>(
-    undefined
-  );
+  const [guidedSetupState, setGuidedSetupState] = useState<GuidedSetupState | undefined>(undefined);
   const isFirstRender = useRef(true);
 
   useEffect(() => {
@@ -100,7 +99,7 @@ export const GuidedSetupPanel = ({ api, application, http }: Props) => {
   };
 
   const guideConfig = getConfig(guidedSetupState);
-  const stepLabel = getStepLabel(guideConfig?.steps, guidedSetupState);
+  const currentStep = getCurrentStep(guideConfig?.steps, guidedSetupState);
 
   const navigateToStep = (step: StepConfig) => {
     setIsGuideOpen(false);
@@ -109,6 +108,7 @@ export const GuidedSetupPanel = ({ api, application, http }: Props) => {
     }
   };
 
+  // TODO handle loading, error state
   if (!guideConfig) {
     return (
       <EuiButton onClick={toggleGuide} color="success" fill isDisabled={true}>
@@ -123,12 +123,16 @@ export const GuidedSetupPanel = ({ api, application, http }: Props) => {
     <EuiPopover
       button={
         <EuiButton onClick={toggleGuide} color="success" fill>
-          {i18n.translate('guidedOnboarding.guidedSetupButtonLabel', {
-            defaultMessage: 'Guided setup{stepLabel}',
-            values: {
-              stepLabel,
-            },
-          })}
+          {currentStep
+            ? i18n.translate('guidedOnboarding.guidedSetupStepButtonLabel', {
+                defaultMessage: 'Guided setup: Step {currentStep}',
+                values: {
+                  currentStep,
+                },
+              })
+            : i18n.translate('guidedOnboarding.guidedSetupButtonLabel', {
+                defaultMessage: 'Guided setup',
+              })}
         </EuiButton>
       }
       isOpen={isGuideOpen}
