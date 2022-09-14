@@ -69,11 +69,14 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
   const [pinnedCategory, setPinnedCategory] = useState<Category | null>(null);
   const [sparkLines, setSparkLines] = useState<SparkLinesPerCategory>({});
 
-  useEffect(() => {
-    return () => {
-      cancelRequest();
-    };
-  }, [cancelRequest]);
+  useEffect(
+    function cancelRequestOnLeave() {
+      return () => {
+        cancelRequest();
+      };
+    },
+    [cancelRequest]
+  );
 
   const setSearchParams = useCallback(
     (searchParams: {
@@ -139,11 +142,14 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
     [dataView]
   );
 
-  useEffect(() => {
-    if (fields.length === 1) {
-      setSelectedField(fields[0].label);
-    }
-  }, [fields]);
+  useEffect(
+    function setSingleFieldAsSelected() {
+      if (fields.length === 1) {
+        setSelectedField(fields[0].label);
+      }
+    },
+    [fields]
+  );
 
   useEffect(() => {
     if (documentStats.documentCountStats?.buckets) {

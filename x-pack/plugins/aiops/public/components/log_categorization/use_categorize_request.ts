@@ -8,6 +8,7 @@
 import { cloneDeep } from 'lodash';
 import { useRef, useCallback } from 'react';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/public';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
@@ -55,13 +56,13 @@ export function useCategorizeRequest() {
       timeField: string,
       from: number | undefined,
       to: number | undefined,
-      queryIn: any,
+      query: QueryDslQueryContainer,
       intervalMs?: number
     ): Promise<{ categories: Category[]; sparkLinesPerCategory: SparkLinesPerCategory }> => {
       return new Promise((resolve, reject) => {
         data.search
           .search<any, CatResponse>(
-            createCategoryRequest(index, field, timeField, from, to, queryIn, intervalMs),
+            createCategoryRequest(index, field, timeField, from, to, query, intervalMs),
             { abortSignal: abortController.current.signal }
           )
           .subscribe({
@@ -102,7 +103,7 @@ function createCategoryRequest(
   timeField: string,
   from: number | undefined,
   to: number | undefined,
-  queryIn: any,
+  queryIn: QueryDslQueryContainer,
   intervalMs?: number
 ) {
   const query = cloneDeep(queryIn);
@@ -124,7 +125,7 @@ function createCategoryRequest(
     delete query.multi_match;
   }
 
-  query.bool.must.push({
+  (query.bool.must as QueryDslQueryContainer[]).push({
     range: {
       [timeField]: {
         gte: from,
