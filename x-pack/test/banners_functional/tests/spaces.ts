@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects([
     'common',
     'security',
@@ -28,18 +29,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     before(async () => {
+      await kibanaServer.uiSettings.replace(
+        {
+          'banners:textContent': 'default space banner text',
+        },
+        { space: 'default' }
+      );
       await PageObjects.security.login(undefined, undefined, {
         expectSpaceSelector: true,
       });
-      await PageObjects.spaceSelector.clickSpaceCard('default');
-
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaSettings();
-
-      await PageObjects.settings.setAdvancedSettingsTextArea(
-        'banners:textContent',
-        'default space banner text'
-      );
     });
 
     it('displays the space-specific banner within the space', async () => {
