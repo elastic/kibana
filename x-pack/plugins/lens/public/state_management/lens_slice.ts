@@ -311,9 +311,11 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           const datasource = datasourceMap[datasourceId!];
           return {
             ...datasourceState,
-            state: isOnlyLayer
-              ? datasource.clearLayer(datasourceState.state, layerId)
-              : datasource.removeLayer(datasourceState.state, layerId),
+            ...(datasourceId === state.activeDatasourceId && {
+              state: isOnlyLayer
+                ? datasource.clearLayer(datasourceState.state, layerId)
+                : datasource.removeLayer(datasourceState.state, layerId),
+            }),
           };
         }
       );
