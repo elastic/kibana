@@ -37,7 +37,7 @@ import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../../common/hooks/use_selector';
-import { useKibana } from '../../../../../common/lib/kibana';
+import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import type { UpdateDateRange } from '../../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../../common/components/filters_global';
@@ -78,7 +78,11 @@ import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_l
 import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
-import { APP_UI_ID } from '../../../../../../common/constants';
+import {
+  APP_UI_ID,
+  DEFAULT_INDEX_KEY,
+  DEFAULT_THREAT_INDEX_KEY,
+} from '../../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../../common/containers/use_full_screen';
 import { Display } from '../../../../../hosts/pages/display';
 
@@ -300,6 +304,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { globalFullScreen } = useGlobalFullScreen();
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
   const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
+
+  const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
+  const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
 
   useEffect(() => {
     const fetchDataViews = async () => {
@@ -767,6 +774,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                             isLoading={false}
                             defaultValues={{ dataViewTitle, ...defineRuleData }}
                             kibanaDataViews={dataViewOptions}
+                            indicesConfig={indicesConfig}
+                            threatIndicesConfig={threatIndicesConfig}
                           />
                         )}
                       </StepPanel>

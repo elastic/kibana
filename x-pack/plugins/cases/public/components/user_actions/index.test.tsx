@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
+import { waitFor, screen } from '@testing-library/react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import routeData from 'react-router';
 
@@ -21,8 +21,9 @@ import {
   hostReleaseComment,
 } from '../../containers/mock';
 import { UserActions } from '.';
-import { TestProviders } from '../../common/mock';
+import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
 import { Actions } from '../../../common/api';
+import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 
 const fetchUserActions = jest.fn();
 const onUpdateField = jest.fn();
@@ -32,6 +33,8 @@ const onShowAlertDetails = jest.fn();
 const defaultProps = {
   caseServices: {},
   caseUserActions: [],
+  userProfiles: new Map(),
+  currentUserProfile: undefined,
   connectors: [],
   actionsNavigation: { href: jest.fn(), onClick: jest.fn() },
   getRuleDetailsHref: jest.fn(),
@@ -65,6 +68,7 @@ describe(`UserActions`, () => {
   const sampleData = {
     content: 'what a great comment update',
   };
+  let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -74,22 +78,20 @@ describe(`UserActions`, () => {
     });
 
     jest.spyOn(routeData, 'useParams').mockReturnValue({ detailName: 'case-id' });
+    appMockRender = createAppMockRenderer();
   });
 
   it('Loading spinner when user actions loading and displays fullName/username', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <UserActions {...{ ...defaultProps, isLoadingUserActions: true }} />
-      </TestProviders>
+    appMockRender.render(
+      <UserActions
+        {...{ ...defaultProps, currentUserProfile: userProfiles[0], isLoadingUserActions: true }}
+      />
     );
 
-    expect(wrapper.find(`[data-test-subj="user-actions-loading"]`).exists()).toEqual(true);
-    expect(wrapper.find(`[data-test-subj="user-action-avatar"]`).first().prop('name')).toEqual(
-      defaultProps.data.createdBy.fullName
-    );
-    expect(
-      wrapper.find(`[data-test-subj="description-action"] figcaption strong`).first().text()
-    ).toEqual(defaultProps.data.createdBy.username);
+    expect(screen.getByTestId('user-actions-loading')).toBeInTheDocument();
+    expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
+    expect(screen.getByText('LK')).toBeInTheDocument();
+    expect(screen.getByText('Leslie Knope')).toBeInTheDocument();
   });
 
   it('Renders service now update line with top and bottom when push is required', async () => {
@@ -402,23 +404,24 @@ describe(`UserActions`, () => {
     });
 
     it('shows the correct username', async () => {
-      const isolateAction = [getHostIsolationUserAction()];
+      const isolateAction = [
+        getHostIsolationUserAction({ createdBy: { profileUid: userProfiles[0].uid } }),
+      ];
       const props = {
         ...defaultProps,
+        userProfiles: userProfilesMap,
         caseUserActions: isolateAction,
-        data: { ...defaultProps.data, comments: [hostIsolationComment()] },
+        data: {
+          ...defaultProps.data,
+          comments: [hostIsolationComment({ createdBy: { profileUid: userProfiles[0].uid } })],
+        },
       };
 
-      const wrapper = mount(
-        <TestProviders>
-          <UserActions {...props} />
-        </TestProviders>
-      );
-      await waitFor(() => {
-        expect(wrapper.find(`[data-test-subj="user-action-avatar"]`).first().prop('name')).toEqual(
-          defaultProps.data.createdBy.fullName
-        );
-      });
+      appMockRender.render(<UserActions {...props} />);
+
+      expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
+      expect(screen.getByText('DR')).toBeInTheDocument();
+      expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
     });
 
     it('shows a lock icon if the action is isolate', async () => {
@@ -440,6 +443,7 @@ describe(`UserActions`, () => {
         ).toBe('lock');
       });
     });
+
     it('shows a lockOpen icon if the action is unisolate/release', async () => {
       const isolateAction = [getHostIsolationUserAction()];
       const props = {
