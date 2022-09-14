@@ -38,6 +38,7 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataViewsState } from '../../state_management';
 import { createMockedIndexPattern } from '../../indexpattern_datasource/mocks';
 import { createMockDataViewsState } from '../../data_views_service/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 const exampleAnnotation: EventAnnotationConfig = {
   id: 'an1',
@@ -89,6 +90,7 @@ const xyVisualization = getXyVisualization({
   core: coreMock.createStart(),
   storage: {} as IStorageWrapper,
   data: dataPluginMock.createStartContract(),
+  unifiedSearch: unifiedSearchPluginMock.createStartContract(),
 });
 
 describe('xy_visualization', () => {
