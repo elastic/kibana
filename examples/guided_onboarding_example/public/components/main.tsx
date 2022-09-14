@@ -60,7 +60,7 @@ export const Main = (props: MainProps) => {
   const startGuide = async (guide: UseCase) => {
     const response = await guidedOnboardingApi?.updateGuideState({
       activeGuide: guide,
-      activeStep: 'add_data',
+      activeStep: 'unset',
     });
 
     if (response) {

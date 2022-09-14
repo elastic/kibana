@@ -26,39 +26,46 @@ import type { StepStatus, StepConfig } from '../types';
 interface GuidedSetupStepProps {
   accordionId: string;
   stepStatus: StepStatus;
-  step: StepConfig;
+  stepConfig: StepConfig;
+  stepNumber: number;
   navigateToStep: (step: StepConfig) => void;
 }
 
 export const GuidedSetupStep = ({
   accordionId,
   stepStatus,
-  step,
+  stepNumber,
+  stepConfig,
   navigateToStep,
 }: GuidedSetupStepProps) => {
   const { euiTheme } = useEuiTheme();
 
-  const statusCircleCss = ({ status }: { status: StepStatus }) => css`
+  const stepNumberCss = css`
     width: 24px;
     height: 24px;
-    border-radius: 32px;
-    ${(status === 'complete' || status === 'in_progress') &&
-    `background-color: ${euiTheme.colors.success};`}
-    ${status === 'incomplete' &&
-    `
-    border: 2px solid ${euiTheme.colors.lightShade};
-  `}
+    border-radius: 50%;
+    border: 2px solid ${euiTheme.colors.success};
+    font-weight: ${euiTheme.font.weight.medium};
+    text-align: center;
+    line-height: 1.4;
+  `;
+
+  const stepTitleCss = css`
+    font-weight: ${euiTheme.font.weight.bold};
   `;
 
   const buttonContent = (
-    <EuiFlexGroup gutterSize="s">
+    <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="center" alignItems="center">
       <EuiFlexItem grow={false}>
-        <span css={statusCircleCss({ status: stepStatus })} className="eui-textCenter">
-          <span className="euiScreenReaderOnly">{stepStatus}</span>
-          {stepStatus === 'complete' && <EuiIcon type="check" color="white" />}
-        </span>
+        {stepStatus === 'complete' ? (
+          <EuiIcon type="check" size="m" color="white" />
+        ) : (
+          <span css={stepNumberCss}>{stepNumber}</span>
+        )}
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>{step.title}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText css={stepTitleCss}>{stepConfig.title}</EuiText>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 
@@ -68,20 +75,25 @@ export const GuidedSetupStep = ({
         id={accordionId}
         buttonContent={buttonContent}
         arrowDisplay="right"
-        forceState={stepStatus === 'in_progress' ? 'open' : 'closed'}
+        forceState={
+          stepStatus === 'in_progress' || stepStatus === 'initialized' ? 'open' : 'closed'
+        }
       >
         <>
           <EuiSpacer size="s" />
-          <EuiText size="s">{step.description}</EuiText>
+          <EuiText size="s">{stepConfig.description}</EuiText>
           <EuiSpacer />
-          {stepStatus === 'in_progress' && (
+          {(stepStatus === 'in_progress' || stepStatus === 'initialized') && (
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={() => navigateToStep(step)} fill>
-                  {/* TODO: Support for conditional "Continue" button label if user revists a step - https://github.com/elastic/kibana/issues/139752 */}
-                  {i18n.translate('guidedOnboarding.dropdownPanel.startStepButtonLabel', {
-                    defaultMessage: 'Start',
-                  })}
+                <EuiButton onClick={() => navigateToStep(stepConfig)} fill>
+                  {stepStatus === 'in_progress'
+                    ? i18n.translate('guidedOnboarding.dropdownPanel.continueStepButtonLabel', {
+                        defaultMessage: 'Continue',
+                      })
+                    : i18n.translate('guidedOnboarding.dropdownPanel.startStepButtonLabel', {
+                        defaultMessage: 'Start',
+                      })}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>

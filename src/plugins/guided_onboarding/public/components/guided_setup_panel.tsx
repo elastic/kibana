@@ -21,6 +21,7 @@ import {
   htmlIdGenerator,
   EuiButtonEmpty,
   EuiTitle,
+  EuiLink,
 } from '@elastic/eui';
 
 import { ApplicationStart } from '@kbn/core-application-browser';
@@ -61,21 +62,45 @@ const getCurrentStep = (steps?: StepConfig[], state?: GuidedSetupState): number 
   }
 };
 
+// TODO this logic is still not working correctly
 const getStepStatus = (steps: StepConfig[], stepIndex: number, activeStep?: string): StepStatus => {
-  const activeStepIndex = steps.findIndex((step: StepConfig) => step.id === activeStep);
-  if (activeStepIndex < stepIndex) {
-    return 'incomplete';
+  // If activeStep is unset, we assume the user has just activated the guide but not started the first step
+  if (activeStep === 'unset' && stepIndex === 0) {
+    return 'initialized';
   }
+
+  const activeStepIndex = steps.findIndex((step: StepConfig) => step.id === activeStep);
+
+  if (activeStepIndex < stepIndex) {
+    return 'not_started';
+  }
+
   if (activeStepIndex === stepIndex) {
     return 'in_progress';
   }
+
   return 'complete';
 };
 
-export const GuidedSetupPanel = ({ api, application, http }: Props) => {
+export const GuidedSetupPanel = ({ api, application }: Props) => {
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [guidedSetupState, setGuidedSetupState] = useState<GuidedSetupState | undefined>(undefined);
   const isFirstRender = useRef(true);
+
+  const toggleGuide = () => {
+    setIsGuideOpen((prevIsGuideOpen) => !prevIsGuideOpen);
+  };
+
+  const navigateToStep = (step: StepConfig) => {
+    setIsGuideOpen(false);
+    if (step.location) {
+      application.navigateToApp(step.location.appID, { path: step.location.path });
+    }
+  };
+
+  const navigateToLandingPage = () => {
+    application.navigateToApp('home', { path: '#getting_started' });
+  };
 
   useEffect(() => {
     const subscription = api.fetchGuideState$().subscribe((newState) => {
@@ -94,19 +119,7 @@ export const GuidedSetupPanel = ({ api, application, http }: Props) => {
     return () => subscription.unsubscribe();
   }, [api, guidedSetupState?.activeGuide, guidedSetupState?.activeStep]);
 
-  const toggleGuide = () => {
-    setIsGuideOpen((prevIsGuideOpen) => !prevIsGuideOpen);
-  };
-
   const guideConfig = getConfig(guidedSetupState);
-  const currentStep = getCurrentStep(guideConfig?.steps, guidedSetupState);
-
-  const navigateToStep = (step: StepConfig) => {
-    setIsGuideOpen(false);
-    if (step.location) {
-      application.navigateToApp(step.location.appID, { path: step.location.path });
-    }
-  };
 
   // TODO handle loading, error state
   if (!guideConfig) {
@@ -118,6 +131,8 @@ export const GuidedSetupPanel = ({ api, application, http }: Props) => {
       </EuiButton>
     );
   }
+
+  const currentStep = getCurrentStep(guideConfig.steps, guidedSetupState);
 
   return (
     <EuiPopover
@@ -144,11 +159,11 @@ export const GuidedSetupPanel = ({ api, application, http }: Props) => {
     >
       <EuiPopoverTitle>
         <EuiButtonEmpty
-          onClick={() => {}}
+          onClick={navigateToLandingPage}
           iconSide="left"
           iconType="arrowLeft"
-          isDisabled={true}
           flush="left"
+          color="text"
         >
           {i18n.translate('guidedOnboarding.dropdownPanel.backToGuidesLink', {
             defaultMessage: 'Back to guides',
@@ -160,21 +175,38 @@ export const GuidedSetupPanel = ({ api, application, http }: Props) => {
       </EuiPopoverTitle>
 
       <div css={guidedPanelContainerCss}>
-        <EuiText>
+        <EuiText size="m">
           <p>{guideConfig?.description}</p>
         </EuiText>
-        <EuiSpacer />
+
+        {guideConfig.docs && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiLink external target="_blank" href={guideConfig.docs.url}>
+              {guideConfig.docs.text}
+            </EuiLink>
+          </>
+        )}
+
         <EuiHorizontalRule />
-        <EuiProgress
-          label={i18n.translate('guidedOnboarding.dropdownPanel.progressLabel', {
-            defaultMessage: 'Progress',
-          })}
-          value={40}
-          max={100}
-          size="l"
-          valueText
-        />
+
+        {/* TODO this is still not working correctly */}
+        {/* Only show the progress bar when a step is active */}
+        {Boolean(currentStep) && (
+          <EuiProgress
+            label={i18n.translate('guidedOnboarding.dropdownPanel.progressLabel', {
+              defaultMessage: 'Progress',
+            })}
+            // TODO Remove hard-coded values
+            value={40}
+            max={100}
+            size="l"
+            valueText
+          />
+        )}
+
         <EuiSpacer size="xl" />
+
         {guideConfig?.steps.map((step, index, steps) => {
           const accordionId = htmlIdGenerator(`accordion${index}`)();
           const stepStatus = getStepStatus(steps, index, guidedSetupState?.activeStep);
@@ -183,7 +215,8 @@ export const GuidedSetupPanel = ({ api, application, http }: Props) => {
             <GuidedSetupStep
               accordionId={accordionId}
               stepStatus={stepStatus}
-              step={step}
+              stepConfig={step}
+              stepNumber={index + 1}
               navigateToStep={navigateToStep}
             />
           );
