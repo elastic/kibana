@@ -19,7 +19,7 @@ import { registerIndexRoutes } from './indices';
 describe('Enterprise Search Managed Indices', () => {
   let mockRouter: MockRouter;
   const mockClient = {
-    asCurrentUser: {}
+    asCurrentUser: {},
   };
 
   beforeEach(() => {
@@ -63,10 +63,7 @@ describe('Enterprise Search Managed Indices', () => {
         params: { indexName: 'search-index-name' },
       });
 
-      expect(fetchMlInferencePipelineProcessors).toHaveBeenCalledWith(
-        {},
-        'search-index-name'
-      );
+      expect(fetchMlInferencePipelineProcessors).toHaveBeenCalledWith({}, 'search-index-name');
 
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: mockData,
