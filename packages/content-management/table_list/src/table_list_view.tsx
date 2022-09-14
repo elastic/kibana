@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { useReducer, useCallback, useEffect, useRef, useMemo, ReactNode } from 'react';
+import React, {
+  useReducer,
+  useCallback,
+  useEffect,
+  useRef,
+  useMemo,
+  ReactNode,
+  MouseEvent,
+} from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiBasicTableColumn,
@@ -24,6 +32,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { Table, ConfirmDeleteModal, ListingLimitWarning } from './components';
 import { useServices } from './services';
@@ -53,7 +62,10 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
     searchQuery: string,
     references?: SavedObjectsFindOptionsReference[]
   ): Promise<{ total: number; hits: T[] }>;
-  getDetailViewLink(entity: T): string;
+  /** Handler to set the item title "href" value. If it returns undefined there won't be a link for this item. */
+  getDetailViewLink?: (entity: T) => string | undefined;
+  /** Handler to execute when clicking the item title */
+  onClickTitle?: (item: T) => void;
   createItem?(): void;
   deleteItems?(items: T[]): Promise<void>;
   editItem?(item: T): void;
@@ -103,9 +115,22 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   editItem,
   deleteItems,
   getDetailViewLink,
+  onClickTitle,
   id = 'userContent',
   children,
 }: Props<T>) {
+  if (!getDetailViewLink && !onClickTitle) {
+    throw new Error(
+      `[TableListView] One o["getDetailViewLink" or "onClickTitle"] prop must be provided.`
+    );
+  }
+
+  if (getDetailViewLink && onClickTitle) {
+    throw new Error(
+      `[TableListView] Either "getDetailViewLink" or "onClickTitle" can be provided. Not both.`
+    );
+  }
+
   const isMounted = useRef(false);
   const fetchIdx = useRef(0);
 
@@ -116,11 +141,23 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     searchQueryParser,
     notifyError,
     DateFormatterComp,
+    navigateToUrl,
+    currentAppId$,
   } = useServices();
 
   const reducer = useMemo(() => {
     return getReducer<T>({ DateFormatterComp });
   }, [DateFormatterComp]);
+
+  const redirectAppLinksCoreStart = useMemo(
+    () => ({
+      application: {
+        navigateToUrl,
+        currentAppId$,
+      },
+    }),
+    [navigateToUrl, currentAppId$]
+  );
 
   const [state, dispatch] = useReducer<(state: State<T>, action: Action<T>) => State<T>>(reducer, {
     items: [],
@@ -137,14 +174,37 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           defaultMessage: 'Title',
         }),
         sortable: true,
-        render: (field: keyof T, record: T) => (
-          <EuiLink
-            href={getDetailViewLink(record)}
-            data-test-subj={`${id}ListingTitleLink-${record.attributes.title.split(' ').join('-')}`}
-          >
-            {record.attributes.title}
-          </EuiLink>
-        ),
+        render: (field: keyof T, record: T) => {
+          // The validation is handled at the top of the component
+          const href = getDetailViewLink ? getDetailViewLink(record) : undefined;
+
+          if (!href && !onClickTitle) {
+            // This item is not clickable
+            return <span>{record.attributes.title}</span>;
+          }
+
+          return (
+            <RedirectAppLinks coreStart={redirectAppLinksCoreStart}>
+              {/* eslint-disable-next-line  @elastic/eui/href-or-on-click */}
+              <EuiLink
+                href={getDetailViewLink ? getDetailViewLink(record) : undefined}
+                onClick={
+                  onClickTitle
+                    ? (e: MouseEvent) => {
+                        e.preventDefault();
+                        onClickTitle(record);
+                      }
+                    : undefined
+                }
+                data-test-subj={`${id}ListingTitleLink-${record.attributes.title
+                  .split(' ')
+                  .join('-')}`}
+              >
+                {record.attributes.title}
+              </EuiLink>
+            </RedirectAppLinks>
+          );
+        },
       },
       {
         field: 'attributes.description',
@@ -391,74 +451,69 @@ function TableListViewComp<T extends UserContentCommonSchema>({
 
   if (!fetchError && hasNoItems) {
     return (
-      <KibanaPageTemplate
-        data-test-subj={pageDataTestSubject}
-        pageBodyProps={{
-          'aria-labelledby': hasInitialFetchReturned ? headingId : undefined,
-        }}
-        isEmptyState={true}
-      >
-        {renderNoItemsMessage()}
+      <KibanaPageTemplate panelled isEmptyState={true} data-test-subj={pageDataTestSubject}>
+        <KibanaPageTemplate.Section
+          aria-labelledby={hasInitialFetchReturned ? headingId : undefined}
+        >
+          {renderNoItemsMessage()}
+        </KibanaPageTemplate.Section>
       </KibanaPageTemplate>
     );
   }
 
   return (
-    <KibanaPageTemplate
-      data-test-subj={pageDataTestSubject}
-      pageHeader={{
-        pageTitle: <span id={headingId}>{tableListTitle}</span>,
-        rightSideItems: [renderCreateButton() ?? <span />],
-        'data-test-subj': 'top-nav',
-      }}
-      pageBodyProps={{
-        'aria-labelledby': hasInitialFetchReturned ? headingId : undefined,
-      }}
-    >
-      {/* Any children passed to the component */}
-      {children}
-
-      {/* Too many items error */}
-      {showLimitError && (
-        <ListingLimitWarning
-          canEditAdvancedSettings={canEditAdvancedSettings}
-          advancedSettingsLink={getListingLimitSettingsUrl()}
-          entityNamePlural={entityNamePlural}
-          totalItems={totalItems}
-          listingLimit={listingLimit}
-        />
-      )}
-
-      {/* Error while fetching items */}
-      {showFetchError && renderFetchError()}
-
-      {/* Table of items */}
-      <Table<T>
-        dispatch={dispatch}
-        items={items}
-        isFetchingItems={isFetchingItems}
-        searchQuery={searchQuery}
-        tableColumns={tableColumns}
-        tableSort={tableSort}
-        pagination={pagination}
-        selectedIds={selectedIds}
-        entityName={entityName}
-        entityNamePlural={entityNamePlural}
-        deleteItems={deleteItems}
-        tableCaption={tableListTitle}
+    <KibanaPageTemplate panelled data-test-subj={pageDataTestSubject}>
+      <KibanaPageTemplate.Header
+        pageTitle={<span id={headingId}>{tableListTitle}</span>}
+        rightSideItems={[renderCreateButton() ?? <span />]}
+        data-test-subj="top-nav"
       />
+      <KibanaPageTemplate.Section aria-labelledby={hasInitialFetchReturned ? headingId : undefined}>
+        {/* Any children passed to the component */}
+        {children}
 
-      {/* Delete modal */}
-      {showDeleteModal && (
-        <ConfirmDeleteModal<T>
-          isDeletingItems={isDeletingItems}
+        {/* Too many items error */}
+        {showLimitError && (
+          <ListingLimitWarning
+            canEditAdvancedSettings={canEditAdvancedSettings}
+            advancedSettingsLink={getListingLimitSettingsUrl()}
+            entityNamePlural={entityNamePlural}
+            totalItems={totalItems}
+            listingLimit={listingLimit}
+          />
+        )}
+
+        {/* Error while fetching items */}
+        {showFetchError && renderFetchError()}
+
+        {/* Table of items */}
+        <Table<T>
+          dispatch={dispatch}
+          items={items}
+          isFetchingItems={isFetchingItems}
+          searchQuery={searchQuery}
+          tableColumns={tableColumns}
+          tableSort={tableSort}
+          pagination={pagination}
+          selectedIds={selectedIds}
           entityName={entityName}
           entityNamePlural={entityNamePlural}
-          items={selectedItems}
-          onConfirm={deleteSelectedItems}
-          onCancel={() => dispatch({ type: 'onCancelDeleteItems' })}
+          deleteItems={deleteItems}
+          tableCaption={tableListTitle}
         />
-      )}
+
+        {/* Delete modal */}
+        {showDeleteModal && (
+          <ConfirmDeleteModal<T>
+            isDeletingItems={isDeletingItems}
+            entityName={entityName}
+            entityNamePlural={entityNamePlural}
+            items={selectedItems}
+            onConfirm={deleteSelectedItems}
+            onCancel={() => dispatch({ type: 'onCancelDeleteItems' })}
+          />
+        )}
+      </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
 }

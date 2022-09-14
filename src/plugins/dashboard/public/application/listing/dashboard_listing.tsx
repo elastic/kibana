@@ -47,6 +47,7 @@ const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
 interface DashboardSavedObjectUserContent extends UserContentCommonSchema {
   attributes: {
     title: string;
+    description?: string;
     timeRestore: boolean;
   };
 }
@@ -61,6 +62,7 @@ const toTableListViewSavedObject = (
     type: 'dashboard',
     attributes: {
       title: (savedObject.title as string) ?? '',
+      description: savedObject.description as string,
       timeRestore: savedObject.timeRestore as boolean,
     },
   };

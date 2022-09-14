@@ -7,6 +7,8 @@
  */
 import React from 'react';
 import type { ComponentType } from 'react';
+import { from } from 'rxjs';
+
 import { TableListViewProvider, Services } from '../services';
 
 export const getMockServices = (overrides?: Partial<Services>) => {
@@ -14,6 +16,8 @@ export const getMockServices = (overrides?: Partial<Services>) => {
     canEditAdvancedSettings: true,
     getListingLimitSettingsUrl: () => 'http://elastic.co',
     notifyError: () => undefined,
+    currentAppId$: from('mockedApp'),
+    navigateToUrl: () => undefined,
     ...overrides,
   };
 
