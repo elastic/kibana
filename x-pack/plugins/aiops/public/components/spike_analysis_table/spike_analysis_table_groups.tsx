@@ -158,7 +158,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
                 data-test-subj="aiopsSpikeAnalysisTableColumnGroupBadge"
                 color="hollow"
               >
-                +{Object.keys(repeatedValues).length} duplicates
+                +{Object.keys(repeatedValues).length} more
               </EuiBadge>
               <EuiSpacer size="xs" />
             </>
