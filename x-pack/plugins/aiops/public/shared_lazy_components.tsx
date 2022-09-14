@@ -40,8 +40,8 @@ const LogCategorizationLazyWrapper: FC = ({ children }) => (
 );
 
 /**
- * Lazy-wrapped ExplainLogRateSpikesAppState React component
- * @param {ExplainLogRateSpikesAppStateProps}  props - properties specifying the data on which to run the analysis.
+ * Lazy-wrapped LogCategorizationAppStateProps React component
+ * @param {LogCategorizationAppStateProps}  props - properties specifying the data on which to run the analysis.
  */
 export const LogCategorization: FC<LogCategorizationAppStateProps> = (props) => (
   <LogCategorizationLazyWrapper>

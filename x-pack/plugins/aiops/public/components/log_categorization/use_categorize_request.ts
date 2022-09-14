@@ -175,6 +175,10 @@ function createCategoryRequest(
 function processCategoryResults(result: CatResponse, field: string) {
   const sparkLinesPerCategory: SparkLinesPerCategory = {};
 
+  if (result.rawResponse.aggregations === undefined) {
+    throw new Error('processCategoryResults failed, did not return aggregations.');
+  }
+
   const categories: Category[] = result.rawResponse.aggregations!.categories.buckets.map((b) => {
     sparkLinesPerCategory[b.key] =
       b.sparkline === undefined

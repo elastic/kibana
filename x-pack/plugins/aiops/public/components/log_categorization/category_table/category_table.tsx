@@ -144,7 +144,7 @@ export const CategoryTable: FC<Props> = ({
     },
     {
       name: 'Actions',
-      width: 60,
+      width: '60px',
       actions: [
         {
           name: i18n.translate('xpack.aiops.logCategorization.showInDiscover', {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 
 import { DocumentCountChart as DocumentCountChartRoot } from '../document_count_content/document_count_chart';
 import { TotalCountHeader } from '../document_count_content/total_count_header';
@@ -30,11 +30,7 @@ export const DocumentCountChart: FC<Props> = ({
   selectedCategory,
   documentCountStats,
 }) => {
-  if (documentCountStats?.interval === undefined) {
-    return null;
-  }
-
-  const getChartPoints = () => {
+  const chartPoints = useMemo(() => {
     const category = selectedCategory ?? pinnedCategory ?? null;
     return eventRate.map(({ key, docCount }) => {
       let value = docCount;
@@ -43,9 +39,9 @@ export const DocumentCountChart: FC<Props> = ({
       }
       return { time: key, value };
     });
-  };
+  }, [eventRate, pinnedCategory, selectedCategory, sparkLines]);
 
-  const getChartPointsSplit = () => {
+  const chartPointsSplit = useMemo(() => {
     const category = selectedCategory ?? pinnedCategory ?? null;
     return category !== null
       ? eventRate.map(({ key }) => {
@@ -56,14 +52,18 @@ export const DocumentCountChart: FC<Props> = ({
           return { time: key, value };
         })
       : undefined;
-  };
+  }, [eventRate, pinnedCategory, selectedCategory, sparkLines]);
+
+  if (documentCountStats?.interval === undefined) {
+    return null;
+  }
 
   return (
     <>
       <TotalCountHeader totalCount={totalCount} />
       <DocumentCountChartRoot
-        chartPoints={getChartPoints()}
-        chartPointsSplit={getChartPointsSplit()}
+        chartPoints={chartPoints}
+        chartPointsSplit={chartPointsSplit}
         timeRangeEarliest={eventRate[0].key}
         timeRangeLatest={eventRate[eventRate.length - 1].key}
         interval={documentCountStats.interval}
