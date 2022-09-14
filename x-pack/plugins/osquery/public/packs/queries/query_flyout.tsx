@@ -62,7 +62,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   const {
     handleSubmit,
     formState: { isSubmitting },
-    setValue,
+    reset,
     clearErrors,
   } = hooksForm;
   const onSubmit = (payload: PackQueryFormData) => {
@@ -75,27 +75,17 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     (savedQuery) => {
       if (savedQuery) {
         clearErrors('id');
-        setValue('id', savedQuery.id);
-        setValue('query', savedQuery.query);
-        // setValue('description', savedQuery.description); // TODO do we need it?
-        setValue('platform', savedQuery.platform ? savedQuery.platform : 'linux,windows,darwin');
-        setValue('version', savedQuery.version ? [savedQuery.version] : []);
-        setValue('interval', savedQuery.interval);
-        setValue(
-          'ecs_mapping',
-          !isEmpty(savedQuery.ecs_mapping)
-            ? map(savedQuery.ecs_mapping, (value, key) => ({
-                key,
-                result: {
-                  type: Object.keys(value)[0],
-                  value: Object.values(value)[0] as string,
-                },
-              }))
-            : [defaultEcsFormData]
-        );
+        reset({
+          id: savedQuery.id,
+          query: savedQuery.query,
+          platform: savedQuery.platform ? savedQuery.platform : 'linux,windows,darwin',
+          version: savedQuery.version ? [savedQuery.version] : [],
+          interval: savedQuery.interval,
+          ecs_mapping: savedQuery.ecs_mapping,
+        });
       }
     },
-    [clearErrors, setValue]
+    [clearErrors, reset]
   );
   /* Avoids accidental closing of the flyout when the user clicks outside of the flyout */
   const maskProps = useMemo(() => ({ onClick: () => ({}) }), []);
