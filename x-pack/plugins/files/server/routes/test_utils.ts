@@ -6,7 +6,6 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { FileServiceStart } from '../file_service';
 import { createFileServiceMock } from '../mocks';
 import type { FileKindsRequestHandlerContext } from './file_kind/types';
 
