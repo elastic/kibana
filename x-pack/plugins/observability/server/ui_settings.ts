@@ -223,11 +223,11 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
   },
   [enableInfrastructureHostsView]: {
     category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.infrastructureHostsView', {
+    name: i18n.translate('xpack.observability.enableInfrastructureHostsView', {
       defaultMessage: 'Infrastructure Hosts view',
     }),
     value: false,
-    description: i18n.translate('xpack.observability.enableInfrastructureViewDescription', {
+    description: i18n.translate('xpack.observability.enableInfrastructureHostsViewDescription', {
       defaultMessage: 'Enable the Hosts view in the Infrastructure app',
     }),
     schema: schema.boolean(),
