@@ -301,14 +301,7 @@ export function registerIndexRoutes({
 
       if (createResult.exists) {
         return response.conflict({
-          body: new Error(
-            i18n.translate('xpack.ingestPipelines.createRoute.duplicatePipelineIdErrorMessage', {
-              defaultMessage: "There is already a pipeline with name '{pipelineName}'.",
-              values: {
-                pipelineName,
-              },
-            })
-          ),
+          body: new Error(`There is already a pipeline with name '${pipelineName}'.`)
         });
       }
 
