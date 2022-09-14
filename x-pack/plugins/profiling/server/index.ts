@@ -5,8 +5,23 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
+import { schema, TypeOf } from '@kbn/config-schema';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { ProfilingPlugin } from './plugin';
+
+const configSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: false }),
+});
+
+type ProfilingConfig = TypeOf<typeof configSchema>;
+
+// plugin config
+export const config: PluginConfigDescriptor<ProfilingConfig> = {
+  exposeToBrowser: {
+    enabled: true,
+  },
+  schema: configSchema,
+};
 
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
