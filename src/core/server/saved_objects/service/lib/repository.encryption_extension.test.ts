@@ -16,24 +16,12 @@ import {
 } from './repository.test.mock';
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  SavedObjectsFindOptions,
-} from '../../types';
 
-import {
-  SavedObjectsRepository,
-} from './repository';
+import { SavedObjectsRepository } from './repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  SavedObjectsRawDocSource,
-  SavedObjectsSerializer,
-} from '../../serialization';
+import { SavedObjectsRawDocSource, SavedObjectsSerializer } from '../../serialization';
 import { kibanaMigratorMock } from '../../migrations/kibana_migrator.mock';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
-import {
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsBulkUpdateOptions,
-} from '../saved_objects_client';
 
 import { savedObjectsEncryptionExtensionMock } from './repository.extensions.mock';
 import {
@@ -53,6 +41,7 @@ import {
   updateSuccess,
   bulkCreateSuccess,
   bulkUpdateSuccess,
+  findSuccess,
 } from './respository.test.common';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
@@ -146,11 +135,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
 
       client.get.mockResponseOnce(response);
       mockEncryptionExt.isEncryptableType.mockReturnValue(false);
-      const result = await repository.get(
-        nonEncryptedSO.type,
-        nonEncryptedSO.id,
-        options
-      );
+      const result = await repository.get(nonEncryptedSO.type, nonEncryptedSO.id, options);
       expect(client.get).toHaveBeenCalledTimes(1);
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(1);
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(nonEncryptedSO.type);
@@ -355,9 +340,17 @@ describe('SavedObjectsRepository Encryption Extension', () => {
 
     it('does not attempt to encrypt or decrypt if type is not encryptable', async () => {
       mockEncryptionExt.isEncryptableType.mockReturnValue(false);
-      const result = await updateSuccess(client, repository, registry, nonEncryptedSO.type, nonEncryptedSO.id, attributes, {
-        namespace,
-      });
+      const result = await updateSuccess(
+        client,
+        repository,
+        registry,
+        nonEncryptedSO.type,
+        nonEncryptedSO.id,
+        attributes,
+        {
+          namespace,
+        }
+      );
       expect(client.update).toHaveBeenCalledTimes(1);
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(nonEncryptedSO.type);
@@ -378,10 +371,18 @@ describe('SavedObjectsRepository Encryption Extension', () => {
         ...encryptedSO,
         ...decryptedStrippedAttributes,
       });
-      const result = await updateSuccess(client, repository, registry, encryptedSO.type, encryptedSO.id, encryptedSO.attributes, {
-        namespace,
-        references: encryptedSO.references,
-      });
+      const result = await updateSuccess(
+        client,
+        repository,
+        registry,
+        encryptedSO.type,
+        encryptedSO.id,
+        encryptedSO.attributes,
+        {
+          namespace,
+          references: encryptedSO.references,
+        }
+      );
       expect(client.update).toHaveBeenCalledTimes(1);
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
@@ -436,7 +437,9 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       mockEncryptionExt.isEncryptableType.mockReturnValueOnce(false);
       mockEncryptionExt.isEncryptableType.mockReturnValueOnce(true);
       const getId = (type: string, id: string) => `${namespace}:${type}:${id}`; // test that the raw document ID equals this (e.g., has a namespace prefix)
-      await bulkGetSuccess(client, repository, registry, [nonEncryptedSO, encryptedSO], { namespace });
+      await bulkGetSuccess(client, repository, registry, [nonEncryptedSO, encryptedSO], {
+        namespace,
+      });
       _expectClientCallArgs([nonEncryptedSO, encryptedSO], { getId });
       expect(mockEncryptionExt.isEncryptableType).toBeCalledTimes(2);
       expect(mockEncryptionExt.isEncryptableType).toBeCalledWith(nonEncryptedSO.type);
@@ -512,10 +515,15 @@ describe('SavedObjectsRepository Encryption Extension', () => {
         ...decryptedStrippedAttributes,
       });
 
-      const result = await bulkCreateSuccess(client, repository, [{ ...encryptedSO, version: mockVersion }], {
-        overwrite: true,
-        // version: mockVersion, // this doesn't work in bulk...looks like it checks the object itself?
-      });
+      const result = await bulkCreateSuccess(
+        client,
+        repository,
+        [{ ...encryptedSO, version: mockVersion }],
+        {
+          overwrite: true,
+          // version: mockVersion, // this doesn't work in bulk...looks like it checks the object itself?
+        }
+      );
       expect(client.bulk).toHaveBeenCalledTimes(1);
       expect(result.saved_objects).not.toBeUndefined();
       expect(result.saved_objects.length).toBe(1);
@@ -551,7 +559,13 @@ describe('SavedObjectsRepository Encryption Extension', () => {
     it('does not use options `namespace` or object `namespace` to encrypt attributes if neither are specified', async () => {
       mockEncryptionExt.isEncryptableType.mockReturnValue(true);
 
-      await bulkUpdateSuccess(client, repository, registry, [{ ...encryptedSO, namespace: undefined }], { namespace: undefined });
+      await bulkUpdateSuccess(
+        client,
+        repository,
+        registry,
+        [{ ...encryptedSO, namespace: undefined }],
+        { namespace: undefined }
+      );
       expect(client.bulk).toHaveBeenCalledTimes(1);
 
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2); // 2x optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
@@ -567,7 +581,13 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       mockEncryptionExt.isEncryptableType.mockReturnValue(true);
       const usedNamespace = 'options-namespace';
 
-      await bulkUpdateSuccess(client, repository, registry, [{ ...encryptedSO, namespace: undefined }], { namespace: usedNamespace });
+      await bulkUpdateSuccess(
+        client,
+        repository,
+        registry,
+        [{ ...encryptedSO, namespace: undefined }],
+        { namespace: usedNamespace }
+      );
       expect(client.bulk).toHaveBeenCalledTimes(1);
 
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2); // 2x optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
@@ -583,7 +603,13 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       mockEncryptionExt.isEncryptableType.mockReturnValue(true);
       const usedNamespace = 'object-namespace';
 
-      await bulkUpdateSuccess(client, repository, registry, [{ ...encryptedSO, namespace: usedNamespace }], { namespace: undefined });
+      await bulkUpdateSuccess(
+        client,
+        repository,
+        registry,
+        [{ ...encryptedSO, namespace: usedNamespace }],
+        { namespace: undefined }
+      );
       expect(client.bulk).toHaveBeenCalledTimes(1);
 
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2); // 2x optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
@@ -637,17 +663,15 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       } as estypes.SearchResponse<SavedObjectsRawDocSource>;
     };
 
-    const findSuccess = async (options: SavedObjectsFindOptions, namespace?: string) => {
-      client.search.mockResponseOnce(generateSearchResults(namespace));
-      const result = await repository.find(options);
-      expect(mockGetSearchDsl).toHaveBeenCalledTimes(1);
-      expect(client.search).toHaveBeenCalledTimes(1);
-      return result;
-    };
-
     it(`only attempts to decrypt and strip attributes for types that are encryptable`, async () => {
       mockEncryptionExt.isEncryptableType.mockReturnValueOnce(true);
-      await findSuccess({ type: [encryptedSO.type, 'index-pattern'] });
+      await findSuccess(
+        client,
+        repository,
+        { type: [encryptedSO.type, 'index-pattern'] },
+        undefined,
+        generateSearchResults
+      );
       expect(client.search).toHaveBeenCalledTimes(1);
       expect(mockEncryptionExt.isEncryptableType).toBeCalledTimes(2);
       expect(mockEncryptionExt.isEncryptableType).toBeCalledWith(encryptedSO.type);

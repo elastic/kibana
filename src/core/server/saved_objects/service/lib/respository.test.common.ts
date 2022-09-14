@@ -6,17 +6,11 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable @typescript-eslint/no-shadow */
-
-// import {
-//   pointInTimeFinderMock,
-//   mockGetCurrentTime,
-//   mockPreflightCheckForCreate,
-//   mockGetSearchDsl,
-// } from './repository.test.mock';
-
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
+import { loggerMock } from '@kbn/logging-mocks';
+import { mockGetSearchDsl } from './repository.test.mock';
+
 import {
   SavedObjectsType,
   SavedObject,
@@ -25,19 +19,15 @@ import {
   SavedObjectsFindOptions,
 } from '../../types';
 
-import {
-  SavedObjectsRepository,
-} from './repository';
-import { loggerMock } from '@kbn/logging-mocks';
-import {
-  SavedObjectsRawDocSource,
-  SavedObjectsSerializer,
-} from '../../serialization';
+import { SavedObjectsRepository } from './repository';
+import { SavedObjectsRawDocSource, SavedObjectsSerializer } from '../../serialization';
 import { encodeHitVersion } from '../../version';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { DocumentMigrator } from '../../migrations/core/document_migrator';
-import { kibanaMigratorMock } from '../../migrations/kibana_migrator.mock';
-import { ElasticsearchClientMock } from '../../../elasticsearch/client/mocks';
+import {
+  elasticsearchClientMock,
+  ElasticsearchClientMock,
+} from '../../../elasticsearch/client/mocks';
 import {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
@@ -45,11 +35,57 @@ import {
   SavedObjectsBulkUpdateOptions,
   SavedObjectsCreateOptions,
   SavedObjectsUpdateOptions,
+  SavedObjectsDeleteOptions,
 } from '../saved_objects_client';
 import { SavedObjectsMappingProperties, SavedObjectsTypeMappingDefinition } from '../../mappings';
 
-import { savedObjectsEncryptionExtensionMock } from './repository.extensions.mock';
-import { ElasticsearchClient } from '@kbn/core/server/elasticsearch';
+// import { savedObjectsEncryptionExtensionMock } from './repository.extensions.mock';
+// import { ElasticsearchClient } from '../../../elasticsearch';
+import { SavedObjectsErrorHelpers } from './errors';
+
+export const DEFAULT_SPACE = 'default';
+
+export interface ExpectedErrorResult {
+  type: string;
+  id: string;
+  error: Record<string, any>;
+}
+
+export type ErrorPayload = Error & Payload;
+
+export const createBadRequestError = (reason?: string) =>
+  SavedObjectsErrorHelpers.createBadRequestError(reason).output.payload as unknown as ErrorPayload;
+export const createConflictError = (type: string, id: string, reason?: string) =>
+  SavedObjectsErrorHelpers.createConflictError(type, id, reason).output
+    .payload as unknown as ErrorPayload;
+export const createGenericNotFoundError = (type: string | null = null, id: string | null = null) =>
+  SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output
+    .payload as unknown as ErrorPayload;
+export const createUnsupportedTypeError = (type: string) =>
+  SavedObjectsErrorHelpers.createUnsupportedTypeError(type).output
+    .payload as unknown as ErrorPayload;
+
+export const expectError = ({ type, id }: { type: string; id: string }) => ({
+  type,
+  id,
+  error: expect.any(Object),
+});
+
+export const expectErrorResult = (
+  { type, id }: TypeIdTuple,
+  error: Record<string, any>,
+  overrides: Record<string, unknown> = {}
+): ExpectedErrorResult => ({
+  type,
+  id,
+  error: { ...error, ...overrides },
+});
+export const expectErrorNotFound = (obj: TypeIdTuple, overrides?: Record<string, unknown>) =>
+  expectErrorResult(obj, createGenericNotFoundError(obj.type, obj.id), overrides);
+export const expectErrorConflict = (obj: TypeIdTuple, overrides?: Record<string, unknown>) =>
+  expectErrorResult(obj, createConflictError(obj.type, obj.id), overrides);
+export const expectErrorInvalidType = (obj: TypeIdTuple, overrides?: Record<string, unknown>) =>
+  expectErrorResult(obj, createUnsupportedTypeError(obj.type), overrides);
 
 export const KIBANA_VERSION = '2.0.0';
 export const CUSTOM_INDEX_TYPE = 'customIndex';
@@ -171,7 +207,10 @@ export const mappings: SavedObjectsTypeMappingDefinition = {
   },
 };
 
-export const createType = (type: string, parts: Partial<SavedObjectsType> = {}): SavedObjectsType => ({
+export const createType = (
+  type: string,
+  parts: Partial<SavedObjectsType> = {}
+): SavedObjectsType => ({
   name: type,
   hidden: false,
   namespaceType: 'single',
@@ -251,7 +290,7 @@ export const createDocumentMigrator = (registry: SavedObjectTypeRegistry) => {
     kibanaVersion: KIBANA_VERSION,
     log: loggerMock.create(),
   });
-}
+};
 
 export const getMockGetResponse = (
   registry: SavedObjectTypeRegistry,
@@ -283,9 +322,7 @@ export const getMockGetResponse = (
   return {
     // NOTE: Elasticsearch returns more fields (_index, _type) but the SavedObjectsRepository method ignores these
     found: true,
-    _id: `${
-      registry.isSingleNamespace(type) && namespaceId ? `${namespaceId}:` : ''
-    }${type}:${id}`,
+    _id: `${registry.isSingleNamespace(type) && namespaceId ? `${namespaceId}:` : ''}${type}:${id}`,
     ...mockVersionProps,
     _source: {
       ...(registry.isSingleNamespace(type) && { namespace: namespaceId }),
@@ -316,7 +353,9 @@ export const getMockMgetResponse = (
 ) =>
   ({
     docs: objects.map((obj) =>
-      obj.found === false ? obj : getMockGetResponse(registry, obj, obj.initialNamespaces ?? namespace)
+      obj.found === false
+        ? obj
+        : getMockGetResponse(registry, obj, obj.initialNamespaces ?? namespace)
     ),
   } as estypes.MgetResponse<SavedObjectsRawDocSource>);
 
@@ -335,7 +374,7 @@ export const mockUpdateResponse = (
   type: string,
   id: string,
   options?: SavedObjectsUpdateOptions,
-  originId?: string,
+  originId?: string
 ) => {
   client.update.mockResponseOnce(
     {
@@ -371,7 +410,7 @@ export const updateSuccess = async <T>(
     mockGetResponseValue?: estypes.GetResponse;
   } = {}
 ) => {
-  const { mockGetResponseValue, originId, } = internalOptions;
+  const { mockGetResponseValue, originId } = internalOptions;
   if (registry.isMultiNamespace(type)) {
     const mockGetResponse =
       mockGetResponseValue ?? getMockGetResponse(registry, { type, id }, options?.namespace);
@@ -452,23 +491,24 @@ export const getMockBulkUpdateResponse = (
   options?: SavedObjectsBulkUpdateOptions,
   originId?: string
 ) =>
-({
-  items: objects.map(({ type, id }) => ({
-    update: {
-      _id: `${registry.isSingleNamespace(type) && options?.namespace ? `${options?.namespace}:` : ''
+  ({
+    items: objects.map(({ type, id }) => ({
+      update: {
+        _id: `${
+          registry.isSingleNamespace(type) && options?.namespace ? `${options?.namespace}:` : ''
         }${type}:${id}`,
-      ...mockVersionProps,
-      get: {
-        _source: {
-          // If the existing saved object contains an originId attribute, the operation will return it in the result.
-          // The originId parameter is just used for test purposes to modify the mock cluster call response.
-          ...(!!originId && { originId }),
+        ...mockVersionProps,
+        get: {
+          _source: {
+            // If the existing saved object contains an originId attribute, the operation will return it in the result.
+            // The originId parameter is just used for test purposes to modify the mock cluster call response.
+            ...(!!originId && { originId }),
+          },
         },
+        result: 'updated',
       },
-      result: 'updated',
-    },
-  })),
-} as estypes.BulkResponse);
+    })),
+  } as estypes.BulkResponse);
 
 export const bulkUpdateSuccess = async (
   client: ElasticsearchClientMock,
@@ -477,15 +517,175 @@ export const bulkUpdateSuccess = async (
   objects: SavedObjectsBulkUpdateObject[],
   options?: SavedObjectsBulkUpdateOptions,
   originId?: string,
+  multiNamespaceSpace?: string // the space for multi namespace objects returned by mock mget (this is only needed for space ext testing)
 ) => {
   const multiNamespaceObjects = objects.filter(({ type }) => registry.isMultiNamespace(type));
   if (multiNamespaceObjects?.length) {
-    const response = getMockMgetResponse(registry, multiNamespaceObjects, options?.namespace);
+    const response = getMockMgetResponse(
+      registry,
+      multiNamespaceObjects,
+      multiNamespaceSpace ?? options?.namespace
+    );
     client.mget.mockResponseOnce(response);
   }
   const response = getMockBulkUpdateResponse(registry, objects, options, originId);
   client.bulk.mockResponseOnce(response);
   const result = await repository.bulkUpdate(objects, options);
   expect(client.mget).toHaveBeenCalledTimes(multiNamespaceObjects?.length ? 1 : 0);
+  return result;
+};
+
+export type IGenerateSearchResultsFunction = (
+  namespace?: string
+) => estypes.SearchResponse<SavedObjectsRawDocSource>;
+
+export const generateIndexPatternSearchResults = (namespace?: string) => {
+  return {
+    took: 1,
+    timed_out: false,
+    _shards: {} as any,
+    hits: {
+      total: 4,
+      hits: [
+        {
+          _index: '.kibana',
+          _id: `${namespace ? `${namespace}:` : ''}index-pattern:logstash-*`,
+          _score: 1,
+          ...mockVersionProps,
+          _source: {
+            namespace,
+            originId: 'some-origin-id', // only one of the results has an originId, this is intentional to test both a positive and negative case
+            type: 'index-pattern',
+            ...mockTimestampFields,
+            'index-pattern': {
+              title: 'logstash-*',
+              timeFieldName: '@timestamp',
+              notExpandable: true,
+            },
+          },
+        },
+        {
+          _index: '.kibana',
+          _id: `${namespace ? `${namespace}:` : ''}config:6.0.0-alpha1`,
+          _score: 2,
+          ...mockVersionProps,
+          _source: {
+            namespace,
+            type: 'config',
+            ...mockTimestampFields,
+            config: {
+              buildNum: 8467,
+              defaultIndex: 'logstash-*',
+            },
+          },
+        },
+        {
+          _index: '.kibana',
+          _id: `${namespace ? `${namespace}:` : ''}index-pattern:stocks-*`,
+          _score: 3,
+          ...mockVersionProps,
+          _source: {
+            namespace,
+            type: 'index-pattern',
+            ...mockTimestampFields,
+            'index-pattern': {
+              title: 'stocks-*',
+              timeFieldName: '@timestamp',
+              notExpandable: true,
+            },
+          },
+        },
+        {
+          _index: '.kibana',
+          _id: `${NAMESPACE_AGNOSTIC_TYPE}:something`,
+          _score: 4,
+          ...mockVersionProps,
+          _source: {
+            type: NAMESPACE_AGNOSTIC_TYPE,
+            ...mockTimestampFields,
+            [NAMESPACE_AGNOSTIC_TYPE]: {
+              name: 'bar',
+            },
+          },
+        },
+      ],
+    },
+  } as estypes.SearchResponse<SavedObjectsRawDocSource>;
+};
+
+export const findSuccess = async (
+  client: ElasticsearchClientMock,
+  repository: SavedObjectsRepository,
+  options: SavedObjectsFindOptions,
+  namespace?: string,
+  generateSearchResultsFunc: IGenerateSearchResultsFunction = generateIndexPatternSearchResults
+) => {
+  client.search.mockResponseOnce(generateSearchResultsFunc(namespace));
+  const result = await repository.find(options);
+  expect(mockGetSearchDsl).toHaveBeenCalledTimes(1);
+  expect(client.search).toHaveBeenCalledTimes(1);
+  return result;
+};
+
+export const deleteSuccess = async (
+  client: ElasticsearchClientMock,
+  repository: SavedObjectsRepository,
+  registry: SavedObjectTypeRegistry,
+  type: string,
+  id: string,
+  options?: SavedObjectsDeleteOptions,
+  internalOptions: { mockGetResponseValue?: estypes.GetResponse } = {}
+) => {
+  const { mockGetResponseValue } = internalOptions;
+  if (registry.isMultiNamespace(type)) {
+    const mockGetResponse =
+      mockGetResponseValue ?? getMockGetResponse(registry, { type, id }, options?.namespace);
+    client.get.mockResponseOnce(mockGetResponse);
+  }
+  client.delete.mockResponseOnce({
+    result: 'deleted',
+  } as estypes.DeleteResponse);
+  const result = await repository.delete(type, id, options);
+  expect(client.get).toHaveBeenCalledTimes(registry.isMultiNamespace(type) ? 1 : 0);
+  return result;
+};
+
+export const removeReferencesToSuccess = async (
+  client: ElasticsearchClientMock,
+  repository: SavedObjectsRepository,
+  type: string,
+  id: string,
+  options = {},
+  updatedCount = 42
+) => {
+  client.updateByQuery.mockResponseOnce({
+    updated: updatedCount,
+  });
+  return await repository.removeReferencesTo(type, id, options);
+};
+
+export const checkConflicts = async (
+  repository: SavedObjectsRepository,
+  objects: TypeIdTuple[],
+  options?: SavedObjectsBaseOptions
+) =>
+  repository.checkConflicts(
+    objects.map(({ type, id }) => ({ type, id })), // checkConflicts only uses type and id
+    options
+  );
+
+export const checkConflictsSuccess = async (
+  client: ElasticsearchClientMock,
+  repository: SavedObjectsRepository,
+  registry: SavedObjectTypeRegistry,
+  objects: TypeIdTuple[],
+  options?: SavedObjectsBaseOptions
+) => {
+  const response = getMockMgetResponse(registry, objects, options?.namespace);
+  client.mget.mockResolvedValue(
+    elasticsearchClientMock.createSuccessTransportRequestPromise(response)
+  );
+  const result = await checkConflicts(repository, objects, options);
+  expect(client.mget).toHaveBeenCalledTimes(1);
   return result;
 };

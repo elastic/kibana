@@ -5,16 +5,38 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ISavedObjectsEncryptionExtension } from '../../..';
+import {
+  ISavedObjectsEncryptionExtension,
+  ISavedObjectsSpacesExtension,
+  ISavedObjectsSecurityExtension,
+} from '../../..';
 
-const create = () => {
+const createEncryptionExt = () => {
   const mock: jest.Mocked<ISavedObjectsEncryptionExtension> = {
     isEncryptableType: jest.fn(),
     decryptOrStripResponseAttributes: jest.fn(),
     encryptAttributes: jest.fn(),
   };
-
   return mock;
 };
+export const savedObjectsEncryptionExtensionMock = { create: createEncryptionExt };
 
-export const savedObjectsEncryptionExtensionMock = { create };
+const createSpacesExt = () => {
+  const mock: jest.Mocked<ISavedObjectsSpacesExtension> = {
+    getCurrentNamespace: jest.fn(),
+    getSearchableNamespaces: jest.fn(),
+  };
+  return mock;
+};
+export const savedObjectsSpacesExtensionMock = { create: createSpacesExt };
+
+const createSecurityExt = () => {
+  const mock: jest.Mocked<ISavedObjectsSecurityExtension> = {
+    checkAuthorization: jest.fn(),
+    enforceAuthorization: jest.fn(),
+    addAuditEvent: jest.fn(),
+    redactNamespaces: jest.fn(),
+  };
+  return mock;
+};
+export const savedObjectsSecurityExtensionMock = { create: createSecurityExt };

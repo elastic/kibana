@@ -23,7 +23,7 @@ import { internalBulkResolve, InternalBulkResolveParams } from './internal_bulk_
 import { SavedObjectsUtils } from './utils';
 import { normalizeNamespace } from './internal_utils';
 
-import type { ISavedObjectsEncryptionExtension, ISavedObjectTypeRegistry, SavedObjectTypeRegistry } from '../../..';
+import type { ISavedObjectsEncryptionExtension } from '../../..';
 import { savedObjectsEncryptionExtensionMock } from './repository.extensions.mock';
 
 const VERSION_PROPS = { _seq_no: 1, _primary_term: 1 };
@@ -52,7 +52,7 @@ describe('internalBulkResolve', () => {
   function setup(
     objects: SavedObjectsBulkResolveObject[],
     options: SavedObjectsBaseOptions = {},
-    encryptionExt?: ISavedObjectsEncryptionExtension,
+    encryptionExt?: ISavedObjectsEncryptionExtension
   ): InternalBulkResolveParams {
     registry = typeRegistryMock.create();
     client = elasticsearchClientMock.createElasticsearchClient();
@@ -348,7 +348,7 @@ describe('internalBulkResolve', () => {
     });
   }
 
-  describe.only('with encryption extension', () => {
+  describe('with encryption extension', () => {
     const namespace = 'foo';
 
     const attributes = {
@@ -360,19 +360,18 @@ describe('internalBulkResolve', () => {
     };
 
     beforeEach(() => {
-      mockGetSavedObjectFromSource.mockImplementation(
-        (_registry, type, id) => {
-          return {
-            id,
-            type,
-            namespaces: [namespace],
-            attributes,
-            references: [],
-          } as SavedObject
-        });
-    })
+      mockGetSavedObjectFromSource.mockImplementation((_registry, type, id) => {
+        return {
+          id,
+          type,
+          namespaces: [namespace],
+          attributes,
+          references: [],
+        } as SavedObject;
+      });
+    });
 
-    it.only('only attempts to decrypt and strip attributes for types that are encryptable', async () => {
+    it('only attempts to decrypt and strip attributes for types that are encryptable', async () => {
       const objects = [
         { type: OBJ_TYPE, id: '11' }, // non encryptable type
         { type: ENCRYPTED_TYPE, id: '12' }, // encryptable type
@@ -382,12 +381,12 @@ describe('internalBulkResolve', () => {
       mockBulkResults(
         // No alias matches
         { found: false },
-        { found: false },
+        { found: false }
       );
       mockMgetResults(
         // exact matches
         { found: true },
-        { found: true },
+        { found: true }
       );
 
       encryptionExtMock.isEncryptableType.mockReturnValueOnce(false);
@@ -401,9 +400,8 @@ describe('internalBulkResolve', () => {
 
       expect(encryptionExtMock.decryptOrStripResponseAttributes).toBeCalledTimes(1);
       expect(encryptionExtMock.decryptOrStripResponseAttributes).toBeCalledWith(
-        expect.objectContaining({ type: ENCRYPTED_TYPE, id: '12', attributes})
-      )
-        ;
+        expect.objectContaining({ type: ENCRYPTED_TYPE, id: '12', attributes })
+      );
     });
   });
 

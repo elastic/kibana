@@ -6,441 +6,68 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable @typescript-eslint/no-shadow */
-
 import {
   pointInTimeFinderMock,
-  // mockCollectMultiNamespaceReferences,
-  // mockGetBulkOperationError,
-  // mockInternalBulkResolve,
-  // mockUpdateObjectsSpaces,
   mockGetCurrentTime,
   mockPreflightCheckForCreate,
-  // mockDeleteLegacyUrlAliases,
+  mockUpdateObjectsSpaces,
   mockGetSearchDsl,
+  mockCollectMultiNamespaceReferences,
+  mockInternalBulkResolve,
 } from './repository.test.mock';
 
-// import type { Payload } from '@hapi/boom';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { schema } from '@kbn/config-schema';
-import {
-  SavedObjectsType,
-  SavedObject,
-  SavedObjectReference,
-  SavedObjectsBaseOptions,
-  SavedObjectsFindOptions,
-} from '../../../types';
-// import type { SavedObjectsUpdateObjectsSpacesResponse } from './update_objects_spaces';
-import {
-  // SavedObjectsDeleteByNamespaceOptions,
-  // SavedObjectsIncrementCounterField,
-  // SavedObjectsIncrementCounterOptions,
-  SavedObjectsRepository,
-} from './repository';
-// import { SavedObjectsErrorHelpers } from './errors';
-// import {
-//   PointInTimeFinder,
-//   SavedObjectsCreatePointInTimeFinderDependencies,
-//   SavedObjectsCreatePointInTimeFinderOptions,
-// } from './point_in_time_finder';
-// import { ALL_NAMESPACES_STRING } from './utils';
+import { SavedObject } from '../../types';
+
+import { SavedObjectsRepository } from './repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  // SavedObjectsRawDoc,
-  SavedObjectsRawDocSource,
-  SavedObjectsSerializer,
-  // SavedObjectUnsanitizedDoc,
-} from '../../serialization';
-import { encodeHitVersion } from '../../version';
-import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { DocumentMigrator } from '../../migrations/core/document_migrator';
+import { SavedObjectsSerializer } from '../../serialization';
 import { kibanaMigratorMock } from '../../migrations/kibana_migrator.mock';
-// import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
-// import * as esKuery from '@kbn/es-query';
-// import { errors as EsErrors } from '@elastic/elasticsearch';
+
+import { savedObjectsSpacesExtensionMock } from './repository.extensions.mock';
 import {
-  SavedObjectsBulkCreateObject,
-  SavedObjectsBulkGetObject,
-  // SavedObjectsBulkResolveObject,
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsBulkUpdateOptions,
-  SavedObjectsCreateOptions,
-  // SavedObjectsDeleteOptions,
-  // SavedObjectsOpenPointInTimeOptions,
-  // SavedObjectsResolveResponse,
-  SavedObjectsUpdateOptions,
-} from '../saved_objects_client';
-import { SavedObjectsMappingProperties, SavedObjectsTypeMappingDefinition } from '../../mappings';
-// import {
-//   SavedObjectsCollectMultiNamespaceReferencesObject,
-//   SavedObjectsCollectMultiNamespaceReferencesResponse,
-//   SavedObjectsExtensions,
-//   SavedObjectsUpdateObjectsSpacesObject,
-//   SavedObjectsUpdateObjectsSpacesOptions,
-// } from '../../..';
-// import { InternalBulkResolveError } from './internal_bulk_resolve';
-
-import { savedObjectsEncryptionExtensionMock } from './repository.extensions.mock';
-
-// const { nodeTypes } = esKuery;
+  DEFAULT_SPACE,
+  mockTimestamp,
+  mappings,
+  bulkGetSuccess,
+  createRegistry,
+  createDocumentMigrator,
+  getMockGetResponse,
+  createSpySerializer,
+  updateSuccess,
+  bulkCreateSuccess,
+  bulkUpdateSuccess,
+  createBadRequestError,
+  CUSTOM_INDEX_TYPE,
+  findSuccess,
+  deleteSuccess,
+  removeReferencesToSuccess,
+  MULTI_NAMESPACE_ISOLATED_TYPE,
+  checkConflictsSuccess,
+  MULTI_NAMESPACE_TYPE,
+} from './respository.test.common';
+import { SavedObjectsBulkUpdateObject, SavedObjectsResolveResponse } from '../saved_objects_client';
+import { SavedObjectsErrorHelpers } from './errors';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
 
-interface TypeIdTuple {
-  id: string;
-  type: string;
-}
+const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
 
-// interface ExpectedErrorResult {
-//   type: string;
-//   id: string;
-//   error: Record<string, any>;
-// }
-
-// type ErrorPayload = Error & Payload;
-
-// const createBadRequestError = (reason?: string) =>
-//   SavedObjectsErrorHelpers.createBadRequestError(reason).output.payload as ErrorPayload;
-// const createConflictError = (type: string, id: string, reason?: string) =>
-//   SavedObjectsErrorHelpers.createConflictError(type, id, reason).output.payload as ErrorPayload;
-// const createGenericNotFoundError = (type: string | null = null, id: string | null = null) =>
-//   SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload as ErrorPayload;
-// const createUnsupportedTypeError = (type: string) =>
-//   SavedObjectsErrorHelpers.createUnsupportedTypeError(type).output.payload as ErrorPayload;
-
-describe('SavedObjectsRepository Encryption Extension', () => {
+describe('SavedObjectsRepository Spaces Extension', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
-  let savedObjectsRepository: SavedObjectsRepository;
+  let repository: SavedObjectsRepository;
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
   let serializer: jest.Mocked<SavedObjectsSerializer>;
-  let encryptionExtMock: ReturnType<typeof savedObjectsEncryptionExtensionMock.create>;
+  let mockSpacesExt: ReturnType<typeof savedObjectsSpacesExtensionMock.create>;
 
-  const mockTimestamp = '2017-08-14T15:49:14.886Z';
-  const mockTimestampFields = { updated_at: mockTimestamp };
-  const mockVersionProps = { _seq_no: 1, _primary_term: 1 };
-  const mockVersion = encodeHitVersion(mockVersionProps);
+  const registry = createRegistry();
+  const documentMigrator = createDocumentMigrator(registry);
 
-  const KIBANA_VERSION = '2.0.0';
-  const CUSTOM_INDEX_TYPE = 'customIndex';
-  /** This type has namespaceType: 'agnostic'. */
-  const NAMESPACE_AGNOSTIC_TYPE = 'globalType';
-  /**
-   * This type has namespaceType: 'multiple'.
-   *
-   * That means that the object is serialized with a globally unique ID across namespaces. It also means that the object is shareable across
-   * namespaces.
-   **/
-  const MULTI_NAMESPACE_TYPE = 'multiNamespaceType';
-  /**
-   * This type has namespaceType: 'multiple-isolated'.
-   *
-   * That means that the object is serialized with a globally unique ID across namespaces. It also means that the object is NOT shareable
-   * across namespaces. This distinction only matters when using the `collectMultiNamespaceReferences` or `updateObjectsSpaces` APIs, or
-   * when using the `initialNamespaces` argument with the `create` and `bulkCreate` APIs. Those allow you to define or change what
-   * namespaces an object exists in.
-   *
-   * In a nutshell, this type is more restrictive than `MULTI_NAMESPACE_TYPE`, so we use `MULTI_NAMESPACE_ISOLATED_TYPE` for any test cases
-   * where `MULTI_NAMESPACE_TYPE` would also satisfy the test case.
-   **/
-  const MULTI_NAMESPACE_ISOLATED_TYPE = 'multiNamespaceIsolatedType';
-  /** This type has namespaceType: 'multiple', and it uses a custom index. */
-  const MULTI_NAMESPACE_CUSTOM_INDEX_TYPE = 'multiNamespaceTypeCustomIndex';
-  const HIDDEN_TYPE = 'hiddenType';
-  const ENCRYPTED_TYPE = 'encryptedType';
-  const MULTI_NAMESPACE_ENCRYPTED_TYPE = 'multiNamespaceEncryptedType';
-
-  const mappings: SavedObjectsTypeMappingDefinition = {
-    properties: {
-      config: {
-        properties: {
-          otherField: {
-            type: 'keyword',
-          },
-        },
-      },
-      'index-pattern': {
-        properties: {
-          someField: {
-            type: 'keyword',
-          },
-        },
-      },
-      dashboard: {
-        properties: {
-          otherField: {
-            type: 'keyword',
-          },
-        },
-      },
-      [CUSTOM_INDEX_TYPE]: {
-        properties: {
-          otherField: {
-            type: 'keyword',
-          },
-        },
-      },
-      [NAMESPACE_AGNOSTIC_TYPE]: {
-        properties: {
-          yetAnotherField: {
-            type: 'keyword',
-          },
-        },
-      },
-      [MULTI_NAMESPACE_TYPE]: {
-        properties: {
-          evenYetAnotherField: {
-            type: 'keyword',
-          },
-        },
-      },
-      [MULTI_NAMESPACE_ISOLATED_TYPE]: {
-        properties: {
-          evenYetAnotherField: {
-            type: 'keyword',
-          },
-        },
-      },
-      [MULTI_NAMESPACE_CUSTOM_INDEX_TYPE]: {
-        properties: {
-          evenYetAnotherField: {
-            type: 'keyword',
-          },
-        },
-      },
-      [HIDDEN_TYPE]: {
-        properties: {
-          someField: {
-            type: 'keyword',
-          },
-        },
-      },
-      [ENCRYPTED_TYPE]: {
-        properties: {
-          encryptedField: {
-            type: 'keyword',
-          },
-        },
-      },
-      [MULTI_NAMESPACE_ENCRYPTED_TYPE]: {
-        properties: {
-          encryptedField: {
-            type: 'keyword',
-          },
-        },
-      },
-    },
-  };
-
-  const createType = (type: string, parts: Partial<SavedObjectsType> = {}): SavedObjectsType => ({
-    name: type,
-    hidden: false,
-    namespaceType: 'single',
-    mappings: {
-      properties: mappings.properties[type].properties! as SavedObjectsMappingProperties,
-    },
-    migrations: { '1.1.1': (doc) => doc },
-    ...parts,
-  });
-
-  const registry = new SavedObjectTypeRegistry();
-  registry.registerType(createType('config'));
-  registry.registerType(createType('index-pattern'));
-  registry.registerType(
-    createType('dashboard', {
-      schemas: {
-        '8.0.0-testing': schema.object({
-          title: schema.maybe(schema.string()),
-          otherField: schema.maybe(schema.string()),
-        }),
-      },
-    })
-  );
-  registry.registerType(createType(CUSTOM_INDEX_TYPE, { indexPattern: 'custom' }));
-  registry.registerType(createType(NAMESPACE_AGNOSTIC_TYPE, { namespaceType: 'agnostic' }));
-  registry.registerType(createType(MULTI_NAMESPACE_TYPE, { namespaceType: 'multiple' }));
-  registry.registerType(
-    createType(MULTI_NAMESPACE_ISOLATED_TYPE, { namespaceType: 'multiple-isolated' })
-  );
-  registry.registerType(
-    createType(MULTI_NAMESPACE_CUSTOM_INDEX_TYPE, {
-      namespaceType: 'multiple',
-      indexPattern: 'custom',
-    })
-  );
-  registry.registerType(
-    createType(HIDDEN_TYPE, {
-      hidden: true,
-      namespaceType: 'agnostic',
-    })
-  );
-  registry.registerType(
-    createType(ENCRYPTED_TYPE, {
-      namespaceType: 'single',
-    })
-  );
-  registry.registerType(
-    createType(MULTI_NAMESPACE_ENCRYPTED_TYPE, {
-      namespaceType: 'multiple',
-    })
-  );
-
-  const documentMigrator = new DocumentMigrator({
-    typeRegistry: registry,
-    kibanaVersion: KIBANA_VERSION,
-    log: loggerMock.create(),
-  });
-
-  const getMockGetResponse = (
-    {
-      type,
-      id,
-      references,
-      namespace: objectNamespace,
-      originId,
-    }: {
-      type: string;
-      id: string;
-      namespace?: string;
-      originId?: string;
-      references?: SavedObjectReference[];
-    },
-    namespace?: string | string[]
-  ) => {
-    let namespaces;
-    if (objectNamespace) {
-      namespaces = [objectNamespace];
-    } else if (namespace) {
-      namespaces = Array.isArray(namespace) ? namespace : [namespace];
-    } else {
-      namespaces = ['default'];
-    }
-    const namespaceId = namespaces[0] === 'default' ? undefined : namespaces[0];
-
-    return {
-      // NOTE: Elasticsearch returns more fields (_index, _type) but the SavedObjectsRepository method ignores these
-      found: true,
-      _id: `${
-        registry.isSingleNamespace(type) && namespaceId ? `${namespaceId}:` : ''
-      }${type}:${id}`,
-      ...mockVersionProps,
-      _source: {
-        ...(registry.isSingleNamespace(type) && { namespace: namespaceId }),
-        ...(registry.isMultiNamespace(type) && { namespaces }),
-        ...(originId && { originId }),
-        type,
-        [type]:
-          type !== ENCRYPTED_TYPE && type !== MULTI_NAMESPACE_ENCRYPTED_TYPE
-            ? { title: 'Testing' }
-            : {
-                title: 'Testing',
-                attrOne: 'one',
-                attrSecret: '*secret*',
-                attrNotSoSecret: '*not-so-secret*',
-                attrThree: 'three',
-              },
-        references,
-        specialProperty: 'specialValue',
-        ...mockTimestampFields,
-      } as SavedObjectsRawDocSource,
-    } as estypes.GetResponse<SavedObjectsRawDocSource>;
-  };
-
-  const getMockMgetResponse = (
-    objects: Array<TypeIdTuple & { found?: boolean; initialNamespaces?: string[] }>,
-    namespace?: string
-  ) =>
-    ({
-      docs: objects.map((obj) =>
-        obj.found === false ? obj : getMockGetResponse(obj, obj.initialNamespaces ?? namespace)
-      ),
-    } as estypes.MgetResponse<SavedObjectsRawDocSource>);
-
-  expect.extend({
-    toBeDocumentWithoutError(received, type, id) {
-      if (received.type === type && received.id === id && !received.error) {
-        return { message: () => `expected type and id not to match without error`, pass: true };
-      } else {
-        return { message: () => `expected type and id to match without error`, pass: false };
-      }
-    },
-  });
-  // const expectSuccess = ({ type, id }: { type: string; id: string }) => {
-  //   // @ts-expect-error TS is not aware of the extension
-  //   return expect.toBeDocumentWithoutError(type, id);
-  // };
-
-  // const expectError = ({ type, id }: { type: string; id: string }) => ({
-  //   type,
-  //   id,
-  //   error: expect.any(Object),
-  // });
-
-  // const expectErrorResult = (
-  //   { type, id }: TypeIdTuple,
-  //   error: Record<string, any>,
-  //   overrides: Record<string, unknown> = {}
-  // ): ExpectedErrorResult => ({
-  //   type,
-  //   id,
-  //   error: { ...error, ...overrides },
-  // });
-  // const expectErrorNotFound = (obj: TypeIdTuple, overrides?: Record<string, unknown>) =>
-  //   expectErrorResult(obj, createGenericNotFoundError(obj.type, obj.id), overrides);
-  // const expectErrorConflict = (obj: TypeIdTuple, overrides?: Record<string, unknown>) =>
-  //   expectErrorResult(obj, createConflictError(obj.type, obj.id), overrides);
-  // const expectErrorInvalidType = (obj: TypeIdTuple, overrides?: Record<string, unknown>) =>
-  //   expectErrorResult(obj, createUnsupportedTypeError(obj.type), overrides);
-
-  // const expectMigrationArgs = (args: unknown, contains = true, n = 1) => {
-  //   const obj = contains ? expect.objectContaining(args) : expect.not.objectContaining(args);
-  //   expect(migrator.migrateDocument).toHaveBeenNthCalledWith(n, obj);
-  // };
-
-  const createSpySerializer = () => {
-    const spyInstance = {
-      isRawSavedObject: jest.fn(),
-      rawToSavedObject: jest.fn(),
-      savedObjectToRaw: jest.fn(),
-      generateRawId: jest.fn(),
-      generateRawLegacyUrlAliasId: jest.fn(),
-      trimIdPrefix: jest.fn(),
-    };
-    const realInstance = new SavedObjectsSerializer(registry);
-    Object.keys(spyInstance).forEach((key) => {
-      // @ts-expect-error no proper way to do this with typing support
-      spyInstance[key].mockImplementation((...args) => realInstance[key](...args));
-    });
-
-    return spyInstance as unknown as jest.Mocked<SavedObjectsSerializer>;
-  };
-
-  const namespace = 'foo-namespace';
-  const encryptedSO = {
-    id: 'encrypted-id',
-    type: ENCRYPTED_TYPE,
-    namespaces: [namespace],
-    attributes: {
-      attrNotSoSecret: '*not-so-secret*',
-      attrOne: 'one',
-      attrSecret: '*secret*',
-      attrThree: 'three',
-      title: 'Testing',
-    },
-    references: [],
-  };
-  const decryptedStrippedAttributes = {
-    attributes: { attrOne: 'one', attrNotSoSecret: 'not-so-secret', attrThree: 'three' },
-  };
-  const nonEncryptedSO = {
-    id: 'non-encrypted-id',
-    type: 'index-pattern',
-    namespaces: [namespace],
-    attributes: { title: 'Logstash' },
-    references: [],
-  };
+  // const currentSpace = 'foo-namespace';
+  const defaultOptions = { ignore: [404], maxRetries: 0, meta: true }; // These are just the hard-coded options passed in via the repo
 
   const instantiateRepository = () => {
     const allTypes = registry.getAllTypes().map((type) => type.name);
@@ -456,741 +83,681 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       serializer,
       allowedTypes,
       logger,
-      extensions: { encryptionExtension: encryptionExtMock },
+      extensions: { spacesExtension: mockSpacesExt },
     });
   };
 
-  beforeEach(() => {
-    pointInTimeFinderMock.mockClear();
-    client = elasticsearchClientMock.createElasticsearchClient();
-    migrator = kibanaMigratorMock.create();
-    documentMigrator.prepareMigrations();
-    migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
-    migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
-    logger = loggerMock.create();
+  const availableSpaces = [
+    { id: 'default', name: '', disabledFeatures: [] },
+    { id: 'ns-1', name: '', disabledFeatures: [] },
+    { id: 'ns-2', name: '', disabledFeatures: [] },
+    { id: 'ns-3', name: '', disabledFeatures: [] },
+    { id: 'ns-4', name: '', disabledFeatures: [] },
+  ];
 
-    // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
-    serializer = createSpySerializer();
+  [
+    { id: DEFAULT_SPACE, expectedNamespace: undefined },
+    { id: 'ns-1', expectedNamespace: 'ns-1' },
+  ].forEach((currentSpace) => {
+    describe(`${currentSpace.id} space`, () => {
+      beforeEach(() => {
+        pointInTimeFinderMock.mockClear();
+        client = elasticsearchClientMock.createElasticsearchClient();
+        migrator = kibanaMigratorMock.create();
+        documentMigrator.prepareMigrations();
+        migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
+        migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
+        logger = loggerMock.create();
 
-    // create a mock saved objects encryption extension
-    encryptionExtMock = savedObjectsEncryptionExtensionMock.create();
+        // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
+        serializer = createSpySerializer(registry);
 
-    mockGetCurrentTime.mockReturnValue(mockTimestamp);
-    mockGetSearchDsl.mockClear();
-  });
+        // create a mock saved objects encryption extension
+        mockSpacesExt = savedObjectsSpacesExtensionMock.create();
 
-  // const mockMigrationVersion = { foo: '2.3.4' };
-  // const mockMigrateDocument = (doc: SavedObjectUnsanitizedDoc<any>) => ({
-  //   ...doc,
-  //   attributes: {
-  //     ...doc.attributes,
-  //     ...(doc.attributes?.title && { title: `${doc.attributes.title}!!` }),
-  //   },
-  //   migrationVersion: mockMigrationVersion,
-  //   references: [{ name: 'search_0', type: 'search', id: '123' }],
-  // });
+        mockGetCurrentTime.mockReturnValue(mockTimestamp);
+        mockGetSearchDsl.mockClear();
 
-  describe('#get', () => {
-    beforeEach(() => {
-      savedObjectsRepository = instantiateRepository(); // #ToDo: pass in parameters to determine which extensions should be active in this suite
-    });
+        repository = instantiateRepository();
 
-    it('does not attempt to decrypt or strip attributes if type is not encryptable', async () => {
-      const namespace = 'foo-namespace';
-      const options = { namespace };
+        mockSpacesExt.getCurrentNamespace.mockImplementation((namespace: string | undefined) => {
+          if (namespace) {
+            throw new Error(createBadRequestError(ERROR_NAMESPACE_SPECIFIED).message);
+          }
+          return currentSpace.expectedNamespace;
+        });
 
-      const response = getMockGetResponse({
-        type: nonEncryptedSO.type,
-        id: nonEncryptedSO.id,
-        namespace,
-      });
+        mockSpacesExt.getSearchableNamespaces.mockImplementation(
+          (namespaces: string[] | undefined): Promise<string[]> => {
+            if (!namespaces) {
+              return Promise.resolve([] as string[]);
+            } else if (!namespaces.length) {
+              return Promise.resolve(namespaces);
+            }
 
-      client.get.mockResponseOnce(response);
-      encryptionExtMock.isEncryptableType.mockReturnValue(false);
-      const result = await savedObjectsRepository.get(
-        nonEncryptedSO.type,
-        nonEncryptedSO.id,
-        options
-      );
-      expect(client.get).toHaveBeenCalledTimes(1);
-      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledTimes(1);
-      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledWith(nonEncryptedSO.type);
-      expect(encryptionExtMock.decryptOrStripResponseAttributes).not.toBeCalled();
-      expect(result).toEqual(
-        expect.objectContaining({
-          type: nonEncryptedSO.type,
-          id: nonEncryptedSO.id,
-          namespaces: [namespace],
-        })
-      );
-    });
-
-    it('decrypts and strips attributes if type is encryptable', async () => {
-      const namespace = 'foo-namespace';
-      const options = { namespace };
-
-      const response = getMockGetResponse({
-        type: encryptedSO.type,
-        id: encryptedSO.id,
-        namespace: options.namespace,
-      });
-      client.get.mockResponseOnce(response);
-      encryptionExtMock.isEncryptableType.mockReturnValue(true);
-      encryptionExtMock.decryptOrStripResponseAttributes.mockResolvedValue({
-        ...encryptedSO,
-        ...decryptedStrippedAttributes,
-      });
-
-      const result = await savedObjectsRepository.get(encryptedSO.type, encryptedSO.id, options);
-      expect(client.get).toHaveBeenCalledTimes(1);
-      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledTimes(1);
-      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
-      expect(encryptionExtMock.decryptOrStripResponseAttributes).toHaveBeenCalledTimes(1);
-      expect(encryptionExtMock.decryptOrStripResponseAttributes).toHaveBeenCalledWith(
-        expect.objectContaining({
-          ...encryptedSO,
-        }),
-        undefined
-      );
-      expect(result).toEqual(
-        expect.objectContaining({
-          ...decryptedStrippedAttributes,
-        })
-      );
-    });
-  });
-
-  describe('#create', () => {
-    beforeEach(() => {
-      savedObjectsRepository = instantiateRepository(); // #ToDo: pass in parameters to determine which extensions should be active in this suite
-
-      mockPreflightCheckForCreate.mockReset();
-      mockPreflightCheckForCreate.mockImplementation(({ objects }) => {
-        return Promise.resolve(objects.map(({ type, id }) => ({ type, id }))); // respond with no errors by default
-      });
-      client.create.mockResponseImplementation((params) => {
-        return {
-          body: {
-            _id: params.id,
-            ...mockVersionProps,
-          } as estypes.CreateResponse,
-        };
-      });
-    });
-
-    const createSuccess = async <T>(
-      type: string,
-      attributes: T,
-      options?: SavedObjectsCreateOptions
-    ) => {
-      return await savedObjectsRepository.create(type, attributes, options);
-    };
-
-    it('does not attempt to encrypt or decrypt if type is not encryptable', async () => {
-      encryptionExtMock.isEncryptableType.mockReturnValue(false);
-      const result = await createSuccess(nonEncryptedSO.type, nonEncryptedSO.attributes, {
-        namespace,
-      });
-      expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
-      expect(client.create).toHaveBeenCalled();
-      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledTimes(3); // getValidId, optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
-      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledWith(nonEncryptedSO.type);
-      expect(encryptionExtMock.encryptAttributes).not.toHaveBeenCalled();
-      expect(encryptionExtMock.decryptOrStripResponseAttributes).not.toBeCalled();
-      expect(result).toEqual(
-        expect.objectContaining({
-          type: nonEncryptedSO.type,
-          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
-          namespaces: [namespace],
-        })
-      );
-    });
-
-    it('encrypts attributes and strips them from response if type is encryptable', async () => {
-      encryptionExtMock.isEncryptableType.mockReturnValue(true);
-      encryptionExtMock.decryptOrStripResponseAttributes.mockResolvedValue({
-        ...encryptedSO,
-        ...decryptedStrippedAttributes,
-      });
-
-      const result = await createSuccess(encryptedSO.type, encryptedSO.attributes, {
-        namespace,
-      });
-      expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
-      expect(client.create).toHaveBeenCalled();
-      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledTimes(3); // getValidId, optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
-      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
-      expect(encryptionExtMock.encryptAttributes).toHaveBeenCalledTimes(1);
-      expect(encryptionExtMock.encryptAttributes).toHaveBeenCalledWith(
-        {
-          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
-          namespace,
-          type: ENCRYPTED_TYPE,
-        },
-        encryptedSO.attributes
-      );
-      expect(encryptionExtMock.decryptOrStripResponseAttributes).toHaveBeenCalledTimes(1);
-      expect(encryptionExtMock.decryptOrStripResponseAttributes).toHaveBeenCalledWith(
-        expect.objectContaining({
-          ...encryptedSO,
-          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
-          attributes: undefined,
-        }),
-        encryptedSO.attributes // original attributes
-      );
-      expect(result).toEqual(
-        expect.objectContaining({
-          ...decryptedStrippedAttributes,
-        })
-      );
-    });
-
-    it(`fails if non-UUID ID is specified for encrypted type`, async () => {
-      encryptionExtMock.isEncryptableType.mockReturnValue(true);
-      encryptionExtMock.decryptOrStripResponseAttributes.mockResolvedValue({
-        ...encryptedSO,
-        ...decryptedStrippedAttributes,
-      });
-
-      await expect(
-        createSuccess(encryptedSO.type, encryptedSO.attributes, {
-          id: 'this-should-throw-an-error',
-        })
-      ).rejects.toThrow(
-        'Predefined IDs are not allowed for saved objects with encrypted attributes unless the ID is a UUID.: Bad Request'
-      );
-    });
-
-    it(`allows a specified ID when overwriting an existing object`, async () => {
-      encryptionExtMock.isEncryptableType.mockReturnValue(true);
-      encryptionExtMock.decryptOrStripResponseAttributes.mockResolvedValue({
-        ...encryptedSO,
-        ...decryptedStrippedAttributes,
-      });
-
-      await expect(
-        createSuccess(encryptedSO.type, encryptedSO.attributes, {
-          id: encryptedSO.id,
-          overwrite: true,
-          version: mockVersion,
-        })
-      ).resolves.not.toThrowError();
-    });
-
-    describe('namespace', () => {
-      const doTest = async (namespace: string, expectNamespaceInDescriptor: boolean) => {
-        const options = { overwrite: true, namespace };
-        encryptionExtMock.isEncryptableType.mockReturnValue(true);
-
-        await createSuccess(
-          expectNamespaceInDescriptor ? ENCRYPTED_TYPE : MULTI_NAMESPACE_ENCRYPTED_TYPE,
-          encryptedSO.attributes,
-          options
+            if (namespaces?.includes('*')) {
+              return Promise.resolve(availableSpaces.map((space) => space.id));
+            } else {
+              return Promise.resolve(
+                namespaces?.filter((namespace) =>
+                  availableSpaces.some((space) => space.id === namespace)
+                )
+              );
+            }
+          }
         );
-        expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
-        expect(client.index).toHaveBeenCalled(); // if overwrite is true, index will be called instead of create
-        expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledTimes(3); // getValidId, optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
-        expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledWith(
-          expectNamespaceInDescriptor ? ENCRYPTED_TYPE : MULTI_NAMESPACE_ENCRYPTED_TYPE
-        );
-        expect(encryptionExtMock.encryptAttributes).toHaveBeenCalledTimes(1);
-        expect(encryptionExtMock.encryptAttributes).toHaveBeenCalledWith(
-          {
-            id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
-            namespace: expectNamespaceInDescriptor ? namespace : undefined,
-            type: expectNamespaceInDescriptor ? ENCRYPTED_TYPE : MULTI_NAMESPACE_ENCRYPTED_TYPE,
-          },
-          encryptedSO.attributes
-        );
-      };
-
-      it('uses `namespace` to encrypt attributes if it is specified when type is single-namespace', async () => {
-        await doTest(namespace, true);
       });
 
-      it('does not use `namespace` to encrypt attributes if it is specified when type is not single-namespace', async () => {
-        await doTest(namespace, false);
-      });
-    });
-  });
+      describe('#get', () => {
+        test(`throws error if options.namespace is specified`, async () => {
+          // Just makes sure the error propogstes from the extension through the repo call
+          await expect(repository.get('foo', '', { namespace: 'bar' })).rejects.toThrowError(
+            createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
+          );
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith('bar');
+        });
 
-  describe('#update', () => {
-    const attributes = { title: 'Testing' };
-    const originId = 'some-origin-id';
+        test(`supplements id with the current namespace`, async () => {
+          const type = CUSTOM_INDEX_TYPE;
+          const id = 'some-id';
 
-    const mockUpdateResponse = (
-      type: string,
-      id: string,
-      options?: SavedObjectsUpdateOptions,
-      includeOriginId?: boolean
-    ) => {
-      client.update.mockResponseOnce(
-        {
-          _id: `${type}:${id}`,
-          ...mockVersionProps,
-          result: 'updated',
-          // don't need the rest of the source for test purposes, just the namespace and namespaces attributes
-          get: {
-            _source: {
-              namespaces: [options?.namespace ?? 'default'],
-              namespace: options?.namespace,
+          const response = getMockGetResponse(registry, {
+            type,
+            id,
+          });
 
-              // "includeOriginId" is not an option for the operation; however, if the existing saved object contains an originId attribute, the
-              // operation will return it in the result. This flag is just used for test purposes to modify the mock cluster call response.
-              ...(includeOriginId && { originId }),
-            },
-          },
-        } as estypes.UpdateResponse,
-        { statusCode: 200 }
-      );
-    };
-
-    const updateSuccess = async <T>(
-      type: string,
-      id: string,
-      attributes: T,
-      options?: SavedObjectsUpdateOptions,
-      internalOptions: {
-        includeOriginId?: boolean;
-        mockGetResponseValue?: estypes.GetResponse;
-      } = {}
-    ) => {
-      const { mockGetResponseValue, includeOriginId } = internalOptions;
-      if (registry.isMultiNamespace(type)) {
-        const mockGetResponse =
-          mockGetResponseValue ?? getMockGetResponse({ type, id }, options?.namespace);
-        client.get.mockResponseOnce(mockGetResponse, { statusCode: 200 });
-      }
-      mockUpdateResponse(type, id, options, includeOriginId);
-      const result = await savedObjectsRepository.update(type, id, attributes, options);
-      expect(client.get).toHaveBeenCalledTimes(registry.isMultiNamespace(type) ? 1 : 0);
-      return result;
-    };
-
-    beforeEach(() => {
-      savedObjectsRepository = instantiateRepository(); // #ToDo: pass in parameters to determine which extensions should be active in this suite
-
-      mockPreflightCheckForCreate.mockReset();
-      mockPreflightCheckForCreate.mockImplementation(({ objects }) => {
-        return Promise.resolve(objects.map(({ type, id }) => ({ type, id }))); // respond with no errors by default
-      });
-    });
-
-    it('does not attempt to encrypt or decrypt if type is not encryptable', async () => {
-      encryptionExtMock.isEncryptableType.mockReturnValue(false);
-      const result = await updateSuccess(nonEncryptedSO.type, nonEncryptedSO.id, attributes, {
-        namespace,
-      });
-      expect(client.update).toHaveBeenCalledTimes(1);
-      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledTimes(2); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
-      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledWith(nonEncryptedSO.type);
-      expect(encryptionExtMock.encryptAttributes).not.toHaveBeenCalled();
-      expect(encryptionExtMock.decryptOrStripResponseAttributes).not.toBeCalled();
-      expect(result).toEqual(
-        expect.objectContaining({
-          type: nonEncryptedSO.type,
-          id: nonEncryptedSO.id,
-          namespaces: [namespace],
-        })
-      );
-    });
-
-    it('encrypts attributes and strips them from response if type is encryptable', async () => {
-      encryptionExtMock.isEncryptableType.mockReturnValue(true);
-      encryptionExtMock.decryptOrStripResponseAttributes.mockResolvedValue({
-        ...encryptedSO,
-        ...decryptedStrippedAttributes,
-      });
-      const result = await updateSuccess(encryptedSO.type, encryptedSO.id, encryptedSO.attributes, {
-        namespace,
-        references: encryptedSO.references,
-      });
-      expect(client.update).toHaveBeenCalledTimes(1);
-      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledTimes(2); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
-      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
-      expect(encryptionExtMock.encryptAttributes).toHaveBeenCalledTimes(1);
-      expect(encryptionExtMock.encryptAttributes).toHaveBeenCalledWith(
-        {
-          id: encryptedSO.id,
-          namespace,
-          type: ENCRYPTED_TYPE,
-        },
-        encryptedSO.attributes
-      );
-      expect(encryptionExtMock.decryptOrStripResponseAttributes).toHaveBeenCalledTimes(1);
-      expect(encryptionExtMock.decryptOrStripResponseAttributes).toHaveBeenCalledWith(
-        expect.objectContaining({
-          ...encryptedSO,
-        }),
-        encryptedSO.attributes // original attributes
-      );
-      expect(result).toEqual(
-        expect.objectContaining({
-          ...decryptedStrippedAttributes,
-        })
-      );
-    });
-  });
-
-  describe('#bulkGet', () => {
-    beforeEach(() => {
-      savedObjectsRepository = instantiateRepository(); // #ToDo: pass in parameters to determine which extensions should be active in this suite
-    });
-
-    const bulkGet = async (
-      objects: SavedObjectsBulkGetObject[],
-      options?: SavedObjectsBaseOptions
-    ) =>
-      savedObjectsRepository.bulkGet(
-        objects.map(({ type, id, namespaces }) => ({ type, id, namespaces })), // bulkGet only uses type, id, and optionally namespaces
-        options
-      );
-    const bulkGetSuccess = async (objects: SavedObject[], options?: SavedObjectsBaseOptions) => {
-      const response = getMockMgetResponse(objects, options?.namespace);
-      client.mget.mockResponseOnce(response);
-      const result = await bulkGet(objects, options);
-      expect(client.mget).toHaveBeenCalledTimes(1);
-      return { response, result };
-    };
-
-    const _expectClientCallArgs = (
-      objects: TypeIdTuple[],
-      {
-        _index = expect.any(String),
-        getId = () => expect.any(String),
-      }: { _index?: string; getId?: (type: string, id: string) => string }
-    ) => {
-      expect(client.mget).toHaveBeenCalledWith(
-        expect.objectContaining({
-          body: {
-            docs: objects.map(({ type, id }) =>
-              expect.objectContaining({
-                _index,
-                _id: getId(type, id),
-              })
-            ),
-          },
-        }),
-        expect.anything()
-      );
-    };
-
-    it(`only attempts to decrypt and strip attributes for types that are encryptable`, async () => {
-      encryptionExtMock.isEncryptableType.mockReturnValueOnce(false);
-      encryptionExtMock.isEncryptableType.mockReturnValueOnce(true);
-      const getId = (type: string, id: string) => `${namespace}:${type}:${id}`; // test that the raw document ID equals this (e.g., has a namespace prefix)
-      await bulkGetSuccess([nonEncryptedSO, encryptedSO], { namespace });
-      _expectClientCallArgs([nonEncryptedSO, encryptedSO], { getId });
-      expect(encryptionExtMock.isEncryptableType).toBeCalledTimes(2);
-      expect(encryptionExtMock.isEncryptableType).toBeCalledWith(nonEncryptedSO.type);
-      expect(encryptionExtMock.isEncryptableType).toBeCalledWith(encryptedSO.type);
-      expect(encryptionExtMock.decryptOrStripResponseAttributes).toBeCalledTimes(1);
-      expect(encryptionExtMock.decryptOrStripResponseAttributes).toBeCalledWith(
-        expect.objectContaining({ ...encryptedSO }),
-        undefined
-      );
-    });
-  });
-
-  describe('#bulkCreate', () => {
-    beforeEach(() => {
-      savedObjectsRepository = instantiateRepository(); // #ToDo: pass in parameters to determine which extensions should be active in this suite
-    });
-
-    const getMockBulkCreateResponse = (
-      objects: SavedObjectsBulkCreateObject[],
-      namespace?: string
-    ) => {
-      return {
-        errors: false,
-        took: 1,
-        items: objects.map(({ type, id, originId, attributes, references, migrationVersion }) => ({
-          create: {
-            // status: 1,
-            // _index: '.kibana',
-            _id: `${namespace ? `${namespace}:` : ''}${type}:${id}`,
-            _source: {
-              [type]: attributes,
-              type,
-              namespace,
-              ...(originId && { originId }),
-              references,
-              ...mockTimestampFields,
-              migrationVersion: migrationVersion || { [type]: '1.1.1' },
-            },
-            ...mockVersionProps,
-          },
-        })),
-      } as unknown as estypes.BulkResponse;
-    };
-
-    const bulkCreateSuccess = async (
-      objects: SavedObjectsBulkCreateObject[],
-      options?: SavedObjectsCreateOptions
-    ) => {
-      const response = getMockBulkCreateResponse(objects, options?.namespace);
-      client.bulk.mockResponse(response);
-      const result = await savedObjectsRepository.bulkCreate(objects, options);
-      return { response, result };
-    };
-
-    it(`only attempts to encrypt and decrypt attributes for types that are encryptable`, async () => {
-      encryptionExtMock.isEncryptableType.mockReturnValueOnce(false); // getValidId
-      encryptionExtMock.isEncryptableType.mockReturnValueOnce(true);
-      encryptionExtMock.isEncryptableType.mockReturnValueOnce(false); // optionallyEncryptAttributes
-      encryptionExtMock.isEncryptableType.mockReturnValueOnce(true);
-      encryptionExtMock.isEncryptableType.mockReturnValueOnce(false); // optionallyDecryptAndRedactSingleResult
-      encryptionExtMock.isEncryptableType.mockReturnValueOnce(true);
-      await bulkCreateSuccess([
-        nonEncryptedSO,
-        { ...encryptedSO, id: undefined }, // Predefined IDs are not allowed for saved objects with encrypted attributes unless the ID is a UUID
-      ]);
-      expect(client.bulk).toHaveBeenCalledTimes(1);
-
-      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledTimes(6); // x2 getValidId, optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
-      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledWith(nonEncryptedSO.type);
-      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
-      expect(encryptionExtMock.encryptAttributes).toHaveBeenCalledTimes(1);
-      expect(encryptionExtMock.encryptAttributes).toHaveBeenCalledWith(
-        expect.objectContaining({ type: encryptedSO.type }),
-        encryptedSO.attributes
-      );
-      expect(encryptionExtMock.decryptOrStripResponseAttributes).toHaveBeenCalledTimes(1);
-      expect(encryptionExtMock.decryptOrStripResponseAttributes).toHaveBeenCalledWith(
-        expect.objectContaining({ type: encryptedSO.type }),
-        encryptedSO.attributes
-      );
-    });
-
-    it(`fails if non-UUID ID is specified for encrypted type`, async () => {
-      encryptionExtMock.isEncryptableType.mockReturnValue(true);
-      const { result } = await bulkCreateSuccess([
-        encryptedSO, // Predefined IDs are not allowed for saved objects with encrypted attributes unless the ID is a UUID
-      ]);
-      expect(client.bulk).not.toHaveBeenCalled();
-      expect(result.saved_objects).not.toBeUndefined();
-      expect(result.saved_objects.length).toBe(1);
-      expect(result.saved_objects[0].error).not.toBeUndefined();
-      expect(result.saved_objects[0].error).toMatchObject({
-        statusCode: 400,
-        error: 'Bad Request',
-        message:
-          'Predefined IDs are not allowed for saved objects with encrypted attributes unless the ID is a UUID.: Bad Request',
-      });
-    });
-
-    it(`does not fail if ID is specified for not encrypted type`, async () => {
-      encryptionExtMock.isEncryptableType.mockReturnValue(false);
-      const { result } = await bulkCreateSuccess([nonEncryptedSO]);
-      expect(client.bulk).toHaveBeenCalledTimes(1);
-      expect(result.saved_objects).not.toBeUndefined();
-      expect(result.saved_objects.length).toBe(1);
-      expect(result.saved_objects[0].error).toBeUndefined();
-    });
-
-    it(`allows a specified ID when overwriting an existing object`, async () => {
-      encryptionExtMock.isEncryptableType.mockReturnValue(true);
-      encryptionExtMock.decryptOrStripResponseAttributes.mockResolvedValue({
-        ...encryptedSO,
-        version: mockVersion,
-        ...decryptedStrippedAttributes,
+          client.get.mockResponseOnce(response);
+          await repository.get(type, id);
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
+          expect(client.get).toHaveBeenCalledTimes(1);
+          expect(client.get).toHaveBeenCalledWith(
+            expect.objectContaining({
+              id: `${
+                currentSpace.expectedNamespace ? `${currentSpace.expectedNamespace}:` : ''
+              }${type}:${id}`,
+            }),
+            defaultOptions
+          );
+        });
       });
 
-      const { result } = await bulkCreateSuccess([{ ...encryptedSO, version: mockVersion }], {
-        overwrite: true,
-        // version: mockVersion, // this doesn't work in bulk...looks like it checks the object itself?
+      describe('#update', () => {
+        test(`throws error if options.namespace is specified`, async () => {
+          // Just makes sure the error propogstes from the extension through the repo call
+          await expect(
+            repository.update('foo', 'some-id', { attr: 'value' }, { namespace: 'bar' })
+          ).rejects.toThrowError(createBadRequestError(ERROR_NAMESPACE_SPECIFIED));
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledWith('bar');
+        });
+
+        test(`supplements internal parameters with the current namespace`, async () => {
+          const type = CUSTOM_INDEX_TYPE;
+          const id = 'some-id';
+
+          await updateSuccess(
+            client,
+            repository,
+            registry,
+            type,
+            id,
+            {},
+            { upsert: true },
+            { mockGetResponseValue: { found: false } as estypes.GetResponse }
+          );
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
+          expect(client.update).toHaveBeenCalledTimes(1);
+          expect(client.update).toHaveBeenCalledWith(
+            expect.objectContaining({
+              id: `${
+                currentSpace.expectedNamespace ? `${currentSpace.expectedNamespace}:` : ''
+              }${type}:${id}`,
+              body: expect.objectContaining({
+                upsert: expect.objectContaining(
+                  currentSpace.expectedNamespace
+                    ? {
+                        namespace: currentSpace.expectedNamespace,
+                      }
+                    : {}
+                ),
+              }),
+            }),
+            { maxRetries: 0 }
+          );
+        });
       });
-      expect(client.bulk).toHaveBeenCalledTimes(1);
-      expect(result.saved_objects).not.toBeUndefined();
-      expect(result.saved_objects.length).toBe(1);
-      expect(result.saved_objects[0].error).toBeUndefined();
-    });
-  });
 
-  describe('#bulkUpdate', () => {
-    beforeEach(() => {
-      savedObjectsRepository = instantiateRepository(); // #ToDo: pass in parameters to determine which extensions should be active in this suite
-    });
+      describe('#create', () => {
+        test(`throws error if options.namespace is specified`, async () => {
+          await expect(
+            repository.create('foo', { attr: 'value' }, { namespace: 'bar' })
+          ).rejects.toThrowError(createBadRequestError(ERROR_NAMESPACE_SPECIFIED));
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledWith('bar');
+          // expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
+        });
 
-    const originId = 'some-origin-id';
+        test(`supplements internal parameters with the current namespace`, async () => {
+          const type = CUSTOM_INDEX_TYPE;
+          const attributes = { attr: 'value' };
 
-    const getMockBulkUpdateResponse = (
-      objects: TypeIdTuple[],
-      options?: SavedObjectsBulkUpdateOptions,
-      includeOriginId?: boolean
-    ) =>
-    ({
-      items: objects.map(({ type, id }) => ({
-        update: {
-          _id: `${registry.isSingleNamespace(type) && options?.namespace ? `${options?.namespace}:` : ''
-            }${type}:${id}`,
-          ...mockVersionProps,
-          get: {
-            _source: {
-              // "includeOriginId" is not an option for the operation; however, if the existing saved object contains an originId attribute, the
-              // operation will return it in the result. This flag is just used for test purposes to modify the mock cluster call response.
-              ...(includeOriginId && { originId }),
-            },
-          },
-          result: 'updated',
-        },
-      })),
-    } as estypes.BulkResponse);
+          await repository.create(type, { attr: 'value' });
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
+          expect(client.create).toHaveBeenCalledTimes(1);
+          const regex = new RegExp(
+            `${
+              currentSpace.expectedNamespace ? `${currentSpace.expectedNamespace}:` : ''
+            }${type}:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}`
+          );
+          expect(client.create).toHaveBeenCalledWith(
+            expect.objectContaining({
+              id: expect.stringMatching(regex),
+              body: expect.objectContaining(
+                currentSpace.expectedNamespace
+                  ? {
+                      namespace: currentSpace.expectedNamespace,
+                      type: CUSTOM_INDEX_TYPE,
+                      customIndex: attributes,
+                    }
+                  : { type: CUSTOM_INDEX_TYPE, customIndex: attributes }
+              ),
+            }),
+            { maxRetries: 0, meta: true }
+          );
+        });
+      });
 
-    const bulkUpdateSuccess = async (
-      objects: SavedObjectsBulkUpdateObject[],
-      options?: SavedObjectsBulkUpdateOptions,
-      includeOriginId?: boolean
-    ) => {
-      const multiNamespaceObjects = objects.filter(({ type }) => registry.isMultiNamespace(type));
-      if (multiNamespaceObjects?.length) {
-        const response = getMockMgetResponse(multiNamespaceObjects, options?.namespace);
-        client.mget.mockResponseOnce(response);
-      }
-      const response = getMockBulkUpdateResponse(objects, options, includeOriginId);
-      client.bulk.mockResponseOnce(response);
-      const result = await savedObjectsRepository.bulkUpdate(objects, options);
-      expect(client.mget).toHaveBeenCalledTimes(multiNamespaceObjects?.length ? 1 : 0);
-      return result;
-    };
+      describe('#delete', () => {
+        test(`throws error if options.namespace is specified`, async () => {
+          await expect(
+            repository.delete('foo', 'some-id', { namespace: 'bar' })
+          ).rejects.toThrowError(createBadRequestError(ERROR_NAMESPACE_SPECIFIED));
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledWith('bar');
+        });
 
-    it(`only attempts to encrypt and decrypt attributes for types that are encryptable`, async () => {
-      encryptionExtMock.isEncryptableType.mockReturnValueOnce(false); // optionallyEncryptAttributes
-      encryptionExtMock.isEncryptableType.mockReturnValueOnce(true);
-      encryptionExtMock.isEncryptableType.mockReturnValueOnce(false); // optionallyDecryptAndRedactSingleResult
-      encryptionExtMock.isEncryptableType.mockReturnValueOnce(true);
+        test(`supplements id with the current namespace`, async () => {
+          const type = CUSTOM_INDEX_TYPE;
+          const id = 'some-id';
 
-      await bulkUpdateSuccess([nonEncryptedSO, encryptedSO]);
-      expect(client.bulk).toHaveBeenCalledTimes(1);
+          await deleteSuccess(client, repository, registry, type, id);
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
+          expect(client.delete).toHaveBeenCalledTimes(1);
+          const regex = new RegExp(
+            `${
+              currentSpace.expectedNamespace ? `${currentSpace.expectedNamespace}:` : ''
+            }${type}:${id}`
+          );
+          expect(client.delete).toHaveBeenCalledWith(
+            expect.objectContaining({
+              id: expect.stringMatching(regex),
+            }),
+            { ignore: [404], maxRetries: 0, meta: true }
+          );
+        });
+      });
 
-      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledTimes(4); // 2x optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
-      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledWith(nonEncryptedSO.type);
-      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
-      expect(encryptionExtMock.encryptAttributes).toHaveBeenCalledTimes(1);
-      expect(encryptionExtMock.encryptAttributes).toHaveBeenCalledWith(
-        expect.objectContaining({ type: encryptedSO.type }),
-        encryptedSO.attributes
-      );
-      expect(encryptionExtMock.decryptOrStripResponseAttributes).toHaveBeenCalledTimes(1);
-      expect(encryptionExtMock.decryptOrStripResponseAttributes).toHaveBeenCalledWith(
-        expect.objectContaining({ type: encryptedSO.type }),
-        encryptedSO.attributes
-      );
-    });
+      describe('#removeReferencesTo', () => {
+        test(`throws error if options.namespace is specified`, async () => {
+          await expect(
+            repository.removeReferencesTo('foo', 'some-id', { namespace: 'bar' })
+          ).rejects.toThrowError(createBadRequestError(ERROR_NAMESPACE_SPECIFIED));
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledWith('bar');
+        });
 
-    it('does not use options `namespace` or object `namespace` to encrypt attributes if neither are specified', async () => {
-      encryptionExtMock.isEncryptableType.mockReturnValue(true);
+        test(`supplements internal parameters with the current namespace`, async () => {
+          const type = CUSTOM_INDEX_TYPE;
+          const id = 'some-id';
 
-      await bulkUpdateSuccess([{ ...encryptedSO, namespace: undefined }], { namespace: undefined });
-      expect(client.bulk).toHaveBeenCalledTimes(1);
+          const query = { query: 1, aggregations: 2 };
+          mockGetSearchDsl.mockReturnValue(query);
 
-      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledTimes(2); // 2x optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
-      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
-      expect(encryptionExtMock.encryptAttributes).toHaveBeenCalledTimes(1);
-      expect(encryptionExtMock.encryptAttributes).toHaveBeenCalledWith(
-        { id: encryptedSO.id, type: encryptedSO.type, namespace: undefined },
-        encryptedSO.attributes
-      );
-    });
+          await removeReferencesToSuccess(client, repository, type, id);
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
+          expect(client.updateByQuery).toHaveBeenCalledTimes(1);
+          expect(mockGetSearchDsl).toHaveBeenCalledTimes(1);
+          expect(mockGetSearchDsl).toHaveBeenCalledWith(
+            mappings,
+            registry,
+            expect.objectContaining({
+              namespaces: currentSpace.expectedNamespace
+                ? [currentSpace.expectedNamespace]
+                : undefined,
+              hasReference: { type, id },
+            })
+          );
+        });
+      });
 
-    it('with a single-namespace type...uses options `namespace` to encrypt attributes if it is specified and object `namespace` is not', async () => {
-      encryptionExtMock.isEncryptableType.mockReturnValue(true);
-      const usedNamespace = 'options-namespace';
+      describe('#checkConflicts', () => {
+        test(`throws error if options.namespace is specified`, async () => {
+          await expect(
+            repository.checkConflicts(undefined, { namespace: 'bar' })
+          ).rejects.toThrowError(createBadRequestError(ERROR_NAMESPACE_SPECIFIED));
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledWith('bar');
+        });
 
-      await bulkUpdateSuccess([{ ...encryptedSO, namespace: undefined }], { namespace: usedNamespace });
-      expect(client.bulk).toHaveBeenCalledTimes(1);
+        test(`supplements internal parameters with the current namespace`, async () => {
+          const obj1 = { type: CUSTOM_INDEX_TYPE, id: 'one' };
+          const obj2 = { type: MULTI_NAMESPACE_ISOLATED_TYPE, id: 'two' };
 
-      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledTimes(2); // 2x optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
-      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
-      expect(encryptionExtMock.encryptAttributes).toHaveBeenCalledTimes(1);
-      expect(encryptionExtMock.encryptAttributes).toHaveBeenCalledWith(
-        { id: encryptedSO.id, type: encryptedSO.type, namespace: usedNamespace },
-        encryptedSO.attributes
-      );
-    });
+          await checkConflictsSuccess(client, repository, registry, [obj1, obj2]);
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
+          expect(client.mget).toHaveBeenCalledTimes(1);
+          expect(client.mget).toHaveBeenCalledWith(
+            expect.objectContaining({
+              body: expect.objectContaining({
+                docs: expect.arrayContaining([
+                  expect.objectContaining({
+                    _id: `${
+                      currentSpace.expectedNamespace ? `${currentSpace.expectedNamespace}:` : ''
+                    }${obj1.type}:${obj1.id}`,
+                  }),
+                  expect.objectContaining({
+                    _id: `${obj2.type}:${obj2.id}`,
+                  }),
+                ]),
+              }),
+            }),
+            { ignore: [404], maxRetries: 0, meta: true }
+          );
+        });
+      });
 
-    it('with a single-namespace type...uses object `namespace` to encrypt attributes if it is specified', async () => {
-      encryptionExtMock.isEncryptableType.mockReturnValue(true);
-      const usedNamespace = 'object-namespace';
+      describe('#updateObjectSpaces', () => {
+        afterEach(() => {
+          mockUpdateObjectsSpaces.mockReset();
+        });
 
-      await bulkUpdateSuccess([{ ...encryptedSO, namespace: usedNamespace }], { namespace: undefined });
-      expect(client.bulk).toHaveBeenCalledTimes(1);
+        test(`throws error if options.namespace is specified`, async () => {
+          await expect(
+            repository.updateObjectsSpaces([], [], [], { namespace: 'bar' })
+          ).rejects.toThrowError(createBadRequestError(ERROR_NAMESPACE_SPECIFIED));
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledWith('bar');
+        });
 
-      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledTimes(2); // 2x optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
-      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
-      expect(encryptionExtMock.encryptAttributes).toHaveBeenCalledTimes(1);
-      expect(encryptionExtMock.encryptAttributes).toHaveBeenCalledWith(
-        { id: encryptedSO.id, type: encryptedSO.type, namespace: usedNamespace },
-        encryptedSO.attributes
-      );
-    });
-  });
+        test(`supplements internal parameters with the current namespace`, async () => {
+          const obj1 = { type: CUSTOM_INDEX_TYPE, id: 'one' };
+          const obj2 = { type: MULTI_NAMESPACE_ISOLATED_TYPE, id: 'two' };
+          const spacesToAdd = ['space-x'];
+          const spacesToRemove = ['space-y'];
 
-  describe('#find', () => {
-    beforeEach(() => {
-      savedObjectsRepository = instantiateRepository(); // #ToDo: pass in parameters to determine which extensions should be active in this suite
-    });
-
-    const generateSearchResults = (namespace?: string) => {
-      return {
-        took: 1,
-        timed_out: false,
-        _shards: {} as any,
-        hits: {
-          total: 2,
-          hits: [
-            {
-              _index: '.kibana',
-              _id: `${namespace ? `${namespace}:` : ''}${encryptedSO.type}:${encryptedSO.id}`,
-              _score: 1,
-              ...mockVersionProps,
-              _source: {
-                ...encryptedSO,
-                originId: 'some-origin-id', // only one of the results has an originId, this is intentional to test both a positive and negative case
+          await repository.updateObjectsSpaces([obj1, obj2], spacesToAdd, spacesToRemove);
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
+          expect(mockUpdateObjectsSpaces).toHaveBeenCalledTimes(1);
+          expect(mockUpdateObjectsSpaces).toHaveBeenCalledWith(
+            expect.objectContaining({
+              objects: [obj1, obj2],
+              options: {
+                namespace: currentSpace.expectedNamespace
+                  ? currentSpace.expectedNamespace
+                  : undefined,
               },
-            },
-            {
-              _index: '.kibana',
-              _id: `${namespace ? `${namespace}:` : ''}index-pattern:logstash-*`,
-              _score: 2,
-              ...mockVersionProps,
-              _source: {
-                namespace,
-                originId: 'some-origin-id', // only one of the results has an originId, this is intentional to test both a positive and negative case
-                type: 'index-pattern',
-                ...mockTimestampFields,
-                'index-pattern': {
-                  title: 'logstash-*',
-                  timeFieldName: '@timestamp',
-                  notExpandable: true,
-                },
+            })
+          );
+        });
+      });
+
+      describe('#collectMultiNamespaceReferences', () => {
+        afterEach(() => {
+          mockCollectMultiNamespaceReferences.mockReset();
+        });
+
+        test(`throws error if options.namespace is specified`, async () => {
+          await expect(
+            repository.collectMultiNamespaceReferences([], { namespace: 'bar' })
+          ).rejects.toThrowError(createBadRequestError(ERROR_NAMESPACE_SPECIFIED));
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledWith('bar');
+        });
+
+        test(`supplements internal parameters with the current namespace`, async () => {
+          const obj1 = { type: CUSTOM_INDEX_TYPE, id: 'one' };
+          const obj2 = { type: MULTI_NAMESPACE_ISOLATED_TYPE, id: 'two' };
+
+          await repository.collectMultiNamespaceReferences([obj1, obj2]);
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
+          expect(mockCollectMultiNamespaceReferences).toHaveBeenCalledTimes(1);
+          expect(mockCollectMultiNamespaceReferences).toHaveBeenCalledWith(
+            expect.objectContaining({
+              objects: [obj1, obj2],
+              options: {
+                namespace: currentSpace.expectedNamespace
+                  ? currentSpace.expectedNamespace
+                  : undefined,
               },
+            })
+          );
+        });
+      });
+
+      describe('#openPointInTimeForType', () => {
+        test(`propogates options.namespaces: ['*']`, async () => {
+          await repository.openPointInTimeForType(CUSTOM_INDEX_TYPE, { namespaces: ['*'] });
+          expect(mockSpacesExt.getSearchableNamespaces).toBeCalledTimes(1);
+          expect(mockSpacesExt.getSearchableNamespaces).toBeCalledWith(['*']);
+          // It's not necessary to test the output of the mock...
+          // await expect(mockSpacesExt.getSearchableNamespaces).resolves.toBe(
+          //   availableSpaces.map((space) => space.id)
+          // );
+        });
+      });
+
+      describe('#resolve', () => {
+        afterEach(() => {
+          mockInternalBulkResolve.mockReset();
+        });
+
+        test(`throws error if options.namespace is specified`, async () => {
+          await expect(
+            repository.resolve('foo', 'some-id', { namespace: 'bar' })
+          ).rejects.toThrowError(createBadRequestError(ERROR_NAMESPACE_SPECIFIED));
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledWith('bar');
+        });
+
+        test(`supplements internal parameters with the current namespace`, async () => {
+          const type = CUSTOM_INDEX_TYPE;
+          const id = 'some-id';
+
+          const expectedResult: SavedObjectsResolveResponse = {
+            saved_object: { type, id, attributes: {}, references: [] },
+            outcome: 'exactMatch',
+          };
+          mockInternalBulkResolve.mockResolvedValue({ resolved_objects: [expectedResult] });
+          await repository.resolve(type, id);
+          expect(mockInternalBulkResolve).toHaveBeenCalledTimes(1);
+          expect(mockInternalBulkResolve).toHaveBeenCalledWith(
+            expect.objectContaining({
+              objects: [{ type, id }],
+              options: {
+                namespace: currentSpace.expectedNamespace
+                  ? currentSpace.expectedNamespace
+                  : undefined,
+              },
+            })
+          );
+        });
+      });
+
+      describe('#bulkGet', () => {
+        const obj1: SavedObject<unknown> = {
+          type: 'config',
+          id: '6.0.0-alpha1',
+          attributes: { title: 'Testing' },
+          references: [
+            {
+              name: 'ref_0',
+              type: 'test',
+              id: '1',
             },
           ],
-        },
-      } as estypes.SearchResponse<SavedObjectsRawDocSource>;
-    };
+          originId: 'some-origin-id', // only one of the results has an originId, this is intentional to test both a positive and negative case
+        };
+        const obj2: SavedObject<unknown> = {
+          type: MULTI_NAMESPACE_TYPE,
+          id: 'logstash-*',
+          attributes: { title: 'Testing' },
+          references: [
+            {
+              name: 'ref_0',
+              type: 'test',
+              id: '2',
+            },
+          ],
+        };
 
-    const findSuccess = async (options: SavedObjectsFindOptions, namespace?: string) => {
-      client.search.mockResponseOnce(generateSearchResults(namespace));
-      const result = await savedObjectsRepository.find(options);
-      expect(mockGetSearchDsl).toHaveBeenCalledTimes(1);
-      expect(client.search).toHaveBeenCalledTimes(1);
-      return result;
-    };
+        test(`throws error if options.namespace is specified`, async () => {
+          await expect(
+            bulkGetSuccess(client, repository, registry, [obj1, obj2], { namespace: 'foo-bar' })
+          ).rejects.toThrowError(createBadRequestError(ERROR_NAMESPACE_SPECIFIED));
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledWith('foo-bar');
+        });
 
-    it(`only attempts to decrypt and strip attributes for types that are encryptable`, async () => {
-      encryptionExtMock.isEncryptableType.mockReturnValueOnce(true);
-      await findSuccess({ type: [encryptedSO.type, 'index-pattern'] });
-      expect(client.search).toHaveBeenCalledTimes(1);
-      expect(encryptionExtMock.isEncryptableType).toBeCalledTimes(2);
-      expect(encryptionExtMock.isEncryptableType).toBeCalledWith(encryptedSO.type);
-      expect(encryptionExtMock.isEncryptableType).toBeCalledWith('index-pattern');
-      expect(encryptionExtMock.decryptOrStripResponseAttributes).toBeCalledTimes(1);
-      expect(encryptionExtMock.decryptOrStripResponseAttributes).toBeCalledWith(
-        expect.objectContaining({ type: encryptedSO.type, id: encryptedSO.id }),
-        undefined
-      );
+        test(`supplements internal parameters with the current namespace`, async () => {
+          await bulkGetSuccess(client, repository, registry, [obj1, obj2]);
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
+          expect(mockSpacesExt.getSearchableNamespaces).not.toHaveBeenCalled();
+          expect(client.mget).toHaveBeenCalledTimes(1);
+          expect(client.mget).toHaveBeenCalledWith(
+            expect.objectContaining({
+              body: expect.objectContaining({
+                docs: expect.arrayContaining([
+                  expect.objectContaining({
+                    _id: `${
+                      currentSpace.expectedNamespace ? `${currentSpace.expectedNamespace}:` : ''
+                    }${obj1.type}:${obj1.id}`,
+                  }),
+                  expect.objectContaining({
+                    _id: `${obj2.type}:${obj2.id}`,
+                  }),
+                ]),
+              }),
+            }),
+            { ignore: [404], maxRetries: 0, meta: true }
+          );
+        });
+
+        test(`replaces object namespaces '*' with available spaces`, async () => {
+          await bulkGetSuccess(client, repository, registry, [
+            obj1,
+            { ...obj2, namespaces: ['*'] },
+          ]);
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
+          expect(mockSpacesExt.getSearchableNamespaces).toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getSearchableNamespaces).toHaveBeenCalledWith(['*']);
+        });
+      });
+
+      describe('#bulkCreate', () => {
+        beforeEach(() => {
+          mockPreflightCheckForCreate.mockReset();
+          mockPreflightCheckForCreate.mockImplementation(({ objects }) => {
+            return Promise.resolve(objects.map(({ type, id }) => ({ type, id }))); // respond with no errors by default
+          });
+        });
+
+        const obj1 = {
+          type: 'config',
+          id: '6.0.0-alpha1',
+          attributes: { title: 'Test One' },
+          references: [{ name: 'ref_0', type: 'test', id: '1' }],
+        };
+        const obj2 = {
+          type: MULTI_NAMESPACE_TYPE,
+          id: 'logstash-*',
+          attributes: { title: 'Test Two' },
+          references: [{ name: 'ref_0', type: 'test', id: '2' }],
+        };
+
+        test(`throws error if options.namespace is specified`, async () => {
+          await expect(
+            bulkCreateSuccess(client, repository, [obj1, obj2], { namespace: 'foo-bar' })
+          ).rejects.toThrowError(createBadRequestError(ERROR_NAMESPACE_SPECIFIED));
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledWith('foo-bar');
+        });
+
+        test(`supplements internal parameters with the current namespace`, async () => {
+          await bulkCreateSuccess(client, repository, [obj1, obj2]);
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
+          expect(mockSpacesExt.getSearchableNamespaces).not.toHaveBeenCalled();
+          expect(client.bulk).toHaveBeenCalledTimes(1);
+          expect(client.bulk).toHaveBeenCalledWith(
+            expect.objectContaining({
+              body: expect.arrayContaining([
+                expect.objectContaining({
+                  create: expect.objectContaining({
+                    _id: `${
+                      currentSpace.expectedNamespace ? `${currentSpace.expectedNamespace}:` : ''
+                    }${obj1.type}:${obj1.id}`,
+                  }),
+                }),
+                expect.objectContaining({
+                  create: expect.objectContaining({
+                    _id: `${obj2.type}:${obj2.id}`,
+                  }),
+                }),
+              ]),
+            }),
+            { maxRetries: 0 }
+          );
+        });
+      });
+
+      describe('#bulkUpdate', () => {
+        const obj1: SavedObjectsBulkUpdateObject = {
+          type: 'config',
+          id: '6.0.0-alpha1',
+          attributes: { title: 'Test One' },
+        };
+        const obj2: SavedObjectsBulkUpdateObject = {
+          type: MULTI_NAMESPACE_TYPE,
+          id: 'logstash-*',
+          attributes: { title: 'Test Two' },
+        };
+
+        test(`throws error if options.namespace is specified`, async () => {
+          await expect(
+            bulkUpdateSuccess(client, repository, registry, [obj1, obj2], { namespace: 'foo-bar' })
+          ).rejects.toThrowError(createBadRequestError(ERROR_NAMESPACE_SPECIFIED));
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledWith('foo-bar');
+        });
+
+        test(`supplements internal parameters with the current namespace`, async () => {
+          await bulkUpdateSuccess(
+            client,
+            repository,
+            registry,
+            [obj1, obj2],
+            undefined,
+            undefined,
+            currentSpace.expectedNamespace
+          );
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
+          expect(mockSpacesExt.getSearchableNamespaces).not.toHaveBeenCalled();
+          expect(client.bulk).toHaveBeenCalledTimes(1);
+          expect(client.bulk).toHaveBeenCalledWith(
+            expect.objectContaining({
+              body: expect.arrayContaining([
+                expect.objectContaining({
+                  update: expect.objectContaining({
+                    _id: `${
+                      currentSpace.expectedNamespace ? `${currentSpace.expectedNamespace}:` : ''
+                    }${obj1.type}:${obj1.id}`,
+                  }),
+                }),
+                expect.objectContaining({
+                  doc: expect.objectContaining({
+                    config: obj1.attributes,
+                  }),
+                }),
+                expect.objectContaining({
+                  update: expect.objectContaining({
+                    _id: `${obj2.type}:${obj2.id}`,
+                  }),
+                }),
+                expect.objectContaining({
+                  doc: expect.objectContaining({
+                    multiNamespaceType: obj2.attributes,
+                  }),
+                }),
+              ]),
+            }),
+            { maxRetries: 0 }
+          );
+        });
+      });
+
+      describe('#bulkResolve', () => {
+        afterEach(() => {
+          mockInternalBulkResolve.mockReset();
+        });
+
+        test(`throws error if options.namespace is specified`, async () => {
+          await expect(repository.bulkResolve([], { namespace: 'foo-bar' })).rejects.toThrowError(
+            createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
+          );
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledWith('foo-bar');
+        });
+
+        test(`supplements internal parameters with the current namespace`, async () => {
+          mockInternalBulkResolve.mockResolvedValue({
+            resolved_objects: [
+              {
+                saved_object: { type: 'mock', id: 'mock-object', attributes: {}, references: [] },
+                outcome: 'exactMatch',
+              },
+              {
+                type: 'obj-type',
+                id: 'obj-id-2',
+                error: SavedObjectsErrorHelpers.createGenericNotFoundError('obj-type', 'obj-id-2'),
+              },
+            ],
+          });
+          const objects = [
+            { type: 'obj-type', id: 'obj-id-1' },
+            { type: 'obj-type', id: 'obj-id-2' },
+          ];
+          await repository.bulkResolve(objects);
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
+          expect(mockSpacesExt.getSearchableNamespaces).not.toHaveBeenCalled();
+          expect(mockInternalBulkResolve).toHaveBeenCalledTimes(1);
+          expect(mockInternalBulkResolve).toHaveBeenCalledWith(
+            expect.objectContaining({
+              options: {
+                namespace: currentSpace.expectedNamespace
+                  ? `${currentSpace.expectedNamespace}`
+                  : undefined,
+              },
+            })
+          );
+        });
+      });
+
+      describe('#find', () => {
+        test(`supplements internal parameters with options.type and options.namespaces`, async () => {
+          const type = 'index-pattern';
+          await findSuccess(client, repository, { type, namespaces: [currentSpace.id] });
+          expect(mockSpacesExt.getSearchableNamespaces).toBeCalledTimes(1);
+          expect(mockSpacesExt.getSearchableNamespaces).toBeCalledWith([currentSpace.id]);
+          expect(mockGetSearchDsl).toHaveBeenCalledWith(
+            mappings,
+            registry,
+            expect.objectContaining({
+              namespaces: [currentSpace.id],
+              type: [type],
+            })
+          );
+        });
+
+        test(`propogates options.namespaces: ['*']`, async () => {
+          const type = 'index-pattern';
+          await findSuccess(client, repository, { type, namespaces: ['*'] });
+          expect(mockSpacesExt.getSearchableNamespaces).toBeCalledTimes(1);
+          expect(mockSpacesExt.getSearchableNamespaces).toBeCalledWith(['*']);
+        });
+      });
     });
   });
 });
