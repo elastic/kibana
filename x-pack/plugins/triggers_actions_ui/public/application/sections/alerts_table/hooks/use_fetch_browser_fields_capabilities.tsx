@@ -8,10 +8,11 @@
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useCallback, useEffect, useState } from 'react';
 import { RuntimeField } from '@kbn/data-views-plugin/common';
 import { IFieldSubType } from '@kbn/es-query';
+import { useKibana } from '../../../../common/lib/kibana';
+import { ERROR_FETCH_BROWSER_FIELDS } from './translations';
 
 export interface FetchAlertsArgs {
   featureIds: ValidFeatureId[];
@@ -44,10 +45,16 @@ export type BrowserFields = {
 
 export type UseFetchAlerts = ({ featureIds }: FetchAlertsArgs) => [boolean, FetchAlertResp];
 
+const INVALID_FEATURE_ID = 'siem';
+
 export const useFetchBrowserFieldCapabilities = ({
   featureIds,
 }: FetchAlertsArgs): [boolean | undefined, BrowserFields] => {
-  const { http } = useKibana().services;
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
+
   const [isLoading, setIsLoading] = useState<boolean | undefined>(undefined);
   const [browserFields, setBrowserFields] = useState<BrowserFields>(() => ({}));
 
@@ -59,9 +66,16 @@ export const useFetchBrowserFieldCapabilities = ({
         query: { featureIds },
       });
     } catch (e) {
+      toasts.addDanger(ERROR_FETCH_BROWSER_FIELDS);
       return {};
     }
-  }, [featureIds, http]);
+  }, [featureIds, http, toasts]);
+
+  useEffect(() => {
+    if (featureIds.includes(INVALID_FEATURE_ID)) {
+      setIsLoading(false);
+    }
+  }, [featureIds]);
 
   useEffect(() => {
     if (isLoading !== undefined) return;
