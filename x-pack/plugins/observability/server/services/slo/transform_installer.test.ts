@@ -11,7 +11,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { MockedLogger } from '@kbn/logging-mocks';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 
-import { TransformInstaller } from './transform_installer';
+import { DefaultTransformInstaller } from './transform_installer';
 import {
   ApmTransactionErrorRateTransformGenerator,
   TransformGenerator,
@@ -34,9 +34,9 @@ describe('TransformerGenerator', () => {
       const generators: Record<SLITypes, TransformGenerator> = {
         'slo.apm.transaction_duration': new DummyTransformGenerator(),
       };
-      const service = new TransformInstaller(generators, esClientMock, loggerMock);
+      const service = new DefaultTransformInstaller(generators, esClientMock, loggerMock);
 
-      expect(() =>
+      await expect(
         service.installAndStartTransform(
           createSLO({
             type: 'slo.apm.transaction_error_rate',
@@ -56,9 +56,9 @@ describe('TransformerGenerator', () => {
       const generators: Record<SLITypes, TransformGenerator> = {
         'slo.apm.transaction_duration': new FailTransformGenerator(),
       };
-      const service = new TransformInstaller(generators, esClientMock, loggerMock);
+      const service = new DefaultTransformInstaller(generators, esClientMock, loggerMock);
 
-      expect(() =>
+      await expect(
         service.installAndStartTransform(
           createSLO({
             type: 'slo.apm.transaction_duration',
@@ -80,7 +80,7 @@ describe('TransformerGenerator', () => {
     const generators: Record<SLITypes, TransformGenerator> = {
       'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
     };
-    const service = new TransformInstaller(generators, esClientMock, loggerMock);
+    const service = new DefaultTransformInstaller(generators, esClientMock, loggerMock);
 
     await service.installAndStartTransform(createSLO(createAPMTransactionErrorRateIndicator()));
 
