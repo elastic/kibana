@@ -7,7 +7,7 @@
 
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import React, { FC, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
 import { Route, Switch, useHistory } from 'react-router-dom';
 import { OutPortal } from 'react-reverse-portal';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -88,6 +88,22 @@ const getRoutes = (
       pageHeader: {
         children: <MonitorDetailsPageHeader />,
         pageTitle: <MonitorDetailsPageTitle />,
+        breadcrumbs: [
+          {
+            text: (
+              <>
+                <EuiIcon size="s" type="arrowLeft" />{' '}
+                <FormattedMessage
+                  id="xpack.synthetics.monitorSummaryRoute.monitorBreadcrumb"
+                  defaultMessage="Monitors"
+                />
+              </>
+            ),
+            color: 'primary',
+            'aria-current': false,
+            href: '#', // FIXME
+          },
+        ],
         // rightSideItems: [<RunTestManually />],
       },
     },
