@@ -45,12 +45,21 @@ export const useToGetInternalFlyout = () => {
   const { alertId, isAlert, hostName, ruleName, timestamp } =
     useBasicDataFromDetailsData(detailsData);
 
-  const [hostRiskLoading, { data, isModuleEnabled }] = useHostRiskScore({
-    filterQuery: hostName ? buildHostNamesFilter([hostName]) : undefined,
-    pagination: {
+  const filterQuery = useMemo(
+    () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
+    [hostName]
+  );
+
+  const pagination = useMemo(
+    () => ({
       cursorStart: 0,
       querySize: 1,
-    },
+    }),
+    []
+  );
+  const [hostRiskLoading, { data, isModuleEnabled }] = useHostRiskScore({
+    filterQuery,
+    pagination,
   });
 
   const hostRisk: HostRisk | null = useMemo(

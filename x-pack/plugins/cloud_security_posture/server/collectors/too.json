@@ -1,0 +1,61 @@
+// {
+//   "cloud_security_posture": {
+//     "findings": {
+//       "doc_count": 4444,
+//       "latest_doc_timestamp": ""
+//     },
+//     "findings_latest": {
+//       "doc_count": 4444
+//     },
+//     "score": {
+//       "doc_count": 244      
+//     },
+//     "package_policy": [
+//         "version": 0.29,
+//         "package_policy_id": "foo",
+//         "deployment_type": "EKS / Vanilla",
+//         "benchmark": "CIS Kubernetes 1.23 v1.0.0",
+//         "agents": {
+//             "total": 3,
+//             "version": "8.4.0"
+//           },
+//           "accounts": [
+//             "agents_count": 5,
+//             "account_id": "cluster_id",
+//             "findings": {
+//                 "doc_count": 4444
+//               },
+//               "findings_latest": {
+//                 "doc_count": 100,
+//                 "passed": 300,
+//                 "failed": 200,
+//                 "by_resource_type":
+//                 {
+//                 "k8s_object": {
+//                   "doc_count": 100,
+//                   "passed": 50,
+//                   "failed": 50
+//                 },
+//                 "process": {
+//                   "total": 200,
+//                   "passed": 150,
+//                   "failed": 50
+//                 },
+//                 "file": {
+//                   "total": 100,
+//                   "passed": 70,
+//                   "failed": 30
+//                 },
+//                 "load_balancer": {
+//                   "total": 100,
+//                   "passed": 30,
+//                   "failed": 70
+//                 }
+//               }
+//               },
+//           ]
+
+//     ]
+//   }
+// }
+

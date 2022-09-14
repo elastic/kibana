@@ -30,6 +30,7 @@ const createRulesClientMock = () => {
     listAlertTypes: jest.fn(),
     getAlertSummary: jest.fn(),
     getExecutionLogForRule: jest.fn(),
+    getGlobalExecutionLogWithAuth: jest.fn(),
     getActionErrorLog: jest.fn(),
     getSpaceId: jest.fn(),
     bulkEdit: jest.fn(),

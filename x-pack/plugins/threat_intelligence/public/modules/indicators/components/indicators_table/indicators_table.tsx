@@ -17,11 +17,11 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDataGridColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import { CellActions } from './cell_actions';
 import { BrowserFields, SecuritySolutionDataViewBase } from '../../../../types';
 import { Indicator } from '../../../../../common/types/indicator';
 import { cellRendererFactory } from './cell_renderer';
 import { EmptyState } from '../../../../components/empty_state';
-import { AddToTimeline } from '../../../timeline/components/add_to_timeline';
 import { IndicatorsTableContext, IndicatorsTableContextValue } from './context';
 import { IndicatorsFlyout } from '../indicators_flyout/indicators_flyout';
 import { Pagination } from '../../hooks/use_indicators';
@@ -40,7 +40,6 @@ export interface IndicatorsTableProps {
 }
 
 export const TABLE_TEST_ID = 'tiIndicatorsTable';
-export const CELL_TIMELINE_BUTTON_TEST_ID = 'tiIndicatorsTableCellTimelineButton';
 
 const gridStyle = {
   border: 'horizontal',
@@ -56,7 +55,6 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   onChangeItemsPerPage,
   pagination,
   loading,
-  indexPattern,
   browserFields,
 }) => {
   const [expanded, setExpanded] = useState<Indicator>();
@@ -66,34 +64,13 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
     [pagination.pageIndex, pagination.pageSize]
   );
 
-  // field name to field type map to allow the cell_renderer to format dates
-  const fieldTypesMap: { [id: string]: string } = useMemo(() => {
-    if (!indexPattern) return {};
-
-    const res: { [id: string]: string } = {};
-    indexPattern.fields.map((field) => (res[field.name] = field.type));
-    return res;
-  }, [indexPattern]);
-
   const indicatorTableContextValue = useMemo<IndicatorsTableContextValue>(
-    () => ({ expanded, setExpanded, indicators, fieldTypesMap }),
-    [expanded, indicators, fieldTypesMap]
+    () => ({ expanded, setExpanded, indicators }),
+    [expanded, indicators]
   );
 
   const start = pagination.pageIndex * pagination.pageSize;
   const end = start + pagination.pageSize;
-
-  const flyoutFragment = useMemo(
-    () =>
-      expanded ? (
-        <IndicatorsFlyout
-          indicator={expanded}
-          fieldTypesMap={fieldTypesMap}
-          closeFlyout={() => setExpanded(undefined)}
-        />
-      ) : null,
-    [expanded, fieldTypesMap]
-  );
 
   const leadingControlColumns = useMemo(
     () => [
@@ -119,11 +96,12 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
       (col: EuiDataGridColumn) =>
         (col.cellActions = [
           ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => (
-            <AddToTimeline
-              data={indicators[rowIndex % pagination.pageSize]}
-              field={columnId}
-              component={Component}
-              testId={CELL_TIMELINE_BUTTON_TEST_ID}
+            <CellActions
+              rowIndex={rowIndex}
+              columnId={columnId}
+              Component={Component}
+              indicators={indicators}
+              pagination={pagination}
             />
           ),
         ])
@@ -140,42 +118,67 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
     onToggleColumn: handleToggleColumn,
   });
 
-  if (loading) {
-    return (
-      <EuiFlexGroup justifyContent="spaceAround">
-        <EuiFlexItem grow={false}>
-          <EuiPanel hasShadow={false} hasBorder={false} paddingSize="xl">
-            <EuiLoadingSpinner size="xl" />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
+  const flyoutFragment = useMemo(
+    () =>
+      expanded ? (
+        <IndicatorsFlyout indicator={expanded} closeFlyout={() => setExpanded(undefined)} />
+      ) : null,
+    [expanded]
+  );
 
-  if (!indicatorCount) {
-    return <EmptyState />;
-  }
+  const gridFragment = useMemo(() => {
+    if (loading) {
+      return (
+        <EuiFlexGroup justifyContent="spaceAround">
+          <EuiFlexItem grow={false}>
+            <EuiPanel hasShadow={false} hasBorder={false} paddingSize="xl">
+              <EuiLoadingSpinner size="xl" />
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    if (!indicatorCount) {
+      return <EmptyState />;
+    }
+
+    return (
+      <EuiDataGrid
+        aria-labelledby="indicators-table"
+        leadingControlColumns={leadingControlColumns}
+        columns={columns}
+        columnVisibility={columnVisibility}
+        rowCount={indicatorCount}
+        renderCellValue={renderCellValue}
+        toolbarVisibility={toolbarOptions}
+        pagination={{
+          ...pagination,
+          onChangeItemsPerPage,
+          onChangePage,
+        }}
+        gridStyle={gridStyle}
+        data-test-subj={TABLE_TEST_ID}
+      />
+    );
+  }, [
+    columnVisibility,
+    columns,
+    indicatorCount,
+    leadingControlColumns,
+    loading,
+    onChangeItemsPerPage,
+    onChangePage,
+    pagination,
+    renderCellValue,
+    toolbarOptions,
+  ]);
 
   return (
     <div>
       <IndicatorsTableContext.Provider value={indicatorTableContextValue}>
-        <EuiDataGrid
-          aria-labelledby="indicators-table"
-          leadingControlColumns={leadingControlColumns}
-          columns={columns}
-          columnVisibility={columnVisibility}
-          rowCount={indicatorCount}
-          renderCellValue={renderCellValue}
-          toolbarVisibility={toolbarOptions}
-          pagination={{
-            ...pagination,
-            onChangeItemsPerPage,
-            onChangePage,
-          }}
-          gridStyle={gridStyle}
-          data-test-subj={TABLE_TEST_ID}
-        />
         {flyoutFragment}
+        {gridFragment}
       </IndicatorsTableContext.Provider>
     </div>
   );

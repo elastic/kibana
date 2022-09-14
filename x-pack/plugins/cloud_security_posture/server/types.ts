@@ -22,6 +22,13 @@ import type {
   RequestHandler,
   RouteMethod,
   SavedObjectsClientContract,
+<<<<<<< HEAD
+=======
+  IScopedClusterClient,
+  KibanaResponseFactory,
+  RequestHandler,
+  RouteMethod,
+>>>>>>> upstream/main
 } from '@kbn/core/server';
 import type {
   AgentPolicyServiceInterface,

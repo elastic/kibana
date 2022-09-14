@@ -19,6 +19,7 @@
         "description": [],
         "path": "x-pack/plugins/license_api_guard/server/license.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "licenseApiGuard",
@@ -32,6 +33,7 @@
             ],
             "path": "x-pack/plugins/license_api_guard/server/license.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "licenseApiGuard",
@@ -45,6 +47,7 @@
                 ],
                 "path": "x-pack/plugins/license_api_guard/server/license.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -62,6 +65,7 @@
             ],
             "path": "x-pack/plugins/license_api_guard/server/license.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "licenseApiGuard",
@@ -75,6 +79,7 @@
                 ],
                 "path": "x-pack/plugins/license_api_guard/server/license.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -118,6 +123,7 @@
             ],
             "path": "x-pack/plugins/license_api_guard/server/license.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "licenseApiGuard",
@@ -140,6 +146,7 @@
                 ],
                 "path": "x-pack/plugins/license_api_guard/server/license.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -153,7 +160,8 @@
             "label": "isEsSecurityEnabled",
             "description": [],
             "path": "x-pack/plugins/license_api_guard/server/license.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

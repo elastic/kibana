@@ -33,6 +33,7 @@
         ],
         "path": "packages/core/metrics/core-metrics-server/src/collectors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -48,6 +49,7 @@
             ],
             "path": "packages/core/metrics/core-metrics-server/src/collectors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -65,6 +67,7 @@
             ],
             "path": "packages/core/metrics/core-metrics-server/src/collectors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -82,6 +85,7 @@
             ],
             "path": "packages/core/metrics/core-metrics-server/src/collectors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -99,6 +103,7 @@
         ],
         "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -108,7 +113,8 @@
             "label": "fromTimestamp",
             "description": [],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -118,7 +124,8 @@
             "label": "lastUpdatedAt",
             "description": [],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -128,7 +135,8 @@
             "label": "min",
             "description": [],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -138,7 +146,8 @@
             "label": "max",
             "description": [],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -148,7 +157,8 @@
             "label": "mean",
             "description": [],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -158,7 +168,8 @@
             "label": "exceeds",
             "description": [],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -168,7 +179,8 @@
             "label": "stddev",
             "description": [],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -181,7 +193,8 @@
               "{ 50: number; 75: number; 95: number; 99: number; }"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -207,6 +220,7 @@
         ],
         "path": "packages/core/metrics/core-metrics-server/src/collectors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -224,6 +238,7 @@
             ],
             "path": "packages/core/metrics/core-metrics-server/src/collectors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -241,6 +256,7 @@
             ],
             "path": "packages/core/metrics/core-metrics-server/src/collectors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -258,6 +274,7 @@
         ],
         "path": "packages/core/metrics/core-metrics-server/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -269,7 +286,8 @@
               "Interval metrics are collected in milliseconds"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -295,6 +313,7 @@
             ],
             "path": "packages/core/metrics/core-metrics-server/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -312,6 +331,7 @@
         ],
         "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -326,7 +346,8 @@
               "Date"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -351,6 +372,7 @@
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
             "deprecated": true,
             "removeBy": "8.8.0",
+            "trackAdoption": false,
             "references": []
           },
           {
@@ -373,7 +395,8 @@
               "[]"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -394,7 +417,8 @@
               }
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -409,7 +433,8 @@
               "{ avg_in_millis: number; max_in_millis: number; }"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -424,7 +449,8 @@
               "{ disconnects: number; total: number; statusCodes: Record<number, number>; }"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -436,7 +462,8 @@
               "number of current concurrent connections to the server"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -452,6 +479,7 @@
         ],
         "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -466,7 +494,8 @@
               "\"linux\" | \"aix\" | \"android\" | \"darwin\" | \"freebsd\" | \"haiku\" | \"openbsd\" | \"sunos\" | \"win32\" | \"cygwin\" | \"netbsd\""
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -478,7 +507,8 @@
               "The os platform release, prefixed by the platform name"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -493,7 +523,8 @@
               "string | undefined"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -508,7 +539,8 @@
               "string | undefined"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -523,7 +555,8 @@
               "{ '1m': number; '5m': number; '15m': number; }"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -538,7 +571,8 @@
               "{ total_in_bytes: number; free_in_bytes: number; used_in_bytes: number; }"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -550,7 +584,8 @@
               "the OS uptime"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -565,7 +600,8 @@
               "{ control_group: string; usage_nanos: number; } | undefined"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -580,7 +616,8 @@
               "{ control_group: string; cfs_period_micros: number; cfs_quota_micros: number; stat: { number_of_elapsed_periods: number; number_of_times_throttled: number; time_throttled_nanos: number; }; } | undefined"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -596,6 +633,7 @@
         ],
         "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -607,7 +645,8 @@
               "pid of the kibana process"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -622,7 +661,8 @@
               "{ heap: { total_in_bytes: number; used_in_bytes: number; size_limit: number; }; resident_set_size_in_bytes: number; }"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -634,7 +674,8 @@
               "mean event loop delay since last collection"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -655,7 +696,8 @@
               }
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -667,7 +709,8 @@
               "uptime of the kibana process"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -683,6 +726,7 @@
         ],
         "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -697,7 +741,8 @@
               "{ avg_in_millis: number; max_in_millis: number; }"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -712,7 +757,8 @@
               "{ disconnects: number; total: number; statusCodes: Record<number, number>; }"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server",
@@ -724,7 +770,8 @@
               "number of current concurrent connections to the server"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -752,6 +799,7 @@
         ],
         "path": "packages/core/metrics/core-metrics-server/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

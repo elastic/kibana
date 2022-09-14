@@ -7,10 +7,12 @@
 
 import { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../common/constants';
-import { FindingsUsage, getFindingsUsage } from './findings_stats_collector';
+import { getFindingsUsage, IndexCounter } from './findings_stats_collector';
 
-interface Usage {
-  findings_stats: FindingsUsage;
+interface CSPMUsage {
+  findings: IndexCounter;
+  latest_findings: IndexCounter;
+  score: IndexCounter;
 }
 
 export function registerIndicesCounterCollector(usageCollection?: UsageCollectionSetup): void {
@@ -20,151 +22,52 @@ export function registerIndicesCounterCollector(usageCollection?: UsageCollectio
   }
 
   // create usage collector
-  const indicesCounterCollector = usageCollection.makeUsageCollector<Usage>({
+  const indicesCounterCollector = usageCollection.makeUsageCollector<CSPMUsage>({
     type: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
 
     isReady: () => true,
     fetch: async (collectorFetchContext: CollectorFetchContext) => {
       await getFindingsUsage(collectorFetchContext.esClient);
       return {
-        findings_stats: {
-          benchmark: 'boo',
-          total: 5,
-          passed: 5,
-          failed: 8,
-          k8s_object: {
-            total: 5,
-            passed: 5,
-            failed: 8,
-          },
-          process: {
-            total: 5,
-            passed: 5,
-            failed: 8,
-          },
-          file: {
-            total: 5,
-            passed: 5,
-            failed: 8,
-          },
-          load_balancer: {
-            total: 5,
-            passed: 5,
-            failed: 8,
-          },
+        findings: {
+          doc_count: 5,
+        },
+        latest_findings: {
+          doc_count: 5,
+        },
+        score: {
+          doc_count: 5,
         },
       };
     },
     schema: {
-      findings_stats: {
-        benchmark: {
-          type: 'keyword',
-          _meta: {
-            description: 'The total number of enrolled agents, in any state',
-          },
-        },
-        total: {
+      findings: {
+        doc_count: {
           type: 'long',
           _meta: {
             description: 'The total number of enrolled agents, in any state',
           },
         },
-        passed: {
+      },
+      latest_findings: {
+        doc_count: {
           type: 'long',
           _meta: {
             description: 'The total number of enrolled agents, in any state',
           },
         },
-        failed: {
+      },
+      score: {
+        doc_count: {
           type: 'long',
           _meta: {
             description: 'The total number of enrolled agents, in any state',
-          },
-        },
-        k8s_object: {
-          total: {
-            type: 'long',
-            _meta: {
-              description: 'The total number of enrolled agents, in any state',
-            },
-          },
-          passed: {
-            type: 'long',
-            _meta: {
-              description: 'The total number of enrolled agents, in any state',
-            },
-          },
-          failed: {
-            type: 'long',
-            _meta: {
-              description: 'The total number of enrolled agents, in any state',
-            },
-          },
-        },
-        process: {
-          total: {
-            type: 'long',
-            _meta: {
-              description: 'The total number of enrolled agents, in any state',
-            },
-          },
-          passed: {
-            type: 'long',
-            _meta: {
-              description: 'The total number of enrolled agents, in any state',
-            },
-          },
-          failed: {
-            type: 'long',
-            _meta: {
-              description: 'The total number of enrolled agents, in any state',
-            },
-          },
-        },
-        file: {
-          total: {
-            type: 'long',
-            _meta: {
-              description: 'The total number of enrolled agents, in any state',
-            },
-          },
-          passed: {
-            type: 'long',
-            _meta: {
-              description: 'The total number of enrolled agents, in any state',
-            },
-          },
-          failed: {
-            type: 'long',
-            _meta: {
-              description: 'The total number of enrolled agents, in any state',
-            },
-          },
-        },
-        load_balancer: {
-          total: {
-            type: 'long',
-            _meta: {
-              description: 'The total number of enrolled agents, in any state',
-            },
-          },
-          passed: {
-            type: 'long',
-            _meta: {
-              description: 'The total number of enrolled agents, in any state',
-            },
-          },
-          failed: {
-            type: 'long',
-            _meta: {
-              description: 'The total number of enrolled agents, in any state',
-            },
           },
         },
       },
     },
-    // register usage collector
   });
+  // register usage collector
   usageCollection.registerCollector(indicesCounterCollector);
   console.log('Register!!');
 }
