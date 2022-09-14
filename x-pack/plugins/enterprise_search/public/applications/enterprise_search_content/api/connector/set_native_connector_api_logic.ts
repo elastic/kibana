@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorConfiguration } from '../../../../../common/types/connectors';
+import { ConnectorStatus } from '../../../../../common/types/connectors';
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 import { NativeConnector } from '../../components/search_index/connector/types';
@@ -26,19 +26,23 @@ export const setNativeConnector = async ({
 }: SetNativeConnectorArgs) => {
   const { configuration, serviceType } = nativeConnector;
 
-  await HttpLogic.values.http.put<ConnectorConfiguration>(
+  await HttpLogic.values.http.put(
     `/internal/enterprise_search/connectors/${connectorId}/service_type`,
     {
       body: JSON.stringify({ serviceType }),
     }
   );
 
-  await HttpLogic.values.http.post<ConnectorConfiguration>(
+  await HttpLogic.values.http.post(
     `/internal/enterprise_search/connectors/${connectorId}/configuration`,
     {
       body: JSON.stringify(configuration),
     }
   );
+
+  await HttpLogic.values.http.put(`/internal/enterprise_search/connectors/${connectorId}/status`, {
+    body: JSON.stringify({ status: ConnectorStatus.NEEDS_CONFIGURATION }),
+  });
 
   return { connectorId };
 };

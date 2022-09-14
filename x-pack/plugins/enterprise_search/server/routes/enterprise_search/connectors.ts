@@ -6,7 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
 import { i18n } from '@kbn/i18n';
+
+import { ConnectorStatus } from '../../../common/types/connectors';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
@@ -15,6 +18,7 @@ import { startConnectorSync } from '../../lib/connectors/start_sync';
 import { updateConnectorConfiguration } from '../../lib/connectors/update_connector_configuration';
 import { updateConnectorScheduling } from '../../lib/connectors/update_connector_scheduling';
 import { updateConnectorServiceType } from '../../lib/connectors/update_connector_service_type';
+import { updateConnectorStatus } from '../../lib/connectors/update_connector_status';
 
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
@@ -155,6 +159,27 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         client,
         request.params.connectorId,
         request.body.serviceType
+      );
+      return response.ok({ body: result });
+    })
+  );
+
+  router.put(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}/status',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+        body: schema.object({ status: schema.string() }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const result = await updateConnectorStatus(
+        client,
+        request.params.connectorId,
+        request.body.status as ConnectorStatus
       );
       return response.ok({ body: result });
     })
