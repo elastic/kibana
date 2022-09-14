@@ -35,6 +35,10 @@ import { Nbsp } from './nbsp';
 import { useDateFormat } from '../../hooks';
 import { TextHighlight } from './text_highlight';
 
+export const EXEC_USER_CHANGE = i18n.translate('xpack.sessionView.execUserChange', {
+  defaultMessage: 'Exec user change',
+});
+
 export interface ProcessDeps {
   process: Process;
   isSessionLeader?: boolean;
@@ -286,12 +290,9 @@ export function ProcessTreeNode({
             <EuiButton
               data-test-subj="sessionView:processTreeNodeRootEscalationFlag"
               css={buttonStyles.userChangedButton}
+              aria-label={EXEC_USER_CHANGE}
             >
-              <FormattedMessage
-                id="xpack.sessionView.execUserChange"
-                defaultMessage="Exec user change: "
-              />
-              <span>{user.name}</span>
+              {EXEC_USER_CHANGE} :<span>{user.name}</span>
             </EuiButton>
           )}
           {!isSessionLeader && children.length > 0 && (

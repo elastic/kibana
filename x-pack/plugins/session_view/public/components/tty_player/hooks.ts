@@ -70,59 +70,81 @@ export const useFetchIOEvents = (sessionEntityId: string) => {
 };
 
 /**
- * flattens all pages of IO events into an array of lines
- * note: not efficient currently, tracking a page cursor to avoid redoing work is needed.
+ * flattens all pages of IO events into an array of lines, and builds up an array of process start markers
  */
 export const useIOLines = (pages: ProcessEventsPage[] | undefined) => {
+  const [cursor, setCursor] = useState(0);
+  const [processedLines, setProcessedLines] = useState<IOLine[]>([]);
+  const [processedMarkers, setProcessedMarkers] = useState<ProcessStartMarker[]>([]);
   const linesAndEntityIdMap = useMemo(() => {
-    const newLines: IOLine[] = [];
-    const processStartMarkers: ProcessStartMarker[] = [];
-
     if (!pages) {
-      return { lines: newLines, processStartMarkers };
+      return { lines: processedLines, processStartMarkers: processedMarkers };
+    }
+
+    const pagesToProcess = pages.slice(cursor);
+    const newMarkers: ProcessStartMarker[] = [];
+    let newLines: IOLine[] = [];
+
+    newLines = pagesToProcess.reduce((previous, current) => {
+      if (current.events) {
+        current.events.forEach((event) => {
+          const { process } = event;
+          if (process?.io?.text !== undefined && process.entity_id !== undefined) {
+            const splitLines = process.io.text.split(TTY_LINE_SPLITTER_REGEX);
+            const combinedLines = [splitLines[0]];
+            const previousProcessId =
+              previous[previous.length - 1]?.event.process?.entity_id ||
+              processedLines[processedLines.length - 1]?.event.process?.entity_id;
+
+            if (previousProcessId !== process.entity_id) {
+              const processLineInfo: ProcessStartMarker = {
+                line: processedLines.length + previous.length,
+                event,
+              };
+              newMarkers.push(processLineInfo);
+            }
+
+            // delimiters e.g \r\n or cursor movements are merged with their line text
+            // we start on an odd number so that cursor movements happen at the start of each line
+            // this is needed for the search to work accurately
+            for (let i = 1; i < splitLines.length - 1; i = i + 2) {
+              combinedLines.push(splitLines[i] + splitLines[i + 1]);
+            }
+
+            const data: IOLine[] = combinedLines.map((line) => {
+              return {
+                event, // pointer to the event so it's easy to look up other details for the line
+                value: line,
+              };
+            });
+
+            previous = previous.concat(data);
+          }
+        });
+      }
+      return previous;
+    }, newLines);
+
+    const lines = processedLines.concat(newLines);
+    const processStartMarkers = processedMarkers.concat(newMarkers);
+
+    if (newLines.length > 0) {
+      setProcessedLines(lines);
+    }
+
+    if (newMarkers.length > 0) {
+      setProcessedMarkers(processStartMarkers);
+    }
+
+    if (pages.length > cursor) {
+      setCursor(pages.length);
     }
 
     return {
-      lines: pages.reduce((previous, current) => {
-        if (current.events) {
-          current.events.forEach((event) => {
-            const { process } = event;
-            if (process?.io?.text !== undefined && process.entity_id !== undefined) {
-              const splitLines = process.io.text.split(TTY_LINE_SPLITTER_REGEX);
-              const combinedLines = [splitLines[0]];
-              const previousProcessId = previous[previous.length - 1]?.event.process?.entity_id;
-
-              if (previousProcessId !== process.entity_id) {
-                const processLineInfo: ProcessStartMarker = {
-                  line: previous.length,
-                  event,
-                };
-                processStartMarkers.push(processLineInfo);
-              }
-
-              // delimiters e.g \r\n or cursor movements are merged with their line text
-              // we start on an odd number so that cursor movements happen at the start of each line
-              // this is needed for the search to work accurately
-              for (let i = 1; i < splitLines.length - 1; i = i + 2) {
-                combinedLines.push(splitLines[i] + splitLines[i + 1]);
-              }
-
-              const data: IOLine[] = combinedLines.map((line) => {
-                return {
-                  event, // pointer to the event so it's easy to look up other details for the line
-                  value: line,
-                };
-              });
-
-              previous = previous.concat(data);
-            }
-          });
-        }
-        return previous;
-      }, newLines),
+      lines,
       processStartMarkers,
     };
-  }, [pages]);
+  }, [cursor, pages, processedLines, processedMarkers]);
   return linesAndEntityIdMap;
 };
 
@@ -200,8 +222,13 @@ export const useXtermPlayer = ({
 
       if (clear) {
         linesToPrint = lines.slice(Math.max(0, lineNumber - TTY_LINES_PRE_SEEK), lineNumber + 1);
-        terminal.reset();
-        terminal.clear();
+        try {
+          terminal.reset();
+          terminal.clear();
+        } catch (err) {
+          // noop
+          // there is some random race condition with the jump to feature that causes these calls to error out.
+        }
       } else {
         linesToPrint = lines.slice(lineNumber, lineNumber + TTY_LINES_PER_FRAME);
       }

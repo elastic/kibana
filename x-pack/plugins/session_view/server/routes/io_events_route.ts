@@ -86,13 +86,13 @@ export const registerIOEventsRoute = (router: IRouter) => {
         query: schema.object({
           sessionEntityId: schema.string(),
           cursor: schema.maybe(schema.string()),
+          pageSize: schema.maybe(schema.number()),
         }),
       },
     },
     async (context, request, response) => {
       const client = (await context.core).elasticsearch.client.asCurrentUser;
-      const { cursor } = request.query;
-      const { sessionEntityId } = request.query;
+      const { sessionEntityId, cursor, pageSize = IO_EVENTS_PER_PAGE } = request.query;
 
       try {
         const ttyPredicates = await getTTYQueryPredicates(client, sessionEntityId);
@@ -122,7 +122,7 @@ export const registerIOEventsRoute = (router: IRouter) => {
                 ],
               },
             },
-            size: IO_EVENTS_PER_PAGE,
+            size: Math.min(pageSize, IO_EVENTS_PER_PAGE),
             sort: [{ [TIMESTAMP]: 'asc' }],
             search_after: cursor ? [cursor] : undefined,
           },

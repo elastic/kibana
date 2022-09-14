@@ -123,7 +123,7 @@ export const TTYPlayerControls = ({
               iconType="arrowStart"
               display="empty"
               size="m"
-              aria-label="TTY Start Button"
+              aria-label={TTY_START}
               onClick={seekToStart}
             />
           </EuiToolTip>
@@ -136,7 +136,7 @@ export const TTYPlayerControls = ({
               iconType="arrowLeft"
               display="empty"
               size="m"
-              aria-label="TTY Previous Button"
+              aria-label={TTY_PREVIOUS}
               onClick={seekToPrevProcess}
             />
           </EuiToolTip>
@@ -149,7 +149,7 @@ export const TTYPlayerControls = ({
               iconType={isPlaying ? 'pause' : 'playFilled'}
               display="empty"
               size="m"
-              aria-label="TTY Play Button"
+              aria-label={isPlaying ? TTY_PAUSE : TTY_PLAY}
               onClick={onTogglePlayback}
             />
           </EuiToolTip>
@@ -162,7 +162,7 @@ export const TTYPlayerControls = ({
               iconType="arrowRight"
               display="empty"
               size="m"
-              aria-label="TTY Next Button"
+              aria-label={TTY_NEXT}
               onClick={seekToNextProcess}
             />
           </EuiToolTip>
@@ -175,7 +175,7 @@ export const TTYPlayerControls = ({
               iconType="arrowEnd"
               display="empty"
               size="m"
-              aria-label="TTY End Button"
+              aria-label={TTY_END}
               onClick={seekToEnd}
             />
           </EuiToolTip>
@@ -195,6 +195,7 @@ export const TTYPlayerControls = ({
             size="s"
             onClick={handleViewInSession}
             iconType="arrowRight"
+            aria-label={VIEW_IN_SESSION}
           >
             {VIEW_IN_SESSION}
           </EuiButtonEmpty>

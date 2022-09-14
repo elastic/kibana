@@ -57,8 +57,8 @@ export const TTYPlayer = ({
     isFetching,
   });
 
-  const tty = lines?.[currentLine]?.event?.process?.tty;
-  const currentProcessEvent = lines[currentLine]?.event;
+  const currentProcessEvent = lines[Math.min(lines.length - 1, currentLine)]?.event;
+  const tty = currentProcessEvent?.process?.tty;
 
   useEffect(() => {
     if (
@@ -89,7 +89,8 @@ export const TTYPlayer = ({
     seekToLine,
   ]);
 
-  if (tty && !tty.rows) {
+  const validTTY = tty?.rows && tty?.rows > 1 && tty?.rows < 1000;
+  if (tty && !validTTY) {
     tty.rows = DEFAULT_TTY_ROWS;
     tty.columns = DEFAULT_TTY_COLS;
   }
