@@ -25,25 +25,26 @@ const getJourneySteps = async (
     log.info('Splitting request streams by journey steps');
     const ftrStepHits = await esClient.getJourneySteps(buildId, journeyName);
     if (!ftrStepHits || ftrStepHits.length === 0) {
-      throw new Error(
-        `No 'functional test runner' steps found. Can't calculate steps time range, output file won't be generated.`
+      log.error(
+        `No 'functional test runner' step docs found. Can't calculate steps time range, output file won't be generated.`
       );
+      return;
     }
     return getSteps(ftrStepHits);
   } else {
     const ftrTransactionHits = await esClient.getJourneyTransactions(buildId, journeyName);
 
     if (!ftrTransactionHits || ftrTransactionHits.length === 0) {
-      throw new Error(
+      log.warning(
         `No 'functional test runner' transactions found. Can't calculate journey time range, output file won't be generated.`
       );
+      return;
     }
 
     // There should be a single top-level transaction, representing journey browser starting time and session duration.
     if (ftrTransactionHits.length > 1) {
-      throw new Error(
-        `Filtering doesn't work, more than 1 'functional test runner' transaction found`
-      );
+      log.error(`Filtering doesn't work, more than 1 'functional test runner' transaction found`);
+      return;
     }
 
     return [{ name: 'journey', ...calculateTransactionTimeRage(ftrTransactionHits[0]) }];
@@ -67,6 +68,11 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
 
   const esClient = new ESClient(authOptions, log);
   const steps = await getJourneySteps(esClient, log, buildId, journeyName, splitBySteps);
+
+  if (!steps) {
+    return;
+  }
+
   const stepsWithTransactions = await esClient.getKibanaServerTransactions(
     buildId,
     journeyName,
@@ -76,7 +82,7 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
   const hits = stepsWithTransactions.flatMap((step) => step.transactions);
 
   if (!hits || hits.length === 0) {
-    log.warning(`No Kibana server transactions found. Output file won't be generated.`);
+    log.error(`No Kibana server transactions found. Output file won't be generated.`);
     return;
   }
 
