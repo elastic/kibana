@@ -26,12 +26,14 @@ const getLabelTitle = (userAction: UserActionResponse<ConnectorUserAction>) => {
 
 export const createConnectorUserActionBuilder: UserActionBuilder = ({
   userAction,
+  userProfiles,
   handleOutlineComment,
 }) => ({
   build: () => {
     const connectorUserAction = userAction as UserActionResponse<ConnectorUserAction>;
     const label = getLabelTitle(connectorUserAction);
     const commonBuilder = createCommonUpdateUserActionBuilder({
+      userProfiles,
       userAction,
       handleOutlineComment,
       label,
