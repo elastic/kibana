@@ -90,9 +90,5 @@ export const entityAnalyticsLinks: LinkItem = {
       defaultMessage: 'technical preview',
     }),
   },
-  globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.appLinks.entityAnalytics', {
-      defaultMessage: 'Entity Analytics',
-    }),
-  ],
+  globalSearchKeywords: [ENTITY_ANALYTICS],
 };
