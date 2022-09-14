@@ -19,9 +19,9 @@ import { Query, Filter, TimeRange, AggregateQuery, isOfQueryType } from '@kbn/es
 import { withKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import type { TimeHistoryContract, SavedQuery } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
-import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 
+import type { IUnifiedSearchPluginServices } from '../types';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
 import { QueryBarMenu, QueryBarMenuProps } from '../query_string_input/query_bar_menu';
@@ -32,7 +32,7 @@ import type { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { searchBarStyles } from './search_bar.styles';
 
 export interface SearchBarInjectedDeps {
-  kibana: KibanaReactContextValue<IDataPluginServices>;
+  kibana: KibanaReactContextValue<IUnifiedSearchPluginServices>;
   intl: InjectedIntl;
   timeHistory?: TimeHistoryContract;
   // Filter bar

@@ -55,6 +55,9 @@ export const discoverServiceMock = {
   },
   fieldFormats: fieldFormatsMock,
   filterManager: dataPlugin.query.filterManager,
+  inspector: {
+    open: jest.fn(),
+  },
   uiSettings: {
     get: jest.fn((key: string) => {
       if (key === 'fields:popularLimit') {
