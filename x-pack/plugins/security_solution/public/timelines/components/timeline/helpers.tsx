@@ -171,36 +171,21 @@ export const combineQueries = ({
       filterQuery,
       kqlError,
     };
-  } else if (isEmpty(dataProviders) && !isEmpty(kqlQuery.query)) {
-    kuery.query = `(${kqlQuery.query})`;
-    const [filterQuery, kqlError] = convertToBuildEsQuery({
-      config,
-      queries: [kuery],
-      indexPattern,
-      filters,
-    });
-    return {
-      filterQuery,
-      kqlError,
-    };
-  } else if (!isEmpty(dataProviders) && isEmpty(kqlQuery)) {
-    kuery.query = `(${buildGlobalQuery(dataProviders, browserFields)})`;
-    const [filterQuery, kqlError] = convertToBuildEsQuery({
-      config,
-      queries: [kuery],
-      indexPattern,
-      filters,
-    });
-    return {
-      filterQuery,
-      kqlError,
-    };
   }
   const operatorKqlQuery = kqlMode === 'filter' ? 'and' : 'or';
-  const postpend = (q: string) => `${!isEmpty(q) ? ` ${operatorKqlQuery} (${q})` : ''}`;
-  kuery.query = `((${buildGlobalQuery(dataProviders, browserFields)})${postpend(
-    kqlQuery.query as string
-  )})`;
+
+  const postpend = (q: string) => `${!isEmpty(q) ? `(${q})` : ''}`;
+
+  const globalQuery = buildGlobalQuery(dataProviders, browserFields); // based on Data Providers
+
+  const querySuffix = postpend(kqlQuery.query as string); // based on Unified Search bar
+
+  const queryPrefix = globalQuery ? `(${globalQuery})` : '';
+
+  const queryOperator = queryPrefix && querySuffix ? operatorKqlQuery : '';
+
+  kuery.query = `(${queryPrefix} ${queryOperator} ${querySuffix})`;
+
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config,
     queries: [kuery],
