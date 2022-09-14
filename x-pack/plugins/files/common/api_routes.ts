@@ -7,7 +7,7 @@
 
 import type { TypeOf, Type } from '@kbn/config-schema';
 import { PLUGIN_ID } from './constants';
-import type { FileJSON, Pagination, FilesMetrics, FileShareJSONWithToken } from './types';
+import type { FileJSON, Pagination, FilesMetrics } from './types';
 
 export const API_BASE_PATH = `/api/${PLUGIN_ID}`;
 
@@ -105,23 +105,7 @@ export type FilesMetricsHttpEndpoint = HttpApiInterfaceEntryDefinition<
   FilesMetrics
 >;
 
-export type FileShareHttpEndpoint = HttpApiInterfaceEntryDefinition<
-  {
-    fileId: string;
-  },
-  unknown,
-  {
-    /**
-     * Unix timestamp of when the share will expire.
-     */
-    validUntil?: number;
-    /**
-     * Optional name to uniquely identify this share instance.
-     */
-    name?: string;
-  },
-  FileShareJSONWithToken
->;
+export type { Endpoint as FileShareHttpEndpoint } from '../server/routes/file_kind/share/share';
 
 export type FileUnshareHttpEndpoint = HttpApiInterfaceEntryDefinition<
   {
