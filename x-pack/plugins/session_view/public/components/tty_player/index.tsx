@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef, useState, useCallback, useMemo } from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiButton } from '@elastic/eui';
+import { throttle } from 'lodash';
 import { ProcessEvent } from '../../../common/types/process_tree';
 import { TTYSearchBar } from '../tty_search_bar';
 import { TTYTextSizer } from '../tty_text_sizer';
@@ -20,6 +21,7 @@ import { TTYPlayerControls } from '../tty_player_controls';
 import { TOGGLE_TTY_PLAYER, DETAIL_PANEL } from '../session_view/translations';
 
 export interface TTYPlayerDeps {
+  show: boolean;
   sessionEntityId: string;
   onClose(): void;
   isFullscreen: boolean;
@@ -27,6 +29,7 @@ export interface TTYPlayerDeps {
 }
 
 export const TTYPlayer = ({
+  show,
   sessionEntityId,
   onClose,
   isFullscreen,
@@ -35,8 +38,8 @@ export const TTYPlayer = ({
   const ref = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const { data, fetchNextPage, hasNextPage } = useFetchIOEvents(sessionEntityId);
-  const { lines, processIdLineMap } = useIOLines(data?.pages);
+  const { data, fetchNextPage, hasNextPage, isFetching } = useFetchIOEvents(sessionEntityId);
+  const { lines, processStartMarkers } = useIOLines(data?.pages);
 
   const [fontSize, setFontSize] = useState(DEFAULT_TTY_FONT_SIZE);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -59,15 +62,13 @@ export const TTYPlayer = ({
     tty.columns = DEFAULT_TTY_COLS;
   }
 
-  const styles = useStyles(tty);
+  const styles = useStyles(tty, show);
 
-  const onSeekLine = useCallback(
-    (line: number) => {
+  const onSeekLine = useMemo(() => {
+    return throttle((line: number) => {
       seekToLine(line);
-      setIsPlaying(false);
-    },
-    [seekToLine]
-  );
+    }, 100);
+  }, [seekToLine]);
 
   const onTogglePlayback = useCallback(() => {
     setIsPlaying(!isPlaying);
@@ -85,6 +86,7 @@ export const TTYPlayer = ({
             <EuiButtonIcon
               isSelected={true}
               display="fill"
+              isLoading={isFetching}
               iconType="apmTrace"
               onClick={onClose}
               size="m"
@@ -115,7 +117,7 @@ export const TTYPlayer = ({
 
       <TTYPlayerControls
         currentProcessEvent={currentProcessEvent}
-        processIdLineMap={processIdLineMap}
+        processStartMarkers={processStartMarkers}
         lastProcessEntityId={lines[lines.length - 1]?.event.process?.entity_id}
         isPlaying={isPlaying}
         currentLine={currentLine}

@@ -31,7 +31,7 @@ export const TIMESTAMP_PROPERTY = '@timestamp';
 export const PROCESS_EVENTS_PER_PAGE = 400;
 export const ALERTS_PER_PROCESS_EVENTS_PAGE = 1500;
 export const ALERTS_PER_PAGE = 100;
-export const IO_EVENTS_PER_PAGE = 2;
+export const IO_EVENTS_PER_PAGE = 10;
 
 // react-query caching keys
 export const QUERY_KEY_PROCESS_EVENTS = 'sessionViewProcessEvents';
@@ -48,7 +48,7 @@ export const ALERT_STATUS = {
 export const LOCAL_STORAGE_DISPLAY_OPTIONS_KEY = 'sessionView:displayOptions';
 export const MOUSE_EVENT_PLACEHOLDER = { stopPropagation: () => undefined } as React.MouseEvent;
 export const DEBOUNCE_TIMEOUT = 500;
-export const DEFAULT_TTY_PLAYSPEED_MS = 80; // milli seconds per line of tty output.
+export const DEFAULT_TTY_PLAYSPEED_MS = 50; // milli seconds per line of tty output.
 export const DEFAULT_TTY_FONT_SIZE = 11;
 export const DEFAULT_TTY_ROWS = 50;
 export const DEFAULT_TTY_COLS = 200;

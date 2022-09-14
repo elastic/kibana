@@ -11,7 +11,7 @@ import { transparentize } from '@elastic/eui';
 import { useEuiTheme } from '../../hooks';
 import { Teletype } from '../../../common/types/process_tree';
 
-export const useStyles = (tty?: Teletype) => {
+export const useStyles = (tty?: Teletype, show?: boolean) => {
   const { euiTheme, euiVars } = useEuiTheme();
   const cached = useMemo(() => {
     const { size, font, colors, border } = euiTheme;
@@ -19,6 +19,7 @@ export const useStyles = (tty?: Teletype) => {
     const container: CSSObject = {
       position: 'absolute',
       top: 0,
+      display: show ? 'block' : 'none',
       width: '100%',
       height: '100%',
       overflow: 'hidden',
@@ -80,7 +81,7 @@ export const useStyles = (tty?: Teletype) => {
       terminal,
       scrollPane,
     };
-  }, [tty, euiVars, euiTheme]);
+  }, [euiTheme, show, euiVars.euiFormBackgroundDisabledColor, tty?.rows, tty?.columns]);
 
   return cached;
 };

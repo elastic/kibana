@@ -13,12 +13,9 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SearchAddon } from './xterm_search';
 import { useEuiTheme } from '../../hooks';
 
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session_view_io_events.mock';
-
 import {
   IOLine,
-  ProcessEntityIdIOLine,
+  ProcessStartMarker,
   ProcessEvent,
   ProcessEventResults,
   ProcessEventsPage,
@@ -34,7 +31,8 @@ import {
   TTY_LINE_SPLITTER_REGEX,
 } from '../../../common/constants';
 
-const MOCK_DEBUG = false; // This code will be removed once we have an agent to test with.
+const LINES_PER_FRAME = 2;
+const LINES_PRE_SEEK = 1000;
 
 export const useFetchIOEvents = (sessionEntityId: string) => {
   const { http } = useKibana<CoreStart>().services;
@@ -51,18 +49,13 @@ export const useFetchIOEvents = (sessionEntityId: string) => {
         },
       });
 
-      if (MOCK_DEBUG) {
-        res.events = sessionViewIOEventsMock.events;
-        res.total = res.events?.length || 0;
-      }
-
       const events = res.events?.map((event: any) => event._source as ProcessEvent) ?? [];
 
       return { events, cursor, total: res.total };
     },
     {
       getNextPageParam: (lastPage) => {
-        if (!MOCK_DEBUG && lastPage.events.length >= IO_EVENTS_PER_PAGE) {
+        if (lastPage.events.length >= IO_EVENTS_PER_PAGE) {
           return {
             cursor: lastPage.events[lastPage.events.length - 1]['@timestamp'],
           };
@@ -84,10 +77,10 @@ export const useFetchIOEvents = (sessionEntityId: string) => {
 export const useIOLines = (pages: ProcessEventsPage[] | undefined) => {
   const linesAndEntityIdMap = useMemo(() => {
     const newLines: IOLine[] = [];
-    const entityIdLineMap: Record<string, ProcessEntityIdIOLine> = {};
+    const processStartMarkers: ProcessStartMarker[] = [];
 
     if (!pages) {
-      return { lines: newLines, processIdLineMap: entityIdLineMap };
+      return { lines: newLines, processStartMarkers };
     }
 
     return {
@@ -99,16 +92,13 @@ export const useIOLines = (pages: ProcessEventsPage[] | undefined) => {
               const splitLines = process.io.text.split(TTY_LINE_SPLITTER_REGEX);
               const combinedLines = [splitLines[0]];
               const previousProcessId = previous[previous.length - 1]?.event.process?.entity_id;
-              const currentProcessLineInfo: ProcessEntityIdIOLine = {
-                value: entityIdLineMap[process.entity_id]?.value ?? previous.length,
-              };
 
-              if (previousProcessId && previousProcessId !== process.entity_id) {
-                entityIdLineMap[previousProcessId].next = currentProcessLineInfo.value;
-                currentProcessLineInfo.previous = entityIdLineMap[previousProcessId].value;
-              }
               if (previousProcessId !== process.entity_id) {
-                entityIdLineMap[process.entity_id] = currentProcessLineInfo;
+                const processLineInfo: ProcessStartMarker = {
+                  line: previous.length || 0,
+                  event,
+                };
+                processStartMarkers.push(processLineInfo);
               }
 
               // delimiters e.g \r\n or cursor movements are merged with their line text
@@ -131,7 +121,7 @@ export const useIOLines = (pages: ProcessEventsPage[] | undefined) => {
         }
         return previous;
       }, newLines),
-      processIdLineMap: entityIdLineMap,
+      processStartMarkers,
     };
   }, [pages]);
   return linesAndEntityIdMap;
@@ -196,11 +186,11 @@ export const useXtermPlayer = ({
       let linesToPrint;
 
       if (clear) {
-        linesToPrint = lines.slice(0, lineNumber + 1);
+        linesToPrint = lines.slice(Math.max(0, lineNumber - LINES_PRE_SEEK), lineNumber + 1);
         terminal.reset();
         terminal.clear();
       } else {
-        linesToPrint = [lines[lineNumber]];
+        linesToPrint = lines.slice(lineNumber, lineNumber + LINES_PER_FRAME);
       }
 
       linesToPrint.forEach((line, index) => {
@@ -228,24 +218,20 @@ export const useXtermPlayer = ({
       // clear and rerender
       render(currentLine, true);
     }
-  }, [currentLine, fontSize, terminal, render, tty]);
+
+    if (hasNextPage && fetchNextPage && currentLine >= lines.length - 100) {
+      fetchNextPage();
+    }
+  }, [currentLine, fontSize, terminal, render, tty, hasNextPage, fetchNextPage, lines.length]);
 
   useEffect(() => {
     if (isPlaying) {
       const timer = setTimeout(() => {
         if (currentLine < lines.length - 1) {
-          setCurrentLine(currentLine + 1);
-        }
-
-        if (!isPlaying) {
-          return;
+          setCurrentLine(currentLine + LINES_PER_FRAME);
         }
 
         render(currentLine, false);
-
-        if (hasNextPage && fetchNextPage && currentLine === lines.length - 1) {
-          fetchNextPage();
-        }
       }, playSpeed);
 
       return () => {
@@ -257,11 +243,10 @@ export const useXtermPlayer = ({
   const seekToLine = useCallback(
     (index) => {
       setCurrentLine(index);
-      setIsPlaying(false);
 
       render(index, true);
     },
-    [setIsPlaying, render]
+    [render]
   );
 
   const search = useCallback(

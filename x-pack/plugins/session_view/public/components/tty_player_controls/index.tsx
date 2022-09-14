@@ -14,7 +14,8 @@ import {
   EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
-import { ProcessEntityIdIOLine, ProcessEvent } from '../../../common/types/process_tree';
+import { findIndex } from 'lodash';
+import { ProcessStartMarker, ProcessEvent } from '../../../common/types/process_tree';
 import { useStyles } from './styles';
 import {
   TTY_END,
@@ -28,7 +29,7 @@ import {
 
 export interface TTYPlayerControlsDeps {
   currentProcessEvent: ProcessEvent | undefined;
-  processIdLineMap: Record<string, ProcessEntityIdIOLine>;
+  processStartMarkers: ProcessStartMarker[];
   lastProcessEntityId: string | undefined;
   isPlaying: boolean;
   currentLine: number;
@@ -42,7 +43,7 @@ export interface TTYPlayerControlsDeps {
 
 export const TTYPlayerControls = ({
   currentProcessEvent,
-  processIdLineMap,
+  processStartMarkers,
   lastProcessEntityId,
   isPlaying,
   currentLine,
@@ -54,21 +55,6 @@ export const TTYPlayerControls = ({
   textSizer,
 }: TTYPlayerControlsDeps) => {
   const styles = useStyles();
-
-  const isFirstProcess = useMemo(
-    () =>
-      (currentProcessEvent?.process?.entity_id &&
-        processIdLineMap[currentProcessEvent.process.entity_id].previous === undefined) ||
-      false,
-    [currentProcessEvent, processIdLineMap]
-  );
-  const isLastProcess = useMemo(
-    () =>
-      (currentProcessEvent?.process?.entity_id &&
-        processIdLineMap[currentProcessEvent.process.entity_id].next === undefined) ||
-      false,
-    [currentProcessEvent, processIdLineMap]
-  );
 
   const onLineChange = useCallback(
     (event: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) => {
@@ -83,28 +69,38 @@ export const TTYPlayerControls = ({
   }, [onSeekLine]);
 
   const seekToEnd = useCallback(() => {
-    if (lastProcessEntityId) {
-      onSeekLine(processIdLineMap[lastProcessEntityId]?.value);
-    }
-  }, [lastProcessEntityId, onSeekLine, processIdLineMap]);
+    onSeekLine(linesLength);
+  }, [linesLength, onSeekLine]);
 
   const seekToPrevProcess = useCallback(() => {
-    if (
-      currentProcessEvent?.process?.entity_id &&
-      processIdLineMap[currentProcessEvent.process.entity_id]?.previous !== undefined
-    ) {
-      onSeekLine(processIdLineMap[currentProcessEvent.process.entity_id]?.previous ?? 0);
+    let index = findIndex(processStartMarkers, (marker) => {
+      if (marker.line > currentLine) {
+        return true;
+      }
+
+      return false;
+    });
+
+    if (index === -1) {
+      index = processStartMarkers.length - 1;
     }
-  }, [currentProcessEvent, processIdLineMap, onSeekLine]);
+
+    const previousMarker = processStartMarkers[index - 2];
+    onSeekLine(previousMarker?.line || 0);
+  }, [processStartMarkers, onSeekLine, currentLine]);
 
   const seekToNextProcess = useCallback(() => {
-    if (
-      currentProcessEvent?.process?.entity_id &&
-      processIdLineMap[currentProcessEvent.process.entity_id]?.next !== undefined
-    ) {
-      onSeekLine(processIdLineMap[currentProcessEvent.process.entity_id]?.next ?? 0);
-    }
-  }, [currentProcessEvent, processIdLineMap, onSeekLine]);
+    const nextIndex = findIndex(processStartMarkers, (marker) => {
+      if (marker.line > currentLine) {
+        return true;
+      }
+
+      return false;
+    });
+
+    const nextMarker = processStartMarkers[nextIndex];
+    onSeekLine(nextMarker?.line || linesLength);
+  }, [processStartMarkers, onSeekLine, linesLength, currentLine]);
 
   const handleViewInSession = useCallback(() => {
     if (currentProcessEvent) {
@@ -131,7 +127,6 @@ export const TTYPlayerControls = ({
               size="m"
               aria-label="TTY Start Button"
               onClick={seekToStart}
-              disabled={isFirstProcess}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -145,7 +140,6 @@ export const TTYPlayerControls = ({
               size="m"
               aria-label="TTY Previous Button"
               onClick={seekToPrevProcess}
-              disabled={isFirstProcess}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -172,7 +166,6 @@ export const TTYPlayerControls = ({
               size="m"
               aria-label="TTY Next Button"
               onClick={seekToNextProcess}
-              disabled={isLastProcess}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -186,7 +179,6 @@ export const TTYPlayerControls = ({
               size="m"
               aria-label="TTY End Button"
               onClick={seekToEnd}
-              disabled={isLastProcess}
             />
           </EuiToolTip>
         </EuiFlexItem>

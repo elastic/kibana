@@ -394,14 +394,13 @@ export const SessionView = ({
           );
         }}
       </EuiResizableContainer>
-      {showTTY && (
-        <TTYPlayer
-          sessionEntityId={sessionEntityId}
-          onClose={onToggleTTY}
-          isFullscreen={isFullScreen}
-          onJumpToEvent={onJumpToEvent}
-        />
-      )}
+      <TTYPlayer
+        show={showTTY}
+        sessionEntityId={sessionEntityId}
+        onClose={onToggleTTY}
+        isFullscreen={isFullScreen}
+        onJumpToEvent={onJumpToEvent}
+      />
     </div>
   );
 };
