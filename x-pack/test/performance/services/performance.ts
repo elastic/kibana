@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-/* eslint-disable no-console */
-
 import Url from 'url';
 import * as Rx from 'rxjs';
 import { inspect } from 'util';
 import { setTimeout } from 'timers/promises';
-import apm, { Span, Transaction } from 'elastic-apm-node';
+import apmNode from 'elastic-apm-node';
 import playwright, { ChromiumBrowser, Page, BrowserContext, CDPSession, Request } from 'playwright';
 import { FtrService, FtrProviderContext } from '../ftr_provider_context';
 
@@ -23,64 +21,97 @@ export interface StepCtx {
 type StepFn = (ctx: StepCtx) => Promise<void>;
 export type Steps = Array<{ name: string; handler: StepFn }>;
 
+interface UserJourneyExtra {
+  requireAuth: boolean;
+}
+
 export class PerformanceTestingService extends FtrService {
   private readonly auth = this.ctx.getService('auth');
   private readonly log = this.ctx.getService('log');
   private readonly config = this.ctx.getService('config');
 
   private browser: ChromiumBrowser | undefined;
-  private currentSpanStack: Array<Span | null> = [];
-  private currentTransaction: Transaction | undefined | null = undefined;
+  private page: Page | undefined;
+  private client: CDPSession | undefined;
+  private context: BrowserContext | undefined;
+  private currentSpanStack: Array<apmNode.Span | null> = [];
+  private currentTransaction: apmNode.Transaction | undefined | null = undefined;
 
   private pageTeardown$ = new Rx.Subject<Page>();
   private telemetryTrackerSubs = new Map<Page, Rx.Subscription>();
 
+  private apm: apmNode.Agent | null = null;
+  private authRequired: boolean = false;
+
   constructor(ctx: FtrProviderContext) {
     super(ctx);
 
-    ctx.getService('lifecycle').beforeTests.add(() => {
-      apm.start({
-        serviceName: 'functional test runner',
-        environment: process.env.CI ? 'ci' : 'development',
-        active: this.config.get(`kbnTestServer.env`).ELASTIC_APM_ACTIVE !== 'false',
-        serverUrl: this.config.get(`kbnTestServer.env`).ELASTIC_APM_SERVER_URL,
-        secretToken: this.config.get(`kbnTestServer.env`).ELASTIC_APM_SECRET_TOKEN,
-        globalLabels: this.config.get(`kbnTestServer.env`).ELASTIC_APM_GLOBAL_LABELS,
-        transactionSampleRate:
-          this.config.get(`kbnTestServer.env`).ELASTIC_APM_TRANSACTION_SAMPLE_RATE,
-        logger: process.env.VERBOSE_APM_LOGGING
-          ? {
-              warn(...args: any[]) {
-                console.log('APM WARN', ...args);
-              },
-              info(...args: any[]) {
-                console.log('APM INFO', ...args);
-              },
-              fatal(...args: any[]) {
-                console.log('APM FATAL', ...args);
-              },
-              error(...args: any[]) {
-                console.log('APM ERROR', ...args);
-              },
-              debug(...args: any[]) {
-                console.log('APM DEBUG', ...args);
-              },
-              trace(...args: any[]) {
-                console.log('APM TRACE', ...args);
-              },
-            }
-          : undefined,
-      });
+    ctx.getService('lifecycle').beforeTestSuite.add(this.beforeAll.bind(this));
+    ctx.getService('lifecycle').afterTestSuite.add(this.afterAll.bind(this));
+    ctx.getService('lifecycle').testFailure.add(this.onStepError.bind(this));
+  }
+
+  private async beforeAll() {
+    const kbnTestServerEnv = this.config.get(`kbnTestServer.env`);
+
+    this.apm = apmNode.start({
+      serviceName: 'functional test runner',
+      environment: process.env.CI ? 'ci' : 'development',
+      active: kbnTestServerEnv.ELASTIC_APM_ACTIVE !== 'false',
+      serverUrl: kbnTestServerEnv.ELASTIC_APM_SERVER_URL,
+      secretToken: kbnTestServerEnv.ELASTIC_APM_SECRET_TOKEN,
+      globalLabels: kbnTestServerEnv.ELASTIC_APM_GLOBAL_LABELS,
+      transactionSampleRate: kbnTestServerEnv.ELASTIC_APM_TRANSACTION_SAMPLE_RATE,
     });
 
-    ctx.getService('lifecycle').cleanup.add(async () => {
-      await this.shutdownBrowser();
-      await new Promise<void>((resolve) => apm.flush(() => resolve()));
+    if (this.currentTransaction) {
+      throw new Error(`Transaction exist, end prev transaction ${this.currentTransaction?.name}`);
+    }
+
+    // this.config.get('journeyName');
+    this.currentTransaction = this.apm?.startTransaction(`Journey xd`, 'performance');
+
+    const browser = await this.getBrowserInstance();
+    this.context = await browser.newContext({ bypassCSP: true });
+
+    if (!this.authRequired) {
+      const cookie = await this.auth.login({ username: 'elastic', password: 'changeme' });
+      await this.context.addCookies([cookie]);
+    }
+
+    this.page = await this.context.newPage();
+
+    if (!process.env.NO_BROWSER_LOG) {
+      this.page.on('console', this.onConsoleEvent());
+    }
+
+    await this.sendCDPCommands(this.context, this.page);
+
+    this.trackTelemetryRequests(this.page);
+    await this.interceptBrowserRequests(this.page);
+  }
+
+  private async afterAll() {
+    await this.tearDown();
+    await this.shutdownBrowser();
+
+    this.currentTransaction?.end('Success');
+    this.currentTransaction = undefined;
+
+    // @ts-ignore
+    if (this.apm?.isStarted() && this.apm._conf.active) {
+      this.log.info('Apm flushes');
+      await new Promise<void>((resolve) => this.apm?.flush(() => resolve()));
       // wait for the HTTP request that apm.flush() starts, which we
       // can't track but hope is complete within 3 seconds
       // https://github.com/elastic/apm-agent-nodejs/issues/2088
       await setTimeout(3000);
-    });
+    }
+  }
+
+  private async onStepError(err: Error) {
+    this.currentTransaction?.end(`Failure ${err.message}`);
+    this.currentTransaction = undefined;
   }
 
   private getKibanaUrl() {
@@ -91,34 +122,9 @@ export class PerformanceTestingService extends FtrService {
     });
   }
 
-  private async withTransaction<T>(name: string, block: () => Promise<T>) {
-    try {
-      if (this.currentTransaction) {
-        throw new Error(
-          `Transaction already started, make sure you end transaction ${this.currentTransaction?.name}`
-        );
-      }
-      this.currentTransaction = apm.startTransaction(name, 'performance');
-      const result = await block();
-      if (this.currentTransaction === undefined) {
-        throw new Error(`No transaction started`);
-      }
-      this.currentTransaction?.end('success');
-      this.currentTransaction = undefined;
-      return result;
-    } catch (e) {
-      if (this.currentTransaction === undefined) {
-        throw new Error(`No transaction started`);
-      }
-      this.currentTransaction?.end('failure');
-      this.currentTransaction = undefined;
-      throw e;
-    }
-  }
-
   private async withSpan<T>(name: string, type: string | undefined, block: () => Promise<T>) {
     try {
-      this.currentSpanStack.unshift(apm.startSpan(name, type ?? null));
+      this.currentSpanStack.unshift(this.apm?.startSpan(name, type ?? null)!);
       const result = await block();
       if (this.currentSpanStack.length === 0) {
         throw new Error(`No Span started`);
@@ -147,9 +153,9 @@ export class PerformanceTestingService extends FtrService {
     if (this.browser) {
       return this.browser;
     }
-    return await this.withSpan('browser creation', 'setup', async () => {
+    return await this.withSpan('Browser creation', 'setup', async () => {
       const headless = !!(process.env.TEST_BROWSER_HEADLESS || process.env.CI);
-      this.browser = await playwright.chromium.launch({ headless, timeout: 60000 });
+      this.browser = await playwright.chromium.launch({ headless, timeout: 60_000 });
       return this.browser;
     });
   }
@@ -219,48 +225,25 @@ export class PerformanceTestingService extends FtrService {
     });
   }
 
-  public runUserJourney(
-    journeyName: string,
-    steps: Steps,
-    { requireAuth }: { requireAuth: boolean }
-  ) {
-    return this.withTransaction(`Journey ${journeyName}`, async () => {
-      const browser = await this.getBrowserInstance();
-      const context = await browser.newContext({ bypassCSP: true });
-
-      if (!requireAuth) {
-        const cookie = await this.auth.login({ username: 'elastic', password: 'changeme' });
-        await context.addCookies([cookie]);
-      }
-
-      const page = await context.newPage();
-      if (!process.env.NO_BROWSER_LOG) {
-        page.on('console', this.onConsoleEvent());
-      }
-      const client = await this.sendCDPCommands(context, page);
-
-      this.trackTelemetryRequests(page);
-      await this.interceptBrowserRequests(page);
-      await this.handleSteps(steps, page);
-      await this.tearDown(page, client, context);
-    });
+  public runUserJourney(steps: Steps, { requireAuth }: UserJourneyExtra) {
+    const journeyName = 'xd'; // this.config.get('journeyName');
+    this.authRequired = requireAuth;
+    describe(journeyName, () => this.handleSteps(steps));
   }
 
-  private async tearDown(page: Page, client: CDPSession, context: BrowserContext) {
-    if (page) {
-      const telemetryTracker = this.telemetryTrackerSubs.get(page);
-      this.telemetryTrackerSubs.delete(page);
+  private async tearDown() {
+    if (this.page) {
+      const telemetryTracker = this.telemetryTrackerSubs.get(this.page);
+      this.telemetryTrackerSubs.delete(this.page);
 
       if (telemetryTracker && !telemetryTracker.closed) {
-        this.log.info(
-          `Waiting for telemetry requests to complete, including requests starting within next 3 secs`
-        );
-        this.pageTeardown$.next(page);
+        this.log.info(`Waiting for telemetry requests, including starting within next 3 secs`);
+        this.pageTeardown$.next(this.page);
         await new Promise<void>((resolve) => telemetryTracker.add(resolve));
       }
-      await client.detach();
-      await page.close();
-      await context.close();
+      await this.client?.detach();
+      await this.page.close();
+      await this.context?.close();
     }
   }
 
@@ -270,14 +253,15 @@ export class PerformanceTestingService extends FtrService {
     }
   }
 
-  private async handleSteps(steps: Array<{ name: string; handler: StepFn }>, page: Page) {
+  private handleSteps(steps: Array<{ name: string; handler: StepFn }>) {
     for (const step of steps) {
-      await this.withSpan(`step: ${step.name}`, 'step', async () => {
+      it(step.name, async () => {
         try {
-          await step.handler({ page, kibanaUrl: this.getKibanaUrl() });
+          await step.handler({ page: this.page!, kibanaUrl: this.getKibanaUrl() });
         } catch (e) {
           const error = new Error(`Step [${step.name}] failed: ${e.message}`);
           error.stack = e.stack;
+          throw error; // Rethrow error if step fails otherwise it is silently passing
         }
       });
     }
@@ -296,10 +280,10 @@ export class PerformanceTestingService extends FtrService {
           ? args.map((arg) => (typeof arg === 'string' ? arg : inspect(arg, false, null))).join(' ')
           : message.text();
 
-        console.log(`[console.${message.type()}]`, text);
-        console.log('    ', location);
+        this.log.debug(`[console.${message.type()}]`, text);
+        this.log.debug(`     `, location);
       } catch (e) {
-        console.error('Failed to evaluate console.log line', e);
+        this.log.error('Failed to evaluate log line from browser\n' + e);
       }
     };
   }
