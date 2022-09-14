@@ -89,7 +89,8 @@ export const createMockedIndexPattern = (someProps?: Partial<IndexPattern>): Ind
     hasRestrictions: false,
     fields,
     getFieldByName: getFieldByNameFactory(fields),
-    spec: undefined,
+    isPersisted: true,
+    spec: {},
     ...someProps,
   };
 };
@@ -130,7 +131,8 @@ export const createMockedRestrictedIndexPattern = () => {
     fieldFormatMap: { bytes: { id: 'bytes', params: { pattern: '0.0' } } },
     fields,
     getFieldByName: getFieldByNameFactory(fields),
-    spec: undefined,
+    isPersisted: true,
+    spec: {},
     typeMeta: {
       params: {
         rollup_index: 'my-fake-index-pattern',

@@ -16,10 +16,7 @@ import {
 import React, { useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { useCurrentUser } from '../../common/lib/kibana';
 import { AddComment } from '../add_comment';
-import { UserActionAvatar } from './avatar';
-import { UserActionUsername } from './username';
 import { useCaseViewParams } from '../../common/navigation';
 import { builderMap } from './builder';
 import { isUserActionTypeSupported, getManualAlertIdsWithNoRuleId } from './helpers';
@@ -28,6 +25,9 @@ import { getDescriptionUserAction } from './description';
 import { useUserActionsHandler } from './use_user_actions_handler';
 import { NEW_COMMENT_ID } from './constants';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { UserToolTip } from '../user_profiles/user_tooltip';
+import { Username } from '../user_profiles/username';
+import { HoverableAvatar } from '../user_profiles/hoverable_avatar';
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
   margin-bottom: 8px;
@@ -67,7 +67,7 @@ const MyEuiCommentList = styled(EuiCommentList)`
       flex-grow: 1;
     }
 
-    & .comment-action.empty-comment [class*="euiCommentEvent-regular] {
+    & .comment-action.empty-comment [class*="euiCommentEvent-regular"] {
       box-shadow: none;
       .euiCommentEvent__header {
         padding: ${theme.eui.euiSizeM} ${theme.eui.euiSizeS};
@@ -96,7 +96,6 @@ export const UserActions = React.memo(
   }: UserActionTreeProps) => {
     const { detailName: caseId, commentId } = useCaseViewParams();
     const [initLoading, setInitLoading] = useState(true);
-    const currentUser = useCurrentUser();
     const { externalReferenceAttachmentTypeRegistry, persistableStateAttachmentTypeRegistry } =
       useCasesContext();
 
@@ -147,6 +146,7 @@ export const UserActions = React.memo(
     const descriptionCommentListObj: EuiCommentProps = useMemo(
       () =>
         getDescriptionUserAction({
+          userProfiles,
           caseData,
           commentRefs,
           manageMarkdownEditIds,
@@ -156,6 +156,7 @@ export const UserActions = React.memo(
           handleManageQuote,
         }),
       [
+        userProfiles,
         caseData,
         commentRefs,
         manageMarkdownEditIds,
@@ -243,15 +244,12 @@ export const UserActions = React.memo(
       ? [
           {
             username: (
-              <UserActionUsername
-                username={currentUser?.username}
-                fullName={currentUser?.fullName}
-              />
+              <UserToolTip userInfo={currentUserProfile}>
+                <Username userInfo={currentUserProfile} />
+              </UserToolTip>
             ),
             'data-test-subj': 'add-comment',
-            timelineAvatar: (
-              <UserActionAvatar username={currentUser?.username} fullName={currentUser?.fullName} />
-            ),
+            timelineAvatar: <HoverableAvatar userInfo={currentUserProfile} />,
             className: 'isEdit',
             children: MarkdownNewComment,
           },

@@ -74,7 +74,7 @@ export function DiscoverChart({
 
   useEffect(() => {
     if (!timeField) return;
-    getVisualizeInformation(timeField, dataView.id, savedSearch.columns || []).then((info) => {
+    getVisualizeInformation(timeField, dataView, savedSearch.columns || []).then((info) => {
       setCanVisualize(Boolean(info));
     });
   }, [dataView, savedSearch.columns, timeField]);
@@ -83,8 +83,8 @@ export function DiscoverChart({
     if (!timeField) {
       return;
     }
-    triggerVisualizeActions(timeField, dataView.id, savedSearch.columns || []);
-  }, [dataView.id, savedSearch, timeField]);
+    triggerVisualizeActions(timeField, savedSearch.columns || [], dataView);
+  }, [dataView, savedSearch.columns, timeField]);
 
   const onShowChartOptions = useCallback(() => {
     setShowChartOptionsPopover(!showChartOptionsPopover);
