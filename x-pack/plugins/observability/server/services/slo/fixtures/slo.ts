@@ -7,12 +7,11 @@
 
 import uuid from 'uuid';
 import { SLI, SLO } from '../../../types/models';
+import { CreateSLOParams } from '../../../types/schema';
 
-export const createSLO = (indicator: SLI): SLO => ({
-  id: uuid.v1(),
+const commonSLO: Omit<CreateSLOParams, 'indicator'> = {
   name: 'irrelevant',
   description: 'irrelevant',
-  indicator,
   time_window: {
     duration: '7d',
     is_rolling: true,
@@ -21,9 +20,20 @@ export const createSLO = (indicator: SLI): SLO => ({
   objective: {
     target: 0.999,
   },
+};
+
+export const createSLOParams = (indicator: SLI): CreateSLOParams => ({
+  ...commonSLO,
+  indicator,
+});
+
+export const createSLO = (indicator: SLI): SLO => ({
+  ...commonSLO,
+  id: uuid.v1(),
   settings: {
     destination_index: 'some-index',
   },
+  indicator,
 });
 
 export const createAPMTransactionErrorRateIndicator = (params = {}): SLI => ({
