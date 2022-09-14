@@ -19,6 +19,7 @@ import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 
 import {
   addChangePointsAction,
+  addChangePointsGroupAction,
   addChangePointsHistogramAction,
   aiopsExplainLogRateSpikesSchema,
   addErrorAction,
@@ -32,6 +33,12 @@ import type { AiopsLicense } from '../types';
 
 import { fetchFieldCandidates } from './queries/fetch_field_candidates';
 import { fetchChangePointPValues } from './queries/fetch_change_point_p_values';
+import { generateItemsets } from './generate_itemsets';
+import {
+  getSimpleHierarchicalTree,
+  getSimpleHierarchicalTreeLeaves,
+  markDuplicates,
+} from './get_simple_hierarchical_tree';
 
 // Overall progress is a float from 0 to 1.
 const LOADED_FIELD_CANDIDATES = 0.2;
@@ -197,6 +204,43 @@ export const defineExplainLogRateSpikesRoute = (
           endWithUpdatedLoadingState();
           return;
         }
+
+        // fields, df = analysis.generate_itemsets_es()
+        const { fields, df, totalDocCount } = await generateItemsets(
+          client,
+          request.body.index,
+          changePoints,
+          request.body.timeFieldName,
+          request.body.deviationMin,
+          request.body.deviationMax
+        );
+
+        // Filter itemsets by significant change point field value pairs
+        // TODO possibly move this to the ES query
+        const filteredDf = df.filter((fi) => {
+          const { set: currentItems } = fi;
+
+          return Object.entries(currentItems).every(([key, value]) => {
+            return changePoints.some((cp) => {
+              return cp.fieldName === key && cp.fieldValue === value;
+            });
+          });
+        });
+
+        // fields_tree, root = aiops.ItemSetTree.get_simple_hierarchical_tree(df, True, False, fields=list(fields))
+        const { fields: fieldsTree, root } = getSimpleHierarchicalTree(
+          filteredDf,
+          true,
+          false,
+          fields
+        );
+
+        // console.log('fields', fieldsTree);
+        // console.log('root', root);
+
+        const changePointsGroups = getSimpleHierarchicalTreeLeaves(root, []);
+
+        push(addChangePointsGroupAction(markDuplicates(changePointsGroups)));
 
         const histogramFields: [NumericHistogramField] = [
           { fieldName: request.body.timeFieldName, type: KBN_FIELD_TYPES.DATE },

@@ -80,6 +80,8 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     { reducer: streamReducer, initialState }
   );
 
+  // console.log('data', data.changePointsGroups);
+
   const errors = useMemo(() => [...streamErrors, ...data.errors], [streamErrors, data.errors]);
 
   // Start handler clears possibly hovered or pinned
