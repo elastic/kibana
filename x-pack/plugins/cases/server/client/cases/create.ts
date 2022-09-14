@@ -41,7 +41,7 @@ export const create = async (
 ): Promise<CaseResponse> => {
   const {
     unsecuredSavedObjectsClient,
-    services: { caseService, userActionService },
+    services: { caseService, userActionService, licensingService },
     user,
     logger,
     authorization: auth,
@@ -71,6 +71,20 @@ export const create = async (
       operation: Operations.createCase,
       entities: [{ owner: query.owner, id: savedObjectID }],
     });
+
+    /**
+     * Assign users to a case is only available to Platinum+
+     */
+
+    if (query.assignees && query.assignees.length !== 0) {
+      const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
+
+      if (!hasPlatinumLicenseOrGreater) {
+        throw Boom.forbidden(
+          'In order to assign users to cases, you must be subscribed to an Elastic Platinum license'
+        );
+      }
+    }
 
     const newCase = await caseService.postNewCase({
       attributes: transformNewCase({
