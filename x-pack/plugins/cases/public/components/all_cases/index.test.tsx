@@ -231,4 +231,11 @@ describe('AllCases', () => {
       ).toBeFalsy();
     });
   });
+
+  it('should render the case callouts', async () => {
+    const result = appMockRender.render(<AllCases />);
+    await waitFor(() => {
+      expect(result.getByTestId('case-callouts')).toBeInTheDocument();
+    });
+  });
 });

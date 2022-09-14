@@ -45,6 +45,7 @@ import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
+import { useLicense } from '../../common/use_license';
 
 jest.mock('../../containers/use_create_attachments');
 jest.mock('../../containers/use_bulk_update_case');
@@ -63,6 +64,7 @@ jest.mock('../app/use_available_owners', () => ({
   useAvailableCasesOwners: () => ['securitySolution', 'observability'],
 }));
 jest.mock('../../containers/use_update_case');
+jest.mock('../../common/use_license');
 
 const useDeleteCasesMock = useDeleteCases as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
@@ -76,6 +78,7 @@ const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
+const useLicenseMock = useLicense as jest.Mock;
 
 const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
 
@@ -174,11 +177,14 @@ describe('AllCasesListGeneric', () => {
     useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
     useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
     useUpdateCaseMock.mockReturnValue({ updateCaseProperty });
+    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
     mockKibana();
     moment.tz.setDefault('UTC');
   });
 
   it('should render AllCasesList', async () => {
+    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+
     const wrapper = mount(
       <TestProviders>
         <AllCasesList />
@@ -217,6 +223,8 @@ describe('AllCasesListGeneric', () => {
   });
 
   it("should show a tooltip with the assignee's email when hover over the assignee avatar", async () => {
+    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+
     const result = render(
       <TestProviders>
         <AllCasesList />
@@ -1000,6 +1008,70 @@ describe('AllCasesListGeneric', () => {
         },
         queryParams: { page: 1, perPage: 5, sortField: 'createdAt', sortOrder: 'desc' },
       });
+    });
+  });
+});
+
+describe('Assignees', () => {
+  it('should hide the assignees column on basic license', async () => {
+    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
+
+    const result = render(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(result.getByTestId('cases-table')).toBeTruthy();
+      expect(result.queryAllByTestId('case-table-column-assignee').length).toBe(0);
+    });
+  });
+
+  it('should show the assignees column on platinum license', async () => {
+    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+
+    const result = render(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(result.getByTestId('cases-table')).toBeTruthy();
+      expect(result.queryAllByTestId('case-table-column-assignee').length).toBeGreaterThan(0);
+    });
+  });
+
+  it('should hide the assignees filters on basic license', async () => {
+    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
+
+    const result = render(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(result.getByTestId('cases-table')).toBeTruthy();
+      expect(result.queryAllByTestId('options-filter-popover-button-assignees').length).toBe(0);
+    });
+  });
+
+  it('should show the assignees filters on platinum license', async () => {
+    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+
+    const result = render(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(result.getByTestId('cases-table')).toBeTruthy();
+      expect(
+        result.queryAllByTestId('options-filter-popover-button-assignees').length
+      ).toBeGreaterThan(0);
     });
   });
 });

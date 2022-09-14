@@ -6,17 +6,23 @@
  */
 
 import { useMemo } from 'react';
-import { SingleCaseMetricsFeature } from '../../containers/types';
-import { useCasesContext } from './use_cases_context';
+import { SingleCaseMetricsFeature } from '../../common/ui';
+import { useCasesContext } from '../components/cases_context/use_cases_context';
+import { useLicense } from './use_license';
 
 export interface UseCasesFeatures {
   isAlertsEnabled: boolean;
   isSyncAlertsEnabled: boolean;
+  caseAssignmentAuthorized: boolean;
+  pushToServiceAuthorized: boolean;
   metricsFeatures: SingleCaseMetricsFeature[];
 }
 
 export const useCasesFeatures = (): UseCasesFeatures => {
   const { features } = useCasesContext();
+  const { isAtLeastPlatinum } = useLicense();
+  const hasLicenseGreaterThanPlatinum = isAtLeastPlatinum();
+
   const casesFeatures = useMemo(
     () => ({
       isAlertsEnabled: features.alerts.enabled,
@@ -30,8 +36,11 @@ export const useCasesFeatures = (): UseCasesFeatures => {
        */
       isSyncAlertsEnabled: !features.alerts.enabled ? false : features.alerts.sync,
       metricsFeatures: features.metrics,
+      caseAssignmentAuthorized: hasLicenseGreaterThanPlatinum,
+      pushToServiceAuthorized: hasLicenseGreaterThanPlatinum,
     }),
-    [features.alerts.enabled, features.alerts.sync, features.metrics]
+    [features.alerts.enabled, features.alerts.sync, features.metrics, hasLicenseGreaterThanPlatinum]
   );
+
   return casesFeatures;
 };

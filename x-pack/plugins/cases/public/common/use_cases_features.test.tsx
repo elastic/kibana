@@ -7,9 +7,11 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { CasesContextFeatures } from '../../common/ui';
 import { useCasesFeatures, UseCasesFeatures } from './use_cases_features';
-import { TestProviders } from '../../common/mock';
-import { CasesContextFeatures } from '../../containers/types';
+import { TestProviders } from './mock/test_providers';
+import { LicenseType, LICENSE_TYPE } from '@kbn/licensing-plugin/common/types';
 
 describe('useCasesFeatures', () => {
   // isAlertsEnabled, isSyncAlertsEnabled, alerts
@@ -40,6 +42,8 @@ describe('useCasesFeatures', () => {
         isAlertsEnabled,
         isSyncAlertsEnabled,
         metricsFeatures: [],
+        caseAssignmentAuthorized: false,
+        pushToServiceAuthorized: false,
       });
     }
   );
@@ -55,6 +59,36 @@ describe('useCasesFeatures', () => {
       isAlertsEnabled: true,
       isSyncAlertsEnabled: true,
       metricsFeatures: ['connectors'],
+      caseAssignmentAuthorized: false,
+      pushToServiceAuthorized: false,
     });
   });
+
+  const licenseTests: Array<[LicenseType, boolean]> = (Object.keys(LICENSE_TYPE) as LicenseType[])
+    .filter((type: LicenseType) => isNaN(Number(type)))
+    .map((type) => [
+      type,
+      type === 'platinum' || type === 'enterprise' || type === 'trial' ? true : false,
+    ]);
+
+  it.each(licenseTests)(
+    'allows platinum features on a platinum license',
+    async (type, expectedResult) => {
+      const license = licensingMock.createLicense({
+        license: { type },
+      });
+
+      const { result } = renderHook<{}, UseCasesFeatures>(() => useCasesFeatures(), {
+        wrapper: ({ children }) => <TestProviders license={license}>{children}</TestProviders>,
+      });
+
+      expect(result.current).toEqual({
+        isAlertsEnabled: true,
+        isSyncAlertsEnabled: true,
+        metricsFeatures: [],
+        caseAssignmentAuthorized: expectedResult,
+        pushToServiceAuthorized: expectedResult,
+      });
+    }
+  );
 });

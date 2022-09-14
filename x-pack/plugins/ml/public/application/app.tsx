@@ -27,7 +27,7 @@ import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
 
 export type MlDependencies = Omit<
   MlSetupDependencies,
-  'share' | 'fieldFormats' | 'maps' | 'cases'
+  'share' | 'fieldFormats' | 'maps' | 'cases' | 'licensing'
 > &
   MlStartDependencies;
 
@@ -91,6 +91,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     charts: deps.charts,
     cases: deps.cases,
     unifiedSearch: deps.unifiedSearch,
+    licensing: deps.licensing,
     ...coreStart,
   };
 

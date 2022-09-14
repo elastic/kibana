@@ -79,6 +79,32 @@ function throwIfTitleIsInvalid(requests: UpdateRequestWithOriginalCase[]) {
 }
 
 /**
+ * Throws an error if any of the requests attempt to update the assignees of the case
+ * without the appropriate license
+ */
+function throwIfUpdateAssigneesWithoutValidLicense(
+  requests: UpdateRequestWithOriginalCase[],
+  hasPlatinumLicenseOrGreater: boolean
+) {
+  if (hasPlatinumLicenseOrGreater) {
+    return;
+  }
+
+  const requestsUpdatingAssignees = requests.filter(
+    ({ updateReq }) => updateReq.assignees !== undefined
+  );
+
+  if (requestsUpdatingAssignees.length > 0) {
+    const ids = requestsUpdatingAssignees.map(({ updateReq }) => updateReq.id);
+    throw Boom.forbidden(
+      `In order to assign users to cases, you must be subscribed to an Elastic Platinum license, ids: [${ids.join(
+        ', '
+      )}]`
+    );
+  }
+}
+
+/**
  * Get the id from a reference in a comment for a specific type.
  */
 function getID(
@@ -230,7 +256,7 @@ export const update = async (
 ): Promise<CasesResponse> => {
   const {
     unsecuredSavedObjectsClient,
-    services: { caseService, userActionService, alertsService },
+    services: { caseService, userActionService, alertsService, licensingService },
     user,
     logger,
     authorization,
@@ -301,8 +327,11 @@ export const update = async (
       throw Boom.notAcceptable('All update fields are identical to current version.');
     }
 
+    const hasPlatinumLicense = await licensingService.isAtLeastPlatinum();
+
     throwIfUpdateOwner(updateCases);
     throwIfTitleIsInvalid(updateCases);
+    throwIfUpdateAssigneesWithoutValidLicense(updateCases, hasPlatinumLicense);
 
     const updatedCases = await patchCases({ caseService, user, casesToUpdate: updateCases });
 

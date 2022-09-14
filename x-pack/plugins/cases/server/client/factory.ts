@@ -17,6 +17,7 @@ import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { SAVED_OBJECT_TYPES } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
 import {
@@ -33,6 +34,7 @@ import { CasesClient, createCasesClient } from '.';
 import { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 import { CasesServices } from './types';
+import { LicensingService } from '../services/licensing';
 
 interface CasesClientFactoryArgs {
   securityPluginSetup?: SecurityPluginSetup;
@@ -40,6 +42,7 @@ interface CasesClientFactoryArgs {
   spacesPluginStart: SpacesPluginStart;
   featuresPluginStart: FeaturesPluginStart;
   actionsPluginStart: ActionsPluginStart;
+  licensingPluginStart: LicensingPluginStart;
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
@@ -148,6 +151,8 @@ export class CasesClientFactory {
       attachmentService,
     });
 
+    const licensingService = new LicensingService(this.options.licensingPluginStart.license$);
+
     return {
       alertsService: new AlertService(esClient, this.logger),
       caseService,
@@ -158,6 +163,7 @@ export class CasesClientFactory {
         this.options.persistableStateAttachmentTypeRegistry
       ),
       attachmentService,
+      licensingService,
     };
   }
 }

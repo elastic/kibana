@@ -24,8 +24,6 @@ const TitleComponent: React.FC<Props> = ({ isLoading }) => (
         autoFocus: true,
         fullWidth: true,
         disabled: isLoading,
-        // TODO set a custom test subj
-        // 'data-test-subj': 'caseTitleInput',
       },
     }}
   />

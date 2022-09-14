@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { isEqual, uniq } from 'lodash';
+import { useCasesFeatures } from '../../../common/use_cases_features';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetConnectors } from '../../../containers/configure/use_connectors';
@@ -46,6 +49,7 @@ export const CaseViewActivity = ({
 }) => {
   const { permissions } = useCasesContext();
   const { getCaseViewUrl } = useCaseViewNavigation();
+  const { caseAssignmentAuthorized, pushToServiceAuthorized } = useCasesFeatures();
 
   const { data: userActionsData, isLoading: isLoadingUserActions } = useGetCaseUserActions(
     caseData.id,
@@ -185,14 +189,18 @@ export const CaseViewActivity = ({
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
-        <AssignUsers
-          caseAssignees={caseData.assignees}
-          currentUserProfile={currentUserProfile}
-          onAssigneesChanged={onUpdateAssignees}
-          isLoading={isLoadingAssigneeData}
-          userProfiles={userProfiles ?? new Map()}
-        />
-        <EuiSpacer size="m" />
+        {caseAssignmentAuthorized ? (
+          <>
+            <AssignUsers
+              caseAssignees={caseData.assignees}
+              currentUserProfile={currentUserProfile}
+              onAssigneesChanged={onUpdateAssignees}
+              isLoading={isLoadingAssigneeData}
+              userProfiles={userProfiles ?? new Map()}
+            />
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
         <SeveritySidebarSelector
           isDisabled={!permissions.update}
           isLoading={isLoading}
@@ -221,7 +229,7 @@ export const CaseViewActivity = ({
           onSubmit={onSubmitTags}
           isLoading={isLoading && loadingKey === 'tags'}
         />
-        {userActionsData ? (
+        {pushToServiceAuthorized && userActionsData ? (
           <EditConnector
             caseData={caseData}
             caseServices={userActionsData.caseServices}

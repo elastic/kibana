@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import Boom from '@hapi/boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
@@ -37,7 +38,7 @@ export const find = async (
   clientArgs: CasesClientArgs
 ): Promise<CasesFindResponse> => {
   const {
-    services: { caseService },
+    services: { caseService, licensingService },
     authorization,
     logger,
   } = clientArgs;
@@ -52,6 +53,20 @@ export const find = async (
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.findCases);
+
+    /**
+     * Assign users to a case is only available to Platinum+
+     */
+
+    if (!isEmpty(queryParams.assignees)) {
+      const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
+
+      if (!hasPlatinumLicenseOrGreater) {
+        throw Boom.forbidden(
+          'In order to filter cases by assignees, you must be subscribed to an Elastic Platinum license'
+        );
+      }
+    }
 
     const queryArgs: ConstructQueryParams = {
       tags: queryParams.tags,

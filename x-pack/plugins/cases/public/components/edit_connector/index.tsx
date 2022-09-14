@@ -283,6 +283,7 @@ export const EditConnector = React.memo(
           gutterSize="xs"
           justifyContent="spaceBetween"
           responsive={false}
+          data-test-subj="case-view-edit-connector"
         >
           <EuiFlexItem grow={false} data-test-subj="connector-edit-header">
             <h4>{i18n.CONNECTORS}</h4>
