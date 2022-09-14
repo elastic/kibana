@@ -62,7 +62,7 @@ export const createMlInferencePipeline = async (
     ...mlInferencePipeline,
   });
 
-  return {
+  return Promise.resolve({
     created: true,
-  };
+  });
 };
