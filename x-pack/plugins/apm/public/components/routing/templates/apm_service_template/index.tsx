@@ -257,6 +257,9 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
         defaultMessage: 'Metrics',
       }),
+      append: isServerlessAgent(runtimeName) ? (
+        <BetaBadge icon="beaker" />
+      ) : undefined,
       hidden: isMetricsTabHidden({ agentName, runtimeName }),
     },
     {
