@@ -15,11 +15,11 @@ const allSuccessSnoozeMessage = (total: number) =>
     values: { total },
   });
 
-const someSuccessSnoozeMessage = (success: number, failure: number) =>
+const someSuccessSnoozeMessage = (failure: number) =>
   i18n.translate('xpack.triggersActionsUI.sections.ruleApi.bulkEditResponse.snooze.someSuccess', {
     defaultMessage:
       'Successfully updated snooze for some rules, failed for {failure, plural, one {# rule} other {# rules}}.',
-    values: { success, failure },
+    values: { failure },
   });
 
 const allFailureSnoozeMessage = (total: number) =>
@@ -38,13 +38,13 @@ const allSuccessUpdateApiKeyMessage = (total: number) =>
     }
   );
 
-const someSuccessUpdateApiKeyMessage = (success: number, failure: number) =>
+const someSuccessUpdateApiKeyMessage = (failure: number) =>
   i18n.translate(
     'xpack.triggersActionsUI.sections.ruleApi.bulkEditResponse.updateApiKey.someSuccess',
     {
       defaultMessage:
         'Successfully updated API key for some rules, failed for {failure, plural, one {# rule} other {# rules}}.',
-      values: { success, failure },
+      values: { failure },
     }
   );
 
@@ -66,7 +66,7 @@ export const getFormattedBulkSnoozeResponseMessage = (response: BulkEditResponse
   if (errors.length === total) {
     return allFailureSnoozeMessage(total);
   }
-  return someSuccessSnoozeMessage(total - errors.length, errors.length);
+  return someSuccessSnoozeMessage(errors.length);
 };
 
 export const getFormattedBulkUpdateApiKeyResponseMessage = (response: BulkEditResponse) => {
@@ -77,5 +77,5 @@ export const getFormattedBulkUpdateApiKeyResponseMessage = (response: BulkEditRe
   if (errors.length === total) {
     return allFailureUpdateApiKeyMessage(total);
   }
-  return someSuccessUpdateApiKeyMessage(total - errors.length, errors.length);
+  return someSuccessUpdateApiKeyMessage(errors.length);
 };

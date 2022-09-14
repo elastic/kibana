@@ -34,7 +34,7 @@ const failureMessage = i18n.translate(
 );
 
 const confirmationTitle = i18n.translate(
-  'xpack.triggersActionsUI.sections.rulesList.bulkSnoozeScheduleFailMessage',
+  'xpack.triggersActionsUI.sections.rulesList.bulkDeleteScheduleConfirmationTitle',
   {
     defaultMessage: 'Bulk delete snooze schedules',
   }

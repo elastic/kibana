@@ -6,9 +6,11 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment';
+import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import {
   EuiBasicTable,
   EuiFlexGroup,
@@ -26,6 +28,7 @@ import {
   EuiScreenReaderOnly,
   EuiCheckbox,
   RIGHT_ALIGNMENT,
+  useEuiTheme,
 } from '@elastic/eui';
 import {
   RuleExecutionStatus,
@@ -40,6 +43,8 @@ import {
   ALERT_STATUS_LICENSE_ERROR,
   SELECT_ALL_RULES,
   CLEAR_SELECTION,
+  TOTAL_RULES,
+  SELECT_ALL_ARIA_LABEL,
 } from '../translations';
 import { getHealthColor } from './rule_execution_status_filter';
 import {
@@ -52,6 +57,7 @@ import {
   RuleTypeRegistryContract,
   SnoozeSchedule,
 } from '../../../../types';
+import { DEFAULT_NUMBER_FORMAT } from '../../../constants';
 import { shouldShowDurationWarning } from '../../../lib/execution_duration_utils';
 import { PercentileSelectablePopover } from './percentile_selectable_popover';
 import { RuleDurationFormat } from './rule_duration_format';
@@ -135,6 +141,7 @@ export interface RulesListTableProps {
   onSelectPage: () => void;
   onSelectRow: (rule: RuleTableItem) => void;
   isRowSelected: (rule: RuleTableItem) => boolean;
+  renderSelectAllDropdown: () => React.ReactNode;
   renderCollapsedItemActions?: (
     rule: RuleTableItem,
     onLoading: (isLoading: boolean) => void
@@ -203,6 +210,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
     onSelectRow = EMPTY_HANDLER,
     isRowSelected = () => false,
     renderCollapsedItemActions = EMPTY_RENDER,
+    renderSelectAllDropdown,
     renderRuleError = EMPTY_RENDER,
     visibleColumns,
   } = props;
@@ -210,6 +218,9 @@ export const RulesListTable = (props: RulesListTableProps) => {
   const [tagPopoverOpenIndex, setTagPopoverOpenIndex] = useState<number>(-1);
   const [currentlyOpenNotify, setCurrentlyOpenNotify] = useState<string>();
   const [isLoadingMap, setIsLoadingMap] = useState<Record<string, boolean>>({});
+
+  const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
+  const { euiTheme } = useEuiTheme();
 
   const selectedPercentile = useMemo(() => {
     const selectedOption = percentileOptions.find((option) => option.checked === 'on');
@@ -832,12 +843,16 @@ export const RulesListTable = (props: RulesListTableProps) => {
     visibleColumns,
   });
 
+  const formattedTotalRules = useMemo(() => {
+    return numeral(rulesState.totalItemCount).format(defaultNumberFormat);
+  }, [rulesState.totalItemCount, defaultNumberFormat]);
+
   const selectAllButtonText = useMemo(() => {
     if (isAllSelected) {
       return CLEAR_SELECTION;
     }
-    return SELECT_ALL_RULES(rulesState.totalItemCount);
-  }, [isAllSelected, rulesState.totalItemCount]);
+    return SELECT_ALL_RULES(formattedTotalRules, rulesState.totalItemCount);
+  }, [isAllSelected, formattedTotalRules, rulesState.totalItemCount]);
 
   const rowProps = useCallback(
     (rule: RuleTableItem) => {
@@ -854,16 +869,22 @@ export const RulesListTable = (props: RulesListTableProps) => {
 
   return (
     <EuiFlexGroup gutterSize="none" direction="column">
-      <EuiFlexGroup gutterSize="none">
+      <EuiFlexGroup gutterSize="none" alignItems="center">
         <EuiFlexItem grow={false}>{ColumnSelector}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {numberOfSelectedRules > 0 ? (
+            renderSelectAllDropdown?.()
+          ) : (
+            <EuiText size="xs" style={{ fontWeight: euiTheme.font.weight.semiBold }}>
+              {TOTAL_RULES(formattedTotalRules, rulesState.totalItemCount)}
+            </EuiText>
+          )}
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {numberOfSelectedRules > 0 && (
             <EuiButtonEmpty
               size="xs"
-              aria-label={i18n.translate(
-                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.selectAllAriaLabel',
-                { defaultMessage: 'Toggle select all rules' }
-              )}
+              aria-label={SELECT_ALL_ARIA_LABEL}
               data-test-subj="selectAllRulesButton"
               iconType={isAllSelected ? 'cross' : 'pagesSelect'}
               onClick={onSelectAll}

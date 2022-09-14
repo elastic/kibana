@@ -92,6 +92,9 @@ export function useRulesBulkEditSelect({
 
   const isPageSelected = useMemo(() => {
     const { selectedIds, isAllSelected } = state;
+    if (!itemIds.length) {
+      return false;
+    }
     return itemIds.every((id) => {
       if (isAllSelected) {
         return !selectedIds.has(id);

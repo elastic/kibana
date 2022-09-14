@@ -5,12 +5,27 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiPopover } from '@elastic/eui';
+import React, { useState, useMemo } from 'react';
+import numeral from '@elastic/numeral';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
+import { SELECT_SHOW_BULK_ACTIONS_ARIA_LABEL, SELECTED_RULES } from '../../rules_list/translations';
+import { DEFAULT_NUMBER_FORMAT } from '../../../constants';
 
-export const BulkOperationPopover: React.FunctionComponent = ({ children }) => {
+export interface BulkOperationPopoverProps {
+  numberOfSelectedRules?: number;
+  children: JSX.Element;
+}
+
+export const BulkOperationPopover = (props: BulkOperationPopoverProps) => {
+  const { children, numberOfSelectedRules = 0 } = props;
+
+  const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+
+  const formattedSelectedRules = useMemo(() => {
+    return numeral(numberOfSelectedRules).format(defaultNumberFormat);
+  }, [numberOfSelectedRules, defaultNumberFormat]);
 
   return (
     <EuiPopover
@@ -19,16 +34,16 @@ export const BulkOperationPopover: React.FunctionComponent = ({ children }) => {
       data-test-subj="bulkAction"
       panelPaddingSize="s"
       button={
-        <EuiButton
-          iconType="arrowDown"
+        <EuiButtonEmpty
+          size="xs"
           iconSide="right"
+          iconType="arrowDown"
+          aria-label={SELECT_SHOW_BULK_ACTIONS_ARIA_LABEL}
+          data-test-subj="showBulkActionButton"
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
         >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.buttonTitle"
-            defaultMessage="Manage rules"
-          />
-        </EuiButton>
+          {SELECTED_RULES(formattedSelectedRules, numberOfSelectedRules)}
+        </EuiButtonEmpty>
       }
     >
       {children &&

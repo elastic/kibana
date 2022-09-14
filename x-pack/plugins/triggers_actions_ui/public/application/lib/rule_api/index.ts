@@ -34,9 +34,12 @@ export { unmuteAlertInstance } from './unmute_alert';
 export { unmuteRule, unmuteRules } from './unmute';
 export { updateRule } from './update';
 export { resolveRule } from './resolve_rule';
-export { snoozeRule, bulkSnoozeRules, BulkSnoozeRulesProps } from './snooze';
-export { unsnoozeRule, bulkUnsnoozeRules, BulkUnsnoozeRulesProps } from './unsnooze';
-export { updateAPIKey, bulkUpdateAPIKey, BulkUpdateAPIKeyProps } from './update_api_key';
+export type { BulkSnoozeRulesProps } from './snooze';
+export { snoozeRule, bulkSnoozeRules } from './snooze';
+export type { BulkUnsnoozeRulesProps } from './unsnooze';
+export { unsnoozeRule, bulkUnsnoozeRules } from './unsnooze';
+export type { BulkUpdateAPIKeyProps } from './update_api_key';
+export { updateAPIKey, bulkUpdateAPIKey } from './update_api_key';
 export {
   getFormattedBulkSnoozeResponseMessage,
   getFormattedBulkUpdateApiKeyResponseMessage,

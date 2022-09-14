@@ -22,7 +22,6 @@ import {
   EuiLink,
   EuiEmptyPrompt,
   EuiHealth,
-  EuiText,
   EuiTableSortingType,
   EuiButtonIcon,
   EuiSelectableOption,
@@ -375,6 +374,19 @@ export const RulesList = ({
     }
   }, [ruleExecutionStatusesFilter]);
 
+  // Clear bulk selection anytime the filters change
+  useEffect(() => {
+    onClearSelection();
+  }, [
+    searchText,
+    rulesTypesFilter,
+    actionTypesFilter,
+    ruleExecutionStatusesFilter,
+    ruleStatusesFilter,
+    tagsFilter,
+    hasDefaultRuleTypesFiltersOn,
+  ]);
+
   const buildErrorListItems = (_executionStatus: RuleExecutionStatus) => {
     const hasErrorMessage = _executionStatus.status === 'error';
     const errorMessage = _executionStatus?.error?.message;
@@ -600,34 +612,6 @@ export const RulesList = ({
         </>
       ) : null}
       <EuiFlexGroup gutterSize="s">
-        {numberOfSelectedItems > 0 && (
-          <EuiFlexItem grow={false}>
-            <BulkOperationPopover>
-              <RuleQuickEditButtons
-                selectedItems={convertRulesToTableItems({
-                  rules: filterRulesById(rulesState.data, [...selectedIds]),
-                  ruleTypeIndex: ruleTypesState.data,
-                  canExecuteActions,
-                  config,
-                })}
-                isAllSelected={isAllSelected}
-                getFilter={getFilter}
-                onPerformingAction={() => setIsPerformingAction(true)}
-                onActionPerformed={() => {
-                  loadData();
-                  setIsPerformingAction(false);
-                }}
-                setRulesToDelete={setRulesToDelete}
-                setRulesToUpdateAPIKey={setRulesToUpdateAPIKey}
-                setRulesToSnooze={setRulesToSnooze}
-                setRulesToSchedule={setRulesToSchedule}
-                setRulesToSnoozeFilter={setRulesToSnoozeFilter}
-                setRulesToScheduleFilter={setRulesToScheduleFilter}
-                setRulesToUpdateAPIKeyFilter={setRulesToUpdateAPIKeyFilter}
-              />
-            </BulkOperationPopover>
-          </EuiFlexItem>
-        )}
         {authorizedToCreateAnyRules && showCreateRuleButton ? (
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -692,18 +676,6 @@ export const RulesList = ({
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued" data-test-subj="totalRulesCount">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.totalItemsCountDescription"
-                  defaultMessage="Showing: {pageSize} of {totalItemCount} rules."
-                  values={{
-                    totalItemCount: rulesState.totalItemCount,
-                    pageSize: rulesState.data.length,
-                  }}
-                />
-              </EuiText>
-            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiHealth color="success" data-test-subj="totalActiveRulesCount">
                 <FormattedMessage
@@ -860,6 +832,34 @@ export const RulesList = ({
               iconType={itemIdToExpandedRowMap[rule.id] ? 'arrowUp' : 'arrowDown'}
             />
           ) : null;
+        }}
+        renderSelectAllDropdown={() => {
+          return (
+            <BulkOperationPopover numberOfSelectedRules={numberOfSelectedItems}>
+              <RuleQuickEditButtons
+                selectedItems={convertRulesToTableItems({
+                  rules: filterRulesById(rulesState.data, [...selectedIds]),
+                  ruleTypeIndex: ruleTypesState.data,
+                  canExecuteActions,
+                  config,
+                })}
+                isAllSelected={isAllSelected}
+                getFilter={getFilter}
+                onPerformingAction={() => setIsPerformingAction(true)}
+                onActionPerformed={() => {
+                  loadData();
+                  setIsPerformingAction(false);
+                }}
+                setRulesToDelete={setRulesToDelete}
+                setRulesToUpdateAPIKey={setRulesToUpdateAPIKey}
+                setRulesToSnooze={setRulesToSnooze}
+                setRulesToSchedule={setRulesToSchedule}
+                setRulesToSnoozeFilter={setRulesToSnoozeFilter}
+                setRulesToScheduleFilter={setRulesToScheduleFilter}
+                setRulesToUpdateAPIKeyFilter={setRulesToUpdateAPIKeyFilter}
+              />
+            </BulkOperationPopover>
+          );
         }}
         rulesListKey={rulesListKey}
         config={config}
