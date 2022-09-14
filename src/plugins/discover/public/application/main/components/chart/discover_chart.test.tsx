@@ -95,6 +95,7 @@ async function mountComponent(isTimeBased: boolean = false) {
       id: '123',
       getFieldByName: () => ({ type: 'date', name: 'timefield', visualizable: true }),
       timeFieldName: 'timefield',
+      toSpec: () => ({ id: '123', timeFieldName: 'timefield' }),
     } as unknown as DataView,
     resetSavedSearch: jest.fn(),
     savedSearch: savedSearchMock,
@@ -167,12 +168,13 @@ describe('Discover chart', () => {
       },
     } as unknown as UiActionsStart);
     const component = await mountComponent(true);
-    component.find('[data-test-subj="discoverEditVisualization"]').first().simulate('click');
-    expect(fn).toHaveBeenCalledWith(
-      expect.objectContaining({
-        indexPatternId: '123',
-        fieldName: 'timefield',
-      })
-    );
+    await act(async () => {
+      await component
+        .find('[data-test-subj="discoverEditVisualization"]')
+        .first()
+        .simulate('click');
+    });
+
+    expect(fn).toHaveBeenCalled();
   });
 });

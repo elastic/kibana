@@ -1822,17 +1822,6 @@
         "description": [
           "\nThe attributes stored in the UsageCounters' SavedObjects"
         ],
-        "signature": [
-          {
-            "pluginId": "usageCollection",
-            "scope": "server",
-            "docId": "kibUsageCollectionPluginApi",
-            "section": "def-server.UsageCountersSavedObjectAttributes",
-            "text": "UsageCountersSavedObjectAttributes"
-          },
-          " extends ",
-          "SavedObjectAttributes"
-        ],
         "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
         "deprecated": false,
         "trackAdoption": false,

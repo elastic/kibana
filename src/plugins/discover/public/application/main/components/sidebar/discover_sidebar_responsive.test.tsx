@@ -73,6 +73,7 @@ jest.mock('../../utils/calc_field_counts', () => ({
 
 function getCompProps(): DiscoverSidebarResponsiveProps {
   const dataView = stubLogstashDataView;
+  dataView.toSpec = jest.fn(() => ({}));
 
   const hits = getDataTableRecords(dataView);
 
@@ -110,6 +111,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     onDataViewCreated: jest.fn(),
     useNewFieldsApi: true,
+    persistDataView: jest.fn(),
   };
 }
 

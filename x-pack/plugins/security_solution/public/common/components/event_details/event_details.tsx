@@ -193,7 +193,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                   isReadOnly={isReadOnly}
                 />
 
-                {(enrichmentCount > 0 || isLicenseValid) && (
+                {enrichmentCount > 0 && isLicenseValid && (
                   <ThreatSummaryView
                     isDraggable={isDraggable}
                     hostRisk={hostRisk}
