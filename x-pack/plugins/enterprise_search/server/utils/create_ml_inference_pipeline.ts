@@ -8,9 +8,8 @@
 import { IngestGetPipelineResponse, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 
-import { ErrorCode } from '../../common/types/error_codes';
-
 import { formatMlPipelineBody } from './create_pipeline_definitions';
+import { ErrorCode } from '../../common/types/error_codes';
 
 /**
  * Details of a created or updated pipeline.
