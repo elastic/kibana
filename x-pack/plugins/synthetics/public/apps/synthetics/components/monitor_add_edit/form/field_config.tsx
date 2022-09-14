@@ -390,11 +390,14 @@ export const FIELD: Record<string, FieldMeta> = {
         options: Object.values(locations).map((location) => ({
           label: locations?.find((loc) => location.id === loc.id)?.label,
           id: location.id,
+          key: location.id,
           isServiceManaged: location.isServiceManaged,
         })),
         selectedOptions: Object.values(field?.value as ServiceLocations).map((location) => ({
-          label: locations?.find((loc) => location.id === loc.id)?.label,
+          color: locations.some((s) => s.id === location.id) ? 'default' : 'danger',
+          label: locations?.find((loc) => location.id === loc.id)?.label ?? location.id,
           id: location.id,
+          key: location.id,
           isServiceManaged: location.isServiceManaged,
         })),
         'data-test-subj': 'syntheticsMonitorConfigLocations',
