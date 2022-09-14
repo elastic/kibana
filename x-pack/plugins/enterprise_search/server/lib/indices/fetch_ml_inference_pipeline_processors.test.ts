@@ -49,6 +49,7 @@ describe('fetchMlInferencePipelineProcessorNames lib function', () => {
       'my-index'
     );
 
+    expect(mockClient.ingest.getPipeline).toHaveBeenCalledWith({ id: 'my-index@ml-inference' });
     expect(response).toEqual(expected);
   });
 
@@ -73,6 +74,9 @@ describe('fetchMlInferencePipelineProcessorNames lib function', () => {
       'my-index-without-ml-inference-pipeline'
     );
 
+    expect(mockClient.ingest.getPipeline).toHaveBeenCalledWith({
+      id: 'my-index-without-ml-inference-pipeline@ml-inference',
+    });
     expect(response).toEqual([]);
   });
 });
@@ -153,6 +157,9 @@ describe('fetchPipelineProcessorInferenceData lib function', () => {
       ['ml-inference-pipeline-1', 'ml-inference-pipeline-2', 'non-ml-inference-pipeline']
     );
 
+    expect(mockClient.ingest.getPipeline).toHaveBeenCalledWith({
+      id: 'ml-inference-pipeline-1,ml-inference-pipeline-2,non-ml-inference-pipeline',
+    });
     expect(response).toEqual(expected);
   });
 });
@@ -241,6 +248,12 @@ describe('fetchAndAddTrainedModelData lib function', () => {
       input
     );
 
+    expect(mockClient.ml.getTrainedModels).toHaveBeenCalledWith({
+      model_id: 'trained-model-id-1,trained-model-id-2',
+    });
+    expect(mockClient.ml.getTrainedModelsStats).toHaveBeenCalledWith({
+      model_id: 'trained-model-id-1,trained-model-id-2',
+    });
     expect(response).toEqual(expected);
   });
 });
