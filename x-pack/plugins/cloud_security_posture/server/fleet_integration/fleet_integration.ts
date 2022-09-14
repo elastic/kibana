@@ -52,30 +52,58 @@ export const onPackagePolicyPostCreateCallback = async (
   packagePolicy: PackagePolicy,
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
+  await UpdateCspRulesAccordingToCspRuleTemplates(packagePolicy, savedObjectsClient, logger);
+};
+
+export const OnPackagePolicyUpgradeCallback = async (
+  logger: Logger,
+  packagePolicy: PackagePolicy,
+  savedObjectsClient: SavedObjectsClientContract
+): Promise<void> => {
+  await UpdateCspRulesAccordingToCspRuleTemplates(packagePolicy, savedObjectsClient, logger);
+};
+
+const UpdateCspRulesAccordingToCspRuleTemplates = async (
+  packagePolicy: PackagePolicy,
+  savedObjectsClient: SavedObjectsClientContract,
+  logger: Logger
+): Promise<void> => {
   const benchmarkType = getBenchmarkInputType(packagePolicy.inputs);
 
   // Create csp-rules from the generic asset
-  const existingRuleTemplates: SavedObjectsFindResponse<CspRuleTemplate> =
-    await savedObjectsClient.find({
-      type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
-      perPage: 10000,
-      filter: getBenchmarkTypeFilter(benchmarkType),
-    });
+  const ruleTemplates: SavedObjectsFindResponse<CspRuleTemplate> = await savedObjectsClient.find({
+    type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+    perPage: 10000,
+    filter: getBenchmarkTypeFilter(benchmarkType),
+  });
 
-  if (existingRuleTemplates.total === 0) {
-    logger.warn(`expected CSP rule templates to exists for type: ${benchmarkType}`);
-    return;
-  }
+  const oldCspRules: SavedObjectsFindResponse<CspRule> = await savedObjectsClient.find({
+    type: CSP_RULE_SAVED_OBJECT_TYPE,
+    perPage: 10000,
+    filter: createCspRuleSearchFilterByPackagePolicy({
+      packagePolicyId: packagePolicy.id,
+      policyId: packagePolicy.policy_id,
+    }),
+  });
+  const oldCspRulesDictionary: Map<string, SavedObjectsFindResult<CspRule>> = new Map(
+    oldCspRules.saved_objects.map((rule) => [rule.attributes.metadata.id, rule])
+  );
 
   const cspRules = generateRulesFromTemplates(
     packagePolicy.id,
     packagePolicy.policy_id,
-    existingRuleTemplates.saved_objects
+    ruleTemplates.saved_objects,
+    oldCspRulesDictionary ?? new Map()
   );
 
   try {
     await savedObjectsClient.bulkCreate(cspRules);
     logger.info(`Generated CSP rules for package ${packagePolicy.policy_id}`);
+    await Promise.all(
+      oldCspRules.saved_objects.map((rule) =>
+        savedObjectsClient.delete(CSP_RULE_SAVED_OBJECT_TYPE, rule.id)
+      )
+    );
   } catch (e) {
     logger.error('failed to generate rules out of template');
     logger.error(e);
@@ -99,6 +127,7 @@ export const removeCspRulesInstancesCallback = async (
       }),
       perPage: 10000,
     });
+
     await Promise.all(cspRules.map((rule) => soClient.delete(CSP_RULE_SAVED_OBJECT_TYPE, rule.id)));
   } catch (e) {
     logger.error(`Failed to delete CSP rules after delete package ${deletedPackagePolicy.id}`);
@@ -130,16 +159,22 @@ export const isCspPackageInstalled = async (
 const generateRulesFromTemplates = (
   packagePolicyId: string,
   policyId: string,
-  cspRuleTemplates: Array<SavedObjectsFindResult<CspRuleTemplate>>
+  cspRuleTemplates: Array<SavedObjectsFindResult<CspRuleTemplate>>,
+  oldCspRules: Map<string, SavedObjectsFindResult<CspRule>>
 ): Array<SavedObjectsBulkCreateObject<CspRule>> =>
-  cspRuleTemplates.map((template) => ({
-    type: CSP_RULE_SAVED_OBJECT_TYPE,
-    attributes: {
-      ...template.attributes,
-      package_policy_id: packagePolicyId,
-      policy_id: policyId,
-    },
-  }));
+  cspRuleTemplates.map((template) => {
+    const cspRule = oldCspRules.get(template.attributes.metadata.id);
+    const response = {
+      type: CSP_RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        ...template.attributes,
+        package_policy_id: packagePolicyId,
+        policy_id: policyId,
+        enabled: cspRule?.attributes.enabled ?? template.attributes.enabled,
+      },
+    };
+    return response;
+  });
 
 const getInputType = (inputType: string): string => {
   // Get the last part of the input type, input type structure: cloudbeat/<benchmark_id>
