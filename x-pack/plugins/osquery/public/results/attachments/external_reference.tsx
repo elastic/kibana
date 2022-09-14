@@ -12,7 +12,6 @@ import { lazy } from 'react';
 // import { EuiButtonIcon } from '@elastic/eui';
 import { AttachmentContent } from './external_references_content';
 import ServicesWrapper from '../../shared_components/services_wrapper';
-import { useKibana } from '../../common/lib/kibana';
 import OsqueryLogo from '../../components/osquery_icon/osquery.svg';
 
 const AttachmentContentLazy = lazy(() => import('./external_references_content'));
