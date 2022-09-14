@@ -10,15 +10,6 @@ import { StepCtx } from '../../services/performance';
 export default function ({ getService }: FtrProviderContext) {
   describe('security_hosts_dashboard', () => {
     const performance = getService('performance');
-    const esArchiver = getService('esArchiver');
-
-    before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/performance/es_archives/security_dashboard_data');
-    });
-
-    after(async () => {
-      await esArchiver.unload('x-pack/test/performance/es_archives/security_dashboard_data');
-    });
 
     it('security_hosts_dashboard', async () => {
       await performance.runUserJourney(

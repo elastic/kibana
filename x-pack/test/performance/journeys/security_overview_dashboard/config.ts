@@ -13,8 +13,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const testFiles = [require.resolve('./security_overview_dashboard')];
 
   const config = {
-    testFiles,
     ...performanceConfig.getAll(),
+    testFiles,
+    testData: {
+      esArchives: ['x-pack/test/performance/es_archives/security_dashboard_data'],
+    },
   };
 
   const apmGlobalLabels = {
