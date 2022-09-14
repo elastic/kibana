@@ -312,6 +312,17 @@ export class DataGridService extends FtrService {
     return await tableDocViewRow.findByTestSubject(`~removeInclusiveFilterButton`);
   }
 
+  public async clickFieldActionInFlyout(fieldName: string, actionName: string): Promise<void> {
+    const openPopoverButtonSelector = `openFieldActionsButton-${fieldName}`;
+    const inlineButtonsGroupSelector = `fieldActionsGroup-${fieldName}`;
+    if (await this.testSubjects.exists(openPopoverButtonSelector)) {
+      await this.testSubjects.click(openPopoverButtonSelector);
+    } else {
+      await this.testSubjects.existOrFail(inlineButtonsGroupSelector);
+    }
+    await this.testSubjects.click(`${actionName}-${fieldName}`);
+  }
+
   public async removeInclusiveFilter(
     detailsRow: WebElementWrapper,
     fieldName: string
