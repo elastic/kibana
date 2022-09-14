@@ -14,6 +14,7 @@ describe('createMlInferencePipeline util function', () => {
   const modelId = 'my-model-id';
   const sourceField = 'my-source-field';
   const destinationField = 'my-dest-field';
+  const inferencePipelineGeneratedName = `ml-inference-${pipelineName}`;
 
   const mockClient = {
     ingest: {
@@ -45,7 +46,7 @@ describe('createMlInferencePipeline util function', () => {
     );
 
     const expectedResult = {
-      created: true,
+      created: inferencePipelineGeneratedName,
     };
 
     const actualResult = await createMlInferencePipeline(
@@ -60,20 +61,14 @@ describe('createMlInferencePipeline util function', () => {
     expect(mockClient.ingest.putPipeline).toHaveBeenCalled();
   });
 
-  it('should not create the pipeline if it already exists', async () => {
-    const inferencePipelineGeneratedName = `ml-inference-${pipelineName}`;
-
+  it('should throw an error without creating the pipeline if it already exists', () => {
     mockClient.ingest.getPipeline.mockImplementation(() =>
       Promise.resolve({
         [inferencePipelineGeneratedName]: {},
       })
     ); // Pipeline exists
 
-    const expectedResult = {
-      exists: true,
-    };
-
-    const actualResult = await createMlInferencePipeline(
+    const actualResult = createMlInferencePipeline(
       pipelineName,
       modelId,
       sourceField,
@@ -81,7 +76,7 @@ describe('createMlInferencePipeline util function', () => {
       mockClient as unknown as ElasticsearchClient
     );
 
-    expect(actualResult).toEqual(expectedResult);
+    expect(actualResult).rejects.toThrow(Error);
     expect(mockClient.ingest.putPipeline).not.toHaveBeenCalled();
   });
 });

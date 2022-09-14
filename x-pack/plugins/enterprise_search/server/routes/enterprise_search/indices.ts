@@ -291,18 +291,27 @@ export function registerIndexRoutes({
         destination_field: destinationField,
       } = request.body;
 
-      const createResult = await createMlInferencePipeline(
-        pipelineName,
-        modelId,
-        sourceField,
-        destinationField || modelId,
-        client.asCurrentUser
-      );
+      try {
+        await createMlInferencePipeline(
+          pipelineName,
+          modelId,
+          sourceField,
+          destinationField || modelId,
+          client.asCurrentUser
+        );
+      } catch (error) {
+        console.log('err', error);
+        // Handle scenario where pipeline already exists
+        if ((error as Error).message === ErrorCode.PIPELINE_ALREADY_EXISTS) {
+          return createError({
+            errorCode: (error as Error).message as ErrorCode,
+            message: 'Pipeline already exists',
+            response,
+            statusCode: 409,
+          });
+        }
 
-      if (createResult.exists) {
-        return response.conflict({
-          body: new Error(`There is already a pipeline with name '${pipelineName}'.`),
-        });
+        throw error;
       }
 
       return response.ok({

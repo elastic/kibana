@@ -8,13 +8,13 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 
 import { formatMlPipelineBody } from './create_pipeline_definitions';
+import { ErrorCode } from '../../common/types/error_codes';
 
 /**
- * Indicators for a possibly created pipeline.
+ * Details of a created pipeline.
  */
-export interface CreatedPipelineFlags {
-  created?: boolean;
-  exists?: boolean;
+export interface CreatedPipeline {
+  created: string;
 }
 
 /**
@@ -31,22 +31,20 @@ export const createMlInferencePipeline = async (
   sourceField: string,
   destinationField: string,
   esClient: ElasticsearchClient
-): Promise<CreatedPipelineFlags> => {
+): Promise<CreatedPipeline> => {
   const inferencePipelineGeneratedName = `ml-inference-${pipelineName}`;
 
   // Check that a pipeline with the same name doesn't already exist
+  let pipelineByName = {};
   try {
-    const pipelineByName = await esClient.ingest.getPipeline({
+    pipelineByName = await esClient.ingest.getPipeline({
       id: inferencePipelineGeneratedName,
     });
-
-    if (pipelineByName[inferencePipelineGeneratedName]) {
-      return Promise.resolve({
-        exists: true,
-      });
-    }
-  } catch (e) {
+  } catch (error) {
     // Silently swallow error
+  }
+  if (pipelineByName[inferencePipelineGeneratedName as keyof typeof pipelineByName]) {
+    throw new Error(ErrorCode.PIPELINE_ALREADY_EXISTS);
   }
 
   // Generate pipeline with default processors
@@ -63,6 +61,6 @@ export const createMlInferencePipeline = async (
   });
 
   return Promise.resolve({
-    created: true,
+    created: inferencePipelineGeneratedName,
   });
 };
