@@ -13,17 +13,7 @@ import {
   FrameGroup,
   FrameGroupID,
 } from './frame_group';
-import {
-  createStackFrameMetadata,
-  Executable,
-  FileID,
-  groupStackFrameMetadataByStackTrace,
-  StackFrame,
-  StackFrameID,
-  StackFrameMetadata,
-  StackTrace,
-  StackTraceID,
-} from './profiling';
+import { StackFrameMetadata, StackTraceID } from './profiling';
 
 export interface CallerCalleeIntermediateNode {
   frameGroup: FrameGroup;
@@ -303,20 +293,4 @@ export function fromCallerCalleeIntermediateNode(
   }
 
   return node;
-}
-
-export function createCallerCalleeDiagram(
-  events: Map<StackTraceID, number>,
-  stackTraces: Map<StackTraceID, StackTrace>,
-  stackFrames: Map<StackFrameID, StackFrame>,
-  executables: Map<FileID, Executable>
-): CallerCalleeNode {
-  const rootFrame = createStackFrameMetadata();
-  const frameMetadataForTraces = groupStackFrameMetadataByStackTrace(
-    stackTraces,
-    stackFrames,
-    executables
-  );
-  const root = createCallerCalleeIntermediateRoot(rootFrame, events, frameMetadataForTraces);
-  return fromCallerCalleeIntermediateNode(root);
 }
