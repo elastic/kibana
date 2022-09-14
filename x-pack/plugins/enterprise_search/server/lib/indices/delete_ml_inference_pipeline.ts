@@ -44,6 +44,7 @@ export const deleteMlInferencePipeline = async (
         if (updatedProcessors.length !== parentPipeline.processors.length) {
           const updatedPipeline: IngestPutPipelineRequest = {
             ...parentPipeline,
+            id: parentPipelineId,
             processors: updatedProcessors,
           };
 
