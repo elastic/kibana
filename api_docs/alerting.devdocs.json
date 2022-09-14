@@ -2810,6 +2810,16 @@
             "section": "def-common.IExecutionLogResult",
             "text": "IExecutionLogResult"
           },
+          ">; getGlobalExecutionLogWithAuth: ({ dateStart, dateEnd, filter, page, perPage, sort, }: ",
+          "GetGlobalExecutionLogParams",
+          ") => Promise<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.IExecutionLogResult",
+            "text": "IExecutionLogResult"
+          },
           ">; getActionErrorLog: ({ id, dateStart, dateEnd, filter, page, perPage, sort, }: ",
           "GetActionErrorLogByIdParams",
           ") => Promise<",
@@ -4124,6 +4134,28 @@
             "type": "boolean",
             "tags": [],
             "label": "timed_out",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.IExecutionLog.rule_id",
+            "type": "string",
+            "tags": [],
+            "label": "rule_id",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.IExecutionLog.rule_name",
+            "type": "string",
+            "tags": [],
+            "label": "rule_name",
             "description": [],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
             "deprecated": false,

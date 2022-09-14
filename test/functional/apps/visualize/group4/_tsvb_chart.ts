@@ -18,17 +18,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const kibanaServer = getService('kibanaServer');
 
-  const { timePicker, visChart, visualBuilder, visualize, settings } = getPageObjects([
-    'timePicker',
+  const { visChart, visualBuilder, visualize, settings, common } = getPageObjects([
     'visChart',
     'visualBuilder',
     'visualize',
     'settings',
+    'common',
   ]);
+
+  const from = 'Sep 19, 2015 @ 06:31:44.000';
+  const to = 'Sep 22, 2015 @ 18:31:44.000';
 
   describe('visual builder', function describeIndexTests() {
     before(async () => {
       await visualize.initTests();
+      await common.setTime({ from, to });
     });
 
     beforeEach(async () => {
@@ -36,6 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ['kibana_admin', 'test_logstash_reader', 'kibana_sample_admin'],
         { skipBrowserRefresh: true }
       );
+
       await visualize.navigateToNewVisualization();
       await visualize.clickVisualBuilder();
       await visualBuilder.checkVisualBuilderIsPresent();
@@ -398,10 +403,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.setMetricsDataTimerangeMode('Last value');
         await visualBuilder.setDropLastBucket(true);
         await visualBuilder.clickDataTab('metric');
-        await timePicker.setAbsoluteRange(
-          'Sep 19, 2015 @ 06:31:44.000',
-          'Sep 22, 2015 @ 18:31:44.000'
-        );
       });
 
       const switchIndexTest = async (useKibanaIndexes: boolean) => {
@@ -435,10 +436,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.clickPanelOptions('metric');
         await visualBuilder.setMetricsDataTimerangeMode('Last value');
         await visualBuilder.setDropLastBucket(true);
-        await timePicker.setAbsoluteRange(
-          'Sep 19, 2015 @ 06:31:44.000',
-          'Sep 22, 2015 @ 18:31:44.000'
-        );
       });
 
       it('should be able to switch to gte interval (>=2d)', async () => {

@@ -577,6 +577,10 @@
                 "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts"
               },
               {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.ts"
+              },
+              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/analytics/analytics_service.test.ts"
               },
@@ -587,6 +591,18 @@
               {
                 "plugin": "@kbn/core-analytics-server-mocks",
                 "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-mocks",
@@ -919,6 +935,10 @@
                 "path": "packages/core/execution-context/core-execution-context-browser-internal/src/execution_context_service.ts"
               },
               {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.ts"
+              },
+              {
                 "plugin": "cloud",
                 "path": "x-pack/plugins/cloud/public/plugin.test.ts"
               },
@@ -981,6 +1001,14 @@
               {
                 "plugin": "@kbn/core-elasticsearch-server-internal",
                 "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/register_analytics_context_provider.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
@@ -10559,7 +10587,7 @@
             "tags": [],
             "label": "attributes",
             "description": [
-              "{@inheritdoc SavedObjectAttributes}"
+              "The data for a Saved Object is stored as an object in the `attributes` property."
             ],
             "signature": [
               "T"
@@ -10657,7 +10685,9 @@
         "parentPluginId": "core",
         "id": "def-public.SavedObjectAttributes",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObjectAttributes",
         "description": [
           "\nThe data for a Saved Object is stored as an object in the `attributes`\nproperty.\n"
@@ -10666,8 +10696,590 @@
           "SavedObjectAttributes"
         ],
         "path": "node_modules/@types/kbn__core-saved-objects-common/index.d.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/common/types.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/common/types.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/common/types/modules.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/common/types/modules.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/actions_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/actions_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/actions_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/actions_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/actions_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/actions_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/actions_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/types.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/common/rule.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/common/rule.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/common/rule.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/common/rule.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/common/rule.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/common/rule.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/geo_containment/migrations.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/geo_containment/migrations.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/types.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/types.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/types.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/types.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/types.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/types.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/types.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/server/routes/custom_elements/find.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/server/routes/custom_elements/find.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/server/routes/workpad/find.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/server/routes/workpad/find.ts"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_types.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_types.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_migrations.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_migrations.ts"
+          },
+          {
+            "plugin": "taskManager",
+            "path": "x-pack/plugins/task_manager/server/task_store.test.ts"
+          },
+          {
+            "plugin": "taskManager",
+            "path": "x-pack/plugins/task_manager/server/task_store.test.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/saved_objects/dashboard_migrations.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/saved_objects/dashboard_migrations.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/usage/dashboard_telemetry_collection_task.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/usage/dashboard_telemetry_collection_task.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/usage/dashboard_telemetry.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/usage/dashboard_telemetry.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts"
+          },
+          {
+            "plugin": "savedSearch",
+            "path": "src/plugins/saved_search/server/saved_objects/search_migrations.ts"
+          },
+          {
+            "plugin": "savedSearch",
+            "path": "src/plugins/saved_search/server/saved_objects/search_migrations.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/types.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/types.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/types.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/create_source.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/create_source.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_flyout.tsx"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_flyout.tsx"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_flyout.tsx"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/plugins/embeddable/public/lib/embeddables/default_embeddable_factory_provider.ts"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/plugins/embeddable/public/lib/embeddables/default_embeddable_factory_provider.ts"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/plugins/embeddable/public/types.ts"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/plugins/embeddable/public/types.ts"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/common/types/models/settings.ts"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/common/types/models/settings.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/save_with_confirmation.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/save_with_confirmation.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/find_object_by_title.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/find_object_by_title.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_visualization_references/saved_visualization_references.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_visualization_references/saved_visualization_references.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/wizard/search_selection/search_selection.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/wizard/search_selection/search_selection.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/hooks/use_find_saved_object.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/hooks/use_find_saved_object.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/hooks/use_create_saved_object.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/hooks/use_create_saved_object.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/hooks/use_create_saved_object.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/hooks/use_get_saved_object.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/hooks/use_get_saved_object.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/hooks/use_update_saved_object.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/hooks/use_update_saved_object.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/hooks/use_update_saved_object.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/containers/saved_view/saved_view.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/containers/saved_view/saved_view.tsx"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/shareable_runtime/types.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/shareable_runtime/types.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/services/persistence/saved_workspace_references.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/services/persistence/saved_workspace_references.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/save_with_confirmation.test.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/save_with_confirmation.test.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/save_with_confirmation.test.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-server-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/collect_references_deep.test.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-server-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/collect_references_deep.test.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "core",
@@ -14920,16 +15532,13 @@
       {
         "parentPluginId": "core",
         "id": "def-public.URL_MAX_LENGTH",
-        "type": "CompoundType",
+        "type": "number",
         "tags": [],
         "label": "URL_MAX_LENGTH",
         "description": [
           "\nThe max URL length allowed by the current browser. Should be used to display warnings to users when query parameters\ncause URL to exceed this limit."
         ],
-        "signature": [
-          "2000 | 25000"
-        ],
-        "path": "src/core/public/core_app/errors/url_overflow.tsx",
+        "path": "node_modules/@types/kbn__core-apps-browser-internal/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -18604,6 +19213,10 @@
                 "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts"
               },
               {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.ts"
+              },
+              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/analytics/analytics_service.test.ts"
               },
@@ -18614,6 +19227,18 @@
               {
                 "plugin": "@kbn/core-analytics-server-mocks",
                 "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-mocks",
@@ -18946,6 +19571,10 @@
                 "path": "packages/core/execution-context/core-execution-context-browser-internal/src/execution_context_service.ts"
               },
               {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.ts"
+              },
+              {
                 "plugin": "cloud",
                 "path": "x-pack/plugins/cloud/public/plugin.test.ts"
               },
@@ -19008,6 +19637,14 @@
               {
                 "plugin": "@kbn/core-elasticsearch-server-internal",
                 "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/register_analytics_context_provider.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
@@ -21123,13 +21760,7 @@
               "{@link StatusServiceSetup}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.StatusServiceSetup",
-                "text": "StatusServiceSetup"
-              }
+              "StatusServiceSetup"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false,
@@ -21383,7 +22014,10 @@
         "description": [
           "\nStatus of core services.\n"
         ],
-        "path": "src/core/server/status/types.ts",
+        "signature": [
+          "CoreStatus"
+        ],
+        "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -21398,7 +22032,7 @@
               "ServiceStatus",
               "<unknown>"
             ],
-            "path": "src/core/server/status/types.ts",
+            "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -21413,7 +22047,7 @@
               "ServiceStatus",
               "<unknown>"
             ],
-            "path": "src/core/server/status/types.ts",
+            "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -36020,12 +36654,44 @@
                 "path": "src/plugins/kibana_usage_collection/server/collectors/ops_stats/ops_stats_collector.ts"
               },
               {
+                "plugin": "@kbn/core-apps-browser-internal",
+                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.ts"
+              },
+              {
+                "plugin": "@kbn/core-apps-browser-internal",
+                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.ts"
+              },
+              {
+                "plugin": "@kbn/core-apps-browser-internal",
+                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.ts"
+              },
+              {
+                "plugin": "@kbn/core-apps-browser-internal",
+                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.ts"
+              },
+              {
+                "plugin": "@kbn/core-apps-browser-internal",
+                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.ts"
+              },
+              {
+                "plugin": "@kbn/core-apps-browser-internal",
+                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.ts"
+              },
+              {
                 "plugin": "@kbn/core-metrics-server-internal",
                 "path": "packages/core/metrics/core-metrics-server-internal/src/ops_metrics_collector.ts"
               },
               {
                 "plugin": "@kbn/core-metrics-server-internal",
                 "path": "packages/core/metrics/core-metrics-server-internal/src/logging/get_ops_metrics_log.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/routes/status.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/routes/status.ts"
               },
               {
                 "plugin": "@kbn/core-usage-data-server-internal",
@@ -36042,6 +36708,10 @@
               {
                 "plugin": "@kbn/core-metrics-server-internal",
                 "path": "packages/core/metrics/core-metrics-server-internal/src/logging/get_ops_metrics_log.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-apps-browser-internal",
+                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.test.ts"
               }
             ]
           },
@@ -36932,13 +37602,13 @@
             "signature": [
               "{ legacy: { globalConfig$: ",
               "Observable",
-              "<Readonly<{ elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+              "<Readonly<{ elasticsearch: Readonly<{ readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
               "ByteSizeValue",
               ") => boolean; isLessThan: (other: ",
               "ByteSizeValue",
               ") => boolean; isEqualTo: (other: ",
               "ByteSizeValue",
-              ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ByteSizeValueUnit | undefined) => string; }>; }>; }>>; get: () => Readonly<{ elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+              ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ByteSizeValueUnit | undefined) => string; }>; }>; }>>; get: () => Readonly<{ elasticsearch: Readonly<{ readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
               "ByteSizeValue",
               ") => boolean; isLessThan: (other: ",
               "ByteSizeValue",
@@ -39258,7 +39928,7 @@
             "tags": [],
             "label": "attributes",
             "description": [
-              "{@inheritdoc SavedObjectAttributes}"
+              "The data for a Saved Object is stored as an object in the `attributes` property."
             ],
             "signature": [
               "T"
@@ -39356,7 +40026,9 @@
         "parentPluginId": "core",
         "id": "def-server.SavedObjectAttributes",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObjectAttributes",
         "description": [
           "\nThe data for a Saved Object is stored as an object in the `attributes`\nproperty.\n"
@@ -39365,8 +40037,590 @@
           "SavedObjectAttributes"
         ],
         "path": "node_modules/@types/kbn__core-saved-objects-common/index.d.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/common/types.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/common/types.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/common/types/modules.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/common/types/modules.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/actions_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/actions_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/actions_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/actions_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/actions_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/actions_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/actions_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/types.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/common/rule.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/common/rule.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/common/rule.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/common/rule.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/common/rule.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/common/rule.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/geo_containment/migrations.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/geo_containment/migrations.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/types.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/types.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/types.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/types.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/types.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/types.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/types.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/server/routes/custom_elements/find.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/server/routes/custom_elements/find.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/server/routes/workpad/find.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/server/routes/workpad/find.ts"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_types.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_types.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_migrations.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_migrations.ts"
+          },
+          {
+            "plugin": "taskManager",
+            "path": "x-pack/plugins/task_manager/server/task_store.test.ts"
+          },
+          {
+            "plugin": "taskManager",
+            "path": "x-pack/plugins/task_manager/server/task_store.test.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/saved_objects/dashboard_migrations.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/saved_objects/dashboard_migrations.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/usage/dashboard_telemetry_collection_task.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/usage/dashboard_telemetry_collection_task.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/usage/dashboard_telemetry.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/usage/dashboard_telemetry.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts"
+          },
+          {
+            "plugin": "savedSearch",
+            "path": "src/plugins/saved_search/server/saved_objects/search_migrations.ts"
+          },
+          {
+            "plugin": "savedSearch",
+            "path": "src/plugins/saved_search/server/saved_objects/search_migrations.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/types.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/types.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/types.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/create_source.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/create_source.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_flyout.tsx"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_flyout.tsx"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_flyout.tsx"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/plugins/embeddable/public/lib/embeddables/default_embeddable_factory_provider.ts"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/plugins/embeddable/public/lib/embeddables/default_embeddable_factory_provider.ts"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/plugins/embeddable/public/types.ts"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/plugins/embeddable/public/types.ts"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/common/types/models/settings.ts"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/common/types/models/settings.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/save_with_confirmation.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/save_with_confirmation.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/find_object_by_title.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/find_object_by_title.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_visualization_references/saved_visualization_references.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_visualization_references/saved_visualization_references.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/wizard/search_selection/search_selection.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/wizard/search_selection/search_selection.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/hooks/use_find_saved_object.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/hooks/use_find_saved_object.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/hooks/use_create_saved_object.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/hooks/use_create_saved_object.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/hooks/use_create_saved_object.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/hooks/use_get_saved_object.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/hooks/use_get_saved_object.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/hooks/use_update_saved_object.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/hooks/use_update_saved_object.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/hooks/use_update_saved_object.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/containers/saved_view/saved_view.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/containers/saved_view/saved_view.tsx"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/shareable_runtime/types.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/shareable_runtime/types.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/services/persistence/saved_workspace_references.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/services/persistence/saved_workspace_references.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/save_with_confirmation.test.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/save_with_confirmation.test.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/save_with_confirmation.test.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-server-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/collect_references_deep.test.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-server-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/collect_references_deep.test.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "core",
@@ -40213,7 +41467,7 @@
             "tags": [],
             "label": "attributes",
             "description": [
-              "{@inheritdoc SavedObjectAttributes}"
+              "The data for a Saved Object is stored as an object in the `attributes` property."
             ],
             "signature": [
               "{ [P in keyof T]?: T[P] | undefined; }"
@@ -45149,9 +46403,7 @@
               "\nRegister a {@link SavedObjectsType | savedObjects type} definition.\n\nSee the {@link SavedObjectsTypeMappingDefinition | mappings format} and\n{@link SavedObjectMigrationMap | migration format} for more details about these.\n"
             ],
             "signature": [
-              "<Attributes extends ",
-              "SavedObjectAttributes",
-              " = any>(type: ",
+              "<Attributes = unknown>(type: ",
               "SavedObjectsType",
               "<Attributes>) => void"
             ],
@@ -46420,7 +47672,7 @@
           "ServiceStatus",
           "<Meta>"
         ],
-        "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
+        "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46436,7 +47688,7 @@
             "signature": [
               "Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }> | Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }> | Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }> | Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>"
             ],
-            "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
+            "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -46449,7 +47701,7 @@
             "description": [
               "\nA high-level summary of the service status."
             ],
-            "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
+            "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -46465,7 +47717,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
+            "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -46481,7 +47733,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
+            "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -46497,7 +47749,7 @@
             "signature": [
               "Meta | undefined"
             ],
-            "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
+            "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -46906,7 +48158,10 @@
         "description": [
           "\nAPI for accessing status of Core and this plugin's dependencies as well as for customizing this plugin's status.\n"
         ],
-        "path": "src/core/server/status/types.ts",
+        "signature": [
+          "StatusServiceSetup"
+        ],
+        "path": "node_modules/@types/kbn__core-status-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46922,16 +48177,10 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreStatus",
-                "text": "CoreStatus"
-              },
+              "CoreStatus",
               ">"
             ],
-            "path": "src/core/server/status/types.ts",
+            "path": "node_modules/@types/kbn__core-status-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -46950,7 +48199,7 @@
               "ServiceStatus",
               "<unknown>>"
             ],
-            "path": "src/core/server/status/types.ts",
+            "path": "node_modules/@types/kbn__core-status-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -46970,7 +48219,7 @@
               "ServiceStatus",
               "<unknown>>) => void"
             ],
-            "path": "src/core/server/status/types.ts",
+            "path": "node_modules/@types/kbn__core-status-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -46987,7 +48236,7 @@
                   "ServiceStatus",
                   "<unknown>>"
                 ],
-                "path": "src/core/server/status/types.ts",
+                "path": "node_modules/@types/kbn__core-status-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -47010,7 +48259,7 @@
               "ServiceStatus",
               "<unknown>>>"
             ],
-            "path": "src/core/server/status/types.ts",
+            "path": "node_modules/@types/kbn__core-status-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -47029,7 +48278,7 @@
               "ServiceStatus",
               "<unknown>>"
             ],
-            "path": "src/core/server/status/types.ts",
+            "path": "node_modules/@types/kbn__core-status-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -47045,7 +48294,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "src/core/server/status/types.ts",
+            "path": "node_modules/@types/kbn__core-status-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -48623,7 +49872,7 @@
         "label": "EcsEventKind",
         "description": [],
         "signature": [
-          "\"metric\" | \"alert\" | \"state\" | \"event\" | \"signal\" | \"pipeline_error\""
+          "\"metric\" | \"alert\" | \"signal\" | \"state\" | \"event\" | \"pipeline_error\""
         ],
         "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
@@ -52214,7 +53463,7 @@
         "signature": [
           "Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }> | Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }> | Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }> | Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>"
         ],
-        "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
+        "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -52227,7 +53476,7 @@
         "label": "SharedGlobalConfig",
         "description": [],
         "signature": [
-          "{ readonly elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; readonly path: Readonly<{ readonly data: string; }>; readonly savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+          "{ readonly elasticsearch: Readonly<{ readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; readonly path: Readonly<{ readonly data: string; }>; readonly savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
           "ByteSizeValue",
           ") => boolean; isLessThan: (other: ",
           "ByteSizeValue",
@@ -52405,7 +53654,7 @@
         "signature": [
           "{ readonly available: Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }>; readonly degraded: Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }>; readonly unavailable: Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }>; readonly critical: Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>; }"
         ],
-        "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
+        "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
