@@ -299,8 +299,23 @@ export function registerIndexRoutes({
         client.asCurrentUser
       );
 
+      if (createResult.exists) {
+        return response.conflict({
+          body: new Error(
+            i18n.translate('xpack.ingestPipelines.createRoute.duplicatePipelineIdErrorMessage', {
+              defaultMessage: "There is already a pipeline with name '{pipelineName}'.",
+              values: {
+                pipelineName,
+              },
+            })
+          ),
+        });
+      }
+
       return response.ok({
-        body: createResult,
+        body: {
+          created: pipelineName
+        },
         headers: { 'content-type': 'application/json' },
       });
     })
