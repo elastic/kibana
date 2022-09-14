@@ -33,7 +33,7 @@ import { removePolicyFromArtifacts } from './handlers/remove_policy_from_artifac
 import type { FeatureUsageService } from '../endpoint/services/feature_usage/service';
 import type { EndpointMetadataService } from '../endpoint/services/metadata';
 import { notifyProtectionFeatureUsage } from './notify_protection_feature_usage';
-import type { Config } from './types';
+import type { AnyPolicyCreateConfig } from './types';
 import { ENDPOINT_INTEGRATION_CONFIG_KEY } from './constants';
 import { createEventFilters } from './handlers/create_event_filters';
 
@@ -72,12 +72,12 @@ export const getPackagePolicyCreateCallback = (
       (input) => input.type === ENDPOINT_INTEGRATION_CONFIG_KEY
     )?.config?._config;
 
-    if (integrationConfigInput !== undefined) {
+    if (integrationConfigInput?.value) {
       // The cast below is needed in order to ensure proper typing for the
-      // Endpoint and Cloud Security integration configuration
-      endpointIntegrationConfig = integrationConfigInput.value as Config;
+      // Elastic Defend integration configuration
+      endpointIntegrationConfig = integrationConfigInput.value as AnyPolicyCreateConfig;
 
-      // Validate that the Endpoint and Cloud Security integration config is valid
+      // Validate that the Elastic Defend integration config is valid
       validateIntegrationConfig(endpointIntegrationConfig, logger);
     }
 
@@ -169,12 +169,8 @@ export const getPackagePolicyPostCreateCallback = (
   exceptionsClient: ExceptionListClient | undefined
 ): PostPackagePolicyPostCreateCallback => {
   return async (packagePolicy: PackagePolicy): Promise<PackagePolicy> => {
-    if (!exceptionsClient) {
-      return packagePolicy;
-    }
-
     // We only care about Endpoint package policies
-    if (!isEndpointPackagePolicy(packagePolicy)) {
+    if (!exceptionsClient || !isEndpointPackagePolicy(packagePolicy)) {
       return packagePolicy;
     }
 
