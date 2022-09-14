@@ -88,7 +88,7 @@ export interface FieldStatisticsTableProps {
   savedSearchRefetch$?: DataRefetch$;
   availableFields$?: AvailableFields$;
   searchSessionId?: string;
-  savedSearchDataTotalHits$: DataTotalHits$;
+  savedSearchDataTotalHits$?: DataTotalHits$;
 }
 
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
