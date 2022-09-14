@@ -65,9 +65,7 @@ export async function fetchFrequentItems(
     field,
   }));
 
-  // TODO add real totalDocCount
-  // total_doc_count = terms['total_doc_count'][0]
-  const totalDocCount = 1;
+  const totalDocCount = terms[0].total_doc_count;
   const minDocCount = 50000;
   let sampleProbability = 1;
 
