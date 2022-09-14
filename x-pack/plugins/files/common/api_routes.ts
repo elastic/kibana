@@ -7,13 +7,7 @@
 
 import type { TypeOf, Type } from '@kbn/config-schema';
 import { PLUGIN_ID } from './constants';
-import type {
-  FileJSON,
-  Pagination,
-  FilesMetrics,
-  FileShareJSON,
-  FileShareJSONWithToken,
-} from './types';
+import type { FileJSON, Pagination, FilesMetrics, FileShareJSONWithToken } from './types';
 
 export const API_BASE_PATH = `/api/${PLUGIN_ID}`;
 
