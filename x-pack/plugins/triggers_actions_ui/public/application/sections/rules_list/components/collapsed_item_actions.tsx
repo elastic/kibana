@@ -42,6 +42,7 @@ export type ComponentOpts = {
   setRulesToDelete: React.Dispatch<React.SetStateAction<string[]>>;
   onEditRule: (item: RuleTableItem) => void;
   onUpdateAPIKey: (id: string[]) => void;
+  onRunRule: (item: RuleTableItem) => void;
 } & Pick<BulkOperationsComponentOpts, 'disableRule' | 'enableRule' | 'snoozeRule' | 'unsnoozeRule'>;
 
 export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
@@ -55,6 +56,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   onUpdateAPIKey,
   snoozeRule,
   unsnoozeRule,
+  onRunRule,
 }: ComponentOpts) => {
   const {
     ruleTypeRegistry,
@@ -229,6 +231,18 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           name: i18n.translate(
             'xpack.triggersActionsUI.sections.rulesList.collapsedItemActions.updateApiKey',
             { defaultMessage: 'Update API key' }
+          ),
+        },
+        {
+          disabled: !item.isEditable,
+          'data-test-subj': 'runRule',
+          onClick: () => {
+            setIsPopoverOpen(!isPopoverOpen);
+            onRunRule(item);
+          },
+          name: i18n.translate(
+            'xpack.triggersActionsUI.sections.rulesList.collapsedItemActions.runRule',
+            { defaultMessage: 'Run rule' }
           ),
         },
         {

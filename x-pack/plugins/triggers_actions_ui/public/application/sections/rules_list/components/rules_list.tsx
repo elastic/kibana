@@ -88,6 +88,7 @@ import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
 import { RulesListAutoRefresh } from './rules_list_auto_refresh';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
 import { RulesListVisibleColumns } from './rules_list_column_selector';
+import { runRule } from '../../../lib/run_rule';
 
 const ENTER_KEY = 13;
 
@@ -259,6 +260,10 @@ export const RulesList = ({
   const onRuleEdit = (ruleItem: RuleTableItem) => {
     setEditFlyoutVisibility(true);
     setCurrentRuleToEdit(ruleItem);
+  };
+
+  const onRunRule = async (id: string) => {
+    await runRule(http, toasts, id);
   };
 
   const isRuleTypeEditableInContext = (ruleTypeId: string) =>
@@ -787,6 +792,7 @@ export const RulesList = ({
             setRulesToDelete={setRulesToDelete}
             onEditRule={() => onRuleEdit(rule)}
             onUpdateAPIKey={setRulesToUpdateAPIKey}
+            onRunRule={() => onRunRule(rule.id)}
           />
         )}
         renderRuleError={(rule) => {

@@ -40,7 +40,7 @@ import {
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
 } from '@kbn/security-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import {
   IEvent,
   IEventLogClient,
@@ -2755,6 +2755,55 @@ export class RulesClient {
         { version }
       );
     }
+  }
+
+  public async runSoon({ id }: { id: string }) {
+    const { attributes } = await this.unsecuredSavedObjectsClient.get<Rule>('alert', id);
+    try {
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: attributes.alertTypeId,
+        consumer: attributes.consumer,
+        operation: ReadOperations.RunSoon,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+
+      if (attributes.actions.length) {
+        await this.actionsAuthorization.ensureAuthorized('execute');
+      }
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.RUN_SOON,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.RUN_SOON,
+        outcome: 'unknown',
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
+
+    const taskDoc = attributes.scheduledTaskId
+      ? await this.taskManager.get(attributes.scheduledTaskId)
+      : null;
+    if (
+      taskDoc &&
+      (taskDoc.status === TaskStatus.Claiming || taskDoc.status === TaskStatus.Running)
+    ) {
+      return i18n.translate('xpack.alerting.rulesClient.runSoon.ruleIsRunning', {
+        defaultMessage: 'Rule is already running',
+      });
+    }
+
+    await this.taskManager.runSoon(id);
   }
 
   public async listAlertTypes() {

@@ -61,6 +61,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { ruleReducer } from '../../rule_form/rule_reducer';
 import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
+import { runRule } from '../../../lib/run_rule';
 
 export type RuleDetailsProps = {
   rule: Rule;
@@ -164,6 +165,9 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   const ruleActions = rule.actions;
   const uniqueActions = Array.from(new Set(ruleActions.map((item: any) => item.actionTypeId)));
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
+  const onRunRule = async (id: string) => {
+    await runRule(http, toasts, id);
+  };
 
   // Check whether interval is below configured minium
   useEffect(() => {
@@ -411,6 +415,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
               }
               requestRefresh();
             }}
+            onRunRule={onRunRule}
           />,
           editButton,
           <EuiButtonEmpty
