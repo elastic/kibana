@@ -19,6 +19,7 @@ import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plu
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DistributiveOmit } from '@elastic/eui';
+import type { ApmBase } from '@elastic/apm-rum';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type {
   CasesByAlertId,
@@ -62,6 +63,7 @@ export interface CasesPluginStart {
   features: FeaturesPluginStart;
   security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
+  apm?: ApmBase;
 }
 
 /**
