@@ -10,8 +10,7 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const ALL_ALERTS = 10;
 
-export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const PageObjects = getPageObjects(['header']);
+export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
   describe('Observability overview', function () {
@@ -44,7 +43,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('With alerts', function () {
       it('navigate and open alerts section', async () => {
         await observability.overview.common.navigateToOverviewPageWithAlerts();
-        await PageObjects.header.waitUntilLoadingHasFinished();
         await observability.overview.common.openAlertsSectionAndWaitToAppear();
       });
 
