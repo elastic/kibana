@@ -75,6 +75,9 @@ export function DiscoverLayout({
   searchSource,
   state,
   stateContainer,
+  persistDataView,
+  updateAdHocDataViewId,
+  adHocDataViewList,
 }: DiscoverLayoutProps) {
   const {
     trackUiMetric,
@@ -242,6 +245,9 @@ export function DiscoverLayout({
         isPlainRecord={isPlainRecord}
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
         onFieldEdited={onFieldEdited}
+        persistDataView={persistDataView}
+        updateAdHocDataViewId={updateAdHocDataViewId}
+        adHocDataViewList={adHocDataViewList}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout
@@ -268,6 +274,7 @@ export function DiscoverLayout({
               viewMode={viewMode}
               onDataViewCreated={onDataViewCreated}
               availableFields$={savedSearchData$.availableFields$}
+              persistDataView={persistDataView}
             />
           </EuiFlexItem>
           <EuiHideFor sizes={['xs', 's']}>
