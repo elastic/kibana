@@ -203,6 +203,7 @@ export class DiscoverPlugin
       this.locator = plugins.share.url.locators.create(
         new DiscoverAppLocatorDefinition({
           useHash: core.uiSettings.get('state:storeInSessionStorage'),
+          core,
         })
       );
     }
