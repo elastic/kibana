@@ -148,10 +148,10 @@ export const CategoryTable: FC<Props> = ({
       actions: [
         {
           name: i18n.translate('xpack.aiops.logCategorization.showInDiscover', {
-            defaultMessage: 'Show these in discover',
+            defaultMessage: 'Show these in Discover',
           }),
           description: i18n.translate('xpack.aiops.logCategorization.showInDiscover', {
-            defaultMessage: 'Show these in discover',
+            defaultMessage: 'Show these in Discover',
           }),
           icon: 'discoverApp',
           type: 'icon',
@@ -159,10 +159,10 @@ export const CategoryTable: FC<Props> = ({
         },
         {
           name: i18n.translate('xpack.aiops.logCategorization.filterOutInDiscover', {
-            defaultMessage: 'Filter out in discover',
+            defaultMessage: 'Filter out in Discover',
           }),
           description: i18n.translate('xpack.aiops.logCategorization.filterOutInDiscover', {
-            defaultMessage: 'Filter out in discover',
+            defaultMessage: 'Filter out in Discover',
           }),
           icon: 'filter',
           type: 'icon',
@@ -221,7 +221,7 @@ export const CategoryTable: FC<Props> = ({
               <EuiButton size="s" onClick={() => openInDiscover(QUERY_MODE.INCLUDE)}>
                 <FormattedMessage
                   id="xpack.aiops.logCategorization.showInDiscover"
-                  defaultMessage="Show these in discover"
+                  defaultMessage="Show these in Discover"
                 />
               </EuiButton>
             </EuiFlexItem>
@@ -229,7 +229,7 @@ export const CategoryTable: FC<Props> = ({
               <EuiButton size="s" onClick={() => openInDiscover(QUERY_MODE.EXCLUDE)}>
                 <FormattedMessage
                   id="xpack.aiops.logCategorization.filterOutInDiscover"
-                  defaultMessage="Filter out in discover"
+                  defaultMessage="Filter out in Discover"
                 />
               </EuiButton>
             </EuiFlexItem>
