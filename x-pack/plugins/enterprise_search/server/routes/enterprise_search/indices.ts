@@ -20,6 +20,7 @@ import { fetchConnectorByIndexName, fetchConnectors } from '../../lib/connectors
 import { fetchCrawlerByIndexName, fetchCrawlers } from '../../lib/crawler/fetch_crawlers';
 
 import { createIndex } from '../../lib/indices/create_index';
+import { indexOrAliasExists } from '../../lib/indices/exists_index';
 import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices } from '../../lib/indices/fetch_indices';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
@@ -364,7 +365,14 @@ export function registerIndexRoutes({
       const { client } = (await context.core).elasticsearch;
       const defaultDescription = `ML inference pipeline for index ${indexName}`;
 
-      // TODO: should we check if index exists?
+      if (!(await indexOrAliasExists(client, indexName))) {
+        return createError({
+          errorCode: ErrorCode.INDEX_NOT_FOUND,
+          message: `Could not find index [${indexName}]`,
+          response,
+          statusCode: 404,
+        });
+      }
 
       const simulateRequest: IngestSimulateRequest = {
         docs,
@@ -402,7 +410,14 @@ export function registerIndexRoutes({
       const pipelineId = `ml-inference-${pipelineName}`;
       const defaultDescription = `ML inference pipeline for index ${indexName}`;
 
-      // TODO: should we check if index exists?
+      if (!(await indexOrAliasExists(client, indexName))) {
+        return createError({
+          errorCode: ErrorCode.INDEX_NOT_FOUND,
+          message: `Could not find index [${indexName}]`,
+          response,
+          statusCode: 404,
+        });
+      }
 
       const updateRequest: IngestPutPipelineRequest = {
         id: pipelineId,
