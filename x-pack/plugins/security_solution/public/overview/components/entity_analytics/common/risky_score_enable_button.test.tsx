@@ -16,6 +16,10 @@ jest.mock('./utils');
 
 describe('RiskyScoreEnableButton', () => {
   const mockRefetch = jest.fn();
+  const timerange = {
+    startDate: 'mockStartDate',
+    endDate: 'mockEndDate',
+  };
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -23,7 +27,11 @@ describe('RiskyScoreEnableButton', () => {
     it('Renders expected children', () => {
       render(
         <TestProviders>
-          <RiskyScoreEnableButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.host} />
+          <RiskyScoreEnableButton
+            refetch={mockRefetch}
+            riskScoreEntity={RiskScoreEntity.host}
+            timerange={timerange}
+          />
         </TestProviders>
       );
 
@@ -36,7 +44,11 @@ describe('RiskyScoreEnableButton', () => {
     it('Triggers the right installer', async () => {
       render(
         <TestProviders>
-          <RiskyScoreEnableButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.host} />
+          <RiskyScoreEnableButton
+            refetch={mockRefetch}
+            riskScoreEntity={RiskScoreEntity.host}
+            timerange={timerange}
+          />
         </TestProviders>
       );
 
@@ -50,7 +62,11 @@ describe('RiskyScoreEnableButton', () => {
     it('Update button state while installing', async () => {
       render(
         <TestProviders>
-          <RiskyScoreEnableButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.host} />
+          <RiskyScoreEnableButton
+            refetch={mockRefetch}
+            riskScoreEntity={RiskScoreEntity.host}
+            timerange={timerange}
+          />
         </TestProviders>
       );
 
@@ -66,7 +82,11 @@ describe('RiskyScoreEnableButton', () => {
     it('Refretch the module when installation finished', async () => {
       render(
         <TestProviders>
-          <RiskyScoreEnableButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.host} />
+          <RiskyScoreEnableButton
+            refetch={mockRefetch}
+            riskScoreEntity={RiskScoreEntity.host}
+            timerange={timerange}
+          />
         </TestProviders>
       );
 
@@ -82,7 +102,11 @@ describe('RiskyScoreEnableButton', () => {
     it('Renders expected children', () => {
       render(
         <TestProviders>
-          <RiskyScoreEnableButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.user} />
+          <RiskyScoreEnableButton
+            refetch={mockRefetch}
+            riskScoreEntity={RiskScoreEntity.user}
+            timerange={timerange}
+          />
         </TestProviders>
       );
 
@@ -95,7 +119,11 @@ describe('RiskyScoreEnableButton', () => {
     it('Triggers the right installer', async () => {
       render(
         <TestProviders>
-          <RiskyScoreEnableButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.user} />
+          <RiskyScoreEnableButton
+            refetch={mockRefetch}
+            riskScoreEntity={RiskScoreEntity.user}
+            timerange={timerange}
+          />
         </TestProviders>
       );
 
@@ -109,7 +137,11 @@ describe('RiskyScoreEnableButton', () => {
     it('Update button state while installing', async () => {
       render(
         <TestProviders>
-          <RiskyScoreEnableButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.user} />
+          <RiskyScoreEnableButton
+            refetch={mockRefetch}
+            riskScoreEntity={RiskScoreEntity.user}
+            timerange={timerange}
+          />
         </TestProviders>
       );
 
@@ -125,7 +157,11 @@ describe('RiskyScoreEnableButton', () => {
     it('Refretch the module when installation finished', async () => {
       render(
         <TestProviders>
-          <RiskyScoreEnableButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.user} />
+          <RiskyScoreEnableButton
+            refetch={mockRefetch}
+            riskScoreEntity={RiskScoreEntity.user}
+            timerange={timerange}
+          />
         </TestProviders>
       );
 
