@@ -7,7 +7,7 @@ There are many ways to run {es} while you are developing.
 
 === By snapshot
 
-This will run a snapshot of {es} that is usually built nightly. Read more about <<development-es-snapshots>>.
+This will run a snapshot of {es} that is usually built nightly. Snapshot status is available on the https://ci.kibana.dev/es-snapshots[dashboard].
 
 [source,bash]
 ----
