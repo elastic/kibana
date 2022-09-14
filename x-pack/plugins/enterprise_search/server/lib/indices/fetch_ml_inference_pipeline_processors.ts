@@ -6,15 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-
-// TODO: grab this from the file where its defined once
-// https://github.com/elastic/kibana/pull/140456 is merged.
-interface InferencePipeline {
-  isDeployed: boolean;
-  modelType: string;
-  pipelineName: string;
-  trainedModelName: string;
-}
+import { InferencePipeline } from '@kbn/enterprise-search-plugin/common/types/pipelines';
 
 export const fetchMlInferencePipelineProcessorNames = async (
   client: ElasticsearchClient,
@@ -32,7 +24,8 @@ export const fetchMlInferencePipelineProcessorNames = async (
       .map((obj) => obj.pipeline?.name)
       .filter((name): name is string => name !== undefined);
   } catch (err) {
-    // If someone provides a bad index name, catch the error and return an empty array of names.
+    // The GET /_ingest/pipeline API returns an empty object on 404 Not Found. If someone provides
+    // a bad index name, catch the error and return an empty array of names.
     return [];
   }
 };

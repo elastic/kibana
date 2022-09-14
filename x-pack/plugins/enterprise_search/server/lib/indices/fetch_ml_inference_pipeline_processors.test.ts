@@ -6,6 +6,7 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
+import { InferencePipeline } from '@kbn/enterprise-search-plugin/common/types/pipelines';
 
 import {
   fetchAndAddTrainedModelData,
@@ -150,6 +151,94 @@ describe('fetchPipelineProcessorInferenceData lib function', () => {
     const response = await fetchPipelineProcessorInferenceData(
       mockClient as unknown as IScopedClusterClient,
       ['ml-inference-pipeline-1', 'ml-inference-pipeline-2', 'non-ml-inference-pipeline']
+    );
+
+    expect(response).toEqual(expected);
+  });
+});
+
+describe('fetchAndAddTrainedModelData lib function', () => {
+  const mockClient = {
+    ml: {
+      getTrainedModels: jest.fn(),
+      getTrainedModelsStats: jest.fn(),
+    },
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should update the pipeline processor data with model type of deployment status info', async () => {
+    const mockGetTrainedModelsData = {
+      count: 1,
+      trained_model_configs: [
+        {
+          model_id: 'trained-model-id-1',
+          model_type: 'lang_ident',
+        },
+        {
+          model_id: 'trained-model-id-2',
+          model_type: 'pytorch',
+        },
+      ],
+    };
+
+    const mockGetTrainedModelStats = {
+      count: 1,
+      trained_model_stats: [
+        {
+          model_id: 'trained-model-id-1',
+        },
+        {
+          model_id: 'trained-model-id-2',
+          deployment_stats: {
+            state: 'started',
+          },
+        },
+      ],
+    };
+
+    mockClient.ml.getTrainedModels.mockImplementation(() =>
+      Promise.resolve(mockGetTrainedModelsData)
+    );
+    mockClient.ml.getTrainedModelsStats.mockImplementation(() =>
+      Promise.resolve(mockGetTrainedModelStats)
+    );
+
+    const input = {
+      'trained-model-id-1': {
+        isDeployed: false,
+        modelType: 'unknown',
+        pipelineName: 'ml-inference-pipeline-1',
+        trainedModelName: 'trained-model-id-1',
+      },
+      'trained-model-id-2': {
+        isDeployed: false,
+        modelType: 'unknown',
+        pipelineName: 'ml-inference-pipeline-2',
+        trainedModelName: 'trained-model-id-2',
+      },
+    } as Record<string, InferencePipeline>;
+
+    const expected = {
+      'trained-model-id-1': {
+        isDeployed: false,
+        modelType: 'lang_ident',
+        pipelineName: 'ml-inference-pipeline-1',
+        trainedModelName: 'trained-model-id-1',
+      },
+      'trained-model-id-2': {
+        isDeployed: true,
+        modelType: 'pytorch',
+        pipelineName: 'ml-inference-pipeline-2',
+        trainedModelName: 'trained-model-id-2',
+      },
+    } as Record<string, InferencePipeline>;
+
+    const response = await fetchAndAddTrainedModelData(
+      mockClient as unknown as IScopedClusterClient,
+      input
     );
 
     expect(response).toEqual(expected);
