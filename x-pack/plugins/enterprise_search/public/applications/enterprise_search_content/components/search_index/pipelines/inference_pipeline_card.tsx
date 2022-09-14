@@ -7,6 +7,8 @@
 
 import React, { useState } from 'react';
 
+import { useValues } from 'kea';
+
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -15,11 +17,14 @@ import {
   EuiHealth,
   EuiPanel,
   EuiPopover,
+  EuiPopoverTitle,
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+
+import { HttpLogic } from '../../../../shared/http';
 
 import { InferencePipeline } from './types';
 
@@ -29,6 +34,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = ({
   isDeployed,
   modelType,
 }) => {
+  const { http } = useValues(HttpLogic);
   const [isPopOverOpen, setIsPopOverOpen] = useState(false);
 
   const deployedText = i18n.translate('xpack.enterpriseSearch.inferencePipelineCard.isDeployed', {
@@ -69,20 +75,33 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = ({
                 isOpen={isPopOverOpen}
                 closePopover={() => setIsPopOverOpen(false)}
               >
+                <EuiPopoverTitle paddingSize="m">
+                  {i18n.translate('xpack.enterpriseSearch.inferencePipelineCard.action.title', {
+                    defaultMessage: 'Actions',
+                  })}
+                </EuiPopoverTitle>
                 <EuiFlexGroup direction="column" gutterSize="none">
                   <EuiFlexItem>
                     <div>
-                      <EuiButtonEmpty flush="both" iconType="eye" color="text">
+                      <EuiButtonEmpty
+                        size="s"
+                        flush="both"
+                        iconType="eye"
+                        color="text"
+                        href={http.basePath.prepend(
+                          `/app/management/ingest/ingest_pipelines/?pipeline=${pipelineName}`
+                        )}
+                      >
                         {i18n.translate(
                           'xpack.enterpriseSearch.inferencePipelineCard.action.view',
-                          { defaultMessage: 'View pipeline in Stack Management' }
+                          { defaultMessage: 'View in Stack Management' }
                         )}
                       </EuiButtonEmpty>
                     </div>
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <div>
-                      <EuiButtonEmpty flush="both" iconType="trash" color="text">
+                      <EuiButtonEmpty size="s" flush="both" iconType="trash" color="text">
                         {i18n.translate(
                           'xpack.enterpriseSearch.inferencePipelineCard.action.delete',
                           { defaultMessage: 'Delete pipeline' }
