@@ -63,6 +63,12 @@ export const AccessDeniedPage: React.FC<ComponentProps> = () => {
           />
         </p>
         <p>
+          <FormattedMessage
+            id="xpack.monitoring.accessDenied.noRemoteClusterClientDescription"
+            defaultMessage="If the setting `monitoring.ui.ccs.enabled` is set to `true`, make sure your cluster has the `remote_cluster_client` role on at least one node."
+          />
+        </p>
+        <p>
           <EuiButton href="../app/home">
             <FormattedMessage
               id="xpack.monitoring.accessDenied.backToKibanaButtonLabel"
