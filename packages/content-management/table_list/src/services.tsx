@@ -7,12 +7,10 @@
  */
 
 import React, { FC, useContext, useMemo } from 'react';
-import type { EuiTableFieldDataColumnType, SearchFilterConfig } from '@elastic/eui';
+import type { SearchFilterConfig } from '@elastic/eui';
 import type { Observable } from 'rxjs';
 import type { FormattedRelative } from '@kbn/i18n-react';
 import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
-
-import { UserContentCommonSchema } from './table_list_view';
 
 type UnmountCallback = () => void;
 type MountPoint = (element: HTMLElement) => UnmountCallback;
@@ -44,9 +42,9 @@ export interface Services {
     searchQuery: string;
     references?: SavedObjectsFindOptionsReference[];
   };
-  getTagsColumnDefinition?: () => EuiTableFieldDataColumnType<UserContentCommonSchema> | undefined;
   getSearchBarFilters?: () => SearchFilterConfig[];
   DateFormatterComp?: DateFormatter;
+  TagList: FC<{ references: SavedObjectsReference[]; onClick?: (name: string) => void }>;
 }
 
 const TableListViewContext = React.createContext<Services | null>(null);
@@ -101,7 +99,14 @@ export interface TableListViewKibanaDependencies {
    */
   savedObjectsTagging?: {
     ui: {
-      getTableColumnDefinition: () => EuiTableFieldDataColumnType<UserContentCommonSchema>;
+      components: {
+        TagList: React.FC<{
+          object: {
+            references: SavedObjectsReference[];
+          };
+          onClick?: (name: string) => void;
+        }>;
+      };
       parseSearchQuery: (
         query: string,
         options?: {
@@ -150,6 +155,18 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
     }
   }, [savedObjectsTagging]);
 
+  const TagList = useMemo(() => {
+    const Comp: Services['TagList'] = ({ references, onClick }) => {
+      if (!savedObjectsTagging?.ui.components.TagList) {
+        return null;
+      }
+      const PluginTagList = savedObjectsTagging.ui.components.TagList;
+      return <PluginTagList object={{ references }} onClick={onClick} />;
+    };
+
+    return Comp;
+  }, [savedObjectsTagging?.ui.components.TagList]);
+
   return (
     <RedirectAppLinksKibanaProvider coreStart={core}>
       <TableListViewProvider
@@ -162,12 +179,12 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
         notifyError={(title, text) => {
           core.notifications.toasts.addDanger({ title: toMountPoint(title), text });
         }}
-        getTagsColumnDefinition={savedObjectsTagging?.ui.getTableColumnDefinition}
         getSearchBarFilters={getSearchBarFilters}
         searchQueryParser={searchQueryParser}
         DateFormatterComp={(props) => <FormattedRelative {...props} />}
         currentAppId$={core.application.currentAppId$}
         navigateToUrl={core.application.navigateToUrl}
+        TagList={TagList}
       >
         {children}
       </TableListViewProvider>
