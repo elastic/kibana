@@ -10,37 +10,32 @@ import './index.scss';
 import React from 'react';
 import { History } from 'history';
 import { Provider } from 'react-redux';
-import { first } from 'rxjs/operators';
 import { I18nProvider, FormattedRelative } from '@kbn/i18n-react';
 import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch, Route, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import { AppMountParameters, CoreSetup } from '@kbn/core/public';
 
 import { DashboardListing } from './listing';
 import { dashboardStateStore } from './state';
 import { DashboardApp } from './dashboard_app';
+import { addHelpMenuToAppChrome } from './lib';
 import { DashboardNoMatch } from './listing/dashboard_no_match';
-import { KibanaContextProvider, KibanaThemeProvider } from '../services/kibana_react';
-import { addHelpMenuToAppChrome, DashboardSessionStorage } from './lib';
 import { createDashboardListingFilterUrl } from '../dashboard_constants';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
-import { getDashboardPageTitle, dashboardReadonlyBadge } from '../dashboard_strings';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
-import { DashboardAppServices, DashboardEmbedSettings, RedirectToProps } from '../types';
+import { dashboardReadonlyBadge, getDashboardPageTitle } from '../dashboard_strings';
 import {
-  DashboardFeatureFlagConfig,
-  DashboardSetupDependencies,
-  DashboardStart,
-  DashboardStartDependencies,
-} from '../plugin';
-import {
-  AppMountParameters,
-  CoreSetup,
-  PluginInitializerContext,
-  ScopedHistory,
-} from '../services/core';
+  DashboardAppServices,
+  DashboardEmbedSettings,
+  RedirectToProps,
+  DashboardMountContextProps,
+} from '../types';
+import { DashboardStart, DashboardStartDependencies } from '../plugin';
+import { pluginServices } from '../services/plugin_services';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',
@@ -51,98 +46,38 @@ export const dashboardUrlParams = {
 
 export interface DashboardMountProps {
   appUnMounted: () => void;
-  restorePreviousUrl: () => void;
-
-  scopedHistory: ScopedHistory<unknown>;
   element: AppMountParameters['element'];
-  initializerContext: PluginInitializerContext;
-  onAppLeave: AppMountParameters['onAppLeave'];
   core: CoreSetup<DashboardStartDependencies, DashboardStart>;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  usageCollection: DashboardSetupDependencies['usageCollection'];
+  mountContext: DashboardMountContextProps;
 }
 
-export async function mountApp({
-  core,
-  element,
-  onAppLeave,
-  appUnMounted,
-  scopedHistory,
-  usageCollection,
-  initializerContext,
-  restorePreviousUrl,
-  setHeaderActionMenu,
-}: DashboardMountProps) {
-  const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
+export async function mountApp({ core, element, appUnMounted, mountContext }: DashboardMountProps) {
+  const [, , dashboardStart] = await core.getStartServices(); // TODO: Remove as part of https://github.com/elastic/kibana/pull/138774
+  const { DashboardMountContext } = await import('./hooks/dashboard_mount_context');
 
   const {
-    navigation,
-    savedObjects,
-    urlForwarding,
+    application,
+    chrome: { setBadge, docTitle },
+    dashboardCapabilities: { showWriteControls },
     data: dataStart,
-    share: shareStart,
-    spaces: spacesApi,
-    embeddable: embeddableStart,
-    savedObjectsTaggingOss,
-    visualizations,
-    presentationUtil,
-    screenshotMode,
-    dataViewEditor,
-  } = pluginsStart;
+    embeddable,
+    notifications,
+    savedObjectsTagging,
+    settings: { uiSettings },
+  } = pluginServices.getServices();
 
-  const activeSpaceId =
-    spacesApi && (await spacesApi.getActiveSpace$().pipe(first()).toPromise())?.id;
   let globalEmbedSettings: DashboardEmbedSettings | undefined;
   let routerHistory: History;
 
-  const savedObjectsTagging = savedObjectsTaggingOss?.getTaggingApi();
+  // TODO: Remove as part of https://github.com/elastic/kibana/pull/138774
   const dashboardServices: DashboardAppServices = {
-    navigation,
-    onAppLeave,
-    savedObjects,
-    urlForwarding,
-    dataViewEditor,
-    visualizations,
-    usageCollection,
-    core: coreStart,
-    data: dataStart,
-    share: shareStart,
-    initializerContext,
-    restorePreviousUrl,
-    setHeaderActionMenu,
-    chrome: coreStart.chrome,
-    embeddable: embeddableStart,
-    uiSettings: coreStart.uiSettings,
-    scopedHistory: () => scopedHistory,
-    screenshotModeService: screenshotMode,
-    dataViews: dataStart.dataViews,
-    savedQueryService: dataStart.query.savedQueries,
-    savedObjectsClient: coreStart.savedObjects.client,
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
-    savedObjectsTagging,
-    allowByValueEmbeddables:
-      initializerContext.config.get<DashboardFeatureFlagConfig>().allowByValueEmbeddables,
-    dashboardCapabilities: {
-      show: Boolean(coreStart.application.capabilities.dashboard.show),
-      saveQuery: Boolean(coreStart.application.capabilities.dashboard.saveQuery),
-      createNew: Boolean(coreStart.application.capabilities.dashboard.createNew),
-      mapsCapabilities: { save: Boolean(coreStart.application.capabilities.maps?.save) },
-      createShortUrl: Boolean(coreStart.application.capabilities.dashboard.createShortUrl),
-      showWriteControls: Boolean(coreStart.application.capabilities.dashboard.showWriteControls),
-      visualizeCapabilities: { save: Boolean(coreStart.application.capabilities.visualize?.save) },
-      storeSearchSession: Boolean(coreStart.application.capabilities.dashboard.storeSearchSession),
-    },
-    dashboardSessionStorage: new DashboardSessionStorage(
-      core.notifications.toasts,
-      activeSpaceId || 'default'
-    ),
-    spacesService: spacesApi,
   };
 
   const getUrlStateStorage = (history: RouteComponentProps['history']) =>
     createKbnUrlStateStorage({
       history,
-      useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
+      useHash: uiSettings.get('state:storeInSessionStorage'),
       ...withNotifyOnErrors(core.notifications.toasts),
     });
 
@@ -190,7 +125,7 @@ export async function mountApp({
   };
 
   const renderListingPage = (routeProps: RouteComponentProps) => {
-    coreStart.chrome.docTitle.change(getDashboardPageTitle());
+    docTitle.change(getDashboardPageTitle());
     const routeParams = parse(routeProps.history.location.search);
     const title = (routeParams.title as string) || undefined;
     const filter = (routeParams.filter as string) || undefined;
@@ -212,7 +147,7 @@ export async function mountApp({
   };
 
   const hasEmbeddableIncoming = Boolean(
-    dashboardServices.embeddable
+    embeddable
       .getStateTransfer()
       .getIncomingEmbeddablePackage(DashboardConstants.DASHBOARDS_ID, false)
   );
@@ -222,19 +157,23 @@ export async function mountApp({
 
   // dispatch synthetic hash change event to update hash history objects
   // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
-  const unlistenParentHistory = scopedHistory.listen(() => {
+  const unlistenParentHistory = mountContext.scopedHistory().listen(() => {
     window.dispatchEvent(new HashChangeEvent('hashchange'));
   });
 
   const app = (
+    // TODO: Remove KibanaContextProvider as part of https://github.com/elastic/kibana/pull/138774
     <I18nProvider>
       <Provider store={dashboardStateStore}>
         <KibanaContextProvider services={dashboardServices}>
-          <presentationUtil.ContextProvider>
+          <DashboardMountContext.Provider value={mountContext}>
             <KibanaThemeProvider theme$={core.theme.theme$}>
               <TableListViewKibanaProvider
                 {...{
-                  core: coreStart,
+                  core: {
+                    application,
+                    notifications,
+                  },
                   toMountPoint,
                   savedObjectsTagging,
                   FormattedRelative,
@@ -262,15 +201,16 @@ export async function mountApp({
                 </HashRouter>
               </TableListViewKibanaProvider>
             </KibanaThemeProvider>
-          </presentationUtil.ContextProvider>
+          </DashboardMountContext.Provider>
         </KibanaContextProvider>
       </Provider>
     </I18nProvider>
   );
 
-  addHelpMenuToAppChrome(dashboardServices.chrome, coreStart.docLinks);
-  if (!dashboardServices.dashboardCapabilities.showWriteControls) {
-    coreStart.chrome.setBadge({
+  addHelpMenuToAppChrome();
+
+  if (!showWriteControls) {
+    setBadge({
       text: dashboardReadonlyBadge.getText(),
       tooltip: dashboardReadonlyBadge.getTooltip(),
       iconType: 'glasses',

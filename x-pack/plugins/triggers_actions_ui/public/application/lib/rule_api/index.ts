@@ -37,3 +37,4 @@ export { resolveRule } from './resolve_rule';
 export { snoozeRule } from './snooze';
 export { unsnoozeRule } from './unsnooze';
 export { updateAPIKey } from './update_api_key';
+export { runSoon } from './run_soon';

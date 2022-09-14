@@ -16,12 +16,13 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
-import type { SavedObjectReference } from '@kbn/core/types';
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import useMount from 'react-use/lib/useMount';
-import { TableListView } from '@kbn/content-management-table-list';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
+import type { SavedObjectReference } from '@kbn/core/types';
+import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
+import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { TableListView, type UserContentCommonSchema } from '@kbn/content-management-table-list';
 
 import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../../types';
@@ -32,14 +33,12 @@ import {
   dashboardUnsavedListingStrings,
   getNewDashboardTitle,
 } from '../../dashboard_strings';
-import { syncQueryStateWithUrl } from '../../services/data';
-import { IKbnUrlStateStorage } from '../../services/kibana_utils';
-import { useKibana } from '../../services/kibana_react';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { confirmCreateWithUnsaved, confirmDiscardUnsavedChanges } from './confirm_overlays';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
-import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
 import { DashboardAppNoDataPage, isDashboardAppInNoDataState } from '../dashboard_app_no_data';
+import { pluginServices } from '../../services/plugin_services';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../../services/dashboard_session_storage/dashboard_session_storage_service';
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
@@ -82,28 +81,30 @@ export const DashboardListing = ({
   kbnUrlStateStorage,
 }: DashboardListingProps) => {
   const {
-    services: {
-      core,
-      data,
-      dataViews,
-      savedDashboards,
-      savedObjectsClient,
-      dashboardCapabilities,
-      dashboardSessionStorage,
-      chrome: { setBreadcrumbs },
-    },
+    services: { savedDashboards },
   } = useKibana<DashboardAppServices>();
+
+  const {
+    application,
+    chrome: { setBreadcrumbs },
+    coreContext: { executionContext },
+    dashboardCapabilities: { showWriteControls },
+    dashboardSessionStorage,
+    data: { query },
+    savedObjects: { client },
+    settings: { uiSettings },
+  } = pluginServices.getServices();
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   useMount(() => {
-    (async () => setShowNoDataPage(await isDashboardAppInNoDataState(dataViews)))();
+    (async () => setShowNoDataPage(await isDashboardAppInNoDataState()))();
   });
 
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
     dashboardSessionStorage.getDashboardIdsWithUnsavedChanges()
   );
 
-  useExecutionContext(core.executionContext, {
+  useExecutionContext(executionContext, {
     type: 'application',
     page: 'list',
   });
@@ -119,12 +120,12 @@ export const DashboardListing = ({
 
   useEffect(() => {
     // syncs `_g` portion of url with query services
-    const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
-      data.query,
+    const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
+      query,
       kbnUrlStateStorage
     );
     if (title) {
-      attemptLoadDashboardByTitle(title, savedObjectsClient).then((result) => {
+      attemptLoadDashboardByTitle(title).then((result) => {
         if (!result) return;
         redirectTo({
           destination: 'dashboard',
@@ -137,11 +138,10 @@ export const DashboardListing = ({
     return () => {
       stopSyncingQueryServiceStateWithUrl();
     };
-  }, [title, savedObjectsClient, redirectTo, data.query, kbnUrlStateStorage]);
+  }, [title, client, redirectTo, query, kbnUrlStateStorage]);
 
-  const { showWriteControls } = dashboardCapabilities;
-  const listingLimit = core.uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
-  const initialPageSize = core.uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
+  const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
+  const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
   const defaultFilter = title ? `"${title}"` : '';
 
   const createItem = useCallback(() => {
@@ -149,8 +149,6 @@ export const DashboardListing = ({
       redirectTo({ destination: 'dashboard' });
     } else {
       confirmCreateWithUnsaved(
-        core.overlays,
-        core.theme,
         () => {
           dashboardSessionStorage.clearState();
           redirectTo({ destination: 'dashboard' });
@@ -158,7 +156,7 @@ export const DashboardListing = ({
         () => redirectTo({ destination: 'dashboard' })
       );
     }
-  }, [dashboardSessionStorage, redirectTo, core.overlays, core.theme]);
+  }, [dashboardSessionStorage, redirectTo]);
 
   const emptyPrompt = useMemo(() => {
     if (!showWriteControls) {
@@ -184,7 +182,7 @@ export const DashboardListing = ({
             size="s"
             color="danger"
             onClick={() =>
-              confirmDiscardUnsavedChanges(core.overlays, () => {
+              confirmDiscardUnsavedChanges(() => {
                 dashboardSessionStorage.clearState(DASHBOARD_PANELS_UNSAVED_ID);
                 setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges());
               })
@@ -236,7 +234,7 @@ export const DashboardListing = ({
                     sampleDataInstallLink: (
                       <EuiLink
                         onClick={() =>
-                          core.application.navigateToApp('home', {
+                          application.navigateToApp('home', {
                             path: '#/tutorial_directory/sampleData',
                           })
                         }
@@ -256,8 +254,7 @@ export const DashboardListing = ({
   }, [
     redirectTo,
     createItem,
-    core.overlays,
-    core.application,
+    application,
     showWriteControls,
     unsavedDashboardIds,
     dashboardSessionStorage,
@@ -319,13 +316,7 @@ export const DashboardListing = ({
           }}
           id="dashboard"
           getDetailViewLink={({ id, attributes: { timeRestore } }) =>
-            getDashboardListItemLink(
-              core.application,
-              kbnUrlStateStorage,
-              core.uiSettings.get('state:storeInSessionStorage'), // use hash
-              id,
-              timeRestore
-            )
+            getDashboardListItemLink(kbnUrlStateStorage, id, timeRestore)
           }
         >
           <DashboardUnsavedListing
