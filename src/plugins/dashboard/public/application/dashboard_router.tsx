@@ -39,6 +39,7 @@ import {
 } from '../types';
 import { DashboardStart, DashboardStartDependencies } from '../plugin';
 import { pluginServices } from '../services/plugin_services';
+import { DashboardApplicationService } from '../services/application/types';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',
@@ -53,6 +54,12 @@ export interface DashboardMountProps {
   core: CoreSetup<DashboardStartDependencies, DashboardStart>;
   mountContext: DashboardMountContextProps;
 }
+
+// because the type of `application.capabilities.advancedSettings` is so generic, the provider
+// requiring the `save` key to be part of it is causing type issues - so, creating a custom type
+type TableListViewApplicationService = DashboardApplicationService & {
+  capabilities: { advancedSettings: { save: boolean } };
+};
 
 export async function mountApp({ core, element, appUnMounted, mountContext }: DashboardMountProps) {
   const [, , dashboardStart] = await core.getStartServices(); // TODO: Remove as part of https://github.com/elastic/kibana/pull/138774
@@ -174,15 +181,14 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
               <TableListViewKibanaProvider
                 {...{
                   core: {
-                    application:
-                      application as unknown as TableListViewKibanaDependencies['core']['application'],
+                    application: application as TableListViewApplicationService,
                     notifications,
                   },
                   toMountPoint,
                   savedObjectsTagging: savedObjectsTagging.hasApi // TODO: clean up this logic once https://github.com/elastic/kibana/issues/140433 is resolved
                     ? ({
                         ui: savedObjectsTagging,
-                      } as unknown as TableListViewKibanaDependencies['savedObjectsTagging'])
+                      } as TableListViewKibanaDependencies['savedObjectsTagging'])
                     : undefined,
                   FormattedRelative,
                 }}
