@@ -315,7 +315,7 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.hidden]?: boolean;
   [RegistryDataStreamKeys.dataset]: string;
   [RegistryDataStreamKeys.title]: string;
-  [RegistryDataStreamKeys.release]: string;
+  [RegistryDataStreamKeys.release]: RegistryRelease;
   [RegistryDataStreamKeys.streams]?: RegistryStream[];
   [RegistryDataStreamKeys.package]: string;
   [RegistryDataStreamKeys.path]: string;
@@ -417,6 +417,14 @@ export type PackageInfo =
   | Installable<Merge<RegistryPackage, EpmPackageAdditions>>
   | Installable<Merge<ArchivePackage, EpmPackageAdditions>>;
 
+// TODO - Expand this with other experimental indexing types
+export type ExperimentalIndexingFeature = 'synthetic_source';
+
+export interface ExperimentalDataStreamFeature {
+  data_stream: string;
+  features: Record<ExperimentalIndexingFeature, boolean>;
+}
+
 export interface Installation extends SavedObjectAttributes {
   installed_kibana: KibanaAssetReference[];
   installed_es: EsAssetReference[];
@@ -433,6 +441,11 @@ export interface Installation extends SavedObjectAttributes {
   install_format_schema_version?: string;
   verification_status: PackageVerificationStatus;
   verification_key_id?: string | null;
+  // TypeScript doesn't like using the `ExperimentalDataStreamFeature` type defined above here
+  experimental_data_stream_features?: Array<{
+    data_stream: string;
+    features: Record<ExperimentalIndexingFeature, boolean>;
+  }>;
 }
 
 export interface PackageUsageStats {
