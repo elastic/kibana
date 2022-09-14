@@ -126,21 +126,19 @@ export const SearchIndex: React.FC = () => {
     },
   ];
 
-  const PIPELINES_TAB: EuiTabbedContentTab[] = [
-    {
-      content: <SearchIndexPipelines />,
-      id: SearchIndexTabId.PIPELINES,
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.pipelinesTabLabel', {
-        defaultMessage: 'Pipelines',
-      }),
-    },
-  ];
+  const PIPELINES_TAB: EuiTabbedContentTab = {
+    content: <SearchIndexPipelines mlPipelinesEnabled={pipelinesEnabled} />,
+    id: SearchIndexTabId.PIPELINES,
+    name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.pipelinesTabLabel', {
+      defaultMessage: 'Pipelines',
+    }),
+  };
 
   const tabs: EuiTabbedContentTab[] = [
     ...ALL_INDICES_TABS,
     ...(isConnectorIndex(indexData) ? CONNECTOR_TABS : []),
     ...(isCrawlerIndex(indexData) ? CRAWLER_TABS : []),
-    ...(pipelinesEnabled ? PIPELINES_TAB : []),
+    PIPELINES_TAB,
   ];
 
   const selectedTab = tabs.find((tab) => tab.id === tabId);
