@@ -502,7 +502,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 ## Security Threat Intelligence - Under Security Platform
 /x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-solution-platform
 
-## Security Solution cross teams ownership
+## Security Solution cross teams ownership - TEST
 /x-pack/plugins/security_solution/cypress/downloads @elastic/security-detections-response @elastic/security-threat-hunting
 /x-pack/plugins/security_solution/cypress/fixtures @elastic/security-detections-response @elastic/security-threat-hunting
 /x-pack/plugins/security_solution/cypress/helpers @elastic/security-detections-response @elastic/security-threat-hunting
