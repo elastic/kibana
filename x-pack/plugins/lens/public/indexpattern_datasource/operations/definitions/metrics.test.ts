@@ -14,6 +14,7 @@ import { OriginalColumn } from '../../to_expression';
 import { operationDefinitionMap } from '.';
 
 const medianOperation = operationDefinitionMap.median;
+const standardDeviationOperation = operationDefinitionMap.standard_deviation;
 
 describe('metrics', () => {
   describe('optimizeEsAggs', () => {
@@ -168,8 +169,14 @@ describe('metrics', () => {
           schema: 'metric',
           field: 'bar',
         }),
+        makeEsAggBuilder('aggMedian', {
+          id: 2,
+          enabled: true,
+          schema: 'metric',
+          field: 'foo',
+        }),
         makeEsAggBuilder('aggSinglePercentile', {
-          id: 1,
+          id: 3,
           enabled: true,
           schema: 'metric',
           field: 'foo',
@@ -187,6 +194,40 @@ describe('metrics', () => {
 
       expect(newAggs).toEqual(aggs);
       expect(newIdMap).toEqual(esAggsIdMap);
+    });
+
+    it('should preserve operation-specific agg config params', () => {
+      const field = 'foo';
+
+      const aggs = [
+        makeEsAggBuilder('aggStdDeviation', {
+          id: 1,
+          enabled: true,
+          schema: 'metric',
+          field,
+          timeShift: undefined,
+          emptyAsNull: undefined,
+        }),
+        makeEsAggBuilder('aggStdDeviation', {
+          id: 2,
+          enabled: true,
+          schema: 'metric',
+          field,
+          timeShift: undefined,
+          emptyAsNull: undefined,
+        }),
+      ];
+
+      const { esAggsIdMap, aggsToIdsMap } = buildMapsFromAggBuilders(aggs);
+
+      const { aggs: newAggs } = standardDeviationOperation.optimizeEsAggs!(
+        aggs,
+        esAggsIdMap,
+        aggsToIdsMap
+      );
+
+      expect(newAggs).toHaveLength(1);
+      expect(newAggs[0].functions[0].getArgument('showBounds')?.[0]).toBe(false);
     });
   });
 });
