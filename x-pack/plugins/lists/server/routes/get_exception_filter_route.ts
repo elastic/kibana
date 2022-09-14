@@ -43,7 +43,7 @@ export const getExceptionFilterRoute = (router: ListsPluginRouter): void => {
           type,
           alias = null,
           exclude_exceptions: excludeExceptions = true,
-          chunk_size: chunkSize = 1024,
+          chunk_size: chunkSize = 10,
         } = request.body;
         if (type === 'exception_list_ids') {
           for (const {

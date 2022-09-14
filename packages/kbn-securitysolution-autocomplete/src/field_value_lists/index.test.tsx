@@ -42,7 +42,7 @@ jest.mock('@kbn/securitysolution-list-hooks', () => {
 
   return {
     ...originalModule,
-    useFindSmallLists: () => ({
+    useFindListsBySize: () => ({
       error: undefined,
       loading: false,
       result: mockResult,

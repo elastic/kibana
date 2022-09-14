@@ -37,7 +37,7 @@ import {
   LIST_ITEM_URL,
   LIST_PRIVILEGES_URL,
   LIST_URL,
-  INTERNAL_LIST_URL,
+  FIND_LISTS_BY_SIZE,
 } from '@kbn/securitysolution-list-constants';
 import { toError, toPromise } from '../fp_utils';
 
@@ -107,7 +107,7 @@ const findListsWithValidation = async ({
 
 export { findListsWithValidation as findLists };
 
-const findSmallLists = async ({
+const findListsBySize = async ({
   http,
   cursor,
   page,
@@ -115,7 +115,7 @@ const findSmallLists = async ({
   per_page,
   signal,
 }: ApiParams & FindListSchemaEncoded): Promise<FoundSmallListSchema> => {
-  return http.fetch(`${INTERNAL_LIST_URL}/_find_lists_by_size`, {
+  return http.fetch(`${FIND_LISTS_BY_SIZE}`, {
     method: 'GET',
     query: {
       cursor,
@@ -126,7 +126,7 @@ const findSmallLists = async ({
   });
 };
 
-const findSmallListsWithValidation = async ({
+const findListsBySizeWithValidation = async ({
   cursor,
   http,
   pageIndex,
@@ -140,12 +140,12 @@ const findSmallListsWithValidation = async ({
       per_page: pageSize != null ? pageSize.toString() : undefined,
     },
     (payload) => fromEither(validateEither(findListSchema, payload)),
-    chain((payload) => tryCatch(() => findSmallLists({ http, signal, ...payload }), toError)),
+    chain((payload) => tryCatch(() => findListsBySize({ http, signal, ...payload }), toError)),
     chain((response) => fromEither(validateEither(foundSmallListSchema, response))),
     flow(toPromise)
   );
 
-export { findSmallListsWithValidation as findSmallLists };
+export { findListsBySizeWithValidation as findListsBySize };
 
 const importList = async ({
   file,

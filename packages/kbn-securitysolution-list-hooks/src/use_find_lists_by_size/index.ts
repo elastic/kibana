@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { findSmallLists } from '@kbn/securitysolution-list-api';
+import { findListsBySize } from '@kbn/securitysolution-list-api';
 import { useAsync, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 
-const findSmallListsWithOptionalSignal = withOptionalSignal(findSmallLists);
+const findListsBySizeWithOptionalSignal = withOptionalSignal(findListsBySize);
 
-export const useFindSmallLists = () => useAsync(findSmallListsWithOptionalSignal);
+export const useFindListsBySize = () => useAsync(findListsBySizeWithOptionalSignal);

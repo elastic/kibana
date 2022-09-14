@@ -9,7 +9,7 @@ import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { findListSchema, foundSmallListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  INTERNAL_LIST_URL,
+  FIND_LISTS_BY_SIZE,
   MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE,
   MAXIMUM_SMALL_VALUE_LIST_SIZE,
 } from '@kbn/securitysolution-list-constants';
@@ -19,13 +19,13 @@ import { decodeCursor } from '../services/utils';
 
 import { buildRouteValidation, buildSiemResponse, getListClient } from './utils';
 
-export const findSmallListRoute = (router: ListsPluginRouter): void => {
+export const findListsBySizeRoute = (router: ListsPluginRouter): void => {
   router.get(
     {
       options: {
         tags: ['access:lists-read'],
       },
-      path: `${INTERNAL_LIST_URL}/_find_lists_by_size`,
+      path: `${FIND_LISTS_BY_SIZE}`,
       validate: {
         query: buildRouteValidation(findListSchema),
       },
@@ -67,6 +67,7 @@ export const findSmallListRoute = (router: ListsPluginRouter): void => {
             filter,
             page,
             perPage,
+            runtimeMappings: undefined,
             searchAfter,
             sortField,
             sortOrder,

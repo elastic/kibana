@@ -10,11 +10,11 @@ import * as t from 'io-ts';
 
 import { listSchema } from '../list_schema';
 
-export const foundSmallListSchema = t.exact(
+export const foundListsBySizeSchema = t.exact(
   t.type({
     largeLists: t.array(listSchema),
     smallLists: t.array(listSchema),
   })
 );
 
-export type FoundSmallListSchema = t.TypeOf<typeof foundSmallListSchema>;
+export type FoundListsBySizeSchema = t.TypeOf<typeof foundListsBySizeSchema>;

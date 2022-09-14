@@ -72,6 +72,7 @@ export const findListItemRoute = (router: ListsPluginRouter): void => {
             listId,
             page,
             perPage,
+            runtimeMappings: undefined,
             searchAfter,
             sortField,
             sortOrder,

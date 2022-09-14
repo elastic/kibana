@@ -9,7 +9,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { useFindSmallLists } from '@kbn/securitysolution-list-hooks';
+import { useFindListsBySize } from '@kbn/securitysolution-list-hooks';
 import { DataViewFieldBase } from '@kbn/es-query';
 
 import { filterFieldToList } from '../filter_field_to_list';
@@ -58,7 +58,7 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
     smallLists: [],
     largeLists: [],
   });
-  const { loading, result, start } = useFindSmallLists();
+  const { loading, result, start } = useFindListsBySize();
   const getLabel = useCallback(({ name }) => name, []);
 
   const optionsMemo = useMemo(

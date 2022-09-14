@@ -45,7 +45,7 @@ export const getEsQueryFilter = async (
     http: KibanaServices.get().http,
     exceptions: lists,
     excludeExceptions,
-    chunkSize: 1024,
+    chunkSize: 10,
   });
   const initialQuery = { query, language };
   const allFilters = getAllFilters(filters as Filter[], filter);

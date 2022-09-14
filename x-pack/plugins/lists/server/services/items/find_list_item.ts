@@ -92,6 +92,7 @@ export const findListItem = async ({
       },
       ignore_unavailable: true,
       index: listItemIndex,
+      size: 0,
       track_total_hits: true,
     });
 

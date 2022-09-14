@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { FoundSmallListSchema } from '.';
+import { FoundListsBySizeSchema } from '.';
 import { getListResponseMock } from '../list_schema/index.mock';
 
-export const getFoundSmallListSchemaMock = (): FoundSmallListSchema => ({
+export const getFoundSmallListSchemaMock = (): FoundListsBySizeSchema => ({
   smallLists: [getListResponseMock()],
   largeLists: [getListResponseMock()],
 });

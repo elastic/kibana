@@ -21,7 +21,7 @@ import {
   matchesOperator,
 } from '@kbn/securitysolution-list-utils';
 import { validateFilePathInput } from '@kbn/securitysolution-utils';
-import { useFindSmallLists } from '@kbn/securitysolution-list-hooks';
+import { useFindListsBySize } from '@kbn/securitysolution-list-hooks';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
@@ -44,7 +44,7 @@ describe('BuilderEntryItem', () => {
   let wrapper: ReactWrapper;
 
   beforeEach(() => {
-    (useFindSmallLists as jest.Mock).mockReturnValue({
+    (useFindListsBySize as jest.Mock).mockReturnValue({
       error: undefined,
       loading: false,
       result: mockResult,

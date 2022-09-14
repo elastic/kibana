@@ -70,7 +70,7 @@ export const useInvestigateInTimeline = ({
         await getExceptionFilterFromIds({
           exceptionListIds: exceptionsLists,
           excludeExceptions: true,
-          chunkSize: 10000,
+          chunkSize: 20,
           alias: 'Exceptions',
           onSuccess: (filter) => {
             return filter;

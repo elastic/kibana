@@ -304,7 +304,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             const { filter: exceptionFilter, unprocessedExceptions } = await buildExceptionFilter({
               alias: null,
               excludeExceptions: true,
-              chunkSize: 1024,
+              chunkSize: 10,
               lists: exceptionItems,
               listClient,
             });
