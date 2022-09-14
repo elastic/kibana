@@ -6,6 +6,6 @@
  */
 
 export interface Container {
-  id: string;
-  image?: string;
+  id?: string | null;
+  image?: string | null;
 }

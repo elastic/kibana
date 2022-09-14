@@ -1,8 +1,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "apm-2019.07.29",
     "mappings": {
       "_meta": {
@@ -1561,6 +1560,14 @@
               "ignore_above": 1024,
               "type": "keyword"
             },
+            "node": {
+              "properties": {
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
             "runtime": {
               "properties": {
                 "name": {
@@ -2119,8 +2126,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "metricbeat-2019.07.29",
     "mappings": {
       "_meta": {

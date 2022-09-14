@@ -65,8 +65,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
           params: {
             path: {
-              serviceName: 'opbeans-go',
-              serviceNodeName: '05c94267b32ffc8bead290e194e9703d206a52839b6b7b3fa4045595f545ef10',
+              serviceName: 'opbeans-node',
+              serviceNodeName: '768120daead4526f5ba3ec583e0b081a19a525843aa5632a5e0b1de3a367f52d',
             },
             query: {
               start,
@@ -77,8 +77,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(response.body.kubernetes?.pod).to.eql({
-          name: 'opbeans-go-65dd88695-hfrtv',
-          uid: '4c91b856-42c0-4db8-a352-f857fd1bd286',
+          name: null,
+          uid: null,
         });
         expect(response.body.kubernetes?.deployment).to.eql([]);
         expect(response.body.kubernetes?.namespace).to.eql([]);
@@ -153,7 +153,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           endpoint: 'GET /internal/apm/services/{serviceName}/metadata/details',
           params: {
             path: {
-              serviceName: 'opbeans-ruby',
+              serviceName: 'opbeans-node',
             },
             query: {
               start,
@@ -162,6 +162,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
         });
 
+        expect(response.body.kubernetes?.pod).to.eql({
+          name: null,
+          uid: null,
+        });
         expect(response.status).to.be(200);
         expect(response.body.kubernetes?.deployment).to.eql([]);
         expect(response.body.kubernetes?.namespace).to.eql([]);

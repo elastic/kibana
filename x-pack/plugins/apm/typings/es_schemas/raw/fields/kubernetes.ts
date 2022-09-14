@@ -6,7 +6,7 @@
  */
 
 export interface Kubernetes {
-  pod?: { uid: string; [key: string]: unknown };
+  pod?: { uid?: string | null; [key: string]: unknown };
   namespace?: string[];
   replicaset?: string[];
   deployment?: string[];

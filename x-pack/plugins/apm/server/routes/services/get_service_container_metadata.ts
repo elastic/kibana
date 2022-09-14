@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import {
   CONTAINER,
@@ -21,31 +22,21 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
 import { Container } from '../../../typings/es_schemas/raw/fields/container';
-import { maybe } from '../../../common/utils/maybe';
 
 export interface ContainerMetadata {
   kubernetes?: Kubernetes;
   container?: Container;
 }
-
-interface ResponseHitSource {
-  [key: string]: {
-    pod: {
-      name: string;
-      uid: string;
-    };
-    image: {
-      name: string;
-    };
-    id: string;
-  };
+interface Buckets {
+  buckets: Array<{
+    key: string;
+  }>;
 }
 interface ResponseAggregations {
-  [key: string]: {
-    buckets: Array<{
-      key: string;
-    }>;
-  };
+  deployment: Buckets;
+  replicaset: Buckets;
+  namespace: Buckets;
+  top_metrics: estypes.AggregationsTopMetricsAggregate;
 }
 
 export const getServiceContainerMetadata = async ({
@@ -93,6 +84,27 @@ export const getServiceContainerMetadata = async ({
       },
     },
     aggs: {
+      top_metrics: {
+        top_metrics: {
+          metrics: [
+            {
+              field: KUBERNETES_POD_NAME,
+            },
+            {
+              field: KUBERNETES_POD_UID,
+            },
+            {
+              field: CONTAINER_ID,
+            },
+            {
+              field: CONTAINER_IMAGE,
+            },
+          ],
+          sort: {
+            '@timestamp': 'desc',
+          },
+        },
+      },
       deployment: {
         terms: {
           field: KUBERNETES_DEPLOYMENT_NAME,
@@ -114,13 +126,13 @@ export const getServiceContainerMetadata = async ({
     },
   });
 
-  const sources = maybe(response.hits.hits[0])?._source as ResponseHitSource;
+  const metrics = response.aggregations?.top_metrics?.top[0]?.metrics;
 
   return {
     kubernetes: {
       pod: {
-        name: sources?.kubernetes?.pod?.name,
-        uid: sources?.kubernetes?.pod?.uid,
+        name: metrics?.[KUBERNETES_POD_NAME] as string | null,
+        uid: metrics?.[KUBERNETES_POD_UID] as string | null,
       },
       deployment: response.aggregations?.deployment?.buckets.map(
         (bucket) => bucket.key
@@ -133,8 +145,8 @@ export const getServiceContainerMetadata = async ({
       ),
     },
     container: {
-      image: sources?.container?.image?.name,
-      id: sources?.container.id,
+      image: metrics?.[CONTAINER_IMAGE] as string | null,
+      id: metrics?.[CONTAINER_ID] as string | null,
     },
   };
 };
