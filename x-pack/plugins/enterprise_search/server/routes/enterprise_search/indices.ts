@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  IngestPutPipelineRequest,
+  IngestSimulateRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 
 import { i18n } from '@kbn/i18n';
@@ -333,6 +337,83 @@ export function registerIndexRoutes({
 
       return response.ok({
         body: createIndexResponse,
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/pipelines/ml_inference/_simulate',
+      validate: {
+        body: schema.object({
+          pipeline: schema.object({
+            description: schema.maybe(schema.string()),
+            processors: schema.arrayOf(schema.any()),
+          }),
+          docs: schema.arrayOf(schema.any()),
+        }),
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { pipeline, docs } = request.body;
+      const indexName = decodeURIComponent(request.params.indexName);
+      const { client } = (await context.core).elasticsearch;
+      const defaultDescription = `ML inference pipeline for index ${indexName}`;
+
+      // TODO: should we check if index exists?
+
+      const simulateRequest: IngestSimulateRequest = {
+        docs,
+        pipeline: { description: defaultDescription, ...pipeline },
+      };
+
+      const simulateResult = await client.asCurrentUser.ingest.simulate(simulateRequest);
+
+      return response.ok({
+        body: simulateResult,
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  router.put(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/pipelines/ml_inference/{pipelineName}',
+      validate: {
+        body: schema.object({
+          description: schema.maybe(schema.string()),
+          processors: schema.arrayOf(schema.any()),
+        }),
+        params: schema.object({
+          indexName: schema.string(),
+          pipelineName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const pipelineBody = request.body;
+      const indexName = decodeURIComponent(request.params.indexName);
+      const pipelineName = decodeURIComponent(request.params.pipelineName);
+      const { client } = (await context.core).elasticsearch;
+      const pipelineId = `ml-inference-${pipelineName}`;
+      const defaultDescription = `ML inference pipeline for index ${indexName}`;
+
+      // TODO: should we check if index exists?
+
+      const updateRequest: IngestPutPipelineRequest = {
+        id: pipelineId,
+        description: defaultDescription,
+        ...pipelineBody,
+      };
+
+      const updateResult = await client.asCurrentUser.ingest.putPipeline(updateRequest);
+
+      return response.ok({
+        body: updateResult,
         headers: { 'content-type': 'application/json' },
       });
     })
