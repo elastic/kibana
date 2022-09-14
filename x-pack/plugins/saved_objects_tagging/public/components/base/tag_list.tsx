@@ -12,16 +12,17 @@ import { TagBadge } from './tag_badge';
 
 export interface TagListProps {
   tags: Array<Tag | TagAttributes>;
+  onClick?: (name: string) => void;
 }
 
 /**
  * Displays a list of tag
  */
-export const TagList: FC<TagListProps> = ({ tags }) => {
+export const TagList: FC<TagListProps> = ({ tags, onClick }) => {
   return (
     <EuiBadgeGroup>
       {tags.map((tag) => (
-        <TagBadge key={tag.name} tag={tag} />
+        <TagBadge key={tag.name} tag={tag} onClick={onClick} />
       ))}
     </EuiBadgeGroup>
   );
