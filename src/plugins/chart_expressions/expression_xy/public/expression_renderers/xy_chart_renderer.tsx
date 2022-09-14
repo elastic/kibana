@@ -22,8 +22,9 @@ import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { getDataLayers } from '../helpers';
+import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+
+import type { getDataLayers } from '../helpers';
 import { LayerTypes, SeriesTypes } from '../../common/constants';
 import type { XYChartProps } from '../../common';
 import type { BrushEvent, FilterEvent } from '../types';
@@ -51,10 +52,10 @@ const extractCounterEvents = (
   originatingApp: string,
   { layers, yAxisConfigs }: XYChartProps['args'],
   services: {
-    getColumnByAccessor: typeof getColumnByAccessor;
+    getDataLayers: typeof getDataLayers;
   }
 ) => {
-  const dataLayers = getDataLayers(layers);
+  const dataLayers = services.getDataLayers(layers);
 
   if (dataLayers.length) {
     const [dataLayer] = dataLayers;
@@ -99,7 +100,7 @@ const extractCounterEvents = (
       (dataLayer.splitAccessors ?? [])
         .map(
           (splitAccessor) =>
-            services.getColumnByAccessor(splitAccessor, dataLayer.table.columns)?.meta?.params?.id
+            getColumnByAccessor(splitAccessor, dataLayer.table.columns)?.meta?.params?.id
         )
         .filter(Boolean)
     );
@@ -107,9 +108,10 @@ const extractCounterEvents = (
     const aggregateLayers: string[] = dataLayers
       .map((l) =>
         l.accessors.reduce<string[]>((acc, accessor) => {
-          const metricType = services
-            .getColumnByAccessor(accessor, l.table.columns)
-            ?.meta?.sourceParams?.type?.toString();
+          const metricType = getColumnByAccessor(
+            accessor,
+            l.table.columns
+          )?.meta?.sourceParams?.type?.toString();
 
           if (
             metricType &&
@@ -164,12 +166,10 @@ export const getXyChartRenderer = ({
     const deps = await getStartDeps();
 
     // Lazy loaded parts
-    const [{ getColumnByAccessor }, { XYChartReportable }, { calculateMinInterval }] =
-      await Promise.all([
-        import('@kbn/visualizations-plugin/common/utils'),
-        import('../components/xy_chart'),
-        import('../helpers/interval'),
-      ]);
+    const [{ XYChartReportable }, { calculateMinInterval, getDataLayers }] = await Promise.all([
+      import('../components/xy_chart'),
+      import('../helpers'),
+    ]);
 
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
     const onClickValue = (data: FilterEvent['data']) => {
@@ -186,7 +186,7 @@ export const getXyChartRenderer = ({
 
       if (deps.usageCollection && containerType && visualizationType) {
         const uiEvents = extractCounterEvents(visualizationType, config.args, {
-          getColumnByAccessor,
+          getDataLayers,
         });
 
         if (uiEvents) {
