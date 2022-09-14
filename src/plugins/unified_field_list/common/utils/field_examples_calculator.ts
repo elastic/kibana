@@ -23,6 +23,9 @@ interface FieldValueCountsParams {
 }
 
 export const canProvideExamplesForField = (field: DataViewField): boolean => {
+  if (field.name === '_score') {
+    return false;
+  }
   return ['string', 'text', 'keyword', 'version', 'ip', 'number'].includes(field.type);
 };
 

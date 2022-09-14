@@ -314,17 +314,27 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
     (!histogram || histogram.buckets.length === 0) &&
     (!topValues || topValues.buckets.length === 0)
   ) {
-    const messageNoData = (
-      <FieldSummaryMessage
-        message={i18n.translate(
-          'unifiedFieldList.fieldStats.notAvailableForThisFieldWithoutDataDescription',
-          {
+    const messageNoData =
+      sampledDocuments && totalDocuments && sampledDocuments < totalDocuments ? (
+        <FieldSummaryMessage
+          message={i18n.translate('unifiedFieldList.fieldStats.noFieldDataInSampleDescription', {
             defaultMessage:
-              "This field is not available for visualizations because it doesn't have any data.",
-          }
-        )}
-      />
-    );
+              'No field data for the current sample of {sampledDocumentsFormatted} {sampledDocuments, plural, one {record} other {records}}.',
+            values: {
+              sampledDocuments,
+              sampledDocumentsFormatted: fieldFormats
+                .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                .convert(sampledDocuments),
+            },
+          })}
+        />
+      ) : (
+        <FieldSummaryMessage
+          message={i18n.translate('unifiedFieldList.fieldStats.noFieldDataDescription', {
+            defaultMessage: 'No field data for the current search.',
+          })}
+        />
+      );
 
     return overrideMissingContent
       ? overrideMissingContent({

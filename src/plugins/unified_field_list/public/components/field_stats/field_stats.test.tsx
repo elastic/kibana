@@ -92,6 +92,13 @@ describe('UnifiedFieldList <FieldStats />', () => {
           aggregatable: true,
           searchable: true,
         },
+        {
+          name: 'geo_shape',
+          displayName: 'geo_shape',
+          type: 'geo_shape',
+          aggregatable: true,
+          searchable: true,
+        },
       ],
       getFormatterForField: jest.fn(() => ({
         convert: jest.fn((s: unknown) => JSON.stringify(s)),
@@ -219,16 +226,42 @@ describe('UnifiedFieldList <FieldStats />', () => {
     expect(wrapper.text()).toBe('Analysis is not available for this field.');
   });
 
-  it('should render nothing if no data is found', async () => {
+  it('should render a message if no data is found', async () => {
     const wrapper = await mountWithIntl(<FieldStats {...defaultProps} />);
 
     await wrapper.update();
 
     expect(loadFieldStats).toHaveBeenCalled();
 
-    expect(wrapper.text()).toBe(
-      "This field is not available for visualizations because it doesn't have any data."
-    );
+    expect(wrapper.text()).toBe('No field data for the current search.');
+  });
+
+  it('should render a message if no data is found in sample', async () => {
+    let resolveFunction: (arg: unknown) => void;
+
+    (loadFieldStats as jest.Mock).mockImplementation(() => {
+      return new Promise((resolve) => {
+        resolveFunction = resolve;
+      });
+    });
+
+    const wrapper = mountWithIntl(<FieldStats {...defaultProps} />);
+
+    await wrapper.update();
+
+    await act(async () => {
+      resolveFunction!({
+        totalDocuments: 10000,
+        sampledDocuments: 5000,
+        sampledValues: 0,
+      });
+    });
+
+    await wrapper.update();
+
+    expect(loadFieldStats).toHaveBeenCalledTimes(1);
+
+    expect(wrapper.text()).toBe('No field data for the current sample of 5000 records.');
   });
 
   it('should render Top Values field stats correctly for a keyword field', async () => {
