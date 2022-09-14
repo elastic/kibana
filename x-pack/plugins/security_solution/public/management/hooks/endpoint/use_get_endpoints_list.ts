@@ -18,6 +18,10 @@ type GetEndpointsListResponse = Array<{
   selected: boolean;
 }>;
 
+const PAGING_PARAMS = Object.freeze({
+  default: 50,
+  all: 10000,
+});
 /**
  * Get info for a security solution endpoint host using hostnames via kuery param
  * page and pageSize are fixed for showing 50 hosts at most on the 1st page
@@ -47,16 +51,48 @@ export const useGetEndpointsList = ({
       const metadataListResponse = await http.get<MetadataListResponse>(HOST_METADATA_LIST_ROUTE, {
         query: {
           page: 0,
-          pageSize: 50,
+          pageSize:
+            // if the user has selected agents then search the whole index.
+            // as selected host could be somewhere after the 50 that are shown
+            // otherwise, limit the search to 50 hosts
+            selectedAgentIds && selectedAgentIds.length > 0
+              ? PAGING_PARAMS.all
+              : PAGING_PARAMS.default,
           kuery: [...agentIdsKuery, kuery].join(' or '),
         },
       });
 
-      return metadataListResponse.data.map((list) => ({
-        id: list.metadata.agent.id,
-        name: list.metadata.host.hostname,
-        selected: selectedAgentIds?.includes(list.metadata.agent.id) ?? false,
-      }));
+      // pick out the selected agents and push them to the top of the list
+      const augmentedDataBasedOnSelectedAgents = metadataListResponse.data.reduce<{
+        selected: GetEndpointsListResponse;
+        rest: GetEndpointsListResponse;
+      }>(
+        (acc, list) => {
+          const item = {
+            id: list.metadata.agent.id,
+            name: list.metadata.host.hostname,
+          };
+          if (selectedAgentIds?.includes(list.metadata.agent.id)) {
+            acc.selected.push({
+              ...item,
+              selected: true,
+            });
+          } else {
+            acc.rest.push({
+              ...item,
+              selected: false,
+            });
+          }
+          return acc;
+        },
+        { selected: [], rest: [] }
+      );
+
+      // return 50 items max including the selected items
+      return [
+        ...augmentedDataBasedOnSelectedAgents.selected,
+        ...augmentedDataBasedOnSelectedAgents.rest,
+      ].slice(0, PAGING_PARAMS.default);
     },
   });
 };

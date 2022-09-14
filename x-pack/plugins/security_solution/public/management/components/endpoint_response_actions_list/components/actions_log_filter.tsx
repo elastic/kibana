@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useState, useCallback } from 'react';
+import React, { memo, useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSelectable, EuiPopoverTitle } from '@elastic/eui';
 import type { ResponseActions } from '../../../../../common/endpoint/service/response_actions/constants';
 import { ActionsLogFilterPopover } from './actions_log_filter_popover';
@@ -38,12 +38,14 @@ export const ActionsLogFilter = memo(
     // search string state
     const [searchString, setSearchString] = useState('');
     const {
+      areHostsSelectedOnMount,
       isLoading,
       items,
       setItems,
       hasActiveFilters,
       numActiveFilters,
       numFilters,
+      setAreHostsSelectedOnMount,
       setUrlActionsFilters,
       setUrlHostsFilters,
       setUrlStatusesFilters,
@@ -53,6 +55,45 @@ export const ActionsLogFilter = memo(
       isPopoverOpen,
       searchString,
     });
+
+    // track popover state to pin selected options
+    const wasPopoverOpen = useRef(isPopoverOpen);
+    useEffect(() => {
+      return () => {
+        wasPopoverOpen.current = isPopoverOpen;
+      };
+    }, [isPopoverOpen, wasPopoverOpen]);
+
+    // compute if selected hosts should be pinned
+    const shouldPinSelectedHosts = useCallback(
+      (isNotChangingOptions: boolean = true) => {
+        // case 1: when no hosts are selected initially
+        return (
+          isNotChangingOptions && wasPopoverOpen.current && isPopoverOpen && filterName === 'hosts'
+        );
+      },
+      [filterName, isPopoverOpen, wasPopoverOpen]
+    );
+
+    // augmented options based on hosts filter
+    const sortedHostsFilterOptions = useMemo(() => {
+      if (shouldPinSelectedHosts() || areHostsSelectedOnMount) {
+        const sortedItems = items.reduce<{ selected: FilterItems; rest: FilterItems }>(
+          (acc, item) => {
+            if (item.checked === 'on') {
+              acc.selected.push(item);
+            } else {
+              acc.rest.push(item);
+            }
+            return acc;
+          },
+          { selected: [], rest: [] }
+        );
+        return [...sortedItems.selected, ...sortedItems.rest];
+      }
+      // return options as is for other filters
+      return items;
+    }, [areHostsSelectedOnMount, shouldPinSelectedHosts, items]);
 
     const isSearchable = useMemo(() => filterName !== 'statuses', [filterName]);
 
@@ -80,16 +121,21 @@ export const ActionsLogFilter = memo(
           } else if (filterName === 'statuses') {
             setUrlStatusesFilters(selectedItems.join());
           }
+          // reset shouldPinSelectedHosts, setAreHostsSelectedOnMount
+          shouldPinSelectedHosts(false);
+          setAreHostsSelectedOnMount(false);
         }
 
         // update query state
         onChangeFilterOptions(selectedItems);
       },
       [
+        shouldPinSelectedHosts,
         filterName,
         isFlyout,
         setItems,
         onChangeFilterOptions,
+        setAreHostsSelectedOnMount,
         setUrlActionsFilters,
         setUrlHostsFilters,
         setUrlStatusesFilters,
@@ -144,7 +190,7 @@ export const ActionsLogFilter = memo(
           emptyMessage={UX_MESSAGES.filterEmptyMessage(filterName)}
           isLoading={isLoading}
           onChange={onOptionsChange}
-          options={items}
+          options={sortedHostsFilterOptions}
           searchable={isSearchable ? true : undefined}
           searchProps={{
             placeholder: UX_MESSAGES.filterSearchPlaceholder(filterName),

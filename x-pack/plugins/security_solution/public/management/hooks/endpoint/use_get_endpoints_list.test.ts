@@ -67,7 +67,7 @@ describe('useGetEndpointsList hook', () => {
       path: HOST_METADATA_LIST_ROUTE,
       query: {
         page: 0,
-        pageSize: 50,
+        pageSize: 10000,
         kuery:
           'united.endpoint.agent.id:"agent-a" or united.endpoint.agent.id:"agent-b" or united.endpoint.host.hostname:*',
       },
@@ -83,7 +83,7 @@ describe('useGetEndpointsList hook', () => {
       path: HOST_METADATA_LIST_ROUTE,
       query: {
         page: 0,
-        pageSize: 50,
+        pageSize: 10000,
         kuery:
           'united.endpoint.agent.id:"agent-a" or united.endpoint.agent.id:"agent-b" or united.endpoint.host.hostname:*xyz*',
       },

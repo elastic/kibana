@@ -172,12 +172,14 @@ export const useActionsLogFilter = ({
   isPopoverOpen: boolean;
   searchString: string;
 }): {
+  areHostsSelectedOnMount: boolean;
   isLoading: boolean;
   items: FilterItems;
   setItems: React.Dispatch<React.SetStateAction<FilterItems>>;
   hasActiveFilters: boolean;
   numActiveFilters: number;
   numFilters: number;
+  setAreHostsSelectedOnMount: (value: React.SetStateAction<boolean>) => void;
   setUrlActionsFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlActionsFilters'];
   setUrlHostsFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlHostsFilters'];
   setUrlStatusesFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlStatusesFilters'];
@@ -185,7 +187,7 @@ export const useActionsLogFilter = ({
   const {
     commands,
     statuses,
-    hosts: selectedAgentIds,
+    hosts: selectedAgentIdsFromUrl,
     setUrlActionsFilters,
     setUrlHostsFilters,
     setUrlStatusesFilters,
@@ -194,9 +196,21 @@ export const useActionsLogFilter = ({
   const isHostsFilter = filterName === 'hosts';
   const { data: endpointsList, isFetching } = useGetEndpointsList({
     searchString,
-    selectedAgentIds,
+    selectedAgentIds: selectedAgentIdsFromUrl,
   });
 
+  // track state of selected hosts via URL
+  // when page is loaded via selected hosts on URL
+  const [areHostsSelectedOnMount, setAreHostsSelectedOnMount] = useState<boolean>(false);
+  useEffect(() => {
+    if (selectedAgentIdsFromUrl && selectedAgentIdsFromUrl.length > 0) {
+      setAreHostsSelectedOnMount(true);
+    }
+    // don't sync with changes to further selectedAgentIdsFromUrl
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // filter options
   const [items, setItems] = useState<FilterItems>(
     isStatusesFilter
       ? RESPONSE_ACTION_STATUS.map((statusName) => ({
@@ -250,35 +264,16 @@ export const useActionsLogFilter = ({
   const numFilters = useMemo(() => items.filter((item) => item.checked !== 'on').length, [items]);
 
   return {
+    areHostsSelectedOnMount,
     isLoading: isHostsFilter && isFetching,
     items,
     setItems,
     hasActiveFilters,
     numActiveFilters,
     numFilters,
+    setAreHostsSelectedOnMount,
     setUrlActionsFilters,
     setUrlHostsFilters,
     setUrlStatusesFilters,
   };
 };
-
-// !isPopoverOpen && selectedAgentIds?.length
-//         ? items
-//             .map((item) => {
-//               if (selectedAgentIds.includes(item.key)) {
-//                 item.checked = 'on';
-//               }
-//               return item;
-//             })
-//             .reduce<FilterItems>((acc, item) => {
-//               const selected: FilterItems = [];
-//               const rest: FilterItems = [];
-//               if (item.checked === 'on') {
-//                 selected.push(item);
-//               }
-//               rest.push(item);
-
-//               acc.push(...selected, ...rest);
-//               return acc;
-//             }, [])
-//         :
