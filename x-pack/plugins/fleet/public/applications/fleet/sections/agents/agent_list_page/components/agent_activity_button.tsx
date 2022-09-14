@@ -19,9 +19,9 @@ export const AgentActivityButton: React.FC<{
 
   const [agentActivityTourState, setAgentActivityTourState] = useState(showAgentActivityTour);
 
-  const hideTour = () => uiSettings.get('hideAgentActivityTour', false);
+  const isTourHidden = uiSettings.get('hideAgentActivityTour', false);
 
-  const setHideTour = () => uiSettings.set('hideAgentActivityTour', true);
+  const setTourAsHidden = () => uiSettings.set('hideAgentActivityTour', true);
 
   useEffect(() => {
     setAgentActivityTourState(showAgentActivityTour);
@@ -45,10 +45,10 @@ export const AgentActivityButton: React.FC<{
 
   const onFinish = () => {
     setAgentActivityTourState({ isOpen: false });
-    setHideTour();
+    setTourAsHidden();
   };
 
-  return hideTour() ? (
+  return isTourHidden ? (
     button
   ) : (
     <EuiTourStep

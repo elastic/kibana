@@ -45,16 +45,18 @@ export async function getActionStatuses(
     });
   } catch (err) {
     if (err.statusCode === 404) {
-      // .fleet-actions-results not yet exists
+      // .fleet-actions-results does not yet exist
       appContextService.getLogger().debug(err);
     } else {
       throw err;
     }
   }
 
-  return actions.map((action) => {
+  const results = [];
+
+  for (const action of actions) {
     const matchingBucket = (acks.aggregations?.ack_counts as any).buckets?.find(
-      (b: any) => b.key === action.actionId
+      (bucket: any) => bucket.key === action.actionId
     );
     const nbAgentsAck = matchingBucket?.doc_count ?? 0;
     const completionTime = (matchingBucket?.max_timestamp as any)?.value_as_string;
@@ -62,15 +64,46 @@ export async function getActionStatuses(
     const complete = nbAgentsAck === nbAgentsActioned;
     const cancelledAction = cancelledActions.find((a) => a.actionId === action.actionId);
 
-    return {
+    // query to find errors in action results, cannot do aggregation on text type
+    const res = await esClient.search({
+      index: AGENT_ACTIONS_RESULTS_INDEX,
+      track_total_hits: true,
+      rest_total_hits_as_int: true,
+      query: {
+        bool: {
+          must: [{ term: { action_id: action.actionId } }],
+          should: [
+            {
+              exists: {
+                field: 'error',
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+      size: 0,
+    });
+
+    const hasErrors = (res.hits.total ?? 0) > 0;
+
+    results.push({
       ...action,
       nbAgentsAck,
-      status: complete ? 'complete' : cancelledAction ? 'cancelled' : action.status,
+      status: complete
+        ? 'COMPLETE'
+        : cancelledAction
+        ? 'CANCELLED'
+        : hasErrors
+        ? 'FAILED'
+        : action.status,
       nbAgentsActioned,
       cancellationTime: cancelledAction?.timestamp,
       completionTime: complete ? completionTime : undefined,
-    };
-  });
+    });
+  }
+
+  return results;
 }
 
 async function _getCancelledActions(
@@ -149,7 +182,7 @@ async function _getActions(
           startTime: source.start_time,
           type: source.type,
           nbAgentsActioned: source.total ?? 0,
-          status: isExpired ? 'expired' : 'in progress',
+          status: isExpired ? 'EXPIRED' : 'IN_PROGRESS',
           expiration: source.expiration,
           newPolicyId: source.data?.policy_id as string,
           creationTime: source['@timestamp']!,

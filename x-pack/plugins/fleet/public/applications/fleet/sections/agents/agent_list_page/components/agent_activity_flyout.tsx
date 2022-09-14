@@ -50,9 +50,9 @@ export const AgentActivityFlyout: React.FunctionComponent<{
     newPolicyId: getAgentPolicyName(a.newPolicyId ?? ''),
   }));
 
-  const inProgressActions = currentActionsEnriched.filter((a) => a.status === 'in progress');
+  const inProgressActions = currentActionsEnriched.filter((a) => a.status === 'IN_PROGRESS');
 
-  const completedActions = currentActionsEnriched.filter((a) => a.status !== 'in progress');
+  const completedActions = currentActionsEnriched.filter((a) => a.status !== 'IN_PROGRESS');
 
   const todayActions = getTodayActions(completedActions);
   const otherDays = getOtherDaysActions(completedActions);
@@ -157,7 +157,7 @@ const ActivitySection: React.FunctionComponent<{
         </EuiText>
       </EuiPanel>
       {actions.map((currentAction) =>
-        currentAction.type === 'UPGRADE' && currentAction.status === 'in progress' ? (
+        currentAction.type === 'UPGRADE' && currentAction.status === 'IN_PROGRESS' ? (
           <UpgradeInProgressActivityItem action={currentAction} abortUpgrade={abortUpgrade} />
         ) : (
           <ActivityItem action={currentAction} />
@@ -202,12 +202,13 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
     <EuiText>
       <FormattedMessage
         id="xpack.fleet.agentActivity.completedTitle"
-        defaultMessage="{nbAgents, plural, one {# agent} other {# agents}} {completedText}"
+        defaultMessage="{nbAgents} {agents} {completedText}"
         values={{
           nbAgents:
             action.nbAgentsAck === action.nbAgentsActioned
               ? action.nbAgentsAck
               : action.nbAgentsAck + ' of ' + action.nbAgentsActioned,
+          agents: action.nbAgentsActioned === 1 ? 'agent' : 'agents',
           completedText: actionNames[action.type ?? 'ACTION'].completedText,
         }}
       />
@@ -232,7 +233,7 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
       description: ReactNode | null;
     };
   } = {
-    'in progress': {
+    IN_PROGRESS: {
       icon: <EuiLoadingSpinner size="m" />,
       title: (
         <EuiText>
@@ -253,7 +254,7 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
       titleColor: inProgressTitleColor,
       description: null,
     },
-    complete: {
+    COMPLETE: {
       icon: <EuiIcon size="m" type="checkInCircleFilled" color="green" />,
       title: completeTitle,
       titleColor: 'green',
@@ -275,7 +276,7 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
           <EuiText color="subdued">{completedDescription}</EuiText>
         ),
     },
-    failed: {
+    FAILED: {
       icon: <EuiIcon size="m" type="alert" color="red" />,
       title: completeTitle,
       titleColor: 'red',
@@ -289,7 +290,7 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
         </EuiText>
       ),
     },
-    cancelled: {
+    CANCELLED: {
       icon: <EuiIcon size="m" type="alert" color="grey" />,
       titleColor: 'grey',
       title: (
@@ -315,7 +316,7 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
         </EuiText>
       ),
     },
-    expired: {
+    EXPIRED: {
       icon: <EuiIcon size="m" type="alert" color="grey" />,
       titleColor: 'grey',
       title: (
@@ -432,20 +433,28 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
                       id="xpack.fleet.agentActivityFlyout.scheduledDescription"
                       defaultMessage="Scheduled for "
                     />
-                    <b>{formattedTime(action.startTime)}</b>.
+                    <strong>{formattedTime(action.startTime)}</strong>.
                   </p>
                 ) : null}
                 <p>
                   <FormattedMessage
                     id="xpack.fleet.agentActivityFlyout.upgradeDescription"
-                    defaultMessage="Agents may also be configured to upgrade automatically. "
+                    defaultMessage="{guideLink} about agent upgrades."
+                    values={{
+                      guideLink: (
+                        <EuiLink
+                          href={docLinks.links.fleet.upgradeElasticAgent}
+                          target="_blank"
+                          external
+                        >
+                          <FormattedMessage
+                            id="xpack.fleet.agentActivityFlyout.guideLink"
+                            defaultMessage="Learn more"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
                   />
-                  <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank" external>
-                    <FormattedMessage
-                      id="xpack.fleet.agentActivityFlyout.guideLink"
-                      defaultMessage="Learn more."
-                    />
-                  </EuiLink>
                 </p>
               </EuiText>
             </EuiFlexItem>
