@@ -936,7 +936,6 @@
     "dashboard.createConfirmModal.unsavedChangesSubtitle": "編集を続行するか、空のダッシュボードで始めてください。",
     "dashboard.createConfirmModal.unsavedChangesTitle": "新しいダッシュボードはすでに実行中です",
     "dashboard.dashboardAppBreadcrumbsTitle": "ダッシュボード",
-    "dashboard.dashboardGrid.toast.unableToLoadDashboardDangerMessage": "ダッシュボードが読み込めません。",
     "dashboard.dashboardPageTitle": "ダッシュボード",
     "dashboard.dashboardWasSavedSuccessMessage": "ダッシュボード「{dashTitle}」が保存されました。",
     "dashboard.discardChangesConfirmModal.cancelButtonLabel": "キャンセル",
