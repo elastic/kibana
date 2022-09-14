@@ -9,6 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
+import { Subscription } from 'rxjs';
 import uuid from 'uuid';
 import { CoreStart, IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
 import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
@@ -85,6 +86,7 @@ export interface InheritedChildInput extends IndexSignature {
   filters: Filter[];
   query: Query;
   timeRange: TimeRange;
+  timeslice?: [number, number];
   refreshConfig?: RefreshInterval;
   viewMode: ViewMode;
   hidePanelTitles?: boolean;
@@ -113,6 +115,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
   private onDestroyControlGroup?: () => void;
+  private subscriptions: Subscription = new Subscription();
+
   public controlGroup?: ControlGroupContainer;
   private domNode?: HTMLElement;
 
@@ -182,6 +186,23 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         }
       );
     }
+
+    this.subscriptions.add(
+      this.getAnyChildOutputChange$().subscribe(() => {
+        if (!this.controlGroup) {
+          return;
+        }
+
+        for (const child of Object.values(this.children)) {
+          const isLoading = child.getOutput().loading;
+          if (isLoading) {
+            this.controlGroup.anyControlOutputConsumerLoading$.next(true);
+            return;
+          }
+        }
+        this.controlGroup.anyControlOutputConsumerLoading$.next(false);
+      })
+    );
   }
 
   private onDataLoaded(data: DashboardLoadedInfo) {
@@ -345,6 +366,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   public destroy() {
     super.destroy();
+    this.subscriptions.unsubscribe();
     this.onDestroyControlGroup?.();
     if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }
@@ -354,6 +376,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       viewMode,
       refreshConfig,
       timeRange,
+      timeslice,
       query,
       hidePanelTitles,
       filters,
@@ -362,6 +385,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       syncTooltips,
       executionContext,
     } = this.input;
+
     let combinedFilters = filters;
     if (this.controlGroup) {
       combinedFilters = combineDashboardFiltersWithControlGroupFilters(filters, this.controlGroup);
@@ -371,6 +395,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       hidePanelTitles,
       query,
       timeRange,
+      timeslice,
       refreshConfig,
       viewMode,
       id,

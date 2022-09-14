@@ -37,6 +37,7 @@ const defaultParams: OnlySearchSourceRuleParams = {
   threshold: [0],
   searchConfiguration: {},
   searchType: 'searchSource',
+  excludeHitsFromPreviousRun: true,
 };
 
 describe('fetchSearchSourceQuery', () => {
@@ -137,6 +138,39 @@ describe('fetchSearchSourceQuery', () => {
         searchSourceInstance,
         params,
         '2020-01-09T22:12:41.941Z'
+      );
+      const searchRequest = searchSource.getSearchRequestBody();
+      expect(searchRequest.query).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "time": Object {
+                    "format": "strict_date_optional_time",
+                    "gte": "2020-02-09T23:10:41.941Z",
+                    "lte": "2020-02-09T23:15:41.941Z",
+                  },
+                },
+              },
+            ],
+            "must": Array [],
+            "must_not": Array [],
+            "should": Array [],
+          },
+        }
+      `);
+    });
+
+    it('does not add time range if excludeHitsFromPreviousRun is false', async () => {
+      const params = { ...defaultParams, excludeHitsFromPreviousRun: false };
+
+      const searchSourceInstance = createSearchSourceMock({ index: dataViewMock });
+
+      const { searchSource } = updateSearchSource(
+        searchSourceInstance,
+        params,
+        '2020-02-09T23:12:41.941Z'
       );
       const searchRequest = searchSource.getSearchRequestBody();
       expect(searchRequest.query).toMatchInlineSnapshot(`

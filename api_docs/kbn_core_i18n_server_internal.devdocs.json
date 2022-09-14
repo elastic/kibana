@@ -19,6 +19,7 @@
         "description": [],
         "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-i18n-server-internal",
@@ -32,6 +33,7 @@
             ],
             "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-i18n-server-internal",
@@ -45,6 +47,7 @@
                 ],
                 "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -64,6 +67,7 @@
             ],
             "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-i18n-server-internal",
@@ -77,6 +81,7 @@
                 ],
                 "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -98,6 +103,7 @@
             ],
             "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-i18n-server-internal",
@@ -111,6 +117,7 @@
                 ],
                 "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -136,6 +143,7 @@
         ],
         "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
+import { fetchSyncJobsByConnectorId } from '../../lib/connectors/fetch_sync_jobs';
 import { startConnectorSync } from '../../lib/connectors/start_sync';
 import { updateConnectorConfiguration } from '../../lib/connectors/update_connector_configuration';
 import { updateConnectorScheduling } from '../../lib/connectors/update_connector_scheduling';
@@ -109,6 +110,31 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       const { client } = (await context.core).elasticsearch;
       await startConnectorSync(client, request.params.connectorId);
       return response.ok();
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}/sync_jobs',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+        query: schema.object({
+          page: schema.number({ defaultValue: 0, min: 0 }),
+          size: schema.number({ defaultValue: 10, min: 0 }),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const result = await fetchSyncJobsByConnectorId(
+        client,
+        request.params.connectorId,
+        request.query.page,
+        request.query.size
+      );
+      return response.ok({ body: result });
     })
   );
 }

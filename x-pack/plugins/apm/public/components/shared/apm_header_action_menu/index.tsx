@@ -44,6 +44,16 @@ export function ApmHeaderActionMenu() {
     <EuiHeaderLinks gutterSize="xs">
       <EuiHeaderLink
         color="text"
+        href={apmHref('/storage-explorer')}
+        iconType="beaker"
+        data-test-subj="apmStorageExplorerHeaderLink"
+      >
+        {i18n.translate('xpack.apm.storageExplorerLinkLabel', {
+          defaultMessage: 'Storage Explorer',
+        })}
+      </EuiHeaderLink>
+      <EuiHeaderLink
+        color="text"
         href={apmHref('/settings')}
         data-test-subj="apmSettingsHeaderLink"
       >

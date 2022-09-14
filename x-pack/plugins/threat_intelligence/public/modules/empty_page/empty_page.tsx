@@ -24,7 +24,7 @@ export const EmptyPage: VFC = () => {
   const documentationLink = useTIDocumentationLink();
 
   return (
-    <SecuritySolutionPluginTemplateWrapper template="noData">
+    <SecuritySolutionPluginTemplateWrapper isEmptyState>
       <EuiEmptyPrompt
         icon={
           <EuiImage

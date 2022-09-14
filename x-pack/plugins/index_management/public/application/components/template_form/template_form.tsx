@@ -277,7 +277,7 @@ export const TemplateForm = ({
     }
 
     return (
-      <EuiButton size="s" onClick={showPreviewFlyout}>
+      <EuiButton size="s" onClick={showPreviewFlyout} data-test-subj="previewIndexTemplate">
         <FormattedMessage
           id="xpack.idxMgmt.templateForm.previewIndexTemplateButtonLabel"
           defaultMessage="Preview index template"

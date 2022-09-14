@@ -22,7 +22,11 @@ describe('breakdown metrics', () => {
   const INTERVALS = 6;
 
   beforeEach(() => {
-    const javaService = apm.service('opbeans-java', 'production', 'java');
+    const javaService = apm.service({
+      name: 'opbeans-java',
+      environment: 'production',
+      agentName: 'java',
+    });
     const javaInstance = javaService.instance('instance-1');
 
     const start = new Date('2021-01-01T00:00:00.000Z');
@@ -34,15 +38,18 @@ describe('breakdown metrics', () => {
       .rate(LIST_RATE)
       .generator((timestamp) =>
         javaInstance
-          .transaction('GET /api/product/list')
+          .transaction({ transactionName: 'GET /api/product/list' })
           .timestamp(timestamp)
           .duration(1000)
           .children(
             javaInstance
-              .span('GET apm-*/_search', 'db', 'elasticsearch')
+              .span({ spanName: 'GET apm-*/_search', spanType: 'db', spanSubtype: 'elasticsearch' })
               .timestamp(timestamp + 150)
               .duration(500),
-            javaInstance.span('GET foo', 'db', 'redis').timestamp(timestamp).duration(100)
+            javaInstance
+              .span({ spanName: 'GET foo', spanType: 'db', spanSubtype: 'redis' })
+              .timestamp(timestamp)
+              .duration(100)
           )
       );
 
@@ -51,17 +58,17 @@ describe('breakdown metrics', () => {
       .rate(ID_RATE)
       .generator((timestamp) =>
         javaInstance
-          .transaction('GET /api/product/:id')
+          .transaction({ transactionName: 'GET /api/product/:id' })
           .timestamp(timestamp)
           .duration(1000)
           .children(
             javaInstance
-              .span('GET apm-*/_search', 'db', 'elasticsearch')
+              .span({ spanName: 'GET apm-*/_search', spanType: 'db', spanSubtype: 'elasticsearch' })
               .duration(500)
               .timestamp(timestamp + 100)
               .children(
                 javaInstance
-                  .span('bar', 'external', 'http')
+                  .span({ spanName: 'bar', spanType: 'external', spanSubtype: 'http' })
                   .timestamp(timestamp + 200)
                   .duration(100)
               )

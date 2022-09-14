@@ -264,6 +264,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     return () => {
       unmounted = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(props.anomaly)]);
 
   const openCustomUrl = (customUrl: KibanaUrlConfig) => {
@@ -668,47 +669,48 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         );
       }
     }
-
-    if (anomaly.isGeoRecord === true) {
-      items.push(
-        <EuiContextMenuItem
-          key="view_in_maps"
-          icon="gisApp"
-          onClick={async () => {
-            const mapsLink = await getAnomaliesMapsLink(anomaly);
-            await application.navigateToApp(MAPS_APP_ID, { path: mapsLink?.path });
-          }}
-          data-test-subj="mlAnomaliesListRowActionViewInMapsButton"
-        >
-          <FormattedMessage
-            id="xpack.ml.anomaliesTable.linksMenu.viewInMapsLabel"
-            defaultMessage="View in Maps"
-          />
-        </EuiContextMenuItem>
-      );
-    } else if (
-      props.sourceIndicesWithGeoFields &&
-      props.sourceIndicesWithGeoFields[anomaly.jobId]
-    ) {
-      items.push(
-        <EuiContextMenuItem
-          key="view_in_maps"
-          icon="gisApp"
-          onClick={async () => {
-            const mapsLink = await getAnomalySourceMapsLink(
-              anomaly,
-              props.sourceIndicesWithGeoFields
-            );
-            await application.navigateToApp(MAPS_APP_ID, { path: mapsLink?.path });
-          }}
-          data-test-subj="mlAnomaliesListRowActionViewSourceIndexInMapsButton"
-        >
-          <FormattedMessage
-            id="xpack.ml.anomaliesTable.linksMenu.viewSourceIndexInMapsLabel"
-            defaultMessage="View source index in Maps"
-          />
-        </EuiContextMenuItem>
-      );
+    if (application.capabilities.maps?.show) {
+      if (anomaly.isGeoRecord === true) {
+        items.push(
+          <EuiContextMenuItem
+            key="view_in_maps"
+            icon="gisApp"
+            onClick={async () => {
+              const mapsLink = await getAnomaliesMapsLink(anomaly);
+              await application.navigateToApp(MAPS_APP_ID, { path: mapsLink?.path });
+            }}
+            data-test-subj="mlAnomaliesListRowActionViewInMapsButton"
+          >
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.linksMenu.viewInMapsLabel"
+              defaultMessage="View in Maps"
+            />
+          </EuiContextMenuItem>
+        );
+      } else if (
+        props.sourceIndicesWithGeoFields &&
+        props.sourceIndicesWithGeoFields[anomaly.jobId]
+      ) {
+        items.push(
+          <EuiContextMenuItem
+            key="view_in_maps"
+            icon="gisApp"
+            onClick={async () => {
+              const mapsLink = await getAnomalySourceMapsLink(
+                anomaly,
+                props.sourceIndicesWithGeoFields
+              );
+              await application.navigateToApp(MAPS_APP_ID, { path: mapsLink?.path });
+            }}
+            data-test-subj="mlAnomaliesListRowActionViewSourceIndexInMapsButton"
+          >
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.linksMenu.viewSourceIndexInMapsLabel"
+              defaultMessage="View source index in Maps"
+            />
+          </EuiContextMenuItem>
+        );
+      }
     }
 
     if (application.capabilities.discover?.show && isCategorizationAnomalyRecord) {
@@ -759,6 +761,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       );
     }
     return items;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     openInDiscoverUrl,
     discoverUrlError,
