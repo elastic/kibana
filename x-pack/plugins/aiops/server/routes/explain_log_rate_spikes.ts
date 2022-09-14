@@ -31,14 +31,14 @@ import { API_ENDPOINT } from '../../common/api';
 
 import type { AiopsLicense } from '../types';
 
-import { fetchFieldCandidates } from './queries/fetch_field_candidates';
 import { fetchChangePointPValues } from './queries/fetch_change_point_p_values';
-import { generateItemsets } from './generate_itemsets';
+import { fetchFieldCandidates } from './queries/fetch_field_candidates';
+import { fetchFrequentItems } from './queries/fetch_frequent_items';
 import {
   getSimpleHierarchicalTree,
   getSimpleHierarchicalTreeLeaves,
   markDuplicates,
-} from './get_simple_hierarchical_tree';
+} from './queries/get_simple_hierarchical_tree';
 
 // Overall progress is a float from 0 to 1.
 const LOADED_FIELD_CANDIDATES = 0.2;
@@ -205,8 +205,7 @@ export const defineExplainLogRateSpikesRoute = (
           return;
         }
 
-        // fields, df = analysis.generate_itemsets_es()
-        const { fields, df, totalDocCount } = await generateItemsets(
+        const { fields, df } = await fetchFrequentItems(
           client,
           request.body.index,
           changePoints,
@@ -216,7 +215,6 @@ export const defineExplainLogRateSpikesRoute = (
         );
 
         // Filter itemsets by significant change point field value pairs
-        // TODO possibly move this to the ES query
         const filteredDf = df.filter((fi) => {
           const { set: currentItems } = fi;
 
@@ -227,17 +225,7 @@ export const defineExplainLogRateSpikesRoute = (
           });
         });
 
-        // fields_tree, root = aiops.ItemSetTree.get_simple_hierarchical_tree(df, True, False, fields=list(fields))
-        const { fields: fieldsTree, root } = getSimpleHierarchicalTree(
-          filteredDf,
-          true,
-          false,
-          fields
-        );
-
-        // console.log('fields', fieldsTree);
-        // console.log('root', root);
-
+        const { root } = getSimpleHierarchicalTree(filteredDf, true, false, fields);
         const changePointsGroups = getSimpleHierarchicalTreeLeaves(root, []);
 
         push(addChangePointsGroupAction(markDuplicates(changePointsGroups)));

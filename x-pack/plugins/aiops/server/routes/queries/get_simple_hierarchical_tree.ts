@@ -6,11 +6,11 @@
  */
 
 import { max } from 'd3-array';
-import { omit, uniq } from 'lodash';
+// import { omit, uniq } from 'lodash';
 
 import type { ChangePointGroup, FieldValuePair } from '@kbn/ml-agg-utils';
 
-import type { ItemsetResult } from './generate_itemsets';
+import type { ItemsetResult } from './fetch_frequent_items';
 
 function getValueCounts(df: ItemsetResult[], field: string) {
   return df.reduce((p, c) => {
@@ -245,11 +245,11 @@ export function getSimpleHierarchicalTree(
   displayOther: boolean,
   fields: string[] = []
 ) {
-  const candidates = uniq(
-    df.flatMap((d) =>
-      Object.keys(omit(d, ['size', 'maxPValue', 'doc_count', 'support', 'total_doc_count']))
-    )
-  );
+  // const candidates = uniq(
+  //   df.flatMap((d) =>
+  //     Object.keys(omit(d, ['size', 'maxPValue', 'doc_count', 'support', 'total_doc_count']))
+  //   )
+  // );
 
   const field = fields[0];
 
