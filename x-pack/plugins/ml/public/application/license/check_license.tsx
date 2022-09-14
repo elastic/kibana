@@ -16,18 +16,18 @@ let mlLicense: MlClientLicense | null = null;
  * Create a new mlLicense and cache it for later checks
  *
  * @export
- * @param {LicensingPluginSetup} licensingSetup
+ * @param {LicensingPluginStart} licensingStart
  * @param application
  * @param postInitFunctions
  * @returns {MlClientLicense}
  */
 export function setLicenseCache(
-  licensingSetup: LicensingPluginStart,
+  licensingStart: LicensingPluginStart,
   application: CoreStart['application'],
   postInitFunctions?: Array<(lic: MlLicense) => void>
 ) {
   mlLicense = new MlClientLicense(application);
-  mlLicense.setup(licensingSetup.license$, postInitFunctions);
+  mlLicense.setup(licensingStart.license$, postInitFunctions);
   return mlLicense;
 }
 
