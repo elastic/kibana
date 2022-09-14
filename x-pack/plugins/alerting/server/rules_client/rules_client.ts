@@ -269,6 +269,7 @@ export type BulkEditOperation =
   | {
       operation: 'set';
       field: Extract<BulkEditFields, 'apiKey'>;
+      value: undefined;
     };
 
 type RuleParamsModifier<Params extends RuleTypeParams> = (params: Params) => Promise<Params>;
