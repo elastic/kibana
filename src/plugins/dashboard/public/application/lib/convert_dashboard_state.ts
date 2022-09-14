@@ -10,15 +10,8 @@ import _ from 'lodash';
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { ControlGroupInput } from '@kbn/controls-plugin/public';
-import {
-  compareFilters,
-  isFilterPinned,
-  migrateFilter,
-  COMPARE_ALL_OPTIONS,
-  type Filter,
-} from '@kbn/es-query';
 import { type EmbeddablePackageState, ViewMode } from '@kbn/embeddable-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
+import { isFilterPinned, TimeRange } from '@kbn/es-query';
 
 import type { DashboardSavedObject } from '../../saved_dashboards';
 import { getTagsFromSavedDashboard, migrateAppState } from '.';
@@ -89,9 +82,10 @@ export const stateToDashboardContainerInput = ({
   executionContext,
 }: StateToDashboardContainerInputProps): DashboardContainerInput => {
   const {
-    data: { query: queryService },
+    data: {
+      query: { timefilter: timefilterService, filterManager },
+    },
   } = pluginServices.getServices();
-  const { filterManager, timefilter: timefilterService } = queryService;
   const { timefilter } = timefilterService;
 
   const {
@@ -111,14 +105,7 @@ export const stateToDashboardContainerInput = ({
 
   return {
     refreshConfig: timefilter.getRefreshInterval(),
-    filters: filterManager.getFilters().filter((filter) => {
-      return (
-        isFilterPinned(filter) ||
-        dashboardFilters.some((dashboardFilter) =>
-          filtersAreEqual(migrateFilter(_.cloneDeep(dashboardFilter)), migrateFilter(filter))
-        )
-      );
-    }),
+    filters: dashboardFilters.concat(filterManager.getFilters().filter((f) => isFilterPinned(f))),
     isFullScreenMode: fullScreenMode,
     id: savedDashboard.id || '',
     isEmbeddedExternally,
@@ -139,10 +126,6 @@ export const stateToDashboardContainerInput = ({
     executionContext,
   };
 };
-
-const filtersAreEqual = (first: Filter, second: Filter) =>
-  compareFilters(first, second, { ...COMPARE_ALL_OPTIONS, state: false });
-
 /**
  * Converts a given dashboard state object to raw dashboard state. This is useful for sharing, and session restoration, as
  * they require panels to be formatted as an array.

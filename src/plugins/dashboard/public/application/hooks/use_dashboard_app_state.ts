@@ -10,10 +10,10 @@ import { History } from 'history';
 import { debounceTime, switchMap } from 'rxjs/operators';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
-
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { isFilterPinned } from '@kbn/es-query';
 
 import { DashboardConstants } from '../..';
 import { getNewDashboardTitle } from '../../dashboard_strings';
@@ -203,6 +203,9 @@ export const useDashboardAppState = ({
         // if there is an incoming embeddable, dashboard always needs to be in edit mode to receive it.
         ...(incomingEmbeddable ? { viewMode: ViewMode.EDIT } : {}),
       };
+      initialDashboardState.filters = initialDashboardState.filters.filter((filter) => {
+        return !isFilterPinned(filter);
+      });
       dispatchDashboardStateChange(setDashboardState(initialDashboardState));
 
       /**
