@@ -1,16 +1,19 @@
+
+
 import axios from "axios";
 import { ITelemetryReceiver } from "./receiver";
 import { ESClusterInfo } from "./types";
+import { AdmZip } from 'adm-zip';
 
 
 export interface IArtifact {
   start(receiver: ITelemetryReceiver): Promise<void>;
-  getArtifact(): Promise<unknown>;
+  getArtifact(name: string): Promise<unknown>;
 }
 
 class Artifact implements IArtifact {
-  private url?: string;
-  private readonly PROD_CDN_URL = 'https://artifacts.security.elastic.co/downloads/endpoint/manifest';
+  private manifestUrl?: string;
+  private readonly PROD_CDN_URL = 'https://artifacts.security.elastic.co';
   //private readonly STAGING_CDN_URL = 'https://artifacts.security.elastic.co/downloads/endpoint/manifest/artifacts-8.4.0.zip';
   private readonly AXIOS_TIMEOUT_MS = 10_000;
   private receiver?: ITelemetryReceiver;
@@ -20,21 +23,35 @@ class Artifact implements IArtifact {
     this.receiver = receiver;
     this.esClusterInfo = await this.receiver.fetchClusterInfo();
     const version = this.esClusterInfo?.version?.number;
-    this.url = `${this.PROD_CDN_URL}/artifacts-${version}.zip`;
+    this.manifestUrl = `${this.PROD_CDN_URL}/downloads/kibana/manifest/artifacts-${version}.zip`;
   }
 
 
-  public async getArtifact(): Promise<unknown> {
+  public async getArtifact(name: string): Promise<unknown> {
     try {
-      if (this.url) {
-        const response = await axios.get(this.url, { timeout: this.AXIOS_TIMEOUT_MS });
-        return response.data;
+      if (this.manifestUrl) {
+        const response = await axios.get(this.manifestUrl, { timeout: this.AXIOS_TIMEOUT_MS, responseType: 'arraybuffer' });
+        const zip = new AdmZip(response.data);
+        const entries = zip.getEntries();
+        const manifest = JSON.parse(entries[0].getData().toString());
+        const relativeUrl = manifest['artifacts'][name]['relative_url'];
+        if (relativeUrl) {
+          const url = `${this.PROD_CDN_URL}/${relativeUrl}`;
+          const artifactResponse = await axios.get(url, { timeout: this.AXIOS_TIMEOUT_MS });
+          return artifactResponse.data;
+        } else {
+          throw Error(`No artifact for name ${name}`);
+        }
+      } else {
+        throw Error('No manifest url');
       }
     } catch (err) {
       console.log(err);
       throw err;
     }
   }
+
+
 
 
 }
