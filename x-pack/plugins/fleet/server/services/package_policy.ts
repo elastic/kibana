@@ -257,6 +257,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
 
         const { id, ...pkgPolicyWithoutId } = packagePolicy;
 
+        let elasticsearch: PackagePolicy['elasticsearch'];
         if (packagePolicy.package) {
           const pkgInfo = packageInfos.get(
             `${packagePolicy.package.name}-${packagePolicy.package.version}`
@@ -265,6 +266,8 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
           inputs = pkgInfo
             ? await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs)
             : inputs;
+
+          elasticsearch = pkgInfo.elasticsearch;
         }
 
         return {
@@ -273,6 +276,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
           attributes: {
             ...pkgPolicyWithoutId,
             inputs,
+            elasticsearch,
             policy_id: agentPolicyId,
             revision: 1,
             created_at: isoDate,
