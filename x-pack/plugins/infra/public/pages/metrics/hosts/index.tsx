@@ -6,12 +6,9 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-
-import { DocumentTitle } from '../../../components/document_title';
 
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
@@ -42,16 +39,6 @@ export const HostsPage = () => {
   ]);
   return (
     <EuiErrorBoundary>
-      <DocumentTitle
-        title={(previousTitle: string) =>
-          i18n.translate('xpack.infra.infrastructureHostsPage.documentTitle', {
-            defaultMessage: '{previousTitle} | Hosts',
-            values: {
-              previousTitle,
-            },
-          })
-        }
-      />
       {isLoading && !source ? (
         <SourceLoadingPage />
       ) : metricIndicesExist && source ? (
