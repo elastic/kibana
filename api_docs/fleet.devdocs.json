@@ -981,6 +981,37 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-public.PackageGenericErrorsListProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "PackageGenericErrorsListProps",
+        "description": [],
+        "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackageGenericErrorsListProps.packageErrors",
+            "type": "Array",
+            "tags": [],
+            "label": "packageErrors",
+            "description": [
+              "A list of errors from a package"
+            ],
+            "signature": [
+              "FleetServerAgentComponentUnit",
+              "[]"
+            ],
+            "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-public.PackagePolicyCreateExtension",
         "type": "Interface",
         "tags": [],
@@ -1894,10 +1925,10 @@
             "id": "def-public.UIExtensionsStorage.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string]: Partial<Record<\"agent-enrollment-flyout\" | \"package-detail-assets\" | \"package-detail-custom\" | \"package-policy-create\" | \"package-policy-edit\" | \"package-policy-edit-tabs\" | \"package-policy-response\", UIExtensionPoint>>",
+            "label": "[key: string]: Partial<Record<\"agent-enrollment-flyout\" | \"package-detail-assets\" | \"package-detail-custom\" | \"package-policy-create\" | \"package-policy-edit\" | \"package-policy-edit-tabs\" | \"package-policy-response\" | \"package-generic-errors-list\", UIExtensionPoint>>",
             "description": [],
             "signature": [
-              "[key: string]:  Partial<Record<\"agent-enrollment-flyout\" | \"package-detail-assets\" | \"package-detail-custom\" | \"package-policy-create\" | \"package-policy-edit\" | \"package-policy-edit-tabs\" | \"package-policy-response\", ",
+              "[key: string]:  Partial<Record<\"agent-enrollment-flyout\" | \"package-detail-assets\" | \"package-detail-custom\" | \"package-policy-create\" | \"package-policy-edit\" | \"package-policy-edit-tabs\" | \"package-policy-response\" | \"package-generic-errors-list\", ",
               {
                 "pluginId": "fleet",
                 "scope": "public",
@@ -2032,6 +2063,39 @@
             "docId": "kibFleetPluginApi",
             "section": "def-public.PackageCustomExtensionComponentProps",
             "text": "PackageCustomExtensionComponentProps"
+          },
+          ">"
+        ],
+        "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-public.PackageGenericErrorsListComponent",
+        "type": "Type",
+        "tags": [],
+        "label": "PackageGenericErrorsListComponent",
+        "description": [
+          "\nUI Component Extension is used on the pages displaying the ability to see\na generic endpoint errors list"
+        ],
+        "signature": [
+          "React.ComponentClass<",
+          {
+            "pluginId": "fleet",
+            "scope": "public",
+            "docId": "kibFleetPluginApi",
+            "section": "def-public.PackageGenericErrorsListProps",
+            "text": "PackageGenericErrorsListProps"
+          },
+          ", any> | React.FunctionComponent<",
+          {
+            "pluginId": "fleet",
+            "scope": "public",
+            "docId": "kibFleetPluginApi",
+            "section": "def-public.PackageGenericErrorsListProps",
+            "text": "PackageGenericErrorsListProps"
           },
           ">"
         ],
@@ -2197,6 +2261,8 @@
             "text": "PackageAssetsExtension"
           },
           " | ",
+          "PackageGenericErrorsListExtension",
+          " | ",
           {
             "pluginId": "fleet",
             "scope": "public",
@@ -2290,6 +2356,8 @@
                 "section": "def-public.PackageAssetsExtension",
                 "text": "PackageAssetsExtension"
               },
+              " | ",
+              "PackageGenericErrorsListExtension",
               " | ",
               {
                 "pluginId": "fleet",
@@ -3554,6 +3622,8 @@
                   "section": "def-public.PackageAssetsExtension",
                   "text": "PackageAssetsExtension"
                 },
+                " | ",
+                "PackageGenericErrorsListExtension",
                 " | ",
                 {
                   "pluginId": "fleet",

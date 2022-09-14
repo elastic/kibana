@@ -137,9 +137,7 @@
                     "section": "def-public.EmbeddableFactory",
                     "text": "EmbeddableFactory"
                   },
-                  "<I, O, E, ",
-                  "SavedObjectAttributes",
-                  "> | undefined"
+                  "<I, O, E, unknown> | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
                 "deprecated": false,
@@ -202,9 +200,7 @@
                     "section": "def-public.EmbeddableOutput",
                     "text": "EmbeddableOutput"
                   },
-                  ">, ",
-                  "SavedObjectAttributes",
-                  ">>"
+                  ">, unknown>>"
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
                 "deprecated": false,
@@ -585,9 +581,7 @@
                     "section": "def-public.EmbeddableOutput",
                     "text": "EmbeddableOutput"
                   },
-                  ">, ",
-                  "SavedObjectAttributes",
-                  ">) | undefined"
+                  ">, unknown>) | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx",
                 "deprecated": false,
@@ -975,9 +969,7 @@
                     "section": "def-public.EmbeddableFactory",
                     "text": "EmbeddableFactory"
                   },
-                  "<I, O, E, ",
-                  "SavedObjectAttributes",
-                  "> | undefined"
+                  "<I, O, E, unknown> | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
@@ -1782,9 +1774,7 @@
                 "section": "def-public.EmbeddableFactory",
                 "text": "EmbeddableFactory"
               },
-              "<TEmbeddableInput, any, TEmbeddable, ",
-              "SavedObjectAttributes",
-              ">, partial?: Partial<TEmbeddableInput>) => ",
+              "<TEmbeddableInput, any, TEmbeddable, unknown>, partial?: Partial<TEmbeddableInput>) => ",
               {
                 "pluginId": "embeddable",
                 "scope": "common",
@@ -1813,9 +1803,7 @@
                     "section": "def-public.EmbeddableFactory",
                     "text": "EmbeddableFactory"
                   },
-                  "<TEmbeddableInput, any, TEmbeddable, ",
-                  "SavedObjectAttributes",
-                  ">"
+                  "<TEmbeddableInput, any, TEmbeddable, unknown>"
                 ],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
@@ -2093,9 +2081,7 @@
                     "section": "def-public.EmbeddableFactory",
                     "text": "EmbeddableFactory"
                   },
-                  "<I, O, E, ",
-                  "SavedObjectAttributes",
-                  "> | undefined"
+                  "<I, O, E, unknown> | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/lib/actions/edit_panel_action.ts",
                 "deprecated": false,
@@ -4675,9 +4661,7 @@
             "section": "def-public.IEmbeddable",
             "text": "IEmbeddable"
           },
-          "<I, O>, T extends ",
-          "SavedObjectAttributes",
-          " = ",
+          "<I, O>, T = ",
           "SavedObjectAttributes",
           ">(def: ",
           {
@@ -5676,9 +5660,7 @@
             "section": "def-public.EmbeddableFactory",
             "text": "EmbeddableFactory"
           },
-          "<I, O, E, ",
-          "SavedObjectAttributes",
-          "> | undefined; getAllFactories: () => IterableIterator<",
+          "<I, O, E, unknown> | undefined; getAllFactories: () => IterableIterator<",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -5726,9 +5708,7 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ">, ",
-          "SavedObjectAttributes",
-          ">>; overlays: ",
+          ">, unknown>>; overlays: ",
           "OverlayStart",
           "; notifications: ",
           "NotificationsStart",
@@ -5853,9 +5833,7 @@
                     "section": "def-public.EmbeddableFactory",
                     "text": "EmbeddableFactory"
                   },
-                  "<I, O, E, ",
-                  "SavedObjectAttributes",
-                  "> | undefined"
+                  "<I, O, E, unknown> | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
                 "deprecated": false,
@@ -5931,9 +5909,7 @@
                     "section": "def-public.EmbeddableOutput",
                     "text": "EmbeddableOutput"
                   },
-                  ">, ",
-                  "SavedObjectAttributes",
-                  ">>"
+                  ">, unknown>>"
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
                 "deprecated": false,
@@ -10203,9 +10179,7 @@
               "section": "def-public.EmbeddableFactoryDefinition",
               "text": "EmbeddableFactoryDefinition"
             },
-            "<I, O, E, ",
-            "SavedObjectAttributes",
-            ">) => () => ",
+            "<I, O, E, unknown>) => () => ",
             {
               "pluginId": "embeddable",
               "scope": "public",
@@ -10213,9 +10187,7 @@
               "section": "def-public.EmbeddableFactory",
               "text": "EmbeddableFactory"
             },
-            "<I, O, E, ",
-            "SavedObjectAttributes",
-            ">"
+            "<I, O, E, unknown>"
           ],
           "path": "src/plugins/embeddable/public/plugin.tsx",
           "deprecated": false,
@@ -10251,9 +10223,7 @@
                   "section": "def-public.EmbeddableFactoryDefinition",
                   "text": "EmbeddableFactoryDefinition"
                 },
-                "<I, O, E, ",
-                "SavedObjectAttributes",
-                ">"
+                "<I, O, E, unknown>"
               ],
               "path": "src/plugins/embeddable/public/plugin.tsx",
               "deprecated": false,
@@ -10453,9 +10423,7 @@
               "section": "def-public.EmbeddableFactory",
               "text": "EmbeddableFactory"
             },
-            "<I, O, E, ",
-            "SavedObjectAttributes",
-            "> | undefined"
+            "<I, O, E, unknown> | undefined"
           ],
           "path": "src/plugins/embeddable/public/plugin.tsx",
           "deprecated": false,
@@ -10535,9 +10503,7 @@
               "section": "def-public.EmbeddableOutput",
               "text": "EmbeddableOutput"
             },
-            ">, ",
-            "SavedObjectAttributes",
-            ">>"
+            ">, unknown>>"
           ],
           "path": "src/plugins/embeddable/public/plugin.tsx",
           "deprecated": false,

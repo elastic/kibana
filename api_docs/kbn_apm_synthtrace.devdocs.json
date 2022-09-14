@@ -1052,7 +1052,7 @@
             "label": "service",
             "description": [],
             "signature": [
-              "(name: string, environment: string, agentName: string) => ",
+              "({ name, environment, agentName, }: { name: string; environment: string; agentName: string; }) => ",
               "Service"
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/index.ts",
@@ -1063,32 +1063,13 @@
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
                 "id": "def-server.apm.service.$1",
-                "type": "string",
+                "type": "Object",
                 "tags": [],
-                "label": "name",
+                "label": "__0",
                 "description": [],
-                "path": "packages/kbn-apm-synthtrace/src/lib/apm/service.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.apm.service.$2",
-                "type": "string",
-                "tags": [],
-                "label": "environment",
-                "description": [],
-                "path": "packages/kbn-apm-synthtrace/src/lib/apm/service.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.apm.service.$3",
-                "type": "string",
-                "tags": [],
-                "label": "agentName",
-                "description": [],
+                "signature": [
+                  "{ name: string; environment: string; agentName: string; }"
+                ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/apm/service.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1103,7 +1084,7 @@
             "label": "browser",
             "description": [],
             "signature": [
-              "(serviceName: string, production: string, userAgent: Partial<{ 'user_agent.original': string; 'user_agent.os.name': string; 'user_agent.name': string; 'user_agent.device.name': string; 'user_agent.version': number; }>) => ",
+              "({ serviceName, environment, userAgent, }: { serviceName: string; environment: string; userAgent: Partial<{ 'user_agent.original': string; 'user_agent.os.name': string; 'user_agent.name': string; 'user_agent.device.name': string; 'user_agent.version': number; }>; }) => ",
               "Browser"
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/index.ts",
@@ -1114,34 +1095,12 @@
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
                 "id": "def-server.apm.browser.$1",
-                "type": "string",
-                "tags": [],
-                "label": "serviceName",
-                "description": [],
-                "path": "packages/kbn-apm-synthtrace/src/lib/apm/browser.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.apm.browser.$2",
-                "type": "string",
-                "tags": [],
-                "label": "production",
-                "description": [],
-                "path": "packages/kbn-apm-synthtrace/src/lib/apm/browser.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.apm.browser.$3",
                 "type": "Object",
                 "tags": [],
-                "label": "userAgent",
+                "label": "__0",
                 "description": [],
                 "signature": [
-                  "{ 'user_agent.original'?: string | undefined; 'user_agent.os.name'?: string | undefined; 'user_agent.name'?: string | undefined; 'user_agent.device.name'?: string | undefined; 'user_agent.version'?: number | undefined; }"
+                  "{ serviceName: string; environment: string; userAgent: Partial<{ 'user_agent.original': string; 'user_agent.os.name': string; 'user_agent.name': string; 'user_agent.device.name': string; 'user_agent.version': number; }>; }"
                 ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/apm/browser.ts",
                 "deprecated": false,

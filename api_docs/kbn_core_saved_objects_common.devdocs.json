@@ -127,7 +127,7 @@
             "tags": [],
             "label": "attributes",
             "description": [
-              "{@inheritdoc SavedObjectAttributes}"
+              "The data for a Saved Object is stored as an object in the `attributes` property."
             ],
             "signature": [
               "T"
@@ -237,14 +237,17 @@
         "parentPluginId": "@kbn/core-saved-objects-common",
         "id": "def-common.SavedObjectAttributes",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObjectAttributes",
         "description": [
           "\nThe data for a Saved Object is stored as an object in the `attributes`\nproperty.\n"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [],
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-common",

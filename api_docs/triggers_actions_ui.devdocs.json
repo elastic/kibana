@@ -3480,7 +3480,7 @@
             "label": "actionVariables",
             "description": [],
             "signature": [
-              "AsActionVariables<\"params\"> & Partial<AsActionVariables<\"state\" | \"context\">>"
+              "AsActionVariables<\"params\"> & Partial<AsActionVariables<\"context\" | \"state\">>"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
@@ -4590,7 +4590,7 @@
         "label": "ActionVariables",
         "description": [],
         "signature": [
-          "AsActionVariables<\"params\"> & Partial<AsActionVariables<\"state\" | \"context\">>"
+          "AsActionVariables<\"params\"> & Partial<AsActionVariables<\"context\" | \"state\">>"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,

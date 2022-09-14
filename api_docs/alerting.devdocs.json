@@ -4149,6 +4149,17 @@
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.IExecutionLog.rule_name",
+            "type": "string",
+            "tags": [],
+            "label": "rule_name",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

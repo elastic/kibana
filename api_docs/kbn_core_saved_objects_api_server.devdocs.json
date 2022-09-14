@@ -2391,7 +2391,7 @@
             "tags": [],
             "label": "attributes",
             "description": [
-              "{@inheritdoc SavedObjectAttributes}"
+              "The data for a Saved Object is stored as an object in the `attributes` property."
             ],
             "signature": [
               "{ [P in keyof T]?: T[P] | undefined; }"

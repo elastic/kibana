@@ -658,7 +658,7 @@
         "label": "EcsEventKind",
         "description": [],
         "signature": [
-          "\"metric\" | \"alert\" | \"state\" | \"event\" | \"signal\" | \"pipeline_error\""
+          "\"metric\" | \"alert\" | \"signal\" | \"state\" | \"event\" | \"pipeline_error\""
         ],
         "path": "packages/kbn-logging/src/ecs/event.ts",
         "deprecated": false,

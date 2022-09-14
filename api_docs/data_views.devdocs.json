@@ -10731,7 +10731,9 @@
               "\nA record of capabilities (aggregations) for an index rollup job"
             ],
             "signature": [
-              "[index: string]:  { aggs?: _.Dictionary<",
+              "[index: string]:  { aggs?: ",
+              "Dictionary",
+              "<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -19829,7 +19831,7 @@
             "tags": [],
             "label": "attributes",
             "description": [
-              "{@inheritdoc SavedObjectAttributes}"
+              "The data for a Saved Object is stored as an object in the `attributes` property."
             ],
             "signature": [
               "T"

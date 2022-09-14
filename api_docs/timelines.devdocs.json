@@ -377,7 +377,7 @@
           "EsQueryConfig",
           "; indexPattern: ",
           "DataViewBase",
-          "; queries: ",
+          " | undefined; queries: ",
           "Query",
           "[]; filters: ",
           "Filter",
@@ -425,9 +425,8 @@
                 "label": "indexPattern",
                 "description": [],
                 "signature": [
-                  "{ fields: ",
-                  "DataViewFieldBase",
-                  "[]; id?: string | undefined; title: string; }"
+                  "DataViewBase",
+                  " | undefined"
                 ],
                 "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
                 "deprecated": false,

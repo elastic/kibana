@@ -789,7 +789,7 @@
           },
           ", \"id\" | \"title\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: (() => void) | undefined, services: Pick<",
           "SavedObjectKibanaServices",
-          ", \"overlays\" | \"savedObjectsClient\">) => Promise<true>"
+          ", \"savedObjectsClient\" | \"overlays\">) => Promise<true>"
         ],
         "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
         "deprecated": false,
@@ -858,7 +858,7 @@
             "signature": [
               "Pick<",
               "SavedObjectKibanaServices",
-              ", \"overlays\" | \"savedObjectsClient\">"
+              ", \"savedObjectsClient\" | \"overlays\">"
             ],
             "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
             "deprecated": false,

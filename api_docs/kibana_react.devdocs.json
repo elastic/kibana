@@ -211,7 +211,8 @@
             "label": "debouncedFetch",
             "description": [],
             "signature": [
-              "((filter: string) => Promise<void>) & _.Cancelable"
+              "((filter: string) => Promise<void>) & ",
+              "Cancelable"
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
@@ -1704,18 +1705,6 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "esUiShared",
-            "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx"
-          },
-          {
-            "plugin": "esUiShared",
-            "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx"
-          },
-          {
-            "plugin": "esUiShared",
-            "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx"
-          },
-          {
             "plugin": "home",
             "path": "src/plugins/home/public/application/application.tsx"
           },
@@ -1750,6 +1739,18 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
+          },
+          {
+            "plugin": "esUiShared",
+            "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx"
+          },
+          {
+            "plugin": "esUiShared",
+            "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx"
+          },
+          {
+            "plugin": "esUiShared",
+            "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx"
           },
           {
             "plugin": "spaces",
