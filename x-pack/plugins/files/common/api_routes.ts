@@ -166,10 +166,4 @@ export type FileListSharesHttpEndpoint = HttpApiInterfaceEntryDefinition<
   }
 >;
 
-export type FilePublicDownloadHttpEndpoint = HttpApiInterfaceEntryDefinition<
-  { fileName?: string },
-  { token: string },
-  unknown,
-  // Should be a readable stream
-  any
->;
+export type { Endpoint as FilePublicDownloadHttpEndpoint } from '../server/routes/public_facing/download';
