@@ -104,7 +104,8 @@ export class SyntheticsPrivateLocation {
 
     await this.checkPermissions(
       request,
-      `Unable to create Synthetics package policy for monitor ${config[ConfigKey.NAME]
+      `Unable to create Synthetics package policy for monitor ${
+        config[ConfigKey.NAME]
       }. Fleet write permissions are needed to use Synthetics private locations.`
     );
 
@@ -127,7 +128,8 @@ export class SyntheticsPrivateLocation {
 
       if (!newPolicy) {
         throw new Error(
-          `Unable to create Synthetics package policy for monitor ${config[ConfigKey.NAME]
+          `Unable to create Synthetics package policy for monitor ${
+            config[ConfigKey.NAME]
           } with private location ${location.label}`
         );
       }
@@ -141,7 +143,8 @@ export class SyntheticsPrivateLocation {
       } catch (e) {
         this.server.logger.error(e);
         throw new Error(
-          `Unable to create Synthetics package policy for monitor ${config[ConfigKey.NAME]
+          `Unable to create Synthetics package policy for monitor ${
+            config[ConfigKey.NAME]
           } with private location ${location.label}`
         );
       }
@@ -155,7 +158,8 @@ export class SyntheticsPrivateLocation {
   ) {
     await this.checkPermissions(
       request,
-      `Unable to update Synthetics package policy for monitor ${config[ConfigKey.NAME]
+      `Unable to update Synthetics package policy for monitor ${
+        config[ConfigKey.NAME]
       }. Fleet write permissions are needed to use Synthetics private locations.`
     );
 
@@ -180,7 +184,8 @@ export class SyntheticsPrivateLocation {
 
           if (!newPolicy) {
             throw new Error(
-              `Unable to ${hasPolicy ? 'update' : 'create'
+              `Unable to ${
+                hasPolicy ? 'update' : 'create'
               } Synthetics package policy for private location ${privateLocation.label}`
             );
           }
@@ -200,7 +205,8 @@ export class SyntheticsPrivateLocation {
           } catch (e) {
             this.server.logger.error(e);
             throw new Error(
-              `Unable to delete Synthetics package policy for monitor ${config[ConfigKey.NAME]
+              `Unable to delete Synthetics package policy for monitor ${
+                config[ConfigKey.NAME]
               } with private location ${privateLocation.label}`
             );
           }
@@ -208,7 +214,8 @@ export class SyntheticsPrivateLocation {
       } catch (e) {
         this.server.logger.error(e);
         throw new Error(
-          `Unable to ${hasPolicy ? 'update' : 'create'} Synthetics package policy for monitor ${config[ConfigKey.NAME]
+          `Unable to ${hasPolicy ? 'update' : 'create'} Synthetics package policy for monitor ${
+            config[ConfigKey.NAME]
           } with private location ${privateLocation.label}`
         );
       }
@@ -280,7 +287,8 @@ export class SyntheticsPrivateLocation {
         if (location) {
           await this.checkPermissions(
             request,
-            `Unable to delete Synthetics package policy for monitor ${config[ConfigKey.NAME]
+            `Unable to delete Synthetics package policy for monitor ${
+              config[ConfigKey.NAME]
             }. Fleet write permissions are needed to use Synthetics private locations.`
           );
 
@@ -296,7 +304,8 @@ export class SyntheticsPrivateLocation {
           } catch (e) {
             this.server.logger.error(e);
             throw new Error(
-              `Unable to delete Synthetics package policy for monitor ${config[ConfigKey.NAME]
+              `Unable to delete Synthetics package policy for monitor ${
+                config[ConfigKey.NAME]
               } with private location ${location.label}`
             );
           }
