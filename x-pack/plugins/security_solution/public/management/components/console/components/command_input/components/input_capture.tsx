@@ -72,7 +72,7 @@ export const InputCapture = memo<InputCaptureProps>(
     const getTextSelection = useCallback((): string => {
       if (focusEleRef.current) {
         const selection = document.getSelection();
-        const selectionText = selection?.toString() ?? '';
+        const selectionText = (selection?.toString() ?? '').replace(/[\r\n]/g, '');
 
         if (!selection || selectionText.length === 0) {
           return '';
