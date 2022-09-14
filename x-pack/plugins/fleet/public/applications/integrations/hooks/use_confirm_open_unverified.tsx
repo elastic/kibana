@@ -11,9 +11,9 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback } from 'react';
 
 import { useStartServices } from '../../fleet/hooks';
-import { ConfirmForceInstallModal } from '../components';
+import { ConfirmOpenUnverifiedModal } from '../components';
 
-const confirmForceInstall = ({
+const confirmOpenUnverified = ({
   pkg,
   overlays,
   docLinks,
@@ -25,7 +25,7 @@ const confirmForceInstall = ({
   new Promise((resolve) => {
     const session = overlays.openModal(
       toMountPoint(
-        <ConfirmForceInstallModal
+        <ConfirmOpenUnverifiedModal
           pkg={pkg}
           onConfirm={() => {
             session.close();
@@ -41,11 +41,11 @@ const confirmForceInstall = ({
     );
   });
 
-export const useConfirmForceInstall = () => {
+export const useConfirmOpenUnverified = () => {
   const { overlays, docLinks } = useStartServices();
 
   return useCallback(
-    (pkg: { name: string; version: string }) => confirmForceInstall({ pkg, overlays, docLinks }),
+    (pkg: { name: string; version: string }) => confirmOpenUnverified({ pkg, overlays, docLinks }),
     [docLinks, overlays]
   );
 };
