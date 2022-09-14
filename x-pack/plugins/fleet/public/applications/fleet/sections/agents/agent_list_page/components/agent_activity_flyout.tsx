@@ -22,6 +22,8 @@ import {
   EuiButton,
   EuiLink,
   EuiEmptyPrompt,
+  EuiButtonEmpty,
+  EuiFlyoutFooter,
 } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -36,6 +38,10 @@ const FullHeightFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflowContent {
     height: 100%;
   }
+`;
+
+const FlyoutFooterWPadding = styled(EuiFlyoutFooter)`
+  padding: 16px 24px !important;
 `;
 
 export const AgentActivityFlyout: React.FunctionComponent<{
@@ -159,6 +165,20 @@ export const AgentActivityFlyout: React.FunctionComponent<{
             />
           ))}
         </FullHeightFlyoutBody>
+        <FlyoutFooterWPadding>
+          <EuiFlexGroup justifyContent="flexStart">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={onClose}>
+                <EuiText>
+                  <FormattedMessage
+                    id="xpack.fleet.agentActivityFlyout.closeBtn"
+                    defaultMessage="Close"
+                  />
+                </EuiText>
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </FlyoutFooterWPadding>
       </EuiFlyout>
     </>
   );
