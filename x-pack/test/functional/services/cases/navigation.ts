@@ -14,7 +14,7 @@ export function CasesNavigationProvider({ getPageObject, getService }: FtrProvid
   return {
     async navigateToApp(app: string = 'cases', appSelector: string = 'cases-app') {
       await common.navigateToApp(app);
-      await testSubjects.existOrFail(appSelector, { timeout: 2000 });
+      await testSubjects.existOrFail(appSelector);
     },
 
     async navigateToConfigurationPage(app: string = 'cases', appSelector: string = 'cases-app') {

@@ -21,6 +21,7 @@ import { updateRules } from '../../rules/update_rules';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { legacyMigrate } from '../../rules/utils';
 import { readRules } from '../../rules/read_rules';
+import { checkDefaultRuleExceptionListReferences } from './utils/check_for_default_rule_exception_list';
 
 export const updateRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
   router.put(
@@ -52,6 +53,8 @@ export const updateRulesRoute = (router: SecuritySolutionPluginRouter, ml: Setup
           savedObjectsClient,
         });
         throwAuthzError(await mlAuthz.validateRuleType(request.body.type));
+
+        checkDefaultRuleExceptionListReferences({ exceptionLists: request.body.exceptions_list });
 
         const existingRule = await readRules({
           rulesClient,

@@ -39,6 +39,23 @@ export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
 
+export const ANALYTICS_PLUGIN = {
+  ID: 'enterpriseSearchAnalytics',
+  NAME: i18n.translate('xpack.enterpriseSearch.analytics.productName', {
+    defaultMessage: 'Analytics',
+  }),
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.analytics.productDescription', {
+    defaultMessage:
+      'Dashboards and tools for visualizing end-user behavior and measuring the performance of your search applications.',
+  }),
+  CARD_DESCRIPTION: i18n.translate('xpack.enterpriseSearch.analytics.productCardDescription', {
+    defaultMessage:
+      'Dashboards and tools for visualizing end-user behavior and measuring the performance of your search applications.',
+  }),
+  URL: '/app/enterprise_search/analytics',
+  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
+};
+
 export const ELASTICSEARCH_PLUGIN = {
   ID: 'elasticsearch',
   NAME: i18n.translate('xpack.enterpriseSearch.elasticsearch.productName', {

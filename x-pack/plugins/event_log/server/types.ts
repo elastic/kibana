@@ -7,6 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest, CustomRequestHandlerContext } from '@kbn/core/server';
+import { KueryNode } from '@kbn/es-query';
 
 export type { IEvent, IValidatedEvent } from '../generated/schemas';
 export { EventSchema, ECS_VERSION } from '../generated/schemas';
@@ -61,6 +62,11 @@ export interface IEventLogClient {
     ids: string[],
     options?: Partial<AggregateOptionsType>,
     legacyIds?: string[]
+  ): Promise<AggregateEventsBySavedObjectResult>;
+  aggregateEventsWithAuthFilter(
+    type: string,
+    authFilter: KueryNode,
+    options?: Partial<AggregateOptionsType>
   ): Promise<AggregateEventsBySavedObjectResult>;
 }
 

@@ -25,6 +25,7 @@ describe('es_query executor', () => {
     index: ['test-index'],
     timeField: '',
     searchType: 'esQuery',
+    excludeHitsFromPreviousRun: true,
   };
   describe('tryToParseAsDate', () => {
     it.each<[string | number]>([['2019-01-01T00:00:00.000Z'], [1546300800000]])(

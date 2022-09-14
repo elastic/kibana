@@ -31,12 +31,15 @@ const configSchema = schema.object({
     slo: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
     }),
+    alertDetails: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
   }),
 });
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
-    unsafe: false,
+    unsafe: true,
   },
   schema: configSchema,
 };

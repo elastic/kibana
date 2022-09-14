@@ -10,12 +10,13 @@ import expect from '@kbn/expect';
 import { findCasesResp, getPostCaseRequest, postCaseReq } from '../../../../common/lib/mock';
 import {
   createCase,
-  suggestUserProfiles,
   getCase,
   findCases,
   updateCase,
   deleteAllCaseItems,
 } from '../../../../common/lib/utils';
+
+import { suggestUserProfiles } from '../../../../common/lib/user_profiles';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { bulkGetUserProfiles } from '../../../../common/lib/user_profiles';
@@ -103,6 +104,17 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       expect(retrievedProfiles).to.eql(profiles);
+    });
+
+    it('removes duplicate assignees when creating a case', async () => {
+      const postedCase = await createCase(
+        supertest,
+        getPostCaseRequest({
+          assignees: [{ uid: '123' }, { uid: '123' }],
+        })
+      );
+
+      expect(postedCase.assignees).to.eql([{ uid: '123' }]);
     });
 
     it('assigns a user to a case and retrieves the users profile from a get case call', async () => {
@@ -247,6 +259,50 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       expect(retrievedProfiles).to.eql(profiles);
+    });
+
+    it('remove duplicate assignees when updating a case', async () => {
+      const postedCase = await createCase(supertest, getPostCaseRequest());
+
+      const patchedCases = await updateCase({
+        supertest,
+        params: {
+          cases: [
+            {
+              id: postedCase.id,
+              version: postedCase.version,
+              assignees: [{ uid: '123' }, { uid: '123' }],
+            },
+          ],
+        },
+      });
+
+      expect(patchedCases[0].assignees).to.eql([{ uid: '123' }]);
+    });
+
+    it('does not set the assignees to an empty array when the field is not updated', async () => {
+      const postedCase = await createCase(
+        supertest,
+        getPostCaseRequest({
+          assignees: [{ uid: '123' }],
+        })
+      );
+
+      await updateCase({
+        supertest,
+        params: {
+          cases: [
+            {
+              id: postedCase.id,
+              version: postedCase.version,
+              title: 'abc',
+            },
+          ],
+        },
+      });
+
+      const updatedCase = await getCase({ supertest, caseId: postedCase.id });
+      expect(updatedCase.assignees).to.eql([{ uid: '123' }]);
     });
   });
 };

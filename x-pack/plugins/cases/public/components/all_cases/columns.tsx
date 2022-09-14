@@ -7,7 +7,6 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  EuiAvatar,
   EuiBadgeGroup,
   EuiBadge,
   EuiButton,
@@ -24,6 +23,7 @@ import {
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 
+import { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { Case, DeleteCase, UpdateByKey } from '../../../common/ui/types';
 import { CaseStatuses, ActionConnector, CaseSeverity } from '../../../common/api';
 import { OWNER_INFO } from '../../../common/constants';
@@ -44,6 +44,11 @@ import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { severities } from '../severity/config';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { UserToolTip } from '../user_profiles/user_tooltip';
+import { useAssignees } from '../../containers/user_profiles/use_assignees';
+import { getUsernameDataTestSubj } from '../user_profiles/data_test_subject';
+import { CurrentUserProfile } from '../types';
+import { SmallUserAvatar } from '../user_profiles/small_user_avatar';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -57,8 +62,45 @@ const MediumShadeText = styled.p`
 const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
 
+const AssigneesColumn: React.FC<{
+  assignees: Case['assignees'];
+  userProfiles: Map<string, UserProfileWithAvatar>;
+  currentUserProfile: CurrentUserProfile;
+}> = ({ assignees, userProfiles, currentUserProfile }) => {
+  const { allAssignees } = useAssignees({
+    caseAssignees: assignees,
+    userProfiles,
+    currentUserProfile,
+  });
+
+  if (allAssignees.length <= 0) {
+    return getEmptyTagValue();
+  }
+
+  return (
+    <EuiFlexGroup gutterSize="none" data-test-subj="case-table-column-assignee" wrap>
+      {allAssignees.map((assignee) => {
+        const dataTestSubjName = getUsernameDataTestSubj(assignee);
+        return (
+          <EuiFlexItem
+            grow={false}
+            key={assignee.uid}
+            data-test-subj={`case-table-column-assignee-${dataTestSubjName}`}
+          >
+            <UserToolTip userInfo={assignee.profile}>
+              <SmallUserAvatar userInfo={assignee.profile} />
+            </UserToolTip>
+          </EuiFlexItem>
+        );
+      })}
+    </EuiFlexGroup>
+  );
+};
+AssigneesColumn.displayName = 'AssigneesColumn';
 export interface GetCasesColumn {
   filterStatus: string;
+  userProfiles: Map<string, UserProfileWithAvatar>;
+  currentUserProfile: CurrentUserProfile;
   handleIsLoading: (a: boolean) => void;
   refreshCases?: (a?: boolean) => void;
   isSelectorView: boolean;
@@ -69,6 +111,8 @@ export interface GetCasesColumn {
 }
 export const useCasesColumns = ({
   filterStatus,
+  userProfiles,
+  currentUserProfile,
   handleIsLoading,
   refreshCases,
   isSelectorView,
@@ -173,27 +217,15 @@ export const useCasesColumns = ({
       },
     },
     {
-      field: 'createdBy',
-      name: i18n.REPORTER,
-      render: (createdBy: Case['createdBy']) => {
-        if (createdBy != null) {
-          return (
-            <EuiToolTip
-              position="top"
-              content={createdBy.username ?? i18n.UNKNOWN}
-              data-test-subj="case-table-column-createdBy-tooltip"
-            >
-              <EuiAvatar
-                className="userAction__circle"
-                name={createdBy.fullName ? createdBy.fullName : createdBy.username ?? i18n.UNKNOWN}
-                size="s"
-                data-test-subj="case-table-column-createdBy"
-              />
-            </EuiToolTip>
-          );
-        }
-        return getEmptyTagValue();
-      },
+      field: 'assignees',
+      name: i18n.ASSIGNEES,
+      render: (assignees: Case['assignees']) => (
+        <AssigneesColumn
+          assignees={assignees}
+          userProfiles={userProfiles}
+          currentUserProfile={currentUserProfile}
+        />
+      ),
     },
     {
       field: 'tags',

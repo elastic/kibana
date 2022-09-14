@@ -12,11 +12,18 @@ export const HOSTS_DONUT_CHART =
 
 export const HOSTS_TABLE = '[data-test-subj="entity_analytics_hosts"] #hostRiskDashboardTable';
 
-export const TABLE_ROWS = '.euiTableRow';
+export const HOSTS_TABLE_ROWS = '[data-test-subj="entity_analytics_hosts"] .euiTableRow';
 
 export const USERS_DONUT_CHART =
   '[data-test-subj="entity_analytics_users"] [data-test-subj="donut-chart"]';
 
+export const USERS_TABLE_ROWS = '[data-test-subj="entity_analytics_users"] .euiTableRow';
+
 export const USERS_TABLE = '[data-test-subj="entity_analytics_users"] #userRiskDashboardTable';
 
 export const ENABLE_USER_RISK_SCORE_BUTTON = '[data-test-subj="enable_user_risk_score"]';
+
+export const ANOMALIES_TABLE =
+  '[data-test-subj="entity_analytics_anomalies"] #entityAnalyticsDashboardAnomaliesTable';
+
+export const ANOMALIES_TABLE_ROWS = '[data-test-subj="entity_analytics_anomalies"] .euiTableRow';

@@ -18,3 +18,6 @@ export * from './src/get_operators';
 export * from './src/hooks';
 export * from './src/operator';
 export * from './src/param_is_valid';
+export * from './src/param_contains_space';
+
+export { default as autoCompletei18n } from './src/translations';

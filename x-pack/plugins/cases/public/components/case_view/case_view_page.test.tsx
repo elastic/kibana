@@ -21,6 +21,7 @@ import { useGetCaseUserActions } from '../../containers/use_get_case_user_action
 import { useGetTags } from '../../containers/use_get_tags';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { useUpdateCase } from '../../containers/use_update_case';
+import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { CaseViewPage } from './case_view_page';
 import {
   caseData,
@@ -31,6 +32,7 @@ import {
   defaultUseGetCaseUserActions,
 } from './mocks';
 import { CaseViewPageProps, CASE_VIEW_PAGE_TABS } from './types';
+import { userProfiles } from '../../containers/user_profiles/api.mock';
 
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_update_case');
@@ -40,6 +42,7 @@ jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/use_get_case');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/use_post_push_to_service');
+jest.mock('../../containers/user_profiles/use_bulk_get_user_profiles');
 jest.mock('../user_actions/timestamp', () => ({
   UserActionTimestamp: () => <></>,
 }));
@@ -56,6 +59,7 @@ const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
 const useGetTagsMock = useGetTags as jest.Mock;
+const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
 
 const mockGetCase = (props: Partial<UseGetCase> = {}) => {
   const data = {
@@ -96,13 +100,26 @@ describe('CaseViewPage', () => {
     usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
     useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
     useGetTagsMock.mockReturnValue({ data: [], isLoading: false });
+    useBulkGetUserProfilesMock.mockReturnValue({ data: new Map(), isLoading: false });
 
     appMockRenderer = createAppMockRenderer();
   });
 
   it('should render CaseViewPage', async () => {
+    const damagedRaccoonUser = userProfiles[0].user;
+    const caseDataWithDamagedRaccoon = {
+      ...caseData,
+      createdBy: {
+        profileUid: userProfiles[0].uid,
+        username: damagedRaccoonUser.username,
+        fullName: damagedRaccoonUser.full_name,
+        email: damagedRaccoonUser.email,
+      },
+    };
+
+    const props = { ...caseProps, caseData: caseDataWithDamagedRaccoon };
     appMockRenderer = createAppMockRenderer({ features: { metrics: ['alerts.count'] } });
-    const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
+    const result = appMockRenderer.render(<CaseViewPage {...props} />);
 
     expect(result.getByTestId('header-page-title')).toHaveTextContent(data.title);
     expect(result.getByTestId('case-view-status-dropdown')).toHaveTextContent('Open');
@@ -115,9 +132,7 @@ describe('CaseViewPage', () => {
       within(result.getByTestId('case-view-tag-list')).getByTestId('tag-pepsi')
     ).toHaveTextContent(data.tags[1]);
 
-    expect(result.getAllByTestId('case-view-username')[0]).toHaveTextContent(
-      data.createdBy.username ?? ''
-    );
+    expect(result.getAllByText(data.createdBy.fullName!)[0]).toBeInTheDocument();
 
     expect(
       within(result.getByTestId('description-action')).getByTestId('user-action-markdown')

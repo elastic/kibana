@@ -56,5 +56,6 @@ export function getToastNotificationService() {
  */
 export function useToastNotificationService(): ToastNotificationService {
   const { toasts } = useNotifications();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   return useMemo(() => toastNotificationServiceProvider(toasts), []);
 }
