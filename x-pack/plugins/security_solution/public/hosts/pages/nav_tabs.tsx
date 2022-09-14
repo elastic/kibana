@@ -71,7 +71,11 @@ export const navTabsHosts = ({
     hiddenTabs.push(HostsTableType.risk);
   }
 
+<<<<<<< HEAD
   if (!isEnterprise) {
+=======
+  if (!isEnterprisePlus) {
+>>>>>>> 326489dc7b18a3ffe77d1ed158fa1bd1e4a6dce6
     hiddenTabs.push(HostsTableType.sessions);
   }
 
