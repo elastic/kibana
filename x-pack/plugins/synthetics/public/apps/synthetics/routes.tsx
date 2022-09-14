@@ -17,7 +17,6 @@ import { useInspectorContext } from '@kbn/observability-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
 import { MonitorAddPage } from './components/monitor_add_edit/monitor_add_page';
 import { MonitorEditPage } from './components/monitor_add_edit/monitor_edit_page';
-import { MonitorDetailsPageHeader } from './components/monitor_details/monitor_details_page_header';
 import { MonitorDetailsPageTitle } from './components/monitor_details/monitor_details_page_title';
 import { MonitorDetailsPage } from './components/monitor_details/monitor_details_page';
 import { GettingStartedPage } from './components/getting_started/getting_started_page';
@@ -86,7 +85,6 @@ const getRoutes = (
       component: () => <MonitorDetailsPage />,
       dataTestSubj: 'syntheticsMonitorDetailsPage',
       pageHeader: {
-        children: <MonitorDetailsPageHeader />,
         pageTitle: <MonitorDetailsPageTitle />,
         breadcrumbs: [
           {

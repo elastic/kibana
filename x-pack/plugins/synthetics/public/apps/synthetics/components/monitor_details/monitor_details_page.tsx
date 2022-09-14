@@ -12,6 +12,7 @@ import { useSelectedMonitor } from './hooks/use_selected_monitor';
 import { useSelectedLocation } from './hooks/use_selected_location';
 import { getMonitorAction, getMonitorRecentPingsAction } from '../../state/monitor_details';
 import { useMonitorListBreadcrumbs } from '../monitors_page/hooks/use_breadcrumbs';
+import { MonitorDetailsTabs } from './monitor_detials_tabs';
 export const MonitorDetailsPage = () => {
   const { monitor } = useSelectedMonitor();
 
@@ -30,5 +31,5 @@ export const MonitorDetailsPage = () => {
     }
   }, [dispatch, monitorId, selectedLocation]);
 
-  return <></>;
+  return <MonitorDetailsTabs />;
 };
