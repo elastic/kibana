@@ -21,7 +21,7 @@ import { pluginsServiceMock } from './plugins/plugins_service.mock';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { integrationsServiceMock } from '@kbn/core-integrations-browser-mocks';
-import { coreAppMock } from './core_app/core_app.mock';
+import { coreAppsMock } from '@kbn/core-apps-browser-mocks';
 
 export const analyticsServiceStartMock = analyticsServiceMock.createAnalyticsServiceStart();
 export const MockAnalyticsService = analyticsServiceMock.create();
@@ -126,10 +126,10 @@ jest.doMock('@kbn/core-integrations-browser-internal', () => ({
   IntegrationsService: IntegrationsServiceConstructor,
 }));
 
-export const MockCoreApp = coreAppMock.create();
+export const MockCoreApp = coreAppsMock.create();
 export const CoreAppConstructor = jest.fn().mockImplementation(() => MockCoreApp);
-jest.doMock('./core_app', () => ({
-  CoreApp: CoreAppConstructor,
+jest.doMock('@kbn/core-apps-browser-internal', () => ({
+  CoreAppsService: CoreAppConstructor,
 }));
 
 export const MockThemeService = themeServiceMock.create();

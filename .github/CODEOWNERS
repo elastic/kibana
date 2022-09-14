@@ -383,10 +383,10 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/plugins/security_solution/common/search_strategy/timeline @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/common/types/timeline @elastic/security-threat-hunting-investigations
 
-/x-pack/plugins/security_solution/cypress/integration/timeline_templates @elastic/security-threat-hunting-investigations
-/x-pack/plugins/security_solution/cypress/integration/timeline @elastic/security-threat-hunting-investigations
-/x-pack/plugins/security_solution/cypress/integration/detection_alerts @elastic/security-threat-hunting-investigations
-/x-pack/plugins/security_solution/cypress/integration/urls @elastic/security-threat-hunting-investigations
+/x-pack/plugins/security_solution/cypress/e2e/timeline_templates @elastic/security-threat-hunting-investigations
+/x-pack/plugins/security_solution/cypress/e2e/timeline @elastic/security-threat-hunting-investigations
+/x-pack/plugins/security_solution/cypress/e2e/detection_alerts @elastic/security-threat-hunting-investigations
+/x-pack/plugins/security_solution/cypress/e2e/urls @elastic/security-threat-hunting-investigations
 
 /x-pack/plugins/security_solution/public/common/components/alerts_viewer @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/detections/components/alerts_table/timeline_action @elastic/security-threat-hunting-investigations
@@ -407,18 +407,18 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/network @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/user @elastic/security-threat-hunting-explore
 
-/x-pack/plugins/security_solution/cypress/integration/cases @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/integration/host_details @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/integration/hosts @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/integration/network @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/integration/overview @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/integration/pagination @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/integration/users @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/cypress/e2e/cases @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/cypress/e2e/host_details @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/cypress/e2e/hosts @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/cypress/e2e/network @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/cypress/e2e/overview @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/cypress/e2e/pagination @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/cypress/e2e/users @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/screens/hosts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/screens/network @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/tasks/hosts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/tasks/network @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/upgrade_integration/threat_hunting/cases @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/cypress/upgrade_e2e/threat_hunting/cases @elastic/security-threat-hunting-explore
 
 /x-pack/plugins/security_solution/public/common/components/charts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/header_page @elastic/security-threat-hunting-explore
@@ -463,7 +463,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 
 
 ## Security Solution sub teams - Detections and Response Rules
-/x-pack/plugins/security_solution/cypress/integration/detection_rules @elastic/security-detections-response-rules
+/x-pack/plugins/security_solution/cypress/e2e/detection_rules @elastic/security-detections-response-rules
 
 /x-pack/plugins/security_solution/public/detections/components/rules @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/public/detections/components/severity @elastic/security-detections-response-rules
@@ -488,9 +488,9 @@ x-pack/examples/files_example @elastic/kibana-app-services
 ## Security Solution sub teams - Security Platform
 /x-pack/plugins/lists @elastic/security-solution-platform
 
-/x-pack/plugins/security_solution/cypress/integration/data_sources @elastic/security-solution-platform
-/x-pack/plugins/security_solution/cypress/integration/exceptions @elastic/security-solution-platform
-/x-pack/plugins/security_solution/cypress/integration/value_lists @elastic/security-solution-platform
+/x-pack/plugins/security_solution/cypress/e2e/data_sources @elastic/security-solution-platform
+/x-pack/plugins/security_solution/cypress/e2e/exceptions @elastic/security-solution-platform
+/x-pack/plugins/security_solution/cypress/e2e/value_lists @elastic/security-solution-platform
 
 /x-pack/plugins/security_solution/public/common/components/exceptions @elastic/security-solution-platform
 /x-pack/plugins/security_solution/public/exceptions @elastic/security-solution-platform
@@ -540,8 +540,8 @@ x-pack/plugins/security_solution/server/usage/ @elastic/security-data-analytics
 x-pack/plugins/security_solution/server/lib/telemetry/ @elastic/security-data-analytics
 
 ## Security Solution sub teams - security-engineering-productivity
-x-pack/plugins/security_solution/cypress/ccs_integration @elastic/security-engineering-productivity
-x-pack/plugins/security_solution/cypress/upgrade_integration @elastic/security-engineering-productivity
+x-pack/plugins/security_solution/cypress/ccs_e2e @elastic/security-engineering-productivity
+x-pack/plugins/security_solution/cypress/upgrade_e2e @elastic/security-engineering-productivity
 x-pack/plugins/security_solution/cypress/README.md @elastic/security-engineering-productivity
 x-pack/test/security_solution_cypress @elastic/security-engineering-productivity
 
@@ -571,7 +571,7 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 
 # Security Solution onboarding tour
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/platform-onboarding
-/x-pack/plugins/security_solution/cypress/integration/guided_onboarding @elastic/platform-onboarding
+/x-pack/plugins/security_solution/cypress/e2e/guided_onboarding @elastic/platform-onboarding
 
 # Design (at the bottom for specificity of SASS files)
 **/*.scss  @elastic/kibana-design
@@ -658,6 +658,8 @@ packages/core/application/core-application-browser @elastic/kibana-core
 packages/core/application/core-application-browser-internal @elastic/kibana-core
 packages/core/application/core-application-browser-mocks @elastic/kibana-core
 packages/core/application/core-application-common @elastic/kibana-core
+packages/core/apps/core-apps-browser-internal @elastic/kibana-core
+packages/core/apps/core-apps-browser-mocks @elastic/kibana-core
 packages/core/base/core-base-browser-internal @elastic/kibana-core
 packages/core/base/core-base-browser-mocks @elastic/kibana-core
 packages/core/base/core-base-common @elastic/kibana-core
@@ -783,6 +785,9 @@ packages/core/ui-settings/core-ui-settings-browser @elastic/kibana-core
 packages/core/ui-settings/core-ui-settings-browser-internal @elastic/kibana-core
 packages/core/ui-settings/core-ui-settings-browser-mocks @elastic/kibana-core
 packages/core/ui-settings/core-ui-settings-common @elastic/kibana-core
+packages/core/ui-settings/core-ui-settings-server @elastic/kibana-core
+packages/core/ui-settings/core-ui-settings-server-internal @elastic/kibana-core
+packages/core/ui-settings/core-ui-settings-server-mocks @elastic/kibana-core
 packages/core/usage-data/core-usage-data-base-server-internal @elastic/kibana-core
 packages/core/usage-data/core-usage-data-server @elastic/kibana-core
 packages/core/usage-data/core-usage-data-server-internal @elastic/kibana-core
