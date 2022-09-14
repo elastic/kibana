@@ -52,11 +52,17 @@ export class UnifiedSearchPageObject extends FtrService {
     await (await this.find.byClassName('indexPatternEditor__form')).click();
   }
 
-  public async createNewDataView(dataViewName: string, adHoc?: boolean) {
+  public async createNewDataView(dataViewName: string, adHoc = false, hasTimeField = false) {
     await this.clickCreateNewDataView();
     await this.testSubjects.setValue('createIndexPatternTitleInput', dataViewName, {
       clearWithKeyboard: true,
       typeCharByChar: true,
+    });
+    await this.retry.waitFor('timestamp field loaded', async () => {
+      const timestampField = await this.testSubjects.find('timestampField');
+      return hasTimeField
+        ? !(await timestampField.elementHasClass('euiComboBox-isDisabled'))
+        : true;
     });
     await this.testSubjects.click(adHoc ? 'exploreIndexPatternButton' : 'saveIndexPatternButton');
   }
