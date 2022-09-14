@@ -15,7 +15,10 @@ import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch, Route, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { TableListViewKibanaProvider } from '@kbn/content-management-table-list';
+import {
+  TableListViewKibanaDependencies,
+  TableListViewKibanaProvider,
+} from '@kbn/content-management-table-list';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { AppMountParameters, CoreSetup } from '@kbn/core/public';
@@ -171,11 +174,16 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
               <TableListViewKibanaProvider
                 {...{
                   core: {
-                    application,
+                    application:
+                      application as unknown as TableListViewKibanaDependencies['core']['application'],
                     notifications,
                   },
                   toMountPoint,
-                  savedObjectsTagging,
+                  savedObjectsTagging: savedObjectsTagging.hasApi // TODO: clean up this logic once https://github.com/elastic/kibana/issues/140433 is resolved
+                    ? ({
+                        ui: savedObjectsTagging,
+                      } as unknown as TableListViewKibanaDependencies['savedObjectsTagging'])
+                    : undefined,
                   FormattedRelative,
                 }}
               >
