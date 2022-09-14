@@ -1,0 +1,68 @@
+{
+  "attributes": {
+    "description": "Space 2",
+    "title": "This is the second test space"
+  },
+  "coreMigrationVersion": "7.17.7",
+  "id": "my_dashboard",
+  "migrationVersion": {
+    "dashboard": "7.17.3"
+  },
+  "references": [],
+  "type": "dashboard",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzcxLDFd"
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object in one space"
+  },
+  "id": "conflict_2_space_2",
+  "originId": "conflict_2",
+  "references": [],
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzY2LDFd"
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object in one space"
+  },
+  "id": "conflict_1_space_2",
+  "originId": "conflict_1",
+  "references": [],
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzYzLDFd"
+}
+
+{
+  "attributes": {
+    "title": "This is used to test an inexact match conflict for an originId -> originId match"
+  },
+  "id": "conflict_1a_space_2",
+  "originId": "conflict_1a",
+  "references": [],
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzUwMiwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object in one space"
+  },
+  "id": "space_2_only",
+  "references": [
+    {
+      "id": "each_space",
+      "name": "refname",
+      "type": "sharedtype"
+    }
+  ],
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzQ5MSwxXQ=="
+}

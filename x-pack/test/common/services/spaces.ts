@@ -9,6 +9,7 @@ import Axios from 'axios';
 import { format as formatUrl } from 'url';
 import util from 'util';
 import { FtrProviderContext } from '../ftr_provider_context';
+import type { Space } from '../../../plugins/spaces/common';
 
 export function SpacesServiceProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
@@ -45,6 +46,20 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
         );
       }
       log.debug(`deleted space: ${spaceId}`);
+    }
+
+    public async getAll() {
+      log.debug('retrieving all spaces');
+      const { data, status, statusText } = await axios.get<Space[]>('/api/spaces/space');
+
+      if (status !== 200) {
+        throw new Error(
+          `Expected status code of 200, received ${status} ${statusText}: ${util.inspect(data)}`
+        );
+      }
+      log.debug(`retrieved ${data.length} spaces`);
+
+      return data;
     }
   })();
 }
