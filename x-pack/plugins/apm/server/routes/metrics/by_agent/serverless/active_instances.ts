@@ -106,7 +106,7 @@ export async function getActiveInstances({
         data:
           aggregations?.timeseriesData.buckets.map((timeseriesBucket) => ({
             x: timeseriesBucket.key,
-            y: timeseriesBucket.doc_count,
+            y: timeseriesBucket.activeInstances.value,
           })) || [],
       },
     ],
