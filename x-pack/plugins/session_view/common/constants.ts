@@ -28,7 +28,7 @@ export const HOST_BOOT_ID_PROPERTY = 'host.boot.id';
 export const TIMESTAMP_PROPERTY = '@timestamp';
 
 // page sizes
-export const PROCESS_EVENTS_PER_PAGE = 400;
+export const PROCESS_EVENTS_PER_PAGE = 500;
 export const ALERTS_PER_PROCESS_EVENTS_PAGE = 1500;
 export const ALERTS_PER_PAGE = 100;
 export const IO_EVENTS_PER_PAGE = 10;
@@ -50,8 +50,8 @@ export const MOUSE_EVENT_PLACEHOLDER = { stopPropagation: () => undefined } as R
 export const DEBOUNCE_TIMEOUT = 500;
 export const DEFAULT_TTY_PLAYSPEED_MS = 50; // milli seconds per line of tty output.
 export const DEFAULT_TTY_FONT_SIZE = 11;
-export const DEFAULT_TTY_ROWS = 50;
-export const DEFAULT_TTY_COLS = 200;
+export const DEFAULT_TTY_ROWS = 66;
+export const DEFAULT_TTY_COLS = 280;
 
 // we split terminal output on both newlines and cursor movements.
 export const TTY_LINE_SPLITTER_REGEX = /(\r?\n|\x1b\[\d+;\d+[Hf])/gi;

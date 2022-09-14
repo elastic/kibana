@@ -49,6 +49,7 @@ export interface ProcessDeps {
   scrollerRef: RefObject<HTMLDivElement>;
   onChangeJumpToEventVisibility: (isVisible: boolean, isAbove: boolean) => void;
   onShowAlertDetails: (alertUuid: string) => void;
+  onJumpToOutput: (entityId: string) => void;
   loadNextButton?: ReactElement | null;
   loadPreviousButton?: ReactElement | null;
 }
@@ -70,12 +71,12 @@ export function ProcessTreeNode({
   scrollerRef,
   onChangeJumpToEventVisibility,
   onShowAlertDetails,
+  onJumpToOutput,
   loadPreviousButton,
   loadNextButton,
 }: ProcessDeps) {
   const [childrenExpanded, setChildrenExpanded] = useState(isSessionLeader || process.autoExpand);
   const [alertsExpanded, setAlertsExpanded] = useState(false);
-  const [outputExpanded, setOutputExpanded] = useState(false);
   const { searchMatched } = process;
 
   const dateFormat = useDateFormat();
@@ -142,10 +143,6 @@ export function ProcessTreeNode({
     setAlertsExpanded(!alertsExpanded);
   }, [alertsExpanded]);
 
-  const onOutputToggle = useCallback(() => {
-    setOutputExpanded(!outputExpanded);
-  }, [outputExpanded]);
-
   const onProcessClicked = useCallback(
     (e: MouseEvent) => {
       e.stopPropagation();
@@ -164,6 +161,14 @@ export function ProcessTreeNode({
 
   const processDetails = process.getDetails();
   const hasExec = process.hasExec();
+
+  const onOutputClicked = useCallback(() => {
+    const entityId = processDetails.process?.entity_id;
+
+    if (entityId) {
+      onJumpToOutput(entityId);
+    }
+  }, [onJumpToOutput, processDetails.process?.entity_id]);
 
   const processIcon = useMemo(() => {
     if (!process.parent) {
@@ -299,7 +304,7 @@ export function ProcessTreeNode({
               alertsCount={alerts.length}
             />
           )}
-          {hasOutputs && <OutputButton onToggle={onOutputToggle} isExpanded={outputExpanded} />}
+          {hasOutputs && <OutputButton onClick={onOutputClicked} />}
         </div>
       </div>
 
@@ -323,6 +328,7 @@ export function ProcessTreeNode({
                 process={child}
                 depth={childrenTreeDepth}
                 onProcessSelected={onProcessSelected}
+                onJumpToOutput={onJumpToOutput}
                 jumpToEntityId={jumpToEntityId}
                 investigatedAlertId={investigatedAlertId}
                 selectedProcess={selectedProcess}

@@ -75,6 +75,7 @@ export const SessionView = ({
   const [updatedAlertsStatus, setUpdatedAlertsStatus] = useState<AlertStatusEventEntityIdMap>({});
   const [currentJumpToCursor, setCurrentJumpToCursor] = useState(jumpToCursor);
   const [currentJumpToEntityId, setCurrentJumpToEntityId] = useState(jumpToEntityId);
+  const [currentJumpToOutputEntityId, setCurrentJumpToOutputEntityId] = useState('');
 
   const styles = useStyles({ height, isFullScreen });
 
@@ -111,6 +112,11 @@ export const SessionView = ({
     },
     [sessionEntityId]
   );
+
+  const onJumpToOutput = useCallback((entityId: string) => {
+    setCurrentJumpToOutputEntityId(entityId);
+    setShowTTY(true);
+  }, []);
 
   const {
     data,
@@ -353,6 +359,7 @@ export const SessionView = ({
                       searchQuery={searchQuery}
                       selectedProcess={selectedProcess}
                       onProcessSelected={onProcessSelected}
+                      onJumpToOutput={onJumpToOutput}
                       jumpToEntityId={currentJumpToEntityId}
                       investigatedAlertId={investigatedAlertId}
                       isFetching={isFetching}
@@ -400,6 +407,7 @@ export const SessionView = ({
         onClose={onToggleTTY}
         isFullscreen={isFullScreen}
         onJumpToEvent={onJumpToEvent}
+        autoSeekToEntityId={currentJumpToOutputEntityId}
       />
     </div>
   );

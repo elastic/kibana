@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { Teletype } from '../../../common/types/process_tree';
 import { DEFAULT_TTY_FONT_SIZE } from '../../../common/constants';
@@ -55,9 +55,20 @@ export const TTYTextSizer = ({
     }
   }, [isFullscreen, containerHeight, fit, fontSize, onFontSizeChanged, tty?.rows]);
 
+  useEffect(() => {
+    if (isFullscreen) {
+      setFit(true);
+    }
+  }, [isFullscreen]);
+
   const onToggleFit = useCallback(() => {
-    setFit(!fit);
-  }, [fit, setFit]);
+    const newValue = !fit;
+    setFit(newValue);
+
+    if (!newValue) {
+      onFontSizeChanged(DEFAULT_TTY_FONT_SIZE);
+    }
+  }, [fit, setFit, onFontSizeChanged]);
 
   return (
     <EuiFlexGroup

@@ -31,8 +31,8 @@ import {
   TTY_LINE_SPLITTER_REGEX,
 } from '../../../common/constants';
 
-const LINES_PER_FRAME = 2;
-const LINES_PRE_SEEK = 1000;
+const LINES_PER_FRAME = 10;
+const LINES_PRE_SEEK = 200;
 
 export const useFetchIOEvents = (sessionEntityId: string) => {
   const { http } = useKibana<CoreStart>().services;
@@ -135,6 +135,7 @@ export interface XtermPlayerDeps {
   fontSize: number;
   hasNextPage?: boolean;
   fetchNextPage?: () => void;
+  isFetching?: boolean;
 }
 
 export const useXtermPlayer = ({
@@ -145,6 +146,7 @@ export const useXtermPlayer = ({
   fontSize,
   hasNextPage,
   fetchNextPage,
+  isFetching,
 }: XtermPlayerDeps) => {
   const { euiTheme } = useEuiTheme();
   const { font, colors } = euiTheme;
@@ -219,7 +221,7 @@ export const useXtermPlayer = ({
       render(currentLine, true);
     }
 
-    if (hasNextPage && fetchNextPage && currentLine >= lines.length - 100) {
+    if (!isFetching && hasNextPage && fetchNextPage && currentLine >= lines.length - 100) {
       fetchNextPage();
     }
   }, [currentLine, fontSize, terminal, render, tty, hasNextPage, fetchNextPage, lines.length]);

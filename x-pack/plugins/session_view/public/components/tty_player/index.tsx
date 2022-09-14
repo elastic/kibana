@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useRef, useState, useCallback, useMemo } from 'react';
+import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiButton } from '@elastic/eui';
 import { throttle } from 'lodash';
 import { ProcessEvent } from '../../../common/types/process_tree';
@@ -26,6 +26,7 @@ export interface TTYPlayerDeps {
   onClose(): void;
   isFullscreen: boolean;
   onJumpToEvent(event: ProcessEvent): void;
+  autoSeekToEntityId?: string;
 }
 
 export const TTYPlayer = ({
@@ -34,15 +35,16 @@ export const TTYPlayer = ({
   onClose,
   isFullscreen,
   onJumpToEvent,
+  autoSeekToEntityId,
 }: TTYPlayerDeps) => {
   const ref = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const { data, fetchNextPage, hasNextPage, isFetching } = useFetchIOEvents(sessionEntityId);
   const { lines, processStartMarkers } = useIOLines(data?.pages);
-
   const [fontSize, setFontSize] = useState(DEFAULT_TTY_FONT_SIZE);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [currentAutoSeekEntityId, setCurrentAutoSeekEntityId] = useState('');
 
   const { search, currentLine, seekToLine } = useXtermPlayer({
     ref,
@@ -52,10 +54,40 @@ export const TTYPlayer = ({
     fontSize,
     hasNextPage,
     fetchNextPage,
+    isFetching,
   });
 
   const tty = lines?.[currentLine]?.event?.process?.tty;
   const currentProcessEvent = lines[currentLine]?.event;
+
+  useEffect(() => {
+    if (
+      autoSeekToEntityId &&
+      currentAutoSeekEntityId !== autoSeekToEntityId &&
+      currentProcessEvent?.process?.entity_id !== autoSeekToEntityId
+    ) {
+      const foundMarker = processStartMarkers.find((marker) => {
+        if (marker.event.process?.entity_id === autoSeekToEntityId) {
+          return true;
+        }
+        return false;
+      });
+
+      if (foundMarker) {
+        seekToLine(foundMarker.line);
+        setCurrentAutoSeekEntityId(autoSeekToEntityId);
+      } else {
+        seekToLine(lines.length - 1); // seek to end to force next page to load.
+      }
+    }
+  }, [
+    autoSeekToEntityId,
+    currentAutoSeekEntityId,
+    currentProcessEvent?.process?.entity_id,
+    lines.length,
+    processStartMarkers,
+    seekToLine,
+  ]);
 
   if (tty && !tty.rows) {
     tty.rows = DEFAULT_TTY_ROWS;
