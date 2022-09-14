@@ -36,14 +36,10 @@ export function ProfilingAppPageTemplate({
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        paddingSize: 's',
         pageTitle: i18n.translate('xpack.profiling.appPageTemplate.pageTitle', {
           defaultMessage: 'Profiling',
         }),
         tabs,
-      }}
-      pageBodyProps={{
-        paddingSize: 'none',
       }}
     >
       <EuiFlexGroup direction="column">

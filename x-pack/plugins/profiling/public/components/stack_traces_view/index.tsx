@@ -77,8 +77,8 @@ export function StackTracesView() {
 
   return (
     <ProfilingAppPageTemplate tabs={tabs}>
-      <EuiFlexGroup direction="column" alignItems="center">
-        <EuiFlexItem style={{ width: '100%' }}>
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem grow>
           <EuiPanel>
             <EuiFlexGroup direction="column" gutterSize="m">
               <EuiFlexItem>
@@ -150,7 +150,7 @@ export function StackTracesView() {
             </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem style={{ width: '100%' }}>
+        <EuiFlexItem grow>
           <AsyncComponent size="m" mono {...state} style={{ minHeight: 200 }}>
             <ChartGrid
               charts={data?.charts ?? []}
