@@ -10,12 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import {
-  SavedObject,
-  SavedObjectsClientContract,
-  SavedObjectsFindResponse,
-  SavedObjectsFindResult,
-} from '@kbn/core/server';
+import { SavedObject, SavedObjectsFindResponse, SavedObjectsFindResult } from '@kbn/core/server';
 
 import { nodeBuilder } from '@kbn/es-query';
 
@@ -31,6 +26,7 @@ import {
   excess,
   throwErrors,
   CaseAttributes,
+  User,
 } from '../../../common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
@@ -50,7 +46,7 @@ import {
 import { UpdateAlertRequest } from '../alerts/types';
 import { CasesClientArgs } from '..';
 import { Operations, OwnerEntity } from '../../authorization';
-import { getClosedInfoForUpdate, getDurationForUpdate } from './utils';
+import { dedupAssignees, getClosedInfoForUpdate, getDurationForUpdate } from './utils';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -139,13 +135,11 @@ async function updateAlerts({
   casesWithSyncSettingChangedToOn,
   casesWithStatusChangedAndSynced,
   caseService,
-  unsecuredSavedObjectsClient,
   alertsService,
 }: {
   casesWithSyncSettingChangedToOn: UpdateRequestWithOriginalCase[];
   casesWithStatusChangedAndSynced: UpdateRequestWithOriginalCase[];
   caseService: CasesService;
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
   alertsService: AlertService;
 }) {
   /**
@@ -310,35 +304,7 @@ export const update = async (
     throwIfUpdateOwner(updateCases);
     throwIfTitleIsInvalid(updateCases);
 
-    const updatedDt = new Date().toISOString();
-    const updatedCases = await caseService.patchCases({
-      cases: updateCases.map(({ updateReq, originalCase }) => {
-        // intentionally removing owner from the case so that we don't accidentally allow it to be updated
-        const { id: caseId, version, owner, ...updateCaseAttributes } = updateReq;
-
-        return {
-          caseId,
-          originalCase,
-          updatedAttributes: {
-            ...updateCaseAttributes,
-            ...getClosedInfoForUpdate({
-              user,
-              closedDate: updatedDt,
-              status: updateCaseAttributes.status,
-            }),
-            ...getDurationForUpdate({
-              status: updateCaseAttributes.status,
-              closedAt: updatedDt,
-              createdAt: originalCase.attributes.created_at,
-            }),
-            updated_at: updatedDt,
-            updated_by: user,
-          },
-          version,
-        };
-      }),
-      refresh: false,
-    });
+    const updatedCases = await patchCases({ caseService, user, casesToUpdate: updateCases });
 
     // If a status update occurred and the case is synced then we need to update all alerts' status
     // attached to the case to the new status.
@@ -367,7 +333,6 @@ export const update = async (
       casesWithStatusChangedAndSynced,
       casesWithSyncSettingChangedToOn,
       caseService,
-      unsecuredSavedObjectsClient,
       alertsService,
     });
 
@@ -408,4 +373,50 @@ export const update = async (
       logger,
     });
   }
+};
+
+const patchCases = async ({
+  caseService,
+  casesToUpdate,
+  user,
+}: {
+  caseService: CasesService;
+  casesToUpdate: UpdateRequestWithOriginalCase[];
+  user: User;
+}) => {
+  const updatedDt = new Date().toISOString();
+
+  const updatedCases = await caseService.patchCases({
+    cases: casesToUpdate.map(({ updateReq, originalCase }) => {
+      // intentionally removing owner from the case so that we don't accidentally allow it to be updated
+      const { id: caseId, version, owner, assignees, ...updateCaseAttributes } = updateReq;
+
+      const dedupedAssignees = dedupAssignees(assignees);
+
+      return {
+        caseId,
+        originalCase,
+        updatedAttributes: {
+          ...updateCaseAttributes,
+          ...(dedupedAssignees && { assignees: dedupedAssignees }),
+          ...getClosedInfoForUpdate({
+            user,
+            closedDate: updatedDt,
+            status: updateCaseAttributes.status,
+          }),
+          ...getDurationForUpdate({
+            status: updateCaseAttributes.status,
+            closedAt: updatedDt,
+            createdAt: originalCase.attributes.created_at,
+          }),
+          updated_at: updatedDt,
+          updated_by: user,
+        },
+        version,
+      };
+    }),
+    refresh: false,
+  });
+
+  return updatedCases;
 };
