@@ -6,3 +6,4 @@
  */
 
 export * from './use_is_edit_flow';
+export { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
