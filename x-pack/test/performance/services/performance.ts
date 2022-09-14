@@ -11,7 +11,7 @@ import { inspect } from 'util';
 import { setTimeout } from 'timers/promises';
 import apmNode from 'elastic-apm-node';
 import playwright, { ChromiumBrowser, Page, BrowserContext, CDPSession, Request } from 'playwright';
-import { FtrService, FtrProviderContext } from '../ftr_provider_context';
+import { FtrService } from '../ftr_provider_context';
 
 export interface StepCtx {
   page: Page;
@@ -42,14 +42,6 @@ export class PerformanceTestingService extends FtrService {
 
   private apm: apmNode.Agent | null = null;
   private authRequired: boolean = false;
-
-  constructor(ctx: FtrProviderContext) {
-    super(ctx);
-
-    ctx.getService('lifecycle').beforeTestSuite.add(this.beforeAll.bind(this));
-    ctx.getService('lifecycle').afterTestSuite.add(this.afterAll.bind(this));
-    ctx.getService('lifecycle').testFailure.add(this.onStepError.bind(this));
-  }
 
   private async beforeAll() {
     const kbnTestServerEnv = this.config.get(`kbnTestServer.env`);
@@ -109,7 +101,7 @@ export class PerformanceTestingService extends FtrService {
     }
   }
 
-  private async onStepError(err: Error) {
+  private onStepError(err: Error) {
     this.currentTransaction?.end(`Failure ${err.message}`);
     this.currentTransaction = undefined;
   }
@@ -228,7 +220,28 @@ export class PerformanceTestingService extends FtrService {
   public runUserJourney(steps: Steps, { requireAuth }: UserJourneyExtra) {
     const journeyName = 'xd'; // this.config.get('journeyName');
     this.authRequired = requireAuth;
-    describe(journeyName, () => this.handleSteps(steps));
+
+    describe(journeyName, () => {
+      before(async () => {
+        await this.beforeAll();
+      });
+      after(async () => {
+        await this.afterAll();
+      });
+
+      for (const step of steps) {
+        it(step.name, async () => {
+          try {
+            await step.handler({ page: this.page!, kibanaUrl: this.getKibanaUrl() });
+          } catch (e) {
+            const error = new Error(`Step [${step.name}] failed: ${e.message}`);
+            error.stack = e.stack;
+            this.onStepError(error);
+            throw error; // Rethrow error if step fails otherwise it is silently passing
+          }
+        });
+      }
+    });
   }
 
   private async tearDown() {
@@ -250,20 +263,6 @@ export class PerformanceTestingService extends FtrService {
   private async shutdownBrowser() {
     if (this.browser) {
       await (await this.getBrowserInstance()).close();
-    }
-  }
-
-  private handleSteps(steps: Array<{ name: string; handler: StepFn }>) {
-    for (const step of steps) {
-      it(step.name, async () => {
-        try {
-          await step.handler({ page: this.page!, kibanaUrl: this.getKibanaUrl() });
-        } catch (e) {
-          const error = new Error(`Step [${step.name}] failed: ${e.message}`);
-          error.stack = e.stack;
-          throw error; // Rethrow error if step fails otherwise it is silently passing
-        }
-      });
     }
   }
 
