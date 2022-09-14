@@ -18,10 +18,7 @@ import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { GetStateReturn } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
 
-export type DiscoverTopNavProps = Pick<
-  DiscoverLayoutProps,
-  'dataView' | 'navigateTo' | 'savedSearch' | 'searchSource'
-> & {
+export type DiscoverTopNavProps = Pick<DiscoverLayoutProps, 'dataView' | 'navigateTo'> & {
   onOpenInspector: () => void;
   query?: Query | AggregateQuery;
   savedQuery?: string;
@@ -44,9 +41,7 @@ export const DiscoverTopNav = ({
   savedQuery,
   stateContainer,
   updateQuery,
-  searchSource,
   navigateTo,
-  savedSearch,
   resetSavedSearch,
   onChangeDataView,
   isPlainRecord,
@@ -54,6 +49,7 @@ export const DiscoverTopNav = ({
   onFieldEdited,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
+  const savedSearch = stateContainer.savedSearch;
 
   const showDatePicker = useMemo(
     () => dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP,
@@ -143,7 +139,6 @@ export const DiscoverTopNav = ({
         services,
         state: stateContainer,
         onOpenInspector,
-        searchSource,
         onOpenSavedSearch,
         isPlainRecord,
       }),
@@ -154,7 +149,6 @@ export const DiscoverTopNav = ({
       services,
       stateContainer,
       onOpenInspector,
-      searchSource,
       onOpenSavedSearch,
       isPlainRecord,
     ]

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useMemo, useEffect, useState, useCallback } from 'react';
+import { useMemo, useEffect, useCallback, useState } from 'react';
 import { isEqual } from 'lodash';
 import { History } from 'history';
 import { DataViewListItem, DataViewType } from '@kbn/data-views-plugin/public';
@@ -46,12 +46,12 @@ export function useDiscoverState({
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const { timefilter } = data.query.timefilter;
 
-  const dataView = savedSearch.searchSource.getField('index')!;
+  const [dataView, setDataView] = useState(savedSearch.searchSource.getField('index')!);
 
   const searchSource = useMemo(() => {
-    savedSearch.searchSource.setField('index', dataView);
-    return savedSearch.searchSource.createChild();
-  }, [savedSearch, dataView]);
+    savedSearch.searchSource = savedSearch.searchSource.createChild();
+    return savedSearch.searchSource;
+  }, [savedSearch]);
 
   const stateContainer = useMemo(
     () =>
@@ -62,10 +62,6 @@ export function useDiscoverState({
       }),
     [history, savedSearch, services]
   );
-
-  const { appStateContainer } = stateContainer;
-
-  const [state, setState] = useState(appStateContainer.getState());
 
   /**
    * Search session logic
@@ -116,18 +112,16 @@ export function useDiscoverState({
    * or dataView / savedSearch switch
    */
   useEffect(() => {
-    const stopSync = stateContainer.initializeAndSync(dataView, filterManager, data);
-    setState(stateContainer.appStateContainer.getState());
-
+    const stopSync = stateContainer.initializeAndSync();
     return () => stopSync();
-  }, [stateContainer, filterManager, data, dataView]);
+  }, [stateContainer, filterManager, data]);
 
   /**
    * Track state changes that should trigger a fetch
    */
   useEffect(() => {
-    const unsubscribe = appStateContainer.subscribe(async (nextState) => {
-      const { hideChart, interval, sort, index } = state;
+    const unsubscribe = stateContainer.appStateContainer.subscribe(async (nextState) => {
+      const { hideChart, interval, sort, index } = stateContainer.getPreviousAppState();
       // chart was hidden, now it should be displayed, so data is needed
       const chartDisplayChanged = nextState.hideChart !== hideChart && hideChart;
       const chartIntervalChanged = nextState.interval !== interval;
@@ -147,17 +141,16 @@ export function useDiscoverState({
           services.uiSettings
         );
         savedSearch.searchSource.setField('index', nextDataView.loaded);
-
         reset();
+        setDataView(nextDataView.loaded);
       }
 
       if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged) {
         refetch$.next(undefined);
       }
-      setState(nextState);
     });
     return () => unsubscribe();
-  }, [services, appStateContainer, state, refetch$, data$, reset, savedSearch.searchSource]);
+  }, [services, refetch$, data$, reset, savedSearch.searchSource, stateContainer]);
 
   /**
    * function to revert any changes to a given saved search
@@ -184,9 +177,8 @@ export function useDiscoverState({
       });
 
       await stateContainer.replaceUrlAppState(newAppState);
-      setState(newAppState);
     },
-    [services, dataView, stateContainer]
+    [services, stateContainer, dataView]
   );
 
   /**
@@ -194,31 +186,24 @@ export function useDiscoverState({
    */
   const onChangeDataView = useCallback(
     async (id: string) => {
+      const prevAppState = stateContainer.appStateContainer.getState();
+      const prevDataView = await dataViews.get(prevAppState.index!);
       const nextDataView = await dataViews.get(id);
-      if (nextDataView && dataView) {
+      if (nextDataView && prevDataView) {
         const nextAppState = getDataViewAppState(
-          dataView,
+          prevDataView,
           nextDataView,
-          state.columns || [],
-          (state.sort || []) as SortOrder[],
+          prevAppState.columns || [],
+          (prevAppState.sort || []) as SortOrder[],
           uiSettings.get(MODIFY_COLUMNS_ON_SWITCH),
           uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
-          state.query
+          prevAppState.query
         );
         stateContainer.setAppState(nextAppState);
       }
       setExpandedDoc(undefined);
     },
-    [
-      uiSettings,
-      dataView,
-      dataViews,
-      setExpandedDoc,
-      state.columns,
-      state.query,
-      state.sort,
-      stateContainer,
-    ]
+    [uiSettings, dataViews, setExpandedDoc, stateContainer]
   );
   /**
    * Function triggered when the user changes the query in the search bar
@@ -261,8 +246,6 @@ export function useDiscoverState({
     onChangeDataView,
     onUpdateQuery,
     searchSource,
-    setState,
-    state,
     stateContainer,
   };
 }

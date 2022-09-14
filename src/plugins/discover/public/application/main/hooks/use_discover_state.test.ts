@@ -27,7 +27,6 @@ describe('test useDiscoverState', () => {
         dataViewList: [dataViewMock as DataViewListItem],
       });
     });
-    expect(result.current.state.index).toBe(dataViewMock.id);
     expect(result.current.stateContainer).toBeInstanceOf(Object);
     expect(result.current.searchSource).toBeInstanceOf(SearchSource);
   });

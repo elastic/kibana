@@ -8,11 +8,10 @@
 
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { DataViewListItem, ISearchSource } from '@kbn/data-plugin/public';
+import { DataViewListItem } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DataTableRecord } from '../../../../types';
-import { AppState, GetStateReturn } from '../../services/discover_state';
+import { GetStateReturn } from '../../services/discover_state';
 import { DataRefetch$, SavedSearchData } from '../../hooks/use_saved_search';
 
 export interface DiscoverLayoutProps {
@@ -28,10 +27,7 @@ export interface DiscoverLayoutProps {
   resetSavedSearch: () => void;
   expandedDoc?: DataTableRecord;
   setExpandedDoc: (doc?: DataTableRecord) => void;
-  savedSearch: SavedSearch;
   savedSearchData$: SavedSearchData;
   savedSearchRefetch$: DataRefetch$;
-  searchSource: ISearchSource;
-  state: AppState;
   stateContainer: GetStateReturn;
 }

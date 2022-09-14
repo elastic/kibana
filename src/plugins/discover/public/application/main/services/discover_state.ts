@@ -29,12 +29,10 @@ import {
 import {
   connectToQueryState,
   DataPublicPluginStart,
-  FilterManager,
   QueryState,
   SearchSessionInfoProvider,
   syncQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
@@ -134,11 +132,7 @@ export interface GetStateReturn {
   /**
    * Initialize state with filters and query,  start state syncing
    */
-  initializeAndSync: (
-    dataView: DataView,
-    filterManager: FilterManager,
-    data: DataPublicPluginStart
-  ) => () => void;
+  initializeAndSync: () => () => void;
   /**
    * Start sync between state and URL -- only used for testing
    */
@@ -175,6 +169,9 @@ export interface GetStateReturn {
    * Pause the auto refresh interval without pushing an entry to history
    */
   pauseAutoRefreshInterval: () => Promise<void>;
+
+  getSavedSearch: () => SavedSearch;
+  savedSearch: SavedSearch;
 }
 
 const APP_STATE_URL_KEY = '_a';
@@ -208,7 +205,7 @@ export function getState({ history, savedSearch, services }: GetStateParams): Ge
   );
 
   // todo filter source depending on fields fetching flag (if no columns remain and source fetching is enabled, use default columns)
-  let previousAppState: AppState;
+  let previousAppState: AppState = {};
   const appStateContainer = createStateContainer<AppState>(initialAppState);
 
   const appStateContainerModified = {
@@ -259,6 +256,10 @@ export function getState({ history, savedSearch, services }: GetStateParams): Ge
       return stop;
     },
     setAppState: (newPartial: AppState) => setState(appStateContainerModified, newPartial),
+    getSavedSearch: () => {
+      return savedSearch;
+    },
+    savedSearch,
     replaceUrlAppState,
     resetInitialAppState: () => {
       initialAppState = appStateContainer.getState();
@@ -274,14 +275,12 @@ export function getState({ history, savedSearch, services }: GetStateParams): Ge
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
     pauseAutoRefreshInterval,
-    initializeAndSync: (
-      dataView: DataView,
-      filterManager: FilterManager,
-      data: DataPublicPluginStart
-    ) => {
-      if (appStateContainer.getState().index !== dataView.id) {
+    initializeAndSync: () => {
+      const dataView = savedSearch.searchSource.getField('index');
+      const { filterManager, data } = services;
+      if (appStateContainer.getState().index !== dataView?.id) {
         // used data view is different than the given by url/state which is invalid
-        setState(appStateContainerModified, { index: dataView.id });
+        setState(appStateContainerModified, { index: dataView?.id });
       }
       // sync initial app filters from state to filterManager
       const filters = appStateContainer.getState().filters;
@@ -311,7 +310,7 @@ export function getState({ history, savedSearch, services }: GetStateParams): Ge
       // some filters may not be valid for this context, so update
       // the filter manager with a modified list of valid filters
       const currentFilters = filterManager.getFilters();
-      const validFilters = getValidFilters(dataView, currentFilters);
+      const validFilters = getValidFilters(dataView!, currentFilters);
       if (!isEqual(currentFilters, validFilters)) {
         filterManager.setFilters(validFilters);
       }

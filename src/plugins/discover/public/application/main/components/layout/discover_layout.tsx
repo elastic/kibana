@@ -25,6 +25,7 @@ import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import { InspectorSession } from '@kbn/inspector-plugin/public';
+import { useStateContainer } from '../../hooks/use_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
@@ -71,9 +72,6 @@ export function DiscoverLayout({
   savedSearchRefetch$,
   resetSavedSearch,
   savedSearchData$,
-  savedSearch,
-  searchSource,
-  state,
   stateContainer,
 }: DiscoverLayoutProps) {
   const {
@@ -89,6 +87,7 @@ export function DiscoverLayout({
     inspector,
   } = useDiscoverServices();
   const { main$, charts$, totalHits$ } = savedSearchData$;
+  const state = useStateContainer(stateContainer);
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
   const dataState: DataMainMsg = useDataState(main$);
 
@@ -145,10 +144,10 @@ export function DiscoverLayout({
     // prevent overlapping
     setExpandedDoc(undefined);
     const session = inspector.open(inspectorAdapters, {
-      title: savedSearch.title,
+      title: stateContainer.savedSearch.title,
     });
     setInspectorSession(session);
-  }, [setExpandedDoc, inspectorAdapters, savedSearch, inspector]);
+  }, [setExpandedDoc, inspector, inspectorAdapters, stateContainer.savedSearch.title]);
 
   useEffect(() => {
     return () => {
@@ -228,11 +227,11 @@ export function DiscoverLayout({
         tabIndex={-1}
         ref={savedSearchTitle}
       >
-        {savedSearch.title
+        {stateContainer.savedSearch.title
           ? i18n.translate('discover.pageTitleWithSavedSearch', {
               defaultMessage: 'Discover - {savedSearchTitle}',
               values: {
-                savedSearchTitle: savedSearch.title,
+                savedSearchTitle: stateContainer.savedSearch.title,
               },
             })
           : i18n.translate('discover.pageTitleWithoutSavedSearch', {
@@ -245,8 +244,6 @@ export function DiscoverLayout({
         query={state.query}
         navigateTo={navigateTo}
         savedQuery={state.savedQuery}
-        savedSearch={savedSearch}
-        searchSource={searchSource}
         stateContainer={stateContainer}
         updateQuery={onUpdateQuery}
         resetSavedSearch={resetSavedSearch}
@@ -257,7 +254,7 @@ export function DiscoverLayout({
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout
-          savedSearch={savedSearch}
+          savedSearch={stateContainer.savedSearch}
           spaces={spaces}
           history={history}
         />
@@ -339,7 +336,7 @@ export function DiscoverLayout({
                       <EuiFlexItem grow={false}>
                         <DiscoverChartMemoized
                           resetSavedSearch={resetSavedSearch}
-                          savedSearch={savedSearch}
+                          savedSearch={stateContainer.savedSearch}
                           savedSearchDataChart$={charts$}
                           savedSearchDataTotalHits$={totalHits$}
                           stateContainer={stateContainer}
@@ -361,7 +358,7 @@ export function DiscoverLayout({
                       dataView={dataView}
                       navigateTo={navigateTo}
                       onAddFilter={!isPlainRecord ? (onAddFilter as DocViewFilterFn) : undefined}
-                      savedSearch={savedSearch}
+                      savedSearch={stateContainer.savedSearch}
                       setExpandedDoc={setExpandedDoc}
                       state={state}
                       stateContainer={stateContainer}
@@ -370,7 +367,7 @@ export function DiscoverLayout({
                   ) : (
                     <FieldStatisticsTableMemoized
                       availableFields$={savedSearchData$.availableFields$}
-                      savedSearch={savedSearch}
+                      savedSearch={stateContainer.savedSearch}
                       dataView={dataView}
                       query={state.query}
                       filters={state.filters}
