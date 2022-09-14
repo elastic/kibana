@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export * from '../../common/translations';
+export * from '../user_profiles/translations';
 
 export const NO_CASES = i18n.translate('xpack.cases.caseTable.noCases.title', {
   defaultMessage: 'No cases to display',
@@ -113,3 +114,23 @@ export const ATTC_STAT = i18n.translate('xpack.cases.casesStats.mttr', {
 export const ATTC_DESCRIPTION = i18n.translate('xpack.cases.casesStats.mttrDescription', {
   defaultMessage: 'The average duration (from creation to closure) for your current cases',
 });
+
+export const FILTER_ASSIGNEES_ARIA_LABEL = i18n.translate(
+  'xpack.cases.allCasesView.filterAssigneesAriaLabel',
+  {
+    defaultMessage: 'click to filter assignees',
+  }
+);
+
+export const CLEAR_FILTERS = i18n.translate(
+  'xpack.cases.allCasesView.filterAssignees.clearFilters',
+  {
+    defaultMessage: 'Clear filters',
+  }
+);
+
+export const TOTAL_ASSIGNEES_FILTERED = (total: number) =>
+  i18n.translate('xpack.cases.allCasesView.totalFilteredUsers', {
+    defaultMessage: '{total, plural, one {# assignee} other {# assignees}} filtered',
+    values: { total },
+  });
