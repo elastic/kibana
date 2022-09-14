@@ -114,7 +114,7 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     },
     monitoring: {
       properties: {
-        //TODO migrations
+        // TODO migrations
         run: {
           properties: {
             history: {
@@ -177,48 +177,11 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
                   },
                 },
               },
-            }
+            },
           },
         },
       },
     },
-    // TODO Need to be deprecated by last_run
-    // executionStatus: {
-    //   properties: {
-    //     numberOfTriggeredActions: {
-    //       type: 'long',
-    //     },
-    //     status: {
-    //       type: 'keyword',
-    //     },
-    //     lastExecutionDate: {
-    //       type: 'date',
-    //     },
-    //     lastDuration: {
-    //       type: 'long',
-    //     },
-    //     error: {
-    //       properties: {
-    //         reason: {
-    //           type: 'keyword',
-    //         },
-    //         message: {
-    //           type: 'keyword',
-    //         },
-    //       },
-    //     },
-    //     warning: {
-    //       properties: {
-    //         reason: {
-    //           type: 'keyword',
-    //         },
-    //         message: {
-    //           type: 'keyword',
-    //         },
-    //       },
-    //     },
-    //   },
-    // },
     snoozeSchedule: {
       type: 'nested',
       properties: {
@@ -295,6 +258,43 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     next_run: {
       type: 'date',
     },
+    // Deprecated, if you need to add new property please do it in `last_run`
+    executionStatus: {
+      properties: {
+        numberOfTriggeredActions: {
+          type: 'long',
+        },
+        status: {
+          type: 'keyword',
+        },
+        lastExecutionDate: {
+          type: 'date',
+        },
+        lastDuration: {
+          type: 'long',
+        },
+        error: {
+          properties: {
+            reason: {
+              type: 'keyword',
+            },
+            message: {
+              type: 'keyword',
+            },
+          },
+        },
+        warning: {
+          properties: {
+            reason: {
+              type: 'keyword',
+            },
+            message: {
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    },
     last_run: {
       properties: {
         outcome: {
@@ -320,8 +320,8 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
             recovered: {
               type: 'float',
             },
-           ignored: {
-            type: 'float',
+            ignored: {
+              type: 'float',
             },
           },
         },
