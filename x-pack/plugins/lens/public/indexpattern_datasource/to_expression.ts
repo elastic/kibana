@@ -59,6 +59,7 @@ function getExpressionForLayer(
   }
 
   const columns = { ...layer.columns };
+  // make sure the columns are in topological order
   const sortedColumns = sortedReferences(
     columnOrder.map((colId) => [colId, columns[colId]] as const)
   );
@@ -72,12 +73,16 @@ function getExpressionForLayer(
         if (!('references' in currentColumn)) return;
         currentColumn.references.forEach((referenceColumnId) => {
           let referencedColumn = columns[referenceColumnId];
+          const hasFilter = referencedColumn.filter;
           const referenceDef = operationDefinitionMap[column.operationType];
-          if (referenceDef.filterable && !referencedColumn.filter) {
+          if (referenceDef.filterable && !hasFilter) {
             referencedColumn = { ...referencedColumn, filter: column.filter };
             columns[referenceColumnId] = referencedColumn;
           }
-          setFilterForAllReferences(referencedColumn);
+          if (!hasFilter) {
+            // only push through the current filter if the current level doesn't have its own
+            setFilterForAllReferences(referencedColumn);
+          }
         });
       }
       setFilterForAllReferences(column);
@@ -89,12 +94,16 @@ function getExpressionForLayer(
         if (!('references' in currentColumn)) return;
         currentColumn.references.forEach((referenceColumnId) => {
           let referencedColumn = columns[referenceColumnId];
+          const hasShift = referencedColumn.timeShift;
           const referenceDef = operationDefinitionMap[column.operationType];
-          if (referenceDef.shiftable && !referencedColumn.timeShift) {
+          if (referenceDef.shiftable && !hasShift) {
             referencedColumn = { ...referencedColumn, timeShift: column.timeShift };
             columns[referenceColumnId] = referencedColumn;
           }
-          setTimeShiftForAllReferences(referencedColumn);
+          if (!hasShift) {
+            // only push through the current time shift if the current level doesn't have its own
+            setTimeShiftForAllReferences(referencedColumn);
+          }
         });
       }
       setTimeShiftForAllReferences(column);
