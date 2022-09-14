@@ -16,6 +16,7 @@ export const ProjectMonitorThrottlingConfigCodec = t.interface({
 
 export const ProjectBrowserMonitorCodec = t.intersection([
   t.interface({
+    type: t.string,
     id: t.string,
     name: t.string,
     schedule: t.number,
@@ -35,6 +36,9 @@ export const ProjectBrowserMonitorCodec = t.intersection([
     }),
     params: t.record(t.string, t.unknown),
     enabled: t.boolean,
+    urls: t.array(t.string),
+    hosts: t.string,
+    max_redirects: t.string,
   }),
 ]);
 

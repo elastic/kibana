@@ -96,6 +96,8 @@ export const deleteMonitor = async ({
       monitorId
     );
 
+    const deletePromise = savedObjectsClient.delete(syntheticsMonitorType, monitorId);
+
     const monitor =
       await encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
         syntheticsMonitor.name,
@@ -117,7 +119,6 @@ export const deleteMonitor = async ({
       request,
       savedObjectsClient
     );
-    const deletePromise = savedObjectsClient.delete(syntheticsMonitorType, monitorId);
 
     const [errors] = await Promise.all([deleteSyncPromise, deletePromise]);
 
