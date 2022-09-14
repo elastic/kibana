@@ -38,6 +38,7 @@ describe('saved search embeddable', () => {
   let mountpoint: HTMLDivElement;
   let filterManagerMock: jest.Mocked<FilterManager>;
   let servicesMock: jest.Mocked<DiscoverServices>;
+  let executeTriggerActions: jest.Mock;
 
   const createEmbeddable = (searchMock?: jest.Mock) => {
     const savedSearchMock = {
@@ -65,7 +66,8 @@ describe('saved search embeddable', () => {
       rowHeight: 30,
       rowsPerPage: 50,
     };
-    const executeTriggerActions = jest.fn();
+
+    executeTriggerActions = jest.fn();
 
     const embeddable = new SavedSearchEmbeddable(
       savedSearchEmbeddableConfig,
@@ -130,14 +132,18 @@ describe('saved search embeddable', () => {
     expect(searchProps.columns).toEqual(['message', 'extension', 'bytes']);
 
     expect(searchProps.rowHeightState).toEqual(30);
-    await waitOneTick();
     searchProps.onUpdateRowHeight!(40);
+    await waitOneTick();
     expect(searchProps.rowHeightState).toEqual(40);
 
     expect(searchProps.rowsPerPageState).toEqual(50);
-    await waitOneTick();
     searchProps.onUpdateRowsPerPage!(100);
+    await waitOneTick();
     expect(searchProps.rowsPerPageState).toEqual(100);
+
+    searchProps.onFilter!({ name: 'customer_id', type: 'string', scripted: false }, [17], '+');
+    await waitOneTick();
+    expect(executeTriggerActions).toHaveBeenCalled();
   });
 
   it('should emit error output in case of fetch error', async () => {
