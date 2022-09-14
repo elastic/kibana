@@ -133,11 +133,13 @@ export function getTextBasedLanguagesDatasource({
     getPersistableState({ layers }: TextBasedLanguagesPrivateState) {
       const savedObjectReferences: SavedObjectReference[] = [];
       Object.entries(layers).forEach(([layerId, { index, ...persistableLayer }]) => {
-        savedObjectReferences.push({
-          type: 'index-pattern',
-          id: index,
-          name: getLayerReferenceName(layerId),
-        });
+        if (index) {
+          savedObjectReferences.push({
+            type: 'index-pattern',
+            id: index,
+            name: getLayerReferenceName(layerId),
+          });
+        }
       });
       return { state: { layers }, savedObjectReferences };
     },

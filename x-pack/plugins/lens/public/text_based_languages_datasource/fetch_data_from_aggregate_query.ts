@@ -13,7 +13,7 @@ import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { queryStateToExpressionAst } from '@kbn/data-plugin/common';
 
-interface SQLErrorResponse {
+interface TextBasedLanguagesErrorResponse {
   error: {
     message: string;
   };
@@ -42,7 +42,7 @@ export function fetchDataFromAggregateQuery(
         let finalData: Datatable;
         let error: string | undefined;
         execution.pipe(pluck('result')).subscribe((resp) => {
-          const response = resp as Datatable | SQLErrorResponse;
+          const response = resp as Datatable | TextBasedLanguagesErrorResponse;
           if (response.type === 'error') {
             error = response.error.message;
           } else {
