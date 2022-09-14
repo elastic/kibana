@@ -54,6 +54,32 @@ export function getAgentStatus(agent: Agent | FleetServerAgent): AgentStatus {
   return 'online';
 }
 
+export function getPreviousAgentStatusForOfflineAgents(
+  agent: Agent | FleetServerAgent
+): AgentStatus | undefined {
+  if (agent.unenrollment_started_at && !agent.unenrolled_at) {
+    return 'unenrolling';
+  }
+
+  if (agent.last_checkin_status === 'error') {
+    return 'error';
+  }
+  if (agent.last_checkin_status === 'degraded') {
+    return 'degraded';
+  }
+
+  const policyRevision =
+    'policy_revision' in agent
+      ? agent.policy_revision
+      : 'policy_revision_idx' in agent
+      ? agent.policy_revision_idx
+      : undefined;
+
+  if (!policyRevision || (agent.upgrade_started_at && agent.upgrade_status !== 'completed')) {
+    return 'updating';
+  }
+}
+
 export function buildKueryForEnrollingAgents(path: string = ''): string {
   return `not (${path}last_checkin:*)`;
 }
