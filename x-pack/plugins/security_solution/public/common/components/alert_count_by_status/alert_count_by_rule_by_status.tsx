@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
@@ -24,16 +24,21 @@ import { useNavigateToTimeline } from '../../../overview/components/detection_re
 import { useQueryToggle } from '../../containers/query_toggle';
 import { FormattedCount } from '../formatted_number';
 import { HeaderSection } from '../header_section';
+import { HoverVisibilityContainer } from '../hover_visibility_container';
 import { BUTTON_CLASS as INSPECT_BUTTON_CLASS } from '../inspect';
+import { useLocalStorage } from '../local_storage';
 import { LastUpdatedAt, MultiSelectPopover } from './components';
 import * as i18n from './translations';
 import type { AlertCountByRuleByStatusItem } from './use_alert_count_by_rule_by_status';
 import { useAlertCountByRuleByStatus } from './use_alert_count_by_rule_by_status';
-import { HoverVisibilityContainer } from '../hover_visibility_container';
 
 interface AlertCountByStatusProps {
   field: string;
   value: string;
+}
+
+interface StatusSelection {
+  [fieldName: string]: Status[];
 }
 
 type GetTableColumns = (
@@ -43,6 +48,7 @@ type GetTableColumns = (
 
 const statuses = ['open', 'acknowledged', 'closed'];
 const ALERT_COUNT_BY_RULE_BY_STATUS = 'alerts-by-status-by-rule';
+const LOCAL_STORAGE_KEY = 'alertCountByFieldNameWidgetSettings';
 
 const StyledEuiPanel = euiStyled(EuiPanel)`
   display: flex;
@@ -55,7 +61,6 @@ const StyledEuiPanel = euiStyled(EuiPanel)`
 export const AlertCountByStatus = React.memo(({ field, value }: AlertCountByStatusProps) => {
   const queryId = `${ALERT_COUNT_BY_RULE_BY_STATUS}-by-${field}`;
   const { toggleStatus, setToggleStatus } = useQueryToggle(queryId);
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>(['open']);
 
   const { openRuleInTimeline } = useNavigateToTimeline();
   const columns = useMemo(
@@ -63,11 +68,31 @@ export const AlertCountByStatus = React.memo(({ field, value }: AlertCountByStat
     [field, value, openRuleInTimeline]
   );
 
+  const [selectedStatusesByField, setSelectedStatusesByField] = useLocalStorage<StatusSelection>({
+    defaultValue: {
+      [field]: ['open'],
+    },
+    key: LOCAL_STORAGE_KEY,
+    isInvalidDefault: (valueFromStorage) => {
+      return valueFromStorage && valueFromStorage[field] ? false : true;
+    },
+  });
+
+  const updateSelection = useCallback(
+    (selection: Status[]) => {
+      setSelectedStatusesByField({
+        ...selectedStatusesByField,
+        [field]: selection,
+      });
+    },
+    [field, selectedStatusesByField, setSelectedStatusesByField]
+  );
+
   const { items, isLoading, updatedAt } = useAlertCountByRuleByStatus({
     field,
     value,
     queryId,
-    statuses: selectedStatuses as Status[],
+    statuses: selectedStatusesByField[field] as Status[],
     skip: !toggleStatus,
   });
 
@@ -86,8 +111,8 @@ export const AlertCountByStatus = React.memo(({ field, value }: AlertCountByStat
             <MultiSelectPopover
               title={i18n.Status}
               allItems={statuses}
-              selectedItems={selectedStatuses}
-              onSelectedItemsChange={setSelectedStatuses}
+              selectedItems={selectedStatusesByField[field]}
+              onSelectedItemsChange={(selectedItems) => updateSelection(selectedItems as Status[])}
             />
           </HeaderSection>
 

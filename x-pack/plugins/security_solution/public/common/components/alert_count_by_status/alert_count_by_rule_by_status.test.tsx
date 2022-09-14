@@ -25,7 +25,7 @@ const mockUseAlertCountByRuleByStatus = jest.fn(() => defaultUseAlertCountByRule
 const mockUseAlertCountByRuleByStatusReturn = (
   overrides: Partial<UseAlertCountByRuleByStatusReturn>
 ) => {
-  mockUseAlertCountByRuleByStatus.mockReturnValueOnce({
+  mockUseAlertCountByRuleByStatus.mockReturnValue({
     ...defaultUseAlertCountByRuleByStatusReturn,
     ...overrides,
   });
