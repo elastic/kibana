@@ -72,7 +72,7 @@ A good how-to on building Chromium from source is
 We have an `linux/args.gn` file that is automatically copied to the build target directory.
 
 To get a list of the build arguments that are enabled, install `depot_tools` and run
-`gn args out/headless --list`. It prints out all of the flags and their
+`gn args out/headless --list` from the `chromium/src` directory. It prints out all of the flags and their
 settings, including the defaults. Some build flags are documented
 [here](https://www.chromium.org/developers/gn-build-configuration).
 
