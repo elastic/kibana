@@ -27,14 +27,25 @@ export const MANIFEST_V2: JSONSchema = {
       `,
     },
     owner: {
-      type: 'string',
+      oneOf: [
+        {
+          type: 'string',
+          pattern: '^@',
+        },
+        {
+          type: 'array',
+          items: {
+            type: 'string',
+            pattern: '^@',
+          },
+        },
+      ],
       description: desc`
         Github handle for the person or team who is responsible for this package.
         This owner will be used in the codeowners files for this package.
 
-        For additional codeowners, you add manually add entries to the codeowners file.
+        For additional codeowners, the value can be an array of user/team names.
       `,
-      pattern: '^@',
     },
     typeDeps: {
       type: 'array',

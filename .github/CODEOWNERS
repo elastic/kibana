@@ -136,7 +136,6 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/test/functional/apps/apm/  @elastic/apm-ui
 /x-pack/test/apm_api_integration/ @elastic/apm-ui
 /src/apm.js @elastic/kibana-core @vigneshshanmugam
-/packages/kbn-apm-config-loader/ @vigneshshanmugam
 /src/core/types/elasticsearch @elastic/apm-ui
 /packages/kbn-utility-types/src/dot.ts @dgieselaar
 /packages/kbn-utility-types/src/dot_test.ts @dgieselaar
@@ -808,7 +807,7 @@ packages/kbn-alerts @elastic/security-solution
 packages/kbn-ambient-storybook-types @elastic/kibana-operations
 packages/kbn-ambient-ui-types @elastic/kibana-operations
 packages/kbn-analytics @elastic/kibana-core
-packages/kbn-apm-config-loader @elastic/kibana-core
+packages/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
 packages/kbn-apm-synthtrace @elastic/apm-ui
 packages/kbn-apm-utils @elastic/apm-ui
 packages/kbn-axe-config @elastic/kibana-qa

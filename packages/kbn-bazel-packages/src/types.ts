@@ -54,12 +54,10 @@ interface PackageManifestBaseFields {
    */
   id: string;
   /**
-   * Github handle for the person or team who is responsible for this package.
-   * This owner will be used in the codeowners files for this package.
-   *
-   * For additional codeowners, you add manually add entries to the codeowners file.
+   * Github handles for the people or teams responsible for this package.
+   * These values will be used in the codeowners files for this package.
    */
-  owner: string;
+  owner: string[];
   /**
    * Packages which are required for the source code in the package to be type-
    * checked. This list is updated automatically by the package linter

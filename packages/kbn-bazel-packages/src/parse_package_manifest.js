@@ -31,6 +31,12 @@ const err = (key, value, msg) => {
 };
 
 /**
+ * @param {unknown} v
+ * @returns {v is string}
+ */
+const isValidOwner = (v) => typeof v === 'string' && v.startsWith('@');
+
+/**
  * @param {unknown} plugin
  * @returns {import('./types').PluginPackageManifest['plugin']}
  */
@@ -132,8 +138,15 @@ function validatePackageManifest(parsed) {
     throw err(`id`, id, `must be a string that starts with @kbn/`);
   }
 
-  if (typeof owner !== 'string' || !owner.startsWith('@')) {
-    throw err(`owner`, owner, `must be a valid Github team handle starting with @`);
+  if (
+    !(Array.isArray(owner) && owner.every(isValidOwner)) &&
+    !(typeof owner === 'string' && isValidOwner(owner))
+  ) {
+    throw err(
+      `owner`,
+      owner,
+      `must be a valid Github team handle starting with @, or an array of such handles`
+    );
   }
 
   if (!isArrOfStrings(typeDeps)) {
@@ -150,7 +163,7 @@ function validatePackageManifest(parsed) {
 
   const base = {
     id,
-    owner,
+    owner: Array.isArray(owner) ? owner : [owner],
     typeDeps,
     runtimeDeps,
     devOnly,
