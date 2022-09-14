@@ -120,28 +120,27 @@ export class EnterpriseSearchPlugin implements Plugin {
       },
     });
 
-    if (bahavioralAnalyticsEnabled) {
-      core.application.register({
-        id: ANALYTICS_PLUGIN.ID,
-        title: ANALYTICS_PLUGIN.NAME,
-        euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
-        appRoute: ANALYTICS_PLUGIN.URL,
-        category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-        mount: async (params: AppMountParameters) => {
-          const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
-          const { chrome, http } = kibanaDeps.core;
-          chrome.docTitle.change(ANALYTICS_PLUGIN.NAME);
+    core.application.register({
+      id: ANALYTICS_PLUGIN.ID,
+      title: ANALYTICS_PLUGIN.NAME,
+      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
+      searchable: bahavioralAnalyticsEnabled,
+      appRoute: ANALYTICS_PLUGIN.URL,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      mount: async (params: AppMountParameters) => {
+        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+        const { chrome, http } = kibanaDeps.core;
+        chrome.docTitle.change(ANALYTICS_PLUGIN.NAME);
 
-          await this.getInitialData(http);
-          const pluginData = this.getPluginData();
+        await this.getInitialData(http);
+        const pluginData = this.getPluginData();
 
-          const { renderApp } = await import('./applications');
-          const { Analytics } = await import('./applications/analytics');
+        const { renderApp } = await import('./applications');
+        const { Analytics } = await import('./applications/analytics');
 
-          return renderApp(Analytics, kibanaDeps, pluginData);
-        },
-      });
-    }
+        return renderApp(Analytics, kibanaDeps, pluginData);
+      },
+    });
 
     core.application.register({
       id: ELASTICSEARCH_PLUGIN.ID,
