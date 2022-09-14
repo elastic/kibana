@@ -106,21 +106,7 @@ export type FilesMetricsHttpEndpoint = HttpApiInterfaceEntryDefinition<
 >;
 
 export type { Endpoint as FileShareHttpEndpoint } from '../server/routes/file_kind/share/share';
-
-export type FileUnshareHttpEndpoint = HttpApiInterfaceEntryDefinition<
-  {
-    /**
-     * Share token id
-     */
-    id: string;
-  },
-  unknown,
-  unknown,
-  {
-    ok: true;
-  }
->;
-
+export type { Endpoint as FileUnshareHttpEndpoint } from '../server/routes/file_kind/share/unshare';
 export type { Endpoint as FileGetShareHttpEndpoint } from '../server/routes/file_kind/share/get';
 export type { Endpoint as FileListSharesHttpEndpoint } from '../server/routes/file_kind/share/list';
 export type { Endpoint as FilePublicDownloadHttpEndpoint } from '../server/routes/public_facing/download';
