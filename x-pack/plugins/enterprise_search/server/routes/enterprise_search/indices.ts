@@ -420,15 +420,19 @@ export function registerIndexRoutes({
       }
 
       const updateRequest: IngestPutPipelineRequest = {
+        _meta: {
+          managed: true,
+          managed_by: 'Enterprise Search',
+        },
         id: pipelineId,
         description: defaultDescription,
         ...pipelineBody,
       };
 
-      const updateResult = await client.asCurrentUser.ingest.putPipeline(updateRequest);
+      await client.asCurrentUser.ingest.putPipeline(updateRequest);
 
       return response.ok({
-        body: updateResult,
+        body: { pipeline_id: pipelineId },
         headers: { 'content-type': 'application/json' },
       });
     })
