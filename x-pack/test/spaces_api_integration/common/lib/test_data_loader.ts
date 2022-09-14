@@ -32,11 +32,7 @@ const OBJECTS_TO_SHARE: Array<{
   {
     spacesToAdd: ['*'],
     spacesToRemove: ['default'],
-    objects: [
-      { type: 'sharedtype', id: 'all_spaces' },
-      { type: 'sharedtype', id: 'space_2_only_matching_origin' },
-      { type: 'sharedtype', id: 'alias_delete_exclusive' },
-    ],
+    objects: [{ type: 'sharedtype', id: 'all_spaces' }],
   },
   {
     spacesToRemove: ['default'],
@@ -48,15 +44,11 @@ const OBJECTS_TO_SHARE: Array<{
     objects: [
       { type: 'sharedtype', id: 'each_space' },
       { type: 'sharedtype', id: 'conflict_2_all' },
-      { type: 'sharedtype', id: 'alias_delete_inclusive' },
     ],
   },
   {
     spacesToAdd: [SPACE_1.id],
-    objects: [
-      { type: 'sharedtype', id: 'conflict_1c_default_and_space_1' },
-      { type: 'sharedtype', id: 'default_and_space_1' },
-    ],
+    objects: [{ type: 'sharedtype', id: 'default_and_space_1' }],
   },
   {
     spacesToAdd: [SPACE_2.id],
@@ -119,8 +111,10 @@ export function getTestDataLoader({ getService }: FtrProviderContext) {
       log.debug(`Removing data from the following spaces: ${allSpacesIds.join(', ')}`);
       await Promise.all(
         allSpacesIds.flatMap((spaceId) => [
-          kbnServer.savedObjects.cleanStandardList({ space: spaceId }),
-          kbnServer.savedObjects.clean({ space: spaceId, types: ['sharedtype', 'isolatedtype'] }),
+          kbnServer.savedObjects.cleanStandardList({ space: spaceId, force: true }).catch(() => {}),
+          kbnServer.savedObjects
+            .clean({ space: spaceId, types: ['sharedtype'], force: true })
+            .catch(() => {}),
         ])
       );
     },

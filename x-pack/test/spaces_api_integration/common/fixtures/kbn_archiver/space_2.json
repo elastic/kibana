@@ -1,5 +1,21 @@
 {
   "attributes": {
+    "description": "Space 2",
+    "title": "This is the second test space"
+  },
+  "coreMigrationVersion": "7.17.7",
+  "id": "my_dashboard",
+  "migrationVersion": {
+    "dashboard": "7.17.3"
+  },
+  "references": [],
+  "type": "dashboard",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzcxLDFd"
+}
+
+{
+  "attributes": {
     "title": "A shared saved-object in one space"
   },
   "id": "conflict_2_space_2",
@@ -7,30 +23,19 @@
   "references": [],
   "type": "sharedtype",
   "updated_at": "2017-09-21T18:59:16.270Z",
-  "version": "WzUxMCwxXQ=="
+  "version": "WzY2LDFd"
 }
 
 {
   "attributes": {
-    "title": "This is used to test an inexact match conflict for an id -> originId match"
+    "title": "A shared saved-object in one space"
   },
-  "id": "conflict_1c_space_2",
-  "originId": "conflict_1c_default_and_space_1",
+  "id": "conflict_1_space_2",
+  "originId": "conflict_1",
   "references": [],
   "type": "sharedtype",
   "updated_at": "2017-09-21T18:59:16.270Z",
-  "version": "WzUwNywxXQ=="
-}
-
-{
-  "attributes": {
-    "title": "This is used to test an inexact match conflict for an originId -> id match"
-  },
-  "id": "conflict_1b_space_2",
-  "references": [],
-  "type": "sharedtype",
-  "updated_at": "2017-09-21T18:59:16.270Z",
-  "version": "WzUwNSwxXQ=="
+  "version": "WzYzLDFd"
 }
 
 {
@@ -60,15 +65,4 @@
   "type": "sharedtype",
   "updated_at": "2017-09-21T18:59:16.270Z",
   "version": "WzQ5MSwxXQ=="
-}
-
-{
-  "attributes": {
-    "title": "Some title"
-  },
-  "id": "my_isolated_object",
-  "references": [],
-  "type": "isolatedtype",
-  "updated_at": "2017-09-21T18:49:16.270Z",
-  "version": "WzQ4NywxXQ=="
 }
