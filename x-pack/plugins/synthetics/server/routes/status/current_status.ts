@@ -45,6 +45,7 @@ export const createGetCurrentStatusRoute: SyntheticsRestApiRouteFactory = (libs:
     let monitors;
     const enabledIds: Array<string | undefined> = [];
     const disabledIds: Array<string | undefined> = [];
+    let disabledCount = 0;
     let page = 1;
     let maxPeriod = 0;
     /**
@@ -68,6 +69,7 @@ export const createGetCurrentStatusRoute: SyntheticsRestApiRouteFactory = (libs:
       monitors.saved_objects.forEach((monitor) => {
         if (monitor.attributes.enabled === false) {
           disabledIds.push(monitor.id);
+          disabledCount += monitor.attributes.locations.length;
         } else {
           enabledIds.push(monitor.id);
           maxPeriod = Math.max(maxPeriod, periodToMs(monitor.attributes.schedule));
@@ -87,7 +89,7 @@ export const createGetCurrentStatusRoute: SyntheticsRestApiRouteFactory = (libs:
 
     return {
       snapshot,
-      disabledCount: disabledIds.length,
+      disabledCount,
       disabledIds,
       enabledIds,
     };
