@@ -8,9 +8,9 @@ import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { EVENT_ACTION, TIMESTAMP } from '@kbn/rule-data-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { parse } from '@kbn/datemath';
 import { Aggregate } from '../../common/types/aggregate';
 import { EventAction, EventKind, ProcessEvent } from '../../common/types/process_tree';
-import { parse } from '@kbn/datemath';
 import {
   IO_EVENTS_ROUTE,
   IO_EVENTS_PER_PAGE,
@@ -18,7 +18,6 @@ import {
   ENTRY_SESSION_ENTITY_ID_PROPERTY,
   TTY_CHAR_DEVICE_MAJOR_PROPERTY,
   TTY_CHAR_DEVICE_MINOR_PROPERTY,
-  HOST_BOOT_ID_PROPERTY,
   PROCESS_ENTITY_ID_PROPERTY,
   PROCESS_EVENTS_PER_PAGE,
 } from '../../common/constants';
@@ -110,7 +109,7 @@ export const registerIOEventsRoute = (router: IRouter) => {
                 must: [
                   { term: { [TTY_CHAR_DEVICE_MAJOR_PROPERTY]: ttyPredicates.ttyMajor } },
                   { term: { [TTY_CHAR_DEVICE_MINOR_PROPERTY]: ttyPredicates.ttyMinor } },
-//                  { term: { [HOST_BOOT_ID_PROPERTY]: ttyPredicates.bootId } },
+                  //                  { term: { [HOST_BOOT_ID_PROPERTY]: ttyPredicates.bootId } },
                   { term: { [EVENT_ACTION]: 'text_output' } },
                   {
                     range: {
