@@ -66,7 +66,6 @@ const mockConfig: ConfigSchema = {
   ui: {
     enabled: false,
   },
-  profilingEnabled: false,
 };
 
 const urlService = new UrlService({
