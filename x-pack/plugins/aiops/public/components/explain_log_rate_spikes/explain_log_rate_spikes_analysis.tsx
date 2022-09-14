@@ -32,8 +32,6 @@ import type { ApiExplainLogRateSpikes } from '../../../common/api';
 
 import { SpikeAnalysisGroupsTable } from '../spike_analysis_table';
 import { SpikeAnalysisTable } from '../spike_analysis_table';
-// TODO: remove once api is in place
-import { mockData } from './mock_data';
 
 const showUngroupedMessage = i18n.translate(
   'xpack.aiops.spikeAnalysisTable.groupedSwitchLabel.showUngrouped',
@@ -129,13 +127,13 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   const groupTableItems = useMemo(() => {
     // First, create map of field value counts e.g. { log.logger.keyword: { request: 3, publisher_pipeline_output: 1 }, ... }
     // Then remove duplicate values and create table items like { id: 1, group: {...}, doc_count: 1234 }
-    const groupFieldValuesCountMap = mockData.reduce((countMap, current) => {
+    const groupFieldValuesCountMap = data.changePointsGroups.reduce((countMap, current) => {
       // If field name/key exists, increase count else create it and set count to 1
       const currentGroup = current.group;
       currentGroup.forEach((group) => {
-        const fieldName = group.field;
+        const fieldName = group.fieldName;
         const fieldNameCountMap = countMap[fieldName];
-        const fieldValue = group.value;
+        const fieldValue = group.fieldValue;
 
         if (fieldNameCountMap === undefined) {
           countMap[fieldName] = { [fieldValue]: 1 };
@@ -148,17 +146,17 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       return countMap;
     }, {} as Record<string, Record<string, number>>);
 
-    const tableItems = mockData.map(({ group, docCount }, index) => {
+    const tableItems = data.changePointsGroups.map(({ group, docCount }, index) => {
       const sortedGroup = group.sort((a, b) =>
-        a.field > b.field ? 1 : b.field > a.field ? -1 : 0
+        a.fieldName > b.fieldName ? 1 : b.fieldName > a.fieldName ? -1 : 0
       );
       const dedupedGroup = {};
       const repeatedValues = {};
 
       sortedGroup.forEach((pair) => {
-        const fieldName = pair.field;
-        const fieldValue = pair.value;
-        if (groupFieldValuesCountMap[fieldName][fieldValue] <= 2) {
+        const fieldName = pair.fieldName;
+        const fieldValue = pair.fieldValue;
+        if (pair.duplicate === false) {
           // @ts-ignore // TODO: remove once we have real data
           dedupedGroup[fieldName] = fieldValue;
         } else {
@@ -176,7 +174,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     });
 
     return tableItems;
-  }, []);
+  }, [data.changePointsGroups]);
 
   const shouldRerunAnalysis = useMemo(
     () =>
