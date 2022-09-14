@@ -13,12 +13,13 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { useServices } from '../services';
 import type { UserContentCommonSchema, Props as TableListViewProps } from '../table_list_view';
 
-interface Props<T extends UserContentCommonSchema> {
-  id: string;
+type InheritedProps<T extends UserContentCommonSchema> = Pick<
+  TableListViewProps<T>,
+  'onClickTitle' | 'getDetailViewLink' | 'id'
+>;
+interface Props<T extends UserContentCommonSchema> extends InheritedProps<T> {
   item: T;
   searchTerm?: string;
-  getDetailViewLink: TableListViewProps<T>['getDetailViewLink'];
-  onClickTitle: TableListViewProps<T>['onClickTitle'];
 }
 
 export function ItemDetails<T extends UserContentCommonSchema>({
@@ -29,9 +30,10 @@ export function ItemDetails<T extends UserContentCommonSchema>({
   onClickTitle,
 }: Props<T>) {
   const {
+    references,
     attributes: { title, description },
   } = item;
-  const { navigateToUrl, currentAppId$ } = useServices();
+  const { navigateToUrl, currentAppId$, TagList } = useServices();
 
   const redirectAppLinksCoreStart = useMemo(
     () => ({
@@ -99,6 +101,7 @@ export function ItemDetails<T extends UserContentCommonSchema>({
           </p>
         </EuiText>
       )}
+      {Boolean(references) && <TagList references={references} />}
     </div>
   );
 }
