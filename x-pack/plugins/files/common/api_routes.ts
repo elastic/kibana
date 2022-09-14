@@ -7,7 +7,6 @@
 
 import type { TypeOf, Type } from '@kbn/config-schema';
 import { PLUGIN_ID } from './constants';
-import type { FilesMetrics } from './types';
 
 export const API_BASE_PATH = `/api/${PLUGIN_ID}`;
 
@@ -66,14 +65,7 @@ export type { Endpoint as ListFileKindHttpEndpoint } from '../server/routes/file
 export type { Endpoint as UpdateFileKindHttpEndpoint } from '../server/routes/file_kind/update';
 export type { Endpoint as UploadFileKindHttpEndpoint } from '../server/routes/file_kind/upload';
 export type { Endpoint as FindFilesHttpEndpoint } from '../server/routes/find';
-
-export type FilesMetricsHttpEndpoint = HttpApiInterfaceEntryDefinition<
-  unknown,
-  unknown,
-  unknown,
-  FilesMetrics
->;
-
+export type { Endpoint as FilesMetricsHttpEndpoint } from '../server/routes/metrics';
 export type { Endpoint as FileShareHttpEndpoint } from '../server/routes/file_kind/share/share';
 export type { Endpoint as FileUnshareHttpEndpoint } from '../server/routes/file_kind/share/unshare';
 export type { Endpoint as FileGetShareHttpEndpoint } from '../server/routes/file_kind/share/get';
