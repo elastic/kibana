@@ -28,7 +28,7 @@ describe('UserToolTip', () => {
     };
 
     render(
-      <UserToolTip profile={profile}>
+      <UserToolTip userInfo={profile}>
         <strong>{'case user'}</strong>
       </UserToolTip>
     );
@@ -57,7 +57,7 @@ describe('UserToolTip', () => {
     };
 
     render(
-      <UserToolTip profile={profile}>
+      <UserToolTip userInfo={profile}>
         <strong>{'case user'}</strong>
       </UserToolTip>
     );
@@ -87,7 +87,7 @@ describe('UserToolTip', () => {
     };
 
     render(
-      <UserToolTip profile={profile}>
+      <UserToolTip userInfo={profile}>
         <strong>{'case user'}</strong>
       </UserToolTip>
     );
@@ -116,7 +116,7 @@ describe('UserToolTip', () => {
     };
 
     render(
-      <UserToolTip profile={profile}>
+      <UserToolTip userInfo={profile}>
         <strong>{'case user'}</strong>
       </UserToolTip>
     );
@@ -144,7 +144,7 @@ describe('UserToolTip', () => {
     };
 
     render(
-      <UserToolTip profile={profile}>
+      <UserToolTip userInfo={profile}>
         <strong>{'case user'}</strong>
       </UserToolTip>
     );

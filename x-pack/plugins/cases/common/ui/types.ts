@@ -122,11 +122,7 @@ export enum SortFieldCase {
   closedAt = 'closedAt',
 }
 
-export interface ElasticUser {
-  readonly email?: string | null;
-  readonly fullName?: string | null;
-  readonly username?: string | null;
-}
+export type ElasticUser = SnakeToCamelCase<User>;
 
 export interface FetchCasesProps extends ApiProps {
   queryParams?: QueryParams;

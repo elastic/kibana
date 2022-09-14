@@ -45,10 +45,10 @@ import { severities } from '../severity/config';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { UserToolTip } from '../user_profiles/user_tooltip';
-import { CaseUserAvatar } from '../user_profiles/user_avatar';
 import { useAssignees } from '../../containers/user_profiles/use_assignees';
 import { getUsernameDataTestSubj } from '../user_profiles/data_test_subject';
 import { CurrentUserProfile } from '../types';
+import { SmallUserAvatar } from '../user_profiles/small_user_avatar';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -87,8 +87,8 @@ const AssigneesColumn: React.FC<{
             key={assignee.uid}
             data-test-subj={`case-table-column-assignee-${dataTestSubjName}`}
           >
-            <UserToolTip profile={assignee.profile}>
-              <CaseUserAvatar size="s" profile={assignee.profile} />
+            <UserToolTip userInfo={assignee.profile}>
+              <SmallUserAvatar userInfo={assignee.profile} />
             </UserToolTip>
           </EuiFlexItem>
         );

@@ -206,6 +206,7 @@ export const CaseViewActivity = ({
           email={emailContent}
           headline={i18n.REPORTER}
           users={[caseData.createdBy]}
+          userProfiles={userProfiles}
         />
         {userActionsData?.participants ? (
           <UserList
@@ -214,6 +215,7 @@ export const CaseViewActivity = ({
             headline={i18n.PARTICIPANTS}
             loading={isLoadingUserActions}
             users={userActionsData.participants}
+            userProfiles={userProfiles}
           />
         ) : null}
         <EditTags

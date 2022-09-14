@@ -12,7 +12,11 @@ import { createRegisteredAttachmentUserActionBuilder } from './registered_attach
 
 type BuilderArgs = Pick<
   UserActionBuilderArgs,
-  'userAction' | 'persistableStateAttachmentTypeRegistry' | 'caseData' | 'handleDeleteComment'
+  | 'userAction'
+  | 'persistableStateAttachmentTypeRegistry'
+  | 'caseData'
+  | 'handleDeleteComment'
+  | 'userProfiles'
 > & {
   comment: SnakeToCamelCase<CommentResponseTypePersistableState>;
   isLoading: boolean;
@@ -20,6 +24,7 @@ type BuilderArgs = Pick<
 
 export const createPersistableStateAttachmentUserActionBuilder = ({
   userAction,
+  userProfiles,
   comment,
   persistableStateAttachmentTypeRegistry,
   caseData,
@@ -28,6 +33,7 @@ export const createPersistableStateAttachmentUserActionBuilder = ({
 }: BuilderArgs): ReturnType<UserActionBuilder> => {
   return createRegisteredAttachmentUserActionBuilder({
     userAction,
+    userProfiles,
     comment,
     registry: persistableStateAttachmentTypeRegistry,
     caseData,

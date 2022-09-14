@@ -6,41 +6,18 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
-import { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { CaseUserAvatar } from './user_avatar';
-import { UserToolTip } from './user_tooltip';
-import { getName } from './display_name';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import * as i18n from './translations';
 import { Assignee } from './types';
+import { HoverableUserWithAvatar } from './hoverable_user_with_avatar';
 import { useCasesContext } from '../cases_context/use_cases_context';
-
-const UserAvatarWithName: React.FC<{ profile?: UserProfileWithAvatar }> = ({ profile }) => {
-  return (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <CaseUserAvatar size={'s'} profile={profile} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup direction={'column'} gutterSize="none">
-          <EuiFlexItem>
-            <EuiText size="s" className="eui-textBreakWord">
-              {getName(profile?.user)}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
-UserAvatarWithName.displayName = 'UserAvatarWithName';
 
 export interface UserRepresentationProps {
   assignee: Assignee;
   onRemoveAssignee: (removedAssigneeUID: string) => void;
 }
 
-const UserRepresentationComponent: React.FC<UserRepresentationProps> = ({
+const RemovableUserComponent: React.FC<UserRepresentationProps> = ({
   assignee,
   onRemoveAssignee,
 }) => {
@@ -67,9 +44,7 @@ const UserRepresentationComponent: React.FC<UserRepresentationProps> = ({
       data-test-subj={`user-profile-assigned-user-group-${usernameDataTestSubj}`}
     >
       <EuiFlexItem grow={false}>
-        <UserToolTip profile={assignee.profile}>
-          <UserAvatarWithName profile={assignee.profile} />
-        </UserToolTip>
+        <HoverableUserWithAvatar userInfo={assignee.profile} />
       </EuiFlexItem>
       {permissions.update && (
         <EuiFlexItem grow={false}>
@@ -98,6 +73,6 @@ const UserRepresentationComponent: React.FC<UserRepresentationProps> = ({
   );
 };
 
-UserRepresentationComponent.displayName = 'UserRepresentation';
+RemovableUserComponent.displayName = 'RemovableUser';
 
-export const UserRepresentation = React.memo(UserRepresentationComponent);
+export const RemovableUser = React.memo(RemovableUserComponent);

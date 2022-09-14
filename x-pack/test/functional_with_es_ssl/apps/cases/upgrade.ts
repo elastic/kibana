@@ -235,13 +235,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.exists('case-refresh');
       });
 
-      it('shows the refresh button', async () => {
+      it('shows the actions button', async () => {
         await testSubjects.exists('property-actions');
       });
 
       it('shows the reporter correctly', async () => {
         const reporter = await find.byCssSelector(
-          '[data-test-subj="case-view-user-list-reporter"] [data-test-subj="case-view-username"]'
+          '[data-test-subj="case-view-user-list-reporter"] [data-test-subj="user-profile-username"]'
         );
 
         expect(await reporter.getVisibleText()).equal('elastic');
@@ -249,7 +249,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('shows the participants correctly', async () => {
         const participant = await find.byCssSelector(
-          '[data-test-subj="case-view-user-list-participants"] [data-test-subj="case-view-username"]'
+          '[data-test-subj="case-view-user-list-participants"] [data-test-subj="user-profile-username"]'
         );
 
         expect(await participant.getVisibleText()).equal('elastic');

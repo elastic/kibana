@@ -14,18 +14,22 @@ import { CommentResponseActionsType } from '../../../../common/api';
 import { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { UserActionTimestamp } from '../timestamp';
 import { SnakeToCamelCase } from '../../../../common/types';
-import { UserActionUsernameWithAvatar } from '../avatar_username';
 import { UserActionCopyLink } from '../copy_link';
 import { MarkdownRenderer } from '../../markdown_editor';
 import { ContentWrapper } from '../markdown_form';
 import { HostIsolationCommentEvent } from './host_isolation_event';
+import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
 
-type BuilderArgs = Pick<UserActionBuilderArgs, 'userAction' | 'actionsNavigation'> & {
+type BuilderArgs = Pick<
+  UserActionBuilderArgs,
+  'userAction' | 'actionsNavigation' | 'userProfiles'
+> & {
   comment: SnakeToCamelCase<CommentResponseActionsType>;
 };
 
 export const createActionAttachmentUserActionBuilder = ({
   userAction,
+  userProfiles,
   comment,
   actionsNavigation,
 }: BuilderArgs): ReturnType<UserActionBuilder> => ({
@@ -35,10 +39,7 @@ export const createActionAttachmentUserActionBuilder = ({
     return [
       {
         username: (
-          <UserActionUsernameWithAvatar
-            username={comment.createdBy.username}
-            fullName={comment.createdBy.fullName}
-          />
+          <HoverableUserWithAvatarResolver user={comment.createdBy} userProfiles={userProfiles} />
         ),
         className: classNames('comment-action', {
           'empty-comment': comment.comment.trim().length === 0,
