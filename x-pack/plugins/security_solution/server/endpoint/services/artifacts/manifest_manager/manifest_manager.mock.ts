@@ -8,7 +8,7 @@
 import LRU from 'lru-cache';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
-import type { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
@@ -64,7 +64,7 @@ export enum ManifestManagerMockType {
 export interface ManifestManagerMockOptions {
   cache: LRU<string, Buffer>;
   exceptionListClient: ExceptionListClient;
-  packagePolicyService: jest.Mocked<PackagePolicyServiceInterface>;
+  packagePolicyService: jest.Mocked<PackagePolicyClient>;
   savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 }
 

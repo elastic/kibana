@@ -16,7 +16,7 @@ import type {
   AgentClient,
   AgentPolicyServiceInterface,
   PackageService,
-  PackagePolicyServiceInterface,
+  PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
@@ -34,7 +34,7 @@ export class TelemetryReceiver {
   private agentClient?: AgentClient;
   private agentPolicyService?: AgentPolicyServiceInterface;
   private packageService?: PackageService;
-  private packagePolicyService?: PackagePolicyServiceInterface;
+  private packagePolicyService?: PackagePolicyClient;
   private esClient?: ElasticsearchClient;
   private soClient?: SavedObjectsClientContract;
   private readonly max_records = 100;

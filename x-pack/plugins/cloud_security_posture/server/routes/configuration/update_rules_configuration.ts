@@ -15,7 +15,7 @@ import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { unset } from 'lodash';
 import produce from 'immer';
@@ -147,7 +147,7 @@ export const updatePackagePolicyRuntimeCfgVar = async ({
   user,
   rules,
 }: {
-  packagePolicyService: PackagePolicyServiceInterface;
+  packagePolicyService: PackagePolicyClient;
   packagePolicy: PackagePolicy;
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;

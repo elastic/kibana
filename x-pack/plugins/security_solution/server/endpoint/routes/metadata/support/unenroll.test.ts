@@ -12,11 +12,11 @@ import {
   createPackagePolicyServiceMock,
 } from '@kbn/fleet-plugin/server/mocks';
 import type { Agent, PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
-import type { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 
 describe('test find all unenrolled Agent id', () => {
   let mockAgentClient: jest.Mocked<AgentClient>;
-  let mockPackagePolicyService: jest.Mocked<PackagePolicyServiceInterface>;
+  let mockPackagePolicyService: jest.Mocked<PackagePolicyClient>;
 
   beforeEach(() => {
     mockAgentClient = createMockAgentClient();

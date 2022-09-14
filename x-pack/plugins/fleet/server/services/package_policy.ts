@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/* eslint-disable max-classes-per-file */
 
 import { omit, partition, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -64,6 +65,7 @@ import {
   PackagePolicyRestrictionRelatedError,
   PackagePolicyNotFoundError,
   HostedAgentPolicyRestrictionRelatedError,
+  FleetUnauthorizedError,
 } from '../errors';
 import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
@@ -76,6 +78,9 @@ import type {
   PostPackagePolicyPostCreateCallback,
 } from '../types';
 import type { ExternalCallback } from '..';
+
+import type { FleetAuthzRouteConfig } from '../routes/security';
+import { getAuthzFromRequest, hasRequiredFleetAuthzPrivilege } from '../routes/security';
 
 import { storedPackagePolicyToAgentInputs } from './agent_policies';
 import { agentPolicyService } from './agent_policy';
@@ -90,6 +95,7 @@ import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
 import { sendTelemetryEvents } from './upgrade_sender';
 import { handleExperimentalDatastreamFeatureOptIn } from './package_policies';
 import { updateDatastreamExperimentalFeatures } from './epm/packages/update';
+import type { PackagePolicyClient, PackagePolicyService } from './package_policy_service';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -106,7 +112,7 @@ export const DATA_STREAM_ALLOWED_INDEX_PRIVILEGES = new Set([
   'read_cross_cluster',
 ]);
 
-class PackagePolicyService implements PackagePolicyServiceInterface {
+class PackagePolicyClientImpl implements PackagePolicyClient {
   public async create(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -1123,6 +1129,66 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
   }
 }
 
+export class PackagePolicyServiceImpl
+  extends PackagePolicyClientImpl
+  implements PackagePolicyService
+{
+  public asScoped(request: KibanaRequest): PackagePolicyClient {
+    const preflightCheck = async (fleetAuthzConfig: FleetAuthzRouteConfig) => {
+      const authz = await getAuthzFromRequest(request);
+      if (!hasRequiredFleetAuthzPrivilege(authz, fleetAuthzConfig)) {
+        throw new FleetUnauthorizedError('Not authorized to this action on integration policies');
+      }
+    };
+    return new PackagePolicyClientWithAuthz(preflightCheck);
+  }
+
+  public get asInternalUser() {
+    return new PackagePolicyClientWithAuthz();
+  }
+}
+
+class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
+  constructor(
+    private readonly preflightCheck?: (
+      fleetAuthzConfig: FleetAuthzRouteConfig
+    ) => void | Promise<void>
+  ) {
+    super();
+  }
+
+  #runPreflight = async (fleetAuthzConfig: FleetAuthzRouteConfig) => {
+    if (this.preflightCheck) {
+      return await this.preflightCheck(fleetAuthzConfig);
+    }
+  };
+
+  async create(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    packagePolicy: NewPackagePolicy,
+    options?: {
+      spaceId?: string;
+      id?: string;
+      user?: AuthenticatedUser;
+      bumpRevision?: boolean;
+      force?: boolean;
+      skipEnsureInstalled?: boolean;
+      skipUniqueNameVerification?: boolean;
+      overwrite?: boolean;
+      packageInfo?: PackageInfo;
+    }
+  ): Promise<PackagePolicy> {
+    await this.#runPreflight({
+      fleetAuthz: {
+        integrations: { writeIntegrationPolicies: true },
+      },
+    });
+
+    return super.create(soClient, esClient, packagePolicy, options);
+  }
+}
+
 function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: PackageInfo) {
   const validationResults = validatePackagePolicy(packagePolicy, pkgInfo, safeLoad);
   if (validationHasErrors(validationResults)) {
@@ -1389,133 +1455,7 @@ export interface NewPackagePolicyWithId extends NewPackagePolicy {
   policy_id: string;
 }
 
-export interface PackagePolicyServiceInterface {
-  create(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    packagePolicy: NewPackagePolicy,
-    options?: {
-      spaceId?: string;
-      id?: string;
-      user?: AuthenticatedUser;
-      bumpRevision?: boolean;
-      force?: boolean;
-      skipEnsureInstalled?: boolean;
-      skipUniqueNameVerification?: boolean;
-      overwrite?: boolean;
-      packageInfo?: PackageInfo;
-    }
-  ): Promise<PackagePolicy>;
-
-  bulkCreate(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    packagePolicies: NewPackagePolicyWithId[],
-    options?: {
-      user?: AuthenticatedUser;
-      bumpRevision?: boolean;
-      force?: true;
-    }
-  ): Promise<PackagePolicy[]>;
-
-  get(soClient: SavedObjectsClientContract, id: string): Promise<PackagePolicy | null>;
-
-  findAllForAgentPolicy(
-    soClient: SavedObjectsClientContract,
-    agentPolicyId: string
-  ): Promise<PackagePolicy[]>;
-
-  getByIDs(
-    soClient: SavedObjectsClientContract,
-    ids: string[],
-    options?: { ignoreMissing?: boolean }
-  ): Promise<PackagePolicy[] | null>;
-
-  list(
-    soClient: SavedObjectsClientContract,
-    options: ListWithKuery
-  ): Promise<ListResult<PackagePolicy>>;
-
-  listIds(
-    soClient: SavedObjectsClientContract,
-    options: ListWithKuery
-  ): Promise<ListResult<string>>;
-
-  update(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    id: string,
-    packagePolicyUpdate: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser; force?: boolean },
-    currentVersion?: string
-  ): Promise<PackagePolicy>;
-
-  delete(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    ids: string[],
-    options?: { user?: AuthenticatedUser; skipUnassignFromAgentPolicies?: boolean; force?: boolean }
-  ): Promise<DeletePackagePoliciesResponse>;
-
-  upgrade(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    ids: string[],
-    options?: { user?: AuthenticatedUser },
-    packagePolicy?: PackagePolicy,
-    pkgVersion?: string
-  ): Promise<UpgradePackagePolicyResponse>;
-
-  getUpgradeDryRunDiff(
-    soClient: SavedObjectsClientContract,
-    id: string,
-    packagePolicy?: PackagePolicy,
-    pkgVersion?: string
-  ): Promise<UpgradePackagePolicyDryRunResponseItem>;
-
-  enrichPolicyWithDefaultsFromPackage(
-    soClient: SavedObjectsClientContract,
-    newPolicy: NewPackagePolicy
-  ): Promise<NewPackagePolicy>;
-
-  buildPackagePolicyFromPackage(
-    soClient: SavedObjectsClientContract,
-    pkgName: string,
-    logger?: Logger
-  ): Promise<NewPackagePolicy | undefined>;
-
-  runExternalCallbacks<A extends ExternalCallback[0]>(
-    externalCallbackType: A,
-    packagePolicy: A extends 'postPackagePolicyDelete'
-      ? DeletePackagePoliciesResponse
-      : A extends 'packagePolicyPostCreate'
-      ? PackagePolicy
-      : NewPackagePolicy,
-    context: RequestHandlerContext,
-    request: KibanaRequest
-  ): Promise<
-    A extends 'postPackagePolicyDelete'
-      ? void
-      : A extends 'packagePolicyPostCreate'
-      ? PackagePolicy
-      : NewPackagePolicy
-  >;
-
-  runDeleteExternalCallbacks(deletedPackagePolicies: DeletePackagePoliciesResponse): Promise<void>;
-
-  getUpgradePackagePolicyInfo(
-    soClient: SavedObjectsClientContract,
-    id: string
-  ): Promise<{
-    packagePolicy: PackagePolicy;
-    packageInfo: PackageInfo;
-    experimentalDataStreamFeatures: ExperimentalDataStreamFeature[];
-  }>;
-}
-
-export const packagePolicyService: PackagePolicyServiceInterface = new PackagePolicyService();
-
-export type { PackagePolicyService };
+export const packagePolicyService: PackagePolicyClient = new PackagePolicyClientImpl();
 
 export function updatePackageInputs(
   basePackagePolicy: NewPackagePolicy,

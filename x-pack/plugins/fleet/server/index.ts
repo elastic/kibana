@@ -35,7 +35,7 @@ export { AgentNotFoundError, FleetUnauthorizedError } from './errors';
 export { config } from './config';
 export type { FleetConfigType } from './config';
 
-export type { PackagePolicyServiceInterface } from './services/package_policy';
+export type { PackagePolicyClient } from './services/package_policy_service';
 
 export { relativeDownloadUrlFromArtifact } from './services/artifacts/mappings';
 

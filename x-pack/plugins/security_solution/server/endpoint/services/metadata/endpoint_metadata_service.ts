@@ -14,10 +14,7 @@ import type {
 
 import type { SearchTotalHits, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Agent, AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
-import type {
-  AgentPolicyServiceInterface,
-  PackagePolicyServiceInterface,
-} from '@kbn/fleet-plugin/server';
+import type { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import { getAgentStatus } from '@kbn/fleet-plugin/common/services/agent_status';
 import type {
@@ -77,7 +74,7 @@ export class EndpointMetadataService {
   constructor(
     private savedObjectsStart: SavedObjectsServiceStart,
     private readonly agentPolicyService: AgentPolicyServiceInterface,
-    private readonly packagePolicyService: PackagePolicyServiceInterface,
+    private readonly packagePolicyService: PackagePolicyClient,
     private readonly logger?: Logger
   ) {}
 

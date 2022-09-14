@@ -27,7 +27,7 @@ import type {
   AgentService,
   PackageService,
   AgentPolicyServiceInterface,
-  PackagePolicyServiceInterface,
+  PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
 import type { FleetStartContract, FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -64,7 +64,7 @@ export interface CspApiRequestHandlerContext {
   soClient: SavedObjectsClientContract;
   agentPolicyService: AgentPolicyServiceInterface;
   agentService: AgentService;
-  packagePolicyService: PackagePolicyServiceInterface;
+  packagePolicyService: PackagePolicyClient;
   packageService: PackageService;
 }
 
