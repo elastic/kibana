@@ -12,7 +12,12 @@ export const useStyles = () => {
     display: 'inline-flex',
   };
 
+  const displayNone: CSSObject = {
+    display: 'none',
+  };
+
   return {
     inlineFlex,
+    displayNone,
   };
 };
