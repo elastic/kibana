@@ -751,13 +751,15 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   }, [
     renderDiscoverResultsAction,
     renderLensResultsAction,
-    addToCase,
-    addToTimeline,
     renderIDColumn,
     renderQueryColumn,
     renderDocsColumn,
     renderAgentsColumn,
     renderToggleResultsAction,
+    addToCase,
+    addToTimeline,
+    timelines,
+    appName,
   ]);
 
   const sorting = useMemo(
