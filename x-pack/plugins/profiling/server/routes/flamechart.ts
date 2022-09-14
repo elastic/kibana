@@ -49,14 +49,15 @@ export function registerFlameChartSearchRoute({ router, logger }: RouteRegisterP
           });
 
         const flamegraph = await withProfilingSpan('collect_flamegraph', async () => {
-          return new FlameGraph(
-            eventsIndex.sampleRate,
+          return new FlameGraph({
+            sampleRate: eventsIndex.sampleRate,
             totalCount,
-            stackTraceEvents,
+            events: stackTraceEvents,
             stackTraces,
             stackFrames,
-            executables
-          ).toElastic();
+            executables,
+            totalSeconds: timeTo - timeFrom,
+          }).toElastic();
         });
 
         logger.info('returning payload response to client');

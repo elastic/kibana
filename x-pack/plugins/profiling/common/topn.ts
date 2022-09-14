@@ -10,6 +10,7 @@ import { InferSearchResponseOf } from '@kbn/core/types/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import { ProfilingESField } from './elasticsearch';
+import { createUniformBucketsForTimeRange } from './histogram';
 import { StackFrameMetadata } from './profiling';
 
 export const OTHER_BUCKET_LABEL = i18n.translate('xpack.profiling.topn.otherBucketLabel', {
@@ -108,14 +109,16 @@ export function getTopNAggregationRequest({
 export function createTopNSamples(
   response: Required<
     InferSearchResponseOf<unknown, { body: { aggs: ReturnType<typeof getTopNAggregationRequest> } }>
-  >['aggregations']
+  >['aggregations'],
+  startMilliseconds: number,
+  endMilliseconds: number,
+  bucketWidth: number
 ): TopNSample[] {
   const bucketsByCategories = new Map();
   const uniqueTimestamps = new Set<number>();
-
   const groupByBuckets = response.group_by.buckets ?? [];
 
-  // keep track of the sum per timestamp to subtract it from the 'other' bucket
+  // Keep track of the sum per timestamp to subtract it from the 'other' bucket
   const sumsOfKnownFieldsByTimestamp = new Map<number, number>();
 
   // Convert the buckets into nested maps and record the unique timestamps
@@ -129,12 +132,12 @@ export function createTopNSamples(
       uniqueTimestamps.add(timestamp);
       const sumAtTimestamp = (sumsOfKnownFieldsByTimestamp.get(timestamp) ?? 0) + count;
       sumsOfKnownFieldsByTimestamp.set(timestamp, sumAtTimestamp);
-      frameCountsByTimestamp.set(items[j].key, count);
+      frameCountsByTimestamp.set(timestamp, count);
     }
     bucketsByCategories.set(groupByBuckets[i].key, frameCountsByTimestamp);
   }
 
-  // create the 'other' bucket by subtracting the sum of all known buckets
+  // Create the 'other' bucket by subtracting the sum of all known buckets
   // from the total
   const otherFrameCountsByTimestamp = new Map<number, number>();
 
@@ -153,16 +156,24 @@ export function createTopNSamples(
     otherFrameCountsByTimestamp.set(timestamp, valueForOtherBucket);
   }
 
-  // only add the 'other' bucket if at least one value per timestamp is > 0
+  // Only add the 'other' bucket if at least one value per timestamp is > 0
   if (addOtherBucket) {
     bucketsByCategories.set(OTHER_BUCKET_LABEL, otherFrameCountsByTimestamp);
   }
 
-  // Normalize samples so there are an equal number of data points per each timestamp
+  // Fill in missing timestamps so that the entire time range is covered
+  const timestamps = createUniformBucketsForTimeRange(
+    [...uniqueTimestamps],
+    startMilliseconds,
+    endMilliseconds,
+    bucketWidth
+  );
+
+  // Normalize samples so there are an equal number of data points per timestamp
   const samples: TopNSample[] = [];
   for (const category of bucketsByCategories.keys()) {
-    for (const timestamp of uniqueTimestamps) {
-      const frameCountsByTimestamp = bucketsByCategories.get(category);
+    const frameCountsByTimestamp = bucketsByCategories.get(category);
+    for (const timestamp of timestamps) {
       const sample: TopNSample = {
         Timestamp: timestamp,
         Count: frameCountsByTimestamp.get(timestamp) ?? 0,
