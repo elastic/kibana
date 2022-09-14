@@ -64,28 +64,37 @@ export async function getActionStatuses(
     const complete = nbAgentsAck === nbAgentsActioned;
     const cancelledAction = cancelledActions.find((a) => a.actionId === action.actionId);
 
-    // query to find errors in action results, cannot do aggregation on text type
-    const res = await esClient.search({
-      index: AGENT_ACTIONS_RESULTS_INDEX,
-      track_total_hits: true,
-      rest_total_hits_as_int: true,
-      query: {
-        bool: {
-          must: [{ term: { action_id: action.actionId } }],
-          should: [
-            {
-              exists: {
-                field: 'error',
+    let hasErrors = false;
+    try {
+      // query to find errors in action results, cannot do aggregation on text type
+      const res = await esClient.search({
+        index: AGENT_ACTIONS_RESULTS_INDEX,
+        track_total_hits: true,
+        rest_total_hits_as_int: true,
+        query: {
+          bool: {
+            must: [{ term: { action_id: action.actionId } }],
+            should: [
+              {
+                exists: {
+                  field: 'error',
+                },
               },
-            },
-          ],
-          minimum_should_match: 1,
+            ],
+            minimum_should_match: 1,
+          },
         },
-      },
-      size: 0,
-    });
-
-    const hasErrors = (res.hits.total ?? 0) > 0;
+        size: 0,
+      });
+      hasErrors = (res.hits.total ?? 0) > 0;
+    } catch (err) {
+      if (err.statusCode === 404) {
+        // .fleet-actions-results does not yet exist
+        appContextService.getLogger().debug(err);
+      } else {
+        throw err;
+      }
+    }
 
     results.push({
       ...action,
