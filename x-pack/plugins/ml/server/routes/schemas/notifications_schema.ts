@@ -38,8 +38,8 @@ export const getNotificationsQuerySchema = schema.object({
   sortDirection: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
     defaultValue: 'desc',
   }),
-  earliestMs: schema.maybe(schema.number()),
-  latestMs: schema.maybe(schema.number()),
+  earliest: schema.maybe(schema.string()),
+  latest: schema.maybe(schema.string()),
 });
 
 export const getNotificationsCountQuerySchema = schema.object({

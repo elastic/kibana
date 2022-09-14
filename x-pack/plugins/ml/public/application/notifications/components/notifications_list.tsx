@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
   EuiBasicTable,
-  IconColor,
+  EuiSearchBar,
   EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFieldSearch,
+  IconColor,
+  Query,
+  SearchFilterConfig,
 } from '@elastic/eui';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import useDebounce from 'react-use/lib/useDebounce';
+import { useTimeRangeUpdates } from '../../contexts/kibana/use_timefilter';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { useRefresh } from '../../routing/use_refresh';
@@ -41,9 +42,9 @@ const levelBadgeMap: Record<MessageLevel, IconColor> = {
 
 export const getDefaultNotificationsListState = (): ListingPageUrlState => ({
   pageIndex: 0,
-  pageSize: 50,
+  pageSize: 25,
   sortField: 'timestamp',
-  sortDirection: 'asc',
+  sortDirection: 'desc',
 });
 
 export const NotificationsList: FC = () => {
@@ -53,6 +54,8 @@ export const NotificationsList: FC = () => {
     },
   } = useMlKibana();
   const { displayErrorToast } = useToastNotificationService();
+
+  const timeRange = useTimeRangeUpdates();
 
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState<NotificationItem[]>([]);
@@ -75,7 +78,24 @@ export const NotificationsList: FC = () => {
 
   const searchQueryText = pageState.queryText;
 
+  const queryInstance = useMemo<Query | undefined>(() => {
+    try {
+      return EuiSearchBar.Query.parse(searchQueryText ?? '');
+    } catch (error) {
+      displayErrorToast(
+        error,
+        i18n.translate('xpack.ml.notifications.invalidQueryError', {
+          defaultMessage: 'Invalid query',
+        })
+      );
+    }
+  }, [searchQueryText, displayErrorToast]);
+
   const fetchNotifications = useCallback(async () => {
+    if (!queryInstance) return;
+
+    const queryString = EuiSearchBar.Query.toESQueryString(queryInstance);
+
     try {
       setIsLoading(true);
       const response = await mlApiServices.notifications.findMessages({
@@ -83,7 +103,9 @@ export const NotificationsList: FC = () => {
         from: pagination.pageIndex,
         sortField: sorting.sort!.field,
         sortDirection: sorting.sort!.direction,
-        queryString: searchQueryText,
+        earliest: timeRange.from,
+        latest: timeRange.to,
+        queryString,
       });
       setItems(response.results);
       setTotalCount(response.total);
@@ -97,22 +119,21 @@ export const NotificationsList: FC = () => {
     }
 
     setIsLoading(false);
-  }, [pagination, sorting, searchQueryText]);
-
-  useEffect(
-    function updateOnTimerRefresh() {
-      if (!refresh) return;
-      fetchNotifications();
-    },
-    [refresh]
-  );
+  }, [
+    pagination,
+    sorting,
+    queryInstance,
+    mlApiServices.notifications,
+    displayErrorToast,
+    timeRange,
+  ]);
 
   useDebounce(
-    function updateOnF() {
+    function refetchNotification() {
       fetchNotifications();
     },
     500,
-    [pagination, sorting, searchQueryText]
+    [pagination, sorting, queryInstance, refresh]
   );
 
   const columns: Array<EuiBasicTableColumn<NotificationItem>> = [
@@ -151,7 +172,17 @@ export const NotificationsList: FC = () => {
       render: (value: MessageLevel) => {
         return <EuiBadge color={'hollow'}>{value}</EuiBadge>;
       },
-      width: '150px',
+      width: '200px',
+    },
+    {
+      field: 'job_id',
+      name: i18n.translate('xpack.ml.notifications.entityLabel', {
+        defaultMessage: 'Entity ID',
+      }),
+      sortable: true,
+      truncateText: false,
+      'data-test-subj': 'mlNotificationEntity',
+      width: '200px',
     },
     {
       field: 'message',
@@ -164,34 +195,118 @@ export const NotificationsList: FC = () => {
     },
   ];
 
-  // @ts-ignore
-  const levelOptions = useMemo(() => {
-    return Object.values(MESSAGE_LEVEL).map((v) => {
-      return {
-        value: v,
-        name: v,
-      };
-    });
+  const filters: SearchFilterConfig[] = useMemo<SearchFilterConfig[]>(() => {
+    return [
+      {
+        type: 'field_value_selection',
+        field: 'level',
+        name: i18n.translate('xpack.ml.notifications.filters.level.name', {
+          defaultMessage: 'Level',
+        }),
+        multiSelect: 'or',
+        options: [
+          {
+            value: MESSAGE_LEVEL.ERROR,
+            name: i18n.translate('xpack.ml.notifications.filters.level.error', {
+              defaultMessage: 'Error',
+            }),
+            field: 'level',
+          },
+          {
+            value: MESSAGE_LEVEL.WARNING,
+            name: i18n.translate('xpack.ml.notifications.filters.level.warning', {
+              defaultMessage: 'Warning',
+            }),
+            field: 'level',
+          },
+          {
+            value: MESSAGE_LEVEL.INFO,
+            name: i18n.translate('xpack.ml.notifications.filters.level.info', {
+              defaultMessage: 'Info',
+            }),
+            field: 'level',
+          },
+        ],
+      },
+      {
+        type: 'field_value_selection',
+        field: 'job_type',
+        name: i18n.translate('xpack.ml.notifications.filters.level.type', {
+          defaultMessage: 'Type',
+        }),
+        multiSelect: 'or',
+        options: [
+          {
+            value: 'anomaly_detector',
+            name: i18n.translate('xpack.ml.notifications.filters.level.error', {
+              defaultMessage: 'Anomaly Detection',
+            }),
+          },
+          {
+            value: 'data_frame_analytics',
+            name: i18n.translate('xpack.ml.notifications.filters.level.warning', {
+              defaultMessage: 'Data Frame Analytics',
+            }),
+          },
+          {
+            value: 'inference',
+            name: i18n.translate('xpack.ml.notifications.filters.level.inference', {
+              defaultMessage: 'Inference',
+            }),
+          },
+          {
+            value: 'system',
+            name: i18n.translate('xpack.ml.notifications.filters.level.info', {
+              defaultMessage: 'System',
+            }),
+          },
+        ],
+      },
+    ];
   }, []);
 
   return (
     <>
-      <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem>
-          <EuiFieldSearch
-            fullWidth
-            placeholder={i18n.translate('xpack.ml.notifications.searchPlaceholder', {
-              defaultMessage: 'Search by message...',
-            })}
-            value={searchQueryText}
-            onChange={(e) => {
-              updatePageState({ queryText: e.target.value });
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiSearchBar
+        query={queryInstance}
+        box={{
+          placeholder: i18n.translate('xpack.ml.notifications.searchPlaceholder', {
+            defaultMessage: 'Search notifications...',
+          }),
+          incremental: true,
+          schema: {
+            strict: true,
+            fields: {
+              level: {
+                type: 'string',
+                name: 'level',
+                searchable: false,
+                aggregatable: true,
+              },
+              job_type: {
+                type: 'string',
+                name: 'job_type',
+                searchable: false,
+                aggregatable: true,
+              },
+              message: {
+                type: 'string',
+                name: 'message',
+                searchable: true,
+                aggregatable: false,
+              },
+            },
+          },
+        }}
+        filters={filters}
+        onChange={(e) => {
+          updatePageState({ queryText: e.queryText });
+        }}
+        data-test-subj={'mlNotificationsSearchBar'}
+      />
 
       <EuiSpacer size={'m'} />
+
       <EuiBasicTable<NotificationItem>
         columns={columns}
         hasActions={true}

@@ -33,36 +33,48 @@ export class NotificationsService {
           sort: [{ [params.sortField]: { order: params.sortDirection } }],
           query: {
             bool: {
+              // ...(params.queryString
+              //   ? { must: [{ match_phrase: { message: params.queryString } }] }
+              //   : {}),
               ...(params.queryString
-                ? { must: [{ match_phrase: { message: params.queryString } }] }
+                ? {
+                    must: [
+                      {
+                        query_string: {
+                          query: params.queryString,
+                          default_field: 'message',
+                        },
+                      },
+                    ],
+                  }
                 : {}),
               filter: [
-                ...(params.earliestMs || params.latestMs
+                ...(params.earliest || params.latest
                   ? [
                       {
                         range: {
                           timestamp: {
-                            ...(params.earliestMs ? { gt: params.earliestMs } : {}),
-                            ...(params.latestMs ? { lte: params.latestMs } : {}),
+                            ...(params.earliest ? { gt: params.earliest } : {}),
+                            ...(params.latest ? { lte: params.latest } : {}),
                           },
                         },
                       },
                     ]
                   : []),
-                ...(!!params.level
-                  ? [
-                      {
-                        term: { level: { value: params.level } },
-                      },
-                    ]
-                  : []),
-                ...(!!params.type
-                  ? [
-                      {
-                        term: { type: { value: params.type } },
-                      },
-                    ]
-                  : []),
+                // ...(!!params.level
+                //   ? [
+                //       {
+                //         term: { level: { value: params.level } },
+                //       },
+                //     ]
+                //   : []),
+                // ...(!!params.type
+                //   ? [
+                //       {
+                //         term: { type: { value: params.type } },
+                //       },
+                //     ]
+                //   : []),
               ],
             },
           },

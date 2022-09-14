@@ -15,6 +15,8 @@ export interface NotificationsQueryParams {
   sortField?: string;
   sortDirection?: string;
   queryString?: string;
+  earliest?: string;
+  latest?: string;
 }
 
 export interface NotificationSource {
