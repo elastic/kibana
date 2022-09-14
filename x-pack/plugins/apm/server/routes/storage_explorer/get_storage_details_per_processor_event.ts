@@ -133,10 +133,7 @@ export async function getStorageDetailsPerProcessorEvent({
       );
 
     return {
-      processorEvent: processorEvent as Exclude<
-        ProcessorEvent,
-        ProcessorEvent.profile
-      >,
+      processorEvent,
       docs:
         bucketForProcessorEvent?.number_of_metric_docs_for_processor_event
           .value ?? 0,

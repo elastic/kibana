@@ -48,7 +48,6 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'infrastructure'
     | 'service-map'
     | 'logs'
-    | 'profiling'
     | 'alerts';
   hidden?: boolean;
 };
@@ -184,7 +183,7 @@ export function isInfraTabHidden({
 
 function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   const { agentName, runtimeName } = useApmServiceContext();
-  const { config, core, plugins } = useApmPluginContext();
+  const { core, plugins } = useApmPluginContext();
   const { capabilities } = core.application;
   const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(
     plugins,
@@ -304,20 +303,6 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       }),
       hidden:
         !agentName || isRumAgentName(agentName) || isMobileAgentName(agentName),
-    },
-    {
-      key: 'profiling',
-      href: router.link('/services/{serviceName}/profiling', {
-        path: {
-          serviceName,
-        },
-        query,
-      }),
-      hidden: !config.profilingEnabled,
-      append: <TechnicalPreviewBadge icon="beaker" />,
-      label: i18n.translate('xpack.apm.serviceDetails.profilingTabLabel', {
-        defaultMessage: 'Profiling',
-      }),
     },
     {
       key: 'alerts',

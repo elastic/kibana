@@ -18,7 +18,6 @@ import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import { Annotation } from '@kbn/observability-plugin/common/annotations';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import { latencyAggregationTypeRt } from '../../../common/latency_aggregation_types';
-import { ProfilingValueType } from '../../../common/profiling';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceAnnotations } from './annotations';
@@ -32,8 +31,6 @@ import { getServiceMetadataIcons } from './get_service_metadata_icons';
 import { getServiceNodeMetadata } from './get_service_node_metadata';
 import { getServiceTransactionTypes } from './get_service_transaction_types';
 import { getThroughput } from './get_throughput';
-import { getServiceProfilingStatistics } from './profiling/get_service_profiling_statistics';
-import { getServiceProfilingTimeline } from './profiling/get_service_profiling_timeline';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
@@ -1028,108 +1025,6 @@ export const serviceDependenciesBreakdownRoute = createApmServerRoute({
   },
 });
 
-const serviceProfilingTimelineRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/profiling/timeline',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([environmentRt, kueryRt, rangeRt]),
-  }),
-  options: {
-    tags: ['access:apm'],
-  },
-  handler: async (
-    resources
-  ): Promise<{
-    profilingTimeline: Array<{
-      x: number;
-      valueTypes: {
-        wall_time: number;
-        cpu_time: number;
-        samples: number;
-        alloc_objects: number;
-        alloc_space: number;
-        inuse_objects: number;
-        inuse_space: number;
-        unknown: number;
-      };
-    }>;
-  }> => {
-    const setup = await setupRequest(resources);
-    const { params } = resources;
-    const {
-      path: { serviceName },
-      query: { environment, kuery, start, end },
-    } = params;
-
-    const profilingTimeline = await getServiceProfilingTimeline({
-      kuery,
-      setup,
-      serviceName,
-      environment,
-      start,
-      end,
-    });
-
-    return { profilingTimeline };
-  },
-});
-
-const serviceProfilingStatisticsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/profiling/statistics',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      t.type({
-        valueType: t.union([
-          t.literal(ProfilingValueType.wallTime),
-          t.literal(ProfilingValueType.cpuTime),
-          t.literal(ProfilingValueType.samples),
-          t.literal(ProfilingValueType.allocObjects),
-          t.literal(ProfilingValueType.allocSpace),
-          t.literal(ProfilingValueType.inuseObjects),
-          t.literal(ProfilingValueType.inuseSpace),
-        ]),
-      }),
-    ]),
-  }),
-  options: {
-    tags: ['access:apm'],
-  },
-  handler: async (
-    resources
-  ): Promise<{
-    nodes: Record<string, import('./../../../common/profiling').ProfileNode>;
-    rootNodes: string[];
-  }> => {
-    const setup = await setupRequest(resources);
-
-    const { params, logger } = resources;
-
-    const {
-      path: { serviceName },
-      query: { environment, kuery, valueType, start, end },
-    } = params;
-
-    return getServiceProfilingStatistics({
-      kuery,
-      serviceName,
-      environment,
-      valueType,
-      setup,
-      logger,
-      start,
-      end,
-    });
-  },
-});
-
 const serviceAnomalyChartsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/anomaly_charts',
   params: t.type({
@@ -1263,8 +1158,6 @@ export const serviceRouteRepository = {
   ...serviceInstancesDetailedStatisticsRoute,
   ...serviceDependenciesRoute,
   ...serviceDependenciesBreakdownRoute,
-  ...serviceProfilingTimelineRoute,
-  ...serviceProfilingStatisticsRoute,
   ...serviceAnomalyChartsRoute,
   ...sortedAndFilteredServicesRoute,
 };

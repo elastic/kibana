@@ -21,7 +21,6 @@ import {
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { omit } from 'lodash';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { Profile } from '../../../../../typings/es_schemas/ui/profile';
 import { withApmSpan } from '../../../../utils/with_apm_span';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { Metric } from '../../../../../typings/es_schemas/ui/metric';
@@ -69,7 +68,6 @@ type TypeOfProcessorEvent<T extends ProcessorEvent> = {
   transaction: Transaction;
   span: Span;
   metric: Metric;
-  profile: Profile;
 }[T];
 
 type TypedSearchResponse<TParams extends APMEventESSearchRequest> =

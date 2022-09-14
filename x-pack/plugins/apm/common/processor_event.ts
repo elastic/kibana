@@ -12,7 +12,6 @@ export const processorEventRt = t.union([
   t.literal(ProcessorEvent.error),
   t.literal(ProcessorEvent.metric),
   t.literal(ProcessorEvent.span),
-  t.literal(ProcessorEvent.profile),
 ]);
 /**
  * Processor events that are searchable in the UI via the query bar.

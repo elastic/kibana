@@ -23,7 +23,6 @@ import { ServiceNodeOverview } from '../../app/service_node_overview';
 import { ServiceNodeMetrics } from '../../app/service_node_metrics';
 import { ServiceMapServiceDetail } from '../../app/service_map';
 import { TransactionDetails } from '../../app/transaction_details';
-import { ServiceProfiling } from '../../app/service_profiling';
 import { ServiceDependencies } from '../../app/service_dependencies';
 import { ServiceLogs } from '../../app/service_logs';
 import { InfraOverview } from '../../app/infra_overview';
@@ -267,13 +266,6 @@ export const serviceDetail = {
         searchBarOptions: {
           showKueryBar: false,
         },
-      }),
-      '/services/{serviceName}/profiling': page({
-        tab: 'profiling',
-        title: i18n.translate('xpack.apm.views.serviceProfiling.title', {
-          defaultMessage: 'Profiling',
-        }),
-        element: <ServiceProfiling />,
       }),
       '/services/{serviceName}/infrastructure': page({
         tab: 'infrastructure',
