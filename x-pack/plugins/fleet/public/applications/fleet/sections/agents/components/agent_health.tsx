@@ -82,7 +82,7 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
     }
 
     return getPreviousAgentStatusForOfflineAgents(agent);
-  }, [showOfflinePreviousStatus]);
+  }, [showOfflinePreviousStatus, agent]);
 
   return (
     <EuiToolTip
