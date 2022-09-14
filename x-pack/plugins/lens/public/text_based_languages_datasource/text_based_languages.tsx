@@ -12,6 +12,7 @@ import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
+import type { SavedObjectReference } from '@kbn/core/public';
 import { EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -37,6 +38,10 @@ import type {
 import { FieldSelect } from './field_select';
 import { Datasource } from '../types';
 import { LayerPanel } from './layerpanel';
+
+function getLayerReferenceName(layerId: string) {
+  return `textBasedLanguages-datasource-layer-${layerId}`;
+}
 
 export function getTextBasedLanguagesDatasource({
   core,
@@ -126,7 +131,15 @@ export function getTextBasedLanguagesDatasource({
     },
 
     getPersistableState({ layers }: TextBasedLanguagesPrivateState) {
-      return { state: { layers }, savedObjectReferences: [] };
+      const savedObjectReferences: SavedObjectReference[] = [];
+      Object.entries(layers).forEach(([layerId, { index, ...persistableLayer }]) => {
+        savedObjectReferences.push({
+          type: 'index-pattern',
+          id: index,
+          name: getLayerReferenceName(layerId),
+        });
+      });
+      return { state: { layers }, savedObjectReferences };
     },
     isValidColumn(state, indexPatterns, layerId, columnId) {
       const layer = state.layers[layerId];
