@@ -95,6 +95,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       // TODO Handle data view without time fields.
       timeFieldName: dataView.timeFieldName ?? '',
       index: dataView.title,
+      grouping: true,
       ...windowParameters,
     },
     { reducer: streamReducer, initialState }
