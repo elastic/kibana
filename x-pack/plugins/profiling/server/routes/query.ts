@@ -40,13 +40,3 @@ export function createCommonFilter({
     },
   };
 }
-
-export function findFixedIntervalForBucketsPerTimeRange(
-  timeFrom: number,
-  timeTo: number,
-  buckets: number
-): string {
-  const range = timeTo - timeFrom;
-  const interval = Math.max(Math.floor(range / buckets), 1);
-  return `${interval}s`;
-}
