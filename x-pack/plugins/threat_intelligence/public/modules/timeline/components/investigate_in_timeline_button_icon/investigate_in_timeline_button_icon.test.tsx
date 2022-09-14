@@ -7,20 +7,27 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
+import {
+  generateMockIndicator,
+  generateMockUrlIndicator,
+  Indicator,
+} from '../../../../../common/types/indicator';
 import { EMPTY_VALUE } from '../../../../../common/constants';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
-import { InvestigateInTimeline } from './investigate_in_timeline';
+import { InvestigateInTimelineButtonIcon } from './investigate_in_timeline_button_icon';
 
-describe('<InvestigateInTimeline />', () => {
-  it('should render timeline button when Indicator data', () => {
-    const mockData: Indicator = generateMockIndicator();
+describe('<InvestigateInTimelineButtonIcon />', () => {
+  it('should render button icon when Indicator data is correct', () => {
+    const mockData: Indicator = generateMockUrlIndicator();
+    const mockId = 'mockId';
 
     const component = render(
       <TestProvidersComponent>
-        <InvestigateInTimeline data={mockData} />
+        <InvestigateInTimelineButtonIcon data={mockData} data-test-subj={mockId} />
       </TestProvidersComponent>
     );
+
+    expect(component.getByTestId(mockId)).toBeInTheDocument();
     expect(component).toMatchSnapshot();
   });
 
@@ -30,9 +37,10 @@ describe('<InvestigateInTimeline />', () => {
 
     const component = render(
       <TestProvidersComponent>
-        <InvestigateInTimeline data={mockData} />
+        <InvestigateInTimelineButtonIcon data={mockData} />
       </TestProvidersComponent>
     );
+
     expect(component).toMatchSnapshot();
   });
 });

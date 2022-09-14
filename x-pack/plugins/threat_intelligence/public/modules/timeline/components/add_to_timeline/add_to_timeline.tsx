@@ -6,10 +6,11 @@
  */
 
 import React, { useRef, VFC } from 'react';
-import { DataProvider, QueryOperator } from '@kbn/timelines-plugin/common';
+import { DataProvider } from '@kbn/timelines-plugin/common';
 import { AddToTimelineButtonProps } from '@kbn/timelines-plugin/public';
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui/src/components/button';
 import { EuiContextMenuItem } from '@elastic/eui';
+import { generateDataProvider } from '../../lib/data-provider';
 import { ComponentType } from '../../../../../common/types/component_type';
 import { getIndicatorFieldAndValue } from '../../../indicators/lib/field_value';
 import { EMPTY_VALUE } from '../../../../../common/constants';
@@ -65,23 +66,7 @@ export const AddToTimeline: VFC<AddToTimelineProps> = ({ data, field, type, as, 
     return <></>;
   }
 
-  const operator = ':' as QueryOperator;
-
-  const dataProvider: DataProvider[] = [
-    {
-      and: [],
-      enabled: true,
-      id: `timeline-indicator-${key}-${value}`,
-      name: value,
-      excluded: false,
-      kqlQuery: '',
-      queryMatch: {
-        field: key,
-        value,
-        operator,
-      },
-    },
-  ];
+  const dataProvider: DataProvider[] = [generateDataProvider(key, value)];
 
   const addToTimelineProps: AddToTimelineButtonProps = {
     dataProvider,
