@@ -13,8 +13,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiPanel,
@@ -33,73 +33,29 @@ interface ControlGroupExampleProps {
   dataViews: DataViewsPublicPluginStart;
 }
 
-interface ControlSelectOptions {
-  [key: string]: { fieldName: string; displayName: string; icon: string };
-}
-
-const preconfiguredParentFields: ControlSelectOptions = {
-  machineOS: {
-    fieldName: 'machine.os.keyword',
-    displayName: 'Machine OS',
-    icon: 'user',
-  },
-  message: {
-    fieldName: 'message.keyword',
-    displayName: 'Message',
-    icon: 'user',
-  },
-  bytes: {
-    fieldName: 'bytes',
-    displayName: 'Bytes',
-    icon: 'user',
-  },
+const preconfiguredFields = {
+  'machine.os.keyword': { title: 'Machine OS', icon: 'compute' },
+  'extension.keyword': { title: 'Extension', icon: 'copy' },
+  'host.keyword': { title: 'Host', icon: 'package' },
+  'geo.srcdest': { title: 'Source / Destination', icon: 'globe' },
+  'message.keyword': { title: 'Message', icon: 'string' },
+  bytes: { title: 'Bytes', icon: 'database' },
 };
 
-const preconfiguredChildFields: ControlSelectOptions = {
-  machineOS: {
-    fieldName: 'machine.os.keyword',
-    displayName: 'Machine OS',
-    icon: 'user',
-  },
-  message: {
-    fieldName: 'message.keyword',
-    displayName: 'Message',
-    icon: 'user',
-  },
-  bytes: {
-    fieldName: 'bytes',
-    displayName: 'Bytes',
-    icon: 'user',
-  },
-};
-
-const mapFieldsToControlOptions = (
-  availableUUIDs: string[],
-  preconfiguredFields: ControlSelectOptions,
-  controlGroupAPI: ControlGroupContainer,
-  setIsPopoverOpen: React.Dispatch<React.SetStateAction<boolean>>,
-  setAvailableUUIDs: React.Dispatch<React.SetStateAction<string[]>>,
-  dataViewId?: string
-) => {
+const mapFieldsToControlOptions = (controlGroupAPI: ControlGroupContainer, dataViewId?: string) => {
   return [
     {
       id: 0,
       title: 'Check out these pre-configured filter options',
-      items: availableUUIDs.map((fieldIdToUse) => {
-        const fieldToUse = preconfiguredFields[fieldIdToUse];
+      items: Object.entries(preconfiguredFields).map(([fieldName, meta]) => {
         return {
-          name: fieldToUse.displayName,
-          icon: fieldToUse.icon,
+          name: meta.title,
+          icon: meta.icon,
           onClick: () => {
-            setIsPopoverOpen(false);
-            setAvailableUUIDs((currentAvailableUUIDs) =>
-              currentAvailableUUIDs.filter((id) => id !== fieldIdToUse)
-            );
             if (!controlGroupAPI || !dataViewId) return;
             controlGroupAPI.addDataControlFromField({
-              title: fieldToUse.displayName,
-              uuid: fieldIdToUse,
-              fieldName: fieldToUse.fieldName,
+              title: meta.title,
+              fieldName: fieldName,
               dataViewId,
             });
           },
@@ -109,24 +65,47 @@ const mapFieldsToControlOptions = (
   ];
 };
 
+const AddPreconfiguredControlButton = ({
+  dataViewId,
+  api,
+}: {
+  dataViewId?: string;
+  api?: ControlGroupContainer;
+}) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const addControlButton = (
+    <EuiButton onClick={() => setIsPopoverOpen(true)} iconType="arrowDown" iconSide="right">
+      Add a pre-configured control
+    </EuiButton>
+  );
+
+  return dataViewId && api ? (
+    <EuiPopover
+      id={'addControlPopover'}
+      button={addControlButton}
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+    >
+      <EuiContextMenu initialPanelId={0} panels={mapFieldsToControlOptions(api, dataViewId)} />
+    </EuiPopover>
+  ) : null;
+};
+
 export const ControlGroupEmbeddableExample = ({
   controls,
   dataViews,
 }: ControlGroupExampleProps) => {
-  const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.EDIT);
   const [dataViewId, setDataViewId] = useState<string>();
 
-  const [isParentPopoverOpen, setIsParentPopoverOpen] = useState(false);
+  // Store API references in state hooks
   const [parentControlGroupAPI, setParentControlGroupAPI] = useState<ControlGroupContainer>();
-  const [availableParentUUIDs, setAvailableParentUUIDs] = useState<string[]>(
-    Object.keys(preconfiguredParentFields)
-  );
-
-  const [isChildPopoverOpen, setIsChildPopoverOpen] = useState(false);
   const [childControlGroupAPI, setchildControlGroupAPI] = useState<ControlGroupContainer>();
-  const [availableChildUUIDs, setAvailableChildUUIDs] = useState<string[]>(
-    Object.keys(preconfiguredChildFields)
-  );
+
+  // View mode is an example of state managed by the page and passed in as props to control group
+  const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.EDIT);
 
   // load the default data view
   useEffect(() => {
@@ -145,43 +124,11 @@ export const ControlGroupEmbeddableExample = ({
   useEffect(() => {
     if (!parentControlGroupAPI || !childControlGroupAPI) return;
 
-    const subscription = parentControlGroupAPI.onControlRemoved$.subscribe((idRemoved) => {
-      setAvailableParentUUIDs((currentAvailableUUIDs) => [...currentAvailableUUIDs, idRemoved]);
-    });
-    subscription.add(
-      childControlGroupAPI.onControlRemoved$.subscribe((idRemoved) => {
-        setAvailableChildUUIDs((currentAvailableUUIDs) => [...currentAvailableUUIDs, idRemoved]);
-      })
-    );
-    subscription.add(
-      parentControlGroupAPI.onFiltersPublished$.subscribe((parentOutputFilters) =>
-        childControlGroupAPI.updateFilterContext(parentOutputFilters)
-      )
+    const subscription = parentControlGroupAPI.onFiltersPublished$.subscribe(
+      (parentOutputFilters) => childControlGroupAPI.updateFilterContext(parentOutputFilters)
     );
     return () => subscription?.unsubscribe();
   }, [parentControlGroupAPI, childControlGroupAPI]);
-
-  const addControlToParentButton = (
-    <EuiButton
-      disabled={availableParentUUIDs.length === 0}
-      onClick={() => setIsParentPopoverOpen(true)}
-      iconType="arrowDown"
-      iconSide="right"
-    >
-      Add a pre-configured control
-    </EuiButton>
-  );
-
-  const addControlToChildButton = (
-    <EuiButton
-      disabled={availableChildUUIDs.length === 0}
-      onClick={() => setIsChildPopoverOpen(true)}
-      iconType="arrowDown"
-      iconSide="right"
-    >
-      Add a pre-configured control
-    </EuiButton>
-  );
 
   return (
     <EuiPageBody>
@@ -190,6 +137,15 @@ export const ControlGroupEmbeddableExample = ({
           <EuiTitle size="l">
             <h1>Control Group Embeddable Imperative API Example</h1>
           </EuiTitle>
+        </EuiPageHeaderSection>
+      </EuiPageHeader>
+      <EuiPageContent>
+        <EuiPageContentBody>
+          <EuiText>
+            Pages can manage a subset of Embeddable state and pass it in via props. Embeddable
+            building blocks will respond and re-render when these props change. This example app
+            owns the ViewMode state.
+          </EuiText>
           <EuiButton
             onClick={() =>
               setViewMode((currentViewMode) => {
@@ -199,10 +155,9 @@ export const ControlGroupEmbeddableExample = ({
           >
             Switch to {viewMode === ViewMode.VIEW ? 'edit mode' : 'view mode'}
           </EuiButton>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <EuiPageContent>
-        <EuiPageContentBody>
+
+          <EuiSpacer size="xxl" />
+
           <EuiText>
             The following is a blank Control Group. The Add control button is configured in the
             example app, and adds Controls to the group via the API.
@@ -216,26 +171,10 @@ export const ControlGroupEmbeddableExample = ({
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiPopover
-                  id={'addControlPopover'}
-                  button={addControlToParentButton}
-                  isOpen={isParentPopoverOpen}
-                  closePopover={() => setIsParentPopoverOpen(false)}
-                  panelPaddingSize="none"
-                  anchorPosition="downLeft"
-                >
-                  <EuiContextMenu
-                    initialPanelId={0}
-                    panels={mapFieldsToControlOptions(
-                      availableParentUUIDs,
-                      preconfiguredParentFields,
-                      parentControlGroupAPI!,
-                      setIsParentPopoverOpen,
-                      setAvailableParentUUIDs,
-                      dataViewId
-                    )}
-                  />
-                </EuiPopover>
+                <AddPreconfiguredControlButton
+                  dataViewId={dataViewId}
+                  api={parentControlGroupAPI}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
@@ -252,26 +191,7 @@ export const ControlGroupEmbeddableExample = ({
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiPopover
-                  id={'addControlToChildPopover'}
-                  button={addControlToChildButton}
-                  isOpen={isChildPopoverOpen}
-                  closePopover={() => setIsChildPopoverOpen(false)}
-                  panelPaddingSize="none"
-                  anchorPosition="downLeft"
-                >
-                  <EuiContextMenu
-                    initialPanelId={0}
-                    panels={mapFieldsToControlOptions(
-                      availableChildUUIDs,
-                      preconfiguredChildFields,
-                      childControlGroupAPI!,
-                      setIsChildPopoverOpen,
-                      setAvailableChildUUIDs,
-                      dataViewId
-                    )}
-                  />
-                </EuiPopover>
+                <AddPreconfiguredControlButton dataViewId={dataViewId} api={childControlGroupAPI} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>

@@ -18,7 +18,7 @@ import { ControlGroupInput, ControlGroupOutput, CONTROL_GROUP_TYPE } from './typ
 import { ControlGroupContainer } from './embeddable/control_group_container';
 
 export interface ControlGroupRendererProps {
-  input?: Partial<ControlGroupInput>;
+  input?: Partial<Pick<ControlGroupInput, 'viewMode' | 'executionContext'>>;
   onEmbeddableLoad: (controlGroupContainer: ControlGroupContainer) => void;
 }
 
