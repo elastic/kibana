@@ -6,7 +6,8 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { InferencePipeline } from '@kbn/enterprise-search-plugin/common/types/pipelines';
+
+import { InferencePipeline } from '../../../common/types/pipelines';
 
 import {
   fetchAndAddTrainedModelData,
@@ -286,7 +287,9 @@ describe('fetchMlInferencePipelineProcessors lib function', () => {
     it('should return an empty array', async () => {
       mockClient.ingest.getPipeline.mockImplementationOnce(() => Promise.resolve(mockGetPipeline));
       mockClient.ingest.getPipeline.mockImplementationOnce(() =>
-        Promise.resolve({ 'non-ml-inference-pipeline': mockGetPipeline2['non-ml-inference-pipeline'] })
+        Promise.resolve({
+          'non-ml-inference-pipeline': mockGetPipeline2['non-ml-inference-pipeline'],
+        })
       );
 
       const response = await fetchMlInferencePipelineProcessors(
@@ -320,7 +323,7 @@ describe('fetchMlInferencePipelineProcessors lib function', () => {
         Promise.resolve(mockGetTrainedModelStats)
       );
 
-      const expected = [something['trained-model-id-1']]
+      const expected = [something['trained-model-id-1']];
 
       const response = await fetchMlInferencePipelineProcessors(
         mockClient as unknown as ElasticsearchClient,
