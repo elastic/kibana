@@ -301,7 +301,7 @@ export function registerIndexRoutes({
 
       if (createResult.exists) {
         return response.conflict({
-          body: new Error(`There is already a pipeline with name '${pipelineName}'.`)
+          body: new Error(`There is already a pipeline with name '${pipelineName}'.`),
         });
       }
 
