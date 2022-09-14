@@ -73,10 +73,25 @@ interface Props {
   location: string;
   onClose: () => void;
   onEnabledChange: () => void;
+  currentDurationChartFrom?: string;
+  currentDurationChartTo?: string;
+  previousDurationChartFrom?: string;
+  previousDurationChartTo?: string;
 }
 
+const DEFAULT_DURATION_CHART_FROM = 'now-12h';
+const DEFAULT_CURRENT_DURATION_CHART_TO = 'now';
+const DEFAULT_PREVIOUS_DURATION_CHART_FROM = 'now-24h';
+const DEFAULT_PREVIOUS_DURATION_CHART_TO = 'now-12h';
+
 export function MonitorDetailFlyout(props: Props) {
-  const { id } = props;
+  const {
+    id,
+    currentDurationChartFrom,
+    currentDurationChartTo,
+    previousDurationChartFrom,
+    previousDurationChartTo,
+  } = props;
   const state = useSelector(selectOverviewState);
 
   const monitor: MonitorOverviewItem | null = useMemo(() => {
@@ -192,8 +207,8 @@ export function MonitorDetailFlyout(props: Props) {
                   seriesType: 'area',
                   color: theme.euiTheme.colors.success,
                   time: {
-                    from: 'now-12h',
-                    to: 'now',
+                    from: currentDurationChartFrom ?? DEFAULT_DURATION_CHART_FROM,
+                    to: currentDurationChartTo ?? DEFAULT_CURRENT_DURATION_CHART_TO,
                   },
                   reportDefinitions: {
                     'monitor.id': [id],
@@ -213,8 +228,8 @@ export function MonitorDetailFlyout(props: Props) {
                   seriesType: 'line',
                   color: '#ddaf84',
                   time: {
-                    from: 'now-24h',
-                    to: 'now-12h',
+                    from: previousDurationChartFrom ?? DEFAULT_PREVIOUS_DURATION_CHART_FROM,
+                    to: previousDurationChartTo ?? DEFAULT_PREVIOUS_DURATION_CHART_TO,
                   },
                   reportDefinitions: {
                     'monitor.id': [id],
