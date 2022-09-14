@@ -9,7 +9,6 @@ import { isEmpty } from 'lodash';
 import { Position, ScaleType } from '@elastic/charts';
 import type { EuiSelectOption } from '@elastic/eui';
 import type { Type, Language, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { Unit } from '@kbn/datemath';
 import type { Filter } from '@kbn/es-query';
 import * as i18n from './translations';
 import { histogramDateTimeFormatter } from '../../../../common/components/utils';
@@ -17,6 +16,7 @@ import type { ChartSeriesConfigs } from '../../../../common/components/charts/co
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import type { FieldValueQueryBar } from '../query_bar';
 import type { ESQuery } from '../../../../../common/typed_json';
+import type { TimeframePreviewOptions } from '../../../pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../pages/detection_engine/rules/types';
 
 /**
@@ -25,18 +25,13 @@ import { DataSourceType } from '../../../pages/detection_engine/rules/types';
  * @param hits Total query search hits
  * @param timeframe Range selected by user (last hour, day...)
  */
-export const isNoisy = (hits: number, timeframe: Unit): boolean => {
-  if (timeframe === 'h') {
-    return hits > 1;
-  } else if (timeframe === 'd') {
-    return hits / 24 > 1;
-  } else if (timeframe === 'w') {
-    return hits / 168 > 1;
-  } else if (timeframe === 'M') {
-    return hits / 30 > 1;
-  }
-
-  return false;
+export const isNoisy = (hits: number, timeframe: TimeframePreviewOptions): boolean => {
+  const oneHour = 1000 * 60 * 60;
+  const durationInHours = Math.max(
+    (timeframe.timeframeEnd.valueOf() - timeframe.timeframeStart.valueOf()) / oneHour,
+    1.0
+  );
+  return hits / durationInHours > 1;
 };
 
 /**

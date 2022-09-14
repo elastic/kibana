@@ -149,6 +149,8 @@ const expectedIndexPatterns = {
     hasRestrictions: false,
     fields: fieldsOne,
     getFieldByName: getFieldByNameFactory(fieldsOne),
+    isPersisted: true,
+    spec: {},
   },
   2: {
     id: '2',
@@ -157,6 +159,8 @@ const expectedIndexPatterns = {
     timeFieldName: 'timestamp',
     fields: fieldsTwo,
     getFieldByName: getFieldByNameFactory(fieldsTwo),
+    isPersisted: true,
+    spec: {},
   },
 };
 
@@ -408,6 +412,8 @@ describe('IndexPattern Data Source suggestions', () => {
                 searchable: true,
               },
             ]),
+            isPersisted: true,
+            spec: {},
           },
         };
 
@@ -650,6 +656,8 @@ describe('IndexPattern Data Source suggestions', () => {
                 searchable: true,
               },
             ]),
+            isPersisted: true,
+            spec: {},
           },
         };
 
@@ -2772,6 +2780,8 @@ describe('IndexPattern Data Source suggestions', () => {
           hasRestrictions: false,
           fields,
           getFieldByName: getFieldByNameFactory(fields),
+          isPersisted: true,
+          spec: {},
         },
       });
 
@@ -2867,6 +2877,8 @@ describe('IndexPattern Data Source suggestions', () => {
               searchable: true,
             },
           ]),
+          isPersisted: true,
+          spec: {},
         },
       };
 
@@ -2947,6 +2959,8 @@ describe('IndexPattern Data Source suggestions', () => {
               searchable: true,
             },
           ]),
+          isPersisted: true,
+          spec: {},
         },
       };
 

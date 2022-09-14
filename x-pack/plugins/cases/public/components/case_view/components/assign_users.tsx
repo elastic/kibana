@@ -12,7 +12,7 @@ import {
   EuiText,
   EuiLink,
   EuiLoadingSpinner,
-  EuiSpacer,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 
 import { UserProfileWithAvatar } from '@kbn/user-profile-components';
@@ -21,7 +21,7 @@ import { useAssignees } from '../../../containers/user_profiles/use_assignees';
 import { CaseAssignees } from '../../../../common/api/cases/assignee';
 import * as i18n from '../translations';
 import { SidebarTitle } from './sidebar_title';
-import { UserRepresentation } from '../../user_profiles/user_representation';
+import { RemovableUser } from '../../user_profiles/removable_user';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { Assignee } from '../../user_profiles/types';
 import { SuggestUsersPopover } from './suggest_users_popover';
@@ -76,7 +76,7 @@ const AssigneesList: React.FC<AssigneesListProps> = ({
         <EuiFlexGroup direction="column" gutterSize="s">
           {assignees.map((assignee) => (
             <EuiFlexItem key={assignee.uid} grow={false}>
-              <UserRepresentation assignee={assignee} onRemoveAssignee={onAssigneeRemoved} />
+              <RemovableUser assignee={assignee} onRemoveAssignee={onAssigneeRemoved} />
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
@@ -170,7 +170,7 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
   }, [isPopoverOpen, needToUpdateAssignees, onAssigneesChanged, selectedAssignees]);
 
   return (
-    <EuiFlexItem grow={false}>
+    <EuiFlexItem grow={false} data-test-subj="case-view-assignees">
       <EuiFlexGroup
         alignItems="center"
         gutterSize="xs"
@@ -195,7 +195,7 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
+      <EuiHorizontalRule margin="xs" />
       <AssigneesList
         assignees={allAssignees}
         currentUserProfile={currentUserProfile}
