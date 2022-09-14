@@ -44,10 +44,11 @@ const chartBase: ChartBase = {
 };
 
 /**
- * To calculate the compute usage we need to multiple the "system.memory.total" by "faas.billed_duration".
+ * To calculate the compute usage we need to multiply the "system.memory.total" by "faas.billed_duration".
  * But the result of this calculation is in Bytes-milliseconds, as the "system.memory.total" is stored in bytes and the "faas.billed_duration" is stored in milliseconds.
  * But to calculate the overall cost AWS uses GB-second, so we need to convert the result to this unit.
  */
+const GB = 1024 ** 3;
 function calculateComputeUsageGBSeconds({
   faasBilledDuration,
   totalMemory,
@@ -58,9 +59,10 @@ function calculateComputeUsageGBSeconds({
   if (!isFiniteNumber(faasBilledDuration) || !isFiniteNumber(totalMemory)) {
     return 0;
   }
-  const bytesMsResult = totalMemory * faasBilledDuration;
-  const GBSeconds = 1024 * 1024 * 1024 * 1000;
-  return bytesMsResult / GBSeconds;
+
+  const totalMemoryGB = totalMemory / GB;
+  const faasBilledDurationSec = faasBilledDuration * 1000;
+  return totalMemoryGB * faasBilledDurationSec;
 }
 
 export async function getComputeUsage({
