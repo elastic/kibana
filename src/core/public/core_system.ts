@@ -71,6 +71,17 @@ export interface InternalCoreStart extends Omit<CoreStart, 'application'> {
   injectedMetadata: InternalInjectedMetadataStart;
 }
 
+// Expands the definition of navigator to include experimental features
+interface ExtendedNavigator {
+  connection?: {
+    effectiveType?: string;
+  };
+  // Estimated RAM
+  deviceMemory?: number;
+  // Number of cores
+  hardwareConcurrency?: number;
+}
+
 /**
  * The CoreSystem is the root of the new platform, and setups all parts
  * of Kibana in the UI, including the LegacyPlatform which is managed
@@ -168,12 +179,24 @@ export class CoreSystem {
     });
 
     const timing = this.getLoadMarksInfo();
+
+    const navigatorExt = navigator as ExtendedNavigator;
+    const navigatorInfo: Record<string, string> = {};
+    if (navigatorExt.deviceMemory) {
+      navigatorInfo.deviceMemory = String(navigatorExt.deviceMemory);
+    }
+    if (navigatorExt.hardwareConcurrency) {
+      navigatorInfo.hardwareConcurrency = String(navigatorExt.hardwareConcurrency);
+    }
+
     reportPerformanceMetricEvent(analytics, {
       eventName: KIBANA_LOADED_EVENT,
       meta: {
         kibana_version: this.coreContext.env.packageInfo.version,
         protocol: window.location.protocol,
         ...fetchOptionalMemoryInfo(),
+        // Report some hardware metrics for bucketing
+        ...navigatorInfo,
       },
       duration: timing[LOAD_FIRST_NAV],
       key1: LOAD_START,
