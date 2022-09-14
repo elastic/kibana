@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { IO_EVENTS_PER_PAGE, IO_EVENTS_ROUTE } from '@kbn/session-view-plugin/common/constants';
+import { IO_EVENTS_ROUTE } from '@kbn/session-view-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const MOCK_SESSION_ENTITY_ID =
