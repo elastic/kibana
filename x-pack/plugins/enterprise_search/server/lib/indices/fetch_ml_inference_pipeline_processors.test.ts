@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { InferencePipeline } from '@kbn/enterprise-search-plugin/common/types/pipelines';
 
 import {
@@ -45,7 +45,7 @@ describe('fetchMlInferencePipelineProcessorNames lib function', () => {
     const expected = ['my-ml-pipeline'];
 
     const response = await fetchMlInferencePipelineProcessorNames(
-      mockClient as unknown as IScopedClusterClient,
+      mockClient as unknown as ElasticsearchClient,
       'my-index'
     );
 
@@ -70,7 +70,7 @@ describe('fetchMlInferencePipelineProcessorNames lib function', () => {
     mockClient.ingest.getPipeline.mockImplementation(() => Promise.resolve(mockGetPipeline));
 
     const response = await fetchMlInferencePipelineProcessorNames(
-      mockClient as unknown as IScopedClusterClient,
+      mockClient as unknown as ElasticsearchClient,
       'my-index-without-ml-inference-pipeline'
     );
 
@@ -153,7 +153,7 @@ describe('fetchPipelineProcessorInferenceData lib function', () => {
     };
 
     const response = await fetchPipelineProcessorInferenceData(
-      mockClient as unknown as IScopedClusterClient,
+      mockClient as unknown as ElasticsearchClient,
       ['ml-inference-pipeline-1', 'ml-inference-pipeline-2', 'non-ml-inference-pipeline']
     );
 
@@ -244,7 +244,7 @@ describe('fetchAndAddTrainedModelData lib function', () => {
     } as Record<string, InferencePipeline>;
 
     const response = await fetchAndAddTrainedModelData(
-      mockClient as unknown as IScopedClusterClient,
+      mockClient as unknown as ElasticsearchClient,
       input
     );
 
