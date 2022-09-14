@@ -122,7 +122,7 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
         <EuiFocusTrap disabled={!focusOwnership}>
           <Pane timelineId={timelineId} visible={show} />
         </EuiFocusTrap>
-        <FlyoutBottomBar activeTab={activeTab} timelineId={timelineId} showDataproviders={!show} />
+        <FlyoutBottomBar timelineId={timelineId} showDataproviders={!show} />
       </>
     </EuiOutsideClickDetector>
   );

@@ -4,29 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiPanel } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
-
 import { FLYOUT_BUTTON_BAR_CLASS_NAME } from '../../timeline/helpers';
 import { FlyoutHeaderPanel } from '../header';
 
-const DataProvidersPanel = styled(EuiPanel)`
-  border-radius: 0;
-  padding: 0 4px 0 4px;
-  user-select: none;
-  z-index: ${({ theme }) => theme.eui.euiZLevel9};
-`;
-
 interface FlyoutBottomBarProps {
-  activeTab: TimelineTabs;
   showDataproviders: boolean;
   timelineId: string;
 }
 
 export const FlyoutBottomBar = React.memo<FlyoutBottomBarProps>(
-  ({ activeTab, showDataproviders, timelineId }) => {
+  ({ showDataproviders, timelineId }) => {
     return (
       <div className={FLYOUT_BUTTON_BAR_CLASS_NAME} data-test-subj="flyoutBottomBar">
         {showDataproviders && <FlyoutHeaderPanel timelineId={timelineId} />}
