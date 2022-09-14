@@ -11,8 +11,9 @@ import { EuiBadge, EuiToolTip } from '@elastic/eui';
 
 import { euiLightVars as euiVars } from '@kbn/ui-theme';
 
+import { getPreviousAgentStatusForOfflineAgents } from '../../../../../../common/services/agent_status';
+
 import type { Agent } from '../../../types';
-import { getPreviousAgentStatusForOfflineAgents } from '@kbn/fleet-plugin/common/services/agent_status';
 
 interface Props {
   agent: Agent;
