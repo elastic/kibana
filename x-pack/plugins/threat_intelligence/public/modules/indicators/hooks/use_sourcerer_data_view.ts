@@ -7,8 +7,6 @@
 
 import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { BrowserField } from '@kbn/triggers-actions-ui-plugin/public/application/sections/field_browser/types';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { SecuritySolutionDataViewBase } from '../../../types';
 import { useSecurityContext } from '../../../hooks/use_security_context';
