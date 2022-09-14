@@ -56,11 +56,12 @@ const LiveQueryDetailsPageComponent = () => {
   const addToCaseButton = useCallback(
     (payload) => (
       <AddToCaseButton
-        queryId={payload?.queryId}
+        queryId={payload.queryId}
         actionId={actionId}
         agentIds={data?.agents}
-        isIcon={payload?.isIcon}
-        isDisabled={payload?.isDisabled}
+        isIcon={payload.isIcon}
+        isDisabled={payload.isDisabled}
+        iconProps={payload.iconProps}
       />
     ),
     [data?.agents, actionId]

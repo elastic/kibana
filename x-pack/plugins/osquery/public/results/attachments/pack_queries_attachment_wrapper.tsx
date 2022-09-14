@@ -31,7 +31,7 @@ export const PackQueriesAttachmentWrapper = ({
     ...(queryId ? { queryIds: [queryId] } : {}),
   });
 
-  // TODO think of a better way to distinguish if we want to put timeline in here
+  // TODO think of a better way to distinguish if we want to put timeline in here, so far I have no other ideas
   const { basePath } = useHistory() as unknown as { basePath: string };
   const isObservability = basePath === '/app/observability';
 

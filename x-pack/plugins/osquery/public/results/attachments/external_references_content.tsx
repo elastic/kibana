@@ -25,9 +25,9 @@ export const AttachmentContent = (props: AttachmentContentProps) => (
     <EuiFlexItem>
       <QueryClientProvider client={queryClient}>
         <PackQueriesAttachmentWrapper
-          actionId={props.externalReferenceMetadata?.actionId}
-          queryId={props.externalReferenceMetadata?.queryId}
-          agentIds={props.externalReferenceMetadata?.agentIds}
+          actionId={props.externalReferenceMetadata.actionId}
+          queryId={props.externalReferenceMetadata.queryId}
+          agentIds={props.externalReferenceMetadata.agentIds}
         />
       </QueryClientProvider>
     </EuiFlexItem>

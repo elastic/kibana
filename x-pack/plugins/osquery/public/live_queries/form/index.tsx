@@ -285,11 +285,11 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const addToCaseButton = useCallback(
     (payload) => (
       <AddToCaseButton
-        queryId={payload?.queryId}
+        queryId={payload.queryId}
         agentIds={agentIds}
         actionId={liveQueryActionId || ''}
-        isIcon={payload?.isIcon}
-        isDisabled={payload?.isDisabled}
+        isIcon={payload.isIcon}
+        isDisabled={payload.isDisabled}
       />
     ),
     [agentIds, liveQueryActionId]

@@ -9,7 +9,6 @@ import React, { useCallback } from 'react';
 import { CommentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
 import { EuiButtonEmpty, EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { JsonValue } from '@kbn/utility-types';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { useGetUserCasesPermissions } from './use_get_cases_permissions';
 import { useKibana } from '../common/lib/kibana';
@@ -22,38 +21,27 @@ const ADD_TO_CASE = i18n.translate(
 );
 
 interface IProps {
-  queryId?: string;
+  queryId: string;
   agentIds?: string[];
   actionId: string;
   isIcon?: boolean;
   isDisabled?: boolean;
+  iconProps?: Record<string, string>;
 }
-
-// interface OsqueryCasesButtonComponentProps {
-//   onClick: () => void;
-// }
-//
-// const OsqueryCasesButtonComponent: React.FC<OsqueryCasesButtonComponentProps> = (props) => (
-//   <EuiButtonIcon iconType={'casesApp'} color="text" size="xs" iconSize="l" {...props} />
-// );
 
 export const AddToCaseButton: React.FC<IProps> = ({
   actionId,
-  agentIds,
-  queryId,
+  agentIds = [],
+  queryId = '',
   isIcon = false,
   isDisabled,
+  iconProps,
 }) => {
   const { cases: casesUi } = useKibana().services;
 
   const casePermissions = useGetUserCasesPermissions();
-  const hasWritePermissions =
-    casePermissions.create &&
-    casePermissions.read &&
-    casePermissions.update &&
-    casePermissions.push;
-
   const hasReadPermissions = casePermissions.read && casePermissions.update && casePermissions.push;
+  const hasWritePermissions = casePermissions.create && hasReadPermissions;
 
   const createCaseFlyout = casesUi.hooks.getUseCasesAddToNewCaseFlyout({});
   const selectCaseModal = casesUi.hooks.getUseCasesAddToExistingCaseModal({});
@@ -67,7 +55,7 @@ export const AddToCaseButton: React.FC<IProps> = ({
           type: ExternalReferenceStorageType.elasticSearchDoc,
         },
         externalReferenceAttachmentTypeId: 'osquery',
-        externalReferenceMetadata: { actionId, agentIds, queryId } as { [x: string]: JsonValue },
+        externalReferenceMetadata: { actionId, agentIds, queryId },
       },
     ];
     if (hasWritePermissions) {
@@ -92,6 +80,7 @@ export const AddToCaseButton: React.FC<IProps> = ({
           iconType={'casesApp'}
           onClick={handleClick}
           isDisabled={isDisabled || !hasReadPermissions}
+          {...iconProps}
         />
       </EuiToolTip>
     );

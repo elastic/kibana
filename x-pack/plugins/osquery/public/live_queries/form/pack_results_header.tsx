@@ -12,7 +12,13 @@ import styled from 'styled-components';
 
 interface PackResultsHeadersProps {
   actionId?: string;
-  addToCase?: ({ isIcon }: { isIcon: boolean }) => ReactElement;
+  addToCase?: ({
+    isIcon,
+    iconProps,
+  }: {
+    isIcon: boolean;
+    iconProps: Record<string, string>;
+  }) => ReactElement;
   queryIds: Array<{ value: string; field: string }>;
 }
 
@@ -45,7 +51,18 @@ export const PackResultsHeader = ({ actionId, addToCase }: PackResultsHeadersPro
         </EuiText>
       </StyledResultsHeading>
       <StyledIconsList grow={false}>
-        <span>{actionId && addToCase && addToCase({ isIcon: true })}</span>
+        <span>
+          {actionId &&
+            addToCase &&
+            addToCase({
+              isIcon: true,
+              iconProps: {
+                color: 'text',
+                size: 'xs',
+                iconSize: 'l',
+              },
+            })}
+        </span>
       </StyledIconsList>
     </EuiFlexGroup>
     <EuiSpacer size={'l'} />
