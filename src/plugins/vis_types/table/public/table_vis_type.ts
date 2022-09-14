@@ -104,4 +104,9 @@ export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
   hierarchicalData: (vis) => vis.params.showPartialRows || vis.params.showMetricsAtAllLevels,
   requiresSearch: true,
   navigateToLens: async (vis, timefilter) => (vis ? convertToLens(vis, timefilter) : null),
+  getExpressionVariables: async (vis, timeFilter) => {
+    return {
+      canNavigateToLens: Boolean(vis?.params ? await convertToLens(vis, timeFilter) : null),
+    };
+  },
 };

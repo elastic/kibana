@@ -39,7 +39,7 @@ export const getTableVisRenderer: (
 ) => ExpressionRenderDefinition<TableVisRenderValue> = (core, usageCollection) => ({
   name: 'table_vis',
   reuseDomNode: true,
-  render: async (domNode, { visData, visConfig }, handlers) => {
+  render: async (domNode, { visData, visConfig, canNavigateToLens }, handlers) => {
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
@@ -55,6 +55,7 @@ export const getTableVisRenderer: (
         const counterEvents = [
           `render_${visualizationType}_table`,
           !visData.table ? `render_${visualizationType}_table_split` : undefined,
+          canNavigateToLens ? `render_${visualizationType}_table_convertable` : undefined,
         ].filter(Boolean) as string[];
 
         usageCollection.reportUiCounter(containerType, METRIC_TYPE.COUNT, counterEvents);
