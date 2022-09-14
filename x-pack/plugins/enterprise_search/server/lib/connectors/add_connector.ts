@@ -69,6 +69,7 @@ export const addConnector = async (
     is_native: boolean;
     language: string | null;
     service_type?: string | null;
+    last_synced: string | null;
   }
 ): Promise<{ id: string; index_name: string }> => {
   const connectorsIndexExists = await client.asCurrentUser.indices.exists({
@@ -93,7 +94,7 @@ export const addConnector = async (
     last_seen: null,
     last_sync_error: null,
     last_sync_status: null,
-    last_synced: null,
+    last_synced: input.last_synced,
     name: input.index_name.startsWith('search-') ? input.index_name.substring(7) : input.index_name,
     pipeline: connectorsPipelineMeta
       ? {
