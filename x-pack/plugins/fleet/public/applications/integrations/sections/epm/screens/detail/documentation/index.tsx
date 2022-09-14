@@ -106,7 +106,7 @@ const Inputs: React.FunctionComponent<{
         }
         return acc;
       }, [] as RegistryInputWithStreams[]),
-    [packageInfo]
+    [packageInfo, integration]
   );
   return (
     <>
