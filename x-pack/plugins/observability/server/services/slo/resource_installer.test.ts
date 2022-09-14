@@ -15,14 +15,14 @@ import {
   SLO_INGEST_PIPELINE_NAME,
   SLO_RESOURCES_VERSION,
 } from '../../assets/constants';
-import { ResourceInstaller } from './resource_installer';
+import { DefaultResourceInstaller } from './resource_installer';
 
 describe('resourceInstaller', () => {
   describe("when the common resources don't exist", () => {
     it('installs the common resources', async () => {
       const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
       mockClusterClient.indices.existsIndexTemplate.mockResponseOnce(false);
-      const installer = new ResourceInstaller(mockClusterClient, loggerMock.create());
+      const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create());
 
       await installer.ensureCommonResourcesInstalled();
 
@@ -51,7 +51,7 @@ describe('resourceInstaller', () => {
       mockClusterClient.ingest.getPipeline.mockResponseOnce({
         [SLO_INGEST_PIPELINE_NAME]: { _meta: { version: SLO_RESOURCES_VERSION } },
       } as IngestGetPipelineResponse);
-      const installer = new ResourceInstaller(mockClusterClient, loggerMock.create());
+      const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create());
 
       await installer.ensureCommonResourcesInstalled();
 

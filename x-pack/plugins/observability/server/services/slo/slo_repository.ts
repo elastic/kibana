@@ -13,6 +13,7 @@ import { SO_SLO_TYPE } from '../../saved_objects';
 export interface SLORepository {
   save(slo: SLO): Promise<SLO>;
   findById(id: string): Promise<SLO>;
+  deleteById(id: string): Promise<void>;
 }
 
 export class KibanaSavedObjectsSLORepository implements SLORepository {
@@ -32,6 +33,10 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
   async findById(id: string): Promise<SLO> {
     const slo = await this.soClient.get<StoredSLO>(SO_SLO_TYPE, id);
     return toSLOModel(slo.attributes);
+  }
+
+  async deleteById(id: string): Promise<void> {
+    await this.soClient.delete(SO_SLO_TYPE, id);
   }
 }
 

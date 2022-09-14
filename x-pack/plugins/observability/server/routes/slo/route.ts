@@ -5,19 +5,25 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
 import {
+  CreateSLO,
+  DefaultResourceInstaller,
+  DefaultTransformInstaller,
   KibanaSavedObjectsSLORepository,
-  ResourceInstaller,
-  TransformInstaller,
 } from '../../services/slo';
 import {
   ApmTransactionDurationTransformGenerator,
   ApmTransactionErrorRateTransformGenerator,
+  TransformGenerator,
 } from '../../services/slo/transform_generators';
-import { SLO } from '../../types/models';
+import { SLITypes } from '../../types/models';
 import { createSLOParamsSchema } from '../../types/schema';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
+
+const transformGenerators: Record<SLITypes, TransformGenerator> = {
+  'slo.apm.transaction_duration': new ApmTransactionDurationTransformGenerator(),
+  'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
+};
 
 const createSLORoute = createObservabilityServerRoute({
   endpoint: 'POST /api/observability/slos',
@@ -30,31 +36,14 @@ const createSLORoute = createObservabilityServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const spaceId = spacesService.getSpaceId(request);
 
-    const resourceInstaller = new ResourceInstaller(esClient, logger);
+    const resourceInstaller = new DefaultResourceInstaller(esClient, logger);
     const repository = new KibanaSavedObjectsSLORepository(soClient);
-    const transformInstaller = new TransformInstaller(
-      {
-        'slo.apm.transaction_duration': new ApmTransactionDurationTransformGenerator(),
-        'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
-      },
-      esClient,
-      logger
-    );
+    const transformInstaller = new DefaultTransformInstaller(transformGenerators, esClient, logger);
+    const createSLO = new CreateSLO(resourceInstaller, repository, transformInstaller, spaceId);
 
-    await resourceInstaller.ensureCommonResourcesInstalled(spaceId);
+    const response = await createSLO.execute(params.body);
 
-    const slo: SLO = {
-      ...params.body,
-      id: uuid.v1(),
-      settings: {
-        destination_index: params.body.settings?.destination_index,
-      },
-    };
-
-    await repository.save(slo);
-    await transformInstaller.installAndStartTransform(slo, spaceId);
-
-    return slo;
+    return response;
   },
 });
 

@@ -6,12 +6,16 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+
 import { SLO, SLITypes } from '../../types/models';
 import { TransformGenerator } from './transform_generators';
 
-export class TransformInstaller {
+export interface TransformInstaller {
+  installAndStartTransform(slo: SLO, spaceId: string): Promise<void>;
+}
+
+export class DefaultTransformInstaller implements TransformInstaller {
   constructor(
     private generators: Record<SLITypes, TransformGenerator>,
     private esClient: ElasticsearchClient,

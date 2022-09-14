@@ -10,15 +10,15 @@ import {
   MappingRuntimeFieldType,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { getSLODestinationIndexName, SLO_INGEST_PIPELINE_NAME } from '../../../assets/constants';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
+import { TransformGenerator } from '.';
+import { getSLODestinationIndexName, SLO_INGEST_PIPELINE_NAME } from '../../../assets/constants';
 import {
   apmTransactionErrorRateSLOSchema,
   APMTransactionErrorRateSLO,
   SLO,
 } from '../../../types/models';
 import { ALL_VALUE } from '../../../types/schema';
-import { TransformGenerator } from '.';
 
 const APM_SOURCE_INDEX = 'metrics-apm*';
 const ALLOWED_STATUS_CODES = ['2xx', '3xx', '4xx', '5xx'];

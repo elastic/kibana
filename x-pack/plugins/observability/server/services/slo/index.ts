@@ -8,3 +8,4 @@
 export * from './resource_installer';
 export * from './slo_repository';
 export * from './transform_installer';
+export * from './create_slo';

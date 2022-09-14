@@ -38,7 +38,7 @@ function aStoredSLO(slo: SLO): SavedObject<StoredSLO> {
   };
 }
 
-describe('sloRepository', () => {
+describe('KibanaSavedObjectsSLORepository', () => {
   let soClientMock: jest.Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
@@ -70,5 +70,13 @@ describe('sloRepository', () => {
 
     expect(foundSLO).toEqual(anSLO);
     expect(soClientMock.get).toHaveBeenCalledWith(SO_SLO_TYPE, anSLO.id);
+  });
+
+  it('removes an SLO', async () => {
+    const repository = new KibanaSavedObjectsSLORepository(soClientMock);
+
+    await repository.deleteById(anSLO.id);
+
+    expect(soClientMock.delete).toHaveBeenCalledWith(SO_SLO_TYPE, anSLO.id);
   });
 });
