@@ -473,7 +473,6 @@ Array [
     "references": Array [],
     "type": "index-pattern",
     "updated_at": "2022-08-12T16:20:10.121Z",
-    "version": "WzYwMTQsMV0=",
   },
   Object {
     "attributes": Object {
@@ -587,7 +586,6 @@ Array [
     ],
     "type": "lens",
     "updated_at": "2022-08-12T16:20:10.121Z",
-    "version": "WzYwMTUsMV0=",
   },
   Object {
     "attributes": Object {
@@ -606,7 +604,6 @@ Array [
     "references": Array [],
     "type": "index-pattern",
     "updated_at": "2022-08-12T16:20:10.121Z",
-    "version": "WzYwMTYsMV0=",
   },
   Object {
     "attributes": Object {
@@ -727,7 +724,6 @@ Array [
     ],
     "type": "lens",
     "updated_at": "2022-08-12T16:31:30.450Z",
-    "version": "WzYyMzQsMV0=",
   },
   Object {
     "attributes": Object {
@@ -746,7 +742,6 @@ Array [
     "references": Array [],
     "type": "index-pattern",
     "updated_at": "2022-08-12T16:20:10.121Z",
-    "version": "WzYwMTksMV0=",
   },
   Object {
     "attributes": Object {
@@ -773,7 +768,6 @@ Array [
     ],
     "type": "visualization",
     "updated_at": "2022-08-12T16:20:10.121Z",
-    "version": "WzYwMjAsMV0=",
   },
   Object {
     "attributes": Object {
@@ -800,7 +794,6 @@ Array [
     ],
     "type": "visualization",
     "updated_at": "2022-08-12T16:20:10.121Z",
-    "version": "WzYwMjEsMV0=",
   },
   Object {
     "attributes": Object {
@@ -827,7 +820,6 @@ Array [
     ],
     "type": "visualization",
     "updated_at": "2022-08-12T16:20:10.121Z",
-    "version": "WzYwMjIsMV0=",
   },
   Object {
     "attributes": Object {
@@ -843,7 +835,6 @@ Array [
     "references": Array [],
     "type": "tag",
     "updated_at": "2022-08-12T16:20:10.121Z",
-    "version": "WzYwMjMsMV0=",
   },
   Object {
     "attributes": Object {
@@ -898,7 +889,6 @@ Array [
     ],
     "type": "dashboard",
     "updated_at": "2022-08-12T16:20:10.121Z",
-    "version": "WzYwMjQsMV0=",
   },
   Object {
     "attributes": Object {
@@ -943,7 +933,6 @@ Array [
     ],
     "type": "dashboard",
     "updated_at": "2022-08-12T16:20:10.121Z",
-    "version": "WzYwMjUsMV0=",
   },
 ]
 `;
