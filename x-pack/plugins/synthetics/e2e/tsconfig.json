@@ -15,9 +15,6 @@
     },
     {
       "path": "../tsconfig.json",
-    },
-    {
-      "path": "../../../test/tsconfig.json",
     }
   ]
 }
