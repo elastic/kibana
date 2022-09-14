@@ -8,21 +8,10 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { SchemaConfig } from '../../..';
-import { Operations, PercentileParams } from '../..';
+import { PercentileParams } from '../..';
 import { getFieldNameFromField, getLabelForPercentile } from '../utils';
 import { createColumn, getFormat } from './column';
-import {
-  PercentileColumnWithExtendedMeta,
-  PercentileColumn,
-  Column,
-  CommonColumnConverterArgs,
-} from './types';
-
-export const isPercentileColumnWithMeta = (
-  column: Column
-): column is PercentileColumnWithExtendedMeta =>
-  column.operationType === Operations.PERCENTILE &&
-  Boolean((column as PercentileColumnWithExtendedMeta)?.meta?.reference);
+import { PercentileColumn, CommonColumnConverterArgs } from './types';
 
 export const convertToPercentileParams = (percentile: number): PercentileParams => ({
   percentile,
@@ -87,21 +76,13 @@ export const convertToPercentileColumn = (
   if (!field) {
     return null;
   }
-  const commonColumnParams = createColumn(agg, field, { reducedTimeRange });
 
   return {
     operationType: 'percentile',
     sourceField: field.name,
-    ...commonColumnParams,
+    ...createColumn(agg, field, { reducedTimeRange }),
     params: { ...params, ...getFormat() },
     label: getLabelForPercentile(agg),
-    meta:
-      index !== undefined
-        ? {
-            reference: `${commonColumnParams.meta.aggId}.${index}`,
-            ...commonColumnParams.meta,
-          }
-        : commonColumnParams.meta,
     timeShift: agg.aggParams?.timeShift,
   };
 };

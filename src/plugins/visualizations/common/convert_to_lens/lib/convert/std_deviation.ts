@@ -11,7 +11,7 @@ import { addTimeRangeToFormula } from '../metrics/formula';
 import { getFieldNameFromField } from '../utils';
 import { createFormulaColumn } from './formula';
 import { getFormulaFromMetric, SUPPORTED_METRICS } from './supported_metrics';
-import { CommonColumnConverterArgs } from './types';
+import { CommonColumnConverterArgs, FormulaColumn } from './types';
 
 const STD_LOWER = 'std_lower';
 const STD_UPPER = 'std_upper';
@@ -73,5 +73,9 @@ export const convertToStdDeviationFormulaColumns = (
     return null;
   }
 
-  return { ...createFormulaColumn(formula, agg), label: agg.label };
+  const formulaColumn: FormulaColumn | null = createFormulaColumn(formula, agg);
+  if (!formulaColumn) {
+    return null;
+  }
+  return { ...formulaColumn, label: agg.label };
 };

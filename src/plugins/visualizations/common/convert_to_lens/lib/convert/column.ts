@@ -8,7 +8,6 @@
 
 import uuid from 'uuid';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { IAggConfig } from '@kbn/data-plugin/common';
 import { DataType, FormatParams } from '../../types';
 import { SchemaConfig } from '../../../types';
 import { AggId, ExtraColumnFields, GeneralColumnWithMeta } from './types';
@@ -33,20 +32,4 @@ export const createColumn = (
   reducedTimeRange,
   timeShift: agg.aggParams?.timeShift,
   meta: { aggId: createAggregationId(agg) },
-});
-
-export const createAggregationIdFromCustomAgg = (agg: IAggConfig): AggId => `${agg.type.name}.${0}`;
-
-export const createColumnFromCustomAgg = (
-  agg: IAggConfig,
-  field?: DataViewField,
-  { isBucketed = false, isSplit = false, reducedTimeRange }: ExtraColumnFields = {}
-): GeneralColumnWithMeta => ({
-  columnId: uuid(),
-  dataType: (field?.type as DataType) ?? undefined,
-  label: agg.getFieldDisplayName(),
-  isBucketed,
-  isSplit,
-  reducedTimeRange,
-  meta: { aggId: createAggregationIdFromCustomAgg(agg) },
 });

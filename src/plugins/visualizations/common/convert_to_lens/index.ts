@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
+export type { AggBasedColumn } from './lib/convert/types';
 export * from './types';
 export * from './constants';

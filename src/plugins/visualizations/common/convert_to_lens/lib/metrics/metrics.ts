@@ -18,12 +18,16 @@ import {
   convertToStdDeviationFormulaColumns,
   convertToLastValueColumn,
   convertToCumulativeSumAggColumn,
+  AggBasedColumn,
 } from '../convert';
 import { SUPPORTED_METRICS } from '../convert/supported_metrics';
-import { Column } from '../../types';
 import { getValidColumns } from '../utils';
 
-export const convertMetricToColumns = (agg: SchemaConfig, dataView: DataView): Column[] | null => {
+export const convertMetricToColumns = (
+  agg: SchemaConfig,
+  dataView: DataView,
+  aggs: Array<SchemaConfig<METRIC_TYPES>>
+): AggBasedColumn[] | null => {
   const supportedAgg = SUPPORTED_METRICS[agg.aggType];
   if (!supportedAgg) {
     return null;
@@ -91,6 +95,7 @@ export const convertMetricToColumns = (agg: SchemaConfig, dataView: DataView): C
       const columns = convertToCumulativeSumAggColumn({
         agg,
         dataView,
+        aggs,
       });
       return getValidColumns(columns);
     }
@@ -99,6 +104,7 @@ export const convertMetricToColumns = (agg: SchemaConfig, dataView: DataView): C
       const columns = convertToOtherParentPipelineAggColumns({
         agg,
         dataView,
+        aggs,
       });
       return getValidColumns(columns);
     }
@@ -109,6 +115,7 @@ export const convertMetricToColumns = (agg: SchemaConfig, dataView: DataView): C
       const columns = convertToSiblingPipelineColumns({
         agg,
         dataView,
+        aggs,
       });
       return getValidColumns(columns);
     }

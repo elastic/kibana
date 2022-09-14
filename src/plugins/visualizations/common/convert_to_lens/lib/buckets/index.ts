@@ -6,16 +6,13 @@
  * Side Public License, v 1.
  */
 
-import {
-  AggParamsMapping,
-  AggParamsTerms,
-  BUCKET_TYPES,
-  IAggConfig,
-} from '@kbn/data-plugin/common';
+import { AggParamsTerms, BUCKET_TYPES, IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { convertToSchemaConfig } from '../../../vis_schemas';
-import { Column, SchemaConfig } from '../../..';
+import { SchemaConfig } from '../../..';
 import {
+  AggBasedColumn,
+  CommonBucketConverterArgs,
   convertToDateHistogramColumn,
   convertToFiltersColumn,
   convertToTermsColumn,
@@ -35,9 +32,7 @@ const isSupportedBucketAgg = (agg: SchemaConfig): agg is SchemaConfig<BucketAggs
 
 export const getBucketColumns = (
   aggType: BUCKET_TYPES,
-  aggParams: AggParamsMapping[BucketAggs],
-  dataView: DataView,
-  metricColumns: Column[],
+  { aggParams, dataView, metricColumns, aggs }: CommonBucketConverterArgs<BucketAggs>,
   {
     label,
     isSplit = false,
@@ -66,11 +61,9 @@ export const getBucketColumns = (
       }
       if (field.type !== 'date') {
         return convertToTermsColumn(
-          aggParams as AggParamsTerms,
+          { aggParams: aggParams as AggParamsTerms, dataView, metricColumns, aggs },
           label,
-          dataView,
-          isSplit,
-          metricColumns
+          isSplit
         );
       } else {
         return convertToDateHistogramColumn(
@@ -88,19 +81,32 @@ export const getBucketColumns = (
 };
 
 export const convertBucketToColumns = (
-  agg: SchemaConfig | IAggConfig,
-  dataView: DataView,
+  {
+    agg,
+    dataView,
+    metricColumns,
+    aggs,
+  }: {
+    agg: SchemaConfig | IAggConfig;
+    dataView: DataView;
+    metricColumns: AggBasedColumn[];
+    aggs: Array<SchemaConfig<METRIC_TYPES>>;
+  },
   isSplit: boolean = false,
-  metricColumns: Column[],
   dropEmptyRowsInDateHistogram: boolean = false
 ) => {
   const currentAgg = isSchemaConfig(agg) ? agg : convertToSchemaConfig(agg);
   if (!currentAgg.aggParams || !isSupportedBucketAgg(currentAgg)) {
     return null;
   }
-  return getBucketColumns(currentAgg.aggType, currentAgg.aggParams, dataView, metricColumns, {
-    label: getLabel(currentAgg),
-    isSplit,
-    dropEmptyRowsInDateHistogram,
-  });
+  const { aggParams } = currentAgg;
+  return getBucketColumns(
+    currentAgg.aggType,
+    { aggParams, dataView, metricColumns, aggs },
+    {
+      label: getLabel(currentAgg),
+      isSplit,
+      dropEmptyRowsInDateHistogram,
+    }
+  );
 };

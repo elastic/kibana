@@ -11,12 +11,14 @@ import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { DataViewFieldBase } from '@kbn/es-query';
 import { SchemaConfig } from '../../types';
-import { Column } from '../types';
 import {
+  AggBasedColumn,
   MetricsWithoutSpecialParams,
-  Column as ColumnWithMeta,
+  ParentPipelineMetric,
   SiblingPipelineMetric,
 } from './convert';
+import { ColumnWithMeta } from '../types';
+import { convertToSchemaConfig } from '../../vis_schemas';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
@@ -32,7 +34,9 @@ export const getLabelForPercentile = (agg: SchemaConfig) => {
     : '';
 };
 
-export const getValidColumns = (columns: Array<Column | null> | Column | null | undefined) => {
+export const getValidColumns = (
+  columns: Array<AggBasedColumn | null> | AggBasedColumn | null | undefined
+) => {
   if (columns && Array.isArray(columns)) {
     const nonNullColumns = columns.filter(
       (c): c is Exclude<UnwrapArray<typeof columns>, null> => c !== null
@@ -69,7 +73,9 @@ export const isSchemaConfig = (agg: SchemaConfig | IAggConfig): agg is SchemaCon
   return false;
 };
 
-export const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
+export const isColumnWithMeta = (
+  column: AggBasedColumn | ColumnWithMeta
+): column is ColumnWithMeta => {
   if ((column as ColumnWithMeta).meta) {
     return true;
   }
@@ -162,4 +168,34 @@ export const getCutomBucketsFromSiblingAggs = (metrics: SchemaConfig[]) => {
 
     return acc;
   }, []);
+};
+
+export const getMetricFromParentPipelineAgg = (
+  agg: SchemaConfig<ParentPipelineMetric | SiblingPipelineMetric>,
+  aggs: Array<SchemaConfig<METRIC_TYPES>>
+) => {
+  if (!agg.aggParams) {
+    return null;
+  }
+
+  if (isSiblingPipeline(agg)) {
+    if (agg.aggParams.customMetric) {
+      return convertToSchemaConfig(agg.aggParams.customMetric);
+    }
+    return null;
+  }
+
+  const { customMetric, metricAgg } = agg.aggParams;
+  if (!customMetric && metricAgg === 'custom') {
+    return null;
+  }
+
+  let metric;
+  if (!customMetric) {
+    metric = aggs.find(({ aggId }) => aggId === metricAgg);
+  } else {
+    metric = convertToSchemaConfig(customMetric);
+  }
+
+  return metric as SchemaConfig<METRIC_TYPES>;
 };

@@ -7,14 +7,12 @@
  */
 
 import { convertMetricToColumns } from '../metrics';
-import { CommonColumnConverterArgs, SiblingPipelineMetric } from './types';
-import { Column } from '../../types';
+import { AggBasedColumn, ExtendedColumnConverterArgs, SiblingPipelineMetric } from './types';
 import { convertToSchemaConfig } from '../../../vis_schemas';
 
 export const convertToSiblingPipelineColumns = (
-  columnConverterArgs: CommonColumnConverterArgs<SiblingPipelineMetric>,
-  reducedTimeRange?: string
-): Column | null => {
+  columnConverterArgs: ExtendedColumnConverterArgs<SiblingPipelineMetric>
+): AggBasedColumn | null => {
   const { aggParams, label } = columnConverterArgs.agg;
   if (!aggParams) {
     return null;
@@ -26,7 +24,8 @@ export const convertToSiblingPipelineColumns = (
 
   const customMetricColumn = convertMetricToColumns(
     { ...convertToSchemaConfig(aggParams.customMetric), label },
-    columnConverterArgs.dataView
+    columnConverterArgs.dataView,
+    columnConverterArgs.aggs
   );
 
   if (!customMetricColumn) {

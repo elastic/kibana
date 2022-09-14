@@ -7,13 +7,13 @@
  */
 
 import { DataViewField, METRIC_TYPES } from '@kbn/data-plugin/common';
-import { convertToSchemaConfig } from '../../../vis_schemas';
 import { SchemaConfig } from '../../..';
 import { Operations } from '../../constants';
 import { isMetricWithField, getStdDeviationFormula } from '../convert';
 import { getFormulaFromMetric, SUPPORTED_METRICS } from '../convert/supported_metrics';
 import {
   getFieldNameFromField,
+  getMetricFromParentPipelineAgg,
   isPercentileAgg,
   isPercentileRankAgg,
   isPipeline,
@@ -112,7 +112,10 @@ const isDataViewField = (field: string | DataViewField): field is DataViewField 
   return false;
 };
 
-const getFormulaForSubMetric = (agg: SchemaConfig, reducedTimeRange?: string): string | null => {
+const getFormulaForSubMetric = (
+  agg: SchemaConfig,
+  aggs: Array<SchemaConfig<METRIC_TYPES>>
+): string | null => {
   const op = SUPPORTED_METRICS[agg.aggType];
   if (!op) {
     return null;
@@ -122,7 +125,7 @@ const getFormulaForSubMetric = (agg: SchemaConfig, reducedTimeRange?: string): s
     PARENT_PIPELINE_OPS.includes(op.name) ||
     SIBLING_PIPELINE_AGGS.includes(agg.aggType as METRIC_TYPES)
   ) {
-    return getFormulaForPipelineAgg(agg as PipelineAggs, reducedTimeRange);
+    return getFormulaForPipelineAgg(agg as PipelineAggs, aggs);
   }
 
   if (METRIC_OPS_WITHOUT_PARAMS.includes(op.name)) {
@@ -133,19 +136,14 @@ const getFormulaForSubMetric = (agg: SchemaConfig, reducedTimeRange?: string): s
         ? isDataViewField(metricAgg.aggParams.field)
           ? metricAgg.aggParams?.field.displayName
           : metricAgg.aggParams?.field
-        : undefined,
-      reducedTimeRange
+        : undefined
     );
   }
 
   if (op.name === Operations.PERCENTILE_RANK) {
     const percentileRanksAgg = agg as SchemaConfig<METRIC_TYPES.PERCENTILE_RANKS>;
 
-    return getFormulaForPercentileRanks(
-      percentileRanksAgg,
-      percentileRanksAgg.aggParams?.field,
-      reducedTimeRange
-    );
+    return getFormulaForPercentileRanks(percentileRanksAgg, percentileRanksAgg.aggParams?.field);
   }
 
   return null;
@@ -161,7 +159,7 @@ export const getFormulaForPipelineAgg = (
     | METRIC_TYPES.MIN_BUCKET
     | METRIC_TYPES.SUM_BUCKET
   >,
-  reducedTimeRange?: string
+  aggs: Array<SchemaConfig<METRIC_TYPES>>
 ) => {
   const { aggType } = agg;
   const supportedAgg = SUPPORTED_METRICS[aggType];
@@ -169,12 +167,12 @@ export const getFormulaForPipelineAgg = (
     return null;
   }
 
-  if (!agg.aggParams || !agg.aggParams.customMetric) {
+  const metricAgg = getMetricFromParentPipelineAgg(agg, aggs);
+  if (!metricAgg) {
     return null;
   }
 
-  const metricAgg = convertToSchemaConfig(agg.aggParams.customMetric);
-  const subFormula = getFormulaForSubMetric(metricAgg);
+  const subFormula = getFormulaForSubMetric(metricAgg, aggs);
   if (subFormula === null) {
     return null;
   }
@@ -187,9 +185,12 @@ export const getFormulaForPipelineAgg = (
   return subFormula;
 };
 
-export const getFormulaForAgg = (agg: SchemaConfig<METRIC_TYPES>) => {
+export const getFormulaForAgg = (
+  agg: SchemaConfig<METRIC_TYPES>,
+  aggs: Array<SchemaConfig<METRIC_TYPES>>
+) => {
   if (isPipeline(agg)) {
-    return getFormulaForPipelineAgg(agg);
+    return getFormulaForPipelineAgg(agg, aggs);
   }
 
   if (isPercentileAgg(agg)) {

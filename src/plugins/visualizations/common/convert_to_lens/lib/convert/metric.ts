@@ -20,7 +20,7 @@ import {
   MedianColumn,
   MinColumn,
   SumColumn,
-} from '../../types';
+} from './types';
 import { getFieldNameFromField } from '../utils';
 
 type MetricAggregationWithoutParams =

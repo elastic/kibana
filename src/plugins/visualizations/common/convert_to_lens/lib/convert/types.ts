@@ -16,6 +16,18 @@ import {
   GenericColumnWithMeta,
   PercentileColumn as BasePercentileColumn,
   PercentileRanksColumn as BasePercentileRanksColumn,
+  FormulaColumn as BaseFormulaColumn,
+  LastValueColumn as BaseLastValueColumn,
+  AvgColumn as BaseAvgColumn,
+  CountColumn as BaseCountColumn,
+  CardinalityColumn as BaseCardinalityColumn,
+  MaxColumn as BaseMaxColumn,
+  MedianColumn as BaseMedianColumn,
+  MinColumn as BaseMinColumn,
+  SumColumn as BaseSumColumn,
+  CumulativeSumColumn as BaseCumulativeSumColumn,
+  MovingAverageColumn as BaseMovingAverageColumn,
+  DerivativeColumn as BaseDerivativeColumn,
   DateHistogramColumn,
   TermsColumn,
   FiltersColumn,
@@ -53,6 +65,21 @@ export interface CommonColumnConverterArgs<
   dataView: DataView;
 }
 
+export interface ExtendedColumnConverterArgs<
+  Agg extends SupportedAggregation = SupportedAggregation
+> extends CommonColumnConverterArgs<Agg> {
+  aggs: Array<SchemaConfig<METRIC_TYPES>>;
+}
+
+export interface CommonBucketConverterArgs<
+  Agg extends SupportedAggregation = SupportedAggregation
+> {
+  aggParams: Exclude<SchemaConfig<Agg>['aggParams'], undefined>;
+  dataView: DataView;
+  metricColumns: AggBasedColumn[];
+  aggs: Array<SchemaConfig<METRIC_TYPES>>;
+}
+
 export type AggId = `${string}.${string}`;
 
 export interface Meta {
@@ -67,32 +94,20 @@ export interface ExtraColumnFields {
   reducedTimeRange?: string;
 }
 
-export type PercentileMeta = {
-  reference: `${AggId}.${number}`;
-} & Meta;
+export type PercentileColumn = GenericColumnWithMeta<BasePercentileColumn, Meta>;
+export type PercentileRanksColumn = GenericColumnWithMeta<BasePercentileRanksColumn, Meta>;
 
-export type PercentileColumnWithCommonMeta = GenericColumnWithMeta<BasePercentileColumn, Meta>;
-export type PercentileColumnWithExtendedMeta = GenericColumnWithMeta<
-  BasePercentileColumn,
-  PercentileMeta
->;
-export type PercentileColumn = PercentileColumnWithCommonMeta | PercentileColumnWithExtendedMeta;
+export type AggBasedColumn = GenericColumnWithMeta<BaseColumn, Meta> | BucketColumn;
 
-export type PercentileRanksColumnWithCommonMeta = GenericColumnWithMeta<
-  BasePercentileRanksColumn,
-  Meta
->;
-export type PercentileRanksColumnWithExtendedMeta = GenericColumnWithMeta<
-  BasePercentileRanksColumn,
-  PercentileMeta
->;
-
-export type PercentileRanksColumn =
-  | PercentileRanksColumnWithCommonMeta
-  | PercentileRanksColumnWithExtendedMeta;
-
-export type CommonPercentileColumnWithExtendedMeta =
-  | PercentileColumnWithExtendedMeta
-  | PercentileRanksColumnWithExtendedMeta;
-
-export type Column = GenericColumnWithMeta<BaseColumn, Meta>;
+export type FormulaColumn = GenericColumnWithMeta<BaseFormulaColumn, Meta>;
+export type LastValueColumn = GenericColumnWithMeta<BaseLastValueColumn, Meta>;
+export type AvgColumn = GenericColumnWithMeta<BaseAvgColumn, Meta>;
+export type CountColumn = GenericColumnWithMeta<BaseCountColumn, Meta>;
+export type CardinalityColumn = GenericColumnWithMeta<BaseCardinalityColumn, Meta>;
+export type MaxColumn = GenericColumnWithMeta<BaseMaxColumn, Meta>;
+export type MedianColumn = GenericColumnWithMeta<BaseMedianColumn, Meta>;
+export type MinColumn = GenericColumnWithMeta<BaseMinColumn, Meta>;
+export type SumColumn = GenericColumnWithMeta<BaseSumColumn, Meta>;
+export type CumulativeSumColumn = GenericColumnWithMeta<BaseCumulativeSumColumn, Meta>;
+export type MovingAverageColumn = GenericColumnWithMeta<BaseMovingAverageColumn, Meta>;
+export type DerivativeColumn = GenericColumnWithMeta<BaseDerivativeColumn, Meta>;

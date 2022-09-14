@@ -8,10 +8,10 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { SchemaConfig } from '../../..';
-import { LastValueColumn, LastValueParams } from '../../types';
+import { LastValueParams } from '../../types';
 import { getFieldNameFromField } from '../utils';
 import { createColumn, getFormat } from './column';
-import { CommonColumnConverterArgs } from './types';
+import { CommonColumnConverterArgs, LastValueColumn } from './types';
 
 const convertToLastValueParams = (
   agg: SchemaConfig<METRIC_TYPES.TOP_HITS | METRIC_TYPES.TOP_METRICS>

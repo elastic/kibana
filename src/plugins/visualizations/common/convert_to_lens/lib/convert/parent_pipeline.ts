@@ -7,27 +7,27 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
-import { convertToSchemaConfig } from '../../../vis_schemas';
 import { SchemaConfig } from '../../..';
-import {
-  Column,
-  CumulativeSumColumn,
-  DerivativeColumn,
-  FormulaColumn,
-  MovingAverageColumn,
-  MovingAverageParams,
-} from '../../types';
+import { MovingAverageParams } from '../../types';
 import { convertMetricToColumns, getFormulaForPipelineAgg } from '../metrics';
 import { createColumn } from './column';
 import { createFormulaColumn } from './formula';
 import {
   convertMetricAggregationColumnWithoutSpecialParams,
   MetricAggregationColumnWithoutSpecialParams,
-  MetricsWithoutSpecialParams,
 } from './metric';
 import { SUPPORTED_METRICS } from './supported_metrics';
-import { CommonColumnConverterArgs, OtherParentPipelineAggs } from './types';
+import {
+  MovingAverageColumn,
+  DerivativeColumn,
+  CumulativeSumColumn,
+  FormulaColumn,
+  ExtendedColumnConverterArgs,
+  OtherParentPipelineAggs,
+  AggBasedColumn,
+} from './types';
 import { PIPELINE_AGGS, SIBLING_PIPELINE_AGGS } from './constants';
+import { getMetricFromParentPipelineAgg } from '../utils';
 
 export type ParentPipelineAggColumn = MovingAverageColumn | DerivativeColumn | CumulativeSumColumn;
 
@@ -38,38 +38,32 @@ export const convertToMovingAverageParams = (
 });
 
 export const convertToOtherParentPipelineAggColumns = (
-  { agg, dataView }: CommonColumnConverterArgs<OtherParentPipelineAggs>,
+  { agg, dataView, aggs }: ExtendedColumnConverterArgs<OtherParentPipelineAggs>,
   reducedTimeRange?: string
-): FormulaColumn | [ParentPipelineAggColumn, Column] | null => {
-  const { aggParams, aggType } = agg;
-  if (!aggParams) {
-    return null;
-  }
-
+): FormulaColumn | [ParentPipelineAggColumn, AggBasedColumn] | null => {
+  const { aggType } = agg;
   const op = SUPPORTED_METRICS[aggType];
   if (!op) {
     return null;
   }
 
-  const { customMetric } = aggParams;
-  if (!customMetric) {
+  const metric = getMetricFromParentPipelineAgg(agg, aggs);
+  if (!metric) {
     return null;
   }
 
-  const subAgg = SUPPORTED_METRICS[customMetric.type.name as METRIC_TYPES];
+  const subAgg = SUPPORTED_METRICS[metric.aggType];
 
   if (!subAgg) {
     return null;
   }
-
-  const metric = convertToSchemaConfig(customMetric) as SchemaConfig<MetricsWithoutSpecialParams>;
 
   if (SIBLING_PIPELINE_AGGS.includes(metric.aggType)) {
     return null;
   }
 
   if (PIPELINE_AGGS.includes(metric.aggType)) {
-    const formula = getFormulaForPipelineAgg(agg, reducedTimeRange);
+    const formula = getFormulaForPipelineAgg(agg, aggs);
     if (!formula) {
       return null;
     }
@@ -77,7 +71,7 @@ export const convertToOtherParentPipelineAggColumns = (
     return createFormulaColumn(formula, agg);
   }
 
-  const subMetric = convertMetricToColumns(metric, dataView);
+  const subMetric = convertMetricToColumns(metric, dataView, aggs);
 
   if (subMetric === null) {
     return null;
@@ -96,7 +90,7 @@ export const convertToOtherParentPipelineAggColumns = (
 };
 
 export const convertToCumulativeSumAggColumn = (
-  { agg, dataView }: CommonColumnConverterArgs<METRIC_TYPES.CUMULATIVE_SUM>,
+  { agg, dataView, aggs }: ExtendedColumnConverterArgs<METRIC_TYPES.CUMULATIVE_SUM>,
   reducedTimeRange?: string
 ):
   | FormulaColumn
@@ -106,28 +100,26 @@ export const convertToCumulativeSumAggColumn = (
   if (!aggParams) {
     return null;
   }
-
-  const { customMetric } = aggParams;
-  if (!customMetric) {
+  const metric = getMetricFromParentPipelineAgg(agg, aggs);
+  if (!metric) {
     return null;
   }
 
-  const subAgg = SUPPORTED_METRICS[customMetric.type.name as METRIC_TYPES];
+  const subAgg = SUPPORTED_METRICS[metric.aggType];
 
   if (!subAgg) {
     return null;
   }
-  const metric = convertToSchemaConfig(customMetric) as SchemaConfig<MetricsWithoutSpecialParams>;
 
   if (SIBLING_PIPELINE_AGGS.includes(metric.aggType)) {
     return null;
   }
 
-  if ((!customMetric.getField() && subAgg.name === 'count') || subAgg.name === 'sum') {
+  if (metric.aggType === METRIC_TYPES.COUNT || subAgg.name === 'sum') {
     // create column for sum or count
     const subMetric = convertMetricAggregationColumnWithoutSpecialParams(
       subAgg,
-      { agg: metric, dataView },
+      { agg: metric as SchemaConfig<METRIC_TYPES.SUM | METRIC_TYPES.COUNT>, dataView },
       reducedTimeRange
     );
     if (subMetric === null) {
@@ -151,7 +143,7 @@ export const convertToCumulativeSumAggColumn = (
       subMetric,
     ];
   } else {
-    const formula = getFormulaForPipelineAgg(agg, reducedTimeRange);
+    const formula = getFormulaForPipelineAgg(agg, aggs);
     if (!formula) {
       return null;
     }

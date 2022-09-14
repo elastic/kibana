@@ -6,24 +6,25 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { AggParamsTerms } from '@kbn/data-plugin/common';
+import { BUCKET_TYPES } from '@kbn/data-plugin/common';
 import uuid from 'uuid';
-import { Column, DataType, TermsColumn, TermsParams } from '../../types';
+import { DataType, TermsColumn, TermsParams } from '../../types';
 import { getFieldNameFromField, isColumnWithMeta } from '../utils';
 import { convertToSchemaConfig } from '../../../vis_schemas';
 import { convertMetricToColumns } from '../metrics';
+import { CommonBucketConverterArgs } from './types';
 
 interface OrderByWithAgg {
   orderAgg?: TermsParams['orderAgg'];
   orderBy: TermsParams['orderBy'];
 }
 
-const getOrderByWithAgg = (
-  aggParams: AggParamsTerms,
-  dataView: DataView,
-  metricColumns: Column[]
-): OrderByWithAgg | null => {
+const getOrderByWithAgg = ({
+  aggParams,
+  dataView,
+  aggs,
+  metricColumns,
+}: CommonBucketConverterArgs<BUCKET_TYPES.TERMS>): OrderByWithAgg | null => {
   if (aggParams.orderBy === '_key') {
     return { orderBy: { type: 'alphabetical' } };
   }
@@ -34,7 +35,8 @@ const getOrderByWithAgg = (
     }
     const orderMetricColumn = convertMetricToColumns(
       convertToSchemaConfig(aggParams.orderAgg),
-      dataView
+      dataView,
+      aggs
     );
     if (!orderMetricColumn) {
       return null;
@@ -62,12 +64,13 @@ const getOrderByWithAgg = (
   };
 };
 
-export const convertToTermsParams = (
-  aggParams: AggParamsTerms,
-  dataView: DataView,
-  metricColumns: Column[]
-): TermsParams | null => {
-  const orderByWithAgg = getOrderByWithAgg(aggParams, dataView, metricColumns);
+export const convertToTermsParams = ({
+  aggParams,
+  dataView,
+  aggs,
+  metricColumns,
+}: CommonBucketConverterArgs<BUCKET_TYPES.TERMS>): TermsParams | null => {
+  const orderByWithAgg = getOrderByWithAgg({ aggParams, dataView, aggs, metricColumns });
   if (orderByWithAgg === null) {
     return null;
   }
@@ -86,11 +89,9 @@ export const convertToTermsParams = (
 };
 
 export const convertToTermsColumn = (
-  aggParams: AggParamsTerms,
+  { aggParams, dataView, aggs, metricColumns }: CommonBucketConverterArgs<BUCKET_TYPES.TERMS>,
   label: string,
-  dataView: DataView,
-  isSplit: boolean,
-  metricColumns: Column[]
+  isSplit: boolean
 ): TermsColumn | null => {
   if (!aggParams?.field) {
     return null;
@@ -102,7 +103,7 @@ export const convertToTermsColumn = (
     return null;
   }
 
-  const params = convertToTermsParams(aggParams, dataView, metricColumns);
+  const params = convertToTermsParams({ aggParams, dataView, aggs, metricColumns });
   if (!params) {
     return null;
   }

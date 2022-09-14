@@ -8,14 +8,14 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { SchemaConfig } from '../../..';
-import { FormulaColumn } from '../../types';
-import { createFormulaColumn } from '../convert';
+import { createFormulaColumn, FormulaColumn } from '../convert';
 import { getFormulaForAgg } from './formula';
 
 export const getPercentageColumnFormulaColumn = (
-  agg: SchemaConfig<METRIC_TYPES>
+  agg: SchemaConfig<METRIC_TYPES>,
+  aggs: Array<SchemaConfig<METRIC_TYPES>>
 ): FormulaColumn | null => {
-  const metricFormula = getFormulaForAgg(agg);
+  const metricFormula = getFormulaForAgg(agg, aggs);
   if (!metricFormula) {
     return null;
   }

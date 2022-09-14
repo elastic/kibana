@@ -7,8 +7,8 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { TimefilterContract } from '@kbn/data-plugin/public';
-import { Column } from '../../common';
+import { METRIC_TYPES, TimefilterContract } from '@kbn/data-plugin/public';
+import { AggBasedColumn, SchemaConfig } from '../../common';
 import { convertMetricToColumns } from '../../common/convert_to_lens/lib/metrics';
 import { convertBucketToColumns } from '../../common/convert_to_lens/lib/buckets';
 import {
@@ -18,7 +18,7 @@ import {
 import { Vis } from '../types';
 import { getVisSchemas, Schemas } from '../vis_schemas';
 
-export function isReferenced(columns: Column[], columnId: string) {
+export function isReferenced(columns: AggBasedColumn[], columnId: string) {
   const allReferences = Object.values(columns).flatMap((col) =>
     'references' in col ? col.references : []
   );
@@ -34,19 +34,28 @@ const getBucketColumns = (
   keys: Array<keyof Schemas>,
   dataView: DataView,
   isSplit: boolean,
-  metricColumns: Column[],
+  metricColumns: AggBasedColumn[],
   dropEmptyRowsInDateHistogram: boolean = false
 ) => {
-  const columns: Column[] = [];
+  const columns: AggBasedColumn[] = [];
   for (const key of keys) {
     if (visSchemas[key] && visSchemas[key]?.length) {
       const bucketColumns = visSchemas[key]?.flatMap((m) =>
-        convertBucketToColumns(m, dataView, isSplit, metricColumns, dropEmptyRowsInDateHistogram)
+        convertBucketToColumns(
+          {
+            agg: m,
+            dataView,
+            metricColumns,
+            aggs: visSchemas.metric as Array<SchemaConfig<METRIC_TYPES>>,
+          },
+          isSplit,
+          dropEmptyRowsInDateHistogram
+        )
       );
       if (!bucketColumns || bucketColumns.includes(null)) {
         return null;
       }
-      columns.push(...(bucketColumns as Column[]));
+      columns.push(...(bucketColumns as AggBasedColumn[]));
     }
   }
   return columns;
@@ -100,20 +109,20 @@ export const getColumnsFromVis = <T>(
     return null;
   }
 
-  const metricColumns = visSchemas.metric.flatMap((m) => convertMetricToColumns(m, dataView));
+  const aggs = visSchemas.metric as Array<SchemaConfig<METRIC_TYPES>>;
+
+  const metricColumns = visSchemas.metric.flatMap((m) => convertMetricToColumns(m, dataView, aggs));
 
   if (metricColumns.includes(null)) {
     return null;
   }
-  const metrics = metricColumns as Column[];
+  const metrics = metricColumns as AggBasedColumn[];
   const customBucketColumns = [];
 
   if (customBuckets.length) {
     const customBucketColumn = convertBucketToColumns(
-      customBuckets[0],
-      dataView,
+      { agg: customBuckets[0], dataView, metricColumns: metrics, aggs },
       false,
-      metricColumns as Column[],
       config?.dropEmptyRowsInDateHistogram
     );
     if (!customBucketColumn) {
@@ -127,7 +136,7 @@ export const getColumnsFromVis = <T>(
     buckets,
     dataView,
     false,
-    metricColumns as Column[],
+    metricColumns as AggBasedColumn[],
     config?.dropEmptyRowsInDateHistogram
   );
   if (!bucketColumns) {
@@ -139,7 +148,7 @@ export const getColumnsFromVis = <T>(
     splits,
     dataView,
     true,
-    metricColumns as Column[],
+    metricColumns as AggBasedColumn[],
     config?.dropEmptyRowsInDateHistogram
   );
   if (!splitBucketColumns) {

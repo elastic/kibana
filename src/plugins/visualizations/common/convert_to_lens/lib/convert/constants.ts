@@ -8,13 +8,13 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 
-export const PARENT_PIPELINE_AGGS = [
+export const PARENT_PIPELINE_AGGS: string[] = [
   METRIC_TYPES.CUMULATIVE_SUM,
   METRIC_TYPES.DERIVATIVE,
   METRIC_TYPES.MOVING_FN,
 ];
 
-export const SIBLING_PIPELINE_AGGS = [
+export const SIBLING_PIPELINE_AGGS: string[] = [
   METRIC_TYPES.AVG_BUCKET,
   METRIC_TYPES.MAX_BUCKET,
   METRIC_TYPES.MIN_BUCKET,

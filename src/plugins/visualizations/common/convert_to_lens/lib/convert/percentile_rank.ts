@@ -72,21 +72,12 @@ export const convertToPercentileRankColumn = (
     return null;
   }
 
-  const commonColumnParams = createColumn(agg, field, { reducedTimeRange });
-
   return {
     operationType: 'percentile_rank',
     sourceField: field.name,
-    ...commonColumnParams,
+    ...createColumn(agg, field, { reducedTimeRange }),
     params: { ...params, ...getFormat() },
     label: getLabelForPercentile(agg),
-    meta:
-      index !== undefined
-        ? {
-            reference: `${commonColumnParams.meta.aggId}.${index}`,
-            ...commonColumnParams.meta,
-          }
-        : commonColumnParams.meta,
     timeShift: aggParams?.timeShift,
   };
 };
