@@ -18,16 +18,17 @@ import { byNameTagSorter } from '../../utils';
 interface SavedObjectTagListProps {
   object: { references: SavedObject['references'] };
   tags: Tag[];
+  onClick?: (name: string) => void;
 }
 
-const SavedObjectTagList: FC<SavedObjectTagListProps> = ({ object, tags: allTags }) => {
+const SavedObjectTagList: FC<SavedObjectTagListProps> = ({ object, tags: allTags, onClick }) => {
   const objectTags = useMemo(() => {
     const { tags } = getObjectTags(object, allTags);
     tags.sort(byNameTagSorter);
     return tags;
   }, [object, allTags]);
 
-  return <TagList tags={objectTags} />;
+  return <TagList tags={objectTags} onClick={onClick} />;
 };
 
 interface GetConnectedTagListOptions {

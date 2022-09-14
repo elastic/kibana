@@ -217,7 +217,11 @@ export interface TagListComponentProps {
   /**
    * The object to display tags for.
    */
-  object: SavedObject;
+  object: { references: SavedObject['references'] };
+  /**
+   * Handler to execute when clicking on a tag
+   */
+  onClick?: (name: string) => void;
 }
 
 /**
