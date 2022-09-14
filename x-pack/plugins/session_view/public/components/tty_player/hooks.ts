@@ -176,6 +176,18 @@ export const useXtermPlayer = ({
     if (ref.current && !terminal.element) {
       terminal.open(ref.current);
     }
+
+    const onScroll = (event: WheelEvent) => {
+      if ((event?.target as HTMLDivElement)?.className === 'xterm-cursor-layer') {
+        event.stopImmediatePropagation();
+      }
+    };
+
+    window.addEventListener('wheel', onScroll, true);
+
+    return () => {
+      window.removeEventListener('wheel', onScroll, true);
+    };
   }, [terminal, ref]);
 
   const render = useCallback(

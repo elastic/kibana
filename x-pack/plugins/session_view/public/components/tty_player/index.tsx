@@ -104,7 +104,7 @@ export const TTYPlayer = ({
 
   const onTogglePlayback = useCallback(() => {
     // if at the end, seek to beginning
-    if (currentLine >= lines.length) {
+    if (currentLine >= lines.length - 1) {
       seekToLine(0);
     }
     setIsPlaying(!isPlaying);
