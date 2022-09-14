@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, ChangeEvent, MouseEvent, useMemo } from 'react';
+import React, { useCallback, ChangeEvent, MouseEvent } from 'react';
 import {
   EuiButtonEmpty,
   EuiPanel,
