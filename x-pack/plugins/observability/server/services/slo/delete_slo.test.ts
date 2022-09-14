@@ -25,12 +25,12 @@ describe('DeleteSLO', () => {
   describe('happy path', () => {
     it('calls the expected services', async () => {
       const sloId = 'some-slo-id';
-      const response = await deleteSLO.execute(sloId);
+
+      await deleteSLO.execute(sloId);
 
       expect(mockRepository.deleteById).toHaveBeenCalledWith(sloId);
       expect(mockTransformManager.stop).toHaveBeenCalledWith(getSLOTransformId(sloId));
       expect(mockTransformManager.uninstall).toHaveBeenCalledWith(getSLOTransformId(sloId));
-      expect(response).toBe(true);
     });
   });
 });
