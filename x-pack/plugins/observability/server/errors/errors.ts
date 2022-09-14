@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
 export class ObservabilityError extends Error {
   constructor(message?: string) {
     super(message);
