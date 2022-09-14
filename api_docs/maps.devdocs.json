@@ -1222,7 +1222,8 @@
             "label": "_setMapExtentFilter",
             "description": [],
             "signature": [
-              "(() => void) & _.Cancelable"
+              "(() => void) & ",
+              "Cancelable"
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
