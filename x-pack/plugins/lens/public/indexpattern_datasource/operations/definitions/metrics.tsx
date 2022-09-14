@@ -222,7 +222,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         if (fnBuilder.name === typeToFn[type]) {
           const groupByKey = `${fnBuilder.getArgument('field')?.[0]}-${
             fnBuilder.getArgument('timeShift')?.[0]
-          }`;
+          }-${Boolean(fnBuilder.getArgument('emptyAsNull')?.[0])}`; // boolean cooersion since "undefined" is effectively the same as "false"
           if (!(groupByKey in metricExpressionsByArgs)) {
             metricExpressionsByArgs[groupByKey] = [];
           }

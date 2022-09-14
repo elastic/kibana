@@ -1,0 +1,223 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`metrics optimizeEsAggs should collapse aggs with matching parameters 1`] = `
+Array [
+  Object {
+    "findFunction": [Function],
+    "functions": Array [
+      Object {
+        "addArgument": [Function],
+        "arguments": Object {
+          "emptyAsNull": Array [
+            true,
+          ],
+          "enabled": Array [
+            true,
+          ],
+          "field": Array [
+            "Lek",
+          ],
+          "id": Array [
+            1,
+          ],
+          "schema": Array [
+            "metric",
+          ],
+        },
+        "getArgument": [Function],
+        "name": "aggMedian",
+        "removeArgument": [Function],
+        "replaceArgument": [Function],
+        "toAst": [Function],
+        "toString": [Function],
+        "type": "expression_function_builder",
+      },
+    ],
+    "toAst": [Function],
+    "toString": [Function],
+    "type": "expression_builder",
+  },
+  Object {
+    "findFunction": [Function],
+    "functions": Array [
+      Object {
+        "addArgument": [Function],
+        "arguments": Object {
+          "emptyAsNull": Array [
+            false,
+          ],
+          "enabled": Array [
+            true,
+          ],
+          "field": Array [
+            "Lek",
+          ],
+          "id": Array [
+            3,
+          ],
+          "schema": Array [
+            "metric",
+          ],
+        },
+        "getArgument": [Function],
+        "name": "aggMedian",
+        "removeArgument": [Function],
+        "replaceArgument": [Function],
+        "toAst": [Function],
+        "toString": [Function],
+        "type": "expression_function_builder",
+      },
+    ],
+    "toAst": [Function],
+    "toString": [Function],
+    "type": "expression_builder",
+  },
+  Object {
+    "findFunction": [Function],
+    "functions": Array [
+      Object {
+        "addArgument": [Function],
+        "arguments": Object {
+          "enabled": Array [
+            true,
+          ],
+          "field": Array [
+            "Handcrafted",
+          ],
+          "id": Array [
+            5,
+          ],
+          "schema": Array [
+            "metric",
+          ],
+        },
+        "getArgument": [Function],
+        "name": "aggMedian",
+        "removeArgument": [Function],
+        "replaceArgument": [Function],
+        "toAst": [Function],
+        "toString": [Function],
+        "type": "expression_function_builder",
+      },
+    ],
+    "toAst": [Function],
+    "toString": [Function],
+    "type": "expression_builder",
+  },
+  Object {
+    "findFunction": [Function],
+    "functions": Array [
+      Object {
+        "addArgument": [Function],
+        "arguments": Object {
+          "enabled": Array [
+            true,
+          ],
+          "field": Array [
+            "Handcrafted",
+          ],
+          "id": Array [
+            7,
+          ],
+          "schema": Array [
+            "metric",
+          ],
+          "timeShift": Array [
+            "1d",
+          ],
+        },
+        "getArgument": [Function],
+        "name": "aggMedian",
+        "removeArgument": [Function],
+        "replaceArgument": [Function],
+        "toAst": [Function],
+        "toString": [Function],
+        "type": "expression_function_builder",
+      },
+    ],
+    "toAst": [Function],
+    "toString": [Function],
+    "type": "expression_builder",
+  },
+  Object {
+    "findFunction": [Function],
+    "functions": Array [
+      Object {
+        "addArgument": [Function],
+        "arguments": Object {
+          "enabled": Array [
+            true,
+          ],
+          "field": Array [
+            "Handcrafted",
+          ],
+          "id": Array [
+            9,
+          ],
+          "schema": Array [
+            "metric",
+          ],
+          "timeShift": Array [
+            "2d",
+          ],
+        },
+        "getArgument": [Function],
+        "name": "aggMedian",
+        "removeArgument": [Function],
+        "replaceArgument": [Function],
+        "toAst": [Function],
+        "toString": [Function],
+        "type": "expression_function_builder",
+      },
+    ],
+    "toAst": [Function],
+    "toString": [Function],
+    "type": "expression_builder",
+  },
+]
+`;
+
+exports[`metrics optimizeEsAggs should collapse aggs with matching parameters 2`] = `
+Object {
+  "col-0-0": Array [
+    Object {
+      "id": "original-0",
+    },
+    Object {
+      "id": "original-1",
+    },
+  ],
+  "col-2-2": Array [
+    Object {
+      "id": "original-2",
+    },
+    Object {
+      "id": "original-3",
+    },
+  ],
+  "col-4-4": Array [
+    Object {
+      "id": "original-4",
+    },
+    Object {
+      "id": "original-5",
+    },
+  ],
+  "col-6-6": Array [
+    Object {
+      "id": "original-6",
+    },
+    Object {
+      "id": "original-7",
+    },
+  ],
+  "col-8-8": Array [
+    Object {
+      "id": "original-8",
+    },
+    Object {
+      "id": "original-9",
+    },
+  ],
+}
+`;
