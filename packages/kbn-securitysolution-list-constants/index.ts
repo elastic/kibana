@@ -67,6 +67,8 @@ export const MAX_EXCEPTION_LIST_SIZE = 10000;
 
 export const MAXIMUM_SMALL_VALUE_LIST_SIZE = 65536;
 
+export const MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE = 200;
+
 /** ID of trusted apps agnostic list */
 export const ENDPOINT_TRUSTED_APPS_LIST_ID = 'endpoint_trusted_apps';
 

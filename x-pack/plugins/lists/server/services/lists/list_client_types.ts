@@ -30,6 +30,7 @@ import type {
   _VersionOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { Version, VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 
 import type { ConfigType } from '../../config';
 
@@ -272,6 +273,8 @@ export interface FindListOptions {
   perPage: PerPage;
   /** The current page number for the current find */
   page: Page;
+  /** Any runtime mappings to be included in the ES query */
+  runtimeMappings: MappingRuntimeFields | undefined;
   /** array of search_after terms, otherwise "undefined" if there is no search_after */
   searchAfter: string[] | undefined;
   /** Which field to sort on, "undefined" for no sort field */
@@ -295,6 +298,8 @@ export interface FindListItemOptions {
   perPage: PerPage;
   /** The current page number for the current find */
   page: Page;
+  /** Any runtime mappings to be included in the ES query */
+  runtimeMappings: MappingRuntimeFields | undefined;
   /** array of search_after terms, otherwise "undefined" if there is no search_after */
   searchAfter: string[];
   /** Which field to sort on, "undefined" for no sort field */

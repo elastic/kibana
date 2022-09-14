@@ -10,9 +10,9 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { findListSchema, foundSmallListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   INTERNAL_LIST_URL,
+  MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE,
   MAXIMUM_SMALL_VALUE_LIST_SIZE,
 } from '@kbn/securitysolution-list-constants';
-import { partition } from 'lodash';
 
 import type { ListsPluginRouter } from '../types';
 import { decodeCursor } from '../services/utils';
@@ -89,6 +89,7 @@ export const findSmallListRoute = (router: ListsPluginRouter): void => {
                 listId: valueList.id,
                 page: 0,
                 perPage: 0,
+                runtimeMappings: undefined,
                 searchAfter: [],
                 sortField: undefined,
                 sortOrder: undefined,
@@ -99,20 +100,32 @@ export const findSmallListRoute = (router: ListsPluginRouter): void => {
                 list &&
                 list.total < MAXIMUM_SMALL_VALUE_LIST_SIZE
               ) {
-                const rangeList = await listClient.findAllListItems({
-                  filter: '',
+                const rangeList = await listClient.findListItem({
+                  currentIndexPosition: 0,
+                  filter: 'is_cidr: false',
                   listId: valueList.id,
+                  page: 0,
+                  perPage: 0,
+                  runtimeMappings: {
+                    is_cidr: {
+                      script: `
+                        if (params._source["ip_range"] instanceof String) {
+                          emit(true);
+                        } else {
+                          emit(false);
+                        }
+                        `,
+                      type: 'boolean',
+                    },
+                  },
+                  searchAfter: [],
+                  sortField: undefined,
+                  sortOrder: undefined,
                 });
-                const [dashNotationRange, slashNotationRange] = partition(
-                  rangeList?.data,
-                  ({ value }) => {
-                    return value.includes('-');
-                  }
-                );
-                return (
-                  dashNotationRange.length < 200 &&
-                  slashNotationRange.length < MAXIMUM_SMALL_VALUE_LIST_SIZE
-                );
+
+                return rangeList && rangeList.total < MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE
+                  ? true
+                  : false;
               }
               return list && list.total < MAXIMUM_SMALL_VALUE_LIST_SIZE ? true : false;
             })

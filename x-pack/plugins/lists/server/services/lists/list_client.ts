@@ -810,6 +810,7 @@ export class ListClient {
     sortField,
     sortOrder,
     searchAfter,
+    runtimeMappings,
   }: FindListOptions): Promise<FoundListSchema> => {
     const { esClient } = this;
     const listIndex = this.getListIndex();
@@ -820,6 +821,7 @@ export class ListClient {
       listIndex,
       page,
       perPage,
+      runtimeMappings,
       searchAfter,
       sortField,
       sortOrder,
@@ -847,6 +849,7 @@ export class ListClient {
     currentIndexPosition,
     perPage,
     page,
+    runtimeMappings,
     sortField,
     sortOrder,
     searchAfter,
@@ -863,6 +866,7 @@ export class ListClient {
       listItemIndex,
       page,
       perPage,
+      runtimeMappings,
       searchAfter,
       sortField,
       sortOrder,

@@ -276,18 +276,6 @@ describe('get_filter', () => {
                       "bool": Object {
                         "filter": Array [
                           Object {
-                            "bool": Object {
-                              "minimum_should_match": 1,
-                              "should": Array [
-                                Object {
-                                  "match_phrase": Object {
-                                    "some.not.nested.field": "some value",
-                                  },
-                                },
-                              ],
-                            },
-                          },
-                          Object {
                             "nested": Object {
                               "path": "some.parentField",
                               "query": Object {
@@ -303,6 +291,18 @@ describe('get_filter', () => {
                                 },
                               },
                               "score_mode": "none",
+                            },
+                          },
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "match_phrase": Object {
+                                    "some.not.nested.field": "some value",
+                                  },
+                                },
+                              ],
                             },
                           },
                         ],

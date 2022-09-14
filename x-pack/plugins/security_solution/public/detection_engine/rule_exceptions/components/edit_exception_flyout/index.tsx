@@ -61,6 +61,7 @@ import {
 import { Loader } from '../../../../common/components/loader';
 import type { ErrorInfo } from '../error_callout';
 import { ErrorCallout } from '../error_callout';
+import { ruleTypesThatAllowLargeValueLists } from '../../utils/constants';
 
 interface EditExceptionFlyoutProps {
   ruleName: string;
@@ -334,11 +335,7 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
   };
 
   const allowLargeValueLists = useMemo(
-    () =>
-      maybeRule?.type === 'query' ||
-      maybeRule?.type === 'machine_learning' ||
-      maybeRule?.type === 'saved_query' ||
-      maybeRule?.type === 'threat_match',
+    () => (maybeRule != null ? ruleTypesThatAllowLargeValueLists.includes(maybeRule.type) : false),
     [maybeRule]
   );
 

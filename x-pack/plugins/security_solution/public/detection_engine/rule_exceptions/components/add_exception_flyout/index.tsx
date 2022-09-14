@@ -66,6 +66,7 @@ import type { ErrorInfo } from '../error_callout';
 import { ErrorCallout } from '../error_callout';
 import type { AlertData } from '../../utils/types';
 import { useFetchIndex } from '../../../../common/containers/source';
+import { ruleTypesThatAllowLargeValueLists } from '../../utils/constants';
 
 export interface AddExceptionFlyoutProps {
   ruleName: string;
@@ -440,11 +441,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   }, [hasOsSelection, selectedOs]);
 
   const allowLargeValueLists = useMemo(
-    () =>
-      maybeRule?.type === 'query' ||
-      maybeRule?.type === 'machine_learning' ||
-      maybeRule?.type === 'saved_query' ||
-      maybeRule?.type === 'threat_match',
+    () => (maybeRule != null ? ruleTypesThatAllowLargeValueLists.includes(maybeRule.type) : false),
     [maybeRule]
   );
 

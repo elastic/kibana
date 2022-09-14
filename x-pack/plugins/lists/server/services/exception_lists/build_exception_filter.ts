@@ -29,7 +29,10 @@ import type { Filter } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { partition } from 'lodash';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
-import { MAXIMUM_SMALL_VALUE_LIST_SIZE } from '@kbn/securitysolution-list-constants';
+import {
+  MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE,
+  MAXIMUM_SMALL_VALUE_LIST_SIZE,
+} from '@kbn/securitysolution-list-constants';
 
 import type { ListClient } from '../..';
 
@@ -248,6 +251,7 @@ export const filterOutUnprocessableValueLists = async <
           listId: id,
           page: 0,
           perPage: 0,
+          runtimeMappings: undefined,
           searchAfter: [],
           sortField: undefined,
           sortOrder: undefined,
@@ -492,7 +496,7 @@ export const buildListClause = async (
     const [dashNotationRange, slashNotationRange] = partition(listValues, (value) => {
       return value.includes('-');
     });
-    if (dashNotationRange.length > 200) {
+    if (dashNotationRange.length > MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE) {
       return undefined;
     }
     const rangeClauses = buildIpRangeClauses(dashNotationRange, field);
