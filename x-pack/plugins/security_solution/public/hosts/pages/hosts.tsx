@@ -60,6 +60,7 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { LandingPageComponent } from '../../common/components/landing_page';
 import { Loader } from '../../common/components/loader';
 import { hostNameExistsFilter } from '../../common/components/visualization_actions/utils';
+import { useLicense } from '../../common/hooks/use_license';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -151,6 +152,8 @@ const HostsComponent = () => {
 
   useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
+  const isEnterprisePlus = useLicense().isEnterprise();
+
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     containerElement.current
       ?.querySelector<HTMLButtonElement>('.inspectButtonComponent:last-of-type')
@@ -214,6 +217,7 @@ const HostsComponent = () => {
                 navTabs={navTabsHosts({
                   hasMlUserPermissions: hasMlUserPermissions(capabilities),
                   isRiskyHostsEnabled: riskyHostsFeatureEnabled,
+                  isEnterprise: isEnterprisePlus,
                 })}
               />
 

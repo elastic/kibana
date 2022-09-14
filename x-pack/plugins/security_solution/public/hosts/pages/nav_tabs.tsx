@@ -10,19 +10,18 @@ import * as i18n from './translations';
 import { HostsTableType } from '../store/model';
 import type { HostsNavTab } from './navigation/types';
 import { HOSTS_PATH } from '../../../common/constants';
-import { useLicense } from '../../common/hooks/use_license'
 
 const getTabsOnHostsUrl = (tabName: HostsTableType) => `${HOSTS_PATH}/${tabName}`;
 
 export const navTabsHosts = ({
   hasMlUserPermissions,
   isRiskyHostsEnabled,
+  isEnterprise,
 }: {
   hasMlUserPermissions: boolean;
   isRiskyHostsEnabled: boolean;
+  isEnterprise?: boolean;
 }): HostsNavTab => {
-  const isEnterprisePlus = useLicense().isEnterprise();
-
   const hiddenTabs = [];
   const hostsNavTabs = {
     [HostsTableType.hosts]: {
@@ -72,7 +71,7 @@ export const navTabsHosts = ({
     hiddenTabs.push(HostsTableType.risk);
   }
 
-  if(!isEnterprisePlus){
+  if (!isEnterprise) {
     hiddenTabs.push(HostsTableType.sessions);
   }
 
