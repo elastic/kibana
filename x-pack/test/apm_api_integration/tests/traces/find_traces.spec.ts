@@ -97,11 +97,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('Find traces when traces exist', { config: 'basic', archives: [] }, () => {
     before(() => {
-      const java = apm.service('java', 'production', 'java').instance('java');
+      const java = apm
+        .service({ name: 'java', environment: 'production', agentName: 'java' })
+        .instance('java');
 
-      const node = apm.service('node', 'development', 'nodejs').instance('node');
+      const node = apm
+        .service({ name: 'node', environment: 'development', agentName: 'nodejs' })
+        .instance('node');
 
-      const python = apm.service('python', 'production', 'python').instance('python');
+      const python = apm
+        .service({ name: 'python', environment: 'production', agentName: 'python' })
+        .instance('python');
 
       function generateTrace(timestamp: number, order: Instance[], db?: 'elasticsearch' | 'redis') {
         return order
@@ -114,7 +120,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             const time = timestamp + invertedIndex * 10;
 
             const transaction: Transaction = instance
-              .transaction(`GET /${instance.fields['service.name']!}/api`)
+              .transaction({ transactionName: `GET /${instance.fields['service.name']!}/api` })
               .timestamp(time)
               .duration(duration);
 
@@ -122,7 +128,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               const next = order[invertedIndex + 1].fields['service.name']!;
               transaction.children(
                 instance
-                  .span(`GET ${next}/api`, 'external', 'http')
+                  .span({ spanName: `GET ${next}/api`, spanType: 'external', spanSubtype: 'http' })
                   .destination(next)
                   .duration(duration)
                   .timestamp(time + 1)
@@ -131,7 +137,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             } else if (db) {
               transaction.children(
                 instance
-                  .span(db, 'db', db)
+                  .span({ spanName: db, spanType: 'db', spanSubtype: db })
                   .destination(db)
                   .duration(duration)
                   .timestamp(time + 1)

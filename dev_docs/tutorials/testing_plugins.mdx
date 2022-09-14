@@ -688,11 +688,10 @@ reflected in the mock.
 // src/plugins/myplugin/public/saved_query_service.ts
 import {
   SavedObjectsClientContract,
-  SavedObjectAttributes,
   SimpleSavedObject,
 } from 'src/core/public';
 
-export type SavedQueryAttributes = SavedObjectAttributes & {
+export type SavedQueryAttributes = {
   title: string;
   description: 'bar';
   query: {
