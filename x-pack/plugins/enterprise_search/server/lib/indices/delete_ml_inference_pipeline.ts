@@ -40,14 +40,17 @@ export const deleteMlInferencePipeline = async (
         const updatedProcessors = parentPipeline.processors.filter(
           (p) => !(p.pipeline !== undefined && p.pipeline.name === pipelineName)
         );
-        const updatedPipeline = {
-          ...parentPipeline,
-          ...{ processors: updatedProcessors },
-        } as IngestPutPipelineRequest;
+        // only update if we changed something
+        if (updatedProcessors.length !== parentPipeline.processors.length) {
+          const updatedPipeline = {
+            ...parentPipeline,
+            ...{ processors: updatedProcessors },
+          } as IngestPutPipelineRequest;
 
-        const updateResponse = await client.ingest.putPipeline(updatedPipeline);
-        if (updateResponse.acknowledged === true) {
-          response.updated = parentPipelineId;
+          const updateResponse = await client.ingest.putPipeline(updatedPipeline);
+          if (updateResponse.acknowledged === true) {
+            response.updated = parentPipelineId;
+          }
         }
       }
     }
