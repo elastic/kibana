@@ -478,6 +478,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                       // @ts-expect-error version string !+ string[]
                       data={liveQueryDetails?.queries ?? selectedPackData?.attributes?.queries}
                       addToCase={addToCaseButton}
+                      addToTimeline={addToTimeline}
                       showResultsHeader
                     />
                   </EuiFlexItem>

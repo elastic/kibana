@@ -684,20 +684,19 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
       {
         render: renderLensResultsAction,
       },
-    ];
-    if (addToCase) {
-      resultActions.push({
-        render: (item) =>
+      {
+        available: () => !!addToCase,
+        render: (item: { action_id: string }) =>
+          addToCase &&
           addToCase({ actionId: item.action_id, isIcon: true, isDisabled: !item.action_id }),
-      });
-    }
-
-    if (addToTimeline && timelines && appName === SECURITY_APP_NAME) {
-      resultActions.push({
-        render: (item) =>
+      },
+      {
+        available: () => addToTimeline && timelines && appName === SECURITY_APP_NAME,
+        render: (item: { action_id: string }) =>
+          addToTimeline &&
           addToTimeline({ queries: [{ field: 'action_id', value: item.action_id }], isIcon: true }),
-      });
-    }
+      },
+    ];
 
     return [
       {
