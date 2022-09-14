@@ -12,6 +12,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import { i18n } from '@kbn/i18n';
