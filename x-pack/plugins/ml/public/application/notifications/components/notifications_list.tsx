@@ -133,7 +133,7 @@ export const NotificationsList: FC = () => {
       fetchNotifications();
     },
     500,
-    [pagination, sorting, queryInstance, refresh]
+    [pagination.pageIndex, pagination.pageSize, sorting, queryInstance, refresh]
   );
 
   const columns: Array<EuiBasicTableColumn<NotificationItem>> = [
