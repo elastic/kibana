@@ -72,6 +72,9 @@ export const InputCapture = memo<InputCaptureProps>(
     const getTextSelection = useCallback((): string => {
       if (focusEleRef.current) {
         const selection = document.getSelection();
+        // Get the selected text and remove any new line breaks from it.
+        // The input area does not allow for new line breaks and due to the markup, if user makes
+        // a selection that also captures the cursor, then a new line break is included in the selection
         const selectionText = (selection?.toString() ?? '').replace(/[\r\n]/g, '');
 
         if (!selection || selectionText.length === 0) {
@@ -128,7 +131,8 @@ export const InputCapture = memo<InputCaptureProps>(
 
     const handleOnPaste = useCallback<ClipboardEventHandler>(
       (ev) => {
-        const value = ev.clipboardData.getData('text');
+        // Get the data the user pasted as text and remove all new line breaks from it
+        const value = ev.clipboardData.getData('text').replace(/[\r\n]/g, '');
 
         // hard-coded for use in onCapture and future keyboard functions
         const eventDetails = {
