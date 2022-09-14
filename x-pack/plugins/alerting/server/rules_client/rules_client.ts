@@ -40,7 +40,7 @@ import {
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
 } from '@kbn/security-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import {
   IEvent,
   IEventLogClient,
@@ -365,6 +365,15 @@ export interface GetExecutionLogByIdParams {
   sort: estypes.Sort;
 }
 
+export interface GetGlobalExecutionLogParams {
+  dateStart: string;
+  dateEnd?: string;
+  filter?: string;
+  page: number;
+  perPage: number;
+  sort: estypes.Sort;
+}
+
 export interface GetActionErrorLogByIdParams {
   id: string;
   dateStart: string;
@@ -375,7 +384,7 @@ export interface GetActionErrorLogByIdParams {
   sort: estypes.Sort;
 }
 
-interface ScheduleRuleOptions {
+interface ScheduleTaskOptions {
   id: string;
   consumer: string;
   ruleTypeId: string;
@@ -580,7 +589,7 @@ export class RulesClient {
     if (data.enabled) {
       let scheduledTask;
       try {
-        scheduledTask = await this.scheduleRule({
+        scheduledTask = await this.scheduleTask({
           id: createdAlert.id,
           consumer: data.consumer,
           ruleTypeId: rawRule.alertTypeId,
@@ -870,6 +879,75 @@ export class RulesClient {
     } catch (err) {
       this.logger.debug(
         `rulesClient.getExecutionLogForRule(): error searching event log for rule ${id}: ${err.message}`
+      );
+      throw err;
+    }
+  }
+
+  public async getGlobalExecutionLogWithAuth({
+    dateStart,
+    dateEnd,
+    filter,
+    page,
+    perPage,
+    sort,
+  }: GetGlobalExecutionLogParams): Promise<IExecutionLogResult> {
+    this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
+
+    let authorizationTuple;
+    try {
+      authorizationTuple = await this.authorization.getFindAuthorizationFilter(
+        AlertingAuthorizationEntity.Alert,
+        {
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'kibana.alert.rule.rule_type_id',
+            consumer: 'kibana.alert.rule.consumer',
+          },
+        }
+      );
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.GET_GLOBAL_EXECUTION_LOG,
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.GET_GLOBAL_EXECUTION_LOG,
+      })
+    );
+
+    const dateNow = new Date();
+    const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
+    const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    try {
+      const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
+        'alert',
+        authorizationTuple.filter as KueryNode,
+        {
+          start: parsedDateStart.toISOString(),
+          end: parsedDateEnd.toISOString(),
+          aggs: getExecutionLogAggregation({
+            filter,
+            page,
+            perPage,
+            sort,
+          }),
+        }
+      );
+
+      return formatExecutionLogResult(aggResult);
+    } catch (err) {
+      this.logger.debug(
+        `rulesClient.getGlobalExecutionLogWithAuth(): error searching global event log: ${err.message}`
       );
       throw err;
     }
@@ -2035,7 +2113,24 @@ export class RulesClient {
       } catch (e) {
         throw e;
       }
-      const scheduledTask = await this.scheduleRule({
+    }
+
+    let scheduledTaskIdToCreate: string | null = null;
+    if (attributes.scheduledTaskId) {
+      // If scheduledTaskId defined in rule SO, make sure it exists
+      try {
+        await this.taskManager.get(attributes.scheduledTaskId);
+      } catch (err) {
+        scheduledTaskIdToCreate = id;
+      }
+    } else {
+      // If scheduledTaskId doesn't exist in rule SO, set it to rule ID
+      scheduledTaskIdToCreate = id;
+    }
+
+    if (scheduledTaskIdToCreate) {
+      // Schedule the task if it doesn't exist
+      const scheduledTask = await this.scheduleTask({
         id,
         consumer: attributes.consumer,
         ruleTypeId: attributes.alertTypeId,
@@ -2045,6 +2140,9 @@ export class RulesClient {
       await this.unsecuredSavedObjectsClient.update('alert', id, {
         scheduledTaskId: scheduledTask.id,
       });
+    } else {
+      // Task exists so set enabled to true
+      await this.taskManager.bulkEnableDisable([attributes.scheduledTaskId!], true);
     }
   }
 
@@ -2179,14 +2277,21 @@ export class RulesClient {
         this.updateMeta({
           ...attributes,
           enabled: false,
-          scheduledTaskId: null,
+          scheduledTaskId: attributes.scheduledTaskId === id ? attributes.scheduledTaskId : null,
           updatedBy: await this.getUserName(),
           updatedAt: new Date().toISOString(),
         }),
         { version }
       );
+
+      // If the scheduledTaskId does not match the rule id, we should
+      // remove the task, otherwise mark the task as disabled
       if (attributes.scheduledTaskId) {
-        await this.taskManager.removeIfExists(attributes.scheduledTaskId);
+        if (attributes.scheduledTaskId !== id) {
+          await this.taskManager.removeIfExists(attributes.scheduledTaskId);
+        } else {
+          await this.taskManager.bulkEnableDisable([attributes.scheduledTaskId], false);
+        }
       }
     }
   }
@@ -2652,6 +2757,55 @@ export class RulesClient {
     }
   }
 
+  public async runSoon({ id }: { id: string }) {
+    const { attributes } = await this.unsecuredSavedObjectsClient.get<Rule>('alert', id);
+    try {
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: attributes.alertTypeId,
+        consumer: attributes.consumer,
+        operation: ReadOperations.RunSoon,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+
+      if (attributes.actions.length) {
+        await this.actionsAuthorization.ensureAuthorized('execute');
+      }
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.RUN_SOON,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.RUN_SOON,
+        outcome: 'unknown',
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
+
+    const taskDoc = attributes.scheduledTaskId
+      ? await this.taskManager.get(attributes.scheduledTaskId)
+      : null;
+    if (
+      taskDoc &&
+      (taskDoc.status === TaskStatus.Claiming || taskDoc.status === TaskStatus.Running)
+    ) {
+      return i18n.translate('xpack.alerting.rulesClient.runSoon.ruleIsRunning', {
+        defaultMessage: 'Rule is already running',
+      });
+    }
+
+    await this.taskManager.runSoon(id);
+  }
+
   public async listAlertTypes() {
     return await this.authorization.filterByRuleTypeAuthorization(
       this.ruleTypeRegistry.list(),
@@ -2664,7 +2818,7 @@ export class RulesClient {
     return this.spaceId;
   }
 
-  private async scheduleRule(opts: ScheduleRuleOptions) {
+  private async scheduleTask(opts: ScheduleTaskOptions) {
     const { id, consumer, ruleTypeId, schedule, throwOnConflict } = opts;
     const taskInstance = {
       id, // use the same ID for task document as the rule
@@ -2681,6 +2835,7 @@ export class RulesClient {
         alertInstances: {},
       },
       scope: ['alerting'],
+      enabled: true,
     };
     try {
       return await this.taskManager.schedule(taskInstance);

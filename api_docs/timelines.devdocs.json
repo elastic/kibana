@@ -377,7 +377,7 @@
           "EsQueryConfig",
           "; indexPattern: ",
           "DataViewBase",
-          "; queries: ",
+          " | undefined; queries: ",
           "Query",
           "[]; filters: ",
           "Filter",
@@ -425,9 +425,8 @@
                 "label": "indexPattern",
                 "description": [],
                 "signature": [
-                  "{ fields: ",
-                  "DataViewFieldBase",
-                  "[]; id?: string | undefined; title: string; }"
+                  "DataViewBase",
+                  " | undefined"
                 ],
                 "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
                 "deprecated": false,
@@ -6453,7 +6452,7 @@
           },
           " extends Omit<",
           "TimelineRequestBasicOptions",
-          ", \"timerange\" | \"filterQuery\" | \"runtimeMappings\">"
+          ", \"timerange\" | \"runtimeMappings\" | \"filterQuery\">"
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
         "deprecated": false,

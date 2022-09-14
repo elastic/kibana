@@ -148,6 +148,8 @@ Example:
 }
 ```
 
+**Important!** To prevent conflicts, it's important to not re-use ad-hoc data view ids for different specs. If you change the spec in some way, make sure to also change its id. This even applies across multiple embeddables, sessions, etc. Ideally, the id will be globally unique. You can use the `uuid` package to generate a new unique id every time when you are changing the spec in some way. However, make sure to also not change the id on every single render either, as this will have a substantial performance impact.
+
 ## Refreshing a Lens embeddable
 
 The Lens embeddable is handling data fetching internally, this means as soon as the props change, it will trigger a new request if necessary. However, in some situations it's necessary to trigger a refresh even if the configuration of the chart doesn't change at all. Refreshing is managed using search sessions is Lens. To trigger a refresh without changing the actual configuration of a Lens embeddable, follow these steps:
@@ -188,6 +190,9 @@ Run all tests from the `x-pack` root directory
 - API Functional tests:
   - Run `node scripts/functional_tests_server`
   - Run `node ../scripts/functional_test_runner.js --config ./test/api_integration/config.ts --grep=Lens`
+- Performance journeys:
+  - Run `node scripts/functional_tests_server.js --config x-pack/test/performance/journeys/data_stress_test_lens/config.ts`
+  - Run `node scripts/functional_test_runner --config x-pack/test/performance/journeys/data_stress_test_lens/config.ts`
 
 ## Developing tips
 

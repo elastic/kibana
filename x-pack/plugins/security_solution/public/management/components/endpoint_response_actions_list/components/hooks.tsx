@@ -10,7 +10,10 @@ import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
-import type { ResponseActionStatus } from '../../../../../common/endpoint/service/response_actions/constants';
+import type {
+  ResponseActions,
+  ResponseActionStatus,
+} from '../../../../../common/endpoint/service/response_actions/constants';
 import {
   RESPONSE_ACTION_COMMANDS,
   RESPONSE_ACTION_STATUS,
@@ -19,6 +22,7 @@ import type { DateRangePickerValues } from './actions_log_date_range_picker';
 import type { FILTER_NAMES } from '../translations';
 import { UX_MESSAGES } from '../translations';
 import { StatusBadge } from './status_badge';
+import { useActionHistoryUrlParams } from './use_action_history_url_params';
 
 const defaultDateRangeOptions = Object.freeze({
   autoRefreshOptions: {
@@ -30,7 +34,8 @@ const defaultDateRangeOptions = Object.freeze({
   recentlyUsedDateRanges: [],
 });
 
-export const useDateRangePicker = () => {
+export const useDateRangePicker = (isFlyout: boolean) => {
+  const { setUrlDateRangeFilters } = useActionHistoryUrlParams();
   const [dateRangePickerState, setDateRangePickerState] =
     useState<DateRangePickerValues>(defaultDateRangeOptions);
 
@@ -83,9 +88,16 @@ export const useDateRangePicker = () => {
           .slice(0, 9),
       ];
       updateActionListRecentlyUsedDateRanges(newRecentlyUsedDateRanges);
+
+      // update URL params for date filters
+      if (!isFlyout) {
+        setUrlDateRangeFilters({ startDate: newStart, endDate: newEnd });
+      }
     },
     [
       dateRangePickerState.recentlyUsedDateRanges,
+      isFlyout,
+      setUrlDateRangeFilters,
       updateActionListDateRanges,
       updateActionListRecentlyUsedDateRanges,
     ]
@@ -98,6 +110,7 @@ export type FilterItems = Array<{
   key: string;
   label: string;
   checked: 'on' | undefined;
+  'data-test-subj': string;
 }>;
 
 export const getActionStatus = (status: ResponseActionStatus): string => {
@@ -111,36 +124,84 @@ export const getActionStatus = (status: ResponseActionStatus): string => {
   return '';
 };
 
+/**
+ * map actual command to ui command
+ * unisolate -> release
+ * running-processes -> processes
+ */
+export const getUiCommand = (
+  command: ResponseActions
+): Exclude<ResponseActions, 'unisolate' | 'running-processes'> | 'release' | 'processes' => {
+  if (command === 'unisolate') {
+    return 'release';
+  } else if (command === 'running-processes') {
+    return 'processes';
+  } else {
+    return command;
+  }
+};
+
+/**
+ * map UI command back to actual command
+ * release -> unisolate
+ * processes -> running-processes
+ */
+export const getCommandKey = (
+  uiCommand: Exclude<ResponseActions, 'unisolate' | 'running-processes'> | 'release' | 'processes'
+): ResponseActions => {
+  if (uiCommand === 'release') {
+    return 'unisolate';
+  } else if (uiCommand === 'processes') {
+    return 'running-processes';
+  } else {
+    return uiCommand;
+  }
+};
+
 // TODO: add more filter names here
 export type FilterName = keyof typeof FILTER_NAMES;
 export const useActionsLogFilter = (
-  filterName: FilterName
+  filterName: FilterName,
+  isFlyout: boolean
 ): {
   items: FilterItems;
   setItems: React.Dispatch<React.SetStateAction<FilterItems>>;
   hasActiveFilters: boolean;
   numActiveFilters: number;
   numFilters: number;
+  setUrlActionsFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlActionsFilters'];
+  setUrlStatusesFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlStatusesFilters'];
 } => {
+  const { commands, statuses, setUrlActionsFilters, setUrlStatusesFilters } =
+    useActionHistoryUrlParams();
   const isStatusesFilter = filterName === 'statuses';
   const [items, setItems] = useState<FilterItems>(
     isStatusesFilter
-      ? RESPONSE_ACTION_STATUS.map((filter) => ({
-          key: filter,
+      ? RESPONSE_ACTION_STATUS.map((statusName) => ({
+          key: statusName,
           label: (
             <StatusBadge
               color={
-                filter === 'successful' ? 'success' : filter === 'failed' ? 'danger' : 'warning'
+                statusName === 'successful'
+                  ? 'success'
+                  : statusName === 'failed'
+                  ? 'danger'
+                  : 'warning'
               }
-              status={getActionStatus(filter)}
+              status={getActionStatus(statusName)}
             />
           ) as unknown as string,
-          checked: undefined,
+          checked: !isFlyout && statuses?.includes(statusName) ? 'on' : undefined,
+          'data-test-subj': `${filterName}-filter-option`,
         }))
-      : RESPONSE_ACTION_COMMANDS.map((filter) => ({
-          key: filter,
-          label: filter === 'unisolate' ? 'release' : filter,
-          checked: undefined,
+      : RESPONSE_ACTION_COMMANDS.map((commandName) => ({
+          key: commandName,
+          label: getUiCommand(commandName),
+          checked:
+            !isFlyout && commands?.map((command) => getCommandKey(command)).includes(commandName)
+              ? 'on'
+              : undefined,
+          'data-test-subj': `${filterName}-filter-option`,
         }))
   );
 
@@ -151,5 +212,13 @@ export const useActionsLogFilter = (
   );
   const numFilters = useMemo(() => items.filter((item) => item.checked !== 'on').length, [items]);
 
-  return { items, setItems, hasActiveFilters, numActiveFilters, numFilters };
+  return {
+    items,
+    setItems,
+    hasActiveFilters,
+    numActiveFilters,
+    numFilters,
+    setUrlActionsFilters,
+    setUrlStatusesFilters,
+  };
 };

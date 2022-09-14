@@ -57,7 +57,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [] },
     () => {
       before(async () => {
-        const instance = apm.service(serviceName, 'production', 'go').instance(instanceName);
+        const instance = apm
+          .service({ name: serviceName, environment: 'production', agentName: 'go' })
+          .instance(instanceName);
         await synthtraceEsClient.index(
           timerange(start, end)
             .interval('1m')
@@ -65,7 +67,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .generator((timestamp) =>
               instance
                 .containerId(instanceName)
-                .transaction('GET /api/product/list')
+                .transaction({ transactionName: 'GET /api/product/list' })
                 .timestamp(timestamp)
                 .duration(1000)
                 .success()

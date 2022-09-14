@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { UiActionsStart, VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { GlobeIllustration } from '@kbn/chart-icons';
+import { IndexPattern } from '../../../types';
 import { getVisualizeGeoFieldMessage } from '../../../utils';
 import { DragDrop } from '../../../drag_drop';
 import { APP_ID } from '../../../../common/constants';
@@ -19,7 +20,7 @@ import './geo_field_workspace_panel.scss';
 interface Props {
   fieldType: string;
   fieldName: string;
-  indexPatternId: string;
+  indexPattern: IndexPattern;
   uiActions: UiActionsStart;
 }
 
@@ -37,7 +38,7 @@ const dragDropOrder = [1, 0, 0, 0];
 export function GeoFieldWorkspacePanel(props: Props) {
   function onDrop() {
     props.uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER).exec({
-      indexPatternId: props.indexPatternId,
+      dataViewSpec: props.indexPattern.spec,
       fieldName: props.fieldName,
       originatingApp: APP_ID,
     });
