@@ -341,7 +341,7 @@ export function registerIndexRoutes({
 
   router.delete(
     {
-      path: '/internal/enterprise_search/indices/{indexName}/pipelines/ml-inference/{pipelineName}',
+      path: '/internal/enterprise_search/indices/{indexName}/pipelines/ml_inference/{pipelineName}',
       validate: {
         params: schema.object({
           indexName: schema.string(),
