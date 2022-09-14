@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { Status } from '../../../../../common/types/api';
-import { enableIndexTransformsTab } from '../../../../../common/ui_settings_keys';
+import { enableIndexPipelinesTab } from '../../../../../common/ui_settings_keys';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
@@ -39,16 +39,17 @@ import { SearchIndexDocuments } from './documents';
 import { SearchIndexIndexMappings } from './index_mappings';
 import { IndexNameLogic } from './index_name_logic';
 import { SearchIndexOverview } from './overview';
+import { SearchIndexPipelines } from './pipelines/pipelines';
 
 export enum SearchIndexTabId {
   // all indices
   OVERVIEW = 'overview',
   DOCUMENTS = 'documents',
   INDEX_MAPPINGS = 'index_mappings',
+  PIPELINES = 'pipelines',
   // connector indices
   CONFIGURATION = 'configuration',
   SCHEDULING = 'scheduling',
-  TRANSFORMS = 'transforms',
   // crawler indices
   DOMAIN_MANAGEMENT = 'domain_management',
 }
@@ -65,7 +66,7 @@ export const SearchIndex: React.FC = () => {
 
   const { indexName } = useValues(IndexNameLogic);
 
-  const transformsEnabled = uiSettings?.get<boolean>(enableIndexTransformsTab) ?? false;
+  const pipelinesEnabled = uiSettings?.get<boolean>(enableIndexPipelinesTab) ?? false;
 
   const ALL_INDICES_TABS: EuiTabbedContentTab[] = [
     {
@@ -125,12 +126,12 @@ export const SearchIndex: React.FC = () => {
     },
   ];
 
-  const TRANSFORMS_TAB: EuiTabbedContentTab[] = [
+  const PIPELINES_TAB: EuiTabbedContentTab[] = [
     {
-      content: <div />,
-      id: SearchIndexTabId.TRANSFORMS,
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.transformsTabLabel', {
-        defaultMessage: 'Transforms',
+      content: <SearchIndexPipelines />,
+      id: SearchIndexTabId.PIPELINES,
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.pipelinesTabLabel', {
+        defaultMessage: 'Pipelines',
       }),
     },
   ];
@@ -139,7 +140,7 @@ export const SearchIndex: React.FC = () => {
     ...ALL_INDICES_TABS,
     ...(isConnectorIndex(indexData) ? CONNECTOR_TABS : []),
     ...(isCrawlerIndex(indexData) ? CRAWLER_TABS : []),
-    ...(transformsEnabled && isConnectorIndex(indexData) ? TRANSFORMS_TAB : []),
+    ...(pipelinesEnabled ? PIPELINES_TAB : []),
   ];
 
   const selectedTab = tabs.find((tab) => tab.id === tabId);
