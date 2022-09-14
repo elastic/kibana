@@ -59,6 +59,7 @@ import {
   getLensDataViewMigrations,
   commonMigrateMetricIds,
   commonMigratePartitionChartGroups,
+  commonMigratePartitionMetrics,
 } from './common_migrations';
 
 interface LensDocShapePre710<VisualizationState = unknown> {
@@ -545,6 +546,13 @@ const migratePartitionChartGroups: SavedObjectMigrationFn<LensDocShape840, LensD
   ),
 });
 
+const migratePartitionMetrics: SavedObjectMigrationFn<LensDocShape850, LensDocShape850> = (
+  doc
+) => ({
+  ...doc,
+  attributes: commonMigratePartitionMetrics(doc.attributes),
+});
+
 const lensMigrations: SavedObjectMigrationMap = {
   '7.7.0': removeInvalidAccessors,
   // The order of these migrations matter, since the timefield migration relies on the aggConfigs
@@ -565,7 +573,12 @@ const lensMigrations: SavedObjectMigrationMap = {
     enhanceTableRowHeight
   ),
   '8.3.0': flow(lockOldMetricVisSettings, preserveOldLegendSizeDefault, fixValueLabelsInXY),
-  '8.5.0': flow(migrateMetricIds, addEventAnnotationType, migratePartitionChartGroups),
+  '8.5.0': flow(
+    migrateMetricIds,
+    addEventAnnotationType,
+    migratePartitionChartGroups,
+    migratePartitionMetrics
+  ),
 };
 
 export const getAllMigrations = (

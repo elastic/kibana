@@ -31,6 +31,7 @@ import {
   getLensDataViewMigrations,
   commonMigrateMetricIds,
   commonMigratePartitionChartGroups,
+  commonMigratePartitionMetrics,
 } from '../migrations/common_migrations';
 import {
   CustomVisualizationMigrations,
@@ -150,6 +151,7 @@ export const makeLensEmbeddableFactory =
                     layers: Array<{ groups?: string[] }>;
                   }>
                 );
+                migratedLensState = commonMigratePartitionMetrics(migratedLensState);
                 return {
                   ...lensState,
                   attributes: migratedLensState,
