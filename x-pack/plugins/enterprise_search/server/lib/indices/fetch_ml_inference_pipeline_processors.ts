@@ -6,7 +6,8 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { InferencePipeline } from '@kbn/enterprise-search-plugin/common/types/pipelines';
+
+import { InferencePipeline } from '../../../common/types/pipelines';
 
 export const fetchMlInferencePipelineProcessorNames = async (
   client: ElasticsearchClient,
@@ -45,7 +46,7 @@ export const fetchPipelineProcessorInferenceData = async (
         mlInferencePipelineProcessorConfigs[pipelineProcessorName].processors || [];
 
       // Find the inference processor, which we can assume there will only be one.
-      const inferenceProcessor = subProcessors.find(obj => obj.hasOwnProperty('inference'));
+      const inferenceProcessor = subProcessors.find((obj) => obj.hasOwnProperty('inference'));
 
       const trainedModelName = inferenceProcessor?.inference?.model_id;
       if (trainedModelName)
