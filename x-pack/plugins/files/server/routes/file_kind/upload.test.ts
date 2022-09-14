@@ -16,6 +16,7 @@ import { handler } from './upload';
 import { createFileKindsRequestHandlerContextMock } from '../test_utils';
 import { FileKindsRequestHandlerContext } from './types';
 import { File } from '../../file';
+import { AbortedUploadError } from '../../file/errors';
 
 const createRequest = httpServerMock.createKibanaRequest;
 
@@ -60,22 +61,23 @@ describe('upload', () => {
     expect(deleteFn).not.toHaveBeenCalled();
   });
 
-  describe('self-destruct', () => {
+  describe('self-destruct on abort', () => {
     it('deletes a file on failure to upload', async () => {
-      uploadContent.mockImplementationOnce(stopFn);
+      uploadContent.mockImplementationOnce(() => {
+        throw new AbortedUploadError('Request aborted');
+      });
 
-      await expect(() =>
-        handler(
-          ctx,
-          createRequest({
-            params: { id: 'test' },
-            query: { selfDestructOnFailure: true },
-            body: Readable.from(['test']),
-          }),
-          kibanaResponseFactory
-        )
-      ).rejects.toThrowError(testErrorMessage);
-
+      const { status, payload } = await handler(
+        ctx,
+        createRequest({
+          params: { id: 'test' },
+          query: { selfDestructOnAbort: true },
+          body: Readable.from(['test']),
+        }),
+        kibanaResponseFactory
+      );
+      expect(status).toBe(499);
+      expect(payload).toEqual({ message: 'Request aborted' });
       expect(deleteFn).toHaveBeenCalledTimes(1);
     });
   });
