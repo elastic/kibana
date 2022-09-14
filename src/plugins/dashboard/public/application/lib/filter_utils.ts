@@ -8,9 +8,9 @@
 
 import _ from 'lodash';
 import moment, { Moment } from 'moment';
-import { Optional } from '@kbn/utility-types';
-
-import { Filter, TimeRange, RefreshInterval } from '../../services/data';
+import type { Optional } from '@kbn/utility-types';
+import type { RefreshInterval } from '@kbn/data-plugin/public';
+import type { Filter, TimeRange } from '@kbn/es-query';
 
 type TimeRangeCompare = Optional<TimeRange>;
 type RefreshIntervalCompare = Optional<RefreshInterval>;
