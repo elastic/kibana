@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { flow } from 'lodash';
+import { flow, uniqBy } from 'lodash';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
 import {
@@ -26,6 +26,7 @@ import {
   CaseStatuses,
   User,
   CaseAttributes,
+  CaseAssignees,
 } from '../../../common/api';
 import { CasesClientGetAlertsResponse } from '../alerts/types';
 import {
@@ -54,6 +55,14 @@ interface CreateIncidentArgs {
   alerts: CasesClientGetAlertsResponse;
   casesConnectors: CasesConnectorsMap;
 }
+
+export const dedupAssignees = (assignees?: CaseAssignees): CaseAssignees | undefined => {
+  if (assignees == null) {
+    return;
+  }
+
+  return uniqBy(assignees, 'uid');
+};
 
 export const getLatestPushInfo = (
   connectorId: string,
