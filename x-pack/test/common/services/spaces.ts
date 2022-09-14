@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Space } from '@kbn/spaces-plugin/common';
 import Axios from 'axios';
 import { format as formatUrl } from 'url';
 import util from 'util';
@@ -45,6 +46,20 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
         );
       }
       log.debug(`deleted space id: ${spaceId}`);
+    }
+
+    public async getAll() {
+      log.debug('retrieving all spaces');
+      const { data, status, statusText } = await axios.get<Space[]>('/api/spaces/space');
+
+      if (status !== 200) {
+        throw new Error(
+          `Expected status code of 200, received ${status} ${statusText}: ${util.inspect(data)}`
+        );
+      }
+      log.debug(`retrieved ${data.length} spaces`);
+
+      return data;
     }
   })();
 }
