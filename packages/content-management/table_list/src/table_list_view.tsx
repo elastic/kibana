@@ -10,7 +10,6 @@ import React, { useReducer, useCallback, useEffect, useRef, useMemo, ReactNode }
 import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiBasicTableColumn,
-  EuiTableFieldDataColumnType,
   EuiButton,
   EuiCallOut,
   EuiEmptyPrompt,
@@ -25,7 +24,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
-import { Table, ConfirmDeleteModal, ListingLimitWarning, ItemDetails } from './components';
+import {
+  Table,
+  ConfirmDeleteModal,
+  ListingLimitWarning,
+  ItemDetails,
+  UpdatedAtField,
+} from './components';
 import { useServices } from './services';
 import type { SavedObjectsReference, SavedObjectsFindOptionsReference } from './services';
 import type { Action } from './actions';
@@ -72,7 +77,7 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   searchQuery: string;
   selectedIds: string[];
   totalItems: number;
-  tableColumns: Array<EuiBasicTableColumn<T>>;
+  hasUpdatedAtMetadata: boolean;
   pagination: Pagination;
   tableSort?: {
     field: keyof T;
@@ -134,8 +139,8 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   } = useServices();
 
   const reducer = useMemo(() => {
-    return getReducer<T>({ DateFormatterComp });
-  }, [DateFormatterComp]);
+    return getReducer<T>();
+  }, []);
 
   const [state, dispatch] = useReducer<(state: State<T>, action: Action<T>) => State<T>>(reducer, {
     items: [],
@@ -144,26 +149,8 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     isFetchingItems: false,
     isDeletingItems: false,
     showDeleteModal: false,
+    hasUpdatedAtMetadata: false,
     selectedIds: [],
-    tableColumns: [
-      {
-        field: 'attributes.title',
-        name: i18n.translate('contentManagement.tableList.titleColumnName', {
-          defaultMessage: 'Title',
-        }),
-        sortable: true,
-        render: (field: keyof T, record: T) => {
-          return (
-            <ItemDetails<T>
-              id={id}
-              item={record}
-              getDetailViewLink={getDetailViewLink}
-              onClickTitle={onClickTitle}
-            />
-          );
-        },
-      },
-    ],
     searchQuery: initialQuery,
     pagination: {
       pageIndex: 0,
@@ -183,7 +170,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     isDeletingItems,
     selectedIds,
     totalItems,
-    tableColumns: stateTableColumns,
+    hasUpdatedAtMetadata,
     pagination,
     tableSort,
   } = state;
@@ -193,24 +180,43 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   const showLimitError = !showFetchError && totalItems > listingLimit;
 
   const tableColumns = useMemo(() => {
-    const columns = stateTableColumns.slice();
+    const columns: Array<EuiBasicTableColumn<T>> = [
+      {
+        field: 'attributes.title',
+        name: i18n.translate('contentManagement.tableList.mainColumnName', {
+          defaultMessage: 'Name, description, tags',
+        }),
+        sortable: true,
+        render: (field: keyof T, record: T) => {
+          return (
+            <ItemDetails<T>
+              id={id}
+              item={record}
+              getDetailViewLink={getDetailViewLink}
+              onClickTitle={onClickTitle}
+              searchTerm={searchQuery}
+            />
+          );
+        },
+      },
+    ];
 
     if (customTableColumn) {
-      const indexUpdatedAtCol = columns.reduce((acc, column, index) => {
-        if (acc >= 0) {
-          return acc;
-        }
-        const field = (column as EuiTableFieldDataColumnType<T>).field;
-        return field === 'updatedAt' ? index : acc;
-      }, -1);
+      columns.push(customTableColumn);
+    }
 
-      if (indexUpdatedAtCol >= 0) {
-        // We want to keep the "updatedAt" column next to the actions so we
-        // will insert the custom column before the udpatedAt col
-        columns.splice(indexUpdatedAtCol, 0, customTableColumn);
-      } else {
-        columns.push(customTableColumn);
-      }
+    if (hasUpdatedAtMetadata) {
+      columns.push({
+        field: 'updatedAt',
+        name: i18n.translate('contentManagement.tableList.lastUpdatedColumnTitle', {
+          defaultMessage: 'Last updated',
+        }),
+        render: (field: string, record: { updatedAt?: string }) => (
+          <UpdatedAtField dateTime={record.updatedAt} DateFormatterComp={DateFormatterComp} />
+        ),
+        sortable: true,
+        width: '150px',
+      });
     }
 
     // Add "Actions" column
@@ -248,7 +254,16 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     }
 
     return columns;
-  }, [stateTableColumns, customTableColumn, editItem]);
+  }, [
+    customTableColumn,
+    hasUpdatedAtMetadata,
+    editItem,
+    id,
+    getDetailViewLink,
+    onClickTitle,
+    searchQuery,
+    DateFormatterComp,
+  ]);
 
   const itemsById = useMemo(() => {
     return keyBy(items, 'id');

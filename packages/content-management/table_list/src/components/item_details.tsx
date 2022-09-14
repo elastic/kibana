@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiText, EuiLink, EuiTitle, EuiHighlight } from '@elastic/eui';
+import { EuiText, EuiLink, EuiTitle, EuiHighlight, EuiSpacer } from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { useServices } from '../services';
@@ -72,9 +72,13 @@ export function ItemDetails<T extends UserContentCommonSchema>({
           onClick={onClickTitleHandler}
           data-test-subj={`${id}ListingTitleLink-${item.attributes.title.split(' ').join('-')}`}
         >
-          <EuiHighlight highlightAll search={searchTerm}>
-            {title}
-          </EuiHighlight>
+          <EuiText>
+            <h4>
+              <EuiHighlight highlightAll search={searchTerm}>
+                {title}
+              </EuiHighlight>
+            </h4>
+          </EuiText>
         </EuiLink>
       </RedirectAppLinks>
     );
@@ -101,6 +105,7 @@ export function ItemDetails<T extends UserContentCommonSchema>({
           </p>
         </EuiText>
       )}
+      <EuiSpacer size="s" />
       {Boolean(references) && <TagList references={references} />}
     </div>
   );
