@@ -38,10 +38,10 @@ import {
   type InternalApplicationStart,
 } from '@kbn/core-application-browser-internal';
 import { RenderingService } from '@kbn/core-rendering-browser-internal';
+import { CoreAppsService } from '@kbn/core-apps-browser-internal';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import { CoreSetup, CoreStart } from '.';
 import { PluginsService } from './plugins';
-import { CoreApp } from './core_app';
 
 import {
   LOAD_SETUP_DONE,
@@ -71,6 +71,17 @@ export interface InternalCoreStart extends Omit<CoreStart, 'application'> {
   injectedMetadata: InternalInjectedMetadataStart;
 }
 
+// Expands the definition of navigator to include experimental features
+interface ExtendedNavigator {
+  connection?: {
+    effectiveType?: string;
+  };
+  // Estimated RAM
+  deviceMemory?: number;
+  // Number of cores
+  hardwareConcurrency?: number;
+}
+
 /**
  * The CoreSystem is the root of the new platform, and setups all parts
  * of Kibana in the UI, including the LegacyPlatform which is managed
@@ -95,7 +106,7 @@ export class CoreSystem {
   private readonly docLinks: DocLinksService;
   private readonly rendering: RenderingService;
   private readonly integrations: IntegrationsService;
-  private readonly coreApp: CoreApp;
+  private readonly coreApp: CoreAppsService;
   private readonly deprecations: DeprecationsService;
   private readonly theme: ThemeService;
   private readonly rootDomElement: HTMLElement;
@@ -140,7 +151,7 @@ export class CoreSystem {
     this.executionContext = new ExecutionContextService();
 
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
-    this.coreApp = new CoreApp(this.coreContext);
+    this.coreApp = new CoreAppsService(this.coreContext);
 
     performance.mark(KBN_LOAD_MARKS, {
       detail: LOAD_CORE_CREATED,
@@ -168,12 +179,24 @@ export class CoreSystem {
     });
 
     const timing = this.getLoadMarksInfo();
+
+    const navigatorExt = navigator as ExtendedNavigator;
+    const navigatorInfo: Record<string, string> = {};
+    if (navigatorExt.deviceMemory) {
+      navigatorInfo.deviceMemory = String(navigatorExt.deviceMemory);
+    }
+    if (navigatorExt.hardwareConcurrency) {
+      navigatorInfo.hardwareConcurrency = String(navigatorExt.hardwareConcurrency);
+    }
+
     reportPerformanceMetricEvent(analytics, {
       eventName: KIBANA_LOADED_EVENT,
       meta: {
         kibana_version: this.coreContext.env.packageInfo.version,
         protocol: window.location.protocol,
         ...fetchOptionalMemoryInfo(),
+        // Report some hardware metrics for bucketing
+        ...navigatorInfo,
       },
       duration: timing[LOAD_FIRST_NAV],
       key1: LOAD_START,
