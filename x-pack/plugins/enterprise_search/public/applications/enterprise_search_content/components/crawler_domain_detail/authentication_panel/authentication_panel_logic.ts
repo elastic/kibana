@@ -15,6 +15,7 @@ import {
 } from '../crawler_domain_detail_logic';
 
 interface AuthenticationPanelValues {
+  areCredentialsVisible: boolean;
   headerContent: string;
   isEditing: boolean;
   isModalVisible: boolean;
@@ -33,6 +34,7 @@ type AuthenticationPanelActions = {
   setIsModalVisible(isModalVisible: boolean): { isModalVisible: boolean };
   setPassword(password: string): { password: string };
   setUsername(username: string): { username: string };
+  toggleCredentialVisibility(): void;
 } & Pick<CrawlerDomainDetailActions, 'submitAuthUpdate' | 'receiveDomainData'>;
 
 export const AuthenticationPanelLogic = kea<
@@ -52,8 +54,18 @@ export const AuthenticationPanelLogic = kea<
     setIsModalVisible: (isModalVisible) => ({ isModalVisible }),
     setPassword: (password) => ({ password }),
     setUsername: (username) => ({ username }),
+    toggleCredentialVisibility: true,
   }),
   reducers: () => ({
+    areCredentialsVisible: [
+      false,
+      {
+        disableEditing: () => false,
+        enableEditing: () => false,
+        receiveDomainData: () => false,
+        toggleCredentialVisibility: (areCredentialsVisible) => !areCredentialsVisible,
+      },
+    ],
     headerContent: [
       '',
       {

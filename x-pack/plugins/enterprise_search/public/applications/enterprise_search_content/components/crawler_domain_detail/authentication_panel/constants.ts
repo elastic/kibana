@@ -14,12 +14,6 @@ export const AUTHENTICATION_LABELS = {
       defaultMessage: 'Basic authentication',
     }
   ),
-  generic: i18n.translate(
-    'xpack.enterpriseSearch.crawler.authenticationPanel.genericAuthenticationLabel',
-    {
-      defaultMessage: 'Authentication',
-    }
-  ),
   raw: i18n.translate('xpack.enterpriseSearch.crawler.authenticationPanel.rawAuthenticationLabel', {
     defaultMessage: 'Authentication header',
   }),
