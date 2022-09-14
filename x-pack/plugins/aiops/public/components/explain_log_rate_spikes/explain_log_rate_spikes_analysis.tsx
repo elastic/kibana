@@ -8,7 +8,14 @@
 import React, { useEffect, useMemo, useState, FC } from 'react';
 import { isEqual } from 'lodash';
 
-import { EuiCallOut, EuiEmptyPrompt, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiEmptyPrompt,
+  EuiFormRow,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+} from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ProgressControls } from '@kbn/aiops-components';
@@ -23,7 +30,17 @@ import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
 import type { ApiExplainLogRateSpikes } from '../../../common/api';
 
+import { SpikeAnalysisGroupsTable } from '../spike_analysis_table';
 import { SpikeAnalysisTable } from '../spike_analysis_table';
+// TODO: remove once api is in place
+import { mockData } from './mock_data';
+
+const showUngroupedMessage = i18n.translate(
+  'xpack.aiops.spikeAnalysisTable.groupedSwitchLabel.showUngrouped',
+  {
+    defaultMessage: 'Show ungrouped',
+  }
+);
 
 /**
  * ExplainLogRateSpikes props require a data view.
@@ -59,6 +76,11 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   const [currentAnalysisWindowParameters, setCurrentAnalysisWindowParameters] = useState<
     WindowParameters | undefined
   >();
+  const [showUngrouped, setShowUngrouped] = useState<boolean>(false);
+
+  const onSwitchToggle = (e: { target: { checked: React.SetStateAction<boolean> } }) => {
+    setShowUngrouped(e.target.checked);
+  };
 
   const {
     cancel,
@@ -104,6 +126,58 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const groupTableItems = useMemo(() => {
+    // First, create map of field value counts e.g. { log.logger.keyword: { request: 3, publisher_pipeline_output: 1 }, ... }
+    // Then remove duplicate values and create table items like { id: 1, group: {...}, doc_count: 1234 }
+    const groupFieldValuesCountMap = mockData.reduce((countMap, current) => {
+      // If field name/key exists, increase count else create it and set count to 1
+      const currentGroup = current.group;
+      currentGroup.forEach((group) => {
+        const fieldName = group.field;
+        const fieldNameCountMap = countMap[fieldName];
+        const fieldValue = group.value;
+
+        if (fieldNameCountMap === undefined) {
+          countMap[fieldName] = { [fieldValue]: 1 };
+        } else if (fieldNameCountMap[fieldValue] === undefined) {
+          fieldNameCountMap[fieldValue] = 1;
+        } else {
+          fieldNameCountMap[fieldValue] += 1;
+        }
+      });
+      return countMap;
+    }, {} as Record<string, Record<string, number>>);
+
+    const tableItems = mockData.map(({ group, docCount }, index) => {
+      const sortedGroup = group.sort((a, b) =>
+        a.field > b.field ? 1 : b.field > a.field ? -1 : 0
+      );
+      const dedupedGroup = {};
+      const repeatedValues = {};
+
+      sortedGroup.forEach((pair) => {
+        const fieldName = pair.field;
+        const fieldValue = pair.value;
+        if (groupFieldValuesCountMap[fieldName][fieldValue] <= 2) {
+          // @ts-ignore // TODO: remove once we have real data
+          dedupedGroup[fieldName] = fieldValue;
+        } else {
+          // @ts-ignore // TODO: remove once we have real data
+          repeatedValues[fieldName] = fieldValue;
+        }
+      });
+
+      return {
+        id: index,
+        docCount,
+        group: dedupedGroup,
+        repeatedValues,
+      };
+    });
+
+    return tableItems;
+  }, []);
+
   const shouldRerunAnalysis = useMemo(
     () =>
       currentAnalysisWindowParameters !== undefined &&
@@ -123,6 +197,15 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         onCancel={cancel}
         shouldRerunAnalysis={shouldRerunAnalysis}
       />
+      <EuiFormRow display="columnCompressedSwitch" label={showUngroupedMessage}>
+        <EuiSwitch
+          showLabel={false}
+          label={''}
+          checked={showUngrouped}
+          onChange={onSwitchToggle}
+          compressed
+        />
+      </EuiFormRow>
       <EuiSpacer size="xs" />
       {!isRunning && !showSpikeAnalysisTable && (
         <EuiEmptyPrompt
@@ -173,7 +256,18 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           <EuiSpacer size="xs" />
         </>
       )}
-      {showSpikeAnalysisTable && (
+      {showSpikeAnalysisTable && !showUngrouped ? (
+        <SpikeAnalysisGroupsTable
+          changePoints={data.changePoints}
+          groupTableItems={groupTableItems}
+          loading={isRunning}
+          onPinnedChangePoint={onPinnedChangePoint}
+          onSelectedChangePoint={onSelectedChangePoint}
+          selectedChangePoint={selectedChangePoint}
+          dataViewId={dataView.id}
+        />
+      ) : null}
+      {showSpikeAnalysisTable && showUngrouped ? (
         <SpikeAnalysisTable
           changePoints={data.changePoints}
           loading={isRunning}
@@ -182,7 +276,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           selectedChangePoint={selectedChangePoint}
           dataViewId={dataView.id}
         />
-      )}
+      ) : null}
     </div>
   );
 };
