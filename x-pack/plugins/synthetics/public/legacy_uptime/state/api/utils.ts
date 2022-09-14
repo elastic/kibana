@@ -31,7 +31,7 @@ class ApiService {
     this._addInspectorRequest = addInspectorRequest;
   }
 
-  private constructor() { }
+  private constructor() {}
 
   static getInstance(): ApiService {
     if (!ApiService.instance) {
