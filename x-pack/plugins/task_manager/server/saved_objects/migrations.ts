@@ -42,7 +42,7 @@ export function getMigrations(): SavedObjectMigrationMap {
       pipeMigrations(resetAttemptsAndStatusForTheTasksWithoutSchedule, resetUnrecognizedStatus),
       '8.2.0'
     ),
-    '8.5.0': executeMigrationWithErrorHandling(pipeMigrations(addEnabledField), '8.5.0'),
+    // '8.5.0': executeMigrationWithErrorHandling(pipeMigrations(addEnabledField), '8.5.0'),
   };
 }
 

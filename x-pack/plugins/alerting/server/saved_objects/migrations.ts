@@ -196,7 +196,7 @@ export function getMigrations(
       '8.2.0': executeMigrationWithErrorHandling(migrationRules820, '8.2.0'),
       '8.3.0': executeMigrationWithErrorHandling(migrationRules830, '8.3.0'),
       '8.4.1': executeMigrationWithErrorHandling(migrationRules841, '8.4.1'),
-      '8.5.0': executeMigrationWithErrorHandling(migrationRules850, '8.5.0'),
+      // '8.5.0': executeMigrationWithErrorHandling(migrationRules850, '8.5.0'),
     },
     getSearchSourceMigrations(encryptedSavedObjects, searchSourceMigrations)
   );

@@ -1265,7 +1265,7 @@ const visualizationSavedObjectTypeMigrations = {
   '8.0.0': flow(removeMarkdownLessFromTSVB),
   '8.1.0': flow(updatePieVisApi),
   '8.3.0': preserveOldLegendSizeDefault,
-  '8.5.0': removeExclamationCircleIcon,
+  // '8.5.0': removeExclamationCircleIcon,
 };
 
 /**

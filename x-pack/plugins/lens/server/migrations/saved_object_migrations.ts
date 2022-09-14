@@ -565,7 +565,7 @@ const lensMigrations: SavedObjectMigrationMap = {
     enhanceTableRowHeight
   ),
   '8.3.0': flow(lockOldMetricVisSettings, preserveOldLegendSizeDefault, fixValueLabelsInXY),
-  '8.5.0': flow(migrateMetricIds, addEventAnnotationType, migratePartitionChartGroups),
+  // '8.5.0': flow(migrateMetricIds, addEventAnnotationType, migratePartitionChartGroups),
 };
 
 export const getAllMigrations = (

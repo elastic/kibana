@@ -135,26 +135,26 @@ export const makeLensEmbeddableFactory =
                   attributes: migratedLensState,
                 } as unknown as SerializableRecord;
               },
-              '8.5.0': (state) => {
-                const lensState = state as unknown as {
-                  attributes: LensDocShape850<VisState850>;
-                };
+              // '8.5.0': (state) => {
+              //   const lensState = state as unknown as {
+              //     attributes: LensDocShape850<VisState850>;
+              //   };
 
-                let migratedLensState = commonMigrateMetricIds(lensState.attributes);
-                migratedLensState = commonExplicitAnnotationType(
-                  migratedLensState as LensDocShape850<XYVisState850>
-                );
-                migratedLensState = commonMigratePartitionChartGroups(
-                  migratedLensState as LensDocShape850<{
-                    shape: string;
-                    layers: Array<{ groups?: string[] }>;
-                  }>
-                );
-                return {
-                  ...lensState,
-                  attributes: migratedLensState,
-                } as unknown as SerializableRecord;
-              },
+              //   let migratedLensState = commonMigrateMetricIds(lensState.attributes);
+              //   migratedLensState = commonExplicitAnnotationType(
+              //     migratedLensState as LensDocShape850<XYVisState850>
+              //   );
+              //   migratedLensState = commonMigratePartitionChartGroups(
+              //     migratedLensState as LensDocShape850<{
+              //       shape: string;
+              //       layers: Array<{ groups?: string[] }>;
+              //     }>
+              //   );
+              //   return {
+              //     ...lensState,
+              //     attributes: migratedLensState,
+              //   } as unknown as SerializableRecord;
+              // },
             }),
             getLensCustomVisualizationMigrations(customVisualizationMigrations)
           ),

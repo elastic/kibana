@@ -353,7 +353,7 @@ export const sessionViewIOEventsMock: ProcessEventResults = {
           },
         },
         process: {
-          entity_id: '1',
+          entity_id: '3',
           name: 'bash',
           executable: '/bin/bash',
           entry_leader: {

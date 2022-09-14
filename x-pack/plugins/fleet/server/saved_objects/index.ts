@@ -107,7 +107,7 @@ const getSavedObjectTypes = (
       '7.10.0': migrateAgentPolicyToV7100,
       '7.12.0': migrateAgentPolicyToV7120,
       '8.4.0': migrateAgentPolicyToV840,
-      '8.5.0': migrateAgentPolicyToV850,
+      // '8.5.0': migrateAgentPolicyToV850,
     },
   },
   [OUTPUT_SAVED_OBJECT_TYPE]: {
@@ -222,7 +222,7 @@ const getSavedObjectTypes = (
       '8.2.0': migratePackagePolicyToV820,
       '8.3.0': migratePackagePolicyToV830,
       '8.4.0': migratePackagePolicyToV840,
-      '8.5.0': migratePackagePolicyToV850,
+      // '8.5.0': migratePackagePolicyToV850,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {

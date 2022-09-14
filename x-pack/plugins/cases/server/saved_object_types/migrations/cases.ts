@@ -191,5 +191,5 @@ export const caseMigrations = {
   '7.15.0': caseConnectorIdMigration,
   '8.1.0': removeCaseType,
   '8.3.0': pipeMigrations(addDuration, addSeverity),
-  '8.5.0': addAssignees,
+  // '8.5.0': addAssignees,
 };
