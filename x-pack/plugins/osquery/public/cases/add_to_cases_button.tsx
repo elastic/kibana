@@ -10,7 +10,6 @@ import { CommentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/com
 import { EuiButtonEmpty, EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { useGetUserCasesPermissions } from './use_get_cases_permissions';
 import { useKibana } from '../common/lib/kibana';
 
 const ADD_TO_CASE = i18n.translate(
@@ -37,14 +36,11 @@ export const AddToCaseButton: React.FC<IProps> = ({
   isDisabled,
   iconProps,
 }) => {
-  const { cases: casesUi } = useKibana().services;
+  const { cases } = useKibana().services;
 
-  const casePermissions = useGetUserCasesPermissions();
+  const casePermissions = cases.helpers.canUseCases();
   const hasReadPermissions = casePermissions.read && casePermissions.update && casePermissions.push;
-  const hasWritePermissions = casePermissions.create && hasReadPermissions;
-
-  const createCaseFlyout = casesUi.hooks.getUseCasesAddToNewCaseFlyout({});
-  const selectCaseModal = casesUi.hooks.getUseCasesAddToExistingCaseModal({});
+  const selectCaseModal = cases.hooks.getUseCasesAddToExistingCaseModal({});
 
   const handleClick = useCallback(() => {
     const attachments: CaseAttachmentsWithoutOwner = [
@@ -58,24 +54,22 @@ export const AddToCaseButton: React.FC<IProps> = ({
         externalReferenceMetadata: { actionId, agentIds, queryId },
       },
     ];
-    if (hasWritePermissions) {
+    if (hasReadPermissions) {
       selectCaseModal.open({ attachments });
-    } else if (hasReadPermissions) {
-      createCaseFlyout.open({ attachments });
     }
-  }, [
-    actionId,
-    agentIds,
-    createCaseFlyout,
-    hasReadPermissions,
-    hasWritePermissions,
-    queryId,
-    selectCaseModal,
-  ]);
+  }, [actionId, agentIds, hasReadPermissions, queryId, selectCaseModal]);
 
   if (isIcon) {
     return (
-      <EuiToolTip content={<EuiFlexItem>Add to Case</EuiFlexItem>}>
+      <EuiToolTip
+        content={
+          <EuiFlexItem>
+            {i18n.translate('xpack.osquery.cases.addToCaseText', {
+              defaultMessage: 'Add to Case',
+            })}
+          </EuiFlexItem>
+        }
+      >
         <EuiButtonIcon
           iconType={'casesApp'}
           onClick={handleClick}

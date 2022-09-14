@@ -10,7 +10,6 @@ import React, { useMemo } from 'react';
 import type { ReactElement } from 'react';
 import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
-import { useGetUserCasesPermissions } from '../../../cases/use_get_cases_permissions';
 
 import type { AddToTimelinePayload } from '../../../timelines/use_add_to_timeline';
 import type { ECSMapping } from '../../../../common/schemas/common';
@@ -39,7 +38,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   addToCase,
 }) => {
   const { cases } = useKibana().services;
-  const casePermissions = useGetUserCasesPermissions();
+  const casePermissions = cases.helpers.canUseCases();
   const CasesContext = cases.ui.getCasesContext();
 
   const tabs = useMemo(

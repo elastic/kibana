@@ -45,7 +45,6 @@ import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import type { PackItem } from '../../packs/types';
 import type { LogsDataView } from '../../common/hooks/use_logs_data_view';
 import { useLogsDataView } from '../../common/hooks/use_logs_data_view';
-import { useGetUserCasesPermissions } from '../../cases/use_get_cases_permissions';
 
 const TruncateTooltipText = styled.div`
   width: 100%;
@@ -561,7 +560,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 }) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, unknown>>({});
   const { cases } = useKibana().services;
-  const casePermissions = useGetUserCasesPermissions();
+  const casePermissions = cases.helpers.canUseCases();
   const CasesContext = cases.ui.getCasesContext();
 
   const renderIDColumn = useCallback(
