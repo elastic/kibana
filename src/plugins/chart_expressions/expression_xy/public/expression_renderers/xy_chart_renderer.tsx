@@ -22,7 +22,7 @@ import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import type { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { getDataLayers } from '../helpers';
 import { LayerTypes, SeriesTypes } from '../../common/constants';
 import type { XYChartProps } from '../../common';
@@ -49,7 +49,10 @@ interface XyChartRendererDeps {
 
 const extractCounterEvents = (
   originatingApp: string,
-  { layers, yAxisConfigs }: XYChartProps['args']
+  { layers, yAxisConfigs }: XYChartProps['args'],
+  services: {
+    getColumnByAccessor: typeof getColumnByAccessor;
+  }
 ) => {
   const dataLayers = getDataLayers(layers);
 
@@ -96,20 +99,17 @@ const extractCounterEvents = (
       (dataLayer.splitAccessors ?? [])
         .map(
           (splitAccessor) =>
-            getColumnByAccessor(splitAccessor, dataLayer.table.columns)?.meta?.params?.id
+            services.getColumnByAccessor(splitAccessor, dataLayer.table.columns)?.meta?.params?.id
         )
         .filter(Boolean)
     );
 
-    // Multiple average/min/max/sum bucket aggs in a single vis or
-    // one average/min/max/sum bucket aggs on an xy chart with at least one "split series" defined
     const aggregateLayers: string[] = dataLayers
       .map((l) =>
         l.accessors.reduce<string[]>((acc, accessor) => {
-          const metricType = getColumnByAccessor(
-            accessor,
-            l.table.columns
-          )?.meta?.sourceParams?.type?.toString();
+          const metricType = services
+            .getColumnByAccessor(accessor, l.table.columns)
+            ?.meta?.sourceParams?.type?.toString();
 
           if (
             metricType &&
@@ -131,6 +131,8 @@ const extractCounterEvents = (
         dataLayer.markSizeAccessor ? 'metric_dot_size' : undefined,
         multiAxisSide ? 'multi_axis_same_side' : undefined,
         multiSplitNonTerms.size > 1 ? 'multi_split_non_terms' : undefined,
+        // Multiple average/min/max/sum bucket aggs in a single vis or
+        // one average/min/max/sum bucket aggs on an xy chart with at least one "split series" defined
         aggregateLayers.length > 1 ||
         (aggregateLayers.length === 1 && dataLayer.splitAccessors?.length)
           ? 'aggregate_bucket'
@@ -161,6 +163,14 @@ export const getXyChartRenderer = ({
   render: async (domNode: Element, config: XYChartProps, handlers) => {
     const deps = await getStartDeps();
 
+    // Lazy loaded parts
+    const [{ getColumnByAccessor }, { XYChartReportable }, { calculateMinInterval }] =
+      await Promise.all([
+        import('@kbn/visualizations-plugin/common/utils'),
+        import('../components/xy_chart'),
+        import('../helpers/interval'),
+      ]);
+
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
     const onClickValue = (data: FilterEvent['data']) => {
       handlers.event({ name: 'filter', data });
@@ -175,7 +185,9 @@ export const getXyChartRenderer = ({
       const visualizationType = extractVisualizationType(executionContext);
 
       if (deps.usageCollection && containerType && visualizationType) {
-        const uiEvents = extractCounterEvents(visualizationType, config.args);
+        const uiEvents = extractCounterEvents(visualizationType, config.args, {
+          getColumnByAccessor,
+        });
 
         if (uiEvents) {
           deps.usageCollection.reportUiCounter(containerType, METRIC_TYPE.COUNT, uiEvents);
@@ -184,11 +196,6 @@ export const getXyChartRenderer = ({
 
       handlers.done();
     };
-
-    const [{ XYChartReportable }, { calculateMinInterval }] = await Promise.all([
-      import('../components/xy_chart'),
-      import('../helpers/interval'),
-    ]);
 
     const chartContainerStyle = css({
       position: 'relative',
