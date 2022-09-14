@@ -376,7 +376,7 @@ export const LensTopNavMenu = ({
   }, [data]);
 
   useEffect(() => {
-    if (isOfAggregateQueryType(query)) {
+    if (typeof query === 'object' && query !== null && isOfAggregateQueryType(query)) {
       setIsOnTextBasedMode(true);
     }
   }, [query]);
