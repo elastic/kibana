@@ -94,7 +94,7 @@ export const useIOLines = (pages: ProcessEventsPage[] | undefined) => {
 
               if (previousProcessId !== process.entity_id) {
                 const processLineInfo: ProcessStartMarker = {
-                  line: previous.length || 0,
+                  line: previous.length,
                   event,
                 };
                 processStartMarkers.push(processLineInfo);
