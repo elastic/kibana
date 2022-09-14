@@ -30,6 +30,7 @@ export * from './visualizations/gauge/gauge_visualization';
 export * from './visualizations/gauge';
 
 export * from './indexpattern_datasource/indexpattern';
+export { getTextBasedLanguagesDatasource } from './text_based_languages_datasource/text_based_languages';
 export { createFormulaPublicApi } from './indexpattern_datasource/operations/definitions/formula/formula_public_api';
 
 export * from './indexpattern_datasource';

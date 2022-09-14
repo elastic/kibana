@@ -10,8 +10,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { getTextBasedLanguagesDatasource } from './text_based_languages';
-import { Datasource, EditorFrameSetup } from '../types';
+import { EditorFrameSetup } from '../types';
 
 export interface TextBasedLanguageSetupPlugins {
   data: DataPublicPluginSetup;
@@ -31,17 +30,17 @@ export class TextBasedLanguagesDatasource {
     core: CoreSetup<TextBasedLanguageStartPlugins>,
     { editorFrame }: TextBasedLanguageSetupPlugins
   ) {
-    editorFrame.registerDatasource(
-      async () =>
-        core.getStartServices().then(([coreStart, { data, dataViews, expressions }]) =>
-          getTextBasedLanguagesDatasource({
-            core: coreStart,
-            storage: new Storage(localStorage),
-            data,
-            dataViews,
-            expressions,
-          })
-        ) as Promise<Datasource>
-    );
+    editorFrame.registerDatasource(async () => {
+      const { getTextBasedLanguagesDatasource } = await import('../async_services');
+      const [coreStart, { data, dataViews, expressions }] = await core.getStartServices();
+
+      return getTextBasedLanguagesDatasource({
+        core: coreStart,
+        storage: new Storage(localStorage),
+        data,
+        dataViews,
+        expressions,
+      });
+    });
   }
 }

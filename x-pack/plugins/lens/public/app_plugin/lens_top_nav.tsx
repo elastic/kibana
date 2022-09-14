@@ -376,6 +376,12 @@ export const LensTopNavMenu = ({
   }, [data]);
 
   useEffect(() => {
+    if (isOfAggregateQueryType(query)) {
+      setIsOnTextBasedMode(true);
+    }
+  }, [query]);
+
+  useEffect(() => {
     return () => {
       // Make sure to close the editors when unmounting
       closeFieldEditor.current?.();
