@@ -10,8 +10,12 @@ import { CaseStatuses } from '@kbn/cases-plugin/common';
 import { CaseSeverityWithAll } from '@kbn/cases-plugin/common/ui';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { CasesCommon } from './common';
 
-export function CasesTableServiceProvider({ getService, getPageObject }: FtrProviderContext) {
+export function CasesTableServiceProvider(
+  { getService, getPageObject }: FtrProviderContext,
+  casesCommon: CasesCommon
+) {
   const common = getPageObject('common');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
@@ -132,13 +136,11 @@ export function CasesTableServiceProvider({ getService, getPageObject }: FtrProv
       await testSubjects.click(`case-severity-filter-${severity}`);
     },
 
-    async filterByReporter(reporter: string) {
-      await common.clickAndValidate(
-        'options-filter-popover-button-Reporter',
-        `options-filter-popover-item-${reporter}`
-      );
+    async filterByAssignee(assignee: string) {
+      await common.clickAndValidate('options-filter-popover-button-assignees', 'euiSelectableList');
 
-      await testSubjects.click(`options-filter-popover-item-${reporter}`);
+      await casesCommon.setSearchTextInAssigneesPopover(assignee);
+      await casesCommon.selectFirstRowInAssigneesPopover();
     },
 
     async filterByOwner(owner: string) {
