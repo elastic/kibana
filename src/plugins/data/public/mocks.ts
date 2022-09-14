@@ -8,10 +8,11 @@
 
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { createDatatableUtilitiesMock } from '../common/mocks';
-import { DataPlugin, DataViewsContract } from '.';
+import { DataPlugin } from '.';
 import { searchServiceMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
 import { createNowProviderMock } from './now_provider/mocks';
+import { dataViewPluginMocks } from './data_views/mocks';
 
 export type Setup = jest.Mocked<ReturnType<DataPlugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<DataPlugin['start']>>;
@@ -26,20 +27,7 @@ const createSetupContract = (): Setup => {
 
 const createStartContract = (): Start => {
   const queryStartMock = queryServiceMock.createStartContract();
-  const dataViews = {
-    find: jest.fn((search) => [{ id: search, title: search }]),
-    createField: jest.fn(() => {}),
-    createFieldList: jest.fn(() => []),
-    ensureDefaultIndexPattern: jest.fn(),
-    make: () => ({
-      fieldsFetcher: {
-        fetchForWildcard: jest.fn(),
-      },
-    }),
-    get: jest.fn().mockReturnValue(Promise.resolve({})),
-    clearCache: jest.fn(),
-    getIdsWithTitle: jest.fn(),
-  } as unknown as DataViewsContract;
+  const dataViews = dataViewPluginMocks.createStartContract();
 
   return {
     actions: {

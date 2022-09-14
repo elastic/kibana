@@ -12,17 +12,13 @@ import {
   EmbeddableFactoryDefinition,
   EmbeddableInput,
   IContainer,
-} from '../../../services/embeddable';
-import {
-  PlaceholderEmbeddable,
-  PlaceholderEmbeddableServices,
-  PLACEHOLDER_EMBEDDABLE,
-} from './placeholder_embeddable';
+} from '@kbn/embeddable-plugin/public';
+import { PlaceholderEmbeddable, PLACEHOLDER_EMBEDDABLE } from './placeholder_embeddable';
 
 export class PlaceholderEmbeddableFactory implements EmbeddableFactoryDefinition {
   public readonly type = PLACEHOLDER_EMBEDDABLE;
 
-  constructor(private readonly getStartServices: () => Promise<PlaceholderEmbeddableServices>) {}
+  constructor() {}
 
   public async isEditable() {
     return false;
@@ -33,8 +29,7 @@ export class PlaceholderEmbeddableFactory implements EmbeddableFactoryDefinition
   }
 
   public async create(initialInput: EmbeddableInput, parent?: IContainer) {
-    const services = await this.getStartServices();
-    return new PlaceholderEmbeddable(initialInput, services, parent);
+    return new PlaceholderEmbeddable(initialInput, parent);
   }
 
   public getDisplayName() {

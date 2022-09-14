@@ -9,7 +9,9 @@
 import { History } from 'history';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { EmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
 import { useDashboardSelector } from './state';
 import { useDashboardAppState } from './hooks';
@@ -20,11 +22,11 @@ import {
   leaveConfirmStrings,
 } from '../dashboard_strings';
 import { createDashboardEditUrl } from '../dashboard_constants';
-import { EmbeddableRenderer, ViewMode } from '../services/embeddable';
 import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboard_top_nav';
-import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../types';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
+import { DashboardEmbedSettings, DashboardRedirect } from '../types';
 import { DashboardAppNoDataPage } from './dashboard_app_no_data';
+import { pluginServices } from '../services/plugin_services';
+import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 export interface DashboardAppProps {
   history: History;
   savedDashboardId?: string;
@@ -38,16 +40,17 @@ export function DashboardApp({
   redirectTo,
   history,
 }: DashboardAppProps) {
+  const { onAppLeave } = useDashboardMountContext();
   const {
-    core,
-    chrome,
-    embeddable,
-    onAppLeave,
-    uiSettings,
-    data,
-    spacesService,
-    screenshotModeService,
-  } = useKibana<DashboardAppServices>().services;
+    chrome: { setBreadcrumbs, setIsVisible },
+    coreContext: { executionContext },
+    data: { search },
+    embeddable: { getStateTransfer },
+    notifications: { toasts },
+    screenshotMode: { isScreenshotMode },
+    settings: { uiSettings },
+    spaces: { getLegacyUrlConflict },
+  } = pluginServices.getServices();
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
@@ -57,12 +60,12 @@ export function DashboardApp({
       createKbnUrlStateStorage({
         history,
         useHash: uiSettings.get('state:storeInSessionStorage'),
-        ...withNotifyOnErrors(core.notifications.toasts),
+        ...withNotifyOnErrors(toasts),
       }),
-    [core.notifications.toasts, history, uiSettings]
+    [toasts, history, uiSettings]
   );
 
-  useExecutionContext(core.executionContext, {
+  useExecutionContext(executionContext, {
     type: 'application',
     page: 'app',
     id: savedDashboardId || 'new',
@@ -90,10 +93,7 @@ export function DashboardApp({
   // Build app leave handler whenever hasUnsavedChanges changes
   useEffect(() => {
     onAppLeave((actions) => {
-      if (
-        dashboardAppState.hasUnsavedChanges &&
-        !embeddable.getStateTransfer().isTransferInProgress
-      ) {
+      if (dashboardAppState.hasUnsavedChanges && !getStateTransfer().isTransferInProgress) {
         return actions.confirm(
           leaveConfirmStrings.getLeaveSubtitle(),
           leaveConfirmStrings.getLeaveTitle()
@@ -105,12 +105,12 @@ export function DashboardApp({
       // reset on app leave handler so leaving from the listing page doesn't trigger a confirmation
       onAppLeave((actions) => actions.default());
     };
-  }, [onAppLeave, embeddable, dashboardAppState.hasUnsavedChanges]);
+  }, [onAppLeave, getStateTransfer, dashboardAppState.hasUnsavedChanges]);
 
   // Set breadcrumbs when dashboard's title or view mode changes
   useEffect(() => {
     if (!dashboardState.title && savedDashboardId) return;
-    chrome.setBreadcrumbs([
+    setBreadcrumbs([
       {
         text: getDashboardBreadcrumb(),
         'data-test-subj': 'dashboardListingBreadcrumb',
@@ -122,14 +122,14 @@ export function DashboardApp({
         text: dashboardTitle,
       },
     ]);
-  }, [chrome, dashboardState.title, redirectTo, savedDashboardId, dashboardTitle]);
+  }, [setBreadcrumbs, dashboardState.title, redirectTo, savedDashboardId, dashboardTitle]);
 
   // clear search session when leaving dashboard route
   useEffect(() => {
     return () => {
-      data.search.session.clear();
+      search.session.clear();
     };
-  }, [data.search.session]);
+  }, [search.session]);
 
   const printMode = useMemo(
     () => dashboardAppState.getLatestDashboardState?.().viewMode === ViewMode.PRINT,
@@ -137,8 +137,8 @@ export function DashboardApp({
   );
 
   useEffect(() => {
-    if (!embedSettings) chrome.setIsVisible(!printMode);
-  }, [chrome, printMode, embedSettings]);
+    if (!embedSettings) setIsVisible(!printMode);
+  }, [setIsVisible, printMode, embedSettings]);
 
   return (
     <>
@@ -163,7 +163,7 @@ export function DashboardApp({
           {dashboardAppState.savedDashboard.outcome === 'conflict' &&
           dashboardAppState.savedDashboard.id &&
           dashboardAppState.savedDashboard.aliasId
-            ? spacesService?.ui.components.getLegacyUrlConflict({
+            ? getLegacyUrlConflict?.({
                 currentObjectId: dashboardAppState.savedDashboard.id,
                 otherObjectId: dashboardAppState.savedDashboard.aliasId,
                 otherObjectPath: `#${createDashboardEditUrl(
@@ -173,9 +173,7 @@ export function DashboardApp({
             : null}
           <div
             className={`dashboardViewport ${
-              screenshotModeService && screenshotModeService.isScreenshotMode()
-                ? 'dashboardViewport--screenshotMode'
-                : ''
+              isScreenshotMode() ? 'dashboardViewport--screenshotMode' : ''
             }`}
           >
             <EmbeddableRenderer embeddable={dashboardAppState.dashboardContainer} />

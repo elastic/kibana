@@ -6,14 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/public';
 import { DashboardSavedObject } from '../..';
+import { pluginServices } from '../../services/plugin_services';
 
 export async function attemptLoadDashboardByTitle(
-  title: string,
-  savedObjectsClient: SavedObjectsClientContract
+  title: string
 ): Promise<{ id: string } | undefined> {
-  const results = await savedObjectsClient.find<DashboardSavedObject>({
+  const {
+    savedObjects: { client },
+  } = pluginServices.getServices();
+
+  const results = await client.find<DashboardSavedObject>({
     search: `"${title}"`,
     searchFields: ['title'],
     type: 'dashboard',

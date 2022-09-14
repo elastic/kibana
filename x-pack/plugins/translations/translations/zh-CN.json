@@ -938,7 +938,6 @@
     "dashboard.createConfirmModal.unsavedChangesSubtitle": "继续编辑或使用空白仪表板从头开始。",
     "dashboard.createConfirmModal.unsavedChangesTitle": "新仪表板已在创建中",
     "dashboard.dashboardAppBreadcrumbsTitle": "仪表板",
-    "dashboard.dashboardGrid.toast.unableToLoadDashboardDangerMessage": "无法加载仪表板。",
     "dashboard.dashboardPageTitle": "仪表板",
     "dashboard.dashboardWasSavedSuccessMessage": "仪表板“{dashTitle}”已保存",
     "dashboard.discardChangesConfirmModal.cancelButtonLabel": "取消",

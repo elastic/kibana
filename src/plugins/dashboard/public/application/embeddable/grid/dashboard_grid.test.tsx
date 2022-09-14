@@ -8,35 +8,29 @@
 
 // @ts-ignore
 import sizeMe from 'react-sizeme';
-
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { skip } from 'rxjs/operators';
+
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+
 import { DashboardGrid, DashboardGridProps } from './dashboard_grid';
-import { DashboardContainer, DashboardContainerServices } from '../dashboard_container';
+import { DashboardContainer } from '../dashboard_container';
 import { getSampleDashboardInput } from '../../test_helpers';
-import { KibanaContextProvider } from '../../../services/kibana_react';
-import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import {
-  CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
-} from '../../../services/embeddable_test_samples';
-import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
-import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
-import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
+  CONTACT_CARD_EMBEDDABLE,
+} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
+import { pluginServices } from '../../../services/plugin_services';
 
 let dashboardContainer: DashboardContainer | undefined;
-const presentationUtil = getStubPluginServices();
+const DashboardServicesProvider = pluginServices.getContextProvider();
 
 function prepare(props?: Partial<DashboardGridProps>) {
-  const { setup, doStart } = embeddablePluginMock.createInstance();
-  setup.registerEmbeddableFactory(
-    CONTACT_CARD_EMBEDDABLE,
-    new ContactCardEmbeddableFactory((() => null) as any, {} as any)
-  );
-  const start = doStart();
+  const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
+  pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+    .fn()
+    .mockReturnValue(embeddableFactory);
 
-  const getEmbeddableFactory = start.getEmbeddableFactory;
   const initialInput = getSampleDashboardInput({
     panels: {
       '1': {
@@ -51,40 +45,14 @@ function prepare(props?: Partial<DashboardGridProps>) {
       },
     },
   });
-  const options: DashboardContainerServices = {
-    application: {} as any,
-    embeddable: {
-      getTriggerCompatibleActions: (() => []) as any,
-      getEmbeddableFactories: start.getEmbeddableFactories,
-      getEmbeddablePanel: jest.fn(),
-      getEmbeddableFactory,
-    } as any,
-    notifications: {} as any,
-    overlays: {} as any,
-    inspector: {
-      isAvailable: jest.fn(),
-    } as any,
-    SavedObjectFinder: () => null,
-    ExitFullScreenButton: () => null,
-    uiActions: {
-      getTriggerCompatibleActions: (() => []) as any,
-    } as any,
-    uiSettings: uiSettingsServiceMock.createStartContract(),
-    http: coreMock.createStart().http,
-    theme: coreMock.createStart().theme,
-    presentationUtil,
-    screenshotMode: screenshotModePluginMock.createSetupContract(),
-  };
-  dashboardContainer = new DashboardContainer(initialInput, options);
+  dashboardContainer = new DashboardContainer(initialInput);
   const defaultTestProps: DashboardGridProps = {
     container: dashboardContainer,
-    kibana: null as any,
     intl: null as any,
   };
 
   return {
     props: Object.assign(defaultTestProps, props),
-    options,
   };
 }
 
@@ -100,13 +68,12 @@ afterAll(() => {
 
 // unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
 test.skip('renders DashboardGrid', () => {
-  const { props, options } = prepare();
+  const { props } = prepare();
+
   const component = mountWithIntl(
-    <KibanaContextProvider services={options}>
-      <presentationUtil.ContextProvider>
-        <DashboardGrid {...props} />
-      </presentationUtil.ContextProvider>
-    </KibanaContextProvider>
+    <DashboardServicesProvider>
+      <DashboardGrid {...props} />
+    </DashboardServicesProvider>
   );
   const panelElements = component.find('EmbeddableChildPanel');
   expect(panelElements.length).toBe(2);
@@ -114,13 +81,11 @@ test.skip('renders DashboardGrid', () => {
 
 // unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
 test.skip('renders DashboardGrid with no visualizations', () => {
-  const { props, options } = prepare();
+  const { props } = prepare();
   const component = mountWithIntl(
-    <KibanaContextProvider services={options}>
-      <presentationUtil.ContextProvider>
-        <DashboardGrid {...props} />
-      </presentationUtil.ContextProvider>
-    </KibanaContextProvider>
+    <DashboardServicesProvider>
+      <DashboardGrid {...props} />
+    </DashboardServicesProvider>
   );
 
   props.container.updateInput({ panels: {} });
@@ -130,13 +95,11 @@ test.skip('renders DashboardGrid with no visualizations', () => {
 
 // unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
 test.skip('DashboardGrid removes panel when removed from container', () => {
-  const { props, options } = prepare();
+  const { props } = prepare();
   const component = mountWithIntl(
-    <KibanaContextProvider services={options}>
-      <presentationUtil.ContextProvider>
-        <DashboardGrid {...props} />
-      </presentationUtil.ContextProvider>
-    </KibanaContextProvider>
+    <DashboardServicesProvider>
+      <DashboardGrid {...props} />
+    </DashboardServicesProvider>
   );
 
   const originalPanels = props.container.getInput().panels;
@@ -150,13 +113,11 @@ test.skip('DashboardGrid removes panel when removed from container', () => {
 
 // unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
 test.skip('DashboardGrid renders expanded panel', () => {
-  const { props, options } = prepare();
+  const { props } = prepare();
   const component = mountWithIntl(
-    <KibanaContextProvider services={options}>
-      <presentationUtil.ContextProvider>
-        <DashboardGrid {...props} />
-      </presentationUtil.ContextProvider>
-    </KibanaContextProvider>
+    <DashboardServicesProvider>
+      <DashboardGrid {...props} />
+    </DashboardServicesProvider>
   );
 
   props.container.updateInput({ expandedPanelId: '1' });
@@ -179,13 +140,11 @@ test.skip('DashboardGrid renders expanded panel', () => {
 
 // unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
 test.skip('DashboardGrid unmount unsubscribes', async (done) => {
-  const { props, options } = prepare();
+  const { props } = prepare();
   const component = mountWithIntl(
-    <KibanaContextProvider services={options}>
-      <presentationUtil.ContextProvider>
-        <DashboardGrid {...props} />
-      </presentationUtil.ContextProvider>
-    </KibanaContextProvider>
+    <DashboardServicesProvider>
+      <DashboardGrid {...props} />
+    </DashboardServicesProvider>
   );
 
   component.unmount();

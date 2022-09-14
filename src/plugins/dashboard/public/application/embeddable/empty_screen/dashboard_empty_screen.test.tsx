@@ -10,21 +10,22 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
-import { coreMock } from '@kbn/core/public/mocks';
+import { pluginServices } from '../../../services/plugin_services';
 
 describe('DashboardEmptyScreen', () => {
-  const setupMock = coreMock.createSetup();
+  const DashboardServicesProvider = pluginServices.getContextProvider();
 
   const defaultProps = {
-    isEditMode: false,
     onLinkClick: jest.fn(),
-    uiSettings: setupMock.uiSettings,
-    http: setupMock.http,
   };
 
   function mountComponent(props?: Partial<DashboardEmptyScreenProps>) {
     const compProps = { ...defaultProps, ...props };
-    return mountWithIntl(<DashboardEmptyScreen {...compProps} />);
+    return mountWithIntl(
+      <DashboardServicesProvider>
+        <DashboardEmptyScreen {...compProps} />
+      </DashboardServicesProvider>
+    );
   }
 
   test('renders correctly with view mode', () => {
@@ -44,7 +45,9 @@ describe('DashboardEmptyScreen', () => {
   });
 
   test('renders correctly with readonly mode', () => {
-    const component = mountComponent({ isReadonlyMode: true });
+    pluginServices.getServices().dashboardCapabilities.showWriteControls = false;
+
+    const component = mountComponent();
     expect(component.render()).toMatchSnapshot();
     const paragraph = component.find('.dshStartScreen__panelDesc');
     expect(paragraph.length).toBe(0);

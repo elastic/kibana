@@ -8,60 +8,35 @@
 
 import React from 'react';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
+import { FilterableEmbeddable, isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { getSampleDashboardInput } from '../test_helpers';
-import { CoreStart } from '@kbn/core/public';
-import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { EuiModalFooter } from '@elastic/eui';
-import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
-import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { FiltersNotificationModal, FiltersNotificationProps } from './filters_notification_modal';
-import { FilterableEmbeddable, isErrorEmbeddable, ViewMode } from '../../services/embeddable';
 import {
-  CONTACT_CARD_EMBEDDABLE,
+  ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-  ContactCardEmbeddable,
-} from '../../services/embeddable_test_samples';
+  CONTACT_CARD_EMBEDDABLE,
+} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import { act } from 'react-dom/test-utils';
+import { pluginServices } from '../../services/plugin_services';
 
 describe('LibraryNotificationPopover', () => {
-  const { setup, doStart } = embeddablePluginMock.createInstance();
-  setup.registerEmbeddableFactory(
-    CONTACT_CARD_EMBEDDABLE,
-    new ContactCardEmbeddableFactory((() => null) as any, {} as any)
-  );
-  const start = doStart();
+  const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
+  pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+    .fn()
+    .mockReturnValue(mockEmbeddableFactory);
 
   let container: DashboardContainer;
   let embeddable: ContactCardEmbeddable & FilterableEmbeddable;
   let defaultProps: FiltersNotificationProps;
-  let coreStart: CoreStart;
 
   beforeEach(async () => {
-    coreStart = coreMock.createStart();
-
-    const containerOptions = {
-      ExitFullScreenButton: () => null,
-      SavedObjectFinder: () => null,
-      application: {} as any,
-      embeddable: start,
-      inspector: {} as any,
-      notifications: {} as any,
-      overlays: coreStart.overlays,
-      savedObjectMetaData: {} as any,
-      uiActions: {} as any,
-      uiSettings: uiSettingsServiceMock.createStartContract(),
-      http: coreStart.http,
-      theme: coreStart.theme,
-      presentationUtil: getStubPluginServices(),
-      screenshotMode: screenshotModePluginMock.createSetupContract(),
-    };
-
-    container = new DashboardContainer(getSampleDashboardInput(), containerOptions);
+    container = new DashboardContainer(getSampleDashboardInput());
     const contactCardEmbeddable = await container.addNewEmbeddable<
       ContactCardEmbeddableInput,
       ContactCardEmbeddableOutput,

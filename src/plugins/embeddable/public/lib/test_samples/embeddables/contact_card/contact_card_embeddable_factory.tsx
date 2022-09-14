@@ -39,6 +39,10 @@ export class ContactCardEmbeddableFactory
     });
   }
 
+  public getDefaultInput() {
+    return {};
+  }
+
   public getExplicitInput = (): Promise<Partial<ContactCardEmbeddableInput>> => {
     return new Promise((resolve) => {
       const modalSession = this.overlays.openModal(

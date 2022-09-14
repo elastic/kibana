@@ -938,7 +938,6 @@
     "dashboard.createConfirmModal.unsavedChangesSubtitle": "Poursuivez les modifications ou utilisez un tableau de bord vierge.",
     "dashboard.createConfirmModal.unsavedChangesTitle": "Nouveau tableau de bord déjà en cours",
     "dashboard.dashboardAppBreadcrumbsTitle": "Tableau de bord",
-    "dashboard.dashboardGrid.toast.unableToLoadDashboardDangerMessage": "Impossible de charger le tableau de bord.",
     "dashboard.dashboardPageTitle": "Tableaux de bord",
     "dashboard.dashboardWasSavedSuccessMessage": "Le tableau de bord \"{dashTitle}\" a été enregistré.",
     "dashboard.discardChangesConfirmModal.cancelButtonLabel": "Annuler",

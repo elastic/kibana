@@ -8,19 +8,16 @@
 
 import React from 'react';
 
-import { CoreStart, OverlayStart } from '@kbn/core/public';
-import {
-  EditPanelAction,
-  EmbeddableStart,
-  isFilterableEmbeddable,
-} from '@kbn/embeddable-plugin/public';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-
+import { EditPanelAction, isFilterableEmbeddable } from '@kbn/embeddable-plugin/public';
 import { type AggregateQuery } from '@kbn/es-query';
-import { Action, IncompatibleActionError } from '../../services/ui_actions';
-import { toMountPoint } from '../../services/kibana_react';
-import { IEmbeddable, isErrorEmbeddable } from '../../services/embeddable';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import type { ApplicationStart } from '@kbn/core/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { type IEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+
 import { dashboardFilterNotificationBadge } from '../../dashboard_strings';
+import { pluginServices } from '../../services/plugin_services';
 
 export const BADGE_FILTERS_NOTIFICATION = 'ACTION_FILTERS_NOTIFICATION';
 
@@ -35,14 +32,19 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
 
   private displayName = dashboardFilterNotificationBadge.getDisplayName();
   private icon = 'filter';
+  private applicationService;
+  private embeddableService;
+  private settingsService;
+  private openModal;
 
-  constructor(
-    private application: CoreStart['application'],
-    private embeddableService: EmbeddableStart,
-    private overlays: OverlayStart,
-    private theme: CoreStart['theme'],
-    private uiSettings: CoreStart['uiSettings']
-  ) {}
+  constructor() {
+    ({
+      application: this.applicationService,
+      embeddable: this.embeddableService,
+      overlays: { openModal: this.openModal },
+      settings: this.settingsService,
+    } = pluginServices.getServices());
+  }
 
   public getDisplayName({ embeddable }: FiltersNotificationActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
@@ -86,19 +88,25 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
       throw new IncompatibleActionError();
     }
 
+    const {
+      uiSettings,
+      theme: { theme$ },
+    } = this.settingsService;
+    const { getEmbeddableFactory, getStateTransfer } = this.embeddableService;
+
     const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
-      uiSettings: this.uiSettings,
+      uiSettings,
     });
     const editPanelAction = new EditPanelAction(
-      this.embeddableService.getEmbeddableFactory,
-      this.application,
-      this.embeddableService.getStateTransfer()
+      getEmbeddableFactory,
+      this.applicationService as unknown as ApplicationStart,
+      getStateTransfer()
     );
     const FiltersNotificationModal = await import('./filters_notification_modal').then(
       (m) => m.FiltersNotificationModal
     );
 
-    const session = this.overlays.openModal(
+    const session = this.openModal(
       toMountPoint(
         <KibanaReactContextProvider>
           <FiltersNotificationModal
@@ -109,7 +117,7 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
             onClose={() => session.close()}
           />
         </KibanaReactContextProvider>,
-        { theme$: this.theme.theme$ }
+        { theme$ }
       ),
       {
         'data-test-subj': 'filtersNotificationModal',

@@ -8,19 +8,19 @@
 
 import React from 'react';
 
-import { CoreStart } from '@kbn/core/public';
-import { Action, IncompatibleActionError } from '../../services/ui_actions';
-import { KibanaThemeProvider, reactToUiComponent } from '../../services/kibana_react';
 import {
-  IEmbeddable,
   ViewMode,
-  isReferenceOrValueEmbeddable,
+  type IEmbeddable,
   isErrorEmbeddable,
-} from '../../services/embeddable';
+  isReferenceOrValueEmbeddable,
+} from '@kbn/embeddable-plugin/public';
+import { KibanaThemeProvider, reactToUiComponent } from '@kbn/kibana-react-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { UnlinkFromLibraryAction } from '.';
 import { LibraryNotificationPopover } from './library_notification_popover';
 import { dashboardLibraryNotification } from '../../dashboard_strings';
+import { pluginServices } from '../../services/plugin_services';
 
 export const ACTION_LIBRARY_NOTIFICATION = 'ACTION_LIBRARY_NOTIFICATION';
 
@@ -33,7 +33,15 @@ export class LibraryNotificationAction implements Action<LibraryNotificationActi
   public readonly type = ACTION_LIBRARY_NOTIFICATION;
   public readonly order = 1;
 
-  constructor(private theme: CoreStart['theme'], private unlinkAction: UnlinkFromLibraryAction) {}
+  private theme$;
+
+  constructor(private unlinkAction: UnlinkFromLibraryAction) {
+    ({
+      settings: {
+        theme: { theme$: this.theme$ },
+      },
+    } = pluginServices.getServices());
+  }
 
   private displayName = dashboardLibraryNotification.getDisplayName();
 
@@ -46,7 +54,7 @@ export class LibraryNotificationAction implements Action<LibraryNotificationActi
   }) => {
     const { embeddable } = context;
     return (
-      <KibanaThemeProvider theme$={this.theme.theme$}>
+      <KibanaThemeProvider theme$={this.theme$}>
         <LibraryNotificationPopover
           unlinkAction={this.unlinkAction}
           displayName={this.displayName}

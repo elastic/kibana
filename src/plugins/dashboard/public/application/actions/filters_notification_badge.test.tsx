@@ -9,41 +9,35 @@
 import { getSampleDashboardInput } from '../test_helpers';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 
-import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
-import { CoreStart } from '@kbn/core/public';
 import { FiltersNotificationBadge } from '.';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { type Query, type AggregateQuery, Filter } from '@kbn/es-query';
-
 import {
   ErrorEmbeddable,
   FilterableEmbeddable,
   IContainer,
   isErrorEmbeddable,
-} from '../../services/embeddable';
+} from '@kbn/embeddable-plugin/public';
+
 import {
   ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
-} from '../../services/embeddable_test_samples';
-import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
-import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
+} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
+import { pluginServices } from '../../services/plugin_services';
 
-const { setup, doStart } = embeddablePluginMock.createInstance();
-setup.registerEmbeddableFactory(
-  CONTACT_CARD_EMBEDDABLE,
-  new ContactCardEmbeddableFactory((() => null) as any, {} as any)
-);
-const start = doStart();
+const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
+pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+  .fn()
+  .mockReturnValue(mockEmbeddableFactory);
 
 let action: FiltersNotificationBadge;
 let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable & FilterableEmbeddable;
 const mockGetFilters = jest.fn(async () => [] as Filter[]);
 const mockGetQuery = jest.fn(async () => undefined as Query | AggregateQuery | undefined);
-let coreStart: CoreStart;
 
 const getMockPhraseFilter = (key: string, value: string) => {
   return {
@@ -66,26 +60,7 @@ const getMockPhraseFilter = (key: string, value: string) => {
 };
 
 beforeEach(async () => {
-  coreStart = coreMock.createStart();
-
-  const containerOptions = {
-    ExitFullScreenButton: () => null,
-    SavedObjectFinder: () => null,
-    application: {} as any,
-    embeddable: start,
-    inspector: {} as any,
-    notifications: {} as any,
-    overlays: coreStart.overlays,
-    savedObjectMetaData: {} as any,
-    uiActions: {} as any,
-    uiSettings: uiSettingsServiceMock.createStartContract(),
-    http: coreStart.http,
-    theme: coreStart.theme,
-    presentationUtil: getStubPluginServices(),
-    screenshotMode: screenshotModePluginMock.createSetupContract(),
-  };
-
-  container = new DashboardContainer(getSampleDashboardInput(), containerOptions);
+  container = new DashboardContainer(getSampleDashboardInput());
 
   const contactCardEmbeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
@@ -98,13 +73,7 @@ beforeEach(async () => {
     throw new Error('Failed to create embeddable');
   }
 
-  action = new FiltersNotificationBadge(
-    coreStart.application,
-    embeddablePluginMock.createStartContract(),
-    coreStart.overlays,
-    coreStart.theme,
-    coreStart.uiSettings
-  );
+  action = new FiltersNotificationBadge();
   embeddable = embeddablePluginMock.mockFilterableEmbeddable(contactCardEmbeddable, {
     getFilters: () => mockGetFilters(),
     getQuery: () => mockGetQuery(),

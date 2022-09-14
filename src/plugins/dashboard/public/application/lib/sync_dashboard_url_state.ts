@@ -29,11 +29,8 @@ type SyncDashboardUrlStateProps = DashboardBuildContext & { savedDashboard: Dash
 export const syncDashboardUrlState = ({
   dispatchDashboardStateChange,
   getLatestDashboardState,
-  query: queryService,
   kbnUrlStateStorage,
-  usageCollection,
   savedDashboard,
-  kibanaVersion,
 }: SyncDashboardUrlStateProps) => {
   /**
    * Loads any dashboard state from the URL, and removes the state from the URL.
@@ -44,7 +41,7 @@ export const syncDashboardUrlState = ({
 
     let panelsMap: DashboardPanelMap = {};
     if (rawAppStateInUrl.panels && rawAppStateInUrl.panels.length > 0) {
-      const rawState = migrateAppState(rawAppStateInUrl, kibanaVersion, usageCollection);
+      const rawState = migrateAppState(rawAppStateInUrl);
       panelsMap = convertSavedPanelsToPanelMap(rawState.panels);
     }
 
@@ -78,7 +75,6 @@ export const syncDashboardUrlState = ({
       applyDashboardFilterState({
         currentDashboardState: updatedDashboardState,
         kbnUrlStateStorage,
-        queryService,
         savedDashboard,
       });
 

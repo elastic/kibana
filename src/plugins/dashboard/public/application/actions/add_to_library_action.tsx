@@ -6,19 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import {
   ViewMode,
-  PanelState,
-  IEmbeddable,
+  type PanelState,
+  type IEmbeddable,
   PanelNotFoundError,
-  EmbeddableInput,
-  isReferenceOrValueEmbeddable,
+  type EmbeddableInput,
   isErrorEmbeddable,
-} from '../../services/embeddable';
-import { ApplicationStart, NotificationsStart } from '../../services/core';
+  isReferenceOrValueEmbeddable,
+} from '@kbn/embeddable-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+
 import { dashboardAddToLibraryAction } from '../../dashboard_strings';
-import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
+import { type DashboardPanelState, DASHBOARD_CONTAINER_TYPE, type DashboardContainer } from '..';
+import { pluginServices } from '../../services/plugin_services';
 
 export const ACTION_ADD_TO_LIBRARY = 'saveToLibrary';
 
@@ -31,12 +32,15 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
   public readonly id = ACTION_ADD_TO_LIBRARY;
   public order = 15;
 
-  constructor(
-    private deps: {
-      toasts: NotificationsStart['toasts'];
-      capabilities: ApplicationStart['capabilities'];
-    }
-  ) {}
+  private applicationCapabilities;
+  private toastsService;
+
+  constructor() {
+    ({
+      application: { capabilities: this.applicationCapabilities },
+      notifications: { toasts: this.toastsService },
+    } = pluginServices.getServices());
+  }
 
   public getDisplayName({ embeddable }: AddToLibraryActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
@@ -54,10 +58,8 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
 
   public async isCompatible({ embeddable }: AddToLibraryActionContext) {
     // TODO: Fix this, potentially by adding a 'canSave' function to embeddable interface
-    const canSave =
-      embeddable.type === 'map'
-        ? this.deps.capabilities.maps?.save
-        : this.deps.capabilities.visualize.save;
+    const { maps, visualize } = this.applicationCapabilities;
+    const canSave = embeddable.type === 'map' ? maps.save : visualize.save;
 
     return Boolean(
       canSave &&
@@ -75,7 +77,6 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
     if (!isReferenceOrValueEmbeddable(embeddable)) {
       throw new IncompatibleActionError();
     }
-
     const newInput = await embeddable.getInputAsRefType();
 
     embeddable.updateInput(newInput);
@@ -95,7 +96,7 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
     const title = dashboardAddToLibraryAction.getSuccessMessage(
       embeddable.getTitle() ? `'${embeddable.getTitle()}'` : ''
     );
-    this.deps.toasts.addSuccess({
+    this.toastsService.addSuccess({
       title,
       'data-test-subj': 'addPanelToLibrarySuccess',
     });

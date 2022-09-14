@@ -17,9 +17,13 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ApplicationStart, SavedObjectsFindOptionsReference } from '@kbn/core/public';
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import type { ApplicationStart, SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import useMount from 'react-use/lib/useMount';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import { TableListView, useKibana } from '@kbn/kibana-react-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+
 import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../../types';
 import {
@@ -29,15 +33,12 @@ import {
   dashboardUnsavedListingStrings,
   getNewDashboardTitle,
 } from '../../dashboard_strings';
-import { syncQueryStateWithUrl } from '../../services/data';
-import { IKbnUrlStateStorage } from '../../services/kibana_utils';
-import { TableListView, useKibana } from '../../services/kibana_react';
-import { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { confirmCreateWithUnsaved, confirmDiscardUnsavedChanges } from './confirm_overlays';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
-import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
 import { DashboardAppNoDataPage, isDashboardAppInNoDataState } from '../dashboard_app_no_data';
+import { pluginServices } from '../../services/plugin_services';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../../services/dashboard_session_storage/dashboard_session_storage_service';
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
@@ -56,29 +57,32 @@ export const DashboardListing = ({
   kbnUrlStateStorage,
 }: DashboardListingProps) => {
   const {
-    services: {
-      core,
-      data,
-      dataViews,
-      savedDashboards,
-      savedObjectsClient,
-      savedObjectsTagging,
-      dashboardCapabilities,
-      dashboardSessionStorage,
-      chrome: { setBreadcrumbs },
-    },
+    services: { savedDashboards },
   } = useKibana<DashboardAppServices>();
+
+  const {
+    application,
+    chrome: { setBreadcrumbs },
+    coreContext: { executionContext },
+    dashboardCapabilities: { showWriteControls },
+    dashboardSessionStorage,
+    data: { query },
+    notifications: { toasts },
+    savedObjects: { client },
+    savedObjectsTagging: { getSearchBarFilter, parseSearchQuery },
+    settings: { uiSettings, theme },
+  } = pluginServices.getServices();
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   useMount(() => {
-    (async () => setShowNoDataPage(await isDashboardAppInNoDataState(dataViews)))();
+    (async () => setShowNoDataPage(await isDashboardAppInNoDataState()))();
   });
 
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
     dashboardSessionStorage.getDashboardIdsWithUnsavedChanges()
   );
 
-  useExecutionContext(core.executionContext, {
+  useExecutionContext(executionContext, {
     type: 'application',
     page: 'list',
   });
@@ -94,12 +98,12 @@ export const DashboardListing = ({
 
   useEffect(() => {
     // syncs `_g` portion of url with query services
-    const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
-      data.query,
+    const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
+      query,
       kbnUrlStateStorage
     );
     if (title) {
-      attemptLoadDashboardByTitle(title, savedObjectsClient).then((result) => {
+      attemptLoadDashboardByTitle(title).then((result) => {
         if (!result) return;
         redirectTo({
           destination: 'dashboard',
@@ -112,22 +116,15 @@ export const DashboardListing = ({
     return () => {
       stopSyncingQueryServiceStateWithUrl();
     };
-  }, [title, savedObjectsClient, redirectTo, data.query, kbnUrlStateStorage]);
+  }, [title, client, redirectTo, query, kbnUrlStateStorage]);
 
-  const { showWriteControls } = dashboardCapabilities;
-  const listingLimit = core.uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
-  const initialPageSize = core.uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
+  const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
+  const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
   const defaultFilter = title ? `"${title}"` : '';
 
   const tableColumns = useMemo(
-    () =>
-      getTableColumns(
-        core.application,
-        kbnUrlStateStorage,
-        core.uiSettings.get('state:storeInSessionStorage'),
-        savedObjectsTagging
-      ),
-    [core.application, core.uiSettings, kbnUrlStateStorage, savedObjectsTagging]
+    () => getTableColumns(kbnUrlStateStorage, uiSettings.get('state:storeInSessionStorage')),
+    [uiSettings, kbnUrlStateStorage]
   );
 
   const createItem = useCallback(() => {
@@ -135,8 +132,6 @@ export const DashboardListing = ({
       redirectTo({ destination: 'dashboard' });
     } else {
       confirmCreateWithUnsaved(
-        core.overlays,
-        core.theme,
         () => {
           dashboardSessionStorage.clearState();
           redirectTo({ destination: 'dashboard' });
@@ -144,7 +139,7 @@ export const DashboardListing = ({
         () => redirectTo({ destination: 'dashboard' })
       );
     }
-  }, [dashboardSessionStorage, redirectTo, core.overlays, core.theme]);
+  }, [dashboardSessionStorage, redirectTo]);
 
   const emptyPrompt = useMemo(() => {
     if (!showWriteControls) {
@@ -170,7 +165,7 @@ export const DashboardListing = ({
             size="s"
             color="danger"
             onClick={() =>
-              confirmDiscardUnsavedChanges(core.overlays, () => {
+              confirmDiscardUnsavedChanges(() => {
                 dashboardSessionStorage.clearState(DASHBOARD_PANELS_UNSAVED_ID);
                 setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges());
               })
@@ -222,7 +217,7 @@ export const DashboardListing = ({
                     sampleDataInstallLink: (
                       <EuiLink
                         onClick={() =>
-                          core.application.navigateToApp('home', {
+                          application.navigateToApp('home', {
                             path: '#/tutorial_directory/sampleData',
                           })
                         }
@@ -242,8 +237,7 @@ export const DashboardListing = ({
   }, [
     redirectTo,
     createItem,
-    core.overlays,
-    core.application,
+    application,
     showWriteControls,
     unsavedDashboardIds,
     dashboardSessionStorage,
@@ -253,8 +247,8 @@ export const DashboardListing = ({
     (filter: string) => {
       let searchTerm = filter;
       let references: SavedObjectsFindOptionsReference[] | undefined;
-      if (savedObjectsTagging) {
-        const parsed = savedObjectsTagging.ui.parseSearchQuery(filter, {
+      if (parseSearchQuery) {
+        const parsed = parseSearchQuery(filter, {
           useName: true,
         });
         searchTerm = parsed.searchTerm;
@@ -266,7 +260,7 @@ export const DashboardListing = ({
         hasReference: references,
       });
     },
-    [listingLimit, savedDashboards, savedObjectsTagging]
+    [listingLimit, savedDashboards, parseSearchQuery]
   );
 
   const deleteItems = useCallback(
@@ -285,10 +279,9 @@ export const DashboardListing = ({
   );
 
   const searchFilters = useMemo(() => {
-    return savedObjectsTagging
-      ? [savedObjectsTagging.ui.getSearchBarFilter({ useName: true })]
-      : [];
-  }, [savedObjectsTagging]);
+    const searchBarFilter = getSearchBarFilter?.({ useName: true });
+    return searchBarFilter ? [searchBarFilter] : [];
+  }, [getSearchBarFilter]);
 
   const { getEntityName, getTableCaption, getTableListTitle, getEntityNamePlural } =
     dashboardListingTable;
@@ -304,7 +297,7 @@ export const DashboardListing = ({
           initialPageSize={initialPageSize}
           editItem={!showWriteControls ? undefined : editItem}
           initialFilter={initialFilter ?? defaultFilter}
-          toastNotifications={core.notifications.toasts}
+          toastNotifications={toasts}
           headingId="dashboardListingHeading"
           findItems={fetchItems}
           rowHeader="title"
@@ -318,8 +311,9 @@ export const DashboardListing = ({
             listingLimit,
             tableColumns,
           }}
-          theme={core.theme}
-          application={core.application}
+          theme={theme}
+          // The below type conversion is necessary until the TableListView component allows partial services
+          application={application as unknown as ApplicationStart}
         >
           <DashboardUnsavedListing
             redirectTo={redirectTo}
@@ -334,12 +328,12 @@ export const DashboardListing = ({
   );
 };
 
-const getTableColumns = (
-  application: ApplicationStart,
-  kbnUrlStateStorage: IKbnUrlStateStorage,
-  useHash: boolean,
-  savedObjectsTagging?: SavedObjectsTaggingApi
-) => {
+const getTableColumns = (kbnUrlStateStorage: IKbnUrlStateStorage, useHash: boolean) => {
+  const {
+    savedObjectsTagging: { getTableColumnDefinition },
+  } = pluginServices.getServices();
+  const tableColumnDefinition = getTableColumnDefinition?.();
+
   return [
     {
       field: 'title',
@@ -348,7 +342,6 @@ const getTableColumns = (
       render: (field: string, record: { id: string; title: string; timeRestore: boolean }) => (
         <EuiLink
           href={getDashboardListItemLink(
-            application,
             kbnUrlStateStorage,
             useHash,
             record.id,
@@ -366,6 +359,6 @@ const getTableColumns = (
       render: (field: string, record: { description: string }) => <span>{record.description}</span>,
       sortable: true,
     },
-    ...(savedObjectsTagging ? [savedObjectsTagging.ui.getTableColumnDefinition()] : []),
+    ...(tableColumnDefinition ? [tableColumnDefinition] : []),
   ] as unknown as Array<EuiBasicTableColumn<Record<string, unknown>>>;
 };

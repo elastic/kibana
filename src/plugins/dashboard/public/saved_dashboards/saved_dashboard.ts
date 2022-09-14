@@ -11,9 +11,11 @@ import { SavedObjectsClientContract } from '@kbn/core/public';
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/types';
 import { RawControlGroupAttributes } from '@kbn/controls-plugin/common';
-import { EmbeddableStart } from '../services/embeddable';
-import { SavedObject, SavedObjectsStart } from '../services/saved_objects';
-import { Filter, ISearchSource, Query, RefreshInterval } from '../services/data';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { ISearchSource } from '@kbn/data-plugin/common';
+import { RefreshInterval } from '@kbn/data-plugin/public';
+import { Query, Filter } from '@kbn/es-query';
+import type { SavedObject, SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 
 import { createDashboardEditUrl } from '../dashboard_constants';
 import { extractReferences, injectReferences } from '../../common/saved_dashboard_references';

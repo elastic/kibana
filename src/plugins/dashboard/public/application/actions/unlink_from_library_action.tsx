@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { NotificationsStart } from '@kbn/core/public';
-import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import {
   ViewMode,
-  PanelState,
-  IEmbeddable,
-  PanelNotFoundError,
-  EmbeddableInput,
-  isReferenceOrValueEmbeddable,
+  type PanelState,
+  type IEmbeddable,
   isErrorEmbeddable,
-} from '../../services/embeddable';
+  PanelNotFoundError,
+  type EmbeddableInput,
+  isReferenceOrValueEmbeddable,
+} from '@kbn/embeddable-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { dashboardUnlinkFromLibraryAction } from '../../dashboard_strings';
-import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
+import { type DashboardPanelState, DASHBOARD_CONTAINER_TYPE, type DashboardContainer } from '..';
+import { pluginServices } from '../../services/plugin_services';
 
 export const ACTION_UNLINK_FROM_LIBRARY = 'unlinkFromLibrary';
 
@@ -31,7 +31,13 @@ export class UnlinkFromLibraryAction implements Action<UnlinkFromLibraryActionCo
   public readonly id = ACTION_UNLINK_FROM_LIBRARY;
   public order = 15;
 
-  constructor(private deps: { toasts: NotificationsStart['toasts'] }) {}
+  private toastsService;
+
+  constructor() {
+    ({
+      notifications: { toasts: this.toastsService },
+    } = pluginServices.getServices());
+  }
 
   public getDisplayName({ embeddable }: UnlinkFromLibraryActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
@@ -84,7 +90,7 @@ export class UnlinkFromLibraryAction implements Action<UnlinkFromLibraryActionCo
       embeddable.getTitle() ? `'${embeddable.getTitle()}'` : ''
     );
 
-    this.deps.toasts.addSuccess({
+    this.toastsService.addSuccess({
       title,
       'data-test-subj': 'unlinkPanelSuccess',
     });
