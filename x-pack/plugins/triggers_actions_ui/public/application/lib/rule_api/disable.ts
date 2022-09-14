@@ -5,33 +5,18 @@
  * 2.0.
  */
 import { HttpSetup } from '@kbn/core/public';
-import { BASE_ALERTING_API_PATH, INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
+import { BASE_ALERTING_API_PATH } from '../../constants';
 
 export async function disableRule({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
   await http.post(`${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}/_disable`);
 }
 
-export interface BulkDisableRulesProps {
-  ids?: string[];
-  filter?: string;
-}
-
-export async function bulkDisableRules({
+export async function disableRules({
   ids,
-  filter,
   http,
-}: BulkDisableRulesProps & { http: HttpSetup }): Promise<void> {
-  await http.post(`${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_edit`, {
-    body: JSON.stringify({
-      ids,
-      filter,
-      operations: [
-        {
-          operation: 'set',
-          field: 'enable',
-          value: false,
-        },
-      ],
-    }),
-  });
+}: {
+  ids: string[];
+  http: HttpSetup;
+}): Promise<void> {
+  await Promise.all(ids.map((id) => disableRule({ id, http })));
 }

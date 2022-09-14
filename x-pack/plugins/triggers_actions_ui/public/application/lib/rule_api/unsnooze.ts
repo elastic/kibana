@@ -6,6 +6,7 @@
  */
 import { HttpSetup } from '@kbn/core/public';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
+import { BulkEditResponse } from '../../../types';
 
 export async function unsnoozeRule({
   id,
@@ -29,15 +30,15 @@ export interface BulkUnsnoozeRulesProps {
   scheduleIds?: string[];
 }
 
-export async function bulkUnsnoozeRules({
+export function bulkUnsnoozeRules({
   ids,
   filter,
   scheduleIds,
   http,
-}: BulkUnsnoozeRulesProps & { http: HttpSetup }): Promise<void> {
-  await http.post(`${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_edit`, {
+}: BulkUnsnoozeRulesProps & { http: HttpSetup }): Promise<BulkEditResponse> {
+  return http.post(`${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_edit`, {
     body: JSON.stringify({
-      ids,
+      ids: ids?.length ? ids : undefined,
       filter,
       operations: [
         {

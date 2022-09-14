@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiModal,
   EuiModalHeader,
@@ -14,6 +15,7 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
   EuiModalHeaderTitle,
+  EuiConfirmModal,
 } from '@elastic/eui';
 import {
   withBulkRuleOperations,
@@ -21,12 +23,27 @@ import {
 } from '../../common/components/with_bulk_rule_api_operations';
 import { RuleSnoozeScheduler } from './rule_snooze/scheduler';
 import { RuleTableItem, SnoozeSchedule } from '../../../../types';
+import { getFormattedBulkSnoozeResponseMessage } from '../../../lib/rule_api';
 import { useKibana } from '../../../../common/lib/kibana';
+
+const failureMessage = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.bulkSnoozeScheduleFailMessage',
+  {
+    defaultMessage: 'Failed to bulk snooze rules',
+  }
+);
+
+const confirmationTitle = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.bulkSnoozeScheduleFailMessage',
+  {
+    defaultMessage: 'Bulk delete snooze schedules',
+  }
+);
 
 export type BulkSnoozeScheduleModalProps = {
   rulesToSchedule: RuleTableItem[];
-  rulesToScheduleFilter?: string;
   numberOfSelectedRules?: number;
+  rulesToScheduleFilter?: string;
   onClose: () => void;
   onSave: () => void;
 } & BulkOperationsComponentOpts;
@@ -35,7 +52,7 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
   const {
     rulesToSchedule,
     rulesToScheduleFilter,
-    // numberOfSelectedRules,
+    numberOfSelectedRules = 0,
     onClose,
     onSave,
     bulkSnoozeRules,
@@ -46,6 +63,8 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
     notifications: { toasts },
   } = useKibana().services;
 
+  const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
+
   const isScheduleModalOpen = useMemo(() => {
     if (rulesToScheduleFilter) {
       return true;
@@ -55,24 +74,58 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
 
   const onAddSnoozeSchedule = async (schedule: SnoozeSchedule) => {
     onClose();
-    await bulkSnoozeRules({
-      ids: rulesToSchedule.map((item) => item.id),
-      filter: rulesToScheduleFilter,
-      snoozeSchedule: schedule,
-    });
-    toasts.addSuccess('Rules successfully snoozed.');
+    try {
+      const response = await bulkSnoozeRules({
+        ids: rulesToSchedule.map((item) => item.id),
+        filter: rulesToScheduleFilter,
+        snoozeSchedule: schedule,
+      });
+      toasts.addInfo(getFormattedBulkSnoozeResponseMessage(response));
+    } catch (error) {
+      toasts.addError(error, {
+        title: failureMessage,
+      });
+    }
     onSave();
   };
 
   const onRemoveSnoozeSchedule = async () => {
+    setShowConfirmation(false);
     onClose();
-    await bulkUnsnoozeRules({
-      ids: rulesToSchedule.map((item) => item.id),
-      filter: rulesToScheduleFilter,
-    });
-    toasts.addSuccess('Rule schedules successfully unsnoozed.');
+    try {
+      const response = await bulkUnsnoozeRules({
+        ids: rulesToSchedule.map((item) => item.id),
+        filter: rulesToScheduleFilter,
+      });
+      toasts.addInfo(getFormattedBulkSnoozeResponseMessage(response));
+    } catch (error) {
+      toasts.addError(error, {
+        title: failureMessage,
+      });
+    }
     onSave();
   };
+
+  if (showConfirmation) {
+    return (
+      <EuiConfirmModal
+        title={confirmationTitle}
+        onCancel={() => {
+          setShowConfirmation(false);
+          onClose();
+        }}
+        onConfirm={onRemoveSnoozeSchedule}
+        cancelButtonText="No, don't do it"
+        confirmButtonText="Yes, do it"
+        buttonColor="danger"
+        defaultFocusedButton="confirm"
+      >
+        <p>
+          Are you sure you want to delete all snooze schedules for {numberOfSelectedRules} rules?
+        </p>
+      </EuiConfirmModal>
+    );
+  }
 
   if (isScheduleModalOpen) {
     return (
@@ -85,11 +138,13 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
         </EuiModalHeader>
         <EuiModalBody>
           <RuleSnoozeScheduler
+            showDelete
+            bulkSnoozeSchedule
             hasTitle={false}
             isLoading={false}
             initialSchedule={null}
             onSaveSchedule={onAddSnoozeSchedule}
-            onCancelSchedules={onRemoveSnoozeSchedule}
+            onCancelSchedules={() => setShowConfirmation(true)}
             onClose={() => {}}
           />
         </EuiModalBody>

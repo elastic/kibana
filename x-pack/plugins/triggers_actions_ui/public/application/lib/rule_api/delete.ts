@@ -6,7 +6,6 @@
  */
 import { HttpSetup } from '@kbn/core/public';
 import { BASE_ALERTING_API_PATH } from '../../constants';
-// import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 
 export async function deleteRules({
   ids,
@@ -28,18 +27,4 @@ export async function deleteRules({
     }
   );
   return { successes, errors };
-}
-
-export interface BulkDeleteRulesProps {
-  ids?: string[];
-  filter?: string;
-}
-
-export async function bulkDeleteRules({
-  ids,
-  filter,
-  http,
-}: BulkDeleteRulesProps & { http: HttpSetup }): Promise<{ successes: string[]; errors: string[] }> {
-  // TODO: Determine the appropriate endpoint for bulk delete
-  return { successes: [], errors: [] };
 }

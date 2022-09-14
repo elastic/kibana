@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiModal,
   EuiModalHeader,
@@ -20,23 +21,29 @@ import {
   ComponentOpts as BulkOperationsComponentOpts,
 } from '../../common/components/with_bulk_rule_api_operations';
 import { RuleTableItem, SnoozeSchedule } from '../../../../types';
-import { SnoozePanel } from './rule_snooze';
+import { SnoozePanel, futureTimeToInterval } from './rule_snooze';
 import { isRuleSnoozed } from '../../../lib';
+import { getFormattedBulkSnoozeResponseMessage } from '../../../lib/rule_api';
 import { useKibana } from '../../../../common/lib/kibana';
 
 export type BulkSnoozeModalProps = {
   rulesToSnooze: RuleTableItem[];
   rulesToSnoozeFilter?: string;
-  numberOfSelectedRules?: number;
   onClose: () => void;
   onSave: () => void;
 } & BulkOperationsComponentOpts;
+
+const failureMessage = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.bulkSnoozeFailMessage',
+  {
+    defaultMessage: 'Failed to bulk snooze rules',
+  }
+);
 
 export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
   const {
     rulesToSnooze,
     rulesToSnoozeFilter,
-    // numberOfSelectedRules,
     onClose,
     onSave,
     bulkSnoozeRules,
@@ -61,25 +68,47 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
     return rulesToSnooze.some((item) => isRuleSnoozed(item));
   }, [rulesToSnooze, rulesToSnoozeFilter]);
 
+  const interval = useMemo(() => {
+    if (rulesToSnoozeFilter) {
+      return;
+    }
+    const rule = rulesToSnooze.find((item) => item.isSnoozedUntil);
+    if (rule) {
+      return futureTimeToInterval(rule.isSnoozedUntil);
+    }
+  }, [rulesToSnooze, rulesToSnoozeFilter]);
+
   const onSnoozeRule = async (schedule: SnoozeSchedule) => {
     onClose();
-    await bulkSnoozeRules({
-      ids: rulesToSnooze.map((item) => item.id),
-      filter: rulesToSnoozeFilter,
-      snoozeSchedule: schedule,
-    });
-    toasts.addSuccess('Rules successfully snoozed.');
+    try {
+      const response = await bulkSnoozeRules({
+        ids: rulesToSnooze.map((item) => item.id),
+        filter: rulesToSnoozeFilter,
+        snoozeSchedule: schedule,
+      });
+      toasts.addInfo(getFormattedBulkSnoozeResponseMessage(response));
+    } catch (error) {
+      toasts.addError(error, {
+        title: failureMessage,
+      });
+    }
     onSave();
   };
 
   const onUnsnoozeRule = async (scheduleIds?: string[]) => {
     onClose();
-    await bulkUnsnoozeRules({
-      ids: rulesToSnooze.map((item) => item.id),
-      filter: rulesToSnoozeFilter,
-      scheduleIds,
-    });
-    toasts.addSuccess('Rules successfully unsnoozed.');
+    try {
+      const response = await bulkUnsnoozeRules({
+        ids: rulesToSnooze.map((item) => item.id),
+        filter: rulesToSnoozeFilter,
+        scheduleIds,
+      });
+      toasts.addInfo(getFormattedBulkSnoozeResponseMessage(response));
+    } catch (error) {
+      toasts.addError(error, {
+        title: failureMessage,
+      });
+    }
     onSave();
   };
 
@@ -94,6 +123,7 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
         </EuiModalHeader>
         <EuiModalBody>
           <SnoozePanel
+            interval={interval}
             snoozeRule={onSnoozeRule}
             unsnoozeRule={onUnsnoozeRule}
             showAddSchedule={false}

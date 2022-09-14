@@ -9,9 +9,9 @@ export { alertingFrameworkHealth } from './health';
 export type { LoadRuleAggregationsProps } from './aggregate_helpers';
 export { loadRuleAggregations, loadRuleTags } from './aggregate';
 export { createRule } from './create';
-export { deleteRules, bulkDeleteRules, BulkDeleteRulesProps } from './delete';
-export { disableRule, bulkDisableRules, BulkDisableRulesProps } from './disable';
-export { enableRule, bulkEnableRules, BulkEnableRulesProps } from './enable';
+export { deleteRules } from './delete';
+export { disableRule, disableRules } from './disable';
+export { enableRule, enableRules } from './enable';
 export { loadRule } from './get_rule';
 export { loadRuleSummary } from './rule_summary';
 export { muteAlertInstance } from './mute_alert';
@@ -37,3 +37,7 @@ export { resolveRule } from './resolve_rule';
 export { snoozeRule, bulkSnoozeRules, BulkSnoozeRulesProps } from './snooze';
 export { unsnoozeRule, bulkUnsnoozeRules, BulkUnsnoozeRulesProps } from './unsnooze';
 export { updateAPIKey, bulkUpdateAPIKey, BulkUpdateAPIKeyProps } from './update_api_key';
+export {
+  getFormattedBulkSnoozeResponseMessage,
+  getFormattedBulkUpdateApiKeyResponseMessage,
+} from './bulk_edit_helpers';

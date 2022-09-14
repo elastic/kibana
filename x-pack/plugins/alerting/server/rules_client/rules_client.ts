@@ -227,7 +227,7 @@ export interface FindOptions extends IndexType {
 
 export type BulkEditFields = keyof Pick<
   Rule,
-  'actions' | 'tags' | 'schedule' | 'throttle' | 'notifyWhen' | 'snoozeSchedule'
+  'actions' | 'tags' | 'schedule' | 'throttle' | 'notifyWhen' | 'snoozeSchedule' | 'apiKey'
 >;
 
 export type BulkEditOperation =
@@ -264,7 +264,11 @@ export type BulkEditOperation =
   | {
       operation: 'delete';
       field: Extract<BulkEditFields, 'snoozeSchedule'>;
-      value: string[] | undefined;
+      value?: string[];
+    }
+  | {
+      operation: 'set';
+      field: Extract<BulkEditFields, 'apiKey'>;
     };
 
 type RuleParamsModifier<Params extends RuleTypeParams> = (params: Params) => Promise<Params>;
@@ -1789,6 +1793,21 @@ export class RulesClient {
             };
 
             for (const operation of operations) {
+              const { field } = operation;
+              if (field === 'snoozeSchedule' || field === 'apiKey') {
+                if (rule.attributes.actions.length) {
+                  try {
+                    await this.actionsAuthorization.ensureAuthorized('execute');
+                  } catch (error) {
+                    throw Error(`Rule not authorized for bulk ${field} update - ${error.message}`);
+                  }
+                }
+              }
+            }
+
+            let hasUpdateApiKeyOperation = false;
+
+            for (const operation of operations) {
               switch (operation.field) {
                 case 'actions':
                   await this.validateActions(ruleType, operation.value);
@@ -1796,18 +1815,35 @@ export class RulesClient {
                   break;
                 case 'snoozeSchedule':
                   if (operation.operation === 'set') {
+                    const snoozeAttributes = getSnoozeAttributes(attributes, operation.value);
+                    const schedules = snoozeAttributes.snoozeSchedule.filter((snooze) => snooze.id);
+                    if (schedules.length > 5) {
+                      throw Error(
+                        `Error updating rule: rule cannot have more than 5 snooze schedules`
+                      );
+                    }
                     attributes = {
                       ...attributes,
-                      ...getSnoozeAttributes(attributes, operation.value),
+                      ...snoozeAttributes,
                     };
                   }
                   if (operation.operation === 'delete') {
+                    const idsToDelete: string[] = [];
+                    attributes.snoozeSchedule?.forEach((schedule) => {
+                      if (schedule.id) {
+                        idsToDelete.push(schedule.id);
+                      }
+                    });
                     attributes = {
                       ...attributes,
-                      ...getUnsnoozeAttributes(attributes, operation.value),
+                      ...getUnsnoozeAttributes(attributes, idsToDelete),
                     };
                   }
                   break;
+                case 'apiKey': {
+                  hasUpdateApiKeyOperation = true;
+                  break;
+                }
                 default:
                   attributes = applyBulkEditOperation(operation, attributes);
               }
@@ -1854,10 +1890,12 @@ export class RulesClient {
               validatedMutatedAlertTypeParams
             );
 
+            const shouldUpdateApiKey = attributes.enabled || hasUpdateApiKeyOperation;
+
             // create API key
             let createdAPIKey = null;
             try {
-              createdAPIKey = attributes.enabled
+              createdAPIKey = shouldUpdateApiKey
                 ? await this.createAPIKey(this.generateAPIKeyName(ruleType.id, attributes.name))
                 : null;
             } catch (error) {

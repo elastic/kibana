@@ -16,13 +16,12 @@ import {
   AlertingFrameworkHealth,
   ResolvedRule,
   SnoozeSchedule,
+  BulkEditResponse,
 } from '../../../../types';
 import {
   deleteRules,
-  bulkDisableRules,
-  BulkDisableRulesProps,
-  bulkEnableRules,
-  BulkEnableRulesProps,
+  disableRules,
+  enableRules,
   muteRules,
   unmuteRules,
   disableRule,
@@ -55,8 +54,8 @@ import { useKibana } from '../../../../common/lib/kibana';
 export interface ComponentOpts {
   muteRules: (rules: Rule[]) => Promise<void>;
   unmuteRules: (rules: Rule[]) => Promise<void>;
-  bulkEnableRules: (props: BulkEnableRulesProps) => Promise<void>;
-  bulkDisableRules: (props: BulkDisableRulesProps) => Promise<void>;
+  enableRules: (rules: Rule[]) => Promise<void>;
+  disableRules: (rules: Rule[]) => Promise<void>;
   deleteRules: (rules: Rule[]) => Promise<{
     successes: string[];
     errors: string[];
@@ -85,9 +84,9 @@ export interface ComponentOpts {
   getHealth: () => Promise<AlertingFrameworkHealth>;
   resolveRule: (id: Rule['id']) => Promise<ResolvedRule>;
   snoozeRule: (rule: Rule, snoozeSchedule: SnoozeSchedule) => Promise<void>;
-  bulkSnoozeRules: (props: BulkSnoozeRulesProps) => Promise<void>;
+  bulkSnoozeRules: (props: BulkSnoozeRulesProps) => Promise<BulkEditResponse>;
   unsnoozeRule: (rule: Rule, scheduleIds?: string[]) => Promise<void>;
-  bulkUnsnoozeRules: (props: BulkUnsnoozeRulesProps) => Promise<void>;
+  bulkUnsnoozeRules: (props: BulkUnsnoozeRulesProps) => Promise<BulkEditResponse>;
 }
 
 export type PropsWithOptionalApiHandlers<T> = Omit<T, keyof ComponentOpts> & Partial<ComponentOpts>;
@@ -109,11 +108,14 @@ export function withBulkRuleOperations<T>(
         unmuteRules={async (items: Rule[]) =>
           unmuteRules({ http, ids: items.filter(isRuleMuted).map((item) => item.id) })
         }
-        bulkEnableRules={async (bulkEanbleRulesProps: BulkEnableRulesProps) =>
-          bulkEnableRules({ http, ...bulkEanbleRulesProps })
+        enableRules={async (items: Rule[]) =>
+          enableRules({ http, ids: items.filter(isRuleDisabled).map((item) => item.id) })
         }
-        bulkDisableRules={async (bulkDisableRulesProps: BulkDisableRulesProps) =>
-          bulkDisableRules({ http, ...bulkDisableRulesProps })
+        disableRules={async (items: Rule[]) =>
+          disableRules({
+            http,
+            ids: items.filter((item) => !isRuleDisabled(item)).map((item) => item.id),
+          })
         }
         deleteRules={async (items: Rule[]) =>
           deleteRules({ http, ids: items.map((item) => item.id) })

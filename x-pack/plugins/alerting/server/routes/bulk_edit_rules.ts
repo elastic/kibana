@@ -67,6 +67,10 @@ const operationsSchema = schema.arrayOf(
       field: schema.literal('snoozeSchedule'),
       value: schema.maybe(scheduleIdsSchema),
     }),
+    schema.object({
+      operation: schema.literal('set'),
+      field: schema.literal('apiKey'),
+    }),
   ]),
   { minSize: 1 }
 );

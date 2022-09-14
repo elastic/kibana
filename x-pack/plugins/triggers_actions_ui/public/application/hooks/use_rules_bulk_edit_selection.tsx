@@ -58,7 +58,10 @@ const reducer = (state: BulkEditSelectionState, action: Action) => {
       };
     }
     case ActionTypes.CLEAR_SELECTION: {
-      return initialState;
+      return {
+        ...initialState,
+        selectedIds: new Set<string>(),
+      };
     }
     default:
       return state;
@@ -135,8 +138,13 @@ export function useRulesBulkEditSelect({
 
   const getFilter = useCallback(() => {
     const { selectedIds, isAllSelected } = state;
+    const idsArray = [...selectedIds];
+
     if (isAllSelected) {
-      return `not alert.id: ("${[...selectedIds].join(' or ')}")`;
+      if (idsArray.length === 0) {
+        return 'alert.id: *';
+      }
+      return `NOT (${idsArray.map((id) => `alert.id: "alert:${id}"`).join(' or ')})`;
     }
     return '';
   }, [state]);

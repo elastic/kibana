@@ -10,6 +10,9 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState, useMemo } from 'react';
 import { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '../../common/lib/kibana';
+import { getFormattedBulkUpdateApiKeyResponseMessage } from '../lib/rule_api';
+import { BulkEditResponse } from '../../types';
+
 export const UpdateApiKeyModalConfirmation = ({
   onCancel,
   idsToUpdate,
@@ -31,7 +34,7 @@ export const UpdateApiKeyModalConfirmation = ({
     ids?: string[];
     filter?: string;
     http: HttpSetup;
-  }) => Promise<void>;
+  }) => Promise<BulkEditResponse>;
   setIsLoadingState: (isLoading: boolean) => void;
   onUpdated: () => void;
 }) => {
@@ -72,14 +75,12 @@ export const UpdateApiKeyModalConfirmation = ({
         setUpdateModalVisibility(false);
         setIsLoadingState(true);
         try {
-          await apiUpdateApiKeyCall({ ids: idsToUpdate, filter: idsToUpdateFilter, http });
-          toasts.addSuccess(
-            i18n.translate('xpack.triggersActionsUI.updateApiKeyConfirmModal.successMessage', {
-              defaultMessage:
-                'API {idsToUpdate, plural, one {key} other {keys}} {idsToUpdate, plural, one {has} other {have}} been updated',
-              values: { idsToUpdate: numberOfIdsToUpdate },
-            })
-          );
+          const response = await apiUpdateApiKeyCall({
+            ids: idsToUpdate,
+            filter: idsToUpdateFilter,
+            http,
+          });
+          toasts.addInfo(getFormattedBulkUpdateApiKeyResponseMessage(response));
         } catch (e) {
           toasts.addError(e, {
             title: i18n.translate(

@@ -64,7 +64,7 @@ import {
   enableRule,
   snoozeRule,
   unsnoozeRule,
-  bulkDeleteRules,
+  deleteRules,
   bulkUpdateAPIKey,
 } from '../../../lib/rule_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
@@ -205,7 +205,6 @@ export const RulesList = ({
   });
 
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
-  const [rulesToDeleteFilter, setRulesToDeleteFilter] = useState<string>('');
 
   const [rulesToSnooze, setRulesToSnooze] = useState<RuleTableItem[]>([]);
   const [rulesToSnoozeFilter, setRulesToSnoozeFilter] = useState<string>('');
@@ -543,11 +542,6 @@ export const RulesList = ({
     itemIds: rulesState.data.map((item) => item.id),
   });
 
-  const clearRulesToDelete = () => {
-    setRulesToDelete([]);
-    setRulesToDeleteFilter('');
-  };
-
   const clearRulesToSnooze = () => {
     setRulesToSnooze([]);
     setRulesToSnoozeFilter('');
@@ -627,7 +621,6 @@ export const RulesList = ({
                 setRulesToUpdateAPIKey={setRulesToUpdateAPIKey}
                 setRulesToSnooze={setRulesToSnooze}
                 setRulesToSchedule={setRulesToSchedule}
-                setRulesToDeleteFilter={setRulesToDeleteFilter}
                 setRulesToSnoozeFilter={setRulesToSnoozeFilter}
                 setRulesToScheduleFilter={setRulesToScheduleFilter}
                 setRulesToUpdateAPIKeyFilter={setRulesToUpdateAPIKeyFilter}
@@ -804,11 +797,13 @@ export const RulesList = ({
       <EuiSpacer size="s" />
       <RulesListTable
         items={tableItems}
-        canExecuteActions={canExecuteActions}
         isLoading={rulesState.isLoading || ruleTypesState.isLoading || isPerformingAction}
         rulesState={rulesState}
         ruleTypesState={ruleTypesState}
         ruleTypeRegistry={ruleTypeRegistry}
+        isPageSelected={isPageSelected}
+        isAllSelected={isAllSelected}
+        numberOfSelectedRules={numberOfSelectedItems}
         sort={sort}
         page={page}
         percentileOptions={percentileOptions}
@@ -840,8 +835,6 @@ export const RulesList = ({
         onSelectAll={onSelectAll}
         onSelectPage={onSelectPage}
         onSelectRow={onSelectRow}
-        isPageSelected={isPageSelected}
-        isAllSelected={isAllSelected}
         isRowSelected={isRowSelected}
         renderCollapsedItemActions={(rule, onLoading) => (
           <CollapsedItemActions
@@ -909,22 +902,20 @@ export const RulesList = ({
     <section data-test-subj="rulesList">
       <DeleteModalConfirmation
         onDeleted={async () => {
-          clearRulesToDelete();
+          setRulesToDelete([]);
           onClearSelection();
           await loadData();
         }}
         onErrors={async () => {
           // Refresh the rules from the server, some rules may have beend deleted
           await loadData();
-          clearRulesToDelete();
+          setRulesToDelete([]);
         }}
         onCancel={() => {
-          clearRulesToDelete();
+          setRulesToDelete([]);
         }}
-        apiDeleteCall={bulkDeleteRules}
+        apiDeleteCall={deleteRules}
         idsToDelete={rulesToDelete}
-        idsToDeleteFilter={rulesToDeleteFilter}
-        numberOfSelectedRules={numberOfSelectedItems}
         singleTitle={i18n.translate('xpack.triggersActionsUI.sections.rulesList.singleTitle', {
           defaultMessage: 'rule',
         })}

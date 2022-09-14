@@ -112,7 +112,9 @@ export interface RulesListTableProps {
   sort: EuiTableSortingType<RuleTableItem>['sort'];
   page: Pagination;
   percentileOptions: EuiSelectableOption[];
-  canExecuteActions: boolean;
+  numberOfSelectedRules?: number;
+  isPageSelected: boolean;
+  isAllSelected: boolean;
   itemIdToExpandedRowMap?: Record<string, React.ReactNode>;
   config: TriggersActionsUiConfig;
   onSort?: (sort: EuiTableSortingType<RuleTableItem>['sort']) => void;
@@ -132,8 +134,6 @@ export interface RulesListTableProps {
   onSelectAll: () => void;
   onSelectPage: () => void;
   onSelectRow: (rule: RuleTableItem) => void;
-  isPageSelected: boolean;
-  isAllSelected: boolean;
   isRowSelected: (rule: RuleTableItem) => boolean;
   renderCollapsedItemActions?: (
     rule: RuleTableItem,
@@ -179,6 +179,9 @@ export const RulesListTable = (props: RulesListTableProps) => {
     ruleTypeRegistry,
     isLoading = false,
     sort,
+    isPageSelected = false,
+    isAllSelected = false,
+    numberOfSelectedRules = 0,
     page,
     percentileOptions,
     itemIdToExpandedRowMap = EMPTY_OBJECT,
@@ -198,8 +201,6 @@ export const RulesListTable = (props: RulesListTableProps) => {
     onSelectAll = EMPTY_HANDLER,
     onSelectPage = EMPTY_HANDLER,
     onSelectRow = EMPTY_HANDLER,
-    isPageSelected = false,
-    isAllSelected = false,
     isRowSelected = () => false,
     renderCollapsedItemActions = EMPTY_RENDER,
     renderRuleError = EMPTY_RENDER,
@@ -856,18 +857,20 @@ export const RulesListTable = (props: RulesListTableProps) => {
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem grow={false}>{ColumnSelector}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="xs"
-            aria-label={i18n.translate(
-              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.selectAllAriaLabel',
-              { defaultMessage: 'Toggle select all rules' }
-            )}
-            data-test-subj="selectAllRulesButton"
-            iconType={isAllSelected ? 'cross' : 'pagesSelect'}
-            onClick={onSelectAll}
-          >
-            {selectAllButtonText}
-          </EuiButtonEmpty>
+          {numberOfSelectedRules > 0 && (
+            <EuiButtonEmpty
+              size="xs"
+              aria-label={i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.selectAllAriaLabel',
+                { defaultMessage: 'Toggle select all rules' }
+              )}
+              data-test-subj="selectAllRulesButton"
+              iconType={isAllSelected ? 'cross' : 'pagesSelect'}
+              onClick={onSelectAll}
+            >
+              {selectAllButtonText}
+            </EuiButtonEmpty>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexItem>
