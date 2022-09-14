@@ -181,7 +181,6 @@ export {
   SearchSource,
   SearchSessionState,
   SortDirection,
-  handleResponse,
 } from './search';
 
 export type {
@@ -292,7 +291,6 @@ export function plugin(initializerContext: PluginInitializerContext<ConfigSchema
 export type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
-  IDataPluginServices,
   DataPublicPluginStartActions,
 } from './types';
 

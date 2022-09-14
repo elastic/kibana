@@ -8,7 +8,7 @@
 
 import { random } from 'lodash';
 
-import { apm, timerange } from '..';
+import { apm, timerange } from '../..';
 import { Instance } from '../lib/apm/instance';
 import { Scenario } from '../cli/scenario';
 import { getLogger } from '../cli/utils/get_common_services';
@@ -29,16 +29,18 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
     generate: ({ from, to }) => {
       const range = timerange(from, to);
 
-      const successfulTimestamps = range.interval('1s').rate(3);
+      const successfulTimestamps = range.ratePerMinute(180);
 
       const instances = [...Array(numServices).keys()].map((index) =>
         apm
-          .service(
-            `${services[index % services.length]}-${languages[index % languages.length]}-${index}`,
-            ENVIRONMENT,
-            languages[index % languages.length]
-          )
-          .instance('instance')
+          .service({
+            name: `${services[index % services.length]}-${
+              languages[index % languages.length]
+            }-${index}`,
+            environment: ENVIRONMENT,
+            agentName: languages[index % languages.length],
+          })
+          .instance(`instance-${index}`)
       );
 
       const urls = ['GET /order/{id}', 'POST /basket/{id}', 'DELETE /basket', 'GET /products'];
@@ -53,18 +55,22 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
           const generateError = random(1, 4) % 3 === 0;
           const generateChildError = random(0, 5) % 2 === 0;
           const span = instance
-            .transaction(url)
+            .transaction({ transactionName: url })
             .timestamp(timestamp)
             .duration(duration)
             .children(
               instance
-                .span('GET apm-*/_search', 'db', 'elasticsearch')
+                .span({
+                  spanName: 'GET apm-*/_search',
+                  spanType: 'db',
+                  spanSubtype: 'elasticsearch',
+                })
                 .duration(childDuration)
                 .destination('elasticsearch')
                 .timestamp(timestamp)
                 .outcome(generateError && generateChildError ? 'failure' : 'success'),
               instance
-                .span('custom_operation', 'custom')
+                .span({ spanName: 'custom_operation', spanType: 'custom' })
                 .duration(remainderDuration)
                 .success()
                 .timestamp(timestamp + childDuration)
@@ -73,7 +79,9 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
             ? span.success()
             : span
                 .failure()
-                .errors(instance.error(`No handler for ${url}`).timestamp(timestamp + 50));
+                .errors(
+                  instance.error({ message: `No handler for ${url}` }).timestamp(timestamp + 50)
+                );
         });
 
         return successfulTraceEvents;

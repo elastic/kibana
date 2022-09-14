@@ -39,8 +39,8 @@ export function setTimeScaling(
         timeScale,
         currentColumn.timeShift,
         currentColumn.timeShift,
-        currentColumn.window,
-        currentColumn.window
+        currentColumn.reducedTimeRange,
+        currentColumn.reducedTimeRange
       );
   return {
     ...layer,

@@ -87,7 +87,7 @@ export function generateFormula(
     }
     previousFormula += `shift='${previousColumn.timeShift}'`;
   }
-  if (previousColumn.window) {
+  if (previousColumn.reducedTimeRange) {
     if (
       previousColumn.operationType !== 'count' ||
       previousColumn.filter ||
@@ -95,7 +95,7 @@ export function generateFormula(
     ) {
       previousFormula += ', ';
     }
-    previousFormula += `timeRange='${previousColumn.window}'`;
+    previousFormula += `reducedTimeRange='${previousColumn.reducedTimeRange}'`;
   }
   if (previousFormula) {
     // close the formula at the end

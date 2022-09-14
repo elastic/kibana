@@ -7,9 +7,9 @@
 
 import {
   EuiPage,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageBody,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiTab,
   EuiTabs,
   EuiSpacer,

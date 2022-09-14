@@ -7,7 +7,7 @@
  */
 
 import _, { merge } from 'lodash';
-import glob from 'glob';
+import globby from 'globby';
 import { basename, join, resolve } from 'path';
 import { readFileSync } from 'fs';
 
@@ -115,8 +115,8 @@ export class SpecDefinitionsService {
   }
 
   private loadJSONSpecInDir(dirname: string) {
-    const generatedFiles = glob.sync(join(dirname, 'generated', '*.json'));
-    const overrideFiles = glob.sync(join(dirname, 'overrides', '*.json'));
+    const generatedFiles = globby.sync(join(dirname, 'generated', '*.json'));
+    const overrideFiles = globby.sync(join(dirname, 'overrides', '*.json'));
 
     return generatedFiles.reduce((acc, file) => {
       const overrideFile = overrideFiles.find((f) => basename(f) === basename(file));

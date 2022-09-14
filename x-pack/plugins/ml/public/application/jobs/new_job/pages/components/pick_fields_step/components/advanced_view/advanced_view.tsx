@@ -26,6 +26,7 @@ export const AdvancedView: FC<Props> = ({ isActive, setCanProceed }) => {
     if (typeof setCanProceed === 'function') {
       setCanProceed(metricsValid && settingsValid);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [metricsValid, settingsValid]);
 
   return (

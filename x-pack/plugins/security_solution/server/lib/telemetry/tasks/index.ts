@@ -20,7 +20,9 @@ export function createTelemetryTaskConfigs(): SecurityTelemetryTaskConfig[] {
     createTelemetryDiagnosticsTaskConfig(),
     createTelemetryEndpointTaskConfig(telemetryConfiguration.max_security_list_telemetry_batch),
     createTelemetrySecurityListTaskConfig(telemetryConfiguration.max_endpoint_telemetry_batch),
-    createTelemetryDetectionRuleListsTaskConfig(telemetryConfiguration.max_detection_rule_telemetry_batch),
+    createTelemetryDetectionRuleListsTaskConfig(
+      telemetryConfiguration.max_detection_rule_telemetry_batch
+    ),
     createTelemetryPrebuiltRuleAlertsTaskConfig(telemetryConfiguration.max_detection_alerts_batch),
     createTelemetryTimelineTaskConfig(),
     createTelemetryConfigurationTaskConfig(),

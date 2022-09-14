@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { getPreviousDiagTaskTimestamp } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
-import type {TelemetryConfiguration } from '../types';
+import type { TelemetryConfiguration } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
 import { artifactService } from '../artifact';
@@ -32,9 +32,12 @@ export function createTelemetryConfigurationTaskConfig() {
       const configArtifact = artifactService.getArtifact() as unknown as TelemetryConfiguration;
       telemetryConfiguration.max_detection_alerts_batch = configArtifact.max_detection_alerts_batch;
       telemetryConfiguration.telemetry_max_buffer_size = configArtifact.telemetry_max_buffer_size;
-      telemetryConfiguration.max_detection_rule_telemetry_batch = configArtifact.max_detection_rule_telemetry_batch;
-      telemetryConfiguration.max_endpoint_telemetry_batch = configArtifact.max_endpoint_telemetry_batch;
-      telemetryConfiguration.max_security_list_telemetry_batch = configArtifact.max_security_list_telemetry_batch;
+      telemetryConfiguration.max_detection_rule_telemetry_batch =
+        configArtifact.max_detection_rule_telemetry_batch;
+      telemetryConfiguration.max_endpoint_telemetry_batch =
+        configArtifact.max_endpoint_telemetry_batch;
+      telemetryConfiguration.max_security_list_telemetry_batch =
+        configArtifact.max_security_list_telemetry_batch;
       return 0;
     },
   };

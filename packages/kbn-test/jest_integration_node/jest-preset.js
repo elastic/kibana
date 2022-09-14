@@ -21,20 +21,20 @@ module.exports = {
     (pattern) => !pattern.includes('integration_tests')
   ),
   setupFilesAfterEnv: [
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/after_env.integration.js',
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.moment_timezone.js',
+    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/after_env.integration.js',
+    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/mocks.moment_timezone.js',
   ],
   reporters: [
     'default',
     [
-      '@kbn/test/target_node/jest/junit_reporter',
+      '@kbn/test/target_node/src/jest/junit_reporter',
       {
         rootDirectory: '.',
         reportName: 'Jest Integration Tests',
       },
     ],
     [
-      '@kbn/test/target_node/jest/ci_stats_jest_reporter',
+      '@kbn/test/target_node/src/jest/ci_stats_jest_reporter',
       {
         testGroupType: 'Jest Integration Tests',
       },
@@ -45,7 +45,7 @@ module.exports = {
     : ['html', 'text'],
 
   snapshotSerializers: [],
-  setupFiles: ['<rootDir>/node_modules/@kbn/test/target_node/jest/setup/babel_polyfill.js'],
+  setupFiles: ['<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/babel_polyfill.js'],
   haste: {
     ...preset.haste,
     throwOnModuleCollision: true,

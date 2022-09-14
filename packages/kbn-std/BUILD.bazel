@@ -7,11 +7,21 @@ PKG_REQUIRE_NAME = "@kbn/std"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
+    "**/*.ts",
   ],
   exclude = [
-    "**/*.test.*",
     "**/test_helpers.ts",
+    "**/*.config.js",
+    "**/*.mock.*",
+    "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -49,7 +59,6 @@ jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
-  root_input_dir = "src",
 )
 
 ts_config(
@@ -70,7 +79,6 @@ ts_project(
   declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSavedObjectsRouteHandlerContext } from '../saved_objects';
+import type { CoreSavedObjectsRouteHandlerContext } from '@kbn/core-saved-objects-server-internal';
 import type { IUiSettingsClient, InternalUiSettingsServiceStart } from './types';
 
 /**

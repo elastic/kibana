@@ -32,7 +32,6 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
       });
 
       loadTestFile(require.resolve('./dashboard'));
-      loadTestFile(require.resolve('./dashboard_panel'));
       loadTestFile(require.resolve('./filter_panel'));
       loadTestFile(require.resolve('./home'));
       loadTestFile(require.resolve('./discover'));

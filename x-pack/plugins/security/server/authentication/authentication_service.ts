@@ -335,7 +335,10 @@ export class AuthenticationService {
       loggers,
       clusterClient,
       basePath: http.basePath,
-      config: { authc: config.authc },
+      config: {
+        authc: config.authc,
+        accessAgreement: config.accessAgreement,
+      },
       getCurrentUser,
       featureUsageService,
       userProfileService,

@@ -27,6 +27,7 @@ import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks'
 import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 
 import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import type { LensAttributeService } from '../lens_attribute_service';
 import type {
   LensByValueInput,
@@ -87,7 +88,7 @@ export function makeDefaultServices(
   const dataViewsMock = dataViewPluginMocks.createStartContract();
   dataViewsMock.get.mockImplementation(
     jest.fn((id) =>
-      Promise.resolve({ id, isTimeBased: () => true, fields: [] })
+      Promise.resolve({ id, isTimeBased: () => true, fields: [], isPersisted: () => true })
     ) as unknown as DataViewsPublicPluginStart['get']
   );
   dataViewsMock.getIdsWithTitle.mockImplementation(jest.fn(async () => []));
@@ -158,6 +159,7 @@ export function makeDefaultServices(
       remove: jest.fn(),
       clear: jest.fn(),
     },
+    uiActions: uiActionsPluginMock.createStartContract(),
     spaces: spacesPluginMock.createStartContract(),
     charts: chartPluginMock.createSetupContract(),
     dataViewFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),

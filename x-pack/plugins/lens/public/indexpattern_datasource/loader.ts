@@ -49,16 +49,18 @@ function getLayerReferenceName(layerId: string) {
 
 export function extractReferences({ layers }: IndexPatternPrivateState) {
   const savedObjectReferences: SavedObjectReference[] = [];
-  const persistableLayers: Record<string, Omit<IndexPatternLayer, 'indexPatternId'>> = {};
+  const persistableState: IndexPatternPersistedState = {
+    layers: {},
+  };
   Object.entries(layers).forEach(([layerId, { indexPatternId, ...persistableLayer }]) => {
+    persistableState.layers[layerId] = persistableLayer;
     savedObjectReferences.push({
       type: 'index-pattern',
       id: indexPatternId,
       name: getLayerReferenceName(layerId),
     });
-    persistableLayers[layerId] = persistableLayer;
   });
-  return { savedObjectReferences, state: { layers: persistableLayers } };
+  return { savedObjectReferences, state: persistableState };
 }
 
 export function injectReferences(
@@ -200,6 +202,27 @@ export function changeIndexPattern({
   };
 }
 
+export function renameIndexPattern({
+  oldIndexPatternId,
+  newIndexPatternId,
+  state,
+}: {
+  oldIndexPatternId: string;
+  newIndexPatternId: string;
+  state: IndexPatternPrivateState;
+}) {
+  return {
+    ...state,
+    layers: mapValues(state.layers, (layer) =>
+      layer.indexPatternId === oldIndexPatternId
+        ? { ...layer, indexPatternId: newIndexPatternId }
+        : layer
+    ),
+    currentIndexPatternId:
+      state.currentIndexPatternId === oldIndexPatternId ? newIndexPatternId : oldIndexPatternId,
+  };
+}
+
 export function triggerActionOnIndexPatternChange({
   state,
   layerId,
@@ -211,7 +234,8 @@ export function triggerActionOnIndexPatternChange({
   state: IndexPatternPrivateState;
   uiActions: UiActionsStart;
 }) {
-  const fromDataView = state.layers[layerId].indexPatternId;
+  const fromDataView = state.layers[layerId]?.indexPatternId;
+  if (!fromDataView) return;
   const toDataView = indexPatternId;
 
   const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);

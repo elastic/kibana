@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import uuid from 'uuid';
 import { CoreSetup } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { curry, times } from 'lodash';
+import { curry, range, times } from 'lodash';
 import {
   RuleType,
   AlertInstanceState,
@@ -269,6 +270,60 @@ function getFailingAlertType() {
         },
       });
       throw new Error('Failed to execute alert type');
+    },
+  };
+  return result;
+}
+
+function getExceedsAlertLimitRuleType() {
+  const paramsSchema = schema.object({
+    index: schema.string(),
+    getsLimit: schema.boolean(),
+    reportsLimitReached: schema.boolean(),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  const result: RuleType<ParamsType, never, {}, {}, {}, 'default'> = {
+    id: 'test.exceedsAlertLimit',
+    name: 'Test: ExceedsAlertLimit',
+    validate: {
+      params: paramsSchema,
+    },
+    actionGroups: [
+      {
+        id: 'default',
+        name: 'Default',
+      },
+    ],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    async executor({ services, params, state }) {
+      let limit: number | null = null;
+      if (params.getsLimit) {
+        limit = services.alertFactory.alertLimit.getValue();
+      }
+
+      const alertsToCreate = limit ? limit : 25;
+
+      range(alertsToCreate)
+        .map(() => uuid.v4())
+        .forEach((id: string) => {
+          services.alertFactory.create(id).scheduleActions('default');
+        });
+
+      if (params.reportsLimitReached) {
+        services.alertFactory.alertLimit.setLimitReached(true);
+      }
+
+      // Index something
+      await services.scopedClusterClient.asCurrentUser.index({
+        index: params.index,
+        refresh: 'wait_for',
+        body: {
+          numAlerts: alertsToCreate,
+        },
+      });
     },
   };
   return result;
@@ -786,4 +841,5 @@ export function defineAlertTypes(
   alerting.registerType(getLongRunningPatternRuleType(false));
   alerting.registerType(getCancellableRuleType());
   alerting.registerType(getPatternSuccessOrFailureAlertType());
+  alerting.registerType(getExceedsAlertLimitRuleType());
 }

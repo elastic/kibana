@@ -17,19 +17,19 @@ export interface NewOutput {
   name: string;
   type: ValueOf<OutputType>;
   hosts?: string[];
-  ca_sha256?: string;
-  ca_trusted_fingerprint?: string;
-  config_yaml?: string;
+  ca_sha256?: string | null;
+  ca_trusted_fingerprint?: string | null;
+  config_yaml?: string | null;
   ssl?: {
     certificate_authorities?: string[];
     certificate?: string;
     key?: string;
-  };
+  } | null;
 }
 
 export type OutputSOAttributes = NewOutput & {
   output_id?: string;
-  ssl?: string; // encrypted ssl field
+  ssl?: string | null; // encrypted ssl field
 };
 
 export type Output = NewOutput & {

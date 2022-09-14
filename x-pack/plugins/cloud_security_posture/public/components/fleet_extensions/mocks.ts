@@ -15,7 +15,6 @@ export const getCspNewPolicyMock = (type: BenchmarkId = 'cis_k8s'): NewPackagePo
   namespace: 'default',
   policy_id: '',
   enabled: true,
-  output_id: '',
   inputs: [
     {
       type: CLOUDBEAT_VANILLA,
@@ -50,6 +49,15 @@ export const getCspNewPolicyMock = (type: BenchmarkId = 'cis_k8s'): NewPackagePo
               type: 'text',
             },
             session_token: {
+              type: 'text',
+            },
+            shared_credential_file: {
+              type: 'text',
+            },
+            credential_profile_name: {
+              type: 'text',
+            },
+            role_arn: {
               type: 'text',
             },
           },

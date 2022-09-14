@@ -41,6 +41,7 @@ export const useRefresh = () => {
       ),
       annotationsRefresh$.pipe(map((d) => ({ lastRefresh: d })))
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return useObservable<Refresh>(refresh$);

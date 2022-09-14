@@ -16,18 +16,18 @@ export const DEFAULT_TIME_SCALE = 's' as TimeScaleUnit;
 function getSuffix(
   scale: TimeScaleUnit | undefined,
   shift: string | undefined,
-  window: string | undefined
+  reducedTimeRange: string | undefined
 ) {
   return (
     (shift || scale ? ' ' : '') +
     (scale ? unitSuffixesLong[scale] : '') +
     (shift && scale ? ' ' : '') +
     (shift ? `-${shift}` : '') +
-    (window ? ' ' : '') +
-    (window
-      ? i18n.translate('xpack.lens.windowSuffix', {
-          defaultMessage: 'last {window}',
-          values: { window },
+    (reducedTimeRange ? ' ' : '') +
+    (reducedTimeRange
+      ? i18n.translate('xpack.lens.reducedTimeRangeSuffix', {
+          defaultMessage: 'last {reducedTimeRange}',
+          values: { reducedTimeRange },
         })
       : '')
   );
@@ -39,23 +39,23 @@ export function adjustTimeScaleLabelSuffix(
   newTimeScale: TimeScaleUnit | undefined,
   previousShift: string | undefined,
   newShift: string | undefined,
-  previousWindow: string | undefined,
-  newWindow: string | undefined
+  previousReducedTimeRange: string | undefined,
+  newReducedTimeRange: string | undefined
 ) {
   let cleanedLabel = oldLabel;
   // remove added suffix if column had a time scale previously
-  if (previousTimeScale || previousShift || previousWindow) {
-    const suffix = getSuffix(previousTimeScale, previousShift, previousWindow);
+  if (previousTimeScale || previousShift || previousReducedTimeRange) {
+    const suffix = getSuffix(previousTimeScale, previousShift, previousReducedTimeRange);
     const suffixPosition = oldLabel.lastIndexOf(suffix);
     if (suffixPosition !== -1) {
       cleanedLabel = oldLabel.substring(0, suffixPosition);
     }
   }
-  if (!newTimeScale && !newShift && !newWindow) {
+  if (!newTimeScale && !newShift && !newReducedTimeRange) {
     return cleanedLabel;
   }
   // add new suffix if column has a time scale now
-  return `${cleanedLabel}${getSuffix(newTimeScale, newShift, newWindow)}`;
+  return `${cleanedLabel}${getSuffix(newTimeScale, newShift, newReducedTimeRange)}`;
 }
 
 export function adjustTimeScaleOnOtherColumnChange<T extends GenericIndexPatternColumn>(
@@ -85,8 +85,8 @@ export function adjustTimeScaleOnOtherColumnChange<T extends GenericIndexPattern
       undefined,
       column.timeShift,
       column.timeShift,
-      column.window,
-      column.window
+      column.reducedTimeRange,
+      column.reducedTimeRange
     ),
   };
 }

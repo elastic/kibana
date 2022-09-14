@@ -24,12 +24,31 @@ const args: Args = {
   isLoading: false,
   showMissingIntegrationMessage: false,
 };
+const categories = [
+  {
+    title: 'Category One',
+    id: 'category_one',
+    count: 2,
+  },
+  {
+    title: 'Category Two',
+    id: 'category_two',
+    count: 3,
+  },
+  {
+    title: 'Web',
+    id: 'web',
+    count: 1,
+  },
+];
 
 export const EmptyList = (props: Args) => (
   <PackageListGrid
     list={[]}
     onSearchChange={action('onSearchChange')}
     setSelectedCategory={action('setSelectedCategory')}
+    categories={categories}
+    selectedCategory=""
     {...props}
   />
 );
@@ -46,8 +65,8 @@ export const List = (props: Args) => (
         version: '1.0.0',
         url: 'https://example.com',
         icons: [],
-        integration: 'integation',
-        categories: ['web'],
+        integration: 'integration',
+        categories: ['category_two'],
       },
       {
         title: 'Package Two',
@@ -58,8 +77,8 @@ export const List = (props: Args) => (
         version: '1.0.0',
         url: 'https://example.com',
         icons: [],
-        integration: 'integation',
-        categories: ['web'],
+        integration: 'integration',
+        categories: ['category_one'],
       },
       {
         title: 'Package Three',
@@ -70,7 +89,7 @@ export const List = (props: Args) => (
         version: '1.0.0',
         url: 'https://example.com',
         icons: [],
-        integration: 'integation',
+        integration: 'integration',
         categories: ['web'],
       },
       {
@@ -82,8 +101,8 @@ export const List = (props: Args) => (
         version: '1.0.0',
         url: 'https://example.com',
         icons: [],
-        integration: 'integation',
-        categories: ['web'],
+        integration: 'integration',
+        categories: ['category_one'],
       },
       {
         title: 'Package Five',
@@ -94,8 +113,8 @@ export const List = (props: Args) => (
         version: '1.0.0',
         url: 'https://example.com',
         icons: [],
-        integration: 'integation',
-        categories: ['web'],
+        integration: 'integration',
+        categories: ['category_two'],
       },
       {
         title: 'Package Six',
@@ -106,12 +125,14 @@ export const List = (props: Args) => (
         version: '1.0.0',
         url: 'https://example.com',
         icons: [],
-        integration: 'integation',
-        categories: ['web'],
+        integration: 'integration',
+        categories: ['category_two'],
       },
     ]}
     onSearchChange={action('onSearchChange')}
     setSelectedCategory={action('setSelectedCategory')}
+    categories={categories}
+    selectedCategory=""
     {...props}
   />
 );
