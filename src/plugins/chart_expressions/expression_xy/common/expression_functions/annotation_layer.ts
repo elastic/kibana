@@ -24,6 +24,10 @@ export function annotationLayerFunction(): ExpressionFunctionDefinition<
     inputTypes: ['datatable'],
     help: strings.getAnnotationLayerFnHelp(),
     args: {
+      layerId: {
+        types: ['string'],
+        help: strings.getLayerIdHelp(),
+      },
       simpleView: {
         types: ['boolean'],
         default: false,

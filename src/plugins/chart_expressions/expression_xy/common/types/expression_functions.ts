@@ -291,12 +291,13 @@ export interface XYProps {
 }
 
 export interface AnnotationLayerArgs {
+  layerId: string;
   annotations: EventAnnotationOutput[];
   simpleView?: boolean;
 }
 
 export type ExtendedAnnotationLayerArgs = AnnotationLayerArgs & {
-  layerId?: string;
+  layerId: string;
 };
 
 export type AnnotationLayerConfigResult = AnnotationLayerArgs & {

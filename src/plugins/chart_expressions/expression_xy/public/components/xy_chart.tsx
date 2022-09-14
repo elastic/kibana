@@ -128,6 +128,7 @@ export type XYChartRenderProps = XYChartProps & {
   eventAnnotationService: EventAnnotationServiceType;
   renderComplete: () => void;
   uiState?: PersistedState;
+  timeFormat: string;
 };
 
 function getValueLabelsStyling(isHorizontal: boolean): {
@@ -189,6 +190,7 @@ export function XYChart({
   data,
   formatFactory,
   timeZone,
+  timeFormat,
   chartsThemeService,
   chartsActiveCursorService,
   paletteService,
@@ -408,7 +410,8 @@ export function XYChart({
     lineAnnotations as PointEventAnnotationRow[],
     annotationsConfigs,
     annotations?.datatable.columns,
-    formatFactory
+    formatFactory,
+    timeFormat
   );
 
   const visualConfigs = [
