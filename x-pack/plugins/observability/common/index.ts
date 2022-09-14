@@ -21,6 +21,7 @@ export {
   apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
   apmOperationsTab,
+  enableInfrastructureHostsView,
 } from './ui_settings_keys';
 
 export {

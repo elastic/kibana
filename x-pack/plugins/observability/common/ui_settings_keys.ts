@@ -18,3 +18,4 @@ export const apmServiceGroupMaxNumberOfServices =
   'observability:apmServiceGroupMaxNumberOfServices';
 export const apmTraceExplorerTab = 'observability:apmTraceExplorerTab';
 export const apmOperationsTab = 'observability:apmOperationsTab';
+export const enableInfrastructureHostsView = 'observability:enableInfrastructureHostsView';

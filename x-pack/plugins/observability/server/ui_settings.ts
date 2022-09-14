@@ -21,6 +21,7 @@ import {
   apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
   apmOperationsTab,
+  enableInfrastructureHostsView,
 } from '../common/ui_settings_keys';
 
 const technicalPreviewLabel = i18n.translate(
@@ -219,5 +220,16 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     value: false,
     requiresPageReload: true,
     type: 'boolean',
+  },
+  [enableInfrastructureHostsView]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.infrastructureHostsView', {
+      defaultMessage: 'Infrastructure Hosts view',
+    }),
+    value: false,
+    description: i18n.translate('xpack.observability.enableInfrastructureViewDescription', {
+      defaultMessage: 'Enable the Hosts view in the Infrastructure app',
+    }),
+    schema: schema.boolean(),
   },
 };
