@@ -46,6 +46,8 @@ function getComponent({
       aggregatable: true,
       readFromDocValues: true,
     });
+  const dataView = stubDataView;
+  dataView.toSpec = () => ({});
 
   const props = {
     dataView: stubDataView,
@@ -56,6 +58,7 @@ function getComponent({
     onRemoveField: jest.fn(),
     showDetails,
     selected,
+    persistDataView: jest.fn(),
   };
   const services = {
     history: () => ({
