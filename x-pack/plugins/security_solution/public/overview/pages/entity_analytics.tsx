@@ -74,10 +74,7 @@ const EntityAnalyticsComponent = () => {
                 </EuiFlexGroup>
               )
             ) : (
-              <Paywall
-                title={i18n.ENTITY_ANALYTICS_TITLE}
-                description={i18n.ENTITY_ANALYTICS_LICENSE_DESC}
-              />
+              <Paywall featureDescription={i18n.ENTITY_ANALYTICS_LICENSE_DESC} />
             )}
           </SecuritySolutionPageWrapper>
         </>

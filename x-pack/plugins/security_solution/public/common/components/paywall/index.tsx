@@ -32,7 +32,7 @@ const PaywallDiv = styled.div`
   }
 `;
 
-export const Paywall = memo(({ title, description }: { title: string; description?: string }) => {
+export const Paywall = memo(({ featureDescription }: { featureDescription?: string }) => {
   const { getAppUrl, navigateTo } = useNavigation();
   const subscriptionUrl = getAppUrl({
     appId: 'management',
@@ -59,7 +59,9 @@ export const Paywall = memo(({ title, description }: { title: string; descriptio
           <EuiText>
             <EuiFlexItem>
               <p>
-                <EuiTextColor color="subdued">{i18n.UPGRADE_MESSAGE(description)}</EuiTextColor>
+                <EuiTextColor color="subdued">
+                  {i18n.UPGRADE_MESSAGE(featureDescription)}
+                </EuiTextColor>
               </p>
             </EuiFlexItem>
             <EuiFlexItem>

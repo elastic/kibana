@@ -50,13 +50,6 @@ export const DETECTION_RESPONSE_TITLE = i18n.translate(
   }
 );
 
-export const ENTITY_ANALYTICS_TITLE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.pageTitle',
-  {
-    defaultMessage: 'Entity Analytics',
-  }
-);
-
 export const ENTITY_ANALYTICS_LICENSE_DESC = i18n.translate(
   'xpack.securitySolution.entityAnalytics.pageDesc',
   {
