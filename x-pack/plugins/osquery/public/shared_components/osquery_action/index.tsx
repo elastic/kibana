@@ -8,7 +8,7 @@
 import { EuiLoadingContent, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import type { AddToTimelinePayload } from '../../timelines/use_add_to_timeline';
+import type { AddToTimelinePayload } from '../../timelines/get_add_to_timeline';
 import {
   AGENT_STATUS_ERROR,
   EMPTY_PROMPT,

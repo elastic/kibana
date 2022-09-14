@@ -14,7 +14,6 @@ import type {
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { getExternalReferenceAttachmentRegular } from './results/attachments/external_reference';
 import type {
   OsqueryPluginSetup,
   OsqueryPluginStart,
@@ -32,7 +31,9 @@ import {
   getLazyOsqueryAction,
   getLazyLiveQueryField,
   useIsOsqueryAvailableSimple,
+  getExternalReferenceAttachmentRegular,
 } from './shared_components';
+import type { ServicesWrapperProps } from './shared_components/services_wrapper';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private kibanaVersion: string;
@@ -76,7 +77,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
           ...depsStart,
           storage,
           kibanaVersion,
-        })
+        } as unknown as ServicesWrapperProps['services'])
       );
     });
 

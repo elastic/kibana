@@ -6,8 +6,8 @@
  */
 
 import React, { useCallback, useLayoutEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { useAddToTimeline } from '../../timelines/use_add_to_timeline';
+import { useKibana } from '../../common/lib/kibana';
+import { getAddToTimeline } from '../../timelines/get_add_to_timeline';
 import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 
@@ -22,8 +22,11 @@ export const PackQueriesAttachmentWrapper = ({
   agentIds,
   queryId,
 }: PackQueriesAttachmentWrapperProps) => {
+  const {
+    services: { timelines, appName },
+  } = useKibana();
   const [isLive, setIsLive] = useState(false);
-  const handleAddToTimeline = useAddToTimeline();
+  const addToTimelineButton = getAddToTimeline(timelines, appName);
 
   const { data } = useLiveQueryDetails({
     actionId,
@@ -31,23 +34,19 @@ export const PackQueriesAttachmentWrapper = ({
     ...(queryId ? { queryIds: [queryId] } : {}),
   });
 
-  // TODO think of a better way to distinguish if we want to put timeline in here, so far I have no other ideas
-  const { basePath } = useHistory() as unknown as { basePath: string };
-  const isObservability = basePath === '/app/observability';
-
   useLayoutEffect(() => {
     setIsLive(() => !(data?.status === 'completed'));
   }, [data?.status]);
 
   const addToTimeline = useCallback(
     (payload) => {
-      if (!actionId || isObservability) {
+      if (!actionId || !addToTimelineButton) {
         return <></>;
       }
 
-      return handleAddToTimeline(payload);
+      return addToTimelineButton(payload);
     },
-    [actionId, isObservability, handleAddToTimeline]
+    [actionId, addToTimelineButton]
   );
 
   return (

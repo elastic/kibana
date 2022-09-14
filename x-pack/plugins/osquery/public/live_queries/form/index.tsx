@@ -21,7 +21,7 @@ import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { isEmpty, map, find, pickBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import type { AddToTimelinePayload } from '../../timelines/use_add_to_timeline';
+import type { AddToTimelinePayload } from '../../timelines/get_add_to_timeline';
 import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
 import type {
   EcsMappingFormField,

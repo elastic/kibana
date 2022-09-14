@@ -28,7 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import type { AddToTimelinePayload } from '../timelines/use_add_to_timeline';
+import type { AddToTimelinePayload } from '../timelines/get_add_to_timeline';
 import type { ECSMapping } from '../../common/schemas/common';
 import { useAllResults } from './use_all_results';
 import type { ResultEdges } from '../../common/search_strategy';

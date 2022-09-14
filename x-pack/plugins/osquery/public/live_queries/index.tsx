@@ -10,7 +10,7 @@ import { EuiCode, EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { AddToTimelinePayload } from '../timelines/use_add_to_timeline';
+import type { AddToTimelinePayload } from '../timelines/get_add_to_timeline';
 import type { EcsMappingSerialized } from '../packs/queries/ecs_mapping_editor_field';
 import { LiveQueryForm } from './form';
 import { useActionResultsPrivileges } from '../action_results/use_action_privileges';

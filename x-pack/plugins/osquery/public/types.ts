@@ -42,6 +42,7 @@ export interface StartPlugins {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesUiStart;
   timelines: TimelinesUIStart;
+  appName?: string;
 }
 
 export interface SetupPlugins {

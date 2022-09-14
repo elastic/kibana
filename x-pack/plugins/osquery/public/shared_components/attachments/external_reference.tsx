@@ -9,9 +9,7 @@ import { EuiAvatar } from '@elastic/eui';
 import React from 'react';
 import type { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { lazy } from 'react';
-// import { EuiButtonIcon } from '@elastic/eui';
-import { AttachmentContent } from './external_references_content';
-import ServicesWrapper from '../../shared_components/services_wrapper';
+import type { ServicesWrapperProps } from '../services_wrapper';
 import OsqueryLogo from '../../components/osquery_icon/osquery.svg';
 
 const AttachmentContentLazy = lazy(() => import('./external_references_content'));
@@ -26,9 +24,15 @@ const AttachmentContentLazy = lazy(() => import('./external_references_content')
 //   />
 // );
 
-export const getExternalReferenceAttachmentRegular: () => ExternalReferenceAttachmentType = (
-  services
-) => ({
+export interface IExternalReferenceMetaDataProps {
+  actionId: string;
+  agentIds: string[];
+  queryId: string;
+}
+
+export const getExternalReferenceAttachmentRegular = (
+  services: ServicesWrapperProps['services']
+): ExternalReferenceAttachmentType => ({
   id: 'osquery',
   displayName: 'Osquery',
   getAttachmentViewObject: () => ({
@@ -38,15 +42,13 @@ export const getExternalReferenceAttachmentRegular: () => ExternalReferenceAttac
     // actions: <AttachmentActions />,
     // @ts-expect-error update types
     children: (props) => (
-      <ServicesWrapper services={services}>
-        <AttachmentContent {...props} />
-      </ServicesWrapper>
+      <AttachmentContentLazy
+        {...props}
+        externalReferenceMetadata={
+          props.externalReferenceMetadata as unknown as IExternalReferenceMetaDataProps
+        }
+        services={services}
+      />
     ),
-    // children: (props) => (
-    //   <ServicesWrapper services={services}>
-    //     <>dupa</>
-    //     {/* <AttachmentContent {...props} /> */}
-    //   </ServicesWrapper>
-    // ),
   }),
 });

@@ -34,7 +34,8 @@ import type {
 import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/constants';
 import { FilterStateStore } from '@kbn/es-query';
 import styled from 'styled-components';
-import type { AddToTimelinePayload } from '../../timelines/use_add_to_timeline';
+import { SECURITY_APP_NAME } from '../../timelines/get_add_to_timeline';
+import type { AddToTimelinePayload } from '../../timelines/get_add_to_timeline';
 import { PackResultsHeader } from './pack_results_header';
 import { Direction } from '../../../common/search_strategy';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
@@ -560,7 +561,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   showResultsHeader,
 }) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, unknown>>({});
-  const { cases } = useKibana().services;
+  const { cases, timelines, appName } = useKibana().services;
   const casePermissions = cases.helpers.canUseCases();
   const CasesContext = cases.ui.getCasesContext();
 
@@ -691,7 +692,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
       });
     }
 
-    if (addToTimeline) {
+    if (addToTimeline && timelines && appName === SECURITY_APP_NAME) {
       resultActions.push({
         render: (item) =>
           addToTimeline({ queries: [{ field: 'action_id', value: item.action_id }], isIcon: true }),
