@@ -144,14 +144,5 @@ export type FileUnshareHttpEndpoint = HttpApiInterfaceEntryDefinition<
 >;
 
 export type { Endpoint as FileGetShareHttpEndpoint } from '../server/routes/file_kind/share/get';
-
-export type FileListSharesHttpEndpoint = HttpApiInterfaceEntryDefinition<
-  unknown,
-  Pagination & { forFileId?: string },
-  unknown,
-  {
-    shares: FileShareJSON[];
-  }
->;
-
+export type { Endpoint as FileListSharesHttpEndpoint } from '../server/routes/file_kind/share/list';
 export type { Endpoint as FilePublicDownloadHttpEndpoint } from '../server/routes/public_facing/download';
