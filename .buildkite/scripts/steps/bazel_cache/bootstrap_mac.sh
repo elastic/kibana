@@ -20,8 +20,11 @@ rm -rf "$TMP_HOME"
 mkdir -p "$TMP_HOME"
 export HOME="$TMP_HOME"
 
-BAZEL_LOGS="$WORKSPACE/bazel_logs"
-mkdir -p "$BAZEL_LOGS"
-export EXECUTION_LOG_BINARY_FILE="$BAZEL_LOGS/exec.log"
+if [[ "${BAZEL_DEBUG:-}" == "true" ]]; then
+  BAZEL_LOGS="$WORKSPACE/bazel_logs"
+  mkdir -p "$BAZEL_LOGS"
+  export EXECUTION_LOG_BINARY_FILE="$BAZEL_LOGS/exec.log"
+  export BAZEL_CLEAN=true
+fi
 
 .buildkite/scripts/bootstrap.sh

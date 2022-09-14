@@ -5,6 +5,11 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/common/setup_bazel.sh
 
+if [[ "${BAZEL_CLEAN:-}" == "true" ]]; then
+  echo "--- Running bazel clean"
+  bazel clean
+fi
+
 echo "--- yarn install and bootstrap"
 
 BOOTSTRAP_PARAMS=()
