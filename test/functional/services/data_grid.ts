@@ -80,15 +80,24 @@ export class DataGridService extends FtrService {
       .map((cell) => $(cell).text());
   }
 
+  private getCellElementSelector(rowIndex: number = 0, columnIndex: number = 0) {
+    return `[data-test-subj="euiDataGridBody"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${columnIndex}"][data-gridcell-row-index="${rowIndex}"]`;
+  }
+
   /**
    * Returns a grid cell element by row & column indexes.
    * @param rowIndex data row index starting from 0 (0 means 1st row)
    * @param columnIndex column index starting from 0 (0 means 1st column)
    */
   public async getCellElement(rowIndex: number = 0, columnIndex: number = 0) {
-    return await this.find.byCssSelector(
-      `[data-test-subj="euiDataGridBody"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${columnIndex}"][data-gridcell-row-index="${rowIndex}"]`
-    );
+    return await this.find.byCssSelector(this.getCellElementSelector(rowIndex, columnIndex));
+  }
+
+  /**
+   * The same as getCellElement, but useful when multiple data grids are on the page.
+   */
+  public async getAllCellElements(rowIndex: number = 0, columnIndex: number = 0) {
+    return await this.find.allByCssSelector(this.getCellElementSelector(rowIndex, columnIndex));
   }
 
   public async getDocCount(): Promise<number> {
@@ -310,6 +319,17 @@ export class DataGridService extends FtrService {
     tableDocViewRow: WebElementWrapper
   ): Promise<WebElementWrapper> {
     return await tableDocViewRow.findByTestSubject(`~removeInclusiveFilterButton`);
+  }
+
+  public async clickFieldActionInFlyout(fieldName: string, actionName: string): Promise<void> {
+    const openPopoverButtonSelector = `openFieldActionsButton-${fieldName}`;
+    const inlineButtonsGroupSelector = `fieldActionsGroup-${fieldName}`;
+    if (await this.testSubjects.exists(openPopoverButtonSelector)) {
+      await this.testSubjects.click(openPopoverButtonSelector);
+    } else {
+      await this.testSubjects.existOrFail(inlineButtonsGroupSelector);
+    }
+    await this.testSubjects.click(`${actionName}-${fieldName}`);
   }
 
   public async removeInclusiveFilter(
