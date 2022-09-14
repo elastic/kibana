@@ -7,7 +7,7 @@
 
 import type { TypeOf, Type } from '@kbn/config-schema';
 import { PLUGIN_ID } from './constants';
-import type { FileJSON, Pagination, FilesMetrics } from './types';
+import type { FilesMetrics } from './types';
 
 export const API_BASE_PATH = `/api/${PLUGIN_ID}`;
 
@@ -65,38 +65,7 @@ export type { Endpoint as GetByIdFileKindHttpEndpoint } from '../server/routes/f
 export type { Endpoint as ListFileKindHttpEndpoint } from '../server/routes/file_kind/list';
 export type { Endpoint as UpdateFileKindHttpEndpoint } from '../server/routes/file_kind/update';
 export type { Endpoint as UploadFileKindHttpEndpoint } from '../server/routes/file_kind/upload';
-
-export type FindFilesHttpEndpoint = HttpApiInterfaceEntryDefinition<
-  unknown,
-  Pagination,
-  {
-    /**
-     * Filter for set of file-kinds
-     */
-    kind?: string[];
-
-    /**
-     * Filter for match on names
-     */
-    name?: string[];
-
-    /**
-     * Filter for set of meta attributes matching this object
-     */
-    meta?: {};
-
-    /**
-     * Filter for match on extensions
-     */
-    extension?: string[];
-
-    /**
-     * Filter for match on extensions
-     */
-    status?: string[];
-  },
-  { files: FileJSON[] }
->;
+export type { Endpoint as FindFilesHttpEndpoint } from '../server/routes/find';
 
 export type FilesMetricsHttpEndpoint = HttpApiInterfaceEntryDefinition<
   unknown,

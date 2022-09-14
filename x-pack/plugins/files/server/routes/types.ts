@@ -41,5 +41,5 @@ export type AsyncResponse<T> = Promise<IKibanaResponse<T>>;
 export type CreateHandler<E extends AnyEndpoint> = FilesRequestHandler<
   E['inputs']['params'],
   E['inputs']['query'],
-  E['inputs']['query']
+  E['inputs']['body']
 >;
