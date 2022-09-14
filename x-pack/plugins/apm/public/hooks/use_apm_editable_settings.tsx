@@ -10,7 +10,6 @@ import { FieldState } from '@kbn/advanced-settings-plugin/public';
 import { toEditableConfig } from '@kbn/advanced-settings-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { isEmpty } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 
 function getEditableConfig({
