@@ -13,9 +13,9 @@ import type {
   CreateRulesSchema,
 } from '../../../../../common/detection_engine/schemas/request';
 
-import { previewRule } from './api';
-import * as i18n from './translations';
-import { transformOutput } from './transforms';
+import { previewRule } from '../../../containers/detection_engine/rules/api';
+import * as i18n from '../../../containers/detection_engine/rules/translations';
+import { transformOutput } from '../../../containers/detection_engine/rules/transforms';
 import type { TimeframePreviewOptions } from '../../../pages/detection_engine/rules/types';
 import { usePreviewInvocationCount } from './use_preview_invocation_count';
 
