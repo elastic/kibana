@@ -35,9 +35,7 @@ export const setMonitor = async ({
   id?: string;
 }): Promise<{ attributes: { errors: ServiceLocationErrors } } | SyntheticsMonitor> => {
   if (id) {
-    return await apiService.put(`${API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor, undefined, {
-      preserve_namespace: true,
-    });
+    return await apiService.put(`${API_URLS.SYNTHETICS_MONITORS}/${id}`);
   } else {
     return await apiService.post(API_URLS.SYNTHETICS_MONITORS, monitor, undefined, {
       preserve_namespace: true,
