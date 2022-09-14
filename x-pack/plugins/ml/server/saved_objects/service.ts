@@ -744,6 +744,8 @@ export function mlSavedObjectServiceFactory(
   }
 
   return {
+    getIds: _getIds,
+    getModelIds: _getModelIds,
     getAllJobObjects,
     getJobObject,
     createAnomalyDetectionJob,

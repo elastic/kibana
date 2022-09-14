@@ -24,9 +24,9 @@ export function notificationsRoutes({ router, routeGuard }: RouteInitialization)
         tags: ['access:ml:canGetAnnotations'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response, mlSavedObjectService }) => {
       try {
-        const notificationsService = new NotificationsService(client, mlClient);
+        const notificationsService = new NotificationsService(client, mlSavedObjectService);
 
         const results = await notificationsService.searchMessages(request.query);
 
@@ -49,9 +49,9 @@ export function notificationsRoutes({ router, routeGuard }: RouteInitialization)
         tags: ['access:ml:canGetAnnotations'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlSavedObjectService, request, response }) => {
       try {
-        const notificationsService = new NotificationsService(client, mlClient);
+        const notificationsService = new NotificationsService(client, mlSavedObjectService);
 
         const results = await notificationsService.countMessages(request.query);
 
