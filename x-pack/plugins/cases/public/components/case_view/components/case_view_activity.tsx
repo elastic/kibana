@@ -7,7 +7,7 @@
 
 /* eslint-disable complexity */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { isEqual, uniq } from 'lodash';
 import { useCasesFeatures } from '../../../common/use_cases_features';
@@ -32,7 +32,6 @@ import { getConnectorById } from '../../utils';
 import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
 import { useGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
 import { AssignUsers } from './assign_users';
-import { SidebarSection } from './sidebar_section';
 import { Assignee } from '../../user_profiles/types';
 
 export const CaseViewActivity = ({
@@ -191,7 +190,7 @@ export const CaseViewActivity = ({
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
         {caseAssignmentAuthorized ? (
-          <SidebarSection>
+          <>
             <AssignUsers
               caseAssignees={caseData.assignees}
               currentUserProfile={currentUserProfile}
@@ -199,7 +198,8 @@ export const CaseViewActivity = ({
               isLoading={isLoadingAssigneeData}
               userProfiles={userProfiles ?? new Map()}
             />
-          </SidebarSection>
+            <EuiSpacer size="m" />
+          </>
         ) : null}
         <SeveritySidebarSelector
           isDisabled={!permissions.update}
