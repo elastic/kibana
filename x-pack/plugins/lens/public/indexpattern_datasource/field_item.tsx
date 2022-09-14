@@ -356,7 +356,7 @@ function FieldItemPopoverContents(props: FieldItemProps) {
                 <EuiPopoverFooter>
                   <VisualizeGeoFieldButton
                     uiActions={uiActions}
-                    indexPatternId={indexPattern.id}
+                    indexPattern={indexPattern}
                     fieldName={field.name}
                   />
                 </EuiPopoverFooter>

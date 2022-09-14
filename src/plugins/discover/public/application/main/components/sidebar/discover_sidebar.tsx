@@ -26,7 +26,7 @@ import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import { isEqual } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
-import { DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
+import { DataViewField, getFieldSubtypeMulti, type DataView } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverField } from './discover_field';
 import { DiscoverFieldSearch } from './discover_field_search';
@@ -93,6 +93,7 @@ export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProp
   viewMode: VIEW_MODE;
 
   showDataViewPicker?: boolean;
+  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
 }
 
 export function DiscoverSidebarComponent({
@@ -117,6 +118,7 @@ export function DiscoverSidebarComponent({
   createNewDataView,
   showDataViewPicker,
   state,
+  persistDataView,
 }: DiscoverSidebarProps) {
   const { uiSettings, dataViewFieldEditor } = useDiscoverServices();
   const [fields, setFields] = useState<DataViewField[] | null>(null);
@@ -413,6 +415,7 @@ export function DiscoverSidebarComponent({
                                 onEditField={editField}
                                 onDeleteField={deleteField}
                                 showFieldStats={showFieldStats}
+                                persistDataView={persistDataView}
                                 state={state}
                                 contextualFields={columns}
                               />
@@ -475,6 +478,7 @@ export function DiscoverSidebarComponent({
                                 onEditField={editField}
                                 onDeleteField={deleteField}
                                 showFieldStats={showFieldStats}
+                                persistDataView={persistDataView}
                                 state={state}
                                 contextualFields={columns}
                               />
@@ -506,6 +510,7 @@ export function DiscoverSidebarComponent({
                             onEditField={editField}
                             onDeleteField={deleteField}
                             showFieldStats={showFieldStats}
+                            persistDataView={persistDataView}
                             state={state}
                             contextualFields={columns}
                           />

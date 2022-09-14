@@ -76,6 +76,8 @@ async function getComponent({
       aggregatable: true,
       readFromDocValues: true,
     });
+  const dataView = stubDataView;
+  dataView.toSpec = () => ({});
 
   const props: DiscoverFieldProps = {
     dataView: stubDataView,
@@ -86,6 +88,7 @@ async function getComponent({
     onRemoveField: jest.fn(),
     showFieldStats,
     selected,
+    persistDataView: jest.fn(),
     state: {
       query: { query: '', language: 'lucene' },
       filters: [],
