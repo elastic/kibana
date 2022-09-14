@@ -62,6 +62,8 @@ export const defineExplainLogRateSpikesRoute = (
         return response.forbidden();
       }
 
+      const groupingEnabled = !!request.body.grouping;
+
       const client = (await context.core).elasticsearch.client.asCurrentUser;
 
       const controller = new AbortController();
@@ -205,30 +207,32 @@ export const defineExplainLogRateSpikesRoute = (
           return;
         }
 
-        const { fields, df } = await fetchFrequentItems(
-          client,
-          request.body.index,
-          changePoints,
-          request.body.timeFieldName,
-          request.body.deviationMin,
-          request.body.deviationMax
-        );
+        if (groupingEnabled) {
+          const { fields, df } = await fetchFrequentItems(
+            client,
+            request.body.index,
+            changePoints,
+            request.body.timeFieldName,
+            request.body.deviationMin,
+            request.body.deviationMax
+          );
 
-        // Filter itemsets by significant change point field value pairs
-        const filteredDf = df.filter((fi) => {
-          const { set: currentItems } = fi;
+          // Filter itemsets by significant change point field value pairs
+          const filteredDf = df.filter((fi) => {
+            const { set: currentItems } = fi;
 
-          return Object.entries(currentItems).every(([key, value]) => {
-            return changePoints.some((cp) => {
-              return cp.fieldName === key && cp.fieldValue === value;
+            return Object.entries(currentItems).every(([key, value]) => {
+              return changePoints.some((cp) => {
+                return cp.fieldName === key && cp.fieldValue === value;
+              });
             });
           });
-        });
 
-        const { root } = getSimpleHierarchicalTree(filteredDf, true, false, fields);
-        const changePointsGroups = getSimpleHierarchicalTreeLeaves(root, []);
+          const { root } = getSimpleHierarchicalTree(filteredDf, true, false, fields);
+          const changePointsGroups = getSimpleHierarchicalTreeLeaves(root, []);
 
-        push(addChangePointsGroupAction(markDuplicates(changePointsGroups)));
+          push(addChangePointsGroupAction(markDuplicates(changePointsGroups)));
+        }
 
         const histogramFields: [NumericHistogramField] = [
           { fieldName: request.body.timeFieldName, type: KBN_FIELD_TYPES.DATE },
