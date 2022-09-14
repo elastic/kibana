@@ -29,6 +29,8 @@ import { getUserDisplayName } from './user_profile';
 import type { UserProfileWithAvatar } from './user_avatar';
 import { UserAvatar } from './user_avatar';
 
+const NULL_OPTION_KEY = 'null';
+
 /**
  * Props of {@link UserProfilesSelectable} component
  */
@@ -172,10 +174,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
       // Get any newly added selected options
       const selectedOptionsToAdd: SelectableOption[] = selectedOptions
         ? selectedOptions
-            .filter(
-              (profile) =>
-                !nextOptions.find((option) => option.key === (profile ? profile.uid : 'null'))
-            )
+            .filter((profile) => !nextOptions.find((option) => isMatchingOption(option, profile)))
             .map((option) => toSelectableOption(option, nullOptionLabel))
         : [];
 
@@ -184,10 +183,8 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
         ? defaultOptions
             .filter(
               (profile) =>
-                !nextOptions.find((option) => option.key === (profile ? profile.uid : 'null')) &&
-                !selectedOptionsToAdd.find(
-                  (option) => option.key === (profile ? profile.uid : 'null')
-                )
+                !nextOptions.find((option) => isMatchingOption(option, profile)) &&
+                !selectedOptionsToAdd.find((option) => isMatchingOption(option, profile))
             )
             .map((option) => toSelectableOption(option, nullOptionLabel))
         : [];
@@ -210,7 +207,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
     setDisplayedOptions((values) =>
       values.map((option) => {
         if (selectedOptions) {
-          const match = selectedOptions.find((p) => option.key === (p ? p.uid : 'null'));
+          const match = selectedOptions.find((profile) => isMatchingOption(option, profile));
           return { ...option, checked: match === undefined ? undefined : 'on' };
         }
         return { ...option, checked: undefined };
@@ -244,20 +241,20 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
             }
             if (
               selectedOptions &&
-              selectedOptions.find((p) => option.key === (p ? p.uid : 'null')) !== undefined
+              selectedOptions.find((profile) => isMatchingOption(option, profile)) !== undefined
             ) {
               return false;
             }
             return true;
           })
-          .map((option) => (option.key === 'null' ? null : option.data));
+          .map((option) => (option.key === NULL_OPTION_KEY ? null : option.data));
 
         // Add all options from `props.selectedOptions` unless they have been deselected in `nextOptions`
         if (selectedOptions && !singleSelection) {
           selectedOptions.forEach((profile) => {
-            const match = nextOptions.find((o) => o.key === (profile ? profile.uid : 'null'));
+            const match = nextOptions.find((option) => isMatchingOption(option, profile));
             if (match === undefined || match.checked === 'on') {
-              if (match && match.key === 'null') {
+              if (match && match.key === NULL_OPTION_KEY) {
                 values.unshift(profile);
               } else {
                 values.push(profile);
@@ -391,11 +388,18 @@ function toSelectableOption(
     };
   }
   return {
-    key: 'null',
+    key: NULL_OPTION_KEY,
     label:
       nullOptionLabel ??
       i18n.translate('userProfileComponents.userProfilesSelectable.nullOptionLabel', {
         defaultMessage: 'No users',
       }),
   };
+}
+
+function isMatchingOption<Option extends UserProfileWithAvatar | null>(
+  option: SelectableOption,
+  profile: Option
+) {
+  return option.key === (profile ? profile.uid : NULL_OPTION_KEY);
 }
