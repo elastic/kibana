@@ -522,7 +522,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/plugins/security_solution/common/ecs @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/common/test @elastic/security-detections-response-rules @elastic/security-detections-response-alerts
 
-/x-pack/plugins/security_solution/public/common/components/callouts @elastic/security-detections-response-rules @elastic/security-detections-response-alerts
+/x-pack/plugins/security_solution/public/common/components/callouts @elastic/security-detections-response
 /x-pack/plugins/security_solution/public/common/components/hover_actions @elastic/security-threat-hunting-explore @elastic/security-threat-hunting-investigations
 
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions @elastic/security-solution-platform @elastic/security-detections-response-rules
