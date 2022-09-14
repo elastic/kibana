@@ -7,8 +7,8 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
+import { isErrorEmbeddable, IContainer, ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
-import { isErrorEmbeddable, IContainer, ErrorEmbeddable } from '../../services/embeddable';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import {
@@ -17,28 +17,24 @@ import {
   ContactCardEmbeddableOutput,
   ContactCardExportableEmbeddableFactory,
   CONTACT_CARD_EXPORTABLE_EMBEDDABLE,
-} from '../../services/embeddable_test_samples';
-import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
+} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
+import { coreMock } from '@kbn/core/public/mocks';
 import { ExportCSVAction } from './export_csv_action';
-import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public/types';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { LINE_FEED_CHARACTER } from '@kbn/data-plugin/common/exports/export_csv';
-import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
-import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
+import { pluginServices } from '../../services/plugin_services';
 
 describe('Export CSV action', () => {
-  const { setup, doStart } = embeddablePluginMock.createInstance();
-  setup.registerEmbeddableFactory(
-    CONTACT_CARD_EXPORTABLE_EMBEDDABLE,
-    new ContactCardExportableEmbeddableFactory((() => null) as any, {} as any)
-  );
-  const start = doStart();
-
   let container: DashboardContainer;
   let embeddable: ContactCardEmbeddable;
   let coreStart: CoreStart;
-  let dataMock: jest.Mocked<DataPublicPluginStart>;
+
+  const mockEmbeddableFactory = new ContactCardExportableEmbeddableFactory(
+    (() => null) as any,
+    {} as any
+  );
+  pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+    .fn()
+    .mockReturnValue(mockEmbeddableFactory);
 
   beforeEach(async () => {
     coreStart = coreMock.createStart();
@@ -49,22 +45,6 @@ describe('Export CSV action', () => {
       create: jest.fn().mockImplementation(() => ({ id: 'brandNewSavedObject' })),
     };
 
-    const options = {
-      ExitFullScreenButton: () => null,
-      SavedObjectFinder: () => null,
-      application: {} as any,
-      embeddable: start,
-      inspector: {} as any,
-      notifications: {} as any,
-      overlays: coreStart.overlays,
-      savedObjectMetaData: {} as any,
-      uiActions: {} as any,
-      uiSettings: uiSettingsServiceMock.createStartContract(),
-      http: coreStart.http,
-      theme: coreStart.theme,
-      presentationUtil: getStubPluginServices(),
-      screenshotMode: screenshotModePluginMock.createSetupContract(),
-    };
     const input = getSampleDashboardInput({
       panels: {
         '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
@@ -73,8 +53,7 @@ describe('Export CSV action', () => {
         }),
       },
     });
-    container = new DashboardContainer(input, options);
-    dataMock = dataPluginMock.createStartContract();
+    container = new DashboardContainer(input);
 
     const contactCardEmbeddable = await container.addNewEmbeddable<
       ContactCardEmbeddableInput,
@@ -92,7 +71,7 @@ describe('Export CSV action', () => {
   });
 
   test('Download is incompatible with embeddables without getInspectorAdapters implementation', async () => {
-    const action = new ExportCSVAction({ core: coreStart, data: dataMock });
+    const action = new ExportCSVAction();
     const errorEmbeddable = new ErrorEmbeddable(
       'Wow what an awful error',
       { id: ' 404' },
@@ -102,7 +81,7 @@ describe('Export CSV action', () => {
   });
 
   test('Should download a compatible Embeddable', async () => {
-    const action = new ExportCSVAction({ core: coreStart, data: dataMock });
+    const action = new ExportCSVAction();
     const result = (await action.execute({ embeddable, asString: true })) as unknown as
       | undefined
       | Record<string, { content: string; type: string }>;
@@ -115,7 +94,7 @@ describe('Export CSV action', () => {
   });
 
   test('Should not download incompatible Embeddable', async () => {
-    const action = new ExportCSVAction({ core: coreStart, data: dataMock });
+    const action = new ExportCSVAction();
     const errorEmbeddable = new ErrorEmbeddable(
       'Wow what an awful error',
       { id: ' 404' },

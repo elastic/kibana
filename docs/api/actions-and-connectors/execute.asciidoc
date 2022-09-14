@@ -50,19 +50,23 @@ depending on the connector type. For information about the parameter properties,
 refer to <<action-types>>.
 +
 --
-.Index connectors
+.`Params` properties
 [%collapsible%open]
 ====
+
+.Index connectors
+[%collapsible%open]
+=====
 `documents`::
 (Required, array of objects) The documents to index in JSON format.
 
 For more information, refer to
 {kibana-ref}/index-action-type.html[Index connector and action].
-====
+=====
 
 .Jira connectors
 [%collapsible%open]
-====
+=====
 `subAction`::
 (Required, string) The action to test. Valid values include: `fieldsByIssueType`,
 `getFields`, `getIncident`, `issue`, `issues`, `issueTypes`, and `pushToService`.
@@ -74,55 +78,55 @@ on the `subAction` value. This object is not required when `subAction` is
 +
 .Properties when `subAction` is `fieldsByIssueType`
 [%collapsible%open]
-=====
+======
 `id`:::
 (Required, string) The Jira issue type identifier. For example, `10024`.
-=====
+======
 +
 .Properties when `subAction` is `getIncident`
 [%collapsible%open]
-=====
+======
 `externalId`:::
 (Required, string) The Jira issue identifier. For example, `71778`.
-=====
+======
 +
 .Properties when `subAction` is `issue`
 [%collapsible%open]
-=====
+======
 `id`:::
 (Required, string) The Jira issue identifier. For example, `71778`.
-=====
+======
 +
 .Properties when `subAction` is `issues`
 [%collapsible%open]
-=====
+======
 `title`:::
 (Required, string) The title of the Jira issue.
-=====
+======
 +
 .Properties when `subAction` is `pushToService`
 [%collapsible%open]
-=====
-comments:::
+======
+`comments`:::
 (Optional, array of objects) Additional information that is sent to Jira.
 +
 .Properties of `comments`
 [%collapsible%open]
-======
-comment::::
+=======
+`comment`::::
 (string) A comment related to the incident. For example, describe how to
 troubleshoot the issue.
 
-commentId::::
+`commentId`::::
 (integer) A unique identifier for the comment.
-======
+=======
 
-incident:::
+`incident`:::
 (Required, object) Information necessary to create or update a Jira incident.
 +
 .Properties of `incident`
 [%collapsible%open]
-======
+=======
 `description`::::
 (Optional, string) The details about the incident.
 
@@ -151,22 +155,288 @@ types of issues.
 `title`::::
 (Optional, string) A title for the incident, used for searching the contents of
 the knowledge base.
+=======
 ======
-=====
 
 For more information, refer to
 {kibana-ref}/jira-action-type.html[{jira} connector and action].
-====
+=====
+
+.{sn-itom} connectors
+[%collapsible%open]
+=====
+`subAction`::
+(Required, string) The action to test. Valid values include: `addEvent` and
+`getChoices`.
+
+`subActionParams`::
+(Required^*^, object) The set of configuration properties, which vary depending
+on the `subAction` value.
++
+.Properties when `subAction` is `addEvent`
+[%collapsible%open]
+======
+`additional_info`::::
+(Optional, string) Additional information about the event.
+
+`description`::::
+(Optional, string) The details about the event.
+
+`event_class`::::
+(Optional, string) A specific instance of the source.
+
+`message_key`::::
+(Optional, string) All actions sharing this key are associated with the same
+{sn} alert. The default value is `<rule ID>:<alert instance ID>`.
+
+`metric_name`::::
+(Optional, string) The name of the metric.
+
+`node`::::
+(Optional, string) The host that the event was triggered for.
+
+`resource`::::
+(Optional, string) The name of the resource.
+
+`severity`::::
+(Optional, string) The severity of the event.
+
+`source`::::
+(Optional, string) The name of the event source type.
+
+`time_of_event`::::
+(Optional, string) The time of the event.
+
+`type`::::
+(Optional, string) The type of event.
+======
++
+.Properties when `subAction` is `getChoices`
+[%collapsible%open]
+======
+`fields`::::
+(Required, array of strings) An array of fields. For example, `["severity"]`.
+======
+=====
+
+.{sn-itsm} connectors
+[%collapsible%open]
+=====
+`subAction`::
+(Required, string) The action to test. Valid values include: `getFields`,
+`getIncident`, `getChoices`, and `pushToService`.
+
+`subActionParams`::
+(Required^*^, object) The set of configuration properties, which vary depending
+on the `subAction` value. This object is not required when `subAction` is
+`getFields`.
++
+.Properties when `subAction` is `getChoices`
+[%collapsible%open]
+======
+`fields`::::
+(Required, array of strings) An array of fields. For example, `["category","impact"]`.
+======
++
+.Properties when `subAction` is `getIncident`
+[%collapsible%open]
+======
+`externalId`::::
+(Required, string) The {sn-itsm} issue identifier.
+======
++
+.Properties when `subAction` is `pushToService`
+[%collapsible%open]
+======
+`comments`:::
+(Optional, array of objects) Additional information that is sent to {sn-sir}.
++
+.Properties of `comments`
+[%collapsible%open]
+=======
+`comment`::::
+(string) A comment related to the incident. For example, describe how to
+troubleshoot the issue.
+
+`commentId`::::
+(integer) A unique identifier for the comment.
+
+////
+version::::
+(string) TBD
+////
+=======
+
+`incident`:::
+(Required, object) Information necessary to create or update a {sn-sir} incident.
++
+.Properties of `incident`
+[%collapsible%open]
+=======
+`category`::::
+(Optional, string) The category of the incident.
+
+`correlation_display`::::
+(Optional, string) A descriptive label of the alert for correlation purposes in
+{sn}.
+
+`correlation_id`::::
+(Optional, string) The correlation identifier for the security incident.
+Connectors using the same correlation ID are associated with the same {sn}
+incident. This value determines whether a new {sn} incident is created or an
+existing one is updated. Modifying this value is optional; if not modified, the
+rule ID and alert ID are combined as `{{ruleID}}:{{alert ID}}` to form the
+correlation ID value in {sn}. The maximum character length for this value is 100
+characters.
++
+NOTE: Using the default configuration of `{{ruleID}}:{{alert ID}}` ensures
+that {sn} creates a separate incident record for every generated alert that uses
+a unique alert ID. If the rule generates multiple alerts that use the same alert
+IDs, {sn} creates and continually updates a single incident record for the alert.
+
+`description`::::
+(Optional, string) The details about the incident.
+
+`externalId`::::
+(Optional, string) The  {sn-itsm} issue identifier. If present, the incident is
+updated. Otherwise, a new incident is created.
+
+`impact`::::
+(Optional, string) The impact in {sn-itsm}.
+
+`severity`::::
+(Optional, string) The severity of the incident.
+
+`short_description`::::
+(Required, string) A short description for the incident, used for searching the
+contents of the knowledge base.
+
+`subcategory`::::
+(Optional, string) The subcategory in {sn-itsm}.
+
+`urgency`::::
+(Optional, string) The urgency in {sn-itsm}.
+=======
+======
+=====
+
+.{sn-sir} connectors
+[%collapsible%open]
+=====
+`subAction`::
+(Required, string) The action to test. Valid values include: `getFields`,
+`getIncident`, `getChoices`, and `pushToService`.
+
+`subActionParams`::
+(Required^*^, object) The set of configuration properties, which vary depending
+on the `subAction` value. This object is not required when `subAction` is
+`getFields`.
++
+.Properties when `subAction` is `getChoices`
+[%collapsible%open]
+======
+`fields`::::
+(Required, array of strings) An array of fields. For example, `["priority","category"]`.
+======
++
+.Properties when `subAction` is `getIncident`
+[%collapsible%open]
+======
+`externalId`::::
+(Required, string) The {sn-sir} issue identifier.
+======
++
+.Properties when `subAction` is `pushToService`
+[%collapsible%open]
+======
+`comments`:::
+(Optional, array of objects) Additional information that is sent to {sn-sir}.
++
+.Properties of `comments`
+[%collapsible%open]
+=======
+`comment`::::
+(string) A comment related to the incident. For example, describe how to
+troubleshoot the issue.
+
+`commentId`::::
+(integer) A unique identifier for the comment.
+
+////
+`version`::::
+(string) TBD
+////
+=======
+
+`incident`:::
+(Required, object) Information necessary to create or update a {sn-sir} incident.
++
+.Properties of `incident`
+[%collapsible%open]
+=======
+`category`::::
+(Optional, string) The category of the incident.
+
+`correlation_display`::::
+(Optional, string) A descriptive label of the alert for correlation purposes in
+{sn}.
+
+`correlation_id`::::
+(Optional, string) The correlation identifier for the security incident.
+Connectors using the same correlation ID are associated with the same {sn}
+incident. This value determines whether a new {sn} incident is created or an
+existing one is updated. Modifying this value is optional; if not modified, the
+rule ID and alert ID are combined as `{{ruleID}}:{{alert ID}}` to form the
+correlation ID value in {sn}. The maximum character length for this value is 100
+characters.
++
+NOTE: Using the default configuration of `{{ruleID}}:{{alert ID}}` ensures that
+{sn} creates a separate incident record for every generated alert that uses a
+unique alert ID. If the rule generates multiple alerts that use the same alert
+IDs, {sn} creates and continually updates a single incident record for the alert.
+
+`description`::::
+(Optional, string) The details about the incident.
+
+`dest_ip`::::
+(Optional, string or array of strings) A list of destination IP addresses related
+to the security incident. The IPs are added as observables to the security incident.
+
+`externalId`::::
+(Optional, string) The {sn-sir} issue identifier. If present, the incident is
+updated. Otherwise, a new incident is created.
+
+`malware_hash`::::
+(Optional, string or array of strings) A list of malware URLs related to the
+security incident. The URLs are added as observables to the security incident.
+
+`priority`::::
+(Optional, string) The priority of the incident.
+
+`short_description`::::
+(Required, string) A short description for the incident, used for searching the
+contents of the knowledge base.
+
+`source_ip`::::
+(Optional, string or array of strings) A list of source IP addresses related to
+the security incident. The IPs are added as observables to the security incident.
+
+`subcategory`::::
+(Optional, string) The subcategory of the incident.
+=======
+======
+=====
 
 .Server log connectors
 [%collapsible%open]
-====
+=====
 `level`::
 (Optional, string) The log level of the message: `trace`, `debug`, `info`,
 `warn`, `error`, or `fatal`. Defaults to `info`.
 
 `message`::
 (Required, string) The message to log.
+=====
 ====
 --
 
@@ -276,5 +546,41 @@ The API returns the following:
     {"id":"10023","name":"Bug"},{"id":"10000","name":"Epic"}
   ],
   "connector_id":"b3aad810-edbe-11ec-82d1-11348ecbf4a6"
+}
+--------------------------------------------------
+
+Retrieve the list of choices for a {sn-itom} connector:
+
+[source,sh]
+--------------------------------------------------
+POST api/actions/connector/9d9be270-2fd2-11ed-b0e0-87533c532698/_execute
+{
+  "params": {
+    "subAction": "getChoices",
+    "subActionParams": {
+      "fields": [ "severity","urgency" ]
+    }
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+The API returns the severity and urgency choices, for example:
+
+[source,sh]
+--------------------------------------------------
+{
+  "status": "ok",
+  "data":[
+    {"dependent_value":"","label":"Critical","value":"1","element":"severity"},
+    {"dependent_value":"","label":"Major","value":"2","element":"severity"},
+    {"dependent_value":"","label":"Minor","value":"3","element":"severity"},
+    {"dependent_value":"","label":"Warning","value":"4","element":"severity"},
+    {"dependent_value":"","label":"OK","value":"5","element":"severity"},
+    {"dependent_value":"","label":"Clear","value":"0","element":"severity"},
+    {"dependent_value":"","label":"1 - High","value":"1","element":"urgency"},
+    {"dependent_value":"","label":"2 - Medium","value":"2","element":"urgency"},
+    {"dependent_value":"","label":"3 - Low","value":"3","element":"urgency"}],
+  "connector_id":"9d9be270-2fd2-11ed-b0e0-87533c532698"
 }
 --------------------------------------------------
