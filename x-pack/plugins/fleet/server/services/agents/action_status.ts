@@ -55,7 +55,7 @@ export async function getActionStatuses(
   const results = [];
 
   for (const action of actions) {
-    const matchingBucket = (acks.aggregations?.ack_counts as any).buckets?.find(
+    const matchingBucket = (acks?.aggregations?.ack_counts as any).buckets?.find(
       (bucket: any) => bucket.key === action.actionId
     );
     const nbAgentsAck = matchingBucket?.doc_count ?? 0;
