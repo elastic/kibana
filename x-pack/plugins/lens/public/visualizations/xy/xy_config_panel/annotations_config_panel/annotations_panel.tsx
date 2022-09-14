@@ -17,7 +17,12 @@ import {
   isQueryAnnotationConfig,
   isRangeAnnotationConfig,
 } from '@kbn/event-annotation-plugin/public';
-import { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
+import {
+  EventAnnotationConfig,
+  PointInTimeEventAnnotationConfig,
+  QueryPointEventAnnotationConfig,
+} from '@kbn/event-annotation-plugin/common';
+import moment from 'moment';
 import {
   FieldOption,
   FieldOptionValue,
@@ -70,23 +75,20 @@ export const AnnotationsPanel = (
   const isRange = isRangeAnnotationConfig(currentAnnotation);
   const [queryInputShouldOpen, setQueryInputShouldOpen] = React.useState(false);
   useEffect(() => {
-    if (isQueryBased) {
-      setQueryInputShouldOpen(false);
-    } else {
-      setQueryInputShouldOpen(true);
-    }
+    setQueryInputShouldOpen(!isQueryBased);
   }, [isQueryBased]);
 
   const setAnnotations = useCallback(
-    (annotation) => {
+    <T extends EventAnnotationConfig>(annotation: Partial<T> | undefined) => {
       if (annotation == null) {
         return;
       }
       const newConfigs = [...(localLayer.annotations || [])];
       const existingIndex = newConfigs.findIndex((c) => c.id === accessor);
       if (existingIndex !== -1) {
+        const existingConfig = newConfigs[existingIndex];
         newConfigs[existingIndex] = sanitizeProperties({
-          ...newConfigs[existingIndex],
+          ...existingConfig,
           ...annotation,
         });
       } else {
@@ -138,37 +140,42 @@ export const AnnotationsPanel = (
             ]}
             idSelected={`lens_xyChart_annotation_${currentAnnotation?.type}`}
             onChange={(id) => {
-              const typeFromId = id.replace('lens_xyChart_annotation_', '');
+              const typeFromId = id.replace(
+                'lens_xyChart_annotation_',
+                ''
+              ) as EventAnnotationConfig['type'];
               if (currentAnnotation?.type === typeFromId) {
                 return;
               }
-              if (currentAnnotation?.key.type === 'range') {
-                return setAnnotations({
-                  type: typeFromId,
-                  label:
-                    currentAnnotation.label === defaultRangeAnnotationLabel
-                      ? defaultAnnotationLabel
-                      : currentAnnotation.label,
-                  color: toLineAnnotationColor(currentAnnotation.color),
-                  key: { type: 'point_in_time' },
-                });
-              }
-              const currentIndexPattern = frame.dataViews.indexPatterns[localLayer.indexPatternId];
-              const extraProps =
-                typeFromId === 'query'
+              if (typeFromId === 'query') {
+                const currentIndexPattern =
+                  frame.dataViews.indexPatterns[localLayer.indexPatternId];
+                // If coming from a range type, it requires some additional resets
+                const additionalRangeResets = isRangeAnnotationConfig(currentAnnotation)
                   ? {
-                      timeField:
-                        currentIndexPattern.timeFieldName ??
-                        // fallback to the first avaiable date field in the dataView
-                        currentIndexPattern.fields.find(
-                          ({ type: fieldType }) => fieldType === 'date'
-                        )?.displayName,
+                      label:
+                        currentAnnotation.label === defaultRangeAnnotationLabel
+                          ? defaultAnnotationLabel
+                          : currentAnnotation.label,
+                      color: toLineAnnotationColor(currentAnnotation.color),
                     }
                   : {};
-              setAnnotations({
+                return setAnnotations({
+                  type: typeFromId,
+                  timeField:
+                    (currentIndexPattern.timeFieldName ||
+                      // fallback to the first avaiable date field in the dataView
+                      currentIndexPattern.fields.find(({ type: fieldType }) => fieldType === 'date')
+                        ?.displayName) ??
+                    '',
+                  key: { type: 'point_in_time' },
+                  ...additionalRangeResets,
+                });
+              }
+              // From query to manual annotation
+              return setAnnotations<PointInTimeEventAnnotationConfig>({
                 type: typeFromId,
-                key: currentAnnotation?.key,
-                ...extraProps,
+                key: { type: 'point_in_time', timestamp: moment().toISOString() },
               });
             }}
             isFullWidth

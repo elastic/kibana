@@ -365,5 +365,57 @@ describe('AnnotationsPanel', () => {
         })
       );
     });
+
+    test('should fallback to the first date field available in the dataView if not time-based', () => {
+      const state = testState();
+      const indexPattern = createMockedIndexPattern({ timeFieldName: '' });
+      state.layers[0] = {
+        annotations: [customLineStaticAnnotation],
+        layerId: 'annotation',
+        layerType: 'annotations',
+        indexPatternId: indexPattern.id,
+      };
+      const frameMock = createMockFramePublicAPI({
+        datasourceLayers: {},
+        dataViews: createMockDataViewsState({
+          indexPatterns: { [indexPattern.id]: indexPattern },
+        }),
+      });
+
+      const setState = jest.fn();
+
+      const component = mount(
+        <AnnotationsPanel
+          layerId={state.layers[0].layerId}
+          frame={frameMock}
+          setState={setState}
+          accessor="ann1"
+          groupId="left"
+          state={state}
+          datatableUtilities={datatableUtilities}
+          formatFactory={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          panelRef={React.createRef()}
+        />
+      );
+
+      act(() => {
+        component
+          .find(`[data-test-subj="lns-xyAnnotation-placementType"]`)
+          .find(EuiButtonGroup)
+          .prop('onChange')!('lens_xyChart_annotation_query');
+      });
+      component.update();
+
+      expect(setState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          layers: [
+            expect.objectContaining({
+              annotations: [expect.objectContaining({ timeField: 'timestampLabel' })],
+            }),
+          ],
+        })
+      );
+    });
   });
 });

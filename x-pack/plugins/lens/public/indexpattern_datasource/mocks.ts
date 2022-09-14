@@ -9,19 +9,7 @@ import { DragContextState } from '../drag_drop';
 import { getFieldByNameFactory } from './pure_helpers';
 import type { IndexPattern, IndexPatternField } from '../types';
 
-export const createMockedIndexPatternWithoutType = (
-  typeToFilter: IndexPatternField['type']
-): IndexPattern => {
-  const { fields, ...otherIndexPatternProps } = createMockedIndexPattern();
-  const filteredFields = fields.filter(({ type }) => type !== typeToFilter);
-  return {
-    ...otherIndexPatternProps,
-    fields: filteredFields,
-    getFieldByName: getFieldByNameFactory(filteredFields),
-  };
-};
-
-export const createMockedIndexPattern = (): IndexPattern => {
+export const createMockedIndexPattern = (someProps?: Partial<IndexPattern>): IndexPattern => {
   const fields = [
     {
       name: 'timestamp',
@@ -102,6 +90,7 @@ export const createMockedIndexPattern = (): IndexPattern => {
     fields,
     getFieldByName: getFieldByNameFactory(fields),
     spec: undefined,
+    ...someProps,
   };
 };
 
@@ -188,6 +177,18 @@ export const createMockedRestrictedIndexPattern = () => {
         },
       },
     },
+  };
+};
+
+export const createMockedIndexPatternWithoutType = (
+  typeToFilter: IndexPatternField['type']
+): IndexPattern => {
+  const { fields, ...otherIndexPatternProps } = createMockedIndexPattern();
+  const filteredFields = fields.filter(({ type }) => type !== typeToFilter);
+  return {
+    ...otherIndexPatternProps,
+    fields: filteredFields,
+    getFieldByName: getFieldByNameFactory(filteredFields),
   };
 };
 
