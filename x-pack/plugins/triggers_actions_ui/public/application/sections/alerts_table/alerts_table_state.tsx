@@ -160,6 +160,7 @@ const AlertsTableState = ({
     storageAlertsTable,
     storage,
     id,
+    defaultColumns: (alertsTableConfiguration && alertsTableConfiguration.columns) ?? [],
   });
 
   const [

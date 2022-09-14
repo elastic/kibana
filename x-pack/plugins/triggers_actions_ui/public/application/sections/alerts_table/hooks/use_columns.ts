@@ -20,6 +20,7 @@ interface UseColumnsArgs {
   storageAlertsTable: React.MutableRefObject<AlertsTableStorage>;
   storage: React.MutableRefObject<IStorageWrapper>;
   id: string;
+  defaultColumns: EuiDataGridColumn[];
 }
 
 const fieldTypeToDataGridColumnTypeMapper = (fieldType: string) => {
@@ -74,7 +75,13 @@ const getColumnByColumnId = (columns: EuiDataGridColumn[], columnId: string) => 
   return columns.find(({ id }: { id: string }) => id === columnId);
 };
 
-export const useColumns = ({ featureIds, storageAlertsTable, storage, id }: UseColumnsArgs) => {
+export const useColumns = ({
+  featureIds,
+  storageAlertsTable,
+  storage,
+  id,
+  defaultColumns,
+}: UseColumnsArgs) => {
   const [isBrowserFieldDataLoading, browserFields] = useFetchBrowserFieldCapabilities({
     featureIds,
   });
@@ -83,6 +90,7 @@ export const useColumns = ({ featureIds, storageAlertsTable, storage, id }: UseC
   const [visibleColumns, setVisibleColumns] = useState(
     storageAlertsTable.current.visibleColumns ?? []
   );
+
   useEffect(() => {
     if (isBrowserFieldDataLoading !== false || isColumnsPopulated === true) return;
 
@@ -117,21 +125,50 @@ export const useColumns = ({ featureIds, storageAlertsTable, storage, id }: UseC
 
   const onToggleColumn = useCallback(
     (columnId: string): void => {
-      const currentIndex = visibleColumns.indexOf(columnId);
-      const newColumnIds =
-        currentIndex >= 0
-          ? [...visibleColumns.slice(0, currentIndex), ...visibleColumns.slice(currentIndex + 1)]
-          : [...visibleColumns, columnId];
+      const visibleIndex = visibleColumns.indexOf(columnId);
+      const defaultIndex = defaultColumns.findIndex(
+        (column: EuiDataGridColumn) => column.id === columnId
+      );
+
+      const isVisible = visibleIndex >= 0;
+      const isInDefaultConfig = defaultIndex >= 0;
+
+      let newColumnIds: string[] = [];
+
+      // if the column is shown, remove it
+      if (isVisible) {
+        newColumnIds = [
+          ...visibleColumns.slice(0, visibleIndex),
+          ...visibleColumns.slice(visibleIndex + 1),
+        ];
+      }
+
+      // if the column isn't shown but it's part of the default config
+      // insert into the same position as in the default config
+      if (!isVisible && isInDefaultConfig) {
+        newColumnIds = [
+          ...visibleColumns.slice(0, defaultIndex),
+          columnId,
+          ...visibleColumns.slice(defaultIndex),
+        ];
+      }
+
+      // if the column isn't shown and it's not part of the default config
+      // push it into the last position
+      if (!isVisible && !isInDefaultConfig) {
+        newColumnIds = [...visibleColumns, columnId];
+      }
 
       const newColumns = newColumnIds.map((_columnId) => {
-        const column = getColumnByColumnId(columns, _columnId);
+        const column = getColumnByColumnId(defaultColumns, _columnId);
+
         return euiColumnFactory(column ? column : { id: _columnId }, browserFields);
       });
 
       onChangeVisibleColumns(newColumnIds);
       onColumnsChange(newColumns, newColumnIds);
     },
-    [browserFields, columns, onChangeVisibleColumns, onColumnsChange, visibleColumns]
+    [browserFields, defaultColumns, onChangeVisibleColumns, onColumnsChange, visibleColumns]
   );
 
   const onResetColumns = useCallback(() => {
