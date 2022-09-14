@@ -65,15 +65,7 @@ export interface HttpApiInterfaceEntryDefinition<
 }
 
 export type { Endpoint as CreateFileKindHttpEndpoint } from '../server/routes/file_kind/create';
-
-export type DeleteFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
-  {
-    id: string;
-  },
-  unknown,
-  unknown,
-  { ok: true }
->;
+export type { Endpoint as DeleteFileKindHttpEndpoint } from '../server/routes/file_kind/delete';
 
 export type DownloadFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
   {
