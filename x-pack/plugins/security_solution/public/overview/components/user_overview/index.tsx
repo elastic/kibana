@@ -10,7 +10,6 @@ import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import type { RiskSeverity } from '../../../../common/search_strategy';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import type { DescriptionList } from '../../../../common/utility_types';
@@ -91,7 +90,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
         <DefaultFieldRenderer
           rowItems={getOr([], fieldName, fieldData)}
           attrName={fieldName}
-          idPrefix={contextID ? `user-overview-${contextID}` : 'iuser-overview'}
+          idPrefix={contextID ? `user-overview-${contextID}` : 'user-overview'}
           isDraggable={isDraggable}
         />
       ),
@@ -116,10 +115,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
           description: (
             <>
               {userRiskData ? (
-                <RiskScore
-                  severity={userRiskData.user.risk.calculated_level as RiskSeverity}
-                  hideBackgroundColor
-                />
+                <RiskScore severity={userRiskData.user.risk.calculated_level} hideBackgroundColor />
               ) : (
                 getEmptyTagValue()
               )}
