@@ -45,7 +45,7 @@ describe('TTYTextSizer component', () => {
     }
 
     expect(props.onFontSizeChanged).toHaveBeenCalledTimes(1);
-    expect(props.onFontSizeChanged).toHaveBeenCalledWith(6.41025641025641);
+    expect(props.onFontSizeChanged).toHaveBeenCalledWith(6);
   });
 
   it('emits a larger fontSize when zoom in clicked', async () => {

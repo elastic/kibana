@@ -31,8 +31,6 @@ export const registerGetTotalIOBytesRoute = (router: IRouter) => {
       try {
         const ttyPredicates = await getTTYQueryPredicates(client, sessionEntityId);
 
-        console.log(ttyPredicates);
-
         if (!ttyPredicates) {
           return response.ok({ body: { total: 0 } });
         }
@@ -45,7 +43,7 @@ export const registerGetTotalIOBytesRoute = (router: IRouter) => {
                 must: [
                   { term: { [TTY_CHAR_DEVICE_MAJOR_PROPERTY]: ttyPredicates.ttyMajor } },
                   { term: { [TTY_CHAR_DEVICE_MINOR_PROPERTY]: ttyPredicates.ttyMinor } },
-                  //                  { term: { [HOST_BOOT_ID_PROPERTY]: ttyPredicates.bootId } },
+                  // TODO: uncomment when host.boot.id is populated in endpoint.  { term: { [HOST_BOOT_ID_PROPERTY]: ttyPredicates.bootId } },
                   { term: { [EVENT_ACTION]: 'text_output' } },
                   {
                     range: {

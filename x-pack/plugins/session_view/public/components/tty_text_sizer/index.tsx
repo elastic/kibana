@@ -53,7 +53,7 @@ export const TTYTextSizer = ({
         onFontSizeChanged(newSize);
       }
     }
-  }, [isFullscreen, containerHeight, fit, fontSize, onFontSizeChanged, tty?.rows]);
+  }, [containerHeight, fit, fontSize, onFontSizeChanged, tty?.rows]);
 
   useEffect(() => {
     if (isFullscreen) {

@@ -29,10 +29,9 @@ import {
   DEFAULT_TTY_ROWS,
   DEFAULT_TTY_COLS,
   TTY_LINE_SPLITTER_REGEX,
+  TTY_LINES_PER_FRAME,
+  TTY_LINES_PRE_SEEK,
 } from '../../../common/constants';
-
-const LINES_PER_FRAME = 10;
-const LINES_PRE_SEEK = 200;
 
 export const useFetchIOEvents = (sessionEntityId: string) => {
   const { http } = useKibana<CoreStart>().services;
@@ -188,11 +187,11 @@ export const useXtermPlayer = ({
       let linesToPrint;
 
       if (clear) {
-        linesToPrint = lines.slice(Math.max(0, lineNumber - LINES_PRE_SEEK), lineNumber + 1);
+        linesToPrint = lines.slice(Math.max(0, lineNumber - TTY_LINES_PRE_SEEK), lineNumber + 1);
         terminal.reset();
         terminal.clear();
       } else {
-        linesToPrint = lines.slice(lineNumber, lineNumber + LINES_PER_FRAME);
+        linesToPrint = lines.slice(lineNumber, lineNumber + TTY_LINES_PER_FRAME);
       }
 
       linesToPrint.forEach((line, index) => {
@@ -240,7 +239,7 @@ export const useXtermPlayer = ({
     if (isPlaying) {
       const timer = setTimeout(() => {
         if (currentLine < lines.length - 1) {
-          setCurrentLine(currentLine + LINES_PER_FRAME);
+          setCurrentLine(Math.min(lines.length - 1, currentLine + TTY_LINES_PER_FRAME));
         } else {
           setIsPlaying(false);
         }
