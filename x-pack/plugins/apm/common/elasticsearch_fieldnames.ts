@@ -131,19 +131,6 @@ export const TRANSACTION_URL = 'url.full';
 export const USER_AGENT_DEVICE = 'user_agent.device.name';
 export const USER_AGENT_OS = 'user_agent.os.name';
 
-export const PROFILE_ID = 'profile.id';
-export const PROFILE_TOP_ID = 'profile.top.id';
-export const PROFILE_STACK = 'profile.stack';
-
-export const PROFILE_SAMPLES_COUNT = 'profile.samples.count';
-export const PROFILE_CPU_NS = 'profile.cpu.ns';
-export const PROFILE_WALL_US = 'profile.wall.us';
-
-export const PROFILE_ALLOC_OBJECTS = 'profile.alloc_objects.count';
-export const PROFILE_ALLOC_SPACE = 'profile.alloc_space.bytes';
-export const PROFILE_INUSE_OBJECTS = 'profile.inuse_objects.count';
-export const PROFILE_INUSE_SPACE = 'profile.inuse_space.bytes';
-
 export const FAAS_ID = 'faas.id';
 export const FAAS_COLDSTART = 'faas.coldstart';
 export const FAAS_TRIGGER_TYPE = 'faas.trigger.type';
