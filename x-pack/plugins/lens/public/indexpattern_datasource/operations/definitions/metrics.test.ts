@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import faker from 'faker';
-
 import {
   buildExpression,
   buildExpressionFunction,
@@ -40,8 +38,8 @@ describe('metrics', () => {
     };
 
     it('should collapse aggs with matching parameters', () => {
-      const field1 = faker.random.word();
-      const field2 = faker.random.word();
+      const field1 = 'field1';
+      const field2 = 'field2';
       const timeShift1 = '1d';
       const timeShift2 = '2d';
 
@@ -160,6 +158,35 @@ describe('metrics', () => {
       expect(newAggs).toMatchSnapshot();
 
       expect(newIdMap).toMatchSnapshot();
+    });
+
+    it("shouldn't touch unrelated aggs or aggs with no siblings", () => {
+      const aggs = [
+        makeEsAggBuilder('aggMedian', {
+          id: 1,
+          enabled: true,
+          schema: 'metric',
+          field: 'bar',
+        }),
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 1,
+          enabled: true,
+          schema: 'metric',
+          field: 'foo',
+          percentile: 30,
+        }),
+      ];
+
+      const { esAggsIdMap, aggsToIdsMap } = buildMapsFromAggBuilders(aggs);
+
+      const { esAggsIdMap: newIdMap, aggs: newAggs } = medianOperation.optimizeEsAggs!(
+        aggs,
+        esAggsIdMap,
+        aggsToIdsMap
+      );
+
+      expect(newAggs).toEqual(aggs);
+      expect(newIdMap).toEqual(esAggsIdMap);
     });
   });
 });

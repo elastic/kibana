@@ -15,7 +15,7 @@ Array [
             true,
           ],
           "field": Array [
-            "Lek",
+            "field1",
           ],
           "id": Array [
             1,
@@ -50,7 +50,7 @@ Array [
             true,
           ],
           "field": Array [
-            "Lek",
+            "field1",
           ],
           "id": Array [
             3,
@@ -82,7 +82,7 @@ Array [
             true,
           ],
           "field": Array [
-            "Handcrafted",
+            "field2",
           ],
           "id": Array [
             5,
@@ -114,7 +114,7 @@ Array [
             true,
           ],
           "field": Array [
-            "Handcrafted",
+            "field2",
           ],
           "id": Array [
             7,
@@ -149,7 +149,7 @@ Array [
             true,
           ],
           "field": Array [
-            "Handcrafted",
+            "field2",
           ],
           "id": Array [
             9,
