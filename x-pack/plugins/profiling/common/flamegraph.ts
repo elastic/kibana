@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import objectHash from 'object-hash';
+
+import fnv from 'fnv-plus';
 import { CallerCalleeNode, createCallerCalleeDiagram } from './callercallee';
 import {
   describeFrameType,
@@ -203,7 +204,7 @@ export class FlameGraph {
       columnar.CountInclusive[idx] = node.CountInclusive;
       columnar.CountExclusive[idx] = node.CountExclusive;
 
-      const id = objectHash([parentID, node.FrameGroupID]);
+      const id = fnv.fast1a64utf(`${parentID}${node.FrameGroupID}`).toString();
 
       columnar.ID[idx] = id;
 
