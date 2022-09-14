@@ -9,9 +9,8 @@
 import { skip, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import deepEqual from 'fast-deep-equal';
 import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
-import { EMPTY, merge, pipe, Subject, Subscription } from 'rxjs';
+import { merge, Subject, Subscription } from 'rxjs';
 import { EuiContextMenuPanel } from '@elastic/eui';
 
 import {
