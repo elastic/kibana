@@ -7,9 +7,9 @@
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 import { StoredSLO, SLO } from '../../types/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 
 export interface SLORepository {
   save(slo: SLO): Promise<SLO>;
