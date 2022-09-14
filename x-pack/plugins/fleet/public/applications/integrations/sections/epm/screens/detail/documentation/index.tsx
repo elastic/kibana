@@ -27,7 +27,7 @@ import type {
   RegistryStream,
   RegistryInput,
 } from '../../../../../types';
-import { useStartServices } from '../../../../../../..//hooks';
+import { useStartServices } from '../../../../../../../hooks';
 import { getStreamsForInputType } from '../../../../../../../../common/services';
 
 interface Props {
