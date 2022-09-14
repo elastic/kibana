@@ -32,6 +32,7 @@ import {
   defaultUseGetCaseUserActions,
 } from './mocks';
 import { CaseViewPageProps, CASE_VIEW_PAGE_TABS } from './types';
+import { userProfiles } from '../../containers/user_profiles/api.mock';
 
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_update_case');
@@ -105,8 +106,20 @@ describe('CaseViewPage', () => {
   });
 
   it('should render CaseViewPage', async () => {
+    const damagedRaccoonUser = userProfiles[0].user;
+    const caseDataWithDamagedRaccoon = {
+      ...caseData,
+      createdBy: {
+        profileUid: userProfiles[0].uid,
+        username: damagedRaccoonUser.username,
+        fullName: damagedRaccoonUser.full_name,
+        email: damagedRaccoonUser.email,
+      },
+    };
+
+    const props = { ...caseProps, caseData: caseDataWithDamagedRaccoon };
     appMockRenderer = createAppMockRenderer({ features: { metrics: ['alerts.count'] } });
-    const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
+    const result = appMockRenderer.render(<CaseViewPage {...props} />);
 
     expect(result.getByTestId('header-page-title')).toHaveTextContent(data.title);
     expect(result.getByTestId('case-view-status-dropdown')).toHaveTextContent('Open');
@@ -119,9 +132,7 @@ describe('CaseViewPage', () => {
       within(result.getByTestId('case-view-tag-list')).getByTestId('tag-pepsi')
     ).toHaveTextContent(data.tags[1]);
 
-    expect(result.getAllByTestId('case-view-username')[0]).toHaveTextContent(
-      data.createdBy.username ?? ''
-    );
+    expect(result.getAllByText(data.createdBy.fullName!)[0]).toBeInTheDocument();
 
     expect(
       within(result.getByTestId('description-action')).getByTestId('user-action-markdown')
