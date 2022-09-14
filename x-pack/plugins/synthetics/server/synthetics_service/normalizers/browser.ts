@@ -61,7 +61,7 @@ const getNormalizeCommonFields = ({
   const defaultFields = DEFAULT_COMMON_FIELDS;
 
   const normalizedFields = {
-    [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
+    [ConfigKey.MONITOR_TYPE]: monitor.type as DataStream,
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
     [ConfigKey.NAME]: monitor.name || '',
     [ConfigKey.SCHEDULE]: {
@@ -82,7 +82,6 @@ const getNormalizeCommonFields = ({
     [ConfigKey.CUSTOM_HEARTBEAT_ID]: `${monitor.id}-${projectId}-${namespace}`,
     [ConfigKey.TIMEOUT]: null,
     [ConfigKey.ENABLED]: monitor.enabled ?? defaultFields[ConfigKey.ENABLED],
-    [ConfigKey.MAX_REDIRECTS]: '',
   };
   return {
     ...defaultFields,

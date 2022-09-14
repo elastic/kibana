@@ -65,6 +65,7 @@ describe('browser normalizers', () => {
         tags: ['tag1', 'tag2'],
         ignoreHTTPSErrors: true,
         apmServiceName: 'cart-service',
+        type: DataStream.BROWSER,
       },
       {
         id: 'test-id-2',
@@ -83,6 +84,7 @@ describe('browser normalizers', () => {
         tags: ['tag3', 'tag4'],
         ignoreHTTPSErrors: false,
         apmServiceName: 'bean-service',
+        type: DataStream.BROWSER,
       },
       {
         id: 'test-id-3',
@@ -102,6 +104,7 @@ describe('browser normalizers', () => {
         tags: ['tag3', 'tag4'],
         ignoreHTTPSErrors: false,
         apmServiceName: 'bean-service',
+        type: DataStream.BROWSER,
       },
     ];
 
