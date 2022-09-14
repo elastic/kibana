@@ -10,6 +10,7 @@
  */
 export enum RawIndicatorFieldId {
   Type = 'threat.indicator.type',
+  Confidence = 'threat.indicator.confidence',
   FirstSeen = 'threat.indicator.first_seen',
   LastSeen = 'threat.indicator.last_seen',
   MarkingTLP = 'threat.indicator.marking.tlp',
@@ -44,6 +45,7 @@ export enum RawIndicatorFieldId {
   TimeStamp = '@timestamp',
   Id = '_id',
   Name = 'threat.indicator.name',
+  Description = 'threat.indicator.description',
   NameOrigin = 'threat.indicator.name_origin',
 }
 

@@ -81,6 +81,7 @@ interface AgentBase {
   user_provided_metadata: AgentMetadata;
   local_metadata: AgentMetadata;
   tags?: string[];
+  components?: FleetServerAgentComponent[];
 }
 
 export interface Agent extends AgentBase {
@@ -125,7 +126,7 @@ export interface ActionStatus {
 }
 
 // Generated from FleetServer schema.json
-interface FleetServerAgentComponentUnit {
+export interface FleetServerAgentComponentUnit {
   id: string;
   type: 'input' | 'output';
   status: FleetServerAgentComponentStatus;

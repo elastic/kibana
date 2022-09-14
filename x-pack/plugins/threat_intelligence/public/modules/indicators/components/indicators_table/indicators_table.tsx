@@ -55,7 +55,6 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   onChangeItemsPerPage,
   pagination,
   loading,
-  indexPattern,
   browserFields,
 }) => {
   const [expanded, setExpanded] = useState<Indicator>();
@@ -65,18 +64,9 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
     [pagination.pageIndex, pagination.pageSize]
   );
 
-  // field name to field type map to allow the cell_renderer to format dates
-  const fieldTypesMap: { [id: string]: string } = useMemo(() => {
-    if (!indexPattern) return {};
-
-    const res: { [id: string]: string } = {};
-    indexPattern.fields.map((field) => (res[field.name] = field.type));
-    return res;
-  }, [indexPattern]);
-
   const indicatorTableContextValue = useMemo<IndicatorsTableContextValue>(
-    () => ({ expanded, setExpanded, indicators, fieldTypesMap }),
-    [expanded, indicators, fieldTypesMap]
+    () => ({ expanded, setExpanded, indicators }),
+    [expanded, indicators]
   );
 
   const start = pagination.pageIndex * pagination.pageSize;
@@ -131,13 +121,9 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   const flyoutFragment = useMemo(
     () =>
       expanded ? (
-        <IndicatorsFlyout
-          indicator={expanded}
-          fieldTypesMap={fieldTypesMap}
-          closeFlyout={() => setExpanded(undefined)}
-        />
+        <IndicatorsFlyout indicator={expanded} closeFlyout={() => setExpanded(undefined)} />
       ) : null,
-    [expanded, fieldTypesMap]
+    [expanded]
   );
 
   const gridFragment = useMemo(() => {

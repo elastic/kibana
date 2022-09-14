@@ -21,25 +21,26 @@ Cypress.Commands.add('loginAsEditorUser', () => {
 Cypress.Commands.add(
   'loginAs',
   ({ username, password }: { username: string; password: string }) => {
-    cy.log(`Calling 'loginAs'`);
-    cy.session([username, password], () => {
-      cy.log(`Logging in as ${username}`);
-      const kibanaUrl = Cypress.env('KIBANA_URL');
-      cy.request({
-        log: false,
-        method: 'POST',
-        url: `${kibanaUrl}/internal/security/login`,
-        body: {
-          providerType: 'basic',
-          providerName: 'basic',
-          currentURL: `${kibanaUrl}/login`,
-          params: { username, password },
-        },
-        headers: {
-          'kbn-xsrf': 'e2e_test',
-        },
-      });
+    // cy.session(username, () => {
+    const kibanaUrl = Cypress.env('KIBANA_URL');
+    cy.log(`Logging in as ${username} on ${kibanaUrl}`);
+    cy.visit('/');
+    cy.request({
+      log: true,
+      method: 'POST',
+      url: `${kibanaUrl}/internal/security/login`,
+      body: {
+        providerType: 'basic',
+        providerName: 'basic',
+        currentURL: `${kibanaUrl}/login`,
+        params: { username, password },
+      },
+      headers: {
+        'kbn-xsrf': 'e2e_test',
+      },
+      // });
     });
+    cy.visit('/');
   }
 );
 
