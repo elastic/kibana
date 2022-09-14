@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { isEqual, uniq } from 'lodash';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
@@ -29,7 +29,6 @@ import { getConnectorById } from '../../utils';
 import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
 import { useGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
 import { AssignUsers } from './assign_users';
-import { SidebarSection } from './sidebar_section';
 import { Assignee } from '../../user_profiles/types';
 
 export const CaseViewActivity = ({
@@ -186,15 +185,14 @@ export const CaseViewActivity = ({
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
-        <SidebarSection>
-          <AssignUsers
-            caseAssignees={caseData.assignees}
-            currentUserProfile={currentUserProfile}
-            onAssigneesChanged={onUpdateAssignees}
-            isLoading={isLoadingAssigneeData}
-            userProfiles={userProfiles ?? new Map()}
-          />
-        </SidebarSection>
+        <AssignUsers
+          caseAssignees={caseData.assignees}
+          currentUserProfile={currentUserProfile}
+          onAssigneesChanged={onUpdateAssignees}
+          isLoading={isLoadingAssigneeData}
+          userProfiles={userProfiles ?? new Map()}
+        />
+        <EuiSpacer size="m" />
         <SeveritySidebarSelector
           isDisabled={!permissions.update}
           isLoading={isLoading}
@@ -206,6 +204,7 @@ export const CaseViewActivity = ({
           email={emailContent}
           headline={i18n.REPORTER}
           users={[caseData.createdBy]}
+          userProfiles={userProfiles}
         />
         {userActionsData?.participants ? (
           <UserList
@@ -214,6 +213,7 @@ export const CaseViewActivity = ({
             headline={i18n.PARTICIPANTS}
             loading={isLoadingUserActions}
             users={userActionsData.participants}
+            userProfiles={userProfiles}
           />
         ) : null}
         <EditTags
