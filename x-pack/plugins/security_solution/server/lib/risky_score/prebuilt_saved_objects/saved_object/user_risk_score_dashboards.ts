@@ -23,7 +23,6 @@ export const userRiskScoreDashboards: SavedObject[] = [
     references: [],
     type: 'index-pattern',
     updated_at: '2022-08-12T16:20:10.121Z',
-    version: 'WzYwMTQsMV0=',
   },
   {
     attributes: {
@@ -110,7 +109,6 @@ export const userRiskScoreDashboards: SavedObject[] = [
     ],
     type: 'lens',
     updated_at: '2022-08-12T16:20:10.121Z',
-    version: 'WzYwMTUsMV0=',
   },
   {
     attributes: {
@@ -127,7 +125,6 @@ export const userRiskScoreDashboards: SavedObject[] = [
     references: [],
     type: 'index-pattern',
     updated_at: '2022-08-12T16:20:10.121Z',
-    version: 'WzYwMTYsMV0=',
   },
   {
     attributes: {
@@ -223,7 +220,6 @@ export const userRiskScoreDashboards: SavedObject[] = [
     ],
     type: 'lens',
     updated_at: '2022-08-12T16:31:30.450Z',
-    version: 'WzYyMzQsMV0=',
   },
   {
     attributes: {
@@ -240,7 +236,6 @@ export const userRiskScoreDashboards: SavedObject[] = [
     references: [],
     type: 'index-pattern',
     updated_at: '2022-08-12T16:20:10.121Z',
-    version: 'WzYwMTksMV0=',
   },
   {
     attributes: {
@@ -267,7 +262,6 @@ export const userRiskScoreDashboards: SavedObject[] = [
     ],
     type: 'visualization',
     updated_at: '2022-08-12T16:20:10.121Z',
-    version: 'WzYwMjAsMV0=',
   },
   {
     attributes: {
@@ -294,7 +288,6 @@ export const userRiskScoreDashboards: SavedObject[] = [
     ],
     type: 'visualization',
     updated_at: '2022-08-12T16:20:10.121Z',
-    version: 'WzYwMjEsMV0=',
   },
   {
     attributes: {
@@ -321,7 +314,6 @@ export const userRiskScoreDashboards: SavedObject[] = [
     ],
     type: 'visualization',
     updated_at: '2022-08-12T16:20:10.121Z',
-    version: 'WzYwMjIsMV0=',
   },
   {
     attributes: { color: '#6edb7f', description: '', name: 'experimental' },
@@ -331,7 +323,6 @@ export const userRiskScoreDashboards: SavedObject[] = [
     references: [],
     type: 'tag',
     updated_at: '2022-08-12T16:20:10.121Z',
-    version: 'WzYwMjMsMV0=',
   },
   {
     attributes: {
@@ -383,7 +374,6 @@ export const userRiskScoreDashboards: SavedObject[] = [
     ],
     type: 'dashboard',
     updated_at: '2022-08-12T16:20:10.121Z',
-    version: 'WzYwMjQsMV0=',
   },
   {
     attributes: {
@@ -425,6 +415,5 @@ export const userRiskScoreDashboards: SavedObject[] = [
     ],
     type: 'dashboard',
     updated_at: '2022-08-12T16:20:10.121Z',
-    version: 'WzYwMjUsMV0=',
   },
 ];

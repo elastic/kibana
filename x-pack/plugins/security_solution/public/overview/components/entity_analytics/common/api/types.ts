@@ -4,48 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
+import type { HttpSetup, NotificationsStart, ThemeServiceStart } from '@kbn/core/public';
 
-export interface CreateIngestPipeline {
-  http: HttpSetup;
+interface RiskyScoreApiBase {
   errorMessage?: string;
+  http: HttpSetup;
   notifications?: NotificationsStart;
+  renderDocLink?: (message: string) => React.ReactNode;
   signal?: AbortSignal;
+  theme?: ThemeServiceStart;
+}
+export interface CreateIngestPipeline extends RiskyScoreApiBase {
   options: {
     name: string;
     processors: string | Array<Record<string, unknown>>;
   };
 }
 
-export interface DeleteIngestPipeline {
-  http: HttpSetup;
-  notifications?: NotificationsStart;
-  errorMessage?: string;
-  signal?: AbortSignal;
+export interface DeleteIngestPipeline extends RiskyScoreApiBase {
   names: string;
 }
 
-export interface CreateIndices {
-  http: HttpSetup;
-  notifications?: NotificationsStart;
-  signal?: AbortSignal;
-  errorMessage?: string;
+export interface CreateIndices extends RiskyScoreApiBase {
   options: { index: string; mappings: string | Record<string, unknown> };
 }
 
-export interface DeleteIndices {
-  http: HttpSetup;
-  notifications?: NotificationsStart;
-  signal?: AbortSignal;
-  errorMessage?: string;
+export interface DeleteIndices extends RiskyScoreApiBase {
   options: { indices: string[] };
 }
 
-export interface CreateStoredScript {
-  http: HttpSetup;
-  notifications?: NotificationsStart;
-  signal?: AbortSignal;
-  errorMessage?: string;
+export interface CreateStoredScript extends RiskyScoreApiBase {
   options: {
     id: string;
     script: {
@@ -56,70 +44,55 @@ export interface CreateStoredScript {
   };
 }
 
-export interface DeleteStoredScript {
-  http: HttpSetup;
-  notifications?: NotificationsStart;
-  signal?: AbortSignal;
-  errorMessage?: string;
+export interface DeleteStoredScript extends RiskyScoreApiBase {
   options: {
     id: string;
   };
 }
 
-export interface DeleteStoredScripts {
-  http: HttpSetup;
-  notifications?: NotificationsStart;
-  signal?: AbortSignal;
-  errorMessage?: string;
+export interface DeleteStoredScripts extends RiskyScoreApiBase {
   ids: string[];
 }
 
-export interface CreateTransforms {
-  http: HttpSetup;
-  notifications?: NotificationsStart;
-  signal?: AbortSignal;
-  errorMessage?: string;
+export interface CreateTransform extends RiskyScoreApiBase {
   transformId: string;
   options: string | Record<string, unknown>;
 }
 
-export interface StartTransforms {
-  http: HttpSetup;
-  notifications?: NotificationsStart;
-  signal?: AbortSignal;
-  errorMessage?: string;
+export interface CreateTransformResult {
+  transformsCreated: string[];
+  errors?: Array<{
+    id: string;
+    error?: { name: string; output?: { payload?: { cause?: string } } };
+  }>;
+}
+
+export interface StartTransforms extends RiskyScoreApiBase {
   transformIds: string[];
 }
 
-export interface StopTransforms {
-  http: HttpSetup;
-  notifications?: NotificationsStart;
-  signal?: AbortSignal;
-  errorMessage?: string;
+interface TransformResult {
+  success: boolean;
+  error?: { root_cause?: unknown; type?: string; reason?: string };
+}
+
+export type StartTransformsResult = Record<string, TransformResult>;
+
+export interface StopTransforms extends RiskyScoreApiBase {
   transformIds: string[];
 }
 
-export interface GetTransformState {
-  http: HttpSetup;
-  notifications?: NotificationsStart;
-  signal?: AbortSignal;
-  errorMessage?: string;
+export type StopTransformsResult = Record<string, TransformResult>;
+
+export interface GetTransformState extends RiskyScoreApiBase {
   transformId: string;
 }
 
-export interface GetTransformsState {
-  http: HttpSetup;
-  notifications?: NotificationsStart;
-  errorMessage?: string;
-  signal?: AbortSignal;
+export interface GetTransformsState extends RiskyScoreApiBase {
   transformIds: string[];
 }
 
-export interface DeleteTransforms {
-  http: HttpSetup;
-  notifications?: NotificationsStart;
-  errorMessage?: string;
-  signal?: AbortSignal;
+export interface DeleteTransforms extends RiskyScoreApiBase {
   transformIds: string[];
   options?: {
     deleteDestIndex?: boolean;
@@ -127,3 +100,16 @@ export interface DeleteTransforms {
     forceDelete?: boolean;
   };
 }
+
+export type DeleteTransformsResult = Record<
+  string,
+  {
+    transformDeleted: TransformResult;
+    destIndexDeleted: {
+      success: boolean;
+    };
+    destDataViewDeleted: {
+      success: boolean;
+    };
+  }
+>;

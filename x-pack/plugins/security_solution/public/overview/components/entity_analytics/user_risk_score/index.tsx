@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
-  EuiLink,
   EuiPanel,
   EuiToolTip,
 } from '@elastic/eui';
@@ -45,6 +44,7 @@ import type { inputsModel } from '../../../../common/store';
 import { useCheckSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_check_signal_index';
 import { RiskyScoreRestartButton } from '../common/risky_score_restart_button';
 import { RiskyScoreEnableButton } from '../common/risky_score_enable_button';
+import { RiskyScoreDocLink } from '../common/risky_score_doc_link';
 
 const TABLE_QUERY_ID = 'userRiskDashboardTable';
 
@@ -52,7 +52,14 @@ const IconWrapper = styled.span`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
-export const EntityAnalyticsUserRiskScores = () => {
+export const EntityAnalyticsUserRiskScores = ({
+  timerange,
+}: {
+  timerange: {
+    startDate: string;
+    endDate: string;
+  };
+}) => {
   const { deleteQuery, setQuery } = useGlobalTime();
   const [updatedAt, setUpdatedAt] = useState<number>(Date.now());
   const { toggleStatus, setToggleStatus } = useQueryToggle(TABLE_QUERY_ID);
@@ -132,7 +139,7 @@ export const EntityAnalyticsUserRiskScores = () => {
   }
 
   if (!isModuleEnabled && !isTableLoading) {
-    return <EntityAnalyticsUserRiskScoresDisable refetch={refetch} />;
+    return <EntityAnalyticsUserRiskScoresDisable timerange={timerange} refetch={refetch} />;
   }
 
   return (
@@ -142,11 +149,7 @@ export const EntityAnalyticsUserRiskScores = () => {
           title={headerTitle}
           titleSize="s"
           subtitle={
-            <LastUpdatedAt
-              isUpdating={isTableLoading || isKpiLoading}
-              updatedAt={updatedAt}
-              refresh={refetch}
-            />
+            <LastUpdatedAt isUpdating={isTableLoading || isKpiLoading} updatedAt={updatedAt} />
           }
           id={TABLE_QUERY_ID}
           toggleStatus={toggleStatus}
@@ -207,7 +210,16 @@ export const EntityAnalyticsUserRiskScores = () => {
   );
 };
 
-const EntityAnalyticsUserRiskScoresDisable = ({ refetch }: { refetch: inputsModel.Refetch }) => {
+const EntityAnalyticsUserRiskScoresDisable = ({
+  refetch,
+  timerange,
+}: {
+  refetch: inputsModel.Refetch;
+  timerange: {
+    startDate: string;
+    endDate: string;
+  };
+}) => {
   const { signalIndexExists } = useCheckSignalIndex();
 
   return (
@@ -218,17 +230,16 @@ const EntityAnalyticsUserRiskScoresDisable = ({ refetch }: { refetch: inputsMode
         body={
           <>
             {i18n.ENABLE_USER_RISK_SCORE_DESCRIPTION}{' '}
-            <EuiLink href={RISKY_USERS_DOC_LINK} target="_blank" external>
-              {i18n.LEARN_MORE}
-            </EuiLink>
+            <RiskyScoreDocLink riskScoreEntity={RiskScoreEntity.user} />
           </>
         }
         actions={
           <EuiToolTip content={!signalIndexExists ? i18n.ENABLE_RISK_SCORE_POPOVER : null}>
             <RiskyScoreEnableButton
+              disabled={!signalIndexExists}
               refetch={refetch}
               riskScoreEntity={RiskScoreEntity.user}
-              disabled={!signalIndexExists}
+              timerange={timerange}
             />
           </EuiToolTip>
         }

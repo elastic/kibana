@@ -34,10 +34,18 @@ const mockHttp = {
   post: jest.fn(),
 } as unknown as HttpSetup;
 const mockSpaceId = 'customSpace';
+const mockTimerange = {
+  startDate: 'startDate',
+  endDate: 'endDate',
+};
 
 describe('installHostRiskScoreModule', () => {
   beforeAll(async () => {
-    await installHostRiskScoreModule({ http: mockHttp, spaceId: mockSpaceId });
+    await installHostRiskScoreModule({
+      http: mockHttp,
+      spaceId: mockSpaceId,
+      timerange: mockTimerange,
+    });
   });
 
   afterAll(() => {
@@ -93,7 +101,11 @@ describe('installHostRiskScoreModule', () => {
 
 describe(`installUserRiskScoreModule`, () => {
   beforeAll(async () => {
-    await installUserRiskScoreModule({ http: mockHttp, spaceId: `customSpace` });
+    await installUserRiskScoreModule({
+      http: mockHttp,
+      spaceId: `customSpace`,
+      timerange: mockTimerange,
+    });
   });
 
   afterAll(() => {

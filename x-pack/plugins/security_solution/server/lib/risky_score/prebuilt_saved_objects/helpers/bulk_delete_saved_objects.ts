@@ -5,9 +5,26 @@
  * 2.0.
  */
 
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { FrameworkRequest } from '../../../framework';
 import * as savedObjectsToCreate from '../saved_object';
 import type { SavedObjectTemplate } from '../types';
+
+const deleteSavedObject = async ({
+  savedObjectsClient,
+  options: { type, id },
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  options: { type: string; id: string };
+}) => {
+  try {
+    await savedObjectsClient.get(type, id);
+    await savedObjectsClient.delete(type, id);
+    return id;
+  } catch (e) {
+    return new Error(`Unable to delete ${id}`);
+  }
+};
 
 export const bulkDeleteSavedObjects = async ({
   request,
@@ -31,7 +48,7 @@ export const bulkDeleteSavedObjects = async ({
     savedObjects.map((so) => {
       const id = spaceId ? so.id.replace(regex, spaceId) : so.id;
 
-      savedObjectsClient.delete(so.type, id);
+      deleteSavedObject({ savedObjectsClient, options: { type: so.type, id } });
       return id;
     })
   );

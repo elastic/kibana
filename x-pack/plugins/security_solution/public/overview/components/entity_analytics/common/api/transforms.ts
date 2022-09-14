@@ -7,48 +7,78 @@
 
 import {
   GET_TRANSFORM_STATE_ERROR_MESSAGE,
+  GET_TRANSFORM_STATE_NOT_FOUND_MESSAGE,
   START_TRANSFORMS_ERROR_MESSAGE,
   STOP_TRANSFORMS_ERROR_MESSAGE,
   TRANSFORM_CREATION_ERROR_MESSAGE,
   TRANSFORM_DELETION_ERROR_MESSAGE,
 } from './translations';
 import type {
-  CreateTransforms,
+  CreateTransform,
+  CreateTransformResult,
   DeleteTransforms,
+  DeleteTransformsResult,
   GetTransformsState,
   GetTransformState,
   StartTransforms,
+  StartTransformsResult,
   StopTransforms,
+  StopTransformsResult,
 } from './types';
 
 const TRANSFORM_API_BASE_PATH = `/api/transform`;
+const toastLifeTimeMs = 600000;
+
+const getErrorToastMessage = ({
+  messageBody,
+  renderDocLink,
+}: {
+  messageBody: string;
+  renderDocLink?: (message: string) => React.ReactNode;
+}) => (renderDocLink ? (renderDocLink(messageBody) as unknown as string) : messageBody);
 
 export async function createTransform({
+  errorMessage,
   http,
   notifications,
-  signal,
-  errorMessage,
-  transformId,
   options,
-}: CreateTransforms) {
+  renderDocLink,
+  signal,
+  transformId,
+}: CreateTransform) {
   const res = await http
-    .put<{ errors: unknown[]; transformsCreated: Array<{}> }>(
-      `${TRANSFORM_API_BASE_PATH}/transforms/${transformId}`,
-      {
-        body: JSON.stringify(options),
-        signal,
-      }
-    )
+    .put<CreateTransformResult>(`${TRANSFORM_API_BASE_PATH}/transforms/${transformId}`, {
+      body: JSON.stringify(options),
+      signal,
+    })
     .then((result) => {
       const { errors } = result;
-      if (errors.length > 0) {
-        notifications?.toasts?.addDanger(errorMessage ?? TRANSFORM_CREATION_ERROR_MESSAGE);
+      const errorMessageTitle = errorMessage ?? TRANSFORM_CREATION_ERROR_MESSAGE;
+
+      if (errors && errors.length > 0) {
+        const failedIds = errors?.map<string>(({ id, error }) => {
+          if (error?.output?.payload?.cause) {
+            return `${id}: ${error?.output?.payload?.cause}`;
+          }
+          return id;
+        }, []);
+
+        notifications?.toasts?.addError(new Error(errorMessageTitle), {
+          title: errorMessageTitle,
+          toastMessage: getErrorToastMessage({
+            messageBody: failedIds.join(', '),
+            renderDocLink,
+          }),
+          toastLifeTimeMs,
+        });
       }
+      return result;
     })
     .catch((e) => {
-      notifications?.toasts?.addDanger({
+      notifications?.toasts?.addError(e, {
         title: errorMessage ?? TRANSFORM_CREATION_ERROR_MESSAGE,
-        text: e?.body?.message,
+        toastMessage: getErrorToastMessage({ messageBody: e?.body?.message, renderDocLink }),
+        toastLifeTimeMs,
       });
     });
 
@@ -58,12 +88,13 @@ export async function createTransform({
 export async function startTransforms({
   http,
   notifications,
+  renderDocLink,
   signal,
   errorMessage,
   transformIds,
 }: StartTransforms) {
   const res = await http
-    .post(`${TRANSFORM_API_BASE_PATH}/start_transforms`, {
+    .post<StartTransformsResult>(`${TRANSFORM_API_BASE_PATH}/start_transforms`, {
       body: JSON.stringify(
         transformIds.map((id) => ({
           id,
@@ -71,10 +102,32 @@ export async function startTransforms({
       ),
       signal,
     })
+    .then((result) => {
+      const failedIds = Object.entries(result).reduce<string[]>((acc, [key, val]) => {
+        return !val.success
+          ? [...acc, val?.error?.reason ? `${key}: ${val?.error?.reason}` : key]
+          : acc;
+      }, []);
+      const errorMessageTitle = errorMessage ?? START_TRANSFORMS_ERROR_MESSAGE(failedIds.length);
+
+      if (failedIds.length > 0) {
+        notifications?.toasts?.addError(new Error(errorMessageTitle), {
+          title: errorMessageTitle,
+          toastMessage: getErrorToastMessage({
+            messageBody: failedIds.join(', '),
+            renderDocLink,
+          }),
+          toastLifeTimeMs,
+        });
+      }
+
+      return result;
+    })
     .catch((e) => {
-      notifications?.toasts?.addDanger({
+      notifications?.toasts?.addError(e, {
         title: errorMessage ?? START_TRANSFORMS_ERROR_MESSAGE(transformIds.length),
-        text: e?.body?.message,
+        toastMessage: getErrorToastMessage({ messageBody: e?.body?.message, renderDocLink }),
+        toastLifeTimeMs,
       });
     });
 
@@ -84,21 +137,36 @@ export async function startTransforms({
 export async function getTransformState({
   http,
   notifications,
+  renderDocLink,
   signal,
-  errorMessage,
+  errorMessage = GET_TRANSFORM_STATE_NOT_FOUND_MESSAGE,
   transformId,
 }: GetTransformState) {
   const res = await http
-    .get<{ transforms: Array<{ id: string; state: string }> }>(
+    .get<{ transforms: Array<{ id: string; state: string }>; count: number }>(
       `${TRANSFORM_API_BASE_PATH}/transforms/${transformId}/_stats`,
       {
         signal,
       }
     )
+    .then((result) => {
+      if (result.count === 0) {
+        notifications?.toasts?.addError(new Error(errorMessage), {
+          title: errorMessage,
+          toastMessage: getErrorToastMessage({
+            messageBody: `${GET_TRANSFORM_STATE_NOT_FOUND_MESSAGE}: ${transformId}`,
+            renderDocLink,
+          }),
+          toastLifeTimeMs,
+        });
+      }
+      return result;
+    })
     .catch((e) => {
-      notifications?.toasts?.addDanger({
+      notifications?.toasts?.addError(e, {
         title: errorMessage ?? GET_TRANSFORM_STATE_ERROR_MESSAGE,
-        text: e?.body?.message,
+        toastMessage: getErrorToastMessage({ messageBody: e?.body?.message, renderDocLink }),
+        toastLifeTimeMs,
       });
     });
 
@@ -133,10 +201,11 @@ export async function stopTransforms({
   signal,
   errorMessage,
   transformIds,
+  renderDocLink,
 }: StopTransforms) {
   const states = await getTransformsState({ http, signal, transformIds });
   const res = await http
-    .post(`${TRANSFORM_API_BASE_PATH}/stop_transforms`, {
+    .post<StopTransformsResult>(`${TRANSFORM_API_BASE_PATH}/stop_transforms`, {
       body: JSON.stringify(
         states.reduce(
           (acc, state) =>
@@ -154,10 +223,35 @@ export async function stopTransforms({
       ),
       signal,
     })
+    .then((result) => {
+      const failedIds = Object.entries(result).reduce<string[]>((acc, [key, val]) => {
+        return !val.success
+          ? [...acc, val?.error?.reason ? `${key}: ${val?.error?.reason}` : key]
+          : acc;
+      }, []);
+
+      const errorMessageTitle = errorMessage ?? STOP_TRANSFORMS_ERROR_MESSAGE(failedIds.length);
+      if (failedIds.length > 0) {
+        notifications?.toasts?.addError(new Error(errorMessageTitle), {
+          title: errorMessageTitle,
+          toastMessage: getErrorToastMessage({
+            messageBody: failedIds.join(', '),
+            renderDocLink,
+          }),
+          toastLifeTimeMs,
+        });
+      }
+
+      return result;
+    })
     .catch((e) => {
-      notifications?.toasts?.addDanger({
+      notifications?.toasts?.addError(e, {
         title: errorMessage ?? STOP_TRANSFORMS_ERROR_MESSAGE(transformIds.length),
-        text: e?.body?.message,
+        toastMessage: getErrorToastMessage({
+          messageBody: e?.body?.message,
+          renderDocLink,
+        }),
+        toastLifeTimeMs,
       });
     });
 
@@ -171,10 +265,11 @@ export async function deleteTransforms({
   errorMessage,
   transformIds,
   options,
+  renderDocLink,
 }: DeleteTransforms) {
   await stopTransforms({ http, signal, transformIds });
   const res = await http
-    .post(`${TRANSFORM_API_BASE_PATH}/delete_transforms`, {
+    .post<DeleteTransformsResult>(`${TRANSFORM_API_BASE_PATH}/delete_transforms`, {
       body: JSON.stringify({
         transformsInfo: transformIds.map((id) => ({
           id,
@@ -184,10 +279,40 @@ export async function deleteTransforms({
       }),
       signal,
     })
+    .then((result) => {
+      const failedIds = Object.entries(result).reduce<string[]>((acc, [key, val]) => {
+        return !val.transformDeleted.success
+          ? [
+              ...acc,
+              val?.transformDeleted?.error?.reason
+                ? `${key}: ${val?.transformDeleted?.error?.reason}`
+                : key,
+            ]
+          : acc;
+      }, []);
+      const errorMessageTitle = errorMessage ?? STOP_TRANSFORMS_ERROR_MESSAGE(failedIds.length);
+
+      if (failedIds.length > 0) {
+        notifications?.toasts?.addError(new Error(errorMessageTitle), {
+          title: errorMessageTitle,
+          toastMessage: getErrorToastMessage({
+            messageBody: failedIds.join(', '),
+            renderDocLink,
+          }),
+          toastLifeTimeMs,
+        });
+      }
+
+      return result;
+    })
     .catch((e) => {
-      notifications?.toasts?.addDanger({
+      notifications?.toasts?.addError(e, {
         title: errorMessage ?? TRANSFORM_DELETION_ERROR_MESSAGE(transformIds.length),
-        text: e?.body?.message,
+        toastMessage: getErrorToastMessage({
+          messageBody: e?.body?.message,
+          renderDocLink,
+        }),
+        toastLifeTimeMs,
       });
     });
 

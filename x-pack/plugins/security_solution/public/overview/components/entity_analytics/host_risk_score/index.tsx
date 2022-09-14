@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
-  EuiLink,
   EuiPanel,
   EuiToolTip,
 } from '@elastic/eui';
@@ -45,15 +44,23 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import type { inputsModel } from '../../../../common/store';
 import { RiskyScoreRestartButton } from '../common/risky_score_restart_button';
 import { RiskyScoreEnableButton } from '../common/risky_score_enable_button';
+import { RISKY_HOSTS_DOC_LINK } from '../../../../../common/constants';
+import { RiskyScoreDocLink } from '../common/risky_score_doc_link';
 
 const TABLE_QUERY_ID = 'hostRiskDashboardTable';
-const RISKY_HOSTS_DOC_LINK =
-  'https://www.github.com/elastic/detection-rules/blob/main/docs/experimental-machine-learning/host-risk-score.md';
+
 const IconWrapper = styled.span`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
-export const EntityAnalyticsHostRiskScores = () => {
+const EntityAnalyticsHostRiskScoresComponent = ({
+  timerange,
+}: {
+  timerange: {
+    startDate: string;
+    endDate: string;
+  };
+}) => {
   const { deleteQuery, setQuery } = useGlobalTime();
   const [updatedAt, setUpdatedAt] = useState<number>(Date.now());
   const { toggleStatus, setToggleStatus } = useQueryToggle(TABLE_QUERY_ID);
@@ -134,7 +141,7 @@ export const EntityAnalyticsHostRiskScores = () => {
   }
 
   if (!isModuleEnabled && !isTableLoading) {
-    return <EntityAnalyticsHostRiskScoresDisable refetch={refetch} />;
+    return <EntityAnalyticsHostRiskScoresDisable refetch={refetch} timerange={timerange} />;
   }
 
   return (
@@ -144,11 +151,7 @@ export const EntityAnalyticsHostRiskScores = () => {
           title={headerTitle}
           titleSize="s"
           subtitle={
-            <LastUpdatedAt
-              isUpdating={isTableLoading || isKpiLoading}
-              updatedAt={updatedAt}
-              refresh={refetch}
-            />
+            <LastUpdatedAt isUpdating={isTableLoading || isKpiLoading} updatedAt={updatedAt} />
           }
           id={TABLE_QUERY_ID}
           toggleStatus={toggleStatus}
@@ -209,7 +212,19 @@ export const EntityAnalyticsHostRiskScores = () => {
   );
 };
 
-const EntityAnalyticsHostRiskScoresDisable = ({ refetch }: { refetch: inputsModel.Refetch }) => {
+export const EntityAnalyticsHostRiskScores = React.memo(EntityAnalyticsHostRiskScoresComponent);
+EntityAnalyticsHostRiskScores.displayName = 'EntityAnalyticsHostRiskScores';
+
+const EntityAnalyticsHostRiskScoresDisableComponent = ({
+  refetch,
+  timerange,
+}: {
+  refetch: inputsModel.Refetch;
+  timerange: {
+    startDate: string;
+    endDate: string;
+  };
+}) => {
   const { signalIndexExists } = useCheckSignalIndex();
 
   return (
@@ -220,9 +235,7 @@ const EntityAnalyticsHostRiskScoresDisable = ({ refetch }: { refetch: inputsMode
         body={
           <>
             {i18n.ENABLE_HOST_RISK_SCORE_DESCRIPTION}{' '}
-            <EuiLink href={RISKY_HOSTS_DOC_LINK} target="_blank" external>
-              {i18n.LEARN_MORE}
-            </EuiLink>
+            <RiskyScoreDocLink riskScoreEntity={RiskScoreEntity.host} />
           </>
         }
         actions={
@@ -231,6 +244,7 @@ const EntityAnalyticsHostRiskScoresDisable = ({ refetch }: { refetch: inputsMode
               refetch={refetch}
               riskScoreEntity={RiskScoreEntity.host}
               disabled={!signalIndexExists}
+              timerange={timerange}
             />
           </EuiToolTip>
         }
@@ -238,3 +252,8 @@ const EntityAnalyticsHostRiskScoresDisable = ({ refetch }: { refetch: inputsMode
     </EuiPanel>
   );
 };
+
+export const EntityAnalyticsHostRiskScoresDisable = React.memo(
+  EntityAnalyticsHostRiskScoresDisableComponent
+);
+EntityAnalyticsHostRiskScoresDisable.displayName = 'EntityAnalyticsHostRiskScoresDisable';

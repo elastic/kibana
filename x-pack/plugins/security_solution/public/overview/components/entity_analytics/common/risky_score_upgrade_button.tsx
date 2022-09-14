@@ -13,31 +13,67 @@ import { useKibana } from '../../../../common/lib/kibana';
 import type { inputsModel } from '../../../../common/store';
 import { UpgradeState, upgradeHostRiskScoreModule, upgradeUserRiskScoreModule } from './utils';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { useRiskyScoreToastContent } from './use_risky_score_toast_content';
 
 const RiskyScoreUpgradeButtonComponent = ({
   refetch,
   riskScoreEntity,
+  timerange,
 }: {
   refetch: inputsModel.Refetch;
   riskScoreEntity: RiskScoreEntity;
+  timerange: {
+    endDate: string;
+    startDate: string;
+  };
 }) => {
   const [status, setStatus] = useState<UpgradeState>();
   const spaceId = useSpaceId();
-  const { http, notifications } = useKibana().services;
+  const { http, notifications, theme, dashboard } = useKibana().services;
+  const { renderDocLink, renderDashboardLink } = useRiskyScoreToastContent(riskScoreEntity);
 
   const upgradeHostRiskScore = useCallback(async () => {
     setStatus(UpgradeState.Started);
 
     if (riskScoreEntity === RiskScoreEntity.host) {
-      await upgradeHostRiskScoreModule({ http, notifications, spaceId });
+      await upgradeHostRiskScoreModule({
+        http,
+        notifications,
+        spaceId,
+        timerange,
+        renderDashboardLink,
+        renderDocLink,
+        theme,
+        dashboard,
+      });
     }
 
     if (riskScoreEntity === RiskScoreEntity.user) {
-      await upgradeUserRiskScoreModule({ http, notifications, spaceId });
+      await upgradeUserRiskScoreModule({
+        http,
+        notifications,
+        spaceId,
+        timerange,
+        renderDashboardLink,
+        renderDocLink,
+        theme,
+        dashboard,
+      });
     }
     setStatus(UpgradeState.Done);
     refetch();
-  }, [riskScoreEntity, refetch, http, notifications, spaceId]);
+  }, [
+    riskScoreEntity,
+    refetch,
+    http,
+    notifications,
+    spaceId,
+    timerange,
+    renderDashboardLink,
+    renderDocLink,
+    theme,
+    dashboard,
+  ]);
 
   return (
     <EuiButton

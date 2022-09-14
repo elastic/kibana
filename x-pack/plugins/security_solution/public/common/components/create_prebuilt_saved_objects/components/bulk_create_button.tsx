@@ -21,6 +21,10 @@ interface ImportSavedObjectsButtonProps {
   successTitle: string;
   templateName: string;
   title: string;
+  timerange: {
+    startDate: string;
+    endDate: string;
+  };
 }
 
 const ImportSavedObjectsButtonComponent: React.FC<ImportSavedObjectsButtonProps> = ({
@@ -30,6 +34,7 @@ const ImportSavedObjectsButtonComponent: React.FC<ImportSavedObjectsButtonProps>
   successTitle,
   templateName,
   title,
+  timerange,
 }) => {
   const {
     services: { http },
@@ -48,6 +53,7 @@ const ImportSavedObjectsButtonComponent: React.FC<ImportSavedObjectsButtonProps>
         options: {
           templateName,
         },
+        ...timerange,
       });
       const savedObjects: Array<SavedObject<SavedObjectAttributes>> = getOr(
         [],
@@ -68,7 +74,7 @@ const ImportSavedObjectsButtonComponent: React.FC<ImportSavedObjectsButtonProps>
       setStatus('error');
       addError(e, { title: IMPORT_SAVED_OBJECTS_FAILURE, toastMessage: e.message });
     }
-  }, [addError, addSuccess, http, onSuccessCallback, templateName]);
+  }, [addError, addSuccess, http, onSuccessCallback, templateName, timerange]);
 
   if (successLink || status === 'success') {
     return (

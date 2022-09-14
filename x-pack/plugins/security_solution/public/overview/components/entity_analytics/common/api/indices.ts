@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { INDICES_CREATION_ERROR_MESSAGE, INDICES_DELETION_ERROR_MESSAGE } from './translations';
 import type { CreateIndices, DeleteIndices } from './types';
 import {
@@ -13,11 +14,13 @@ import {
 } from '../../../../../../common/constants';
 
 export async function createIndices({
+  errorMessage,
   http,
   notifications,
-  signal,
-  errorMessage,
   options,
+  renderDocLink,
+  signal,
+  theme,
 }: CreateIndices) {
   const res = await http
     .put(RISKY_SCORE_CREATE_INDEX, {
@@ -27,7 +30,9 @@ export async function createIndices({
     .catch((e) => {
       notifications?.toasts?.addDanger({
         title: errorMessage ?? INDICES_CREATION_ERROR_MESSAGE,
-        text: e?.body?.message,
+        text: toMountPoint(renderDocLink ? renderDocLink(e?.body?.message) : e?.body?.message, {
+          theme$: theme?.theme$,
+        }),
       });
     });
 
@@ -35,11 +40,13 @@ export async function createIndices({
 }
 
 export async function deleteIndices({
+  errorMessage,
   http,
   notifications,
-  signal,
-  errorMessage,
   options,
+  renderDocLink,
+  signal,
+  theme,
 }: DeleteIndices) {
   const count = options.indices.length;
   const res = await http
@@ -50,7 +57,9 @@ export async function deleteIndices({
     .catch((e) => {
       notifications?.toasts?.addDanger({
         title: errorMessage ?? INDICES_DELETION_ERROR_MESSAGE(count),
-        text: e?.body?.message,
+        text: toMountPoint(renderDocLink ? renderDocLink(e?.body?.message) : e?.body?.message, {
+          theme$: theme?.theme$,
+        }),
       });
     });
 

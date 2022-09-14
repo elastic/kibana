@@ -67,6 +67,13 @@ export const GET_TRANSFORM_STATE_ERROR_MESSAGE = i18n.translate(
   }
 );
 
+export const GET_TRANSFORM_STATE_NOT_FOUND_MESSAGE = i18n.translate(
+  'xpack.securitySolution.riskyScore.api.transforms.getState.notFoundMessageTitle',
+  {
+    defaultMessage: `Transform not found`,
+  }
+);
+
 export const START_TRANSFORMS_ERROR_MESSAGE = (totalCount: number) =>
   i18n.translate('xpack.securitySolution.riskyScore.api.transforms.start.errorMessageTitle', {
     values: { totalCount },

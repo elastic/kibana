@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import {
   RISKY_SCORE_CREATE_STORED_SCRIPT,
   RISKY_SCORE_DELETE_STORED_SCRIPT,
@@ -16,11 +17,13 @@ import {
 import type { CreateStoredScript, DeleteStoredScript, DeleteStoredScripts } from './types';
 
 export async function createStoredScript({
+  errorMessage,
   http,
   notifications,
-  signal,
-  errorMessage,
   options,
+  renderDocLink,
+  signal,
+  theme,
 }: CreateStoredScript) {
   const res = await http
     .put(RISKY_SCORE_CREATE_STORED_SCRIPT, {
@@ -30,7 +33,9 @@ export async function createStoredScript({
     .catch((e) => {
       notifications?.toasts?.addDanger({
         title: errorMessage ?? STORED_SCRIPT_CREATION_ERROR_MESSAGE,
-        text: e?.body?.message,
+        text: toMountPoint(renderDocLink ? renderDocLink(e?.body?.message) : e?.body?.message, {
+          theme$: theme?.theme$,
+        }),
       });
     });
 
@@ -38,21 +43,25 @@ export async function createStoredScript({
 }
 
 export async function deleteStoredScript({
+  errorMessage,
   http,
   notifications,
-  signal,
-  errorMessage,
   options,
+  renderDocLink,
+  signal,
+  theme,
 }: DeleteStoredScript) {
   const res = await http
-    .put(RISKY_SCORE_DELETE_STORED_SCRIPT, {
+    .delete(RISKY_SCORE_DELETE_STORED_SCRIPT, {
       body: JSON.stringify(options),
       signal,
     })
     .catch((e) => {
       notifications?.toasts?.addDanger({
         title: errorMessage ?? STORED_SCRIPT_DELETION_ERROR_MESSAGE,
-        text: e?.body?.message,
+        text: toMountPoint(renderDocLink ? renderDocLink(e?.body?.message) : e?.body?.message, {
+          theme$: theme?.theme$,
+        }),
       });
     });
 

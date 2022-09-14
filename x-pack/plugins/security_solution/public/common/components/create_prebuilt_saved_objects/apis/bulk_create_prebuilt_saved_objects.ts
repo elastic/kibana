@@ -4,32 +4,114 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type {
+  HttpSetup,
+  NotificationsStart,
+  SavedObject,
+  SavedObjectAttributes,
+  ThemeServiceStart,
+} from '@kbn/core/public';
 
-import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+
 import { prebuiltSavedObjectsBulkCreateUrl } from '../../../../../common/constants';
-import { IMPORT_SAVED_OBJECTS_FAILURE } from '../translations';
+import {
+  RISKY_HOSTS_DASHBOARD_TITLE,
+  RISKY_USERS_DASHBOARD_TITLE,
+} from '../../../../hosts/pages/navigation/constants';
+import { IMPORT_SAVED_OBJECTS_FAILURE, IMPORT_SAVED_OBJECTS_SUCCESS } from '../translations';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
+
+const toastLifeTimeMs = 600000;
 
 interface Options {
   templateName: string;
 }
 
 export const bulkCreatePrebuiltSavedObjects = async ({
+  dashboard,
+  endDate,
+  errorMessage,
   http,
   notifications,
-  errorMessage,
   options,
+  renderDashboardLink,
+  renderDocLink,
+  startDate,
+  theme,
 }: {
+  dashboard?: DashboardStart;
+  endDate: string;
+  errorMessage?: string;
   http: HttpSetup;
   notifications?: NotificationsStart;
-  errorMessage?: string;
   options: Options;
+  renderDashboardLink?: (message: string, dashboardUrl: string) => React.ReactNode;
+  renderDocLink?: (message: string) => React.ReactNode;
+  startDate: string;
+  theme?: ThemeServiceStart;
 }) => {
   const res = await http
-    .post(prebuiltSavedObjectsBulkCreateUrl(options.templateName))
+    .post<{ saved_objects: Array<SavedObject<SavedObjectAttributes>> }>(
+      prebuiltSavedObjectsBulkCreateUrl(options.templateName)
+    )
+    .then((result) => {
+      const errors = result.saved_objects.reduce<string[]>((acc, o) => {
+        return o.error != null ? [...acc, `${o.id}: ${o.error.message}`] : acc;
+      }, []);
+
+      if (errors.length > 0) {
+        notifications?.toasts?.addError(new Error(errorMessage ?? IMPORT_SAVED_OBJECTS_FAILURE), {
+          title: errorMessage ?? IMPORT_SAVED_OBJECTS_FAILURE,
+          toastMessage: renderDocLink
+            ? (renderDocLink(errors.join(', ')) as unknown as string)
+            : errors.join(', '),
+          toastLifeTimeMs,
+        });
+      } else {
+        const dashboardTitle =
+          options.templateName === `${RiskScoreEntity.user}RiskScoreDashboards`
+            ? RISKY_USERS_DASHBOARD_TITLE
+            : RISKY_HOSTS_DASHBOARD_TITLE;
+
+        const targetDashboard = result.saved_objects.find(
+          (obj) => obj.type === 'dashboard' && obj?.attributes?.title === dashboardTitle
+        );
+
+        let targetUrl;
+        if (targetDashboard?.id) {
+          targetUrl = dashboard?.locator?.getRedirectUrl({
+            dashboardId: targetDashboard?.id,
+            timeRange: {
+              to: endDate,
+              from: startDate,
+            },
+          });
+        }
+
+        const successMessage = result.saved_objects
+          .map((o) => o?.attributes?.title ?? o?.attributes?.name)
+          .join(', ');
+
+        notifications?.toasts?.addSuccess({
+          title: IMPORT_SAVED_OBJECTS_SUCCESS(result.saved_objects.length),
+          text: toMountPoint(
+            renderDashboardLink && targetUrl
+              ? renderDashboardLink(successMessage, targetUrl)
+              : successMessage,
+            {
+              theme$: theme?.theme$,
+            }
+          ),
+        });
+      }
+    })
     .catch((e) => {
-      notifications?.toasts?.addDanger({
+      notifications?.toasts?.addError(new Error(errorMessage ?? IMPORT_SAVED_OBJECTS_FAILURE), {
         title: errorMessage ?? IMPORT_SAVED_OBJECTS_FAILURE,
-        text: e?.body?.message,
+        toastMessage: renderDocLink ? renderDocLink(e?.body?.message) : e?.body?.message,
+        toastLifeTimeMs,
       });
     });
 

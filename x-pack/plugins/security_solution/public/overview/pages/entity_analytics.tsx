@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
 import { SpyRoute } from '../../common/utils/route/spy_routes';
@@ -21,9 +21,18 @@ import { EntityAnalyticsUserRiskScores } from '../components/entity_analytics/us
 import { EntityAnalyticsAnomalies } from '../components/entity_analytics/anomalies';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { InputsModelId } from '../../common/store/inputs/constants';
+import { useGlobalTime } from '../../common/containers/use_global_time';
 
 const EntityAnalyticsComponent = () => {
   const { indicesExist, loading: isSourcererLoading, indexPattern } = useSourcererDataView();
+  const { to, from } = useGlobalTime();
+  const timerange = useMemo(
+    () => ({
+      startDate: from,
+      endDate: to,
+    }),
+    [from, to]
+  );
   return (
     <>
       {indicesExist ? (
@@ -47,11 +56,11 @@ const EntityAnalyticsComponent = () => {
                 </EuiFlexItem>
 
                 <EuiFlexItem>
-                  <EntityAnalyticsHostRiskScores />
+                  <EntityAnalyticsHostRiskScores timerange={timerange} />
                 </EuiFlexItem>
 
                 <EuiFlexItem>
-                  <EntityAnalyticsUserRiskScores />
+                  <EntityAnalyticsUserRiskScores timerange={timerange} />
                 </EuiFlexItem>
 
                 <EuiFlexItem>

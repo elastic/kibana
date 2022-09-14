@@ -15,34 +15,70 @@ import type { inputsModel } from '../../../../common/store';
 
 import { InstallationState, installHostRiskScoreModule, installUserRiskScoreModule } from './utils';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { useRiskyScoreToastContent } from './use_risky_score_toast_content';
 
 const RiskyScoreEnableButtonComponent = ({
   refetch,
   riskScoreEntity,
   disabled = false,
+  timerange,
 }: {
   refetch: inputsModel.Refetch;
   riskScoreEntity: RiskScoreEntity;
   disabled?: boolean;
+  timerange: {
+    startDate: string;
+    endDate: string;
+  };
 }) => {
   const [installationState, setInstallationState] = useState<InstallationState>();
   const spaceId = useSpaceId();
-  const { http, notifications } = useKibana().services;
+  const { http, notifications, theme, dashboard } = useKibana().services;
+  const { renderDocLink, renderDashboardLink } = useRiskyScoreToastContent(riskScoreEntity);
 
   const onBoardingRiskScore = useCallback(async () => {
     setInstallationState(InstallationState.Started);
 
     if (riskScoreEntity === RiskScoreEntity.host) {
-      await installHostRiskScoreModule({ http, notifications, spaceId });
+      await installHostRiskScoreModule({
+        http,
+        theme,
+        renderDocLink,
+        renderDashboardLink,
+        dashboard,
+        notifications,
+        spaceId,
+        timerange,
+      });
     }
 
     if (riskScoreEntity === RiskScoreEntity.user) {
-      await installUserRiskScoreModule({ http, notifications, spaceId });
+      await installUserRiskScoreModule({
+        http,
+        theme,
+        renderDocLink,
+        renderDashboardLink,
+        dashboard,
+        notifications,
+        spaceId,
+        timerange,
+      });
     }
 
     setInstallationState(InstallationState.Done);
     refetch();
-  }, [riskScoreEntity, refetch, http, notifications, spaceId]);
+  }, [
+    riskScoreEntity,
+    refetch,
+    http,
+    theme,
+    renderDocLink,
+    renderDashboardLink,
+    dashboard,
+    notifications,
+    spaceId,
+    timerange,
+  ]);
 
   return (
     <EuiButton

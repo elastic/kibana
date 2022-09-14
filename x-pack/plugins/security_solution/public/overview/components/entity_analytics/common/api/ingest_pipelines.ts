@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import {
   INGEST_PIPELINE_CREATION_ERROR_MESSAGE,
   INGEST_PIPELINE_DELETION_ERROR_MESSAGE,
@@ -14,11 +15,13 @@ import type { CreateIngestPipeline, DeleteIngestPipeline } from './types';
 const INGEST_PIPELINES_API_BASE_PATH = `/api/ingest_pipelines`;
 
 export async function createIngestPipeline({
+  errorMessage,
   http,
   notifications,
-  signal,
-  errorMessage,
   options,
+  renderDocLink,
+  signal,
+  theme,
 }: CreateIngestPipeline) {
   const res = await http
     .post(INGEST_PIPELINES_API_BASE_PATH, {
@@ -28,7 +31,9 @@ export async function createIngestPipeline({
     .catch((e) => {
       notifications?.toasts?.addDanger({
         title: errorMessage ?? INGEST_PIPELINE_CREATION_ERROR_MESSAGE,
-        text: e?.body?.message,
+        text: toMountPoint(renderDocLink ? renderDocLink(e?.body?.message) : e?.body?.message, {
+          theme$: theme?.theme$,
+        }),
       });
     });
 
@@ -36,11 +41,13 @@ export async function createIngestPipeline({
 }
 
 export async function deleteIngestPipelines({
-  http,
-  notifications,
-  signal,
   errorMessage,
+  http,
   names, // separate with ','
+  notifications,
+  renderDocLink,
+  signal,
+  theme,
 }: DeleteIngestPipeline) {
   const count = names.split(',').length;
   const res = await http
@@ -50,7 +57,9 @@ export async function deleteIngestPipelines({
     .catch((e) => {
       notifications?.toasts?.addDanger({
         title: errorMessage ?? INGEST_PIPELINE_DELETION_ERROR_MESSAGE(count),
-        text: e?.body?.message,
+        text: toMountPoint(renderDocLink ? renderDocLink(e?.body?.message) : e?.body?.message, {
+          theme$: theme?.theme$,
+        }),
       });
     });
 
