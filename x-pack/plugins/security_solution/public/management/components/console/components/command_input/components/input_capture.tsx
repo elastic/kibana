@@ -72,27 +72,25 @@ export const InputCapture = memo<InputCaptureProps>(
     const getTextSelection = useCallback((): string => {
       if (focusEleRef.current) {
         const selection = document.getSelection();
+
         // Get the selected text and remove any new line breaks from it.
         // The input area does not allow for new line breaks and due to the markup, if user makes
         // a selection that also captures the cursor, then a new line break is included in the selection
         const selectionText = (selection?.toString() ?? '').replace(/[\r\n]/g, '');
 
-        if (!selection || selectionText.length === 0) {
+        const isSelectionWithinInputCapture =
+          focusEleRef.current && selection
+            ? focusEleRef.current?.contains(selection.focusNode) &&
+              focusEleRef.current?.contains(selection.anchorNode)
+            : false;
+
+        selection?.removeAllRanges();
+
+        if (!selection || selectionText.length === 0 || !isSelectionWithinInputCapture) {
           return '';
         }
 
-        // Determine if the text selection is only from inside the text input area
-        // (ex. User could have selected text that also capture content outside of the input area)
-        if (
-          focusEleRef.current?.contains(selection.focusNode) &&
-          focusEleRef.current?.contains(selection.anchorNode)
-        ) {
-          selection.removeAllRanges();
-          return selectionText;
-        }
-
-        selection.removeAllRanges();
-        return '';
+        return selectionText;
       }
 
       return '';
