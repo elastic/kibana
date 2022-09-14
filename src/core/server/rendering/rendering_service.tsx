@@ -15,6 +15,7 @@ import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import { firstValueFrom, of } from 'rxjs';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '../plugins';
 import { Template } from './views';
 import {
@@ -27,7 +28,6 @@ import {
 } from './types';
 import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
 import { getSettingValue, getStylesheetPaths } from './render_utils';
-import { IUiSettingsClient } from '../ui_settings';
 import { filterUiPlugins } from './filter_ui_plugins';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
 

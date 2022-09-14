@@ -785,6 +785,9 @@ packages/core/ui-settings/core-ui-settings-browser @elastic/kibana-core
 packages/core/ui-settings/core-ui-settings-browser-internal @elastic/kibana-core
 packages/core/ui-settings/core-ui-settings-browser-mocks @elastic/kibana-core
 packages/core/ui-settings/core-ui-settings-common @elastic/kibana-core
+packages/core/ui-settings/core-ui-settings-server @elastic/kibana-core
+packages/core/ui-settings/core-ui-settings-server-internal @elastic/kibana-core
+packages/core/ui-settings/core-ui-settings-server-mocks @elastic/kibana-core
 packages/core/usage-data/core-usage-data-base-server-internal @elastic/kibana-core
 packages/core/usage-data/core-usage-data-server @elastic/kibana-core
 packages/core/usage-data/core-usage-data-server-internal @elastic/kibana-core

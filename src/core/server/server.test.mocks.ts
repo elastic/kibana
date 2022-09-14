@@ -51,10 +51,10 @@ jest.doMock('@kbn/core-http-context-server-internal', () => ({
   ContextService: jest.fn(() => mockContextService),
 }));
 
-import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 
 export const mockUiSettingsService = uiSettingsServiceMock.create();
-jest.doMock('./ui_settings/ui_settings_service', () => ({
+jest.doMock('@kbn/core-ui-settings-server-internal', () => ({
   UiSettingsService: jest.fn(() => mockUiSettingsService),
 }));
 
