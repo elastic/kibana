@@ -186,7 +186,9 @@
           "\nOverload to set up a string based response stream with support\nfor gzip compression depending on provided request headers.\n"
         ],
         "signature": [
-          "(headers: Headers, logger: ",
+          "(headers: ",
+          "Headers",
+          ", logger: ",
           "Logger",
           ") => StreamFactoryReturnType<T>"
         ],
@@ -197,7 +199,7 @@
           {
             "parentPluginId": "@kbn/aiops-utils",
             "id": "def-common.streamFactory.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "headers",
             "description": [
@@ -242,7 +244,9 @@
           "\nSets up a response stream with support for gzip compression depending on provided\nrequest headers. Any non-string data pushed to the stream will be stream as NDJSON.\n"
         ],
         "signature": [
-          "(headers: Headers, logger: ",
+          "(headers: ",
+          "Headers",
+          ", logger: ",
           "Logger",
           ") => StreamFactoryReturnType<T>"
         ],
@@ -253,7 +257,7 @@
           {
             "parentPluginId": "@kbn/aiops-utils",
             "id": "def-common.streamFactory.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "headers",
             "description": [
