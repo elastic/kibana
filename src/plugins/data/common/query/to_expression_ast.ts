@@ -52,7 +52,6 @@ export async function queryStateToExpressionAst({
     filters: filters && filtersToAst(filters),
   });
   const ast = buildExpression([kibana, kibanaContext]).toAst();
-
   if (query && isOfAggregateQueryType(query)) {
     const mode = getAggregateQueryMode(query);
     // sql query
@@ -60,6 +59,7 @@ export async function queryStateToExpressionAst({
       const idxPattern = getIndexPatternFromSQLQuery(query.sql);
       const idsTitles = await dataViewsService.getIdsWithTitle();
       const dataViewIdTitle = idsTitles.find(({ title }) => title === idxPattern);
+
       if (dataViewIdTitle) {
         const dataView = await dataViewsService.get(dataViewIdTitle.id);
         const timeFieldName = dataView.timeFieldName;
@@ -75,19 +75,10 @@ export async function queryStateToExpressionAst({
 
     // esql query
     if (mode === 'esql' && 'esql' in query) {
-      const idxPattern = getIndexPatternFromSQLQuery(query.esql);
-      const idsTitles = await dataViewsService.getIdsWithTitle();
-      const dataViewIdTitle = idsTitles.find(({ title }) => title === idxPattern);
-      if (dataViewIdTitle) {
-        const dataView = await dataViewsService.get(dataViewIdTitle.id);
-        const timeFieldName = dataView.timeFieldName;
-        const essql = aggregateQueryToAst(query, timeFieldName);
+      const essql = aggregateQueryToAst(query);
 
-        if (essql) {
-          ast.chain.push(essql);
-        }
-      } else {
-        throw new Error(`No data view found for index pattern ${idxPattern}`);
+      if (essql) {
+        ast.chain.push(essql);
       }
     }
   }
