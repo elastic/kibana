@@ -87,10 +87,6 @@ function dfDepthFirstSearch(
   collapseRedundant: boolean,
   displayOther: boolean
 ) {
-  // df = df[df[field] == value].copy(deep=True)
-  // if len(df) == 0:
-  //     return 0
-
   const filteredItemSets = iss.filter((is) => {
     for (const [key, values] of Object.entries(is.set)) {
       if (key === field && values.includes(value)) {
@@ -104,22 +100,11 @@ function dfDepthFirstSearch(
     return 0;
   }
 
-  // doc_count = df['doc_count'].max()
-  // total_doc_count = df['total_doc_count'].max()
   const docCount = max(filteredItemSets.map((fis) => fis.doc_count)) ?? 0;
   const totalDocCount = max(filteredItemSets.map((fis) => fis.total_doc_count)) ?? 0;
 
-  // label = f"{parent_label} '{value}'"
   let label = `${parentLabel} ${value}`;
 
-  // if parent_doc_count == doc_count and collapse_redundant:
-  //     # collapse identical paths
-  //     display_parent.name += f" '{value}'"
-  //     display_node = display_parent
-  // else:
-  //     display_node = ipytree.Node(f"{doc_count}/{total_doc_count}{label}")
-  //     display_node.icon_style = 'warning'
-  //     display_parent.add_node(display_node)
   let displayNode: NewNode;
   if (parentDocCount === docCount && collapseRedundant) {
     // collapse identical paths
@@ -136,32 +121,6 @@ function dfDepthFirstSearch(
     displayParent.addNode(displayNode);
   }
 
-  // get children
-  // while True:
-  //     next_field_index = fields.index(field) + 1
-  //     if next_field_index >= len(fields):
-  //         display_node.icon = 'file'
-  //         display_node.icon_style = 'info'
-  //         return doc_count
-  //     next_field = fields[next_field_index]
-
-  //     # TODO - add handling of creating * as next level of tree
-
-  //     if len(df[next_field].value_counts().index) > 0:
-  //         break
-  //     else:
-  //         field = next_field
-  //         if collapse_redundant:
-  //             # add dummy node label
-  //             display_node.name += " '*'"
-  //             label += " '*'"
-  //         else:
-  //             label += " '*'"
-  //             next_display_node = ipytree.Node(f"{doc_count}/{total_doc_count}{label}")
-  //             next_display_node.icon_style = 'warning'
-  //             display_node.add_node(next_display_node)
-
-  //             display_node = next_display_node
   let nextField: string;
   while (true) {
     const nextFieldIndex = fields.indexOf(field) + 1;
@@ -173,12 +132,6 @@ function dfDepthFirstSearch(
     nextField = fields[nextFieldIndex];
 
     // TODO - add handling of creating * as next level of tree
-
-    // console.log(
-    //   'filter',
-    //   nextField,
-    //   filteredItemSets.filter((is) => is.items[nextField] !== undefined).length
-    // );
 
     if (Object.keys(getValueCounts(filteredItemSets, nextField)).length > 0) {
       break;
@@ -198,12 +151,6 @@ function dfDepthFirstSearch(
     }
   }
 
-  // sub_count = 0
-  // for next_value in df[next_field].value_counts().index:
-  //     sub_count += ItemSetTree.df_depth_first_search(fields, display_node, doc_count, label, next_field,
-  //                                                    next_value, df,
-  //                                                    collapse_redundant,
-  //                                                    display_other)
   let subCount = 0;
   for (const nextValue of getValuesDescending(filteredItemSets, nextField)) {
     subCount += dfDepthFirstSearch(
@@ -219,10 +166,6 @@ function dfDepthFirstSearch(
     );
   }
 
-  // if display_other:
-  // if sub_count < doc_count:
-  //     display_node.add_node(
-  //         ipytree.Node(f"{doc_count - sub_count}/{total_doc_count}{parent_label} '{value}' 'OTHER'"))
   if (displayOther) {
     if (subCount < docCount) {
       displayNode.addNode(
