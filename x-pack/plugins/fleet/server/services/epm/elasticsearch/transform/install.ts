@@ -10,6 +10,11 @@ import { errors } from '@elastic/elasticsearch';
 import { safeLoad } from 'js-yaml';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
+import {
+  PACKAGE_TEMPLATE_SUFFIX,
+  USER_SETTINGS_TEMPLATE_SUFFIX,
+} from '../../../../../common/constants';
+
 import { installComponentAndIndexTemplateForDataStream } from '../template/install';
 import { processFields } from '../../fields/field';
 import { generateMappings } from '../template/template';
@@ -26,9 +31,15 @@ import type {
 import { getInstallation } from '../../packages';
 import { retryTransientEsErrors } from '../retry';
 
-import { mergeIndexTemplateWithMappings } from './merge_index_template_mappings';
 import { deleteTransforms } from './remove';
 import { getAsset } from './common';
+
+const DEFAULT_TRANSFORM_TEMPLATES_PRIORITY = 250;
+enum TRANSFORM_SPECS_TYPES {
+  MANIFEST = 'manifest',
+  FIELDS = 'fields',
+  TRANSFORM = 'transform',
+}
 
 interface TransformModuleBase {
   transformModuleId?: string;
@@ -43,7 +54,7 @@ interface TransformInstallation extends TransformModuleBase {
   content: any;
 }
 
-export const installLegacyTransformsAssets = async (
+const installLegacyTransformsAssets = async (
   installablePackage: InstallablePackage,
   installNameSuffix: string,
   transformPaths: string[],
@@ -109,7 +120,105 @@ export const installLegacyTransformsAssets = async (
   return { installedTransforms, esReferences };
 };
 
-export const installTransformsAssets = async (
+const processTransformAssetsPerModule = (
+  installablePackage: InstallablePackage,
+  installNameSuffix: string,
+  transformPaths: string[]
+) => {
+  const transformsSpecifications = new Map();
+  const destinationIndexTemplates: DestinationIndexTemplateInstallation[] = [];
+  const transforms: TransformInstallation[] = [];
+
+  transformPaths.forEach((path: string) => {
+    const { transformModuleId, fileName } = getTransformFolderAndFileNames(
+      installablePackage,
+      path
+    );
+
+    // Since there can be multiple assets per transform definition
+    // We want to create a unique list of assets/specifications for each transform
+    if (transformsSpecifications.get(transformModuleId) === undefined) {
+      transformsSpecifications.set(transformModuleId, new Map());
+    }
+    const packageAssets = transformsSpecifications.get(transformModuleId);
+
+    const content = safeLoad(getAsset(path).toString('utf-8'));
+
+    if (fileName === TRANSFORM_SPECS_TYPES.FIELDS) {
+      const validFields = processFields(content);
+      const mappings = generateMappings(validFields);
+      packageAssets?.set('mappings', mappings);
+    }
+
+    if (fileName === TRANSFORM_SPECS_TYPES.TRANSFORM) {
+      transformsSpecifications.get(transformModuleId)?.set('destinationIndex', content.dest);
+      transformsSpecifications.get(transformModuleId)?.set('transform', content);
+      content._meta = getESAssetMetadata({ packageName: installablePackage.name });
+      transforms.push({
+        transformModuleId,
+        installationName: getTransformNameForInstallation(
+          installablePackage,
+          transformModuleId,
+          installNameSuffix
+        ),
+        content,
+      });
+    }
+
+    if (fileName === TRANSFORM_SPECS_TYPES.MANIFEST) {
+      if (isPopulatedObject(content, ['start']) && content.start === false) {
+        transformsSpecifications.get(transformModuleId)?.set('start', false);
+      }
+      // If manifest.yml contains destination_index_template
+      // Combine the mappings and other index template settings from manifest.yml into a single index template
+      // Create the index template and track the template in EsAssetReferences
+      if (
+        isPopulatedObject(content, ['destination_index_template']) ||
+        isPopulatedObject(packageAssets.get('mappings'))
+      ) {
+        const destinationIndexTemplate =
+          (content.destination_index_template as Record<string, unknown>) ?? {};
+        destinationIndexTemplates.push({
+          transformModuleId,
+          _meta: getESAssetMetadata({ packageName: installablePackage.name }),
+          installationName: getTransformNameForInstallation(
+            installablePackage,
+            transformModuleId,
+            installNameSuffix,
+            'template'
+          ),
+          template: destinationIndexTemplate,
+        } as DestinationIndexTemplateInstallation);
+        packageAssets.set('destinationIndexTemplate', destinationIndexTemplate);
+      }
+    }
+  });
+
+  const indexTemplatesRefs = destinationIndexTemplates.map((template) => ({
+    id: template.installationName,
+    type: ElasticsearchAssetType.indexTemplate,
+  }));
+  const componentTemplatesRefs = destinationIndexTemplates.map((template) => ({
+    id: `${template.installationName}${USER_SETTINGS_TEMPLATE_SUFFIX}`,
+    type: ElasticsearchAssetType.componentTemplate,
+  }));
+
+  const transformRefs = transforms.map((t) => ({
+    id: t.installationName,
+    type: ElasticsearchAssetType.transform,
+  }));
+
+  return {
+    indexTemplatesRefs,
+    componentTemplatesRefs,
+    transformRefs,
+    transforms,
+    destinationIndexTemplates,
+    transformsSpecifications,
+  };
+};
+
+const installTransformsAssets = async (
   installablePackage: InstallablePackage,
   installNameSuffix: string,
   transformPaths: string[],
@@ -121,127 +230,78 @@ export const installTransformsAssets = async (
 ) => {
   let installedTransforms: EsAssetReference[] = [];
   if (transformPaths.length > 0) {
-    const transformsSpecifications = new Map();
-    const destinationIndexTemplates: DestinationIndexTemplateInstallation[] = [];
-    const indices = [];
-    const transforms: TransformInstallation[] = [];
-
-    transformPaths.forEach((path: string) => {
-      const { transformModuleId, fileName } = getTransformFolderAndFileNames(
-        installablePackage,
-        path
-      );
-
-      // Since there can be multiple assets per transform definition
-      // We want to create a unique list of assets/specifications for each transform
-      if (transformsSpecifications.get(transformModuleId) === undefined) {
-        transformsSpecifications.set(transformModuleId, new Map());
-      }
-      const packageAssets = transformsSpecifications.get(transformModuleId);
-
-      const content = safeLoad(getAsset(path).toString('utf-8'));
-
-      if (fileName === 'fields') {
-        const validFields = processFields(content);
-        const mappings = generateMappings(validFields);
-        packageAssets?.set('mappings', mappings);
-      }
-
-      if (fileName === 'transform') {
-        transformsSpecifications.get(transformModuleId)?.set('destinationIndex', content.dest);
-        indices.push(content.dest);
-        transformsSpecifications.get(transformModuleId)?.set('transform', content);
-        content._meta = getESAssetMetadata({ packageName: installablePackage.name });
-        transforms.push({
-          transformModuleId,
-          installationName: getTransformNameForInstallation(
-            installablePackage,
-            transformModuleId,
-            installNameSuffix
-          ),
-          content,
-        });
-        indices.push(content.dest);
-      }
-
-      if (fileName === 'manifest') {
-        if (isPopulatedObject(content, ['start']) && content.start === false) {
-          transformsSpecifications.get(transformModuleId)?.set('start', false);
-        }
-        // If manifest.yml contains destination_index_template
-        // Combine the mappings and other index template settings from manifest.yml into a single index template
-        // Create the index template and track the template in EsAssetReferences
-        if (
-          isPopulatedObject(content, ['destination_index_template']) ||
-          isPopulatedObject(packageAssets.get('mappings'))
-        ) {
-          const destinationIndexTemplate =
-            (content.destination_index_template as Record<string, unknown>) ?? {};
-          destinationIndexTemplates.push({
-            transformModuleId,
-            _meta: getESAssetMetadata({ packageName: installablePackage.name }),
-            installationName: getTransformNameForInstallation(
-              installablePackage,
-              transformModuleId,
-              installNameSuffix,
-              'template'
-            ),
-            template: destinationIndexTemplate,
-          } as DestinationIndexTemplateInstallation);
-          packageAssets.set('destinationIndexTemplate', destinationIndexTemplate);
-        }
-      }
-    });
-
-    const indexTemplatesRefs = destinationIndexTemplates.map((template) => ({
-      id: template.installationName,
-      type: ElasticsearchAssetType.indexTemplate,
-    }));
-
-    const transformRefs = transforms.map((t) => ({
-      id: t.installationName,
-      type: ElasticsearchAssetType.transform,
-    }));
-
+    const {
+      indexTemplatesRefs,
+      componentTemplatesRefs,
+      transformRefs,
+      transforms,
+      destinationIndexTemplates,
+      transformsSpecifications,
+    } = processTransformAssetsPerModule(installablePackage, installNameSuffix, transformPaths);
     // get and save refs associated with the transforms before installing
     esReferences = await updateEsAssetReferences(
       savedObjectsClient,
       installablePackage.name,
       esReferences,
       {
-        assetsToAdd: [...indexTemplatesRefs, ...transformRefs],
+        assetsToAdd: [...indexTemplatesRefs, ...componentTemplatesRefs, ...transformRefs],
         assetsToRemove: previousInstalledTransformEsAssets,
       }
     );
 
+    // create index templates and component templates
     await Promise.all(
       destinationIndexTemplates
         .map((destinationIndexTemplate) => {
-          const mergedTemplate = mergeIndexTemplateWithMappings(
-            destinationIndexTemplate.template,
-            transformsSpecifications
-              .get(destinationIndexTemplate.transformModuleId)
-              ?.get('mappings')
-          );
-          if (mergedTemplate !== undefined) {
+          const customMappings = transformsSpecifications
+            .get(destinationIndexTemplate.transformModuleId)
+            ?.get('mappings');
+          const customTemplateName = `${destinationIndexTemplate.installationName}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
+          const packageTemplateName = `${destinationIndexTemplate.installationName}${PACKAGE_TEMPLATE_SUFFIX}`;
+          if (destinationIndexTemplate !== undefined || customMappings !== undefined) {
             return installComponentAndIndexTemplateForDataStream({
               esClient,
               logger,
-              componentTemplates: {},
+              componentTemplates: {
+                ...(customMappings
+                  ? {
+                      [customTemplateName]: {
+                        template: {
+                          mappings: customMappings,
+                        },
+                        _meta: destinationIndexTemplate._meta,
+                      },
+                    }
+                  : {}),
+                ...(destinationIndexTemplate.template
+                  ? {
+                      [packageTemplateName]: {
+                        template: {
+                          settings: destinationIndexTemplate.template.settings,
+                          mappings: destinationIndexTemplate.template.mappings,
+                        },
+                        _meta: destinationIndexTemplate._meta,
+                      },
+                    }
+                  : {}),
+              },
               indexTemplate: {
                 templateName: destinationIndexTemplate.installationName,
                 // @ts-expect-error Index template here should not contain data_stream property
                 // as this template is applied to only an index and not a data stream
                 indexTemplate: {
-                  template: mergedTemplate,
-                  priority: 250,
+                  template: { settings: undefined, mappings: undefined },
+                  priority: DEFAULT_TRANSFORM_TEMPLATES_PRIORITY,
                   index_patterns: [
                     transformsSpecifications
                       .get(destinationIndexTemplate.transformModuleId)
                       ?.get('destinationIndex').index,
                   ],
                   _meta: destinationIndexTemplate._meta,
-                  composed_of: [],
+                  composed_of: [
+                    ...(customMappings ? [customTemplateName] : []),
+                    ...(destinationIndexTemplate.template ? [packageTemplateName] : []),
+                  ],
                 },
               },
             });
@@ -249,6 +309,8 @@ export const installTransformsAssets = async (
         })
         .filter((p) => p !== undefined)
     );
+
+    // create destination indices
     await Promise.all(
       transforms.map(async (transform) => {
         const index = transform.content.dest.index;
@@ -264,6 +326,7 @@ export const installTransformsAssets = async (
       })
     );
 
+    // create & optionally start transforms
     const transformsPromises = transforms.map(async (transform) => {
       return handleTransformInstall({
         esClient,
