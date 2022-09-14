@@ -314,7 +314,7 @@ export const LensTopNavMenu = ({
     );
     // Add ad-hoc data views from the Lens state even if they are not used
     Object.values(dataViews.indexPatterns)
-      .filter((indexPattern) => indexPattern.spec)
+      .filter((indexPattern) => !indexPattern.isPersisted)
       .forEach((indexPattern) => {
         indexPatternIds.add(indexPattern.id);
       });

@@ -97,12 +97,14 @@ export async function onSaveSearch({
   state,
   onClose,
   onSaveCb,
+  updateAdHocDataViewId,
 }: {
   dataView: DataView;
   navigateTo: (path: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
   state: GetStateReturn;
+  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
   onClose?: () => void;
   onSaveCb?: () => void;
 }) {
@@ -143,9 +145,13 @@ export async function onSaveSearch({
       copyOnSave: newCopyOnSave,
       isTitleDuplicateConfirmed,
     };
+
+    const updatedDataView =
+      !dataView.isPersisted() && newCopyOnSave ? await updateAdHocDataViewId(dataView) : dataView;
+
     const navigateOrReloadSavedSearch = !Boolean(onSaveCb);
     const response = await saveDataSource({
-      dataView,
+      dataView: updatedDataView,
       saveOptions,
       services,
       navigateTo,

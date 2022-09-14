@@ -191,6 +191,8 @@ describe('Layer Data Panel', () => {
             hasRestrictions: false,
             fields: fieldsOne,
             getFieldByName: getFieldByNameFactory(fieldsOne),
+            isPersisted: true,
+            spec: {},
           },
           '2': {
             id: '2',
@@ -199,6 +201,8 @@ describe('Layer Data Panel', () => {
             timeFieldName: 'timestamp',
             fields: fieldsTwo,
             getFieldByName: getFieldByNameFactory(fieldsTwo),
+            isPersisted: true,
+            spec: {},
           },
           '3': {
             id: '3',
@@ -207,6 +211,8 @@ describe('Layer Data Panel', () => {
             hasRestrictions: false,
             fields: fieldsThree,
             getFieldByName: getFieldByNameFactory(fieldsThree),
+            isPersisted: true,
+            spec: {},
           },
         },
       },

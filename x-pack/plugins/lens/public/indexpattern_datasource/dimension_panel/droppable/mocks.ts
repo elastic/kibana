@@ -77,6 +77,8 @@ export const mockDataViews = (): IndexPatternMap => {
       hasRestrictions: false,
       fields,
       getFieldByName: getFieldByNameFactory(fields),
+      isPersisted: true,
+      spec: {},
     },
     second: {
       id: 'second',
@@ -85,6 +87,8 @@ export const mockDataViews = (): IndexPatternMap => {
       timeFieldName: 'timestamp',
       fields: [fields[0]],
       getFieldByName: getFieldByNameFactory([fields[0]]),
+      isPersisted: true,
+      spec: {},
     },
   };
 };

@@ -88,7 +88,13 @@ export function makeDefaultServices(
   const dataViewsMock = dataViewPluginMocks.createStartContract();
   dataViewsMock.get.mockImplementation(
     jest.fn((id) =>
-      Promise.resolve({ id, isTimeBased: () => true, fields: [], isPersisted: () => true })
+      Promise.resolve({
+        id,
+        isTimeBased: () => true,
+        fields: [],
+        isPersisted: () => true,
+        toSpec: () => ({}),
+      })
     ) as unknown as DataViewsPublicPluginStart['get']
   );
   dataViewsMock.getIdsWithTitle.mockImplementation(jest.fn(async () => []));

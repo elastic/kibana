@@ -12,6 +12,7 @@ import { DataViewListItem, DataViewType } from '@kbn/data-views-plugin/public';
 import { SavedSearch, getSavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
+import { useUrlTracking } from './use_url_tracking';
 import { getState } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
@@ -28,6 +29,7 @@ import { FetchStatus } from '../../types';
 import { getDataViewAppState } from '../utils/get_switch_data_view_app_state';
 import { DataTableRecord } from '../../../types';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
+import { useAdHocDataViews } from './use_adhoc_data_views';
 
 export function useDiscoverState({
   services,
@@ -52,6 +54,8 @@ export function useDiscoverState({
     savedSearch.searchSource.setField('index', dataView);
     return savedSearch.searchSource.createChild();
   }, [savedSearch, dataView]);
+
+  const { setUrlTracking } = useUrlTracking(savedSearch, dataView);
 
   const stateContainer = useMemo(
     () =>
@@ -90,6 +94,51 @@ export function useDiscoverState({
       searchSessionManager.hasSearchSessionIdInURL();
     return shouldSearchOnPageLoad ? FetchStatus.LOADING : FetchStatus.UNINITIALIZED;
   }, [uiSettings, savedSearch.id, searchSessionManager, timefilter]);
+
+  /**
+   * Function triggered when user changes data view in the sidebar
+   */
+  const onChangeDataView = useCallback(
+    async (id: string) => {
+      const nextDataView = await dataViews.get(id);
+      if (nextDataView && dataView) {
+        const nextAppState = getDataViewAppState(
+          dataView,
+          nextDataView,
+          state.columns || [],
+          (state.sort || []) as SortOrder[],
+          uiSettings.get(MODIFY_COLUMNS_ON_SWITCH),
+          uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
+          state.query
+        );
+        setUrlTracking(nextDataView);
+        stateContainer.setAppState(nextAppState);
+      }
+      setExpandedDoc(undefined);
+    },
+    [
+      setUrlTracking,
+      uiSettings,
+      dataView,
+      dataViews,
+      setExpandedDoc,
+      state.columns,
+      state.query,
+      state.sort,
+      stateContainer,
+    ]
+  );
+
+  /**
+   * Adhoc data views functionality
+   */
+  const { adHocDataViewList, persistDataView, updateAdHocDataViewId } = useAdHocDataViews({
+    dataView,
+    dataViews,
+    stateContainer,
+    savedSearch,
+    onChangeDataView,
+  });
 
   /**
    * Data fetching logic
@@ -150,9 +199,9 @@ export function useDiscoverState({
          *  The following line of code catches this, but should be improved
          */
         const nextDataView = await loadDataView(
-          nextState.index,
           services.dataViews,
-          services.uiSettings
+          services.uiSettings,
+          nextState.index
         );
         savedSearch.searchSource.setField('index', nextDataView.loaded);
 
@@ -200,37 +249,6 @@ export function useDiscoverState({
   );
 
   /**
-   * Function triggered when user changes data view in the sidebar
-   */
-  const onChangeDataView = useCallback(
-    async (id: string) => {
-      const nextDataView = await dataViews.get(id);
-      if (nextDataView && dataView) {
-        const nextAppState = getDataViewAppState(
-          dataView,
-          nextDataView,
-          state.columns || [],
-          (state.sort || []) as SortOrder[],
-          uiSettings.get(MODIFY_COLUMNS_ON_SWITCH),
-          uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
-          state.query
-        );
-        stateContainer.setAppState(nextAppState);
-      }
-      setExpandedDoc(undefined);
-    },
-    [
-      uiSettings,
-      dataView,
-      dataViews,
-      setExpandedDoc,
-      state.columns,
-      state.query,
-      state.sort,
-      stateContainer,
-    ]
-  );
-  /**
    * Function triggered when the user changes the query in the search bar
    */
   const onUpdateQuery = useCallback(
@@ -274,5 +292,8 @@ export function useDiscoverState({
     setState,
     state,
     stateContainer,
+    adHocDataViewList,
+    persistDataView,
+    updateAdHocDataViewId,
   };
 }

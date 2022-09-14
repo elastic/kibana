@@ -53,11 +53,14 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     inspectorAdapters,
     onChangeDataView,
     onUpdateQuery,
+    persistDataView,
+    updateAdHocDataViewId,
     refetch$,
     resetSavedSearch,
     searchSource,
     state,
     stateContainer,
+    adHocDataViewList,
   } = useDiscoverState({
     services,
     history: usedHistory,
@@ -113,6 +116,9 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
       searchSource={searchSource}
       state={state}
       stateContainer={stateContainer}
+      persistDataView={persistDataView}
+      updateAdHocDataViewId={updateAdHocDataViewId}
+      adHocDataViewList={adHocDataViewList}
     />
   );
 }

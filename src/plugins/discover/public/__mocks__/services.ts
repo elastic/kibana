@@ -117,6 +117,8 @@ export const discoverServiceMock = {
   toastNotifications: {
     addInfo: jest.fn(),
     addWarning: jest.fn(),
+    addDanger: jest.fn(),
+    addSuccess: jest.fn(),
   },
   expressions: expressionsPlugin,
   savedObjectsTagging: {},

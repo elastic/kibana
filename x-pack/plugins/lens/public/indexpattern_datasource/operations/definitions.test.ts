@@ -76,6 +76,8 @@ const indexPattern = {
   hasRestrictions: false,
   fields: indexPatternFields,
   getFieldByName: getFieldByNameFactory([...indexPatternFields]),
+  isPersisted: true,
+  spec: {},
 };
 
 const baseColumnArgs: {

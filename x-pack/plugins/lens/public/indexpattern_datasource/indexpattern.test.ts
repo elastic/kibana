@@ -156,6 +156,8 @@ const expectedIndexPatterns = {
     hasRestrictions: false,
     fields: fieldsOne,
     getFieldByName: getFieldByNameFactory(fieldsOne),
+    spec: {},
+    isPersisted: true,
   },
   2: {
     id: '2',
@@ -164,6 +166,8 @@ const expectedIndexPatterns = {
     hasRestrictions: true,
     fields: fieldsTwo,
     getFieldByName: getFieldByNameFactory(fieldsTwo),
+    spec: {},
+    isPersisted: true,
   },
 };
 

@@ -106,7 +106,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const fieldName = '_runtimefield-to-delete';
       await createRuntimeField(fieldName);
       await PageObjects.discover.removeField(fieldName);
-      await fieldEditor.confirmDelete();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitForWithTimeout('fieldNames to include edits', 5000, async () => {
         const fieldNames = await PageObjects.discover.getAllFieldNames();

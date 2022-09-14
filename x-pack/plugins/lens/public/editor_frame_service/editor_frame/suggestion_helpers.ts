@@ -103,7 +103,7 @@ export function getSuggestions({
           // used for navigating from Discover to Lens
           dataSourceSuggestions = datasource.getDatasourceSuggestionsForVisualizeField(
             datasourceState,
-            visualizeTriggerFieldContext.indexPatternId,
+            visualizeTriggerFieldContext.dataViewSpec.id!,
             visualizeTriggerFieldContext.fieldName,
             dataViews.indexPatterns
           );

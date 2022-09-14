@@ -34,4 +34,7 @@ export interface DiscoverLayoutProps {
   searchSource: ISearchSource;
   state: AppState;
   stateContainer: GetStateReturn;
+  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
+  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
+  adHocDataViewList: DataView[];
 }
