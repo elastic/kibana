@@ -26,12 +26,13 @@ import {
   useIsWithinBreakpoints,
   EuiSuperUpdateButton,
 } from '@elastic/eui';
-import { IDataPluginServices, TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
+import { TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { PersistedLog } from '@kbn/data-plugin/public';
 import { useKibana, withKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import type { IUnifiedSearchPluginServices } from '../types';
 import QueryStringInputUI from './query_string_input';
 import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../utils/shallow_equal';
@@ -164,7 +165,7 @@ export const QueryBarTopRow = React.memo(
     const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
     const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
 
-    const kibana = useKibana<IDataPluginServices>();
+    const kibana = useKibana<IUnifiedSearchPluginServices>();
     const { uiSettings, storage, appName } = kibana.services;
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
 

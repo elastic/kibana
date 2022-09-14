@@ -42,6 +42,8 @@ const expectedIndexPatterns = {
     hasRestrictions: false,
     fields,
     getFieldByName: getFieldByNameFactory(fields),
+    isPersisted: true,
+    spec: {},
   },
 };
 
