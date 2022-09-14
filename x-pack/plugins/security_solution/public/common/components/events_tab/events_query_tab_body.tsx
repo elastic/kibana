@@ -42,7 +42,6 @@ import { useLicense } from '../../hooks/use_license';
 import { useUiSetting$ } from '../../lib/kibana';
 import { defaultAlertsFilters } from '../events_viewer/external_alerts_filter';
 
-const ACTION_BUTTON_COUNT = 5;
 export const ALERTS_EVENTS_HISTOGRAM_ID = 'alertsOrEventsHistogramQuery';
 
 type QueryTabBodyProps = UserQueryTabBodyProps | HostQueryTabBodyProps | NetworkQueryTabBodyProps;
@@ -67,15 +66,16 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   startDate,
   timelineId,
 }) => {
-  const isEnterprisePlus = useLicense().isEnterprise();
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const [showExternalAlerts, setShowExternalAlerts] = useState(false);
+  const isEnterprisePlus = useLicense().isEnterprise();
+  const ACTION_BUTTON_COUNT = isEnterprisePlus ? 5 : 4;
   const leadingControlColumns = useMemo(
-    () => getDefaultControlColumn(isEnterprisePlus ? ACTION_BUTTON_COUNT : 4),
-    [isEnterprisePlus]
+    () => getDefaultControlColumn(ACTION_BUTTON_COUNT),
+    [ACTION_BUTTON_COUNT]
   );
 
   const toggleExternalAlerts = useCallback(() => setShowExternalAlerts((s) => !s), []);

@@ -77,7 +77,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const { startTransaction } = useStartTransaction();
 
   const isEnterprisePlus = useLicense().isEnterprise();
-  // const isEnterprisePlus = true;
 
   const onPinEvent: OnPinEvent = useCallback(
     (evtId) => dispatch(timelineActions.pinEvent({ id: timelineId, eventId: evtId })),
