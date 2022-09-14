@@ -32,13 +32,11 @@ import type { ApiExplainLogRateSpikes } from '../../../common/api';
 
 import { SpikeAnalysisGroupsTable } from '../spike_analysis_table';
 import { SpikeAnalysisTable } from '../spike_analysis_table';
-// TODO: remove once api is in place
-import { mockData } from './mock_data';
 
-const showUngroupedMessage = i18n.translate(
-  'xpack.aiops.spikeAnalysisTable.groupedSwitchLabel.showUngrouped',
+const groupResultsMessage = i18n.translate(
+  'xpack.aiops.spikeAnalysisTable.groupedSwitchLabel.groupResults',
   {
-    defaultMessage: 'Show ungrouped',
+    defaultMessage: 'Group results',
   }
 );
 
@@ -76,10 +74,10 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   const [currentAnalysisWindowParameters, setCurrentAnalysisWindowParameters] = useState<
     WindowParameters | undefined
   >();
-  const [showUngrouped, setShowUngrouped] = useState<boolean>(false);
+  const [groupResults, setGroupResults] = useState<boolean>(true);
 
   const onSwitchToggle = (e: { target: { checked: React.SetStateAction<boolean> } }) => {
-    setShowUngrouped(e.target.checked);
+    setGroupResults(e.target.checked);
   };
 
   const {
@@ -97,6 +95,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       // TODO Handle data view without time fields.
       timeFieldName: dataView.timeFieldName ?? '',
       index: dataView.title,
+      grouping: true,
       ...windowParameters,
     },
     { reducer: streamReducer, initialState }
@@ -125,38 +124,16 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   }, []);
 
   const groupTableItems = useMemo(() => {
-    // First, create map of field value counts e.g. { log.logger.keyword: { request: 3, publisher_pipeline_output: 1 }, ... }
-    // Then remove duplicate values and create table items like { id: 1, group: {...}, doc_count: 1234 }
-    const groupFieldValuesCountMap = mockData.reduce((countMap, current) => {
-      // If field name/key exists, increase count else create it and set count to 1
-      const currentGroup = current.group;
-      currentGroup.forEach((group) => {
-        const fieldName = group.field;
-        const fieldNameCountMap = countMap[fieldName];
-        const fieldValue = group.value;
-
-        if (fieldNameCountMap === undefined) {
-          countMap[fieldName] = { [fieldValue]: 1 };
-        } else if (fieldNameCountMap[fieldValue] === undefined) {
-          fieldNameCountMap[fieldValue] = 1;
-        } else {
-          fieldNameCountMap[fieldValue] += 1;
-        }
-      });
-      return countMap;
-    }, {} as Record<string, Record<string, number>>);
-
-    const tableItems = mockData.map(({ group, docCount }, index) => {
+    const tableItems = data.changePointsGroups.map(({ group, docCount }, index) => {
       const sortedGroup = group.sort((a, b) =>
-        a.field > b.field ? 1 : b.field > a.field ? -1 : 0
+        a.fieldName > b.fieldName ? 1 : b.fieldName > a.fieldName ? -1 : 0
       );
       const dedupedGroup = {};
       const repeatedValues = {};
 
       sortedGroup.forEach((pair) => {
-        const fieldName = pair.field;
-        const fieldValue = pair.value;
-        if (groupFieldValuesCountMap[fieldName][fieldValue] <= 2) {
+        const { fieldName, fieldValue } = pair;
+        if (pair.duplicate === false) {
           // @ts-ignore // TODO: remove once we have real data
           dedupedGroup[fieldName] = fieldValue;
         } else {
@@ -174,7 +151,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     });
 
     return tableItems;
-  }, []);
+  }, [data.changePointsGroups]);
 
   const shouldRerunAnalysis = useMemo(
     () =>
@@ -184,6 +161,11 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   );
 
   const showSpikeAnalysisTable = data?.changePoints.length > 0;
+  const groupItemCount = groupTableItems.reduce((p, c) => {
+    return p + Object.keys(c.group).length;
+  }, 0);
+  const foundGroups =
+    groupTableItems.length === 0 || (groupTableItems.length > 0 && groupItemCount > 0);
 
   return (
     <div data-test-subj="aiopsExplainLogRateSpikesAnalysis">
@@ -195,15 +177,17 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         onCancel={cancel}
         shouldRerunAnalysis={shouldRerunAnalysis}
       />
-      <EuiFormRow display="columnCompressedSwitch" label={showUngroupedMessage}>
-        <EuiSwitch
-          showLabel={false}
-          label={''}
-          checked={showUngrouped}
-          onChange={onSwitchToggle}
-          compressed
-        />
-      </EuiFormRow>
+      {showSpikeAnalysisTable && foundGroups && (
+        <EuiFormRow display="columnCompressedSwitch" label={groupResultsMessage}>
+          <EuiSwitch
+            showLabel={false}
+            label={''}
+            checked={groupResults}
+            onChange={onSwitchToggle}
+            compressed
+          />
+        </EuiFormRow>
+      )}
       <EuiSpacer size="xs" />
       {!isRunning && !showSpikeAnalysisTable && (
         <EuiEmptyPrompt
@@ -254,7 +238,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           <EuiSpacer size="xs" />
         </>
       )}
-      {showSpikeAnalysisTable && !showUngrouped ? (
+      {showSpikeAnalysisTable && groupResults && foundGroups ? (
         <SpikeAnalysisGroupsTable
           changePoints={data.changePoints}
           groupTableItems={groupTableItems}
@@ -265,7 +249,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           dataViewId={dataView.id}
         />
       ) : null}
-      {showSpikeAnalysisTable && showUngrouped ? (
+      {showSpikeAnalysisTable && (!groupResults || !foundGroups) ? (
         <SpikeAnalysisTable
           changePoints={data.changePoints}
           loading={isRunning}

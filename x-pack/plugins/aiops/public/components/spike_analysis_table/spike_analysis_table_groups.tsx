@@ -129,7 +129,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
         'xpack.aiops.correlations.failedTransactions.correlationsTable.groupLabel',
         { defaultMessage: 'Group' }
       ),
-      render: (_, { group }) => {
+      render: (_, { group, repeatedValues }) => {
         const valuesBadges = [];
         for (const fieldName in group) {
           if (group.hasOwnProperty(fieldName)) {
@@ -149,6 +149,20 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
               </>
             );
           }
+        }
+        if (Object.keys(repeatedValues).length > 0) {
+          valuesBadges.push(
+            <>
+              <EuiBadge
+                key={`$more-id`}
+                data-test-subj="aiopsSpikeAnalysisTableColumnGroupBadge"
+                color="hollow"
+              >
+                +{Object.keys(repeatedValues).length} more
+              </EuiBadge>
+              <EuiSpacer size="xs" />
+            </>
+          );
         }
         return valuesBadges;
       },
