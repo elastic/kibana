@@ -22,9 +22,10 @@ import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { isDataLayer } from '../../common/utils/layer_types_guards';
+import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { getDataLayers } from '../helpers';
 import { LayerTypes, SeriesTypes } from '../../common/constants';
-import type { CommonXYLayerConfig, XYChartProps } from '../../common';
+import type { XYChartProps } from '../../common';
 import type { BrushEvent, FilterEvent } from '../types';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { extractContainerType, extractVisualizationType } from '../../../common';
@@ -46,9 +47,14 @@ interface XyChartRendererDeps {
   getStartDeps: GetStartDepsFn;
 }
 
-const extractCounterEvents = (originatingApp: string, layers: CommonXYLayerConfig[]) => {
-  const dataLayer = layers.find(isDataLayer);
-  if (dataLayer) {
+const extractCounterEvents = (
+  originatingApp: string,
+  { layers, yAxisConfigs }: XYChartProps['args']
+) => {
+  const dataLayers = getDataLayers(layers);
+
+  if (dataLayers.length) {
+    const [dataLayer] = dataLayers;
     const type =
       dataLayer.seriesType === SeriesTypes.BAR
         ? `${dataLayer.isHorizontal ? 'horizontal_bar' : 'vertical_bar'}`
@@ -75,11 +81,60 @@ const extractCounterEvents = (originatingApp: string, layers: CommonXYLayerConfi
       }
     );
 
+    // Multiple axes configured on the same side of the chart
+    const multiAxisSide = Object.values(
+      (yAxisConfigs ?? []).reduce<Record<string, number>>((acc, item) => {
+        if (item.position) {
+          acc[item.position] = (acc[item.position] ?? 0) + 1;
+        }
+        return acc;
+      }, {})
+    ).find((i) => i > 1);
+
+    // There are multiple "split series" aggs in an xy chart and they are not all terms but other aggs
+    const multiSplitNonTerms = new Set(
+      (dataLayer.splitAccessors ?? [])
+        .map(
+          (splitAccessor) =>
+            getColumnByAccessor(splitAccessor, dataLayer.table.columns)?.meta?.params?.id
+        )
+        .filter(Boolean)
+    );
+
+    // Multiple average/min/max/sum bucket aggs in a single vis or
+    // one average/min/max/sum bucket aggs on an xy chart with at least one "split series" defined
+    const aggregateLayers: string[] = dataLayers
+      .map((l) =>
+        l.accessors.reduce<string[]>((acc, accessor) => {
+          const metricType = getColumnByAccessor(
+            accessor,
+            l.table.columns
+          )?.meta?.sourceParams?.type?.toString();
+
+          if (
+            metricType &&
+            ['avg_bucket', 'min_bucket', 'max_bucket', 'sum_bucket'].includes(metricType)
+          ) {
+            acc.push(metricType);
+          }
+          return acc;
+        }, [])
+      )
+      .flat();
+
     return [
       [
         type,
         dataLayer.isPercentage ? 'percentage' : undefined,
         dataLayer.isStacked ? 'stacked' : undefined,
+        // There's a metric configured for the dot size in an area or line chart
+        dataLayer.markSizeAccessor ? 'metric_dot_size' : undefined,
+        multiAxisSide ? 'multi_axis_same_side' : undefined,
+        multiSplitNonTerms.size > 1 ? 'multi_split_non_terms' : undefined,
+        aggregateLayers.length > 1 ||
+        (aggregateLayers.length === 1 && dataLayer.splitAccessors?.length)
+          ? 'aggregate_bucket'
+          : undefined,
       ]
         .filter(Boolean)
         .join('_'),
@@ -120,7 +175,7 @@ export const getXyChartRenderer = ({
       const visualizationType = extractVisualizationType(executionContext);
 
       if (deps.usageCollection && containerType && visualizationType) {
-        const uiEvents = extractCounterEvents(visualizationType, config.args.layers);
+        const uiEvents = extractCounterEvents(visualizationType, config.args);
 
         if (uiEvents) {
           deps.usageCollection.reportUiCounter(containerType, METRIC_TYPE.COUNT, uiEvents);
