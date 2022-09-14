@@ -10,7 +10,6 @@ import { apm, timerange } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-// import { roundNumber } from '../../utils';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -54,44 +53,42 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const numberOfPythonInstances = 2;
 
       before(async () => {
+        const cloudFields = {
+          'cloud.provider': 'aws',
+          'cloud.service.name': 'lambda',
+          'cloud.region': 'us-west-2',
+        };
+
         const instanceLambdaPython = apm
-          .serverless({
+          .serverlessFunction({
             serviceName: 'lambda-python',
             environment: 'test',
             agentName: 'python',
-            faasId: 'arn:aws:lambda:us-west-2:123456789012:function:lambda-python',
-            coldStart: true,
-            faasTriggerType: 'other',
+            functionName: 'fn-lambda-python',
           })
-          .instance('instance python');
+          .instance({ instanceName: 'instance python', ...cloudFields });
 
         const instanceLambdaPython2 = apm
-          .serverless({
+          .serverlessFunction({
             serviceName: 'lambda-python',
             environment: 'test',
             agentName: 'python',
-            faasId: 'arn:aws:lambda:us-west-2:123456789012:function:lambda-python-2',
-            coldStart: true,
-            faasTriggerType: 'other',
+            functionName: 'fn-lambda-python-2',
           })
-          .instance('instance python 2');
+          .instance({ instanceName: 'instance python 2', ...cloudFields });
 
         const instanceLambdaNode = apm
-          .serverless({
+          .serverlessFunction({
             serviceName: 'lambda-node',
             environment: 'test',
             agentName: 'nodejs',
-            faasId: 'arn:aws:lambda:us-west-2:123456789012:function:lambda-node',
-            coldStart: false,
-            faasTriggerType: 'other',
+            functionName: 'fn-lambda-node',
           })
-          .instance('instance node');
+          .instance({ instanceName: 'instance node', ...cloudFields });
 
-        const systemMetrics = {
-          'system.memory.actual.free': MEMORY_FREE,
-          'system.memory.total': MEMORY_TOTAL,
-          'system.cpu.total.norm.pct': 0.6,
-          'system.process.cpu.total.norm.pct': 0.7,
+        const systemMemory = {
+          free: MEMORY_FREE,
+          total: MEMORY_TOTAL,
         };
 
         const transactionsEvents = timerange(start, end)
@@ -99,74 +96,41 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .rate(1)
           .generator((timestamp) => [
             instanceLambdaPython
-              .transaction('GET /order/{id}')
-              .defaults({
-                'service.runtime.name': 'AWS_Lambda_python3.8',
-                'cloud.provider': 'aws',
-                'cloud.service.name': 'lambda',
-                'cloud.region': 'us-east-1',
-              })
+              .invocation()
+              .billedDuration(BILLED_DURATION_MS)
+              .coldStart(true)
+              .coldStartDuration(COLD_START_DURATION_PYTHON)
+              .faasDuration(FAAS_DURATION)
+              .faasTimeout(FAAS_TIMEOUT_MS)
+              .memory(systemMemory)
               .timestamp(timestamp)
               .duration(TRANSACTION_DURATION)
               .success(),
             instanceLambdaPython2
-              .transaction('GET /order/{id}')
-              .defaults({
-                'service.runtime.name': 'AWS_Lambda_python3.8',
-                'cloud.provider': 'aws',
-                'cloud.service.name': 'lambda',
-                'cloud.region': 'us-east-1',
-              })
+              .invocation()
+              .billedDuration(BILLED_DURATION_MS)
+              .coldStart(true)
+              .coldStartDuration(COLD_START_DURATION_PYTHON)
+              .faasDuration(FAAS_DURATION)
+              .faasTimeout(FAAS_TIMEOUT_MS)
+              .memory(systemMemory)
               .timestamp(timestamp)
               .duration(TRANSACTION_DURATION)
               .success(),
             instanceLambdaNode
-              .transaction('GET /orders')
-              .defaults({
-                'service.runtime.name': 'AWS_Lambda_nodejs',
-                'cloud.provider': 'aws',
-                'cloud.service.name': 'lambda',
-                'cloud.region': 'us-east-1',
-              })
+              .invocation()
+              .billedDuration(BILLED_DURATION_MS)
+              .coldStart(false)
+              .coldStartDuration(COLD_START_DURATION_NODE)
+              .faasDuration(FAAS_DURATION)
+              .faasTimeout(FAAS_TIMEOUT_MS)
+              .memory(systemMemory)
               .timestamp(timestamp)
               .duration(TRANSACTION_DURATION)
               .success(),
           ]);
 
-        const metricsEvents = timerange(start, end)
-          .interval('30s')
-          .rate(1)
-          .generator((timestamp) => [
-            instanceLambdaPython
-              .appMetrics({
-                ...systemMetrics,
-                'faas.billed_duration': BILLED_DURATION_MS,
-                'faas.timeout': FAAS_TIMEOUT_MS,
-                'faas.coldstart_duration': COLD_START_DURATION_PYTHON,
-                'faas.duration': FAAS_DURATION,
-              })
-              .timestamp(timestamp),
-            instanceLambdaPython2
-              .appMetrics({
-                ...systemMetrics,
-                'faas.billed_duration': BILLED_DURATION_MS,
-                'faas.timeout': FAAS_TIMEOUT_MS,
-                'faas.coldstart_duration': COLD_START_DURATION_PYTHON,
-                'faas.duration': FAAS_DURATION,
-              })
-              .timestamp(timestamp),
-            instanceLambdaNode
-              .appMetrics({
-                ...systemMetrics,
-                'faas.billed_duration': BILLED_DURATION_MS,
-                'faas.timeout': FAAS_TIMEOUT_MS,
-                'faas.coldstart_duration': COLD_START_DURATION_NODE,
-                'faas.duration': FAAS_DURATION,
-              })
-              .timestamp(timestamp),
-          ]);
-
-        await synthtraceEsClient.index(transactionsEvents.merge(metricsEvents));
+        await synthtraceEsClient.index(transactionsEvents);
       });
 
       after(() => synthtraceEsClient.clean());
@@ -204,7 +168,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               });
               const series = avgDurationMetric?.series.find((item) => item.title === title);
               expect(series?.overallValue).to.eql(expectedValue);
-              const meanValue = meanBy(series?.data, 'y');
+              const meanValue = meanBy(
+                series?.data.filter((item) => item.y !== null),
+                'y'
+              );
               expect(meanValue).to.eql(expectedValue);
             })
           );
@@ -224,7 +191,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns correct mean value', () => {
-            const meanValue = meanBy(coldStartDurationMetric?.series[0]?.data, 'y');
+            const meanValue = meanBy(
+              coldStartDurationMetric?.series[0]?.data.filter((item) => item.y !== null),
+              'y'
+            );
             expect(meanValue).to.equal(COLD_START_DURATION_PYTHON);
           });
         });
@@ -244,7 +214,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns correct sum value', () => {
-            const sumValue = sumBy(coldStartCountMetric?.series[0]?.data, 'y');
+            const sumValue = sumBy(
+              coldStartCountMetric?.series[0]?.data.filter((item) => item.y !== null),
+              'y'
+            );
             expect(sumValue).to.equal(numberOfTransactionsCreated * numberOfPythonInstances);
           });
         });
@@ -261,7 +234,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               });
               const series = memoryUsageMetric?.series.find((item) => item.title === title);
               expect(series?.overallValue).to.eql(expectedValue);
-              const meanValue = meanBy(series?.data, 'y');
+              const meanValue = meanBy(
+                series?.data.filter((item) => item.y !== null),
+                'y'
+              );
               expect(meanValue).to.eql(expectedValue);
             })
           );
@@ -281,7 +257,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns correct mean value', () => {
-            const meanValue = meanBy(computeUsageMetric?.series[0]?.data, 'y');
+            const meanValue = meanBy(
+              computeUsageMetric?.series[0]?.data.filter((item) => item.y !== 0),
+              'y'
+            );
             expect(meanValue).to.equal(expectedValue);
           });
         });
@@ -298,7 +277,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns correct sum value', () => {
-            const sumValue = sumBy(activeInstancesMetric?.series[0]?.data, 'y');
+            const sumValue = sumBy(
+              activeInstancesMetric?.series[0]?.data.filter((item) => item.y !== 0),
+              'y'
+            );
             expect(sumValue).to.equal(numberOfTransactionsCreated * numberOfPythonInstances);
           });
         });
@@ -335,7 +317,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               });
               const series = avgDurationMetric?.series.find((item) => item.title === title);
               expect(series?.overallValue).to.eql(expectedValue);
-              const meanValue = meanBy(series?.data, 'y');
+              const meanValue = meanBy(
+                series?.data.filter((item) => item.y !== null),
+                'y'
+              );
               expect(meanValue).to.eql(expectedValue);
             })
           );
@@ -356,7 +341,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns 0 mean value', () => {
-            const meanValue = meanBy(coldStartDurationMetric?.series[0]?.data, 'y');
+            const meanValue = meanBy(
+              coldStartDurationMetric?.series[0]?.data.filter((item) => item.y !== null),
+              'y'
+            );
             expect(meanValue).to.equal(COLD_START_DURATION_NODE);
           });
         });
@@ -386,7 +374,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               });
               const series = memoryUsageMetric?.series.find((item) => item.title === title);
               expect(series?.overallValue).to.eql(expectedValue);
-              const meanValue = meanBy(series?.data, 'y');
+              const meanValue = meanBy(
+                series?.data.filter((item) => item.y !== null),
+                'y'
+              );
               expect(meanValue).to.eql(expectedValue);
             })
           );
@@ -406,7 +397,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns correct mean value', () => {
-            const meanValue = meanBy(computeUsageMetric?.series[0]?.data, 'y');
+            const meanValue = meanBy(
+              computeUsageMetric?.series[0]?.data.filter((item) => item.y !== 0),
+              'y'
+            );
             expect(meanValue).to.equal(expectedValue);
           });
         });
@@ -424,7 +418,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns correct sum value', () => {
-            const sumValue = sumBy(activeInstancesMetric?.series[0]?.data, 'y');
+            const sumValue = sumBy(
+              activeInstancesMetric?.series[0]?.data.filter((item) => item.y !== 0),
+              'y'
+            );
             expect(sumValue).to.equal(numberOfTransactionsCreated);
           });
         });
