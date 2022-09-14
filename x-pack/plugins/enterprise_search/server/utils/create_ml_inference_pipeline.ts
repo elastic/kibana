@@ -13,8 +13,8 @@ import { formatMlPipelineBody } from './create_pipeline_definitions';
  * Indicators for a possibly created pipeline.
  */
 export interface CreatedPipelineFlags {
-  created?: boolean,
-  exists?: boolean
+  created?: boolean;
+  exists?: boolean;
 }
 
 /**
@@ -42,7 +42,7 @@ export const createMlInferencePipeline = async (
 
     if (pipelineByName[inferencePipelineGeneratedName]) {
       return Promise.resolve({
-        exists: true
+        exists: true,
       });
     }
   } catch (e) {

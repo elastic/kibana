@@ -314,7 +314,7 @@ export function registerIndexRoutes({
 
       return response.ok({
         body: {
-          created: pipelineName
+          created: pipelineName,
         },
         headers: { 'content-type': 'application/json' },
       });
