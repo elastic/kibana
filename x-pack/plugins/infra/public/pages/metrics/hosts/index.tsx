@@ -7,7 +7,6 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import React from 'react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
@@ -63,17 +62,8 @@ export const HostsPage = () => {
                 pageTitle: hostsTitle,
               }}
               pageSectionProps={{
-                paddingSize: 'none',
                 contentProps: {
-                  // This is added to facilitate a full height layout whereby the
-                  // inner container will set its own height and be scrollable.
-                  css: css`
-                    display: flex;
-                    flex-direction: column;
-                    flex: 1 0 auto;
-                    width: 100%;
-                    height: 100%;
-                  `,
+                  className: 'pageSectionContent',
                 },
               }}
             >

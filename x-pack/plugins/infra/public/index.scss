@@ -1,0 +1,9 @@
+// This is added to facilitate a full height layout whereby the
+// inner container will set its own height and be scrollable.
+.pageSectionContent {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  width: 100%;
+  height: 100%;
+}
