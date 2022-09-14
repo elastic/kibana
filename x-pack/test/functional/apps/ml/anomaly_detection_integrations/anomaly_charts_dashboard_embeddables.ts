@@ -32,6 +32,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const PageObjects = getPageObjects(['common', 'timePicker', 'dashboard']);
+  const from = 'Feb 7, 2016 @ 00:00:00.000';
+  const to = 'Feb 11, 2016 @ 00:00:00.000';
 
   describe('anomaly charts in dashboard', function () {
     this.tags(['ml']);
@@ -41,11 +43,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
+      await PageObjects.common.setTime({ from, to });
     });
 
     after(async () => {
       await ml.api.cleanMlIndices();
       await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await PageObjects.common.unsetTime();
     });
 
     for (const testData of testDataList) {
@@ -80,13 +84,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('create new anomaly charts panel', async () => {
           await ml.dashboardEmbeddables.clickInitializerConfirmButtonEnabled();
           await ml.dashboardEmbeddables.assertDashboardPanelExists(testData.panelTitle);
-
-          await ml.dashboardEmbeddables.assertNoMatchingAnomaliesMessageExists();
-
-          await PageObjects.timePicker.setAbsoluteRange(
-            'Feb 7, 2016 @ 00:00:00.000',
-            'Feb 11, 2016 @ 00:00:00.000'
-          );
           await PageObjects.timePicker.pauseAutoRefresh();
           await ml.dashboardEmbeddables.assertAnomalyChartsSeverityThresholdControlExists();
           await ml.dashboardEmbeddables.assertAnomalyChartsExists();
