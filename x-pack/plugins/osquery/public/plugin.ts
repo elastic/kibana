@@ -68,9 +68,17 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         );
       },
     });
-    plugins.cases?.attachmentFramework.registerExternalReference(
-      getExternalReferenceAttachmentRegular()
-    );
+
+    core.getStartServices().then(([coreStart, depsStart]) => {
+      plugins.cases?.attachmentFramework.registerExternalReference(
+        getExternalReferenceAttachmentRegular({
+          ...coreStart,
+          ...depsStart,
+          storage,
+          kibanaVersion,
+        })
+      );
+    });
 
     // Return methods that should be available to other plugins
     return {};

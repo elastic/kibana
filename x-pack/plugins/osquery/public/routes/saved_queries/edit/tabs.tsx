@@ -8,13 +8,14 @@
 import { EuiTabbedContent, EuiNotificationBadge } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { ReactElement } from 'react';
-import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
 
 import type { AddToTimelinePayload } from '../../../timelines/use_add_to_timeline';
 import type { ECSMapping } from '../../../../common/schemas/common';
 import { ResultsTable } from '../../../results/results_table';
 import { ActionResultsSummary } from '../../../action_results/action_results_summary';
+
+const CASES_OWNER: string[] = [];
 
 interface ResultTabsProps {
   actionId: string;
@@ -82,10 +83,9 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
       failedAgentsCount,
     ]
   );
-  const casesOwner = useMemo(() => [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER], []);
 
   return (
-    <CasesContext owner={casesOwner} permissions={casePermissions}>
+    <CasesContext owner={CASES_OWNER} permissions={casePermissions}>
       <EuiTabbedContent
         // TODO: extend the EuiTabbedContent component to support EuiTabs props
         // bottomBorder={false}

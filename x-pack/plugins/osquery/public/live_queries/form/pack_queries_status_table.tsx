@@ -34,7 +34,6 @@ import type {
 import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/constants';
 import { FilterStateStore } from '@kbn/es-query';
 import styled from 'styled-components';
-import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER } from '@kbn/cases-plugin/common';
 import type { AddToTimelinePayload } from '../../timelines/use_add_to_timeline';
 import { PackResultsHeader } from './pack_results_header';
 import { Direction } from '../../../common/search_strategy';
@@ -45,6 +44,8 @@ import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import type { PackItem } from '../../packs/types';
 import type { LogsDataView } from '../../common/hooks/use_logs_data_view';
 import { useLogsDataView } from '../../common/hooks/use_logs_data_view';
+
+const CASES_OWNER: string[] = [];
 
 const TruncateTooltipText = styled.div`
   width: 100%;
@@ -793,25 +794,22 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
       })),
     [data]
   );
-  const casesOwner = useMemo(() => [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER], []);
 
   return (
-    <>
-      <CasesContext owner={casesOwner} permissions={casePermissions}>
-        {showResultsHeader && (
-          <PackResultsHeader queryIds={queryIds} actionId={actionId} addToCase={addToCase} />
-        )}
+    <CasesContext owner={CASES_OWNER} permissions={casePermissions}>
+      {showResultsHeader && (
+        <PackResultsHeader queryIds={queryIds} actionId={actionId} addToCase={addToCase} />
+      )}
 
-        <StyledEuiBasicTable
-          items={data ?? EMPTY_ARRAY}
-          itemId={getItemId}
-          columns={columns}
-          sorting={sorting}
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-          isExpandable
-        />
-      </CasesContext>
-    </>
+      <StyledEuiBasicTable
+        items={data ?? EMPTY_ARRAY}
+        itemId={getItemId}
+        columns={columns}
+        sorting={sorting}
+        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+        isExpandable
+      />
+    </CasesContext>
   );
 };
 
