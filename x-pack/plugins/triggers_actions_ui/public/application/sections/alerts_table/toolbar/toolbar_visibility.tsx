@@ -10,7 +10,7 @@ import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strat
 import React, { lazy, Suspense } from 'react';
 import { BulkActionsConfig } from '../../../../types';
 import { LastUpdatedAt } from './components/last_updated_at';
-import { FieldBrowser, FieldBrowserProps } from '../../field_browser';
+import { FieldBrowser } from '../../field_browser';
 
 const BulkActionsToolbar = lazy(() => import('../bulk_actions/components/toolbar'));
 
@@ -21,15 +21,7 @@ const getDefaultVisibility = (
   onResetColumns: () => void,
   browserFields: any
 ): EuiDataGridToolBarVisibilityOptions => {
-  const fieldBrowserProps: FieldBrowserProps = {
-    columnIds,
-    browserFields,
-    onResetColumns,
-    onToggleColumn,
-    options: {},
-  };
-
-  const hasBrowserFields = Object.keys(fieldBrowserProps.browserFields).length > 0;
+  const hasBrowserFields = Object.keys(browserFields).length > 0;
 
   return {
     showColumnSelector: true,
@@ -37,7 +29,15 @@ const getDefaultVisibility = (
     additionalControls: {
       right: <LastUpdatedAt updatedAt={updatedAt} />,
       left: {
-        append: hasBrowserFields ? <FieldBrowser {...fieldBrowserProps} /> : undefined,
+        append: hasBrowserFields ? (
+          <FieldBrowser
+            columnIds={columnIds}
+            browserFields={browserFields}
+            onResetColumns={onResetColumns}
+            onToggleColumn={onToggleColumn}
+            options={{}}
+          />
+        ) : undefined,
       },
     },
   };
