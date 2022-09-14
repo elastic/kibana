@@ -30,7 +30,9 @@ export async function generateData({
   start: number;
   end: number;
 }) {
-  const instance = apm.service('synth-go', 'production', 'go').instance('instance-a');
+  const instance = apm
+    .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
+    .instance('instance-a');
   const { rate, transaction, span } = dataConfig;
 
   await synthtraceEsClient.index(
@@ -39,13 +41,13 @@ export async function generateData({
       .rate(rate)
       .generator((timestamp) =>
         instance
-          .transaction(transaction.name)
+          .transaction({ transactionName: transaction.name })
           .timestamp(timestamp)
           .duration(transaction.duration)
           .success()
           .children(
             instance
-              .span(span.name, span.type, span.subType)
+              .span({ spanName: span.name, spanType: span.type, spanSubtype: span.subType })
               .duration(transaction.duration)
               .success()
               .destination(span.destination)
