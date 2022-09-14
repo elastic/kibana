@@ -267,7 +267,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
             ? await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs)
             : inputs;
 
-          elasticsearch = pkgInfo.elasticsearch;
+          elasticsearch = pkgInfo?.elasticsearch;
         }
 
         return {
