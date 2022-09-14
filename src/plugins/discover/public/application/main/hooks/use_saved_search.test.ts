@@ -39,7 +39,6 @@ describe('test useSavedSearch', () => {
         services: discoverServiceMock,
         stateContainer,
         useNewFieldsApi: true,
-        adHocDataViewList: [],
       });
     });
 
@@ -80,7 +79,6 @@ describe('test useSavedSearch', () => {
         services: discoverServiceMock,
         stateContainer,
         useNewFieldsApi: true,
-        adHocDataViewList: [],
       });
     });
 
@@ -125,7 +123,6 @@ describe('test useSavedSearch', () => {
         services: discoverServiceMock,
         stateContainer,
         useNewFieldsApi: true,
-        adHocDataViewList: [],
       });
     });
 
@@ -160,7 +157,6 @@ describe('test useSavedSearch', () => {
         services: discoverServiceMock,
         stateContainer,
         useNewFieldsApi: true,
-        adHocDataViewList: [],
       });
     });
 

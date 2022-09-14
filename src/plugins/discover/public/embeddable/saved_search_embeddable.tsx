@@ -219,7 +219,6 @@ export class SavedSearchEmbeddable
     const useSql = recordRawType === RecordRawType.PLAIN;
 
     try {
-      const dataView = this.savedSearch.searchSource.getField('index');
       // Request SQL data
       if (useSql && query) {
         const result = await fetchSql(
@@ -227,7 +226,6 @@ export class SavedSearchEmbeddable
           this.services.dataViews,
           this.services.data,
           this.services.expressions,
-          dataView && !dataView.isPersisted() ? [dataView] : [],
           this.input.filters,
           this.input.query
         );

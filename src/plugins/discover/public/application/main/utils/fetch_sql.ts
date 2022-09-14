@@ -11,7 +11,7 @@ import { Query, AggregateQuery, Filter } from '@kbn/es-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { queryStateToExpressionAst } from '@kbn/data-plugin/common';
 import { DataTableRecord } from '../../../types';
 
@@ -27,7 +27,6 @@ export function fetchSql(
   dataViewsService: DataViewsContract,
   data: DataPublicPluginStart,
   expressions: ExpressionsStart,
-  adHocDataViews: DataView[],
   filters?: Filter[],
   inputQuery?: Query
 ) {
@@ -38,7 +37,6 @@ export function fetchSql(
     time: timeRange,
     dataViewsService,
     inputQuery,
-    adHocDataViews,
   })
     .then((ast) => {
       if (ast) {

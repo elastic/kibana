@@ -8,7 +8,7 @@
 import { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
-import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { getRawRecordType } from './get_raw_record_type';
 import {
@@ -46,7 +46,6 @@ export interface FetchDeps {
   searchSessionId: string;
   services: DiscoverServices;
   useNewFieldsApi: boolean;
-  adHocDataViewList: DataView[];
 }
 
 /**
@@ -114,13 +113,7 @@ export function fetchAll(
     // Start fetching all required requests
     const documents =
       useSql && query
-        ? fetchSql(
-            query,
-            services.dataViews,
-            data,
-            services.expressions,
-            fetchDeps.adHocDataViewList
-          )
+        ? fetchSql(query, services.dataViews, data, services.expressions)
         : fetchDocuments(searchSource.createCopy(), fetchDeps);
     const charts =
       isChartVisible && !useSql ? fetchChart(searchSource.createCopy(), fetchDeps) : undefined;

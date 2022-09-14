@@ -151,7 +151,6 @@ export function useDiscoverState({
     services,
     stateContainer,
     useNewFieldsApi,
-    adHocDataViewList,
   });
   /**
    * State changes (data view, columns), when a text base query result is returned

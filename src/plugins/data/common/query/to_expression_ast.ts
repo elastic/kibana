@@ -8,11 +8,11 @@
 import {
   isOfAggregateQueryType,
   getAggregateQueryMode,
-  Query,
   getIndexPatternFromSQLQuery,
+  Query,
 } from '@kbn/es-query';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import {
   ExpressionFunctionKibana,
   ExpressionFunctionKibanaContext,
@@ -26,7 +26,6 @@ import {
 interface Args extends QueryState {
   dataViewsService: DataViewsContract;
   inputQuery?: Query;
-  adHocDataViews: DataView[];
 }
 
 /**
@@ -41,7 +40,6 @@ export async function queryStateToExpressionAst({
   inputQuery,
   time,
   dataViewsService,
-  adHocDataViews,
 }: Args) {
   const kibana = buildExpressionFunction<ExpressionFunctionKibana>('kibana', {});
   let q;
@@ -60,19 +58,10 @@ export async function queryStateToExpressionAst({
     if (mode === 'sql' && 'sql' in query) {
       const idxPattern = getIndexPatternFromSQLQuery(query.sql);
       const idsTitles = await dataViewsService.getIdsWithTitle();
+      const dataViewIdTitle = idsTitles.find(({ title }) => title === idxPattern);
 
-      let dataViewId = idsTitles.find(({ title }) => title === idxPattern)?.id;
-
-      // use ad-hoc data view if exists
-      if (!dataViewId) {
-        const adHocDataView = adHocDataViews.find(({ title }) => title === idxPattern);
-        if (adHocDataView) {
-          dataViewId = adHocDataView.id;
-        }
-      }
-
-      if (dataViewId) {
-        const dataView = await dataViewsService.get(dataViewId);
+      if (dataViewIdTitle) {
+        const dataView = await dataViewsService.get(dataViewIdTitle.id);
         const timeFieldName = dataView.timeFieldName;
         const essql = aggregateQueryToAst(query, timeFieldName);
 
