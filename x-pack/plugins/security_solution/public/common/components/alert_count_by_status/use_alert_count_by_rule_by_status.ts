@@ -10,6 +10,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
 import type { GenericBuckets } from '../../../../common/search_strategy';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
+import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { useGlobalTime } from '../../containers/use_global_time';
 import { useQueryInspector } from '../page/manage_query';
@@ -26,7 +27,7 @@ export interface UseAlertCountByRuleByStatusProps {
   statuses: Status[];
   skip?: boolean;
 }
-type UseAlertCountByRuleByStatus = (props: UseAlertCountByRuleByStatusProps) => {
+export type UseAlertCountByRuleByStatus = (props: UseAlertCountByRuleByStatusProps) => {
   items: AlertCountByRuleByStatusItem[];
   isLoading: boolean;
   updatedAt: number;
@@ -41,8 +42,10 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
   statuses,
   skip = false,
 }) => {
-  const [items, setItems] = useState<AlertCountByRuleByStatusItem[]>([]);
   const [updatedAt, setUpdatedAt] = useState(Date.now());
+  const [items, setItems] = useState<AlertCountByRuleByStatusItem[]>([]);
+
+  const { signalIndexName } = useSignalIndex();
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
 
   const {
@@ -61,7 +64,8 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
       statuses,
     }),
     skip,
-    queryName: ALERTS_QUERY_NAMES.BY_RULE_BY_STATUS,
+    queryName: ALERTS_QUERY_NAMES.ALERTS_COUNT_BY_STATUS,
+    indexName: signalIndexName,
   });
 
   useEffect(() => {
@@ -83,7 +87,7 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
       setItems(parseAlertCountByRuleItems(data.aggregations as AlertCountByRuleByFieldAggregation));
     }
     setUpdatedAt(Date.now());
-  }, [data, field, from, statuses, to, value]);
+  }, [data]);
 
   const refetch = useCallback(() => {
     if (!skip && refetchQuery) {
@@ -106,7 +110,7 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
   return { items, isLoading, updatedAt };
 };
 
-const buildRuleAlertsByEntityQuery = ({
+export const buildRuleAlertsByEntityQuery = ({
   from,
   to,
   field,

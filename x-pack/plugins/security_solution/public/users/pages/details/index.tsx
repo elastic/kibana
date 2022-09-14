@@ -60,7 +60,7 @@ import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_ca
 import { LandingPageComponent } from '../../../common/components/landing_page';
 
 const QUERY_ID = 'UsersDetailsQueryId';
-const ES_USER_FIELD = 'user.username';
+const ES_USER_FIELD = 'user.name';
 
 const StyledEuiFlexItem = euiStyled(EuiFlexItem)`
   border: 1px solid ${euiThemeVars.euiColorLightShade};

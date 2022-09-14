@@ -9,7 +9,7 @@ import { APP_UI_ID } from '../../../../../common/constants';
 
 export const ALERTS_QUERY_NAMES = {
   ADD_EXCEPTION_FLYOUT: `${APP_UI_ID} fetchAlerts addExceptionFlyout`,
-  ALERTS_COUNT_BY_STATUS: `${APP_UI_ID} fetchAlerts addExceptionFlyout`,
+  ALERTS_COUNT_BY_STATUS: `${APP_UI_ID} fetchAlerts byRulebyCount`,
   BY_ID: `${APP_UI_ID} fetchAlerts byId`,
   BY_RULE_BY_STATUS: `${APP_UI_ID} fetchAlerts byRulebyStatus`,
   BY_RULE_ID: `${APP_UI_ID} fetchAlerts byRuleId`,

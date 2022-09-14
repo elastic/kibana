@@ -10,7 +10,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFilterButton, EuiFilterSelectItem, EuiPopover } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
-interface MultiSelectPopoverProps {
+export interface MultiSelectPopoverProps {
   title: string;
   allItems: string[];
   selectedItems: string[];
@@ -57,7 +57,7 @@ export const MultiSelectPopover = React.memo(
         button={
           <StyledFilterButton
             grow={false}
-            data-test-subj={'tags-filter-popover-button'}
+            data-test-subj={'multiselect-popover-button'}
             iconType="arrowDown"
             onClick={() => togglePopover()}
             numFilters={allItems.length}

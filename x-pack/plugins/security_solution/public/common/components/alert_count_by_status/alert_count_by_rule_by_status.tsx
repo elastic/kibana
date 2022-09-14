@@ -25,7 +25,7 @@ import { useQueryToggle } from '../../containers/query_toggle';
 import { FormattedCount } from '../formatted_number';
 import { HeaderSection } from '../header_section';
 import { BUTTON_CLASS as INSPECT_BUTTON_CLASS } from '../inspect';
-import { MultiSelectPopover } from './components';
+import { LastUpdatedAt, MultiSelectPopover } from './components';
 import * as i18n from './translations';
 import type { AlertCountByRuleByStatusItem } from './use_alert_count_by_rule_by_status';
 import { useAlertCountByRuleByStatus } from './use_alert_count_by_rule_by_status';
@@ -63,7 +63,7 @@ export const AlertCountByStatus = React.memo(({ field, value }: AlertCountByStat
     [field, value, openRuleInTimeline]
   );
 
-  const { items, isLoading } = useAlertCountByRuleByStatus({
+  const { items, isLoading, updatedAt } = useAlertCountByRuleByStatus({
     field,
     value,
     queryId,
@@ -73,7 +73,7 @@ export const AlertCountByStatus = React.memo(({ field, value }: AlertCountByStat
 
   return (
     <HoverVisibilityContainer show={true} targetClassNames={[INSPECT_BUTTON_CLASS]}>
-      <StyledEuiPanel hasBorder>
+      <StyledEuiPanel hasBorder data-test-subj="alertCountByRulePanel">
         <>
           <HeaderSection
             id={queryId}
@@ -81,6 +81,7 @@ export const AlertCountByStatus = React.memo(({ field, value }: AlertCountByStat
             titleSize="s"
             toggleStatus={toggleStatus}
             toggleQuery={setToggleStatus}
+            subtitle={<LastUpdatedAt updatedAt={updatedAt} isUpdating={isLoading} />}
           >
             <MultiSelectPopover
               title={i18n.Status}
@@ -94,7 +95,7 @@ export const AlertCountByStatus = React.memo(({ field, value }: AlertCountByStat
             <>
               <EuiBasicTable
                 className="eui-yScroll"
-                data-test-subj="severityRuleAlertsTable"
+                data-test-subj="alertCountByRuleTable"
                 columns={columns}
                 items={items}
                 loading={isLoading}
