@@ -179,6 +179,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
       {(resizeRef) => (
         <div
           id={`mlAnomalyExplorerEmbeddableWrapper-${id}`}
+          className="mlAnomalyExplorerEmbeddableWrapper"
           style={{
             width: '100%',
             overflowY: 'auto',

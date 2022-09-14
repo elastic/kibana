@@ -14,16 +14,25 @@ export type MlAnomalyCharts = ProvidedType<typeof AnomalyChartsProvider>;
 export function AnomalyChartsProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const find = getService('find');
 
   return {
     async assertAnomalyExplorerChartsCount(
-      chartsContainerSubj: string,
+      chartsContainerSubj: string | undefined,
       expectedChartsCount: number
     ) {
       await retry.tryForTime(5000, async () => {
-        const chartsContainer = await testSubjects.find(chartsContainerSubj);
+        // For anomaly charts, time range expected is of the chart plotEarliest/plotLatest
+        // and not of the global time range
+        // but since plot earliest & latest might vary depends on the current time
+        // we don't know the exact hashed id for sure
+        // so we find first available chart container if id is not provided
+        const chartsContainer =
+          chartsContainerSubj !== undefined
+            ? await testSubjects.find(chartsContainerSubj)
+            : await find.byCssSelector('[class="mlAnomalyExplorerEmbeddableWrapper"]');
         const actualChartsCount = (
-          await chartsContainer.findAllByClassName('ml-explorer-chart-container', 3000)
+          await chartsContainer?.findAllByClassName('ml-explorer-chart-container', 3000)
         ).length;
         expect(actualChartsCount).to.eql(
           expectedChartsCount,
