@@ -70,6 +70,10 @@ const populateColumns = (
   });
 };
 
+const getColumnByColumnId = (columns: EuiDataGridColumn[], columnId: string) => {
+  return columns.find(({ id }: { id: string }) => id === columnId);
+};
+
 export const useColumns = ({ featureIds, storageAlertsTable, storage, id }: UseColumnsArgs) => {
   const [isBrowserFieldDataLoading, browserFields] = useFetchBrowserFieldCapabilities({
     featureIds,
@@ -79,7 +83,6 @@ export const useColumns = ({ featureIds, storageAlertsTable, storage, id }: UseC
   const [visibleColumns, setVisibleColumns] = useState(
     storageAlertsTable.current.visibleColumns ?? []
   );
-
   useEffect(() => {
     if (isBrowserFieldDataLoading !== false || isColumnsPopulated === true) return;
 
@@ -120,13 +123,15 @@ export const useColumns = ({ featureIds, storageAlertsTable, storage, id }: UseC
           ? [...visibleColumns.slice(0, currentIndex), ...visibleColumns.slice(currentIndex + 1)]
           : [...visibleColumns, columnId];
 
-      const newColumns = newColumnIds.map((_columnId) =>
-        euiColumnFactory({ id: _columnId }, browserFields)
-      );
+      const newColumns = newColumnIds.map((_columnId) => {
+        const column = getColumnByColumnId(columns, _columnId);
+        return euiColumnFactory(column ? column : { id: _columnId }, browserFields);
+      });
+
       onChangeVisibleColumns(newColumnIds);
       onColumnsChange(newColumns, newColumnIds);
     },
-    [browserFields, onChangeVisibleColumns, onColumnsChange, visibleColumns]
+    [browserFields, columns, onChangeVisibleColumns, onColumnsChange, visibleColumns]
   );
 
   const onResetColumns = useCallback(() => {
