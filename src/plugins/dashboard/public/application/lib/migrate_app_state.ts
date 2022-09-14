@@ -7,14 +7,13 @@
  */
 
 import semverSatisfies from 'semver/functions/satisfies';
-import type { SerializableRecord } from '@kbn/utility-types';
+
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
+import type { SerializableRecord } from '@kbn/utility-types';
 
-import { UsageCollectionSetup } from '../../services/usage_collection';
 import { RawDashboardState, SavedDashboardPanel } from '../../types';
-import {
-  migratePanelsTo730,
+import type {
   SavedDashboardPanelTo60,
   SavedDashboardPanel730ToLatest,
   SavedDashboardPanel610,
@@ -22,6 +21,8 @@ import {
   SavedDashboardPanel640To720,
   SavedDashboardPanel620,
 } from '../../../common';
+import { migratePanelsTo730 } from '../../../common';
+import { pluginServices } from '../../services/plugin_services';
 
 /**
  * Attempts to migrate the state stored in the URL into the latest version of it.
@@ -29,9 +30,7 @@ import {
  * Once we hit a major version, we can remove support for older style URLs and get rid of this logic.
  */
 export function migrateAppState(
-  appState: { [key: string]: any } & RawDashboardState,
-  kibanaVersion: string,
-  usageCollection?: UsageCollectionSetup
+  appState: { [key: string]: any } & RawDashboardState
 ): RawDashboardState {
   if (!appState.panels) {
     throw new Error(
@@ -40,6 +39,11 @@ export function migrateAppState(
       })
     );
   }
+
+  const {
+    usageCollection: { reportUiCounter },
+    initializerContext: { kibanaVersion },
+  } = pluginServices.getServices();
 
   const panelNeedsMigration = (
     appState.panels as Array<
@@ -55,13 +59,9 @@ export function migrateAppState(
 
     const version = (panel as SavedDashboardPanel730ToLatest).version;
 
-    if (usageCollection) {
+    if (reportUiCounter) {
       // This will help us figure out when to remove support for older style URLs.
-      usageCollection.reportUiCounter(
-        'DashboardPanelVersionInUrl',
-        METRIC_TYPE.LOADED,
-        `${version}`
-      );
+      reportUiCounter('DashboardPanelVersionInUrl', METRIC_TYPE.LOADED, `${version}`);
     }
 
     return semverSatisfies(version, '<7.3');
