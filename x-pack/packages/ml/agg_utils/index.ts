@@ -15,6 +15,7 @@ export type { FieldsForHistograms } from './src/fetch_histograms_for_fields';
 export type {
   AggCardinality,
   ChangePoint,
+  ChangePointGroup,
   ChangePointHistogram,
   ChangePointHistogramItem,
   HistogramField,
