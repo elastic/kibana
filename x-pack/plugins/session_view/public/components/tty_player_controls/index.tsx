@@ -30,7 +30,6 @@ import {
 export interface TTYPlayerControlsDeps {
   currentProcessEvent: ProcessEvent | undefined;
   processStartMarkers: ProcessStartMarker[];
-  lastProcessEntityId: string | undefined;
   isPlaying: boolean;
   currentLine: number;
   linesLength: number;
@@ -44,7 +43,6 @@ export interface TTYPlayerControlsDeps {
 export const TTYPlayerControls = ({
   currentProcessEvent,
   processStartMarkers,
-  lastProcessEntityId,
   isPlaying,
   currentLine,
   linesLength,

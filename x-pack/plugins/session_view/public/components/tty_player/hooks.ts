@@ -224,13 +224,25 @@ export const useXtermPlayer = ({
     if (!isFetching && hasNextPage && fetchNextPage && currentLine >= lines.length - 100) {
       fetchNextPage();
     }
-  }, [currentLine, fontSize, terminal, render, tty, hasNextPage, fetchNextPage, lines.length]);
+  }, [
+    currentLine,
+    fontSize,
+    terminal,
+    render,
+    tty,
+    hasNextPage,
+    fetchNextPage,
+    lines.length,
+    isFetching,
+  ]);
 
   useEffect(() => {
     if (isPlaying) {
       const timer = setTimeout(() => {
         if (currentLine < lines.length - 1) {
           setCurrentLine(currentLine + LINES_PER_FRAME);
+        } else {
+          setIsPlaying(false);
         }
 
         render(currentLine, false);
@@ -240,7 +252,7 @@ export const useXtermPlayer = ({
         clearTimeout(timer);
       };
     }
-  }, [lines, currentLine, isPlaying, playSpeed, render, hasNextPage, fetchNextPage]);
+  }, [lines, currentLine, isPlaying, playSpeed, render, hasNextPage, fetchNextPage, setIsPlaying]);
 
   const seekToLine = useCallback(
     (index) => {

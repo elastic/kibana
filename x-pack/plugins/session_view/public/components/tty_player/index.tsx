@@ -103,8 +103,12 @@ export const TTYPlayer = ({
   }, [seekToLine]);
 
   const onTogglePlayback = useCallback(() => {
+    // if at the end, seek to beginning
+    if (currentLine >= lines.length) {
+      seekToLine(0);
+    }
     setIsPlaying(!isPlaying);
-  }, [isPlaying]);
+  }, [currentLine, isPlaying, lines.length, seekToLine]);
 
   return (
     <div css={styles.container}>
@@ -150,7 +154,6 @@ export const TTYPlayer = ({
       <TTYPlayerControls
         currentProcessEvent={currentProcessEvent}
         processStartMarkers={processStartMarkers}
-        lastProcessEntityId={lines[lines.length - 1]?.event.process?.entity_id}
         isPlaying={isPlaying}
         currentLine={currentLine}
         linesLength={lines.length}
