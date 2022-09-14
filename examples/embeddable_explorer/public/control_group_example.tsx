@@ -55,7 +55,7 @@ const mapFieldsToControlOptions = (controlGroupAPI: ControlGroupContainer, dataV
             if (!controlGroupAPI || !dataViewId) return;
             controlGroupAPI.addDataControlFromField({
               title: meta.title,
-              fieldName: fieldName,
+              fieldName,
               dataViewId,
             });
           },
