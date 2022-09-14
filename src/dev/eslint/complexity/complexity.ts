@@ -138,9 +138,3 @@ export class ComplexityReportGenerator {
     }
   }
 }
-
-export function generateComplexityReport() {
-  const complexityReportGenerator = new ComplexityReportGenerator({ complexity: 1 });
-
-  return complexityReportGenerator.generate(process.argv.slice(2));
-}

@@ -7,4 +7,4 @@
  */
 
 require('../src/setup_node_env');
-require('../src/dev/eslint').generateComplexityReport().then(console.log);
+require('../src/dev/eslint').generateComplexityReport();
