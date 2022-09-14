@@ -140,9 +140,6 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
           // TODO show an alert
         }
 
-        // await http.post(`/internal/enterprise_search/indices/${indexName}/crawler/crawl_requests`, {
-        //   body: JSON.stringify({ overrides }),
-        // });
         actions.fetchCrawlerData();
       } catch (e) {
         flashAPIErrors(e);
