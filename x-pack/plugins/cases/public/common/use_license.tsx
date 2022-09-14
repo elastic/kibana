@@ -8,6 +8,7 @@
 import { ILicense, LicenseType } from '@kbn/licensing-plugin/public';
 import { useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { Observable } from 'rxjs';
 import { useKibana } from './lib/kibana';
 
 interface UseLicenseReturnValue {
@@ -15,12 +16,12 @@ interface UseLicenseReturnValue {
   isAtLeastPlatinum: () => boolean;
   isAtLeastGold: () => boolean;
   isAtLeastEnterprise: () => boolean;
-  getLicense: () => ILicense | null;
+  getLicense: () => ILicense | null | undefined;
 }
 
 export const useLicense = (): UseLicenseReturnValue => {
   const { licensing } = useKibana().services;
-  const license = useObservable(licensing.license$, null);
+  const license = useObservable<ILicense | null>(licensing?.license$ ?? new Observable(), null);
 
   const isAtLeast = useCallback(
     (level: LicenseType): boolean => {

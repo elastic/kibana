@@ -8,13 +8,10 @@
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import {
-  deleteCasesByESQuery,
-  deleteCasesUserActions,
-  deleteComments,
-  deleteConfiguration,
   createCase,
   updateCase,
   findCases,
+  deleteAllCaseItems,
 } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -24,10 +21,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('assignees', () => {
     afterEach(async () => {
-      await deleteCasesByESQuery(es);
-      await deleteComments(es);
-      await deleteConfiguration(es);
-      await deleteCasesUserActions(es);
+      await deleteAllCaseItems(es);
     });
 
     describe('create_case', () => {

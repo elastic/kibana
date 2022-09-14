@@ -20,7 +20,7 @@ const PlatinumLicenseCalloutComponent: React.FC = () => {
       data-test-subj="case-callout-license-info"
     >
       <FormattedMessage
-        defaultMessage="Assign users to cases or opening cases in external systems is available when you have the {appropriateLicense}, are using a {cloud}, or are testing out a Free Trial."
+        defaultMessage="Assigning users to cases or opening cases in external systems is available when you have the {appropriateLicense}, are using a {cloud}, or are testing out a Free Trial."
         id="xpack.cases.platinumLicenseCalloutMessage"
         values={{
           appropriateLicense: (

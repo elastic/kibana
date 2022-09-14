@@ -42,8 +42,8 @@ describe('useCasesFeatures', () => {
         isAlertsEnabled,
         isSyncAlertsEnabled,
         metricsFeatures: [],
-        allowCaseAssignment: false,
-        allowPushToService: false,
+        caseAssignmentAuthorized: false,
+        pushToServiceAuthorized: false,
       });
     }
   );
@@ -59,8 +59,8 @@ describe('useCasesFeatures', () => {
       isAlertsEnabled: true,
       isSyncAlertsEnabled: true,
       metricsFeatures: ['connectors'],
-      allowCaseAssignment: false,
-      allowPushToService: false,
+      caseAssignmentAuthorized: false,
+      pushToServiceAuthorized: false,
     });
   });
 
@@ -86,8 +86,8 @@ describe('useCasesFeatures', () => {
         isAlertsEnabled: true,
         isSyncAlertsEnabled: true,
         metricsFeatures: [],
-        allowCaseAssignment: expectedResult,
-        allowPushToService: expectedResult,
+        caseAssignmentAuthorized: expectedResult,
+        pushToServiceAuthorized: expectedResult,
       });
     }
   );

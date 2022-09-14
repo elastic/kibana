@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import Boom from '@hapi/boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
@@ -57,7 +58,7 @@ export const find = async (
      * Assign users to a case is only available to Platinum+
      */
 
-    if (queryParams.assignees) {
+    if (!isEmpty(queryParams.assignees)) {
       const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
 
       if (!hasPlatinumLicenseOrGreater) {

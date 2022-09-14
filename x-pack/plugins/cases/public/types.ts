@@ -55,7 +55,7 @@ export interface CasesPluginSetup {
 export interface CasesPluginStart {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
-  licensing: LicensingPluginStart;
+  licensing?: LicensingPluginStart;
   lens: LensPublicStart;
   storage: Storage;
   triggersActionsUi: TriggersActionsStart;

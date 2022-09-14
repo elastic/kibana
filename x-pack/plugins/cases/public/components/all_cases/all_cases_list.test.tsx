@@ -1014,6 +1014,8 @@ describe('AllCasesListGeneric', () => {
 
 describe('Assignees', () => {
   it('should hide the assignees column on basic license', async () => {
+    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
+
     const result = render(
       <TestProviders>
         <AllCasesList />
@@ -1042,6 +1044,8 @@ describe('Assignees', () => {
   });
 
   it('should hide the assignees filters on basic license', async () => {
+    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
+
     const result = render(
       <TestProviders>
         <AllCasesList />

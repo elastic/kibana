@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { MlLicense } from '../../../common/license';
 import { MlClientLicense } from './ml_client_license';
@@ -22,7 +22,7 @@ let mlLicense: MlClientLicense | null = null;
  * @returns {MlClientLicense}
  */
 export function setLicenseCache(
-  licensingSetup: LicensingPluginSetup,
+  licensingSetup: LicensingPluginStart,
   application: CoreStart['application'],
   postInitFunctions?: Array<(lic: MlLicense) => void>
 ) {
