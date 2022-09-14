@@ -150,18 +150,6 @@ describe('useField() hook', () => {
   });
 
   describe('fieldsToValidateOnChange', () => {
-    let fieldHook1: FieldHook;
-    let fieldHook2: FieldHook;
-    const TestField1 = ({ field }: { field: FieldHook }) => {
-      fieldHook1 = field;
-      return null;
-    };
-
-    const TestField2 = ({ field }: { field: FieldHook }) => {
-      fieldHook2 = field;
-      return null;
-    };
-
     const getTestForm =
       (configField1?: FieldConfig, configField2?: FieldConfig) =>
       ({ showField1, showField2 }: { showField1: boolean; showField2: boolean }) => {
@@ -169,8 +157,8 @@ describe('useField() hook', () => {
 
         return (
           <Form form={form}>
-            {showField1 && <UseField path="field1" component={TestField1} config={configField1} />}
-            {showField2 && <UseField path="field2" component={TestField2} config={configField2} />}
+            {showField1 && <UseField path="field1" component={() => null} config={configField1} />}
+            {showField2 && <UseField path="field2" component={() => null} config={configField2} />}
           </Form>
         );
       };
