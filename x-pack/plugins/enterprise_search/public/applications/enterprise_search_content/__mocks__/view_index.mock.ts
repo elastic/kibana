@@ -19,10 +19,10 @@ import {
 
 export const apiIndex: ApiViewIndex = {
   count: 1,
+  hidden: false,
   ingestionMethod: IngestionMethod.API,
   ingestionStatus: IngestionStatus.CONNECTED,
   lastUpdated: null,
-  hidden: false,
   name: 'api',
   total: {
     docs: {
@@ -38,6 +38,7 @@ export const connectorIndex: ConnectorViewIndex = {
     configuration: { foo: { label: 'bar', value: 'barbar' } },
     id: '2',
     index_name: 'connector',
+    is_native: false,
     language: 'en',
     last_seen: null,
     last_sync_error: null,
@@ -91,6 +92,7 @@ export const connectorCrawlerIndex: CrawlerViewIndex = {
     configuration: { foo: { label: 'bar', value: 'barbar' } },
     id: '4',
     index_name: 'connector-crawler',
+    is_native: true,
     language: 'en',
     last_seen: null,
     last_sync_error: null,

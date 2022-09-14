@@ -44,6 +44,9 @@ const names: Record<string, string> = {
   securitySolution: i18n.translate('advancedSettings.categoryNames.securitySolutionLabel', {
     defaultMessage: 'Security Solution',
   }),
+  enterpriseSearch: i18n.translate('advancedSettings.categoryNames.enterpriseSearchLabel', {
+    defaultMessage: 'Enterprise Search',
+  }),
 };
 
 export function getCategoryName(category?: string) {
