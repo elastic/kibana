@@ -209,6 +209,7 @@ describe('AnnotationsPanel', () => {
             indexPatternId: 'indexPattern1',
             layerId: 'annotation',
             layerType: 'annotations',
+            ignoreGlobalFilters: true,
           },
         ],
       });
@@ -233,6 +234,7 @@ describe('AnnotationsPanel', () => {
             indexPatternId: 'indexPattern1',
             layerId: 'annotation',
             layerType: 'annotations',
+            ignoreGlobalFilters: true,
           },
         ],
       });
