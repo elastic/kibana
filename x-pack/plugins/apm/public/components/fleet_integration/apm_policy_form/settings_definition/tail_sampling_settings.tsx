@@ -108,7 +108,7 @@ export function getTailSamplingSettings(docsLinks?: string): SettingsRow[] {
             'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingStorageLimitDescription',
             {
               defaultMessage:
-                'The amount of storage space allocated for trace events matching tail sampling policies.',
+                'The amount of storage space allocated for trace events matching tail sampling policies. Caution: Setting this limit higher than the allowed space may cause APM Server to become unhealthy.',
             }
           ),
           labelAppend: OPTIONAL_LABEL,

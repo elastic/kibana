@@ -10,9 +10,9 @@ import { isRight } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 
 describe('storageSizeRt', () => {
-  describe('must accept any amount', () => {
+  describe('when no min or max defined', () => {
     const storageSizeRt = getStorageSizeRt({});
-    describe('it should not accept', () => {
+    describe('it should not accept unknown values or units', () => {
       ['MB', 1, '1', '5ZB', '6YB', '-2G'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
           expect(isRight(storageSizeRt.decode(input))).toBe(false);
@@ -20,7 +20,7 @@ describe('storageSizeRt', () => {
       });
     });
 
-    describe('it should accept', () => {
+    describe('it should accept integer values with known units', () => {
       ['1B', '0mb', '1b', '-2kb', '3mb', '10GB', '2TB'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
           expect(isRight(storageSizeRt.decode(input))).toBe(true);
@@ -28,12 +28,12 @@ describe('storageSizeRt', () => {
       });
     });
   });
-  describe('must be at least 2000kB', () => {
+  describe('when a min size is given', () => {
     const storageSizeRt = getStorageSizeRt({
       min: '2000kB',
     });
 
-    describe('it should not accept', () => {
+    describe('it should not accept values below min', () => {
       ['mb', '-1kb', '1MB', '3000B'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
           expect(isRight(storageSizeRt.decode(input))).toBe(false);
@@ -52,7 +52,7 @@ describe('storageSizeRt', () => {
       });
     });
 
-    describe('it should accept', () => {
+    describe('is should accept values at or above min', () => {
       ['2000kB', '2MB', '1GB', '2000000B'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
           expect(isRight(storageSizeRt.decode(input))).toBe(true);
@@ -60,12 +60,12 @@ describe('storageSizeRt', () => {
       });
     });
   });
-  describe('must be between 0B and 3GB', () => {
+  describe('when a range is given', () => {
     const storageSizeRt = getStorageSizeRt({
       min: '0B',
       max: '1GB',
     });
-    describe('it should not accept', () => {
+    describe('it should not accept values outside range', () => {
       ['mb', '-1B', '1001MB', '2gb', '-1GB'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
           expect(isRight(storageSizeRt.decode(input))).toBe(false);
@@ -82,7 +82,7 @@ describe('storageSizeRt', () => {
         });
       });
     });
-    describe('it should accept', () => {
+    describe('it should accept values within range', () => {
       ['500b', '100kB', '1000MB', '1GB'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
           expect(isRight(storageSizeRt.decode(input))).toBe(true);
