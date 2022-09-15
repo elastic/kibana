@@ -33,10 +33,6 @@ const StyledIconsList = styled(EuiFlexItem)`
   padding-left: 10px;
 `;
 
-// const IconComponent = () => (
-//   <EuiButtonIcon iconType={'casesApp'} color="text" size="xs" iconSize="l" />
-// );
-
 export const PackResultsHeader = ({ actionId, addToCase }: PackResultsHeadersProps) => (
   <>
     <EuiFlexGroup direction="row" gutterSize="m">
