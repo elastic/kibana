@@ -127,6 +127,7 @@ export const requestEventAnnotations = (
           timeFields,
           filters: ignoreGlobalFilters ? undefined : input?.filters,
           query: ignoreGlobalFilters ? undefined : (input?.query as any),
+          // Keep the timeRange also with ignoreGlobalFilters flag
           timeRange: input?.timeRange,
           abortSignal,
           inspectorAdapters,

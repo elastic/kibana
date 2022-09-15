@@ -321,16 +321,6 @@ export const AnnotationsPanel = (
           value={Boolean(currentAnnotation?.isHidden)}
           onChange={(ev) => setAnnotations({ isHidden: ev.target.checked })}
         />
-        {isQueryBased ? (
-          <ConfigPanelGenericSwitch
-            label={i18n.translate('xpack.lens.xyChart.annotation.ignoreGlobalFilters', {
-              defaultMessage: 'Ignore global filters',
-            })}
-            data-test-subj="lns-annotations-ignore-global-filters"
-            value={Boolean(currentAnnotation?.ignoreGlobalFilters)}
-            onChange={(ev) => setAnnotations({ ignoreGlobalFilters: ev.target.checked })}
-          />
-        ) : null}
       </DimensionEditorSection>
       {isQueryBased && currentAnnotation && (
         <DimensionEditorSection

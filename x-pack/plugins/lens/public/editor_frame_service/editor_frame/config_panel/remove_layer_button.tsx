@@ -103,7 +103,7 @@ const getButtonCopy = (
   };
 };
 
-export function RemoveLayerButton({
+export function getRemoveLayerActionDefinition({
   onRemoveLayer,
   layerIndex,
   isOnlyLayer,
@@ -116,6 +116,37 @@ export function RemoveLayerButton({
   activeVisualization: Visualization;
   layerType?: LayerType;
 }) {
+  const { ariaLabel } = getButtonCopy(
+    layerIndex,
+    layerType || layerTypes.DATA,
+    !!activeVisualization.removeLayer,
+    isOnlyLayer
+  );
+  return {
+    id: 'deleteLayer',
+    name: ariaLabel,
+    description: null,
+    icon: isOnlyLayer ? 'eraser' : 'trash',
+    color: 'danger',
+    fn: onRemoveLayer,
+  };
+}
+
+export interface RemoveLayerButtonProps {
+  onRemoveLayer: () => void;
+  layerIndex: number;
+  isOnlyLayer: boolean;
+  activeVisualization: Visualization;
+  layerType?: LayerType;
+}
+
+export function RemoveLayerButton({
+  onRemoveLayer,
+  layerIndex,
+  isOnlyLayer,
+  activeVisualization,
+  layerType,
+}: RemoveLayerButtonProps) {
   const { ariaLabel, modalTitle, modalDesc } = getButtonCopy(
     layerIndex,
     layerType || layerTypes.DATA,

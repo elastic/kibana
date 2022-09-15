@@ -773,6 +773,15 @@ interface VisualizationStateFromContextChangeProps {
   context: VisualizeEditorContext;
 }
 
+export interface LayerAction<T extends unknown = unknown> {
+  id: string;
+  name: string;
+  description?: string;
+  fn?: () => void;
+  icon?: React.ReactElement;
+  color?: string;
+}
+
 /**
  * Object passed to `getSuggestions` of a visualization.
  * It contains a possible table the current datasource could
@@ -965,6 +974,16 @@ export interface Visualization<T = unknown, P = unknown> {
       staticValue?: unknown;
     }>;
   }>;
+  /**
+   * returns a list of custom actions supported by the visualization layer.
+   * Default actions like delete/clear are not included in this list and are managed by the editor frame
+   * */
+  getSupportedActionsForLayer?: (
+    layerId: string,
+    state: T,
+    setState: StateSetter<T>
+  ) => Array<LayerAction<T>>;
+  /** returns the type string of the given layer */
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;
   /* returns the type of removal operation to perform for the specific layer in the current state */
   getRemoveOperation?: (state: T, layerId: string) => 'remove' | 'clear';

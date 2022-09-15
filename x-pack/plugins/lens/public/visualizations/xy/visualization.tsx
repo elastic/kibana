@@ -19,6 +19,7 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { FillStyle } from '@kbn/expression-xy-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { EuiSwitch } from '@elastic/eui';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
 import { DimensionEditor } from './xy_config_panel/dimension_editor';
@@ -213,6 +214,45 @@ export const getXyVisualization = ({
       getAnnotationsSupportedLayer(state, frame),
       getReferenceSupportedLayer(state, frame),
     ];
+  },
+
+  getSupportedActionsForLayer(layerId, state, setState) {
+    const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
+    const layer = state.layers[layerIndex];
+    const actions = [];
+    if (isAnnotationsLayer(layer)) {
+      const label = i18n.translate('xpack.lens.xyChart.annotations.ignoreGlobalFiltersName', {
+        defaultMessage: 'Ignore global filters',
+      });
+      actions.push({
+        id: 'ignoreGlobalFilters',
+        name: label,
+        description: i18n.translate(
+          'xpack.lens.xyChart.annotations.ignoreGlobalFiltersDescription',
+          {
+            defaultMessage:
+              'All the dimensions configured in this layer ignore filters defined at kibana level.',
+          }
+        ),
+        fn: () => {
+          const newLayers = [...state.layers];
+          newLayers[layerIndex] = { ...layer, ignoreGlobalFilters: !layer.ignoreGlobalFilters };
+          return setState({ ...state, layers: newLayers });
+        },
+        icon: (
+          <EuiSwitch
+            compressed
+            showLabel={false}
+            name="ignoreGlobalFilters"
+            id="ignoreGlobalFilters"
+            label={label}
+            checked={layer.ignoreGlobalFilters}
+            onChange={() => {}}
+          />
+        ),
+      });
+    }
+    return actions;
   },
 
   onIndexPatternChange(state, indexPatternId, layerId) {

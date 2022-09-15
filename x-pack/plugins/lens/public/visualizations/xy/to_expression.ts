@@ -190,6 +190,10 @@ export const buildExpression = (
         annotations: layer.annotations.map((c) => ({
           ...c,
           label: uniqueLabels[c.id],
+          ...(c.type === 'query'
+            ? // Move the ignore flag at the event level
+              { ignoreGlobalFilters: layer.ignoreGlobalFilters }
+            : {}),
         })),
       };
     });

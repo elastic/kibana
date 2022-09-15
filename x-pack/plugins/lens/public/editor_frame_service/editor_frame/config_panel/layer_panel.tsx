@@ -43,6 +43,7 @@ import {
   selectDatasourceStates,
 } from '../../../state_management';
 import { onDropForVisualization } from './buttons/drop_targets_utils';
+import { LayerContextMenu } from './layer_context_menu';
 
 const initialActiveDimensionState = {
   isNew: false,
@@ -305,6 +306,13 @@ export function LayerPanel(
 
   const { dataViews } = props.framePublicAPI;
 
+  const availableActions =
+    activeVisualization.getSupportedActionsForLayer?.(
+      layerId,
+      visualizationState,
+      props.updateVisualization
+    ) ?? [];
+
   return (
     <>
       <section tabIndex={-1} ref={registerLayerRef} className="lnsLayerPanel">
@@ -327,13 +335,26 @@ export function LayerPanel(
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <RemoveLayerButton
-                  onRemoveLayer={onRemoveLayer}
-                  layerIndex={layerIndex}
-                  isOnlyLayer={isOnlyLayer}
-                  activeVisualization={activeVisualization}
-                  layerType={activeVisualization.getLayerType(layerId, visualizationState)}
-                />
+                {availableActions.length ? (
+                  <LayerContextMenu
+                    actions={availableActions}
+                    removeAction={{
+                      onRemoveLayer,
+                      layerIndex,
+                      isOnlyLayer,
+                      activeVisualization,
+                      layerType: activeVisualization.getLayerType(layerId, visualizationState),
+                    }}
+                  />
+                ) : (
+                  <RemoveLayerButton
+                    onRemoveLayer={onRemoveLayer}
+                    layerIndex={layerIndex}
+                    isOnlyLayer={isOnlyLayer}
+                    activeVisualization={activeVisualization}
+                    layerType={activeVisualization.getLayerType(layerId, visualizationState)}
+                  />
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
             {(layerDatasource || activeVisualization.renderLayerPanel) && <EuiSpacer size="s" />}
