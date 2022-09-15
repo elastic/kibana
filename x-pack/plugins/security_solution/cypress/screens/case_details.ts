@@ -29,7 +29,7 @@ export const CASE_DETAILS_USER_ACTION_DESCRIPTION_EVENT =
 export const CASE_DETAILS_USER_ACTION_DESCRIPTION_USERNAME =
   '[data-test-subj="description-action"] .euiCommentEvent__headerUsername';
 
-export const CASE_DETAILS_USERNAMES = '[data-test-subj="case-view-username"]';
+export const CASE_DETAILS_USERNAMES = '[data-test-subj="user-profile-username"]';
 
 export const CASE_EVENT_UPDATE = '.euiCommentEvent[data-type="update"]';
 

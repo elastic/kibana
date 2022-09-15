@@ -18,6 +18,7 @@ import {
   PushToServiceApiParamsSIR as ServiceNowSIRPushToServiceApiParams,
   ServiceNowITSMIncident,
 } from '@kbn/actions-plugin/server/builtin_action_types/servicenow/types';
+import { UserProfile } from '@kbn/security-plugin/common';
 import { CaseResponse, ConnectorMappingsAttributes } from '../../../common/api';
 
 export type Incident = JiraIncident | ResilientIncident | ServiceNowITSMIncident;
@@ -67,6 +68,7 @@ export interface TransformFieldsArgs<P, S> {
   currentIncident?: S;
   fields: PipedField[];
   params: P;
+  userProfiles?: Map<string, UserProfile>;
 }
 
 export interface ExternalServiceComment {

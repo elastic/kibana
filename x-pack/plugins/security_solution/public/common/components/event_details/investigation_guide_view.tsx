@@ -7,10 +7,11 @@
 
 import { EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-
-import React, { useMemo } from 'react';
+import React, { createContext, useMemo } from 'react';
 import styled from 'styled-components';
 
+import type { GetBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
+import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import * as i18n from './translations';
 import { useRuleWithFallback } from '../../../detections/containers/detection_engine/rules/use_rule_with_fallback';
 import { MarkdownRenderer } from '../markdown_editor';
@@ -22,6 +23,8 @@ export const Indent = styled.div`
   word-break: break-word;
 `;
 
+export const BasicAlertDataContext = createContext<Partial<GetBasicDataFromDetailsData>>({});
+
 const InvestigationGuideViewComponent: React.FC<{
   data: TimelineEventsDetailsItem[];
 }> = ({ data }) => {
@@ -32,13 +35,14 @@ const InvestigationGuideViewComponent: React.FC<{
       : item?.originalValue ?? null;
   }, [data]);
   const { rule: maybeRule } = useRuleWithFallback(ruleId);
+  const basicAlertData = useBasicDataFromDetailsData(data);
 
   if (!maybeRule?.note) {
     return null;
   }
 
   return (
-    <>
+    <BasicAlertDataContext.Provider value={basicAlertData}>
       <EuiSpacer size="l" />
       <EuiTitle size="xxxs" data-test-subj="summary-view-guide">
         <h5>{i18n.INVESTIGATION_GUIDE}</h5>
@@ -51,7 +55,7 @@ const InvestigationGuideViewComponent: React.FC<{
           </LineClamp>
         </EuiText>
       </Indent>
-    </>
+    </BasicAlertDataContext.Provider>
   );
 };
 
