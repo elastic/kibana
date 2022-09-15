@@ -280,33 +280,77 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
-                  "isQuoted": false,
-                  "type": "literal",
-                  "value": "cases.attributes.created_by.username",
+                  "arguments": Array [
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "cases.attributes.created_by.username",
+                    },
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "bob",
+                    },
+                  ],
+                  "function": "is",
+                  "type": "function",
                 },
                 Object {
-                  "isQuoted": false,
-                  "type": "literal",
-                  "value": "bob",
+                  "arguments": Array [
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "cases.attributes.created_by.username",
+                    },
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "sam",
+                    },
+                  ],
+                  "function": "is",
+                  "type": "function",
                 },
               ],
-              "function": "is",
+              "function": "or",
               "type": "function",
             },
             Object {
               "arguments": Array [
                 Object {
-                  "isQuoted": false,
-                  "type": "literal",
-                  "value": "cases.attributes.created_by.username",
+                  "arguments": Array [
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "cases.attributes.created_by.profile_uid",
+                    },
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "bob",
+                    },
+                  ],
+                  "function": "is",
+                  "type": "function",
                 },
                 Object {
-                  "isQuoted": false,
-                  "type": "literal",
-                  "value": "sam",
+                  "arguments": Array [
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "cases.attributes.created_by.profile_uid",
+                    },
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "sam",
+                    },
+                  ],
+                  "function": "is",
+                  "type": "function",
                 },
               ],
-              "function": "is",
+              "function": "or",
               "type": "function",
             },
           ],
@@ -475,17 +519,39 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
-                  "isQuoted": false,
-                  "type": "literal",
-                  "value": "cases.attributes.created_by.username",
+                  "arguments": Array [
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "cases.attributes.created_by.username",
+                    },
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "sam",
+                    },
+                  ],
+                  "function": "is",
+                  "type": "function",
                 },
                 Object {
-                  "isQuoted": false,
-                  "type": "literal",
-                  "value": "sam",
+                  "arguments": Array [
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "cases.attributes.created_by.profile_uid",
+                    },
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "sam",
+                    },
+                  ],
+                  "function": "is",
+                  "type": "function",
                 },
               ],
-              "function": "is",
+              "function": "or",
               "type": "function",
             },
           ],
