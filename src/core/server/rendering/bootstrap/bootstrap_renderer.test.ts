@@ -57,7 +57,7 @@ describe('bootstrapRenderer', () => {
       auth,
       packageInfo,
       uiPlugins,
-      serverBasePath: '/base-path',
+      staticBaseUrl: '/base-path',
     });
   });
 
