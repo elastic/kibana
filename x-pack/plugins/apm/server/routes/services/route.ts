@@ -43,7 +43,7 @@ import {
   probabilityRt,
 } from '../default_api_types';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
-import { getServiceContainerMetadata } from './get_service_container_metadata';
+import { getServiceOverviewContainerMetadata } from './get_service_overview_container_metadata';
 import { getServiceInstanceContainerMetadata } from './get_service_instance_container_metadata';
 import { getServicesDetailedStatistics } from './get_services_detailed_statistics';
 import { getServiceDependenciesBreakdown } from './get_service_dependencies_breakdown';
@@ -285,7 +285,7 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
         savedObjectsClient,
       });
 
-      const containerMetadata = await getServiceContainerMetadata({
+      const containerMetadata = await getServiceOverviewContainerMetadata({
         esClient: esClient.asCurrentUser,
         indexName,
         containerIds: serviceMetadataDetails.container.ids,

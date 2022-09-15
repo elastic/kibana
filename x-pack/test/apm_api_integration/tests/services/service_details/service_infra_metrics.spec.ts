@@ -22,37 +22,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const { start, end } = archives_metadata[archiveName];
 
   registry.when('When data is loaded', { config: 'basic', archives: ['metrics_and_apm'] }, () => {
-    describe('fetch instance overview', () => {
-      it('handles kubernetes metadata', async () => {
-        const response = await apmApiClient.readUser({
-          endpoint:
-            'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
-          params: {
-            path: {
-              serviceName: 'opbeans-java',
-              serviceNodeName: '31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad',
-            },
-            query: {
-              start,
-              end,
-            },
-          },
-        });
-
-        const body: ServiceOverviewInstanceDetails = response.body;
-        const status: number = response.status;
-
-        expect(status).to.be(200);
-        expect(body.kubernetes?.pod).to.eql({
-          name: 'opbeans-java-5b5f75d696-5brrb',
-          uid: '798f59e9-b1b2-11e9-9a96-42010a84004d',
-        });
-        expect(body.kubernetes?.deployment).to.eql(['opbeans-java']);
-        expect(body.kubernetes?.namespace).to.eql(['default']);
-        expect(body.kubernetes?.replicaset).to.eql(['opbeans-java-5b5f75d696']);
-      });
-
-      it('handles empty infra metrics data', async () => {
+    describe('fetch service instance', () => {
+      it('handles empty infra metrics data for a service node', async () => {
         const response = await apmApiClient.readUser({
           endpoint:
             'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
@@ -72,18 +43,45 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const status: number = response.status;
 
         expect(status).to.be(200);
-        expect(body.kubernetes?.pod).to.eql({
-          name: null,
-          uid: null,
+
+        expect(body.kubernetes?.pod).to.eql({});
+        expect(body.kubernetes?.deployment).to.eql({});
+        expect(body.kubernetes?.replicaset).to.eql({});
+        expect(body.kubernetes?.container).to.eql({});
+      });
+
+      it('handles kubernetes metadata for a service node', async () => {
+        const response = await apmApiClient.readUser({
+          endpoint:
+            'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
+          params: {
+            path: {
+              serviceName: 'opbeans-java',
+              serviceNodeName: '31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad',
+            },
+            query: {
+              start,
+              end,
+            },
+          },
         });
-        expect(body.kubernetes?.deployment).to.eql([]);
-        expect(body.kubernetes?.namespace).to.eql([]);
-        expect(body.kubernetes?.replicaset).to.eql([]);
+
+        const body: ServiceOverviewInstanceDetails = response.body;
+        const status: number = response.status;
+
+        expect(status).to.be(200);
+
+        expect(body.kubernetes?.deployment?.name).to.eql('opbeans-java');
+        expect(body.kubernetes?.pod?.name).to.eql('opbeans-java-5b5f75d696-5brrb');
+        expect(body.kubernetes?.pod?.uid).to.eql('798f59e9-b1b2-11e9-9a96-42010a84004d');
+        expect(body.kubernetes?.namespace).to.eql('default');
+        expect(body.kubernetes?.replicaset?.name).to.eql('opbeans-java-5b5f75d696');
+        expect(body.kubernetes?.container?.name).to.eql('opbeans-java');
       });
     });
 
-    describe('fetch service metadata details', () => {
-      it('handles service with multiple kubernetes instances ', async () => {
+    describe('fetch service overview metadata details', () => {
+      it('handles service overview metadata with multiple kubernetes instances', async () => {
         const response = await apmApiClient.readUser({
           endpoint: 'GET /internal/apm/services/{serviceName}/metadata/details',
           params: {
@@ -101,9 +99,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const status: number = response.status;
 
         expect(status).to.be(200);
-        expect(body.kubernetes?.deployment).to.eql(['opbeans-java', 'opbeans-java-2']);
-        expect(body.kubernetes?.namespace).to.eql(['default']);
-        expect(body.kubernetes?.replicaset).to.eql([
+        expect(body.kubernetes?.deployments).to.eql(['opbeans-java', 'opbeans-java-2']);
+        expect(body.kubernetes?.namespaces).to.eql(['default']);
+        expect(body.kubernetes?.containerImages).to.eql([
+          'docker.elastic.co/observability-ci/opbeans-java@sha256:dda30dbabe5c43b8bcd62b48a727f04e9d17147443ea3b3ac2edfc44cb0e69fe',
+          'mysql@sha256:c8f03238ca1783d25af320877f063a36dbfce0daa56a7b4955e6c6e05ab5c70b',
+        ]);
+        expect(body.kubernetes?.replicasets).to.eql([
           'opbeans-java-5b5f75d696',
           'opbeans-java-5b5f75d697',
         ]);
@@ -127,12 +129,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const status: number = response.status;
 
         expect(status).to.be(200);
-        expect(body.container?.image).to.eql(
-          'docker.elastic.co/observability-ci/opbeans-node@sha256:f72b0bfdd0ca24e4f9d10ee73cf713a591dbfa40f1fe9404b04e6f2f3e166949'
-        );
-        expect(body.kubernetes?.deployment).to.eql([]);
-        expect(body.kubernetes?.namespace).to.eql([]);
-        expect(body.kubernetes?.replicaset).to.eql([]);
+        expect(body.kubernetes?.containerImages).to.eql([
+          'docker.elastic.co/observability-ci/opbeans-node@sha256:f72b0bfdd0ca24e4f9d10ee73cf713a591dbfa40f1fe9404b04e6f2f3e166949',
+          'k8s.gcr.io/pause:3.1',
+        ]);
+        expect(body.kubernetes?.deployments).to.eql([]);
+        expect(body.kubernetes?.namespaces).to.eql([]);
+        expect(body.kubernetes?.replicasets).to.eql([]);
       });
 
       it('handles empty infra metrics data', async () => {
@@ -140,7 +143,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           endpoint: 'GET /internal/apm/services/{serviceName}/metadata/details',
           params: {
             path: {
-              serviceName: 'opbeans-node',
+              serviceName: 'opbeans-ruby',
             },
             query: {
               start,
@@ -152,14 +155,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const body: ServiceDetails = response.body;
         const status: number = response.status;
 
-        expect(body.kubernetes?.pod).to.eql({
-          name: null,
-          uid: null,
-        });
         expect(status).to.be(200);
-        expect(body.kubernetes?.deployment).to.eql([]);
-        expect(body.kubernetes?.namespace).to.eql([]);
-        expect(body.kubernetes?.replicaset).to.eql([]);
+        expect(body.kubernetes?.containerImages).to.eql([]);
+        expect(body.kubernetes?.namespaces).to.eql([]);
+        expect(body.kubernetes?.namespaces).to.eql([]);
+        expect(body.kubernetes?.replicasets).to.eql([]);
       });
     });
   });

@@ -6,7 +6,6 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import {
   CONTAINER,
@@ -20,26 +19,27 @@ import {
   KUBERNETES_REPLICASET_NAME,
   KUBERNETES_DEPLOYMENT_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
-import { Container } from '../../../typings/es_schemas/raw/fields/container';
 
-export interface ContainerMetadata {
-  kubernetes?: Kubernetes;
-  container?: Container;
-}
-interface Buckets {
-  buckets: Array<{
-    key: string;
-  }>;
-}
+type ServiceOverviewContainerMetadataDetails =
+  | {
+      kubernetes: {
+        deployments?: string[];
+        replicasets?: string[];
+        namespaces?: string[];
+        containerImages?: string[];
+      };
+    }
+  | undefined;
+
 interface ResponseAggregations {
-  deployment: Buckets;
-  replicaset: Buckets;
-  namespace: Buckets;
-  top_metrics: estypes.AggregationsTopMetricsAggregate;
+  [key: string]: {
+    buckets: Array<{
+      key: string;
+    }>;
+  };
 }
 
-export const getServiceContainerMetadata = async ({
+export const getServiceOverviewContainerMetadata = async ({
   esClient,
   indexName,
   containerIds,
@@ -51,9 +51,9 @@ export const getServiceContainerMetadata = async ({
   containerIds: string[];
   start: number;
   end: number;
-}): Promise<ContainerMetadata> => {
+}): Promise<ServiceOverviewContainerMetadataDetails> => {
   if (!indexName) {
-    return {};
+    return undefined;
   }
 
   const should = [
@@ -84,69 +84,47 @@ export const getServiceContainerMetadata = async ({
       },
     },
     aggs: {
-      top_metrics: {
-        top_metrics: {
-          metrics: [
-            {
-              field: KUBERNETES_POD_NAME,
-            },
-            {
-              field: KUBERNETES_POD_UID,
-            },
-            {
-              field: CONTAINER_ID,
-            },
-            {
-              field: CONTAINER_IMAGE,
-            },
-          ],
-          sort: {
-            '@timestamp': 'desc',
-          },
-        },
-      },
-      deployment: {
+      deployments: {
         terms: {
           field: KUBERNETES_DEPLOYMENT_NAME,
           size: 10,
         },
       },
-      namespace: {
+      namespaces: {
         terms: {
           field: KUBERNETES_NAMESPACE,
           size: 10,
         },
       },
-      replicaset: {
+      replicasets: {
         terms: {
           field: KUBERNETES_REPLICASET_NAME,
+          size: 10,
+        },
+      },
+      containerImages: {
+        terms: {
+          field: CONTAINER_IMAGE,
           size: 10,
         },
       },
     },
   });
 
-  const metrics = response.aggregations?.top_metrics?.top[0]?.metrics;
-
   return {
     kubernetes: {
-      pod: {
-        name: metrics?.[KUBERNETES_POD_NAME] as string | null,
-        uid: metrics?.[KUBERNETES_POD_UID] as string | null,
-      },
-      deployment: response.aggregations?.deployment?.buckets.map(
+      deployments: response.aggregations?.deployments?.buckets.map(
         (bucket) => bucket.key
       ),
-      replicaset: response.aggregations?.replicaset?.buckets.map(
+      replicasets: response.aggregations?.replicasets?.buckets.map(
         (bucket) => bucket.key
       ),
-      namespace: response.aggregations?.namespace?.buckets.map(
+      namespaces: response.aggregations?.namespaces?.buckets.map(
         (bucket) => bucket.key
       ),
-    },
-    container: {
-      image: metrics?.[CONTAINER_IMAGE] as string | null,
-      id: metrics?.[CONTAINER_ID] as string | null,
+      containerImages: response.aggregations?.containerImages?.buckets.map(
+        (bucket) => bucket.key
+      ),
     },
   };
 };
