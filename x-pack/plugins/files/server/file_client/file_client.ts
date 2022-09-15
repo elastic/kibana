@@ -8,7 +8,7 @@ import moment from 'moment';
 import { Readable } from 'stream';
 import mimeType from 'mime';
 import cuid from 'cuid';
-import type { Logger } from '@kbn/core/server';
+import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
@@ -179,7 +179,11 @@ export class FileClientImpl implements FileClient {
         })
       );
     } catch (e) {
-      this.incrementUsageCounter('DELETE_ERROR');
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        this.incrementUsageCounter('DELETE_ERROR_NOT_FOUND');
+      } else {
+        this.incrementUsageCounter('DELETE_ERROR');
+      }
       throw e;
     }
   }
@@ -226,49 +230,37 @@ export class FileClientImpl implements FileClient {
   };
 
   async share({ file, name, validUntil }: ShareArgs): Promise<FileShareJSONWithToken> {
-    this.incrementUsageCounter('SHARE');
-    try {
-      if (!this.internalFileShareService) {
-        throw new Error('#share not implemented');
-      }
-      const shareObject = await this.internalFileShareService.share({
-        file,
-        name,
-        validUntil,
-      });
-      this.logAuditEvent(
-        createAuditEvent({
-          action: 'create',
-          message: `Shared file "${file.data.name}" with id "${file.data.id}"`,
-        })
-      );
-      return shareObject;
-    } catch (e) {
-      this.incrementUsageCounter('SHARE_ERROR');
-      throw e;
+    if (!this.internalFileShareService) {
+      throw new Error('#share not implemented');
     }
+    const shareObject = await this.internalFileShareService.share({
+      file,
+      name,
+      validUntil,
+    });
+    this.logAuditEvent(
+      createAuditEvent({
+        action: 'create',
+        message: `Shared file "${file.data.name}" with id "${file.data.id}"`,
+      })
+    );
+    return shareObject;
   }
 
   unshare: FileShareServiceStart['delete'] = async (arg) => {
-    this.incrementUsageCounter('UNSHARE');
-    try {
-      if (!this.internalFileShareService) {
-        throw new Error('#delete shares is not implemented');
-      }
-      const result = await this.internalFileShareService.delete(arg);
-
-      this.logAuditEvent(
-        createAuditEvent({
-          action: 'delete',
-          message: `Removed share with id "${arg.id}"`,
-        })
-      );
-
-      return result;
-    } catch (e) {
-      this.incrementUsageCounter('UNSHARE_ERROR');
-      throw e;
+    if (!this.internalFileShareService) {
+      throw new Error('#delete shares is not implemented');
     }
+    const result = await this.internalFileShareService.delete(arg);
+
+    this.logAuditEvent(
+      createAuditEvent({
+        action: 'delete',
+        message: `Removed share with id "${arg.id}"`,
+      })
+    );
+
+    return result;
   };
 
   listShares: FileShareServiceStart['list'] = (args) => {

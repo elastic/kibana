@@ -8,16 +8,21 @@
 export function getCounters(fileKind: string) {
   return {
     DELETE: `delete:${fileKind}`,
-    DELETE_ERROR: `delete:error:${fileKind}`,
+    DELETE_ERROR: `delete:error:unknown:${fileKind}`,
+    DELETE_ERROR_NOT_FOUND: `delete:error:not_found:${fileKind}`,
 
-    SHARE: `$unshare:${fileKind}`,
-    SHARE_ERROR: `unshare:error:${fileKind}`,
+    SHARE: `share:${fileKind}`,
+    SHARE_ERROR: `share:error:unknown:${fileKind}`,
+    SHARE_ERROR_EXPIRATION_IN_PAST: `share:error:expiration_in_past:${fileKind}`,
+    SHARE_ERROR_FORBIDDEN: `share:error:forbidden:${fileKind}`,
+    SHARE_ERROR_CONFLICT: `share:error:conflict:${fileKind}`,
 
     UNSHARE: `unshare:${fileKind}`,
-    UNSHARE_ERROR: `unshare:error:${fileKind}`,
+    UNSHARE_ERROR: `unshare:error:unknown:${fileKind}`,
+    UNSHARE_ERROR_NOT_FOUND: `unshare:error:not_found:${fileKind}`,
 
     DOWNLOAD: `download:${fileKind}`,
-    DOWNLOAD_ERROR: `download:error:${fileKind}`,
+    DOWNLOAD_ERROR: `download:error:unknown:${fileKind}`,
   };
 }
 
