@@ -65,17 +65,21 @@ export const timeScaleOperation: OperationDefinition<TimeScaleIndexPatternColumn
       const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
       const dateColumn = buckets.find(
         (colId) => layer.columns[colId].operationType === 'date_histogram'
-      )!;
+      );
+
       return [
         {
           type: 'function',
           function: 'lens_time_scale',
           arguments: {
-            dateColumnId: [dateColumn],
+            dateColumnId: dateColumn ? [dateColumn] : [],
             inputColumnId: [currentColumn.references[0]],
             outputColumnId: [columnId],
             outputColumnName: [currentColumn.label],
             targetUnit: [currentColumn.params.unit!],
+            reducedTimeRange: currentColumn.reducedTimeRange
+              ? [currentColumn.reducedTimeRange]
+              : [],
           },
         },
       ];

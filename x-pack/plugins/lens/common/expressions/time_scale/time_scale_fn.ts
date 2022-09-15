@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import moment from 'moment-timezone';
+import moment, { Moment } from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
-import { buildResultColumns, Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
-import { calculateBounds, DatatableUtilitiesService, parseInterval } from '@kbn/data-plugin/common';
+import { buildResultColumns, DatatableRow, ExecutionContext } from '@kbn/expressions-plugin/common';
+import {
+  calculateBounds,
+  DatatableUtilitiesService,
+  parseInterval,
+  TimeRangeBounds,
+  TimeRange,
+} from '@kbn/data-plugin/common';
 import type { TimeScaleExpressionFunction, TimeScaleUnit, TimeScaleArgs } from './types';
 
 const unitInMs: Record<TimeScaleUnit, number> = {
@@ -27,20 +33,79 @@ export const timeScaleFn =
   ): TimeScaleExpressionFunction['fn'] =>
   async (
     input,
-    { dateColumnId, inputColumnId, outputColumnId, outputColumnName, targetUnit }: TimeScaleArgs,
+    {
+      dateColumnId,
+      inputColumnId,
+      outputColumnId,
+      outputColumnName,
+      targetUnit,
+      reducedTimeRange,
+    }: TimeScaleArgs,
     context
   ) => {
-    const dateColumnDefinition = input.columns.find((column) => column.id === dateColumnId);
+    let timeBounds: TimeRangeBounds | undefined;
+    const contextTimeZone = await getTimezone(context);
 
-    if (!dateColumnDefinition) {
-      throw new Error(
-        i18n.translate('xpack.lens.functions.timeScale.dateColumnMissingMessage', {
-          defaultMessage: 'Specified dateColumnId {columnId} does not exist.',
-          values: {
-            columnId: dateColumnId,
-          },
-        })
-      );
+    let getStartEndOfBucketMeta: (row: DatatableRow) => {
+      startOfBucket: Moment;
+      endOfBucket: Moment;
+    };
+
+    if (dateColumnId) {
+      const dateColumnDefinition = input.columns.find((column) => column.id === dateColumnId);
+
+      if (!dateColumnDefinition) {
+        throw new Error(
+          i18n.translate('xpack.lens.functions.timeScale.dateColumnMissingMessage', {
+            defaultMessage: 'Specified dateColumnId {columnId} does not exist.',
+            values: {
+              columnId: dateColumnId,
+            },
+          })
+        );
+      }
+      const datatableUtilities = await getDatatableUtilities(context);
+      const timeInfo = datatableUtilities.getDateHistogramMeta(dateColumnDefinition, {
+        timeZone: contextTimeZone,
+      });
+      const intervalDuration = timeInfo?.interval && parseInterval(timeInfo.interval);
+      timeBounds = timeInfo?.timeRange && calculateBounds(timeInfo.timeRange);
+
+      getStartEndOfBucketMeta = (row) => {
+        const startOfBucket = moment.tz(row[dateColumnId], timeInfo?.timeZone ?? contextTimeZone);
+
+        return {
+          startOfBucket,
+          endOfBucket: startOfBucket.clone().add(intervalDuration),
+        };
+      };
+
+      if (!timeInfo || !intervalDuration) {
+        throw new Error(
+          i18n.translate('xpack.lens.functions.timeScale.timeInfoMissingMessage', {
+            defaultMessage: 'Could not fetch date histogram information',
+          })
+        );
+      }
+    } else {
+      const timeRange = context.getSearchContext().timeRange as TimeRange;
+      const endOfBucket = moment.tz(timeRange.to, contextTimeZone);
+      let startOfBucket = moment.tz(timeRange.from, contextTimeZone);
+
+      if (reducedTimeRange) {
+        const reducedStartOfBucket = endOfBucket.clone().subtract(parseInterval(reducedTimeRange));
+
+        if (reducedStartOfBucket > startOfBucket) {
+          startOfBucket = reducedStartOfBucket;
+        }
+      }
+
+      timeBounds = calculateBounds(timeRange);
+
+      getStartEndOfBucketMeta = () => ({
+        startOfBucket,
+        endOfBucket,
+      });
     }
 
     const resultColumns = buildResultColumns(
@@ -57,61 +122,30 @@ export const timeScaleFn =
       return input;
     }
 
-    const targetUnitInMs = unitInMs[targetUnit];
-    const datatableUtilities = await getDatatableUtilities(context);
-    const timeInfo = datatableUtilities.getDateHistogramMeta(dateColumnDefinition, {
-      timeZone: await getTimezone(context),
-    });
-    const intervalDuration = timeInfo?.interval && parseInterval(timeInfo.interval);
+    return {
+      ...input,
+      columns: resultColumns,
+      rows: input.rows.map((row) => {
+        const newRow = { ...row };
 
-    if (!timeInfo || !intervalDuration) {
-      throw new Error(
-        i18n.translate('xpack.lens.functions.timeScale.timeInfoMissingMessage', {
-          defaultMessage: 'Could not fetch date histogram information',
-        })
-      );
-    }
-    // the datemath plugin always parses dates by using the current default moment time zone.
-    // to use the configured time zone, we are switching just for the bounds calculation.
+        let { startOfBucket, endOfBucket } = getStartEndOfBucketMeta(row);
 
-    // The code between this call and the reset in the finally block is not allowed to get async,
-    // otherwise the timezone setting can leak out of this function.
-    const defaultTimezone = moment().zoneName();
-    let result: Datatable;
-    try {
-      moment.tz.setDefault(timeInfo.timeZone);
+        if (timeBounds && timeBounds.min) {
+          startOfBucket = moment.max(startOfBucket, timeBounds.min);
+        }
+        if (timeBounds && timeBounds.max) {
+          endOfBucket = moment.min(endOfBucket, timeBounds.max);
+        }
 
-      const timeBounds = timeInfo.timeRange && calculateBounds(timeInfo.timeRange);
+        const bucketSize = endOfBucket.diff(startOfBucket);
+        const factor = bucketSize / unitInMs[targetUnit];
+        const currentValue = newRow[inputColumnId];
 
-      result = {
-        ...input,
-        columns: resultColumns,
-        rows: input.rows.map((row) => {
-          const newRow = { ...row };
+        if (currentValue != null) {
+          newRow[outputColumnId] = Number(currentValue) / factor;
+        }
 
-          let startOfBucket = moment(row[dateColumnId]);
-          let endOfBucket = startOfBucket.clone().add(intervalDuration);
-          if (timeBounds && timeBounds.min) {
-            startOfBucket = moment.max(startOfBucket, timeBounds.min);
-          }
-          if (timeBounds && timeBounds.max) {
-            endOfBucket = moment.min(endOfBucket, timeBounds.max);
-          }
-          const bucketSize = endOfBucket.diff(startOfBucket);
-          const factor = bucketSize / targetUnitInMs;
-
-          const currentValue = newRow[inputColumnId];
-          if (currentValue != null) {
-            newRow[outputColumnId] = Number(currentValue) / factor;
-          }
-
-          return newRow;
-        }),
-      };
-    } finally {
-      // reset default moment timezone
-      moment.tz.setDefault(defaultTimezone);
-    }
-
-    return result;
+        return newRow;
+      }),
+    };
   };

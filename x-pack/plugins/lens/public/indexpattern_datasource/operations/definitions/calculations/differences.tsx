@@ -16,7 +16,6 @@ import {
   hasDateField,
   checkForDataLayerType,
 } from './utils';
-import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
 import { OperationDefinition } from '..';
 import { getFormatFromPreviousColumn, getFilter, combineErrorMessages } from '../helpers';
 import { getDisallowedPreviousShiftMessage } from '../../../time_shift_utils';
@@ -93,7 +92,6 @@ export const derivativeOperation: OperationDefinition<
   isTransferable: (column, newIndexPattern) => {
     return hasDateField(newIndexPattern);
   },
-  onOtherColumnChanged: adjustTimeScaleOnOtherColumnChange,
   getErrorMessage: (layer: IndexPatternLayer, columnId: string) => {
     return combineErrorMessages([
       getErrorsForDateReference(

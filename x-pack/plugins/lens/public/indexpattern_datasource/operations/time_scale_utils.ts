@@ -8,8 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { unitSuffixesLong } from '../../../common/suffix_formatter';
 import type { TimeScaleUnit } from '../../../common/expressions';
-import type { IndexPatternLayer } from '../types';
-import type { GenericIndexPatternColumn } from './definitions';
 
 export const DEFAULT_TIME_SCALE = 's' as TimeScaleUnit;
 
@@ -56,37 +54,4 @@ export function adjustTimeScaleLabelSuffix(
   }
   // add new suffix if column has a time scale now
   return `${cleanedLabel}${getSuffix(newTimeScale, newShift, newReducedTimeRange)}`;
-}
-
-export function adjustTimeScaleOnOtherColumnChange<T extends GenericIndexPatternColumn>(
-  layer: IndexPatternLayer,
-  thisColumnId: string
-): T {
-  const columns = layer.columns;
-  const column = columns[thisColumnId] as T;
-  if (!column.timeScale) {
-    return column;
-  }
-  const hasDateHistogram = Object.values(columns).some(
-    (col) => col?.operationType === 'date_histogram'
-  );
-  if (hasDateHistogram) {
-    return column;
-  }
-  if (column.customLabel) {
-    return column;
-  }
-  return {
-    ...column,
-    timeScale: undefined,
-    label: adjustTimeScaleLabelSuffix(
-      column.label,
-      column.timeScale,
-      undefined,
-      column.timeShift,
-      column.timeShift,
-      column.reducedTimeRange,
-      column.reducedTimeRange
-    ),
-  };
 }
