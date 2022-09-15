@@ -114,11 +114,12 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await aiops.explainLogRateSpikes.clickRerunAnalysisButton(true);
       await aiops.explainLogRateSpikes.assertProgressTitle('Progress: 100% — Done.');
 
-      await aiops.explainLogRateSpikesAnalysisTable.assertSpikeAnalysisTableExists();
+      await aiops.explainLogRateSpikesAnalysisGroupsTable.assertSpikeAnalysisTableExists();
 
-      const analysisTable = await aiops.explainLogRateSpikesAnalysisTable.parseAnalysisTable();
+      const analysisGroupsTable =
+        await aiops.explainLogRateSpikesAnalysisGroupsTable.parseAnalysisTable();
 
-      expect(analysisTable).to.be.eql(testData.expected.analysisTable);
+      expect(analysisGroupsTable).to.be.eql(testData.expected.analysisGroupsTable);
     });
   }
 

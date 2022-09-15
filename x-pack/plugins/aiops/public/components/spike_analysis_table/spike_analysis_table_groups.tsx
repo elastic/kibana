@@ -123,7 +123,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       ),
     },
     {
-      'data-test-subj': 'aiopsSpikeAnalysisTableColumnGroup',
+      'data-test-subj': 'aiopsSpikeAnalysisGroupsTableColumnGroup',
       field: 'group',
       name: i18n.translate(
         'xpack.aiops.correlations.failedTransactions.correlationsTable.groupLabel',
@@ -155,7 +155,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
             <>
               <EuiBadge
                 key={`$more-id`}
-                data-test-subj="aiopsSpikeAnalysisTableColumnGroupBadge"
+                data-test-subj="aiopsSpikeAnalysisGroupsTableColumnGroupBadge"
                 color="hollow"
               >
                 +{Object.keys(repeatedValues).length} more
@@ -166,26 +166,11 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
         }
         return valuesBadges;
       },
-      // render: (_, { group }) => (
-      //   <EuiCodeBlock
-      //     aria-label={i18n.translate('xpack.aiops.correlations.correlationsTable.groupJsonPane', {
-      //       defaultMessage: 'JSON of groups',
-      //     })}
-      //     style={{ width: '100%' }}
-      //     language="json"
-      //     fontSize="s"
-      //     paddingSize="s"
-      //     isCopyable
-      //     data-test-subj={`aiopsSpikeAnalysisTableColumnGroupJSON`}
-      //   >
-      //     {JSON.stringify(group, null, 2)}
-      //   </EuiCodeBlock>
-      // ),
       sortable: false,
       textOnly: true,
     },
     {
-      'data-test-subj': 'aiopsSpikeAnalysisTableColumnDocCount',
+      'data-test-subj': 'aiopsSpikeAnalysisGroupsTableColumnDocCount',
       field: 'docCount',
       name: i18n.translate('xpack.aiops.correlations.correlationsTable.docCountLabel', {
         defaultMessage: 'Doc count',
@@ -238,7 +223,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
 
   return (
     <EuiBasicTable
-      data-test-subj="aiopsSpikeAnalysisTable"
+      data-test-subj="aiopsSpikeAnalysisGroupsTable"
       compressed
       columns={columns}
       items={pageOfItems}
@@ -247,6 +232,11 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       pagination={pagination}
       loading={false}
       sorting={sorting as EuiTableSortingType<GroupTableItem>}
+      rowProps={(group) => {
+        return {
+          'data-test-subj': `aiopsSpikeAnalysisGroupsTableRow row-${group.id}`,
+        };
+      }}
     />
   );
 };
