@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
   const testSubjects = getService('testSubjects');
 
-  describe('discover doc table', async function describeIndexTests() {
+  describe('discover doc table', function describeIndexTests() {
     const rowsHardLimit = 500;
 
     before(async function () {
