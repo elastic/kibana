@@ -21,8 +21,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const indexPatterns = getService('indexPatterns');
   const toasts = getService('toasts');
 
-  // Failing: See https://github.com/elastic/kibana/issues/135110
-  describe.skip('field formatter', function () {
+  // eslint-disable-next-line ban/ban
+  describe.only('field formatter', function () {
     this.tags(['skipFirefox']);
 
     before(async function () {
@@ -167,6 +167,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               FIELD_FORMAT_IDS.BOOLEAN,
               FIELD_FORMAT_IDS.BYTES,
               FIELD_FORMAT_IDS.COLOR,
+              FIELD_FORMAT_IDS.CURRENCY,
               FIELD_FORMAT_IDS.DURATION,
               FIELD_FORMAT_IDS.NUMBER,
               FIELD_FORMAT_IDS.PERCENT,
@@ -190,6 +191,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               FIELD_FORMAT_IDS.BOOLEAN,
               FIELD_FORMAT_IDS.BYTES,
               FIELD_FORMAT_IDS.COLOR,
+              FIELD_FORMAT_IDS.CURRENCY,
               FIELD_FORMAT_IDS.DURATION,
               FIELD_FORMAT_IDS.NUMBER,
               FIELD_FORMAT_IDS.PERCENT,
@@ -370,6 +372,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               FIELD_FORMAT_IDS.BOOLEAN,
               FIELD_FORMAT_IDS.BYTES,
               FIELD_FORMAT_IDS.COLOR,
+              FIELD_FORMAT_IDS.CURRENCY,
               FIELD_FORMAT_IDS.DURATION,
               FIELD_FORMAT_IDS.NUMBER,
               FIELD_FORMAT_IDS.PERCENT,
