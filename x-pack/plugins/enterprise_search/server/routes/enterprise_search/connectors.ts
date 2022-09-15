@@ -103,11 +103,11 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       path: '/internal/enterprise_search/connectors/{connectorId}/start_sync',
       validate: {
         params: schema.object({
-          connectorId: schema.string()
+          connectorId: schema.string(),
         }),
         body: schema.object({
-          nextSyncConfig: schema.string()
-        })
+          nextSyncConfig: schema.string(),
+        }),
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
