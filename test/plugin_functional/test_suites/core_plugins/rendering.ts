@@ -106,6 +106,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data.search.sessions.pageSize (number)',
         'data.search.sessions.trackingInterval (duration)',
         'enterpriseSearch.host (string)',
+        'guidedOnboarding.ui (boolean)',
         'home.disableWelcomeScreen (boolean)',
         'map.emsFileApiUrl (string)',
         'map.emsFontLibraryUrl (string)',
