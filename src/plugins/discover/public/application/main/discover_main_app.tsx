@@ -53,8 +53,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     inspectorAdapters,
     onChangeDataView,
     onUpdateQuery,
-    refetch$,
-    resetSavedSearch,
+    fetchQuery,
     stateContainer,
   } = useDiscoverState({
     services,
@@ -67,7 +66,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   /**
    * Url / Routing logic
    */
-  useUrl({ history: usedHistory, resetSavedSearch });
+  useUrl({ history: usedHistory, stateContainer });
 
   /**
    * SavedSearch depended initializing
@@ -86,11 +85,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    */
   useEffect(() => {
     addHelpMenuToAppChrome(chrome, docLinks);
-  }, [stateContainer, chrome, docLinks]);
-
-  const resetCurrentSavedSearch = useCallback(() => {
-    resetSavedSearch(savedSearch.id);
-  }, [resetSavedSearch, savedSearch]);
+  }, [chrome, docLinks]);
 
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 
@@ -102,11 +97,10 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
       expandedDoc={expandedDoc}
       onChangeDataView={onChangeDataView}
       onUpdateQuery={onUpdateQuery}
-      resetSavedSearch={resetCurrentSavedSearch}
       setExpandedDoc={setExpandedDoc}
       navigateTo={navigateTo}
       savedSearchData$={data$}
-      savedSearchRefetch$={refetch$}
+      fetchQuery={fetchQuery}
       stateContainer={stateContainer}
     />
   );

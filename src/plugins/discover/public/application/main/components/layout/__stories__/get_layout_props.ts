@@ -25,7 +25,7 @@ import { esHits } from '../../../../../__mocks__/es_hits';
 import { Chart } from '../../chart/point_series';
 import { SavedSearch } from '../../../../..';
 import { DiscoverLayoutProps } from '../types';
-import { GetStateReturn } from '../../../services/discover_state';
+import { DiscoverStateContainer } from '../../../services/discover_state';
 
 const chartData = {
   xAxisOrderedValues: [
@@ -156,7 +156,7 @@ const getCommonProps = (dataView: DataView) => {
         }),
         setState: action('Set app state'),
       },
-    } as unknown as GetStateReturn,
+    } as unknown as DiscoverStateContainer,
     setExpandedDoc: action('opening an expanded doc'),
   };
 };

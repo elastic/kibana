@@ -8,7 +8,7 @@
 
 import {
   getState,
-  GetStateReturn,
+  DiscoverStateContainer,
   createSearchSessionRestorationDataProvider,
 } from './discover_state';
 import { createBrowserHistory, History } from 'history';
@@ -18,7 +18,7 @@ import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks_
 import { discoverServiceMock } from '../../../__mocks__/services';
 
 let history: History;
-let state: GetStateReturn;
+let state: DiscoverStateContainer;
 const getCurrentUrl = () => history.createHref(history.location);
 
 describe('Test discover state', () => {

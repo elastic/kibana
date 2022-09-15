@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/common';
-import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { DataViewType } from '@kbn/data-views-plugin/public';
-import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getRawRecordType } from './get_raw_record_type';
 import {
   sendCompleteMsg,
@@ -19,11 +18,9 @@ import {
   sendPartialMsg,
   sendResetMsg,
 } from '../hooks/use_saved_search_messages';
-import { updateSearchSource } from './update_search_source';
 import { fetchDocuments } from './fetch_documents';
 import { fetchTotalHits } from './fetch_total_hits';
 import { fetchChart } from './fetch_chart';
-import { AppState } from '../services/discover_state';
 import { FetchStatus } from '../../types';
 import {
   DataCharts$,
@@ -35,17 +32,15 @@ import {
 } from '../hooks/use_saved_search';
 import { DiscoverServices } from '../../../build_services';
 import { fetchSql } from './fetch_sql';
+import { AppState } from '@kbn/discover-plugin/public/application/main/services/discover_state';
 
 export interface FetchDeps {
   abortController: AbortController;
-  appStateContainer: ReduxLikeStateContainer<AppState>;
   data: DataPublicPluginStart;
   initialFetchStatus: FetchStatus;
   inspectorAdapters: Adapters;
-  savedSearch: SavedSearch;
   searchSessionId: string;
   services: DiscoverServices;
-  useNewFieldsApi: boolean;
 }
 
 /**
@@ -58,11 +53,13 @@ export interface FetchDeps {
  */
 export function fetchAll(
   dataSubjects: SavedSearchData,
-  searchSource: ISearchSource,
+  savedSearch: SavedSearch,
   reset = false,
+  appState: AppState,
   fetchDeps: FetchDeps
 ): Promise<void> {
-  const { initialFetchStatus, appStateContainer, services, useNewFieldsApi, data } = fetchDeps;
+  const { initialFetchStatus, services, data } = fetchDeps;
+  const { searchSource } = savedSearch;
 
   /**
    * Method to create an error handler that will forward the received error
@@ -83,23 +80,14 @@ export function fetchAll(
   };
 
   try {
-    const dataView = searchSource.getField('index')!;
+    const dataView = savedSearch.searchSource.getField('index')!;
     if (reset) {
       sendResetMsg(dataSubjects, initialFetchStatus);
     }
-    const { hideChart, sort, query } = appStateContainer.getState();
+    const query = savedSearch.searchSource.getField('query');
+    const hideChart = savedSearch.hideChart;
     const recordRawType = getRawRecordType(query);
     const useSql = recordRawType === RecordRawType.PLAIN;
-
-    if (recordRawType === RecordRawType.DOCUMENT) {
-      // Update the base searchSource, base for all child fetches
-      updateSearchSource(searchSource, false, {
-        dataView,
-        services,
-        sort: sort as SortOrder[],
-        useNewFieldsApi,
-      });
-    }
 
     // Mark all subjects as loading
     sendLoadingMsg(dataSubjects.main$, recordRawType);
@@ -114,11 +102,15 @@ export function fetchAll(
     const documents =
       useSql && query
         ? fetchSql(query, services.dataViews, data, services.expressions)
-        : fetchDocuments(searchSource.createCopy(), fetchDeps);
+        : fetchDocuments(searchSource.createChild(), fetchDeps);
     const charts =
-      isChartVisible && !useSql ? fetchChart(searchSource.createCopy(), fetchDeps) : undefined;
+      isChartVisible && !useSql
+        ? fetchChart(searchSource.createChild(), appState.interval ?? 'auto', fetchDeps)
+        : undefined;
     const totalHits =
-      !isChartVisible && !useSql ? fetchTotalHits(searchSource.createCopy(), fetchDeps) : undefined;
+      !isChartVisible && !useSql
+        ? fetchTotalHits(searchSource.createChild(), fetchDeps)
+        : undefined;
     /**
      * This method checks the passed in hit count and will send a PARTIAL message to main$
      * if there are results, indicating that we have finished some of the requests that have been

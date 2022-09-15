@@ -14,7 +14,7 @@ import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-obj
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
-import { GetStateReturn } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../services/discover_state';
 import { setBreadcrumbsTitle } from '../../../../utils/breadcrumbs';
 import { persistSavedSearch } from '../../utils/persist_saved_search';
 import { DOC_TABLE_LEGACY } from '../../../../../common';
@@ -33,7 +33,7 @@ async function saveDataSource({
   savedSearch: SavedSearch;
   saveOptions: SaveSavedSearchOptions;
   services: DiscoverServices;
-  state: GetStateReturn;
+  state: DiscoverStateContainer;
   navigateOrReloadSavedSearch: boolean;
 }) {
   const prevSavedSearchId = savedSearch.id;
@@ -102,7 +102,7 @@ export async function onSaveSearch({
   navigateTo: (path: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
-  state: GetStateReturn;
+  state: DiscoverStateContainer;
   onClose?: () => void;
   onSaveCb?: () => void;
 }) {

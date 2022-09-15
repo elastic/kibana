@@ -12,7 +12,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
-import { AppState, GetStateReturn } from '../../services/discover_state';
+import { AppState, DiscoverStateContainer } from '../../services/discover_state';
 import { DataDocuments$ } from '../../hooks/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
@@ -44,7 +44,7 @@ function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
     searchSource: documents$,
     setExpandedDoc: jest.fn(),
     state: { columns: [] },
-    stateContainer: { setAppState: () => {} } as unknown as GetStateReturn,
+    stateContainer: { setAppState: () => {} } as unknown as DiscoverStateContainer,
     navigateTo: jest.fn(),
     onFieldEdited: jest.fn(),
   };
@@ -83,7 +83,7 @@ describe('Discover documents layout', () => {
       setAppState: (newState: Partial<AppState>) => {
         state = { ...state, ...newState };
       },
-    } as unknown as GetStateReturn;
+    } as unknown as DiscoverStateContainer;
 
     onResize(
       {

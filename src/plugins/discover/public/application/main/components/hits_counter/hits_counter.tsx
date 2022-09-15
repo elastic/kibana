@@ -20,23 +20,22 @@ import { i18n } from '@kbn/i18n';
 import { DataTotalHits$, DataTotalHitsMsg } from '../../hooks/use_saved_search';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
+import {DiscoverStateContainer} from "@kbn/discover-plugin/public/application/main/services/discover_state";
 
 export interface HitsCounterProps {
   /**
    * displays the reset button
    */
   showResetButton: boolean;
-  /**
-   * resets the query
-   */
-  onResetQuery: () => void;
+
+  stateContainer: DiscoverStateContainer;
   /**
    * saved search data observable
    */
   savedSearchData$: DataTotalHits$;
 }
 
-export function HitsCounter({ showResetButton, onResetQuery, savedSearchData$ }: HitsCounterProps) {
+export function HitsCounter({ showResetButton, stateContainer, savedSearchData$ }: HitsCounterProps) {
   const data: DataTotalHitsMsg = useDataState(savedSearchData$);
 
   const hits = data.result || 0;
@@ -95,7 +94,7 @@ export function HitsCounter({ showResetButton, onResetQuery, savedSearchData$ }:
           <EuiButtonEmpty
             iconType="refresh"
             data-test-subj="resetSavedSearch"
-            onClick={onResetQuery}
+            onClick={() => stateContainer.resetSavedSearch()}
             size="s"
             aria-label={i18n.translate('discover.reloadSavedSearchButton', {
               defaultMessage: 'Reset search',

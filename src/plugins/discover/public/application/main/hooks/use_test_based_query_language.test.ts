@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
-import { AppState, GetStateReturn } from '../services/discover_state';
+import { AppState, DiscoverStateContainer } from '../services/discover_state';
 import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../types';
 import { DataDocuments$, RecordRawType } from './use_saved_search';
@@ -31,7 +31,7 @@ function getHookProps(
         return [];
       },
     },
-  } as unknown as GetStateReturn;
+  } as unknown as DiscoverStateContainer;
 
   const msgLoading = {
     recordRawType: RecordRawType.PLAIN,

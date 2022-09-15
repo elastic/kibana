@@ -29,7 +29,7 @@ import {
 } from '../../../../../common';
 import { useColumns } from '../../../../hooks/use_data_grid_columns';
 import { DataDocuments$, DataDocumentsMsg, RecordRawType } from '../../hooks/use_saved_search';
-import { AppState, GetStateReturn } from '../../services/discover_state';
+import { AppState, DiscoverStateContainer } from '../../services/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
 import { DocumentExplorerCallout } from '../document_explorer_callout';
@@ -44,7 +44,7 @@ const DataGridMemoized = React.memo(DiscoverGrid);
 // export needs for testing
 export const onResize = (
   colSettings: { columnId: string; width: number },
-  stateContainer: GetStateReturn,
+  stateContainer: DiscoverStateContainer,
   state: AppState
 ) => {
   const grid = { ...(state.grid || {}) };
@@ -75,7 +75,7 @@ function DiscoverDocumentsComponent({
   savedSearch: SavedSearch;
   setExpandedDoc: (doc?: DataTableRecord) => void;
   state: AppState;
-  stateContainer: GetStateReturn;
+  stateContainer: DiscoverStateContainer;
   onFieldEdited?: () => void;
 }) {
   const { capabilities, dataViews, uiSettings } = useDiscoverServices();

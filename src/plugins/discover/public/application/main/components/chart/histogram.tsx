@@ -45,12 +45,12 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DataCharts$, DataChartsMessage } from '../../hooks/use_saved_search';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
-import { GetStateReturn } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../services/discover_state';
 
 export interface DiscoverHistogramProps {
   savedSearchData$: DataCharts$;
   timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
-  stateContainer: GetStateReturn;
+  stateContainer: DiscoverStateContainer;
 }
 
 function getTimezone(uiSettings: IUiSettingsClient) {

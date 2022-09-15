@@ -15,7 +15,7 @@ import {
 import { useCallback, useEffect, useRef } from 'react';
 import { DataViewListItem, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { GetStateReturn } from '../services/discover_state';
+import type { DiscoverStateContainer } from '../services/discover_state';
 import type { DataDocuments$ } from './use_saved_search';
 import { FetchStatus } from '../../types';
 
@@ -33,7 +33,7 @@ export function useTextBasedQueryLanguage({
   savedSearch,
 }: {
   documents$: DataDocuments$;
-  stateContainer: GetStateReturn;
+  stateContainer: DiscoverStateContainer;
   dataViews: DataViewsContract;
   dataViewList: DataViewListItem[];
   savedSearch: SavedSearch;

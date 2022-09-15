@@ -12,7 +12,7 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
 import {
   createSearchSessionRestorationDataProvider,
-  GetStateReturn,
+  DiscoverStateContainer,
 } from '../services/discover_state';
 import { DiscoverServices } from '../../../build_services';
 
@@ -23,7 +23,7 @@ export function useSearchSession({
   savedSearch,
 }: {
   services: DiscoverServices;
-  stateContainer: GetStateReturn;
+  stateContainer: DiscoverStateContainer;
   history: History;
   savedSearch: SavedSearch;
 }) {

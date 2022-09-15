@@ -9,11 +9,11 @@ import { useMemo, useEffect, useCallback, useState } from 'react';
 import { isEqual } from 'lodash';
 import { History } from 'history';
 import { DataViewListItem, DataViewType } from '@kbn/data-views-plugin/public';
-import { SavedSearch, getSavedSearch } from '@kbn/saved-search-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import { updateSearchSource } from '../utils/update_search_source';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
 import { getState } from '../services/discover_state';
-import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
 import { loadDataView } from '../utils/resolve_data_view';
 import { useSavedSearch as useSavedSearchData } from './use_saved_search';
@@ -27,7 +27,6 @@ import { useSearchSession } from './use_search_session';
 import { FetchStatus } from '../../types';
 import { getDataViewAppState } from '../utils/get_switch_data_view_app_state';
 import { DataTableRecord } from '../../../types';
-import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 
 export function useDiscoverState({
   services,
@@ -47,11 +46,6 @@ export function useDiscoverState({
   const { timefilter } = data.query.timefilter;
 
   const [dataView, setDataView] = useState(savedSearch.searchSource.getField('index')!);
-
-  const searchSource = useMemo(() => {
-    savedSearch.searchSource = savedSearch.searchSource.createChild();
-    return savedSearch.searchSource;
-  }, [savedSearch]);
 
   const stateContainer = useMemo(
     () =>
@@ -86,7 +80,6 @@ export function useDiscoverState({
     initialFetchStatus,
     searchSessionManager,
     savedSearch,
-    searchSource,
     services,
     stateContainer,
     useNewFieldsApi,
@@ -128,6 +121,7 @@ export function useDiscoverState({
       const docTableSortChanged = !isEqual(nextState.sort, sort);
       const dataViewChanged = !isEqual(nextState.index, index);
       // NOTE: this is also called when navigating from discover app to context app
+      let nextDataView = dataView;
       if (nextState.index && dataViewChanged) {
         /**
          *  Without resetting the fetch state, e.g. a time column would be displayed when switching
@@ -135,51 +129,35 @@ export function useDiscoverState({
          *  That's because appState is updated before savedSearchData$
          *  The following line of code catches this, but should be improved
          */
-        const nextDataView = await loadDataView(
-          nextState.index,
-          services.dataViews,
-          services.uiSettings
-        );
-        savedSearch.searchSource.setField('index', nextDataView.loaded);
+        nextDataView = (
+          await loadDataView(nextState.index, services.dataViews, services.uiSettings)
+        ).loaded;
+        savedSearch.searchSource.setField('index', nextDataView);
         reset();
-        setDataView(nextDataView.loaded);
+        setDataView(nextDataView);
       }
+      updateSearchSource(savedSearch.searchSource, true, {
+        dataView: nextDataView,
+        services,
+        sort,
+        useNewFieldsApi,
+      });
 
       if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged) {
         refetch$.next(undefined);
       }
     });
     return () => unsubscribe();
-  }, [services, refetch$, data$, reset, savedSearch.searchSource, stateContainer]);
-
-  /**
-   * function to revert any changes to a given saved search
-   */
-  const resetSavedSearch = useCallback(
-    async (id?: string) => {
-      const newSavedSearch = await getSavedSearch(id, {
-        search: services.data.search,
-        savedObjectsClient: services.core.savedObjects.client,
-        spaces: services.spaces,
-        savedObjectsTagging: services.savedObjectsTagging,
-      });
-
-      const newDataView = newSavedSearch.searchSource.getField('index') || dataView;
-      newSavedSearch.searchSource.setField('index', newDataView);
-      const newAppState = getStateDefaults({
-        savedSearch: newSavedSearch,
-        services,
-      });
-
-      restoreStateFromSavedSearch({
-        savedSearch: newSavedSearch,
-        timefilter: services.timefilter,
-      });
-
-      await stateContainer.replaceUrlAppState(newAppState);
-    },
-    [services, stateContainer, dataView]
-  );
+  }, [
+    services,
+    refetch$,
+    data$,
+    reset,
+    savedSearch.searchSource,
+    stateContainer,
+    dataView,
+    useNewFieldsApi,
+  ]);
 
   /**
    * Function triggered when user changes data view in the sidebar
@@ -237,15 +215,26 @@ export function useDiscoverState({
     }
   }, [dataView, stateContainer]);
 
+  const fetchQuery = useCallback(
+    (resetQuery?: boolean) => {
+      if (resetQuery) {
+        refetch$.next('reset');
+      } else {
+        refetch$.next(undefined);
+      }
+      return refetch$;
+    },
+    [refetch$]
+  );
+
   return {
     data$,
     dataView,
     inspectorAdapters,
     refetch$,
-    resetSavedSearch,
+    fetchQuery,
     onChangeDataView,
     onUpdateQuery,
-    searchSource,
     stateContainer,
   };
 }

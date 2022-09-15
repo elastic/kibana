@@ -12,7 +12,7 @@ import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public'
 import { Capabilities, IUiSettingsClient } from '@kbn/core/public';
 import {
   AppState as DiscoverState,
-  GetStateReturn as DiscoverGetStateReturn,
+  DiscoverStateContainer as DiscoverGetStateReturn,
 } from '../application/main/services/discover_state';
 import {
   AppState as ContextState,

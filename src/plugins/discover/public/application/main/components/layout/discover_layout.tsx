@@ -69,8 +69,7 @@ export function DiscoverLayout({
   onChangeDataView,
   onUpdateQuery,
   setExpandedDoc,
-  savedSearchRefetch$,
-  resetSavedSearch,
+  fetchQuery,
   savedSearchData$,
   stateContainer,
 }: DiscoverLayoutProps) {
@@ -182,8 +181,8 @@ export function DiscoverLayout({
   );
 
   const onFieldEdited = useCallback(() => {
-    savedSearchRefetch$.next('reset');
-  }, [savedSearchRefetch$]);
+    fetchQuery(true);
+  }, [fetchQuery]);
 
   const onDisableFilters = useCallback(() => {
     const disabledFilters = filterManager
@@ -246,7 +245,6 @@ export function DiscoverLayout({
         savedQuery={state.savedQuery}
         stateContainer={stateContainer}
         updateQuery={onUpdateQuery}
-        resetSavedSearch={resetSavedSearch}
         onChangeDataView={onChangeDataView}
         isPlainRecord={isPlainRecord}
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
@@ -320,7 +318,7 @@ export function DiscoverLayout({
                 />
               )}
               {resultState === 'uninitialized' && (
-                <DiscoverUninitialized onRefresh={() => savedSearchRefetch$.next(undefined)} />
+                <DiscoverUninitialized onRefresh={() => fetchQuery(false)} />
               )}
               {resultState === 'loading' && <LoadingSpinner />}
               {resultState === 'ready' && (
@@ -335,7 +333,6 @@ export function DiscoverLayout({
                     <>
                       <EuiFlexItem grow={false}>
                         <DiscoverChartMemoized
-                          resetSavedSearch={resetSavedSearch}
                           savedSearch={stateContainer.savedSearch}
                           savedSearchDataChart$={charts$}
                           savedSearchDataTotalHits$={totalHits$}
@@ -375,7 +372,7 @@ export function DiscoverLayout({
                       stateContainer={stateContainer}
                       onAddFilter={!isPlainRecord ? (onAddFilter as DocViewFilterFn) : undefined}
                       trackUiMetric={trackUiMetric}
-                      savedSearchRefetch$={savedSearchRefetch$}
+                      fetchQuery={fetchQuery}
                     />
                   )}
                 </EuiFlexGroup>

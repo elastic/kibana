@@ -8,14 +8,13 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
-import { ISearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import { getRawRecordType } from '../utils/get_raw_record_type';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
-import { GetStateReturn } from '../services/discover_state';
+import { DiscoverStateContainer } from '../services/discover_state';
 import { validateTimeRange } from '../utils/validate_time_range';
 import { Chart } from '../components/chart/point_series';
 import { useSingleton } from './use_singleton';
@@ -106,7 +105,6 @@ export const useSavedSearch = ({
   initialFetchStatus,
   savedSearch,
   searchSessionManager,
-  searchSource,
   services,
   stateContainer,
   useNewFieldsApi,
@@ -114,14 +112,14 @@ export const useSavedSearch = ({
   initialFetchStatus: FetchStatus;
   savedSearch: SavedSearch;
   searchSessionManager: DiscoverSearchSessionManager;
-  searchSource: ISearchSource;
   services: DiscoverServices;
-  stateContainer: GetStateReturn;
+  stateContainer: DiscoverStateContainer;
   useNewFieldsApi: boolean;
 }) => {
   const { data, filterManager } = services;
   const timefilter = data.query.timefilter.timefilter;
-  const { query } = stateContainer.appStateContainer.getState();
+  const appState = stateContainer.appStateContainer.getState();
+  const { query } = appState;
 
   const recordRawType = useMemo(() => getRawRecordType(query), [query]);
 
@@ -180,7 +178,6 @@ export const useSavedSearch = ({
       main$,
       refetch$,
       searchSessionManager,
-      searchSource,
       initialFetchStatus,
     });
     let abortController: AbortController;
@@ -195,16 +192,13 @@ export const useSavedSearch = ({
       abortController = new AbortController();
       const autoRefreshDone = refs.current.autoRefreshDone;
 
-      await fetchAll(dataSubjects, searchSource, val === 'reset', {
+      await fetchAll(dataSubjects, savedSearch, val === 'reset', appState, {
         abortController,
-        appStateContainer: stateContainer.appStateContainer,
         data,
         initialFetchStatus,
         inspectorAdapters,
-        savedSearch,
         searchSessionId: searchSessionManager.getNextSearchSessionId(),
         services,
-        useNewFieldsApi,
       });
 
       // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
@@ -222,6 +216,7 @@ export const useSavedSearch = ({
       subscription.unsubscribe();
     };
   }, [
+    appState,
     data,
     data.query.queryString,
     dataSubjects,
@@ -233,7 +228,6 @@ export const useSavedSearch = ({
     savedSearch,
     searchSessionManager,
     searchSessionManager.newSearchSessionIdFromURL$,
-    searchSource,
     services,
     services.toastNotifications,
     stateContainer.appStateContainer,

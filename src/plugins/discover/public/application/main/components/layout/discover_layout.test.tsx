@@ -18,7 +18,7 @@ import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
-import { GetStateReturn } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../services/discover_state';
 import { DiscoverLayoutProps } from './types';
 import {
   AvailableFields$,
@@ -158,7 +158,7 @@ function mountComponent(
           interval: 'auto',
         }),
       },
-    } as unknown as GetStateReturn,
+    } as unknown as DiscoverStateContainer,
     setExpandedDoc: jest.fn(),
   };
 

@@ -15,7 +15,7 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverLayoutProps } from '../layout/types';
 import { getTopNavLinks } from './get_top_nav_links';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
-import { GetStateReturn } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
 
 export type DiscoverTopNavProps = Pick<DiscoverLayoutProps, 'dataView' | 'navigateTo'> & {
@@ -26,8 +26,7 @@ export type DiscoverTopNavProps = Pick<DiscoverLayoutProps, 'dataView' | 'naviga
     payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
     isUpdate?: boolean
   ) => void;
-  stateContainer: GetStateReturn;
-  resetSavedSearch: () => void;
+  stateContainer: DiscoverStateContainer;
   onChangeDataView: (dataView: string) => void;
   isPlainRecord: boolean;
   textBasedLanguageModeErrors?: Error;
@@ -42,7 +41,6 @@ export const DiscoverTopNav = ({
   stateContainer,
   updateQuery,
   navigateTo,
-  resetSavedSearch,
   onChangeDataView,
   isPlainRecord,
   textBasedLanguageModeErrors,
@@ -68,12 +66,12 @@ export const DiscoverTopNav = ({
   const onOpenSavedSearch = useCallback(
     (newSavedSearchId: string) => {
       if (savedSearch.id && savedSearch.id === newSavedSearchId) {
-        resetSavedSearch();
+        stateContainer.resetSavedSearch(savedSearch.id);
       } else {
         history.push(`/view/${encodeURIComponent(newSavedSearchId)}`);
       }
     },
-    [history, resetSavedSearch, savedSearch.id]
+    [history, savedSearch.id, stateContainer]
   );
 
   useEffect(() => {

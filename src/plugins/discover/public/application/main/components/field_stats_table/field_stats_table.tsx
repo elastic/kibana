@@ -20,7 +20,7 @@ import {
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
-import type { GetStateReturn } from '../../services/discover_state';
+import type { DiscoverStateContainer } from '../../services/discover_state';
 import { AvailableFields$, DataRefetch$ } from '../../hooks/use_saved_search';
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
@@ -73,7 +73,7 @@ export interface FieldStatisticsTableProps {
   /**
    * State container with persisted settings
    */
-  stateContainer?: GetStateReturn;
+  stateContainer?: DiscoverStateContainer;
   /**
    * Callback to add a filter to filter bar
    */
@@ -84,9 +84,9 @@ export interface FieldStatisticsTableProps {
    * @param eventName
    */
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-  savedSearchRefetch$?: DataRefetch$;
   availableFields$?: AvailableFields$;
   searchSessionId?: string;
+  fetchQuery: (reset: boolean) => void;
 }
 
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
@@ -100,7 +100,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     stateContainer,
     onAddFilter,
     trackUiMetric,
-    savedSearchRefetch$,
+    fetchQuery,
     searchSessionId,
   } = props;
   const services = useDiscoverServices();
@@ -124,7 +124,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
       }
     });
 
-    const refetch = savedSearchRefetch$?.subscribe(() => {
+    const refetch = fetchQuery()?.subscribe(() => {
       if (embeddable && !isErrorEmbeddable(embeddable)) {
         embeddable.updateInput({ lastReloadRequestTime: Date.now() });
       }
@@ -141,7 +141,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
       refetch?.unsubscribe();
       fields?.unsubscribe();
     };
-  }, [embeddable, stateContainer, savedSearchRefetch$, availableFields$]);
+  }, [embeddable, stateContainer, availableFields$, fetchQuery]);
 
   useEffect(() => {
     if (embeddable && !isErrorEmbeddable(embeddable)) {

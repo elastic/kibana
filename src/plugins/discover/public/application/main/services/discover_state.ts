@@ -33,7 +33,8 @@ import {
   SearchSessionInfoProvider,
   syncQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { getSavedSearch, SavedSearch } from '@kbn/saved-search-plugin/public';
+import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
@@ -120,7 +121,7 @@ interface GetStateParams {
   services: DiscoverServices;
 }
 
-export interface GetStateReturn {
+export interface DiscoverStateContainer {
   /**
    * kbnUrlStateStorage
    */
@@ -172,6 +173,7 @@ export interface GetStateReturn {
 
   getSavedSearch: () => SavedSearch;
   savedSearch: SavedSearch;
+  resetSavedSearch: (id?: string) => Promise<void>;
 }
 
 const APP_STATE_URL_KEY = '_a';
@@ -181,7 +183,11 @@ const GLOBAL_STATE_URL_KEY = '_g';
  * Builds and returns appState and globalState containers and helper functions
  * Used to sync URL with UI state
  */
-export function getState({ history, savedSearch, services }: GetStateParams): GetStateReturn {
+export function getState({
+  history,
+  savedSearch,
+  services,
+}: GetStateParams): DiscoverStateContainer {
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
   const toasts = services.core.notifications.toasts;
   const defaultAppState = getStateDefaults({
@@ -275,6 +281,28 @@ export function getState({ history, savedSearch, services }: GetStateParams): Ge
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
     pauseAutoRefreshInterval,
+    resetSavedSearch: async (id: string | undefined) => {
+      const actualId = id ?? savedSearch.id;
+
+      const newSavedSearch = await getSavedSearch(actualId, {
+        search: services.data.search,
+        savedObjectsClient: services.core.savedObjects.client,
+        spaces: services.spaces,
+        savedObjectsTagging: services.savedObjectsTagging,
+      });
+
+      const newAppState = getStateDefaults({
+        savedSearch: newSavedSearch,
+        services,
+      });
+
+      restoreStateFromSavedSearch({
+        savedSearch: newSavedSearch,
+        timefilter: services.timefilter,
+      });
+
+      await replaceUrlAppState(newAppState);
+    },
     initializeAndSync: () => {
       const dataView = savedSearch.searchSource.getField('index');
       const { filterManager, data } = services;

@@ -11,7 +11,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import {
   AppState as DiscoverState,
-  GetStateReturn as DiscoverGetStateReturn,
+  DiscoverStateContainer as DiscoverGetStateReturn,
 } from '../../../application/main/services/discover_state';
 import {
   AppState as ContextState,

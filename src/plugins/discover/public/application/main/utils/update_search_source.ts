@@ -27,7 +27,7 @@ export function updateSearchSource(
   }: {
     dataView: DataView;
     services: DiscoverServices;
-    sort: SortOrder[];
+    sort?: SortOrder[];
     useNewFieldsApi: boolean;
   }
 ) {

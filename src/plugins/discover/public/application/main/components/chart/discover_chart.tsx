@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { HitsCounter } from '../hits_counter';
-import { GetStateReturn } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../services/discover_state';
 import { DiscoverHistogram } from './histogram';
 import { DataCharts$, DataTotalHits$ } from '../../hooks/use_saved_search';
 import { useChartPanels } from './use_chart_panels';
@@ -36,7 +36,6 @@ const DiscoverHistogramMemoized = memo(DiscoverHistogram);
 export const CHART_HIDDEN_KEY = 'discover:chartHidden';
 
 export function DiscoverChart({
-  resetSavedSearch,
   savedSearch,
   savedSearchDataChart$,
   savedSearchDataTotalHits$,
@@ -48,11 +47,10 @@ export function DiscoverChart({
   interval,
   isTimeBased,
 }: {
-  resetSavedSearch: () => void;
   savedSearch: SavedSearch;
   savedSearchDataChart$: DataCharts$;
   savedSearchDataTotalHits$: DataTotalHits$;
-  stateContainer: GetStateReturn;
+  stateContainer: DiscoverStateContainer;
   dataView: DataView;
   viewMode: VIEW_MODE;
   setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
@@ -136,7 +134,7 @@ export function DiscoverChart({
             <HitsCounter
               savedSearchData$={savedSearchDataTotalHits$}
               showResetButton={!!(savedSearch && savedSearch.id)}
-              onResetQuery={resetSavedSearch}
+              stateContainer={stateContainer}
             />
           </EuiFlexItem>
           {showViewModeToggle && (

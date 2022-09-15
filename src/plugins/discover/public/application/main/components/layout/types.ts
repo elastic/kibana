@@ -11,7 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataViewListItem } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { DataTableRecord } from '../../../../types';
-import { GetStateReturn } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../services/discover_state';
 import { DataRefetch$, SavedSearchData } from '../../hooks/use_saved_search';
 
 export interface DiscoverLayoutProps {
@@ -24,10 +24,10 @@ export interface DiscoverLayoutProps {
     payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
     isUpdate?: boolean
   ) => void;
-  resetSavedSearch: () => void;
   expandedDoc?: DataTableRecord;
   setExpandedDoc: (doc?: DataTableRecord) => void;
   savedSearchData$: SavedSearchData;
   savedSearchRefetch$: DataRefetch$;
-  stateContainer: GetStateReturn;
+  stateContainer: DiscoverStateContainer;
+  fetchQuery: (reset: boolean) => void;
 }
