@@ -8,9 +8,7 @@
 
 export * from './supported_metrics';
 export * from './metrics_helpers';
-export * from './metrics_converter';
-export * from './parent_pipeline_formula';
-export * from './sibling_pipeline_formula';
+export * from './pipeline_formula';
 export * from './filter_ratio_formula';
-export * from './parent_pipeline_series';
+export * from './counter_rate_formula';
 export * from './validate_metrics';

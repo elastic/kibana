@@ -112,7 +112,11 @@ function getParentFormatter(params: Partial<TermsIndexPatternColumn['params']>) 
 
 const idPrefix = htmlIdGenerator()();
 
-export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field'> = {
+export const termsOperation: OperationDefinition<
+  TermsIndexPatternColumn,
+  'field',
+  TermsIndexPatternColumn['params']
+> = {
   type: 'terms',
   displayName: i18n.translate('xpack.lens.indexPattern.terms', {
     defaultMessage: 'Top values',
@@ -205,7 +209,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         (!column.params.otherBucket || !newIndexPattern.hasRestrictions)
     );
   },
-  buildColumn({ layer, field, indexPattern }) {
+  buildColumn({ layer, field, indexPattern }, columnParams) {
     const existingMetricColumn = Object.entries(layer.columns)
       .filter(([columnId]) => isSortableByColumn(layer, columnId))
       .map(([id]) => id)[0];
@@ -222,17 +226,21 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       sourceField: field.name,
       isBucketed: true,
       params: {
-        size: previousBucketsLength === 0 ? 5 : DEFAULT_SIZE,
-        orderBy: existingMetricColumn
-          ? {
-              type: 'column',
-              columnId: existingMetricColumn,
-            }
-          : { type: 'alphabetical', fallback: true },
-        orderDirection: existingMetricColumn ? 'desc' : 'asc',
-        otherBucket: !indexPattern.hasRestrictions,
-        missingBucket: false,
-        parentFormat: { id: 'terms' },
+        size: columnParams?.size ?? (previousBucketsLength === 0 ? 5 : DEFAULT_SIZE),
+        orderBy:
+          columnParams?.orderBy ??
+          (existingMetricColumn
+            ? {
+                type: 'column',
+                columnId: existingMetricColumn,
+              }
+            : { type: 'alphabetical', fallback: true }),
+        orderAgg: columnParams?.orderBy.type === 'custom' ? columnParams?.orderAgg : undefined,
+        orderDirection: columnParams?.orderDirection ?? (existingMetricColumn ? 'desc' : 'asc'),
+        otherBucket: (columnParams?.otherBucket ?? true) && !indexPattern.hasRestrictions,
+        missingBucket: columnParams?.missingBucket ?? false,
+        parentFormat: columnParams?.parentFormat ?? { id: 'terms' },
+        secondaryFields: columnParams?.secondaryFields,
       },
     };
   },

@@ -13,4 +13,6 @@
 export * from './types';
 export * from './utils';
 export * from './expression_functions';
+export * from './convert_to_lens';
+
 export { LegendSize, LegendSizeToPixels, DEFAULT_LEGEND_SIZE } from './constants';

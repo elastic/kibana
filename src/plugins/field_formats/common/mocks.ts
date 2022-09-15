@@ -13,6 +13,7 @@ export const fieldFormatsMock: IFieldFormatsRegistry = {
   getByFieldType: jest.fn(),
   getDefaultConfig: jest.fn(),
   getDefaultInstance: jest.fn().mockImplementation(() => ({
+    type: { id: 'bytes' },
     convert: jest.fn().mockImplementation((t: string) => t),
     getConverterFor: jest.fn().mockImplementation(() => (t: string) => t),
   })),

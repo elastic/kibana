@@ -6,48 +6,59 @@
  * Side Public License, v 1.
  */
 
+import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import type { Metric } from '../../../../common/types';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { getFilterRatioFormula } from './filter_ratio_formula';
+import { AdditionalArgs } from '../../types';
 
 describe('getFilterRatioFormula', () => {
-  test('should return correct formula for filter ratio', () => {
-    const metric = {
-      id: '12345',
-      type: 'filter_ratio',
-      field: 'day_of_week_i',
-      numerator: {
-        query: 'category.keyword : "Men\'s Clothing" ',
-        language: 'kuery',
-      },
-      denominator: {
-        query: 'customer_gender : "FEMALE" ',
-        language: 'kuery',
-      },
-    } as Metric;
-    const formula = getFilterRatioFormula(metric);
-    expect(formula).toStrictEqual(
-      "count(kql='category.keyword : \"Men\\'s Clothing\" ') / count(kql='customer_gender : \"FEMALE\" ')"
-    );
-  });
+  const metric: Metric = {
+    id: 'some-random-value',
+    type: TSVB_METRIC_TYPES.FILTER_RATIO,
+    field: 'test-1',
+  };
 
-  test('should return correct formula for positive rate', () => {
-    const metric = {
-      id: '12345',
-      type: 'filter_ratio',
-      field: 'day_of_week_i',
-      numerator: {
-        query: 'category.keyword : "Men\'s Clothing" ',
-        language: 'kuery',
-      },
-      denominator: {
-        query: 'customer_gender : "FEMALE" ',
-        language: 'kuery',
-      },
-      metric_agg: 'positive_rate',
-    } as Metric;
-    const formula = getFilterRatioFormula(metric);
-    expect(formula).toStrictEqual(
-      "counter_rate(max('day_of_week_i',kql='category.keyword : \"Men\\'s Clothing\" ')) / counter_rate(max('day_of_week_i',kql='customer_gender : \"FEMALE\" '))"
-    );
+  const metricWithMetricAgg: Metric = {
+    id: 'some-random-value',
+    type: TSVB_METRIC_TYPES.FILTER_RATIO,
+    field: 'test-1',
+    metric_agg: METRIC_TYPES.AVG,
+  };
+
+  const metricWithNotSupportedMetricAgg: Metric = {
+    id: 'some-random-value',
+    type: TSVB_METRIC_TYPES.FILTER_RATIO,
+    field: 'test-1',
+    metric_agg: METRIC_TYPES.MEDIAN,
+  };
+
+  test.each<[string, [Metric, AdditionalArgs], string | null]>([
+    ['null if metric_agg is not supported', [metricWithNotSupportedMetricAgg, {}], null],
+    [
+      'filter ratio formula if metric_agg is not specified',
+      [metric, {}],
+      "count(kql='*') / count(kql='*')",
+    ],
+    [
+      'filter ratio formula if metric_agg is specified',
+      [metricWithMetricAgg, {}],
+      "average('test-1',kql='*') / average('test-1',kql='*')",
+    ],
+    [
+      'filter ratio formula if reducedTimeRange is provided',
+      [metricWithMetricAgg, { reducedTimeRange: '1h' }],
+      "average('test-1',kql='*', reducedTimeRange='1h') / average('test-1',kql='*', reducedTimeRange='1h')",
+    ],
+    [
+      'filter ratio formula if time shift is provided',
+      [metricWithMetricAgg, { reducedTimeRange: '1h', timeShift: '3h' }],
+      "average('test-1',kql='*', shift='3h', reducedTimeRange='1h') / average('test-1',kql='*', shift='3h', reducedTimeRange='1h')",
+    ],
+  ])('should return %s', (_, input, expected) => {
+    if (expected === null) {
+      expect(getFilterRatioFormula(...input)).toBeNull();
+    }
+    expect(getFilterRatioFormula(...input)).toEqual(expected);
   });
 });

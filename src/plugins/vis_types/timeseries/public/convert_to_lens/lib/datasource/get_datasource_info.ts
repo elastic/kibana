@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
   fetchIndexPattern,
   isStringTypeIndexPattern,
@@ -17,33 +17,39 @@ export const getDataSourceInfo = async (
   modelTimeField: string | undefined,
   isOverwritten: boolean,
   overwrittenIndexPattern: IndexPatternValue | undefined,
+  seriesTimeField: string | undefined,
   dataViews: DataViewsPublicPluginStart
 ) => {
   let indexPatternId =
     modelIndexPattern && !isStringTypeIndexPattern(modelIndexPattern) ? modelIndexPattern.id : '';
 
   let timeField = modelTimeField;
+  let indexPattern: DataView | null | undefined;
   // handle override index pattern
   if (isOverwritten) {
-    const { indexPattern } = await fetchIndexPattern(overwrittenIndexPattern, dataViews);
+    const fetchedIndexPattern = await fetchIndexPattern(overwrittenIndexPattern, dataViews);
+    indexPattern = fetchedIndexPattern.indexPattern;
+
     if (indexPattern) {
       indexPatternId = indexPattern.id ?? '';
-      timeField = indexPattern.timeFieldName;
+      timeField = seriesTimeField ?? indexPattern.timeFieldName;
     }
   }
 
   if (!indexPatternId) {
-    const defaultIndex = await dataViews.getDefault();
-    indexPatternId = defaultIndex?.id ?? '';
-    timeField = defaultIndex?.timeFieldName;
-  }
-  if (!timeField) {
-    const indexPattern = await dataViews.get(indexPatternId);
-    timeField = indexPattern.timeFieldName;
+    indexPattern = await dataViews.getDefault();
+    indexPatternId = indexPattern?.id ?? '';
+    timeField = indexPattern?.timeFieldName;
+  } else {
+    indexPattern = await dataViews.get(indexPatternId);
+    if (!timeField) {
+      timeField = indexPattern.timeFieldName;
+    }
   }
 
   return {
     indexPatternId,
     timeField,
+    indexPattern,
   };
 };

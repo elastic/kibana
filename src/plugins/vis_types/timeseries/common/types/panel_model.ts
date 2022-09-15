@@ -22,7 +22,7 @@ interface MetricVariable {
   name?: string;
 }
 
-interface Percentile {
+export interface Percentile {
   id: string;
   mode: 'line' | 'band';
   field?: string;
