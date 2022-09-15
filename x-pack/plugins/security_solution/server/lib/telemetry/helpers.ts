@@ -270,20 +270,15 @@ export const metricsResponseToValueListMetaData = ({
     indicatorMatchMetricsResponse?.aggregations?.vl_used_in_indicator_match_rule_count?.value ?? 0,
 });
 
-class CloudOnlyLogger {
-  private logger?: Logger;
-  private isElasticCloudDeployment = false;
+export let isElasticCloudDeployment = false;
+export const setIsElasticCloudDeployment = (value: boolean) => {
+  isElasticCloudDeployment = value;
+};
 
-  setup(logger: Logger, isElasticCloudDeployment: boolean) {
-    this.logger = logger.get('telemetry_events');
-    this.isElasticCloudDeployment = isElasticCloudDeployment;
+export const tlog = (logger: Logger, message: string) => {
+  if (isElasticCloudDeployment) {
+    logger.info(message);
+  } else {
+    logger.debug(message)
   }
-
-  log(message: string) {
-    if (this.isElasticCloudDeployment) {
-      this.logger?.info(message);
-    }
-  }
-}
-
-export const cloudOnlyLogger = new CloudOnlyLogger();
+};

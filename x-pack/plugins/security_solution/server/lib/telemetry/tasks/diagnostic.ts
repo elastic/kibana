@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import {cloudOnlyLogger, getPreviousDiagTaskTimestamp } from '../helpers';
+import {tlog, getPreviousDiagTaskTimestamp } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { TelemetryEvent } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
@@ -38,10 +38,10 @@ export function createTelemetryDiagnosticsTaskConfig() {
 
       const hits = response.hits?.hits || [];
       if (!Array.isArray(hits) || !hits.length) {
-        logger.info('no diagnostic alerts retrieved');
+        tlog(logger, 'no diagnostic alerts retrieved');
         return 0;
       }
-      logger.info(`Received ${hits.length} diagnostic alerts`);
+      tlog(logger, `Received ${hits.length} diagnostic alerts`);
       const diagAlerts: TelemetryEvent[] = hits.flatMap((h) =>
         h._source != null ? [h._source] : []
       );

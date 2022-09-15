@@ -97,7 +97,7 @@ import type {
 import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
 import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 import { featureUsageService } from './endpoint/services/feature_usage';
-import { cloudOnlyLogger } from '../server/lib/telemetry/helpers';
+import { setIsElasticCloudDeployment } from '../server/lib/telemetry/helpers';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -332,6 +332,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       );
     });
 
+    setIsElasticCloudDeployment(plugins.cloud.isCloudEnabled ?? false);
+
     this.telemetryEventsSender.setup(
       this.telemetryReceiver,
       plugins.telemetry,
@@ -453,8 +455,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       registerListsServerExtension: this.lists?.registerExtension,
       featureUsageService,
     });
-
-    cloudOnlyLogger.setup(this.logger, plugins.security.getIsElasticCloudDeployment());
+    // cloudOnlyLogger.setup(this.logger, plugins.security.getIsElasticCloudDeployment());
 
     this.telemetryReceiver.start(
       core,

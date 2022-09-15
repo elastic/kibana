@@ -22,7 +22,8 @@ import {
   templateExceptionList,
   addDefaultAdvancedPolicyConfigSettings,
   metricsResponseToValueListMetaData,
-  cloudOnlyLogger
+  tlog,
+  setIsElasticCloudDeployment
 } from './helpers';
 import type { ESClusterInfo, ESLicense, ExceptionListItem } from './types';
 import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
@@ -911,28 +912,25 @@ describe('test metrics response to value list meta data', () => {
   });
 });
 
-describe('test cloud only logger', () => {
+describe('test tlog', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
   });
 
-  test('setup should set logger and cloud flag', () => {
-    cloudOnlyLogger.setup(logger, true);
-    expect(logger.get).toHaveBeenCalled();
-  });
 
   test('should log when cloud', () => {
-    cloudOnlyLogger.setup(logger, true);
-    cloudOnlyLogger.log('test');
+    setIsElasticCloudDeployment(true);
+    tlog(logger, 'test');
     expect(logger.info).toHaveBeenCalled();
+    setIsElasticCloudDeployment(false);
   });
 
   test('should NOT log when on prem', () => {
-    cloudOnlyLogger.setup(logger, false);
-    cloudOnlyLogger.log('test');
+    tlog(logger, 'test');
     expect(logger.info).toHaveBeenCalledTimes(0);
+    expect(logger.debug).toHaveBeenCalled();
   });
 
 })

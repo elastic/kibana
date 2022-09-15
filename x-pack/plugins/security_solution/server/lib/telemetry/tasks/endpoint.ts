@@ -26,7 +26,7 @@ import {
   extractEndpointPolicyConfig,
   getPreviousDailyTaskTimestamp,
   isPackagePolicyList,
-  cloudOnlyLogger
+  tlog
 } from '../helpers';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { TELEMETRY_CHANNEL_ENDPOINT_META } from '../constants';
@@ -58,6 +58,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
       sender: ITelemetryEventsSender,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
+      tlog(logger, 'test');
       if (!taskExecutionPeriod.last) {
         throw new Error('last execution timestamp is required');
       }
@@ -89,7 +90,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
        * a metric document(s) exists for an EP agent we map to fleet agent and policy
        */
       if (endpointData.endpointMetrics === undefined) {
-        logger.debug(`no endpoint metrics to report`);
+        tlog(logger, `no endpoint metrics to report`);
         return 0;
       }
 
@@ -98,7 +99,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
       };
 
       if (endpointMetricsResponse.aggregations === undefined) {
-        logger.debug(`no endpoint metrics to report`);
+        tlog(logger, `no endpoint metrics to report`);
         return 0;
       }
 
@@ -131,7 +132,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
       const agentsResponse = endpointData.fleetAgentsResponse;
 
       if (agentsResponse === undefined) {
-        logger.debug('no fleet agent information available');
+        tlog(logger, 'no fleet agent information available');
         return 0;
       }
 
@@ -154,12 +155,12 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
           policyInfo !== undefined &&
           !endpointPolicyCache.has(policyInfo)
         ) {
-          cloudOnlyLogger.log(`policy info exists as ${policyInfo}`);
+          tlog(logger, `policy info exists as ${policyInfo}`);
           const agentPolicy = await receiver.fetchPolicyConfigs(policyInfo);
           const packagePolicies = agentPolicy?.package_policies;
 
           if (packagePolicies !== undefined && isPackagePolicyList(packagePolicies)) {
-            cloudOnlyLogger.log(`package policy exists as ${JSON.stringify(packagePolicies)}`);
+            tlog(logger, `package policy exists as ${JSON.stringify(packagePolicies)}`);
             packagePolicies
               .map((pPolicy) => pPolicy as PolicyData)
               .forEach((pPolicy) => {
@@ -205,7 +206,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
           )
         : new Map<string, EndpointPolicyResponseDocument>();
 
-      cloudOnlyLogger.log(`policy responses exists as ${JSON.stringify(Object.fromEntries(policyResponses))}`);
+      tlog(logger, `policy responses exists as ${JSON.stringify(Object.fromEntries(policyResponses))}`);
 
 
       /** STAGE 4 - Fetch Endpoint Agent Metadata
@@ -216,7 +217,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
        * a metadata document(s) exists for an EP agent we map to fleet agent and policy
        */
       if (endpointData.endpointMetadata === undefined) {
-        logger.debug(`no endpoint metadata to report`);
+        tlog(logger, `no endpoint metadata to report`);
       }
 
       const { body: endpointMetadataResponse } = endpointData.endpointMetadata as unknown as {
@@ -224,7 +225,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
       };
 
       if (endpointMetadataResponse.aggregations === undefined) {
-        logger.debug(`no endpoint metadata to report`);
+        tlog(logger, `no endpoint metadata to report`);
       }
 
       const endpointMetadata =
@@ -236,7 +237,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
           },
           new Map<string, EndpointMetadataDocument>()
         );
-      cloudOnlyLogger.log(`endpoint metadata exists as ${JSON.stringify(Object.fromEntries(endpointMetadata))}`);
+      tlog(logger, `endpoint metadata exists as ${JSON.stringify(Object.fromEntries(endpointMetadata))}`);
       /** STAGE 5 - Create the telemetry log records
        *
        * Iterates through the endpoint metrics documents at STAGE 1 and joins them together
