@@ -92,6 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('project monitors - handles http monitors', async () => {
+      const journeyId = httpProjectMonitors.monitors[1].id;
       const kibanaVersion = await kibanaServer.version.get();
 
       try {
@@ -99,32 +100,25 @@ export default function ({ getService }: FtrProviderContext) {
           projectMonitorEndpoint,
           JSON.stringify(httpProjectMonitors)
         );
-        const journeyId = httpProjectMonitors.monitors[0].id;
 
         expect(messages).to.have.length(2);
         expect(messages[1].updatedMonitors).eql([]);
-        expect(messages[1].failedMonitors).eql([]);
-        expect(messages[1].createdMonitors).eql(
-          httpProjectMonitors.monitors.map((monitor) => monitor.id)
-        );
-        expect(messages[1].warnings).eql(
-          httpProjectMonitors.monitors.map((monitor) => ({
-            id: monitor.id,
-            details: `The following Heartbeat options are not supported for project monitors in ${kibanaVersion}: check.response.body|unsupportedKey.nestedUnsupportedKey`,
+        expect(messages[1].createdMonitors).eql([journeyId]);
+        expect(messages[1].failedMonitors).eql([
+          {
+            id: httpProjectMonitors.monitors[0].id,
+            details: `The following Heartbeat options are not supported for ${httpProjectMonitors.monitors[0].type} project monitors in ${kibanaVersion}: check.response.body|unsupportedKey.nestedUnsupportedKey`,
             reason: 'Unsupported Heartbeat option',
-          }))
-        );
+          },
+        ]);
 
-        const createdMonitorsResponse = await Promise.all(
-          httpProjectMonitors.monitors.map((monitor) => {
-            return supertest
-              .get(API_URLS.SYNTHETICS_MONITORS)
-              .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${monitor.id}` })
-              .set('kbn-xsrf', 'true')
-              .expect(200);
-          })
-        );
-        expect(createdMonitorsResponse[0].body.monitors[0].attributes).to.eql({
+        const createdMonitorsResponse = await supertest
+          .get(API_URLS.SYNTHETICS_MONITORS)
+          .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        expect(createdMonitorsResponse.body.monitors[0].attributes).to.eql({
           __ui: {
             is_tls_enabled: false,
           },
@@ -150,7 +144,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           ],
           max_redirects: '0',
-          name: 'My Monitor 2',
+          name: 'My Monitor 3',
           namespace: 'default',
           origin: 'project',
           original_space: 'default',
@@ -174,11 +168,7 @@ export default function ({ getService }: FtrProviderContext) {
           urls: 'http://localhost:9200',
         });
       } finally {
-        await Promise.all([
-          projectMonitors.monitors.map((monitor) => {
-            return deleteMonitor(monitor.id, projectMonitors.project);
-          }),
-        ]);
+        await deleteMonitor(journeyId, projectMonitors.project);
       }
     });
 
@@ -1101,8 +1091,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              testPolicyId
+            '-' +
+            testPolicyId
         );
         expect(packagePolicy.name).eql(
           `${projectMonitors.monitors[0].id}-${projectMonitors.project}-default-Test private location 0`
@@ -1159,8 +1149,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              testPolicyId
+            '-' +
+            testPolicyId
         );
 
         expect(packagePolicy.policy_id).eql(testPolicyId);
@@ -1194,8 +1184,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              testPolicyId
+            '-' +
+            testPolicyId
         );
 
         expect(packagePolicy2).eql(undefined);
@@ -1238,8 +1228,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              testPolicyId
+            '-' +
+            testPolicyId
         );
 
         expect(packagePolicy.policy_id).eql(testPolicyId);
@@ -1288,8 +1278,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              testPolicyId
+            '-' +
+            testPolicyId
         );
 
         expect(packagePolicy2).eql(undefined);

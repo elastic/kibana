@@ -13,7 +13,7 @@ import {
   FormMonitorType,
   HTTPFields,
 } from '../../../../common/runtime_types/monitor_management';
-import { normalizeYamlConfig, getMonitorTimeout } from '.';
+import { normalizeYamlConfig, getMonitorTimeout, getOptionalArrayField } from './common_fields';
 
 export const getNormalizeHTTPFields = ({
   locations = [],
@@ -38,7 +38,7 @@ export const getNormalizeHTTPFields = ({
     ...commonFields,
     [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
     [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.HTTP,
-    [ConfigKey.URLS]: monitor.urls?.[0] || defaultFields[ConfigKey.URLS],
+    [ConfigKey.URLS]: getOptionalArrayField(monitor.urls) || defaultFields[ConfigKey.URLS],
     [ConfigKey.MAX_REDIRECTS]:
       monitor[ConfigKey.MAX_REDIRECTS] || defaultFields[ConfigKey.MAX_REDIRECTS],
     [ConfigKey.TIMEOUT]: monitor.timeout

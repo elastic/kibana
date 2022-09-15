@@ -67,7 +67,6 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsStreamingRouteFactory =
         deletedMonitors: pushMonitorFormatter.deletedMonitors,
         failedMonitors: pushMonitorFormatter.failedMonitors,
         failedStaleMonitors: pushMonitorFormatter.failedStaleMonitors,
-        warnings: pushMonitorFormatter.warnings,
       });
     } catch (error) {
       subject?.error(error);

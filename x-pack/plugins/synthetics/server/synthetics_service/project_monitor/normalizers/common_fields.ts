@@ -5,14 +5,21 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import {
-  CommonFields,
+  BrowserFields,
   ConfigKey,
+  CommonFields,
+  DataStream,
+  PrivateLocation,
+  Locations,
+  ProjectMonitor,
   ScheduleUnit,
   SourceType,
 } from '../../../../common/runtime_types';
+import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { DEFAULT_COMMON_FIELDS } from '../../../../common/constants/monitor_defaults';
-import { getMonitorLocations, NormalizedProjectProps } from '.';
+import { NormalizedProjectProps } from '.';
 
 export const getNormalizeCommonFields = ({
   locations = [],
@@ -39,7 +46,7 @@ export const getNormalizeCommonFields = ({
     }),
     [ConfigKey.APM_SERVICE_NAME]:
       monitor.apmServiceName || defaultFields[ConfigKey.APM_SERVICE_NAME],
-    [ConfigKey.TAGS]: monitor.tags || defaultFields[ConfigKey.TAGS],
+    [ConfigKey.TAGS]: getOptionalListField(monitor.tags) || defaultFields[ConfigKey.TAGS],
     [ConfigKey.NAMESPACE]: namespace || defaultFields[ConfigKey.NAMESPACE],
     [ConfigKey.ORIGINAL_SPACE]: namespace || defaultFields[ConfigKey.NAMESPACE],
     [ConfigKey.CUSTOM_HEARTBEAT_ID]: getCustomHeartbeatId(monitor, projectId, namespace),
@@ -57,4 +64,120 @@ export const getCustomHeartbeatId = (
   namespace: string
 ) => {
   return `${monitor.id}-${projectId}-${namespace}`;
+};
+
+export const getMonitorLocations = ({
+  privateLocations,
+  publicLocations,
+  monitor,
+}: {
+  monitor: ProjectMonitor;
+  privateLocations: PrivateLocation[];
+  publicLocations: Locations;
+}) => {
+  const publicLocs =
+    monitor.locations?.map((id) => {
+      return publicLocations.find((location) => location.id === id);
+    }) || [];
+  const privateLocs =
+    monitor.privateLocations?.map((locationName) => {
+      return privateLocations.find(
+        (location) =>
+          location.label.toLowerCase() === locationName.toLowerCase() ||
+          location.id.toLowerCase() === locationName.toLowerCase()
+      );
+    }) || [];
+
+  return [...publicLocs, ...privateLocs].filter(
+    (location) => location !== undefined
+  ) as BrowserFields[ConfigKey.LOCATIONS];
+};
+
+export const getMonitorTimeout = (timeout: string) => {
+  const keyMap = {
+    h: 60 * 60,
+    m: 60,
+    s: 1,
+  };
+  const key = timeout.slice(-1) as 'h' | 'm' | 's';
+  const time = parseInt(timeout.slice(0, -1), 10);
+  const timeoutInSeconds = time * (keyMap[key] || 1);
+  return typeof timeoutInSeconds === 'number' ? `${timeoutInSeconds}` : null;
+};
+
+/**
+ * Accounts for heartbeat fields that are optionally an array or single string
+ *
+ * @param {Array | string} [value]
+ * @returns {string} Returns first item when the value is an array, or the value itself
+ */
+export const getOptionalArrayField = (value: string[] | string = '') => Array.isArray(value) ? value[0] : value;
+
+/**
+ * Accounts for array values that are optionally defined as a comma seperated list
+ *
+ * @param {Array | string} [value]
+ * @returns {array} Returns first item when the value is an array, or the value itself
+ */
+export const getOptionalListField = (value?: string[] | string): string[] => {
+  if (Array.isArray(value)) {
+    return value;
+  }
+  return value ? value.split(',') : []
+};
+
+/**
+ * Flattens arbitrary yaml into a synthetics monitor compatible configuration
+ *
+ * @param {Object} [monitor]
+ * @returns {Object} Returns an object containing synthetics-compatible configuration keys
+ */
+const flattenAndFormatObject = (obj: Record<string, unknown>, prefix = '', keys: string[]) =>
+  Object.keys(obj).reduce<Record<string, unknown>>((acc, k) => {
+    const pre = prefix.length ? prefix + '.' : '';
+    const key = pre + k;
+
+    /* If the key is an array of numbers, convert to an array of strings */
+    if (Array.isArray(obj[k])) {
+      acc[key] = (obj[k] as unknown[]).map((value) =>
+        typeof value === 'number' ? String(value) : value
+      );
+      return acc;
+    }
+
+    /* if the key is a supported key stop flattening early */
+    if (keys.includes(key)) {
+      acc[key] = obj[k];
+      return acc;
+    }
+
+    if (typeof obj[k] === 'object') {
+      Object.assign(
+        acc,
+        flattenAndFormatObject(obj[k] as Record<string, unknown>, pre + k, keys)
+      );
+    } else {
+      acc[key] = obj[k];
+    }
+    return acc;
+  }, {});
+
+export const normalizeYamlConfig = (monitor: NormalizedProjectProps['monitor']) => {
+  const defaultFields = DEFAULT_FIELDS[monitor.type as DataStream];
+  const supportedKeys = Object.keys(defaultFields);
+  const flattenedConfig = flattenAndFormatObject(monitor, '', supportedKeys);
+  const {
+    locations: _locations,
+    privateLocations: _privateLocations,
+    content: _content,
+    id: _id,
+    ...yamlConfig
+  } = flattenedConfig;
+  const unsupportedKeys = Object.keys(yamlConfig).filter((key) => !supportedKeys.includes(key));
+  const supportedYamlConfig = omit(yamlConfig, unsupportedKeys);
+
+  return {
+    yamlConfig: supportedYamlConfig,
+    unsupportedKeys,
+  };
 };

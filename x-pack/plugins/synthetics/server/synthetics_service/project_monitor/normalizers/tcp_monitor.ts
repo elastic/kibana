@@ -7,7 +7,7 @@
 
 import { NormalizedProjectProps } from './browser_monitor';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
-import { normalizeYamlConfig, getMonitorTimeout } from '.';
+import { normalizeYamlConfig, getMonitorTimeout } from './common_fields';
 
 import {
   ConfigKey,
@@ -15,7 +15,7 @@ import {
   FormMonitorType,
   TCPFields,
 } from '../../../../common/runtime_types/monitor_management';
-import { getNormalizeCommonFields } from './common_fields';
+import { getNormalizeCommonFields, getOptionalArrayField } from './common_fields';
 
 export const getNormalizeTCPFields = ({
   locations = [],
@@ -38,8 +38,10 @@ export const getNormalizeTCPFields = ({
   const normalizedFields = {
     ...yamlConfig,
     ...commonFields,
+    [ConfigKey.MONITOR_TYPE]: DataStream.TCP,
     [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.TCP,
-    [ConfigKey.HOSTS]: monitor[ConfigKey.HOSTS] || defaultFields[ConfigKey.HOSTS],
+    [ConfigKey.HOSTS]:
+      getOptionalArrayField(monitor[ConfigKey.HOSTS]) || defaultFields[ConfigKey.HOSTS],
     [ConfigKey.TIMEOUT]: monitor.timeout
       ? getMonitorTimeout(monitor.timeout)
       : defaultFields[ConfigKey.TIMEOUT],

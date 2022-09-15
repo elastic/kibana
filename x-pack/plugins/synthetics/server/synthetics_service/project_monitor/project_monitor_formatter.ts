@@ -46,7 +46,7 @@ interface StaleMonitor {
   savedObjectId: string;
 }
 type StaleMonitorMap = Record<string, StaleMonitor>;
-type Warnings = Array<{ id: string; reason: string; details: string; payload?: object }>;
+type Error = Array<{ id: string; reason: string; details: string; payload?: object }>;
 
 export class ProjectMonitorFormatter {
   private projectId: string;
@@ -62,9 +62,8 @@ export class ProjectMonitorFormatter {
   public deletedMonitors: string[] = [];
   public updatedMonitors: string[] = [];
   public staleMonitors: string[] = [];
-  public failedMonitors: Warnings = [];
-  public failedStaleMonitors: Warnings = [];
-  public warnings: Warnings = [];
+  public failedMonitors: Error = [];
+  public failedStaleMonitors: Error = [];
   private server: UptimeServerSetup;
   private projectFilter: string;
   private syntheticsMonitorClient: SyntheticsMonitorClient;
@@ -144,13 +143,13 @@ export class ProjectMonitorFormatter {
       });
 
       if (unsupportedKeys.length) {
-        this.warnings.push({
+        this.failedMonitors.push({
           id: monitor.id,
           reason: 'Unsupported Heartbeat option',
-          details: `The following Heartbeat options are not supported for project monitors in ${
-            this.server.kibanaVersion
-          }: ${unsupportedKeys.join('|')}`,
+          details: `The following Heartbeat options are not supported for ${monitor.type
+            } project monitors in ${this.server.kibanaVersion}: ${unsupportedKeys.join('|')}`,
         });
+        return null;
       }
 
       const validationResult = validateProjectMonitor({

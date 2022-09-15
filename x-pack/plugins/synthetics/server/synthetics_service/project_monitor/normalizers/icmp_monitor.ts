@@ -14,7 +14,7 @@ import {
   FormMonitorType,
   ICMPFields,
 } from '../../../../common/runtime_types/monitor_management';
-import { normalizeYamlConfig, getMonitorTimeout } from '.';
+import { normalizeYamlConfig, getMonitorTimeout } from './common_fields';
 
 export const getNormalizeICMPFields = ({
   locations = [],

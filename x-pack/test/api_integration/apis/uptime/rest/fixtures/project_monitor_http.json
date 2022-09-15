@@ -36,6 +36,40 @@
       "unsupportedKey": {
         "nestedUnsupportedKey": "unsupportedValue"
       }
+    },
+    {
+      "locations": ["localhost"],
+      "type": "http",
+      "enabled": false,
+      "id": "my-monitor-3",
+      "name": "My Monitor 3",
+      "urls": [
+        "http://localhost:9200"
+      ],
+      "schedule": 60,
+      "timeout": "80s",
+      "check.request": {
+        "method": "POST",
+        "headers": {
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
+      },
+      "response": {
+        "include_body": "always"
+      },
+      "response.include_headers": false,
+      "check.response": {
+        "status": [
+          200
+        ],
+        "body":{
+          "positive": [
+            "Saved",
+            "saved"
+          ]
+        }
+      },
+      "content": ""
     }
   ]
 }
