@@ -507,8 +507,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     // closes the dimension editor flyout
     async closeDimensionEditor() {
       await retry.try(async () => {
-        await testSubjects.click('lns-indexPattern-dimensionContainerBack');
-        await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerBack');
+        await testSubjects.click('lns-indexPattern-dimensionContainerClose');
+        await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerClose');
       });
     },
 
@@ -1461,6 +1461,50 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const applyButtonSelector = `lnsApplyChanges__${whichButton}`;
       await testSubjects.waitForEnabled(applyButtonSelector);
       await testSubjects.click(applyButtonSelector);
+    },
+
+    async assertNoInlineWarning() {
+      await testSubjects.missingOrFail('chart-inline-warning');
+    },
+
+    async assertNoEditorWarning() {
+      await testSubjects.missingOrFail('lens-editor-warning');
+    },
+
+    async assertInlineWarning(warningText: string) {
+      await testSubjects.click('chart-inline-warning-button');
+      await testSubjects.existOrFail('chart-inline-warning');
+      const warnings = await testSubjects.findAll('chart-inline-warning');
+      let found = false;
+      for (const warning of warnings) {
+        const text = await warning.getVisibleText();
+        log.info(text);
+        if (text === warningText) {
+          found = true;
+        }
+      }
+      await testSubjects.click('chart-inline-warning-button');
+      if (!found) {
+        throw new Error(`Warning with text "${warningText}" not found`);
+      }
+    },
+
+    async assertEditorWarning(warningText: string) {
+      await testSubjects.click('lens-editor-warning-button');
+      await testSubjects.existOrFail('lens-editor-warning');
+      const warnings = await testSubjects.findAll('lens-editor-warning');
+      let found = false;
+      for (const warning of warnings) {
+        const text = await warning.getVisibleText();
+        log.info(text);
+        if (text === warningText) {
+          found = true;
+        }
+      }
+      await testSubjects.click('lens-editor-warning-button');
+      if (!found) {
+        throw new Error(`Warning with text "${warningText}" not found`);
+      }
     },
   });
 }

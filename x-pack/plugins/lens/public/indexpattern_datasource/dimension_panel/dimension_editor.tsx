@@ -341,7 +341,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
       const partialIcon = compatibleWithCurrentField &&
         referencedField?.partiallyApplicableFunctions?.[operationType] && (
-          <>
+          <span data-test-subj={`${operationType}-partial-warning`}>
             {' '}
             <EuiIconTip
               content={i18n.translate(
@@ -356,7 +356,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               type="partial"
               color="warning"
             />
-          </>
+          </span>
         );
       let label: EuiListGroupItemProps['label'] = (
         <>

@@ -21,7 +21,13 @@ export function Warnings({ warnings }: { warnings: React.ReactNode[] }) {
         panelPaddingSize="none"
         closePopover={() => setOpen(false)}
         button={
-          <EuiButtonEmpty color="warning" iconType="alert" onClick={() => setOpen(!open)} size="xs">
+          <EuiButtonEmpty
+            color="warning"
+            iconType="alert"
+            onClick={() => setOpen(!open)}
+            size="xs"
+            data-test-subj="chart-inline-warning-button"
+          >
             {i18n.translate('charts.warning.warningLabel', {
               defaultMessage:
                 '{numberWarnings, number} {numberWarnings, plural, one {warning} other {warnings}}',
@@ -39,6 +45,7 @@ export function Warnings({ warnings }: { warnings: React.ReactNode[] }) {
                 css={{
                   padding: euiThemeVars.euiSizeS,
                 }}
+                data-test-subj="chart-inline-warning"
               >
                 <EuiText size="s">{w}</EuiText>
               </div>
