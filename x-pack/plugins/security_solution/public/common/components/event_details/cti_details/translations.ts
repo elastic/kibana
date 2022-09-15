@@ -109,7 +109,7 @@ export const CURRENT_HOST_RISK_CLASSIFICATION = i18n.translate(
 export const ORIGINAL_HOST_RISK_CLASSIFICATION = i18n.translate(
   'xpack.securitySolution.alertDetails.originalHostRiskClassification',
   {
-    defaultMessage: 'Orignial host risk classification',
+    defaultMessage: 'Original host risk classification',
   }
 );
 

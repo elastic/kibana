@@ -61,14 +61,14 @@ describe('Enrichment', () => {
       cy.get(ENRICHED_DATA_ROW).contains('Low');
       cy.get(ENRICHED_DATA_ROW).contains('Current host risk classification');
       cy.get(ENRICHED_DATA_ROW).contains('Critical').should('not.exist');
-      cy.get(ENRICHED_DATA_ROW).contains('Orignial host risk classification').should('not.exist');
+      cy.get(ENRICHED_DATA_ROW).contains('Original host risk classification').should('not.exist');
 
       cy.get(CLOSE_FLYOUT).click();
       esArchiverUnload('risky_hosts');
       esArchiverLoad('risky_hosts_updated');
       expandFirstAlert();
       cy.get(ENRICHED_DATA_ROW).contains('Critical');
-      cy.get(ENRICHED_DATA_ROW).contains('Orignial host risk classification');
+      cy.get(ENRICHED_DATA_ROW).contains('Original host risk classification');
     });
   });
 });
