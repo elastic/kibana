@@ -12,11 +12,13 @@ import { useEuiTheme } from '../../hooks';
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
   const cached = useMemo(() => {
-    const { size } = euiTheme;
+    const { size, border } = euiTheme;
 
     const controlsPanel: CSSObject = {
       paddingTop: size.s,
       paddingBottom: size.s,
+      borderBottomLeftRadius: border.radius.medium,
+      borderBottomRightRadius: border.radius.medium,
     };
 
     const controlButton: CSSObject = {
