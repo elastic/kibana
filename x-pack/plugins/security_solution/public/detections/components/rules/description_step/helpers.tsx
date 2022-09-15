@@ -99,7 +99,7 @@ export const buildQueryBarDescription = ({
     items = [
       ...items,
       {
-        title: <>{isLoadedFromSavedQuery ? i18n.SAVED_QUERY_FILTERS_LABEL : i18n.FILTERS_LABEL } </>,
+        title: <>{isLoadedFromSavedQuery ? i18n.SAVED_QUERY_FILTERS_LABEL : i18n.FILTERS_LABEL} </>,
         description: (
           <EuiFlexGroup wrap responsive={false} gutterSize="xs">
             {filterManager.getFilters().map((filter, index) => (
@@ -126,7 +126,9 @@ export const buildQueryBarDescription = ({
     items = [
       ...items,
       {
-        title: <>{isLoadedFromSavedQuery ? i18n.SAVED_QUERY_LABEL : (queryLabel ?? i18n.QUERY_LABEL)}</>,
+        title: (
+          <>{isLoadedFromSavedQuery ? i18n.SAVED_QUERY_LABEL : queryLabel ?? i18n.QUERY_LABEL}</>
+        ),
         description: <Query>{query}</Query>,
       },
     ];
