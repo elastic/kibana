@@ -11,36 +11,12 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elast
 
 import { i18n } from '@kbn/i18n';
 
-import { InferencePipeline } from '../../../../../../common/types/pipelines';
 import { DataPanel } from '../../../../shared/data_panel/data_panel';
 
-import { InferencePipelineCard } from './inference_pipeline_card';
 import { IngestPipelinesCard } from './ingest_pipelines_card';
+import { MlInferencePipelineProcessorsCard } from './ml_inference_pipeline_processors_card';
 
 export const SearchIndexPipelines: React.FC = () => {
-  // TODO: REPLACE THIS DATA WITH REAL DATA
-
-  const inferencePipelines: InferencePipeline[] = [
-    {
-      pipelineName: 'NER Processor',
-      trainedModelName: 'elastic_dslim_bert_base_ner',
-      isDeployed: true,
-      modelType: 'pytorch',
-    },
-    {
-      pipelineName: 'Sentiment Analysis',
-      trainedModelName: 'elastic_dslim_bert_base_ner',
-      isDeployed: false,
-      modelType: 'pytorch',
-    },
-    {
-      pipelineName: 'Sentiment Analysis',
-      trainedModelName: 'elastic_dslim_bert_base_ner',
-      isDeployed: false,
-      modelType: 'pytorch',
-    },
-  ];
-
   return (
     <>
       <EuiSpacer />
@@ -121,20 +97,7 @@ export const SearchIndexPipelines: React.FC = () => {
               </EuiButton>
             }
           >
-            {inferencePipelines.length > 0 && (
-              <EuiFlexGroup direction="column" gutterSize="s">
-                {inferencePipelines.map((item: InferencePipeline, index: number) => (
-                  <EuiFlexItem key={index}>
-                    <InferencePipelineCard
-                      trainedModelName={item.trainedModelName}
-                      pipelineName={item.pipelineName}
-                      isDeployed={item.isDeployed}
-                      modelType={item.modelType}
-                    />
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            )}
+            <MlInferencePipelineProcessorsCard />
           </DataPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
