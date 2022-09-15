@@ -17,10 +17,10 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { DiscoverStateContainer } from '../../services/discover_state';
 import { DataTotalHits$, DataTotalHitsMsg } from '../../hooks/use_saved_search';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
-import {DiscoverStateContainer} from "@kbn/discover-plugin/public/application/main/services/discover_state";
 
 export interface HitsCounterProps {
   /**
@@ -35,7 +35,11 @@ export interface HitsCounterProps {
   savedSearchData$: DataTotalHits$;
 }
 
-export function HitsCounter({ showResetButton, stateContainer, savedSearchData$ }: HitsCounterProps) {
+export function HitsCounter({
+  showResetButton,
+  stateContainer,
+  savedSearchData$,
+}: HitsCounterProps) {
   const data: DataTotalHitsMsg = useDataState(savedSearchData$);
 
   const hits = data.result || 0;
