@@ -63,10 +63,10 @@ describe('Discover panels resizable', () => {
     topPanelHeight: number
   ) => {
     const topPanelSize = (topPanelHeight / currentContainerHeight) * 100;
-    expect(component.find('[data-test-subj="dsc-resizable-panel-top"]').at(0).prop('size')).toBe(
+    expect(component.find('[data-test-subj="dscResizablePanelTop"]').at(0).prop('size')).toBe(
       topPanelSize
     );
-    expect(component.find('[data-test-subj="dsc-resizable-panel-main"]').at(0).prop('size')).toBe(
+    expect(component.find('[data-test-subj="dscResizablePanelMain"]').at(0).prop('size')).toBe(
       100 - topPanelSize
     );
   };
@@ -99,7 +99,7 @@ describe('Discover panels resizable', () => {
     expectCorrectPanelSizes(component, containerHeight, initialTopPanelHeight);
     const newTopPanelSize = 30;
     const onPanelSizeChange = component
-      .find('[data-test-subj="dsc-resizable-container"]')
+      .find('[data-test-subj="dscResizableContainer"]')
       .at(0)
       .prop('onPanelWidthChange') as Function;
     act(() => {
@@ -151,10 +151,10 @@ describe('Discover panels resizable', () => {
     const newContainerHeight = 200;
     jest.spyOn(eui, 'useResizeObserver').mockReturnValue({ height: newContainerHeight, width: 0 });
     forceRender(component);
-    expect(component.find('[data-test-subj="dsc-resizable-panel-top"]').at(0).prop('size')).toBe(
+    expect(component.find('[data-test-subj="dscResizablePanelTop"]').at(0).prop('size')).toBe(
       (minTopPanelHeight / newContainerHeight) * 100
     );
-    expect(component.find('[data-test-subj="dsc-resizable-panel-main"]').at(0).prop('size')).toBe(
+    expect(component.find('[data-test-subj="dscResizablePanelMain"]').at(0).prop('size')).toBe(
       (minMainPanelHeight / newContainerHeight) * 100
     );
     jest.spyOn(eui, 'useResizeObserver').mockReturnValue({ height: containerHeight, width: 0 });

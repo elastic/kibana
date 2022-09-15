@@ -133,7 +133,7 @@ export const DiscoverPanelsResizable = ({
         className={className}
         direction="vertical"
         onPanelWidthChange={onPanelSizeChange}
-        data-test-subj="dsc-resizable-container"
+        data-test-subj="dscResizableContainer"
       >
         {(EuiResizablePanel, EuiResizableButton) => (
           <>
@@ -142,7 +142,7 @@ export const DiscoverPanelsResizable = ({
               minSize={`${minTopPanelHeight}px`}
               size={panelSizes.topPanelSize}
               paddingSize="none"
-              data-test-subj="dsc-resizable-panel-top"
+              data-test-subj="dscResizablePanelTop"
             >
               {topPanel}
             </EuiResizablePanel>
@@ -161,7 +161,7 @@ export const DiscoverPanelsResizable = ({
               minSize={`${minMainPanelHeight}px`}
               size={panelSizes.mainPanelSize}
               paddingSize="none"
-              data-test-subj="dsc-resizable-panel-main"
+              data-test-subj="dscResizablePanelMain"
             >
               {mainPanel}
             </EuiResizablePanel>
