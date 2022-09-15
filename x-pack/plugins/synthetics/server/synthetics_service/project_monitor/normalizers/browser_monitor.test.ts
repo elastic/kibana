@@ -251,6 +251,8 @@ describe('browser normalizers', () => {
                 id: 'germany',
                 isServiceManaged: false,
                 label: 'Germany',
+                agentPolicyId: 'germany',
+                concurrentMonitors: 1,
               },
             ],
             name: 'test-name-3',
