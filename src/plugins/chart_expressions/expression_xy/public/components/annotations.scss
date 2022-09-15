@@ -38,20 +38,13 @@
   border-radius: 0 !important;
 }
 
-.xyAnnotationTooltip__rowLabel {
-  font-weight: $euiFontWeightBold;
-}
-
-.xyAnnotationTooltip__rowTimestamp {
-  margin: $euiSizeXS 0;
-}
-
 .xyAnnotationTooltip__extraFields {
   color: $euiColorDarkShade;
+  margin-top: $euiSizeS;
 }
 
 .xyAnnotationTooltip__extraFieldsKey {
-  word-break: break-word;
+  overflow-wrap: break-word;
   hyphens: auto;
 }
 

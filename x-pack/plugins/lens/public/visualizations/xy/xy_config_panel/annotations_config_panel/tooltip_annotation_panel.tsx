@@ -7,7 +7,6 @@
 
 import {
   htmlIdGenerator,
-  EuiButton,
   EuiButtonIcon,
   EuiDraggable,
   EuiFlexGroup,
@@ -15,6 +14,8 @@ import {
   EuiIcon,
   EuiPanel,
   useEuiTheme,
+  EuiTextAlign,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -115,16 +116,19 @@ export function TooltipSection({
     return (
       <>
         <EuiFlexItem grow={true}>
-          <EuiButton
-            isDisabled
-            fullWidth
-            onClick={() => {}}
-            className="lnsConfigPanelAnnotations__noFieldsButton"
+          <EuiPanel
+            color="subdued"
+            paddingSize="s"
+            className="lnsConfigPanelAnnotations__noFieldsPrompt"
           >
-            {i18n.translate('xpack.lens.xyChart.annotation.tooltip.noFields', {
-              defaultMessage: 'None selected',
-            })}
-          </EuiButton>
+            <EuiTextAlign textAlign="center">
+              <EuiText size="s">
+                {i18n.translate('xpack.lens.xyChart.annotation.tooltip.noFields', {
+                  defaultMessage: 'None selected',
+                })}
+              </EuiText>
+            </EuiTextAlign>
+          </EuiPanel>
         </EuiFlexItem>
         {newBucketButton}
       </>
@@ -159,7 +163,6 @@ export function TooltipSection({
         style={{
           backgroundColor: isDragging ? 'transparent' : euiTheme.colors.lightestShade,
           borderRadius: euiTheme.size.xs,
-          marginBottom: euiTheme.size.xs,
         }}
       >
         <DragDropBuckets
@@ -172,12 +175,12 @@ export function TooltipSection({
           }}
           droppableId="ANNOTATION_TOOLTIP_DROPPABLE_AREA"
           items={localValues}
+          className="lnsConfigPanelAnnotations__droppable"
         >
           {localValues.map(({ id, value, isNew }, index) => {
             const fieldIsValid = value ? Boolean(indexPattern.getFieldByName(value)) : true;
             return (
               <EuiDraggable
-                style={{ marginBottom: 4 }}
                 spacing="none"
                 index={index}
                 draggableId={value || 'newField'}
