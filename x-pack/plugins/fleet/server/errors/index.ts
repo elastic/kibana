@@ -8,20 +8,13 @@
 /* eslint-disable max-classes-per-file */
 import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
-import type { FleetErrorType } from '../../common/types';
-
+import { IngestManagerError } from '../../common/errors';
 import { isESClientError } from './utils';
 
 export { defaultIngestErrorHandler, ingestErrorToResponseOptions } from './handlers';
 
 export { isESClientError } from './utils';
-export class IngestManagerError extends Error {
-  attributes?: { type: FleetErrorType };
-  constructor(message?: string, public readonly meta?: unknown) {
-    super(message);
-    this.name = this.constructor.name; // for stack traces
-  }
-}
+export { IngestManagerError } from '../../common/errors';
 
 export class RegistryError extends IngestManagerError {}
 export class RegistryConnectionError extends RegistryError {}

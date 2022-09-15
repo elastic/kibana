@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,6 +28,9 @@ import { dataTypes } from '../../../../../../../common/constants';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 import { useAuthz, useStartServices, sendCreateAgentPolicy } from '../../../../hooks';
 import { AgentPolicyForm, agentPolicyFormValidation } from '../../components';
+import { DevtoolsRequestFlyoutButton } from '../../../../components';
+import { generateCreateAgentPolicyDevToolsRequest } from '../../services';
+import { ExperimentalFeaturesService } from '../../../../services';
 
 const FlyoutWithHigherZIndex = styled(EuiFlyout)`
   z-index: ${(props) => props.theme.eui.euiZLevel5};
@@ -98,6 +101,11 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
       />
     </EuiFlyoutBody>
   );
+  const { showDevtoolsRequest } = ExperimentalFeaturesService.get();
+  const agentPolicyContent = useMemo(
+    () => generateCreateAgentPolicyDevToolsRequest(agentPolicy, withSysMonitoring),
+    [agentPolicy, withSysMonitoring]
+  );
 
   const footer = (
     <EuiFlyoutFooter>
@@ -111,48 +119,68 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            isLoading={isLoading}
-            isDisabled={!hasFleetAllPrivileges || isLoading || Object.keys(validation).length > 0}
-            onClick={async () => {
-              setIsLoading(true);
-              try {
-                const { data, error } = await createAgentPolicy();
-                setIsLoading(false);
-                if (data) {
-                  notifications.toasts.addSuccess(
-                    i18n.translate('xpack.fleet.createAgentPolicy.successNotificationTitle', {
-                      defaultMessage: "Agent policy '{name}' created",
-                      values: { name: agentPolicy.name },
-                    })
-                  );
-                  onClose(data.item);
-                } else {
-                  notifications.toasts.addDanger(
-                    error
-                      ? error.message
-                      : i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
-                          defaultMessage: 'Unable to create agent policy',
-                        })
-                  );
+          <EuiFlexGroup gutterSize="none">
+            {showDevtoolsRequest ? (
+              <EuiFlexItem grow={false}>
+                <DevtoolsRequestFlyoutButton
+                  isDisabled={isLoading || Object.keys(validation).length > 0}
+                  description={i18n.translate(
+                    'xpack.fleet.createAgentPolicy.devtoolsRequestDescription',
+                    {
+                      defaultMessage: 'This Kibana request creates a new agent policy.',
+                    }
+                  )}
+                  request={agentPolicyContent}
+                />
+              </EuiFlexItem>
+            ) : null}
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                isLoading={isLoading}
+                isDisabled={
+                  !hasFleetAllPrivileges || isLoading || Object.keys(validation).length > 0
                 }
-              } catch (e) {
-                setIsLoading(false);
-                notifications.toasts.addDanger(
-                  i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
-                    defaultMessage: 'Unable to create agent policy',
-                  })
-                );
-              }
-            }}
-            data-test-subj="createAgentPolicyFlyoutBtn"
-          >
-            <FormattedMessage
-              id="xpack.fleet.createAgentPolicy.submitButtonLabel"
-              defaultMessage="Create agent policy"
-            />
-          </EuiButton>
+                onClick={async () => {
+                  setIsLoading(true);
+                  try {
+                    const { data, error } = await createAgentPolicy();
+                    setIsLoading(false);
+                    if (data) {
+                      notifications.toasts.addSuccess(
+                        i18n.translate('xpack.fleet.createAgentPolicy.successNotificationTitle', {
+                          defaultMessage: "Agent policy '{name}' created",
+                          values: { name: agentPolicy.name },
+                        })
+                      );
+                      onClose(data.item);
+                    } else {
+                      notifications.toasts.addDanger(
+                        error
+                          ? error.message
+                          : i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
+                              defaultMessage: 'Unable to create agent policy',
+                            })
+                      );
+                    }
+                  } catch (e) {
+                    setIsLoading(false);
+                    notifications.toasts.addDanger(
+                      i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
+                        defaultMessage: 'Unable to create agent policy',
+                      })
+                    );
+                  }
+                }}
+                data-test-subj="createAgentPolicyFlyoutBtn"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.createAgentPolicy.submitButtonLabel"
+                  defaultMessage="Create agent policy"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyoutFooter>
