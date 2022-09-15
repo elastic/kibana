@@ -127,13 +127,13 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
   },
   [SHOW_LEGACY_FIELD_TOP_VALUES]: {
     name: i18n.translate('discover.advancedSettings.showLegacyFieldStatsTitle', {
-      defaultMessage: "Show legacy Top Values for a field in the sidebar's popover",
+      defaultMessage: 'Top values calculation',
     }),
     value: false,
     type: 'boolean',
     description: i18n.translate('discover.advancedSettings.showLegacyFieldStatsText', {
       defaultMessage:
-        'This setting will calculate Top Values for a field based only on loaded records on Discover page. To use the new and more accurate view, turn off this option.',
+        'To calculate the top values for a field in the sidebar using 500 instead of 5,000 records per shard, turn on this option.',
     }),
     category: ['discover'],
     schema: schema.boolean(),

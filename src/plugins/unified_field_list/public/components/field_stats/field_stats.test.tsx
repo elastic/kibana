@@ -261,7 +261,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
 
     expect(loadFieldStats).toHaveBeenCalledTimes(1);
 
-    expect(wrapper.text()).toBe('No field data for the current sample of 5000 records.');
+    expect(wrapper.text()).toBe('No field data for 5000 sample records.');
   });
 
   it('should render Top Values field stats correctly for a keyword field', async () => {

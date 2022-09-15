@@ -319,7 +319,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
         <FieldSummaryMessage
           message={i18n.translate('unifiedFieldList.fieldStats.noFieldDataInSampleDescription', {
             defaultMessage:
-              'No field data for the current sample of {sampledDocumentsFormatted} {sampledDocuments, plural, one {record} other {records}}.',
+              'No field data for {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}.',
             values: {
               sampledDocuments,
               sampledDocumentsFormatted: fieldFormats
