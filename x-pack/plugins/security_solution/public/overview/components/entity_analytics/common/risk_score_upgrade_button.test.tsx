@@ -9,7 +9,7 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { TestProviders } from '../../../../common/mock';
-import { RiskyScoreUpgradeButton } from './risky_score_upgrade_button';
+import { RiskyScoreUpgradeButton } from './risk_score_upgrade_button';
 import { upgradeHostRiskScoreModule, upgradeUserRiskScoreModule } from './utils';
 
 jest.mock('./utils');

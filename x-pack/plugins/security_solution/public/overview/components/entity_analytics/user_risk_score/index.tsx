@@ -43,9 +43,9 @@ import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_bor
 
 import type { inputsModel } from '../../../../common/store';
 import { useCheckSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_check_signal_index';
-import { RiskyScoreRestartButton } from '../common/risky_score_restart_button';
-import { RiskyScoreEnableButton } from '../common/risky_score_enable_button';
-import { RiskyScoreDocLink } from '../common/risky_score_doc_link';
+import { RiskScoreRestartButton } from '../common/risk_score_restart_button';
+import { RiskScoreEnableButton } from '../common/risk_score_enable_button';
+import { RiskScoreDocLink } from '../common/risk_score_doc_link';
 
 const TABLE_QUERY_ID = 'userRiskDashboardTable';
 
@@ -167,7 +167,7 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
           {toggleStatus && (
             <EuiFlexGroup alignItems="center" gutterSize="m">
               <EuiFlexItem>
-                <RiskyScoreRestartButton refetch={refetch} riskScoreEntity={RiskScoreEntity.user} />
+                <RiskScoreRestartButton refetch={refetch} riskScoreEntity={RiskScoreEntity.user} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiButtonEmpty href={RISKY_USERS_DOC_LINK} target="_blank">
@@ -242,12 +242,12 @@ const EntityAnalyticsUserRiskScoresDisableComponent = ({
         body={
           <>
             {i18n.ENABLE_USER_RISK_SCORE_DESCRIPTION}{' '}
-            <RiskyScoreDocLink riskScoreEntity={RiskScoreEntity.user} />
+            <RiskScoreDocLink riskScoreEntity={RiskScoreEntity.user} />
           </>
         }
         actions={
           <EuiToolTip content={!signalIndexExists ? i18n.ENABLE_RISK_SCORE_POPOVER : null}>
-            <RiskyScoreEnableButton
+            <RiskScoreEnableButton
               disabled={!signalIndexExists}
               refetch={refetch}
               riskScoreEntity={RiskScoreEntity.user}

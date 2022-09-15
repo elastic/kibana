@@ -22,7 +22,7 @@ import {
   stopTransforms,
   bulkCreatePrebuiltSavedObjects,
   bulkDeletePrebuiltSavedObjects,
-} from './api';
+} from '../../../../risk_score/containers/onboarding/api';
 import {
   INGEST_PIPELINE_DELETION_ERROR_MESSAGE,
   INSTALLATION_ERROR,
@@ -30,7 +30,7 @@ import {
   TRANSFORM_CREATION_ERROR_MESSAGE,
   TRANSFORM_DELETION_ERROR_MESSAGE,
   UNINSTALLATION_ERROR,
-} from './api/translations';
+} from '../../../../risk_score/containers/onboarding/api/translations';
 
 interface InstallRiskyScoreModule {
   dashboard?: DashboardStart;

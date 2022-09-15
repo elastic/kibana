@@ -7,15 +7,15 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
-import { RISKY_SCORE_CREATE_INDEX } from '../../../../common/constants';
+import { RISK_SCORE_DELETE_STORED_SCRIPT } from '../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
-import { createEsIndexBodySchema, createIndex } from './lib/create_index';
+import { deleteStoredScriptBodySchema, deleteStoredScript } from './lib/delete_script';
 
-export const createEsIndexRoute = (router: SecuritySolutionPluginRouter) => {
-  router.put(
+export const deleteStoredScriptRoute = (router: SecuritySolutionPluginRouter) => {
+  router.delete(
     {
-      path: RISKY_SCORE_CREATE_INDEX,
-      validate: { body: createEsIndexBodySchema },
+      path: RISK_SCORE_DELETE_STORED_SCRIPT,
+      validate: { body: deleteStoredScriptBodySchema },
       options: {
         tags: ['access:securitySolution'],
       },
@@ -25,7 +25,7 @@ export const createEsIndexRoute = (router: SecuritySolutionPluginRouter) => {
       const { client } = (await context.core).elasticsearch;
       const options = request.body;
       try {
-        await createIndex({
+        await deleteStoredScript({
           client,
           options,
         });

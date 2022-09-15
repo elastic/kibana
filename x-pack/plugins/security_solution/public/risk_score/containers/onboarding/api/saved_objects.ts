@@ -17,13 +17,13 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import {
   prebuiltSavedObjectsBulkCreateUrl,
   prebuiltSavedObjectsBulkDeleteUrl,
-} from '../../../../../../common/constants';
+} from '../../../../../common/constants';
 
-import { RiskScoreEntity } from '../../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import {
   RISKY_HOSTS_DASHBOARD_TITLE,
   RISKY_USERS_DASHBOARD_TITLE,
-} from '../../../../../hosts/pages/navigation/constants';
+} from '../../../../hosts/pages/navigation/constants';
 import {
   DELETE_SAVED_OBJECTS_FAILURE,
   IMPORT_SAVED_OBJECTS_FAILURE,

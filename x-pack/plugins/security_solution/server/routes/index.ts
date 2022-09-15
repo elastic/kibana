@@ -8,7 +8,6 @@
 import type { StartServicesAccessor, Logger } from '@kbn/core/server';
 import type { IRuleDataClient, RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 
-import { getRiskScoreIndexStatusRoute } from '../lib/risk_score/routes';
 import type { SecuritySolutionPluginRouter } from '../types';
 
 import { createRulesRoute } from '../lib/detection_engine/routes/rules/create_rules_route';
@@ -82,8 +81,9 @@ import {
   deleteEsIndicesRoute,
   deletePrebuiltSavedObjectsRoute,
   deleteStoredScriptRoute,
+  getRiskScoreIndexStatusRoute,
   readPrebuiltDevToolContentRoute,
-} from '../lib/risky_score/routes';
+} from '../lib/risk_score/routes';
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
@@ -192,12 +192,11 @@ export const initRoutes = (
   readPrebuiltDevToolContentRoute(router);
   createPrebuiltSavedObjectsRoute(router, security);
   deletePrebuiltSavedObjectsRoute(router, security);
+  getRiskScoreIndexStatusRoute(router);
 
   const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
   if (previewTelemetryUrlEnabled) {
     // telemetry preview endpoint for e2e integration tests only at the moment.
     telemetryDetectionRulesPreviewRoute(router, logger, previewTelemetryReceiver, telemetrySender);
   }
-
-  getRiskScoreIndexStatusRoute(router);
 };

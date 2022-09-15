@@ -17,7 +17,7 @@ import {
   requestMock,
 } from '../../detection_engine/routes/__mocks__';
 import { createEsIndexRoute } from './create_index_route';
-import { RISKY_SCORE_CREATE_INDEX } from '../../../../common/constants';
+import { RISK_SCORE_CREATE_INDEX } from '../../../../common/constants';
 import { createIndex } from './lib/create_index';
 
 jest.mock('./lib/create_index', () => {
@@ -45,7 +45,7 @@ describe('createEsIndexRoute', () => {
   it('create index', async () => {
     const request = requestMock.create({
       method: 'put',
-      path: RISKY_SCORE_CREATE_INDEX,
+      path: RISK_SCORE_CREATE_INDEX,
       body: { index: 'test-index', mappings: {} },
     });
     const response = await server.inject(request, requestContextMock.convertContext(context));
@@ -56,7 +56,7 @@ describe('createEsIndexRoute', () => {
   it('Create index - should validate input', async () => {
     const invalidRequest = requestMock.create({
       method: 'put',
-      path: RISKY_SCORE_CREATE_INDEX,
+      path: RISK_SCORE_CREATE_INDEX,
     });
     await server.inject(invalidRequest, requestContextMock.convertContext(context));
     const result = server.validate(invalidRequest);

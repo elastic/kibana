@@ -11,7 +11,7 @@ import {
   requestMock,
 } from '../../detection_engine/routes/__mocks__';
 import { deleteEsIndicesRoute } from './delete_indices_route';
-import { RISKY_SCORE_DELETE_INDICES } from '../../../../common/constants';
+import { RISK_SCORE_DELETE_INDICES } from '../../../../common/constants';
 import { deleteEsIndices } from './lib/delete_indices';
 
 jest.mock('./lib/delete_indices', () => {
@@ -39,7 +39,7 @@ describe('deleteEsIndicesRoute', () => {
   it('delete indices', async () => {
     const request = requestMock.create({
       method: 'post',
-      path: RISKY_SCORE_DELETE_INDICES,
+      path: RISK_SCORE_DELETE_INDICES,
       body: ['test'],
     });
     const response = await server.inject(request, requestContextMock.convertContext(context));
@@ -50,7 +50,7 @@ describe('deleteEsIndicesRoute', () => {
   it('delete indices - should validate input', async () => {
     const invalidRequest = requestMock.create({
       method: 'post',
-      path: RISKY_SCORE_DELETE_INDICES,
+      path: RISK_SCORE_DELETE_INDICES,
     });
     await server.inject(invalidRequest, requestContextMock.convertContext(context));
     const result = server.validate(invalidRequest);

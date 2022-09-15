@@ -9,12 +9,12 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { TestProviders } from '../../../../common/mock';
-import { RiskyScoreEnableButton } from './risky_score_enable_button';
+import { RiskScoreEnableButton } from './risk_score_enable_button';
 import { installHostRiskScoreModule, installUserRiskScoreModule } from './utils';
 
 jest.mock('./utils');
 
-describe('RiskyScoreEnableButton', () => {
+describe('RiskScoreEnableButton', () => {
   const mockRefetch = jest.fn();
   const timerange = {
     from: 'mockStartDate',
@@ -27,7 +27,7 @@ describe('RiskyScoreEnableButton', () => {
     it('Renders expected children', () => {
       render(
         <TestProviders>
-          <RiskyScoreEnableButton
+          <RiskScoreEnableButton
             refetch={mockRefetch}
             riskScoreEntity={RiskScoreEntity.host}
             timerange={timerange}
@@ -44,7 +44,7 @@ describe('RiskyScoreEnableButton', () => {
     it('Triggers the right installer', async () => {
       render(
         <TestProviders>
-          <RiskyScoreEnableButton
+          <RiskScoreEnableButton
             refetch={mockRefetch}
             riskScoreEntity={RiskScoreEntity.host}
             timerange={timerange}
@@ -62,7 +62,7 @@ describe('RiskyScoreEnableButton', () => {
     it('Update button state while installing', async () => {
       render(
         <TestProviders>
-          <RiskyScoreEnableButton
+          <RiskScoreEnableButton
             refetch={mockRefetch}
             riskScoreEntity={RiskScoreEntity.host}
             timerange={timerange}
@@ -84,7 +84,7 @@ describe('RiskyScoreEnableButton', () => {
     it('Renders expected children', () => {
       render(
         <TestProviders>
-          <RiskyScoreEnableButton
+          <RiskScoreEnableButton
             refetch={mockRefetch}
             riskScoreEntity={RiskScoreEntity.user}
             timerange={timerange}
@@ -101,7 +101,7 @@ describe('RiskyScoreEnableButton', () => {
     it('Triggers the right installer', async () => {
       render(
         <TestProviders>
-          <RiskyScoreEnableButton
+          <RiskScoreEnableButton
             refetch={mockRefetch}
             riskScoreEntity={RiskScoreEntity.user}
             timerange={timerange}
@@ -119,7 +119,7 @@ describe('RiskyScoreEnableButton', () => {
     it('Update button state while installing', async () => {
       render(
         <TestProviders>
-          <RiskyScoreEnableButton
+          <RiskScoreEnableButton
             refetch={mockRefetch}
             riskScoreEntity={RiskScoreEntity.user}
             timerange={timerange}

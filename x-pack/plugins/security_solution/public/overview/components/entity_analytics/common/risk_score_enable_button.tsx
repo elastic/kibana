@@ -8,21 +8,25 @@
 import { EuiButton } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { inputsModel } from '../../../../common/store';
-import { upgradeHostRiskScoreModule, upgradeUserRiskScoreModule } from './utils';
+
+import { installHostRiskScoreModule, installUserRiskScoreModule } from './utils';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
-import { useRiskyScoreToastContent } from './use_risky_score_toast_content';
+import { useRiskScoreToastContent } from './use_risk_score_toast_content';
 import { REQUEST_NAMES, useFetch } from '../../../../common/hooks/use_fetch';
 
-const RiskyScoreUpgradeButtonComponent = ({
+const RiskScoreEnableButtonComponent = ({
   refetch,
   riskScoreEntity,
+  disabled = false,
   timerange,
 }: {
   refetch: inputsModel.Refetch;
   riskScoreEntity: RiskScoreEntity;
+  disabled?: boolean;
   timerange: {
     from: string;
     to: string;
@@ -30,61 +34,62 @@ const RiskyScoreUpgradeButtonComponent = ({
 }) => {
   const spaceId = useSpaceId();
   const { http, notifications, theme, dashboard } = useKibana().services;
-  const { renderDocLink, renderDashboardLink } = useRiskyScoreToastContent(riskScoreEntity);
+  const { renderDocLink, renderDashboardLink } = useRiskScoreToastContent(riskScoreEntity);
   const { fetch, isLoading } = useFetch(
-    REQUEST_NAMES.UPGRADE_RISK_SCORE,
+    REQUEST_NAMES.ENABLE_RISK_SCORE,
     riskScoreEntity === RiskScoreEntity.user
-      ? upgradeUserRiskScoreModule
-      : upgradeHostRiskScoreModule
+      ? installUserRiskScoreModule
+      : installHostRiskScoreModule
   );
 
-  const upgradeHostRiskScore = useCallback(async () => {
+  const onBoardingRiskScore = useCallback(() => {
     fetch({
       http,
+      theme,
+      refetch,
+      renderDocLink,
+      renderDashboardLink,
+      dashboard,
       notifications,
       spaceId,
       timerange,
-      refetch,
-      renderDashboardLink,
-      renderDocLink,
-      theme,
-      dashboard,
     });
   }, [
     fetch,
     http,
+    theme,
+    refetch,
+    renderDocLink,
+    renderDashboardLink,
+    dashboard,
     notifications,
     spaceId,
     timerange,
-    renderDashboardLink,
-    renderDocLink,
-    theme,
-    dashboard,
-    refetch,
   ]);
 
   return (
     <EuiButton
       color="primary"
       fill
-      onClick={upgradeHostRiskScore}
+      onClick={onBoardingRiskScore}
       isLoading={isLoading}
-      data-test-subj="risk-score-upgrade"
+      data-test-subj={`enable_${riskScoreEntity}_risk_score`}
+      disabled={disabled}
     >
       {isLoading ? (
         <FormattedMessage
-          id="xpack.securitySolution.riskyScore.upgradingButtonTitle"
-          defaultMessage="Upgrading"
+          id="xpack.securitySolution.riskyScore.enablingButtonTitle"
+          defaultMessage="Enabling"
         />
       ) : (
         <FormattedMessage
-          id="xpack.securitySolution.riskyScore.upgradeButtonTitle"
-          defaultMessage="Upgrade"
+          id="xpack.securitySolution.riskyScore.enableButtonTitle"
+          defaultMessage="Enable"
         />
       )}
     </EuiButton>
   );
 };
 
-export const RiskyScoreUpgradeButton = React.memo(RiskyScoreUpgradeButtonComponent);
-RiskyScoreUpgradeButton.displayName = 'RiskyScoreUpgradeButton';
+export const RiskScoreEnableButton = React.memo(RiskScoreEnableButtonComponent);
+RiskScoreEnableButton.displayName = 'RiskScoreEnableButton';

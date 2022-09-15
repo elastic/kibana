@@ -4,36 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
+
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
-
-import { RISKY_SCORE_DELETE_INDICES } from '../../../../common/constants';
+import { RISK_SCORE_CREATE_STORED_SCRIPT } from '../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
-import { deleteEsIndices } from './lib/delete_indices';
+import { createStoredScriptBodySchema, createStoredScript } from './lib/create_script';
 
-const bodySchema = schema.object({
-  indices: schema.arrayOf(schema.string()),
-});
-
-export const deleteEsIndicesRoute = (router: SecuritySolutionPluginRouter) => {
-  router.post(
+export const createStoredScriptRoute = (router: SecuritySolutionPluginRouter) => {
+  router.put(
     {
-      path: RISKY_SCORE_DELETE_INDICES,
-      validate: { body: bodySchema },
+      path: RISK_SCORE_CREATE_STORED_SCRIPT,
+      validate: { body: createStoredScriptBodySchema },
       options: {
         tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-
       const { client } = (await context.core).elasticsearch;
-      const { indices = [] } = request.body;
-
+      const options = request.body;
       try {
-        await deleteEsIndices({ client, indices });
-        return response.ok({ body: { deleted: indices } });
+        await createStoredScript({
+          client,
+          options,
+        });
+        return response.ok({ body: options });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

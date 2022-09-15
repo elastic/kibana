@@ -42,10 +42,10 @@ import { useCheckSignalIndex } from '../../../../detections/containers/detection
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
 import type { inputsModel } from '../../../../common/store';
-import { RiskyScoreRestartButton } from '../common/risky_score_restart_button';
-import { RiskyScoreEnableButton } from '../common/risky_score_enable_button';
+import { RiskScoreRestartButton } from '../common/risk_score_restart_button';
+import { RiskScoreEnableButton } from '../common/risk_score_enable_button';
 import { RISKY_HOSTS_DOC_LINK } from '../../../../../common/constants';
-import { RiskyScoreDocLink } from '../common/risky_score_doc_link';
+import { RiskScoreDocLink } from '../common/risk_score_doc_link';
 
 const TABLE_QUERY_ID = 'hostRiskDashboardTable';
 
@@ -168,7 +168,7 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
           {toggleStatus && (
             <EuiFlexGroup alignItems="center" gutterSize="m">
               <EuiFlexItem>
-                <RiskyScoreRestartButton refetch={refetch} riskScoreEntity={RiskScoreEntity.host} />
+                <RiskScoreRestartButton refetch={refetch} riskScoreEntity={RiskScoreEntity.host} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiButtonEmpty href={RISKY_HOSTS_DOC_LINK} target="_blank">
@@ -243,12 +243,12 @@ const EntityAnalyticsHostRiskScoresDisableComponent = ({
         body={
           <>
             {i18n.ENABLE_HOST_RISK_SCORE_DESCRIPTION}{' '}
-            <RiskyScoreDocLink riskScoreEntity={RiskScoreEntity.host} />
+            <RiskScoreDocLink riskScoreEntity={RiskScoreEntity.host} />
           </>
         }
         actions={
           <EuiToolTip content={!signalIndexExists ? i18n.ENABLE_RISK_SCORE_POPOVER : null}>
-            <RiskyScoreEnableButton
+            <RiskScoreEnableButton
               refetch={refetch}
               riskScoreEntity={RiskScoreEntity.host}
               disabled={!signalIndexExists}

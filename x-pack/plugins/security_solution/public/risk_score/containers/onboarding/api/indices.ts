@@ -9,9 +9,9 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { INDICES_CREATION_ERROR_MESSAGE, INDICES_DELETION_ERROR_MESSAGE } from './translations';
 import type { CreateIndices, DeleteIndices } from './types';
 import {
-  RISKY_SCORE_CREATE_INDEX,
-  RISKY_SCORE_DELETE_INDICES,
-} from '../../../../../../common/constants';
+  RISK_SCORE_CREATE_INDEX,
+  RISK_SCORE_DELETE_INDICES,
+} from '../../../../../common/constants';
 
 export async function createIndices({
   errorMessage,
@@ -23,7 +23,7 @@ export async function createIndices({
   theme,
 }: CreateIndices) {
   const res = await http
-    .put(RISKY_SCORE_CREATE_INDEX, {
+    .put(RISK_SCORE_CREATE_INDEX, {
       body: JSON.stringify(options),
       signal,
     })
@@ -55,7 +55,7 @@ export async function deleteIndices({
 }: DeleteIndices) {
   const count = options.indices.length;
   const res = await http
-    .post(RISKY_SCORE_DELETE_INDICES, {
+    .post(RISK_SCORE_DELETE_INDICES, {
       body: JSON.stringify(options),
       signal,
     })

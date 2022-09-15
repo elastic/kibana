@@ -12,7 +12,7 @@ import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { RISKY_USERS_DOC_LINK } from '../../../../users/components/constants';
 import { LEARN_MORE } from '../host_risk_score/translations';
 
-const RiskyScoreDocLinkComponent = ({ riskScoreEntity }: { riskScoreEntity: RiskScoreEntity }) => {
+const RiskScoreDocLinkComponent = ({ riskScoreEntity }: { riskScoreEntity: RiskScoreEntity }) => {
   const link =
     riskScoreEntity === RiskScoreEntity.user ? RISKY_USERS_DOC_LINK : RISKY_HOSTS_DOC_LINK;
   return (
@@ -22,6 +22,6 @@ const RiskyScoreDocLinkComponent = ({ riskScoreEntity }: { riskScoreEntity: Risk
   );
 };
 
-export const RiskyScoreDocLink = React.memo(RiskyScoreDocLinkComponent);
+export const RiskScoreDocLink = React.memo(RiskScoreDocLinkComponent);
 
-RiskyScoreDocLink.displayName = 'RiskyScoreDocLink';
+RiskScoreDocLink.displayName = 'RiskScoreDocLink';

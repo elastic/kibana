@@ -277,21 +277,21 @@ export const DETECTION_ENGINE_RULES_BULK_CREATE =
 export const DETECTION_ENGINE_RULES_BULK_UPDATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 
-export const INTERNAL_RISKY_SCORE_URL = '/internal/risk_score' as const;
+export const INTERNAL_RISK_SCORE_URL = '/internal/risk_score' as const;
 export const DEV_TOOL_PREBUILT_CONTENT =
-  `${INTERNAL_RISKY_SCORE_URL}/prebuilt_content/dev_tool/{console_id}` as const;
+  `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/dev_tool/{console_id}` as const;
 export const devToolPrebuiltContentUrl = (spaceId: string, consoleId: string) =>
-  `/s/${spaceId}${INTERNAL_RISKY_SCORE_URL}/prebuilt_content/dev_tool/${consoleId}` as const;
-export const PREBUILT_SAVED_OBJECTS_BULK_CREATE = `${INTERNAL_RISKY_SCORE_URL}/prebuilt_content/saved_objects/_bulk_create/{template_name}`;
+  `/s/${spaceId}${INTERNAL_RISK_SCORE_URL}/prebuilt_content/dev_tool/${consoleId}` as const;
+export const PREBUILT_SAVED_OBJECTS_BULK_CREATE = `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_create/{template_name}`;
 export const prebuiltSavedObjectsBulkCreateUrl = (templateName: string) =>
-  `${INTERNAL_RISKY_SCORE_URL}/prebuilt_content/saved_objects/_bulk_create/${templateName}` as const;
-export const PREBUILT_SAVED_OBJECTS_BULK_DELETE = `${INTERNAL_RISKY_SCORE_URL}/prebuilt_content/saved_objects/_bulk_delete/{template_name}`;
+  `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_create/${templateName}` as const;
+export const PREBUILT_SAVED_OBJECTS_BULK_DELETE = `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_delete/{template_name}`;
 export const prebuiltSavedObjectsBulkDeleteUrl = (templateName: string) =>
-  `${INTERNAL_RISKY_SCORE_URL}/prebuilt_content/saved_objects/_bulk_delete/${templateName}` as const;
-export const RISKY_SCORE_CREATE_INDEX = `${INTERNAL_RISKY_SCORE_URL}/indices/create`;
-export const RISKY_SCORE_DELETE_INDICES = `${INTERNAL_RISKY_SCORE_URL}/indices/delete`;
-export const RISKY_SCORE_CREATE_STORED_SCRIPT = `${INTERNAL_RISKY_SCORE_URL}/stored_scripts/create`;
-export const RISKY_SCORE_DELETE_STORED_SCRIPT = `${INTERNAL_RISKY_SCORE_URL}/stored_scripts/delete`;
+  `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_delete/${templateName}` as const;
+export const RISK_SCORE_CREATE_INDEX = `${INTERNAL_RISK_SCORE_URL}/indices/create`;
+export const RISK_SCORE_DELETE_INDICES = `${INTERNAL_RISK_SCORE_URL}/indices/delete`;
+export const RISK_SCORE_CREATE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/stored_scripts/create`;
+export const RISK_SCORE_DELETE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/stored_scripts/delete`;
 
 /**
  * Internal detection engine routes

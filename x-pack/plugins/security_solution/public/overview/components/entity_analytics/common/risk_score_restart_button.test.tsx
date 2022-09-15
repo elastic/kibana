@@ -9,12 +9,12 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { TestProviders } from '../../../../common/mock';
-import { RiskyScoreRestartButton } from './risky_score_restart_button';
+import { RiskScoreRestartButton } from './risk_score_restart_button';
 import { restartRiskScoreTransforms } from './utils';
 
 jest.mock('./utils');
 
-describe('RiskyScoreRestartButton', () => {
+describe('RiskScoreRestartButton', () => {
   const mockRefetch = jest.fn();
   beforeEach(() => {
     jest.clearAllMocks();
@@ -23,7 +23,7 @@ describe('RiskyScoreRestartButton', () => {
     it('Renders expected children', () => {
       render(
         <TestProviders>
-          <RiskyScoreRestartButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.host} />
+          <RiskScoreRestartButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.host} />
         </TestProviders>
       );
 
@@ -34,7 +34,7 @@ describe('RiskyScoreRestartButton', () => {
     it('Triggers the right installer', async () => {
       render(
         <TestProviders>
-          <RiskyScoreRestartButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.host} />
+          <RiskScoreRestartButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.host} />
         </TestProviders>
       );
 
@@ -50,7 +50,7 @@ describe('RiskyScoreRestartButton', () => {
     it('Update button state while restarting', async () => {
       render(
         <TestProviders>
-          <RiskyScoreRestartButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.host} />
+          <RiskScoreRestartButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.host} />
         </TestProviders>
       );
 
@@ -66,7 +66,7 @@ describe('RiskyScoreRestartButton', () => {
     it('Renders expected children', () => {
       render(
         <TestProviders>
-          <RiskyScoreRestartButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.user} />
+          <RiskScoreRestartButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.user} />
         </TestProviders>
       );
 
@@ -77,7 +77,7 @@ describe('RiskyScoreRestartButton', () => {
     it('Triggers the right installer', async () => {
       render(
         <TestProviders>
-          <RiskyScoreRestartButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.user} />
+          <RiskScoreRestartButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.user} />
         </TestProviders>
       );
 
@@ -93,7 +93,7 @@ describe('RiskyScoreRestartButton', () => {
     it('Update button state while restarting', async () => {
       render(
         <TestProviders>
-          <RiskyScoreRestartButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.user} />
+          <RiskScoreRestartButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.user} />
         </TestProviders>
       );
 

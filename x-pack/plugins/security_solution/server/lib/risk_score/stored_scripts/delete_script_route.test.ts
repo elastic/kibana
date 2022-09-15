@@ -11,7 +11,7 @@ import {
   requestMock,
 } from '../../detection_engine/routes/__mocks__';
 import { deleteStoredScriptRoute } from './delete_script_route';
-import { RISKY_SCORE_DELETE_STORED_SCRIPT } from '../../../../common/constants';
+import { RISK_SCORE_DELETE_STORED_SCRIPT } from '../../../../common/constants';
 import { deleteStoredScript } from './lib/delete_script';
 
 jest.mock('./lib/delete_script', () => {
@@ -39,7 +39,7 @@ describe('deleteStoredScriptRoute', () => {
   it('delete indices', async () => {
     const request = requestMock.create({
       method: 'delete',
-      path: RISKY_SCORE_DELETE_STORED_SCRIPT,
+      path: RISK_SCORE_DELETE_STORED_SCRIPT,
       body: { id: 'test-script' },
     });
     const response = await server.inject(request, requestContextMock.convertContext(context));
@@ -50,7 +50,7 @@ describe('deleteStoredScriptRoute', () => {
   it('delete indices - should validate input', async () => {
     const invalidRequest = requestMock.create({
       method: 'delete',
-      path: RISKY_SCORE_DELETE_STORED_SCRIPT,
+      path: RISK_SCORE_DELETE_STORED_SCRIPT,
     });
     await server.inject(invalidRequest, requestContextMock.convertContext(context));
     const result = server.validate(invalidRequest);

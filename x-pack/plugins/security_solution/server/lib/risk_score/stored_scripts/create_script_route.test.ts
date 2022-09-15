@@ -17,7 +17,7 @@ import {
   requestMock,
 } from '../../detection_engine/routes/__mocks__';
 import { createStoredScriptRoute } from './create_script_route';
-import { RISKY_SCORE_CREATE_STORED_SCRIPT } from '../../../../common/constants';
+import { RISK_SCORE_CREATE_STORED_SCRIPT } from '../../../../common/constants';
 import { createStoredScript } from './lib/create_script';
 
 jest.mock('./lib/create_script', () => {
@@ -45,7 +45,7 @@ describe('createStoredScriptRoute', () => {
   it('Create stored script', async () => {
     const request = requestMock.create({
       method: 'put',
-      path: RISKY_SCORE_CREATE_STORED_SCRIPT,
+      path: RISK_SCORE_CREATE_STORED_SCRIPT,
       body: {
         id: 'test-script',
         script: {
@@ -63,7 +63,7 @@ describe('createStoredScriptRoute', () => {
   it('Create stored script - should validate input', async () => {
     const invalidRequest = requestMock.create({
       method: 'put',
-      path: RISKY_SCORE_CREATE_STORED_SCRIPT,
+      path: RISK_SCORE_CREATE_STORED_SCRIPT,
     });
     await server.inject(invalidRequest, requestContextMock.convertContext(context));
     const result = server.validate(invalidRequest);

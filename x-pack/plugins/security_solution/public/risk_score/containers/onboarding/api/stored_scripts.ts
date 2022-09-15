@@ -7,9 +7,9 @@
 
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import {
-  RISKY_SCORE_CREATE_STORED_SCRIPT,
-  RISKY_SCORE_DELETE_STORED_SCRIPT,
-} from '../../../../../../common/constants';
+  RISK_SCORE_CREATE_STORED_SCRIPT,
+  RISK_SCORE_DELETE_STORED_SCRIPT,
+} from '../../../../../common/constants';
 import {
   STORED_SCRIPT_CREATION_ERROR_MESSAGE,
   STORED_SCRIPT_DELETION_ERROR_MESSAGE,
@@ -26,7 +26,7 @@ export async function createStoredScript({
   theme,
 }: CreateStoredScript) {
   const res = await http
-    .put(RISKY_SCORE_CREATE_STORED_SCRIPT, {
+    .put(RISK_SCORE_CREATE_STORED_SCRIPT, {
       body: JSON.stringify(options),
       signal,
     })
@@ -52,7 +52,7 @@ export async function deleteStoredScript({
   theme,
 }: DeleteStoredScript) {
   const res = await http
-    .delete(RISKY_SCORE_DELETE_STORED_SCRIPT, {
+    .delete(RISK_SCORE_DELETE_STORED_SCRIPT, {
       body: JSON.stringify(options),
       signal,
     })

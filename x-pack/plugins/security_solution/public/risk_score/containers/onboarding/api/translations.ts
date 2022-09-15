@@ -8,113 +8,113 @@
 import { i18n } from '@kbn/i18n';
 
 export const INGEST_PIPELINE_CREATION_ERROR_MESSAGE = i18n.translate(
-  'xpack.securitySolution.riskyScore.api.ingestPipeline.create.errorMessageTitle',
+  'xpack.securitySolution.riskScore.api.ingestPipeline.create.errorMessageTitle',
   {
     defaultMessage: 'Failed to create Ingest pipeline',
   }
 );
 
 export const INGEST_PIPELINE_DELETION_ERROR_MESSAGE = (totalCount: number) =>
-  i18n.translate('xpack.securitySolution.riskyScore.api.ingestPipeline.delete.errorMessageTitle', {
+  i18n.translate('xpack.securitySolution.riskScore.api.ingestPipeline.delete.errorMessageTitle', {
     values: { totalCount },
     defaultMessage: `Failed to delete Ingest {totalCount, plural, =1 {pipeline} other {pipelines}}`,
   });
 
 export const INDICES_CREATION_ERROR_MESSAGE = i18n.translate(
-  'xpack.securitySolution.riskyScore.api.indices.create.errorMessageTitle',
+  'xpack.securitySolution.riskScore.api.indices.create.errorMessageTitle',
   {
     defaultMessage: 'Failed to create index',
   }
 );
 
 export const INDICES_DELETION_ERROR_MESSAGE = (totalCount: number) =>
-  i18n.translate('xpack.securitySolution.riskyScore.api.indices.delete.errorMessageTitle', {
+  i18n.translate('xpack.securitySolution.riskScore.api.indices.delete.errorMessageTitle', {
     values: { totalCount },
     defaultMessage: `Failed to delete {totalCount, plural, =1 {index} other {indices}}`,
   });
 
 export const STORED_SCRIPT_CREATION_ERROR_MESSAGE = i18n.translate(
-  'xpack.securitySolution.riskyScore.api.storedScript.create.errorMessageTitle',
+  'xpack.securitySolution.riskScore.api.storedScript.create.errorMessageTitle',
   {
     defaultMessage: 'Failed to create stored script',
   }
 );
 
 export const STORED_SCRIPT_DELETION_ERROR_MESSAGE = i18n.translate(
-  'xpack.securitySolution.riskyScore.api.storedScript.delete.errorMessageTitle',
+  'xpack.securitySolution.riskScore.api.storedScript.delete.errorMessageTitle',
   {
     defaultMessage: `Failed to delete stored script`,
   }
 );
 
 export const TRANSFORM_CREATION_ERROR_MESSAGE = i18n.translate(
-  'xpack.securitySolution.riskyScore.api.transforms.create.errorMessageTitle',
+  'xpack.securitySolution.riskScore.api.transforms.create.errorMessageTitle',
   {
     defaultMessage: 'Failed to create Transform',
   }
 );
 
 export const TRANSFORM_DELETION_ERROR_MESSAGE = (totalCount: number) =>
-  i18n.translate('xpack.securitySolution.riskyScore.api.transforms.delete.errorMessageTitle', {
+  i18n.translate('xpack.securitySolution.riskScore.api.transforms.delete.errorMessageTitle', {
     values: { totalCount },
     defaultMessage: `Failed to delete {totalCount, plural, =1 {Transform} other {Transforms}}`,
   });
 
 export const GET_TRANSFORM_STATE_ERROR_MESSAGE = i18n.translate(
-  'xpack.securitySolution.riskyScore.api.transforms.getState.errorMessageTitle',
+  'xpack.securitySolution.riskScore.api.transforms.getState.errorMessageTitle',
   {
     defaultMessage: `Failed to get Transform state`,
   }
 );
 
 export const GET_TRANSFORM_STATE_NOT_FOUND_MESSAGE = i18n.translate(
-  'xpack.securitySolution.riskyScore.api.transforms.getState.notFoundMessageTitle',
+  'xpack.securitySolution.riskScore.api.transforms.getState.notFoundMessageTitle',
   {
     defaultMessage: `Transform not found`,
   }
 );
 
 export const START_TRANSFORMS_ERROR_MESSAGE = (totalCount: number) =>
-  i18n.translate('xpack.securitySolution.riskyScore.api.transforms.start.errorMessageTitle', {
+  i18n.translate('xpack.securitySolution.riskScore.api.transforms.start.errorMessageTitle', {
     values: { totalCount },
     defaultMessage: `Failed to start {totalCount, plural, =1 {Transform} other {Transforms}}`,
   });
 
 export const STOP_TRANSFORMS_ERROR_MESSAGE = (totalCount: number) =>
-  i18n.translate('xpack.securitySolution.riskyScore.api.transforms.stop.errorMessageTitle', {
+  i18n.translate('xpack.securitySolution.riskScore.api.transforms.stop.errorMessageTitle', {
     values: { totalCount },
     defaultMessage: `Failed to stop {totalCount, plural, =1 {Transform} other {Transforms}}`,
   });
 
 export const INSTALLATION_ERROR = i18n.translate(
-  'xpack.securitySolution.riskyScore.install.errorMessageTitle',
+  'xpack.securitySolution.riskScore.install.errorMessageTitle',
   {
     defaultMessage: 'Installation error',
   }
 );
 
 export const UNINSTALLATION_ERROR = i18n.translate(
-  'xpack.securitySolution.riskyScore.uninstall.errorMessageTitle',
+  'xpack.securitySolution.riskScore.uninstall.errorMessageTitle',
   {
     defaultMessage: 'Uninstallation error',
   }
 );
 
 export const IMPORT_SAVED_OBJECTS_SUCCESS = (totalCount: number) =>
-  i18n.translate('xpack.securitySolution.riskyScore.savedObjects.bulkCreateSuccessTitle', {
+  i18n.translate('xpack.securitySolution.riskScore.savedObjects.bulkCreateSuccessTitle', {
     values: { totalCount },
     defaultMessage: `{totalCount} {totalCount, plural, =1 {saved object} other {saved objects}} imported successfully`,
   });
 
 export const IMPORT_SAVED_OBJECTS_FAILURE = i18n.translate(
-  'xpack.securitySolution.riskyScore.savedObjects.bulkCreateFailureTitle',
+  'xpack.securitySolution.riskScore.savedObjects.bulkCreateFailureTitle',
   {
     defaultMessage: `Failed to import saved objects`,
   }
 );
 
 export const DELETE_SAVED_OBJECTS_FAILURE = i18n.translate(
-  'xpack.securitySolution.riskyScore.savedObjects.bulkDeleteFailureTitle',
+  'xpack.securitySolution.riskScore.savedObjects.bulkDeleteFailureTitle',
   {
     defaultMessage: `Failed to delete saved objects`,
   }

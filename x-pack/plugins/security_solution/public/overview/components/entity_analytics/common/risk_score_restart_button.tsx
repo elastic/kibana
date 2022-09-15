@@ -16,7 +16,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import type { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { REQUEST_NAMES, useFetch } from '../../../../common/hooks/use_fetch';
 
-const RiskyScoreRestartButtonComponent = ({
+const RiskScoreRestartButtonComponent = ({
   refetch,
   riskScoreEntity,
   disabled = false,
@@ -64,5 +64,5 @@ const RiskyScoreRestartButtonComponent = ({
   );
 };
 
-export const RiskyScoreRestartButton = React.memo(RiskyScoreRestartButtonComponent);
-RiskyScoreRestartButton.displayName = 'RiskyScoreRestartButton';
+export const RiskScoreRestartButton = React.memo(RiskScoreRestartButtonComponent);
+RiskScoreRestartButton.displayName = 'RiskScoreRestartButton';

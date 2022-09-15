@@ -11,17 +11,17 @@ import styled from 'styled-components';
 
 import type { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { VIEW_DASHBOARD } from '../../overview_cti_links/translations';
-import { RiskyScoreDocLink } from './risky_score_doc_link';
+import { RiskScoreDocLink } from './risk_score_doc_link';
 
 const StyledButton = styled(EuiButton)`
   float: right;
 `;
 
-export const useRiskyScoreToastContent = (riskScoreEntity: RiskScoreEntity) => {
+export const useRiskScoreToastContent = (riskScoreEntity: RiskScoreEntity) => {
   const renderDocLink = useCallback(
     (message: string) => (
       <>
-        {message} <RiskyScoreDocLink riskScoreEntity={riskScoreEntity} />
+        {message} <RiskScoreDocLink riskScoreEntity={riskScoreEntity} />
       </>
     ),
     [riskScoreEntity]

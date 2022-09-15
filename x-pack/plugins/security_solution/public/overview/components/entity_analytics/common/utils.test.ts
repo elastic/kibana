@@ -11,9 +11,12 @@ import {
   getRiskScoreLatestTransformId,
   getRiskScorePivotTransformId,
 } from '../../../../../common/utils/risky_score_modules';
-import { bulkDeletePrebuiltSavedObjects, bulkCreatePrebuiltSavedObjects } from './api';
+import {
+  bulkDeletePrebuiltSavedObjects,
+  bulkCreatePrebuiltSavedObjects,
+} from '../../../../risk_score/containers/onboarding/api';
 
-import * as api from './api';
+import * as api from '../../../../risk_score/containers/onboarding/api';
 import {
   installHostRiskScoreModule,
   installUserRiskScoreModule,
@@ -21,7 +24,7 @@ import {
   uninstallRiskScoreModule,
 } from './utils';
 
-jest.mock('./api');
+jest.mock('../../../../risk_score/containers/onboarding/api');
 
 const mockHttp = {
   post: jest.fn(),
