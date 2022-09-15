@@ -32,7 +32,7 @@ const deSelectTextOnPage = () => {
 };
 
 const InputCaptureContainer = styled.div`
-  .invisible-input {
+  .focus-container {
     // Tried to find a way to not use '!important', but cant seem to figure
     // out right combination of pseudo selectors
     outline: none !important;
@@ -44,6 +44,24 @@ const InputCaptureContainer = styled.div`
     top: -100vh;
     left: -100vw;
   }
+
+  .invisible-input {
+    &,
+    &:focus {
+      border: none;
+      outline: none;
+      background-image: none;
+      background-color: transparent;
+      -webkit-box-shadow: none;
+      -moz-box-shadow: none;
+      box-shadow: none;
+      animation: none !important;
+      width: 1ch !important;
+      position: absolute;
+      opacity: 0;
+      top: -100vh;
+      left: -100vw;
+    }
 `;
 
 /**
@@ -83,7 +101,7 @@ export const InputCapture = memo<InputCaptureProps>(
     // Reference to the `<div>` that take in focus (`tabIndex`)
     const focusEleRef = useRef<HTMLDivElement | null>(null);
 
-    // const clipboardCaptureRef = useRef<HTMLInputElement | null>(null);
+    const hiddenInputEleRef = useRef<HTMLInputElement | null>(null);
 
     const getTextSelection = useCallback((): string => {
       if (focusEleRef.current) {
@@ -114,9 +132,6 @@ export const InputCapture = memo<InputCaptureProps>(
       (ev) => {
         // allows for clipboard events to be captured via onPaste event handler
         if (ev.metaKey || ev.ctrlKey) {
-          // if (clipboardCaptureRef.current) {
-          //   clipboardCaptureRef.current.focus();
-          // }
           return;
         }
 
@@ -202,18 +217,18 @@ export const InputCapture = memo<InputCaptureProps>(
           // If user selected text and `force` is not true, then don't focus (else they lose selection)
           if (
             (!force && (window.getSelection()?.toString() ?? '').length > 0) ||
-            document.activeElement === focusEleRef.current
+            document.activeElement === hiddenInputEleRef.current
           ) {
             return;
           }
 
-          focusEleRef.current?.focus();
+          hiddenInputEleRef.current?.focus();
         },
 
         blur: () => {
           // only blur if the input has focus
-          if (focusEleRef.current && document.activeElement === focusEleRef.current) {
-            focusEleRef.current?.blur();
+          if (hiddenInputEleRef.current && document.activeElement === hiddenInputEleRef.current) {
+            hiddenInputEleRef.current?.blur();
           }
         },
       };
@@ -234,7 +249,7 @@ export const InputCapture = memo<InputCaptureProps>(
           aria-placeholder={ARIA_PLACEHOLDER_MESSAGE}
           tabIndex={0}
           ref={focusEleRef}
-          className="invisible-input"
+          className="focus-container"
           data-test-subj={getTestId('keyCapture-input')}
           onBlur={handleOnBlur}
           onFocus={handleOnFocus}
@@ -247,16 +262,17 @@ export const InputCapture = memo<InputCaptureProps>(
           <div className="textSelectionBoundaryHelper"> </div>
           {children}
           <div className="textSelectionBoundaryHelper"> </div>
+          <input
+            ref={hiddenInputEleRef}
+            type="text"
+            value=""
+            tabIndex={-1}
+            onPaste={handleOnPaste}
+            onChange={() => {}}
+            spellCheck="false"
+            className="invisible-input"
+          />
         </div>
-        {/* <input*/}
-        {/*  ref={clipboardCaptureRef}*/}
-        {/*  type="text"*/}
-        {/*  value=""*/}
-        {/*  onPaste={handleOnPaste}*/}
-        {/*  onChange={() => {}}*/}
-        {/*  spellCheck="false"*/}
-        {/*  className="textSelectionBoundaryHelper"*/}
-        {/* />*/}
       </InputCaptureContainer>
     );
   }
