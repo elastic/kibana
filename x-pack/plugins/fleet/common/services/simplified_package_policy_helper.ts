@@ -5,16 +5,26 @@
  * 2.0.
  */
 
-import { packageToPackagePolicy } from '../../../common/services';
 import type {
   NewPackagePolicyInput,
   NewPackagePolicyInputStream,
   PackagePolicyConfigRecord,
-} from '../../../common/types';
-import { PackagePolicyValidationError } from '../../errors';
-import type { NewPackagePolicy, PackageInfo } from '../../types';
+  NewPackagePolicy,
+  PackageInfo,
+} from '../types';
+import { PackagePolicyValidationError } from '../errors';
 
-type SimplifiedVars = Record<string, string | string[] | boolean | number | number[] | null>;
+import { packageToPackagePolicy } from '.';
+
+export type SimplifiedVars = Record<string, string | string[] | boolean | number | number[] | null>;
+
+export type SimplifiedPackagePolicyStreams = Record<
+  string,
+  {
+    enabled?: undefined | boolean;
+    vars?: SimplifiedVars;
+  }
+>;
 
 export interface SimplifiedPackagePolicy {
   id?: string;
@@ -28,13 +38,7 @@ export interface SimplifiedPackagePolicy {
     {
       enabled?: boolean | undefined;
       vars?: SimplifiedVars;
-      streams?: Record<
-        string,
-        {
-          enabled?: undefined | boolean;
-          vars?: SimplifiedVars;
-        }
-      >;
+      streams?: SimplifiedPackagePolicyStreams;
     }
   >;
 }
