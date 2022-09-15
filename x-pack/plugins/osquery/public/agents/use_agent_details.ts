@@ -11,7 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { GetOneAgentResponse } from '@kbn/fleet-plugin/common';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
-import { useOsqueryCasestContext } from '../shared_components/attachments/external_references_content';
+import { useOsqueryCasestContext } from '../shared_components/attachments/osquery_cases_context';
 
 interface UseAgentDetails {
   agentId?: string;

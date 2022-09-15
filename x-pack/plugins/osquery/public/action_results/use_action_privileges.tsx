@@ -7,7 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../common/lib/kibana';
-import { useOsqueryCasestContext } from '../shared_components/attachments/external_references_content';
+import { useOsqueryCasestContext } from '../shared_components/attachments/osquery_cases_context';
 
 export const useActionResultsPrivileges = () => {
   const { http } = useKibana().services;

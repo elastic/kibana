@@ -6,9 +6,9 @@
  */
 
 import type { Context } from 'react';
-import { useContext } from 'react';
+import { createContext, useContext } from 'react';
 
-export const createUseContext =
+const createUseContext =
   <T>(Ctx: Context<T>, name: string) =>
   () => {
     const ctx = useContext(Ctx);
@@ -18,3 +18,8 @@ export const createUseContext =
 
     return ctx;
   };
+
+export const OsqueryCasesContext = createContext<{ asSystemRequest: boolean }>({
+  asSystemRequest: false,
+});
+export const useOsqueryCasestContext = createUseContext(OsqueryCasesContext, 'OsqueryCasesContext');

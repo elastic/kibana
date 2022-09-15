@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
 import { filter } from 'lodash';
-import { useOsqueryCasestContext } from '../shared_components/attachments/external_references_content';
+import { useOsqueryCasestContext } from '../shared_components/attachments/osquery_cases_context';
 import { useKibana } from '../common/lib/kibana';
 import type { ESTermQuery } from '../../common/typed_json';
 import { useErrorToast } from '../common/hooks/use_error_toast';
