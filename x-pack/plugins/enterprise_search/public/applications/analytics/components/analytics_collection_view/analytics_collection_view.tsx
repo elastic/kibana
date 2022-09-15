@@ -27,6 +27,7 @@ import { COLLECTION_CREATION_PATH, COLLECTION_VIEW_PATH } from '../../routes';
 
 import { EnterpriseSearchAnalyticsPageTemplate } from '../layout/page_template';
 
+import { AnalyticsCollectionEvents } from './analytics_collection_events';
 import { AnalyticsCollectionIntegrate } from './analytics_collection_integrate';
 import { AnalyticsCollectionSettings } from './analytics_collection_settings';
 
@@ -147,6 +148,7 @@ export const AnalyticsCollectionView: React.FC = () => {
           {section === 'integrate' && (
             <AnalyticsCollectionIntegrate collection={analyticsCollection} />
           )}
+          {section === 'events' && <AnalyticsCollectionEvents collection={analyticsCollection} />}
         </>
       ) : (
         <EuiEmptyPrompt
