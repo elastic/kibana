@@ -223,7 +223,7 @@ type UserSettingsTemplateName = `${TemplateBaseName}${typeof USER_SETTINGS_TEMPL
 const isUserSettingsTemplate = (name: string): name is UserSettingsTemplateName =>
   name.endsWith(USER_SETTINGS_TEMPLATE_SUFFIX);
 
-function buildComponentTemplates(params: {
+export function buildComponentTemplates(params: {
   mappings: IndexTemplateMappings;
   templateName: string;
   registryElasticsearch: RegistryElasticsearch | undefined;

@@ -10,12 +10,11 @@ import { errors } from '@elastic/elasticsearch';
 import { safeLoad } from 'js-yaml';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
+import { USER_SETTINGS_TEMPLATE_SUFFIX } from '../../../../../common/constants';
 import {
-  PACKAGE_TEMPLATE_SUFFIX,
-  USER_SETTINGS_TEMPLATE_SUFFIX,
-} from '../../../../../common/constants';
-
-import { installComponentAndIndexTemplateForDataStream } from '../template/install';
+  buildComponentTemplates,
+  installComponentAndIndexTemplateForDataStream,
+} from '../template/install';
 import { processFields } from '../../fields/field';
 import { generateMappings } from '../template/template';
 import { getESAssetMetadata } from '../meta';
@@ -27,6 +26,7 @@ import type {
   InstallablePackage,
   ESAssetMetadata,
   IndexTemplate,
+  RegistryElasticsearch,
 } from '../../../../../common/types/models';
 import { getInstallation } from '../../packages';
 import { retryTransientEsErrors } from '../retry';
@@ -256,38 +256,27 @@ const installTransformsAssets = async (
           const customMappings = transformsSpecifications
             .get(destinationIndexTemplate.transformModuleId)
             ?.get('mappings');
-          const customTemplateName = `${destinationIndexTemplate.installationName}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
-          const packageTemplateName = `${destinationIndexTemplate.installationName}${PACKAGE_TEMPLATE_SUFFIX}`;
+          const registryElasticsearch: RegistryElasticsearch = {
+            'index_template.settings': destinationIndexTemplate.template.settings,
+            'index_template.mappings': destinationIndexTemplate.template.mappings,
+          };
+
+          const componentTemplates = buildComponentTemplates({
+            mappings: customMappings,
+            templateName: destinationIndexTemplate.installationName,
+            registryElasticsearch,
+            packageName: installablePackage.name,
+            defaultSettings: {},
+          });
+
           if (destinationIndexTemplate !== undefined || customMappings !== undefined) {
             return installComponentAndIndexTemplateForDataStream({
               esClient,
               logger,
-              componentTemplates: {
-                ...(customMappings
-                  ? {
-                      [customTemplateName]: {
-                        template: {
-                          mappings: customMappings,
-                        },
-                        _meta: destinationIndexTemplate._meta,
-                      },
-                    }
-                  : {}),
-                ...(destinationIndexTemplate.template
-                  ? {
-                      [packageTemplateName]: {
-                        template: {
-                          settings: destinationIndexTemplate.template.settings,
-                          mappings: destinationIndexTemplate.template.mappings,
-                        },
-                        _meta: destinationIndexTemplate._meta,
-                      },
-                    }
-                  : {}),
-              },
+              componentTemplates,
               indexTemplate: {
                 templateName: destinationIndexTemplate.installationName,
-                // @ts-expect-error Index template here should not contain data_stream property
+                // @ts-expect-error We don't need to pass data_stream property here
                 // as this template is applied to only an index and not a data stream
                 indexTemplate: {
                   template: { settings: undefined, mappings: undefined },
@@ -298,10 +287,7 @@ const installTransformsAssets = async (
                       ?.get('destinationIndex').index,
                   ],
                   _meta: destinationIndexTemplate._meta,
-                  composed_of: [
-                    ...(customMappings ? [customTemplateName] : []),
-                    ...(destinationIndexTemplate.template ? [packageTemplateName] : []),
-                  ],
+                  composed_of: Object.keys(componentTemplates),
                 },
               },
             });
@@ -316,13 +302,21 @@ const installTransformsAssets = async (
         const index = transform.content.dest.index;
         const pipelineId = transform.content.dest.pipeline;
 
-        return esClient.indices.create(
-          {
-            index,
-            ...(pipelineId ? { settings: { default_pipeline: pipelineId } } : {}),
-          },
-          { ignore: [400] }
-        );
+        try {
+          await retryTransientEsErrors(
+            () =>
+              esClient.indices.create(
+                {
+                  index,
+                  ...(pipelineId ? { settings: { default_pipeline: pipelineId } } : {}),
+                },
+                { ignore: [400] }
+              ),
+            { logger }
+          );
+        } catch (err) {
+          throw new Error(err.message);
+        }
       })
     );
 
