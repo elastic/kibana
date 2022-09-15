@@ -18,7 +18,13 @@ import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 import { ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
-import { XYLayerConfig, AxesSettingsConfig } from '../types';
+import {
+  EuiIconAxisBottom,
+  EuiIconAxisLeft,
+  EuiIconAxisRight,
+  EuiIconAxisTop,
+} from '@kbn/chart-icons';
+import { isHorizontalChart } from '../state_helpers';
 import {
   ToolbarPopover,
   useDebouncedValue,
@@ -26,11 +32,7 @@ import {
   RangeInputField,
   BucketAxisBoundsControl,
 } from '../../../shared_components';
-import { isHorizontalChart } from '../state_helpers';
-import { EuiIconAxisBottom } from '../../../assets/axis_bottom';
-import { EuiIconAxisLeft } from '../../../assets/axis_left';
-import { EuiIconAxisRight } from '../../../assets/axis_right';
-import { EuiIconAxisTop } from '../../../assets/axis_top';
+import { XYLayerConfig, AxesSettingsConfig } from '../types';
 import { validateExtent } from '../axes_configuration';
 
 import './axis_settings_popover.scss';
@@ -97,6 +99,14 @@ export interface AxisSettingsPopoverProps {
    * Flag whether endzones are visible
    */
   endzonesVisible?: boolean;
+  /**
+   * Set current time marker visibility
+   */
+  setCurrentTimeMarkerVisibility?: (checked: boolean) => void;
+  /**
+   * Flag whether current time marker is visible
+   */
+  currentTimeMarkerVisible?: boolean;
   /**
    * Set scale
    */
@@ -220,6 +230,8 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   setOrientation,
   setEndzoneVisibility,
   endzonesVisible,
+  setCurrentTimeMarkerVisibility,
+  currentTimeMarkerVisible,
   extent,
   setExtent,
   hasBarOrAreaOnAxis,
@@ -350,6 +362,26 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
             })}
             onChange={() => setEndzoneVisibility(!Boolean(endzonesVisible))}
             checked={Boolean(endzonesVisible)}
+            showLabel={false}
+          />
+        </EuiFormRow>
+      )}
+      {setCurrentTimeMarkerVisibility && (
+        <EuiFormRow
+          display="columnCompressedSwitch"
+          label={i18n.translate('xpack.lens.xyChart.showCurrenTimeMarker', {
+            defaultMessage: 'Show current time marker',
+          })}
+          fullWidth
+        >
+          <EuiSwitch
+            compressed
+            data-test-subj="lnsshowCurrentTimeMarker"
+            label={i18n.translate('xpack.lens.xyChart.showCurrenTimeMarker', {
+              defaultMessage: 'Show current time marker',
+            })}
+            onChange={() => setCurrentTimeMarkerVisibility(!Boolean(currentTimeMarkerVisible))}
+            checked={Boolean(currentTimeMarkerVisible)}
             showLabel={false}
           />
         </EuiFormRow>

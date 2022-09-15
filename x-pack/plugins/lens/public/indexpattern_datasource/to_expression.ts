@@ -22,10 +22,11 @@ import {
 } from '@kbn/expressions-plugin/public';
 import { GenericIndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
-import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
+import { IndexPatternPrivateState, IndexPatternLayer } from './types';
 import { DateHistogramIndexPatternColumn, RangeIndexPatternColumn } from './operations/definitions';
 import { FormattedIndexPatternColumn } from './operations/definitions/column_types';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
+import type { IndexPattern, IndexPatternMap } from '../types';
 
 export type OriginalColumn = { id: string } & GenericIndexPatternColumn;
 
@@ -56,7 +57,6 @@ function getExpressionForLayer(
   if (columnOrder.length === 0 || !indexPattern) {
     return null;
   }
-
   const columns = { ...layer.columns };
   Object.keys(columns).forEach((columnId) => {
     const column = columns[columnId];
@@ -126,7 +126,10 @@ function getExpressionForLayer(
 
         const wrapInFilter = Boolean(def.filterable && col.filter);
         const wrapInTimeFilter =
-          def.windowable && !hasDateHistogram && col.window && indexPattern.timeFieldName;
+          def.canReduceTimeRange &&
+          !hasDateHistogram &&
+          col.reducedTimeRange &&
+          indexPattern.timeFieldName;
         let aggAst = def.toEsAggsFn(
           col,
           wrapInFilter ? `${aggId}-metric` : aggId,
@@ -149,7 +152,7 @@ function getExpressionForLayer(
                   enabled: true,
                   schema: 'bucket',
                   filter: col.filter && queryToAst(col.filter),
-                  timeWindow: wrapInTimeFilter ? col.window : undefined,
+                  timeWindow: wrapInTimeFilter ? col.reducedTimeRange : undefined,
                   timeShift: col.timeShift,
                 }),
               ]),
@@ -285,25 +288,25 @@ function getExpressionForLayer(
       ([, col]) => col.operationType === 'date_histogram'
     );
 
-    const columnsWithTimeScale = firstDateHistogramColumn
-      ? columnEntries.filter(
-          ([, col]) =>
-            col.timeScale &&
-            operationDefinitionMap[col.operationType].timeScalingMode &&
-            operationDefinitionMap[col.operationType].timeScalingMode !== 'disabled'
-        )
-      : [];
+    const columnsWithTimeScale = columnEntries.filter(
+      ([, col]) =>
+        col.timeScale &&
+        operationDefinitionMap[col.operationType].timeScalingMode &&
+        operationDefinitionMap[col.operationType].timeScalingMode !== 'disabled'
+    );
+
     const timeScaleFunctions: ExpressionAstFunction[] = columnsWithTimeScale.flatMap(
       ([id, col]) => {
         const scalingCall: ExpressionAstFunction = {
           type: 'function',
           function: 'lens_time_scale',
           arguments: {
-            dateColumnId: [firstDateHistogramColumn![0]],
+            dateColumnId: firstDateHistogramColumn?.length ? [firstDateHistogramColumn[0]] : [],
             inputColumnId: [id],
             outputColumnId: [id],
             outputColumnName: [col.label],
             targetUnit: [col.timeScale!],
+            reducedTimeRange: col.reducedTimeRange ? [col.reducedTimeRange] : [],
           },
         };
 
@@ -413,12 +416,13 @@ function sortedReferences(columns: Array<readonly [string, GenericIndexPatternCo
 export function toExpression(
   state: IndexPatternPrivateState,
   layerId: string,
+  indexPatterns: IndexPatternMap,
   uiSettings: IUiSettingsClient
 ) {
   if (state.layers[layerId]) {
     return getExpressionForLayer(
       state.layers[layerId],
-      state.indexPatterns[state.layers[layerId].indexPatternId],
+      indexPatterns[state.layers[layerId].indexPatternId],
       uiSettings
     );
   }

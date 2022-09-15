@@ -8,7 +8,7 @@
 import React from 'react';
 import { RulesContainer } from './rules_container';
 import { render, screen, fireEvent, within } from '@testing-library/react';
-import { QueryClient } from 'react-query';
+import { QueryClient } from '@tanstack/react-query';
 import { useFindCspRules, useBulkUpdateCspRules, type RuleSavedObject } from './use_csp_rules';
 import * as TEST_SUBJECTS from './test_subjects';
 import { Chance } from 'chance';

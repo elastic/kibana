@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IndexPattern, IndexPatternLayer } from '../../types';
+import { IndexPatternLayer } from '../../types';
 import { documentField } from '../../document_field';
-import { OperationMetadata } from '../../../types';
+import { IndexPatternMap, OperationMetadata } from '../../../types';
 import {
   DateHistogramIndexPatternColumn,
   GenericIndexPatternColumn,
@@ -17,7 +17,7 @@ import {
 import { getFieldByNameFactory } from '../../pure_helpers';
 jest.mock('../../../id_generator');
 
-export const mockDataViews = (): Record<string, IndexPattern> => {
+export const mockDataViews = (): IndexPatternMap => {
   const fields = [
     {
       name: 'timestamp',
@@ -77,6 +77,8 @@ export const mockDataViews = (): Record<string, IndexPattern> => {
       hasRestrictions: false,
       fields,
       getFieldByName: getFieldByNameFactory(fields),
+      isPersisted: true,
+      spec: {},
     },
     second: {
       id: 'second',
@@ -85,6 +87,8 @@ export const mockDataViews = (): Record<string, IndexPattern> => {
       timeFieldName: 'timestamp',
       fields: [fields[0]],
       getFieldByName: getFieldByNameFactory([fields[0]]),
+      isPersisted: true,
+      spec: {},
     },
   };
 };

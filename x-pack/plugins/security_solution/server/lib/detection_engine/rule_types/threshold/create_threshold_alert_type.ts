@@ -14,7 +14,7 @@ import { thresholdRuleParams } from '../../schemas/rule_schemas';
 import { thresholdExecutor } from '../../signals/executors/threshold';
 import type { ThresholdAlertState } from '../../signals/types';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
-import { validateImmutable, validateIndexPatterns } from '../utils';
+import { validateIndexPatterns } from '../utils';
 
 export const createThresholdAlertType = (
   createOptions: CreateRuleOptions
@@ -42,7 +42,6 @@ export const createThresholdAlertType = (
          * @returns mutatedRuleParams
          */
         validateMutatedParams: (mutatedRuleParams) => {
-          validateImmutable(mutatedRuleParams.immutable);
           validateIndexPatterns(mutatedRuleParams.index);
 
           return mutatedRuleParams;
@@ -76,6 +75,7 @@ export const createThresholdAlertType = (
           primaryTimestamp,
           secondaryTimestamp,
           ruleExecutionLogger,
+          aggregatableTimestampField,
         },
         services,
         startedAt,
@@ -98,6 +98,7 @@ export const createThresholdAlertType = (
         runtimeMappings,
         primaryTimestamp,
         secondaryTimestamp,
+        aggregatableTimestampField,
       });
 
       return result;

@@ -25,6 +25,8 @@ export const OVERVIEW = '[data-test-subj="groupedNavPanelLink-overview"]';
 
 export const DETECTION_RESPONSE = '[data-test-subj="groupedNavPanelLink-detection_response"]';
 
+export const ENTITY_ANALYTICS = '[data-test-subj="groupedNavPanelLink-entity-analytics"]';
+
 export const KUBERNETES = '[data-test-subj="groupedNavPanelLink-kubernetes"]';
 
 export const CSP_DASHBOARD =
@@ -49,7 +51,7 @@ export const NETWORK = '[data-test-subj="groupedNavPanelLink-network"]';
 
 export const USERS = '[data-test-subj="groupedNavPanelLink-users"]';
 
-export const THREAT_INTELLIGENCE = '[data-test-subj="groupedNavPanelLink-threat-intelligence"]';
+export const INDICATORS = '[data-test-subj="groupedNavItemLink-threat_intelligence-indicators"]';
 
 export const RULES = '[data-test-subj="groupedNavPanelLink-rules"]';
 
@@ -71,14 +73,14 @@ export const openNavigationPanelFor = (page: string) => {
     case OVERVIEW:
     case DETECTION_RESPONSE:
     case KUBERNETES:
+    case ENTITY_ANALYTICS:
     case CSP_DASHBOARD: {
       panel = DASHBOARDS;
       break;
     }
     case HOSTS:
     case NETWORK:
-    case USERS:
-    case THREAT_INTELLIGENCE: {
+    case USERS: {
       panel = EXPLORE;
       break;
     }

@@ -79,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
-        await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
       });
     });
 
@@ -125,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
-        await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
       });
     });
   });

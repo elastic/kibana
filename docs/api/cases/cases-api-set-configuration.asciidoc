@@ -35,6 +35,7 @@ you must still specify all of the connector details.
 (Optional, string) An identifier for the space. If it is not specified, the
 default space is used.
 
+[role="child_attributes"]
 === {api-request-body-title}
 
 `closure_type`::
@@ -73,8 +74,8 @@ connector, use `none`. To retrieve connector names, use
 <<cases-api-find-connectors>>.
 
 `type`::
-(Required, string) The type of the connector. Valid values are: `.jira`, `.none`,
-`.resilient`,`.servicenow`, `.servicenow-sir`, and `.swimlane`.
+(Required, string) The type of the connector. Valid values are: `.cases-webhook`,
+`.jira`, `.none`, `.resilient`,`.servicenow`, `.servicenow-sir`, and `.swimlane`.
 ====
 
 `owner`::

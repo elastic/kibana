@@ -15,6 +15,7 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiDataGridStyle,
+  EuiLoadingContent,
 } from '@elastic/eui';
 import { useSorting, usePagination, useBulkActions } from './hooks';
 import { AlertsTableProps } from '../../../types';
@@ -156,6 +157,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
                   </EuiFlexItem>
                 )}
                 {renderCustomActionsRow &&
+                  alerts[visibleRowIndex] &&
                   renderCustomActionsRow(alerts[visibleRowIndex], handleFlyoutAlert, props.id)}
               </EuiFlexGroup>
             );
@@ -184,7 +186,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   ]);
 
   useEffect(() => {
-    // Row classes do not deal with visible row indices so we need to handle page offset
+    // Row classes do not deal with visible row indices, so we need to handle page offset
     const rowIndex = flyoutAlertIndex + pagination.pageIndex * pagination.pageSize;
     setRowClasses({
       [rowIndex]: ACTIVE_ROW_CLASS,
@@ -201,7 +203,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     columnId: string;
   }) => {
     const value = data.find((d) => d.field === columnId)?.value ?? [];
-    // console.log({ data, columnId })
     return <>{value.length ? value.join() : '--'}</>;
   };
 
@@ -219,16 +220,21 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     (_props: EuiDataGridCellValueElementProps) => {
       // https://github.com/elastic/eui/issues/5811
       const alert = alerts[_props.rowIndex - pagination.pageSize * pagination.pageIndex];
-      const data: Array<{ field: string; value: string[] }> = [];
-      Object.entries(alert ?? {}).forEach(([key, value]) => {
-        data.push({ field: key, value: value as string[] });
-      });
-      return renderCellValue({
-        ..._props,
-        data,
-      });
+      if (alert) {
+        const data: Array<{ field: string; value: string[] }> = [];
+        Object.entries(alert ?? {}).forEach(([key, value]) => {
+          data.push({ field: key, value: value as string[] });
+        });
+        return renderCellValue({
+          ..._props,
+          data,
+        });
+      } else if (isLoading) {
+        return <EuiLoadingContent lines={1} />;
+      }
+      return null;
     },
-    [alerts, pagination.pageIndex, pagination.pageSize, renderCellValue]
+    [alerts, isLoading, pagination.pageIndex, pagination.pageSize, renderCellValue]
   );
 
   return (

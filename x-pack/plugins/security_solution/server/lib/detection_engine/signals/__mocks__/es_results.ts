@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import type {
   SignalSourceHit,
   SignalSearchResponse,
@@ -497,6 +497,25 @@ export const sampleSignalHit = (): SignalHit => ({
       related_integrations: [],
       required_fields: [],
       setup: '',
+      throttle: 'no_actions',
+      actions: [],
+      building_block_type: undefined,
+      note: undefined,
+      license: undefined,
+      outcome: undefined,
+      alias_target_id: undefined,
+      alias_purpose: undefined,
+      timeline_id: undefined,
+      timeline_title: undefined,
+      meta: undefined,
+      rule_name_override: undefined,
+      timestamp_override: undefined,
+      timestamp_override_fallback_disabled: undefined,
+      namespace: undefined,
+      index: undefined,
+      data_view_id: undefined,
+      filters: undefined,
+      saved_id: undefined,
     },
     depth: 1,
   },

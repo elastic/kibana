@@ -31,6 +31,7 @@ import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_st
 import { COMMON_ARGS, HELP_GROUPS } from '../service/builtin_commands';
 import { getCommandNameWithArgs } from '../service/utils';
 import { ConsoleCodeBlock } from './console_code_block';
+import { useKibana } from '../../../../common/lib/kibana';
 
 // @ts-expect-error TS2769
 const StyledEuiBasicTable = styled(EuiBasicTable)`
@@ -56,7 +57,12 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 `;
 
 const StyledEuiFlexGrid = styled(EuiFlexGrid)`
-  max-width: 50%;
+  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.l}) {
+    max-width: 75%;
+  }
+  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.xl}) {
+    max-width: 50%;
+  }
 `;
 
 const StyledEuiBadge = styled(EuiBadge)`
@@ -74,6 +80,7 @@ export interface CommandListProps {
 export const CommandList = memo<CommandListProps>(({ commands, display = 'default' }) => {
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const dispatch = useConsoleStateDispatch();
+  const { docLinks } = useKibana().services;
 
   const footerMessage = useMemo(() => {
     return (
@@ -148,7 +155,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
     (
       commandsByGroup: CommandDefinition[]
     ): Array<{
-      [key: string]: { name: string; about: React.ElementType | string };
+      [key: string]: { name: string; about: React.ReactNode | string };
     }> => {
       if (commandsByGroup[0].helpGroupLabel === HELP_GROUPS.supporting.label) {
         return [...COMMON_ARGS, ...commandsByGroup].map((command) => ({
@@ -194,15 +201,23 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                   command.RenderComponent && (
                     <EuiFlexItem grow={false}>
                       <EuiToolTip
-                        content={i18n.translate(
-                          'xpack.securitySolution.console.commandList.addButtonTooltip',
-                          { defaultMessage: 'Add to text bar' }
-                        )}
+                        content={
+                          command.helpDisabled === true
+                            ? i18n.translate(
+                                'xpack.securitySolution.console.commandList.disabledButtonTooltip',
+                                { defaultMessage: 'Unsupported command' }
+                              )
+                            : i18n.translate(
+                                'xpack.securitySolution.console.commandList.addButtonTooltip',
+                                { defaultMessage: 'Add to text bar' }
+                              )
+                        }
                       >
                         <EuiButtonIcon
                           iconType="plusInCircle"
                           aria-label={`updateTextInputCommand-${command.name}`}
                           onClick={updateInputText(`${commandNameWithArgs} `)}
+                          isDisabled={command.helpDisabled === true}
                         />
                       </EuiToolTip>
                     </EuiFlexItem>
@@ -228,21 +243,21 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
     const calloutItems = [
       <FormattedMessage
         id="xpack.securitySolution.console.commandList.callout.multipleResponses"
-        defaultMessage="You may enter multiple response actions at the same time."
+        defaultMessage="You can enter consecutive response actions — no need to wait for previous actions to complete."
       />,
       <FormattedMessage
         id="xpack.securitySolution.console.commandList.callout.leavingResponder"
-        defaultMessage="Leaving the responder does not abort the actions."
+        defaultMessage="Leaving the response console does not terminate any actions that have been submitted."
       />,
       <FormattedMessage
         id="xpack.securitySolution.console.commandList.callout.visitSupportSections"
-        defaultMessage="{readMore} about manual response actions."
+        defaultMessage="{learnMore} about response actions and using the console."
         values={{
-          readMore: (
-            <EuiLink>
+          learnMore: (
+            <EuiLink href={docLinks.links.securitySolution.responseActions} target="_blank">
               <FormattedMessage
                 id="xpack.securitySolution.console.commandList.callout.readMoreLink"
-                defaultMessage="Read more"
+                defaultMessage="Learn more"
               />
             </EuiLink>
           ),
@@ -255,17 +270,17 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
         title={
           <FormattedMessage
             id="xpack.securitySolution.console.commandList.callout.title"
-            defaultMessage="Do you know?"
+            defaultMessage="Helpful tips:"
           />
         }
       >
-        <ol>
+        <ul>
           {calloutItems.map((item, index) => (
             <li key={index}>
               <EuiText size="s">{item}</EuiText>
             </li>
           ))}
-        </ol>
+        </ul>
       </StyledEuiCallOut>
     );
 
@@ -288,6 +303,11 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
       {commandsByGroups.map((commandsByGroup) => {
         const groupLabel = commandsByGroup[0].helpGroupLabel;
         const filteredCommands = getFilteredCommands(commandsByGroup);
+
+        if (filteredCommands.length === 0) {
+          return null;
+        }
+
         return (
           <StyledEuiFlexGrid
             columns={3}
@@ -297,6 +317,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
             direction="column"
           >
             {filteredCommands.map((command) => {
+              const commandNameWithArgs = getCommandNameWithArgs(command);
               return (
                 <EuiFlexItem key={command.name}>
                   <EuiDescriptionList
@@ -304,11 +325,13 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                     listItems={[
                       {
                         title: (
-                          <StyledEuiBadge>
-                            <ConsoleCodeBlock inline bold>
-                              {getCommandNameWithArgs(command)}{' '}
-                            </ConsoleCodeBlock>
-                          </StyledEuiBadge>
+                          <EuiToolTip content={commandNameWithArgs}>
+                            <StyledEuiBadge>
+                              <ConsoleCodeBlock inline bold>
+                                {commandNameWithArgs}
+                              </ConsoleCodeBlock>
+                            </StyledEuiBadge>
+                          </EuiToolTip>
                         ),
                         description: (
                           <EuiText color="subdued" size="xs">

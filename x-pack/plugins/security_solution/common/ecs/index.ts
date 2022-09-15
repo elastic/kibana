@@ -74,5 +74,7 @@ export interface Ecs {
   Target?: Target;
   dll?: DllEcs;
   'kibana.alert.workflow_status'?: 'open' | 'acknowledged' | 'in-progress' | 'closed';
-  'kibana.alert.rule.parameters'?: { index: string[] };
+  // I believe these parameters are all snake cased to correspond with how they are sent "over the wire" as request / response
+  // Not representative of the parsed types that are camel cased.
+  'kibana.alert.rule.parameters'?: { index: string[]; data_view_id?: string };
 }

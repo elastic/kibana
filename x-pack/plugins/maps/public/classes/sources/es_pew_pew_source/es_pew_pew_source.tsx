@@ -96,14 +96,6 @@ export class ESPewPewSource extends AbstractESAggSource {
   }
 
   async getImmutableProperties() {
-    let indexPatternTitle = this.getIndexPatternId();
-    try {
-      const indexPattern = await this.getIndexPattern();
-      indexPatternTitle = indexPattern.title;
-    } catch (error) {
-      // ignore error, title will just default to id
-    }
-
     return [
       {
         label: getDataSourceLabel(),
@@ -111,7 +103,7 @@ export class ESPewPewSource extends AbstractESAggSource {
       },
       {
         label: getDataViewLabel(),
-        value: indexPatternTitle,
+        value: await this.getDisplayName(),
       },
       {
         label: i18n.translate('xpack.maps.source.pewPew.sourceGeoFieldLabel', {

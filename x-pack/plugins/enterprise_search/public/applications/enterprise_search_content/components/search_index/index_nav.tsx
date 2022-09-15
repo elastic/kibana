@@ -8,11 +8,12 @@
 // TODO: We need to write tests for this once we have a logic file in place and a functioning API.
 
 import React from 'react';
-import { useRouteMatch, useParams, generatePath } from 'react-router-dom';
+import { useRouteMatch, useParams } from 'react-router-dom';
 
 import { EuiSideNavItemType, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { generateNavLink } from '../../../shared/layout';
 
 import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
@@ -28,6 +29,7 @@ export const useSearchIndicesNav = () => {
 
   const navItems: Array<EuiSideNavItemType<unknown>> = [
     {
+      'data-test-subj': 'IndexLabel',
       id: 'indexName',
       name: indexName,
       renderItem: () => (
@@ -35,40 +37,45 @@ export const useSearchIndicesNav = () => {
           <div className="eui-textTruncate">{indexName.toUpperCase()}</div>
         </EuiText>
       ),
-      'data-test-subj': 'IndexLabel',
     },
     {
+      'data-test-subj': 'IndexOverviewLink',
       id: SearchIndexTabId.OVERVIEW,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.nav.overviewTitle', {
         defaultMessage: 'Overview',
       }),
       ...generateNavLink({
-        to: generatePath(SEARCH_INDEX_TAB_PATH, { indexName, tabId: SearchIndexTabId.OVERVIEW }),
+        to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+          indexName,
+          tabId: SearchIndexTabId.OVERVIEW,
+        }),
       }),
-      'data-test-subj': 'IndexOverviewLink',
     },
     {
+      'data-test-subj': 'IndexDocumentsLink',
       id: SearchIndexTabId.DOCUMENTS,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.nav.documentsTitle', {
         defaultMessage: 'Documents',
       }),
       ...generateNavLink({
-        to: generatePath(SEARCH_INDEX_TAB_PATH, { indexName, tabId: SearchIndexTabId.DOCUMENTS }),
+        to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+          indexName,
+          tabId: SearchIndexTabId.DOCUMENTS,
+        }),
       }),
-      'data-test-subj': 'IndexDocumentsLink',
     },
     {
+      'data-test-subj': 'IndexIndexMappingsLink',
       id: SearchIndexTabId.INDEX_MAPPINGS,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.nav.indexMappingsTitle', {
         defaultMessage: 'Index Mappings',
       }),
       ...generateNavLink({
-        to: generatePath(SEARCH_INDEX_TAB_PATH, {
+        to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
           indexName,
           tabId: SearchIndexTabId.INDEX_MAPPINGS,
         }),
       }),
-      'data-test-subj': 'IndexIndexMappingsLink',
     },
   ];
 

@@ -173,6 +173,7 @@ export function DependencyDetailOperationsList() {
       initialSortField="impact"
       initialSortDirection="desc"
       isLoading={primaryStatsFetch.status === FETCH_STATUS.LOADING}
+      initialPageSize={25}
     />
   );
 }

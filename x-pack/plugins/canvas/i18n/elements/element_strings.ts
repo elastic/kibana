@@ -254,4 +254,12 @@ export const getElementStrings = (): ElementStringDict => ({
       defaultMessage: 'Heatmap visualization',
     }),
   },
+  pieVis: {
+    displayName: i18n.translate('xpack.canvas.elements.pieVisDisplayName', {
+      defaultMessage: '(New) Pie Vis',
+    }),
+    help: i18n.translate('xpack.canvas.elements.pieVisHelpText', {
+      defaultMessage: 'Pie visualization',
+    }),
+  },
 });

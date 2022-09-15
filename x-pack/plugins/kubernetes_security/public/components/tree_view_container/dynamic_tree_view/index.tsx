@@ -16,7 +16,6 @@ import {
   EuiLoadingSpinner,
   EuiToolTip,
 } from '@elastic/eui';
-import { KubernetesCollection } from '../../../types';
 import {
   TREE_NAVIGATION_LOADING,
   TREE_NAVIGATION_SHOW_MORE,
@@ -66,7 +65,7 @@ export const DynamicTreeView = ({
 }: DynamicTreeViewProps) => {
   const styles = useStyles(depth);
 
-  const { indexPattern, hasSelection, setNoResults } = useTreeViewContext();
+  const { indexPattern, setNoResults } = useTreeViewContext();
 
   const { data, fetchNextPage, isFetchingNextPage, hasNextPage, isLoading } =
     useFetchDynamicTreeView(query, tree[depth].key, indexPattern, expanded);
@@ -103,7 +102,7 @@ export const DynamicTreeView = ({
   }, [fetchNextPage, expanded]);
 
   useEffect(() => {
-    if (!hasSelection && !depth && data && data.pages?.[0].buckets?.[0]?.key) {
+    if (!selected && !depth && data && data.pages?.[0].buckets?.[0]?.key) {
       onSelect(
         {},
         tree[depth].type,
@@ -111,7 +110,7 @@ export const DynamicTreeView = ({
         data.pages[0].buckets[0].key_as_string
       );
     }
-  }, [data, depth, hasSelection, onSelect, tree]);
+  }, [data, depth, selected, onSelect, tree]);
 
   const onClickNextPageHandler = () => {
     fetchNextPage();
@@ -230,7 +229,7 @@ const DynamicTreeViewItem = ({
   const buttonRef = useRef<Record<string, any>>({});
 
   const handleSelect = () => {
-    if (tree[depth].type === KubernetesCollection.clusterId) {
+    if (tree[depth].type === 'clusterId') {
       onSelect(selectionDepth, tree[depth].type, aggData.key, aggData.key_as_string);
     } else {
       onSelect(selectionDepth, tree[depth].type, aggData.key);
@@ -297,11 +296,18 @@ const DynamicTreeViewItem = ({
   const isSelected = useMemo(() => {
     return (
       selected ===
-      Object.entries({ ...selectionDepth, [tree[depth].type]: aggData.key })
+      Object.entries({
+        ...selectionDepth,
+        [tree[depth].type]: aggData.key,
+        ...(tree[depth].type === 'clusterId' &&
+          aggData.key_as_string && {
+            clusterName: aggData.key_as_string,
+          }),
+      })
         .map(([k, v]) => `${k}.${v}`)
         .join()
     );
-  }, [aggData.key, depth, selected, selectionDepth, tree]);
+  }, [aggData.key, aggData.key_as_string, depth, selected, selectionDepth, tree]);
 
   return (
     <li
@@ -316,6 +322,7 @@ const DynamicTreeViewItem = ({
         onClick={onButtonToggle}
         onKeyDown={onKeyDown}
         ref={(el) => (buttonRef.current[aggData.key] = el)}
+        css={isLastNode ? styles.leafNodeButton : undefined}
       >
         {!isLastNode && (
           <EuiIcon
@@ -340,8 +347,8 @@ const DynamicTreeViewItem = ({
             selectionDepth={{
               ...selectionDepth,
               [tree[depth].type]: aggData.key,
-              ...(tree[depth].type === KubernetesCollection.clusterId && {
-                [KubernetesCollection.clusterName]: aggData.key_as_string,
+              ...(tree[depth].type === 'clusterId' && {
+                clusterName: aggData.key_as_string,
               }),
             }}
             tree={tree}

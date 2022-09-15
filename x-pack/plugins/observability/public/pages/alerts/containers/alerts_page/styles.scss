@@ -4,7 +4,7 @@ $fullscreenFlyoutTop: 72px;
     top: $fullscreenFlyoutTop;
   }
 
-  .euiFlyout,
+  .euiFlyout.oblt__flyout,
   .euiCollapsibleNav {
     top: $fullscreenFlyoutTop;
     height: calc(100% - #{$fullscreenFlyoutTop});

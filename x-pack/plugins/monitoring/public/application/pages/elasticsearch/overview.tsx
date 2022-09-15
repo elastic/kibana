@@ -14,13 +14,13 @@ import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ElasticsearchOverview } from '../../../components/elasticsearch';
 import { ComponentProps } from '../../route_init';
 import { useCharts } from '../../hooks/use_charts';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 export const ElasticsearchOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
   const { zoomInfo, onBrush } = useCharts();
   const { services } = useKibana<{ data: any }>();
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
   const cluster = find(clusters, {

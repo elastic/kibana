@@ -190,7 +190,6 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
           description: 'Protect the worlds data - but in the East Coast',
           policy_id: agentPolicy!.id,
           enabled: true,
-          output_id: '',
           inputs: [
             {
               type: 'endpoint',

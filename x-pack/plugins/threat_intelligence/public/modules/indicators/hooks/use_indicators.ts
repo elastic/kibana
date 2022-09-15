@@ -16,7 +16,9 @@ import type { Subscription } from 'rxjs';
 import { buildEsQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Indicator } from '../../../../common/types/indicator';
 import { useKibana } from '../../../hooks/use_kibana';
-import { DEFAULT_THREAT_INDEX_KEY, THREAT_QUERY_BASE } from '../../../../common/constants';
+import { THREAT_QUERY_BASE } from '../../../../common/constants';
+import { useSourcererDataView } from './use_sourcerer_data_view';
+import { threatIndicatorNamesOriginScript, threatIndicatorNamesScript } from '../lib/display_name';
 
 const PAGE_SIZES = [10, 25, 50];
 
@@ -26,6 +28,7 @@ export interface UseIndicatorsParams {
   filterQuery: Query;
   filters: Filter[];
   timeRange?: TimeRange;
+  sorting: any[];
 }
 
 export interface UseIndicatorsValue {
@@ -35,7 +38,6 @@ export interface UseIndicatorsValue {
   pagination: Pagination;
   onChangeItemsPerPage: (value: number) => void;
   onChangePage: (value: number) => void;
-  firstLoad: boolean;
   loading: boolean;
 }
 
@@ -46,7 +48,7 @@ export interface RawIndicatorsResponse {
   };
 }
 
-interface Pagination {
+export interface Pagination {
   pageSize: number;
   pageIndex: number;
   pageSizeOptions: number[];
@@ -55,25 +57,21 @@ interface Pagination {
 export const useIndicators = ({
   filters,
   filterQuery,
+  sorting,
   timeRange,
 }: UseIndicatorsParams): UseIndicatorsValue => {
   const {
     services: {
       data: { search: searchService },
-      uiSettings,
     },
   } = useKibana();
-  const defaultThreatIndices = useMemo(
-    () => uiSettings.get(DEFAULT_THREAT_INDEX_KEY),
-    [uiSettings]
-  );
+  const { selectedPatterns } = useSourcererDataView();
 
   const searchSubscription$ = useRef<Subscription>();
   const abortController = useRef(new AbortController());
 
   const [indicators, setIndicators] = useState<Indicator[]>([]);
   const [indicatorCount, setIndicatorCount] = useState<number>(0);
-  const [firstLoad, setFirstLoad] = useState(true);
   const [loading, setLoading] = useState(true);
 
   const [pagination, setPagination] = useState({
@@ -124,12 +122,27 @@ export const useIndicators = ({
         .search<IEsSearchRequest, IKibanaSearchResponse<RawIndicatorsResponse>>(
           {
             params: {
-              index: defaultThreatIndices,
+              index: selectedPatterns,
               body: {
                 size,
                 from,
                 fields: [{ field: '*', include_unmapped: true }],
                 query: queryToExecute,
+                sort: sorting.map(({ id, direction }) => ({ [id]: direction })),
+                runtime_mappings: {
+                  'threat.indicator.name': {
+                    type: 'keyword',
+                    script: {
+                      source: threatIndicatorNamesScript(),
+                    },
+                  },
+                  'threat.indicator.name_origin': {
+                    type: 'keyword',
+                    script: {
+                      source: threatIndicatorNamesOriginScript(),
+                    },
+                  },
+                },
               },
             },
           },
@@ -143,24 +156,22 @@ export const useIndicators = ({
             setIndicatorCount(response.rawResponse.hits.total || 0);
 
             if (isCompleteResponse(response)) {
+              setLoading(false);
               searchSubscription$.current?.unsubscribe();
             } else if (isErrorResponse(response)) {
+              setLoading(false);
               searchSubscription$.current?.unsubscribe();
             }
-
-            setFirstLoad(false);
-            setLoading(false);
           },
           error: (msg) => {
             searchService.showError(msg);
             searchSubscription$.current?.unsubscribe();
 
-            setFirstLoad(false);
             setLoading(false);
           },
         });
     },
-    [queryToExecute, defaultThreatIndices, searchService]
+    [queryToExecute, searchService, selectedPatterns, sorting]
   );
 
   const onChangeItemsPerPage = useCallback(
@@ -201,7 +212,6 @@ export const useIndicators = ({
     pagination,
     onChangePage,
     onChangeItemsPerPage,
-    firstLoad,
     loading,
     handleRefresh,
   };

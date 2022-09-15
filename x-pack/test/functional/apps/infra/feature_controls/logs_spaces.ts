@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'infraHome', 'security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
@@ -20,7 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
 
         await spacesService.create({
           id: 'custom_space',
@@ -31,7 +31,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
       it('shows Logs navlink', async () => {
@@ -59,7 +59,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -69,7 +69,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
       it(`doesn't show Logs navlink`, async () => {

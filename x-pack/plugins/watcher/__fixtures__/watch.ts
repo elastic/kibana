@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { Moment } from 'moment';
 import { getRandomString } from '@kbn/test-jest-helpers';
+import { ClientWatchStatusModel } from '../common/types';
+import { WATCH_STATES, WATCH_STATE_COMMENTS } from '../common/constants';
 
 interface Watch {
   id: string;
@@ -22,14 +23,7 @@ interface Watch {
   timeWindowUnit?: string;
   threshold?: number[];
   isSystemWatch: boolean;
-  watchStatus: {
-    state: 'OK' | 'Firing' | 'Error' | 'Config error' | 'Disabled';
-    comment?: string;
-    lastMetCondition?: Moment;
-    lastChecked?: Moment;
-    isActive: boolean;
-    actionStatuses?: any[];
-  };
+  watchStatus: ClientWatchStatusModel;
 }
 
 export const getWatch = ({
@@ -47,8 +41,13 @@ export const getWatch = ({
   threshold,
   isSystemWatch = false,
   watchStatus = {
-    state: 'OK',
+    id: 'a',
+    state: WATCH_STATES.OK,
     isActive: true,
+    lastChecked: null,
+    lastMetCondition: null,
+    comment: WATCH_STATE_COMMENTS.OK,
+    actionStatuses: [],
   },
 }: Partial<Watch> = {}): Watch => ({
   id,

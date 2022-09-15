@@ -19,6 +19,7 @@ export type HistogramCharts = Array<{
 
 export function TransformWizardProvider({ getService, getPageObjects }: FtrProviderContext) {
   const aceEditor = getService('aceEditor');
+  const browser = getService('browser');
   const canvasElement = getService('canvasElement');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
@@ -26,12 +27,14 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
   const retry = getService('retry');
   const find = getService('find');
   const ml = getService('ml');
+  const toasts = getService('toasts');
+
   const PageObjects = getPageObjects(['discover', 'timePicker']);
 
   return {
     async clickNextButton() {
       await testSubjects.existOrFail('transformWizardNavButtonNext');
-      await testSubjects.clickWhenNotDisabled('transformWizardNavButtonNext');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('transformWizardNavButtonNext');
     },
 
     async assertDefineStepActive() {
@@ -314,7 +317,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       const subj = 'transformAdvancedRuntimeMappingsEditorSwitch';
       if ((await this.getRuntimeMappingsEditorSwitchCheckedState()) !== toggle) {
         await retry.tryForTime(5 * 1000, async () => {
-          await testSubjects.clickWhenNotDisabled(subj);
+          await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
           await this.assertRuntimeMappingsEditorSwitchCheckState(toggle);
         });
       }
@@ -352,7 +355,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     async applyRuntimeMappings() {
       const subj = 'transformRuntimeMappingsApplyButton';
       await testSubjects.existOrFail(subj);
-      await testSubjects.clickWhenNotDisabled(subj);
+      await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
       const isEnabled = await testSubjects.isEnabled(subj);
       expect(isEnabled).to.eql(
         false,
@@ -557,7 +560,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
             break;
         }
       }
-      await testSubjects.clickWhenNotDisabled('transformApplyAggChanges');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('transformApplyAggChanges');
       await testSubjects.missingOrFail(`transformAggPopoverForm_${expectedLabel}`);
     },
 
@@ -1048,6 +1051,34 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
         await this.assertStartButtonEnabled(false);
         await this.assertProgressbarExists();
       });
+    },
+
+    async assertAggregationEntryEditPopoverValid(aggName: string) {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click(`transformAggregationEntryEditButton_${aggName}`);
+
+        await testSubjects.existOrFail(`transformAggPopoverForm_${aggName}`);
+        const isApplyAggChangeEnabled = await testSubjects.isEnabled(
+          `~transformAggPopoverForm_${aggName} > ~transformApplyAggChanges`
+        );
+
+        expect(isApplyAggChangeEnabled).to.eql(
+          true,
+          'Expected Transform aggregation entry `Apply` to be enabled'
+        );
+        // escape popover
+        await browser.pressKeys(browser.keys.ESCAPE);
+      });
+    },
+
+    async assertErrorToastsNotExist() {
+      const toastCount = await toasts.getToastCount();
+      // Toast element index starts at 1, not 0
+      for (let toastIdx = 1; toastIdx < toastCount + 1; toastIdx++) {
+        const toast = await toasts.getToastElement(toastIdx);
+        const isErrorToast = await toast.elementHasClass('euiToast--danger');
+        expect(isErrorToast).to.eql(false, `Expected toast message to be successful, got error.`);
+      }
     },
   };
 }

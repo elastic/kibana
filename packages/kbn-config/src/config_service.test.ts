@@ -21,7 +21,7 @@ import { schema } from '@kbn/config-schema';
 import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
 
 import type { ConfigDeprecationContext } from './deprecation';
-import { ConfigService, Env, RawPackageInfo } from '.';
+import { ConfigService, Env, RawPackageInfo } from '..';
 
 import { getEnvOptions } from './internal_mocks';
 

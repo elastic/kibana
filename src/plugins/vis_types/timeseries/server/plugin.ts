@@ -21,6 +21,7 @@ import { map } from 'rxjs/operators';
 import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { PluginStart } from '@kbn/data-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { PluginStart as DataViewsPublicPluginStart } from '@kbn/data-views-plugin/server';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { VisTypeTimeseriesConfig } from './config';
@@ -50,6 +51,7 @@ interface VisTypeTimeseriesPluginSetupDependencies {
 
 interface VisTypeTimeseriesPluginStartDependencies {
   data: PluginStart;
+  fieldFormats: FieldFormatsStart;
   dataViews: DataViewsPublicPluginStart;
 }
 
@@ -112,9 +114,9 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
         );
       },
       getFieldFormatsService: async (uiSettings) => {
-        const [, { data }] = await core.getStartServices();
+        const [, { fieldFormats }] = await core.getStartServices();
 
-        return data.fieldFormats.fieldFormatServiceFactory(uiSettings);
+        return fieldFormats.fieldFormatServiceFactory(uiSettings);
       },
     };
 

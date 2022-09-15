@@ -7,12 +7,21 @@ PKG_REQUIRE_NAME = "@kbn/core-mount-utils-browser-internal"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
-    "src/**/*.tsx",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.scss",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
     "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -54,6 +63,10 @@ jsts_transpiler(
   srcs = SRCS,
   build_pkg_name = package_name(),
   web = True,
+  additional_args = [
+    "--copy-files",
+    "--quiet"
+  ]
 )
 
 ts_config(
@@ -74,7 +87,6 @@ ts_project(
   declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

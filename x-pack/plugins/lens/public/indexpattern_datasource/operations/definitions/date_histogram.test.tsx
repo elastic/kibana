@@ -11,13 +11,15 @@ import { dateHistogramOperation } from '.';
 import { mount, shallow } from 'enzyme';
 import { EuiSwitch } from '@elastic/eui';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { dataPluginMock, getCalculateAutoTimeExpression } from '@kbn/data-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
-import type { IndexPatternLayer, IndexPattern } from '../../types';
+import type { IndexPatternLayer } from '../../types';
+import type { IndexPattern } from '../../../types';
 import { getFieldByNameFactory } from '../../pure_helpers';
 import { act } from 'react-dom/test-utils';
 
@@ -58,6 +60,8 @@ const indexPattern1: IndexPattern = {
       searchable: true,
     },
   ]),
+  isPersisted: true,
+  spec: {},
 };
 
 const indexPattern2: IndexPattern = {
@@ -84,6 +88,8 @@ const indexPattern2: IndexPattern = {
       searchable: true,
     },
   ]),
+  isPersisted: true,
+  spec: {},
 };
 
 const uiSettingsMock = {} as IUiSettingsClient;
@@ -98,6 +104,7 @@ const defaultOptions = {
     toDate: 'now',
   },
   data: dataStart,
+  fieldFormats: fieldFormatsServiceMock.createStartContract(),
   unifiedSearch: unifiedSearchStart,
   dataViews: dataViewsStart,
   http: {} as HttpSetup,

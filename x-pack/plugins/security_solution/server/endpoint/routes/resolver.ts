@@ -23,14 +23,14 @@ export const registerResolverRoutes = async (
   startServices: StartServicesAccessor<StartPlugins>,
   config: ConfigType
 ) => {
-  const [, { ruleRegistry }] = await startServices();
+  const [, { ruleRegistry, licensing }] = await startServices();
   router.post(
     {
       path: '/api/endpoint/resolver/tree',
       validate: validateTree,
       options: { authRequired: true },
     },
-    handleTree(ruleRegistry, config)
+    handleTree(ruleRegistry, config, licensing)
   );
 
   router.post(

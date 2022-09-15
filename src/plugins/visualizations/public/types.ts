@@ -48,7 +48,7 @@ export interface ISavedVis {
 export interface VisSavedObject extends ISavedVis {
   lastSavedTitle: string;
   getEsType: () => string;
-  getDisplayName?: () => string;
+  getDisplayName: () => string;
   displayName: string;
   migrationVersion?: SavedObjectsMigrationVersion;
   searchSource?: ISearchSource;

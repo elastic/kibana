@@ -10,7 +10,7 @@ import { find } from 'lodash';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPanel,
   EuiSpacer,
   EuiFlexGroup,
@@ -25,7 +25,7 @@ import { ComponentProps } from '../../route_init';
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 // @ts-ignore
 import { ClusterStatus } from '../../../components/kibana/cluster_status';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 import { useCharts } from '../../hooks/use_charts';
 
 const KibanaOverview = ({ data }: { data: any }) => {
@@ -36,7 +36,7 @@ const KibanaOverview = ({ data }: { data: any }) => {
   const showRules =
     data.metrics.kibana_cluster_rule_overdue_count &&
     data.metrics.kibana_cluster_rule_overdue_count.length &&
-    data.metrics.kibana_cluster_rule_overdue_count[0].indices_found.metricbeat;
+    data.metrics.kibana_cluster_rule_overdue_count[0].indices_found.ecs;
 
   return (
     <EuiPage>
@@ -107,7 +107,7 @@ const KibanaOverview = ({ data }: { data: any }) => {
 export const KibanaOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
   const [data, setData] = useState<any>();
   const clusterUuid = globalState.cluster_uuid;
   const cluster = find(clusters, {

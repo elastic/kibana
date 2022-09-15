@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from './services/embeddable';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 /**
  * @param title {string} the current title of the dashboard
@@ -191,6 +191,29 @@ export const dashboardReplacePanelAction = {
     }),
 };
 
+export const dashboardFilterNotificationBadge = {
+  getDisplayName: () =>
+    i18n.translate('dashboard.panel.filters', {
+      defaultMessage: 'Panel filters',
+    }),
+  getEditButtonTitle: () =>
+    i18n.translate('dashboard.panel.filters.modal.editButton', {
+      defaultMessage: 'Edit filters',
+    }),
+  getCloseButtonTitle: () =>
+    i18n.translate('dashboard.panel.filters.modal.closeButton', {
+      defaultMessage: 'Close',
+    }),
+  getQueryTitle: () =>
+    i18n.translate('dashboard.panel.filters.modal.queryTitle', {
+      defaultMessage: 'Query',
+    }),
+  getFiltersTitle: () =>
+    i18n.translate('dashboard.panel.filters.modal.filtersTitle', {
+      defaultMessage: 'Filters',
+    }),
+};
+
 /*
   Dashboard Editor
 */
@@ -363,6 +386,11 @@ export const dashboardLoadingErrorStrings = {
   getDashboardLoadError: (message: string) =>
     i18n.translate('dashboard.loadingError.errorMessage', {
       defaultMessage: 'Error encountered while loading saved dashboard: {message}',
+      values: { message },
+    }),
+  getDashboardGridError: (message: string) =>
+    i18n.translate('dashboard.loadingError.dashboardGridErrorMessage', {
+      defaultMessage: 'Unable to load dashboard: {message}',
       values: { message },
     }),
 };

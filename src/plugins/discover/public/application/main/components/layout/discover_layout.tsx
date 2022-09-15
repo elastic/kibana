@@ -15,7 +15,7 @@ import {
   EuiHorizontalRule,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -24,7 +24,7 @@ import { isOfQueryType } from '@kbn/es-query';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
-import { InspectorSession } from '@kbn/inspector-plugin/public';
+import { useInspector } from '../../hooks/use_inspector';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
@@ -42,12 +42,12 @@ import { useColumns } from '../../../../hooks/use_data_grid_columns';
 import { DiscoverDocuments } from './discover_documents';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
-import { SavedSearchURLConflictCallout } from '../../../../services/saved_searches';
 import { FieldStatisticsTable } from '../field_stats_table';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 import { hasActiveFilter } from './utils';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
+import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
 
 /**
  * Local storage key for sidebar persistence state
@@ -75,6 +75,9 @@ export function DiscoverLayout({
   searchSource,
   state,
   stateContainer,
+  persistDataView,
+  updateAdHocDataViewId,
+  adHocDataViewList,
 }: DiscoverLayoutProps) {
   const {
     trackUiMetric,
@@ -89,7 +92,6 @@ export function DiscoverLayout({
     inspector,
   } = useDiscoverServices();
   const { main$, charts$, totalHits$ } = savedSearchData$;
-  const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
   const dataState: DataMainMsg = useDataState(main$);
 
   const viewMode = useMemo(() => {
@@ -141,23 +143,12 @@ export function DiscoverLayout({
     [dataState.fetchStatus, dataState.foundDocuments, isPlainRecord]
   );
 
-  const onOpenInspector = useCallback(() => {
-    // prevent overlapping
-    setExpandedDoc(undefined);
-    const session = inspector.open(inspectorAdapters, {
-      title: savedSearch.title,
-    });
-    setInspectorSession(session);
-  }, [setExpandedDoc, inspectorAdapters, savedSearch, inspector]);
-
-  useEffect(() => {
-    return () => {
-      if (inspectorSession) {
-        // Close the inspector if this scope is destroyed (e.g. because the user navigates away).
-        inspectorSession.close();
-      }
-    };
-  }, [inspectorSession]);
+  const onOpenInspector = useInspector({
+    setExpandedDoc,
+    inspector,
+    inspectorAdapters,
+    savedSearch,
+  });
 
   const { columns, onAddColumn, onRemoveColumn } = useColumns({
     capabilities,
@@ -254,6 +245,9 @@ export function DiscoverLayout({
         isPlainRecord={isPlainRecord}
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
         onFieldEdited={onFieldEdited}
+        persistDataView={persistDataView}
+        updateAdHocDataViewId={updateAdHocDataViewId}
+        adHocDataViewList={adHocDataViewList}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout
@@ -280,6 +274,7 @@ export function DiscoverLayout({
               viewMode={viewMode}
               onDataViewCreated={onDataViewCreated}
               availableFields$={savedSearchData$.availableFields$}
+              persistDataView={persistDataView}
             />
           </EuiFlexItem>
           <EuiHideFor sizes={['xs', 's']}>

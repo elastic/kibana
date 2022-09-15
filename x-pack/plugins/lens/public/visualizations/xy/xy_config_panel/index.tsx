@@ -213,24 +213,37 @@ export const XyToolbar = memo(function XyToolbar(
     (layer) =>
       !layer.xAccessor ||
       getScaleType(
-        props.frame.datasourceLayers[layer.layerId].getOperationForColumnId(layer.xAccessor),
+        props.frame.datasourceLayers[layer.layerId]?.getOperationForColumnId(layer.xAccessor) ??
+          null,
         ScaleType.Linear
       ) !== 'ordinal'
   );
 
-  // only allow changing endzone visibility if it could show up theoretically (if it's a time viz)
-  const onChangeEndzoneVisiblity = dataLayers.every(
+  const isTimeVis = dataLayers.every(
     (layer) =>
       layer.xAccessor &&
       getScaleType(
-        props.frame.datasourceLayers[layer.layerId].getOperationForColumnId(layer.xAccessor),
+        props.frame.datasourceLayers[layer.layerId]?.getOperationForColumnId(layer.xAccessor) ??
+          null,
         ScaleType.Linear
-      ) === 'time'
-  )
+      ) === ScaleType.Time
+  );
+
+  // only allow changing endzone visibility if it could show up theoretically (if it's a time viz)
+  const onChangeEndzoneVisiblity = isTimeVis
     ? (checked: boolean): void => {
         setState({
           ...state,
           hideEndzones: !checked,
+        });
+      }
+    : undefined;
+
+  const onChangeCurrentTimeMarkerVisibility = isTimeVis
+    ? (checked: boolean): void => {
+        setState({
+          ...state,
+          showCurrentTimeMarker: checked,
         });
       }
     : undefined;
@@ -295,7 +308,8 @@ export const XyToolbar = memo(function XyToolbar(
       if (!xAccessor) {
         return false;
       }
-      const xAccessorOp = props.frame.datasourceLayers[layerId].getOperationForColumnId(xAccessor);
+      const xAccessorOp =
+        props.frame.datasourceLayers[layerId]?.getOperationForColumnId(xAccessor) ?? null;
       return (
         getScaleType(xAccessorOp, ScaleType.Linear) === ScaleType.Time &&
         xAccessorOp?.isBucketed &&
@@ -500,6 +514,8 @@ export const XyToolbar = memo(function XyToolbar(
             isAxisTitleVisible={axisTitlesVisibilitySettings.x}
             endzonesVisible={!state?.hideEndzones}
             setEndzoneVisibility={onChangeEndzoneVisiblity}
+            currentTimeMarkerVisible={state?.showCurrentTimeMarker}
+            setCurrentTimeMarkerVisibility={onChangeCurrentTimeMarkerVisibility}
             hasBarOrAreaOnAxis={false}
             hasPercentageAxis={false}
             useMultilayerTimeAxis={

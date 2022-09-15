@@ -8,12 +8,14 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
+import { UserProfile } from './user_profile';
 
 import { UserProfilesSelectable } from './user_profiles_selectable';
 
-const userProfiles = [
+const userProfiles: UserProfile[] = [
   {
     uid: 'u_BOulL4QMPSyV9jg5lQI2JmCkUnokHTazBnet3xVHNv0_0',
+    enabled: true,
     data: {},
     user: {
       username: 'delighted_nightingale',
@@ -23,6 +25,7 @@ const userProfiles = [
   },
   {
     uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+    enabled: true,
     data: {},
     user: {
       username: 'damaged_raccoon',
@@ -32,6 +35,7 @@ const userProfiles = [
   },
   {
     uid: 'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0',
+    enabled: true,
     data: {},
     user: {
       username: 'physical_dinosaur',
@@ -41,6 +45,7 @@ const userProfiles = [
   },
   {
     uid: 'u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0',
+    enabled: true,
     data: {},
     user: {
       username: 'wet_dingo',
@@ -194,6 +199,73 @@ describe('UserProfilesSelectable', () => {
     const onSearchChange = jest.fn();
     const wrapper = mount(<UserProfilesSelectable onSearchChange={onSearchChange} />);
     wrapper.find('input[type="search"]').simulate('change', { target: { value: 'search' } });
-    expect(onSearchChange).toHaveBeenCalledWith('search', []);
+    expect(onSearchChange).toHaveBeenCalledWith('search');
+  });
+
+  it('should set `id` prop of search input correctly', () => {
+    const wrapper = mount(<UserProfilesSelectable searchInputId="testSearchField" />);
+    expect(wrapper.find('input[type="search"]').prop('id')).toBe('testSearchField');
+  });
+
+  describe('with "no users" option', () => {
+    it('should render `null` option correctly', () => {
+      const [firstOption] = userProfiles;
+      const wrapper = mount(
+        <UserProfilesSelectable selectedOptions={[null]} options={[null, firstOption]} />
+      );
+      expect(wrapper.find('EuiSelectable').prop('options')).toEqual([
+        expect.objectContaining({
+          key: 'null',
+          checked: 'on',
+        }),
+        expect.objectContaining({
+          key: firstOption.uid,
+          checked: undefined,
+        }),
+      ]);
+    });
+
+    it('should trigger `onChange` callback with `null` when "no users" get selected', () => {
+      const onChange = jest.fn();
+      const [firstOption] = userProfiles;
+      const wrapper = mount(
+        <UserProfilesSelectable options={[null, firstOption]} onChange={onChange} />
+      );
+
+      wrapper.find('EuiSelectableListItem').first().simulate('click');
+      expect(onChange).toHaveBeenCalledWith(expect.arrayContaining([null]));
+    });
+
+    it('should trigger `onChange` callback with empty array when nothing gets selected', () => {
+      const onChange = jest.fn();
+      const [firstOption] = userProfiles;
+      const wrapper = mount(
+        <UserProfilesSelectable
+          selectedOptions={[null]}
+          options={[null, firstOption]}
+          onChange={onChange}
+        />
+      );
+
+      wrapper.find('EuiSelectableListItem').first().simulate('click');
+      expect(onChange).toHaveBeenCalledWith(expect.arrayContaining([]));
+    });
+
+    it('should trigger `onChange` callback with selected option when selected', () => {
+      const onChange = jest.fn();
+      const [firstOption] = userProfiles;
+      const wrapper = mount(
+        <UserProfilesSelectable options={[null, firstOption]} onChange={onChange} />
+      );
+
+      wrapper.find('EuiSelectableListItem').last().simulate('click');
+      expect(onChange).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            uid: firstOption.uid,
+          }),
+        ])
+      );
+    });
   });
 });

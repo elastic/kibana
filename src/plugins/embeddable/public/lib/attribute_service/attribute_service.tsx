@@ -45,7 +45,7 @@ export interface AttributeServiceOptions<
     attributes: SavedObjectAttributes,
     savedObjectId?: string
   ) => Promise<{ id?: string } | { error: Error }>;
-  checkForDuplicateTitle: (props: OnSaveProps) => Promise<true>;
+  checkForDuplicateTitle: (props: OnSaveProps) => Promise<boolean>;
   unwrapMethod?: (
     savedObjectId: string
   ) => Promise<AttributeServiceUnwrapResult<SavedObjectAttributes, MetaInfo>>;

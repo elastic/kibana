@@ -14,13 +14,38 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Azure Kubernetes Pods Deleted",
-  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:\"MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/PODS/DELETE\" and \nevent.outcome:(Success or success)\n",
+  "note": "",
+  "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:\"MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/PODS/DELETE\" and\nevent.outcome:(Success or success)\n",
   "references": [
     "https://docs.microsoft.com/en-us/azure/role-based-access-control/resource-provider-operations#microsoftkubernetes"
   ],
+  "related_integrations": [
+    {
+      "integration": "activitylogs",
+      "package": "azure",
+      "version": "0.12.0"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": false,
+      "name": "azure.activitylogs.operation_name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.outcome",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "83a1931d-8136-46fc-b7b9-2db4f639e014",
+  "setup": "The Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -43,5 +68,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 3
+  "version": 5
 }

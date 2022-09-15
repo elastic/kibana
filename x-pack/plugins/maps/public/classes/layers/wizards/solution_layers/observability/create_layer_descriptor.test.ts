@@ -55,7 +55,6 @@ describe('createLayerDescriptor', () => {
             applyGlobalTime: true,
             id: '12345',
             indexPatternId: 'apm_static_index_pattern_id',
-            indexPatternTitle: 'traces-apm*,logs-apm*,metrics-apm*,apm-*',
             metrics: [
               {
                 field: 'transaction.duration.us',
@@ -75,6 +74,7 @@ describe('createLayerDescriptor', () => {
       label: '[Performance] Duration',
       maxZoom: 24,
       minZoom: 0,
+      disableTooltips: false,
       sourceDescriptor: {
         id: emsWorldLayerId,
         tooltipProperties: ['name', 'iso2'],
@@ -173,6 +173,7 @@ describe('createLayerDescriptor', () => {
       label: '[Performance] Duration',
       maxZoom: 24,
       minZoom: 0,
+      disableTooltips: false,
       query: {
         language: 'kuery',
         query: 'processor.event:"transaction"',

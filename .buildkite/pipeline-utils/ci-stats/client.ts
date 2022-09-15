@@ -84,6 +84,9 @@ export class CiStatsClient {
         jenkinsJobId: process.env.BUILDKITE_BUILD_NUMBER,
         jenkinsUrl: process.env.BUILDKITE_BUILD_URL,
         prId: process.env.GITHUB_PR_NUMBER || null,
+        backfillJobIds: process.env.KIBANA_REUSABLE_BUILD_JOB_ID
+          ? [process.env.KIBANA_REUSABLE_BUILD_JOB_ID]
+          : [],
       },
     });
 
@@ -132,13 +135,12 @@ export class CiStatsClient {
     });
   };
 
-  getPrReport = async (buildId: string, backfillJobIds: string[] = []) => {
+  getPrReport = async (buildId: string) => {
     const resp = await this.request<CiStatsPrReport>({
-      path: `v3/pr_report`,
-      method: 'post',
-      body: {
+      method: 'GET',
+      path: `v2/pr_report`,
+      params: {
         buildId,
-        backfillJobIds,
       },
     });
 

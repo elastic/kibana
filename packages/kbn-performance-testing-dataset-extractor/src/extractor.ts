@@ -13,38 +13,10 @@ import path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { ESClient, Document, TransactionDocument } from './es_client';
-import { getRequests } from './server_request';
-import { fetchRequests, requestsToStreams } from './es_request';
-
-const DATE_FORMAT = `YYYY-MM-DD'T'HH:mm:ss.SSS'Z'`;
-
-interface CLIParams {
-  param: {
-    journeyName: string;
-    scalabilitySetup: ScalabilitySetup;
-    buildId: string;
-    withoutStaticResources: boolean;
-  };
-  client: {
-    baseURL: string;
-    username: string;
-    password: string;
-  };
-  log: ToolingLog;
-}
-
-interface InjectionStep {
-  action: string;
-  minUsersCount?: number;
-  maxUsersCount: number;
-  duration: string;
-}
-
-export interface ScalabilitySetup {
-  warmup: InjectionStep[];
-  test: InjectionStep[];
-  maxDuration: string;
-}
+import { getESRequests, getKibanaRequests } from './request';
+import { requestsToStreams } from './stream';
+import { CLIParams, Request } from './types';
+import { DATE_FORMAT } from './constants';
 
 const calculateTransactionTimeRage = (hit: SearchHit<Document>) => {
   const trSource = hit._source as Document;
@@ -70,7 +42,7 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
     username: client.username,
     password: client.password,
   };
-  const { journeyName, scalabilitySetup, buildId, withoutStaticResources } = param;
+  const { journeyName, scalabilitySetup, testData, buildId, withoutStaticResources } = param;
   log.info(
     `Searching transactions with 'labels.testBuildId=${buildId}' and 'labels.journeyName=${journeyName}'`
   );
@@ -100,12 +72,13 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
   const source = hits[0]!._source as TransactionDocument;
   const kibanaVersion = source.service.version;
 
-  const kibanaRequests = getRequests(hits, withoutStaticResources, log);
-  const esRequests = await fetchRequests(esClient, kibanaRequests);
+  const kibanaRequests = getKibanaRequests(hits, withoutStaticResources);
+  const esRequests = await getESRequests(esClient, kibanaRequests);
   log.info(
     `Found ${kibanaRequests.length} Kibana server and ${esRequests.length} Elasticsearch requests`
   );
-  const streams = requestsToStreams(esRequests);
+  const esStreams = requestsToStreams<Request>(esRequests);
+  const kibanaStreams = requestsToStreams<Request>(kibanaRequests);
 
   const outputDir = path.resolve('target/scalability_traces');
   const fileName = `${journeyName.replace(/ /g, '')}-${buildId}.json`;
@@ -116,7 +89,8 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
         journeyName,
         kibanaVersion,
         scalabilitySetup,
-        requests: kibanaRequests,
+        testData,
+        streams: kibanaStreams,
       },
       path.resolve(outputDir, 'server'),
       fileName,
@@ -128,7 +102,8 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
     {
       journeyName,
       kibanaVersion,
-      streams: Array.from(streams.values()),
+      testData,
+      streams: esStreams,
     },
     path.resolve(outputDir, 'es'),
     fileName,

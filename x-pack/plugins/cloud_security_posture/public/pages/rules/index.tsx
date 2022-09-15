@@ -10,6 +10,8 @@ import { generatePath, Link, type RouteComponentProps } from 'react-router-dom';
 import { EuiTextColor, EuiButtonEmpty, EuiFlexGroup, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import type { BreadcrumbEntry } from '../../common/navigation/types';
 import { RulesContainer, type PageUrlParams } from './rules_container';
 import { cloudPosturePages } from '../../common/navigation/constants';
@@ -80,12 +82,14 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
                 />
               </EuiButtonEmpty>
             </Link>
-            <FormattedMessage
-              id="xpack.csp.rules.rulePageHeader.pageHeaderTitle"
-              defaultMessage="Rules - {integrationName}"
-              values={{
-                integrationName: packageInfo?.name,
-              }}
+            <CloudPosturePageTitle
+              isBeta
+              title={i18n.translate('xpack.csp.rules.rulePageHeader.pageHeaderTitle', {
+                defaultMessage: 'Rules - {integrationName}',
+                values: {
+                  integrationName: packageInfo?.name,
+                },
+              })}
             />
           </EuiFlexGroup>
         }

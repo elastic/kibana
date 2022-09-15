@@ -38,15 +38,15 @@ import {
   adjustColumnReferencesForChangedColumn,
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
-import { hasField } from '../pure_utils';
+import { getReferencedField, hasField } from '../pure_utils';
 import { fieldIsInvalid } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
-import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../types';
+import type { IndexPatternLayer } from '../types';
 import { FormatSelector } from './format_selector';
 import { ReferenceEditor } from './reference_editor';
 import { TimeScaling } from './time_scaling';
 import { Filtering } from './filtering';
-import { Window } from './window';
+import { ReducedTimeRange } from './reduced_time_range';
 import { AdvancedOptions } from './advanced_options';
 import { TimeShift } from './time_shift';
 import type { LayerType } from '../../../common';
@@ -67,7 +67,8 @@ import { NameInput } from '../../shared_components';
 import { ParamEditorProps } from '../operations/definitions';
 import { WrappingHelpPopover } from '../help_popover';
 import { isColumn } from '../operations/definitions/helpers';
-import { FieldChoiceWithOperationType } from './field_select';
+import type { FieldChoiceWithOperationType } from './field_select';
+import type { IndexPattern, IndexPatternField } from '../../types';
 import { documentField } from '../document_field';
 
 export interface DimensionEditorProps extends IndexPatternDimensionEditorProps {
@@ -94,12 +95,14 @@ export function DimensionEditor(props: DimensionEditorProps) {
     toggleFullscreen,
     isFullscreen,
     supportStaticValue,
-    supportFieldFormat = true,
+    enableFormatSelector = true,
+    formatSelectorOptions,
     layerType,
     paramEditorCustomProps,
   } = props;
   const services = {
     data: props.data,
+    fieldFormats: props.fieldFormats,
     uiSettings: props.uiSettings,
     savedObjectsClient: props.savedObjectsClient,
     http: props.http,
@@ -286,15 +289,19 @@ export function DimensionEditor(props: DimensionEditorProps) {
     };
   }, []);
 
+  const currentField =
+    selectedColumn &&
+    hasField(selectedColumn) &&
+    currentIndexPattern.getFieldByName(selectedColumn.sourceField);
+
+  const referencedField =
+    currentField || getReferencedField(selectedColumn, currentIndexPattern, state.layers[layerId]);
+
   // Operations are compatible if they match inputs. They are always compatible in
   // the empty state. Field-based operations are not compatible with field-less operations.
   const operationsWithCompatibility = possibleOperations.map((operationType) => {
     const definition = operationDefinitionMap[operationType];
 
-    const currentField =
-      selectedColumn &&
-      hasField(selectedColumn) &&
-      currentIndexPattern.getFieldByName(selectedColumn.sourceField);
     return {
       operationType,
       compatibleWithCurrentField: canTransition({
@@ -309,7 +316,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       disabledStatus:
         definition.getDisabledStatus &&
         definition.getDisabledStatus(
-          state.indexPatterns[state.currentIndexPatternId],
+          props.indexPatterns[state.currentIndexPatternId],
           state.layers[layerId],
           layerType
         ),
@@ -332,12 +339,36 @@ export function DimensionEditor(props: DimensionEditorProps) {
           (!incompleteOperation && selectedColumn && selectedColumn.operationType === operationType)
       );
 
-      let label: EuiListGroupItemProps['label'] = operationDisplay[operationType].displayName;
+      const partialIcon = compatibleWithCurrentField &&
+        referencedField?.partiallyApplicableFunctions?.[operationType] && (
+          <>
+            {' '}
+            <EuiIconTip
+              content={i18n.translate(
+                'xpack.lens.indexPattern.helpPartiallyApplicableFunctionLabel',
+                {
+                  defaultMessage:
+                    'This function may only return partial results, as it is unable to support the full time range of rolled-up historical data.',
+                }
+              )}
+              position="left"
+              size="s"
+              type="partial"
+              color="warning"
+            />
+          </>
+        );
+      let label: EuiListGroupItemProps['label'] = (
+        <>
+          {operationDisplay[operationType].displayName}
+          {partialIcon}
+        </>
+      );
       if (isActive && disabledStatus) {
         label = (
           <EuiToolTip content={disabledStatus} display="block" position="left">
             <EuiText color="danger" size="s">
-              <strong>{operationDisplay[operationType].displayName}</strong>
+              <strong>{label}</strong>
             </EuiText>
           </EuiToolTip>
         );
@@ -561,7 +592,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     setIsCloseable,
     paramEditorCustomProps,
     ReferenceEditor,
-    existingFields: state.existingFields,
+    existingFields: props.existingFields,
     ...services,
   };
 
@@ -569,7 +600,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     <>
       <EuiFormRow
         label={i18n.translate('xpack.lens.indexPattern.functionsLabel', {
-          defaultMessage: 'Function',
+          defaultMessage: 'Functions',
         })}
         fullWidth
       >
@@ -660,7 +691,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 }}
                 validation={validation}
                 currentIndexPattern={currentIndexPattern}
-                existingFields={state.existingFields}
+                existingFields={props.existingFields}
                 selectionStyle={selectedOperationDefinition.selectionStyle}
                 dateRange={dateRange}
                 labelAppend={selectedOperationDefinition?.getHelpMessage?.({
@@ -686,7 +717,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           selectedColumn={selectedColumn as FieldBasedIndexPatternColumn}
           columnId={columnId}
           indexPattern={currentIndexPattern}
-          existingFields={state.existingFields}
+          existingFields={props.existingFields}
           operationSupportMatrix={operationSupportMatrix}
           updateLayer={(newLayer) => {
             if (temporaryQuickFunction) {
@@ -716,7 +747,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const customParamEditor = ParamEditor ? (
     <>
       <ParamEditor
-        existingFields={state.existingFields}
+        existingFields={props.existingFields}
         layer={state.layers[layerId]}
         activeData={props.activeData}
         paramEditorUpdater={
@@ -834,11 +865,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
         selectedColumn &&
           operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
             selectedColumn,
-            state.indexPatterns[state.layers[layerId].indexPatternId],
+            props.indexPatterns[state.layers[layerId].indexPatternId],
             state.layers[layerId].columns
           )
       ),
-    [layerId, selectedColumn, state.indexPatterns, state.layers]
+    [layerId, selectedColumn, props.indexPatterns, state.layers]
   );
 
   const shouldDisplayAdvancedOptions =
@@ -919,9 +950,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
               ) : null,
             },
             {
-              dataTestSubj: 'indexPattern-window-enable',
-              inlineElement: selectedOperationDefinition.windowable ? (
-                <Window
+              dataTestSubj: 'indexPattern-reducedTimeRange-enable',
+              inlineElement: selectedOperationDefinition.canReduceTimeRange ? (
+                <ReducedTimeRange
                   selectedColumn={selectedColumn}
                   columnId={columnId}
                   indexPattern={currentIndexPattern}
@@ -977,8 +1008,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
           <>
             {!incompleteInfo && selectedColumn && temporaryState === 'none' && (
               <NameInput
-                // re-render the input from scratch to obtain new "initial value" if the underlying default label changes
-                key={defaultLabel}
                 value={selectedColumn.label}
                 defaultValue={defaultLabel}
                 onChange={(value) => {
@@ -991,7 +1020,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                         customLabel:
                           operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
                             selectedColumn,
-                            state.indexPatterns[state.layers[layerId].indexPatternId],
+                            props.indexPatterns[state.layers[layerId].indexPatternId],
                             state.layers[layerId].columns
                           ) !== value,
                       },
@@ -1010,11 +1039,15 @@ export function DimensionEditor(props: DimensionEditorProps) {
               />
             )}
 
-            {supportFieldFormat &&
+            {enableFormatSelector &&
             !isFullscreen &&
             selectedColumn &&
             (selectedColumn.dataType === 'number' || selectedColumn.operationType === 'range') ? (
-              <FormatSelector selectedColumn={selectedColumn} onChange={onFormatChange} />
+              <FormatSelector
+                selectedColumn={selectedColumn}
+                onChange={onFormatChange}
+                options={formatSelectorOptions}
+              />
             ) : null}
           </>
         </div>

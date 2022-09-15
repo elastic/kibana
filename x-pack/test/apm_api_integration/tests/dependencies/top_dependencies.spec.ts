@@ -49,94 +49,90 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when(
-    'Top dependencies',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
-    () => {
-      describe('when data is generated', () => {
-        let topDependencies: TopDependencies;
+  registry.when('Top dependencies', { config: 'basic', archives: [] }, () => {
+    describe('when data is generated', () => {
+      let topDependencies: TopDependencies;
 
-        before(async () => {
-          await generateData({ synthtraceEsClient, start, end });
-          const response = await callApi();
-          topDependencies = response.body;
+      before(async () => {
+        await generateData({ synthtraceEsClient, start, end });
+        const response = await callApi();
+        topDependencies = response.body;
+      });
+
+      after(() => synthtraceEsClient.clean());
+
+      it('returns an array of dependencies', () => {
+        expect(topDependencies).to.have.property('dependencies');
+        expect(topDependencies.dependencies).to.have.length(1);
+      });
+
+      it('returns correct dependency information', () => {
+        const location = topDependencies.dependencies[0].location as DependencyNode;
+        const { span } = dataConfig;
+
+        expect(location.type).to.be(NodeType.dependency);
+        expect(location.dependencyName).to.be(span.destination);
+        expect(location.spanType).to.be(span.type);
+        expect(location.spanSubtype).to.be(span.subType);
+        expect(location).to.have.property('id');
+      });
+
+      describe('returns the correct stats', () => {
+        let dependencies: TopDependencies['dependencies'][number];
+
+        before(() => {
+          dependencies = topDependencies.dependencies[0];
         });
 
-        after(() => synthtraceEsClient.clean());
-
-        it('returns an array of dependencies', () => {
-          expect(topDependencies).to.have.property('dependencies');
-          expect(topDependencies.dependencies).to.have.length(1);
+        it("doesn't have previous stats", () => {
+          expect(dependencies.previousStats).to.be(null);
         });
 
-        it('returns correct dependency information', () => {
-          const location = topDependencies.dependencies[0].location as DependencyNode;
-          const { span } = dataConfig;
-
-          expect(location.type).to.be(NodeType.dependency);
-          expect(location.dependencyName).to.be(span.destination);
-          expect(location.spanType).to.be(span.type);
-          expect(location.spanSubtype).to.be(span.subType);
-          expect(location).to.have.property('id');
+        it('has an "impact" property', () => {
+          expect(dependencies.currentStats).to.have.property('impact');
         });
 
-        describe('returns the correct stats', () => {
-          let dependencies: TopDependencies['dependencies'][number];
+        it('returns the correct latency', () => {
+          const {
+            currentStats: { latency },
+          } = dependencies;
 
-          before(() => {
-            dependencies = topDependencies.dependencies[0];
-          });
+          const { transaction } = dataConfig;
 
-          it("doesn't have previous stats", () => {
-            expect(dependencies.previousStats).to.be(null);
-          });
+          expect(latency.value).to.be(transaction.duration * 1000);
+          expect(latency.timeseries.every(({ y }) => y === transaction.duration * 1000)).to.be(
+            true
+          );
+        });
 
-          it('has an "impact" property', () => {
-            expect(dependencies.currentStats).to.have.property('impact');
-          });
+        it('returns the correct throughput', () => {
+          const {
+            currentStats: { throughput },
+          } = dependencies;
+          const { rate } = dataConfig;
 
-          it('returns the correct latency', () => {
-            const {
-              currentStats: { latency },
-            } = dependencies;
+          expect(roundNumber(throughput.value)).to.be(roundNumber(rate));
+        });
 
-            const { transaction } = dataConfig;
+        it('returns the correct total time', () => {
+          const {
+            currentStats: { totalTime },
+          } = dependencies;
+          const { rate, transaction } = dataConfig;
 
-            expect(latency.value).to.be(transaction.duration * 1000);
-            expect(latency.timeseries.every(({ y }) => y === transaction.duration * 1000)).to.be(
-              true
-            );
-          });
+          expect(
+            totalTime.timeseries.every(({ y }) => y === rate * transaction.duration * 1000)
+          ).to.be(true);
+        });
 
-          it('returns the correct throughput', () => {
-            const {
-              currentStats: { throughput },
-            } = dependencies;
-            const { rate } = dataConfig;
-
-            expect(roundNumber(throughput.value)).to.be(roundNumber(rate));
-          });
-
-          it('returns the correct total time', () => {
-            const {
-              currentStats: { totalTime },
-            } = dependencies;
-            const { rate, transaction } = dataConfig;
-
-            expect(
-              totalTime.timeseries.every(({ y }) => y === rate * transaction.duration * 1000)
-            ).to.be(true);
-          });
-
-          it('returns the correct error rate', () => {
-            const {
-              currentStats: { errorRate },
-            } = dependencies;
-            expect(errorRate.value).to.be(0);
-            expect(errorRate.timeseries.every(({ y }) => y === 0)).to.be(true);
-          });
+        it('returns the correct error rate', () => {
+          const {
+            currentStats: { errorRate },
+          } = dependencies;
+          expect(errorRate.value).to.be(0);
+          expect(errorRate.timeseries.every(({ y }) => y === 0)).to.be(true);
         });
       });
-    }
-  );
+    });
+  });
 }

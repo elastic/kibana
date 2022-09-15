@@ -190,7 +190,7 @@ const ActualRelatedAlertsByProcessAncestry: React.FC<{
       <InvestigateInTimelineButton
         asEmptyButton={false}
         dataProviders={dataProviders}
-        data-test-subj={'investigate-ancestry-in-timeline'}
+        data-test-subj="investigate-ancestry-in-timeline"
       >
         {ACTION_INVESTIGATE_IN_TIMELINE}
       </InvestigateInTimelineButton>

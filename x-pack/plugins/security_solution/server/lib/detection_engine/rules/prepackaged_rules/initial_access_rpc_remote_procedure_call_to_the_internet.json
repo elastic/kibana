@@ -17,6 +17,38 @@
   "references": [
     "https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "destination.ip",
+      "type": "ip"
+    },
+    {
+      "ecs": true,
+      "name": "destination.port",
+      "type": "long"
+    },
+    {
+      "ecs": true,
+      "name": "event.category",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "network.transport",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "source.ip",
+      "type": "ip"
+    }
+  ],
   "risk_score": 73,
   "rule_id": "32923416-763a-4531-bb35-f33b9232ecdb",
   "severity": "high",
@@ -47,5 +79,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 11
+  "version": 12
 }

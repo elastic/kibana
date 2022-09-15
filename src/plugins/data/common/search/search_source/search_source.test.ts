@@ -6,17 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { lastValueFrom, of, throwError } from 'rxjs';
+import Rx, { firstValueFrom, lastValueFrom, of, throwError } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { buildExpression, ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { SearchSource, SearchSourceDependencies, SortDirection } from '.';
 import { AggConfigs, AggTypesRegistryStart } from '../..';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
-import { RequestResponder } from '@kbn/inspector-plugin/common';
+import { RequestAdapter, RequestResponder } from '@kbn/inspector-plugin/common';
 import { switchMap } from 'rxjs/operators';
 import { Filter } from '@kbn/es-query';
 import { stubIndexPattern } from '../../stubs';
+import { SearchSourceSearchOptions } from './types';
+import { ISearchGeneric } from '../types';
 
 const getComputedFields = () => ({
   storedFields: [],
@@ -65,7 +67,7 @@ const runtimeFieldDef = {
 };
 
 describe('SearchSource', () => {
-  let mockSearchMethod: any;
+  let mockSearchMethod: jest.Mocked<ISearchGeneric>;
   let searchSourceDependencies: MockedKeys<SearchSourceDependencies>;
   let searchSource: SearchSource;
 
@@ -91,7 +93,7 @@ describe('SearchSource', () => {
       aggs: aggsMock,
       getConfig: getConfigMock,
       search: mockSearchMethod,
-      onResponse: (req, res) => res,
+      onResponse: jest.fn().mockImplementation((_, res) => res),
     };
 
     searchSource = new SearchSource({}, searchSourceDependencies);
@@ -107,13 +109,7 @@ describe('SearchSource', () => {
   describe('#getFields()', () => {
     test('gets the value for the property', () => {
       searchSource.setField('aggs', { i: 5 });
-      expect(searchSource.getFields()).toMatchInlineSnapshot(`
-        Object {
-          "aggs": Object {
-            "i": 5,
-          },
-        }
-      `);
+      expect(searchSource.getFields()).toMatchObject({ aggs: { i: 5 } });
     });
   });
 
@@ -123,14 +119,7 @@ describe('SearchSource', () => {
         language: 'kuery',
         query: `_INDEX : fakebeat and _index : "mybeat-*"`,
       });
-      expect(searchSource.getActiveIndexFilter()).toMatchInlineSnapshot(
-        ['mybeat-*'],
-        `
-        Array [
-          "mybeat-*",
-        ]
-      `
-      );
+      expect(searchSource.getActiveIndexFilter()).toMatchObject(['mybeat-*']);
     });
 
     test('pase _index from filter', () => {
@@ -171,14 +160,7 @@ describe('SearchSource', () => {
         },
       ];
       searchSource.setField('filter', filter);
-      expect(searchSource.getActiveIndexFilter()).toMatchInlineSnapshot(
-        ['auditbeat-*'],
-        `
-        Array [
-          "auditbeat-*",
-        ]
-      `
-      );
+      expect(searchSource.getActiveIndexFilter()).toMatchObject(['auditbeat-*']);
     });
 
     test('pase _index from query and filter with negate equals to true', () => {
@@ -204,7 +186,7 @@ describe('SearchSource', () => {
         language: 'kuery',
         query: '_index : auditbeat-*',
       });
-      expect(searchSource.getActiveIndexFilter()).toMatchInlineSnapshot([], `Array []`);
+      expect(searchSource.getActiveIndexFilter()).toMatchObject([]);
     });
 
     test('pase _index from query and filter with negate equals to true and disabled equals to true', () => {
@@ -230,14 +212,7 @@ describe('SearchSource', () => {
         language: 'kuery',
         query: '_index : auditbeat-*',
       });
-      expect(searchSource.getActiveIndexFilter()).toMatchInlineSnapshot(
-        ['auditbeat-*'],
-        `
-        Array [
-          "auditbeat-*",
-        ]
-      `
-      );
+      expect(searchSource.getActiveIndexFilter()).toMatchObject(['auditbeat-*']);
     });
   });
 
@@ -349,7 +324,7 @@ describe('SearchSource', () => {
 
       test('allows you to override computed fields if you provide a format', async () => {
         const indexPatternFields = indexPattern.fields;
-        indexPatternFields.getByType = (type) => {
+        indexPatternFields.getByType = (_type) => {
           return [];
         };
         searchSource.setField('index', {
@@ -503,29 +478,7 @@ describe('SearchSource', () => {
           language: 'kuery',
         });
         const request = searchSource.getSearchRequestBody();
-        expect(request.query).toMatchInlineSnapshot(`
-          Object {
-            "bool": Object {
-              "filter": Array [
-                Object {
-                  "bool": Object {
-                    "minimum_should_match": 1,
-                    "should": Array [
-                      Object {
-                        "match_phrase": Object {
-                          "agent.keyword": "Mozilla",
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-              "must": Array [],
-              "must_not": Array [],
-              "should": Array [],
-            },
-          }
-        `);
+        expect(request.query).toMatchSnapshot();
       });
 
       test('includes queries in the "must" clause if sorting by _score', async () => {
@@ -535,29 +488,7 @@ describe('SearchSource', () => {
         });
         searchSource.setField('sort', [{ _score: SortDirection.asc }]);
         const request = searchSource.getSearchRequestBody();
-        expect(request.query).toMatchInlineSnapshot(`
-          Object {
-            "bool": Object {
-              "filter": Array [],
-              "must": Array [
-                Object {
-                  "bool": Object {
-                    "minimum_should_match": 1,
-                    "should": Array [
-                      Object {
-                        "match_phrase": Object {
-                          "agent.keyword": "Mozilla",
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-              "must_not": Array [],
-              "should": Array [],
-            },
-          }
-        `);
+        expect(request.query).toMatchSnapshot();
       });
     });
 
@@ -815,7 +746,7 @@ describe('SearchSource', () => {
       test('adds date format to any date field except the one excluded by source filters', async () => {
         const indexPatternFields = indexPattern.fields;
         // @ts-ignore
-        indexPatternFields.getByType = (type) => {
+        indexPatternFields.getByType = (_type) => {
           return [
             { name: '@timestamp', esTypes: ['date_nanos'] },
             { name: 'custom_date', esTypes: ['date'] },
@@ -891,7 +822,7 @@ describe('SearchSource', () => {
       const fn = jest.fn();
       searchSource.onRequestStart(fn);
       const options = {};
-      await searchSource.fetch$(options).toPromise();
+      await firstValueFrom(searchSource.fetch$(options));
       expect(fn).toBeCalledWith(searchSource, options);
     });
 
@@ -904,7 +835,7 @@ describe('SearchSource', () => {
       const parentFn = jest.fn();
       parent.onRequestStart(parentFn);
       const options = {};
-      await searchSource.fetch$(options).toPromise();
+      await firstValueFrom(searchSource.fetch$(options));
 
       expect(fn).toBeCalledWith(searchSource, options);
       expect(parentFn).not.toBeCalled();
@@ -924,7 +855,7 @@ describe('SearchSource', () => {
       const parentFn = jest.fn();
       parent.onRequestStart(parentFn);
       const options = {};
-      await searchSource.fetch$(options).toPromise();
+      await firstValueFrom(searchSource.fetch$(options));
 
       expect(fn).toBeCalledWith(searchSource, options);
       expect(parentFn).toBeCalledWith(searchSource, options);
@@ -950,11 +881,9 @@ describe('SearchSource', () => {
       searchSource.setField('index', localDataView);
       const { searchSourceJSON, references } = searchSource.serialize();
       expect(references.length).toEqual(0);
-      expect(JSON.parse(searchSourceJSON).index).toMatchInlineSnapshot(`
-        Object {
-          "id": "local-123",
-        }
-      `);
+      expect(JSON.parse(searchSourceJSON).index).toMatchObject({
+        id: 'local-123',
+      });
     });
 
     test('should add other fields', () => {
@@ -1055,29 +984,7 @@ describe('SearchSource', () => {
         return filter;
       });
       const serializedFields = searchSource.getSerializedFields();
-      expect(serializedFields).toMatchInlineSnapshot(
-        { index: '123', filter },
-        `
-        Object {
-          "filter": Array [
-            Object {
-              "meta": Object {
-                "alias": "alias",
-                "disabled": false,
-                "index": "456",
-                "negate": false,
-              },
-              "query": Object {
-                "query_string": Object {
-                  "query": "query",
-                },
-              },
-            },
-          ],
-          "index": "123",
-        }
-      `
-      );
+      expect(serializedFields).toMatchSnapshot();
     });
 
     test('should support nested search sources', () => {
@@ -1086,24 +993,10 @@ describe('SearchSource', () => {
       const childSearchSource = searchSource.createChild();
       childSearchSource.setField('timeout', '100');
       const serializedFields = childSearchSource.getSerializedFields(true);
-      expect(serializedFields).toMatchInlineSnapshot(
-        {
-          timeout: '100',
-          parent: {
-            index: '123',
-            from: 123,
-          },
-        },
-        `
-        Object {
-          "parent": Object {
-            "from": 123,
-            "index": "123",
-          },
-          "timeout": "100",
-        }
-      `
-      );
+      expect(serializedFields).toMatchObject({
+        timeout: '100',
+        parent: { index: '123', from: 123 },
+      });
     });
   });
 
@@ -1117,32 +1010,17 @@ describe('SearchSource', () => {
         const complete = jest.fn();
         const res$ = searchSource.fetch$(options);
         res$.subscribe({ next, complete });
-        await res$.toPromise();
+        await firstValueFrom(res$);
 
         expect(next).toBeCalledTimes(2);
         expect(complete).toBeCalledTimes(1);
-        expect(next.mock.calls[0]).toMatchInlineSnapshot(`
-                  Array [
-                    Object {
-                      "isPartial": true,
-                      "isRunning": true,
-                      "rawResponse": Object {
-                        "test": 1,
-                      },
-                    },
-                  ]
-                `);
-        expect(next.mock.calls[1]).toMatchInlineSnapshot(`
-                  Array [
-                    Object {
-                      "isPartial": false,
-                      "isRunning": false,
-                      "rawResponse": Object {
-                        "test": 2,
-                      },
-                    },
-                  ]
-                `);
+        expect(searchSourceDependencies.onResponse).toBeCalledTimes(1);
+        expect(next.mock.calls[0]).toMatchObject([
+          { isPartial: true, isRunning: true, rawResponse: { test: 1 } },
+        ]);
+        expect(next.mock.calls[1]).toMatchObject([
+          { isPartial: false, isRunning: false, rawResponse: { test: 2 } },
+        ]);
       });
 
       test('shareReplays result', async () => {
@@ -1156,7 +1034,7 @@ describe('SearchSource', () => {
         const res$ = searchSource.fetch$(options);
         res$.subscribe({ next, complete });
         res$.subscribe({ next: next2, complete: complete2 });
-        await res$.toPromise();
+        await firstValueFrom(res$);
 
         expect(next).toBeCalledTimes(2);
         expect(next2).toBeCalledTimes(2);
@@ -1180,7 +1058,7 @@ describe('SearchSource', () => {
         const complete = jest.fn();
         const res$ = searchSource.fetch$(options);
         res$.subscribe({ next, error, complete });
-        await res$.toPromise().catch((e) => {});
+        await firstValueFrom(res$).catch((_) => {});
 
         expect(next).toBeCalledTimes(1);
         expect(error).toBeCalledTimes(1);
@@ -1204,20 +1082,20 @@ describe('SearchSource', () => {
       });
 
       test('calls inspector if provided', async () => {
-        const options = {
+        const options: SearchSourceSearchOptions = {
           inspector: {
             title: 'a',
             adapter: {
               start: jest.fn().mockReturnValue(requestResponder),
-            } as any,
+            } as unknown as jest.Mocked<RequestAdapter>,
           },
         };
 
         searchSource = new SearchSource({}, searchSourceDependencies);
         searchSource.setField('index', indexPattern);
-        await searchSource.fetch$(options).toPromise();
+        await firstValueFrom(searchSource.fetch$(options));
 
-        expect(options.inspector.adapter.start).toBeCalledTimes(1);
+        expect(options.inspector?.adapter?.start).toBeCalledTimes(1);
         expect(requestResponder.error).not.toBeCalled();
         expect(requestResponder.json).toBeCalledTimes(1);
         expect(requestResponder.ok).toBeCalledTimes(1);
@@ -1226,12 +1104,12 @@ describe('SearchSource', () => {
       });
 
       test('calls inspector only once, with multiple subs (shareReplay)', async () => {
-        const options = {
+        const options: SearchSourceSearchOptions = {
           inspector: {
             title: 'a',
             adapter: {
               start: jest.fn().mockReturnValue(requestResponder),
-            } as any,
+            } as unknown as jest.Mocked<RequestAdapter>,
           },
         };
 
@@ -1249,33 +1127,32 @@ describe('SearchSource', () => {
           complete: complete2,
         });
 
-        await res$.toPromise();
+        await firstValueFrom(res$);
 
         expect(complete1).toBeCalledTimes(1);
         expect(complete2).toBeCalledTimes(1);
-        expect(options.inspector.adapter.start).toBeCalledTimes(1);
+        expect(options.inspector?.adapter?.start).toBeCalledTimes(1);
       });
 
       test('calls error on inspector', async () => {
-        const options = {
+        const options: SearchSourceSearchOptions = {
           inspector: {
             title: 'a',
             adapter: {
               start: jest.fn().mockReturnValue(requestResponder),
-            } as any,
+            } as unknown as jest.Mocked<RequestAdapter>,
           },
         };
 
-        searchSourceDependencies.search = jest.fn().mockReturnValue(throwError('aaaaa'));
+        searchSourceDependencies.search = jest
+          .fn()
+          .mockReturnValue(throwError(() => new Error('aaaaa')));
 
         searchSource = new SearchSource({}, searchSourceDependencies);
         searchSource.setField('index', indexPattern);
-        await searchSource
-          .fetch$(options)
-          .toPromise()
-          .catch(() => {});
+        await firstValueFrom(searchSource.fetch$(options)).catch(() => {});
 
-        expect(options.inspector.adapter.start).toBeCalledTimes(1);
+        expect(options.inspector?.adapter?.start).toBeCalledTimes(1);
         expect(requestResponder.json).toBeCalledTimes(1);
         expect(requestResponder.error).toBeCalledTimes(1);
         expect(requestResponder.ok).toBeCalledTimes(0);
@@ -1284,7 +1161,7 @@ describe('SearchSource', () => {
     });
 
     describe('postFlightRequest', () => {
-      let fetchSub: any;
+      let fetchSub: Rx.Observer<unknown>;
 
       function getAggConfigs(typesRegistry: AggTypesRegistryStart, enabled: boolean) {
         return new AggConfigs(
@@ -1321,11 +1198,12 @@ describe('SearchSource', () => {
         searchSource.setField('aggs', ac);
         const fetch$ = searchSource.fetch$({});
         fetch$.subscribe(fetchSub);
-        await fetch$.toPromise();
+        await firstValueFrom(fetch$);
 
         expect(fetchSub.next).toHaveBeenCalledTimes(2);
         expect(fetchSub.complete).toHaveBeenCalledTimes(1);
         expect(fetchSub.error).toHaveBeenCalledTimes(0);
+        expect(searchSourceDependencies.onResponse).toBeCalledTimes(1);
 
         expect(typesRegistry.get('avg').postFlightRequest).toHaveBeenCalledTimes(0);
       });
@@ -1348,7 +1226,7 @@ describe('SearchSource', () => {
         searchSource.setField('aggs', ac);
         const fetch$ = searchSource.fetch$({});
         fetch$.subscribe(fetchSub);
-        await fetch$.toPromise().catch((e) => {});
+        await firstValueFrom(fetch$).catch((_) => {});
 
         expect(fetchSub.next).toHaveBeenCalledTimes(0);
         expect(fetchSub.complete).toHaveBeenCalledTimes(0);
@@ -1396,6 +1274,7 @@ describe('SearchSource', () => {
 
         const resp = await lastValueFrom(fetch$);
 
+        expect(searchSourceDependencies.onResponse).toBeCalledTimes(1);
         expect(fetchSub.next).toHaveBeenCalledTimes(3);
         expect(fetchSub.complete).toHaveBeenCalledTimes(1);
         expect(fetchSub.error).toHaveBeenCalledTimes(0);
@@ -1437,7 +1316,7 @@ describe('SearchSource', () => {
         };
         fetch$.subscribe(fetchSub2);
 
-        await fetch$.toPromise();
+        await lastValueFrom(fetch$);
 
         expect(fetchSub.next).toHaveBeenCalledTimes(3);
         expect(fetchSub.complete).toHaveBeenCalledTimes(1);
@@ -1455,7 +1334,7 @@ describe('SearchSource', () => {
         const fetch$ = searchSource.fetch$({});
         fetch$.subscribe(fetchSub);
 
-        await fetch$.toPromise().catch(() => {});
+        await lastValueFrom(fetch$).catch(() => {});
 
         expect(fetchSub.next).toHaveBeenCalledTimes(2);
         expect(fetchSub.complete).toHaveBeenCalledTimes(0);
@@ -1591,9 +1470,7 @@ describe('SearchSource', () => {
     });
 
     test('should not include the `esdsl` function to the chain if the `asDatatable` option is false', () => {
-      expect(toString(searchSource.toExpressionAst({ asDatatable: false }))).toMatchInlineSnapshot(
-        `"kibana_context"`
-      );
+      expect(toString(searchSource.toExpressionAst({ asDatatable: false }))).toBe('kibana_context');
     });
 
     test('should not include the `esaggs` function to the chain if the `asDatatable` option is false', () => {
@@ -1601,8 +1478,8 @@ describe('SearchSource', () => {
         { enabled: true, type: 'avg', schema: 'metric', params: { field: 'bytes' } },
       ]);
 
-      expect(toString(searchSource.toExpressionAst({ asDatatable: false }))).toMatchInlineSnapshot(
-        `"kibana_context"`
+      expect(toString(searchSource.toExpressionAst({ asDatatable: false }))).toMatch(
+        'kibana_context'
       );
     });
   });

@@ -7,7 +7,7 @@
 
 import { DragContextState } from '../drag_drop';
 import { getFieldByNameFactory } from './pure_helpers';
-import type { IndexPattern, IndexPatternField } from './types';
+import type { IndexPattern, IndexPatternField } from '../types';
 
 export const createMockedIndexPatternWithoutType = (
   typeToFilter: IndexPatternField['type']
@@ -101,6 +101,8 @@ export const createMockedIndexPattern = (): IndexPattern => {
     hasRestrictions: false,
     fields,
     getFieldByName: getFieldByNameFactory(fields),
+    isPersisted: true,
+    spec: {},
   };
 };
 
@@ -140,6 +142,8 @@ export const createMockedRestrictedIndexPattern = () => {
     fieldFormatMap: { bytes: { id: 'bytes', params: { pattern: '0.0' } } },
     fields,
     getFieldByName: getFieldByNameFactory(fields),
+    isPersisted: true,
+    spec: {},
     typeMeta: {
       params: {
         rollup_index: 'my-fake-index-pattern',

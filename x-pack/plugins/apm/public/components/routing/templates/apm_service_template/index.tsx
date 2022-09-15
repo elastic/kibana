@@ -14,7 +14,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
-import { enableInfrastructureView } from '@kbn/observability-plugin/public';
 import {
   isMobileAgentName,
   isJavaAgentName,
@@ -49,7 +48,6 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'infrastructure'
     | 'service-map'
     | 'logs'
-    | 'profiling'
     | 'alerts';
   hidden?: boolean;
 };
@@ -155,7 +153,7 @@ export function isMetricsTabHidden({
   );
 }
 
-export function isJVMsTabHidden({
+export function isMetricsJVMsTabHidden({
   agentName,
   runtimeName,
 }: {
@@ -168,16 +166,29 @@ export function isJVMsTabHidden({
   );
 }
 
+export function isInfraTabHidden({
+  agentName,
+  runtimeName,
+}: {
+  agentName?: string;
+  runtimeName?: string;
+}) {
+  return (
+    !agentName ||
+    isRumAgentName(agentName) ||
+    isMobileAgentName(agentName) ||
+    isServerlessAgent(runtimeName)
+  );
+}
+
 function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   const { agentName, runtimeName } = useApmServiceContext();
-  const { config, core, plugins } = useApmPluginContext();
+  const { core, plugins } = useApmPluginContext();
   const { capabilities } = core.application;
   const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(
     plugins,
     capabilities
   );
-
-  const showInfraTab = core.uiSettings.get<boolean>(enableInfrastructureView);
 
   const router = useApmRouter();
 
@@ -255,9 +266,9 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         query,
       }),
       label: i18n.translate('xpack.apm.serviceDetails.nodesTabLabel', {
-        defaultMessage: 'JVMs',
+        defaultMessage: 'Metrics',
       }),
-      hidden: isJVMsTabHidden({ agentName, runtimeName }),
+      hidden: isMetricsJVMsTabHidden({ agentName, runtimeName }),
     },
     {
       key: 'infrastructure',
@@ -269,8 +280,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.infraTabLabel', {
         defaultMessage: 'Infrastructure',
       }),
-
-      hidden: !showInfraTab,
+      hidden: isInfraTabHidden({ agentName, runtimeName }),
     },
     {
       key: 'service-map',
@@ -293,20 +303,6 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       }),
       hidden:
         !agentName || isRumAgentName(agentName) || isMobileAgentName(agentName),
-    },
-    {
-      key: 'profiling',
-      href: router.link('/services/{serviceName}/profiling', {
-        path: {
-          serviceName,
-        },
-        query,
-      }),
-      hidden: !config.profilingEnabled,
-      append: <TechnicalPreviewBadge icon="beaker" />,
-      label: i18n.translate('xpack.apm.serviceDetails.profilingTabLabel', {
-        defaultMessage: 'Profiling',
-      }),
     },
     {
       key: 'alerts',

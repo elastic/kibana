@@ -10,7 +10,7 @@ import { EuiLoadingSpinner, EuiNotificationBadge } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { IndexPattern } from './types';
+import { IndexPattern } from '../types';
 import { FieldItem } from './field_item';
 import { FieldsAccordion, FieldsAccordionProps, FieldItemSharedProps } from './fields_accordion';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';

@@ -102,6 +102,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
   fn(input, args, handlers) {
     validateAccessor(args.metric, input.columns);
     validateAccessor(args.secondaryMetric, input.columns);
+    validateAccessor(args.max, input.columns);
     validateAccessor(args.breakdownBy, input.columns);
 
     if (handlers?.inspectorAdapters?.tables) {

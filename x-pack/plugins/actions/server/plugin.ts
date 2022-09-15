@@ -47,6 +47,7 @@ import { ActionTypeRegistry } from './action_type_registry';
 import {
   createExecutionEnqueuerFunction,
   createEphemeralExecutionEnqueuerFunction,
+  createBulkExecutionEnqueuerFunction,
 } from './create_execute_function';
 import { registerBuiltInActionTypes } from './builtin_action_types';
 import { registerActionsUsageCollector } from './usage';
@@ -120,6 +121,7 @@ export interface PluginSetupContract {
   isPreconfiguredConnector(connectorId: string): boolean;
   getSubActionConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
   getCaseConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
+  getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
 }
 
 export interface PluginStartContract {
@@ -374,6 +376,11 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       },
       getSubActionConnectorClass: () => SubActionConnector,
       getCaseConnectorClass: () => CaseConnector,
+      getActionsHealth: () => {
+        return {
+          hasPermanentEncryptionKey: plugins.encryptedSavedObjects.canEncrypt,
+        };
+      },
     };
   }
 
@@ -432,6 +439,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           preconfiguredActions,
         }),
         executionEnqueuer: createExecutionEnqueuerFunction({
+          taskManager: plugins.taskManager,
+          actionTypeRegistry: actionTypeRegistry!,
+          isESOCanEncrypt: isESOCanEncrypt!,
+          preconfiguredActions,
+        }),
+        bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           actionTypeRegistry: actionTypeRegistry!,
           isESOCanEncrypt: isESOCanEncrypt!,
@@ -621,6 +634,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
               preconfiguredActions,
             }),
             executionEnqueuer: createExecutionEnqueuerFunction({
+              taskManager,
+              actionTypeRegistry: actionTypeRegistry!,
+              isESOCanEncrypt: isESOCanEncrypt!,
+              preconfiguredActions,
+            }),
+            bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
               taskManager,
               actionTypeRegistry: actionTypeRegistry!,
               isESOCanEncrypt: isESOCanEncrypt!,

@@ -13,7 +13,7 @@ import { render, screen } from '@testing-library/react';
 import { BulkActionRuleErrorsList } from './bulk_action_rule_errors_list';
 import { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
 import type { DryRunResult } from './types';
-import { BulkAction } from '../../../../../../../common/detection_engine/schemas/common/schemas';
+import { BulkAction } from '../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 
 const Wrapper: FC = ({ children }) => {
   return (
@@ -61,11 +61,11 @@ describe('Component BulkEditRuleErrorsList', () => {
     ],
     [
       BulkActionsDryRunErrCode.MACHINE_LEARNING_INDEX_PATTERN,
-      "2 custom Machine Learning rules (these rules don't have index patterns)",
+      "2 custom machine learning rules (these rules don't have index patterns)",
     ],
     [
       BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH,
-      "2 Machine Learning rules can't be edited (test failure)",
+      "2 machine learning rules can't be edited (test failure)",
     ],
     [undefined, "2 rules can't be edited (test failure)"],
   ])('should render correct message for "%s" errorCode', (errorCode, value) => {

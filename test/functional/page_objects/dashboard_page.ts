@@ -98,6 +98,8 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async exitFullScreenLogoButtonExists() {
+    // TODO: Replace every instance of `exitFullScreenModeLogo` with `exitFullScreenModeButton` once the new Shared UX
+    // full screen button can be used (i.e. after https://github.com/elastic/kibana/issues/140311 is resolved)
     return await this.testSubjects.exists('exitFullScreenModeLogo');
   }
 
@@ -562,7 +564,7 @@ export class DashboardPageObject extends FtrService {
 
   public async getPanelTitles() {
     this.log.debug('in getPanelTitles');
-    const titleObjects = await this.testSubjects.findAll('dashboardPanelTitle');
+    const titleObjects = await this.find.allByCssSelector('span.embPanel__titleInner');
     return await Promise.all(titleObjects.map(async (title) => await title.getVisibleText()));
   }
 

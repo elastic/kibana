@@ -8,7 +8,7 @@
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
-import { QueryClientProvider } from 'react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 
 import { OsqueryAction } from '.';
 import { queryClient } from '../../query_client';
@@ -79,13 +79,6 @@ describe('Osquery Action', () => {
     mockKibana();
 
     const { getByText } = renderWithContext(<OsqueryAction agentId={'test'} formType={'steps'} />);
-    expect(getByText(EMPTY_PROMPT)).toBeInTheDocument();
-  });
-  it('should return empty prompt when no agentId', async () => {
-    spyOsquery();
-    mockKibana();
-
-    const { getByText } = renderWithContext(<OsqueryAction agentId={''} formType={'steps'} />);
     expect(getByText(EMPTY_PROMPT)).toBeInTheDocument();
   });
   it('should return permission denied when agentFetched and agentData available', async () => {

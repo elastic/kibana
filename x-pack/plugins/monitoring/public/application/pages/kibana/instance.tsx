@@ -12,7 +12,7 @@ import { find } from 'lodash';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiSpacer,
   EuiFlexGrid,
   EuiFlexItem,
@@ -23,7 +23,7 @@ import { ComponentProps } from '../../route_init';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useCharts } from '../../hooks/use_charts';
 // @ts-ignore
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 // @ts-ignore
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 // @ts-ignore
@@ -40,7 +40,7 @@ const KibanaInstance = ({ data, alerts }: { data: any; alerts: any }) => {
   const showRules =
     data.metrics.kibana_instance_rule_executions &&
     data.metrics.kibana_instance_rule_executions.length &&
-    data.metrics.kibana_instance_rule_executions[0].indices_found.metricbeat;
+    data.metrics.kibana_instance_rule_executions[0].indices_found.ecs;
 
   return (
     <EuiPage>
@@ -148,7 +148,7 @@ export const KibanaInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
 
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
   const cluster = find(clusters, {

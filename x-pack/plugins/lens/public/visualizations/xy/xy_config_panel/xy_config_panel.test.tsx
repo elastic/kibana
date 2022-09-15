@@ -12,7 +12,7 @@ import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { XyToolbar } from '.';
 import { DimensionEditor } from './dimension_editor';
 import { AxisSettingsPopover } from './axis_settings_popover';
-import { FramePublicAPI } from '../../../types';
+import { FramePublicAPI, DatasourcePublicAPI } from '../../../types';
 import { State, XYState, XYDataLayerConfig } from '../types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../../../mocks';
@@ -109,7 +109,8 @@ describe('XY Config panels', () => {
     });
 
     it('should pass in endzone visibility setter and current sate for time chart', () => {
-      (frame.datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
+      const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
+      (datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
         dataType: 'date',
       });
       const state = testState();
@@ -134,6 +135,37 @@ describe('XY Config panels', () => {
       expect(component.find(AxisSettingsPopover).at(1).prop('setEndzoneVisibility')).toBeTruthy();
       expect(component.find(AxisSettingsPopover).at(1).prop('endzonesVisible')).toBe(false);
       expect(component.find(AxisSettingsPopover).at(2).prop('setEndzoneVisibility')).toBeFalsy();
+    });
+
+    it('should pass in current time marker visibility setter and current state for time chart', () => {
+      const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
+      (datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
+        dataType: 'date',
+      });
+      const mockSetState = jest.fn();
+      const stateForTest = testState();
+      const state = {
+        ...stateForTest,
+        showCurrentTimeMarker: true,
+        layers: [
+          {
+            ...stateForTest.layers[0],
+            yConfig: [{ axisMode: 'right', forAccessor: 'foo' }],
+          } as XYDataLayerConfig,
+        ],
+      };
+      const component = shallow(<XyToolbar frame={frame} state={state} setState={mockSetState} />);
+
+      expect(
+        component.find(AxisSettingsPopover).at(0).prop('setCurrentTimeMarkerVisibility')
+      ).toBeFalsy();
+      expect(
+        component.find(AxisSettingsPopover).at(1).prop('setCurrentTimeMarkerVisibility')
+      ).toBeTruthy();
+      expect(component.find(AxisSettingsPopover).at(1).prop('currentTimeMarkerVisible')).toBe(true);
+      expect(
+        component.find(AxisSettingsPopover).at(2).prop('setCurrentTimeMarkerVisibility')
+      ).toBeFalsy();
     });
 
     it('should pass in information about current data bounds', () => {

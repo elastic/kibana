@@ -5,7 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import deepmerge from 'deepmerge';
+import { isPlainObject } from 'lodash';
+
 import type {
   NoDataCardServices,
   NoDataCardKibanaDependencies,
@@ -43,7 +46,7 @@ export const getKibanaDependenciesMock = (
   const integrations =
     params.canAccessFleet !== undefined ? params.canAccessFleet : defaultParams.canAccessFleet;
 
-  return deepmerge(
+  const result = deepmerge(
     {
       coreStart: {
         http: {
@@ -60,6 +63,11 @@ export const getKibanaDependenciesMock = (
         },
       },
     },
-    getRedirectAppLinksKibanaDependenciesMock()
+    getRedirectAppLinksKibanaDependenciesMock(),
+    {
+      isMergeableObject: isPlainObject,
+    }
   );
+
+  return result;
 };

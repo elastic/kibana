@@ -307,6 +307,8 @@ const significantCorrelationsTransactionsRoute = createApmServerRoute({
         serviceName: t.string,
         transactionName: t.string,
         transactionType: t.string,
+        durationMin: toNumberRt,
+        durationMax: toNumberRt,
       }),
       environmentRt,
       kueryRt,
@@ -343,6 +345,8 @@ const significantCorrelationsTransactionsRoute = createApmServerRoute({
         end,
         environment,
         kuery,
+        durationMin,
+        durationMax,
         fieldValuePairs,
       },
     } = resources.params;
@@ -362,6 +366,8 @@ const significantCorrelationsTransactionsRoute = createApmServerRoute({
           ],
         },
       },
+      durationMinOverride: durationMin,
+      durationMaxOverride: durationMax,
       fieldValuePairs,
     });
   },
@@ -375,6 +381,8 @@ const pValuesTransactionsRoute = createApmServerRoute({
         serviceName: t.string,
         transactionName: t.string,
         transactionType: t.string,
+        durationMin: toNumberRt,
+        durationMax: toNumberRt,
       }),
       environmentRt,
       kueryRt,
@@ -405,6 +413,8 @@ const pValuesTransactionsRoute = createApmServerRoute({
         end,
         environment,
         kuery,
+        durationMin,
+        durationMax,
         fieldCandidates,
       },
     } = resources.params;
@@ -424,6 +434,8 @@ const pValuesTransactionsRoute = createApmServerRoute({
           ],
         },
       },
+      durationMin,
+      durationMax,
       fieldCandidates,
     });
   },

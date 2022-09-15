@@ -104,7 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, log, updatedRule.id);
       });
 
-      it('should be able to create a new webhook action and attach it to an immutable rule', async () => {
+      it('should not change properties of immutable rule when applying actions to it', async () => {
         await installPrePackagedRules(supertest, log);
         // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
         // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
@@ -120,8 +120,25 @@ export default ({ getService }: FtrProviderContext) => {
           rule_id: immutableRule.rule_id, // Rule id should match the same as the immutable rule
           version: immutableRule.version, // This version number should not change when an immutable rule is updated
           immutable: true, // It should stay immutable true when returning
+          required_fields: immutableRule.required_fields, // required_fields cannot be modified, so newRuleToUpdate will have required_fields from immutable rule
         };
         expect(bodyToCompare).to.eql(expected);
+      });
+
+      it('should be able to create a new webhook action and attach it to an immutable rule', async () => {
+        await installPrePackagedRules(supertest, log);
+        // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
+        // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
+        const immutableRule = await getRule(supertest, log, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
+        const hookAction = await createNewAction(supertest, log);
+        const newRuleToUpdate = getSimpleRule(immutableRule.rule_id);
+        const ruleToUpdate = getRuleWithWebHookAction(hookAction.id, false, newRuleToUpdate);
+        const updatedRule = await updateRule(supertest, log, ruleToUpdate);
+        const bodyToCompare = removeServerGeneratedProperties(updatedRule);
+
+        const expected = getSimpleRuleOutputWithWebHookAction(`${bodyToCompare.actions?.[0].id}`);
+
+        expect(bodyToCompare.actions).to.eql(expected.actions);
       });
 
       it('should be able to create a new webhook action, attach it to an immutable rule and the count of prepackaged rules should not increase. If this fails, suspect the immutable tags are not staying on the rule correctly.', async () => {
@@ -155,13 +172,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body.data.length).to.eql(1); // should have only one length to the data set, otherwise we have duplicates or the tags were removed and that is incredibly bad.
         const bodyToCompare = removeServerGeneratedProperties(body.data[0]);
-        const expected = {
-          ...getSimpleRuleOutputWithWebHookAction(`${bodyToCompare.actions?.[0].id}`),
-          rule_id: immutableRule.rule_id, // Rule id should match the same as the immutable rule
-          version: immutableRule.version, // This version number should not change when an immutable rule is updated
-          immutable: true, // It should stay immutable true when returning
-        };
-        expect(bodyToCompare).to.eql(expected);
+        const expected = getSimpleRuleOutputWithWebHookAction(`${bodyToCompare.actions?.[0].id}`);
+
+        expect(bodyToCompare.actions).to.eql(expected.actions);
+        expect(bodyToCompare.immutable).to.be(true);
       });
     });
   });

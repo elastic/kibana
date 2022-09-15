@@ -8,8 +8,14 @@
 import { Ast, AstFunction } from '@kbn/interpreter';
 import { Position, ScaleType } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import {
+  EventAnnotationServiceType,
+  isManualPointAnnotationConfig,
+  isRangeAnnotationConfig,
+} from '@kbn/event-annotation-plugin/public';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
+import { XYCurveType } from '@kbn/expression-xy-plugin/common';
+import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import {
   State,
   YConfig,
@@ -35,7 +41,7 @@ import { layerTypes } from '../../../common';
 import { axisExtentConfigToExpression } from '../../shared_components';
 
 export const getSortedAccessors = (
-  datasource: DatasourcePublicAPI,
+  datasource: DatasourcePublicAPI | undefined,
   layer: XYDataLayerConfig | XYReferenceLineLayerConfig
 ) => {
   const originalOrder = datasource
@@ -66,7 +72,8 @@ export const toExpression = (
     const datasource = datasourceLayers[layer.layerId];
     if (datasource) {
       datasource.getTableSpec().forEach((column) => {
-        const operation = datasourceLayers[layer.layerId].getOperationForColumnId(column.columnId);
+        const operation =
+          datasourceLayers[layer.layerId]?.getOperationForColumnId(column.columnId) ?? null;
         metadata[layer.layerId][column.columnId] = operation;
       });
     }
@@ -239,6 +246,11 @@ export const buildExpression = (
     });
   }
 
+  const isValidAnnotation = (a: EventAnnotationConfig) =>
+    isManualPointAnnotationConfig(a) ||
+    isRangeAnnotationConfig(a) ||
+    (a.filter && a.filter?.query !== '');
+
   return {
     type: 'expression',
     chain: [
@@ -295,10 +307,10 @@ export const buildExpression = (
           fittingFunction: [state.fittingFunction || 'None'],
           endValue: [state.endValue || 'None'],
           emphasizeFitting: [state.emphasizeFitting || false],
-          curveType: [state.curveType || 'LINEAR'],
           fillOpacity: [state.fillOpacity || 0.3],
           valueLabels: [state?.valueLabels || 'hide'],
           hideEndzones: [state?.hideEndzones || false],
+          addTimeMarker: [state?.showCurrentTimeMarker || false],
           valuesInLegend: [state?.valuesInLegend || false],
           yAxisConfigs: [...yAxisConfigsToExpression(yAxisConfigs)],
           xAxisConfig: [
@@ -330,7 +342,8 @@ export const buildExpression = (
                 datasourceLayers[layer.layerId],
                 metadata,
                 paletteService,
-                datasourceExpressionsByLayers[layer.layerId]
+                datasourceExpressionsByLayers[layer.layerId],
+                state.curveType || 'LINEAR'
               )
             ),
             ...validReferenceLayers.map((layer) =>
@@ -340,10 +353,39 @@ export const buildExpression = (
                 datasourceExpressionsByLayers[layer.layerId]
               )
             ),
-            ...validAnnotationsLayers.map((layer) =>
-              annotationLayerToExpression(layer, eventAnnotationService)
-            ),
           ],
+          annotations:
+            validAnnotationsLayers.length &&
+            validAnnotationsLayers.flatMap((l) => l.annotations.filter(isValidAnnotation)).length
+              ? [
+                  {
+                    type: 'expression',
+                    chain: [
+                      {
+                        type: 'function',
+                        function: 'event_annotations_result',
+                        arguments: {
+                          layers: validAnnotationsLayers.map((layer) =>
+                            annotationLayerToExpression(layer, eventAnnotationService)
+                          ),
+                          datatable: eventAnnotationService.toFetchExpression({
+                            interval:
+                              (validDataLayers[0]?.xAccessor &&
+                                metadata[validDataLayers[0]?.layerId]?.[
+                                  validDataLayers[0]?.xAccessor
+                                ]?.interval) ||
+                              'auto',
+                            groups: validAnnotationsLayers.map((layer) => ({
+                              indexPatternId: layer.indexPatternId,
+                              annotations: layer.annotations.filter(isValidAnnotation),
+                            })),
+                          }),
+                        },
+                      },
+                    ],
+                  },
+                ]
+              : [],
         },
       },
     ],
@@ -375,7 +417,7 @@ const yAxisConfigsToExpression = (yAxisConfigs: AxisConfig[]): Ast[] => {
 
 const referenceLineLayerToExpression = (
   layer: XYReferenceLineLayerConfig,
-  datasourceLayer: DatasourcePublicAPI,
+  datasourceLayer: DatasourcePublicAPI | undefined,
   datasourceExpression: Ast
 ): Ast => {
   return {
@@ -413,9 +455,7 @@ const annotationLayerToExpression = (
         arguments: {
           simpleView: [Boolean(layer.simpleView)],
           layerId: [layer.layerId],
-          annotations: layer.annotations
-            ? layer.annotations.map((ann): Ast => eventAnnotationService.toExpression(ann))
-            : [],
+          annotations: eventAnnotationService.toExpression(layer.annotations || []),
         },
       },
     ],
@@ -425,10 +465,11 @@ const annotationLayerToExpression = (
 const dataLayerToExpression = (
   layer: ValidXYDataLayerConfig,
   yAxisConfigs: AxisConfig[],
-  datasourceLayer: DatasourcePublicAPI,
+  datasourceLayer: DatasourcePublicAPI | undefined,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
   paletteService: PaletteRegistry,
-  datasourceExpression: Ast
+  datasourceExpression: Ast,
+  curveType: XYCurveType
 ): Ast => {
   const columnToLabel = getColumnToLabelMap(layer, datasourceLayer);
 
@@ -450,6 +491,24 @@ const dataLayerToExpression = (
   return {
     type: 'expression',
     chain: [
+      ...(datasourceExpression
+        ? [
+            ...datasourceExpression.chain,
+            ...(layer.collapseFn
+              ? [
+                  {
+                    type: 'function',
+                    function: 'lens_collapse',
+                    arguments: {
+                      by: layer.xAccessor ? [layer.xAccessor] : [],
+                      metric: layer.accessors,
+                      fn: [layer.collapseFn!],
+                    },
+                  } as AstFunction,
+                ]
+              : []),
+          ]
+        : []),
       {
         type: 'function',
         function: 'extendedDataLayer',
@@ -468,35 +527,11 @@ const dataLayerToExpression = (
                 yConfigToDataDecorationConfigExpression(yConfig, yAxisConfigs)
               )
             : [],
+          curveType: [curveType],
           seriesType: [seriesType],
           showLines: seriesType === 'line' || seriesType === 'area' ? [true] : [false],
           accessors: layer.accessors,
           columnToLabel: [JSON.stringify(columnToLabel)],
-          ...(datasourceExpression
-            ? {
-                table: [
-                  {
-                    ...datasourceExpression,
-                    chain: [
-                      ...datasourceExpression.chain,
-                      ...(layer.collapseFn
-                        ? [
-                            {
-                              type: 'function',
-                              function: 'lens_collapse',
-                              arguments: {
-                                by: layer.xAccessor ? [layer.xAccessor] : [],
-                                metric: layer.accessors,
-                                fn: [layer.collapseFn!],
-                              },
-                            } as AstFunction,
-                          ]
-                        : []),
-                    ],
-                  },
-                ],
-              }
-            : {}),
           palette: [
             {
               type: 'expression',

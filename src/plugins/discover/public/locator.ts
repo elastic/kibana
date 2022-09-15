@@ -24,6 +24,11 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
   /**
    * Optionally set index pattern / data view ID.
    */
+  dataViewId?: string;
+  /**
+   * Duplication of dataViewId
+   * @deprecated
+   */
   indexPatternId?: string;
 
   /**
@@ -101,6 +106,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     const {
       useHash = this.deps.useHash,
       filters,
+      dataViewId,
       indexPatternId,
       query,
       refreshInterval,
@@ -132,6 +138,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     if (query) appState.query = query;
     if (filters && filters.length) appState.filters = filters?.filter((f) => !isFilterPinned(f));
     if (indexPatternId) appState.index = indexPatternId;
+    if (dataViewId) appState.index = dataViewId;
     if (columns) appState.columns = columns;
     if (savedQuery) appState.savedQuery = savedQuery;
     if (sort) appState.sort = sort;

@@ -10,9 +10,11 @@ import { EuiCodeBlock, EuiFormRow } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
+import { useController } from 'react-hook-form';
+import { i18n } from '@kbn/i18n';
+import { MAX_QUERY_LENGTH } from '../../packs/queries/validations';
 import { OsquerySchemaLink } from '../../components/osquery_schema_link';
 import { OsqueryEditor } from '../../editor';
-import type { FieldHook } from '../../shared_imports';
 
 const StyledEuiCodeBlock = styled(EuiCodeBlock)`
   min-height: 100px;
@@ -20,20 +22,47 @@ const StyledEuiCodeBlock = styled(EuiCodeBlock)`
 
 interface CodeEditorFieldProps {
   euiFieldProps?: Record<string, unknown>;
-  field: FieldHook<string>;
+  labelAppend?: string;
+  helpText?: string;
 }
 
-const CodeEditorFieldComponent: React.FC<CodeEditorFieldProps> = ({ euiFieldProps, field }) => {
-  const { value, label, labelAppend, helpText, setValue, errors } = field;
-  const error = errors[0]?.message;
+const CodeEditorFieldComponent: React.FC<CodeEditorFieldProps> = ({
+  euiFieldProps,
+  labelAppend,
+  helpText,
+}) => {
+  const {
+    field: { onChange, value },
+    fieldState: { error },
+  } = useController({
+    name: 'query',
+    rules: {
+      required: {
+        message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.emptyQueryError', {
+          defaultMessage: 'Query is a required field',
+        }),
+        value: true,
+      },
+      maxLength: {
+        message: i18n.translate('xpack.osquery.liveQuery.queryForm.largeQueryError', {
+          defaultMessage: 'Query is too large (max {maxLength} characters)',
+          values: { maxLength: MAX_QUERY_LENGTH },
+        }),
+        value: MAX_QUERY_LENGTH,
+      },
+    },
+    defaultValue: '',
+  });
 
   return (
     <EuiFormRow
-      label={label}
+      label={i18n.translate('xpack.osquery.savedQuery.queryEditorLabel', {
+        defaultMessage: 'Query',
+      })}
       labelAppend={!isEmpty(labelAppend) ? labelAppend : <OsquerySchemaLink />}
       helpText={helpText}
-      isInvalid={typeof error === 'string'}
-      error={error}
+      isInvalid={!!error?.message}
+      error={error?.message}
       fullWidth
     >
       {euiFieldProps?.isDisabled ? (
@@ -46,7 +75,7 @@ const CodeEditorFieldComponent: React.FC<CodeEditorFieldProps> = ({ euiFieldProp
           {value}
         </StyledEuiCodeBlock>
       ) : (
-        <OsqueryEditor defaultValue={value} onChange={setValue} />
+        <OsqueryEditor defaultValue={value} onChange={onChange} />
       )}
     </EuiFormRow>
   );

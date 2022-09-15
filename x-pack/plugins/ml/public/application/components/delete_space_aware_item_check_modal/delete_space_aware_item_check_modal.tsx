@@ -278,6 +278,7 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
       setDidUntag(false);
     }
     setIsLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasManagedJob]);
 
   const onUntagClick = async () => {

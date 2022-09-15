@@ -11,11 +11,12 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 const TEST_COLUMN_NAMES = ['@message'];
 const TEST_FILTER_COLUMN_NAMES = [
-  ['extension', 'jpg'],
-  ['geo.src', 'IN'],
+  ['extension', 'jpg', 'extension.raw'],
+  ['geo.src', 'IN', 'geo.src'],
 ];
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const log = getService('log');
   const retry = getService('retry');
   const filterBar = getService('filterBar');
   const dataGrid = getService('dataGrid');
@@ -32,9 +33,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const browser = getService('browser');
+  const security = getService('security');
 
   describe('discover data grid context tests', () => {
     before(async () => {
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
@@ -81,8 +84,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should open the context view with the filters disabled', async () => {
       let disabledFilterCounter = 0;
-      for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-        if (await filterBar.hasFilter(columnName, value, false)) {
+      for (const [_, value, columnId] of TEST_FILTER_COLUMN_NAMES) {
+        if (await filterBar.hasFilter(columnId, value, false)) {
           disabledFilterCounter++;
         }
       }
@@ -112,6 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitFor('document table has a length of 6', async () => {
         const nrOfDocs = (await dataGrid.getBodyRows()).length;
+        log.debug('document table length', nrOfDocs);
         return nrOfDocs === 6;
       });
     });

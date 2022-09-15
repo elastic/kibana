@@ -17,7 +17,7 @@ import { FieldBasedIndexPatternColumn } from '../column_types';
 import { updateColumnParam } from '../../layer_helpers';
 import { supportedFormats } from '../../../../../common/expressions/format_column/supported_formats';
 import { MODES, AUTO_BARS, DEFAULT_INTERVAL, MIN_HISTOGRAM_BARS, SLICES } from './constants';
-import { IndexPattern, IndexPatternField } from '../../../types';
+import { IndexPattern, IndexPatternField } from '../../../../types';
 import { getInvalidFieldMessage, isValidNumber } from '../helpers';
 
 type RangeType = Omit<Range, 'type'>;
@@ -71,7 +71,11 @@ function getFieldDefaultFormat(indexPattern: IndexPattern, field: IndexPatternFi
   return undefined;
 }
 
-export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field'> = {
+export const rangeOperation: OperationDefinition<
+  RangeIndexPatternColumn,
+  'field',
+  RangeColumnParams
+> = {
   type: 'range',
   displayName: i18n.translate('xpack.lens.indexPattern.intervals', {
     defaultMessage: 'Intervals',
@@ -98,7 +102,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
     i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
       defaultMessage: 'Missing field',
     }),
-  buildColumn({ field }) {
+  buildColumn({ field }, columnParams) {
     return {
       label: field.displayName,
       dataType: 'number', // string for Range
@@ -107,12 +111,12 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       isBucketed: true,
       scale: 'interval', // ordinal for Range
       params: {
-        includeEmptyRows: true,
-        type: MODES.Histogram,
-        ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
-        maxBars: AUTO_BARS,
-        format: undefined,
-        parentFormat: undefined,
+        includeEmptyRows: columnParams?.includeEmptyRows ?? true,
+        type: columnParams?.type ?? MODES.Histogram,
+        ranges: columnParams?.ranges ?? [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
+        maxBars: columnParams?.maxBars ?? AUTO_BARS,
+        format: columnParams?.format,
+        parentFormat: columnParams?.parentFormat,
       },
     };
   },
@@ -183,7 +187,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
     paramEditorUpdater,
     indexPattern,
     uiSettings,
-    data,
+    fieldFormats,
   }) => {
     const currentField = indexPattern.getFieldByName(currentColumn.sourceField);
     const numberFormat = currentColumn.params.format;
@@ -192,7 +196,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       supportedFormats[numberFormat.id] &&
       supportedFormats[numberFormat.id].decimalsToPattern(numberFormat.params?.decimals || 0);
 
-    const rangeFormatter = data.fieldFormats.deserialize({
+    const rangeFormatter = fieldFormats.deserialize({
       ...(currentColumn.params.parentFormat || { id: 'range' }),
       params: {
         ...currentColumn.params.parentFormat?.params,

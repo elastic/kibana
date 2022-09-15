@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { mockBrowserFields } from './mock';
 import { FIELD_BROWSER_WIDTH } from './helpers';
 import { FieldBrowserComponent } from './field_browser';
@@ -96,7 +97,8 @@ describe('FieldsBrowser', () => {
       });
 
       result.getByTestId('categories-filter-button').click();
-      expect(result.getByTestId('categories-selector-option-base')).toBeInTheDocument();
+      await waitForEuiPopoverOpen();
+      expect(result.getByTestId('categories-selector-option-base')).toBeVisible();
 
       fireEvent.change(result.getByTestId('field-search'), { target: { value: 'client' } });
       await waitFor(() => {

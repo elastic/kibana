@@ -131,7 +131,7 @@ export class RuleDataClient implements IRuleDataClient {
         const indexPatternsFetcher = new IndexPatternsFetcher(clusterClient);
 
         try {
-          const fields = await indexPatternsFetcher.getFieldsForWildcard({
+          const { fields } = await indexPatternsFetcher.getFieldsForWildcard({
             pattern: indexPattern,
           });
 

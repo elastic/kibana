@@ -127,6 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               body: '{\n "query": \'\'', // E.g. using single quotes
             },
           ],
+
           async () => {
             expect(await PageObjects.console.hasInvalidSyntax()).to.be(true);
           }

@@ -10,7 +10,7 @@ exports[`Storyshots arguments/Palette default 1`] = `
   }
 >
   <div
-    className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+    className="euiPopover euiInputPopover euiSuperSelect emotion-euiPopover-EuiInputPopover"
     onKeyDown={[Function]}
     onMouseDown={[Function]}
     onMouseUp={[Function]}
@@ -18,8 +18,309 @@ exports[`Storyshots arguments/Palette default 1`] = `
     onTouchStart={[Function]}
   >
     <div
-      className="euiPopover__anchor"
-    />
+      className="euiPopover__anchor css-zih94u-render"
+    >
+      <div>
+        <input
+          readOnly={false}
+          type="hidden"
+          value="paul_tor_14"
+        />
+        <div
+          className="euiFormControlLayout euiFormControlLayout--compressed"
+        >
+          <div
+            className="euiFormControlLayout__childrenWrapper"
+          >
+            <span
+              className="emotion-euiScreenReaderOnly"
+              id="euiSuperSelect__generated-id__screenreaderLabelId"
+            >
+              Select an option: 
+              <span
+                className="euiColorPaletteDisplay euiColorPaletteDisplay--sizeSmall"
+              >
+                <span
+                  className="emotion-euiScreenReaderOnly"
+                >
+                  Paul Tor 14
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="euiColorPaletteDisplayFixed__bleedArea"
+                >
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#882E72",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#B178A6",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#D6C1DE",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#1965B0",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#5289C7",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#7BAFDE",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#4EB265",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#90C987",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#CAE0AB",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#F7EE55",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#F6C141",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#F1932D",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#E8601C",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#DC050C",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                </span>
+              </span>
+              , is selected
+            </span>
+            <button
+              aria-haspopup="listbox"
+              className="euiSuperSelectControl euiFormControlLayout--1icons euiSuperSelectControl--compressed"
+              disabled={false}
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              readOnly={false}
+              type="button"
+            >
+              <span
+                className="euiColorPaletteDisplay euiColorPaletteDisplay--sizeSmall"
+              >
+                <span
+                  className="emotion-euiScreenReaderOnly"
+                >
+                  Paul Tor 14
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="euiColorPaletteDisplayFixed__bleedArea"
+                >
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#882E72",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#B178A6",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#D6C1DE",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#1965B0",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#5289C7",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#7BAFDE",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#4EB265",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#90C987",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#CAE0AB",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#F7EE55",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#F6C141",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#F1932D",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#E8601C",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                  <span
+                    style={
+                      Object {
+                        "backgroundColor": "#DC050C",
+                        "width": "7.142857142857143%",
+                      }
+                    }
+                  />
+                </span>
+              </span>
+            </button>
+            <div
+              className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            >
+              <span
+                className="euiFormControlLayoutCustomIcon"
+              >
+                <span
+                  aria-hidden="true"
+                  className="euiFormControlLayoutCustomIcon__icon"
+                  data-euiicon-type="arrowDown"
+                  size="s"
+                >
+                  
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 `;

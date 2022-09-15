@@ -6,7 +6,7 @@
  */
 
 import { createContext, type MutableRefObject } from 'react';
-import type { UseQueryResult } from 'react-query';
+import type { UseQueryResult } from '@tanstack/react-query';
 
 interface FindingsEsPitContextValue {
   setPitId(newPitId: string): void;

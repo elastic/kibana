@@ -32,6 +32,7 @@
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-browser-mocks",
@@ -45,6 +46,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -62,6 +64,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }
@@ -77,6 +80,7 @@
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-browser-mocks",
@@ -90,13 +94,13 @@
               "SavedObjectsClientContract",
               ", savedObject: ",
               "SavedObject",
-              "<unknown>) => ",
-              "SimpleSavedObjectImpl",
-              "<unknown>"
+              "<unknown>) => jest.Mocked<",
+              "SimpleSavedObject",
+              "<unknown>>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts",
             "deprecated": false,
-            "returnComment": [],
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-browser-mocks",
@@ -109,7 +113,9 @@
                   "SavedObjectsClientContract"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-browser-mocks",
@@ -123,9 +129,12 @@
                   "<unknown>"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

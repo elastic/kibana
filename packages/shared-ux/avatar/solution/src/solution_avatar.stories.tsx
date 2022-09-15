@@ -10,7 +10,7 @@ import React from 'react';
 import { KibanaSolutionAvatar, IconTypeProps, KnownSolutionProps } from './solution_avatar';
 
 export default {
-  title: 'Solution Avatar',
+  title: 'Avatar/Solution',
   description: 'A wrapper around EuiAvatar, specifically to stylize Elastic Solutions',
 };
 
@@ -24,11 +24,11 @@ const argTypes = {
 
 type KnownSolutionParams = Pick<KnownSolutionProps, 'size' | 'name'>;
 
-export const SolutionAvatar = (params: KnownSolutionParams) => {
+export const SolutionType = (params: KnownSolutionParams) => {
   return <KibanaSolutionAvatar {...params} />;
 };
 
-SolutionAvatar.argTypes = {
+SolutionType.argTypes = {
   name: {
     control: 'select',
     options: ['Cloud', 'Elastic', 'Kibana', 'Observability', 'Security', 'Enterprise Search'],
@@ -39,11 +39,11 @@ SolutionAvatar.argTypes = {
 
 type IconTypeParams = Pick<IconTypeProps, 'size' | 'name' | 'iconType'>;
 
-export const IconTypeAvatar = (params: IconTypeParams) => {
+export const IconType = (params: IconTypeParams) => {
   return <KibanaSolutionAvatar {...params} />;
 };
 
-IconTypeAvatar.argTypes = {
+IconType.argTypes = {
   iconType: {
     control: 'select',
     options: [

@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'visChart',
   ]);
 
-  const xyChartSelector = 'visTypeXyChart';
+  const xyChartSelector = 'xyVisChart';
 
   // https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html
 

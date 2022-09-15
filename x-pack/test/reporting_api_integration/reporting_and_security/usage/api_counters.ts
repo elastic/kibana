@@ -29,11 +29,14 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.teardownEcommerce();
     });
 
-    it('configuration settings of the tests_server', async () => {
-      const usage = await usageAPI.getUsageStats();
-      expect(usage.kibana_config_usage.xpack_reporting_capture_max_attempts).to.be(1);
-      expect(usage.kibana_config_usage.xpack_reporting_csv_max_size_bytes).to.be(6000);
-      expect(usage.kibana_config_usage.xpack_reporting_roles_enabled).to.be(false);
+    describe('server', function () {
+      this.tags('skipCloud');
+      it('configuration settings of the tests_server', async () => {
+        const usage = await usageAPI.getUsageStats();
+        expect(usage.kibana_config_usage.xpack_reporting_capture_max_attempts).to.be(1);
+        expect(usage.kibana_config_usage.xpack_reporting_csv_max_size_bytes).to.be(6000);
+        expect(usage.kibana_config_usage.xpack_reporting_roles_enabled).to.be(false);
+      });
     });
 
     describe('API counters: management', () => {

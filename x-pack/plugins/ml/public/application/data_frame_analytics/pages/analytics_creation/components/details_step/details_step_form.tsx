@@ -99,6 +99,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
           );
         }
       }, 400),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [jobId]
   );
 
@@ -112,6 +113,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     return () => {
       debouncedJobIdCheck.cancel();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobId]);
 
   useEffect(() => {
@@ -128,6 +130,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     return () => {
       debouncedIndexCheck.cancel();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [destinationIndex]);
 
   useEffect(() => {
@@ -136,6 +139,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     } else if (destIndexSameAsId === false && hasSwitchedToEditor === false) {
       setFormState({ destinationIndex: '' });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [destIndexSameAsId, jobId]);
 
   return (

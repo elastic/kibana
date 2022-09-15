@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { Position } from '@elastic/charts';
-import type { FramePublicAPI } from '../../../../types';
+import type { FramePublicAPI, DatasourcePublicAPI } from '../../../../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../../mocks';
 import { State, XYLayerConfig } from '../../types';
 import { VisualOptionsPopover } from '.';
@@ -111,7 +111,8 @@ describe('Visual options popover', () => {
 
   it('should disabled the popover if there is histogram series', () => {
     // make it detect an histogram series
-    frame.datasourceLayers.first.getOperationForColumnId = jest.fn().mockReturnValueOnce({
+    const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
+    datasourceLayers.first.getOperationForColumnId = jest.fn().mockReturnValueOnce({
       isBucketed: true,
       scale: 'interval',
     });

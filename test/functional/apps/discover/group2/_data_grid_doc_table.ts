@@ -23,9 +23,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
   const testSubjects = getService('testSubjects');
+  const security = getService('security');
 
   describe('discover data grid doc table', function describeIndexTests() {
     before(async function () {
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       log.debug('load kibana index with default index pattern');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
@@ -90,7 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug(`expanded document id: ${expandDocId}`);
 
       await dataGrid.clickRowToggle();
-      await find.clickByCssSelectorWhenNotDisabled('#kbn_doc_viewer_tab_1');
+      await find.clickByCssSelectorWhenNotDisabledWithoutRetry('#kbn_doc_viewer_tab_1');
 
       await retry.waitForWithTimeout(
         'document id in flyout matching the expanded document id',
@@ -138,7 +140,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug(`expanded document id: ${expandDocId}`);
 
       await dataGrid.clickRowToggle();
-      await find.clickByCssSelectorWhenNotDisabled('#kbn_doc_viewer_tab_1');
+      await find.clickByCssSelectorWhenNotDisabledWithoutRetry('#kbn_doc_viewer_tab_1');
 
       await retry.waitForWithTimeout(
         'document id in flyout matching the expanded document id',
@@ -195,8 +197,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           // add columns
           const fields = ['_id', '_index', 'agent'];
           for (const field of fields) {
-            await testSubjects.click(`openFieldActionsButton-${field}`);
-            await testSubjects.click(`toggleColumnButton-${field}`);
+            await dataGrid.clickFieldActionInFlyout(field, 'toggleColumnButton');
           }
 
           const headerWithFields = await dataGrid.getHeaderFields();
@@ -204,8 +205,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           // remove columns
           for (const field of fields) {
-            await testSubjects.click(`openFieldActionsButton-${field}`);
-            await testSubjects.click(`toggleColumnButton-${field}`);
+            await dataGrid.clickFieldActionInFlyout(field, 'toggleColumnButton');
           }
 
           const headerWithoutFields = await dataGrid.getHeaderFields();

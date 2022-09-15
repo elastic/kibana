@@ -13,7 +13,7 @@ import { nextTick } from '@kbn/test-jest-helpers';
 import { HttpError } from '../../../../../common/types/api';
 
 import { SyncStatus } from '../../../../../common/types/connectors';
-import { StartSyncApiLogic } from '../../api/connector_package/start_sync_api_logic';
+import { StartSyncApiLogic } from '../../api/connector/start_sync_api_logic';
 import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
 
 import { IngestionMethod, IngestionStatus } from '../../types';
@@ -26,6 +26,7 @@ import { IndexViewLogic } from './index_view_logic';
 // We can't test fetchTimeOutId because this will get set whenever the logic is created
 // And the timeoutId is non-deterministic. We use expect.object.containing throughout this test file
 const DEFAULT_VALUES = {
+  connectorId: null,
   data: undefined,
   index: undefined,
   indexName: '',
@@ -35,11 +36,13 @@ const DEFAULT_VALUES = {
   isWaitingForSync: false,
   lastUpdated: null,
   localSyncNowValue: false,
+  recheckIndexLoading: false,
   syncStatus: null,
 };
 
 const CONNECTOR_VALUES = {
   ...DEFAULT_VALUES,
+  connectorId: connectorIndex.connector.id,
   data: connectorIndex,
   index: indexToViewIndex(connectorIndex),
   ingestionMethod: IngestionMethod.CONNECTOR,
@@ -52,6 +55,7 @@ describe('IndexViewLogic', () => {
   const { mount: fetchIndexMount } = new LogicMounter(FetchIndexApiLogic);
   const indexNameLogic = new LogicMounter(IndexNameLogic);
   const { mount } = new LogicMounter(IndexViewLogic);
+  const { flashSuccessToast } = mockFlashMessageHelpers;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -132,6 +136,15 @@ describe('IndexViewLogic', () => {
         expect(IndexViewLogic.actions.createNewFetchIndexTimeout).toHaveBeenCalled();
         expect(IndexViewLogic.actions.fetchCrawlerData).not.toHaveBeenCalled();
       });
+      it('should flash success if recheckFetchIndexLoading', () => {
+        IndexViewLogic.actions.resetRecheckIndexLoading = jest.fn();
+        IndexNameLogic.actions.setIndexName('api');
+        IndexViewLogic.actions.recheckIndex();
+        FetchIndexApiLogic.actions.apiSuccess(apiIndex);
+
+        expect(IndexViewLogic.actions.createNewFetchIndexTimeout).toHaveBeenCalled();
+        expect(flashSuccessToast).toHaveBeenCalled();
+      });
     });
 
     describe('fetchIndex.apiError', () => {
@@ -192,6 +205,28 @@ describe('IndexViewLogic', () => {
       jest.advanceTimersByTime(2);
       await nextTick();
       expect(IndexViewLogic.actions.fetchIndex).toHaveBeenCalled();
+    });
+  });
+
+  describe('recheckIndexLoading', () => {
+    it('should be set to true on recheckIndex', () => {
+      IndexViewLogic.actions.recheckIndex();
+      expect(IndexViewLogic.values).toEqual(
+        expect.objectContaining({
+          ...DEFAULT_VALUES,
+          recheckIndexLoading: true,
+        })
+      );
+    });
+    it('should be set to false on resetRecheckIndexLoading', () => {
+      IndexViewLogic.actions.recheckIndex();
+      IndexViewLogic.actions.resetRecheckIndexLoading();
+      expect(IndexViewLogic.values).toEqual(
+        expect.objectContaining({
+          ...DEFAULT_VALUES,
+          recheckIndexLoading: false,
+        })
+      );
     });
   });
 

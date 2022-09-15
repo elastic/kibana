@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { noop } from 'lodash/fp';
 import React, { useCallback } from 'react';
 
 import { ChartSettingsPopover } from '../../../../../common/components/chart_settings_popover';
@@ -16,22 +17,26 @@ interface Props {
   queryId: string;
   setStackBy: (value: string) => void;
   setStackByField1?: (stackBy: string | undefined) => void;
+  onReset?: () => void;
 }
 
 const ChartContextMenuComponent: React.FC<Props> = ({
   defaultStackByField,
   defaultStackByField1,
+  onReset = noop,
   queryId,
   setStackBy,
   setStackByField1,
 }: Props) => {
   const onResetStackByFields = useCallback(() => {
+    onReset();
+
     setStackBy(defaultStackByField);
 
     if (setStackByField1 != null) {
       setStackByField1(defaultStackByField1);
     }
-  }, [defaultStackByField, defaultStackByField1, setStackBy, setStackByField1]);
+  }, [defaultStackByField, defaultStackByField1, onReset, setStackBy, setStackByField1]);
 
   const { defaultInitialPanelId, defaultMenuItems, isPopoverOpen, setIsPopoverOpen } =
     useChartSettingsPopoverConfiguration({

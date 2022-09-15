@@ -11,6 +11,7 @@ import moment from 'moment-timezone';
 import { act, render, waitFor, screen } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import '../../common/mock/match_media';
 import {
@@ -36,12 +37,15 @@ import { registerConnectorsToMockActionRegistry } from '../../common/mock/regist
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { waitForComponentToUpdate } from '../../common/test_utils';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
-import { useGetReporters } from '../../containers/use_get_reporters';
 import { useGetCasesMetrics } from '../../containers/use_get_cases_metrics';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { useGetCases } from '../../containers/use_get_cases';
+import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
+import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
+import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
+import { useLicense } from '../../common/use_license';
 
 jest.mock('../../containers/use_create_attachments');
 jest.mock('../../containers/use_bulk_update_case');
@@ -51,7 +55,8 @@ jest.mock('../../containers/use_get_cases_status');
 jest.mock('../../containers/use_get_cases_metrics');
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_get_tags');
-jest.mock('../../containers/use_get_reporters');
+jest.mock('../../containers/user_profiles/use_get_current_user_profile');
+jest.mock('../../containers/user_profiles/use_bulk_get_user_profiles');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
@@ -59,6 +64,7 @@ jest.mock('../app/use_available_owners', () => ({
   useAvailableCasesOwners: () => ['securitySolution', 'observability'],
 }));
 jest.mock('../../containers/use_update_case');
+jest.mock('../../common/use_license');
 
 const useDeleteCasesMock = useDeleteCases as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
@@ -66,11 +72,13 @@ const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useGetCasesMetricsMock = useGetCasesMetrics as jest.Mock;
 const useUpdateCasesMock = useUpdateCases as jest.Mock;
 const useGetTagsMock = useGetTags as jest.Mock;
-const useGetReportersMock = useGetReporters as jest.Mock;
+const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
+const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
+const useLicenseMock = useLicense as jest.Mock;
 
 const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
 
@@ -144,6 +152,8 @@ describe('AllCasesListGeneric', () => {
     handleIsLoading: jest.fn(),
     isLoadingCases: [],
     isSelectorView: false,
+    userProfiles: new Map(),
+    currentUserProfile: undefined,
   };
 
   let appMockRenderer: AppMockRenderer;
@@ -163,20 +173,18 @@ describe('AllCasesListGeneric', () => {
     useGetCasesStatusMock.mockReturnValue(defaultCasesStatus);
     useGetCasesMetricsMock.mockReturnValue(defaultCasesMetrics);
     useGetTagsMock.mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
-    useGetReportersMock.mockReturnValue({
-      reporters: ['casetester'],
-      respReporters: [{ username: 'casetester' }],
-      isLoading: true,
-      isError: false,
-      fetchReporters: jest.fn(),
-    });
+    useGetCurrentUserProfileMock.mockReturnValue({ data: userProfiles[0], isLoading: false });
+    useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
     useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
     useUpdateCaseMock.mockReturnValue({ updateCaseProperty });
+    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
     mockKibana();
     moment.tz.setDefault('UTC');
   });
 
   it('should render AllCasesList', async () => {
+    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+
     const wrapper = mount(
       <TestProviders>
         <AllCasesList />
@@ -193,9 +201,9 @@ describe('AllCasesListGeneric', () => {
       expect(
         wrapper.find(`span[data-test-subj="case-table-column-tags-coke"]`).first().prop('title')
       ).toEqual(useGetCasesMockState.data.cases[0].tags[0]);
-      expect(wrapper.find(`[data-test-subj="case-table-column-createdBy"]`).first().text()).toEqual(
-        'LK'
-      );
+      expect(
+        wrapper.find(`[data-test-subj="case-user-profile-avatar-damaged_raccoon"]`).first().text()
+      ).toEqual('DR');
       expect(
         wrapper
           .find(`[data-test-subj="case-table-column-createdAt"]`)
@@ -214,20 +222,19 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
-  it('should show a tooltip with the reporter username when hover over the reporter avatar', async () => {
+  it("should show a tooltip with the assignee's email when hover over the assignee avatar", async () => {
+    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+
     const result = render(
       <TestProviders>
         <AllCasesList />
       </TestProviders>
     );
 
-    userEvent.hover(result.queryAllByTestId('case-table-column-createdBy')[0]);
+    userEvent.hover(result.queryAllByTestId('case-user-profile-avatar-damaged_raccoon')[0]);
 
     await waitFor(() => {
-      expect(result.getByTestId('case-table-column-createdBy-tooltip')).toBeTruthy();
-      expect(result.getByTestId('case-table-column-createdBy-tooltip').textContent).toEqual(
-        'lknope'
-      );
+      expect(result.getByText('damaged_raccoon@elastic.co')).toBeInTheDocument();
     });
   });
 
@@ -262,6 +269,7 @@ describe('AllCasesListGeneric', () => {
             title: null,
             totalComment: null,
             totalAlerts: null,
+            assignees: [],
           },
         ],
       },
@@ -426,9 +434,11 @@ describe('AllCasesListGeneric', () => {
     const result = appMockRenderer.render(<AllCasesList />);
     const theCase = useGetCasesMockState.data.cases[0];
     userEvent.click(result.getByTestId('case-status-filter'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('case-status-filter-in-progress'));
     userEvent.click(result.getByTestId(`checkboxSelectRow-${theCase.id}`));
     userEvent.click(result.getByText('Bulk actions'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('cases-bulk-close-button'));
     await waitFor(() => {});
     expect(updateBulkStatus).toBeCalledWith([theCase], CaseStatuses.closed);
@@ -438,9 +448,11 @@ describe('AllCasesListGeneric', () => {
     const result = appMockRenderer.render(<AllCasesList />);
     const theCase = useGetCasesMockState.data.cases[0];
     userEvent.click(result.getByTestId('case-status-filter'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('case-status-filter-closed'));
     userEvent.click(result.getByTestId(`checkboxSelectRow-${theCase.id}`));
     userEvent.click(result.getByText('Bulk actions'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('cases-bulk-open-button'));
     await waitFor(() => {});
     expect(updateBulkStatus).toBeCalledWith([theCase], CaseStatuses.open);
@@ -450,9 +462,11 @@ describe('AllCasesListGeneric', () => {
     const result = appMockRenderer.render(<AllCasesList />);
     const theCase = useGetCasesMockState.data.cases[0];
     userEvent.click(result.getByTestId('case-status-filter'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('case-status-filter-closed'));
     userEvent.click(result.getByTestId(`checkboxSelectRow-${theCase.id}`));
     userEvent.click(result.getByText('Bulk actions'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('cases-bulk-in-progress-button'));
     await waitFor(() => {});
     expect(updateBulkStatus).toBeCalledWith([theCase], CaseStatuses['in-progress']);
@@ -581,7 +595,7 @@ describe('AllCasesListGeneric', () => {
     wrapper.find('[data-test-subj="cases-table-row-select-1"]').first().simulate('click');
     await waitFor(() => {
       expect(onRowClick).toHaveBeenCalledWith({
-        assignees: [],
+        assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
         closedAt: null,
         closedBy: null,
         comments: [],
@@ -644,6 +658,7 @@ describe('AllCasesListGeneric', () => {
   it('should change the status to closed', async () => {
     const result = appMockRenderer.render(<AllCasesList isSelectorView={false} />);
     userEvent.click(result.getByTestId('case-status-filter'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('case-status-filter-closed'));
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
@@ -662,6 +677,7 @@ describe('AllCasesListGeneric', () => {
   it('should change the status to in-progress', async () => {
     const result = appMockRenderer.render(<AllCasesList isSelectorView={false} />);
     userEvent.click(result.getByTestId('case-status-filter'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('case-status-filter-in-progress'));
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
@@ -680,6 +696,7 @@ describe('AllCasesListGeneric', () => {
   it('should change the status to open', async () => {
     const result = appMockRenderer.render(<AllCasesList isSelectorView={false} />);
     userEvent.click(result.getByTestId('case-status-filter'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('case-status-filter-in-progress'));
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
@@ -843,6 +860,7 @@ describe('AllCasesListGeneric', () => {
     }
 
     userEvent.click(screen.getByTestId('case-status-filter'));
+    await waitForEuiPopoverOpen();
     userEvent.click(screen.getByTestId('case-status-filter-closed'));
 
     for (const checkbox of checkboxes) {
@@ -887,5 +905,173 @@ describe('AllCasesListGeneric', () => {
     const alertCounts = await findAllByTestId('case-table-column-alertsCount');
 
     expect(alertCounts.length).toBeGreaterThan(0);
+  });
+
+  describe('Solutions', () => {
+    it('should set the owner to all available solutions when deselecting all solutions', async () => {
+      const { getByTestId } = appMockRenderer.render(
+        <TestProviders owner={[]}>
+          <AllCasesList />
+        </TestProviders>
+      );
+
+      expect(useGetCasesMock).toHaveBeenCalledWith({
+        filterOptions: {
+          search: '',
+          searchFields: [],
+          severity: 'all',
+          reporters: [],
+          status: 'all',
+          tags: [],
+          assignees: [],
+          owner: ['securitySolution', 'observability'],
+        },
+        queryParams: { page: 1, perPage: 5, sortField: 'createdAt', sortOrder: 'desc' },
+      });
+
+      userEvent.click(getByTestId('options-filter-popover-button-Solution'));
+
+      await waitForEuiPopoverOpen();
+
+      userEvent.click(
+        getByTestId(`options-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
+        undefined,
+        {
+          skipPointerEventsCheck: true,
+        }
+      );
+
+      expect(useGetCasesMock).toBeCalledWith({
+        filterOptions: {
+          search: '',
+          searchFields: [],
+          severity: 'all',
+          reporters: [],
+          status: 'all',
+          tags: [],
+          assignees: [],
+          owner: ['securitySolution'],
+        },
+        queryParams: { page: 1, perPage: 5, sortField: 'createdAt', sortOrder: 'desc' },
+      });
+
+      userEvent.click(
+        getByTestId(`options-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
+        undefined,
+        {
+          skipPointerEventsCheck: true,
+        }
+      );
+
+      expect(useGetCasesMock).toHaveBeenLastCalledWith({
+        filterOptions: {
+          search: '',
+          searchFields: [],
+          severity: 'all',
+          reporters: [],
+          status: 'all',
+          tags: [],
+          assignees: [],
+          owner: ['securitySolution', 'observability'],
+        },
+        queryParams: { page: 1, perPage: 5, sortField: 'createdAt', sortOrder: 'desc' },
+      });
+    });
+
+    it('should hide the solutions filter if the owner is provided', async () => {
+      const { queryByTestId } = appMockRenderer.render(
+        <TestProviders owner={[SECURITY_SOLUTION_OWNER]}>
+          <AllCasesList />
+        </TestProviders>
+      );
+
+      expect(queryByTestId('options-filter-popover-button-Solution')).toBeFalsy();
+    });
+
+    it('should call useGetCases with the correct owner on initial render', async () => {
+      appMockRenderer.render(
+        <TestProviders owner={[SECURITY_SOLUTION_OWNER]}>
+          <AllCasesList />
+        </TestProviders>
+      );
+
+      expect(useGetCasesMock).toHaveBeenCalledWith({
+        filterOptions: {
+          search: '',
+          searchFields: [],
+          severity: 'all',
+          reporters: [],
+          status: 'all',
+          tags: [],
+          assignees: [],
+          owner: ['securitySolution'],
+        },
+        queryParams: { page: 1, perPage: 5, sortField: 'createdAt', sortOrder: 'desc' },
+      });
+    });
+  });
+});
+
+describe('Assignees', () => {
+  it('should hide the assignees column on basic license', async () => {
+    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
+
+    const result = render(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(result.getByTestId('cases-table')).toBeTruthy();
+      expect(result.queryAllByTestId('case-table-column-assignee').length).toBe(0);
+    });
+  });
+
+  it('should show the assignees column on platinum license', async () => {
+    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+
+    const result = render(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(result.getByTestId('cases-table')).toBeTruthy();
+      expect(result.queryAllByTestId('case-table-column-assignee').length).toBeGreaterThan(0);
+    });
+  });
+
+  it('should hide the assignees filters on basic license', async () => {
+    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
+
+    const result = render(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(result.getByTestId('cases-table')).toBeTruthy();
+      expect(result.queryAllByTestId('options-filter-popover-button-assignees').length).toBe(0);
+    });
+  });
+
+  it('should show the assignees filters on platinum license', async () => {
+    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+
+    const result = render(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(result.getByTestId('cases-table')).toBeTruthy();
+      expect(
+        result.queryAllByTestId('options-filter-popover-button-assignees').length
+      ).toBeGreaterThan(0);
+    });
   });
 });

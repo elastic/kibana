@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 import type { Query } from '@kbn/es-query';
 
-import { useAiOpsKibana } from '../../kibana_context';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
 import type { ApiExplainLogRateSpikes } from '../../../common/api';
 
@@ -53,8 +53,8 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   onSelectedChangePoint,
   selectedChangePoint,
 }) => {
-  const { services } = useAiOpsKibana();
-  const basePath = services.http?.basePath.get() ?? '';
+  const { http } = useAiopsAppContext();
+  const basePath = http.basePath.get() ?? '';
 
   const [currentAnalysisWindowParameters, setCurrentAnalysisWindowParameters] = useState<
     WindowParameters | undefined
@@ -112,7 +112,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   const showSpikeAnalysisTable = data?.changePoints.length > 0;
 
   return (
-    <>
+    <div data-test-subj="aiopsExplainLogRateSpikesAnalysis">
       <ProgressControls
         progress={data.loaded}
         progressMessage={data.loadingState ?? ''}
@@ -124,6 +124,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       <EuiSpacer size="xs" />
       {!isRunning && !showSpikeAnalysisTable && (
         <EuiEmptyPrompt
+          data-test-subj="aiopsNoResultsFoundEmptyPrompt"
           title={
             <h2>
               <FormattedMessage
@@ -177,8 +178,9 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           onPinnedChangePoint={onPinnedChangePoint}
           onSelectedChangePoint={onSelectedChangePoint}
           selectedChangePoint={selectedChangePoint}
+          dataViewId={dataView.id}
         />
       )}
-    </>
+    </div>
   );
 };

@@ -18,10 +18,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ApplicationStart } from '@kbn/core/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import type { CoreStart } from '@kbn/core/public';
 import { VisualizationListItem } from '../..';
 import { getVisualizeListItemLink } from './get_visualize_list_item_link';
 
@@ -80,7 +80,7 @@ const renderItemTypeIcon = (item: VisualizationListItem) => {
 };
 
 export const getTableColumns = (
-  application: ApplicationStart,
+  core: CoreStart,
   kbnUrlStateStorage: IKbnUrlStateStorage,
   taggingApi?: SavedObjectsTaggingApi
 ) =>
@@ -91,12 +91,17 @@ export const getTableColumns = (
         defaultMessage: 'Title',
       }),
       sortable: true,
-      render: (field: string, { editApp, editUrl, title, error, type }: VisualizationListItem) =>
+      render: (field: string, { editApp, editUrl, title, error }: VisualizationListItem) =>
         // In case an error occurs i.e. the vis has wrong type, we render the vis but without the link
         !error ? (
-          <RedirectAppLinks application={application} className="visListingTable__titleLink">
+          <RedirectAppLinks coreStart={core}>
             <EuiLink
-              href={getVisualizeListItemLink(application, kbnUrlStateStorage, editApp, editUrl)}
+              href={getVisualizeListItemLink(
+                core.application,
+                kbnUrlStateStorage,
+                editApp,
+                editUrl
+              )}
               data-test-subj={`visListingTitleLink-${title.split(' ').join('-')}`}
             >
               {field}

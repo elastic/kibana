@@ -25,9 +25,7 @@ const renderUseMetricsExplorerStateHook = () =>
   renderHook((props) => useMetricsExplorerState(props.source, props.derivedIndexPattern), {
     initialProps: { source, derivedIndexPattern },
     wrapper: ({ children }) => (
-      <MetricsExplorerOptionsContainer.Provider>
-        {children}
-      </MetricsExplorerOptionsContainer.Provider>
+      <MetricsExplorerOptionsContainer>{children}</MetricsExplorerOptionsContainer>
     ),
   });
 

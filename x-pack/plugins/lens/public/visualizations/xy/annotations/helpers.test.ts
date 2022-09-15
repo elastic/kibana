@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { createMockFramePublicAPI } from '../../../mocks';
 import { FramePublicAPI } from '../../../types';
 import { getStaticDate } from './helpers';
-
-const frame = {
-  datasourceLayers: {},
-  dateRange: { fromDate: '2022-02-01T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
-};
 
 describe('annotations helpers', () => {
   describe('getStaticDate', () => {
     it('should return the middle of the date range on when nothing is configured', () => {
-      expect(getStaticDate([], frame)).toBe('2022-03-12T00:00:00.000Z');
+      expect(
+        getStaticDate(
+          [],
+          createMockFramePublicAPI({
+            dateRange: { fromDate: '2022-02-01T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
+          })
+        )
+      ).toBe('2022-03-12T00:00:00.000Z');
     });
     it('should return the middle of the date range value on when there is no active data', () => {
       expect(
@@ -30,7 +33,9 @@ describe('annotations helpers', () => {
               xAccessor: 'a',
             },
           ],
-          frame
+          createMockFramePublicAPI({
+            dateRange: { fromDate: '2022-02-01T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
+          })
         )
       ).toBe('2022-03-12T00:00:00.000Z');
     });
@@ -58,7 +63,7 @@ describe('annotations helpers', () => {
             },
           ],
         },
-      };
+      } as FramePublicAPI['activeData'];
       expect(
         getStaticDate(
           [
@@ -70,10 +75,10 @@ describe('annotations helpers', () => {
               xAccessor: 'a',
             },
           ],
-          {
-            ...frame,
-            activeData: activeData as FramePublicAPI['activeData'],
-          }
+          createMockFramePublicAPI({
+            dateRange: { fromDate: '2022-02-01T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
+            activeData,
+          })
         )
       ).toBe('2022-02-27T23:00:00.000Z');
     });
@@ -101,7 +106,7 @@ describe('annotations helpers', () => {
             },
           ],
         },
-      };
+      } as FramePublicAPI['activeData'];
       expect(
         getStaticDate(
           [
@@ -113,10 +118,10 @@ describe('annotations helpers', () => {
               xAccessor: 'a',
             },
           ],
-          {
-            ...frame,
-            activeData: activeData as FramePublicAPI['activeData'],
-          }
+          createMockFramePublicAPI({
+            dateRange: { fromDate: '2022-02-01T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
+            activeData,
+          })
         )
       ).toBe('2022-03-12T00:00:00.000Z');
     });
@@ -156,7 +161,7 @@ describe('annotations helpers', () => {
             },
           ],
         },
-      };
+      } as FramePublicAPI['activeData'];
       expect(
         getStaticDate(
           [
@@ -168,10 +173,10 @@ describe('annotations helpers', () => {
               xAccessor: 'a',
             },
           ],
-          {
-            ...frame,
-            activeData: activeData as FramePublicAPI['activeData'],
-          }
+          createMockFramePublicAPI({
+            dateRange: { fromDate: '2022-02-01T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
+            activeData,
+          })
         )
       ).toBe('2022-03-26T05:00:00.000Z');
     });
@@ -236,7 +241,7 @@ describe('annotations helpers', () => {
             },
           ],
         },
-      };
+      } as FramePublicAPI['activeData'];
       expect(
         getStaticDate(
           [
@@ -255,11 +260,11 @@ describe('annotations helpers', () => {
               xAccessor: 'd',
             },
           ],
-          {
-            ...frame,
+
+          createMockFramePublicAPI({
+            activeData,
             dateRange: { fromDate: '2020-02-01T00:00:00.000Z', toDate: '2022-09-20T00:00:00.000Z' },
-            activeData: activeData as FramePublicAPI['activeData'],
-          }
+          })
         )
       ).toBe('2020-08-24T12:06:40.000Z');
     });

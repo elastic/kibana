@@ -18,7 +18,8 @@ import {
 } from './definitions';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { documentField } from '../document_field';
-import { IndexPattern, IndexPatternLayer, IndexPatternField } from '../types';
+import { IndexPatternLayer } from '../types';
+import { IndexPattern, IndexPatternField } from '../../types';
 import { GenericIndexPatternColumn } from '.';
 import { DateHistogramIndexPatternColumn } from './definitions/date_histogram';
 
@@ -75,6 +76,8 @@ const indexPattern = {
   hasRestrictions: false,
   fields: indexPatternFields,
   getFieldByName: getFieldByNameFactory([...indexPatternFields]),
+  isPersisted: true,
+  spec: {},
 };
 
 const baseColumnArgs: {
