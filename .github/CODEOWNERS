@@ -365,6 +365,10 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/plugins/ingest_pipelines/  @elastic/platform-deployment-management
 #CC# /x-pack/plugins/cross_cluster_replication/ @elastic/platform-deployment-management
 
+# Management Experience - Platform Onboarding
+/src/plugins/guided_onboarding/ @elastic/platform-onboarding
+/examples/guided_onboarding_example/ @elastic/platform-onboarding
+
 # Security Solution
 /x-pack/test/endpoint_api_integration_no_ingest/ @elastic/security-solution
 /x-pack/test/security_solution_endpoint/ @elastic/security-solution
