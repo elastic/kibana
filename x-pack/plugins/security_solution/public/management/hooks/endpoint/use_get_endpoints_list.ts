@@ -98,7 +98,7 @@ export const useGetEndpointsList = ({
       return [
         ...augmentedDataBasedOnSelectedAgents.selected,
         ...augmentedDataBasedOnSelectedAgents.rest,
-      ].slice(0, selectedAgentIdsCount >= 50 ? selectedAgentIdsCount + 10 : PAGING_PARAMS.default);
+      ].slice(0, selectedAgentIdsCount >= PAGING_PARAMS.default ? selectedAgentIdsCount + 10 : PAGING_PARAMS.default);
     },
   });
 };
