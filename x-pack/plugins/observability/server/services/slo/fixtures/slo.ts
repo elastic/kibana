@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SLI, SLO } from '@kbn/observability-plugin/server/types/models';
-import { CreateSLOParams } from '@kbn/observability-plugin/server/types/rest_specs';
 import uuid from 'uuid';
+import { SLI, SLO } from '../../../types/models';
+import { CreateSLOParams } from '../../../types/rest_specs';
 
 const commonSLO: Omit<CreateSLOParams, 'indicator'> = {
   name: 'irrelevant',
