@@ -53,15 +53,8 @@ const IconWrapper = styled.span`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
-const EntityAnalyticsHostRiskScoresComponent = ({
-  timerange,
-}: {
-  timerange: {
-    startDate: string;
-    endDate: string;
-  };
-}) => {
-  const { deleteQuery, setQuery } = useGlobalTime();
+const EntityAnalyticsHostRiskScoresComponent = () => {
+  const { deleteQuery, setQuery, from, to } = useGlobalTime();
   const [updatedAt, setUpdatedAt] = useState<number>(Date.now());
   const { toggleStatus, setToggleStatus } = useQueryToggle(TABLE_QUERY_ID);
   const columns = useMemo(() => getHostRiskScoreColumns(), []);
@@ -89,6 +82,14 @@ const EntityAnalyticsHostRiskScoresComponent = ({
       querySize: 5,
     },
   });
+
+  const timerange = useMemo(
+    () => ({
+      startDate: from,
+      endDate: to,
+    }),
+    [from, to]
+  );
 
   useQueryInspector({
     queryId: TABLE_QUERY_ID,

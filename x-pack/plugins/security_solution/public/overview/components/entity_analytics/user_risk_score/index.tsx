@@ -52,15 +52,8 @@ const IconWrapper = styled.span`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
-export const EntityAnalyticsUserRiskScores = ({
-  timerange,
-}: {
-  timerange: {
-    startDate: string;
-    endDate: string;
-  };
-}) => {
-  const { deleteQuery, setQuery } = useGlobalTime();
+const EntityAnalyticsUserRiskScoresComponent = () => {
+  const { deleteQuery, setQuery, from, to } = useGlobalTime();
   const [updatedAt, setUpdatedAt] = useState<number>(Date.now());
   const { toggleStatus, setToggleStatus } = useQueryToggle(TABLE_QUERY_ID);
   const columns = useMemo(() => getUserRiskScoreColumns(), []);
@@ -88,6 +81,14 @@ export const EntityAnalyticsUserRiskScores = ({
       querySize: 5,
     },
   });
+
+  const timerange = useMemo(
+    () => ({
+      startDate: from,
+      endDate: to,
+    }),
+    [from, to]
+  );
 
   useQueryInspector({
     queryId: TABLE_QUERY_ID,
@@ -139,7 +140,7 @@ export const EntityAnalyticsUserRiskScores = ({
   }
 
   if (!isModuleEnabled && !isTableLoading) {
-    return <EntityAnalyticsUserRiskScoresDisable timerange={timerange} refetch={refetch} />;
+    return <EntityAnalyticsUserRiskScoresDisable refetch={refetch} timerange={timerange} />;
   }
 
   return (
@@ -210,7 +211,10 @@ export const EntityAnalyticsUserRiskScores = ({
   );
 };
 
-const EntityAnalyticsUserRiskScoresDisable = ({
+export const EntityAnalyticsUserRiskScores = React.memo(EntityAnalyticsUserRiskScoresComponent);
+EntityAnalyticsUserRiskScores.displayName = 'EntityAnalyticsUserRiskScores';
+
+const EntityAnalyticsUserRiskScoresDisableComponent = ({
   refetch,
   timerange,
 }: {
@@ -247,3 +251,8 @@ const EntityAnalyticsUserRiskScoresDisable = ({
     </EuiPanel>
   );
 };
+
+export const EntityAnalyticsUserRiskScoresDisable = React.memo(
+  EntityAnalyticsUserRiskScoresDisableComponent
+);
+EntityAnalyticsUserRiskScoresDisable.displayName = 'EntityAnalyticsUserRiskScoresDisable';
