@@ -1034,6 +1034,7 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
 
     if (
       !ecsMappingFieldState.isTouched &&
+      ecsMappingArrayState.isTouched &&
       xorWith(parsedMapping, ecsMappingArray, isEqual).length > 1
     ) {
       resetField('ecsMappingArray', { defaultValue: [...parsedMapping, defaultEcsFormData] });
