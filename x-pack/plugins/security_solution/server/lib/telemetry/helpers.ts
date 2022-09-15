@@ -9,6 +9,7 @@ import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
 import { merge } from 'lodash';
+import type { Logger } from '@kbn/core/server';
 import { copyAllowlistedFields, exceptionListAllowlistFields } from './filterlists';
 import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
 import type {
@@ -30,9 +31,6 @@ import {
   DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS,
 } from './constants';
 import { tagsToEffectScope } from '../../../common/endpoint/service/trusted_apps/mapping';
-import type {
-  Logger
-} from '@kbn/core/server';
 
 /**
  * Determines the when the last run was in order to execute to.

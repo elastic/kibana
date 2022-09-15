@@ -67,8 +67,8 @@ export async function sendUpgradeAgentAction({
     type: 'UPGRADE',
   });
   await updateAgent(esClient, agentId, {
-    upgraded_at: null,
     upgrade_started_at: now,
+    upgrade_status: 'started',
   });
 }
 
@@ -207,8 +207,8 @@ async function upgradeBatch(
     agentsToUpdate.map((agent) => ({
       agentId: agent.id,
       data: {
-        upgraded_at: null,
         upgrade_started_at: now,
+        upgrade_status: 'started',
       },
     }))
   );
