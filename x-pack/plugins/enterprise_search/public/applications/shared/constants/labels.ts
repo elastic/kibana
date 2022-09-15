@@ -15,6 +15,10 @@ export const PASSWORD_LABEL = i18n.translate('xpack.enterpriseSearch.passwordLab
   defaultMessage: 'Password',
 });
 
+export const TOKEN_LABEL = i18n.translate('xpack.enterpriseSearch.tokenLabel', {
+  defaultMessage: 'Token',
+});
+
 export const TYPE_LABEL = i18n.translate('xpack.enterpriseSearch.typeLabel', {
   defaultMessage: 'Type',
 });

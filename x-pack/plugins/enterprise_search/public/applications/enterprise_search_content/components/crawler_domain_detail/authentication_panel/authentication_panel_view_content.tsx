@@ -13,7 +13,6 @@ import { EuiEmptyPrompt, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { CrawlerAuth } from '../../../api/crawler/types';
 import { CrawlerDomainDetailLogic } from '../crawler_domain_detail_logic';
 
 import './authentication_panel.scss';
@@ -21,9 +20,30 @@ import './authentication_panel.scss';
 export const AuthenticationPanelViewContent: React.FC = () => {
   const { domain } = useValues(CrawlerDomainDetailLogic);
 
-  const currentAuth: CrawlerAuth = domain?.auth ?? null;
-
-  return currentAuth === undefined ? (
+  return domain?.auth ? (
+    <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
+      <EuiTitle size="xs">
+        <h3>
+          {i18n.translate(
+            'xpack.enterpriseSearch.crawler.authenticationPanel.configurationSavePanel.title',
+            {
+              defaultMessage: 'Configuration settings saved',
+            }
+          )}
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiText color="subdued" size="s">
+        {i18n.translate(
+          'xpack.enterpriseSearch.crawler.authenticationPanel.configurationSavePanel.description',
+          {
+            defaultMessage:
+              'Authentication settings for crawling protected content have been saved. To update an authentication mechanism, delete settings and restart.',
+          }
+        )}
+      </EuiText>
+    </EuiPanel>
+  ) : (
     <EuiEmptyPrompt
       title={
         <h4>
@@ -52,28 +72,5 @@ export const AuthenticationPanelViewContent: React.FC = () => {
       }
       titleSize="s"
     />
-  ) : (
-    <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
-      <EuiTitle size="s">
-        <h3>
-          {i18n.translate(
-            'xpack.enterpriseSearch.crawler.authenticationPanel.configurationSavePanel.title',
-            {
-              defaultMessage: 'Configuration settings saved',
-            }
-          )}
-        </h3>
-      </EuiTitle>
-      <EuiSpacer />
-      <EuiText size="s">
-        {i18n.translate(
-          'xpack.enterpriseSearch.crawler.authenticationPanel.configurationSavePanel.description',
-          {
-            defaultMessage:
-              'Authentication settings for crawling protected content have been saved. To update an authentication mechanism, delete settings and restart.',
-          }
-        )}
-      </EuiText>
-    </EuiPanel>
   );
 };

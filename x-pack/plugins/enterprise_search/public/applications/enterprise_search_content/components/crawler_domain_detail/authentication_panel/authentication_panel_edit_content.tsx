@@ -21,7 +21,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import { USERNAME_LABEL, PASSWORD_LABEL } from '../../../../shared/constants';
+import { USERNAME_LABEL, PASSWORD_LABEL, TOKEN_LABEL } from '../../../../shared/constants';
 
 import { AuthenticationPanelLogic } from './authentication_panel_logic';
 import { AUTHENTICATION_LABELS } from './constants';
@@ -82,7 +82,7 @@ export const AuthenticationPanelEditContent: React.FC = () => {
             onChange={() => selectAuthOption('raw')}
           >
             <EuiForm>
-              <EuiFormRow label={PASSWORD_LABEL}>
+              <EuiFormRow label={TOKEN_LABEL}>
                 <EuiFieldPassword
                   type="dual"
                   value={headerContent}
