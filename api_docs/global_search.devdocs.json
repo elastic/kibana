@@ -654,13 +654,7 @@
               "; typeRegistry: ",
               "ISavedObjectTypeRegistry",
               "; }; uiSettings: { client: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              },
+              "IUiSettingsClient",
               "; }; capabilities: ",
               "Observable",
               "<",
