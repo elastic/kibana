@@ -7,9 +7,10 @@
 
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBadge,
-  EuiBasicTable,
+  EuiInMemoryTable,
   EuiSearchBar,
   EuiSpacer,
   IconColor,
@@ -131,15 +132,13 @@ export const NotificationsList: FC = () => {
       fetchNotifications();
     },
     500,
-    [pagination.pageIndex, pagination.pageSize, sorting, queryInstance, refresh]
+    [sorting, queryInstance, refresh]
   );
 
   const columns: Array<EuiBasicTableColumn<NotificationItem>> = [
     {
       field: 'timestamp',
-      name: i18n.translate('xpack.ml.notifications.timeLabel', {
-        defaultMessage: 'Time',
-      }),
+      name: <FormattedMessage id={'xpack.ml.notifications.timeLabel'} defaultMessage={'Time'} />,
       sortable: true,
       truncateText: false,
       'data-test-subj': 'mlNotificationTime',
@@ -148,9 +147,7 @@ export const NotificationsList: FC = () => {
     },
     {
       field: 'level',
-      name: i18n.translate('xpack.ml.notifications.levelLabel', {
-        defaultMessage: 'Level',
-      }),
+      name: <FormattedMessage id={'xpack.ml.notifications.levelLabel'} defaultMessage={'Level'} />,
       sortable: true,
       truncateText: false,
       'data-test-subj': 'mlNotificationLabel',
@@ -161,9 +158,7 @@ export const NotificationsList: FC = () => {
     },
     {
       field: 'job_type',
-      name: i18n.translate('xpack.ml.notifications.typeLabel', {
-        defaultMessage: 'Type',
-      }),
+      name: <FormattedMessage id={'xpack.ml.notifications.typeLabel'} defaultMessage={'Type'} />,
       sortable: true,
       truncateText: false,
       'data-test-subj': 'mlNotificationType',
@@ -174,9 +169,9 @@ export const NotificationsList: FC = () => {
     },
     {
       field: 'job_id',
-      name: i18n.translate('xpack.ml.notifications.entityLabel', {
-        defaultMessage: 'Entity ID',
-      }),
+      name: (
+        <FormattedMessage id={'xpack.ml.notifications.entityLabel'} defaultMessage={'Entity ID'} />
+      ),
       sortable: true,
       truncateText: false,
       'data-test-subj': 'mlNotificationEntity',
@@ -184,9 +179,9 @@ export const NotificationsList: FC = () => {
     },
     {
       field: 'message',
-      name: i18n.translate('xpack.ml.notifications.messageLabel', {
-        defaultMessage: 'Message',
-      }),
+      name: (
+        <FormattedMessage id={'xpack.ml.notifications.messageLabel'} defaultMessage={'Message'} />
+      ),
       sortable: false,
       truncateText: false,
       'data-test-subj': 'mlNotificationMessage',
@@ -311,21 +306,21 @@ export const NotificationsList: FC = () => {
 
       <EuiSpacer size={'m'} />
 
-      <EuiBasicTable<NotificationItem>
+      <EuiInMemoryTable<NotificationItem>
         columns={columns}
-        hasActions={true}
+        hasActions={false}
         isExpandable={false}
         isSelectable={false}
         items={items}
         itemId={'id'}
         loading={isLoading}
         rowProps={(item) => ({
-          'data-test-subj': `mlModelsTableRow row-${item.id}`,
+          'data-test-subj': `mlNotificationsTableRow row-${item.id}`,
         })}
         pagination={pagination}
         onChange={onTableChange}
         sorting={sorting}
-        data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}
+        data-test-subj={isLoading ? 'mlNotificationsTable loading' : 'mlNotificationsTable loaded'}
       />
     </>
   );

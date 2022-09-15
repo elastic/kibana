@@ -50,10 +50,15 @@ export function useTableSettings<TypeOfItem>(
 
   const onTableChange: EuiBasicTableProps<TypeOfItem>['onChange'] = useCallback(
     ({ page, sort }: CriteriaWithPagination<TypeOfItem>) => {
+      let resultSortField = sort?.field;
+      if (typeof resultSortField !== 'string') {
+        resultSortField = pageState.sortField as keyof TypeOfItem;
+      }
+
       const result = {
         pageIndex: page?.index ?? pageState.pageIndex,
         pageSize: page?.size ?? pageState.pageSize,
-        sortField: (sort?.field as string) ?? pageState.sortField,
+        sortField: resultSortField as string,
         sortDirection: sort?.direction ?? pageState.sortDirection,
       };
       updatePageState(result);
