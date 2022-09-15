@@ -291,16 +291,22 @@ export class ProjectMonitorFormatter {
       const chunkSize = 100;
       for (let i = 0; i < staleMonitorsData.length; i += chunkSize) {
         const staleMons = staleMonitorsData.slice(i, i + chunkSize);
-        await deleteMonitorBulk({
-          monitorIds: staleMons.map((sm) => sm.savedObjectId),
-          savedObjectsClient: this.savedObjectsClient,
-          server: this.server,
-          syntheticsMonitorClient: this.syntheticsMonitorClient,
-          request: this.request,
-        });
+        if (!this.keepStale) {
+          await deleteMonitorBulk({
+            monitorIds: staleMons.map((sm) => sm.savedObjectId),
+            savedObjectsClient: this.savedObjectsClient,
+            server: this.server,
+            syntheticsMonitorClient: this.syntheticsMonitorClient,
+            request: this.request,
+          });
+        } else {
+          staleMons.forEach((sm) => {
+            this.staleMonitors.push(sm.journeyId);
+          });
+        }
       }
 
-      if (staleMonitorsData.length > 0) {
+      if (staleMonitorsData.length > 0 && this.keepStale) {
         this.handleStreamingMessage({
           message: `Deleted ${staleMonitorsData.length} stale monitors`,
         });

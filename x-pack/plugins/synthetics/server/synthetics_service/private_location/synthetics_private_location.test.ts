@@ -155,7 +155,7 @@ describe('SyntheticsPrivateLocation', () => {
     ],
     [
       false,
-      'Unable to delete Synthetics package policy for monitor Test Monitor. Fleet write permissions are needed to use Synthetics private locations.',
+      'Unable to delete Synthetics package policy for monitor. Fleet write permissions are needed to use Synthetics private locations.',
     ],
   ])('throws errors for delete monitor', async (writeIntegrationPolicies, error) => {
     const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
@@ -168,13 +168,13 @@ describe('SyntheticsPrivateLocation', () => {
       },
     });
     try {
-      await syntheticsPrivateLocation.deleteMonitor(
-        testConfig,
+      await syntheticsPrivateLocation.deleteMonitors(
+        [testConfig],
         {} as unknown as KibanaRequest,
         savedObjectsClientMock
       );
     } catch (e) {
-      expect(e).toEqual(new Error(e));
+      expect(e).toEqual(new Error(error));
     }
   });
 
