@@ -72,6 +72,15 @@ export async function queryStateToExpressionAst({
         throw new Error(`No data view found for index pattern ${idxPattern}`);
       }
     }
+
+    // esql query
+    if (mode === 'esql' && 'esql' in query) {
+      const essql = aggregateQueryToAst(query);
+
+      if (essql) {
+        ast.chain.push(essql);
+      }
+    }
   }
   return ast;
 }

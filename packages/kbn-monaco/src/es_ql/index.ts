@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-export * from './esaggs';
-export * from './esdsl';
-export * from './essql';
-export * from './esql';
-export * from '../../../common/search/expressions';
-export * from './eql';
+import { LangModuleType } from '../types';
+import { ID } from './constants';
+import { lexerRules } from './lexer_rules';
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const ES_QLLang: LangModuleType = { ID, lexerRules };
