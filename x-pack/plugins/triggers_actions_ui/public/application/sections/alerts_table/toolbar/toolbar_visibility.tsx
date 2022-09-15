@@ -35,7 +35,6 @@ const getDefaultVisibility = (
             browserFields={browserFields}
             onResetColumns={onResetColumns}
             onToggleColumn={onToggleColumn}
-            options={{}}
           />
         ) : undefined,
       },
