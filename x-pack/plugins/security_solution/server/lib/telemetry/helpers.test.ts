@@ -919,7 +919,6 @@ describe('test tlog', () => {
     logger = loggingSystemMock.createLogger();
   });
 
-
   test('should log when cloud', () => {
     setIsElasticCloudDeployment(true);
     tlog(logger, 'test');
