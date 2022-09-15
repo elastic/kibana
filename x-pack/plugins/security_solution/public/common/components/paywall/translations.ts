@@ -11,7 +11,7 @@ export const PLATINUM = i18n.translate('xpack.securitySolution.paywall.platinum'
   defaultMessage: 'Platinum',
 });
 
-export const UPGRADE_CTA = i18n.translate('xpack.securitySolution.paywall.upgradeCta', {
+export const UPGRADE_CTA = i18n.translate('xpack.securitySolution.paywall.upgradeButton', {
   defaultMessage: 'Available from Platinum',
 });
 
