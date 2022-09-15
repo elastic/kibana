@@ -83,12 +83,23 @@ export const buildQueryBarDescription = ({
   queryLabel,
 }: BuildQueryBarDescription): ListItems[] => {
   let items: ListItems[] = [];
+  const isLoadedFromSavedQuery = !isEmpty(savedId) && !isEmpty(savedQueryName);
+  if (isLoadedFromSavedQuery) {
+    items = [
+      ...items,
+      {
+        title: <>{i18n.SAVED_QUERY_NAME_LABEL} </>,
+        description: <>{savedQueryName} </>,
+      },
+    ];
+  }
+
   if (!isEmpty(filters)) {
     filterManager.setFilters(filters);
     items = [
       ...items,
       {
-        title: <>{i18n.FILTERS_LABEL} </>,
+        title: <>{isLoadedFromSavedQuery ? i18n.SAVED_QUERY_FILTERS_LABEL : i18n.FILTERS_LABEL } </>,
         description: (
           <EuiFlexGroup wrap responsive={false} gutterSize="xs">
             {filterManager.getFilters().map((filter, index) => (
@@ -115,20 +126,12 @@ export const buildQueryBarDescription = ({
     items = [
       ...items,
       {
-        title: <>{queryLabel ?? i18n.QUERY_LABEL}</>,
+        title: <>{isLoadedFromSavedQuery ? i18n.SAVED_QUERY_LABEL : (queryLabel ?? i18n.QUERY_LABEL)}</>,
         description: <Query>{query}</Query>,
       },
     ];
   }
-  if (!isEmpty(savedId) && !isEmpty(savedQueryName)) {
-    items = [
-      ...items,
-      {
-        title: <>{i18n.SAVED_ID_LABEL} </>,
-        description: <>{savedQueryName} </>,
-      },
-    ];
-  }
+
   return items;
 };
 

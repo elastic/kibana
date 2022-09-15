@@ -17,9 +17,10 @@ import { TOASTER } from '../../screens/alerts_detection_rules';
 import {
   RULE_NAME_HEADER,
   SAVED_QUERY_NAME_DETAILS,
+  SAVED_QUERY_DETAILS,
+  SAVED_QUERY_FILTERS_DETAILS,  
   DEFINE_RULE_PANEL_PROGRESS,
   CUSTOM_QUERY_DETAILS,
-  FILTERS_DETAILS,
 } from '../../screens/rule_details';
 
 import { goToRuleDetails, editFirstRule } from '../../tasks/alerts_detection_rules';
@@ -102,8 +103,8 @@ describe('Custom saved_query rules', () => {
       cy.get(DEFINE_RULE_PANEL_PROGRESS).should('not.exist');
 
       getDetails(SAVED_QUERY_NAME_DETAILS).should('contain', savedQueryName);
-      getDetails(CUSTOM_QUERY_DETAILS).should('contain', savedQueryQuery);
-      getDetails(FILTERS_DETAILS).should('contain', savedQueryFilterKey);
+      getDetails(SAVED_QUERY_DETAILS).should('contain', savedQueryQuery);
+      getDetails(SAVED_QUERY_FILTERS_DETAILS).should('contain', savedQueryFilterKey);
     });
 
     context('Non existent saved query', () => {
@@ -148,7 +149,7 @@ describe('Custom saved_query rules', () => {
         cy.get(DEFINE_RULE_PANEL_PROGRESS).should('not.exist');
 
         getDetails(SAVED_QUERY_NAME_DETAILS).should('contain', savedQueryName);
-        getDetails(CUSTOM_QUERY_DETAILS).should('contain', savedQueryQuery);
+        getDetails(SAVED_QUERY_DETAILS).should('contain', savedQueryQuery);
       });
 
       it('Allows to update saved_query rule as query rule type', () => {
@@ -229,7 +230,7 @@ describe('Custom saved_query rules', () => {
         cy.get(DEFINE_RULE_PANEL_PROGRESS).should('not.exist');
 
         getDetails(SAVED_QUERY_NAME_DETAILS).should('contain', savedQueryName);
-        getDetails(CUSTOM_QUERY_DETAILS).should('contain', savedQueryQuery);
+        getDetails(SAVED_QUERY_DETAILS).should('contain', savedQueryQuery);
       });
     });
   });
