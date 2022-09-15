@@ -6,14 +6,19 @@
  */
 
 import React from 'react';
-import { configure } from '@testing-library/react';
+import { configure, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import RecentCases, { RecentCasesProps } from '.';
 import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
 import { useGetCasesMockState } from '../../containers/mock';
+// import * as kibanaHooks from '../../common/lib/kibana/hooks';
 import { useCurrentUser } from '../../common/lib/kibana/hooks';
 import { useGetCases } from '../../containers/use_get_cases';
+import * as api from '../../containers/user_profiles/api';
+import { useToasts } from '../../common/lib/kibana';
 
+// jest.mock('../../common/lib/kibana');
+jest.mock('../../containers/user_profiles/api');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../common/lib/kibana/hooks');
 jest.mock('../../common/navigation/hooks');
@@ -31,15 +36,19 @@ const useGetCasesMock = useGetCases as jest.Mock;
 const useCurrentUserMock = useCurrentUser as jest.Mock;
 
 describe('RecentCases', () => {
+  const addSuccess = jest.fn();
+  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError: jest.fn() });
+
   let appMockRender: AppMockRenderer;
   beforeEach(() => {
     jest.clearAllMocks();
     useGetCasesMock.mockImplementation(() => mockData);
-    useCurrentUserMock.mockResolvedValue({
+    useCurrentUserMock.mockReturnValue({
       email: 'elastic@elastic.co',
       fullName: 'Elastic',
       username: 'elastic',
     });
+
     appMockRender = createAppMockRenderer();
   });
 
@@ -78,7 +87,7 @@ describe('RecentCases', () => {
     });
   });
 
-  it('sets the reporter filters correctly', () => {
+  it('sets the reporter filters correctly', async () => {
     const { getByTestId } = appMockRender.render(
       <TestProviders>
         <RecentCases {...defaultProps} />
@@ -91,12 +100,21 @@ describe('RecentCases', () => {
     });
 
     // apply the filter
-    const myRecentCasesElement = getByTestId('myRecentlyReported');
-    userEvent.click(myRecentCasesElement);
+    await waitFor(() => {
+      const myRecentCasesElement = getByTestId('myRecentlyReported');
+      userEvent.click(myRecentCasesElement);
+    });
 
     expect(useGetCasesMock).toHaveBeenLastCalledWith({
       filterOptions: {
-        reporters: [{ email: undefined, full_name: undefined, username: undefined }],
+        reporters: [
+          {
+            email: 'damaged_raccoon@elastic.co',
+            full_name: 'Damaged Raccoon',
+            profile_uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+            username: 'damaged_raccoon',
+          },
+        ],
       },
       queryParams: { perPage: 10 },
     });
@@ -108,6 +126,42 @@ describe('RecentCases', () => {
     expect(useGetCasesMock).toHaveBeenLastCalledWith({
       filterOptions: {
         reporters: [],
+      },
+      queryParams: { perPage: 10 },
+    });
+  });
+
+  it('sets the reporter filters correctly when it cannot find the current user profile', async () => {
+    const spyOnGetCurrentUserProfile = jest.spyOn(api, 'getCurrentUserProfile');
+    // @ts-expect-error expects a UserProfile type but we want to test with undefined
+    spyOnGetCurrentUserProfile.mockResolvedValue(undefined);
+
+    const { getByTestId } = appMockRender.render(
+      <TestProviders>
+        <RecentCases {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(useGetCasesMock).toHaveBeenCalledWith({
+      filterOptions: { reporters: [] },
+      queryParams: { perPage: 10 },
+    });
+
+    // apply the filter
+    await waitFor(() => {
+      const myRecentCasesElement = getByTestId('myRecentlyReported');
+      userEvent.click(myRecentCasesElement);
+    });
+
+    expect(useGetCasesMock).toHaveBeenLastCalledWith({
+      filterOptions: {
+        reporters: [
+          {
+            email: 'elastic@elastic.co',
+            full_name: 'Elastic',
+            username: 'elastic',
+          },
+        ],
       },
       queryParams: { perPage: 10 },
     });
