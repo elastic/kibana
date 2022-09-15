@@ -68,7 +68,7 @@ export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
   const id = useGeneratedHtmlId({ prefix: 'filesUploadFile' });
   const errorId = `${id}_error`;
 
-  const controllButton = (): JSX.Element => {
+  const controllButton = (): JSX.Element | null => {
     if (uploading) {
       return (
         <EuiButtonEmpty
