@@ -17,7 +17,6 @@ import {
 import {
   EuiBadge,
   EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
