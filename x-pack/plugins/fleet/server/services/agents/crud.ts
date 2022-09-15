@@ -18,7 +18,7 @@ import { SO_SEARCH_LIMIT } from '../../../common/constants';
 import { isAgentUpgradeable } from '../../../common/services';
 import { AGENTS_PREFIX, AGENTS_INDEX } from '../../constants';
 import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
-import { IngestManagerError, isESClientError, AgentNotFoundError } from '../../errors';
+import { FleetError, isESClientError, AgentNotFoundError } from '../../errors';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 
@@ -53,7 +53,7 @@ function _joinFilters(filters: Array<string | undefined | KueryNode>): KueryNode
         undefined as KueryNode | undefined
       );
   } catch (err) {
-    throw new IngestManagerError(`Kuery is malformed: ${err.message}`);
+    throw new FleetError(`Kuery is malformed: ${err.message}`);
   }
 }
 
@@ -83,9 +83,7 @@ export async function getAgents(esClient: ElasticsearchClient, options: GetAgent
       })
     ).agents;
   } else {
-    throw new IngestManagerError(
-      'Either options.agentIds or options.kuery are required to get agents'
-    );
+    throw new FleetError('Either options.agentIds or options.kuery are required to get agents');
   }
 
   return agents;
