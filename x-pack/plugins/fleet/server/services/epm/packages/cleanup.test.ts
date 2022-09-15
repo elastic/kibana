@@ -8,7 +8,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import type { PackagePolicyServiceInterface } from '../../package_policy';
+import type { PackagePolicyClient } from '../../package_policy_service';
 import * as storage from '../archive/storage';
 import { packagePolicyService } from '../../package_policy';
 
@@ -26,8 +26,7 @@ jest.mock('../../package_policy');
 
 describe(' Cleanup old assets', () => {
   let soClient: jest.Mocked<SavedObjectsClientContract>;
-  const packagePolicyServiceMock =
-    packagePolicyService as jest.Mocked<PackagePolicyServiceInterface>;
+  const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyClient>;
   let removeArchiveEntriesMock: jest.MockedFunction<typeof storage.removeArchiveEntries>;
 
   function mockFindVersions(versions: string[]) {

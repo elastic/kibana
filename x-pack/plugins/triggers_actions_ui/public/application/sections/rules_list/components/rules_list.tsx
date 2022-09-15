@@ -90,6 +90,7 @@ import { RulesListVisibleColumns } from './rules_list_column_selector';
 import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
 import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
 import { useRulesBulkEditSelect } from '../../../hooks/use_rules_bulk_edit_selection';
+import { runRule } from '../../../lib/run_rule';
 
 const ENTER_KEY = 13;
 
@@ -268,6 +269,10 @@ export const RulesList = ({
   const onRuleEdit = (ruleItem: RuleTableItem) => {
     setEditFlyoutVisibility(true);
     setCurrentRuleToEdit(ruleItem);
+  };
+
+  const onRunRule = async (id: string) => {
+    await runRule(http, toasts, id);
   };
 
   const isRuleTypeEditableInContext = (ruleTypeId: string) =>
@@ -817,6 +822,7 @@ export const RulesList = ({
             setRulesToDelete={setRulesToDelete}
             onEditRule={() => onRuleEdit(rule)}
             onUpdateAPIKey={setRulesToUpdateAPIKey}
+            onRunRule={() => onRunRule(rule.id)}
           />
         )}
         renderRuleError={(rule) => {

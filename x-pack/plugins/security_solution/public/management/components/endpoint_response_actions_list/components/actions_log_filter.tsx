@@ -7,8 +7,9 @@
 
 import React, { memo, useMemo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSelectable, EuiPopoverTitle } from '@elastic/eui';
+import type { ResponseActions } from '../../../../../common/endpoint/service/response_actions/constants';
 import { ActionsLogFilterPopover } from './actions_log_filter_popover';
-import { type FilterItems, type FilterName, useActionsLogFilter } from './hooks';
+import { type FilterItems, type FilterName, useActionsLogFilter, getUiCommand } from './hooks';
 import { ClearAllButton } from './clear_all_button';
 import { UX_MESSAGES } from '../translations';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
@@ -16,22 +17,32 @@ import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 export const ActionsLogFilter = memo(
   ({
     filterName,
+    isFlyout,
     onChangeFilterOptions,
   }: {
     filterName: FilterName;
+    isFlyout: boolean;
     onChangeFilterOptions: (selectedOptions: string[]) => void;
   }) => {
     const getTestId = useTestIdGenerator('response-actions-list');
-    const { items, setItems, hasActiveFilters, numActiveFilters, numFilters } =
-      useActionsLogFilter(filterName);
+    const {
+      items,
+      setItems,
+      hasActiveFilters,
+      numActiveFilters,
+      numFilters,
+      setUrlActionsFilters,
+      setUrlStatusesFilters,
+    } = useActionsLogFilter(filterName, isFlyout);
 
     const isSearchable = useMemo(() => filterName !== 'statuses', [filterName]);
 
     const onChange = useCallback(
       (newOptions: FilterItems) => {
-        setItems(newOptions.map((e) => e));
+        // update filter UI options state
+        setItems(newOptions.map((option) => option));
 
-        // update selected filter state
+        // compute selected list of options
         const selectedItems = newOptions.reduce<string[]>((acc, curr) => {
           if (curr.checked === 'on') {
             acc.push(curr.key);
@@ -39,22 +50,59 @@ export const ActionsLogFilter = memo(
           return acc;
         }, []);
 
+        if (!isFlyout) {
+          // update URL params
+          if (filterName === 'actions') {
+            setUrlActionsFilters(
+              selectedItems.map((item) => getUiCommand(item as ResponseActions)).join()
+            );
+          } else if (filterName === 'statuses') {
+            setUrlStatusesFilters(selectedItems.join());
+          }
+        }
+
         // update query state
         onChangeFilterOptions(selectedItems);
       },
-      [setItems, onChangeFilterOptions]
+      [
+        filterName,
+        isFlyout,
+        setItems,
+        onChangeFilterOptions,
+        setUrlActionsFilters,
+        setUrlStatusesFilters,
+      ]
     );
 
     // clear all selected options
     const onClearAll = useCallback(() => {
+      // update filter UI options state
       setItems(
-        items.map((e) => {
-          e.checked = undefined;
-          return e;
+        items.map((option) => {
+          option.checked = undefined;
+          return option;
         })
       );
+
+      if (!isFlyout) {
+        // update URL params
+        if (filterName === 'actions') {
+          setUrlActionsFilters('');
+        } else if (filterName === 'statuses') {
+          setUrlStatusesFilters('');
+        }
+      }
+      // update query state
       onChangeFilterOptions([]);
-    }, [items, setItems, onChangeFilterOptions]);
+    }, [
+      filterName,
+      isFlyout,
+      items,
+      setItems,
+      onChangeFilterOptions,
+      setUrlActionsFilters,
+      setUrlStatusesFilters,
+    ]);
 
     return (
       <ActionsLogFilterPopover

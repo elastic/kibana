@@ -46,6 +46,7 @@ const mockRouteSpy: RouteSpyState = {
 };
 const mockDispatch = jest.fn();
 const mockUseUserInfo = useUserInfo as jest.Mock;
+jest.mock('../../lib/apm/use_track_http_request');
 jest.mock('../../../detections/components/user_info');
 jest.mock('./api');
 jest.mock('../../utils/global_query_string');
