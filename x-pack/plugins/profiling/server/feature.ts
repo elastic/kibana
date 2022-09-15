@@ -17,29 +17,27 @@ export const PROFILING_FEATURE = {
   }),
   order: 1200,
   category: DEFAULT_APP_CATEGORIES.observability,
-  app: [PROFILING_SERVER_FEATURE_ID, 'kibana'],
-  catalogue: [PROFILING_SERVER_FEATURE_ID],
+  app: ['kibana'],
+  catalogue: [],
   // see x-pack/plugins/features/common/feature_kibana_privileges.ts
   privileges: {
     all: {
-      app: [PROFILING_SERVER_FEATURE_ID, 'kibana'],
-      api: [PROFILING_SERVER_FEATURE_ID],
-      catalogue: [PROFILING_SERVER_FEATURE_ID],
+      app: ['kibana'],
+      catalogue: [],
       savedObject: {
         all: [],
         read: [],
       },
-      ui: ['show', 'save'],
+      ui: [],
     },
     read: {
-      app: [PROFILING_SERVER_FEATURE_ID, 'kibana'],
-      api: [PROFILING_SERVER_FEATURE_ID],
-      catalogue: [PROFILING_SERVER_FEATURE_ID],
+      app: ['kibana'],
+      catalogue: [],
       savedObject: {
         all: [],
         read: [],
       },
-      ui: ['show'],
+      ui: [],
     },
   },
 };

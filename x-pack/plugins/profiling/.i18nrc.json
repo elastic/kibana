@@ -3,5 +3,5 @@
   "paths": {
     "profiling": "."
   },
-  "translations": ["translations/ja-JP.json"]
+  "translations": []
 }

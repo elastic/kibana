@@ -17,9 +17,6 @@ type ProfilingConfig = TypeOf<typeof configSchema>;
 
 // plugin config
 export const config: PluginConfigDescriptor<ProfilingConfig> = {
-  exposeToBrowser: {
-    enabled: true,
-  },
   schema: configSchema,
 };
 
