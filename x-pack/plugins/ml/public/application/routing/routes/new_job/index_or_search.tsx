@@ -52,7 +52,7 @@ const getDataVisBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string)
 
 const getExplainLogRateSpikesBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
   getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-  getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB', navigateToPath, basePath),
+  getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB_EXPLAIN_LOG_RATE_SPIKES', navigateToPath, basePath),
   getBreadcrumbWithUrlForApp('EXPLAIN_LOG_RATE_SPIKES', navigateToPath, basePath),
   {
     text: i18n.translate('xpack.ml.aiopsBreadcrumbs.selectDateViewLabel', {
@@ -63,7 +63,7 @@ const getExplainLogRateSpikesBreadcrumbs = (navigateToPath: NavigateToPath, base
 
 const getLogCategorizationBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
   getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-  getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB', navigateToPath, basePath),
+  getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB_LOG_PATTERN_ANALYSIS', navigateToPath, basePath),
   getBreadcrumbWithUrlForApp('LOG_PATTERN_ANALYSIS', navigateToPath, basePath),
   {
     text: i18n.translate('xpack.ml.aiopsBreadcrumbs.selectDateViewLabel', {

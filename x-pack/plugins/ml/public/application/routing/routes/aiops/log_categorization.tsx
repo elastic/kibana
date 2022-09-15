@@ -35,7 +35,7 @@ export const logCategorizationRouteFactory = (
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB_LOG_PATTERN_ANALYSIS', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.aiops.logCategorization.docTitle', {
         defaultMessage: 'Log Pattern Analysis',
