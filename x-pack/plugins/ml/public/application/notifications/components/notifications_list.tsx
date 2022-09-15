@@ -98,8 +98,6 @@ export const NotificationsList: FC = () => {
     try {
       setIsLoading(true);
       const response = await mlApiServices.notifications.findMessages({
-        size: pagination.pageSize,
-        from: pagination.pageIndex,
         sortField: sorting.sort!.field,
         sortDirection: sorting.sort!.direction,
         earliest: timeRange.from,
@@ -118,14 +116,7 @@ export const NotificationsList: FC = () => {
     }
 
     setIsLoading(false);
-  }, [
-    pagination,
-    sorting,
-    queryInstance,
-    mlApiServices.notifications,
-    displayErrorToast,
-    timeRange,
-  ]);
+  }, [sorting, queryInstance, mlApiServices.notifications, displayErrorToast, timeRange]);
 
   useDebounce(
     function refetchNotification() {
@@ -321,6 +312,12 @@ export const NotificationsList: FC = () => {
         onChange={onTableChange}
         sorting={sorting}
         data-test-subj={isLoading ? 'mlNotificationsTable loading' : 'mlNotificationsTable loaded'}
+        message={
+          <FormattedMessage
+            id={'xpack.ml.notifications.noItemsFoundMessage'}
+            defaultMessage={'No notification found'}
+          />
+        }
       />
     </>
   );
