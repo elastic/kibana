@@ -17,16 +17,18 @@ import {
   EuiProgress,
   EuiHorizontalRule,
   EuiSpacer,
-  EuiTextColor,
   htmlIdGenerator,
   EuiButtonEmpty,
   EuiTitle,
   EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
 import { ApplicationStart } from '@kbn/core-application-browser';
 import { HttpStart } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { guidesConfig } from '../constants';
 import type { GuideConfig, StepStatus, GuidedSetupState, StepConfig } from '../types';
 import type { ApiService } from '../services/api';
@@ -62,17 +64,11 @@ const getCurrentStep = (steps?: StepConfig[], state?: GuidedSetupState): number 
   }
 };
 
-// TODO this logic is still not working correctly
 const getStepStatus = (steps: StepConfig[], stepIndex: number, activeStep?: string): StepStatus => {
-  // If activeStep is unset, we assume the user has just activated the guide but not started the first step
-  if (activeStep === 'unset' && stepIndex === 0) {
-    return 'initialized';
-  }
-
   const activeStepIndex = steps.findIndex((step: StepConfig) => step.id === activeStep);
 
   if (activeStepIndex < stepIndex) {
-    return 'not_started';
+    return 'incomplete';
   }
 
   if (activeStepIndex === stepIndex) {
@@ -122,11 +118,12 @@ export const GuidedSetupPanel = ({ api, application }: Props) => {
   const guideConfig = getConfig(guidedSetupState);
 
   // TODO handle loading, error state
+  // https://github.com/elastic/kibana/issues/139799, https://github.com/elastic/kibana/issues/139798
   if (!guideConfig) {
     return (
-      <EuiButton onClick={toggleGuide} color="success" fill isDisabled={true}>
+      <EuiButton onClick={toggleGuide} color="success" fill isDisabled={true} size="s">
         {i18n.translate('guidedOnboarding.disabledGuidedSetupButtonLabel', {
-          defaultMessage: 'Guided setup',
+          defaultMessage: 'Setup guide',
         })}
       </EuiButton>
     );
@@ -137,16 +134,16 @@ export const GuidedSetupPanel = ({ api, application }: Props) => {
   return (
     <EuiPopover
       button={
-        <EuiButton onClick={toggleGuide} color="success" fill>
+        <EuiButton onClick={toggleGuide} color="success" fill size="s">
           {currentStep
             ? i18n.translate('guidedOnboarding.guidedSetupStepButtonLabel', {
-                defaultMessage: 'Guided setup: Step {currentStep}',
+                defaultMessage: 'Setup guide: Step {currentStep}',
                 values: {
                   currentStep,
                 },
               })
             : i18n.translate('guidedOnboarding.guidedSetupButtonLabel', {
-                defaultMessage: 'Guided setup',
+                defaultMessage: 'Setup guide',
               })}
         </EuiButton>
       }
@@ -190,20 +187,24 @@ export const GuidedSetupPanel = ({ api, application }: Props) => {
 
         <EuiHorizontalRule />
 
-        {/* TODO this is still not working correctly */}
-        {/* Only show the progress bar when a step is active */}
-        {Boolean(currentStep) && (
-          <EuiProgress
-            label={i18n.translate('guidedOnboarding.dropdownPanel.progressLabel', {
-              defaultMessage: 'Progress',
-            })}
-            // TODO Remove hard-coded values
-            value={40}
-            max={100}
-            size="l"
-            valueText
-          />
-        )}
+        {/*
+          TODO: Progress bar should only show after the first step has been started
+          We need to make changes to the state itself in order to support this
+         */}
+        <EuiProgress
+          label={i18n.translate('guidedOnboarding.dropdownPanel.progressLabel', {
+            defaultMessage: 'Progress',
+          })}
+          value={currentStep ? currentStep - 1 : 0}
+          valueText={i18n.translate('guidedOnboarding.dropdownPanel.progressValueLabel', {
+            defaultMessage: '{stepCount} steps',
+            values: {
+              stepCount: `${currentStep ? currentStep - 1 : 0} / ${guideConfig.steps.length}`,
+            },
+          })}
+          max={guideConfig.steps.length}
+          size="l"
+        />
 
         <EuiSpacer size="xl" />
 
@@ -221,16 +222,64 @@ export const GuidedSetupPanel = ({ api, application }: Props) => {
             />
           );
         })}
+
         <EuiPopoverFooter>
-          <EuiText size="xs" textAlign="center">
-            <EuiTextColor color="subdued">
-              <p>
-                {i18n.translate('guidedOnboarding.dropdownPanel.footerDescription', {
-                  defaultMessage: `Got questions? We're here to help.`,
+          <EuiFlexGroup direction="column" alignItems="center" gutterSize="xs">
+            <EuiFlexItem>
+              {/* TODO: Implement exit guide modal - https://github.com/elastic/kibana/issues/139804 */}
+              <EuiButtonEmpty onClick={() => {}}>
+                {i18n.translate('guidedOnboarding.dropdownPanel.footer.exitGuideButtonLabel', {
+                  defaultMessage: 'Exit setup guide',
                 })}
-              </p>
-            </EuiTextColor>
-          </EuiText>
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+
+            <EuiFlexItem>
+              <EuiText color="subdued" textAlign="center">
+                <FormattedMessage
+                  id="guidedOnboarding.dropdownPanel.footer.feedbackDescription"
+                  defaultMessage={`How’s onboarding? We’d love your {feedbackLink}`}
+                  values={{
+                    feedbackLink: (
+                      <EuiLink
+                        href="https://www.elastic.co/kibana/feedback"
+                        target="_blank"
+                        external
+                      >
+                        {i18n.translate(
+                          'guidedOnboarding.dropdownPanel.footer.feedbackDescription',
+                          {
+                            defaultMessage: 'feedback',
+                          }
+                        )}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+
+            <EuiFlexItem>
+              <EuiText color="subdued" textAlign="center">
+                <FormattedMessage
+                  id="guidedOnboarding.dropdownPanel.footer.supportDescription"
+                  defaultMessage={`Other questions? We're {helpLink}`}
+                  values={{
+                    helpLink: (
+                      <EuiLink href="https://cloud.elastic.co/support " target="_blank" external>
+                        {i18n.translate(
+                          'guidedOnboarding.dropdownPanel.footer.helpTextDescription',
+                          {
+                            defaultMessage: 'here to help',
+                          }
+                        )}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPopoverFooter>
       </div>
     </EuiPopover>

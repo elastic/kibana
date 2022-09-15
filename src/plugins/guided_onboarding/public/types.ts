@@ -21,12 +21,12 @@ export interface AppPluginStartDependencies {
 }
 
 export type UseCase = 'observability' | 'security' | 'search';
-export type StepStatus = 'not_started' | 'initialized' | 'in_progress' | 'complete';
+export type StepStatus = 'incomplete' | 'complete' | 'in_progress';
 
 export interface StepConfig {
   id: string;
   title: string;
-  description: string;
+  descriptionList: string[];
   location?: {
     appID: string;
     path: string;

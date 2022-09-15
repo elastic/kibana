@@ -58,7 +58,7 @@ export const GuidedSetupStep = ({
     <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="center" alignItems="center">
       <EuiFlexItem grow={false}>
         {stepStatus === 'complete' ? (
-          <EuiIcon type="check" size="m" color="white" />
+          <EuiIcon type="checkInCircleFilled" size="l" color={euiTheme.colors.success} />
         ) : (
           <span css={stepNumberCss}>{stepNumber}</span>
         )}
@@ -75,25 +75,28 @@ export const GuidedSetupStep = ({
         id={accordionId}
         buttonContent={buttonContent}
         arrowDisplay="right"
-        forceState={
-          stepStatus === 'in_progress' || stepStatus === 'initialized' ? 'open' : 'closed'
-        }
+        forceState={stepStatus === 'in_progress' ? 'open' : 'closed'}
       >
         <>
           <EuiSpacer size="s" />
-          <EuiText size="s">{stepConfig.description}</EuiText>
+
+          <EuiText size="s">
+            <ul>
+              {stepConfig.descriptionList.map((description, index) => {
+                return <li key={`description-${index}`}>{description}</li>;
+              })}
+            </ul>
+          </EuiText>
+
           <EuiSpacer />
-          {(stepStatus === 'in_progress' || stepStatus === 'initialized') && (
+          {stepStatus === 'in_progress' && (
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 <EuiButton onClick={() => navigateToStep(stepConfig)} fill>
-                  {stepStatus === 'in_progress'
-                    ? i18n.translate('guidedOnboarding.dropdownPanel.continueStepButtonLabel', {
-                        defaultMessage: 'Continue',
-                      })
-                    : i18n.translate('guidedOnboarding.dropdownPanel.startStepButtonLabel', {
-                        defaultMessage: 'Start',
-                      })}
+                  {/* TODO: Support for conditional "Continue" button label if user revists a step - https://github.com/elastic/kibana/issues/139752 */}
+                  {i18n.translate('guidedOnboarding.dropdownPanel.startStepButtonLabel', {
+                    defaultMessage: 'Start',
+                  })}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
