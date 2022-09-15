@@ -6,7 +6,6 @@
  */
 
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
-import { getBrowserNormalizer } from '../browser/normalizers';
 import { parseJsonIfString } from '../helpers/parsers';
 import { CommonFields, ConfigKey, DataStream } from '../types';
 import {
@@ -93,5 +92,5 @@ export const commonNormalizers: CommonNormalizerMap = {
   [ConfigKey.REVISION]: getCommonNormalizer(ConfigKey.REVISION),
   [ConfigKey.MONITOR_SOURCE_TYPE]: getCommonNormalizer(ConfigKey.MONITOR_SOURCE_TYPE),
   [ConfigKey.FORM_MONITOR_TYPE]: getCommonNormalizer(ConfigKey.FORM_MONITOR_TYPE),
-  [ConfigKey.JOURNEY_ID]: getBrowserNormalizer(ConfigKey.JOURNEY_ID),
+  [ConfigKey.JOURNEY_ID]: getCommonNormalizer(ConfigKey.JOURNEY_ID),
 };

@@ -92,6 +92,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('project monitors - handles http monitors', async () => {
+      const kibanaVersion = await kibanaServer.version.get();
+
       try {
         const messages = await parseStreamApiResponse(
           projectMonitorEndpoint,
@@ -109,7 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
           httpProjectMonitors.monitors.map((monitor) => ({
             id: monitor.id,
             details:
-              'The following Heartbeat options are not supported for project monitors in 8.5.0: check.response.body|unsupportedKey.nestedUnsupportedKey',
+              `The following Heartbeat options are not supported for project monitors in ${kibanaVersion}: check.response.body|unsupportedKey.nestedUnsupportedKey`,
             reason: 'Unsupported Heartbeat option',
           }))
         );
@@ -1100,8 +1102,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              testPolicyId
+            '-' +
+            testPolicyId
         );
         expect(packagePolicy.name).eql(
           `${projectMonitors.monitors[0].id}-${projectMonitors.project}-default-Test private location 0`
@@ -1158,8 +1160,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              testPolicyId
+            '-' +
+            testPolicyId
         );
 
         expect(packagePolicy.policy_id).eql(testPolicyId);
@@ -1193,8 +1195,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              testPolicyId
+            '-' +
+            testPolicyId
         );
 
         expect(packagePolicy2).eql(undefined);
@@ -1237,8 +1239,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              testPolicyId
+            '-' +
+            testPolicyId
         );
 
         expect(packagePolicy.policy_id).eql(testPolicyId);
@@ -1287,8 +1289,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              testPolicyId
+            '-' +
+            testPolicyId
         );
 
         expect(packagePolicy2).eql(undefined);
