@@ -131,7 +131,7 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
     },
     startCrawl: async ({ overrides = {} }) => {
       try {
-        if (isCrawlerIndex(values.indexData)) {
+        if (isCrawlerIndex(values.indexData) && values.indexData.connector) {
           actions.makeStartSyncRequest({ connectorId: values.indexData.connector.id, nextSyncConfig: overrides });
         } else {
           // TODO show an alert
