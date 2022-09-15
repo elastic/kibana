@@ -73,7 +73,7 @@ export const ActionsLogFilter = memo(
           isNotChangingOptions && wasPopoverOpen.current && isPopoverOpen && filterName === 'hosts'
         );
       },
-      [filterName, isPopoverOpen, wasPopoverOpen]
+      [filterName, isPopoverOpen]
     );
 
     // augmented options based on hosts filter
