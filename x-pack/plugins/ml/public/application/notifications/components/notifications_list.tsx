@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBadge,
+  EuiCallOut,
   EuiInMemoryTable,
   EuiSearchBar,
   EuiSpacer,
@@ -59,6 +60,7 @@ export const NotificationsList: FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
+  const [queryError, setQueryError] = useState<string>('');
 
   const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
 
@@ -79,16 +81,12 @@ export const NotificationsList: FC = () => {
 
   const queryInstance = useMemo<Query | undefined>(() => {
     try {
+      setQueryError('');
       return EuiSearchBar.Query.parse(searchQueryText ?? '');
     } catch (error) {
-      displayErrorToast(
-        error,
-        i18n.translate('xpack.ml.notifications.invalidQueryError', {
-          defaultMessage: 'Invalid query',
-        })
-      );
+      setQueryError(error.message);
     }
-  }, [searchQueryText, displayErrorToast]);
+  }, [searchQueryText, setQueryError]);
 
   const fetchNotifications = useCallback(async () => {
     if (!queryInstance) return;
@@ -292,6 +290,25 @@ export const NotificationsList: FC = () => {
       />
 
       <EuiSpacer size={'m'} />
+
+      {queryError ? (
+        <>
+          <EuiCallOut
+            size={'s'}
+            title={
+              <FormattedMessage
+                id="xpack.ml.notifications.invalidQueryError"
+                defaultMessage="Query is invalid: "
+              />
+            }
+            color="danger"
+            iconType="alert"
+          >
+            <p>{queryError}</p>
+          </EuiCallOut>
+          <EuiSpacer size={'m'} />
+        </>
+      ) : null}
 
       <EuiInMemoryTable<NotificationItem>
         columns={columns}
