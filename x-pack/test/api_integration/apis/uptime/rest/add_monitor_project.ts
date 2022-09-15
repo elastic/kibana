@@ -533,7 +533,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('project monitors validates monitor type', async () => {
+    it('project monitors - validates monitor type', async () => {
       try {
         const messages = await parseStreamApiResponse(
           projectMonitorEndpoint,
@@ -586,7 +586,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('project monitors saves space as data stream namespace', async () => {
+    it('project monitors - saves space as data stream namespace', async () => {
       const username = 'admin';
       const roleName = `synthetics_admin`;
       const password = `${username}-password`;
@@ -640,7 +640,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('project monitors formats custom id appropriately', async () => {
+    it('project monitors - formats custom id appropriately', async () => {
       const username = 'admin';
       const roleName = `synthetics_admin`;
       const password = `${username}-password`;
@@ -696,7 +696,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('project monitors is able to decrypt monitor when updated after hydration', async () => {
+    it('project monitors - is able to decrypt monitor when updated after hydration', async () => {
       try {
         await supertest
           .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
@@ -749,7 +749,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('project monitors is able to enable and disable monitors', async () => {
+    it('project monitors - is able to enable and disable monitors', async () => {
       try {
         await supertest
           .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
@@ -787,7 +787,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('project monitors returns a failed monitor when user defines a private location without fleet permissions', async () => {
+    it('project monitors - returns a failed monitor when user defines a private location without fleet permissions', async () => {
       const secondMonitor = {
         ...projectMonitors.monitors[0],
         id: 'test-id-2',
@@ -867,7 +867,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
           ],
           failedStaleMonitors: [],
-          warnings: [],
         });
       } finally {
         await Promise.all([
@@ -886,7 +885,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('project monitors returns a failed monitor when user tries to delete a monitor without fleet permissions', async () => {
+    it('project monitors - returns a failed monitor when user tries to delete a monitor without fleet permissions', async () => {
       const secondMonitor = {
         ...projectMonitors.monitors[0],
         id: 'test-id-2',
@@ -956,7 +955,6 @@ export default function ({ getService }: FtrProviderContext) {
               reason: 'Failed to delete stale monitor',
             },
           ],
-          warnings: [],
         });
 
         const messages2 = await parseStreamApiResponse(
@@ -977,7 +975,6 @@ export default function ({ getService }: FtrProviderContext) {
           deletedMonitors: [testMonitors[1].id],
           failedMonitors: [],
           failedStaleMonitors: [],
-          warnings: [],
         });
       } finally {
         await Promise.all([
@@ -1043,7 +1040,6 @@ export default function ({ getService }: FtrProviderContext) {
             deletedMonitors: [],
             failedMonitors: [],
             failedStaleMonitors: [],
-            warnings: [],
           },
         ]);
       } finally {
@@ -1091,8 +1087,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-            '-' +
-            testPolicyId
+              '-' +
+              testPolicyId
         );
         expect(packagePolicy.name).eql(
           `${projectMonitors.monitors[0].id}-${projectMonitors.project}-default-Test private location 0`
@@ -1149,8 +1145,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-            '-' +
-            testPolicyId
+              '-' +
+              testPolicyId
         );
 
         expect(packagePolicy.policy_id).eql(testPolicyId);
@@ -1184,8 +1180,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-            '-' +
-            testPolicyId
+              '-' +
+              testPolicyId
         );
 
         expect(packagePolicy2).eql(undefined);
@@ -1228,8 +1224,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-            '-' +
-            testPolicyId
+              '-' +
+              testPolicyId
         );
 
         expect(packagePolicy.policy_id).eql(testPolicyId);
@@ -1278,8 +1274,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-            '-' +
-            testPolicyId
+              '-' +
+              testPolicyId
         );
 
         expect(packagePolicy2).eql(undefined);
