@@ -88,11 +88,17 @@ export const useGetEndpointsList = ({
         { selected: [], rest: [] }
       );
 
+      let selectedAgentIdsCount = 0;
+      if (selectedAgentIds) {
+        selectedAgentIdsCount = selectedAgentIds.length;
+      }
+
       // return 50 items max including the selected items
+      // unless all 50 items are selected then increase the list length by 10
       return [
         ...augmentedDataBasedOnSelectedAgents.selected,
         ...augmentedDataBasedOnSelectedAgents.rest,
-      ].slice(0, PAGING_PARAMS.default);
+      ].slice(0, selectedAgentIdsCount >= 50 ? selectedAgentIdsCount + 10 : PAGING_PARAMS.default);
     },
   });
 };
