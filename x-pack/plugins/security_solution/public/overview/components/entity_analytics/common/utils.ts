@@ -42,8 +42,8 @@ interface InstallRiskyScoreModule {
   spaceId?: string;
   theme?: ThemeServiceStart;
   timerange: {
-    endDate: string;
-    startDate: string;
+    from: string;
+    to: string;
   };
 }
 

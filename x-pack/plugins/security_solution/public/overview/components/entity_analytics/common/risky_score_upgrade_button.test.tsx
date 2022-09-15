@@ -17,8 +17,8 @@ jest.mock('./utils');
 describe('RiskyScoreUpgradeButton', () => {
   const mockRefetch = jest.fn();
   const timerange = {
-    startDate: 'mockStartDate',
-    endDate: 'mockEndDate',
+    from: 'mockStartDate',
+    to: 'mockEndDate',
   };
   beforeEach(() => {
     jest.clearAllMocks();

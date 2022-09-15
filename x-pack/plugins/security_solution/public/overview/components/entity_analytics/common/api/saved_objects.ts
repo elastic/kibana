@@ -38,25 +38,25 @@ interface Options {
 
 export const bulkCreatePrebuiltSavedObjects = async ({
   dashboard,
-  endDate,
+  to,
   errorMessage,
   http,
   notifications,
   options,
   renderDashboardLink,
   renderDocLink,
-  startDate,
+  from,
   theme,
 }: {
   dashboard?: DashboardStart;
-  endDate: string;
+  to: string;
   errorMessage?: string;
   http: HttpSetup;
   notifications?: NotificationsStart;
   options: Options;
   renderDashboardLink?: (message: string, dashboardUrl: string) => React.ReactNode;
   renderDocLink?: (message: string) => React.ReactNode;
-  startDate: string;
+  from: string;
   theme?: ThemeServiceStart;
 }) => {
   const res = await http
@@ -91,8 +91,8 @@ export const bulkCreatePrebuiltSavedObjects = async ({
           targetUrl = dashboard?.locator?.getRedirectUrl({
             dashboardId: targetDashboard?.id,
             timeRange: {
-              to: endDate,
-              from: startDate,
+              to,
+              from,
             },
           });
         }

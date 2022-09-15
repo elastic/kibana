@@ -16,6 +16,8 @@ import {
 } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import { RiskEntity } from '../../../../risk_score/containers/feature_status/api';
+import { RiskScoresDeprecated } from '../../../../common/components/risk_score_deprecated';
 import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { LastUpdatedAt } from '../../detection_response/utils';
@@ -71,23 +73,26 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
     skip: !toggleStatus,
   });
 
-  const [isTableLoading, { data, inspect, refetch, isLicenseValid, isModuleEnabled }] =
-    useUserRiskScore({
-      filterQuery: severityFilter,
-      skip: !toggleStatus,
-      pagination: {
-        cursorStart: 0,
-        querySize: 5,
-      },
-    });
-
   const timerange = useMemo(
     () => ({
-      startDate: from,
-      endDate: to,
+      from,
+      to,
     }),
     [from, to]
   );
+
+  const [
+    isTableLoading,
+    { data, inspect, refetch, isLicenseValid, isDeprecated, isModuleEnabled },
+  ] = useUserRiskScore({
+    filterQuery: severityFilter,
+    skip: !toggleStatus,
+    pagination: {
+      cursorStart: 0,
+      querySize: 5,
+    },
+    timerange,
+  });
 
   useQueryInspector({
     queryId: TABLE_QUERY_ID,
@@ -140,6 +145,10 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
 
   if (!isModuleEnabled && !isTableLoading) {
     return <EntityAnalyticsUserRiskScoresDisable refetch={refetch} timerange={timerange} />;
+  }
+
+  if (isDeprecated) {
+    return <RiskScoresDeprecated entityType={RiskEntity.user} />;
   }
 
   return (
@@ -219,8 +228,8 @@ const EntityAnalyticsUserRiskScoresDisableComponent = ({
 }: {
   refetch: inputsModel.Refetch;
   timerange: {
-    startDate: string;
-    endDate: string;
+    from: string;
+    to: string;
   };
 }) => {
   const { signalIndexExists } = useCheckSignalIndex();

@@ -28,8 +28,8 @@ const mockHttp = {
 } as unknown as HttpSetup;
 const mockSpaceId = 'customSpace';
 const mockTimerange = {
-  startDate: 'startDate',
-  endDate: 'endDate',
+  from: 'startDate',
+  to: 'endDate',
 };
 const mockRefetch = jest.fn();
 describe('installHostRiskScoreModule', () => {

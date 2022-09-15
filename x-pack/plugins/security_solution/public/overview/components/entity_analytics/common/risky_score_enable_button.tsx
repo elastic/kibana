@@ -28,8 +28,8 @@ const RiskyScoreEnableButtonComponent = ({
   riskScoreEntity: RiskScoreEntity;
   disabled?: boolean;
   timerange: {
-    startDate: string;
-    endDate: string;
+    from: string;
+    to: string;
   };
 }) => {
   const spaceId = useSpaceId();

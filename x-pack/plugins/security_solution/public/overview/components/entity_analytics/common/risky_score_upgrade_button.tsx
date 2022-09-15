@@ -24,8 +24,8 @@ const RiskyScoreUpgradeButtonComponent = ({
   refetch: inputsModel.Refetch;
   riskScoreEntity: RiskScoreEntity;
   timerange: {
-    endDate: string;
-    startDate: string;
+    from: string;
+    to: string;
   };
 }) => {
   const spaceId = useSpaceId();
