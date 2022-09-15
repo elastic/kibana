@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { generateDataProvider } from './data-provider';
+import { generateDataProvider } from './data_provider';
 
 describe('generateDataProvider', () => {
   it('should return DataProvider object', () => {

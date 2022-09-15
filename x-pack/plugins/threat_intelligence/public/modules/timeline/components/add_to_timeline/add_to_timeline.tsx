@@ -10,7 +10,7 @@ import { DataProvider } from '@kbn/timelines-plugin/common';
 import { AddToTimelineButtonProps } from '@kbn/timelines-plugin/public';
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui/src/components/button';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { generateDataProvider } from '../../lib/data-provider';
+import { generateDataProvider } from '../../lib/data_provider';
 import { ComponentType } from '../../../../../common/types/component_type';
 import { getIndicatorFieldAndValue } from '../../../indicators/lib/field_value';
 import { EMPTY_VALUE } from '../../../../../common/constants';
