@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
-import { PLUGIN_ID } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 export const getAgentDetailsRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
@@ -17,10 +16,20 @@ export const getAgentDetailsRoute = (router: IRouter, osqueryContext: OsqueryApp
       validate: {
         params: schema.object({}, { unknowns: 'allow' }),
       },
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     async (context, request, response) => {
       let agent;
+      // this is to skip validation eg. for analysts in cases attachments so they can see the results despite not having permissions
+      const { isSystemRequest } = request;
+      if (!isSystemRequest) {
+        const [coreStartServices] = await osqueryContext.getStartServices();
+        const { osquery } = await coreStartServices.capabilities.resolveCapabilities(request);
+        const isInvalid = !osquery.read;
+
+        if (isInvalid) {
+          return response.forbidden();
+        }
+      }
 
       try {
         agent = await osqueryContext.service

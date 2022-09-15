@@ -16,15 +16,16 @@ interface UseAgentDetails {
   agentId?: string;
   silent?: boolean;
   skip?: boolean;
+  asSystemRequest?: boolean;
 }
 
-export const useAgentDetails = ({ agentId, silent, skip }: UseAgentDetails) => {
+export const useAgentDetails = ({ agentId, silent, skip, asSystemRequest }: UseAgentDetails) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
   return useQuery<GetOneAgentResponse, unknown, GetOneAgentResponse['item']>(
     ['agentDetails', agentId],
-    () => http.get(`/internal/osquery/fleet_wrapper/agents/${agentId}`),
+    () => http.get(`/internal/osquery/fleet_wrapper/agents/${agentId}`, { asSystemRequest }),
     {
       enabled: !skip,
       retry: false,

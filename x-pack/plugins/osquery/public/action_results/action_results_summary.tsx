@@ -18,6 +18,7 @@ interface ActionResultsSummaryProps {
   actionId: string;
   expirationDate?: string;
   agentIds?: string[];
+  asSystemRequest?: boolean;
 }
 
 const renderErrorMessage = (error: string) => (
@@ -30,6 +31,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   actionId,
   expirationDate,
   agentIds,
+  asSystemRequest = false,
 }) => {
   const [pageIndex] = useState(0);
   const [pageSize] = useState(50);
@@ -38,7 +40,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     [expirationDate]
   );
   const [isLive, setIsLive] = useState(true);
-  const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
+  const { data: hasActionResultsPrivileges } = useActionResultsPrivileges(asSystemRequest);
   const {
     // @ts-expect-error update types
     data: { aggregations, edges },
@@ -64,7 +66,10 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     });
   }
 
-  const renderAgentIdColumn = useCallback((agentId) => <AgentIdToName agentId={agentId} />, []);
+  const renderAgentIdColumn = useCallback(
+    (agentId) => <AgentIdToName agentId={agentId} asSystemRequest={asSystemRequest} />,
+    [asSystemRequest]
+  );
   const renderRowsColumn = useCallback((rowsCount) => rowsCount ?? '-', []);
   const renderStatusColumn = useCallback(
     (_, item) => {
