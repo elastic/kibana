@@ -290,7 +290,7 @@ export async function deleteTransforms({
             ]
           : acc;
       }, []);
-      const errorMessageTitle = errorMessage ?? STOP_TRANSFORMS_ERROR_MESSAGE(failedIds.length);
+      const errorMessageTitle = errorMessage ?? TRANSFORM_DELETION_ERROR_MESSAGE(failedIds.length);
 
       if (failedIds.length > 0) {
         notifications?.toasts?.addError(new Error(errorMessageTitle), {

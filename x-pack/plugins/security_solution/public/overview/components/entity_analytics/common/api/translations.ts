@@ -17,7 +17,7 @@ export const INGEST_PIPELINE_CREATION_ERROR_MESSAGE = i18n.translate(
 export const INGEST_PIPELINE_DELETION_ERROR_MESSAGE = (totalCount: number) =>
   i18n.translate('xpack.securitySolution.riskyScore.api.ingestPipeline.delete.errorMessageTitle', {
     values: { totalCount },
-    defaultMessage: `Failed to delete ingest {totalCount, plural, =1 {pipeline} other {pipelines}}`,
+    defaultMessage: `Failed to delete Ingest {totalCount, plural, =1 {pipeline} other {pipelines}}`,
   });
 
 export const INDICES_CREATION_ERROR_MESSAGE = i18n.translate(
@@ -57,7 +57,7 @@ export const TRANSFORM_CREATION_ERROR_MESSAGE = i18n.translate(
 export const TRANSFORM_DELETION_ERROR_MESSAGE = (totalCount: number) =>
   i18n.translate('xpack.securitySolution.riskyScore.api.transforms.delete.errorMessageTitle', {
     values: { totalCount },
-    defaultMessage: `Failed to delete {totalCount, plural, =1 {index} other {indices}}`,
+    defaultMessage: `Failed to delete {totalCount, plural, =1 {Transform} other {Transforms}}`,
   });
 
 export const GET_TRANSFORM_STATE_ERROR_MESSAGE = i18n.translate(

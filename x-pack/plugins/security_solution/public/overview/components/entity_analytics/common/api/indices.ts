@@ -30,9 +30,14 @@ export async function createIndices({
     .catch((e) => {
       notifications?.toasts?.addDanger({
         title: errorMessage ?? INDICES_CREATION_ERROR_MESSAGE,
-        text: toMountPoint(renderDocLink ? renderDocLink(e?.body?.message) : e?.body?.message, {
-          theme$: theme?.theme$,
-        }),
+        text: toMountPoint(
+          renderDocLink && e?.body?.message != null
+            ? renderDocLink(e?.body?.message)
+            : e?.body?.message,
+          {
+            theme$: theme?.theme$,
+          }
+        ),
       });
     });
 
@@ -57,9 +62,12 @@ export async function deleteIndices({
     .catch((e) => {
       notifications?.toasts?.addDanger({
         title: errorMessage ?? INDICES_DELETION_ERROR_MESSAGE(count),
-        text: toMountPoint(renderDocLink ? renderDocLink(e?.body?.message) : e?.body?.message, {
-          theme$: theme?.theme$,
-        }),
+        text: toMountPoint(
+          renderDocLink && e?.body?.message ? renderDocLink(e?.body?.message) : e?.body?.message,
+          {
+            theme$: theme?.theme$,
+          }
+        ),
       });
     });
 
