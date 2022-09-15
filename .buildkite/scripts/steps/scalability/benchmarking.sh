@@ -63,6 +63,9 @@ upload_test_results() {
   cd "${LATEST_RUN_ARTIFACTS_DIR}"
   echo "Upload scalability traces as build artifacts"
   buildkite-agent artifact upload "scalability_traces.tar.gz"
+  echo "Upload server logs as build artifacts"
+  tar -czf server-logs.tar.gz data/ftr_servers_logs/**/*
+  buildkite-agent artifact upload server-logs.tar.gz
 }
 
 echo "--- Download the latest artifacts from single user performance pipeline"
@@ -115,6 +118,7 @@ for journey in scalability_traces/server/*; do
     node scripts/functional_tests \
       --config x-pack/test/performance/scalability/config.ts \
       --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
+      --logToFile
       --debug
 done
 
