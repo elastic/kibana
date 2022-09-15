@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 import _ from 'lodash';
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -77,6 +78,7 @@ import {
   getSpacesApi,
   getSearchService,
   getTheme,
+  getUsageCollection,
 } from '../kibana_services';
 import { LayerDescriptor, MapExtent } from '../../common/descriptor_types';
 import { MapContainer } from '../connected_components/map_container';
@@ -446,6 +448,15 @@ export class MapEmbeddable
     this._domNode = domNode;
     if (!this._isInitialized) {
       return;
+    }
+
+    const { embeddingApp } = this.getInput();
+    if (embeddingApp) {
+      getUsageCollection()?.reportUiCounter(
+        APP_ID,
+        METRIC_TYPE.LOADED,
+        `open_maps_embeddable_${embeddingApp}`
+      );
     }
 
     mapEmbeddablesSingleton.register(this.input.id, {

@@ -23,6 +23,7 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import './_embedded_map.scss';
+import { APP_ID } from '../../../../../common/constants';
 
 export function EmbeddedMapComponent({
   layerList,
@@ -71,6 +72,7 @@ export function EmbeddedMapComponent({
         return;
       }
       const input: MapEmbeddableInput = {
+        embeddingApp: APP_ID,
         id: htmlIdGenerator()(),
         attributes: { title: '' },
         filters: data.query.filterManager.getFilters() ?? [],

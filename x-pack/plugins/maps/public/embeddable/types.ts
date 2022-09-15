@@ -41,7 +41,9 @@ export type MapByValueInput = {
 } & EmbeddableInput &
   MapEmbeddableState;
 export type MapByReferenceInput = SavedObjectEmbeddableInput & MapEmbeddableState;
-export type MapEmbeddableInput = MapByValueInput | MapByReferenceInput;
+export type MapEmbeddableInput = (MapByValueInput | MapByReferenceInput) & {
+  embeddingApp?: string;
+};
 
 export type MapEmbeddableOutput = EmbeddableOutput & {
   indexPatterns: DataView[];

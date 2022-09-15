@@ -23,6 +23,7 @@ import {
   ViewMode,
 } from '@kbn/embeddable-plugin/public';
 import { useMlKibana } from '../../contexts/kibana';
+import { PLUGIN_ID } from '../../../../common/constants/app';
 
 export function MlEmbeddedMapComponent({
   layerList,
@@ -71,6 +72,7 @@ export function MlEmbeddedMapComponent({
         return;
       }
       const input: MapEmbeddableInput = {
+        embeddingApp: PLUGIN_ID,
         id: htmlIdGenerator()(),
         attributes: { title: '' },
         filters: [],

@@ -29,6 +29,7 @@ import * as i18n from './translations';
 
 import type { IndexPatternSavedObject } from '../../../common/hooks/types';
 import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import { APP_UI_ID } from '../../../../common/constants';
 
 /**
  * Creates MapEmbeddable with provided initial configuration
@@ -65,6 +66,7 @@ export const createEmbeddable = async (
   }
 
   const input: MapEmbeddableInput = {
+    embeddingApp: APP_UI_ID,
     title: i18n.MAP_TITLE,
     attributes: { title: '' },
     id: uuid.v4(),

@@ -16,6 +16,7 @@ import {
   EmbeddableExpression,
 } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
+import { CANVAS_APP } from '../../../common/lib/constants';
 
 interface Arguments {
   id: string;
@@ -85,6 +86,7 @@ export function savedMap(): ExpressionFunctionDefinition<
       return {
         type: EmbeddableExpressionType,
         input: {
+          embeddingApp: CANVAS_APP,
           id: args.id,
           attributes: { title: '' },
           savedObjectId: args.id,

@@ -65,6 +65,7 @@ export function EmbeddedMapComponent() {
   const factory = embeddablePlugin.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
 
   const input: MapEmbeddableInput = {
+    embeddingApp: 'ux',
     attributes: { title: '' },
     id: uuid.v4(),
     filters: mapFilters,
