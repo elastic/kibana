@@ -22,7 +22,7 @@ import {
   APMTransactionErrorRateSLO,
   SLO,
 } from '../../../types/models';
-import { ALL_VALUE } from '../../../types/schema';
+import { ALL_VALUE } from '@kbn/observability-plugin/server/types/schema';
 
 const APM_SOURCE_INDEX = 'metrics-apm*';
 const ALLOWED_STATUS_CODES = ['2xx', '3xx', '4xx', '5xx'];

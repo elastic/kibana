@@ -21,8 +21,8 @@ import {
   apmTransactionDurationSLOSchema,
   APMTransactionDurationSLO,
 } from '../../../types/models';
-import { ALL_VALUE } from '../../../types/schema';
 import { TransformGenerator } from '.';
+import { ALL_VALUE } from '@kbn/observability-plugin/server/types/schema';
 
 const APM_SOURCE_INDEX = 'metrics-apm*';
 
