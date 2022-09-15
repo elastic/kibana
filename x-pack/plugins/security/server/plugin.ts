@@ -112,10 +112,6 @@ export interface SecurityPluginStart {
    * User profiles services to retrieve user profiles.
    */
   userProfiles: UserProfileServiceStart;
-  /**
-   * Gets the flag to indicate that Kibana is running inside an Elastic Cloud deployment.
-   */
-  getIsElasticCloudDeployment: () => boolean;
 }
 
 export interface PluginSetupDependencies {
@@ -452,7 +448,6 @@ export class SecurityPlugin
         bulkGet: this.userProfileStart.bulkGet,
         suggest: this.userProfileStart.suggest,
       },
-      getIsElasticCloudDeployment: this.getIsElasticCloudDeployment,
     });
   }
 

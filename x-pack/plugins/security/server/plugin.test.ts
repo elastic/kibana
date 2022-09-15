@@ -187,7 +187,6 @@ describe('Security Plugin', () => {
               "useRbacForRequest": [Function],
             },
           },
-          "getIsElasticCloudDeployment": [Function],
           "userProfiles": Object {
             "bulkGet": [Function],
             "getCurrent": [Function],
