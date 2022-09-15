@@ -113,6 +113,39 @@ export const TTYPlayerControls = ({
     }
   }, [currentProcessEvent, onClose, onJumpToEvent]);
 
+  const markersProps = useMemo(() => {
+    if (linesLength < 1) {
+      return [];
+    }
+    return [
+      { type: 'output', value: 20 },
+      { type: 'output', value: 100 },
+      { label: 'data_limited', value: 121 },
+      // { label: 'data_limited', value: 122 },
+      // { label: 'data_limited', value: 123 },
+      // { label: 'data_limited', value: 124 },
+      // { label: 'data_limited', value: 125 },
+      // { label: 'data_limited', value: 126 },
+      // { label: 'data_limited', value: 127 },
+      // { label: 'data_limited', value: 128 },
+      // { label: 'data_limited', value: 129 },
+      // { label: 'data_limited', value: 130 },
+      // { label: 'data_limited', value: 131 },
+      // { label: 'data_limited', value: 132 },
+      // { label: 'data_limited', value: 133 },
+      // { label: 'data_limited', value: 134 },
+      // { label: 'data_limited', value: 135 },
+      // { label: 'data_limited', value: 136 },
+      // { label: 'data_limited', value: 137 },
+      // { label: 'data_limited', value: 138 },
+      // { label: 'data_limited', value: 139 },
+      // { label: 'data_limited', value: 140 },
+      // { label: 'data_limited', value: 141 },
+      { type: 'data_limited', value: 200 },
+      { type: 'data_limited', value: 400 },
+    ] as const;
+  }, [linesLength]);
+
   return (
     <EuiPanel
       css={styles.controlsPanel}
