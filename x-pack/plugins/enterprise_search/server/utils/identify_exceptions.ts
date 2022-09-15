@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-interface ElasticsearchResponseError {
+export interface ElasticsearchResponseError {
   meta?: {
     body?: {
       error?: {

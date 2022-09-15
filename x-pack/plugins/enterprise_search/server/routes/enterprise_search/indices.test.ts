@@ -12,8 +12,13 @@ import { RequestHandlerContext } from '@kbn/core/server';
 jest.mock('../../lib/indices/fetch_ml_inference_pipeline_processors', () => ({
   fetchMlInferencePipelineProcessors: jest.fn(),
 }));
+jest.mock('../../lib/indices/delete_ml_inference_pipeline', () => ({
+  deleteMlInferencePipeline: jest.fn(),
+}));
+
 import { deleteMlInferencePipeline } from '../../lib/indices/delete_ml_inference_pipeline';
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/fetch_ml_inference_pipeline_processors';
+import { ElasticsearchResponseError } from '../../utils/identify_exceptions';
 
 import { registerIndexRoutes } from './indices';
 
@@ -111,12 +116,35 @@ describe('Enterprise Search Managed Indices', () => {
         params: { indexName, pipelineName },
       });
 
-      expect(deleteMlInferencePipeline).toHaveBeenCalledWith(indexName, pipelineName, mockClient);
+      expect(deleteMlInferencePipeline).toHaveBeenCalledWith(indexName, pipelineName, {});
 
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: mockResponse,
         headers: { 'content-type': 'application/json' },
       });
+    });
+
+    it('raises error if deletion failed', async () => {
+      const errorReason = `pipeline is missing: [${pipelineName}]`;
+      const mockError = new Error(errorReason) as ElasticsearchResponseError;
+      mockError.meta = {
+        body: {
+          error: {
+            type: 'resource_not_found_exception',
+          },
+        },
+      };
+      (deleteMlInferencePipeline as jest.Mock).mockImplementationOnce(() => {
+        return Promise.reject(mockError);
+      });
+
+      const response = await mockRouter.callRoute({
+        params: { indexName, pipelineName },
+      });
+
+      expect(deleteMlInferencePipeline).toHaveBeenCalledWith(indexName, pipelineName, {});
+
+      expect(response).toEqual(new Error(errorReason));
     });
   });
 });
