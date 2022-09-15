@@ -52,6 +52,10 @@ function ofName(
   timeScale: string | undefined,
   reducedTimeRange: string | undefined
 ) {
+  if (field?.customLabel) {
+    return field.customLabel;
+  }
+
   return adjustTimeScaleLabelSuffix(
     field?.type !== 'document'
       ? i18n.translate('xpack.lens.indexPattern.valueCountOf', {
@@ -123,6 +127,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
         previousColumn?.timeScale,
         previousColumn?.reducedTimeRange
       ),
+      customLabel: Boolean(field.customLabel),
       dataType: 'number',
       operationType: 'count',
       isBucketed: false,
