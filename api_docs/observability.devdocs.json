@@ -7760,7 +7760,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { success: boolean; }, ",
+          ", { id: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7948,7 +7948,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { success: boolean; }, ",
+          ", { id: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",

@@ -31,7 +31,7 @@ import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experime
 import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
 import RuleStatusPanelWithApi from './rule_status_panel';
 
-const RuleEventLogListWithApi = lazy(() => import('./rule_event_log_list'));
+const RuleEventLogList = lazy(() => import('./rule_event_log_list'));
 const RuleAlertList = lazy(() => import('./rule_alert_list'));
 const RuleDefinition = lazy(() => import('./rule_definition'));
 
@@ -104,11 +104,11 @@ export function RuleComponent({
       }),
       'data-test-subj': 'eventLogListTab',
       content: suspendedComponentWithProps<RuleEventLogListProps<'stackManagement'>>(
-        RuleEventLogListWithApi,
+        RuleEventLogList,
         'xl'
       )({
         fetchRuleSummary: false,
-        rule,
+        ruleId: rule.id,
         ruleType,
         ruleSummary,
         numberOfExecutions,
