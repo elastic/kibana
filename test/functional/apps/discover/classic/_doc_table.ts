@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
   const testSubjects = getService('testSubjects');
 
-  describe('discover doc table', function describeIndexTests() {
+  describe('discover doc table', async function describeIndexTests() {
     const rowsHardLimit = 500;
 
     before(async function () {
@@ -139,7 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(skipButtonText === activeElementText).to.be(true);
       });
 
-      describe('expand a document row', function () {
+      describe('expand a document row', async function () {
         const rowToInspect = 1;
         beforeEach(async function () {
           // close the toggle if open
@@ -219,7 +219,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('add and remove columns', function () {
+      describe('add and remove columns', async function () {
         const extraColumns = ['phpmemory', 'ip'];
 
         afterEach(async function () {
