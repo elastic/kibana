@@ -112,7 +112,7 @@ export interface ISavedObjectsRepository {
    * Deletes multiple documents at once
    * @param {array} objects - an array of objects containing id and type
    * @param {object} [options={}]
-   * @returns {promise} - { statuses: [{ success, error }] }
+   * @returns {promise} - { statuses: [{ id, type, success, error: { message } }] }
    */
   bulkDelete(
     objects: SavedObjectsBulkDeleteObject[],
