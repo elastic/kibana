@@ -17430,7 +17430,6 @@
     "xpack.lens.indexPattern.existenceErrorLabel": "Impossible de charger les informations de champ",
     "xpack.lens.indexPattern.existenceTimeoutAriaLabel": "La récupération de l'existence a expiré",
     "xpack.lens.indexPattern.existenceTimeoutLabel": "Les informations de champ ont pris trop de temps",
-    "xpack.lens.indexPattern.fieldItem.visualizeGeoFieldLinkText": "Visualiser dans Maps",
     "xpack.lens.indexPattern.fieldItemTooltip": "Effectuez un glisser-déposer pour visualiser.",
     "xpack.lens.indexPattern.fieldPlaceholder": "Champ",
     "xpack.lens.indexPattern.fieldStatsButtonEmptyLabel": "Ce champ ne comporte aucune donnée mais vous pouvez toujours effectuer un glisser-déposer pour visualiser.",
