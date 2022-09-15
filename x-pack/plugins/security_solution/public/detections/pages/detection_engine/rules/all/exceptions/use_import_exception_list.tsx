@@ -16,6 +16,9 @@ export const importExceptionList = async ({
   file,
   http,
   signal,
+  overwrite,
+  overwriteExceptions,
+  asNewList,
 }: {
   // TODO: Replace these with kbn packaged versions once we have those available to us
   // These originally came from this location below before moving them to this hacked "any" types:
@@ -23,16 +26,24 @@ export const importExceptionList = async ({
   http: HttpStart;
   signal: AbortSignal;
   file: File;
+  overwrite: boolean;
+  overwriteExceptions: boolean;
+  asNewList: boolean;
 }): Promise<typeof importExceptionsResponseSchema> => {
   const formData = new FormData();
   formData.append('file', file as Blob);
 
-  return http.post<typeof importExceptionsResponseSchema>(`${EXCEPTION_LIST_URL}/_import`, {
-    body: formData,
-    headers: { 'Content-Type': undefined },
-    method: 'POST',
-    signal,
-  });
+  const res = await http.post<typeof importExceptionsResponseSchema>(
+    `${EXCEPTION_LIST_URL}/_import`,
+    {
+      body: formData,
+      query: { overwrite, overwrite_exceptions: overwriteExceptions, as_new_list: asNewList },
+      headers: { 'Content-Type': undefined },
+      method: 'POST',
+      signal,
+    }
+  );
+  return res;
 };
 
 const importListWithOptionalSignal = withOptionalSignal(importExceptionList);

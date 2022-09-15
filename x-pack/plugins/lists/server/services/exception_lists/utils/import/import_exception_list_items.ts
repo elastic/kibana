@@ -33,10 +33,12 @@ export const importExceptionListItems = async ({
   itemsChunks,
   isOverwrite,
   savedObjectsClient,
+  generateNewListId,
   user,
 }: {
   itemsChunks: ImportExceptionListItemSchemaDecoded[][];
   isOverwrite: boolean;
+  generateNewListId: boolean;
   savedObjectsClient: SavedObjectsClientContract;
   user: string;
 }): Promise<ImportDataResponse> => {
@@ -72,6 +74,7 @@ export const importExceptionListItems = async ({
     const { errors, itemsToCreate, itemsToUpdate } = sortExceptionItemsToUpdateOrCreate({
       existingItems: foundItems,
       existingLists: foundLists,
+      generateNewListId,
       isOverwrite,
       items: itemsChunk,
       user,

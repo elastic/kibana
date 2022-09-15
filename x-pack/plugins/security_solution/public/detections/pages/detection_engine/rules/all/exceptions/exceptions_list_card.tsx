@@ -7,9 +7,8 @@
 
 import React, { memo, useCallback, useState } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import { useExceptionListItems } from '@kbn/securitysolution-list-hooks';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { ExceptionsViewerItems } from '../../../../../../common/components/exceptions/viewer/exceptions_viewer_items';
+import { ExceptionsViewerItems } from '../../../../../../detection_engine/rule_exceptions/components/all_exception_items_table/all_items';
 
 import type { ExceptionListInfo } from './use_all_exception_lists';
 
@@ -23,21 +22,73 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(({ exceptionsLis
   const toggle = useCallback(() => {
     setToggleStatus(!toggleStatus);
   }, [toggleStatus]);
-  const [loadingList, exceptionItems, ,] = useExceptionListItems({
-    http,
-    lists: [
-      {
-        id: exceptionsList.id,
-        listId: exceptionsList.list_id,
-        namespaceType: exceptionsList.namespace_type,
-        type: exceptionsList.type,
-      },
-    ],
-    filterOptions: [],
-    showDetectionsListsOnly: true,
-    showEndpointListsOnly: false,
-    matchFilters: true,
-  });
+  // const [loadingList, exceptionItems, ,] = useExceptionListItems({
+  //   http,
+  //   lists: [
+  //     {
+  //       id: exceptionsList.id,
+  //       listId: exceptionsList.list_id,
+  //       namespaceType: exceptionsList.namespace_type,
+  //       type: exceptionsList.type,
+  //     },
+  //   ],
+  //   filterOptions: [],
+  //   showDetectionsListsOnly: true,
+  //   showEndpointListsOnly: false,
+  //   matchFilters: true,
+  // });
+  // const handleFetchItems = useCallback(
+  //   async (options?: GetExceptionItemProps) => {
+  //     const abortCtrl = new AbortController();
+
+  //     const newPagination =
+  //       options?.pagination != null
+  //         ? {
+  //             page: (options.pagination.page ?? 0) + 1,
+  //             perPage: options.pagination.perPage,
+  //           }
+  //         : {
+  //             page: pagination.pageIndex + 1,
+  //             perPage: pagination.pageSize,
+  //           };
+
+  //     if (exceptionListsToQuery.length === 0) {
+  //       return {
+  //         data: [],
+  //         pageIndex: pagination.pageIndex,
+  //         itemsPerPage: pagination.pageSize,
+  //         total: 0,
+  //       };
+  //     }
+
+  //     const {
+  //       page: pageIndex,
+  //       per_page: itemsPerPage,
+  //       total,
+  //       data,
+  //     } = await fetchExceptionListsItemsByListIds({
+  //       filter: undefined,
+  //       http: services.http,
+  //       listIds: exceptionListsToQuery.map((list) => list.list_id),
+  //       namespaceTypes: exceptionListsToQuery.map((list) => list.namespace_type),
+  //       search: options?.search,
+  //       pagination: newPagination,
+  //       signal: abortCtrl.signal,
+  //     });
+
+  //     // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
+  //     // for context around the temporary `id`
+  //     const transformedData = data.map((item) => transformInput(item));
+
+  //     return {
+  //       data: transformedData,
+  //       pageIndex,
+  //       itemsPerPage,
+  //       total,
+  //     };
+  //   },
+  //   [pagination.pageIndex, pagination.pageSize, exceptionListsToQuery, services.http]
+  // );
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -70,8 +121,8 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(({ exceptionsLis
                   isInitLoading={false}
                   exceptions={exceptionItems}
                   loadingItemIds={[]}
-                  onDeleteException={console.error}
-                  onEditExceptionItem={console.error}
+                  onDeleteException={() => ''}
+                  onEditExceptionItem={() => ''}
                 />
               }
             </EuiFlexItem>

@@ -25,6 +25,7 @@ import {
   EuiPageHeader,
   EuiHorizontalRule,
   useGeneratedHtmlId,
+  EuiCheckbox,
 } from '@elastic/eui';
 
 import type { NamespaceType, ExceptionListFilter } from '@kbn/securitysolution-io-ts-list-types';
@@ -109,6 +110,8 @@ export const ExceptionListsTable = React.memo(() => {
   const [lastUpdated, setLastUpdated] = useState(Date.now());
   const [deletingListIds, setDeletingListIds] = useState<string[]>([]);
   const [exportingListIds, setExportingListIds] = useState<string[]>([]);
+  const filePickerRef = useRef<EuiFilePicker | null>(null);
+
   const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
   const [displayImportListFlyout, setDisplayImportListFlyout] = useState(false);
   const { navigateToUrl } = application;
@@ -367,7 +370,19 @@ export const ExceptionListsTable = React.memo(() => {
   const filePickerId = useGeneratedHtmlId({ prefix: 'filePicker' });
   const [file, setFile] = useState<File | null>(null);
   const fileIsValid = !file || validFileTypes.some((fileType) => file.type === fileType);
+  const [overwrite, setOverwrite] = useState(false);
+  const [asNewList, setAsNewList] = useState(false);
 
+  const resetForm = useCallback(() => {
+    if (filePickerRef.current?.fileInput) {
+      filePickerRef.current.fileInput.value = '';
+      filePickerRef.current.handleChange();
+    }
+    setFile(null);
+    setAlreadyExistingItem(false);
+    setAsNewList(false);
+    setOverwrite(false);
+  }, []);
   const { start: importExceptionList, ...importExceptionListState } = useImportExceptionList();
   const ctrl = useRef(new AbortController());
 
@@ -375,10 +390,54 @@ export const ExceptionListsTable = React.memo(() => {
     if (!importExceptionListState.loading && file) {
       ctrl.current = new AbortController();
 
-      importExceptionList({ file, http, signal: ctrl.current.signal });
+      importExceptionList({
+        file,
+        http,
+        signal: ctrl.current.signal,
+        overwrite,
+        overwriteExceptions: overwrite,
+        asNewList,
+      });
     }
-  }, [file, http, importExceptionList, importExceptionListState.loading]);
+  }, [asNewList, file, http, importExceptionList, importExceptionListState.loading, overwrite]);
 
+  const handleImportSuccess = useCallback(
+    (response: ListSchema) => {
+      resetForm();
+      addSuccess({
+        text: i18n.uploadSuccessMessage(response.name),
+        title: i18n.UPLOAD_SUCCESS_TITLE,
+      });
+    },
+    [resetForm, addSuccess]
+  );
+  const handleImportError = useCallback(
+    (errors: Error[]) => {
+      errors.forEach((error) => {
+        if (error.name !== 'AbortError') {
+          addError(error, { title: i18n.UPLOAD_ERROR });
+        }
+      });
+    },
+    [addError]
+  );
+  const [alreadyExistingItem, setAlreadyExistingItem] = useState(false);
+
+  useEffect(() => {
+    if (!importExceptionListState.loading && importExceptionListState.result?.success) {
+      handleImportSuccess(importExceptionListState.result);
+    } else if (!importExceptionListState.loading && importExceptionListState.result?.errors) {
+      handleImportError(importExceptionListState.result.errors);
+      setAlreadyExistingItem(true);
+    }
+  }, [
+    handleImportError,
+    handleImportSuccess,
+    importExceptionListState.error,
+    importExceptionListState.loading,
+    importExceptionListState.result,
+    setAlreadyExistingItem,
+  ]);
   const handleFileChange = useCallback((files: FileList | null) => {
     setFile(files?.item(0) ?? null);
   }, []);
@@ -418,6 +477,7 @@ export const ExceptionListsTable = React.memo(() => {
             <EuiFilePicker
               id={filePickerId}
               multiple
+              ref={filePickerRef}
               initialPromptText="Select or drag and drop multiple files"
               onChange={handleFileChange}
               display={'large'}
@@ -430,6 +490,23 @@ export const ExceptionListsTable = React.memo(() => {
             >
               {i18n.UPLOAD_BUTTON}
             </EuiButton>
+            {alreadyExistingItem && (
+              <>
+                {'We found an existing list'}
+                <EuiCheckbox
+                  id={'basicCheckboxId'}
+                  label="Overwrite the existing list [list name]"
+                  checked={overwrite}
+                  onChange={(e) => setOverwrite(!overwrite)}
+                />
+                <EuiCheckbox
+                  id={'createNewListCheckbox'}
+                  label="Create new list"
+                  checked={asNewList}
+                  onChange={(e) => setAsNewList(!asNewList)}
+                />
+              </>
+            )}
           </EuiFlyoutBody>
         </EuiFlyout>
       )}

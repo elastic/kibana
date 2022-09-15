@@ -174,3 +174,23 @@ export const UPLOAD_BUTTON = i18n.translate(
     defaultMessage: 'Import list',
   }
 );
+
+export const uploadSuccessMessage = (fileName: string) =>
+  i18n.translate('xpack.securitySolution.lists.exceptionListImportSuccess', {
+    defaultMessage: "Exception list '{fileName}' was imported",
+    values: { fileName },
+  });
+
+export const UPLOAD_SUCCESS_TITLE = i18n.translate(
+  'xpack.securitySolution.lists.exceptionListImportSuccessTitle',
+  {
+    defaultMessage: 'Exception list imported',
+  }
+);
+
+export const UPLOAD_ERROR = i18n.translate(
+  'xpack.securitySolution.lists.exceptionListUploadError',
+  {
+    defaultMessage: 'There was an error uploading the exception list.',
+  }
+);
