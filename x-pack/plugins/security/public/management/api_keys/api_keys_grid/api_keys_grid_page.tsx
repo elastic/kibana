@@ -15,9 +15,6 @@ import {
   EuiHealth,
   EuiIcon,
   EuiInMemoryTable,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageHeader,
   EuiSpacer,
   EuiText,
   EuiToolTip,
@@ -29,11 +26,11 @@ import React, { Component } from 'react';
 import { Route } from 'react-router-dom';
 
 import type { NotificationsStart } from '@kbn/core/public';
-import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
@@ -88,7 +85,7 @@ export class APIKeysGridPage extends Component<Props, State> {
 
   public render() {
     return (
-      <div className={APP_WRAPPER_CLASS}>
+      <>
         <Route path="/create">
           <Breadcrumb
             text={i18n.translate('xpack.security.management.apiKeys.createBreadcrumb', {
@@ -107,7 +104,7 @@ export class APIKeysGridPage extends Component<Props, State> {
           </Breadcrumb>
         </Route>
         {this.renderContent()}
-      </div>
+      </>
     );
   }
 
@@ -118,14 +115,12 @@ export class APIKeysGridPage extends Component<Props, State> {
     if (!apiKeys) {
       if (isLoadingApp) {
         return (
-          <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-            <SectionLoading>
-              <FormattedMessage
-                id="xpack.security.management.apiKeys.table.loadingApiKeysDescription"
-                defaultMessage="Loading API keys…"
-              />
-            </SectionLoading>
-          </EuiPageContent>
+          <SectionLoading>
+            <FormattedMessage
+              id="xpack.security.management.apiKeys.table.loadingApiKeysDescription"
+              defaultMessage="Loading API keys…"
+            />
+          </SectionLoading>
         );
       }
 
@@ -135,45 +130,37 @@ export class APIKeysGridPage extends Component<Props, State> {
 
       if (error) {
         return (
-          <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
-            <ApiKeysEmptyPrompt error={error}>
-              <EuiButton iconType="refresh" onClick={this.reloadApiKeys}>
-                <FormattedMessage
-                  id="xpack.security.accountManagement.apiKeys.retryButton"
-                  defaultMessage="Try again"
-                />
-              </EuiButton>
-            </ApiKeysEmptyPrompt>
-          </EuiPageContent>
+          <ApiKeysEmptyPrompt error={error}>
+            <EuiButton iconType="refresh" onClick={this.reloadApiKeys}>
+              <FormattedMessage
+                id="xpack.security.accountManagement.apiKeys.retryButton"
+                defaultMessage="Try again"
+              />
+            </EuiButton>
+          </ApiKeysEmptyPrompt>
         );
       }
 
       if (!areApiKeysEnabled) {
-        return (
-          <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
-            <NotEnabled />
-          </EuiPageContent>
-        );
+        return <NotEnabled />;
       }
     }
 
     if (!isLoadingTable && apiKeys && apiKeys.length === 0) {
       return (
-        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-          <ApiKeysEmptyPrompt>
-            <EuiButton
-              {...reactRouterNavigate(this.props.history, '/create')}
-              fill
-              iconType="plusInCircleFilled"
-              data-test-subj="apiKeysCreatePromptButton"
-            >
-              <FormattedMessage
-                id="xpack.security.management.apiKeys.table.createButton"
-                defaultMessage="Create API key"
-              />
-            </EuiButton>
-          </ApiKeysEmptyPrompt>
-        </EuiPageContent>
+        <ApiKeysEmptyPrompt>
+          <EuiButton
+            {...reactRouterNavigate(this.props.history, '/create')}
+            fill
+            iconType="plusInCircleFilled"
+            data-test-subj="apiKeysCreatePromptButton"
+          >
+            <FormattedMessage
+              id="xpack.security.management.apiKeys.table.createButton"
+              defaultMessage="Create API key"
+            />
+          </EuiButton>
+        </ApiKeysEmptyPrompt>
       );
     }
 
@@ -181,7 +168,8 @@ export class APIKeysGridPage extends Component<Props, State> {
 
     return (
       <>
-        <EuiPageHeader
+        <KibanaPageTemplate.Header
+          paddingSize="none"
           bottomBorder
           pageTitle={
             <FormattedMessage
@@ -219,10 +207,9 @@ export class APIKeysGridPage extends Component<Props, State> {
           ]}
         />
 
-        <EuiSpacer size="l" />
-
         {this.state.createdApiKey && !this.state.isLoadingTable && (
           <>
+            <EuiSpacer size="l" />
             <EuiCallOut
               color="success"
               iconType="check"
@@ -298,11 +285,14 @@ export class APIKeysGridPage extends Component<Props, State> {
                 ]}
               />
             </EuiCallOut>
-            <EuiSpacer />
           </>
         )}
 
-        <EuiPageContentBody>{this.renderTable()}</EuiPageContentBody>
+        <EuiSpacer size="l" />
+
+        <KibanaPageTemplate.Section paddingSize="none">
+          {this.renderTable()}
+        </KibanaPageTemplate.Section>
       </>
     );
   }

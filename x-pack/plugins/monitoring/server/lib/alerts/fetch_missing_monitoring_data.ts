@@ -10,7 +10,7 @@ import { get } from 'lodash';
 import { AlertCluster, AlertMissingData } from '../../../common/types/alerts';
 import { Globals } from '../../static_globals';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
 import { createDatasetFilter } from './create_dataset_query_filter';
 
 interface ClusterBucketESResponse {
@@ -55,7 +55,7 @@ export async function fetchMissingMonitoringData(
 ): Promise<AlertMissingData[]> {
   const endMs = nowInMs;
   // changing this to only search ES because of changes related to https://github.com/elastic/kibana/issues/83309
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     moduleType: 'elasticsearch',
     dataset: 'node_stats',
@@ -74,7 +74,7 @@ export async function fetchMissingMonitoringData(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            createDatasetFilter('node_stats', 'node_stats', 'elasticsearch.node_stats'),
+            createDatasetFilter('node_stats', 'node_stats', getElasticsearchDataset('node_stats')),
             {
               range: {
                 timestamp: {

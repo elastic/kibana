@@ -13,6 +13,7 @@
         "description": [],
         "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "dataVisualizer",
@@ -22,7 +23,8 @@
             "label": "dataViewId",
             "description": [],
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataVisualizer",
@@ -35,7 +37,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataVisualizer",
@@ -48,7 +51,8 @@
               "any"
             ],
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -62,6 +66,7 @@
         "description": [],
         "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "dataVisualizer",
@@ -80,7 +85,8 @@
               }
             ],
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataVisualizer",
@@ -94,7 +100,8 @@
               " | null"
             ],
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataVisualizer",
@@ -107,7 +114,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataVisualizer",
@@ -127,7 +135,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -141,6 +150,7 @@
         "description": [],
         "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "dataVisualizer",
@@ -150,7 +160,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataVisualizer",
@@ -163,7 +174,8 @@
               "\"index\" | \"file\""
             ],
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataVisualizer",
@@ -173,7 +185,8 @@
             "label": "title",
             "description": [],
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataVisualizer",
@@ -183,7 +196,8 @@
             "label": "icon",
             "description": [],
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataVisualizer",
@@ -193,7 +207,8 @@
             "label": "description",
             "description": [],
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataVisualizer",
@@ -207,6 +222,7 @@
             ],
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "dataVisualizer",
@@ -220,6 +236,7 @@
                 ],
                 "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -237,6 +254,7 @@
             ],
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "dataVisualizer",
@@ -250,6 +268,7 @@
                 ],
                 "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -266,7 +285,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -286,6 +306,7 @@
         ],
         "path": "x-pack/plugins/data_visualizer/public/application/file_data_visualizer/file_data_visualizer.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -299,7 +320,8 @@
               "P & { children?: React.ReactNode; }"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataVisualizer",
@@ -312,7 +334,8 @@
               "any"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -345,6 +368,7 @@
         ],
         "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -367,6 +391,7 @@
         ],
         "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -380,7 +405,8 @@
               "P & { children?: React.ReactNode; }"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataVisualizer",
@@ -393,7 +419,8 @@
               "any"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -420,6 +447,7 @@
       ],
       "path": "x-pack/plugins/data_visualizer/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }

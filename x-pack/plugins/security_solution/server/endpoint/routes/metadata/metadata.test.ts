@@ -41,7 +41,7 @@ import type {
   AgentClient,
   PackageService,
   PackageClient,
-  PackagePolicyServiceInterface,
+  PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
 import {
   HOST_METADATA_GET_ROUTE,
@@ -112,7 +112,7 @@ describe('test endpoint routes', () => {
     startContract = createMockEndpointAppContextServiceStartContract();
 
     (
-      startContract.packagePolicyService as jest.Mocked<PackagePolicyServiceInterface>
+      startContract.packagePolicyService as jest.Mocked<PackagePolicyClient>
     ).list.mockImplementation(() => {
       return Promise.resolve({
         items: [],
@@ -280,7 +280,13 @@ describe('test endpoint routes', () => {
                             bool: {
                               must_not: {
                                 bool: {
-                                  should: [{ exists: { field: 'united.agent.upgraded_at' } }],
+                                  should: [
+                                    {
+                                      match: {
+                                        'united.agent.upgrade_status': 'completed',
+                                      },
+                                    },
+                                  ],
                                   minimum_should_match: 1,
                                 },
                               },

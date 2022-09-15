@@ -19,6 +19,10 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote_small', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteLuceneIfNeeded('ft_farequote_small');
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded('ft_farequote_small');
+      await ml.testResources.createSavedSearchFarequoteFilterAndLuceneIfNeeded(
+        'ft_farequote_small'
+      );
+      await ml.testResources.createSavedSearchFarequoteFilterAndKueryIfNeeded('ft_farequote_small');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
@@ -55,22 +59,6 @@ export default function ({ getService }: FtrProviderContext) {
             { chartAvailable: true, id: 'uppercase_airline', legend: '5 categories' },
             { chartAvailable: true, id: 'responsetime', legend: '4.91 - 171.08' },
             { chartAvailable: true, id: 'airline', legend: '5 categories' },
-          ],
-          scatterplotMatrixColorsWizard: [
-            // markers
-            { color: '#52B398', percentage: 15 },
-            // grey boilerplate
-            { color: '#6A717D', percentage: 13 },
-          ],
-          scatterplotMatrixColorStatsResults: [
-            // red markers
-            { color: '#D98071', percentage: 1 },
-            // tick/grid/axis, grey markers
-            { color: '#6A717D', percentage: 12 },
-            { color: '#D3DAE6', percentage: 8 },
-            { color: '#98A1B3', percentage: 12 },
-            // anti-aliasing
-            { color: '#F5F7FA', percentage: 30 },
           ],
           runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
           row: {
@@ -120,22 +108,6 @@ export default function ({ getService }: FtrProviderContext) {
             { chartAvailable: true, id: 'responsetime', legend: '9.91 - 171.08' },
             { chartAvailable: true, id: 'airline', legend: '5 categories' },
           ],
-          scatterplotMatrixColorsWizard: [
-            // markers
-            { color: '#52B398', percentage: 15 },
-            // grey boilerplate
-            { color: '#6A717D', percentage: 13 },
-          ],
-          scatterplotMatrixColorStatsResults: [
-            // red markers
-            { color: '#D98071', percentage: 1 },
-            // tick/grid/axis, grey markers
-            { color: '#6A717D', percentage: 12 },
-            { color: '#D3DAE6', percentage: 8 },
-            { color: '#98A1B3', percentage: 12 },
-            // anti-aliasing
-            { color: '#F5F7FA', percentage: 30 },
-          ],
           runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
           row: {
             memoryStatus: 'ok',
@@ -153,6 +125,105 @@ export default function ({ getService }: FtrProviderContext) {
                   data_counts:
                     '{"training_docs_count":1603,"test_docs_count":0,"skipped_docs_count":0}',
                   description: 'Outlier detection job based on a saved search with kuery query',
+                },
+              },
+              { section: 'progress', expectedEntries: { Phase: '4/4' } },
+            ],
+          } as AnalyticsTableRowDetails,
+        },
+      },
+      {
+        suiteTitle: 'with filter and kuery query',
+        jobType: 'outlier_detection',
+        jobId: `fq_saved_search_4_${dateNow}`,
+        jobDescription: 'Outlier detection job based on a saved search with filter and kuery query',
+        source: 'ft_farequote_filter_and_kuery',
+        get destinationIndex(): string {
+          return `user-${this.jobId}`;
+        },
+        runtimeFields: {
+          uppercase_airline: {
+            type: 'keyword',
+            script: 'emit(params._source.airline.toUpperCase())',
+          },
+        },
+        modelMemory: '65mb',
+        createIndexPattern: true,
+        expected: {
+          source: 'ft_farequote_small',
+          histogramCharts: [
+            { chartAvailable: true, id: 'uppercase_airline', legend: '1 category' },
+            { chartAvailable: true, id: 'responsetime', legend: '57.2 - 96.77' },
+            { chartAvailable: true, id: 'airline', legend: '1 category' },
+          ],
+          runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
+          row: {
+            memoryStatus: 'ok',
+            type: 'outlier_detection',
+            status: 'stopped',
+            progress: '100',
+          },
+          rowDetails: {
+            jobDetails: [
+              {
+                section: 'state',
+                expectedEntries: {
+                  id: `fq_saved_search_4_${dateNow}`,
+                  state: 'stopped',
+                  data_counts:
+                    '{"training_docs_count":290,"test_docs_count":0,"skipped_docs_count":0}',
+                  description:
+                    'Outlier detection job based on a saved search with filter and kuery query',
+                },
+              },
+              { section: 'progress', expectedEntries: { Phase: '4/4' } },
+            ],
+          } as AnalyticsTableRowDetails,
+        },
+      },
+      {
+        suiteTitle: 'with filter and lucene query',
+        jobType: 'outlier_detection',
+        jobId: `fq_saved_search_5_${dateNow}`,
+        jobDescription:
+          'Outlier detection job based on a saved search with filter and lucene query',
+        source: 'ft_farequote_filter_and_lucene',
+        get destinationIndex(): string {
+          return `user-${this.jobId}`;
+        },
+        runtimeFields: {
+          uppercase_airline: {
+            type: 'keyword',
+            script: 'emit(params._source.airline.toUpperCase())',
+          },
+        },
+        modelMemory: '65mb',
+        createIndexPattern: true,
+        expected: {
+          source: 'ft_farequote_small',
+          histogramCharts: [
+            { chartAvailable: true, id: 'uppercase_airline', legend: '1 category' },
+            { chartAvailable: true, id: 'responsetime', legend: '57.2 - 96.77' },
+            { chartAvailable: true, id: 'airline', legend: '1 category' },
+          ],
+          runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
+          row: {
+            memoryStatus: 'ok',
+            type: 'outlier_detection',
+            status: 'stopped',
+            progress: '100',
+          },
+          rowDetails: {
+            jobDetails: [
+              {
+                section: 'state',
+                expectedEntries: {
+                  id: `fq_saved_search_5_${dateNow}`,
+                  state: 'stopped',
+                  data_counts:
+                    '{"training_docs_count":290,"test_docs_count":0,"skipped_docs_count":0}',
+                  description:
+                    'Outlier detection job based on a saved search with filter and lucene query',
                 },
               },
               { section: 'progress', expectedEntries: { Phase: '4/4' } },

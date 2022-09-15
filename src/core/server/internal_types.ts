@@ -52,14 +52,14 @@ import {
 import type { CoreUsageDataStart } from '@kbn/core-usage-data-server';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { I18nServiceSetup } from '@kbn/core-i18n-server';
-import {
+import type { InternalStatusServiceSetup } from '@kbn/core-status-server-internal';
+import type {
   InternalUiSettingsServicePreboot,
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
-} from './ui_settings';
+} from '@kbn/core-ui-settings-server-internal';
 import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesPreboot, InternalHttpResourcesSetup } from './http_resources';
-import { InternalStatusServiceSetup } from './status';
 
 /** @internal */
 export interface InternalCorePreboot {

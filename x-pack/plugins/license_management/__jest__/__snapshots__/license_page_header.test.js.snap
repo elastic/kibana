@@ -3,13 +3,13 @@
 exports[`LicenseStatus component should display display warning is expired 1`] = `
 Array [
   <header
-    class="euiPageHeader euiPageHeader--bottomBorder euiPageHeader--responsive euiPageHeader--center"
+    class="euiPageHeader emotion-euiPageHeader"
   >
     <div
-      class="euiPageHeaderContent"
+      class="euiPageHeaderContent emotion-euiPageHeaderContent-border-l"
     >
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
       >
         <div
           class="euiFlexItem"
@@ -18,7 +18,7 @@ Array [
             class="euiTitle emotion-euiTitle-l"
           >
             <span
-              class="euiPageHeaderContent__titleIcon"
+              class="emotion-euiPageHeaderContent__titleIcon"
               color="danger"
               data-euiicon-type="alert"
             />
@@ -56,13 +56,13 @@ Array [
 exports[`LicenseStatus component should display normally when license is active 1`] = `
 Array [
   <header
-    class="euiPageHeader euiPageHeader--bottomBorder euiPageHeader--responsive euiPageHeader--center"
+    class="euiPageHeader emotion-euiPageHeader"
   >
     <div
-      class="euiPageHeaderContent"
+      class="euiPageHeaderContent emotion-euiPageHeaderContent-border-l"
     >
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
       >
         <div
           class="euiFlexItem"
@@ -71,7 +71,7 @@ Array [
             class="euiTitle emotion-euiTitle-l"
           >
             <span
-              class="euiPageHeaderContent__titleIcon"
+              class="emotion-euiPageHeaderContent__titleIcon"
               color="success"
               data-euiicon-type="checkInCircleFilled"
             />

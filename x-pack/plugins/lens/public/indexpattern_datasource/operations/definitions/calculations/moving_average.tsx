@@ -27,7 +27,6 @@ import {
   getFilter,
   combineErrorMessages,
 } from '../helpers';
-import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
 import type { OperationDefinition, ParamEditorProps } from '..';
 import { getDisallowedPreviousShiftMessage } from '../../../time_shift_utils';
 
@@ -115,7 +114,6 @@ export const movingAverageOperation: OperationDefinition<
   isTransferable: (column, newIndexPattern) => {
     return hasDateField(newIndexPattern);
   },
-  onOtherColumnChanged: adjustTimeScaleOnOtherColumnChange,
   getErrorMessage: (layer: IndexPatternLayer, columnId: string) => {
     return combineErrorMessages([
       getErrorsForDateReference(
