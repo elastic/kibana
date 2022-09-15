@@ -131,15 +131,6 @@ const extractCounterEvents = (
         dataLayer.isPercentage ? 'percentage' : undefined,
         dataLayer.isStacked ? 'stacked' : undefined,
         // There's a metric configured for the dot size in an area or line chart
-        dataLayer.markSizeAccessor ? 'metric_dot_size' : undefined,
-        multiAxisSide ? 'multi_axis_same_side' : undefined,
-        multiSplitNonTerms.size > 1 ? 'multi_split_non_terms' : undefined,
-        // Multiple average/min/max/sum bucket aggs in a single vis or
-        // one average/min/max/sum bucket aggs on an xy chart with at least one "split series" defined
-        aggregateLayers.length > 1 ||
-        (aggregateLayers.length === 1 && dataLayer.splitAccessors?.length)
-          ? 'aggregate_bucket'
-          : undefined,
       ]
         .filter(Boolean)
         .join('_'),
@@ -147,6 +138,15 @@ const extractCounterEvents = (
       byTypes[LayerTypes.ANNOTATIONS] ? 'annotation_layer' : undefined,
       byTypes[LayerTypes.DATA] > 1 ? 'multiple_data_layers' : undefined,
       byTypes.mixedXY ? 'mixed_xy' : undefined,
+      dataLayer.markSizeAccessor ? 'metric_dot_size' : undefined,
+      multiAxisSide ? 'multi_axis_same_side' : undefined,
+      multiSplitNonTerms.size > 1 ? 'multi_split_non_terms' : undefined,
+      // Multiple average/min/max/sum bucket aggs in a single vis or
+      // one average/min/max/sum bucket aggs on an xy chart with at least one "split series" defined
+      aggregateLayers.length > 1 ||
+      (aggregateLayers.length === 1 && dataLayer.splitAccessors?.length)
+        ? 'aggregate_bucket'
+        : undefined,
     ]
       .filter(Boolean)
       .map((item) => `render_${originatingApp}_${item}`);
