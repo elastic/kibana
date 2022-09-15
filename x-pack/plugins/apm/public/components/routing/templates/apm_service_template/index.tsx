@@ -15,9 +15,9 @@ import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
 import {
-  isMobileAgentName,
   isJavaAgentName,
   isJRubyAgent,
+  isMobileAgentName,
   isRumAgentName,
   isServerlessAgent,
 } from '../../../../../common/agent_name';
@@ -29,13 +29,13 @@ import { ServiceAnomalyTimeseriesContextProvider } from '../../../../context/ser
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { SearchBar } from '../../../shared/search_bar';
-import { ServiceIcons } from '../../../shared/service_icons';
-import { ApmMainTemplate } from '../apm_main_template';
-import { AnalyzeDataButton } from './analyze_data_button';
 import { getAlertingCapabilities } from '../../../alerting/get_alerting_capabilities';
 import { BetaBadge } from '../../../shared/beta_badge';
+import { SearchBar } from '../../../shared/search_bar';
+import { ServiceIcons } from '../../../shared/service_icons';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
+import { ApmMainTemplate } from '../apm_main_template';
+import { AnalyzeDataButton } from './analyze_data_button';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -257,7 +257,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         defaultMessage: 'Metrics',
       }),
       append: isServerlessAgent(runtimeName) ? (
-        <BetaBadge icon="beaker" />
+        <TechnicalPreviewBadge icon="beaker" />
       ) : undefined,
       hidden: isMetricsTabHidden({ agentName, runtimeName }),
     },

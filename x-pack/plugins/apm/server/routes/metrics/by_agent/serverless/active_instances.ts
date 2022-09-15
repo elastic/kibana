@@ -108,7 +108,7 @@ export async function getActiveInstances({
         ),
         key: 'active_instances',
         type: 'bar',
-        color: getVizColorForIndex(0, theme),
+        color: getVizColorForIndex(3, theme),
         overallValue: aggregations?.activeInstances.value ?? 0,
         data:
           aggregations?.timeseriesData.buckets.map((timeseriesBucket) => ({

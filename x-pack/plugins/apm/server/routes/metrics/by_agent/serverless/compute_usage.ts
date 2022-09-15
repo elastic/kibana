@@ -136,7 +136,7 @@ export async function getComputeUsage({
                 faasBilledDuration: aggregations?.avgFaasBilledDuration.value,
                 totalMemory: aggregations?.avgTotalMemory.value,
               }),
-              color: getVizColorForIndex(0, theme),
+              color: getVizColorForIndex(1, theme),
               data: timeseriesData.buckets.map((bucket) => {
                 const computeUsage = calculateComputeUsageGBSeconds({
                   faasBilledDuration: bucket.avgFaasBilledDuration.value,
