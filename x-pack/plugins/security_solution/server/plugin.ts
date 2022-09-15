@@ -97,6 +97,7 @@ import type {
 import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
 import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 import { featureUsageService } from './endpoint/services/feature_usage';
+import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -330,6 +331,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         securitySolutionSearchStrategy
       );
     });
+
+    setIsElasticCloudDeployment(plugins.cloud.isCloudEnabled ?? false);
 
     this.telemetryEventsSender.setup(
       this.telemetryReceiver,

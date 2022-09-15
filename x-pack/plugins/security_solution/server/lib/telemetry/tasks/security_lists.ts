@@ -17,7 +17,7 @@ import {
   TELEMETRY_CHANNEL_LISTS,
 } from '../constants';
 import type { ESClusterInfo, ESLicense } from '../types';
-import { batchTelemetryRecords, templateExceptionList } from '../helpers';
+import { batchTelemetryRecords, templateExceptionList, tlog } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
@@ -62,7 +62,7 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
           licenseInfo,
           LIST_TRUSTED_APPLICATION
         );
-        logger.debug(`Trusted Apps: ${trustedAppsJson}`);
+        tlog(logger, `Trusted Apps: ${trustedAppsJson}`);
         count += trustedAppsJson.length;
 
         const batches = batchTelemetryRecords(trustedAppsJson, maxTelemetryBatch);
@@ -81,7 +81,7 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
           licenseInfo,
           LIST_ENDPOINT_EXCEPTION
         );
-        logger.debug(`EP Exceptions: ${epExceptionsJson}`);
+        tlog(logger, `EP Exceptions: ${epExceptionsJson}`);
         count += epExceptionsJson.length;
 
         const batches = batchTelemetryRecords(epExceptionsJson, maxTelemetryBatch);
@@ -100,7 +100,7 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
           licenseInfo,
           LIST_ENDPOINT_EVENT_FILTER
         );
-        logger.debug(`EP Event Filters: ${epFiltersJson}`);
+        tlog(logger, `EP Event Filters: ${epFiltersJson}`);
         count += epFiltersJson.length;
 
         const batches = batchTelemetryRecords(epFiltersJson, maxTelemetryBatch);
@@ -113,6 +113,7 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
       const valueListMetaData = await receiver.fetchValueListMetaData(
         FETCH_VALUE_LIST_META_DATA_INTERVAL_IN_HOURS
       );
+      tlog(logger, `Value List Meta Data: ${JSON.stringify(valueListMetaData)}`);
       if (valueListMetaData?.total_list_count) {
         await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, [valueListMetaData]);
       }

@@ -11,7 +11,7 @@ import type { ITelemetryReceiver } from '../receiver';
 import type { ESClusterInfo, ESLicense, TelemetryEvent } from '../types';
 import type { TaskExecutionPeriod } from '../task';
 import { TELEMETRY_CHANNEL_DETECTION_ALERTS } from '../constants';
-import { batchTelemetryRecords } from '../helpers';
+import { batchTelemetryRecords, tlog } from '../helpers';
 import { copyAllowlistedFields, prebuiltRuleAllowlistFields } from '../filterlists';
 
 export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: number) {
@@ -53,7 +53,7 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
         });
 
         if (telemetryEvents.length === 0) {
-          logger.debug('no prebuilt rule alerts retrieved');
+          tlog(logger, 'no prebuilt rule alerts retrieved');
           return 0;
         }
 
@@ -71,7 +71,7 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
           })
         );
 
-        logger.debug(`sending ${enrichedAlerts.length} elastic prebuilt alerts`);
+        tlog(logger, `sending ${enrichedAlerts.length} elastic prebuilt alerts`);
         const batches = batchTelemetryRecords(enrichedAlerts, maxTelemetryBatch);
         for (const batch of batches) {
           await sender.sendOnDemand(TELEMETRY_CHANNEL_DETECTION_ALERTS, batch);
@@ -79,7 +79,7 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
 
         return enrichedAlerts.length;
       } catch (err) {
-        logger.debug('could not complete prebuilt alerts telemetry task');
+        logger.error('could not complete prebuilt alerts telemetry task');
         return 0;
       }
     },
