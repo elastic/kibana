@@ -18,7 +18,6 @@ import { getNormalizeBrowserFields } from './browser_monitor';
 import { getNormalizeICMPFields } from './icmp_monitor';
 import { getNormalizeTCPFields } from './tcp_monitor';
 import { getNormalizeHTTPFields } from './http_monitor';
-export { getCustomHeartbeatId } from './common_fields';
 
 export interface NormalizedProjectProps {
   locations: Locations;

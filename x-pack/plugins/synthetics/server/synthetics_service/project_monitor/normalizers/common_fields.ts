@@ -43,7 +43,7 @@ export const getNormalizeCommonFields = ({
     [ConfigKey.TAGS]: monitor.tags || defaultFields[ConfigKey.TAGS],
     [ConfigKey.NAMESPACE]: namespace || defaultFields[ConfigKey.NAMESPACE],
     [ConfigKey.ORIGINAL_SPACE]: namespace || defaultFields[ConfigKey.NAMESPACE],
-    [ConfigKey.CUSTOM_HEARTBEAT_ID]: getCustomHeartbeatId(monitor, projectId, namespace, false),
+    [ConfigKey.CUSTOM_HEARTBEAT_ID]: getCustomHeartbeatId(monitor, projectId, namespace),
     [ConfigKey.ENABLED]: monitor.enabled ?? defaultFields[ConfigKey.ENABLED],
   };
   return {
@@ -55,11 +55,7 @@ export const getNormalizeCommonFields = ({
 export const getCustomHeartbeatId = (
   monitor: NormalizedProjectProps['monitor'],
   projectId: string,
-  namespace: string,
-  preserveMonitorId: boolean
+  namespace: string
 ) => {
-  if (monitor.type !== DataStream.BROWSER && preserveMonitorId) {
-    return monitor.id;
-  }
   return `${monitor.id}-${projectId}-${namespace}`;
 };
