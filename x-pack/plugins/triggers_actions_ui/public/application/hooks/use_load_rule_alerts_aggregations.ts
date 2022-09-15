@@ -31,9 +31,6 @@ interface LoadRuleAlertsAggs {
   errorRuleAlertsAggs?: string;
   alertsChartData: AlertChartData[];
 }
-interface IndexName {
-  index: string;
-}
 
 export function useLoadRuleAlertsAggs({ features, ruleId }: UseLoadRuleAlertsAggs) {
   const { http } = useKibana().services;
@@ -50,13 +47,8 @@ export function useLoadRuleAlertsAggs({ features, ruleId }: UseLoadRuleAlertsAgg
     abortCtrlRef.current = new AbortController();
     try {
       if (!features) return;
-      const { index } = await fetchIndexNameAPI({
-        http,
-        features,
-      });
       const { active, recovered, error, alertsChartData } = await fetchRuleAlertsAggByTimeRange({
         http,
-        index,
         ruleId,
         signal: abortCtrlRef.current.signal,
       });
@@ -92,21 +84,6 @@ export function useLoadRuleAlertsAggs({ features, ruleId }: UseLoadRuleAlertsAgg
   return ruleAlertsAggs;
 }
 
-export async function fetchIndexNameAPI({
-  http,
-  features,
-}: {
-  http: HttpSetup;
-  features: string;
-}): Promise<IndexName> {
-  const res = await http.get<{ index_name: string[] }>(`${BASE_RAC_ALERTS_API_PATH}/index`, {
-    query: { features },
-  });
-  return {
-    index: res.index_name[0],
-  };
-}
-
 interface RuleAlertsAggs {
   active: number;
   recovered: number;
@@ -116,12 +93,10 @@ interface RuleAlertsAggs {
 
 export async function fetchRuleAlertsAggByTimeRange({
   http,
-  index,
   ruleId,
   signal,
 }: {
   http: HttpSetup;
-  index: string;
   ruleId: string;
   signal: AbortSignal;
 }): Promise<RuleAlertsAggs> {
@@ -129,7 +104,6 @@ export async function fetchRuleAlertsAggByTimeRange({
     const res = await http.post<AsApiContract<any>>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
       signal,
       body: JSON.stringify({
-        index,
         size: 0,
         query: {
           bool: {
