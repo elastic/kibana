@@ -18,7 +18,7 @@ export const ResponseActionsListPage = () => {
       title={ACTION_HISTORY}
       subtitle={UX_MESSAGES.pageSubTitle}
     >
-      <ResponseActionsLog showHostNames={true} />
+      <ResponseActionsLog showHostNames={true} isFlyout={false} />
     </AdministrationListPage>
   );
 };

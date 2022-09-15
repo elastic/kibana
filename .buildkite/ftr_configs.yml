@@ -45,8 +45,6 @@ disabled:
   - x-pack/plugins/observability/e2e/synthetics_run.ts
 
   # Configs that exist but weren't running in CI when this file was introduced
-  - test/visual_regression/config.ts
-  - x-pack/test/visual_regression/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group2/tests/actions/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group2/tests/telemetry/config.ts
   - x-pack/test/alerting_api_integration/spaces_only_legacy/config.ts
@@ -275,3 +273,4 @@ enabled:
   - x-pack/test/performance/journeys/many_fields_discover/config.ts
   - x-pack/test/performance/journeys/promotion_tracking_dashboard/config.ts
   - x-pack/test/performance/journeys/web_logs_dashboard/config.ts
+  - x-pack/test/performance/journeys/data_stress_test_lens/config.ts

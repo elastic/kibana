@@ -26,7 +26,7 @@ import { IndicatorsTableContext, IndicatorsTableContextValue } from './context';
 import { IndicatorsFlyout } from '../indicators_flyout/indicators_flyout';
 import { Pagination } from '../../hooks/use_indicators';
 import { useToolbarOptions } from './hooks/use_toolbar_options';
-import { useColumnSettings } from './hooks/use_column_settings';
+import { ColumnSettings } from './hooks/use_column_settings';
 
 export interface IndicatorsTableProps {
   indicators: Indicator[];
@@ -37,6 +37,7 @@ export interface IndicatorsTableProps {
   loading: boolean;
   indexPattern: SecuritySolutionDataViewBase;
   browserFields: BrowserFields;
+  columnSettings: ColumnSettings;
 }
 
 export const TABLE_TEST_ID = 'tiIndicatorsTable';
@@ -55,8 +56,8 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   onChangeItemsPerPage,
   pagination,
   loading,
-  indexPattern,
   browserFields,
+  columnSettings: { columns, columnVisibility, handleResetColumns, handleToggleColumn, sorting },
 }) => {
   const [expanded, setExpanded] = useState<Indicator>();
 
@@ -65,18 +66,9 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
     [pagination.pageIndex, pagination.pageSize]
   );
 
-  // field name to field type map to allow the cell_renderer to format dates
-  const fieldTypesMap: { [id: string]: string } = useMemo(() => {
-    if (!indexPattern) return {};
-
-    const res: { [id: string]: string } = {};
-    indexPattern.fields.map((field) => (res[field.name] = field.type));
-    return res;
-  }, [indexPattern]);
-
   const indicatorTableContextValue = useMemo<IndicatorsTableContextValue>(
-    () => ({ expanded, setExpanded, indicators, fieldTypesMap }),
-    [expanded, indicators, fieldTypesMap]
+    () => ({ expanded, setExpanded, indicators }),
+    [expanded, indicators]
   );
 
   const start = pagination.pageIndex * pagination.pageSize;
@@ -98,8 +90,6 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
     ],
     [renderCellValue]
   );
-
-  const { columns, columnVisibility, handleResetColumns, handleToggleColumn } = useColumnSettings();
 
   useMemo(() => {
     columns.forEach(
@@ -131,13 +121,9 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   const flyoutFragment = useMemo(
     () =>
       expanded ? (
-        <IndicatorsFlyout
-          indicator={expanded}
-          fieldTypesMap={fieldTypesMap}
-          closeFlyout={() => setExpanded(undefined)}
-        />
+        <IndicatorsFlyout indicator={expanded} closeFlyout={() => setExpanded(undefined)} />
       ) : null,
-    [expanded, fieldTypesMap]
+    [expanded]
   );
 
   const gridFragment = useMemo(() => {
@@ -161,8 +147,6 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
       <EuiDataGrid
         aria-labelledby="indicators-table"
         leadingControlColumns={leadingControlColumns}
-        columns={columns}
-        columnVisibility={columnVisibility}
         rowCount={indicatorCount}
         renderCellValue={renderCellValue}
         toolbarVisibility={toolbarOptions}
@@ -173,6 +157,9 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
         }}
         gridStyle={gridStyle}
         data-test-subj={TABLE_TEST_ID}
+        sorting={sorting}
+        columnVisibility={columnVisibility}
+        columns={columns}
       />
     );
   }, [
@@ -185,6 +172,7 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
     onChangePage,
     pagination,
     renderCellValue,
+    sorting,
     toolbarOptions,
   ]);
 
