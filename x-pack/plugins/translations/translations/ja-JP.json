@@ -17415,7 +17415,6 @@
     "xpack.lens.indexPattern.existenceErrorLabel": "フィールド情報を読み込めません",
     "xpack.lens.indexPattern.existenceTimeoutAriaLabel": "存在の取り込みがタイムアウトしました",
     "xpack.lens.indexPattern.existenceTimeoutLabel": "フィールド情報に時間がかかりすぎました",
-    "xpack.lens.indexPattern.fieldItem.visualizeGeoFieldLinkText": "Mapsで可視化",
     "xpack.lens.indexPattern.fieldItemTooltip": "可視化するには、ドラッグアンドドロップします。",
     "xpack.lens.indexPattern.fieldPlaceholder": "フィールド",
     "xpack.lens.indexPattern.fieldStatsButtonEmptyLabel": "このフィールドにはデータがありませんが、ドラッグアンドドロップで可視化できます。",

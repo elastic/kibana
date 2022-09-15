@@ -17437,7 +17437,6 @@
     "xpack.lens.indexPattern.existenceErrorLabel": "无法加载字段信息",
     "xpack.lens.indexPattern.existenceTimeoutAriaLabel": "现有内容提取超时",
     "xpack.lens.indexPattern.existenceTimeoutLabel": "字段信息花费时间过久",
-    "xpack.lens.indexPattern.fieldItem.visualizeGeoFieldLinkText": "在 Maps 中可视化",
     "xpack.lens.indexPattern.fieldItemTooltip": "拖放以可视化。",
     "xpack.lens.indexPattern.fieldPlaceholder": "字段",
     "xpack.lens.indexPattern.fieldStatsButtonEmptyLabel": "此字段不包含任何数据，但您仍然可以拖放以进行可视化。",
