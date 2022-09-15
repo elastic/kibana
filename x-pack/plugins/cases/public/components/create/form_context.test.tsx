@@ -43,6 +43,7 @@ import { useGetConnectors } from '../../containers/configure/use_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
 import { waitForComponentToUpdate } from '../../common/test_utils';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
+import { useLicense } from '../../common/use_license';
 
 const sampleId = 'case-id';
 
@@ -61,6 +62,7 @@ jest.mock('../connectors/jira/use_get_issues');
 jest.mock('../connectors/servicenow/use_get_choices');
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/user_profiles/api');
+jest.mock('../../common/use_license');
 
 const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
@@ -75,6 +77,7 @@ const useGetChoicesMock = useGetChoices as jest.Mock;
 const postCase = jest.fn();
 const pushCaseToExternalService = jest.fn();
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useLicenseMock = useLicense as jest.Mock;
 
 const defaultPostCase = {
   isLoading: false,
@@ -148,10 +151,13 @@ describe('Create case', () => {
       data: sampleTags,
       refetch,
     }));
+
     useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
       actionTypeTitle: '.servicenow',
       iconClass: 'logoSecurity',
     });
+
+    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
   });
 
   beforeEach(() => {
@@ -1008,6 +1014,19 @@ describe('Create case', () => {
         ...sampleData,
         assignees: [{ uid: userProfiles[0].uid }],
       });
+    });
+
+    it('should not render the assignees on basic license', async () => {
+      useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
+
+      const renderResult = mockedContext.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
+      );
+
+      expect(renderResult.queryByTestId('createCaseAssigneesComboBox')).toBeNull();
     });
   });
 });

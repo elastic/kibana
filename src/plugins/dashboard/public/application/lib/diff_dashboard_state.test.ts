@@ -7,10 +7,10 @@
  */
 
 import { Filter } from '@kbn/es-query';
+import { EmbeddableInput, IEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { DashboardOptions, DashboardState } from '../../types';
 import { diffDashboardState } from './diff_dashboard_state';
-import { EmbeddableInput, IEmbeddable, ViewMode } from '../../services/embeddable';
 
 const testFilter: Filter = {
   meta: {
