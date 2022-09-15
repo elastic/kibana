@@ -19,6 +19,7 @@ import { Annotation } from '@kbn/observability-plugin/common/annotations';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import { latencyAggregationTypeRt } from '../../../common/latency_aggregation_types';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
+import { getSearchAggregatedServiceMetrics } from '../../lib/helpers/service_metrics';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceAnnotations } from './annotations';
 import { getServices } from './get_services';
@@ -129,18 +130,29 @@ const servicesRoute = createApmServerRoute({
         : Promise.resolve(null),
       getRandomSampler({ security, request, probability }),
     ]);
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      ...setup,
-      kuery,
-      start,
-      end,
-    });
+
+    const [searchAggregatedTransactions, searchAggregatedServiceMetrics] = await Promise.all([
+      getSearchAggregatedTransactions({
+        ...setup,
+        kuery,
+        start,
+        end,
+      }),
+      getSearchAggregatedServiceMetrics({
+        ...setup,
+        kuery,
+        start,
+        end,
+      })
+    ]);
+
 
     return getServices({
       environment,
       kuery,
       setup,
       searchAggregatedTransactions,
+      searchAggregatedServiceMetrics,
       logger,
       start,
       end,
