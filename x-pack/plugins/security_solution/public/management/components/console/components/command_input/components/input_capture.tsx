@@ -76,6 +76,8 @@ export const InputCapture = memo<InputCaptureProps>(
     // Reference to the `<div>` that take in focus (`tabIndex`)
     const focusEleRef = useRef<HTMLDivElement | null>(null);
 
+    const clipboardCaptureRef = useRef<HTMLInputElement | null>(null);
+
     const getTextSelection = useCallback((): string => {
       if (focusEleRef.current) {
         const selection = document.getSelection();
@@ -109,6 +111,9 @@ export const InputCapture = memo<InputCaptureProps>(
       (ev) => {
         // allows for clipboard events to be captured via onPaste event handler
         if (ev.metaKey || ev.ctrlKey) {
+          if (clipboardCaptureRef.current) {
+            clipboardCaptureRef.current.focus();
+          }
           return;
         }
 
@@ -133,11 +138,14 @@ export const InputCapture = memo<InputCaptureProps>(
           eventDetails,
         });
       },
-      [getTextSelection, onCapture]
+      [clipboardCaptureRef, getTextSelection, onCapture]
     );
 
     const handleOnPaste = useCallback<ClipboardEventHandler>(
       (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+
         // Get the data the user pasted as text and remove all new line breaks from it
         const value = ev.clipboardData.getData('text').replace(/[\r\n]/g, '');
 
@@ -157,9 +165,6 @@ export const InputCapture = memo<InputCaptureProps>(
           selection: getTextSelection(),
           eventDetails,
         });
-
-        ev.stopPropagation();
-        ev.preventDefault();
       },
       [getTextSelection, onCapture]
     );
@@ -228,6 +233,15 @@ export const InputCapture = memo<InputCaptureProps>(
           {children}
           <div className="textSelectionBoundaryHelper"> </div>
         </div>
+        <input
+          ref={clipboardCaptureRef}
+          type="text"
+          value=""
+          onPaste={handleOnPaste}
+          onChange={() => {}}
+          spellCheck="false"
+          className="textSelectionBoundaryHelper"
+        />
       </InputCaptureContainer>
     );
   }
