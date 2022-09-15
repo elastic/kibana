@@ -19,7 +19,7 @@ import {
   useCreateAttachments,
 } from '../../containers/use_create_attachments';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import { useCasesFeatures } from '../cases_context/use_cases_features';
+import { useCasesFeatures } from '../../common/use_cases_features';
 import { getConnectorById } from '../utils';
 import { CaseAttachmentsWithoutOwner } from '../../types';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
