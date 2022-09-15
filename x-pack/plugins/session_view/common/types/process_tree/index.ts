@@ -69,10 +69,9 @@ export interface IOLine {
   value: string;
 }
 
-export interface ProcessEntityIdIOLine {
-  previous?: number;
-  value: number;
-  next?: number;
+export interface ProcessStartMarker {
+  event: ProcessEvent;
+  line: number;
 }
 
 export interface IOFields {

@@ -11,6 +11,7 @@ import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   AlertStatusEventEntityIdMap,
+  EventAction,
   ProcessEvent,
   ProcessEventResults,
 } from '../../../common/types/process_tree';
@@ -63,7 +64,10 @@ export const useFetchSessionViewProcessEvents = (
       getNextPageParam: (lastPage, pages) => {
         const isRefetch = pages.length === 1 && jumpToCursor;
         if (isRefetch || lastPage.events.length >= PROCESS_EVENTS_PER_PAGE) {
-          const cursor = lastPage.events?.[lastPage.events.length - 1]?.['@timestamp'];
+          const cursor = lastPage.events.filter((event) => {
+            const action = event.event?.action;
+            return action && [EventAction.fork, EventAction.exec, EventAction.end].includes(action);
+          })?.[lastPage.events.length - 1]?.['@timestamp'];
 
           if (cursor) {
             return {

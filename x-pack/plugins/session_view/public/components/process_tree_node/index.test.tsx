@@ -43,6 +43,7 @@ describe('ProcessTreeNode component', () => {
     } as unknown as RefObject<HTMLDivElement>,
     onChangeJumpToEventVisibility: jest.fn(),
     onShowAlertDetails: jest.fn(),
+    onJumpToOutput: jest.fn(),
     showTimestamp: true,
     verboseMode: false,
   };

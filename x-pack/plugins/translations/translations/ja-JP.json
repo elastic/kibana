@@ -29118,7 +29118,6 @@
     "xpack.sessionView.alertsLoadMoreButton": "その他のアラートを読み込む",
     "xpack.sessionView.backToInvestigatedAlert": "調査されたアラートに戻る",
     "xpack.sessionView.beta": "ベータ",
-    "xpack.sessionView.buttonOpenDetailPanel": "詳細パネル",
     "xpack.sessionView.childProcesses": "子プロセス",
     "xpack.sessionView.detailPanel.entryLeaderTooltip": "初期ターミナル、またはSSH、SSM、その他のリモートアクセスプロトコル経由でのリモートアクセスに関連付けられたセッションリーダープロセス。エントリセッションは、初期プロセスで直接開始されたサービスを表示するためにも使用されます。多くの場合、これはsession_leaderと同じです。",
     "xpack.sessionView.detailPanel.processGroupLeaderTooltip": "現在のプロセスへのプロセスグループリーダー。",

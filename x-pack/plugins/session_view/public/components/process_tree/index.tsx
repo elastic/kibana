@@ -60,6 +60,7 @@ export interface ProcessTreeDeps {
   // a map for alerts with updated status and process.entity_id
   updatedAlertsStatus: AlertStatusEventEntityIdMap;
   onShowAlertDetails: (alertUuid: string) => void;
+  onJumpToOutput: (entityId: string) => void;
   showTimestamp?: boolean;
   verboseMode?: boolean;
 }
@@ -80,6 +81,7 @@ export const ProcessTree = ({
   setSearchResults,
   updatedAlertsStatus,
   onShowAlertDetails,
+  onJumpToOutput,
   showTimestamp = true,
   verboseMode = false,
 }: ProcessTreeDeps) => {
@@ -164,6 +166,7 @@ export const ProcessTree = ({
             isSessionLeader
             process={sessionLeader}
             onProcessSelected={onProcessSelected}
+            onJumpToOutput={onJumpToOutput}
             jumpToEntityId={jumpToEntityId}
             investigatedAlertId={investigatedAlertId}
             selectedProcess={selectedProcess}
