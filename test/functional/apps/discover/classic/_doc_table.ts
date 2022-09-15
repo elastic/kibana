@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async function () {
       log.debug('load kibana index with default index pattern');
-      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
 
       // and load a set of makelogs data
@@ -41,6 +41,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async function () {
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover.json');
+      await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
     });
 
