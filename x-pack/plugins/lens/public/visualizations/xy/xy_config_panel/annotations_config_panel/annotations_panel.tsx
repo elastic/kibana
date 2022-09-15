@@ -313,24 +313,10 @@ export const AnnotationsPanel = (
             defaultMessage: 'Color',
           })}
         />
-        <ConfigPanelGenericSwitch
-          label={i18n.translate('xpack.lens.xyChart.annotation.hide', {
-            defaultMessage: 'Hide annotation',
-          })}
-          data-test-subj="lns-annotations-hide-annotation"
+        <ConfigPanelHideSwitch
           value={Boolean(currentAnnotation?.isHidden)}
           onChange={(ev) => setAnnotations({ isHidden: ev.target.checked })}
         />
-        {isQueryBased ? (
-          <ConfigPanelGenericSwitch
-            label={i18n.translate('xpack.lens.xyChart.annotation.ignoreGlobalFilters', {
-              defaultMessage: 'Ignore global filters',
-            })}
-            data-test-subj="lns-annotations-ignore-global-filters"
-            value={Boolean(currentAnnotation?.ignoreGlobalFilters)}
-            onChange={(ev) => setAnnotations({ ignoreGlobalFilters: ev.target.checked })}
-          />
-        ) : null}
       </DimensionEditorSection>
       {isQueryBased && currentAnnotation && (
         <DimensionEditorSection
@@ -359,25 +345,31 @@ export const AnnotationsPanel = (
   );
 };
 
-const ConfigPanelGenericSwitch = ({
-  label,
-  ['data-test-subj']: dataTestSubj,
+const ConfigPanelHideSwitch = ({
   value,
   onChange,
 }: {
-  label: string;
-  'data-test-subj': string;
   value: boolean;
   onChange: (event: EuiSwitchEvent) => void;
-}) => (
-  <EuiFormRow label={label} display="columnCompressedSwitch" fullWidth>
-    <EuiSwitch
-      compressed
-      label={label}
-      showLabel={false}
-      data-test-subj={dataTestSubj}
-      checked={value}
-      onChange={onChange}
-    />
-  </EuiFormRow>
-);
+}) => {
+  return (
+    <EuiFormRow
+      label={i18n.translate('xpack.lens.xyChart.annotation.name', {
+        defaultMessage: 'Hide annotation',
+      })}
+      display="columnCompressedSwitch"
+      fullWidth
+    >
+      <EuiSwitch
+        compressed
+        label={i18n.translate('xpack.lens.xyChart.annotation.name', {
+          defaultMessage: 'Hide annotation',
+        })}
+        showLabel={false}
+        data-test-subj="lns-annotations-hide-annotation"
+        checked={value}
+        onChange={onChange}
+      />
+    </EuiFormRow>
+  );
+};
