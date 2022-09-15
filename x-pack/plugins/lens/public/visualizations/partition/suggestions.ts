@@ -37,7 +37,7 @@ function shouldReject({ table, keptLayerIds, state }: SuggestionRequest<PieVisua
     keptLayerIds.length > 1 ||
     (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
     table.changeType === 'reorder' ||
-    shouldRejectIntervals ||
+    (table.changeType !== 'initial' && shouldRejectIntervals) ||
     table.columns.some((col) => col.operation.isStaticValue)
   );
 }
@@ -131,13 +131,15 @@ export function suggestions({
             ? {
                 ...state.layers[0],
                 layerId: table.layerId,
-                primaryGroups: groups.map((col) => col.columnId),
+                primaryGroups: groups[0] ? [groups[0].columnId] : [],
+                secondaryGroups: groups[1] ? [groups[1].columnId] : [],
                 metric: metricColumnId,
                 layerType: layerTypes.DATA,
               }
             : {
                 layerId: table.layerId,
-                primaryGroups: groups.map((col) => col.columnId),
+                primaryGroups: groups[0] ? [groups[0].columnId] : [],
+                secondaryGroups: groups[1] ? [groups[1].columnId] : [],
                 metric: metricColumnId,
                 numberDisplay: NumberDisplay.PERCENT,
                 categoryDisplay: CategoryDisplay.DEFAULT,

@@ -35,3 +35,35 @@ export const OperationsWithReferences = {
 } as const;
 
 export const Operations = { ...OperationsWithSourceField, ...OperationsWithReferences } as const;
+
+export const PartitionChartTypes = {
+  PIE: 'pie',
+  DONUT: 'donut',
+  TREEMAP: 'treemap',
+  MOSAIC: 'mosaic',
+  WAFFLE: 'waffle',
+} as const;
+
+export const CategoryDisplay = {
+  DEFAULT: 'default',
+  INSIDE: 'inside',
+  HIDE: 'hide',
+} as const;
+
+export const NumberDisplay = {
+  HIDDEN: 'hidden',
+  PERCENT: 'percent',
+  VALUE: 'value',
+} as const;
+
+export const LegendDisplay = {
+  DEFAULT: 'default',
+  SHOW: 'show',
+  HIDE: 'hide',
+} as const;
+
+export const LayerTypes = {
+  DATA: 'data',
+  REFERENCELINE: 'referenceLine',
+  ANNOTATIONS: 'annotations',
+} as const;

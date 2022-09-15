@@ -10,43 +10,27 @@ import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/chart
 import { $Values } from '@kbn/utility-types';
 import type { PaletteOutput } from '@kbn/coloring';
 import { LegendSize } from '../../constants';
-
-export const XYCurveTypes = {
-  LINEAR: 'LINEAR',
-  CURVE_MONOTONE_X: 'CURVE_MONOTONE_X',
-  CURVE_STEP_AFTER: 'CURVE_STEP_AFTER',
-} as const;
-
-export const YAxisModes = {
-  AUTO: 'auto',
-  LEFT: 'left',
-  RIGHT: 'right',
-  BOTTOM: 'bottom',
-} as const;
-
-export const SeriesTypes = {
-  BAR: 'bar',
-  LINE: 'line',
-  AREA: 'area',
-  BAR_STACKED: 'bar_stacked',
-  AREA_STACKED: 'area_stacked',
-  BAR_HORIZONTAL: 'bar_horizontal',
-  BAR_PERCENTAGE_STACKED: 'bar_percentage_stacked',
-  BAR_HORIZONTAL_STACKED: 'bar_horizontal_stacked',
-  AREA_PERCENTAGE_STACKED: 'area_percentage_stacked',
-  BAR_HORIZONTAL_PERCENTAGE_STACKED: 'bar_horizontal_percentage_stacked',
-} as const;
-
-export const FillTypes = {
-  NONE: 'none',
-  ABOVE: 'above',
-  BELOW: 'below',
-} as const;
+import {
+  CategoryDisplay,
+  PartitionChartTypes,
+  NumberDisplay,
+  LegendDisplay,
+  FillTypes,
+  SeriesTypes,
+  YAxisModes,
+  XYCurveTypes,
+  LayerTypes,
+} from '../constants';
 
 export type FillType = $Values<typeof FillTypes>;
 export type SeriesType = $Values<typeof SeriesTypes>;
 export type YAxisMode = $Values<typeof YAxisModes>;
 export type XYCurveType = $Values<typeof XYCurveTypes>;
+export type PartitionChartType = $Values<typeof PartitionChartTypes>;
+export type CategoryDisplayType = $Values<typeof CategoryDisplay>;
+export type NumberDisplayType = $Values<typeof NumberDisplay>;
+export type LegendDisplayType = $Values<typeof LegendDisplay>;
+export type LayerType = $Values<typeof LayerTypes>;
 
 export interface AxisExtentConfig {
   mode: 'full' | 'custom' | 'dataBounds';
@@ -171,4 +155,30 @@ export interface TableVisConfiguration {
   paging?: PagingState;
 }
 
-export type Configuration = XYConfiguration | TableVisConfiguration;
+export interface PartitionLayerState {
+  layerId: string;
+  layerType: LayerType;
+  primaryGroups: string[];
+  secondaryGroups?: string[];
+  metric?: string;
+  collapseFns?: Record<string, string>;
+  numberDisplay: NumberDisplayType;
+  categoryDisplay: CategoryDisplayType;
+  legendDisplay: LegendDisplayType;
+  legendPosition?: Position;
+  showValuesInLegend?: boolean;
+  nestedLegend?: boolean;
+  percentDecimals?: number;
+  emptySizeRatio?: number;
+  legendMaxLines?: number;
+  legendSize?: LegendSize;
+  truncateLegend?: boolean;
+}
+
+export interface PartitionVisConfiguration {
+  shape: PartitionChartType;
+  layers: PartitionLayerState[];
+  palette?: PaletteOutput;
+}
+
+export type Configuration = XYConfiguration | TableVisConfiguration | PartitionVisConfiguration;

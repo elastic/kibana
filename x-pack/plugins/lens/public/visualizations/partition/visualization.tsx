@@ -19,6 +19,8 @@ import type {
   OperationMetadata,
   AccessorConfig,
   VisualizationDimensionGroupConfig,
+  Suggestion,
+  VisualizeEditorContext,
 } from '../../types';
 import { getSortedGroups, toExpression, toPreviewExpression } from './to_expression';
 import { CategoryDisplay, layerTypes, LegendDisplay, NumberDisplay } from '../../../common';
@@ -27,6 +29,18 @@ import { PartitionChartsMeta } from './partition_charts_meta';
 import { DimensionEditor, PieToolbar } from './toolbar';
 import { checkTableForContainsSmallValues } from './render_helpers';
 import { PieChartTypes, PieLayerState, PieVisualizationState } from '../../../common';
+import { IndexPatternLayer } from '../..';
+import { PartitionVisConfiguration } from '@kbn/visualizations-plugin/common/convert_to_lens';
+
+interface DatatableDatasourceState {
+  [prop: string]: unknown;
+  layers: IndexPatternLayer[];
+}
+
+export interface PartitionSuggestion extends Suggestion {
+  datasourceState: DatatableDatasourceState;
+  visualizationState: PieVisualizationState;
+}
 
 function newLayerState(layerId: string): PieLayerState {
   return {
@@ -40,6 +54,12 @@ function newLayerState(layerId: string): PieLayerState {
     nestedLegend: false,
     layerType: layerTypes.DATA,
   };
+}
+
+function isPartitionVisConfiguration(
+  context: VisualizeEditorContext
+): context is VisualizeEditorContext<PartitionVisConfiguration> {
+  return context.type === 'lnsPie';
 }
 
 const bucketedOperations = (op: OperationMetadata) => op.isBucketed;
@@ -420,6 +440,28 @@ export const getPieVisualization = ({
     }
 
     return warningMessages;
+  },
+
+  getSuggestionFromConvertToLensContext({ suggestions, context }) {
+    if (!isPartitionVisConfiguration(context)) {
+      return;
+    }
+    if (!suggestions.length) {
+      return;
+    }
+    const suggestionByShape = (suggestions as PartitionSuggestion[]).find(
+      (suggestion) => suggestion.visualizationState.shape === context.configuration.shape
+    );
+    if (!suggestionByShape) {
+      return;
+    }
+    return {
+      ...suggestionByShape,
+      visualizationState: {
+        ...suggestionByShape.visualizationState,
+        ...context.configuration,
+      },
+    };
   },
 
   getErrorMessages(state) {
