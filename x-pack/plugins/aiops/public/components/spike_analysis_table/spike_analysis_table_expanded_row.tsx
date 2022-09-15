@@ -45,7 +45,7 @@ const viewInDiscoverMessage = i18n.translate(
 );
 
 interface SpikeAnalysisTableExpandedRowProps {
-  changePoints: any; // ChangePoint[];
+  changePoints: ChangePoint[];
   dataViewId?: string;
   loading: boolean;
   onPinnedChangePoint?: (changePoint: ChangePoint | null) => void;

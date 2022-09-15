@@ -92,7 +92,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
 
       itemIdToExpandedRowMapValues[item.id] = (
         <SpikeAnalysisTableExpandedRow
-          changePoints={expandedTableItems}
+          changePoints={expandedTableItems as ChangePoint[]}
           loading={loading}
           onPinnedChangePoint={onPinnedChangePoint}
           onSelectedChangePoint={onSelectedChangePoint}

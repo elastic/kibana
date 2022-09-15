@@ -27,7 +27,7 @@ export function ExplainLogRateSpikesAnalysisGroupsTableProvider({
 
         const rowObject: {
           group: any;
-          docCount: number;
+          docCount: string;
         } = {
           group: $tr
             .findTestSubject('aiopsSpikeAnalysisGroupsTableColumnGroup')

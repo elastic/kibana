@@ -128,16 +128,14 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       const sortedGroup = group.sort((a, b) =>
         a.fieldName > b.fieldName ? 1 : b.fieldName > a.fieldName ? -1 : 0
       );
-      const dedupedGroup = {};
-      const repeatedValues = {};
+      const dedupedGroup: Record<string, any> = {};
+      const repeatedValues: Record<string, any> = {};
 
       sortedGroup.forEach((pair) => {
         const { fieldName, fieldValue } = pair;
         if (pair.duplicate === false) {
-          // @ts-ignore // TODO: remove once we have real data
           dedupedGroup[fieldName] = fieldValue;
         } else {
-          // @ts-ignore // TODO: remove once we have real data
           repeatedValues[fieldName] = fieldValue;
         }
       });
