@@ -6,13 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import { IO_EVENTS_PER_PAGE, IO_EVENTS_ROUTE } from '@kbn/session-view-plugin/common/constants';
+import { IO_EVENTS_ROUTE } from '@kbn/session-view-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const MOCK_SESSION_ENTITY_ID =
   'MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDU3LTEzMjk2NDkxMDQwLjEzMDAwMDAwMA==';
 const MOCK_IO_EVENT_TOTAL = 8;
 const MOCK_CURSOR = '2022-05-08T13:44:35.570Z';
+const MOCK_PAGE_SIZE = 2;
 
 // eslint-disable-next-line import/no-default-export
 export default function ioEventsTests({ getService }: FtrProviderContext) {
@@ -33,10 +34,11 @@ export default function ioEventsTests({ getService }: FtrProviderContext) {
     it(`${IO_EVENTS_ROUTE} returns a page of IO events`, async () => {
       const response = await supertest.get(IO_EVENTS_ROUTE).set('kbn-xsrf', 'foo').query({
         sessionEntityId: MOCK_SESSION_ENTITY_ID,
+        pageSize: MOCK_PAGE_SIZE,
       });
       expect(response.status).to.be(200);
       expect(response.body.total).to.be(MOCK_IO_EVENT_TOTAL);
-      expect(response.body.events.length).to.be(IO_EVENTS_PER_PAGE);
+      expect(response.body.events.length).to.be(MOCK_PAGE_SIZE);
 
       // ensure sorting timestamp ascending
       let lastSort = 0;
@@ -52,6 +54,7 @@ export default function ioEventsTests({ getService }: FtrProviderContext) {
     it(`${IO_EVENTS_ROUTE} returns a page of IO events (w cursor)`, async () => {
       const response = await supertest.get(IO_EVENTS_ROUTE).set('kbn-xsrf', 'foo').query({
         sessionEntityId: MOCK_SESSION_ENTITY_ID,
+        pageSize: MOCK_PAGE_SIZE,
         cursor: MOCK_CURSOR,
       });
       expect(response.status).to.be(200);

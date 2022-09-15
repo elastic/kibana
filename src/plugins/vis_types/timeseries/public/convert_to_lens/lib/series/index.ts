@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './get_series';
-export * from './get_series_agg';
+export * from './series_agg';
+export * from './metrics_columns';
+export * from './buckets_columns';
