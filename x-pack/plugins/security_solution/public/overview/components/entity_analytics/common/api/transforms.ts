@@ -139,7 +139,7 @@ export async function getTransformState({
   notifications,
   renderDocLink,
   signal,
-  errorMessage = GET_TRANSFORM_STATE_NOT_FOUND_MESSAGE,
+  errorMessage = GET_TRANSFORM_STATE_ERROR_MESSAGE,
   transformId,
 }: GetTransformState) {
   const res = await http
@@ -164,7 +164,7 @@ export async function getTransformState({
     })
     .catch((e) => {
       notifications?.toasts?.addError(e, {
-        title: errorMessage ?? GET_TRANSFORM_STATE_ERROR_MESSAGE,
+        title: errorMessage,
         toastMessage: getErrorToastMessage({ messageBody: e?.body?.message, renderDocLink }),
         toastLifeTimeMs,
       });

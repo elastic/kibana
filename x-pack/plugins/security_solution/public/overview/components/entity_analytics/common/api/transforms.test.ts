@@ -7,7 +7,7 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/securitysolution-io-ts-list-types';
-import { createTransform, deleteTransforms } from './transforms';
+import { createTransform, deleteTransforms, getTransformState, stopTransforms } from './transforms';
 
 const mockRequest = jest.fn();
 const mockHttp = {
@@ -55,6 +55,102 @@ describe('createTransform', () => {
 
   it('handles error', () => {
     expect(mockAddError.mock.calls[0][1].title).toEqual('Failed to create Transform');
+    expect(mockRenderDocLink.mock.calls[0][0]).toEqual('test: unknown');
+  });
+});
+
+describe('getTransformState', () => {
+  beforeAll(async () => {
+    mockRequest.mockResolvedValue({
+      count: 0,
+    });
+    await getTransformState({
+      http: mockHttp,
+      notifications: mockNotification,
+      renderDocLink: mockRenderDocLink,
+      transformId: 'test',
+    });
+  });
+
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
+  it('get transform state', () => {
+    expect(mockRequest.mock.calls[0][0]).toEqual(`/api/transform/transforms/test/_stats`);
+  });
+
+  it('handles error', () => {
+    expect(mockAddError.mock.calls[0][1].title).toEqual('Failed to get Transform state');
+    expect(mockRenderDocLink.mock.calls[0][0]).toEqual('Transform not found: test');
+  });
+});
+
+describe('startTransforms', () => {
+  beforeAll(async () => {
+    mockRequest.mockResolvedValue({
+      count: 0,
+    });
+    await getTransformState({
+      http: mockHttp,
+      notifications: mockNotification,
+      renderDocLink: mockRenderDocLink,
+      transformId: 'test',
+    });
+  });
+
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
+  it('get transform state', () => {
+    expect(mockRequest.mock.calls[0][0]).toEqual(`/api/transform/transforms/test/_stats`);
+  });
+
+  it('handles error', () => {
+    expect(mockAddError.mock.calls[0][1].title).toEqual('Failed to get Transform state');
+    expect(mockRenderDocLink.mock.calls[0][0]).toEqual('Transform not found: test');
+  });
+});
+
+describe('stopTransforms', () => {
+  beforeAll(async () => {
+    // mock get transform state result
+    mockRequest.mockResolvedValueOnce({
+      transforms: [{ id: 'test', state: 'stopped' }],
+      count: 1,
+    });
+    // mock stop transform result
+    mockRequest.mockResolvedValueOnce({
+      test: {
+        success: false,
+        error: {
+          root_cause: '',
+          type: '',
+          reason: 'unknown',
+        },
+      },
+    });
+
+    await stopTransforms({
+      http: mockHttp,
+      notifications: mockNotification,
+      transformIds: ['test'],
+      renderDocLink: mockRenderDocLink,
+    });
+  });
+
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
+  it('get transform state', () => {
+    expect(mockRequest.mock.calls[0][0]).toEqual(`/api/transform/transforms/test/_stats`);
+  });
+
+  it('stop transform', () => {
+    expect(mockRequest.mock.calls[1][0]).toEqual(`/api/transform/stop_transforms`);
+  });
+
+  it('handles error', () => {
+    expect(mockAddError.mock.calls[0][1].title).toEqual('Failed to stop Transform');
     expect(mockRenderDocLink.mock.calls[0][0]).toEqual('test: unknown');
   });
 });
