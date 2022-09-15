@@ -63,6 +63,7 @@ export const uiSettings: Record<string, UiSettings> = {
       defaultMessage: 'Inspect Elasticsearch queries in API responses.',
     }),
     schema: schema.boolean(),
+    requiresPageReload: true,
   },
   [maxSuggestions]: {
     category: [observabilityFeatureId],

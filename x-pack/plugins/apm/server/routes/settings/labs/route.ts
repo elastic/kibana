@@ -6,20 +6,15 @@
  */
 
 import { uiSettings } from '@kbn/observability-plugin/server';
-import { compact } from 'lodash';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 
 const getLabsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/labs',
   options: { tags: ['access:apm'] },
   handler: async (): Promise<{ labsItems: string[] }> => {
-    const labsItems = compact(
-      Object.entries(uiSettings).map(([key, value]): string | undefined => {
-        if (value.showInLabs) {
-          return key;
-        }
-      })
-    );
+    const labsItems = Object.entries(uiSettings)
+      .filter(([key, value]): boolean | undefined => value.showInLabs)
+      .map(([key]): string => key);
     return { labsItems };
   },
 });

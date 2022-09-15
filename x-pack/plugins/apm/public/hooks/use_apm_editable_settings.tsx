@@ -87,8 +87,6 @@ export function useApmEditableSettings(settingsKeys: string[]) {
         await Promise.all(arr);
         setForceReloadSettings((state) => ++state);
         cleanUnsavedChanges();
-      } catch (e) {
-        throw e;
       } finally {
         setIsSaving(false);
       }
