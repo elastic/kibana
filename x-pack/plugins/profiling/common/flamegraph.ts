@@ -6,16 +6,8 @@
  */
 
 import fnv from 'fnv-plus';
-import { CallerCalleeNode, createCallerCalleeDiagram } from './callercallee';
-import {
-  describeFrameType,
-  Executable,
-  FileID,
-  StackFrame,
-  StackFrameID,
-  StackTrace,
-  StackTraceID,
-} from './profiling';
+import { CallerCalleeNode } from './callercallee';
+import { describeFrameType } from './profiling';
 
 interface ColumnarCallerCallee {
   Label: string[];
@@ -30,7 +22,7 @@ interface ColumnarCallerCallee {
   ExecutableID: string[];
 }
 
-export interface ElasticFlameGraph {
+export interface FlameGraph {
   Label: string[];
   Value: number[];
   Position: number[];
@@ -41,6 +33,9 @@ export interface ElasticFlameGraph {
   ID: string[];
   FrameID: string[];
   ExecutableID: string[];
+}
+
+export interface ElasticFlameGraph extends FlameGraph {
   TotalSeconds: number;
   TotalTraces: number;
   SampledTraces: number;
@@ -128,176 +123,116 @@ function getLabel(node: CallerCalleeNode) {
   return getExeFileName(node);
 }
 
-export class FlameGraph {
-  // sampleRate is 1/5^N, with N being the downsampled index the events were fetched from.
-  // N=0: full events table (sampleRate is 1)
-  // N=1: downsampled by 5 (sampleRate is 0.2)
-  // ...
-  sampleRate: number;
-
-  // totalCount is the sum(Count) of all events in the filter range in the
-  // downsampled index we were looking at.
-  // To estimate how many events we have in the full events index: totalCount / sampleRate.
-  // Do the same for single entries in the events array.
-  totalCount: number;
-
-  totalSeconds: number;
-
-  events: Map<StackTraceID, number>;
-  stacktraces: Map<StackTraceID, StackTrace>;
-  stackframes: Map<StackFrameID, StackFrame>;
-  executables: Map<FileID, Executable>;
-
-  constructor({
-    sampleRate,
-    totalCount,
-    events,
-    stackTraces,
-    stackFrames,
-    executables,
-    totalSeconds,
-  }: {
-    sampleRate: number;
-    totalCount: number;
-    events: Map<StackTraceID, number>;
-    stackTraces: Map<StackTraceID, StackTrace>;
-    stackFrames: Map<StackFrameID, StackFrame>;
-    executables: Map<FileID, Executable>;
-    totalSeconds: number;
-  }) {
-    this.sampleRate = sampleRate;
-    this.totalCount = totalCount;
-    this.events = events;
-    this.stacktraces = stackTraces;
-    this.stackframes = stackFrames;
-    this.executables = executables;
-    this.totalSeconds = totalSeconds;
+function countCallees(root: CallerCalleeNode): number {
+  let numCallees = 1;
+  for (const callee of root.Callees) {
+    numCallees += countCallees(callee);
   }
+  return numCallees;
+}
 
-  private countCallees(root: CallerCalleeNode): number {
-    let numCallees = 1;
-    for (const callee of root.Callees) {
-      numCallees += this.countCallees(callee);
+// createColumnarCallerCallee flattens the intermediate representation of the diagram
+// into a columnar format that is more compact than JSON. This representation will later
+// need to be normalized into the response ultimately consumed by the flamegraph.
+export function createColumnarCallerCallee(root: CallerCalleeNode): ColumnarCallerCallee {
+  const numCallees = countCallees(root);
+  const columnar: ColumnarCallerCallee = {
+    Label: new Array<string>(numCallees),
+    Value: new Array<number>(numCallees),
+    X: new Array<number>(numCallees),
+    Y: new Array<number>(numCallees),
+    Color: new Array<number>(numCallees * 4),
+    CountInclusive: new Array<number>(numCallees),
+    CountExclusive: new Array<number>(numCallees),
+    ID: new Array<string>(numCallees),
+    FrameID: new Array<string>(numCallees),
+    ExecutableID: new Array<string>(numCallees),
+  };
+
+  const queue = [{ x: 0, depth: 1, node: root, parentID: 'root' }];
+
+  let idx = 0;
+  while (queue.length > 0) {
+    const { x, depth, node, parentID } = queue.pop()!;
+
+    if (x === 0 && depth === 1) {
+      columnar.Label[idx] = 'root: Represents 100% of CPU time.';
+    } else {
+      columnar.Label[idx] = getLabel(node);
     }
-    return numCallees;
-  }
+    columnar.Value[idx] = node.Samples;
+    columnar.X[idx] = x;
+    columnar.Y[idx] = depth;
 
-  // createColumnarCallerCallee flattens the intermediate representation of the diagram
-  // into a columnar format that is more compact than JSON. This representation will later
-  // need to be normalized into the response ultimately consumed by the flamegraph.
-  private createColumnarCallerCallee(root: CallerCalleeNode): ColumnarCallerCallee {
-    const numCallees = this.countCallees(root);
-    const columnar: ColumnarCallerCallee = {
-      Label: new Array<string>(numCallees),
-      Value: new Array<number>(numCallees),
-      X: new Array<number>(numCallees),
-      Y: new Array<number>(numCallees),
-      Color: new Array<number>(numCallees * 4),
-      CountInclusive: new Array<number>(numCallees),
-      CountExclusive: new Array<number>(numCallees),
-      ID: new Array<string>(numCallees),
-      FrameID: new Array<string>(numCallees),
-      ExecutableID: new Array<string>(numCallees),
-    };
+    const [red, green, blue, alpha] = rgbToRGBA(frameTypeToRGB(node.FrameType, x));
+    const j = 4 * idx;
+    columnar.Color[j] = red;
+    columnar.Color[j + 1] = green;
+    columnar.Color[j + 2] = blue;
+    columnar.Color[j + 3] = alpha;
 
-    const queue = [{ x: 0, depth: 1, node: root, parentID: 'root' }];
+    columnar.CountInclusive[idx] = node.CountInclusive;
+    columnar.CountExclusive[idx] = node.CountExclusive;
 
-    let idx = 0;
-    while (queue.length > 0) {
-      const { x, depth, node, parentID } = queue.pop()!;
+    const id = fnv.fast1a64utf(`${parentID}${node.FrameGroupID}`).toString();
 
-      if (x === 0 && depth === 1) {
-        columnar.Label[idx] = 'root: Represents 100% of CPU time.';
-      } else {
-        columnar.Label[idx] = getLabel(node);
-      }
-      columnar.Value[idx] = node.Samples;
-      columnar.X[idx] = x;
-      columnar.Y[idx] = depth;
+    columnar.ID[idx] = id;
+    columnar.FrameID[idx] = node.FrameID;
+    columnar.ExecutableID[idx] = node.FileID;
 
-      const [red, green, blue, alpha] = rgbToRGBA(frameTypeToRGB(node.FrameType, x));
-      const j = 4 * idx;
-      columnar.Color[j] = red;
-      columnar.Color[j + 1] = green;
-      columnar.Color[j + 2] = blue;
-      columnar.Color[j + 3] = alpha;
+    node.Callees.sort((a: CallerCalleeNode, b: CallerCalleeNode) => b.Samples - a.Samples);
 
-      columnar.CountInclusive[idx] = node.CountInclusive;
-      columnar.CountExclusive[idx] = node.CountExclusive;
-
-      const id = fnv.fast1a64utf(`${parentID}${node.FrameGroupID}`).toString();
-
-      columnar.ID[idx] = id;
-      columnar.FrameID[idx] = node.FrameID;
-      columnar.ExecutableID[idx] = node.FileID;
-
-      node.Callees.sort((a: CallerCalleeNode, b: CallerCalleeNode) => b.Samples - a.Samples);
-
-      let delta = 0;
-      for (const callee of node.Callees) {
-        delta += callee.Samples;
-      }
-
-      for (let i = node.Callees.length - 1; i >= 0; i--) {
-        delta -= node.Callees[i].Samples;
-        queue.push({ x: x + delta, depth: depth + 1, node: node.Callees[i], parentID: id });
-      }
-
-      idx++;
+    let delta = 0;
+    for (const callee of node.Callees) {
+      delta += callee.Samples;
     }
 
-    return columnar;
-  }
-
-  // createElasticFlameGraph normalizes the intermediate columnar representation into the
-  // response ultimately consumed by the flamegraph.
-  private createElasticFlameGraph(columnar: ColumnarCallerCallee): ElasticFlameGraph {
-    const graph: ElasticFlameGraph = {
-      Label: [],
-      Value: [],
-      Position: [],
-      Size: [],
-      Color: [],
-      CountInclusive: [],
-      CountExclusive: [],
-      ID: [],
-      FrameID: [],
-      ExecutableID: [],
-      TotalSeconds: this.totalSeconds,
-      TotalTraces: Math.floor(this.totalCount / this.sampleRate),
-      SampledTraces: this.totalCount,
-    };
-
-    graph.Label = columnar.Label;
-    graph.Value = columnar.Value;
-    graph.Color = columnar.Color;
-    graph.CountInclusive = columnar.CountInclusive;
-    graph.CountExclusive = columnar.CountExclusive;
-    graph.ID = columnar.ID;
-    graph.FrameID = columnar.FrameID;
-    graph.ExecutableID = columnar.ExecutableID;
-
-    const maxX = columnar.Value[0];
-    const maxY = columnar.Y.reduce((max, n) => (n > max ? n : max), 0);
-
-    for (let i = 0; i < columnar.X.length; i++) {
-      const x = normalize(columnar.X[i], 0, maxX);
-      const y = normalize(maxY - columnar.Y[i], 0, maxY);
-      graph.Position.push(x, y);
+    for (let i = node.Callees.length - 1; i >= 0; i--) {
+      delta -= node.Callees[i].Samples;
+      queue.push({ x: x + delta, depth: depth + 1, node: node.Callees[i], parentID: id });
     }
 
-    graph.Size = graph.Value.map((n) => normalize(n, 0, maxX));
-
-    return graph;
+    idx++;
   }
 
-  toElastic(): ElasticFlameGraph {
-    const root = createCallerCalleeDiagram(
-      this.events,
-      this.stacktraces,
-      this.stackframes,
-      this.executables
-    );
-    return this.createElasticFlameGraph(this.createColumnarCallerCallee(root));
+  return columnar;
+}
+
+// createFlameGraph normalizes the intermediate columnar representation into the
+// response ultimately consumed by the flamegraph in the UI.
+export function createFlameGraph(columnar: ColumnarCallerCallee): FlameGraph {
+  const graph: FlameGraph = {
+    Label: [],
+    Value: [],
+    Position: [],
+    Size: [],
+    Color: [],
+    CountInclusive: [],
+    CountExclusive: [],
+    ID: [],
+    FrameID: [],
+    ExecutableID: [],
+  };
+
+  graph.Label = columnar.Label;
+  graph.Value = columnar.Value;
+  graph.Color = columnar.Color;
+  graph.CountInclusive = columnar.CountInclusive;
+  graph.CountExclusive = columnar.CountExclusive;
+  graph.ID = columnar.ID;
+  graph.FrameID = columnar.FrameID;
+  graph.ExecutableID = columnar.ExecutableID;
+
+  const maxX = columnar.Value[0];
+  const maxY = columnar.Y.reduce((max, n) => (n > max ? n : max), 0);
+
+  for (let i = 0; i < columnar.X.length; i++) {
+    const x = normalize(columnar.X[i], 0, maxX);
+    const y = normalize(maxY - columnar.Y[i], 0, maxY);
+    graph.Position.push(x, y);
   }
+
+  graph.Size = graph.Value.map((n) => normalize(n, 0, maxX));
+
+  return graph;
 }

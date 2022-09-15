@@ -7,12 +7,12 @@
 
 import { sum } from 'lodash';
 import {
-  createCallerCalleeDiagram,
   createCallerCalleeIntermediateNode,
+  createCallerCalleeIntermediateRoot,
   fromCallerCalleeIntermediateNode,
 } from './callercallee';
 import { createFrameGroupID } from './frame_group';
-import { createStackFrameMetadata } from './profiling';
+import { createStackFrameMetadata, groupStackFrameMetadataByStackTrace } from './profiling';
 
 import { events, stackTraces, stackFrames, executables } from './__fixtures__/stacktraces';
 
@@ -57,7 +57,19 @@ describe('Caller-callee operations', () => {
   test('2', () => {
     const totalSamples = sum([...events.values()]);
 
-    const root = createCallerCalleeDiagram(events, stackTraces, stackFrames, executables);
+    const rootFrame = createStackFrameMetadata();
+    const frameMetadataForTraces = groupStackFrameMetadataByStackTrace(
+      stackTraces,
+      stackFrames,
+      executables
+    );
+    const intermediateRoot = createCallerCalleeIntermediateRoot(
+      rootFrame,
+      events,
+      frameMetadataForTraces
+    );
+    const root = fromCallerCalleeIntermediateNode(intermediateRoot);
+
     expect(root.Samples).toEqual(totalSamples);
     expect(root.CountInclusive).toEqual(totalSamples);
     expect(root.CountExclusive).toEqual(0);
