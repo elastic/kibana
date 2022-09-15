@@ -78,24 +78,6 @@ describe('RiskyScoreEnableButton', () => {
         );
       });
     });
-
-    it('Refretch the module when installation finished', async () => {
-      render(
-        <TestProviders>
-          <RiskyScoreEnableButton
-            refetch={mockRefetch}
-            riskScoreEntity={RiskScoreEntity.host}
-            timerange={timerange}
-          />
-        </TestProviders>
-      );
-
-      await act(async () => {
-        await userEvent.click(screen.getByTestId(`enable_${RiskScoreEntity.host}_risk_score`));
-      });
-
-      expect(mockRefetch).toHaveBeenCalled();
-    });
   });
 
   describe('User', () => {
@@ -152,24 +134,6 @@ describe('RiskyScoreEnableButton', () => {
           'Enabling'
         );
       });
-    });
-
-    it('Refretch the module when installation finished', async () => {
-      render(
-        <TestProviders>
-          <RiskyScoreEnableButton
-            refetch={mockRefetch}
-            riskScoreEntity={RiskScoreEntity.user}
-            timerange={timerange}
-          />
-        </TestProviders>
-      );
-
-      await act(async () => {
-        await userEvent.click(screen.getByTestId(`enable_${RiskScoreEntity.user}_risk_score`));
-      });
-
-      expect(mockRefetch).toHaveBeenCalled();
     });
   });
 });

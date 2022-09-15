@@ -60,20 +60,6 @@ describe('RiskyScoreRestartButton', () => {
         expect(screen.getByTestId('risk-score-restart')).toHaveTextContent('Restarting');
       });
     });
-
-    it('Refretch the module when restart finished', async () => {
-      render(
-        <TestProviders>
-          <RiskyScoreRestartButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.host} />
-        </TestProviders>
-      );
-
-      await act(async () => {
-        await userEvent.click(screen.getByTestId('risk-score-restart'));
-      });
-
-      expect(mockRefetch).toHaveBeenCalled();
-    });
   });
 
   describe('User', () => {
@@ -116,20 +102,6 @@ describe('RiskyScoreRestartButton', () => {
       await waitFor(() => {
         expect(screen.getByTestId('risk-score-restart')).toHaveTextContent('Restarting');
       });
-    });
-
-    it('Refretch the module when restart finished', async () => {
-      render(
-        <TestProviders>
-          <RiskyScoreRestartButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.user} />
-        </TestProviders>
-      );
-
-      await act(async () => {
-        await userEvent.click(screen.getByTestId('risk-score-restart'));
-      });
-
-      expect(mockRefetch).toHaveBeenCalled();
     });
   });
 });

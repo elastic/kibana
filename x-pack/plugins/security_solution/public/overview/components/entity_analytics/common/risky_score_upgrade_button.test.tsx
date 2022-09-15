@@ -74,24 +74,6 @@ describe('RiskyScoreUpgradeButton', () => {
         expect(screen.getByTestId('risk-score-upgrade')).toHaveTextContent('Upgrading');
       });
     });
-
-    it('Refretch the module when upgrade finished', async () => {
-      render(
-        <TestProviders>
-          <RiskyScoreUpgradeButton
-            refetch={mockRefetch}
-            riskScoreEntity={RiskScoreEntity.host}
-            timerange={timerange}
-          />
-        </TestProviders>
-      );
-
-      await act(async () => {
-        await userEvent.click(screen.getByTestId('risk-score-upgrade'));
-      });
-
-      expect(mockRefetch).toHaveBeenCalled();
-    });
   });
 
   describe('User', () => {
@@ -144,24 +126,6 @@ describe('RiskyScoreUpgradeButton', () => {
       await waitFor(() => {
         expect(screen.getByTestId('risk-score-upgrade')).toHaveTextContent('Upgrading');
       });
-    });
-
-    it('Refretch the module when upgrade finished', async () => {
-      render(
-        <TestProviders>
-          <RiskyScoreUpgradeButton
-            refetch={mockRefetch}
-            riskScoreEntity={RiskScoreEntity.host}
-            timerange={timerange}
-          />
-        </TestProviders>
-      );
-
-      await act(async () => {
-        await userEvent.click(screen.getByTestId('risk-score-upgrade'));
-      });
-
-      expect(mockRefetch).toHaveBeenCalled();
     });
   });
 });
