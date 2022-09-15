@@ -96,15 +96,14 @@ const extractCounterEvents = (
       }, {})
     ).find((i) => i > 1);
 
-    // There are multiple "split series" aggs in an xy chart and they are not all terms but other aggs
-    const multiSplitNonTerms = new Set(
-      (dataLayer.splitAccessors ?? [])
-        .map(
-          (splitAccessor) =>
-            getColumnByAccessor(splitAccessor, dataLayer.table.columns)?.meta?.params?.id
-        )
-        .filter(Boolean)
-    );
+    const multiSplitNonTerms = (dataLayer.splitAccessors ?? [])
+      .map((splitAccessor) =>
+        getColumnByAccessor(
+          splitAccessor,
+          dataLayer.table.columns
+        )?.meta?.sourceParams?.type?.toString()
+      )
+      .filter(Boolean);
 
     const aggregateLayers: string[] = dataLayers
       .map((l) =>
@@ -140,7 +139,10 @@ const extractCounterEvents = (
       byTypes.mixedXY ? 'mixed_xy' : undefined,
       dataLayer.markSizeAccessor ? 'metric_dot_size' : undefined,
       multiAxisSide ? 'multi_axis_same_side' : undefined,
-      multiSplitNonTerms.size > 1 ? 'multi_split_non_terms' : undefined,
+      // There are multiple "split series" aggs in an xy chart and they are not all terms but other aggs
+      multiSplitNonTerms.length > 1 && !multiSplitNonTerms.every((i) => i === 'terms')
+        ? 'multi_split_non_terms'
+        : undefined,
       // Multiple average/min/max/sum bucket aggs in a single vis or
       // one average/min/max/sum bucket aggs on an xy chart with at least one "split series" defined
       aggregateLayers.length > 1 ||
