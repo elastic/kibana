@@ -23,7 +23,7 @@ import {
 import {
   FetchDefaultPipelineApiLogic,
   FetchDefaultPipelineResponse,
-} from '../../../api/connector/get_default_pipeline_logic';
+} from '../../../api/connector/get_default_pipeline_api_logic';
 import {
   PostPipelineArgs,
   PostPipelineResponse,

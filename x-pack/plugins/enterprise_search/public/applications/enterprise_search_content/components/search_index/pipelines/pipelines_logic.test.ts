@@ -22,12 +22,14 @@ const DEFAULT_PIPELINE_VALUES = {
 
 const DEFAULT_VALUES = {
   canSetPipeline: true,
+  defaultPipelineValues: DEFAULT_PIPELINE_VALUES,
+  defaultPipelineValuesData: undefined,
   index: undefined,
   pipelineState: DEFAULT_PIPELINE_VALUES,
   showModal: false,
 };
 
-describe('ConnectorConfigurationLogic', () => {
+describe('PipelinesLogic', () => {
   const { mount } = new LogicMounter(PipelinesLogic);
   const { mount: mountFetchIndexApiLogic } = new LogicMounter(FetchIndexApiLogic);
   const { mount: mountUpdatePipelineLogic } = new LogicMounter(UpdatePipelineApiLogic);
@@ -112,6 +114,28 @@ describe('ConnectorConfigurationLogic', () => {
       it('should call flashSuccessToast', () => {
         PipelinesLogic.actions.apiSuccess({ connectorId: 'a', pipeline: newPipeline });
         expect(flashSuccessToast).toHaveBeenCalledWith('Pipelines successfully updated');
+      });
+    });
+    describe('createCustomPipelineError', () => {
+      it('should call flashAPIError', () => {
+        PipelinesLogic.actions.createCustomPipelineError('error' as any);
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      });
+    });
+    describe('createCustomPipelineSuccess', () => {
+      it('should call flashSuccessToast', () => {
+        PipelinesLogic.actions.setPipelineState = jest.fn();
+        PipelinesLogic.actions.savePipeline = jest.fn();
+        PipelinesLogic.actions.fetchCustomPipeline = jest.fn();
+        PipelinesLogic.actions.fetchIndexApiSuccess(connectorIndex);
+        PipelinesLogic.actions.createCustomPipelineSuccess({ created: ['a', 'b'] });
+        expect(flashSuccessToast).toHaveBeenCalledWith('Custom pipeline successfully created');
+        expect(PipelinesLogic.actions.setPipelineState).toHaveBeenCalledWith({
+          ...PipelinesLogic.values.pipelineState,
+          name: 'a',
+        });
+        expect(PipelinesLogic.actions.savePipeline).toHaveBeenCalled();
+        expect(PipelinesLogic.actions.fetchCustomPipeline).toHaveBeenCalled();
       });
     });
     describe('fetchIndexApiSuccess', () => {

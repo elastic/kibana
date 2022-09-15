@@ -34,7 +34,7 @@ export const CurlRequest: React.FC<CurlRequestParams> = ({
     (cloudContext.cloudId && decodeCloudId(cloudContext.cloudId)?.elasticsearchUrl) || DEFAULT_URL;
   const apiKeyExample = apiKey || '<Create an API Key>';
   const { name: pipelineName, ...pipelineParams } = pipeline ?? {};
-  // We have to prefix the parameters with an underscore to append to the document
+  // We have to prefix the parameters with an underscore because that's what the actual pipeline looks for
   const pipelineArgs = Object.entries(pipelineParams).reduce(
     (acc: Record<string, boolean | undefined>, curr) => ({ ...acc, [`_${curr[0]}`]: curr[1] }),
     {}

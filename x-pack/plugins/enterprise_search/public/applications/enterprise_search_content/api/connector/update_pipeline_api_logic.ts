@@ -19,13 +19,13 @@ export interface PostPipelineResponse {
   pipeline: IngestPipelineParams;
 }
 
-export const postPipeline = async ({
+export const updatePipeline = async ({
   connectorId,
   pipeline,
 }: PostPipelineArgs): Promise<PostPipelineResponse> => {
   const route = `/internal/enterprise_search/connectors/${connectorId}/pipeline`;
 
-  await HttpLogic.values.http.post(route, {
+  await HttpLogic.values.http.put(route, {
     body: JSON.stringify(pipeline),
   });
   return { connectorId, pipeline };
@@ -33,5 +33,5 @@ export const postPipeline = async ({
 
 export const UpdatePipelineApiLogic = createApiLogic(
   ['content', 'update_pipeline_api_logic'],
-  postPipeline
+  updatePipeline
 );

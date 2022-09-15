@@ -18,7 +18,7 @@ export const updateDefaultPipeline = async (
 ): Promise<PostDefaultPipelineResponse> => {
   const route = '/internal/enterprise_search/connectors/default_pipeline';
 
-  await HttpLogic.values.http.post(route, { body: JSON.stringify(pipeline) });
+  await HttpLogic.values.http.put(route, { body: JSON.stringify(pipeline) });
 
   return pipeline;
 };

@@ -16,7 +16,6 @@ import { DataPanel } from '../../../../shared/data_panel/data_panel';
 
 import { InferencePipelineCard } from './inference_pipeline_card';
 import { IngestPipelinesCard } from './ingest_pipelines_card';
-import { InferencePipeline } from './types';
 
 export const SearchIndexPipelines: React.FC<{ mlPipelinesEnabled: boolean }> = () => {
   // TODO: REPLACE THIS DATA WITH REAL DATA

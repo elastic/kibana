@@ -7,6 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { isDeepEqual } from 'react-use/lib/util';
+
 import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_PIPELINE_VALUES } from '../../../../../common/constants';
@@ -23,12 +25,12 @@ import {
 import {
   FetchDefaultPipelineApiLogic,
   FetchDefaultPipelineResponse,
-} from '../../api/connector/get_default_pipeline_logic';
+} from '../../api/connector/get_default_pipeline_api_logic';
 import {
   PostDefaultPipelineArgs,
   PostDefaultPipelineResponse,
   UpdateDefaultPipelineApiLogic,
-} from '../../api/connector/update_default_pipeline_logic';
+} from '../../api/connector/update_default_pipeline_api_logic';
 
 type PipelinesActions = Pick<
   Actions<PostDefaultPipelineArgs, PostDefaultPipelineResponse>,
@@ -45,6 +47,7 @@ type PipelinesActions = Pick<
 interface PipelinesValues {
   defaultPipeline: IngestPipelineParams;
   fetchStatus: Status;
+  hasNoChanges: boolean;
   isLoading: boolean;
   pipelineState: IngestPipelineParams;
   status: Status;
@@ -110,6 +113,11 @@ export const SettingsLogic = kea<MakeLogicType<PipelinesValues, PipelinesActions
     ],
   }),
   selectors: ({ selectors }) => ({
+    hasNoChanges: [
+      () => [selectors.pipelineState, selectors.defaultPipeline],
+      (pipelineState: IngestPipelineParams, defaultPipeline: IngestPipelineParams) =>
+        isDeepEqual(pipelineState, defaultPipeline),
+    ],
     isLoading: [
       () => [selectors.status, selectors.fetchStatus],
       (status, fetchStatus) =>

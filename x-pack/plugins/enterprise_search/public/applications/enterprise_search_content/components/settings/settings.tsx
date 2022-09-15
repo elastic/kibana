@@ -9,17 +9,24 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiButton, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
-import { PipelineSettingsForm } from '../shared/pipeline_settings/pipeline_settings_form';
 
 import { SettingsLogic } from './settings_logic';
+import { SettingsPanel } from './settings_panel';
 
 export const Settings: React.FC = () => {
   const { makeRequest, setPipeline } = useActions(SettingsLogic);
-  const { defaultPipeline, isLoading, pipelineState } = useValues(SettingsLogic);
+  const { defaultPipeline, hasNoChanges, isLoading, pipelineState } = useValues(SettingsLogic);
+
+  const {
+    extract_binary_content: extractBinaryContent,
+    reduce_whitespace: reduceWhitespace,
+    run_ml_inference: runMLInference,
+  } = pipelineState;
+
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[
@@ -35,12 +42,21 @@ export const Settings: React.FC = () => {
           defaultMessage: 'Content Settings',
         }),
         rightSideItems: [
-          <EuiButton fill isLoading={isLoading} onClick={() => makeRequest(pipelineState)}>
+          <EuiButton
+            fill
+            disabled={hasNoChanges}
+            isLoading={isLoading}
+            onClick={() => makeRequest(pipelineState)}
+          >
             {i18n.translate('xpack.enterpriseSearch.content.settings.saveButtonLabel', {
               defaultMessage: 'Save',
             })}
           </EuiButton>,
-          <EuiButton isLoading={isLoading} onClick={() => setPipeline(defaultPipeline)}>
+          <EuiButton
+            disabled={hasNoChanges}
+            isLoading={isLoading}
+            onClick={() => setPipeline(defaultPipeline)}
+          >
             {i18n.translate('xpack.enterpriseSearch.content.settings.resetButtonLabel', {
               defaultMessage: 'Reset',
             })}
@@ -50,40 +66,92 @@ export const Settings: React.FC = () => {
       pageViewTelemetry="Settings"
       isLoading={false}
     >
-      <EuiPanel hasBorder>
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem>
-            <EuiText size="m">
-              <h4>
-                <strong>
-                  {i18n.translate('xpack.enterpriseSearch.content.settings.deploymentHeaderTitle', {
-                    defaultMessage: 'Deployment wide content extraction',
-                  })}
-                </strong>
-              </h4>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="s">
-              {i18n.translate('xpack.enterpriseSearch.content.settings.descriptionOne', {
-                defaultMessage:
-                  'Content extraction for your Enterprise Search deployment allows ingestion mechanisms to extract searchable content from PDFs, and other Word document types. This setting affects all newly created Elasticsearch indices with an associated Enterprise Search ingestion mechanism.',
-              })}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="s">
-              {i18n.translate('xpack.enterpriseSearch.content.settings.descriptionOne', {
-                defaultMessage:
-                  'Each index can be changed individually to enable or disable this feature on their respective configuration pages.',
-              })}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <PipelineSettingsForm pipeline={pipelineState} setPipeline={setPipeline} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+      <SettingsPanel
+        description={i18n.translate(
+          'xpack.enterpriseSearch.content.settings.contentExtraction.description',
+          {
+            defaultMessage:
+              'Allow all ingestion mechanisms on your Enterprise Search deployment to extract searchable content from binary files, like PDFs and Word documents. This setting applies to all new Elasticsearch indices created by an Enterprise Search ingestion mechanism.',
+          }
+        )}
+        link={
+          <EuiLink href="TODO TODO TODO TODO" external>
+            {i18n.translate('xpack.enterpriseSearch.content.settings.contactExtraction.link', {
+              defaultMessage: 'Learn more about content extraction',
+            })}
+          </EuiLink>
+        }
+        onChange={() =>
+          setPipeline({
+            ...pipelineState,
+            extract_binary_content: !pipelineState.extract_binary_content,
+          })
+        }
+        title={i18n.translate('xpack.enterpriseSearch.content.settings.contentExtraction.title', {
+          defaultMessage: 'Deployment wide content extraction',
+        })}
+        value={extractBinaryContent}
+      />
+      <EuiSpacer size="s" />
+      <SettingsPanel
+        description={i18n.translate(
+          'xpack.enterpriseSearch.content.settings.whiteSpaceReduction.description',
+          {
+            defaultMessage:
+              'Whitespace reduction will strip your full-text content of whitespace by default.',
+          }
+        )}
+        link={
+          <EuiLink href="TODO TODO TODO TODO" external>
+            {i18n.translate('xpack.enterpriseSearch.content.settings.whitespaceReduction.link', {
+              defaultMessage: 'Learn more about whitespace reduction',
+            })}
+          </EuiLink>
+        }
+        onChange={() =>
+          setPipeline({
+            ...pipelineState,
+            reduce_whitespace: !pipelineState.reduce_whitespace,
+          })
+        }
+        title={i18n.translate(
+          'xpack.enterpriseSearch.content.settings.whitespaceReduction.deploymentHeaderTitle',
+          {
+            defaultMessage: 'Deployment wide whitespace reduction',
+          }
+        )}
+        value={reduceWhitespace}
+      />
+      <EuiSpacer size="s" />
+      <SettingsPanel
+        description={i18n.translate(
+          'xpack.enterpriseSearch.content.settings.mlInference.description',
+          {
+            defaultMessage:
+              'ML Inference Pipelines will run as part of your pipelines. You will have to configure processors for each index individually on its pipelines page.',
+          }
+        )}
+        link={
+          <EuiLink href="TODO TODO TODO TODO" external>
+            {i18n.translate('xpack.enterpriseSearch.content.settings.mlInference.link', {
+              defaultMessage: 'Learn more about content extraction',
+            })}
+          </EuiLink>
+        }
+        onChange={() =>
+          setPipeline({
+            ...pipelineState,
+            run_ml_inference: !pipelineState.run_ml_inference,
+          })
+        }
+        title={i18n.translate(
+          'xpack.enterpriseSearch.content.settings.mlInference.deploymentHeaderTitle',
+          {
+            defaultMessage: 'Deployment wide ML Inference Pipelines extraction',
+          }
+        )}
+        value={runMLInference}
+      />
     </EnterpriseSearchContentPageTemplate>
   );
 };

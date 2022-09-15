@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiSwitch, EuiTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { DOCUMENTS_API_JSON_EXAMPLE } from '../new_index/constants';
+
+import { SettingsLogic } from '../settings/settings_logic';
 
 import { ClientLibrariesPopover } from './components/client_libraries_popover/popover';
 import { CurlRequest } from './components/curl_request/curl_request';
@@ -27,6 +29,9 @@ export const GenerateApiKeyPanel: React.FC = () => {
   const { apiKey, isGenerateModalOpen } = useValues(OverviewLogic);
   const { indexName } = useValues(IndexViewLogic);
   const { closeGenerateModal } = useActions(OverviewLogic);
+  const { defaultPipeline } = useValues(SettingsLogic);
+
+  const [optimizedRequest, setOptimizedRequest] = useState(true);
 
   return (
     <>
@@ -52,6 +57,16 @@ export const GenerateApiKeyPanel: React.FC = () => {
                     )}
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
+                    <EuiSwitch
+                      onChange={(event) => setOptimizedRequest(event.target.checked)}
+                      label={i18n.translate(
+                        'xpack.enterpriseSearch.content.overview.optimizedRequest.label',
+                        { defaultMessage: 'View Enterprise Search optimized request' }
+                      )}
+                      checked={optimizedRequest}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
                     <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
                       <EuiFlexItem>
                         <ClientLibrariesPopover />
@@ -71,6 +86,7 @@ export const GenerateApiKeyPanel: React.FC = () => {
                       apiKey={apiKey}
                       document={DOCUMENTS_API_JSON_EXAMPLE}
                       indexName={indexName}
+                      pipeline={optimizedRequest ? defaultPipeline : undefined}
                     />
                   </EuiFlexItem>
                 </>

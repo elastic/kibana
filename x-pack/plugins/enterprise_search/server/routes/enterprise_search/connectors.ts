@@ -141,7 +141,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     })
   );
 
-  router.post(
+  router.put(
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/pipeline',
       validate: {
@@ -163,7 +163,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     })
   );
 
-  router.post(
+  router.put(
     {
       path: '/internal/enterprise_search/connectors/default_pipeline',
       validate: {

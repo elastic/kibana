@@ -29,8 +29,10 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_PIPELINE_NAME } from '../../../../../../common/constants';
 
 import { IngestPipelineParams } from '../../../../../../common/types/connectors';
-import { PipelineSettingsForm } from '../../shared/pipeline_settings/pipeline_settings_form';
+
 import { CurlRequest } from '../components/curl_request/curl_request';
+
+import { PipelineSettingsForm } from './pipeline_settings_form';
 
 interface IngestPipelineModalProps {
   closeModal: () => void;
@@ -108,7 +110,7 @@ export const IngestPipelineModal: React.FC<IngestPipelineModalProps> = ({
               </EuiFlexItem>
               <EuiSpacer />
               <EuiFlexItem>
-                <EuiLink href="_" external>
+                <EuiLink href="TODO TODO TODO: Insert actual docslink" external>
                   {i18n.translate(
                     'xpack.enterpriseSearch.content.index.pipelines.ingestModal.modalIngestLinkLabel',
                     {
@@ -199,7 +201,7 @@ export const IngestPipelineModal: React.FC<IngestPipelineModalProps> = ({
         {displayOnly ? (
           <EuiButton fill onClick={closeModal}>
             {i18n.translate(
-              'xpack.enterpriseSearch.content.index.pipelines.ingestModal.saveButtonLabel',
+              'xpack.enterpriseSearch.content.index.pipelines.ingestModal.closeButtonLabel',
               {
                 defaultMessage: 'Close',
               }
