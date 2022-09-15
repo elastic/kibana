@@ -10,13 +10,14 @@ import { HttpLogic } from '../../../shared/http';
 
 export interface StartSyncArgs {
   connectorId: string;
-  nextSyncConfig?: string;
+  nextSyncConfig?: object;
 }
 
 export const startSync = async ({ connectorId, nextSyncConfig }: StartSyncArgs) => {
   const route = `/internal/enterprise_search/connectors/${connectorId}/start_sync`;
   return await HttpLogic.values.http.post(route, {
-    body: JSON.stringify( { nextSyncConfig: nextSyncConfig } )
+    // nextSyncConfig will be stored as a JSON string
+    body: JSON.stringify( { nextSyncConfig: JSON.stringify(nextSyncConfig) } )
   });
 };
 
