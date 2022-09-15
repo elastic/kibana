@@ -29149,7 +29149,6 @@
     "xpack.sessionView.alertsLoadMoreButton": "加载更多告警",
     "xpack.sessionView.backToInvestigatedAlert": "返回到已调查告警",
     "xpack.sessionView.beta": "公测版",
-    "xpack.sessionView.buttonOpenDetailPanel": "详情面板",
     "xpack.sessionView.childProcesses": "子进程",
     "xpack.sessionView.detailPanel.entryLeaderTooltip": "与初始终端或通过 SSH、SSM 和其他远程访问协议执行的远程访问关联的会话 Leader 进程。入口会话也用于表示直接由初始进程启动的服务。在许多情况下，这与 session_leader 相同。",
     "xpack.sessionView.detailPanel.processGroupLeaderTooltip": "当前进程的进程组 leader。",
