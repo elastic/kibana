@@ -22,10 +22,7 @@ import {
   getFormatFromPreviousColumn,
   isColumnOfType,
 } from './helpers';
-import {
-  adjustTimeScaleLabelSuffix,
-  adjustTimeScaleOnOtherColumnChange,
-} from '../time_scale_utils';
+import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { updateColumnParam } from '../layer_helpers';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
@@ -52,6 +49,10 @@ function ofName(
   timeScale: string | undefined,
   reducedTimeRange: string | undefined
 ) {
+  if (field?.customLabel) {
+    return field.customLabel;
+  }
+
   return adjustTimeScaleLabelSuffix(
     field?.type !== 'document'
       ? i18n.translate('xpack.lens.indexPattern.valueCountOf', {
@@ -123,6 +124,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
         previousColumn?.timeScale,
         previousColumn?.reducedTimeRange
       ),
+      customLabel: Boolean(field.customLabel),
       dataType: 'number',
       operationType: 'count',
       isBucketed: false,
@@ -181,8 +183,6 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       },
     ];
   },
-  onOtherColumnChanged: (layer, thisColumnId) =>
-    adjustTimeScaleOnOtherColumnChange<CountIndexPatternColumn>(layer, thisColumnId),
   toEsAggsFn: (column, columnId, indexPattern) => {
     const field = indexPattern.getFieldByName(column.sourceField);
     if (field?.type === 'document') {

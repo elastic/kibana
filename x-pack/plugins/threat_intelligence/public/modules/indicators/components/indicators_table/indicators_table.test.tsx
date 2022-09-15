@@ -25,6 +25,19 @@ const tableProps: IndicatorsTableProps = {
   loading: false,
   browserFields: {},
   indexPattern: { fields: [], title: '' } as SecuritySolutionDataViewBase,
+  columnSettings: {
+    columnVisibility: {
+      visibleColumns: [],
+      setVisibleColumns: () => {},
+    },
+    columns: [],
+    handleResetColumns: () => {},
+    handleToggleColumn: () => {},
+    sorting: {
+      columns: [],
+      onSort: () => {},
+    },
+  },
 };
 
 const indicatorsFixture: Indicator[] = [
