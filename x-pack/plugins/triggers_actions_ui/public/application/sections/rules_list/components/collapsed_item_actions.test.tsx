@@ -23,6 +23,7 @@ const onUpdateAPIKey = jest.fn();
 const snoozeRule = jest.fn();
 const unsnoozeRule = jest.fn();
 const onLoading = jest.fn();
+const onRunRule = jest.fn();
 
 export const tick = (ms = 0) =>
   new Promise((resolve) => {
@@ -95,6 +96,7 @@ describe('CollapsedItemActions', () => {
       snoozeRule,
       unsnoozeRule,
       onLoading,
+      onRunRule,
     };
   };
 
@@ -123,6 +125,7 @@ describe('CollapsedItemActions', () => {
     expect(wrapper.find('[data-test-subj="editRule"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="deleteRule"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="updateApiKey"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="runRule"]').exists()).toBeFalsy();
 
     wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
     await act(async () => {
@@ -136,6 +139,7 @@ describe('CollapsedItemActions', () => {
     expect(wrapper.find('[data-test-subj="editRule"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="deleteRule"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="updateApiKey"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="runRule"]').exists()).toBeTruthy();
 
     expect(
       wrapper.find('[data-test-subj="selectActionButton"]').first().props().disabled
@@ -149,6 +153,23 @@ describe('CollapsedItemActions', () => {
     expect(wrapper.find(`[data-test-subj="deleteRule"] button`).prop('disabled')).toBeFalsy();
     expect(wrapper.find(`[data-test-subj="deleteRule"] button`).text()).toEqual('Delete rule');
     expect(wrapper.find(`[data-test-subj="updateApiKey"] button`).text()).toEqual('Update API key');
+    expect(wrapper.find(`[data-test-subj="runRule"] button`).text()).toEqual('Run rule');
+  });
+
+  test('handles case when run rule is clicked', async () => {
+    await setup();
+    const wrapper = mountWithIntl(<CollapsedItemActions {...getPropsWithRule()} />);
+    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+    wrapper.find('button[data-test-subj="runRule"]').simulate('click');
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+    expect(onRunRule).toHaveBeenCalled();
   });
 
   test('handles case when rule is unmuted and enabled and disable is clicked', async () => {
