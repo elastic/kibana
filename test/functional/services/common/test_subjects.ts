@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import testSubjSelector from '@kbn/test-subj-selector';
+import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
 import { FtrService } from '../../ftr_provider_context';
 import { TimeoutOpt } from './types';

@@ -562,6 +562,7 @@ filegroup(
     "//packages/kbn-telemetry-tools:build_types",
     "//packages/kbn-test:build_types",
     "//packages/kbn-test-jest-helpers:build_types",
+    "//packages/kbn-test-subj-selector:build_types",
     "//packages/kbn-tooling-log:build_types",
     "//packages/kbn-type-summarizer:build_types",
     "//packages/kbn-type-summarizer-cli:build_types",

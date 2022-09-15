@@ -1105,6 +1105,7 @@
     "@types/kbn__telemetry-tools": "link:bazel-bin/packages/kbn-telemetry-tools/npm_module_types",
     "@types/kbn__test": "link:bazel-bin/packages/kbn-test/npm_module_types",
     "@types/kbn__test-jest-helpers": "link:bazel-bin/packages/kbn-test-jest-helpers/npm_module_types",
+    "@types/kbn__test-subj-selector": "link:bazel-bin/packages/kbn-test-subj-selector/npm_module_types",
     "@types/kbn__tooling-log": "link:bazel-bin/packages/kbn-tooling-log/npm_module_types",
     "@types/kbn__type-summarizer": "link:bazel-bin/packages/kbn-type-summarizer/npm_module_types",
     "@types/kbn__type-summarizer-cli": "link:bazel-bin/packages/kbn-type-summarizer-cli/npm_module_types",

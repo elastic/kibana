@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line import/no-default-export
-export default function kbnTestSubjSelector(selector: string): string;
+export { subj } from './test_subj_selector';

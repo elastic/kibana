@@ -7761,6 +7761,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__test-subj-selector@link:bazel-bin/packages/kbn-test-subj-selector/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__test@link:bazel-bin/packages/kbn-test/npm_module_types":
   version "0.0.0"
   uid ""

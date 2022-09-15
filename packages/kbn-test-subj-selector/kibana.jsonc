@@ -1,8 +1,8 @@
 {
   "type": "shared-common",
   "id": "@kbn/test-subj-selector",
-  "devOnly": true,
   "owner": "@elastic/kibana-operations",
+  "devOnly": true,
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
 }

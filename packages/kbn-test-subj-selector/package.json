@@ -1,10 +1,7 @@
 {
   "name": "@kbn/test-subj-selector",
-  "version": "0.2.1",
-  "description": "",
-  "main": "index.js",
-  "keywords": [],
-  "author": "Spencer Alger <email@spalger.com>",
-  "license": "SSPL-1.0 OR Elastic License 2.0",
-  "private": "true"
+  "private": true,
+  "version": "1.0.0",
+  "main": "./target_node/index.js",
+  "license": "SSPL-1.0 OR Elastic License 2.0"
 }
