@@ -18,6 +18,7 @@ import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session
 
 import {
   IOLine,
+  ProcessEntityIdIOLine,
   ProcessEvent,
   ProcessEventResults,
   ProcessEventsPage,
@@ -79,45 +80,59 @@ export const useFetchIOEvents = (sessionEntityId: string) => {
  * note: not efficient currently, tracking a page cursor to avoid redoing work is needed.
  */
 export const useIOLines = (pages: ProcessEventsPage[] | undefined) => {
-  const lines: IOLine[] = useMemo(() => {
+  const linesAndEntityIdMap = useMemo(() => {
     const newLines: IOLine[] = [];
+    const entityIdLineMap: Record<string, ProcessEntityIdIOLine> = {};
 
     if (!pages) {
-      return newLines;
+      return { lines: newLines, processIdLineMap: entityIdLineMap };
     }
 
-    return pages.reduce((previous, current) => {
-      if (current.events) {
-        current.events.forEach((event) => {
-          const { process } = event;
-          if (process?.io?.text !== undefined) {
-            const splitLines = process.io.text.split(TTY_LINE_SPLITTER_REGEX);
-            const combinedLines = [splitLines[0]];
-
-            // delimiters e.g \r\n or cursor movements are merged with their line text
-            // we start on an odd number so that cursor movements happen at the start of each line
-            // this is needed for the search to work accurately
-            for (let i = 1; i < splitLines.length - 1; i = i + 2) {
-              combinedLines.push(splitLines[i] + splitLines[i + 1]);
-            }
-
-            const data: IOLine[] = combinedLines.map((line) => {
-              return {
-                event, // pointer to the event so it's easy to look up other details for the line
-                value: line,
+    return {
+      lines: pages.reduce((previous, current) => {
+        if (current.events) {
+          current.events.forEach((event) => {
+            const { process } = event;
+            if (process?.io?.text !== undefined && process.entity_id !== undefined) {
+              const splitLines = process.io.text.split(TTY_LINE_SPLITTER_REGEX);
+              const combinedLines = [splitLines[0]];
+              const previousProcessId = previous[previous.length - 1]?.event.process?.entity_id;
+              const currentProcessLineInfo: ProcessEntityIdIOLine = {
+                value: entityIdLineMap[process.entity_id]?.value ?? previous.length,
               };
-            });
 
-            previous = previous.concat(data);
-          }
-        });
-      }
+              if (previousProcessId && previousProcessId !== process.entity_id) {
+                entityIdLineMap[previousProcessId].next = currentProcessLineInfo.value;
+                currentProcessLineInfo.previous = entityIdLineMap[previousProcessId].value;
+              }
+              if (previousProcessId !== process.entity_id) {
+                entityIdLineMap[process.entity_id] = currentProcessLineInfo;
+              }
 
-      return previous;
-    }, newLines);
+              // delimiters e.g \r\n or cursor movements are merged with their line text
+              // we start on an odd number so that cursor movements happen at the start of each line
+              // this is needed for the search to work accurately
+              for (let i = 1; i < splitLines.length - 1; i = i + 2) {
+                combinedLines.push(splitLines[i] + splitLines[i + 1]);
+              }
+
+              const data: IOLine[] = combinedLines.map((line) => {
+                return {
+                  event, // pointer to the event so it's easy to look up other details for the line
+                  value: line,
+                };
+              });
+
+              previous = previous.concat(data);
+            }
+          });
+        }
+        return previous;
+      }, newLines),
+      processIdLineMap: entityIdLineMap,
+    };
   }, [pages]);
-
-  return lines;
+  return linesAndEntityIdMap;
 };
 
 export interface XtermPlayerDeps {

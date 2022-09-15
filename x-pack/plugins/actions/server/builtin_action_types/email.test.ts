@@ -25,6 +25,7 @@ import {
   EmailActionTypeExecutorOptions,
 } from './email';
 import { ValidateEmailAddressesOptions } from '../../common';
+import { ActionsConfigurationUtilities } from '../actions_config';
 
 const sendEmailMock = sendEmail as jest.Mock;
 
@@ -34,10 +35,12 @@ const services = actionsMock.createServices();
 
 let actionType: EmailActionType;
 let mockedLogger: jest.Mocked<Logger>;
+let configurationUtilities: ActionsConfigurationUtilities;
 
 beforeEach(() => {
   jest.resetAllMocks();
   const { actionTypeRegistry } = createActionTypeRegistry();
+  configurationUtilities = actionTypeRegistry.getUtils();
   actionType = actionTypeRegistry.get<
     ActionTypeConfigType,
     ActionTypeSecretsType,
@@ -59,7 +62,7 @@ describe('config validation', () => {
       from: 'bob@example.com',
       hasAuth: true,
     };
-    expect(validateConfig(actionType, config)).toEqual({
+    expect(validateConfig(actionType, config, { configurationUtilities })).toEqual({
       ...config,
       host: null,
       port: null,
@@ -77,7 +80,7 @@ describe('config validation', () => {
       port: 8080,
       hasAuth: true,
     };
-    expect(validateConfig(actionType, config)).toEqual({
+    expect(validateConfig(actionType, config, { configurationUtilities })).toEqual({
       ...config,
       service: 'other',
       secure: null,
@@ -95,7 +98,7 @@ describe('config validation', () => {
       port: 8080,
       hasAuth: true,
     };
-    expect(validateConfig(actionType, config)).toEqual({
+    expect(validateConfig(actionType, config, { configurationUtilities })).toEqual({
       ...config,
       secure: null,
       clientId: null,
@@ -112,7 +115,7 @@ describe('config validation', () => {
       tenantId: '12345778',
       hasAuth: true,
     };
-    expect(validateConfig(actionType, config)).toEqual({
+    expect(validateConfig(actionType, config, { configurationUtilities })).toEqual({
       ...config,
       secure: null,
       host: null,
@@ -127,7 +130,7 @@ describe('config validation', () => {
       from: 'bob@example.com',
       hasAuth: true,
     };
-    expect(validateConfig(actionType, config)).toEqual({
+    expect(validateConfig(actionType, config, { configurationUtilities })).toEqual({
       ...config,
       host: null,
       port: null,
@@ -145,70 +148,86 @@ describe('config validation', () => {
 
     // empty object
     expect(() => {
-      validateConfig(actionType, {});
+      validateConfig(actionType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [from]: expected value of type [string] but got [undefined]"`
     );
 
     // no service or host/port
     expect(() => {
-      validateConfig(actionType, baseConfig);
+      validateConfig(actionType, baseConfig, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [host]/[port] is required"`
     );
 
     // host but no port
     expect(() => {
-      validateConfig(actionType, { ...baseConfig, host: 'elastic.co' });
+      validateConfig(actionType, { ...baseConfig, host: 'elastic.co' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [port] is required"`
     );
 
     // port but no host
     expect(() => {
-      validateConfig(actionType, { ...baseConfig, port: 8080 });
+      validateConfig(actionType, { ...baseConfig, port: 8080 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [host] is required"`
     );
 
     // invalid service
     expect(() => {
-      validateConfig(actionType, {
-        ...baseConfig,
-        service: 'bad-nodemailer-service',
-      });
+      validateConfig(
+        actionType,
+        {
+          ...baseConfig,
+          service: 'bad-nodemailer-service',
+        },
+        { configurationUtilities }
+      );
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [service] value 'bad-nodemailer-service' is not valid"`
     );
 
     // invalid exchange_server no clientId and no tenantId
     expect(() => {
-      validateConfig(actionType, {
-        ...baseConfig,
-        service: 'exchange_server',
-      });
+      validateConfig(
+        actionType,
+        {
+          ...baseConfig,
+          service: 'exchange_server',
+        },
+        { configurationUtilities }
+      );
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [clientId]/[tenantId] is required"`
     );
 
     // invalid exchange_server no clientId
     expect(() => {
-      validateConfig(actionType, {
-        ...baseConfig,
-        service: 'exchange_server',
-        tenantId: '342342342',
-      });
+      validateConfig(
+        actionType,
+        {
+          ...baseConfig,
+          service: 'exchange_server',
+          tenantId: '342342342',
+        },
+        { configurationUtilities }
+      );
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [clientId] is required"`
     );
 
     // invalid exchange_server no tenantId
     expect(() => {
-      validateConfig(actionType, {
-        ...baseConfig,
-        service: 'exchange_server',
-        clientId: '12345667',
-      });
+      validateConfig(
+        actionType,
+        {
+          ...baseConfig,
+          service: 'exchange_server',
+          clientId: '12345667',
+        },
+        { configurationUtilities }
+      );
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [tenantId] is required"`
     );
@@ -219,12 +238,13 @@ describe('config validation', () => {
   const NODEMAILER_AOL_SERVICE_HOST = 'smtp.aol.com';
 
   test('config validation handles email host in allowedHosts', () => {
+    const configUtils = {
+      ...actionsConfigMock.create(),
+      isHostnameAllowed: (hostname: string) => hostname === NODEMAILER_AOL_SERVICE_HOST,
+    };
     actionType = getActionType({
       logger: mockedLogger,
-      configurationUtilities: {
-        ...actionsConfigMock.create(),
-        isHostnameAllowed: (hostname) => hostname === NODEMAILER_AOL_SERVICE_HOST,
-      },
+      configurationUtilities: configUtils,
     });
     const baseConfig = {
       from: 'bob@example.com',
@@ -249,46 +269,56 @@ describe('config validation', () => {
       port: 42,
     };
 
-    const validatedConfig1 = validateConfig(actionType, allowedHosts1);
+    const validatedConfig1 = validateConfig(actionType, allowedHosts1, {
+      configurationUtilities: configUtils,
+    });
     expect(validatedConfig1.service).toEqual(allowedHosts1.service);
     expect(validatedConfig1.from).toEqual(allowedHosts1.from);
 
-    const validatedConfig2 = validateConfig(actionType, allowedHosts2);
+    const validatedConfig2 = validateConfig(actionType, allowedHosts2, {
+      configurationUtilities: configUtils,
+    });
     expect(validatedConfig2.host).toEqual(allowedHosts2.host);
     expect(validatedConfig2.port).toEqual(allowedHosts2.port);
     expect(validatedConfig2.from).toEqual(allowedHosts2.from);
 
     expect(() => {
-      validateConfig(actionType, notAllowedHosts1);
+      validateConfig(actionType, notAllowedHosts1, {
+        configurationUtilities: configUtils,
+      });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [service] value 'gmail' resolves to host 'smtp.gmail.com' which is not in the allowedHosts configuration"`
     );
 
     expect(() => {
-      validateConfig(actionType, notAllowedHosts2);
+      validateConfig(actionType, notAllowedHosts2, { configurationUtilities: configUtils });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [host] value 'smtp.gmail.com' is not in the allowedHosts configuration"`
     );
   });
 
   test('config validation for emails calls validateEmailAddresses', async () => {
-    const configurationUtilities = actionsConfigMock.create();
-    configurationUtilities.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
+    const configUtils = actionsConfigMock.create();
+    configUtils.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
 
     const basicActionType = getActionType({
       logger: mockedLogger,
-      configurationUtilities,
+      configurationUtilities: configUtils,
     });
 
     expect(() => {
-      validateConfig(basicActionType, {
-        from: 'badmail',
-        service: 'gmail',
-      });
+      validateConfig(
+        basicActionType,
+        {
+          from: 'badmail',
+          service: 'gmail',
+        },
+        { configurationUtilities: configUtils }
+      );
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [from]: stub for actual message"`
     );
-    expect(configurationUtilities.validateEmailAddresses).toHaveBeenNthCalledWith(1, ['badmail']);
+    expect(configUtils.validateEmailAddresses).toHaveBeenNthCalledWith(1, ['badmail']);
   });
 });
 
@@ -298,7 +328,10 @@ describe('secrets validation', () => {
       user: 'bob',
       password: 'supersecret',
     };
-    expect(validateSecrets(actionType, secrets)).toEqual({ ...secrets, clientSecret: null });
+    expect(validateSecrets(actionType, secrets, { configurationUtilities })).toEqual({
+      ...secrets,
+      clientSecret: null,
+    });
   });
 
   test('secrets validation succeeds when secrets props are null/undefined', () => {
@@ -307,16 +340,20 @@ describe('secrets validation', () => {
       password: null,
       clientSecret: null,
     };
-    expect(validateSecrets(actionType, {})).toEqual(secrets);
-    expect(validateSecrets(actionType, { user: null })).toEqual(secrets);
-    expect(validateSecrets(actionType, { password: null })).toEqual(secrets);
+    expect(validateSecrets(actionType, {}, { configurationUtilities })).toEqual(secrets);
+    expect(validateSecrets(actionType, { user: null }, { configurationUtilities })).toEqual(
+      secrets
+    );
+    expect(validateSecrets(actionType, { password: null }, { configurationUtilities })).toEqual(
+      secrets
+    );
   });
 
   test('secrets validation succeeds when secrets is valid for OAuth 2.0 Client Credentials', () => {
     const secrets: Record<string, unknown> = {
       clientSecret: '12345678',
     };
-    expect(validateSecrets(actionType, secrets)).toEqual({
+    expect(validateSecrets(actionType, secrets, { configurationUtilities })).toEqual({
       ...secrets,
       user: null,
       password: null,
@@ -400,7 +437,7 @@ describe('params validation', () => {
       subject: 'this is a test',
       message: 'this is the message',
     };
-    expect(validateParams(actionType, params)).toMatchInlineSnapshot(`
+    expect(validateParams(actionType, params, { configurationUtilities })).toMatchInlineSnapshot(`
       Object {
         "bcc": Array [],
         "cc": Array [],
@@ -420,35 +457,39 @@ describe('params validation', () => {
   test('params validation fails when params is not valid', () => {
     // empty object
     expect(() => {
-      validateParams(actionType, {});
+      validateParams(actionType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action params: [subject]: expected value of type [string] but got [undefined]"`
     );
   });
 
   test('params validation for emails calls validateEmailAddresses', async () => {
-    const configurationUtilities = actionsConfigMock.create();
-    configurationUtilities.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
+    const configUtils = actionsConfigMock.create();
+    configUtils.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
 
     const basicActionType = getActionType({
       logger: mockedLogger,
-      configurationUtilities,
+      configurationUtilities: configUtils,
     });
 
     expect(() => {
-      validateParams(basicActionType, {
-        to: ['to@example.com'],
-        cc: ['cc@example.com'],
-        bcc: ['bcc@example.com'],
-        subject: 'this is a test',
-        message: 'this is the message',
-      });
+      validateParams(
+        basicActionType,
+        {
+          to: ['to@example.com'],
+          cc: ['cc@example.com'],
+          bcc: ['bcc@example.com'],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action params: [to/cc/bcc]: stub for actual message"`
     );
 
     const allEmails = ['to@example.com', 'cc@example.com', 'bcc@example.com'];
-    expect(configurationUtilities.validateEmailAddresses).toHaveBeenNthCalledWith(1, allEmails, {
+    expect(configUtils.validateEmailAddresses).toHaveBeenNthCalledWith(1, allEmails, {
       treatMustacheTemplatesAsValid: true,
     });
   });
@@ -759,12 +800,12 @@ describe('execute()', () => {
   });
 
   test('ensure execution runs validator with allowMustache false', async () => {
-    const configurationUtilities = actionsConfigMock.create();
-    configurationUtilities.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
+    const configUtils = actionsConfigMock.create();
+    configUtils.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
 
     const testActionType = getActionType({
       logger: mockedLogger,
-      configurationUtilities,
+      configurationUtilities: configUtils,
     });
 
     const customExecutorOptions: EmailActionTypeExecutorOptions = {
@@ -782,7 +823,7 @@ describe('execute()', () => {
         "status": "error",
       }
     `);
-    expect(configurationUtilities.validateEmailAddresses.mock.calls).toMatchInlineSnapshot(`
+    expect(configUtils.validateEmailAddresses.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
           Array [

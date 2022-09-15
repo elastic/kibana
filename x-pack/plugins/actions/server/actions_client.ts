@@ -188,8 +188,13 @@ export class ActionsClient {
     }
 
     const actionType = this.actionTypeRegistry.get(actionTypeId);
-    const validatedActionTypeConfig = validateConfig(actionType, config);
-    const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
+    const configurationUtilities = this.actionTypeRegistry.getUtils();
+    const validatedActionTypeConfig = validateConfig(actionType, config, {
+      configurationUtilities,
+    });
+    const validatedActionTypeSecrets = validateSecrets(actionType, secrets, {
+      configurationUtilities,
+    });
     if (actionType.validate?.connector) {
       validateConnector(actionType, { config, secrets });
     }
@@ -262,8 +267,13 @@ export class ActionsClient {
     const { actionTypeId } = attributes;
     const { name, config, secrets } = action;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
-    const validatedActionTypeConfig = validateConfig(actionType, config);
-    const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
+    const configurationUtilities = this.actionTypeRegistry.getUtils();
+    const validatedActionTypeConfig = validateConfig(actionType, config, {
+      configurationUtilities,
+    });
+    const validatedActionTypeSecrets = validateSecrets(actionType, secrets, {
+      configurationUtilities,
+    });
     if (actionType.validate?.connector) {
       validateConnector(actionType, { config, secrets });
     }

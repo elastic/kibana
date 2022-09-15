@@ -54,7 +54,7 @@ import {
   addTimelineHistory,
   addTimelineNote,
   addTimelineNoteToEvent,
-  addTimelineProvider,
+  addTimelineProviders,
   addTimelineToStore,
   applyKqlFilterQueryDraft,
   pinTimelineEvent,
@@ -129,9 +129,9 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: addTimelineNoteToEvent({ id, noteId, eventId, timelineById: state.timelineById }),
   }))
-  .case(addProvider, (state, { id, provider }) => ({
+  .case(addProvider, (state, { id, providers }) => ({
     ...state,
-    timelineById: addTimelineProvider({ id, provider, timelineById: state.timelineById }),
+    timelineById: addTimelineProviders({ id, providers, timelineById: state.timelineById }),
   }))
   .case(applyKqlFilterQuery, (state, { id, filterQuery }) => ({
     ...state,

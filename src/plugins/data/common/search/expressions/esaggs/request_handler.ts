@@ -19,7 +19,7 @@ import { IAggConfigs } from '../../aggs';
 import { ISearchStartSearchSource } from '../../search_source';
 import { tabifyAggResponse } from '../../tabify';
 
-interface RequestHandlerParams {
+export interface RequestHandlerParams {
   abortSignal?: AbortSignal;
   aggs: IAggConfigs;
   filters?: Filter[];
@@ -30,6 +30,7 @@ interface RequestHandlerParams {
   searchSourceService: ISearchStartSearchSource;
   timeFields?: string[];
   timeRange?: TimeRange;
+  disableShardWarnings?: boolean;
   getNow?: () => Date;
   executionContext?: KibanaExecutionContext;
 }
@@ -45,6 +46,7 @@ export const handleRequest = ({
   searchSourceService,
   timeFields,
   timeRange,
+  disableShardWarnings,
   getNow,
   executionContext,
 }: RequestHandlerParams) => {
@@ -111,6 +113,7 @@ export const handleRequest = ({
       requestSearchSource
         .fetch$({
           abortSignal,
+          disableShardFailureWarning: disableShardWarnings,
           sessionId: searchSessionId,
           inspector: {
             adapter: inspectorAdapters.requests,

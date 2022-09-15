@@ -14,12 +14,13 @@ import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import type { IndexNotFound } from '.';
+import { DEFAULT_TIMEOUT, IndexNotFound } from '.';
 
 /** @internal */
 export interface SetWriteBlockParams {
   client: ElasticsearchClient;
   index: string;
+  timeout?: string;
 }
 
 /**
@@ -35,6 +36,7 @@ export const setWriteBlock =
   ({
     client,
     index,
+    timeout = DEFAULT_TIMEOUT,
   }: SetWriteBlockParams): TaskEither.TaskEither<
     IndexNotFound | RetryableEsClientError,
     'set_write_block_succeeded'
@@ -46,6 +48,7 @@ export const setWriteBlock =
           {
             index,
             block: 'write',
+            timeout,
           },
           { maxRetries: 0 /** handle retry ourselves for now */ }
         )
@@ -69,4 +72,3 @@ export const setWriteBlock =
         .catch(catchRetryableEsClientErrors)
     );
   };
-//

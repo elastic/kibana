@@ -6,22 +6,26 @@
  */
 
 import {
-  ELASTIC_RULES_BTN,
-  CUSTOM_RULES_BTN,
   MODAL_CONFIRMATION_BTN,
-  SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
-  RULES_TAGS_FILTER_BTN,
+  MODAL_CONFIRMATION_BODY,
   RULE_CHECKBOX,
   RULES_TAGS_POPOVER_BTN,
-  RULES_TABLE_REFRESH_INDICATOR,
+  TOASTER_BODY,
+  MODAL_ERROR_BODY,
 } from '../../screens/alerts_detection_rules';
 
 import {
-  RULES_BULK_EDIT_OVERWRITE_INDEX_PATTERNS_CHECKBOX,
-  RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX,
   RULES_BULK_EDIT_INDEX_PATTERNS_WARNING,
   RULES_BULK_EDIT_TAGS_WARNING,
+  RULES_BULK_EDIT_TIMELINE_TEMPLATES_WARNING,
+  TAGS_RULE_BULK_MENU_ITEM,
+  INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
+  APPLY_TIMELINE_RULE_BULK_MENU_ITEM,
 } from '../../screens/rules_bulk_edit';
+
+import { TIMELINE_TEMPLATE_DETAILS } from '../../screens/rule_details';
+
+import { EUI_FILTER_SELECT_ITEM } from '../../screens/common/controls';
 
 import {
   changeRowsPerPageTo,
@@ -34,49 +38,85 @@ import {
   testMultipleSelectedRulesLabel,
   loadPrebuiltDetectionRulesFromHeaderBtn,
   switchToElasticRules,
+  clickErrorToastBtn,
+  unselectRuleByName,
+  cancelConfirmationModal,
 } from '../../tasks/alerts_detection_rules';
 
 import {
-  openBulkEditAddIndexPatternsForm,
-  openBulkEditDeleteIndexPatternsForm,
   typeIndexPatterns,
   waitForBulkEditActionToFinish,
-  confirmBulkEditForm,
+  submitBulkEditForm,
   clickAddIndexPatternsMenuItem,
-  checkElasticRulesCannotBeModified,
+  checkPrebuiltRulesCannotBeModified,
   checkMachineLearningRulesCannotBeModified,
   waitForMixedRulesBulkEditModal,
   openBulkEditAddTagsForm,
   openBulkEditDeleteTagsForm,
   typeTags,
+  openTagsSelect,
+  openBulkActionsMenu,
+  clickApplyTimelineTemplatesMenuItem,
+  clickAddTagsMenuItem,
+  checkOverwriteTagsCheckbox,
+  checkOverwriteIndexPatternsCheckbox,
+  openBulkEditAddIndexPatternsForm,
+  openBulkEditDeleteIndexPatternsForm,
+  selectTimelineTemplate,
+  checkTagsInTagsFilter,
 } from '../../tasks/rules_bulk_edit';
 
-import { hasIndexPatterns } from '../../tasks/rule_details';
+import { hasIndexPatterns, getDetails } from '../../tasks/rule_details';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
-import { createCustomRule, createMachineLearningRule } from '../../tasks/api_calls/rules';
-import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import {
-  getExistingRule,
-  getNewOverrideRule,
+  createCustomRule,
+  createMachineLearningRule,
+  createCustomIndicatorRule,
+  createEventCorrelationRule,
+  createThresholdRule,
+  createNewTermsRule,
+} from '../../tasks/api_calls/rules';
+import { loadPrepackagedTimelineTemplates } from '../../tasks/api_calls/timelines';
+import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
+
+import {
+  getEqlRule,
+  getNewThreatIndicatorRule,
   getNewRule,
   getNewThresholdRule,
   totalNumberOfPrebuiltRules,
   getMachineLearningRule,
+  getNewTermsRule,
 } from '../../objects/rule';
+import { getIndicatorMatchTimelineTemplate } from '../../objects/timeline';
+
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
 
 const RULE_NAME = 'Custom rule for bulk actions';
 
-const CUSTOM_INDEX_PATTERN_1 = 'custom-cypress-test-*';
-const DEFAULT_INDEX_PATTERNS = ['index-1-*', 'index-2-*'];
-const TAGS = ['cypress-tag-1', 'cypress-tag-2'];
-const OVERWRITE_INDEX_PATTERNS = ['overwrite-index-1-*', 'overwrite-index-2-*'];
+const prePopulatedIndexPatterns = ['index-1-*', 'index-2-*'];
+const prePopulatedTags = ['test-default-tag-1', 'test-default-tag-2'];
 
 const expectedNumberOfCustomRulesToBeEdited = 6;
 const expectedNumberOfMachineLearningRulesToBeEdited = 1;
+
+const timelineTemplate = getIndicatorMatchTimelineTemplate();
+/**
+ * total number of custom rules that are not Machine learning
+ */
+const expectedNumberOfNotMLRules =
+  expectedNumberOfCustomRulesToBeEdited - expectedNumberOfMachineLearningRulesToBeEdited;
 const numberOfRulesPerPage = 5;
+
+const indexDataSource = { index: prePopulatedIndexPatterns, type: 'indexPatterns' } as const;
+
+const defaultRuleData = {
+  dataSource: indexDataSource,
+  tags: prePopulatedTags,
+  timeline: timelineTemplate,
+};
 
 describe('Detection rules, bulk edit', () => {
   before(() => {
@@ -90,180 +130,358 @@ describe('Detection rules, bulk edit', () => {
       {
         ...getNewRule(),
         name: RULE_NAME,
-        dataSource: { index: DEFAULT_INDEX_PATTERNS, type: 'indexPatterns' },
+        ...defaultRuleData,
       },
       '1'
     );
-    createCustomRule(getExistingRule(), '2');
-    createCustomRule(getNewOverrideRule(), '3');
-    createCustomRule(getNewThresholdRule(), '4');
-    createCustomRule({ ...getNewRule(), name: 'rule # 5' }, '5');
-    createCustomRule({ ...getNewRule(), name: 'rule # 6' }, '6');
+    createEventCorrelationRule({ ...getEqlRule(), ...defaultRuleData }, '2');
+    createMachineLearningRule({ ...getMachineLearningRule(), ...defaultRuleData });
+    createCustomIndicatorRule({ ...getNewThreatIndicatorRule(), ...defaultRuleData }, '4');
+    createThresholdRule({ ...getNewThresholdRule(), ...defaultRuleData }, '5');
+    createNewTermsRule({ ...getNewTermsRule(), ...defaultRuleData }, '6');
+
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+
     waitForRulesTableToBeLoaded();
   });
 
-  it('should show warning modal windows when some of the selected rules cannot be edited', () => {
-    createMachineLearningRule(getMachineLearningRule(), '7');
+  describe('Prerequisites', () => {
+    it('No rules selected', () => {
+      openBulkActionsMenu();
 
-    loadPrebuiltDetectionRulesFromHeaderBtn();
+      // when no rule selected all bulk edit options should be disabled
+      cy.get(TAGS_RULE_BULK_MENU_ITEM).should('be.disabled');
+      cy.get(INDEX_PATTERNS_RULE_BULK_MENU_ITEM).should('be.disabled');
+      cy.get(APPLY_TIMELINE_RULE_BULK_MENU_ITEM).should('be.disabled');
+    });
 
-    // select few Elastic rules, check if we can't proceed further, as ELastic rules are not editable
-    // filter rules, only Elastic rule to show
-    switchToElasticRules();
+    it('Only prebuilt rules selected', () => {
+      const expectedNumberOfSelectedRules = 10;
 
-    // check modal window for few selected rules
-    selectNumberOfRules(numberOfRulesPerPage);
-    clickAddIndexPatternsMenuItem();
-    checkElasticRulesCannotBeModified(numberOfRulesPerPage);
-    cy.get(MODAL_CONFIRMATION_BTN).click();
+      loadPrebuiltDetectionRulesFromHeaderBtn();
 
-    // Select all rules(Elastic rules and custom)
-    cy.get(ELASTIC_RULES_BTN).click();
-    selectAllRules();
-    clickAddIndexPatternsMenuItem();
-    waitForMixedRulesBulkEditModal(expectedNumberOfCustomRulesToBeEdited);
+      // select Elastic(prebuilt) rules, check if we can't proceed further, as Elastic rules are not editable
+      switchToElasticRules();
+      selectNumberOfRules(expectedNumberOfSelectedRules);
+      clickApplyTimelineTemplatesMenuItem();
 
-    // check rules that cannot be edited for index patterns: immutable and ML
-    checkElasticRulesCannotBeModified(totalNumberOfPrebuiltRules);
-    checkMachineLearningRulesCannotBeModified(expectedNumberOfMachineLearningRulesToBeEdited);
+      // check modal window for Elastic rule that can't be edited
+      checkPrebuiltRulesCannotBeModified(expectedNumberOfSelectedRules);
 
-    // proceed with custom rule editing
-    cy.get(MODAL_CONFIRMATION_BTN)
-      .should('have.text', `Edit ${expectedNumberOfCustomRulesToBeEdited} custom rules`)
-      .click();
+      // the confirm button closes modal
+      cy.get(MODAL_CONFIRMATION_BTN).should('have.text', 'Close').click();
+      cy.get(MODAL_CONFIRMATION_BODY).should('not.exist');
+    });
 
-    typeIndexPatterns([CUSTOM_INDEX_PATTERN_1]);
-    confirmBulkEditForm();
+    it('Prebuilt and custom rules selected: user proceeds with custom rules editing', () => {
+      loadPrebuiltDetectionRulesFromHeaderBtn();
 
-    // check if rule has been updated
-    cy.get(CUSTOM_RULES_BTN).click();
-    cy.get(RULES_TABLE_REFRESH_INDICATOR).should('exist');
-    cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
-    goToTheRuleDetailsOf(RULE_NAME);
-    hasIndexPatterns([...DEFAULT_INDEX_PATTERNS, CUSTOM_INDEX_PATTERN_1].join(''));
+      // modal window should show how many rules can be edit, how many not
+      selectAllRules();
+      clickAddTagsMenuItem();
+      waitForMixedRulesBulkEditModal(expectedNumberOfCustomRulesToBeEdited);
+
+      checkPrebuiltRulesCannotBeModified(totalNumberOfPrebuiltRules);
+
+      // user can proceed with custom rule editing
+      cy.get(MODAL_CONFIRMATION_BTN)
+        .should('have.text', `Edit ${expectedNumberOfCustomRulesToBeEdited} custom rules`)
+        .click();
+
+      // action should finish
+      typeTags(['test-tag']);
+      submitBulkEditForm();
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+    });
+
+    it('Prebuilt and custom rules selected: user cancels action', () => {
+      loadPrebuiltDetectionRulesFromHeaderBtn();
+
+      // modal window should show how many rules can be edit, how many not
+      selectAllRules();
+      clickAddTagsMenuItem();
+      waitForMixedRulesBulkEditModal(expectedNumberOfCustomRulesToBeEdited);
+
+      checkPrebuiltRulesCannotBeModified(totalNumberOfPrebuiltRules);
+
+      // user cancels action and modal disappears
+      cancelConfirmationModal();
+    });
+
+    it('should not lose rules selection after edit action', () => {
+      const rulesCount = 4;
+      // Switch to 5 rules per page, to have few pages in pagination(ideal way to test auto refresh and selection of few items)
+      changeRowsPerPageTo(numberOfRulesPerPage);
+      selectNumberOfRules(rulesCount);
+
+      // open add tags form and add 2 new tags
+      openBulkEditAddTagsForm();
+      typeTags(prePopulatedTags);
+      submitBulkEditForm();
+      waitForBulkEditActionToFinish({ rulesCount });
+
+      testMultipleSelectedRulesLabel(rulesCount);
+      // check if first four(rulesCount) rules still selected and tags are updated
+      for (let i = 0; i < rulesCount; i += 1) {
+        cy.get(RULE_CHECKBOX).eq(i).should('be.checked');
+        cy.get(RULES_TAGS_POPOVER_BTN)
+          .eq(i)
+          .each(($el) => {
+            testTagsBadge($el, prePopulatedTags);
+          });
+      }
+    });
   });
 
-  it('should add/delete/overwrite index patterns in rules', () => {
-    cy.log('Adds index patterns');
-    // Switch to 5(numberOfRulesPerPage) rules per page, so we can edit all existing rules, not only ones on a page
-    // this way we will use underlying bulk edit API with query parameter, which update all rules based on query search results
-    changeRowsPerPageTo(numberOfRulesPerPage);
-    selectAllRules();
+  describe('Tags actions', () => {
+    it('Display list of tags in tags select', () => {
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
-    openBulkEditAddIndexPatternsForm();
-    typeIndexPatterns([CUSTOM_INDEX_PATTERN_1]);
-    confirmBulkEditForm();
-    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+      openBulkEditAddTagsForm();
+      openTagsSelect();
 
-    // check if rule has been updated
-    changeRowsPerPageTo(20);
-    goToTheRuleDetailsOf(RULE_NAME);
-    hasIndexPatterns([...DEFAULT_INDEX_PATTERNS, CUSTOM_INDEX_PATTERN_1].join(''));
-    cy.go('back');
-
-    cy.log('Deletes index patterns');
-    // select all rules on page (as page displays all existing rules).
-    // this way we will use underlying bulk edit API with ids parameter, which updates rules based their ids
-    cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
-    openBulkEditDeleteIndexPatternsForm();
-    typeIndexPatterns([CUSTOM_INDEX_PATTERN_1]);
-    confirmBulkEditForm();
-    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
-
-    // check if rule has been updated
-    goToTheRuleDetailsOf(RULE_NAME);
-    hasIndexPatterns(DEFAULT_INDEX_PATTERNS.join(''));
-    cy.go('back');
-
-    cy.log('Overwrites index patterns');
-    cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
-    openBulkEditAddIndexPatternsForm();
-    cy.get(RULES_BULK_EDIT_OVERWRITE_INDEX_PATTERNS_CHECKBOX)
-      .should('have.text', "Overwrite all selected rules' index patterns")
-      .click();
-    cy.get(RULES_BULK_EDIT_INDEX_PATTERNS_WARNING).should(
-      'have.text',
-      `You’re about to overwrite index patterns for ${expectedNumberOfCustomRulesToBeEdited} selected rules, press Save to apply changes.`
-    );
-    typeIndexPatterns(OVERWRITE_INDEX_PATTERNS);
-    confirmBulkEditForm();
-    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
-
-    // check if rule has been updated
-    goToTheRuleDetailsOf(RULE_NAME);
-    hasIndexPatterns(OVERWRITE_INDEX_PATTERNS.join(''));
-  });
-
-  it('should add/delete/overwrite tags in rules', () => {
-    cy.log('Add tags to all rules');
-    // Switch to 5(numberOfRulesPerPage) rules per page, so we can edit all existing rules, not only ones on a page
-    // this way we will use underlying bulk edit API with query parameter, which update all rules based on query search results
-    changeRowsPerPageTo(numberOfRulesPerPage);
-    selectAllRules();
-
-    // open add tags form and add 2 new tags
-    openBulkEditAddTagsForm();
-    typeTags(TAGS);
-    confirmBulkEditForm();
-    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
-
-    // check if all rules have been updated with new tags
-    changeRowsPerPageTo(20);
-    testAllTagsBadges(TAGS);
-    // test how many tags exist and displayed in filter button
-    cy.get(RULES_TAGS_FILTER_BTN).contains(/Tags2/);
-
-    cy.log('Remove one tag from all rules');
-    // select all rules on page (as page displays all existing rules).
-    // this way we will use underlying bulk edit API with query parameter, which update all rules based on query search results
-    cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
-
-    openBulkEditDeleteTagsForm();
-    typeTags([TAGS[0]]);
-    confirmBulkEditForm();
-    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
-
-    testAllTagsBadges(TAGS.slice(1));
-    cy.get(RULES_TAGS_FILTER_BTN).contains(/Tags1/);
-
-    cy.log('Overwrite all tags');
-    openBulkEditAddTagsForm();
-    cy.get(RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX)
-      .should('have.text', "Overwrite all selected rules' tags")
-      .click();
-    cy.get(RULES_BULK_EDIT_TAGS_WARNING).should(
-      'have.text',
-      `You’re about to overwrite tags for ${expectedNumberOfCustomRulesToBeEdited} selected rules, press Save to apply changes.`
-    );
-    typeTags(['overwrite-tag']);
-    confirmBulkEditForm();
-    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
-
-    testAllTagsBadges(['overwrite-tag']);
-  });
-
-  it('should not lose rules selection after edit action', () => {
-    const rulesCount = 4;
-    // Switch to 5 rules per page, to have few pages in pagination(ideal way to test auto refresh and selection of few items)
-    changeRowsPerPageTo(numberOfRulesPerPage);
-    selectNumberOfRules(rulesCount);
-
-    // open add tags form and add 2 new tags
-    openBulkEditAddTagsForm();
-    typeTags(TAGS);
-    confirmBulkEditForm();
-    waitForBulkEditActionToFinish({ rulesCount });
-
-    testMultipleSelectedRulesLabel(rulesCount);
-    // check if first four(rulesCount) rules still selected and tags are updated
-    for (let i = 0; i < rulesCount; i += 1) {
-      cy.get(RULE_CHECKBOX).eq(i).should('be.checked');
-      cy.get(RULES_TAGS_POPOVER_BTN)
-        .eq(i)
-        .each(($el) => {
-          testTagsBadge($el, TAGS);
+      cy.get(EUI_FILTER_SELECT_ITEM)
+        .should('have.length', prePopulatedTags.length)
+        .each(($el, index) => {
+          cy.wrap($el).should('have.text', prePopulatedTags[index]);
         });
-    }
+    });
+
+    it('Add tags to custom rules', () => {
+      const tagsToBeAdded = ['tag-to-add-1', 'tag-to-add-2'];
+      const resultingTags = [...prePopulatedTags, ...tagsToBeAdded];
+
+      // check if only pre-populated tags exist in the tags filter
+      checkTagsInTagsFilter(prePopulatedTags);
+
+      cy.get(EUI_FILTER_SELECT_ITEM)
+        .should('have.length', prePopulatedTags.length)
+        .each(($el, index) => {
+          cy.wrap($el).should('have.text', prePopulatedTags[index]);
+        });
+
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+
+      // open add tags form and add 2 new tags
+      openBulkEditAddTagsForm();
+      typeTags(tagsToBeAdded);
+      submitBulkEditForm();
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+
+      // check if all rules have been updated with new tags
+      testAllTagsBadges(resultingTags);
+
+      // check that new tags were added to tags filter
+      // tags in tags filter sorted alphabetically
+      const resultingTagsInFilter = [...resultingTags].sort();
+      checkTagsInTagsFilter(resultingTagsInFilter);
+    });
+
+    it('Overwrite tags in custom rules', () => {
+      const tagsToOverwrite = ['overwrite-tag-1'];
+
+      // check if only pre-populated tags exist in the tags filter
+      checkTagsInTagsFilter(prePopulatedTags);
+
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+
+      // open add tags form, check overwrite tags and warning message, type tags
+      openBulkEditAddTagsForm();
+      checkOverwriteTagsCheckbox();
+
+      cy.get(RULES_BULK_EDIT_TAGS_WARNING).should(
+        'have.text',
+        `You’re about to overwrite tags for ${expectedNumberOfCustomRulesToBeEdited} selected rules, press Save to apply changes.`
+      );
+
+      typeTags(tagsToOverwrite);
+      submitBulkEditForm();
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+
+      // check if all rules have been updated with new tags
+      testAllTagsBadges(tagsToOverwrite);
+
+      // check that only new tags are in the tag filter
+      checkTagsInTagsFilter(tagsToOverwrite);
+    });
+
+    it('Delete tags from custom rules', () => {
+      const tagsToDelete = prePopulatedTags.slice(0, 1);
+      const resultingTags = prePopulatedTags.slice(1);
+
+      // check if only pre-populated tags exist in the tags filter
+      checkTagsInTagsFilter(prePopulatedTags);
+
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+
+      // open add tags form, check overwrite tags, type tags
+      openBulkEditDeleteTagsForm();
+      typeTags(tagsToDelete);
+      submitBulkEditForm();
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+
+      // check tags has been removed from all rules
+      testAllTagsBadges(resultingTags);
+
+      // check that tags were removed from the tag filter
+      checkTagsInTagsFilter(resultingTags);
+    });
+  });
+
+  describe('Index patterns', () => {
+    it('Index pattern action applied to custom rules, including machine learning: user proceeds with edit of custom non machine learning rule', () => {
+      const indexPattersToBeAdded = ['index-to-add-1-*', 'index-to-add-2-*'];
+      const resultingIndexPatterns = [...prePopulatedIndexPatterns, ...indexPattersToBeAdded];
+
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      clickAddIndexPatternsMenuItem();
+
+      // confirm editing custom rules, that are not Machine Learning
+      checkMachineLearningRulesCannotBeModified(expectedNumberOfMachineLearningRulesToBeEdited);
+      cy.get(MODAL_CONFIRMATION_BTN).click();
+
+      typeIndexPatterns(indexPattersToBeAdded);
+      submitBulkEditForm();
+
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
+
+      // check if rule has been updated
+      goToTheRuleDetailsOf(RULE_NAME);
+      hasIndexPatterns(resultingIndexPatterns.join(''));
+    });
+
+    it('Index pattern action applied to custom rules, including machine learning: user cancels action', () => {
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      clickAddIndexPatternsMenuItem();
+
+      // confirm editing custom rules, that are not Machine Learning
+      checkMachineLearningRulesCannotBeModified(expectedNumberOfMachineLearningRulesToBeEdited);
+
+      // user cancels action and modal disappears
+      cancelConfirmationModal();
+    });
+
+    it('Add index patterns to custom rules', () => {
+      const indexPattersToBeAdded = ['index-to-add-1-*', 'index-to-add-2-*'];
+      const resultingIndexPatterns = [...prePopulatedIndexPatterns, ...indexPattersToBeAdded];
+
+      // select only rules that are not ML
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      unselectRuleByName(getMachineLearningRule().name);
+
+      openBulkEditAddIndexPatternsForm();
+      typeIndexPatterns(indexPattersToBeAdded);
+      submitBulkEditForm();
+
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
+
+      // check if rule has been updated
+      goToTheRuleDetailsOf(RULE_NAME);
+      hasIndexPatterns(resultingIndexPatterns.join(''));
+    });
+
+    it('Overwrite index patterns in custom rules', () => {
+      const indexPattersToWrite = ['index-to-write-1-*', 'index-to-write-2-*'];
+
+      // select only rules that are not ML
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      unselectRuleByName(getMachineLearningRule().name);
+
+      openBulkEditAddIndexPatternsForm();
+
+      // check overwrite index patterns checkbox, ensure warning message is displayed and type index patterns
+      checkOverwriteIndexPatternsCheckbox();
+      cy.get(RULES_BULK_EDIT_INDEX_PATTERNS_WARNING).should(
+        'have.text',
+        `You’re about to overwrite index patterns for ${expectedNumberOfNotMLRules} selected rules, press Save to apply changes.`
+      );
+
+      typeIndexPatterns(indexPattersToWrite);
+      submitBulkEditForm();
+
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
+
+      // check if rule has been updated
+      goToTheRuleDetailsOf(RULE_NAME);
+      hasIndexPatterns(indexPattersToWrite.join(''));
+    });
+
+    it('Delete index patterns from custom rules', () => {
+      const indexPatternsToDelete = prePopulatedIndexPatterns.slice(0, 1);
+      const resultingIndexPatterns = prePopulatedIndexPatterns.slice(1);
+
+      // select only not ML rules
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      unselectRuleByName(getMachineLearningRule().name);
+
+      openBulkEditDeleteIndexPatternsForm();
+      typeIndexPatterns(indexPatternsToDelete);
+      submitBulkEditForm();
+
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
+
+      // check if rule has been updated
+      goToTheRuleDetailsOf(RULE_NAME);
+      hasIndexPatterns(resultingIndexPatterns.join(''));
+    });
+
+    it('Delete all index patterns from custom rules', () => {
+      // select only rules that are not ML
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      unselectRuleByName(getMachineLearningRule().name);
+
+      openBulkEditDeleteIndexPatternsForm();
+      typeIndexPatterns(prePopulatedIndexPatterns);
+      submitBulkEditForm();
+
+      // error toast should be displayed that that rules edit failed
+      cy.contains(TOASTER_BODY, `${expectedNumberOfNotMLRules} rules failed to update.`);
+
+      // on error toast button click display error that index patterns can't be empty
+      clickErrorToastBtn();
+      cy.contains(MODAL_ERROR_BODY, "Index patterns can't be empty");
+    });
+  });
+
+  describe('Timeline templates', () => {
+    beforeEach(() => {
+      loadPrepackagedTimelineTemplates();
+    });
+
+    it('Apply timeline template to custom rules', () => {
+      const timelineTemplateName = 'Generic Endpoint Timeline';
+
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+
+      // open Timeline template form, check warning, select timeline template
+      clickApplyTimelineTemplatesMenuItem();
+      cy.get(RULES_BULK_EDIT_TIMELINE_TEMPLATES_WARNING).contains(
+        `You're about to apply changes to ${expectedNumberOfCustomRulesToBeEdited} selected rules. If you previously applied Timeline templates to these rules, they will be overwritten or (if you select 'None') reset to none.`
+      );
+      selectTimelineTemplate(timelineTemplateName);
+
+      submitBulkEditForm();
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+
+      // check if timeline template has been updated to selected one
+      goToTheRuleDetailsOf(RULE_NAME);
+      getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', timelineTemplateName);
+    });
+
+    it('Reset timeline template to None for custom rules', () => {
+      const noneTimelineTemplate = 'None';
+
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+
+      // open Timeline template form, submit form without picking timeline template as None is selected by default
+      clickApplyTimelineTemplatesMenuItem();
+
+      submitBulkEditForm();
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+
+      // check if timeline template has been updated to selected one, by opening rule that have had timeline prior to editing
+      goToTheRuleDetailsOf(RULE_NAME);
+      getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', noneTimelineTemplate);
+    });
   });
 });

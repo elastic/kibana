@@ -12,7 +12,10 @@ import {
 } from '../../../../../common/http_api/elasticsearch';
 import { TimeRange } from '../../../../../common/http_api/shared';
 import { ElasticsearchResponse } from '../../../../../common/types/es';
-import { getNewIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
+import {
+  getNewIndexPatterns,
+  getElasticsearchDataset,
+} from '../../../../lib/cluster/get_index_patterns';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors/handle_error';
@@ -108,7 +111,7 @@ export function ccrShardRoute(server: MonitoringCore) {
         {
           bool: {
             should: [
-              { term: { 'data_stream.dataset': { value: `${moduleType}.${dataset}` } } },
+              { term: { 'data_stream.dataset': { value: getElasticsearchDataset(dataset) } } },
               {
                 term: {
                   'metricset.name': {

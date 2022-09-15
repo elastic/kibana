@@ -36,9 +36,16 @@ export const UNKNOWN = i18n.translate(
 );
 
 export const EXCEPTIONS_TAB = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.exceptionsTab',
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExceptionsTab',
   {
-    defaultMessage: 'Exceptions',
+    defaultMessage: 'Rule exceptions',
+  }
+);
+
+export const ENDPOINT_EXCEPTIONS_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.endpointExceptionsTab',
+  {
+    defaultMessage: 'Endpoint exceptions',
   }
 );
 

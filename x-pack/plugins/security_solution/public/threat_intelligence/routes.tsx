@@ -14,13 +14,12 @@ import type { SourcererDataView } from '@kbn/threat-intelligence-plugin/public/t
 import { useKibana } from '../common/lib/kibana';
 import { FiltersGlobal } from '../common/components/filters_global';
 import { SpyRoute } from '../common/utils/route/spy_routes';
-import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 import { licenseService } from '../common/hooks/use_license';
 import { SecurityPageName } from '../app/types';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { useSourcererDataView } from '../common/containers/sourcerer';
-import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
+import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 
 const ThreatIntelligence = memo(() => {
   const { threatIntelligence } = useKibana().services;
@@ -35,18 +34,15 @@ const ThreatIntelligence = memo(() => {
 
   const securitySolutionContext: SecuritySolutionPluginContext = {
     getFiltersGlobalComponent: () => FiltersGlobal,
+    getPageWrapper: () => SecuritySolutionPageWrapper,
     licenseService,
     sourcererDataView: sourcererDataView as unknown as SourcererDataView,
   };
 
   return (
     <TrackApplicationView viewId="threat_intelligence">
-      <PluginTemplateWrapper>
-        <SecuritySolutionPageWrapper noPadding>
-          <ThreatIntelligencePlugin securitySolutionContext={securitySolutionContext} />
-          <SpyRoute pageName={SecurityPageName.threatIntelligenceIndicators} />
-        </SecuritySolutionPageWrapper>
-      </PluginTemplateWrapper>
+      <ThreatIntelligencePlugin securitySolutionContext={securitySolutionContext} />
+      <SpyRoute pageName={SecurityPageName.threatIntelligenceIndicators} />
     </TrackApplicationView>
   );
 });

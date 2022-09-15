@@ -6,9 +6,10 @@
  */
 
 import { stringHash } from '@kbn/ml-string-hash';
-import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import { AnomalySwimlaneEmbeddableInput } from '@kbn/ml-plugin/public';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { AnomalySwimlaneEmbeddableInput } from '@kbn/ml-plugin/public';
+import type { AnomalyChartsEmbeddableInput } from '@kbn/ml-plugin/public/embeddables';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 
 // @ts-expect-error not full interface
@@ -209,7 +210,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'y', ['EGF', 'DAL']);
 
           await ml.testExecution.logTestStep('renders anomaly explorer charts');
-          // TODO check why count changed from 4 to 5
           await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(5);
 
           await ml.testExecution.logTestStep('updates top influencers list');
@@ -410,7 +410,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await ml.anomalyExplorer.attachSwimLaneToCase('viewBy', {
               title: 'ML Test case',
               description: 'Case with an anomaly swim lane',
-              tag: 'ml_case',
+              tag: 'ml_swim_lane_case',
             });
 
             const expectedAttachment = {
@@ -429,7 +429,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               {
                 title: 'ML Test case',
                 description: 'Case with an anomaly swim lane',
-                tag: 'ml_case',
+                tag: 'ml_swim_lane_case',
                 reporter: USER.ML_POWERUSER,
               },
               expectedAttachment,
@@ -445,6 +445,60 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             );
             await ml.anomalyExplorer.openAddToDashboardControl();
             await ml.anomalyExplorer.addAndEditSwimlaneInDashboard('ML Test');
+          });
+        });
+
+        describe('Anomaly Charts as embeddable', function () {
+          beforeEach(async () => {
+            await ml.navigation.navigateToAnomalyExplorer(
+              testData.jobConfig.job_id,
+              {
+                from: '2016-02-07T00%3A00%3A00.000Z',
+                to: '2016-02-11T23%3A59%3A54.000Z',
+              },
+              () => elasticChart.setNewChartUiDebugFlag(true)
+            );
+
+            await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
+            await ml.commonUI.waitForDatePickerIndicatorLoaded();
+
+            await ml.testExecution.logTestStep('clicks on the Overall swim lane cell');
+            const sampleCell = (await ml.swimLane.getCells(overallSwimLaneTestSubj))[0];
+            await ml.swimLane.selectSingleCell(overallSwimLaneTestSubj, {
+              x: sampleCell.x + cellSize,
+              y: sampleCell.y + cellSize,
+            });
+            await ml.swimLane.waitForSwimLanesToLoad();
+          });
+
+          it('attaches an embeddable to a case', async () => {
+            await ml.anomalyExplorer.attachAnomalyChartsToCase({
+              title: 'ML Charts Test case',
+              description: 'Case with an anomaly charts attachment',
+              tag: 'ml_anomaly_charts',
+            });
+
+            const expectedAttachment = {
+              jobIds: [testData.jobConfig.job_id],
+              timeRange: {
+                from: '2016-02-07T00:00:00.000Z',
+                to: '2016-02-11T23:59:54.000Z',
+              },
+              maxSeriesToPlot: 6,
+            } as AnomalyChartsEmbeddableInput;
+
+            expectedAttachment.id = stringHash(JSON.stringify(expectedAttachment)).toString();
+
+            await ml.cases.assertCaseWithAnomalyChartsAttachment(
+              {
+                title: 'ML Charts Test case',
+                description: 'Case with an anomaly charts attachment',
+                tag: 'ml_anomaly_charts',
+                reporter: USER.ML_POWERUSER,
+              },
+              expectedAttachment,
+              6
+            );
           });
         });
       });

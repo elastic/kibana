@@ -44,7 +44,7 @@ import {
   IconChartHeatmap,
   IconChartHorizontalBullet,
   IconChartVerticalBullet,
-} from '..';
+} from '../..';
 
 export default {
   title: 'Chart Icons',

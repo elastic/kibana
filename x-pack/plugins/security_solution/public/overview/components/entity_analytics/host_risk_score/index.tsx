@@ -10,11 +10,13 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiPanel,
   EuiToolTip,
 } from '@elastic/eui';
 
 import { useDispatch } from 'react-redux';
+import styled from 'styled-components';
 import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
@@ -25,6 +27,7 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { useHostRiskScore, useHostRiskScoreKpi } from '../../../../risk_score/containers';
 
 import type { RiskSeverity } from '../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { SecurityPageName } from '../../../../app/types';
 import * as i18n from './translations';
 import { generateSeverityFilter } from '../../../../hosts/store/helpers';
@@ -41,6 +44,10 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 
 const TABLE_QUERY_ID = 'hostRiskDashboardTable';
 
+const IconWrapper = styled.span`
+  margin-left: ${({ theme }) => theme.eui.euiSizeS};
+`;
+
 export const EntityAnalyticsHostRiskScores = () => {
   const { deleteQuery, setQuery } = useGlobalTime();
   const [updatedAt, setUpdatedAt] = useState<number>(Date.now());
@@ -52,7 +59,7 @@ export const EntityAnalyticsHostRiskScores = () => {
   const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
   const severityFilter = useMemo(() => {
-    const [filter] = generateSeverityFilter(selectedSeverity);
+    const [filter] = generateSeverityFilter(selectedSeverity, RiskScoreEntity.host);
 
     return filter ? JSON.stringify(filter.query) : undefined;
   }, [selectedSeverity]);
@@ -100,11 +107,28 @@ export const EntityAnalyticsHostRiskScores = () => {
     return [onClick, href];
   }, [dispatch, getSecuritySolutionLinkProps]);
 
+  const headerTitle = useMemo(() => {
+    return (
+      <>
+        {i18n.HOST_RISK_TITLE}
+        <IconWrapper>
+          <EuiIconTip
+            color="subdued"
+            content={i18n.HOST_RISK_TABLE_TOOLTIP}
+            position="right"
+            size="l"
+            type="iInCircle"
+          />
+        </IconWrapper>
+      </>
+    );
+  }, []);
+
   if (!riskyHostsFeatureEnabled) {
     return null;
   }
 
-  if (!isModuleEnabled) {
+  if (!isModuleEnabled && !isTableLoading) {
     return <EntityAnalyticsHostRiskScoresDisable />;
   }
 
@@ -112,7 +136,7 @@ export const EntityAnalyticsHostRiskScores = () => {
     <InspectButtonContainer>
       <EuiPanel hasBorder data-test-subj="entity_analytics_hosts">
         <HeaderSection
-          title={i18n.HOST_RISK_TITLE}
+          title={headerTitle}
           titleSize="s"
           subtitle={
             <LastUpdatedAt isUpdating={isTableLoading || isKpiLoading} updatedAt={updatedAt} />

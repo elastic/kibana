@@ -1,0 +1,267 @@
+{
+  "id": "@kbn/core-application-browser-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-application-browser-mocks",
+        "id": "def-common.ScopedHistoryMock",
+        "type": "Type",
+        "tags": [],
+        "label": "ScopedHistoryMock",
+        "description": [],
+        "signature": [
+          "{ createSubHistory: jest.MockInstance<",
+          "ScopedHistory",
+          "<unknown>, [basePath: string]>; createHref: jest.MockInstance<string, [location: ",
+          "LocationDescriptorObject",
+          "<unknown>, options?: { prependBasePath?: boolean | undefined; } | undefined]>; length: number; action: ",
+          "Action",
+          "; location: ",
+          "Location",
+          "<unknown>; push: jest.MockInstance<void, [location: ",
+          "LocationDescriptor",
+          "<unknown>]>; replace: jest.MockInstance<void, [location: ",
+          "LocationDescriptor",
+          "<unknown>]>; go: jest.MockInstance<void, [n: number]>; goBack: jest.MockInstance<void, []>; goForward: jest.MockInstance<void, []>; block: jest.MockInstance<",
+          "UnregisterCallback",
+          ", [prompt?: string | boolean | ",
+          "TransitionPromptHook",
+          "<unknown> | undefined]>; listen: jest.MockInstance<",
+          "UnregisterCallback",
+          ", [listener: ",
+          "LocationListener",
+          "<unknown>]>; } & ",
+          "ScopedHistory",
+          "<unknown>"
+        ],
+        "path": "packages/core/application/core-application-browser-mocks/src/scoped_history.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-application-browser-mocks",
+        "id": "def-common.applicationServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "applicationServiceMock",
+        "description": [],
+        "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-application-browser-mocks",
+            "id": "def-common.applicationServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<ApplicationServiceContract>"
+            ],
+            "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-application-browser-mocks",
+            "id": "def-common.applicationServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "ApplicationSetup",
+              ">"
+            ],
+            "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-application-browser-mocks",
+            "id": "def-common.applicationServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "ApplicationStart",
+              ">"
+            ],
+            "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-application-browser-mocks",
+            "id": "def-common.applicationServiceMock.createInternalSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalSetupContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "InternalApplicationSetup",
+              ">"
+            ],
+            "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-application-browser-mocks",
+            "id": "def-common.applicationServiceMock.createInternalStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalStartContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "InternalApplicationStart",
+              ">"
+            ],
+            "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-application-browser-mocks",
+            "id": "def-common.applicationServiceMock.createAppMountParameters",
+            "type": "Function",
+            "tags": [],
+            "label": "createAppMountParameters",
+            "description": [],
+            "signature": [
+              "(parts?: Partial<",
+              "AppMountParameters",
+              "<unknown>>) => ",
+              "AppMountParameters",
+              "<unknown>"
+            ],
+            "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-application-browser-mocks",
+                "id": "def-common.applicationServiceMock.createAppMountParameters.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "parts",
+                "description": [],
+                "signature": [
+                  "{ element?: HTMLElement | undefined; history?: ",
+                  "ScopedHistory",
+                  "<unknown> | undefined; appBasePath?: string | undefined; onAppLeave?: ((handler: ",
+                  "AppLeaveHandler",
+                  ") => void) | undefined; setHeaderActionMenu?: ((menuMount: ",
+                  "MountPoint",
+                  "<HTMLElement> | undefined) => void) | undefined; theme$?: ",
+                  "Observable",
+                  "<",
+                  "CoreTheme",
+                  "> | undefined; }"
+                ],
+                "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-application-browser-mocks",
+        "id": "def-common.scopedHistoryMock",
+        "type": "Object",
+        "tags": [],
+        "label": "scopedHistoryMock",
+        "description": [],
+        "path": "packages/core/application/core-application-browser-mocks/src/scoped_history.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-application-browser-mocks",
+            "id": "def-common.scopedHistoryMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "({ pathname, search, hash, key, state, }?: Partial<",
+              "Location",
+              "<unknown>>) => ",
+              {
+                "pluginId": "@kbn/core-application-browser-mocks",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserMocksPluginApi",
+                "section": "def-common.ScopedHistoryMock",
+                "text": "ScopedHistoryMock"
+              }
+            ],
+            "path": "packages/core/application/core-application-browser-mocks/src/scoped_history.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-application-browser-mocks",
+                "id": "def-common.scopedHistoryMock.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ pathname?: string | undefined; search?: string | undefined; state?: unknown; hash?: string | undefined; key?: string | undefined; }"
+                ],
+                "path": "packages/core/application/core-application-browser-mocks/src/scoped_history.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

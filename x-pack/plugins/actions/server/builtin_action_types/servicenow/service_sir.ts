@@ -7,7 +7,7 @@
 
 import { Observable, ExternalServiceSIR, ObservableResponse, ServiceFactory } from './types';
 
-import { request } from '../lib/axios_utils';
+import { request } from '../../lib/axios_utils';
 import { createExternalService } from './service';
 import { createServiceError } from './utils';
 

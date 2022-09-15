@@ -51,7 +51,9 @@ export function getActionType({ logger }: { logger: Logger }): ServerLogActionTy
     }),
     supportedFeatureIds: [AlertingConnectorFeatureId, UptimeConnectorFeatureId],
     validate: {
-      params: ParamsSchema,
+      params: {
+        schema: ParamsSchema,
+      },
     },
     executor: curry(executor)({ logger }),
   };
