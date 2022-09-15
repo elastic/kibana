@@ -19,6 +19,7 @@ export interface CspmIndicesStats {
 
 export interface IndexStats {
   doc_count: number;
+  size_in_bytes: number;
   latest_doc_timestamp: string;
 }
 
@@ -30,19 +31,24 @@ export const getIndicesStats = async (esClient: ElasticsearchClient): Promise<Cs
   };
 };
 
-export const getIndexStats = async (esClient: ElasticsearchClient, index: string) => {
+export const getIndexStats = async (
+  esClient: ElasticsearchClient,
+  index: string
+): Promise<IndexStats> => {
+  const indexStats = await getIndexDocCount(esClient, index);
   return {
-    doc_count: await getIndexDocsCount(esClient, index),
+    doc_count: indexStats._all.primaries?.docs ? indexStats._all.primaries?.docs?.count : 0,
+    size_in_bytes: indexStats._all.primaries?.store
+      ? indexStats._all.primaries?.store.size_in_bytes
+      : 0,
     latest_doc_timestamp: await getLatestDocTimestamp(esClient, index),
   };
 };
 
-export const getIndexDocsCount = async (esClient: ElasticsearchClient, index: string) => {
-  const indexStats = await esClient.indices.stats({
+export const getIndexDocCount = async (esClient: ElasticsearchClient, index: string) => {
+  return await esClient.indices.stats({
     index,
   });
-
-  return indexStats._all.primaries?.docs ? indexStats._all.primaries?.docs?.count : 0;
 };
 
 const getLatestDocTimestamp = async (esClient: ElasticsearchClient, index: string) => {
