@@ -177,13 +177,19 @@ export function crawlRequestWithDetailsServerToClient(
 }
 
 export function crawlerDataServerToClient(payload: CrawlerDataFromServer): CrawlerData {
-  const { domains, events, most_recent_crawl_request: mostRecentCrawlRequest } = payload;
+  const {
+    domains,
+    events,
+    most_recent_crawl_request: mostRecentCrawlRequest,
+    user_agent: userAgent,
+  } = payload;
 
   return {
     domains: domains.map((domain) => crawlerDomainServerToClient(domain)),
     events: events.map((event) => crawlEventServerToClient(event)),
     mostRecentCrawlRequest:
       mostRecentCrawlRequest && crawlRequestServerToClient(mostRecentCrawlRequest),
+    userAgent,
   };
 }
 
