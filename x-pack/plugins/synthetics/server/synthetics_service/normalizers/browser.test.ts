@@ -111,7 +111,7 @@ describe('browser normalizers', () => {
         privateLocations,
         monitors,
         projectId,
-        namespace: 'test_space',
+        namespace: 'test-space',
       });
       expect(actual).toEqual([
         {
