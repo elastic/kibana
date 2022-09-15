@@ -38,6 +38,17 @@ export const getMappedNonEcsValue = ({
   return undefined;
 };
 
+const getRenderValue = (mappedNonEcsValue: any) => {
+  // can be updated when working on https://github.com/elastic/kibana/issues/140819
+  const value = Array.isArray(mappedNonEcsValue) ? mappedNonEcsValue[0] : mappedNonEcsValue;
+
+  if (!value || typeof value === 'string' || typeof value === 'number') {
+    return value;
+  }
+
+  return '—';
+};
+
 /**
  * This implementation of `EuiDataGrid`'s `renderCellValue`
  * accepts `EuiDataGridCellValueElementProps`, plus `data`
@@ -58,9 +69,7 @@ export const getRenderCellValue = ({
       fieldName: columnId,
     });
 
-    const value = Array.isArray(mappedNonEcsValue)
-      ? mappedNonEcsValue.reduce((x) => x[0])
-      : mappedNonEcsValue;
+    const value = getRenderValue(mappedNonEcsValue);
 
     switch (columnId) {
       case ALERT_STATUS:
