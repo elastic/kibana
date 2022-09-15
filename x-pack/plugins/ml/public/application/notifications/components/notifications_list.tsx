@@ -255,7 +255,7 @@ export const NotificationsList: FC = () => {
             defaultMessage:
               'Search for notifications. Example: job_type:anomaly_detector -level:(info) Datafeed',
           }),
-          incremental: true,
+          incremental: false,
           schema: {
             strict: true,
             fields: {
