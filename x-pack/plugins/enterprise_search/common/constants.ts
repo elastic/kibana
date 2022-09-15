@@ -109,6 +109,7 @@ export const ENTERPRISE_SEARCH_KIBANA_COOKIE = '_enterprise_search';
 
 export const ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID = 'ent-search-logs';
 export const ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID = 'ent-search-audit-logs';
+export const ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID = 'ent-search-analytics-logs';
 
 export const APP_SEARCH_URL = '/app/enterprise_search/app_search';
 export const ENTERPRISE_SEARCH_ELASTICSEARCH_URL = '/app/enterprise_search/elasticsearch';

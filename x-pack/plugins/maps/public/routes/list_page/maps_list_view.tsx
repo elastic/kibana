@@ -8,6 +8,7 @@
 import React from 'react';
 import { SavedObjectReference } from '@kbn/core/types';
 import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { TableListView } from '@kbn/content-management-table-list';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
@@ -21,6 +22,7 @@ import {
   getNavigateToApp,
   getSavedObjectsClient,
   getUiSettings,
+  getUsageCollection,
 } from '../../kibana_services';
 import { getAppTitle } from '../../../common/i18n_getters';
 import { MapSavedObjectAttributes } from '../../../common/map_saved_object_type';
@@ -44,6 +46,7 @@ interface MapUserContent extends UserContentCommonSchema {
 
 function navigateToNewMap() {
   const navigateToApp = getNavigateToApp();
+  getUsageCollection()?.reportUiCounter(APP_ID, METRIC_TYPE.CLICK, 'create_maps_vis_editor');
   navigateToApp(APP_ID, {
     path: MAP_PATH,
   });
