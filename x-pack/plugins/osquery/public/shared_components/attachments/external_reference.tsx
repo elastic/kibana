@@ -12,16 +12,6 @@ import { getLazyExternalContent } from './lazy_external_reference_content';
 import type { ServicesWrapperProps } from '../services_wrapper';
 import OsqueryLogo from '../../components/osquery_icon/osquery.svg';
 
-// TODO waiting for Metadata to add "add to timeline" in here
-// const AttachmentActions: React.FC = () => (
-//   <EuiButtonIcon
-//     data-test-subj="test-attachment-action"
-//     onClick={() => {}}
-//     iconType="arrowRight"
-//     aria-label="See attachment"
-//   />
-// );
-
 export const getExternalReferenceAttachmentRegular = (
   services: ServicesWrapperProps['services']
 ): ExternalReferenceAttachmentType => ({
@@ -31,7 +21,6 @@ export const getExternalReferenceAttachmentRegular = (
     type: 'regular',
     event: 'attached Osquery results',
     timelineAvatar: <EuiAvatar name="osquery" color="subdued" iconType={OsqueryLogo} />,
-    // actions: <AttachmentActions />,
     // @ts-expect-error update types
     children: getLazyExternalContent(services),
   }),

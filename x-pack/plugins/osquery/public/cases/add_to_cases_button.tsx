@@ -39,7 +39,8 @@ export const AddToCaseButton: React.FC<IProps> = ({
   const { cases } = useKibana().services;
 
   const casePermissions = cases.helpers.canUseCases();
-  const hasReadPermissions = casePermissions.read && casePermissions.update && casePermissions.push;
+  const hasCasesPermissions =
+    casePermissions.read && casePermissions.update && casePermissions.push;
   const selectCaseModal = cases.hooks.getUseCasesAddToExistingCaseModal({});
 
   const handleClick = useCallback(() => {
@@ -54,26 +55,18 @@ export const AddToCaseButton: React.FC<IProps> = ({
         externalReferenceMetadata: { actionId, agentIds, queryId },
       },
     ];
-    if (hasReadPermissions) {
+    if (hasCasesPermissions) {
       selectCaseModal.open({ attachments });
     }
-  }, [actionId, agentIds, hasReadPermissions, queryId, selectCaseModal]);
+  }, [actionId, agentIds, hasCasesPermissions, queryId, selectCaseModal]);
 
   if (isIcon) {
     return (
-      <EuiToolTip
-        content={
-          <EuiFlexItem>
-            {i18n.translate('xpack.osquery.cases.addToCaseText', {
-              defaultMessage: 'Add to Case',
-            })}
-          </EuiFlexItem>
-        }
-      >
+      <EuiToolTip content={<EuiFlexItem>{ADD_TO_CASE}</EuiFlexItem>}>
         <EuiButtonIcon
           iconType={'casesApp'}
           onClick={handleClick}
-          isDisabled={isDisabled || !hasReadPermissions}
+          isDisabled={isDisabled || !hasCasesPermissions}
           {...iconProps}
         />
       </EuiToolTip>
@@ -85,7 +78,7 @@ export const AddToCaseButton: React.FC<IProps> = ({
       size="xs"
       iconType="casesApp"
       onClick={handleClick}
-      isDisabled={isDisabled || !hasReadPermissions}
+      isDisabled={isDisabled || !hasCasesPermissions}
     >
       {ADD_TO_CASE}
     </EuiButtonEmpty>
