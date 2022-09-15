@@ -8,7 +8,6 @@
 import {
   CommonFields,
   ConfigKey,
-  DataStream,
   ScheduleUnit,
   SourceType,
 } from '../../../../common/runtime_types';
