@@ -25,7 +25,10 @@ import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import { createIndexPipelineDefinitions } from '../../utils/create_pipeline_definitions';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
-import { isIndexNotFoundException } from '../../utils/identify_exceptions';
+import {
+  isIndexNotFoundException,
+  isResourceNotFoundException,
+} from '../../utils/identify_exceptions';
 
 export function registerIndexRoutes({
   router,
@@ -367,7 +370,7 @@ export function registerIndexRoutes({
 
   router.delete(
     {
-      path: '/internal/enterprise_search/indices/{indexName}/pipelines/ml_inference/{pipelineName}',
+      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipelines/{pipelineName}',
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -380,16 +383,30 @@ export function registerIndexRoutes({
       const pipelineName = decodeURIComponent(request.params.pipelineName);
       const { client } = (await context.core).elasticsearch;
 
-      const deleteResult = await deleteMlInferencePipeline(
-        indexName,
-        pipelineName,
-        client.asCurrentUser
-      );
+      try {
+        const deleteResult = await deleteMlInferencePipeline(
+          indexName,
+          pipelineName,
+          client.asCurrentUser
+        );
 
-      return response.ok({
-        body: deleteResult,
-        headers: { 'content-type': 'application/json' },
-      });
+        return response.ok({
+          body: deleteResult,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (isResourceNotFoundException(error)) {
+          // return specific message if pipeline doesn't exist
+          return createError({
+            errorCode: ErrorCode.RESOURCE_NOT_FOUND,
+            message: error.meta?.body?.error?.reason,
+            response,
+            statusCode: 404,
+          });
+        }
+        // otherwise, let the default handler wrap it
+        throw error;
+      }
     })
   );
 }

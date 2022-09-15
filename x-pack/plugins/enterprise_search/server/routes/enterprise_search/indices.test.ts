@@ -12,34 +12,35 @@ import { RequestHandlerContext } from '@kbn/core/server';
 jest.mock('../../lib/indices/fetch_ml_inference_pipeline_processors', () => ({
   fetchMlInferencePipelineProcessors: jest.fn(),
 }));
+import { deleteMlInferencePipeline } from '../../lib/indices/delete_ml_inference_pipeline';
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/fetch_ml_inference_pipeline_processors';
 
 import { registerIndexRoutes } from './indices';
 
 describe('Enterprise Search Managed Indices', () => {
-  let mockRouter: MockRouter;
   const mockClient = {
     asCurrentUser: {},
   };
 
-  beforeEach(() => {
-    const context = {
-      core: Promise.resolve({ elasticsearch: { client: mockClient } }),
-    } as jest.Mocked<RequestHandlerContext>;
-
-    mockRouter = new MockRouter({
-      context,
-      method: 'get',
-      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors',
-    });
-
-    registerIndexRoutes({
-      ...mockDependencies,
-      router: mockRouter.router,
-    });
-  });
-
   describe('GET /internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors', () => {
+    let mockRouter: MockRouter;
+    beforeEach(() => {
+      const context = {
+        core: Promise.resolve({ elasticsearch: { client: mockClient } }),
+      } as jest.Mocked<RequestHandlerContext>;
+
+      mockRouter = new MockRouter({
+        context,
+        method: 'get',
+        path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors',
+      });
+
+      registerIndexRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
     it('fails validation without index_name', () => {
       const request = { params: {} };
       mockRouter.shouldThrow(request);
@@ -67,6 +68,53 @@ describe('Enterprise Search Managed Indices', () => {
 
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: mockData,
+        headers: { 'content-type': 'application/json' },
+      });
+    });
+  });
+
+  describe('DELETE /internal/enterprise_search/indices/{indexName}/ml_inference/pipelines/{pipelineName}', () => {
+    let mockRouter: MockRouter;
+    const indexName = 'my-index';
+    const pipelineName = 'my-pipeline';
+
+    beforeEach(() => {
+      const context = {
+        core: Promise.resolve({ elasticsearch: { client: mockClient } }),
+      } as jest.Mocked<RequestHandlerContext>;
+
+      mockRouter = new MockRouter({
+        context,
+        method: 'delete',
+        path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipelines/{pipelineName}',
+      });
+
+      registerIndexRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('fails validation without index_name', () => {
+      const request = { params: {} };
+      mockRouter.shouldThrow(request);
+    });
+
+    it('deletes pipeline', async () => {
+      const mockResponse = { deleted: pipelineName };
+
+      (deleteMlInferencePipeline as jest.Mock).mockImplementationOnce(() => {
+        return Promise.resolve(mockResponse);
+      });
+
+      await mockRouter.callRoute({
+        params: { indexName, pipelineName },
+      });
+
+      expect(deleteMlInferencePipeline).toHaveBeenCalledWith(indexName, pipelineName, mockClient);
+
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: mockResponse,
         headers: { 'content-type': 'application/json' },
       });
     });
