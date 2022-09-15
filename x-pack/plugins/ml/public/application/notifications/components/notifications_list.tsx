@@ -28,10 +28,8 @@ import { MESSAGE_LEVEL, MessageLevel } from '../../../../common/constants/messag
 import { ListingPageUrlState } from '../../../../common/types/common';
 import { usePageUrlState } from '../../util/url_state';
 import { ML_PAGES } from '../../../../common/constants/locator';
-import { NotificationsSearchResponse } from '../../../../common/types/notifications';
+import type { NotificationItem } from '../../../../common/types/notifications';
 import { useMlKibana } from '../../contexts/kibana';
-
-export type NotificationItem = NotificationsSearchResponse['results'][number];
 
 const levelBadgeMap: Record<MessageLevel, IconColor> = {
   error: 'danger',

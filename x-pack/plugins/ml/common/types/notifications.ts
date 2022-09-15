@@ -37,6 +37,8 @@ export interface NotificationsSearchResponse {
   >;
 }
 
+export type NotificationItem = NotificationsSearchResponse['results'][number];
+
 export interface NotificationsCountQueryParams {
   lastCheckedAt: number;
 }

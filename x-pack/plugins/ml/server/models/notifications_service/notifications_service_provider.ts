@@ -8,12 +8,15 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MLSavedObjectService } from '../../saved_objects';
-import type { NotificationSource } from '../../../common/types/notifications';
+import type { NotificationItem, NotificationSource } from '../../../common/types/notifications';
 import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import type {
   MessagesSearchParams,
   NotificationsCountParams,
 } from '../../routes/schemas/notifications_schema';
+import { NotificationsSearchResponse } from '../../../common/types/notifications';
+
+const MAX_NOTIFICATIONS_SIZE = 10000;
 
 export class NotificationsService {
   constructor(
@@ -51,8 +54,8 @@ export class NotificationsService {
               {
                 index: ML_NOTIFICATION_INDEX_PATTERN,
                 ignore_unavailable: true,
-                from: params.from * params.size,
-                size: params.size,
+                from: 0,
+                size: MAX_NOTIFICATIONS_SIZE,
                 body: {
                   sort: [{ [params.sortField]: { order: params.sortDirection } }],
                   query: {
@@ -114,11 +117,11 @@ export class NotificationsService {
                 id: result._id,
               };
             }),
-          };
+          } as NotificationsSearchResponse;
         })
     );
 
-    return results.reduce(
+    const response = results.reduce(
       (acc, curr) => {
         acc.total += curr.total;
         acc.results = acc.results.concat(curr.results);
@@ -126,6 +129,31 @@ export class NotificationsService {
       },
       { total: 0, results: [] }
     );
+
+    function getSortCallback(
+      sortField: keyof NotificationItem,
+      sortDirection: 'asc' | 'desc'
+    ): (a: NotificationItem, b: NotificationItem) => any {
+      if (sortField === 'timestamp') {
+        if (sortDirection === 'asc') {
+          return (a, b) => a.timestamp - b.timestamp;
+        } else {
+          return (a, b) => b.timestamp - a.timestamp;
+        }
+      } else {
+        if (sortDirection === 'asc') {
+          return (a, b) => (a[sortField] ?? '').localeCompare(b[sortField]);
+        } else {
+          return (a, b) => (b[sortField] ?? '').localeCompare(a[sortField]);
+        }
+      }
+    }
+
+    response.results = response.results.sort(
+      getSortCallback(params.sortField, params.sortDirection)
+    );
+
+    return response;
   }
 
   /**

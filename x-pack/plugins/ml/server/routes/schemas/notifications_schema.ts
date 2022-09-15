@@ -31,7 +31,17 @@ export const getNotificationsQuerySchema = schema.object({
   /**
    * Sort field
    */
-  sortField: schema.string({ defaultValue: 'timestamp' }),
+  sortField: schema.oneOf(
+    [
+      schema.literal('timestamp'),
+      schema.literal('level'),
+      schema.literal('job_type'),
+      schema.literal('job_id'),
+    ],
+    {
+      defaultValue: 'timestamp',
+    }
+  ),
   /**
    * Sort direction
    */
