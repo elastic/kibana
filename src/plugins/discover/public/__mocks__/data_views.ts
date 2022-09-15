@@ -26,4 +26,6 @@ export const dataViewsMock = {
   getIdsWithTitle: jest.fn(() => {
     return Promise.resolve([dataViewMock, dataViewComplexMock, dataViewWithTimefieldMock]);
   }),
+  create: jest.fn(),
+  clearInstanceCache: jest.fn(),
 } as unknown as jest.Mocked<DataViewsContract>;
