@@ -7,6 +7,8 @@
 
 import { chunk } from 'lodash';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { i18n } from '@kbn/i18n';
 import { asyncForEach } from '@kbn/std';
 import type { IRouter } from '@kbn/core/server';
@@ -212,6 +214,7 @@ export const defineExplainLogRateSpikesRoute = (
           const { fields, df } = await fetchFrequentItems(
             client,
             request.body.index,
+            JSON.parse(request.body.searchQuery) as estypes.QueryDslQueryContainer,
             changePoints,
             request.body.timeFieldName,
             request.body.deviationMin,
