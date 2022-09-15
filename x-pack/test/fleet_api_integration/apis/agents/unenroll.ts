@@ -223,7 +223,7 @@ export default function (providerContext: FtrProviderContext) {
             body: { items: actionStatuses },
           } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
 
-          const action = actionStatuses.find((a: any) => a.actionId === actionId);
+          const action = actionStatuses?.find((a: any) => a.actionId === actionId);
           if (action && action.nbAgentsActioned === action.nbAgentsActionCreated) {
             clearInterval(intervalId);
             resolve({});
