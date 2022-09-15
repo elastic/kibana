@@ -158,7 +158,7 @@ export function RemoveLayerButton({
         size="xs"
         iconType={isOnlyLayer ? 'eraser' : 'trash'}
         color="danger"
-        data-test-subj="lnsLayerRemove"
+        data-test-subj={`lnsLayerRemove--${layerIndex}`}
         aria-label={ariaLabel}
         title={ariaLabel}
         onClick={() => {

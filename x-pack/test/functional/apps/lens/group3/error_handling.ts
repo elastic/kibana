@@ -64,6 +64,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.waitForMissingDataViewWarningDisappear();
         await PageObjects.lens.waitForEmptyWorkspace();
       });
+
+      it('works fine when the dataViews is missing for referenceLines and annotations', async () => {
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await listingTable.searchForItemWithName(
+          'lnsXYWithReferenceLinesAndAnnotationsWithNonExistingDataView'
+        );
+        await PageObjects.lens.clickVisualizeListItemTitle(
+          'lnsXYWithReferenceLinesAndAnnotationsWithNonExistingDataView'
+        );
+        await PageObjects.lens.waitForMissingDataViewWarning();
+      });
     });
   });
 }

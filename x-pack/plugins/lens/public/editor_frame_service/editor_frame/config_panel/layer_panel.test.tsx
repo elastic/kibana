@@ -137,7 +137,7 @@ describe('LayerPanel', () => {
     it('should show the reset button when single layer', async () => {
       const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
       expect(
-        instance.find('[data-test-subj="lnsLayerRemove"]').first().props()['aria-label']
+        instance.find('[data-test-subj="lnsLayerRemove--0"]').first().props()['aria-label']
       ).toContain('Reset layer');
     });
 
@@ -146,7 +146,7 @@ describe('LayerPanel', () => {
         <LayerPanel {...getDefaultProps()} isOnlyLayer={false} />
       );
       expect(
-        instance.find('[data-test-subj="lnsLayerRemove"]').first().props()['aria-label']
+        instance.find('[data-test-subj="lnsLayerRemove--0"]').first().props()['aria-label']
       ).toContain('Delete layer');
     });
 
@@ -155,7 +155,7 @@ describe('LayerPanel', () => {
       delete layerPanelAttributes.activeVisualization.removeLayer;
       const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
       expect(
-        instance.find('[data-test-subj="lnsLayerRemove"]').first().props()['aria-label']
+        instance.find('[data-test-subj="lnsLayerRemove--0"]').first().props()['aria-label']
       ).toContain('Reset visualization');
     });
 
@@ -165,7 +165,7 @@ describe('LayerPanel', () => {
         <LayerPanel {...getDefaultProps()} onRemoveLayer={cb} />
       );
       act(() => {
-        instance.find('[data-test-subj="lnsLayerRemove"]').first().simulate('click');
+        instance.find('[data-test-subj="lnsLayerRemove--0"]').first().simulate('click');
       });
       instance.update();
       act(() => {

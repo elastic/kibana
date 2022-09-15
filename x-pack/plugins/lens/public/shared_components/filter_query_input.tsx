@@ -37,6 +37,7 @@ export function FilterQueryInput({
   helpMessage,
   label = filterByLabel,
   initiallyOpen,
+  ['data-test-subj']: dataTestSubj,
 }: {
   inputFilter: Query | undefined;
   onChange: (query: Query) => void;
@@ -44,6 +45,7 @@ export function FilterQueryInput({
   helpMessage?: string | null;
   label?: string;
   initiallyOpen?: boolean;
+  ['data-test-subj']?: string;
 }) {
   const [filterPopoverOpen, setFilterPopoverOpen] = useState(Boolean(initiallyOpen));
   const { inputValue: queryInput, handleInputChange: setQueryInput } = useDebouncedValue<Query>({
@@ -133,6 +135,7 @@ export function FilterQueryInput({
                 onChange={setQueryInput}
                 isInvalid={!isQueryInputValid}
                 onSubmit={() => {}}
+                data-test-subj={dataTestSubj}
               />
             </EuiFormRow>
           </EuiPopover>
