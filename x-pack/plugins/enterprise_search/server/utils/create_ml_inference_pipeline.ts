@@ -27,7 +27,7 @@ export interface ModifiedPipeline {
  * @param modelId model ID selected by the user.
  * @param sourceField The document field that model will read.
  * @param destinationField The document field that the model will write to.
- * @param esClient the Elasticsearch Client to use when retrieving model details.
+ * @param esClient the Elasticsearch Client to use when retrieving pipeline and model details.
  */
 export const createMlInferencePipeline = async (
   pipelineName: string,
@@ -70,17 +70,24 @@ export const createMlInferencePipeline = async (
   });
 }
 
+/**
+ * Adds the supplied a Machine Learning Inference pipeline reference to the "parent" ML Inference
+ * pipeline that is associated with the index.
+ * @param indexName name of the index this pipeline corresponds to.
+ * @param pipelineName name of the ML Inference pipeline to add.
+ * @param esClient the Elasticsearch Client to use when retrieving pipeline details.
+ */
 export const addSubPipelineToIndexSpecificMlPipeline = async (
   indexName: string,
   pipelineName: string,
-  client: ElasticsearchClient
+  esClient: ElasticsearchClient
 ): Promise<ModifiedPipeline> => {
   const parentPipelineId = `${indexName}@ml-inference`;
 
   // Fetch the parent pipeline
   let parentPipeline: IngestPipeline | undefined = undefined;
   try {
-    const pipelineResponse = await client.ingest.getPipeline({
+    const pipelineResponse = await esClient.ingest.getPipeline({
       id: parentPipelineId,
     });
     parentPipeline = pipelineResponse[parentPipelineId];
@@ -115,7 +122,7 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
     }
   })
 
-  await client.ingest.putPipeline({
+  await esClient.ingest.putPipeline({
     id: parentPipelineId,
     ...parentPipeline,
   });
