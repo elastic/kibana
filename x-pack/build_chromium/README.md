@@ -41,7 +41,7 @@ mkdir ~/chromium && cd ~/chromium
 gsutil cp -r gs://headless_shell_staging/build_chromium .
 
 # Install the OS packages, configure the environment, download the chromium source (25GB)
-python ./build_chromium/init.py [arch_name]
+python ./build_chromium/init.py
 
 # Run the build script with the path to the chromium src directory, the git commit hash
 python ./build_chromium/build.py 70f5d88ea95298a18a85c33c98ea00e02358ad75 x64
