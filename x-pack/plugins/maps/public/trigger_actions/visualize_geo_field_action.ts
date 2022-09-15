@@ -63,7 +63,7 @@ export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
 });
 
 const getMapsLink = async (context: VisualizeFieldContext) => {
-  const indexPattern = await getIndexPatternService().get(context.indexPatternId);
+  const indexPattern = await getIndexPatternService().get(context.dataViewSpec.id!);
   // create initial layer descriptor
   const hasTooltips =
     context?.contextualFields?.length && context?.contextualFields[0] !== '_source';
@@ -77,7 +77,7 @@ const getMapsLink = async (context: VisualizeFieldContext) => {
         type: SOURCE_TYPES.ES_SEARCH,
         tooltipProperties: hasTooltips ? context.contextualFields : [],
         label: indexPattern.title,
-        indexPatternId: context.indexPatternId,
+        indexPatternId: context.dataViewSpec.id,
         geoField: context.fieldName,
         scalingType: SCALING_TYPES.MVT,
       },
