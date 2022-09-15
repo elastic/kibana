@@ -28,8 +28,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
           delete_existing_connector: schema.maybe(schema.boolean()),
           index_name: schema.string(),
           is_native: schema.boolean(),
-          language: schema.nullable(schema.string()),
-          last_synced: schema.string(),
+          language: schema.nullable(schema.string())
         }),
       },
     },

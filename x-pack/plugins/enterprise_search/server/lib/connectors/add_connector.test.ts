@@ -80,7 +80,6 @@ describe('addConnector lib function', () => {
         index_name: 'index_name',
         is_native: false,
         language: 'fr',
-        last_synced: new Date().toISOString(),
       })
     ).resolves.toEqual({ id: 'fakeId', index_name: 'index_name' });
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
@@ -129,7 +128,6 @@ describe('addConnector lib function', () => {
         index_name: 'index_name',
         is_native: true,
         language: 'en',
-        last_synced: new Date().toISOString(),
       })
     ).rejects.toEqual(new Error(ErrorCode.INDEX_ALREADY_EXISTS));
     expect(mockClient.asCurrentUser.indices.create).not.toHaveBeenCalled();
@@ -149,7 +147,6 @@ describe('addConnector lib function', () => {
         index_name: 'index_name',
         is_native: false,
         language: 'en',
-        last_synced: new Date().toISOString(),
       })
     ).rejects.toEqual(new Error(ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS));
     expect(mockClient.asCurrentUser.indices.create).not.toHaveBeenCalled();
@@ -169,7 +166,6 @@ describe('addConnector lib function', () => {
         index_name: 'index_name',
         is_native: false,
         language: 'en',
-        last_synced: new Date().toISOString(),
       })
     ).rejects.toEqual(new Error(ErrorCode.CRAWLER_ALREADY_EXISTS));
     expect(mockClient.asCurrentUser.indices.create).not.toHaveBeenCalled();
@@ -189,7 +185,6 @@ describe('addConnector lib function', () => {
         index_name: 'index_name',
         is_native: true,
         language: 'en',
-        last_synced: new Date().toISOString(),
       })
     ).rejects.toEqual(new Error(ErrorCode.INDEX_ALREADY_EXISTS));
     expect(mockClient.asCurrentUser.indices.create).not.toHaveBeenCalled();
@@ -210,7 +205,6 @@ describe('addConnector lib function', () => {
         index_name: 'index_name',
         is_native: true,
         language: null,
-        last_synced: new Date().toISOString(),
       })
     ).resolves.toEqual({ id: 'fakeId', index_name: 'index_name' });
     expect(mockClient.asCurrentUser.delete).toHaveBeenCalledWith({
@@ -265,7 +259,6 @@ describe('addConnector lib function', () => {
         index_name: 'search-index_name',
         is_native: false,
         language: 'en',
-        last_synced: new Date().toISOString(),
       })
     ).resolves.toEqual({ id: 'fakeId', index_name: 'search-index_name' });
     expect(setupConnectorsIndices as jest.Mock).toHaveBeenCalledWith(mockClient.asCurrentUser);
