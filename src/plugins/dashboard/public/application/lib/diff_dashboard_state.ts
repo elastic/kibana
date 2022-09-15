@@ -112,7 +112,8 @@ const getFiltersAreEqual = (
 ): boolean => {
   return compareFilters(
     filtersA,
-    ignorePinned ? filtersB.filter((f) => !isFilterPinned(f)) : filtersB
+    ignorePinned ? filtersB.filter((f) => !isFilterPinned(f)) : filtersB,
+    COMPARE_ALL_OPTIONS
   );
 };
 

@@ -11,7 +11,14 @@ import _ from 'lodash';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { ControlGroupInput } from '@kbn/controls-plugin/public';
 import { type EmbeddablePackageState, ViewMode } from '@kbn/embeddable-plugin/public';
-import { compareFilters, isFilterPinned, migrateFilter, TimeRange } from '@kbn/es-query';
+import {
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  Filter,
+  isFilterPinned,
+  TimeRange,
+} from '@kbn/es-query';
+import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 
 import type { DashboardSavedObject } from '../../saved_dashboards';
 import { getTagsFromSavedDashboard, migrateAppState } from '.';
@@ -65,6 +72,7 @@ export const savedObjectToDashboardState = ({
   if (rawState.timeRestore) {
     rawState.timeRange = { from: savedDashboard.timeFrom, to: savedDashboard.timeTo } as TimeRange;
   }
+
   rawState.controlGroupInput = deserializeControlGroupFromDashboardSavedObject(
     savedDashboard
   ) as ControlGroupInput;
@@ -83,7 +91,7 @@ export const stateToDashboardContainerInput = ({
 }: StateToDashboardContainerInputProps): DashboardContainerInput => {
   const {
     data: {
-      query: { timefilter: timefilterService, filterManager },
+      query: { filterManager, timefilter: timefilterService },
     },
   } = pluginServices.getServices();
   const { timefilter } = timefilterService;
@@ -103,17 +111,18 @@ export const stateToDashboardContainerInput = ({
     filters: dashboardFilters,
   } = dashboardState;
 
-  const containerFilters = _.uniqWith(
-    [
-      ..._.cloneDeep(dashboardFilters),
-      ...filterManager.getFilters().filter((f) => isFilterPinned(f)),
-    ].map((f) => migrateFilter(f)),
-    compareFilters
-  );
-
+  const migratedDashboardFilters = mapAndFlattenFilters(_.cloneDeep(dashboardFilters));
   return {
     refreshConfig: timefilter.getRefreshInterval(),
-    filters: containerFilters,
+    filters: filterManager
+      .getFilters()
+      .filter(
+        (filter) =>
+          isFilterPinned(filter) ||
+          migratedDashboardFilters.some((dashboardFilter) =>
+            filtersAreEqual(dashboardFilter, filter)
+          )
+      ),
     isFullScreenMode: fullScreenMode,
     id: savedDashboard.id || '',
     isEmbeddedExternally,
@@ -134,6 +143,10 @@ export const stateToDashboardContainerInput = ({
     executionContext,
   };
 };
+
+const filtersAreEqual = (first: Filter, second: Filter) =>
+  compareFilters(first, second, { ...COMPARE_ALL_OPTIONS, state: false });
+
 /**
  * Converts a given dashboard state object to raw dashboard state. This is useful for sharing, and session restoration, as
  * they require panels to be formatted as an array.

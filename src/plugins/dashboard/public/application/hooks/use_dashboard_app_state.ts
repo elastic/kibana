@@ -10,6 +10,7 @@ import { History } from 'history';
 import { debounceTime, switchMap } from 'rxjs/operators';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
+
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
@@ -203,6 +204,7 @@ export const useDashboardAppState = ({
         ...(incomingEmbeddable ? { viewMode: ViewMode.EDIT } : {}),
       };
       dispatchDashboardStateChange(setDashboardState(initialDashboardState));
+
       /**
        * Start syncing dashboard state with the Query, Filters and Timepicker from the Query Service.
        */
