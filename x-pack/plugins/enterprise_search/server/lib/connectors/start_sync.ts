@@ -12,16 +12,19 @@ import { CONNECTORS_INDEX } from '../..';
 import { ConnectorDocument } from '../../../common/types/connectors';
 import { ErrorCode } from '../../../common/types/error_codes';
 
-export const startConnectorSync = async (client: IScopedClusterClient, connectorId: string, nextSyncConfig?: string) => {
+export const startConnectorSync = async (
+  client: IScopedClusterClient,
+  connectorId: string,
+  nextSyncConfig?: string
+) => {
   const connectorResult = await client.asCurrentUser.get<ConnectorDocument>({
     id: connectorId,
     index: CONNECTORS_INDEX,
   });
   const connector = connectorResult._source;
   if (connector) {
-
     if (nextSyncConfig) {
-      connector.configuration["nextSyncConfig"] = { label: "nextSyncConfig", value: nextSyncConfig}
+      connector.configuration.nextSyncConfig = { label: 'nextSyncConfig', value: nextSyncConfig };
     }
 
     const result = await client.asCurrentUser.index<ConnectorDocument>({

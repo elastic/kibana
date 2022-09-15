@@ -46,7 +46,7 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
         is_native: true,
         language: request.body.language,
         service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
-        last_synced: date.toISOString() // prevent Crawler start when index is created
+        last_synced: date.toISOString(), // prevent Crawler start when index is created
       };
       const { client } = (await context.core).elasticsearch;
 
