@@ -211,6 +211,13 @@ export async function mountApp(
       ? historyLocationState.payload
       : undefined;
 
+  if (historyLocationState && historyLocationState.type === ACTION_VISUALIZE_LENS_FIELD) {
+    // remove originatingApp from context when visualizing a field in Lens
+    // so Lens does not try to return to the original app on Save
+    // see https://github.com/elastic/kibana/issues/128695
+    delete initialContext?.originatingApp;
+  }
+
   if (embeddableEditorIncomingState?.searchSessionId) {
     data.search.session.continue(embeddableEditorIncomingState.searchSessionId);
   }

@@ -15,6 +15,7 @@ import {
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { getUiActions } from '../../../../../kibana_services';
+import { PLUGIN_ID } from '../../../../../../common';
 
 export function getTriggerConstant(type: string) {
   return type === KBN_FIELD_TYPES.GEO_POINT || type === KBN_FIELD_TYPES.GEO_SHAPE
@@ -53,6 +54,7 @@ export function triggerVisualizeActions(
     dataViewSpec: dataView.toSpec(false),
     fieldName: field.name,
     contextualFields,
+    originatingApp: PLUGIN_ID,
   };
   getUiActions().getTrigger(trigger).exec(triggerOptions);
 }
