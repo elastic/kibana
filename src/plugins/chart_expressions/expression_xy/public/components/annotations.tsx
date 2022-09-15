@@ -70,11 +70,11 @@ const TooltipAnnotationDetails = ({
   return (
     <div className="xyAnnotationTooltip__extraFields">
       {extraFields.map((field) => (
-        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs">
-          <EuiFlexItem grow={false} className="xyAnnotationTooltip__extraFieldsKey">
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem className="xyAnnotationTooltip__extraFieldsKey">
             {field.name}:
           </EuiFlexItem>
-          <EuiFlexItem grow={false} className="xyAnnotationTooltip__extraFieldsValue">
+          <EuiFlexItem className="xyAnnotationTooltip__extraFieldsValue">
             {field.formatter ? field.formatter.convert(row[field.key]) : row[field.key]}
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -147,7 +147,9 @@ const createCustomTooltip =
                       />
                     </EuiFlexItem>
                     <EuiFlexItem>
-                      <div className="xyAnnotationTooltip__rowLabel">{row.label}</div>
+                      <EuiTitle size="xxxs">
+                        <h6>{row.label}</h6>
+                      </EuiTitle>
                       <EuiFlexItem>{moment(row.time).format(timeFormat)}</EuiFlexItem>
                       <TooltipAnnotationDetails
                         key={snakeCase(row.time)}
@@ -169,7 +171,7 @@ const createCustomTooltip =
             <div className="xyAnnotationTooltip__row ">
               <FormattedMessage
                 id="expressionXY.annotations.skippedCount"
-                defaultMessage="... +{value} more"
+                defaultMessage="+{value} more…"
                 values={{ value: skippedCount }}
               />
             </div>

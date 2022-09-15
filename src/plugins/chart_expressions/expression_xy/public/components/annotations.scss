@@ -33,7 +33,7 @@
 }
 
 .xyAnnotationTooltip__row {
-  font-weight: $euiFontWeightMedium;
+  font-weight: $euiFontWeightRegular;
   padding: $euiSizeS $euiSizeM $euiSizeS $euiSizeS;
   border-radius: 0 !important;
 }
@@ -57,13 +57,12 @@
 
 .xyAnnotationTooltip__extraFieldsValue {
   text-align: right;
-  word-break: break-word;
+  overflow-wrap: break-word;
   hyphens: auto;
 }
 
 .xyAnnotationTooltip__skippedCount {
   position: relative;
   text-align: right;
-  box-shadow: 0 -24px 24px 2px $euiColorGhost;
-  font-weight: $euiFontWeightMedium;
+  font-weight: $euiFontWeightRegular;
 }
