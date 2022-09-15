@@ -39,7 +39,7 @@ curl --retry 120 \
   --retry-all-errors \
   -I -XGET "${TEST_ES_URL}/_cluster/health?wait_for_nodes=>=1&wait_for_status=yellow"
 
-journeys=("login" "ecommerce_dashboard" "flight_dashboard" "web_logs_dashboard" "promotion_tracking_dashboard" "many_fields_discover")
+journeys=("login" "ecommerce_dashboard" "flight_dashboard" "web_logs_dashboard" "promotion_tracking_dashboard" "many_fields_discover" "data_stress_test_lens")
 
 for i in "${journeys[@]}"; do
     echo "JOURNEY[${i}] is running"
