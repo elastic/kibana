@@ -23757,7 +23757,9 @@
             "parentPluginId": "data",
             "id": "def-common.EqlSearchStrategyRequest.options",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "options",
             "description": [],
             "signature": [
@@ -23765,8 +23767,14 @@
               " | undefined"
             ],
             "path": "src/plugins/data/common/search/strategies/eql_search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/hooks/eql/api.ts"
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -25322,6 +25330,24 @@
                 "text": "DataView"
               },
               " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.ISearchOptions.transport",
+            "type": "Object",
+            "tags": [],
+            "label": "transport",
+            "description": [
+              "\nTransportRequestOptions, other than `signal`, to pass through to the ES client.\nTo pass an abort signal, use {@link ISearchOptions.abortSignal}"
+            ],
+            "signature": [
+              "Omit<",
+              "TransportRequestOptions",
+              ", \"signal\"> | undefined"
             ],
             "path": "src/plugins/data/common/search/types.ts",
             "deprecated": false,
