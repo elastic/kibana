@@ -9,15 +9,15 @@ import { FLYOUT_BUTTON_BAR_CLASS_NAME } from '../../timeline/helpers';
 import { FlyoutHeaderPanel } from '../header';
 
 interface FlyoutBottomBarProps {
-  showDataproviders: boolean;
+  showTimelineHeaderPanel: boolean;
   timelineId: string;
 }
 
 export const FlyoutBottomBar = React.memo<FlyoutBottomBarProps>(
-  ({ showDataproviders, timelineId }) => {
+  ({ showTimelineHeaderPanel, timelineId }) => {
     return (
       <div className={FLYOUT_BUTTON_BAR_CLASS_NAME} data-test-subj="flyoutBottomBar">
-        {showDataproviders && <FlyoutHeaderPanel timelineId={timelineId} />}
+        {showTimelineHeaderPanel && <FlyoutHeaderPanel timelineId={timelineId} />}
       </div>
     );
   }

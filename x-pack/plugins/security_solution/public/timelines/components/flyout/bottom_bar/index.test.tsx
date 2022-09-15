@@ -15,7 +15,7 @@ describe('FlyoutBottomBar', () => {
   test('it renders the expected bottom bar', () => {
     render(
       <TestProviders>
-        <FlyoutBottomBar timelineId="test" showDataproviders={true} />
+        <FlyoutBottomBar timelineId="test" showTimelineHeaderPanel={true} />
       </TestProviders>
     );
 
@@ -25,7 +25,7 @@ describe('FlyoutBottomBar', () => {
   test('it renders the flyout header panel', () => {
     render(
       <TestProviders>
-        <FlyoutBottomBar timelineId="test" showDataproviders={true} />
+        <FlyoutBottomBar timelineId="test" showTimelineHeaderPanel={true} />
       </TestProviders>
     );
 
@@ -35,7 +35,7 @@ describe('FlyoutBottomBar', () => {
   test('it hides the flyout header panel', () => {
     render(
       <TestProviders>
-        <FlyoutBottomBar timelineId="test" showDataproviders={false} />
+        <FlyoutBottomBar timelineId="test" showTimelineHeaderPanel={false} />
       </TestProviders>
     );
 
