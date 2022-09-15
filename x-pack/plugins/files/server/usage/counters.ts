@@ -23,6 +23,8 @@ export function getCounters(fileKind: string) {
 
     DOWNLOAD: `download:${fileKind}`,
     DOWNLOAD_ERROR: `download:error:unknown:${fileKind}`,
+
+    UPLOAD_ERROR_ABORT: `upload:error:abort:${fileKind}`,
   };
 }
 
