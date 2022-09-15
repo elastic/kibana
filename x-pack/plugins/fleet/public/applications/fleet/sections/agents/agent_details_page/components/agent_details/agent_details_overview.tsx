@@ -46,7 +46,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
             title: i18n.translate('xpack.fleet.agentDetails.statusLabel', {
               defaultMessage: 'Status',
             }),
-            description: <AgentHealth agent={agent} />,
+            description: <AgentHealth agent={agent} showOfflinePreviousStatus={true} />,
           },
           {
             title: i18n.translate('xpack.fleet.agentDetails.lastActivityLabel', {
