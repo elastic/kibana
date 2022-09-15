@@ -33,8 +33,8 @@ export const notificationsRouteFactory = (
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     {
-      text: i18n.translate('xpack.ml.overview.overviewLabel', {
-        defaultMessage: 'Overview',
+      text: i18n.translate('xpack.ml.overview.notificationsLabel', {
+        defaultMessage: 'Notifications',
       }),
     },
   ],
