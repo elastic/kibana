@@ -31,6 +31,7 @@ export const PackQueriesAttachmentWrapper = ({
   const { data } = useLiveQueryDetails({
     actionId,
     isLive,
+    asSystemRequest: true,
     ...(queryId ? { queryIds: [queryId] } : {}),
   });
 

@@ -6,7 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../../../common';
+import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 export const privilegesCheckRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
@@ -14,11 +14,20 @@ export const privilegesCheckRoute = (router: IRouter, osqueryContext: OsqueryApp
     {
       path: '/internal/osquery/privileges_check',
       validate: {},
-      options: {
-        tags: [`access:${PLUGIN_ID}-readLiveQueries`],
-      },
     },
     async (context, request, response) => {
+      // this is to skip validation eg. for analysts in cases attachments so they can see the results despite not having permissions
+      const { isSystemRequest } = request;
+      if (!isSystemRequest) {
+        const [coreStartServices] = await osqueryContext.getStartServices();
+        const { osquery } = await coreStartServices.capabilities.resolveCapabilities(request);
+        const isInvalid = !osquery.readLiveQueries;
+
+        if (isInvalid) {
+          return response.forbidden();
+        }
+      }
+
       if (osqueryContext.security.authz.mode.useRbacForRequest(request)) {
         const checkPrivileges =
           osqueryContext.security.authz.checkPrivilegesDynamicallyWithRequest(request);

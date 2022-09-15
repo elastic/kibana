@@ -67,7 +67,10 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   addToCase,
 }) => {
   const [isLive, setIsLive] = useState(true);
-  const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
+
+  // addToCase is not available only in Attachment (cases) where we want to make request as internal
+  const asSystemRequest = !addToCase;
+  const { data: hasActionResultsPrivileges } = useActionResultsPrivileges(asSystemRequest);
 
   const {
     // @ts-expect-error update types

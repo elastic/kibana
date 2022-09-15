@@ -19,6 +19,7 @@ interface UseLiveQueryDetails {
   filterQuery?: ESTermQuery | string;
   skip?: boolean;
   queryIds?: string[];
+  asSystemRequest?: boolean;
 }
 
 export interface LiveQueryDetailsItem {
@@ -53,6 +54,7 @@ export const useLiveQueryDetails = ({
   filterQuery,
   isLive = false,
   skip = false,
+  asSystemRequest = false,
   queryIds, // enable finding out specific queries only, eg. in cases
 }: UseLiveQueryDetails) => {
   const { http } = useKibana().services;
@@ -60,7 +62,7 @@ export const useLiveQueryDetails = ({
 
   return useQuery<{ data: LiveQueryDetailsItem }, Error, LiveQueryDetailsItem>(
     ['liveQueries', { actionId, filterQuery, queryIds }],
-    () => http.get(`/api/osquery/live_queries/${actionId}`),
+    () => http.get(`/api/osquery/live_queries/${actionId}`, { asSystemRequest }),
     {
       enabled: !skip && !!actionId,
       refetchInterval: isLive ? 5000 : false,

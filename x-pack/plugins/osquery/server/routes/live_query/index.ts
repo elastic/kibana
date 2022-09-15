@@ -19,6 +19,6 @@ export const initLiveQueryRoutes = (
 ) => {
   findLiveQueryRoute(router);
   createLiveQueryRoute(router, context);
-  getLiveQueryDetailsRoute(router);
+  getLiveQueryDetailsRoute(router, context);
   getLiveQueryResultsRoute(router);
 };

@@ -8,12 +8,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../common/lib/kibana';
 
-export const useActionResultsPrivileges = () => {
+export const useActionResultsPrivileges = (asSystemRequest = false) => {
   const { http } = useKibana().services;
 
   return useQuery(
     ['actionResultsPrivileges'],
-    () => http.get('/internal/osquery/privileges_check'),
+    () => http.get('/internal/osquery/privileges_check', { asSystemRequest }),
     {
       keepPreviousData: true,
     }

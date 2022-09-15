@@ -11,7 +11,7 @@ import { every, map, mapKeys, pick, reduce } from 'lodash';
 import type { Observable } from 'rxjs';
 import { lastValueFrom, zip } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
-import { PLUGIN_ID } from '../../../common';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getActionResponses } from './utils';
 
 import type {
@@ -20,7 +20,10 @@ import type {
 } from '../../../common/search_strategy';
 import { OsqueryQueries } from '../../../common/search_strategy';
 
-export const getLiveQueryDetailsRoute = (router: IRouter<DataRequestHandlerContext>) => {
+export const getLiveQueryDetailsRoute = (
+  router: IRouter<DataRequestHandlerContext>,
+  osqueryContext: OsqueryAppContext
+) => {
   router.get(
     {
       path: '/api/osquery/live_queries/{id}',
@@ -33,10 +36,21 @@ export const getLiveQueryDetailsRoute = (router: IRouter<DataRequestHandlerConte
         ),
         query: schema.object({}, { unknowns: 'allow' }),
       },
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     async (context, request, response) => {
       const abortSignal = getRequestAbortedSignal(request.events.aborted$);
+
+      // this is to skip validation eg. for analysts in cases attachments so they can see the results despite not having permissions
+      const { isSystemRequest } = request;
+      if (!isSystemRequest) {
+        const [coreStartServices] = await osqueryContext.getStartServices();
+        const { osquery } = await coreStartServices.capabilities.resolveCapabilities(request);
+        const isInvalid = !osquery.read;
+
+        if (isInvalid) {
+          return response.forbidden();
+        }
+      }
 
       try {
         const search = await context.search;

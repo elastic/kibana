@@ -647,7 +647,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
                   agentIds={agentIds}
                   failedAgentsCount={item?.failed ?? 0}
                   addToTimeline={addToTimeline}
-                  addToCase={handleAddToCase({ actionId: item.action_id })}
+                  addToCase={addToCase && handleAddToCase({ actionId: item.action_id })}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
