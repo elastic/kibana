@@ -8,9 +8,10 @@
 
 import { AggParamsFilters } from '@kbn/data-plugin/common';
 import uuid from 'uuid';
-import { FiltersColumn } from '../../types';
+import { FiltersColumn } from './types';
 
 export const convertToFiltersColumn = (
+  aggId: string,
   aggParams: AggParamsFilters,
   isSplit: boolean = false
 ): FiltersColumn | null => {
@@ -28,5 +29,6 @@ export const convertToFiltersColumn = (
       filters: aggParams.filters ?? [],
     },
     timeShift: aggParams.timeShift,
+    meta: { aggId },
   };
 };

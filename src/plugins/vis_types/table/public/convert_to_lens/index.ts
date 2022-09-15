@@ -78,7 +78,11 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
     if (!percentageColumn) {
       return null;
     }
-    result.columns.push(percentageColumn);
+    result.columns.splice(
+      result.columnsWithoutReferenced.findIndex((c) => c.meta.aggId === metricAgg.aggId) + 1,
+      0,
+      percentageColumn
+    );
     result.columnsWithoutReferenced.push(percentageColumn);
   }
 

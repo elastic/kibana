@@ -140,6 +140,7 @@ export interface PagingState {
 export interface ColumnState {
   columnId: string;
   summaryRow?: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max';
+  alignment?: 'left' | 'right' | 'center';
   collapseFn?: string;
 }
 

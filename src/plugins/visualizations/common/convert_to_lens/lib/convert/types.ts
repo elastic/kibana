@@ -28,9 +28,9 @@ import {
   CumulativeSumColumn as BaseCumulativeSumColumn,
   MovingAverageColumn as BaseMovingAverageColumn,
   DerivativeColumn as BaseDerivativeColumn,
-  DateHistogramColumn,
-  TermsColumn,
-  FiltersColumn,
+  DateHistogramColumn as BaseDateHistogramColumn,
+  TermsColumn as BaseTermsColumn,
+  FiltersColumn as BaseFiltersColumn,
 } from '../../types';
 
 export type MetricsWithField = Exclude<
@@ -80,7 +80,7 @@ export interface CommonBucketConverterArgs<
   aggs: Array<SchemaConfig<METRIC_TYPES>>;
 }
 
-export type AggId = `${string}.${string}`;
+export type AggId = `${string}`;
 
 export interface Meta {
   aggId: AggId;
@@ -111,3 +111,6 @@ export type SumColumn = GenericColumnWithMeta<BaseSumColumn, Meta>;
 export type CumulativeSumColumn = GenericColumnWithMeta<BaseCumulativeSumColumn, Meta>;
 export type MovingAverageColumn = GenericColumnWithMeta<BaseMovingAverageColumn, Meta>;
 export type DerivativeColumn = GenericColumnWithMeta<BaseDerivativeColumn, Meta>;
+export type DateHistogramColumn = GenericColumnWithMeta<BaseDateHistogramColumn, Meta>;
+export type TermsColumn = GenericColumnWithMeta<BaseTermsColumn, Meta>;
+export type FiltersColumn = GenericColumnWithMeta<BaseFiltersColumn, Meta>;
