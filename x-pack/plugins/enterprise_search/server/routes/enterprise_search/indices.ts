@@ -28,7 +28,6 @@ import {
   createAndReferenceMlInferencePipeline,
   CreatedPipeline,
 } from '../../utils/create_ml_inference_pipeline';
-import { createIndexPipelineDefinitions } from '../../utils/create_pipeline_definitions';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
