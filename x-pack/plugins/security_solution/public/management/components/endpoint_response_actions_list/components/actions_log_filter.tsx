@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { orderBy } from 'lodash/fp';
 import React, { memo, useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSelectable, EuiPopoverTitle } from '@elastic/eui';
 import type { ResponseActions } from '../../../../../common/endpoint/service/response_actions/constants';
@@ -78,18 +79,8 @@ export const ActionsLogFilter = memo(
     // augmented options based on hosts filter
     const sortedHostsFilterOptions = useMemo(() => {
       if (shouldPinSelectedHosts() || areHostsSelectedOnMount) {
-        const sortedItems = items.reduce<{ selected: FilterItems; rest: FilterItems }>(
-          (acc, item) => {
-            if (item.checked === 'on') {
-              acc.selected.push(item);
-            } else {
-              acc.rest.push(item);
-            }
-            return acc;
-          },
-          { selected: [], rest: [] }
-        );
-        return [...sortedItems.selected, ...sortedItems.rest];
+        // pin checked items to the top
+       return orderBy('checked', 'asc', items);
       }
       // return options as is for other filters
       return items;
