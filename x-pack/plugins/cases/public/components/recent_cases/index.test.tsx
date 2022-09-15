@@ -11,13 +11,11 @@ import userEvent from '@testing-library/user-event';
 import RecentCases, { RecentCasesProps } from '.';
 import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
 import { useGetCasesMockState } from '../../containers/mock';
-// import * as kibanaHooks from '../../common/lib/kibana/hooks';
 import { useCurrentUser } from '../../common/lib/kibana/hooks';
 import { useGetCases } from '../../containers/use_get_cases';
 import * as api from '../../containers/user_profiles/api';
 import { useToasts } from '../../common/lib/kibana';
 
-// jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/user_profiles/api');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../common/lib/kibana/hooks');
