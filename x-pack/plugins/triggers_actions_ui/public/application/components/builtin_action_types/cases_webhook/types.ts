@@ -9,7 +9,7 @@ import type {
   CasesWebhookPublicConfigurationType,
   CasesWebhookSecretConfigurationType,
   ExecutorSubActionPushParams,
-} from '@kbn/actions-plugin/server/builtin_action_types/cases_webhook/types';
+} from '@kbn/stack-connectors-plugin/server/connector_types/cases/cases_webhook/types';
 import { UserConfiguredActionConnector } from '../../../../types';
 
 export interface CasesWebhookActionParams {
