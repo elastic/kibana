@@ -278,7 +278,7 @@ const isFields = (path: string) => {
  */
 
 export const loadFieldsFromYaml = (
-  pkg: Pick<PackageInfo, 'version' | 'name'>,
+  pkg: Pick<PackageInfo, 'version' | 'name' | 'type'>,
   datasetName?: string
 ): Field[] => {
   // Fetch all field definition files
