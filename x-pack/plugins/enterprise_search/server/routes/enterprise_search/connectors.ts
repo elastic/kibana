@@ -29,6 +29,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
           index_name: schema.string(),
           is_native: schema.boolean(),
           language: schema.nullable(schema.string()),
+          last_synced: schema.string(),
         }),
       },
     },
