@@ -7,7 +7,10 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 
-import { createMlInferencePipeline, addSubPipelineToIndexSpecificMlPipeline } from './create_ml_inference_pipeline';
+import {
+  createMlInferencePipeline,
+  addSubPipelineToIndexSpecificMlPipeline,
+} from './create_ml_inference_pipeline';
 
 describe('createMlInferencePipeline util function', () => {
   const pipelineName = 'my-pipeline';
@@ -47,7 +50,7 @@ describe('createMlInferencePipeline util function', () => {
 
     const expectedResult = {
       created: true,
-      id: inferencePipelineGeneratedName
+      id: inferencePipelineGeneratedName,
     };
 
     const actualResult = await createMlInferencePipeline(
@@ -98,19 +101,25 @@ describe('addSubPipelineToIndexSpecificMlPipeline util function', () => {
     jest.clearAllMocks();
   });
 
-  it('should add the sub-pipeline reference to the parent ML pipeline if it isn\'t there', async () => {
-    mockClient.ingest.getPipeline.mockImplementation(() => Promise.resolve({
-      [parentPipelineId]: {
-        processors: []
-      },
-    }));
+  it("should add the sub-pipeline reference to the parent ML pipeline if it isn't there", async () => {
+    mockClient.ingest.getPipeline.mockImplementation(() =>
+      Promise.resolve({
+        [parentPipelineId]: {
+          processors: [],
+        },
+      })
+    );
 
     const expectedResult = {
       id: parentPipelineId,
       updated: true,
     };
 
-    const actualResult = await addSubPipelineToIndexSpecificMlPipeline(indexName, pipelineName, mockClient as unknown as ElasticsearchClient);
+    const actualResult = await addSubPipelineToIndexSpecificMlPipeline(
+      indexName,
+      pipelineName,
+      mockClient as unknown as ElasticsearchClient
+    );
 
     expect(actualResult).toEqual(expectedResult);
     // Verify the parent pipeline was updated with a reference of the sub-pipeline
@@ -119,10 +128,10 @@ describe('addSubPipelineToIndexSpecificMlPipeline util function', () => {
       processors: expect.arrayContaining([
         {
           pipeline: {
-            name: pipelineName
-          }
-        }
-      ])
+            name: pipelineName,
+          },
+        },
+      ]),
     });
   });
 
@@ -134,7 +143,11 @@ describe('addSubPipelineToIndexSpecificMlPipeline util function', () => {
       updated: false,
     };
 
-    const actualResult = await addSubPipelineToIndexSpecificMlPipeline(indexName, pipelineName, mockClient as unknown as ElasticsearchClient);
+    const actualResult = await addSubPipelineToIndexSpecificMlPipeline(
+      indexName,
+      pipelineName,
+      mockClient as unknown as ElasticsearchClient
+    );
 
     expect(actualResult).toEqual(expectedResult);
     // Verify the parent pipeline was NOT updated
@@ -142,24 +155,30 @@ describe('addSubPipelineToIndexSpecificMlPipeline util function', () => {
   });
 
   it('should not add the sub-pipeline reference to the parent ML pipeline if it is already there', async () => {
-    mockClient.ingest.getPipeline.mockImplementation(() => Promise.resolve({
-      [parentPipelineId]: {
-        processors: [
-          {
-            pipeline: {
-              name: pipelineName
-            }
-          }
-        ]
-      },
-    }));
+    mockClient.ingest.getPipeline.mockImplementation(() =>
+      Promise.resolve({
+        [parentPipelineId]: {
+          processors: [
+            {
+              pipeline: {
+                name: pipelineName,
+              },
+            },
+          ],
+        },
+      })
+    );
 
     const expectedResult = {
       id: parentPipelineId,
       updated: false,
     };
 
-    const actualResult = await addSubPipelineToIndexSpecificMlPipeline(indexName, pipelineName, mockClient as unknown as ElasticsearchClient);
+    const actualResult = await addSubPipelineToIndexSpecificMlPipeline(
+      indexName,
+      pipelineName,
+      mockClient as unknown as ElasticsearchClient
+    );
 
     expect(actualResult).toEqual(expectedResult);
     // Verify the parent pipeline was NOT updated

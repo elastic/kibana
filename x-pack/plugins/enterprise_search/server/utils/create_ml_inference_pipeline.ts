@@ -39,7 +39,7 @@ export const createMlInferencePipeline = async (
   const inferencePipelineGeneratedName = `ml-inference-${pipelineName}`;
 
   // Check that a pipeline with the same name doesn't already exist
-  let pipelineByName: IngestGetPipelineResponse | undefined = undefined;
+  let pipelineByName: IngestGetPipelineResponse | undefined;
   try {
     pipelineByName = await esClient.ingest.getPipeline({
       id: inferencePipelineGeneratedName,
@@ -68,7 +68,7 @@ export const createMlInferencePipeline = async (
     id: inferencePipelineGeneratedName,
     created: true,
   });
-}
+};
 
 /**
  * Adds the supplied a Machine Learning Inference pipeline reference to the "parent" ML Inference
@@ -85,42 +85,42 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
   const parentPipelineId = `${indexName}@ml-inference`;
 
   // Fetch the parent pipeline
-  let parentPipeline: IngestPipeline | undefined = undefined;
+  let parentPipeline: IngestPipeline | undefined;
   try {
     const pipelineResponse = await esClient.ingest.getPipeline({
       id: parentPipelineId,
     });
     parentPipeline = pipelineResponse[parentPipelineId];
-
   } catch (error) {
     // Swallow error; in this case the next step will return
   }
 
   // Verify the parent pipeline exists with a processors array
-  if (!(parentPipeline?.processors)) {
+  if (!parentPipeline?.processors) {
     return Promise.resolve({
       id: parentPipelineId,
       updated: false,
-    })
+    });
   }
 
   // Check if the sub-pipeline reference is already in the list of processors,
   // if so, don't modify it
-  const existingSubPipeline = parentPipeline.processors
-    .find((p) => p.pipeline?.name === pipelineName)
+  const existingSubPipeline = parentPipeline.processors.find(
+    (p) => p.pipeline?.name === pipelineName
+  );
   if (existingSubPipeline) {
     return Promise.resolve({
       id: parentPipelineId,
       updated: false,
-    })
+    });
   }
 
   // Add sub-processor to the ML inference parent pipeline
   parentPipeline.processors.push({
     pipeline: {
-      name: pipelineName
-    }
-  })
+      name: pipelineName,
+    },
+  });
 
   await esClient.ingest.putPipeline({
     id: parentPipelineId,
@@ -130,5 +130,5 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
   return Promise.resolve({
     id: parentPipelineId,
     updated: true,
-  })
-}
+  });
+};
