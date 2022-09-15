@@ -11,8 +11,10 @@ import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_PIPELINE_VALUES } from '../../../../../../common/constants';
 
+import { HttpError } from '../../../../../../common/types/api';
 import { IngestPipelineParams } from '../../../../../../common/types/connectors';
 import { ElasticsearchIndexWithIngestion } from '../../../../../../common/types/indices';
+import { InferencePipeline } from '../../../../../../common/types/pipelines';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
 import {
   clearFlashMessages,
@@ -44,6 +46,7 @@ import {
   FetchIndexApiParams,
   FetchIndexApiResponse,
 } from '../../../api/index/fetch_index_api_logic';
+import { FetchMlInferencePipelineProcessorsApiLogic } from '../../../api/pipelines/fetch_ml_inference_pipeline_processors';
 import { isApiIndex, isConnectorIndex, isCrawlerIndex } from '../../../utils/indices';
 
 type PipelinesActions = Pick<
@@ -70,6 +73,8 @@ type PipelinesActions = Pick<
   fetchDefaultPipeline: Actions<undefined, FetchDefaultPipelineResponse>['makeRequest'];
   fetchDefaultPipelineSuccess: Actions<undefined, FetchDefaultPipelineResponse>['apiSuccess'];
   fetchIndexApiSuccess: Actions<FetchIndexApiParams, FetchIndexApiResponse>['apiSuccess'];
+  fetchMlInferenceProcessors: typeof FetchMlInferencePipelineProcessorsApiLogic.actions.makeRequest;
+  fetchMlInferenceProcessorsApiError: (error: HttpError) => HttpError;
   openModal: () => void;
   savePipeline: () => void;
   setPipelineState(pipeline: IngestPipelineParams): {
@@ -82,6 +87,7 @@ interface PipelinesValues {
   defaultPipelineValues: IngestPipelineParams;
   defaultPipelineValuesData: IngestPipelineParams | null;
   index: FetchIndexApiResponse;
+  mlInferencePipelineProcessors: InferencePipeline[];
   pipelineState: IngestPipelineParams;
   showModal: boolean;
 }
@@ -109,12 +115,19 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       ['apiSuccess as fetchDefaultPipelineSuccess', 'makeRequest as fetchDefaultPipeline'],
       FetchCustomPipelineApiLogic,
       ['makeRequest as fetchCustomPipeline'],
+      FetchMlInferencePipelineProcessorsApiLogic,
+      [
+        'makeRequest as fetchMlInferenceProcessors',
+        'apiError as fetchMlInferenceProcessorsApiError',
+      ],
     ],
     values: [
       FetchDefaultPipelineApiLogic,
       ['data as defaultPipelineValuesData'],
       FetchIndexApiLogic,
       ['data as index'],
+      FetchMlInferencePipelineProcessorsApiLogic,
+      ['data as mlInferencePipelineProcessors'],
     ],
   },
   events: ({ actions, values }) => ({
