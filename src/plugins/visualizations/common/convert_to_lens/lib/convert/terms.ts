@@ -8,11 +8,11 @@
 
 import { BUCKET_TYPES } from '@kbn/data-plugin/common';
 import uuid from 'uuid';
-import { DataType, TermsColumn, TermsParams } from '../../types';
+import { DataType, TermsParams } from '../../types';
 import { getFieldNameFromField, isColumnWithMeta } from '../utils';
 import { convertToSchemaConfig } from '../../../vis_schemas';
 import { convertMetricToColumns } from '../metrics';
-import { CommonBucketConverterArgs } from './types';
+import { CommonBucketConverterArgs, TermsColumn } from './types';
 
 interface OrderByWithAgg {
   orderAgg?: TermsParams['orderAgg'];
@@ -49,7 +49,7 @@ const getOrderByWithAgg = ({
 
   const orderAgg = metricColumns.find((column) => {
     if (isColumnWithMeta(column)) {
-      return column.meta.aggId.split('.')[1] === aggParams.orderBy;
+      return column.meta.aggId === aggParams.orderBy;
     }
     return false;
   });
@@ -89,6 +89,7 @@ export const convertToTermsParams = ({
 };
 
 export const convertToTermsColumn = (
+  aggId: string,
   { aggParams, dataView, aggs, metricColumns }: CommonBucketConverterArgs<BUCKET_TYPES.TERMS>,
   label: string,
   isSplit: boolean
@@ -118,5 +119,6 @@ export const convertToTermsColumn = (
     isSplit,
     params: { ...params },
     timeShift: aggParams?.timeShift,
+    meta: { aggId },
   };
 };

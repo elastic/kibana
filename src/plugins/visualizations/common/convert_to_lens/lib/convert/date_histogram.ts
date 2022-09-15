@@ -9,8 +9,9 @@
 import { AggParamsDateHistogram } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import uuid from 'uuid';
-import { DataType, DateHistogramColumn, DateHistogramParams } from '../../types';
+import { DataType, DateHistogramParams } from '../../types';
 import { getFieldNameFromField } from '../utils';
+import { DateHistogramColumn } from './types';
 
 export const getLabel = (aggParams: AggParamsDateHistogram, fieldName: string) => {
   return aggParams && 'customLabel' in aggParams ? aggParams.customLabel ?? fieldName : fieldName;
@@ -28,6 +29,7 @@ export const convertToDateHistogramParams = (
 };
 
 export const convertToDateHistogramColumn = (
+  aggId: string,
   aggParams: AggParamsDateHistogram,
   dataView: DataView,
   isSplit: boolean,
@@ -57,5 +59,6 @@ export const convertToDateHistogramColumn = (
     sourceField: dateField.name,
     params,
     timeShift: aggParams.timeShift,
+    meta: { aggId },
   };
 };

@@ -13,7 +13,7 @@ import { SchemaConfig } from '../../../types';
 import { AggId, ExtraColumnFields, GeneralColumnWithMeta } from './types';
 import { getLabel } from '../utils';
 
-export const createAggregationId = (agg: SchemaConfig): AggId => `${agg.aggType}.${agg.aggId}`;
+export const createAggregationId = (agg: SchemaConfig): AggId => `${agg.aggId}`;
 
 export const getFormat = (): FormatParams => {
   return {};
