@@ -28,7 +28,7 @@ export const PipelineSettingsForm: React.FC<PipelineSettingsFormProps> = ({
     run_ml_inference: runMLInference,
   } = pipeline;
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs">
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
         <SettingsCheckableCard
           description={i18n.translate(
