@@ -7,14 +7,18 @@
 
 import React, { VFC } from 'react';
 import { EuiDataGridColumnCellActionProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
-import { FilterInOut } from '../../../query_bar/components/filter_in_out';
+import { ComponentType } from '../../../../../common/types/component_type';
 import { EMPTY_VALUE } from '../../../../../common/constants';
 import { Indicator } from '../../../../../common/types/indicator';
 import { Pagination } from '../../hooks/use_indicators';
 import { AddToTimeline } from '../../../timeline/components/add_to_timeline';
 import { getIndicatorFieldAndValue } from '../../lib/field_value';
+import { FilterIn } from '../../../query_bar/components/filter_in';
+import { FilterOut } from '../../../query_bar/components/filter_out';
 
 export const CELL_TIMELINE_BUTTON_TEST_ID = 'tiIndicatorsTableCellTimelineButton';
+export const CELL_FILTER_IN_BUTTON_TEST_ID = 'tiIndicatorsTableCellFilterInButton';
+export const CELL_FILTER_OUT_BUTTON_TEST_ID = 'tiIndicatorsTableCellFilterOutButton';
 
 export interface CellActionsProps
   extends Omit<EuiDataGridColumnCellActionProps, 'colIndex' | 'isExpanded'> {
@@ -50,12 +54,25 @@ export const CellActions: VFC<CellActionsProps> = ({
 
   return (
     <>
-      <FilterInOut Component={Component} data={indicator} field={key} />
+      <FilterIn
+        as={Component}
+        data={indicator}
+        field={key}
+        type={ComponentType.EuiDataGrid}
+        data-test-subj={CELL_FILTER_IN_BUTTON_TEST_ID}
+      />
+      <FilterOut
+        as={Component}
+        data={indicator}
+        field={key}
+        type={ComponentType.EuiDataGrid}
+        data-test-subj={CELL_FILTER_OUT_BUTTON_TEST_ID}
+      />
       <AddToTimeline
         data={indicator}
         field={key}
-        component={Component}
-        testId={CELL_TIMELINE_BUTTON_TEST_ID}
+        as={Component}
+        data-test-subj={CELL_TIMELINE_BUTTON_TEST_ID}
       />
     </>
   );

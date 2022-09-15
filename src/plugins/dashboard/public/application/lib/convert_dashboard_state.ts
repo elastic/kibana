@@ -7,8 +7,9 @@
  */
 
 import _ from 'lodash';
+
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { ControlGroupInput } from '@kbn/controls-plugin/public';
+import type { ControlGroupInput } from '@kbn/controls-plugin/public';
 import {
   compareFilters,
   isFilterPinned,
@@ -16,27 +17,19 @@ import {
   COMPARE_ALL_OPTIONS,
   type Filter,
 } from '@kbn/es-query';
-import { DashboardSavedObject } from '../../saved_dashboards';
+import { type EmbeddablePackageState, ViewMode } from '@kbn/embeddable-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+
+import type { DashboardSavedObject } from '../../saved_dashboards';
 import { getTagsFromSavedDashboard, migrateAppState } from '.';
-import { EmbeddablePackageState, ViewMode } from '../../services/embeddable';
-import { TimeRange } from '../../services/data';
 import { convertPanelStateToSavedDashboardPanel } from '../../../common/embeddable/embeddable_saved_object_converters';
-import {
-  DashboardState,
-  RawDashboardState,
-  DashboardAppServices,
-  DashboardContainerInput,
-  DashboardBuildContext,
-} from '../../types';
+import type { DashboardState, RawDashboardState, DashboardContainerInput } from '../../types';
 import { convertSavedPanelsToPanelMap } from './convert_dashboard_panels';
 import { deserializeControlGroupFromDashboardSavedObject } from './dashboard_control_group';
+import { pluginServices } from '../../services/plugin_services';
 
 interface SavedObjectToDashboardStateProps {
-  version: string;
-  showWriteControls: boolean;
   savedDashboard: DashboardSavedObject;
-  usageCollection: DashboardAppServices['usageCollection'];
-  savedObjectsTagging: DashboardAppServices['savedObjectsTagging'];
 }
 
 interface StateToDashboardContainerInputProps {
@@ -44,14 +37,11 @@ interface StateToDashboardContainerInputProps {
   isEmbeddedExternally?: boolean;
   dashboardState: DashboardState;
   savedDashboard: DashboardSavedObject;
-  query: DashboardBuildContext['query'];
   incomingEmbeddable?: EmbeddablePackageState;
-  dashboardCapabilities: DashboardBuildContext['dashboardCapabilities'];
   executionContext?: KibanaExecutionContext;
 }
 
 interface StateToRawDashboardStateProps {
-  version: string;
   state: DashboardState;
 }
 /**
@@ -60,28 +50,25 @@ interface StateToRawDashboardStateProps {
  * dashboard panel to a panel state.
  */
 export const savedObjectToDashboardState = ({
-  version,
   savedDashboard,
-  usageCollection,
-  showWriteControls,
-  savedObjectsTagging,
 }: SavedObjectToDashboardStateProps): DashboardState => {
-  const rawState = migrateAppState(
-    {
-      fullScreenMode: false,
-      title: savedDashboard.title,
-      query: savedDashboard.getQuery(),
-      filters: savedDashboard.getFilters(),
-      timeRestore: savedDashboard.timeRestore,
-      description: savedDashboard.description || '',
-      tags: getTagsFromSavedDashboard(savedDashboard, savedObjectsTagging),
-      panels: savedDashboard.panelsJSON ? JSON.parse(savedDashboard.panelsJSON) : [],
-      viewMode: savedDashboard.id || showWriteControls ? ViewMode.EDIT : ViewMode.VIEW,
-      options: savedDashboard.optionsJSON ? JSON.parse(savedDashboard.optionsJSON) : {},
-    },
-    version,
-    usageCollection
-  );
+  const {
+    dashboardCapabilities: { showWriteControls },
+  } = pluginServices.getServices();
+
+  const rawState = migrateAppState({
+    fullScreenMode: false,
+    title: savedDashboard.title,
+    query: savedDashboard.getQuery(),
+    filters: savedDashboard.getFilters(),
+    timeRestore: savedDashboard.timeRestore,
+    description: savedDashboard.description || '',
+    tags: getTagsFromSavedDashboard(savedDashboard),
+    panels: savedDashboard.panelsJSON ? JSON.parse(savedDashboard.panelsJSON) : [],
+    viewMode: savedDashboard.id || showWriteControls ? ViewMode.EDIT : ViewMode.VIEW,
+    options: savedDashboard.optionsJSON ? JSON.parse(savedDashboard.optionsJSON) : {},
+  });
+
   if (rawState.timeRestore) {
     rawState.timeRange = { from: savedDashboard.timeFrom, to: savedDashboard.timeTo } as TimeRange;
   }
@@ -95,14 +82,15 @@ export const savedObjectToDashboardState = ({
  * Converts a dashboard state object to dashboard container input
  */
 export const stateToDashboardContainerInput = ({
-  dashboardCapabilities,
   isEmbeddedExternally,
-  query: queryService,
   searchSessionId,
   savedDashboard,
   dashboardState,
   executionContext,
 }: StateToDashboardContainerInputProps): DashboardContainerInput => {
+  const {
+    data: { query: queryService },
+  } = pluginServices.getServices();
   const { filterManager, timefilter: timefilterService } = queryService;
   const { timefilter } = timefilterService;
 
@@ -134,7 +122,6 @@ export const stateToDashboardContainerInput = ({
       ),
     isFullScreenMode: fullScreenMode,
     id: savedDashboard.id || '',
-    dashboardCapabilities,
     isEmbeddedExternally,
     ...(options || {}),
     controlGroupInput,
@@ -162,11 +149,14 @@ const filtersAreEqual = (first: Filter, second: Filter) =>
  * they require panels to be formatted as an array.
  */
 export const stateToRawDashboardState = ({
-  version,
   state,
 }: StateToRawDashboardStateProps): RawDashboardState => {
+  const {
+    initializerContext: { kibanaVersion },
+  } = pluginServices.getServices();
+
   const savedDashboardPanels = Object.values(state.panels).map((panel) =>
-    convertPanelStateToSavedDashboardPanel(panel, version)
+    convertPanelStateToSavedDashboardPanel(panel, kibanaVersion)
   );
   return { ..._.omit(state, 'panels'), panels: savedDashboardPanels };
 };
