@@ -208,7 +208,7 @@ describe('suggestion helpers', () => {
       datasourceMap,
       datasourceStates,
       visualizeTriggerFieldContext: {
-        indexPatternId: '1',
+        dataViewSpec: { id: '1' },
         fieldName: 'test',
       },
       dataViews,
@@ -238,7 +238,7 @@ describe('suggestion helpers', () => {
       mock3: createMockDatasource('a'),
     };
     const visualizeTriggerField = {
-      indexPatternId: '1',
+      dataViewSpec: { id: '1' },
       fieldName: 'test',
     };
 

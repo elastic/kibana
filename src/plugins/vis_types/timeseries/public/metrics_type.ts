@@ -9,7 +9,6 @@
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
 import {
   Vis,
   VIS_EVENT_TO_TRIGGER,

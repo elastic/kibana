@@ -24,6 +24,7 @@ import {
 
 import {
   createIncident,
+  dedupAssignees,
   getClosedInfoForUpdate,
   getDurationForUpdate,
   getLatestPushInfo,
@@ -91,6 +92,26 @@ const formatIsolateCommentActionsMultipleTargets = {
 const params = { ...basicParams };
 
 describe('utils', () => {
+  describe('dedupAssignees', () => {
+    it('removes duplicate assignees', () => {
+      expect(dedupAssignees([{ uid: '123' }, { uid: '123' }, { uid: '456' }])).toEqual([
+        { uid: '123' },
+        { uid: '456' },
+      ]);
+    });
+
+    it('leaves the array as it is when there are no duplicates', () => {
+      expect(dedupAssignees([{ uid: '123' }, { uid: '456' }])).toEqual([
+        { uid: '123' },
+        { uid: '456' },
+      ]);
+    });
+
+    it('returns undefined when the assignees is undefined', () => {
+      expect(dedupAssignees()).toBeUndefined();
+    });
+  });
+
   describe('prepareFieldsForTransformation', () => {
     test('prepare fields with defaults', () => {
       const res = prepareFieldsForTransformation({
