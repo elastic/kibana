@@ -29,6 +29,8 @@ import {
   RegistryError,
   RegistryResponseError,
   PackageFailedVerificationError,
+  PackagePolicyNotFoundError,
+  FleetUnauthorizedError,
 } from '.';
 
 type IngestErrorHandler = (
@@ -52,7 +54,7 @@ const getHTTPResponseCode = (error: IngestManagerError): number => {
     // Connection errors (ie. RegistryConnectionError) / fallback  (RegistryError) from EPR
     return 502; // Bad Gateway
   }
-  if (error instanceof PackageNotFoundError) {
+  if (error instanceof PackageNotFoundError || error instanceof PackagePolicyNotFoundError) {
     return 404; // Not Found
   }
   if (error instanceof AgentPolicyNameExistsError) {
@@ -72,6 +74,9 @@ const getHTTPResponseCode = (error: IngestManagerError): number => {
   }
   if (error instanceof AgentActionNotFoundError) {
     return 404;
+  }
+  if (error instanceof FleetUnauthorizedError) {
+    return 403; // Unauthorized
   }
   return 400; // Bad Request
 };

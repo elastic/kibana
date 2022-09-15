@@ -39,9 +39,9 @@ import { installationStatuses } from '../../../common/constants';
 import { defaultIngestErrorHandler, PackagePolicyNotFoundError } from '../../errors';
 import { getInstallations, getPackageInfo } from '../../services/epm/packages';
 import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
-import { simplifiedPackagePolicytoNewPackagePolicy } from '../../services/package_policies/simplified_package_policy_helper';
+import { simplifiedPackagePolicytoNewPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
-import type { SimplifiedPackagePolicy } from '../../services/package_policies/simplified_package_policy_helper';
+import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
 export const getPackagePoliciesHandler: RequestHandler<
   undefined,
@@ -220,11 +220,16 @@ export const createPackagePolicyHandler: FleetRequestHandler<
     );
 
     // Create package policy
-    const packagePolicy = await packagePolicyService.create(soClient, esClient, newData, {
-      user,
-      force,
-      spaceId,
-    });
+    const packagePolicy = await fleetContext.packagePolicyService.asCurrentUser.create(
+      soClient,
+      esClient,
+      newData,
+      {
+        user,
+        force,
+        spaceId,
+      }
+    );
 
     const enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
       'packagePolicyPostCreate',

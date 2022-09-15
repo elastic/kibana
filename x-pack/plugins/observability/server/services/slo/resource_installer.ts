@@ -24,7 +24,11 @@ import { getSLOSettingsTemplate } from '../../assets/component_templates/slo_set
 import { getSLOIndexTemplate } from '../../assets/index_templates/slo_index_templates';
 import { getSLOPipelineTemplate } from '../../assets/ingest_templates/slo_pipeline_template';
 
-export class ResourceInstaller {
+export interface ResourceInstaller {
+  ensureCommonResourcesInstalled(spaceId: string): Promise<void>;
+}
+
+export class DefaultResourceInstaller implements ResourceInstaller {
   constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
 
   public async ensureCommonResourcesInstalled(spaceId: string = 'default'): Promise<void> {
