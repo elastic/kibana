@@ -20,6 +20,7 @@ import {
   get,
   xorWith,
   isEqual,
+  filter,
 } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
@@ -1034,8 +1035,11 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
 
     if (
       !ecsMappingFieldState.isTouched &&
-      ecsMappingArrayState.isTouched &&
-      xorWith(parsedMapping, ecsMappingArray, isEqual).length > 1
+      !ecsMappingArrayState.isTouched &&
+      filter(
+        xorWith(parsedMapping, ecsMappingArray, isEqual),
+        (item) => isEmpty(item) || isEqual(item, defaultEcsFormData)
+      ).length
     ) {
       resetField('ecsMappingArray', { defaultValue: [...parsedMapping, defaultEcsFormData] });
     }
@@ -1052,12 +1056,13 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
 
   useEffect(() => {
     const parsedMapping = convertECSMappingToObject(ecsMappingArray);
-    if (!isEmpty(parsedMapping) && !deepEqual(parsedMapping, ecs_mapping)) {
+
+    if (ecsMappingArrayState.isDirty && !deepEqual(parsedMapping, ecs_mapping)) {
       setValue('ecs_mapping', parsedMapping, {
         shouldTouch: true,
       });
     }
-  }, [ecsMappingArray, ecsMappingFieldState.isTouched, ecs_mapping, setValue]);
+  }, [ecsMappingArray, ecsMappingArrayState.isDirty, ecs_mapping, setValue]);
 
   useEffect(() => {
     if (!formState.isValid) {
