@@ -90,9 +90,9 @@ export function getDurationFieldForTransactions(
   searchAggregatedTransactions: boolean,
   searchAggregatedServiceMetrics?: boolean
 ) {
-  return searchAggregatedServiceMetrics 
-  ? TRANSACTION_DURATION_SUMMARY 
-  : searchAggregatedTransactions
+  return searchAggregatedServiceMetrics
+    ? TRANSACTION_DURATION_SUMMARY
+    : searchAggregatedTransactions
     ? TRANSACTION_DURATION_HISTOGRAM
     : TRANSACTION_DURATION;
 }
@@ -101,9 +101,9 @@ export function getDocumentTypeFilterForTransactions(
   searchAggregatedTransactions: boolean,
   searchAggregatedServiceMetrics?: boolean
 ) {
-  return searchAggregatedServiceMetrics 
-  ? [{ exists: { field: TRANSACTION_DURATION_SUMMARY } }] 
-  : searchAggregatedTransactions
+  return searchAggregatedServiceMetrics
+    ? [{ exists: { field: TRANSACTION_DURATION_SUMMARY } }]
+    : searchAggregatedTransactions
     ? [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }]
     : [];
 }

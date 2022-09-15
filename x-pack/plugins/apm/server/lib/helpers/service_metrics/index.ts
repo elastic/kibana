@@ -9,7 +9,7 @@ import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   TRANSACTION_DURATION_SUMMARY,
-  METRICSET_NAME
+  METRICSET_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { APMConfig } from '../../..';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
@@ -27,13 +27,16 @@ export async function getSearchAggregatedServiceMetrics({
   apmEventClient: APMEventClient;
   kuery: string;
 }): Promise<boolean> {
+  if (config.searchAggregatedServiceMetrics) {
+    return getHasAggregatedServicesMetrics({
+      start,
+      end,
+      apmEventClient,
+      kuery,
+    });
+  }
 
-   if (config.searchAggregatedServiceMetrics) {
-      return getHasAggregatedServicesMetrics({ start, end, apmEventClient, kuery })
-   }
-
-   return false;
-
+  return false;
 }
 
 export async function getHasAggregatedServicesMetrics({
@@ -59,7 +62,7 @@ export async function getHasAggregatedServicesMetrics({
           bool: {
             filter: [
               { exists: { field: TRANSACTION_DURATION_SUMMARY } },
-              { term: { [METRICSET_NAME]: 'service'}},
+              { term: { [METRICSET_NAME]: 'service' } },
               ...(start && end ? rangeQuery(start, end) : []),
               ...kqlQuery(kuery),
             ],
@@ -73,9 +76,10 @@ export async function getHasAggregatedServicesMetrics({
   return response.hits.total.value > 0;
 }
 
-export function getDocumentTypeFilterForServiceMetrics(searchAggregatedServiceMetrics: boolean){
+export function getDocumentTypeFilterForServiceMetrics(
+  searchAggregatedServiceMetrics: boolean
+) {
   return searchAggregatedServiceMetrics
-  ? [{ exists: { field: TRANSACTION_DURATION_SUMMARY } }]
-  : [];
+    ? [{ exists: { field: TRANSACTION_DURATION_SUMMARY } }]
+    : [];
 }
-
