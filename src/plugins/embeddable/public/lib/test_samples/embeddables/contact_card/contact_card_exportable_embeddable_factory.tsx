@@ -34,6 +34,10 @@ export class ContactCardExportableEmbeddableFactory
     return true;
   }
 
+  public getDefaultInput() {
+    return {};
+  }
+
   public getDisplayName() {
     return i18n.translate('embeddableApi.samples.contactCard.displayName', {
       defaultMessage: 'contact card',
