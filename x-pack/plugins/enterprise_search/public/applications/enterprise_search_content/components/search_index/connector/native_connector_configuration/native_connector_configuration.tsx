@@ -28,7 +28,6 @@ import { isConnectorIndex } from '../../../../utils/indices';
 import { IndexViewLogic } from '../../index_view_logic';
 import { NATIVE_CONNECTORS } from '../constants';
 
-import { ConnectorNameAndDescription } from './connector_name_and_description';
 import { NativeConnectorAdvancedConfiguration } from './native_connector_advanced_configuration';
 import { NativeConnectorConfigurationConfig } from './native_connector_configuration_config';
 import { ResearchConfiguration } from './research_configuration';
@@ -48,11 +47,10 @@ export const NativeConnectorConfiguration: React.FC = () => {
     return <></>;
   }
 
-  const hasName = !!indexData.connector.name;
   const hasConfigured = hasConfiguredConfiguration(indexData.connector.configuration);
   const hasConfiguredAdvanced =
     indexData.connector.last_synced || indexData.connector.scheduling.enabled;
-  const hasResearched = hasName || hasConfigured || hasConfiguredAdvanced;
+  const hasResearched = hasConfigured || hasConfiguredAdvanced;
 
   return (
     <>
@@ -84,17 +82,18 @@ export const NativeConnectorConfiguration: React.FC = () => {
                   ),
                   titleSize: 'xs',
                 },
-                {
-                  children: <ConnectorNameAndDescription nativeConnector={nativeConnector} />,
-                  status: hasName ? 'complete' : 'incomplete',
-                  title: i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.nameAndDescriptionTitle',
-                    {
-                      defaultMessage: 'Name and description',
-                    }
-                  ),
-                  titleSize: 'xs',
-                },
+                /* Commenting this out for a future PR to implement fully */
+                // {
+                //   children: <ConnectorNameAndDescription nativeConnector={nativeConnector} />,
+                //   status: hasName ? 'complete' : 'incomplete',
+                //   title: i18n.translate(
+                //     'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.nameAndDescriptionTitle',
+                //     {
+                //       defaultMessage: 'Name and description',
+                //     }
+                //   ),
+                //   titleSize: 'xs',
+                // },
                 {
                   children: (
                     <NativeConnectorConfigurationConfig nativeConnector={nativeConnector} />

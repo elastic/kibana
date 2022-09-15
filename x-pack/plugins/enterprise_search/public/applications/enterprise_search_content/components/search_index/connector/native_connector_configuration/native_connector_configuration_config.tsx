@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiCallOut, EuiSpacer, EuiLink, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiLink, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -25,39 +25,39 @@ export const NativeConnectorConfigurationConfig: React.FC<
     <ConnectorConfigurationConfig>
       <EuiText size="s">
         {i18n.translate(
-          'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.description',
+          'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.encryptionWarningMessage',
           {
-            defaultMessage: 'Set configuration and credentials for your connector.',
+            defaultMessage:
+              'Encryption for data source credentials is unavailable in this technical preview. Your data source credentials will be stored, unencrypted, in Elasticsearch.',
           }
-        )}{' '}
-        <EuiLink target="_blank" href={'' /* TODO needs link */}>
-          {i18n.translate(
-            'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.learnMoreLinkLabel',
-            {
-              defaultMessage: 'Learn more about {nativeConnectorName} authentication',
-              values: {
-                nativeConnectorName: nativeConnector.name,
-              },
-            }
-          )}
-        </EuiLink>
+        )}
       </EuiText>
       <EuiSpacer />
-      <EuiCallOut
-        color="warning"
-        iconType="iInCircle"
-        title="Data source credentials are unencrypted"
-      >
-        <EuiText size="s">
-          {i18n.translate(
-            'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.encryptionWarningMessage',
-            {
-              defaultMessage:
-                'Encryption for data source credentials is unavailable in this technical preview. Your data source credentials will be stored, unencrypted, in Elasticsearch.',
-            }
-          )}
-        </EuiText>
-      </EuiCallOut>
+      <EuiFlexGroup direction="row">
+        <EuiFlexItem grow={false}>
+          <EuiLink href={'' /* TODO docLinks url */} target="_blank">
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.securityDocumentationLinkLabel',
+              {
+                defaultMessage: 'Learn more about Elasticsearch security',
+              }
+            )}
+          </EuiLink>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiLink href={'' /* TODO documentation url */} target="_blank">
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.sourceSecurityDocumentationLinkLabel',
+              {
+                defaultMessage: '{name} authentication',
+                values: {
+                  name: nativeConnector.name,
+                },
+              }
+            )}
+          </EuiLink>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </ConnectorConfigurationConfig>
   );
 };

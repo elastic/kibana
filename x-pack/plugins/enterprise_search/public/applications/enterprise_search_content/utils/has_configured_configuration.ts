@@ -8,5 +8,6 @@
 import { ConnectorConfiguration } from '../../../../common/types/connectors';
 
 export const hasConfiguredConfiguration = (configuration: ConnectorConfiguration) => {
-  return !!Object.entries(configuration).find(([, value]) => !!value);
+  // debugger;
+  return !!Object.entries(configuration).find(([, pair]) => !!pair?.value);
 };
