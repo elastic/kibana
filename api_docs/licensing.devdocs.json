@@ -776,10 +776,6 @@
             },
             {
               "plugin": "ml",
-              "path": "x-pack/plugins/ml/public/application/license/check_license.tsx"
-            },
-            {
-              "plugin": "ml",
               "path": "x-pack/plugins/ml/public/plugin.ts"
             },
             {
