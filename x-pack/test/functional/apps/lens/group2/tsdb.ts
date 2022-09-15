@@ -96,6 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel');
         await testSubjects.missingOrFail('median-partial-warning');
         await PageObjects.lens.assertNoEditorWarning();
+        await PageObjects.lens.closeDimensionEditor();
       });
     });
 
