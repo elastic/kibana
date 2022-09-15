@@ -15,9 +15,11 @@ import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/s
 import type { UserProfile } from '@kbn/security-plugin/common';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { excess, SuggestUserProfilesRequestRt, throwErrors } from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
+import { LicensingService } from '../licensing';
 
 const MAX_PROFILES_SIZE = 100;
 const MIN_PROFILES_SIZE = 0;
@@ -26,6 +28,7 @@ interface UserProfileOptions {
   securityPluginSetup?: SecurityPluginSetup;
   securityPluginStart?: SecurityPluginStart;
   spaces: SpacesPluginStart;
+  licensingPluginStart: LicensingPluginStart;
 }
 
 export class UserProfileService {
@@ -78,6 +81,15 @@ export class UserProfileService {
     try {
       if (this.options === undefined) {
         throw new Error('UserProfileService must be initialized before calling suggest');
+      }
+
+      const licensingService = new LicensingService(this.options.licensingPluginStart.license$);
+      const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
+
+      if (!hasPlatinumLicenseOrGreater) {
+        throw Boom.forbidden(
+          'In order to retrieve suggested user profiles, you must be subscribed to an Elastic Platinum license'
+        );
       }
 
       const { spaces } = this.options;

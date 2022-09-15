@@ -40,7 +40,7 @@ import {
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
 } from '@kbn/security-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import {
   IEvent,
   IEventLogClient,
@@ -944,32 +944,7 @@ export class RulesClient {
         }
       );
 
-      const formattedResult = formatExecutionLogResult(aggResult);
-      const ruleIds = [...new Set(formattedResult.data.map((l) => l.rule_id))].filter(
-        Boolean
-      ) as string[];
-      const ruleNameIdEntries = await Promise.all(
-        ruleIds.map(async (id) => {
-          try {
-            const result = await this.get({ id });
-            return [id, result.name];
-          } catch (e) {
-            return [id, id];
-          }
-        })
-      );
-      const ruleNameIdMap: Record<string, string> = ruleNameIdEntries.reduce(
-        (result, [key, val]) => ({ ...result, [key]: val }),
-        {}
-      );
-
-      return {
-        ...formattedResult,
-        data: formattedResult.data.map((entry) => ({
-          ...entry,
-          rule_name: ruleNameIdMap[entry.rule_id!],
-        })),
-      };
+      return formatExecutionLogResult(aggResult);
     } catch (err) {
       this.logger.debug(
         `rulesClient.getGlobalExecutionLogWithAuth(): error searching global event log: ${err.message}`
@@ -2780,6 +2755,55 @@ export class RulesClient {
         { version }
       );
     }
+  }
+
+  public async runSoon({ id }: { id: string }) {
+    const { attributes } = await this.unsecuredSavedObjectsClient.get<Rule>('alert', id);
+    try {
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: attributes.alertTypeId,
+        consumer: attributes.consumer,
+        operation: ReadOperations.RunSoon,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+
+      if (attributes.actions.length) {
+        await this.actionsAuthorization.ensureAuthorized('execute');
+      }
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.RUN_SOON,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.RUN_SOON,
+        outcome: 'unknown',
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
+
+    const taskDoc = attributes.scheduledTaskId
+      ? await this.taskManager.get(attributes.scheduledTaskId)
+      : null;
+    if (
+      taskDoc &&
+      (taskDoc.status === TaskStatus.Claiming || taskDoc.status === TaskStatus.Running)
+    ) {
+      return i18n.translate('xpack.alerting.rulesClient.runSoon.ruleIsRunning', {
+        defaultMessage: 'Rule is already running',
+      });
+    }
+
+    await this.taskManager.runSoon(id);
   }
 
   public async listAlertTypes() {
