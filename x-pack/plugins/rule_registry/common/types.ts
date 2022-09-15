@@ -305,10 +305,8 @@ export interface ClusterPutComponentTemplateBody {
   };
 }
 
-export type BrowserField = FieldSpec & {
-  category: string;
-};
+export type BrowserField = { [fieldName in string]: FieldSpec & { category: string } };
 
 export type BrowserFields = {
-  [category in string]: { fields: { [fieldName in string]: BrowserField } };
+  [category in string]: { fields: BrowserField };
 };

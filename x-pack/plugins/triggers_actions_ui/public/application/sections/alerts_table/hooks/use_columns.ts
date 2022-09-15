@@ -8,12 +8,10 @@
 import { EuiDataGridColumn } from '@elastic/eui';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { useCallback, useEffect, useState } from 'react';
 import { AlertsTableStorage } from '../alerts_table_state';
-import {
-  BrowserFields,
-  useFetchBrowserFieldCapabilities,
-} from './use_fetch_browser_fields_capabilities';
+import { useFetchBrowserFieldCapabilities } from './use_fetch_browser_fields_capabilities';
 
 interface UseColumnsArgs {
   featureIds: AlertConsumers[];

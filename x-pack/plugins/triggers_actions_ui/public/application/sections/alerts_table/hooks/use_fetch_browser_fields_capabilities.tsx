@@ -7,10 +7,8 @@
 
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
+import { BASE_RAC_ALERTS_API_PATH, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { useCallback, useEffect, useState } from 'react';
-import { RuntimeField } from '@kbn/data-views-plugin/common';
-import { IFieldSubType } from '@kbn/es-query';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ERROR_FETCH_BROWSER_FIELDS } from './translations';
 
@@ -21,27 +19,6 @@ export interface FetchAlertsArgs {
 export interface FetchAlertResp {
   alerts: EcsFieldsResponse[];
 }
-
-interface BrowserField {
-  aggregatable: boolean;
-  category: string;
-  description: string | null;
-  example: string | number | null;
-  fields: Readonly<Record<string, Partial<BrowserField>>>;
-  format: string;
-  indexes?: string[];
-  name: string;
-  searchable: boolean;
-  type: string;
-  esTypes?: string[];
-  subType?: IFieldSubType;
-  readFromDocValues: boolean;
-  runtimeField?: RuntimeField;
-}
-
-export type BrowserFields = {
-  [category in string]: { fields: { [fieldName in string]: BrowserField } };
-};
 
 export type UseFetchAlerts = ({ featureIds }: FetchAlertsArgs) => [boolean, FetchAlertResp];
 

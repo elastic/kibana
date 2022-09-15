@@ -12,6 +12,7 @@ import * as t from 'io-ts';
 import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { buildRouteValidation } from './utils/route_validation';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 
 export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerContext>) => {
   router.get(
@@ -50,7 +51,7 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
           });
         }
 
-        const browserFields = await alertsClient.getBrowserFields({
+        const browserFields: BrowserFields = await alertsClient.getBrowserFields({
           indices: o11yIndices,
           metaFields: ['_id', '_index'],
           allowNoIndex: true,

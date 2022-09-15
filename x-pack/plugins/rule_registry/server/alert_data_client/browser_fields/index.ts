@@ -6,7 +6,7 @@
  */
 
 import { FieldDescriptor } from '@kbn/data-views-plugin/server';
-import { BrowserField, BrowserFields } from '../../types';
+import { BrowserFields, BrowserField } from '@kbn/rule-registry-plugin/common';
 
 const getFieldCategory = (fieldCapability: FieldDescriptor) => {
   const name = fieldCapability.name.split('.');
@@ -18,10 +18,7 @@ const getFieldCategory = (fieldCapability: FieldDescriptor) => {
   return name[0];
 };
 
-const browserFieldFactory = (
-  fieldCapability: FieldDescriptor,
-  category: string
-): { [fieldName in string]: BrowserField } => {
+const browserFieldFactory = (fieldCapability: FieldDescriptor, category: string): BrowserField => {
   return {
     [fieldCapability.name]: {
       ...fieldCapability,
