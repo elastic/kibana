@@ -19,6 +19,7 @@ export interface CspmIndicesStats {
 
 export interface IndexStats {
   doc_count: number;
+  deleted: number;
   size_in_bytes: number;
   latest_doc_timestamp: string;
 }
@@ -38,6 +39,9 @@ export const getIndexStats = async (
   const indexStats = await getIndexDocCount(esClient, index);
   return {
     doc_count: indexStats._all.primaries?.docs ? indexStats._all.primaries?.docs?.count : 0,
+    deleted: indexStats._all.primaries?.docs?.deleted
+      ? indexStats._all.primaries?.docs?.deleted
+      : 0,
     size_in_bytes: indexStats._all.primaries?.store
       ? indexStats._all.primaries?.store.size_in_bytes
       : 0,

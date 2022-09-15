@@ -43,6 +43,12 @@ export function registerIndicesCounterCollector(usageCollection?: UsageCollectio
               description: `The total number of docs for the ${FINDINGS_INDEX_DEFAULT_NS} index`,
             },
           },
+          deleted: {
+            type: 'long',
+            _meta: {
+              description: `The total number of docs for the ${FINDINGS_INDEX_DEFAULT_NS} index`,
+            },
+          },
           size_in_bytes: {
             type: 'long',
             _meta: {
@@ -63,6 +69,12 @@ export function registerIndicesCounterCollector(usageCollection?: UsageCollectio
               description: `The total number of docs for the ${LATEST_FINDINGS_INDEX_DEFAULT_NS} index`,
             },
           },
+          deleted: {
+            type: 'long',
+            _meta: {
+              description: `The total number of docs for the ${FINDINGS_INDEX_DEFAULT_NS} index`,
+            },
+          },
           size_in_bytes: {
             type: 'long',
             _meta: {
@@ -81,6 +93,12 @@ export function registerIndicesCounterCollector(usageCollection?: UsageCollectio
             type: 'long',
             _meta: {
               description: `The total number of docs for the ${BENCHMARK_SCORE_INDEX_DEFAULT_NS} index`,
+            },
+          },
+          deleted: {
+            type: 'long',
+            _meta: {
+              description: `The total number of docs for the ${FINDINGS_INDEX_DEFAULT_NS} index`,
             },
           },
           size_in_bytes: {
