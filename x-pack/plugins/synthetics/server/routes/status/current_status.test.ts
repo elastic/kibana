@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { getCounts, periodToMs } from './current_status';
+import { getUptimeESMockClient } from '../../legacy_uptime/lib/requests/test_helpers';
+import { queryMonitorStatus, periodToMs } from './current_status';
 
 jest.mock('../util', () => ({
   getMonitors: jest.fn().mockReturnValue({
@@ -58,19 +59,200 @@ describe('current status route', () => {
     });
   });
 
-  describe('getCounts', () => {
-    it('parses responses and returns id and count data', async () => {
-      // @ts-expect-error mock implementation for test purposes
-      expect(await getCounts(jest.fn(), jest.fn(), jest.fn())).toEqual({
-        disabledCount: 3,
-        disabledIds: ['mon-1'],
-        enabledIds: ['mon-2'],
-        snapshot: {
-          down: 1,
-          total: 3,
-          up: 2,
+  describe('getStats', () => {
+    it('parses expected agg fields', async () => {
+      const { esClient, uptimeEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(
+        getEsResponse([
+          {
+            key: 'id1',
+            location: {
+              buckets: [
+                {
+                  key: 'Asia/Pacific - Japan',
+                  status: {
+                    hits: {
+                      hits: [
+                        {
+                          _source: {
+                            '@timestamp': '2022-09-15T16:08:16.724Z',
+                            monitor: {
+                              status: 'up',
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          {
+            key: 'id2',
+            location: {
+              buckets: [
+                {
+                  key: 'Asia/Pacific - Japan',
+                  status: {
+                    hits: {
+                      hits: [
+                        {
+                          _source: {
+                            '@timestamp': '2022-09-15T16:09:16.724Z',
+                            monitor: {
+                              status: 'up',
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+                {
+                  key: 'Europe - Germany',
+                  status: {
+                    hits: {
+                      hits: [
+                        {
+                          _source: {
+                            '@timestamp': '2022-09-15T16:19:16.724Z',
+                            monitor: {
+                              status: 'down',
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ])
+      );
+      expect(await queryMonitorStatus(uptimeEsClient, 3, 140000, ['id1', 'id2'])).toEqual({
+        down: 1,
+        locationMap: {
+          id1: {
+            'Asia/Pacific - Japan': 'up',
+          },
+          id2: {
+            'Asia/Pacific - Japan': 'up',
+            'Europe - Germany': 'down',
+          },
         },
+        total: 3,
+        up: 2,
+      });
+    });
+
+    it('handles limits with multiple requests', async () => {
+      const { esClient, uptimeEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(
+        getEsResponse([
+          {
+            key: 'id1',
+            location: {
+              buckets: [
+                {
+                  key: 'Asia/Pacific - Japan',
+                  status: {
+                    hits: {
+                      hits: [
+                        {
+                          _source: {
+                            '@timestamp': '2022-09-15T16:08:16.724Z',
+                            monitor: {
+                              status: 'up',
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          {
+            key: 'id2',
+            location: {
+              buckets: [
+                {
+                  key: 'Asia/Pacific - Japan',
+                  status: {
+                    hits: {
+                      hits: [
+                        {
+                          _source: {
+                            '@timestamp': '2022-09-15T16:09:16.724Z',
+                            monitor: {
+                              status: 'up',
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+                {
+                  key: 'Europe - Germany',
+                  status: {
+                    hits: {
+                      hits: [
+                        {
+                          _source: {
+                            '@timestamp': '2022-09-15T16:19:16.724Z',
+                            monitor: {
+                              status: 'down',
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ])
+      );
+      expect(await queryMonitorStatus(uptimeEsClient, 10000, 2500, ['id1', 'id2'])).toEqual({
+        down: 1,
+        locationMap: {
+          id1: {
+            'Asia/Pacific - Japan': 'up',
+          },
+          id2: {
+            'Asia/Pacific - Japan': 'up',
+            'Europe - Germany': 'down',
+          },
+        },
+        total: 3,
+        up: 2,
       });
     });
   });
 });
+
+function getEsResponse(buckets: any[]) {
+  return {
+    took: 605,
+    timed_out: false,
+    _shards: {
+      total: 3,
+      successful: 3,
+      skipped: 0,
+      failed: 0,
+    },
+    hits: {
+      hits: [],
+    },
+    aggregations: {
+      id: {
+        buckets,
+      },
+    },
+  };
+}

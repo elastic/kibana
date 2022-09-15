@@ -12,11 +12,8 @@ import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { UMServerLibs } from '../../legacy_uptime/uptime_server';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
 import { getMonitors } from '../util';
-import { getSnapshotCount } from '../../legacy_uptime/lib/requests/get_snapshot_counts';
-import { UptimeESClient } from '../../legacy_uptime/lib/lib';
+import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-
-const DEFAULT_DATE_RANGE_START = 'now-1h';
 
 /**
  * Helper function that converts a monitor's schedule to a value to use to generate
@@ -30,12 +27,115 @@ export function periodToMs(schedule: { number: string; unit: Unit }) {
   return parseInt(schedule.number, 10) * datemath.unitsMap[schedule.unit].base;
 }
 
-function snapshotFilters(ids: Array<string | undefined>) {
-  return `{"terms": { "monitor.id": ${JSON.stringify(ids)}}}`;
+const DEFAULT_MAX_ES_BUCKET_SIZE = 10000;
+
+export async function queryMonitorStatus(
+  esClient: UptimeEsClient,
+  maxLocations: number,
+  maxPeriod: number,
+  ids: Array<string | undefined>
+) {
+  const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / maxLocations);
+  const pageCount = Math.ceil(ids.length / idSize);
+  const promises: Array<Promise<any>> = [];
+  for (let i = 0; i < pageCount; i++) {
+    const params = {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            {
+              range: {
+                '@timestamp': {
+                  gte: maxPeriod,
+                  lte: 'now',
+                },
+              },
+            },
+            {
+              terms: {
+                'monitor.id': ids,
+              },
+            },
+            {
+              exists: {
+                field: 'summary',
+              },
+            },
+          ],
+        },
+      },
+      aggs: {
+        id: {
+          terms: {
+            field: 'monitor.id',
+            size: idSize,
+          },
+          aggs: {
+            location: {
+              terms: {
+                field: 'observer.geo.name',
+                size: maxLocations,
+              },
+              aggs: {
+                status: {
+                  top_hits: {
+                    size: 1,
+                    sort: [
+                      {
+                        '@timestamp': {
+                          order: 'desc',
+                        },
+                      },
+                    ],
+                    _source: {
+                      includes: ['@timestamp', 'monitor.status'],
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    promises.push(esClient.baseESClient.search(params));
+  }
+  let up = 0;
+  let down = 0;
+  let total = 0;
+  const locationMap: Record<string, Record<string, string>> = {};
+  for await (const response of promises) {
+    response.aggregations?.id.buckets.forEach(
+      ({ key: id, location }: { key: string; location: any }) => {
+        if (!locationMap[id]) locationMap[id] = {};
+        location.buckets.forEach(({ key: locationName, status }: { key: string; status: any }) => {
+          const statusValue = status.hits.hits[0]._source.monitor.status;
+          if (statusValue === 'up') {
+            up += 1;
+          } else if (statusValue === 'down') {
+            down += 1;
+          }
+          locationMap[id] = {
+            ...locationMap[id],
+            [locationName]: statusValue,
+          };
+          total += 1;
+        });
+      }
+    );
+  }
+  return { up, down, total, locationMap };
 }
 
-export async function getCounts(
-  uptimeEsClient: UptimeESClient,
+/**
+ * Multi-stage function that first queries all the user's saved object monitor configs.
+ *
+ * Subsequently, fetch the status for each monitor per location in the data streams.
+ * @returns The counts of up/down/disabled monitor by location, and a map of each monitor:location status.
+ */
+export async function getStatus(
+  uptimeEsClient: UptimeEsClient,
   savedObjectsClient: SavedObjectsClientContract,
   syntheticsMonitorClient: SyntheticsMonitorClient
 ) {
@@ -45,6 +145,7 @@ export async function getCounts(
   let disabledCount = 0;
   let page = 1;
   let maxPeriod = 0;
+  let maxLocations = 1;
   /**
    * Walk through all monitor saved objects, bucket IDs by disabled/enabled status.
    *
@@ -69,25 +170,27 @@ export async function getCounts(
         disabledCount += monitor.attributes.locations.length;
       } else {
         enabledIds.push(monitor.id);
+        maxLocations = Math.max(maxLocations, monitor.attributes.locations.length);
         maxPeriod = Math.max(maxPeriod, periodToMs(monitor.attributes.schedule));
       }
     });
   } while (monitors.saved_objects.length === monitors.per_page);
 
-  // get a status count for all enabled monitors
-  const snapshot = await getSnapshotCount({
+  const { up, down, total, locationMap } = await queryMonitorStatus(
     uptimeEsClient,
-    dateRangeEnd: 'now',
-    dateRangeStart: String(
-      datemath.parse('now')?.valueOf()! - maxPeriod ?? DEFAULT_DATE_RANGE_START
-    ),
-    filters: snapshotFilters(enabledIds),
-  });
+    maxLocations,
+    maxPeriod,
+    enabledIds
+  );
+
   return {
-    snapshot,
     disabledCount,
     disabledIds,
     enabledIds,
+    up,
+    down,
+    total,
+    locationMap,
   };
 }
 
@@ -104,7 +207,7 @@ export const createGetCurrentStatusRoute: SyntheticsRestApiRouteFactory = (libs:
     response,
   }): Promise<any> => {
     return response.ok({
-      body: await getCounts(uptimeEsClient, savedObjectsClient, syntheticsMonitorClient),
+      body: await getStatus(uptimeEsClient, savedObjectsClient, syntheticsMonitorClient),
     });
   },
 });
