@@ -78,7 +78,10 @@ describe('Enterprise Search Managed Indices', () => {
         params: { indexName: 'search-index-name' },
       });
 
-      expect(fetchMlInferencePipelineProcessors).toHaveBeenCalledWith({}, 'search-index-name');
+      expect(fetchMlInferencePipelineProcessors).toHaveBeenCalledWith(
+        mockClient.asCurrentUser,
+        'search-index-name'
+      );
 
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: mockData,
@@ -111,6 +114,7 @@ describe('Enterprise Search Managed Indices', () => {
         },
       },
     ];
+    const indexName = 'my-index';
 
     beforeEach(() => {
       const context = {
@@ -142,7 +146,7 @@ describe('Enterprise Search Managed Indices', () => {
       const request = {
         body: {},
         docs,
-        params: { indexName: 'some-index' },
+        params: { indexName },
       };
       mockRouter.shouldThrow(request);
     });
@@ -151,13 +155,12 @@ describe('Enterprise Search Managed Indices', () => {
       const request = {
         body: pipelineBody,
         docs: [],
-        params: { indexName: 'some-index' },
+        params: { indexName },
       };
       mockRouter.shouldThrow(request);
     });
 
     it('returns error if index does not exist', async () => {
-      const indexName = 'my-index';
       const request = {
         body: pipelineBody,
         docs,
@@ -166,15 +169,14 @@ describe('Enterprise Search Managed Indices', () => {
 
       (indexOrAliasExists as jest.Mock).mockImplementationOnce(() => Promise.resolve(false));
 
-      const response = await mockRouter.callRoute(request);
+      await mockRouter.callRoute(request);
 
       expect(indexOrAliasExists).toHaveBeenCalledWith(mockClient, indexName);
       expect(mockRouter.response.ok).toHaveBeenCalledTimes(0);
-      expect(response).toHaveProperty('statusCode', 404);
+      expect(mockRouter.response.customError).toHaveBeenCalledTimes(1);
     });
 
     it('simulates pipeline', async () => {
-      const indexName = 'my-index';
       const request = {
         body: pipelineBody,
         docs,
@@ -264,11 +266,11 @@ describe('Enterprise Search Managed Indices', () => {
 
       (indexOrAliasExists as jest.Mock).mockImplementationOnce(() => Promise.resolve(false));
 
-      const response = await mockRouter.callRoute(request);
+      await mockRouter.callRoute(request);
 
       expect(indexOrAliasExists).toHaveBeenCalledWith(mockClient, indexName);
       expect(mockRouter.response.ok).toHaveBeenCalledTimes(0);
-      expect(response).toHaveProperty('statusCode', 404);
+      expect(mockRouter.response.customError).toHaveBeenCalledTimes(1);
     });
 
     it('creates pipeline', async () => {
