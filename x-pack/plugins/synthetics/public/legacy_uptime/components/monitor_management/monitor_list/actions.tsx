@@ -81,7 +81,7 @@ export const Actions = ({ id, name, onUpdate, isDisabled, errorSummaries, monito
             onUpdate={onUpdate}
             name={name}
             id={id}
-            isDisabled={isDisabled || !canUpdatePrivateMonitor}
+            isDisabled={isDisabled || isProjectMonitor || !canUpdatePrivateMonitor}
           />
         </EuiToolTip>
       </EuiFlexItem>
