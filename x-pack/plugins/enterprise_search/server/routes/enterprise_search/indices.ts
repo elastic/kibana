@@ -392,7 +392,7 @@ export function registerIndexRoutes({
 
   router.post(
     {
-      path: '/internal/enterprise_search/indices/{indexName}/pipelines/ml_inference/_simulate',
+      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipelines/_simulate',
       validate: {
         body: schema.object({
           pipeline: schema.object({
@@ -415,7 +415,15 @@ export function registerIndexRoutes({
       if (!(await indexOrAliasExists(client, indexName))) {
         return createError({
           errorCode: ErrorCode.INDEX_NOT_FOUND,
-          message: `Could not find index [${indexName}]`,
+          message: i18n.translate(
+            'xpack.enterpriseSearch.server.routes.indices.pipelines.indexMissingError',
+            {
+              defaultMessage: 'The index {indexName} does not exist',
+              values: {
+                indexName,
+              },
+            }
+          ),
           response,
           statusCode: 404,
         });
@@ -437,7 +445,7 @@ export function registerIndexRoutes({
 
   router.put(
     {
-      path: '/internal/enterprise_search/indices/{indexName}/pipelines/ml_inference/{pipelineName}',
+      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipelines/{pipelineName}',
       validate: {
         body: schema.object({
           description: schema.maybe(schema.string()),
@@ -460,7 +468,15 @@ export function registerIndexRoutes({
       if (!(await indexOrAliasExists(client, indexName))) {
         return createError({
           errorCode: ErrorCode.INDEX_NOT_FOUND,
-          message: `Could not find index [${indexName}]`,
+          message: i18n.translate(
+            'xpack.enterpriseSearch.server.routes.indices.pipelines.indexMissingError',
+            {
+              defaultMessage: 'The index {indexName} does not exist',
+              values: {
+                indexName,
+              },
+            }
+          ),
           response,
           statusCode: 404,
         });
@@ -476,10 +492,10 @@ export function registerIndexRoutes({
         ...pipelineBody,
       };
 
-      await client.asCurrentUser.ingest.putPipeline(updateRequest);
+      const createResult = await client.asCurrentUser.ingest.putPipeline(updateRequest);
 
       return response.ok({
-        body: { pipeline_id: pipelineId },
+        body: createResult,
         headers: { 'content-type': 'application/json' },
       });
     })
