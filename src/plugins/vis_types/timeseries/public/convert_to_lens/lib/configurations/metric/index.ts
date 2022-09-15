@@ -54,7 +54,6 @@ export const getConfigurationForMetric = (
     // collapseFn?: string;
     // subtitle?: string;
     // secondaryPrefix?: string;
-    // progressDirection?: LayoutDirection;
     // color?: string;
     // palette?: PaletteOutput<CustomPaletteParams>;
     // maxCols?: number;

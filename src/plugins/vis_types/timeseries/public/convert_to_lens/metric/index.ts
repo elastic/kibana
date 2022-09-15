@@ -23,10 +23,8 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
   const seriesNum = model.series.filter((series) => !series.hidden).length;
 
   const indexPatternIds = new Set();
-  for (const series of model.series) {
-    if (series.hidden) {
-      continue;
-    }
+  const visibleSeries = model.series.filter(({ hidden }) => !hidden);
+  for (const series of visibleSeries) {
     const { indexPatternId } = await getDataSourceInfo(
       model.index_pattern,
       model.time_field,
@@ -46,12 +44,9 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
 
   const buckets = [];
   const metrics = [];
-  // handle multiple layers/series
-  for (const series of model.series) {
-    if (series.hidden) {
-      continue;
-    }
 
+  // handle multiple layers/series
+  for (const series of visibleSeries) {
     // not valid time shift
     if (series.offset_time && parseTimeShift(series.offset_time) === 'invalid') {
       return null;
@@ -84,12 +79,13 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
     }
 
     buckets.push(...bucketsColumns);
-
     if (buckets.length > 1) {
       return null;
     }
+
     metrics.push(...metricsColumns);
   }
+
   const extendedLayer: ExtendedLayer = {
     indexPatternId: indexPatternId as string,
     layerId: uuid(),
