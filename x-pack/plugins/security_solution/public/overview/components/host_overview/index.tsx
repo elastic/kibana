@@ -83,7 +83,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
       [hostName]
     );
 
-    const [_, { data: hostRisk, isModuleEnabled }] = useHostRiskScore({
+    const [_, { data: hostRisk, isLicenseValid }] = useHostRiskScore({
       filterQuery,
       skip: hostName == null,
     });
@@ -101,39 +101,32 @@ export const HostOverview = React.memo<HostSummaryProps>(
     );
 
     const [hostRiskScore, hostRiskLevel] = useMemo(() => {
-      if (isModuleEnabled) {
-        const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
-        return [
-          {
-            title: i18n.HOST_RISK_SCORE,
-            description: (
-              <>
-                {hostRiskData
-                  ? Math.round(hostRiskData.host.risk.calculated_score_norm)
-                  : getEmptyTagValue()}
-              </>
-            ),
-          },
-
-          {
-            title: i18n.HOST_RISK_CLASSIFICATION,
-            description: (
-              <>
-                {hostRiskData ? (
-                  <RiskScore
-                    severity={hostRiskData.host.risk.calculated_level}
-                    hideBackgroundColor
-                  />
-                ) : (
-                  getEmptyTagValue()
-                )}
-              </>
-            ),
-          },
-        ];
-      }
-      return [undefined, undefined];
-    }, [hostRisk, isModuleEnabled]);
+      const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
+      return [
+        {
+          title: i18n.HOST_RISK_SCORE,
+          description: (
+            <>
+              {hostRiskData
+                ? Math.round(hostRiskData.host.risk.calculated_score_norm)
+                : getEmptyTagValue()}
+            </>
+          ),
+        },
+        {
+          title: i18n.HOST_RISK_CLASSIFICATION,
+          description: (
+            <>
+              {hostRiskData ? (
+                <RiskScore severity={hostRiskData.host.risk.calculated_level} hideBackgroundColor />
+              ) : (
+                getEmptyTagValue()
+              )}
+            </>
+          ),
+        },
+      ];
+    }, [hostRisk]);
 
     const column: DescriptionList[] = useMemo(
       () => [
@@ -273,7 +266,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
             )}
           </OverviewWrapper>
         </InspectButtonContainer>
-        {hostRiskScore && hostRiskLevel && (
+        {isLicenseValid && (
           <HostRiskOverviewWrapper
             gutterSize={isInDetailsSidePanel ? 'm' : 'none'}
             direction={isInDetailsSidePanel ? 'column' : 'row'}

@@ -18,6 +18,9 @@ export interface DefaultSideNavItem {
   items?: DefaultSideNavItem[];
   categories?: LinkCategories;
   isBeta?: boolean;
+  betaOptions?: {
+    text: string;
+  };
 }
 
 export interface CustomSideNavItem {
