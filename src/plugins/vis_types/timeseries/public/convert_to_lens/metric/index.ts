@@ -7,7 +7,7 @@
  */
 
 import uuid from 'uuid';
-import { parseTimeShift } from '@kbn/data-plugin/common';
+import { DataView, parseTimeShift } from '@kbn/data-plugin/common';
 import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
@@ -15,8 +15,11 @@ import { getMetricsColumns, getBucketsColumns } from '../lib/series';
 import { getConfigurationForMetric as getConfiguration } from '../lib/configurations/metric';
 import { getReducedTimeRange, isValidMetrics } from '../lib/metrics';
 import { ConvertTsvbToLensVisualization } from '../types';
-import { Layer as ExtendedLayer } from '../lib/convert';
-import { excludeMetaFromLayers } from './utils';
+import { ColumnsWithoutMeta, Layer as ExtendedLayer } from '../lib/convert';
+import { excludeMetaFromLayers, getUniqueBuckets } from './utils';
+
+const MAX_SERIES = 2;
+const MAX_BUCKETS = 2;
 
 export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeRange) => {
   const dataViews = getDataViewsStart();
@@ -24,8 +27,9 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
 
   const indexPatternIds = new Set();
   const visibleSeries = model.series.filter(({ hidden }) => !hidden);
+  let currentIndexPattern: DataView | null = null;
   for (const series of visibleSeries) {
-    const { indexPatternId } = await getDataSourceInfo(
+    const { indexPatternId, indexPattern } = await getDataSourceInfo(
       model.index_pattern,
       model.time_field,
       Boolean(series.override_index_pattern),
@@ -34,6 +38,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
       dataViews
     );
     indexPatternIds.add(indexPatternId);
+    currentIndexPattern = indexPattern;
   }
 
   if (indexPatternIds.size > 1) {
@@ -56,44 +61,56 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
       return null;
     }
 
-    const { indexPattern } = await getDataSourceInfo(
-      model.index_pattern,
-      model.time_field,
-      Boolean(series.override_index_pattern),
-      series.series_index_pattern,
-      series.series_time_field,
-      dataViews
-    );
-
     const reducedTimeRange = getReducedTimeRange(model, series, timeRange);
 
     // handle multiple metrics
-    const metricsColumns = getMetricsColumns(series, indexPattern!, seriesNum, reducedTimeRange);
+    const metricsColumns = getMetricsColumns(
+      series,
+      currentIndexPattern!,
+      seriesNum,
+      reducedTimeRange
+    );
     if (!metricsColumns) {
       return null;
     }
 
-    const bucketsColumns = getBucketsColumns(model, series, metricsColumns, indexPattern!, false);
+    const bucketsColumns = getBucketsColumns(
+      model,
+      series,
+      metricsColumns,
+      currentIndexPattern!,
+      false
+    );
     if (bucketsColumns === null) {
       return null;
     }
 
     buckets.push(...bucketsColumns);
-    if (buckets.length > 1) {
+    metrics.push(...metricsColumns);
+  }
+
+  let uniqueBuckets = buckets;
+  if (visibleSeries.length === MAX_SERIES && buckets.length) {
+    if (buckets.length !== MAX_BUCKETS) {
       return null;
     }
 
-    metrics.push(...metricsColumns);
+    uniqueBuckets = getUniqueBuckets(buckets as ColumnsWithoutMeta[]);
+    if (uniqueBuckets.length !== 1) {
+      return null;
+    }
   }
+
+  const [bucket] = uniqueBuckets;
 
   const extendedLayer: ExtendedLayer = {
     indexPatternId: indexPatternId as string,
     layerId: uuid(),
-    columns: [...metrics, ...buckets],
+    columns: [...metrics, ...(bucket ? [bucket] : [])],
     columnOrder: [],
   };
 
-  const configuration = getConfiguration(model, extendedLayer, buckets[0]);
+  const configuration = getConfiguration(model, extendedLayer, bucket);
   if (!configuration) {
     return null;
   }

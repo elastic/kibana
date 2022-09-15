@@ -9,6 +9,7 @@
 import { MetricVisConfiguration } from '@kbn/visualizations-plugin/common';
 import { Metric, Panel, Series } from '../../../../../common/types';
 import { Column, Layer } from '../../convert';
+import { getPalette } from './palette';
 
 const getMetric = (series: Series | undefined) => {
   if (!series) {
@@ -42,20 +43,16 @@ export const getConfigurationForMetric = (
   const primaryColumn = findMetricColumn(primaryMetric, layer.columns);
   const secondaryColumn = findMetricColumn(secondaryMetric, layer.columns);
 
+  const palette = getPalette(model);
+  if (palette === null) {
+    return null;
+  }
   return {
     layerId: layer.layerId,
     layerType: 'data',
     metricAccessor: primaryColumn?.columnId,
     secondaryMetricAccessor: secondaryColumn?.columnId,
-    // maxAccessor?: string;
     breakdownByAccessor: bucket?.columnId,
-    // // the dimensions can optionally be single numbers
-    // // computed by collapsing all rows
-    // collapseFn?: string;
-    // subtitle?: string;
-    // secondaryPrefix?: string;
-    // color?: string;
-    // palette?: PaletteOutput<CustomPaletteParams>;
-    // maxCols?: number;
+    palette,
   };
 };

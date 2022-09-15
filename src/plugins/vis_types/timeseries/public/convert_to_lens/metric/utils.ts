@@ -5,8 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Layer } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { Layer as ExtendedLayer, excludeMetaFromColumn } from '../lib/convert';
+
+import { uniqWith } from 'lodash';
+import deepEqual from 'react-fast-compare';
+import { Layer, Operations } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { Layer as ExtendedLayer, excludeMetaFromColumn, ColumnsWithoutMeta } from '../lib/convert';
 
 export const excludeMetaFromLayers = (
   layers: Record<string, ExtendedLayer>
@@ -19,3 +22,33 @@ export const excludeMetaFromLayers = (
 
   return newLayers;
 };
+
+export const getUniqueBuckets = (buckets: ColumnsWithoutMeta[]) =>
+  uniqWith(buckets, (bucket1, bucket2) => {
+    if (bucket1.operationType !== bucket2.operationType) {
+      return false;
+    }
+
+    const { columnId, params, ...restBucket } = bucket1;
+    const { columnId: columnId2, params: params2, ...restBucket2 } = bucket2;
+    if (bucket1.operationType === Operations.TERMS && bucket2.operationType === Operations.TERMS) {
+      const { orderAgg, ...restParams } = bucket1.params;
+      const { orderAgg: orderAgg2, ...restParams2 } = bucket2.params;
+      if (orderAgg && orderAgg2) {
+        const { columnId: cId, ...restOrderAgg } = orderAgg;
+        const { columnId: cId2, ...restOrderAgg2 } = orderAgg2;
+
+        return (
+          deepEqual(restBucket, restBucket2) &&
+          deepEqual(restParams, restParams2) &&
+          deepEqual(restOrderAgg, restOrderAgg2)
+        );
+      }
+      if (orderAgg || orderAgg2) {
+        return false;
+      }
+      return deepEqual(restBucket, restBucket2) && deepEqual(restParams, restParams2);
+    }
+
+    return deepEqual(restBucket, restBucket2) && deepEqual(params, params2);
+  });
