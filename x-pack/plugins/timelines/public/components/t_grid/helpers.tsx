@@ -141,7 +141,6 @@ interface CombineQueries {
   filters: Filter[];
   kqlQuery: Query;
   kqlMode: string;
-  isEventViewer?: boolean;
 }
 
 export const isDataProviderEmpty = (dataProviders: DataProvider[]) => {
@@ -156,17 +155,11 @@ export const combineQueries = ({
   filters = [],
   kqlQuery,
   kqlMode,
-  isEventViewer,
 }: CombineQueries): { filterQuery: string | undefined; kqlError: Error | undefined } | null => {
   const kuery: Query = { query: '', language: kqlQuery.language };
   if (isDataProviderEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters)) {
     return null;
-  } else if (
-    isDataProviderEmpty(dataProviders) &&
-    isEmpty(kqlQuery.query) &&
-    !isEmpty(filters) &&
-    isEventViewer
-  ) {
+  } else if (isDataProviderEmpty(dataProviders) && isEmpty(kqlQuery.query) && !isEmpty(filters)) {
     const [filterQuery, kqlError] = convertToBuildEsQuery({
       config,
       queries: [kuery],
