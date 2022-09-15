@@ -11,10 +11,11 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elast
 
 import { i18n } from '@kbn/i18n';
 
+import { InferencePipeline } from '../../../../../../common/types/pipelines';
 import { DataPanel } from '../../../../shared/data_panel/data_panel';
 
 import { InferencePipelineCard } from './inference_pipeline_card';
-import { InferencePipeline } from './types';
+import { IngestPipelinesCard } from './ingest_pipelines_card';
 
 export const SearchIndexPipelines: React.FC = () => {
   // TODO: REPLACE THIS DATA WITH REAL DATA
@@ -75,7 +76,7 @@ export const SearchIndexPipelines: React.FC = () => {
             )}
             iconType="logstashInput"
           >
-            <div />
+            <IngestPipelinesCard />
           </DataPanel>
         </EuiFlexItem>
         <EuiFlexItem>
