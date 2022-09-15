@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-export const MESSAGE_LEVEL = {
-  ERROR: 'error',
-  INFO: 'info',
-  SUCCESS: 'success',
-  WARNING: 'warning',
-} as const;
-
-export type MessageLevel = typeof MESSAGE_LEVEL[keyof typeof MESSAGE_LEVEL];
+export { NotificationsService } from './notifications_service_provider';
