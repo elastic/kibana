@@ -5,33 +5,23 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import type { IExternalReferenceMetaDataProps } from './lazy_external_reference_content';
 import { PackQueriesAttachmentWrapper } from './pack_queries_attachment_wrapper';
-import { OsqueryCasesContext } from './osquery_cases_context';
 
 const AttachmentContent = (props: IExternalReferenceMetaDataProps) => {
   const { externalReferenceMetadata } = props;
 
-  const contextValue = useMemo(
-    () => ({
-      asSystemRequest: true,
-    }),
-    []
-  );
-
   return (
     <EuiFlexGroup data-test-subj="osquery-attachment-content">
       <EuiFlexItem>
-        <OsqueryCasesContext.Provider value={contextValue}>
-          <PackQueriesAttachmentWrapper
-            actionId={externalReferenceMetadata.actionId}
-            queryId={externalReferenceMetadata.queryId}
-            agentIds={externalReferenceMetadata.agentIds}
-          />
-        </OsqueryCasesContext.Provider>
+        <PackQueriesAttachmentWrapper
+          actionId={externalReferenceMetadata.actionId}
+          queryId={externalReferenceMetadata.queryId}
+          agentIds={externalReferenceMetadata.agentIds}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -9,7 +9,6 @@ import { useQuery } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
 import { filter } from 'lodash';
-import { useOsqueryCasestContext } from '../shared_components/attachments/osquery_cases_context';
 import { useKibana } from '../common/lib/kibana';
 import type { ESTermQuery } from '../../common/typed_json';
 import { useErrorToast } from '../common/hooks/use_error_toast';
@@ -58,11 +57,10 @@ export const useLiveQueryDetails = ({
 }: UseLiveQueryDetails) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
-  const { asSystemRequest } = useOsqueryCasestContext();
 
   return useQuery<{ data: LiveQueryDetailsItem }, Error, LiveQueryDetailsItem>(
     ['liveQueries', { actionId, filterQuery, queryIds }],
-    () => http.get(`/api/osquery/live_queries/${actionId}`, { asSystemRequest }),
+    () => http.get(`/api/osquery/live_queries/${actionId}`),
     {
       enabled: !skip && !!actionId,
       refetchInterval: isLive ? 5000 : false,

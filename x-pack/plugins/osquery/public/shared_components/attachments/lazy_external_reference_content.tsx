@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useMemo } from 'react';
+import { EuiCode, EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { OsqueryIcon } from '../../components/osquery_icon';
+import { useKibana } from '../../common/lib/kibana';
 import type { ServicesWrapperProps } from '../services_wrapper';
 import ServicesWrapper from '../services_wrapper';
+import { PERMISSION_DENIED } from '../osquery_action/translations';
 
 export interface IExternalReferenceMetaDataProps {
   externalReferenceMetadata: {
@@ -20,6 +25,39 @@ export interface IExternalReferenceMetaDataProps {
 export const getLazyExternalContent =
   // eslint-disable-next-line react/display-name
   (services: ServicesWrapperProps['services']) => (props: IExternalReferenceMetaDataProps) => {
+    const {
+      services: {
+        application: {
+          capabilities: { osquery },
+        },
+      },
+    } = useKibana();
+
+    const value = useMemo(
+      () => ({
+        osquery: <EuiCode>osquery</EuiCode>,
+      }),
+      []
+    );
+
+    if (!osquery.read) {
+      return (
+        <EuiEmptyPrompt
+          icon={<OsqueryIcon />}
+          title={<h2>{PERMISSION_DENIED}</h2>}
+          titleSize="xs"
+          body={
+            <FormattedMessage
+              id="xpack.osquery.cases.permissionDenied"
+              defaultMessage=" To access this results, ask your administrator for {osquery}  Kibana
+              privileges."
+              values={value}
+            />
+          }
+        />
+      );
+    }
+
     const AttachmentContent = lazy(() => import('./external_references_content'));
 
     return (
