@@ -27,10 +27,10 @@ import type {
 import { HostsFields } from '../../../../common/search_strategy/security_solution/hosts';
 import type { Direction, RiskSeverity } from '../../../../common/search_strategy';
 import type { HostEcs, OsEcs } from '../../../../common/ecs/host';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { SecurityPageName } from '../../../../common/constants';
 import { HostsTableType } from '../../store/model';
 import { useNavigateTo } from '../../../common/lib/kibana/hooks';
+import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 
 const tableType = hostsModel.HostsTableType.hosts;
 
@@ -132,7 +132,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
     },
     [direction, sortField, type, dispatch]
   );
-  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
+  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
 
   const dispatchSeverityUpdate = useCallback(
     (s: RiskSeverity) => {
@@ -151,8 +151,8 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
   );
 
   const hostsColumns = useMemo(
-    () => getHostsColumns(riskyHostsFeatureEnabled, dispatchSeverityUpdate),
-    [dispatchSeverityUpdate, riskyHostsFeatureEnabled]
+    () => getHostsColumns(isPlatinumOrTrialLicense, dispatchSeverityUpdate),
+    [dispatchSeverityUpdate, isPlatinumOrTrialLicense]
   );
 
   const sorting = useMemo(() => getSorting(sortField, direction), [sortField, direction]);

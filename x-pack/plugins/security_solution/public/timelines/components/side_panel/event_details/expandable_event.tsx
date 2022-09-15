@@ -24,7 +24,6 @@ import { EventDetails } from '../../../../common/components/event_details/event_
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import * as i18n from './translations';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
-import type { HostRisk } from '../../../../risk_score/containers';
 
 export type HandleOnEventClosed = () => void;
 interface Props {
@@ -38,7 +37,6 @@ interface Props {
   rawEventData: object | undefined;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
-  hostRisk: HostRisk | null;
   handleOnEventClosed: HandleOnEventClosed;
   isReadOnly?: boolean;
 }
@@ -107,7 +105,6 @@ export const ExpandableEvent = React.memo<Props>(
     isDraggable,
     loading,
     detailsData,
-    hostRisk,
     rawEventData,
     handleOnEventClosed,
     isReadOnly,
@@ -133,7 +130,6 @@ export const ExpandableEvent = React.memo<Props>(
             rawEventData={rawEventData}
             timelineId={timelineId}
             timelineTabType={timelineTabType}
-            hostRisk={hostRisk}
             handleOnEventClosed={handleOnEventClosed}
             isReadOnly={isReadOnly}
           />

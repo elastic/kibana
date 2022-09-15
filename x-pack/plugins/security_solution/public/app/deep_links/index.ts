@@ -173,7 +173,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         title: ENTITY_ANALYTICS,
         path: ENTITY_ANALYTICS_PATH,
         features: [FEATURE.general],
-        experimentalKey: 'entityAnalyticsDashboardEnabled',
         isPremium: true,
         keywords: [
           i18n.translate('xpack.securitySolution.search.entityAnalytics', {
@@ -296,7 +295,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
               defaultMessage: 'Host risk',
             }),
             path: `${HOSTS_PATH}/hostRisk`,
-            experimentalKey: 'riskyHostsEnabled',
           },
           {
             id: SecurityPageName.sessions,
@@ -386,7 +384,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
               defaultMessage: 'User risk',
             }),
             path: `${USERS_PATH}/userRisk`,
-            experimentalKey: 'riskyUsersEnabled',
           },
           {
             id: SecurityPageName.usersEvents,

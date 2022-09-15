@@ -55,8 +55,6 @@ import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { ID } from '../containers/hosts';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-
 import { LandingPageComponent } from '../../common/components/landing_page';
 import { hostNameExistsFilter } from '../../common/components/visualization_actions/utils';
 
@@ -146,8 +144,6 @@ const HostsComponent = () => {
     [indexPattern, query, tabsFilters, uiSettings]
   );
 
-  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
-
   useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
   const onSkipFocusBeforeEventsTable = useCallback(() => {
@@ -208,7 +204,7 @@ const HostsComponent = () => {
               <SecuritySolutionTabNavigation
                 navTabs={navTabsHosts({
                   hasMlUserPermissions: hasMlUserPermissions(capabilities),
-                  isRiskyHostsEnabled: riskyHostsFeatureEnabled,
+                  isRiskyHostsEnabled: capabilities.isPlatinumOrTrialLicense,
                 })}
               />
 

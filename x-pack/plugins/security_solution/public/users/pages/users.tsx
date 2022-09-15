@@ -50,7 +50,6 @@ import { generateSeverityFilter } from '../../hosts/store/helpers';
 import { UsersTableType } from '../store/model';
 import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { LandingPageComponent } from '../../common/components/landing_page';
 import { userNameExistsFilter } from './details/helpers';
 
@@ -169,10 +168,10 @@ const UsersComponent = () => {
   );
 
   const capabilities = useMlCapabilities();
-  const riskyUsersFeatureEnabled = useIsExperimentalFeatureEnabled('riskyUsersEnabled');
+  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
   const navTabs = useMemo(
-    () => navTabsUsers(hasMlUserPermissions(capabilities), riskyUsersFeatureEnabled),
-    [capabilities, riskyUsersFeatureEnabled]
+    () => navTabsUsers(hasMlUserPermissions(capabilities), isPlatinumOrTrialLicense),
+    [capabilities, isPlatinumOrTrialLicense]
   );
 
   return (

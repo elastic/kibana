@@ -78,6 +78,7 @@ const useFormatSideNavItem = (): FormatSideNavItems => {
                     label: current.title,
                     description: current.description,
                     isBeta: current.isBeta,
+                    betaOptions: current.betaOptions,
                     ...getSecuritySolutionLinkProps({ deepLinkId: current.id }),
                   });
                 }
