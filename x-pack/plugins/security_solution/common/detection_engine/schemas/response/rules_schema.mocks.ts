@@ -74,6 +74,7 @@ export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): QueryRespo
   data_view_id: undefined,
   filters: undefined,
   saved_id: undefined,
+  response_actions: undefined,
 });
 export const getSavedQuerySchemaMock = (
   anchorDate: string = ANCHOR_DATE
