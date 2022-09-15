@@ -52,10 +52,12 @@ export const getNormalizeBrowserFields = ({
     [ConfigKey.THROTTLING_CONFIG]: monitor.throttling
       ? `${monitor.throttling.download}d/${monitor.throttling.upload}u/${monitor.throttling.latency}l`
       : defaultFields[ConfigKey.THROTTLING_CONFIG],
-    [ConfigKey.DOWNLOAD_SPEED]: `${monitor.throttling?.download || defaultFields[ConfigKey.DOWNLOAD_SPEED]
-      }`,
-    [ConfigKey.UPLOAD_SPEED]: `${monitor.throttling?.upload || defaultFields[ConfigKey.UPLOAD_SPEED]
-      }`,
+    [ConfigKey.DOWNLOAD_SPEED]: `${
+      monitor.throttling?.download || defaultFields[ConfigKey.DOWNLOAD_SPEED]
+    }`,
+    [ConfigKey.UPLOAD_SPEED]: `${
+      monitor.throttling?.upload || defaultFields[ConfigKey.UPLOAD_SPEED]
+    }`,
     [ConfigKey.IS_THROTTLING_ENABLED]:
       Boolean(monitor.throttling) || defaultFields[ConfigKey.IS_THROTTLING_ENABLED],
     [ConfigKey.LATENCY]: `${monitor.throttling?.latency || defaultFields[ConfigKey.LATENCY]}`,

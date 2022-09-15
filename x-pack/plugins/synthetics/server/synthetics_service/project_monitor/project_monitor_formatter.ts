@@ -146,8 +146,9 @@ export class ProjectMonitorFormatter {
         this.failedMonitors.push({
           id: monitor.id,
           reason: 'Unsupported Heartbeat option',
-          details: `The following Heartbeat options are not supported for ${monitor.type
-            } project monitors in ${this.server.kibanaVersion}: ${unsupportedKeys.join('|')}`,
+          details: `The following Heartbeat options are not supported for ${
+            monitor.type
+          } project monitors in ${this.server.kibanaVersion}: ${unsupportedKeys.join('|')}`,
         });
         return null;
       }

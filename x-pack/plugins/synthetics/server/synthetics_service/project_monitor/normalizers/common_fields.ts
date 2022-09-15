@@ -111,7 +111,8 @@ export const getMonitorTimeout = (timeout: string) => {
  * @param {Array | string} [value]
  * @returns {string} Returns first item when the value is an array, or the value itself
  */
-export const getOptionalArrayField = (value: string[] | string = '') => Array.isArray(value) ? value[0] : value;
+export const getOptionalArrayField = (value: string[] | string = '') =>
+  Array.isArray(value) ? value[0] : value;
 
 /**
  * Accounts for array values that are optionally defined as a comma seperated list
@@ -123,7 +124,7 @@ export const getOptionalListField = (value?: string[] | string): string[] => {
   if (Array.isArray(value)) {
     return value;
   }
-  return value ? value.split(',') : []
+  return value ? value.split(',') : [];
 };
 
 /**
@@ -152,10 +153,7 @@ const flattenAndFormatObject = (obj: Record<string, unknown>, prefix = '', keys:
     }
 
     if (typeof obj[k] === 'object') {
-      Object.assign(
-        acc,
-        flattenAndFormatObject(obj[k] as Record<string, unknown>, pre + k, keys)
-      );
+      Object.assign(acc, flattenAndFormatObject(obj[k] as Record<string, unknown>, pre + k, keys));
     } else {
       acc[key] = obj[k];
     }
