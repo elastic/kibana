@@ -62,7 +62,7 @@ describe('installHostRiskScoreModule', () => {
     expect((api.createStoredScript as jest.Mock).mock.calls[3][0].options).toMatchSnapshot();
   });
 
-  it(`Create IngestPipeline: ml_${RiskScoreEntity.host}riskscore_ingest_pipeline`, async () => {
+  it(`Create IngestPipeline: ml_${RiskScoreEntity.host}riskscore_ingest_pipeline_${mockSpaceId}`, async () => {
     expect((api.createIngestPipeline as jest.Mock).mock.calls[0][0].options).toMatchSnapshot();
   });
 
@@ -102,7 +102,7 @@ describe(`installUserRiskScoreModule`, () => {
     await installUserRiskScoreModule({
       http: mockHttp,
       refetch: mockRefetch,
-      spaceId: `customSpace`,
+      spaceId: mockSpaceId,
       timerange: mockTimerange,
     });
   });
@@ -123,7 +123,7 @@ describe(`installUserRiskScoreModule`, () => {
     expect((api.createStoredScript as jest.Mock).mock.calls[2][0].options).toMatchSnapshot();
   });
 
-  it(`Create IngestPipeline: ml_${RiskScoreEntity.user}riskscore_ingest_pipeline`, async () => {
+  it(`Create IngestPipeline: ml_${RiskScoreEntity.user}riskscore_ingest_pipeline_${mockSpaceId}`, async () => {
     expect((api.createIngestPipeline as jest.Mock).mock.calls[0][0].options).toMatchSnapshot();
   });
 
@@ -186,7 +186,7 @@ describe('UninstallRiskScoreModule - Host', () => {
 
   it('Delete ingest pipelines', () => {
     expect((api.deleteIngestPipelines as jest.Mock).mock.calls[0][0].names).toEqual(
-      getIngestPipelineName(RiskScoreEntity.host)
+      getIngestPipelineName(RiskScoreEntity.host, mockSpaceId)
     );
   });
 
@@ -206,7 +206,7 @@ describe('uninstallRiskScoreModule - User', () => {
   beforeAll(async () => {
     await uninstallRiskScoreModule({
       http: mockHttp,
-      spaceId: 'customSpace',
+      spaceId: mockSpaceId,
       riskScoreEntity: RiskScoreEntity.user,
     });
   });
@@ -230,7 +230,7 @@ describe('uninstallRiskScoreModule - User', () => {
 
   it('Delete ingest pipelines', () => {
     expect((api.deleteIngestPipelines as jest.Mock).mock.calls[0][0].names).toEqual(
-      getIngestPipelineName(RiskScoreEntity.user)
+      getIngestPipelineName(RiskScoreEntity.user, mockSpaceId)
     );
   });
 

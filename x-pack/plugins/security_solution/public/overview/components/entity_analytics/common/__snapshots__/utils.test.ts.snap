@@ -108,9 +108,9 @@ Object {
 }
 `;
 
-exports[`installHostRiskScoreModule Create IngestPipeline: ml_hostriskscore_ingest_pipeline 1`] = `
+exports[`installHostRiskScoreModule Create IngestPipeline: ml_hostriskscore_ingest_pipeline_customSpace 1`] = `
 Object {
-  "name": "ml_hostriskscore_ingest_pipeline",
+  "name": "ml_hostriskscore_ingest_pipeline_customSpace",
   "processors": Array [
     Object {
       "set": Object {
@@ -170,7 +170,7 @@ exports[`installHostRiskScoreModule Create Transform: ml_hostriskscore_pivot_tra
 Object {
   "dest": Object {
     "index": "ml_host_risk_score_customSpace",
-    "pipeline": "ml_hostriskscore_ingest_pipeline",
+    "pipeline": "ml_hostriskscore_ingest_pipeline_customSpace",
   },
   "frequency": "1h",
   "pivot": Object {
@@ -522,9 +522,9 @@ Object {
 }
 `;
 
-exports[`installUserRiskScoreModule Create IngestPipeline: ml_userriskscore_ingest_pipeline 1`] = `
+exports[`installUserRiskScoreModule Create IngestPipeline: ml_userriskscore_ingest_pipeline_customSpace 1`] = `
 Object {
-  "name": "ml_userriskscore_ingest_pipeline",
+  "name": "ml_userriskscore_ingest_pipeline_customSpace",
   "processors": Array [
     Object {
       "set": Object {
@@ -584,7 +584,7 @@ exports[`installUserRiskScoreModule Create Transform: ml_userriskscore_pivot_tra
 Object {
   "dest": Object {
     "index": "ml_user_risk_score_customSpace",
-    "pipeline": "ml_userriskscore_ingest_pipeline",
+    "pipeline": "ml_userriskscore_ingest_pipeline_customSpace",
   },
   "frequency": "1h",
   "pivot": Object {

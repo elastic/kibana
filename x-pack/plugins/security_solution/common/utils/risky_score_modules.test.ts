@@ -46,12 +46,12 @@ describe('getRiskScorePivotTransformId', () => {
 describe('getIngestPipelineName', () => {
   test('getIngestPipelineName - host', () => {
     const name = getIngestPipelineName(RiskScoreEntity.host);
-    expect(name).toMatchInlineSnapshot(`"ml_hostriskscore_ingest_pipeline"`);
+    expect(name).toMatchInlineSnapshot(`"ml_hostriskscore_ingest_pipeline_default"`);
   });
 
   test('getIngestPipelineName - user', () => {
     const name = getIngestPipelineName(RiskScoreEntity.user);
-    expect(name).toMatchInlineSnapshot(`"ml_userriskscore_ingest_pipeline"`);
+    expect(name).toMatchInlineSnapshot(`"ml_userriskscore_ingest_pipeline_default"`);
   });
 });
 

@@ -337,7 +337,7 @@ export const getCreateMLHostPivotTransformOptions = ({
   const options = {
     dest: {
       index: getPivoTransformIndex(RiskScoreEntity.host, spaceId),
-      pipeline: getIngestPipelineName(RiskScoreEntity.host),
+      pipeline: getIngestPipelineName(RiskScoreEntity.host, spaceId),
     },
     frequency: '1h',
     pivot: {
@@ -436,7 +436,7 @@ export const getCreateMLUserPivotTransformOptions = ({
   const options = {
     dest: {
       index: getPivoTransformIndex(RiskScoreEntity.user, spaceId),
-      pipeline: getIngestPipelineName(RiskScoreEntity.user),
+      pipeline: getIngestPipelineName(RiskScoreEntity.user, spaceId),
     },
     frequency: '1h',
     pivot: {

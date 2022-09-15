@@ -298,7 +298,7 @@ exports[`getCreateMLHostPivotTransformOptions getCreateMLHostPivotTransformOptio
 Object {
   "dest": Object {
     "index": "ml_host_risk_score_customSpaceId",
-    "pipeline": "ml_hostriskscore_ingest_pipeline",
+    "pipeline": "ml_hostriskscore_ingest_pipeline_default",
   },
   "frequency": "1h",
   "pivot": Object {
@@ -387,7 +387,7 @@ exports[`getCreateMLUserPivotTransformOptions getCreateMLUserPivotTransformOptio
 Object {
   "dest": Object {
     "index": "ml_user_risk_score_customSpaceId",
-    "pipeline": "ml_userriskscore_ingest_pipeline",
+    "pipeline": "ml_userriskscore_ingest_pipeline_default",
   },
   "frequency": "1h",
   "pivot": Object {
@@ -673,7 +673,7 @@ Object {
 
 exports[`getRiskScoreIngestPipelineOptions getRiskScoreIngestPipelineOptions - host 1`] = `
 Object {
-  "name": "ml_hostriskscore_ingest_pipeline",
+  "name": "ml_hostriskscore_ingest_pipeline_default",
   "processors": Array [
     Object {
       "set": Object {
@@ -705,7 +705,7 @@ Object {
 
 exports[`getRiskScoreIngestPipelineOptions getRiskScoreIngestPipelineOptions - user 1`] = `
 Object {
-  "name": "ml_userriskscore_ingest_pipeline",
+  "name": "ml_userriskscore_ingest_pipeline_default",
   "processors": Array [
     Object {
       "set": Object {
