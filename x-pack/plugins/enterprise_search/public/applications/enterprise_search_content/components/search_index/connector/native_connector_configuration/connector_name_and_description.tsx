@@ -20,6 +20,8 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { isConnectorIndex } from '../../../../utils/indices';
 import { IndexViewLogic } from '../../index_view_logic';
 import { NativeConnector } from '../types';
@@ -38,8 +40,13 @@ export const ConnectorNameAndDescription: React.FC<ConnectorNameAndDescriptionPr
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <EuiText size="s">
-            By naming and describing this connector your colleagues and wider team will know what
-            this connector is meant for.
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.indices.configurationConnector.nameAndDescriptionForm.description',
+              {
+                defaultMessage:
+                  'By naming and describing this connector your colleagues and wider team will know what this connector is meant for.',
+              }
+            )}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -60,7 +67,12 @@ export const ConnectorNameAndDescription: React.FC<ConnectorNameAndDescriptionPr
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiButton disabled type="submit">
-                Save name and description
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.configurationConnector.nameAndDescriptionForm.submitButtonLabel',
+                  {
+                    defaultMessage: 'Save name and description',
+                  }
+                )}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

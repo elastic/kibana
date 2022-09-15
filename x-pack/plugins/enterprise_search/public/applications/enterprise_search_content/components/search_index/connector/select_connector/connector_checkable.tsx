@@ -18,6 +18,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { NATIVE_CONNECTOR_ICONS } from '../../../../../../assets/source_icons/native_connector_icons';
 
@@ -60,15 +61,31 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
     >
       <div className="connectorCheckableContent">
         <EuiText size="s" color="subdued">
-          Search over your {name} content with Enterprise Search.
+          {i18n.translate(
+            'xpack.enterpriseSearch.content.indices.selectConnector.connectorCheckable.description',
+            {
+              defaultMessage: 'Search over your {name} content with Enterprise Search.',
+              values: { name },
+            }
+          )}
         </EuiText>
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">
-          Basic authentication
+          {i18n.translate(
+            'xpack.enterpriseSearch.content.indices.selectConnector.connectorCheckable.basicAuthenticationLabel',
+            {
+              defaultMessage: 'Basic authentication',
+            }
+          )}
         </EuiText>
         <EuiSpacer size="s" />
         <EuiLink target="_blank" href={documentationUrl}>
-          Documentation
+          {i18n.translate(
+            'xpack.enterpriseSearch.content.indices.selectConnector.connectorCheckable.documentationLinkLabel',
+            {
+              defaultMessage: 'Documentation',
+            }
+          )}
         </EuiLink>
       </div>
     </EuiCheckableCard>

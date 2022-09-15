@@ -9,6 +9,8 @@ import React from 'react';
 
 import { EuiCallOut, EuiSpacer, EuiLink, EuiText } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { ConnectorConfigurationConfig } from '../connector_configuration_config';
 import { NativeConnector } from '../types';
 
@@ -22,9 +24,22 @@ export const NativeConnectorConfigurationConfig: React.FC<
   return (
     <ConnectorConfigurationConfig>
       <EuiText size="s">
-        Set configuration and credentials for your connector.{' '}
+        {i18n.translate(
+          'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.description',
+          {
+            defaultMessage: 'Set configuration and credentials for your connector.',
+          }
+        )}{' '}
         <EuiLink target="_blank" href={'' /* TODO needs link */}>
-          Learn more about {nativeConnector.name} authentication
+          {i18n.translate(
+            'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.learnMoreLinkLabel',
+            {
+              defaultMessage: 'Learn more about {nativeConnectorName} authentication',
+              values: {
+                nativeConnectorName: nativeConnector.name,
+              },
+            }
+          )}
         </EuiLink>
       </EuiText>
       <EuiSpacer />
@@ -34,8 +49,13 @@ export const NativeConnectorConfigurationConfig: React.FC<
         title="Data source credentials are unencrypted"
       >
         <EuiText size="s">
-          Encryption for data source credentials is unavailable in this technical preview. Your data
-          source credentials will be stored, unencrypted, in Elasticsearch.
+          {i18n.translate(
+            'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.encryptionWarningMessage',
+            {
+              defaultMessage:
+                'Encryption for data source credentials is unavailable in this technical preview. Your data source credentials will be stored, unencrypted, in Elasticsearch.',
+            }
+          )}
         </EuiText>
       </EuiCallOut>
     </ConnectorConfigurationConfig>

@@ -22,6 +22,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import { Status } from '../../../../../../../common/types/api';
 import { generateEncodedPath } from '../../../../../shared/encode_path_params';
 
@@ -93,13 +95,25 @@ export const SelectConnector: React.FC = () => {
             children: (
               <>
                 <EuiTitle size="s">
-                  <span>Select a connector</span>
+                  <span>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.content.indices.selectConnector.title',
+                      {
+                        defaultMessage: 'Select a connector',
+                      }
+                    )}
+                  </span>
                 </EuiTitle>
                 <EuiSpacer size="s" />
                 <EuiText color="subdued" size="s">
                   <p>
-                    Get started by selecting the connector you’d like to configure to extract, index
-                    and sync data from your data source into your newly created search index.
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.content.indices.selectConnector.description',
+                      {
+                        defaultMessage:
+                          "Get started by selecting the connector you'd like to configure to extract, index and sync data from your data source into your newly created search index.",
+                      }
+                    )}
                   </p>
                 </EuiText>
               </>
@@ -113,7 +127,7 @@ export const SelectConnector: React.FC = () => {
                 <ConnectorCheckable
                   {...nativeConnector}
                   onChange={() => setSelectedConnector(nativeConnector)}
-                  documentationUrl={'' /* TODO docsUrl */}
+                  documentationUrl={'' /* TODO docLinks */}
                   checked={nativeConnector === selectedNativeConnector}
                 />
               </EuiFlexItem>
@@ -121,19 +135,41 @@ export const SelectConnector: React.FC = () => {
           </EuiFlexGroup>
           <EuiSpacer />
           <EuiButton fill color="primary" type="submit" disabled={selectedNativeConnector === null}>
-            Select and configure
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.indices.selectConnector.selectAndConfigureButtonLabel',
+              {
+                defaultMessage: 'Select and configure',
+              }
+            )}
           </EuiButton>
           <EuiSpacer />
           <EuiText size="s">
-            Looking for more connectors?{' '}
-            <EuiLink target="_blank" href={'' /* TODO needs link */}>
-              View additional integrations in Workplace Search
-            </EuiLink>
-            {' or '}
-            <EuiLink target="_blank" href={'' /* TODO needs link */}>
-              build your own
-            </EuiLink>
-            .
+            <FormattedMessage
+              id="xpack.enterpriseSearch.content.indices.selectConnector.moreConnectorsMessage"
+              defaultMessage="Looking for more connectors? {workplaceSearchLink} or {buildYourOwnConnectorLink}."
+              values={{
+                buildYourOwnConnectorLink: (
+                  <EuiLink target="_blank" href={'' /* TODO docLinks */}>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.content.indices.selectConnector.buildYourOwnConnectorLinkLabel',
+                      {
+                        defaultMessage: 'build your own',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+                workplaceSearchLink: (
+                  <EuiLink target="_blank" href={'' /* TODO docLinks */}>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.content.indices.selectConnector.workplaceSearchLinkLabel',
+                      {
+                        defaultMessage: 'View additional integrations in Workplace Search',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
           </EuiText>
         </EuiFormFieldset>
       </form>

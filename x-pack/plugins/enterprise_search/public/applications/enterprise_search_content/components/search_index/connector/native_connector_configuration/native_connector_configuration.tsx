@@ -19,6 +19,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { NATIVE_CONNECTOR_ICONS } from '../../../../../../assets/source_icons/native_connector_icons';
 
 import { hasConfiguredConfiguration } from '../../../../utils/has_configured_configuration';
@@ -74,13 +76,23 @@ export const NativeConnectorConfiguration: React.FC = () => {
                 {
                   children: <ResearchConfiguration nativeConnector={nativeConnector} />,
                   status: hasResearched ? 'complete' : 'incomplete',
-                  title: 'Research configuration requirements',
+                  title: i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.researchConfigurationTitle',
+                    {
+                      defaultMessage: 'Research configuration requirements',
+                    }
+                  ),
                   titleSize: 'xs',
                 },
                 {
                   children: <ConnectorNameAndDescription nativeConnector={nativeConnector} />,
                   status: hasName ? 'complete' : 'incomplete',
-                  title: 'Name and description',
+                  title: i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.nameAndDescriptionTitle',
+                    {
+                      defaultMessage: 'Name and description',
+                    }
+                  ),
                   titleSize: 'xs',
                 },
                 {
@@ -88,13 +100,23 @@ export const NativeConnectorConfiguration: React.FC = () => {
                     <NativeConnectorConfigurationConfig nativeConnector={nativeConnector} />
                   ),
                   status: hasConfigured ? 'complete' : 'incomplete',
-                  title: 'Configuration',
+                  title: i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.configurationTitle',
+                    {
+                      defaultMessage: 'Configuration',
+                    }
+                  ),
                   titleSize: 'xs',
                 },
                 {
                   children: <NativeConnectorAdvancedConfiguration />,
                   status: hasConfiguredAdvanced ? 'complete' : 'incomplete',
-                  title: 'Advanced configuration',
+                  title: i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.advancedConfigurationTitle',
+                    {
+                      defaultMessage: 'Advanced configuration',
+                    }
+                  ),
                   titleSize: 'xs',
                 },
               ]}

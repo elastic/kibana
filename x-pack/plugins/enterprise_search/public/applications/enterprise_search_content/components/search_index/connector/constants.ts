@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import { NativeConnector } from './types';
 
 export const NATIVE_CONNECTORS: NativeConnector[] = [
@@ -12,52 +14,106 @@ export const NATIVE_CONNECTORS: NativeConnector[] = [
     configuration: {
       host: {
         value: '',
-        label: 'MongoDB Host',
+        label: i18n.translate(
+          'xpack.enterpriseSearch.content.nativeConnectors.mongodb.configuration.hostLabel',
+          {
+            defaultMessage: 'MongoDB host',
+          }
+        ),
       },
       user: {
         value: '',
-        label: 'MongoDB Username',
+        label: i18n.translate(
+          'xpack.enterpriseSearch.content.nativeConnectors.mongodb.configuration.usernameLabel',
+          {
+            defaultMessage: 'MongoDB username',
+          }
+        ),
       },
       password: {
         value: '',
-        label: 'MongoDB Password',
+        label: i18n.translate(
+          'xpack.enterpriseSearch.content.nativeConnectors.mongodb.configuration.passwordLabel',
+          {
+            defaultMessage: 'MongoDB password',
+          }
+        ),
       },
       database: {
         value: '',
-        label: 'MongoDB Database',
+        label: i18n.translate(
+          'xpack.enterpriseSearch.content.nativeConnectors.mongodb.configuration.databaseLabel',
+          {
+            defaultMessage: 'MongoDB database',
+          }
+        ),
       },
       collection: {
         value: '',
-        label: 'MongoDB Collection',
+        label: i18n.translate(
+          'xpack.enterpriseSearch.content.nativeConnectors.mongodb.configuration.collectionLabel',
+          {
+            defaultMessage: 'MongoDB collection',
+          }
+        ),
       },
     },
-    name: 'MongoDB',
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.mongodb.name', {
+      defaultMessage: 'MongoDB',
+    }),
     serviceType: 'mongodb',
   },
   {
     configuration: {
       host: {
         value: '',
-        label: 'MySQL Host',
+        label: i18n.translate(
+          'xpack.enterpriseSearch.content.nativeConnectors.mysql.configuration.hostLabel',
+          {
+            defaultMessage: 'MySQL host',
+          }
+        ),
       },
       port: {
         value: '',
-        label: 'MySQL Port',
+        label: i18n.translate(
+          'xpack.enterpriseSearch.content.nativeConnectors.mysql.configuration.portLabel',
+          {
+            defaultMessage: 'MySQL port',
+          }
+        ),
       },
       user: {
         value: '',
-        label: 'MySQL Username',
+        label: i18n.translate(
+          'xpack.enterpriseSearch.content.nativeConnectors.mysql.configuration.usernameLabel',
+          {
+            defaultMessage: 'MySQL username',
+          }
+        ),
       },
       password: {
         value: '',
-        label: 'MySQL Password',
+        label: i18n.translate(
+          'xpack.enterpriseSearch.content.nativeConnectors.mysql.configuration.passwordLabel',
+          {
+            defaultMessage: 'MySQL password',
+          }
+        ),
       },
       database: {
         value: '',
-        label: 'List of MySQL Databases',
+        label: i18n.translate(
+          'xpack.enterpriseSearch.content.nativeConnectors.mysql.configuration.databasesLabel',
+          {
+            defaultMessage: 'List of MySQL databases',
+          }
+        ),
       },
     },
-    name: 'MySQL',
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.mysql.name', {
+      defaultMessage: 'MySQL',
+    }),
     serviceType: 'mysql',
   },
 ];

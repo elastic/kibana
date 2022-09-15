@@ -9,6 +9,8 @@ import React from 'react';
 
 import { EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { NativeConnector } from '../types';
 
 interface ResearchConfigurationProps {
@@ -22,20 +24,38 @@ export const ResearchConfiguration: React.FC<ResearchConfigurationProps> = ({
   return (
     <>
       <EuiText size="s">
-        {name} supports a variety of authentication mechanisms which will be needed for this
-        connector to connect to your instance. Consult with your administrator for the correct
-        credentials to use to connect.
+        {i18n.translate(
+          'xpack.enterpriseSearch.content.indices.configurationConnector.researchConfiguration.description',
+          {
+            defaultMessage:
+              '{name} supports a variety of authentication mechanisms which will be needed for this connector to connect to your instance. Consult with your administrator for the correct credentials to use to connect.',
+            values: {
+              name,
+            },
+          }
+        )}
       </EuiText>
       <EuiSpacer />
       <EuiFlexGroup direction="row" alignItems="flexStart">
         <EuiFlexItem grow={false}>
-          <EuiLink target="_blank" href="">
-            Documentation
+          <EuiLink target="_blank" href={'' /* TODO docLinks */}>
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.indices.configurationConnector.researchConfiguration.connectorDocumentationLinkLabel',
+              {
+                defaultMessage: 'Documentation',
+              }
+            )}
           </EuiLink>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiLink target="_blank" href="">
-            {name} Documentation
+          <EuiLink target="_blank" href={'' /* TODO external link */}>
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.indices.configurationConnector.researchConfiguration.serviceDocumentationLinkLabel',
+              {
+                defaultMessage: '{name} documentation',
+                values: { name },
+              }
+            )}
           </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
