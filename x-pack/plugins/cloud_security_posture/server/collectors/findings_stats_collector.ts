@@ -5,42 +5,59 @@
  * 2.0.
  */
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import {
+  BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+  FINDINGS_INDEX_DEFAULT_NS,
+  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+} from '../../common/constants';
 
-// export interface FindingsUsage extends FindingsStats {
-//   benchmark: string;
-//   k8s_object: FindingsStats;
-//   process: FindingsStats;
-//   file: FindingsStats;
-//   load_balancer: FindingsStats;
-// }
-
-export interface IndexCounter {
-  doc_count: number;
-  // index_size: number;
+export interface CspmIndicesStats {
+  findings: IndexStats;
+  latest_findings: IndexStats;
+  score: IndexStats;
 }
 
-export const getFindingsUsage = async (esClient: ElasticsearchClient) => {
-  const test = await getIndexStats(esClient);
+export interface IndexStats {
+  doc_count: number;
+  latest_doc_timestamp: string;
+}
 
-  // const findingsStats = await getIndexStats(esClient, LATEST_FINDINGS_INDEX_TEMPLATE_NAME);
-  // const latestFindingsStats = await getIndexStats(esClient, FINDINGS_INDEX_NAME);
-  // const scoreStats = await getIndexStats(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS);
-
+export const getIndicesStats = async (esClient: ElasticsearchClient): Promise<CspmIndicesStats> => {
   return {
-    total: 5,
-    passed: 4,
-    failed: 4,
-    cluster_id: 'foo',
-    benchmark: 'boo',
+    findings: await getIndexStats(esClient, FINDINGS_INDEX_DEFAULT_NS),
+    latest_findings: await getIndexStats(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS),
+    score: await getIndexStats(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS),
   };
 };
 
-// const getDocsCount = async (esClient: ElasticsearchClient, index: string) => {
-const getIndexStats = async (esClient: ElasticsearchClient) => {
-  const response = await esClient.search({
-    index: 'logs-cloud_security_posture.findings_latest-default',
-    body: {},
-    // ignore_unavailable: true,
+export const getIndexStats = async (esClient: ElasticsearchClient, index: string) => {
+  return {
+    doc_count: await getIndexDocsCount(esClient, index),
+    latest_doc_timestamp: await getLatestDocTimestamp(esClient, index),
+  };
+};
+
+export const getIndexDocsCount = async (esClient: ElasticsearchClient, index: string) => {
+  const indexStats = await esClient.indices.stats({
+    index,
   });
-  return response;
+
+  return indexStats._all.primaries?.docs ? indexStats._all.primaries?.docs?.count : 0;
+};
+
+const getLatestDocTimestamp = async (esClient: ElasticsearchClient, index: string) => {
+  const latestTimestamp = await esClient.search({
+    index,
+    query: {
+      match_all: {},
+    },
+    sort: '@timestamp:desc',
+    size: 1,
+    fields: ['@timestamp'],
+    _source: false,
+  });
+
+  const latestEventTimestamp = latestTimestamp.hits?.hits[0]?.fields;
+
+  return latestEventTimestamp ? latestEventTimestamp['@timestamp'][0] : '';
 };

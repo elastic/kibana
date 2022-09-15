@@ -6,13 +6,16 @@
  */
 
 import { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../common/constants';
-import { getFindingsUsage, IndexCounter } from './findings_stats_collector';
+import {
+  BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+  FINDINGS_INDEX_DEFAULT_NS,
+  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+} from '../../common/constants';
+import { CspmIndicesStats, getIndicesStats } from './findings_stats_collector';
 
-interface CSPMUsage {
-  findings: IndexCounter;
-  latest_findings: IndexCounter;
-  score: IndexCounter;
+interface CspmUsage {
+  indices: CspmIndicesStats;
 }
 
 export function registerIndicesCounterCollector(usageCollection?: UsageCollectionSetup): void {
@@ -22,52 +25,63 @@ export function registerIndicesCounterCollector(usageCollection?: UsageCollectio
   }
 
   // create usage collector
-  const indicesCounterCollector = usageCollection.makeUsageCollector<CSPMUsage>({
+  const indicesCounterCollector = usageCollection.makeUsageCollector<CspmUsage>({
     type: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-
     isReady: () => true,
     fetch: async (collectorFetchContext: CollectorFetchContext) => {
-      await getFindingsUsage(collectorFetchContext.esClient);
+      const indicesStats = await getIndicesStats(collectorFetchContext.esClient);
       return {
-        findings: {
-          doc_count: 5,
-        },
-        latest_findings: {
-          doc_count: 5,
-        },
-        score: {
-          doc_count: 5,
-        },
+        indices: indicesStats,
       };
     },
     schema: {
-      findings: {
-        doc_count: {
-          type: 'long',
-          _meta: {
-            description: 'The total number of enrolled agents, in any state',
+      indices: {
+        findings: {
+          doc_count: {
+            type: 'long',
+            _meta: {
+              description: `The total number of docs for the ${FINDINGS_INDEX_DEFAULT_NS} index`,
+            },
+          },
+          latest_doc_timestamp: {
+            type: 'date',
+            _meta: {
+              description: `The total number of docs for the ${FINDINGS_INDEX_DEFAULT_NS} index`,
+            },
           },
         },
-      },
-      latest_findings: {
-        doc_count: {
-          type: 'long',
-          _meta: {
-            description: 'The total number of enrolled agents, in any state',
+        latest_findings: {
+          doc_count: {
+            type: 'long',
+            _meta: {
+              description: `The total number of docs for the ${LATEST_FINDINGS_INDEX_DEFAULT_NS} index`,
+            },
+          },
+          latest_doc_timestamp: {
+            type: 'date',
+            _meta: {
+              description: `The total number of docs for the ${FINDINGS_INDEX_DEFAULT_NS} index`,
+            },
           },
         },
-      },
-      score: {
-        doc_count: {
-          type: 'long',
-          _meta: {
-            description: 'The total number of enrolled agents, in any state',
+        score: {
+          doc_count: {
+            type: 'long',
+            _meta: {
+              description: `The total number of docs for the ${BENCHMARK_SCORE_INDEX_DEFAULT_NS} index`,
+            },
+          },
+          latest_doc_timestamp: {
+            type: 'date',
+            _meta: {
+              description: `The total number of docs for the ${FINDINGS_INDEX_DEFAULT_NS} index`,
+            },
           },
         },
       },
     },
   });
+
   // register usage collector
   usageCollection.registerCollector(indicesCounterCollector);
-  console.log('Register!!');
 }
