@@ -20,7 +20,6 @@ import {
   SyntheticsMonitorWithSecrets,
   SyntheticsMonitor,
   ConfigKey,
-  FormMonitorType,
 } from '../../../common/runtime_types';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
@@ -146,10 +145,7 @@ export const syncEditedMonitor = async ({
     const editedSOPromise = savedObjectsClient.update<MonitorFields>(
       syntheticsMonitorType,
       previousMonitor.id,
-      monitorWithRevision.type === 'browser' &&
-        monitorWithRevision[ConfigKey.FORM_MONITOR_TYPE] !== FormMonitorType.SINGLE
-        ? { ...monitorWithRevision, urls: '' }
-        : monitorWithRevision
+      monitorWithRevision
     );
 
     const editSyncPromise = syntheticsMonitorClient.editMonitor(
