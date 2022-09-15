@@ -73,15 +73,14 @@ const TooltipAnnotationDetails = ({
       <div className="xyAnnotationTooltip__extraFields">
         {extraFields.map((field) => (
           <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem className="xyAnnotationTooltip__extraFieldsKey">
-              {field.name}:
-            </EuiFlexItem>
+            <EuiFlexItem className="xyAnnotationTooltip__extraFieldsKey">{field.name}:</EuiFlexItem>
             <EuiFlexItem className="xyAnnotationTooltip__extraFieldsValue">
               {field.formatter ? field.formatter.convert(row[field.key]) : row[field.key]}
             </EuiFlexItem>
           </EuiFlexGroup>
         ))}
-      </div>)
+      </div>
+    )
   );
 };
 
@@ -111,77 +110,77 @@ const createCustomTooltip =
     columns: DatatableColumn[] | undefined,
     timeFormat: string
   ): CustomAnnotationTooltip =>
-    () => {
-      const lastElement = rows[rows.length - 1];
-      const skippedCountFromRequest = lastElement.skippedCount || 0;
-      const displayedSkippedCount =
-        rows.length > DISPLAYED_COUNT_OF_ROWS ? rows.length - DISPLAYED_COUNT_OF_ROWS : 0;
-      const skippedCount = skippedCountFromRequest + displayedSkippedCount;
+  () => {
+    const lastElement = rows[rows.length - 1];
+    const skippedCountFromRequest = lastElement.skippedCount || 0;
+    const displayedSkippedCount =
+      rows.length > DISPLAYED_COUNT_OF_ROWS ? rows.length - DISPLAYED_COUNT_OF_ROWS : 0;
+    const skippedCount = skippedCountFromRequest + displayedSkippedCount;
 
-      return (
-        <EuiPanel
-          color="plain"
-          hasShadow={false}
-          hasBorder={false}
-          paddingSize="none"
-          borderRadius="none"
-          className="xyAnnotationTooltip"
-        >
-          <div className="xyAnnotationTooltip__rows">
-            {rows.slice(0, DISPLAYED_COUNT_OF_ROWS).map((row, index) => {
-              const extraFields = getExtraFields(row, formatFactory, columns);
+    return (
+      <EuiPanel
+        color="plain"
+        hasShadow={false}
+        hasBorder={false}
+        paddingSize="none"
+        borderRadius="none"
+        className="xyAnnotationTooltip"
+      >
+        <div className="xyAnnotationTooltip__rows">
+          {rows.slice(0, DISPLAYED_COUNT_OF_ROWS).map((row, index) => {
+            const extraFields = getExtraFields(row, formatFactory, columns);
 
-              return (
-                <Fragment key={row.time}>
-                  {index > 0 && (
-                    <>
-                      <EuiSpacer size="xs" />
-                      <EuiHorizontalRule margin="none" />
-                      <EuiSpacer size="xs" />
-                    </>
-                  )}
-                  <div className="xyAnnotationTooltip__row">
-                    <EuiFlexGroup gutterSize="xs">
-                      <EuiFlexItem grow={false}>
-                        <AnnotationIcon
-                          type={hasIcon(row.icon) ? row.icon : 'empty'}
-                          color={row.color}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiTitle size="xxxs">
-                          <h6>{row.label}</h6>
-                        </EuiTitle>
-                        <EuiFlexItem>{moment(row.time).format(timeFormat)}</EuiFlexItem>
-                        <TooltipAnnotationDetails
-                          key={snakeCase(row.time)}
-                          row={row}
-                          extraFields={extraFields}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </div>
-                </Fragment>
-              );
-            })}
-          </div>
-          {skippedCount ? (
-            <div className="xyAnnotationTooltip__skippedCount">
-              <EuiSpacer size="xs" />
-              <EuiHorizontalRule margin="none" />
-              <EuiSpacer size="xs" />
-              <div className="xyAnnotationTooltip__row ">
-                <FormattedMessage
-                  id="expressionXY.annotations.skippedCount"
-                  defaultMessage="+{value} more…"
-                  values={{ value: skippedCount }}
-                />
-              </div>
+            return (
+              <Fragment key={row.time}>
+                {index > 0 && (
+                  <>
+                    <EuiSpacer size="xs" />
+                    <EuiHorizontalRule margin="none" />
+                    <EuiSpacer size="xs" />
+                  </>
+                )}
+                <div className="xyAnnotationTooltip__row">
+                  <EuiFlexGroup gutterSize="xs">
+                    <EuiFlexItem grow={false}>
+                      <AnnotationIcon
+                        type={hasIcon(row.icon) ? row.icon : 'empty'}
+                        color={row.color}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiTitle size="xxxs">
+                        <h6>{row.label}</h6>
+                      </EuiTitle>
+                      <EuiFlexItem>{moment(row.time).format(timeFormat)}</EuiFlexItem>
+                      <TooltipAnnotationDetails
+                        key={snakeCase(row.time)}
+                        row={row}
+                        extraFields={extraFields}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </div>
+              </Fragment>
+            );
+          })}
+        </div>
+        {skippedCount ? (
+          <div className="xyAnnotationTooltip__skippedCount">
+            <EuiSpacer size="xs" />
+            <EuiHorizontalRule margin="none" />
+            <EuiSpacer size="xs" />
+            <div className="xyAnnotationTooltip__row ">
+              <FormattedMessage
+                id="expressionXY.annotations.skippedCount"
+                defaultMessage="+{value} more…"
+                values={{ value: skippedCount }}
+              />
             </div>
-          ) : null}
-        </EuiPanel>
-      );
-    };
+          </div>
+        ) : null}
+      </EuiPanel>
+    );
+  };
 
 function getCommonProperty<T, K extends keyof ManualPointEventAnnotationArgs>(
   configArr: ManualPointEventAnnotationArgs[],
@@ -331,8 +330,8 @@ export const Annotations = ({
               {
                 dataValue: isGrouped
                   ? moment(
-                    isBarChart && minInterval ? timebucket + minInterval / 2 : timebucket
-                  ).valueOf()
+                      isBarChart && minInterval ? timebucket + minInterval / 2 : timebucket
+                    ).valueOf()
                   : moment(time).valueOf(),
                 details: annotation.label,
               },
@@ -347,8 +346,8 @@ export const Annotations = ({
                   annotation.lineStyle === 'dashed'
                     ? [strokeWidth * 3, strokeWidth]
                     : annotation.lineStyle === 'dotted'
-                      ? [strokeWidth, strokeWidth]
-                      : undefined,
+                    ? [strokeWidth, strokeWidth]
+                    : undefined,
                 opacity: 1,
               },
             }}
