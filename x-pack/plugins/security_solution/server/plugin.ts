@@ -97,7 +97,7 @@ import type {
 import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
 import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 import { featureUsageService } from './endpoint/services/feature_usage';
-import { setIsElasticCloudDeployment } from '../server/lib/telemetry/helpers';
+import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
