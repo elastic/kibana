@@ -8,7 +8,6 @@ import React, { useCallback, ChangeEvent, MouseEvent } from 'react';
 import {
   EuiButtonEmpty,
   EuiPanel,
-  EuiRange,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
@@ -26,6 +25,7 @@ import {
   TTY_START,
   VIEW_IN_SESSION,
 } from './translations';
+import { TTYPlayerControlsMarkers } from './tty_player_controls_markers';
 
 export interface TTYPlayerControlsDeps {
   currentProcessEvent: ProcessEvent | undefined;
@@ -71,19 +71,12 @@ export const TTYPlayerControls = ({
   }, [linesLength, onSeekLine]);
 
   const seekToPrevProcess = useCallback(() => {
-    let index = findIndex(processStartMarkers, (marker) => {
-      if (marker.line > currentLine) {
-        return true;
-      }
+    const index =
+      currentLine > processStartMarkers[processStartMarkers.length - 1].line
+        ? processStartMarkers.length
+        : findIndex(processStartMarkers, (marker) => marker.line >= currentLine);
 
-      return false;
-    });
-
-    if (index === -1) {
-      index = processStartMarkers.length - 1;
-    }
-
-    const previousMarker = processStartMarkers[index - 2];
+    const previousMarker = processStartMarkers[index - 1];
     onSeekLine(previousMarker?.line || 0);
   }, [processStartMarkers, onSeekLine, currentLine]);
 
@@ -97,7 +90,7 @@ export const TTYPlayerControls = ({
     });
 
     const nextMarker = processStartMarkers[nextIndex];
-    onSeekLine(nextMarker?.line || linesLength);
+    onSeekLine(nextMarker?.line || linesLength - 1);
   }, [processStartMarkers, onSeekLine, linesLength, currentLine]);
 
   const handleViewInSession = useCallback(() => {
@@ -106,39 +99,6 @@ export const TTYPlayerControls = ({
       onClose();
     }
   }, [currentProcessEvent, onClose, onJumpToEvent]);
-
-  const markersProps = useMemo(() => {
-    if (linesLength < 1) {
-      return [];
-    }
-    return [
-      { type: 'output', value: 20 },
-      { type: 'output', value: 100 },
-      { label: 'data_limited', value: 121 },
-      // { label: 'data_limited', value: 122 },
-      // { label: 'data_limited', value: 123 },
-      // { label: 'data_limited', value: 124 },
-      // { label: 'data_limited', value: 125 },
-      // { label: 'data_limited', value: 126 },
-      // { label: 'data_limited', value: 127 },
-      // { label: 'data_limited', value: 128 },
-      // { label: 'data_limited', value: 129 },
-      // { label: 'data_limited', value: 130 },
-      // { label: 'data_limited', value: 131 },
-      // { label: 'data_limited', value: 132 },
-      // { label: 'data_limited', value: 133 },
-      // { label: 'data_limited', value: 134 },
-      // { label: 'data_limited', value: 135 },
-      // { label: 'data_limited', value: 136 },
-      // { label: 'data_limited', value: 137 },
-      // { label: 'data_limited', value: 138 },
-      // { label: 'data_limited', value: 139 },
-      // { label: 'data_limited', value: 140 },
-      // { label: 'data_limited', value: 141 },
-      { type: 'data_limited', value: 200 },
-      { type: 'data_limited', value: 400 },
-    ] as const;
-  }, [linesLength]);
 
   return (
     <EuiPanel
@@ -215,9 +175,9 @@ export const TTYPlayerControls = ({
         </EuiFlexItem>
         <EuiFlexItem style={{ position: 'relative' }}>
           <TTYPlayerControlsMarkers
-            markers={markersProps}
-            playerLength={linesLength}
-            playerValue={currentLine}
+            processStartMarkers={processStartMarkers}
+            linesLength={linesLength}
+            currentLine={currentLine}
             onChange={onLineChange}
           />
         </EuiFlexItem>
