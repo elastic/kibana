@@ -43,12 +43,13 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
-import { useForm, useController, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
+import type { UseFormReturn } from 'react-hook-form';
+import { useForm, useController, useFieldArray, useFormContext } from 'react-hook-form';
+import type { ECSMappingArray, ECSMapping } from '../../../common/schemas/common/utils';
 import {
   convertECSMappingToArray,
   convertECSMappingToObject,
 } from '../../../common/schemas/common/utils';
-import type { FormField } from '../../form/types';
 import ECSSchema from '../../common/schemas/ecs/v8.4.0.json';
 import osquerySchema from '../../common/schemas/osquery/v5.4.0.json';
 
@@ -57,21 +58,7 @@ import type { FormArrayField } from '../../shared_imports';
 import { OsqueryIcon } from '../../components/osquery_icon';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 
-export interface EcsMappingFormField {
-  key: string;
-  result: {
-    type: string;
-    value: string;
-  };
-}
-
-export type EcsMappingSerialized = Record<
-  string,
-  {
-    field?: string;
-    value?: string;
-  }
->;
+export type ECSMappingFormReturn = UseFormReturn<{ ecsMappingArray: ECSMappingArray }>;
 
 const typeMap = {
   binary: 'binary',
@@ -156,8 +143,11 @@ const ECSSchemaOptions = ECSSchema.map((ecs) => ({
 
 type ECSSchemaOption = typeof ECSSchemaOptions[0];
 
-interface ECSComboboxFieldProps extends FormField<string> {
+interface ECSComboboxFieldProps {
   euiFieldProps: EuiComboBoxProps<ECSSchemaOption>;
+  control: ECSMappingFormReturn['control'];
+  watch: ECSMappingFormReturn['watch'];
+  index: number;
   idAria?: string;
   error?: string;
 }
@@ -165,24 +155,43 @@ interface ECSComboboxFieldProps extends FormField<string> {
 const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
   euiFieldProps = {},
   idAria,
-  onChange,
-  value,
-  error,
+  index,
   watch,
+  control,
 }) => {
+  const { ecsMappingArray } = watch();
+  const ecsCurrentMapping = get(ecsMappingArray, `[${index}].result.value`);
+
+  const ecsFieldValidator = useCallback(
+    (value: string) =>
+      !value?.length && ecsCurrentMapping?.length
+        ? i18n.translate('xpack.osquery.pack.queryFlyoutForm.ecsFieldRequiredErrorMessage', {
+            defaultMessage: 'ECS field is required.',
+          })
+        : undefined,
+    [ecsCurrentMapping?.length]
+  );
+
+  const { field: ECSField, fieldState: ECSFieldState } = useController({
+    control,
+    name: `ecsMappingArray.${index}.key`,
+    rules: {
+      validate: ecsFieldValidator,
+    },
+    defaultValue: '',
+  });
+
   const [selectedOptions, setSelected] = useState<Array<EuiComboBoxOptionOption<ECSSchemaOption>>>(
     []
   );
   const describedByIds = useMemo(() => (idAria ? [idAria] : []), [idAria]);
-  const { ecsMappingArray: watchedEcsMapping } = watch() as unknown as {
-    ecsMappingArray: EcsMappingFormField[];
-  };
+  const { ecsMappingArray: watchedEcsMapping } = watch();
   const handleChange = useCallback(
     (newSelectedOptions) => {
       setSelected(newSelectedOptions);
-      onChange(newSelectedOptions[0]?.label ?? '');
+      ECSField.onChange(newSelectedOptions[0]?.label ?? '');
     },
-    [onChange]
+    [ECSField]
   );
 
   // TODO: Create own component for this.
@@ -252,36 +261,41 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
   useEffect(() => {
     // @ts-expect-error update types
     setSelected(() => {
-      if (!value?.length) return [];
+      if (!ECSField.value?.length) return [];
 
-      const selectedOption = find(ECSSchemaOptions, ['label', value]);
+      const selectedOption = find(ECSSchemaOptions, ['label', ECSField.value]);
 
       return selectedOption
         ? [selectedOption]
         : [
             {
-              label: value,
+              label: ECSField.value,
               value: {
-                value,
+                value: ECSField.value,
               },
             },
           ];
     });
-  }, [value]);
+  }, [ECSField.value]);
 
   return (
     <EuiFormRow
       helpText={helpText}
-      error={error}
-      isInvalid={!!error}
+      error={ECSFieldState.error?.message}
+      isInvalid={!!ECSFieldState.error?.message?.length}
       fullWidth
       describedByIds={describedByIds}
       isDisabled={euiFieldProps.isDisabled}
     >
       <EuiComboBox
+        onBlur={ECSField.onBlur}
+        value={ECSField.value}
+        name={ECSField.name}
         prepend={prepend}
+        inputRef={ECSField.ref}
         fullWidth
         singleSelection={SINGLE_SELECTION}
+        error={ECSFieldState.error?.message}
         // @ts-expect-error update types
         options={availableECSSchemaOptions}
         selectedOptions={selectedOptions}
@@ -343,8 +357,10 @@ const EMPTY_ARRAY: EuiComboBoxOptionOption[] = [];
 
 interface OsqueryColumnFieldProps {
   euiFieldProps: EuiComboBoxProps<OsquerySchemaOption>;
-  item: EcsMappingFormField;
   index: number;
+  control: ECSMappingFormReturn['control'];
+  watch: ECSMappingFormReturn['watch'];
+  trigger: ECSMappingFormReturn['trigger'];
   idAria?: string;
   isLastItem: boolean;
 }
@@ -352,68 +368,64 @@ interface OsqueryColumnFieldProps {
 const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   euiFieldProps,
   idAria,
-  item,
   index,
   isLastItem,
-  setValue,
   control,
   watch,
+  trigger,
 }) => {
-  const osqueryResultFieldValidator = (
-    value: string,
-    ecsMappingFormData: EcsMappingFormField[]
-  ): string | undefined => {
-    const currentMapping = ecsMappingFormData && ecsMappingFormData[index];
+  const { ecsMappingArray } = watch();
 
-    if (!value?.length && currentMapping?.key?.length) {
-      return i18n.translate(
-        'xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldRequiredErrorMessage',
-        {
-          defaultMessage: 'Value field is required.',
-        }
-      );
-    }
+  const osqueryResultFieldValidator = useCallback(
+    (value: string): string | undefined => {
+      const currentMapping = ecsMappingArray && ecsMappingArray[index];
 
-    if (!value?.length || currentMapping?.result?.type !== 'field') return;
-
-    const osqueryColumnExists = find(euiFieldProps.options, [
-      'label',
-      isArray(value) ? value[0] : value,
-    ]);
-
-    return !osqueryColumnExists
-      ? i18n.translate(
-          'xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldValueMissingErrorMessage',
+      if (!value?.length && currentMapping?.key?.length) {
+        return i18n.translate(
+          'xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldRequiredErrorMessage',
           {
-            defaultMessage: 'The current query does not return a {columnName} field',
-            values: {
-              columnName: value,
-            },
+            defaultMessage: 'Value field is required.',
           }
-        )
-      : undefined;
-  };
+        );
+      }
 
-  const { ecsMappingArray: watchedEcsMapping } = watch() as unknown as {
-    ecsMappingArray: EcsMappingFormField[];
-  };
+      if (!value?.length || currentMapping?.result?.type !== 'field') return;
 
-  const { field: resultTypeField, fieldState: resultTyoeFieldTypState } = useController({
+      const osqueryColumnExists = find(euiFieldProps.options, [
+        'label',
+        isArray(value) ? value[0] : value,
+      ]);
+
+      return !osqueryColumnExists
+        ? i18n.translate(
+            'xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldValueMissingErrorMessage',
+            {
+              defaultMessage: 'The current query does not return a {columnName} field',
+              values: {
+                columnName: value,
+              },
+            }
+          )
+        : undefined;
+    },
+    [ecsMappingArray, euiFieldProps.options, index]
+  );
+
+  const { field: resultTypeField } = useController({
     control,
     name: `ecsMappingArray.${index}.result.type`,
-    defaultValue: 'field',
+    defaultValue: OSQUERY_COLUMN_VALUE_TYPE_OPTIONS[0].value,
   });
 
   const { field: resultField, fieldState: resultFieldState } = useController({
     control,
     name: `ecsMappingArray.${index}.result.value`,
     rules: {
-      validate: (data) => osqueryResultFieldValidator(data, watchedEcsMapping),
+      validate: osqueryResultFieldValidator,
     },
     defaultValue: '',
   });
-  const itemPath = `ecsMappingArray.${index}`;
-  const resultValue = item.result?.value;
+
   const inputRef = useRef<HTMLInputElement>();
   const [selectedOptions, setSelected] = useState<OsquerySchemaOption[]>([]);
   const describedByIds = useMemo(() => (idAria ? [idAria] : []), [idAria]);
@@ -453,8 +465,8 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   );
 
   const isSingleSelection = useMemo(() => {
-    const ecsData = get(watchedEcsMapping, `${index}`);
-    if (ecsData?.key?.length && item.result?.type === 'value') {
+    const ecsData = get(ecsMappingArray, `${index}`);
+    if (ecsData?.key?.length && resultTypeField.value === 'value') {
       const ecsKeySchemaOption = find(ECSSchemaOptions, ['label', ecsData?.key]);
 
       return ecsKeySchemaOption?.value?.normalization !== 'array';
@@ -465,19 +477,16 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
     }
 
     return !!ecsData?.key?.length;
-  }, [index, isLastItem, item.result?.type, watchedEcsMapping]);
+  }, [ecsMappingArray, index, isLastItem, resultTypeField.value]);
 
   const onTypeChange = useCallback(
     (newType) => {
-      if (newType !== item.result?.type) {
-        setValue(`${itemPath}.result.type`, newType);
-        setValue(
-          `${itemPath}.result.value`,
-          newType === 'value' && isSingleSelection === false ? [] : ''
-        );
+      if (newType !== resultTypeField.value) {
+        resultTypeField.onChange(newType);
+        resultField.onChange(newType === 'value' && isSingleSelection === false ? [] : '');
       }
     },
-    [isSingleSelection, item.result?.type, itemPath, setValue]
+    [isSingleSelection, resultField, resultTypeField]
   );
 
   const handleCreateOption = useCallback(
@@ -487,19 +496,19 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
       if (!trimmedNewOption.length) return;
 
       if (isSingleSelection === false) {
-        setValue(`${itemPath}.result.value`, [trimmedNewOption]);
-        if (resultValue?.length) {
-          setValue(`${itemPath}.result.value`, [...castArray(resultValue), trimmedNewOption]);
+        resultField.onChange([trimmedNewOption]);
+        if (resultField.value?.length) {
+          resultField.onChange([...castArray(resultField.value), trimmedNewOption]);
         } else {
-          setValue(`${itemPath}.result.value`, [trimmedNewOption]);
+          resultField.onChange([trimmedNewOption]);
         }
 
         inputRef.current?.blur();
       } else {
-        setValue(`${itemPath}.result.value`, trimmedNewOption);
+        resultField.onChange(trimmedNewOption);
       }
     },
-    [isSingleSelection, itemPath, resultValue, setValue]
+    [isSingleSelection, resultField]
   );
 
   const Prepend = useMemo(
@@ -507,7 +516,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
       <StyledEuiSuperSelect
         disabled={euiFieldProps.isDisabled}
         options={OSQUERY_COLUMN_VALUE_TYPE_OPTIONS}
-        valueOfSelected={item.result?.type || OSQUERY_COLUMN_VALUE_TYPE_OPTIONS[0].value}
+        valueOfSelected={resultTypeField.value || OSQUERY_COLUMN_VALUE_TYPE_OPTIONS[0].value}
         // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
         popoverProps={{
           panelStyle: {
@@ -517,37 +526,41 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
         onChange={onTypeChange}
       />
     ),
-    [euiFieldProps.isDisabled, item.result?.type, onTypeChange]
+    [euiFieldProps.isDisabled, onTypeChange, resultTypeField.value]
   );
 
   useEffect(() => {
-    if (isSingleSelection && isArray(resultValue)) {
-      setValue(`${itemPath}.result.value`, resultValue.join(' '));
+    if (isSingleSelection && isArray(resultField.value)) {
+      resultField.onChange(resultField.value.join(' '));
     }
 
-    if (!isSingleSelection && !isArray(resultValue)) {
-      const value = resultValue.length ? [resultValue] : [];
-      setValue(`${itemPath}.result.value`, value);
+    if (!isSingleSelection && !isArray(resultField.value)) {
+      const value = resultField.value.length ? [resultField.value] : [];
+      resultField.onChange(value);
     }
-  }, [index, isSingleSelection, itemPath, resultValue, setValue]);
+  }, [index, isSingleSelection, resultField, resultField.value]);
 
   useEffect(() => {
     // @ts-expect-error hard to type to satisfy TS, but it represents proper types
     setSelected((_: OsquerySchemaOption[]): OsquerySchemaOption[] | Array<{ label: string }> => {
-      if (!resultValue?.length) return [];
+      if (!resultField.value?.length) return [];
 
       // Static array values
-      if (isArray(resultValue)) {
-        return resultValue.map((value) => ({ label: value })) as OsquerySchemaOption[];
+      if (isArray(resultField.value)) {
+        return resultField.value.map((value) => ({ label: value })) as OsquerySchemaOption[];
       }
 
-      const selectedOption = find(euiFieldProps?.options, ['label', resultValue]) as
+      const selectedOption = find(euiFieldProps?.options, ['label', resultField.value]) as
         | OsquerySchemaOption
         | undefined;
 
-      return selectedOption ? [selectedOption] : [{ label: resultValue }];
+      return selectedOption ? [selectedOption] : [{ label: resultField.value }];
     });
-  }, [euiFieldProps?.options, setSelected, resultValue]);
+  }, [euiFieldProps?.options, setSelected, resultField.value]);
+
+  useEffect(() => {
+    trigger(`ecsMappingArray.${index}.key`);
+  }, [resultField.value, trigger, index]);
 
   return (
     <EuiFormRow
@@ -578,7 +591,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
             rowHeight={32}
             isClearable
             singleSelection={isSingleSelection ? SINGLE_SELECTION : false}
-            options={(item.result?.type === 'field' && euiFieldProps.options) || EMPTY_ARRAY}
+            options={(resultTypeField.value === 'field' && euiFieldProps.options) || EMPTY_ARRAY}
             idAria={idAria}
             helpText={selectedOptions[0]?.value?.description}
             {...euiFieldProps}
@@ -598,9 +611,11 @@ export interface ECSMappingEditorFieldProps {
 interface ECSMappingEditorFormProps {
   isDisabled?: boolean;
   osquerySchemaOptions: OsquerySchemaOption[];
-  item: EcsMappingFormField;
   index: number;
   isLastItem: boolean;
+  control: ECSMappingFormReturn['control'];
+  watch: ECSMappingFormReturn['watch'];
+  trigger: ECSMappingFormReturn['trigger'];
   onDelete?: FormArrayField['removeItem'];
 }
 
@@ -615,38 +630,13 @@ export const defaultEcsFormData = {
 export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
   isDisabled,
   osquerySchemaOptions,
-  item,
   isLastItem,
   index,
   onDelete,
   control,
   watch,
-  setValue,
+  trigger,
 }) => {
-  const ecsFieldValidator = (value: string, ecsMapping: EcsMappingFormField[]) => {
-    const ecsCurrentMapping = ecsMapping && ecsMapping[index].result?.value;
-
-    return !value?.length && ecsCurrentMapping?.length
-      ? i18n.translate('xpack.osquery.pack.queryFlyoutForm.ecsFieldRequiredErrorMessage', {
-          defaultMessage: 'ECS field is required.',
-        })
-      : undefined;
-  };
-
-  const { ecsMappingArray: ecsMappingArray } = watch() as unknown as {
-    ecsMappingArray: EcsMappingFormField[];
-  };
-  const { field: ECSField, fieldState: ECSFieldState } = useController({
-    control,
-    name: `ecsMappingArray.${index}.key`,
-    rules: {
-      validate: (value: string) => ecsFieldValidator(value, ecsMappingArray),
-    },
-    defaultValue: '',
-  });
-
-  const ecsComboBoxEuiFieldProps = useMemo(() => ({ isDisabled }), [isDisabled]);
-
   const handleDeleteClick = useCallback(() => {
     if (onDelete) {
       onDelete(index);
@@ -660,13 +650,13 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
           <EuiFlexGroup alignItems="flexStart" gutterSize="s" wrap>
             <EuiFlexItem>
               <ECSComboboxField
-                onChange={ECSField.onChange}
-                onBlur={ECSField.onBlur}
-                value={ECSField.value}
-                name={ECSField.name}
-                error={ECSFieldState.error?.message}
-                euiFieldProps={ecsComboBoxEuiFieldProps}
+                control={control}
                 watch={watch}
+                index={index}
+                // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                euiFieldProps={{
+                  isDisabled,
+                }}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -680,10 +670,9 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
           <EuiFlexGroup alignItems="flexStart" gutterSize="s" wrap>
             <ECSFieldWrapper>
               <OsqueryColumnField
-                setValue={setValue}
                 control={control}
                 watch={watch}
-                item={item}
+                trigger={trigger}
                 index={index}
                 isLastItem={isLastItem}
                 // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
@@ -725,9 +714,9 @@ interface OsquerySchemaOption {
   label: string;
   value: {
     name: string;
-    description: string;
-    table: string;
-    suggestion_label: string;
+    description?: string;
+    table?: string;
+    suggestion_label?: string;
   };
 }
 
@@ -746,24 +735,16 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
     setError,
     clearErrors,
     formState: formStateRoot,
-    getFieldState,
-  } = useFormContext();
+    getFieldState: getFieldStateRoot,
+    watch: watchRoot,
+  } = useFormContext<{ query: string; ecs_mapping: ECSMapping }>();
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { query, ecs_mapping } = useWatch() as unknown as {
-    query: string;
-    ecs_mapping: EcsMappingSerialized;
-  };
+  const { query, ecs_mapping } = watchRoot();
+  const ecsMappingFieldState = getFieldStateRoot('ecs_mapping', formStateRoot);
 
-  const ecsMappingFieldState = getFieldState('ecs_mapping', formStateRoot);
-
-  const {
-    control,
-    trigger,
-    watch,
-    setValue: setArrayValue,
-    formState,
-    resetField,
-  } = useForm({
+  const { control, trigger, watch, formState, resetField, getFieldState } = useForm<{
+    ecsMappingArray: ECSMappingArray;
+  }>({
     mode: 'all',
     shouldUnregister: true,
     defaultValues: {
@@ -772,9 +753,7 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
         : [defaultEcsFormData],
     },
   });
-  const { fields, append, remove, replace } = useFieldArray<{
-    ecsMappingArray: EcsMappingFormField[];
-  }>({
+  const { fields, append, remove, replace } = useFieldArray({
     control,
     name: 'ecsMappingArray',
   });
@@ -794,10 +773,6 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
 
     return () => subscription.unsubscribe();
   }, [watch, append]);
-
-  useEffect(() => {
-    setTimeout(() => trigger('ecsMappingArray'), 0);
-  }, [query, trigger]);
 
   useEffect(() => {
     if (!query?.length) {
@@ -1050,7 +1025,6 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
     ecs_mapping,
     replace,
     resetField,
-    setArrayValue,
     setValue,
   ]);
 
@@ -1117,14 +1091,13 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
         <div key={item.id}>
           <ECSMappingEditorForm
             osquerySchemaOptions={osquerySchemaOptions}
-            item={item}
             index={index}
             isLastItem={index === array.length - 1}
             onDelete={remove}
             isDisabled={!!euiFieldProps?.isDisabled}
             control={control}
             watch={watch}
-            setValue={setArrayValue}
+            trigger={trigger}
           />
         </div>
       ))}
