@@ -149,14 +149,6 @@ export function injectReferences(
   if (!references || !references.length) {
     return state as XYState;
   }
-  const indexPatternIds = [];
-  if (initialContext) {
-    if ('isVisualizeAction' in initialContext) {
-      for (const { indexPatternId } of initialContext.layers) {
-        indexPatternIds.push(indexPatternId);
-      }
-    }
-  }
 
   const fallbackIndexPatternId = references.find(({ type }) => type === 'index-pattern')!.id;
   return {

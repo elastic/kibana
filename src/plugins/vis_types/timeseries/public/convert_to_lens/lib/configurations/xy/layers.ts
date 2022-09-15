@@ -14,7 +14,7 @@ import {
   YAxisMode,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { PaletteOutput } from '@kbn/coloring';
-import uuid from 'uuid';
+import { v4 } from 'uuid';
 import { transparentize } from '@elastic/eui';
 import Color from 'color';
 import { euiLightVars } from '@kbn/ui-theme';
@@ -149,7 +149,7 @@ export const getLayers = async (
           }
         });
         return {
-          layerId: uuid(),
+          layerId: v4(),
           layerType: 'annotations',
           annotations: convertedAnnotations,
           indexPatternId,
@@ -168,6 +168,7 @@ const convertAnnotation = (
   if (annotation.query_string) {
     const extraFields = annotation.fields
       ? annotation.fields
+          ?.replace(/\s/g, '')
           ?.split(',')
           .map((field) => {
             const dataViewField = dataView.getFieldByName(field);
