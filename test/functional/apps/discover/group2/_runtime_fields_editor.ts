@@ -117,6 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // navigate to doc view
       const fieldName = '_runtimefield-doc-view';
       await createRuntimeField(fieldName);
+
       const table = await PageObjects.discover.getDocTable();
       const useLegacyTable = await PageObjects.discover.useLegacyTable();
       await table.clickRowToggle();
