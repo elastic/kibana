@@ -67,7 +67,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToMuteRulesMessage',
           {
-            defaultMessage: 'Failed to mute rule(s)',
+            defaultMessage: 'Failed to mute rules',
           }
         ),
       });
@@ -87,7 +87,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToUnmuteRulesMessage',
           {
-            defaultMessage: 'Failed to unmute rule(s)',
+            defaultMessage: 'Failed to unmute rules',
           }
         ),
       });
@@ -107,7 +107,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToEnableRulesMessage',
           {
-            defaultMessage: 'Failed to enable rule(s)',
+            defaultMessage: 'Failed to enable rules',
           }
         ),
       });
@@ -127,7 +127,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToDisableRulesMessage',
           {
-            defaultMessage: 'Failed to disable rule(s)',
+            defaultMessage: 'Failed to disable rules',
           }
         ),
       });
@@ -147,7 +147,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToDeleteRulesMessage',
           {
-            defaultMessage: 'Failed to delete rule(s)',
+            defaultMessage: 'Failed to delete rules',
           }
         ),
       });
@@ -167,7 +167,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToUpdateRuleAPIKeysMessage',
           {
-            defaultMessage: 'Failed to update API keys for rule(s)',
+            defaultMessage: 'Failed to update API keys for rules',
           }
         ),
       });
@@ -248,7 +248,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         >
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.updateRuleAPIKeysTitle"
-            defaultMessage="Update API Keys"
+            defaultMessage="Update API keys"
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
