@@ -190,13 +190,12 @@ export const TTYPlayerControls = ({
             />
           </EuiToolTip>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiRange
-            value={currentLine}
-            min={0}
-            max={Math.max(0, linesLength - 1)}
+        <EuiFlexItem style={{ position: 'relative' }}>
+          <TTYPlayerControlsMarkers
+            markers={markersProps}
+            playerLength={linesLength}
+            playerValue={currentLine}
             onChange={onLineChange}
-            fullWidth
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
