@@ -44,10 +44,10 @@ describe('SuggestUsersPopover', () => {
     fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'dingo' } });
 
     await waitFor(() => {
-      expect(screen.getByText('wet_dingo@elastic.co')).toBeInTheDocument();
+      expect(screen.getByText('WD')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('wet_dingo@elastic.co'));
+    fireEvent.click(screen.getByText('WD'));
 
     expect(onUsersChange.mock.calls[0][0]).toMatchInlineSnapshot(`
       Array [
@@ -75,12 +75,12 @@ describe('SuggestUsersPopover', () => {
     fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'elastic' } });
 
     await waitFor(() => {
-      expect(screen.getByText('wet_dingo@elastic.co')).toBeInTheDocument();
-      expect(screen.getByText('damaged_raccoon@elastic.co')).toBeInTheDocument();
+      expect(screen.getByText('WD')).toBeInTheDocument();
+      expect(screen.getByText('DR')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('wet_dingo@elastic.co'));
-    fireEvent.click(screen.getByText('damaged_raccoon@elastic.co'));
+    fireEvent.click(screen.getByText('WD'));
+    fireEvent.click(screen.getByText('DR'));
 
     expect(onUsersChange.mock.calls[1][0]).toMatchInlineSnapshot(`
       Array [
@@ -123,10 +123,10 @@ describe('SuggestUsersPopover', () => {
     fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'elastic' } });
 
     await waitFor(() => {
-      expect(screen.getByText('wet_dingo@elastic.co')).toBeInTheDocument();
+      expect(screen.getByText('WD')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('wet_dingo@elastic.co'));
+    fireEvent.click(screen.getByText('WD'));
 
     expect(onUsersChange.mock.calls[0][0]).toMatchInlineSnapshot(`
       Array [
@@ -173,10 +173,10 @@ describe('SuggestUsersPopover', () => {
     fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'dingo' } });
 
     await waitFor(() => {
-      expect(screen.getByText('wet_dingo@elastic.co')).toBeInTheDocument();
+      expect(screen.getByText('WD')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('wet_dingo@elastic.co'));
+    fireEvent.click(screen.getByText('WD'));
     expect(screen.getByText('1 assigned')).toBeInTheDocument();
   });
 
@@ -187,7 +187,7 @@ describe('SuggestUsersPopover', () => {
 
     expect(screen.queryByText('assigned')).not.toBeInTheDocument();
     fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'dingo' } });
-    fireEvent.click(screen.getByText('wet_dingo@elastic.co'));
+    fireEvent.click(screen.getByText('WD'));
     expect(screen.getByText('1 assigned')).toBeInTheDocument();
   });
 
