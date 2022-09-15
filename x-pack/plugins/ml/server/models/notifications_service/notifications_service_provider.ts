@@ -35,9 +35,9 @@ export class NotificationsService {
    */
   async searchMessages(params: MessagesSearchParams) {
     const [adJobIds, dfaJobIds, modelIds] = await Promise.all([
-      this.mlSavedObjectService.getIds('anomaly-detector', 'job_id'),
-      this.mlSavedObjectService.getIds('data-frame-analytics', 'job_id'),
-      await this.mlSavedObjectService.getModelIds('model_id'),
+      this.mlSavedObjectService.getAnomalyDetectionJobIds(),
+      this.mlSavedObjectService.getDataFrameAnalyticsJobIds(),
+      this.mlSavedObjectService.getTrainedModelsIds(),
     ]);
 
     const results = await Promise.all(

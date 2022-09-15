@@ -637,6 +637,18 @@ export function mlSavedObjectServiceFactory(
     return models.map((o) => o.attributes[idType]);
   }
 
+  async function getAnomalyDetectionJobIds() {
+    return _getIds('anomaly-detector', 'job_id');
+  }
+
+  async function getDataFrameAnalyticsJobIds() {
+    return _getIds('data-frame-analytics', 'job_id');
+  }
+
+  async function getTrainedModelsIds() {
+    return _getModelIds('model_id');
+  }
+
   async function findTrainedModelsObjectForJobs(
     jobIds: string[],
     currentSpaceOnly: boolean = true
@@ -744,8 +756,9 @@ export function mlSavedObjectServiceFactory(
   }
 
   return {
-    getIds: _getIds,
-    getModelIds: _getModelIds,
+    getAnomalyDetectionJobIds,
+    getDataFrameAnalyticsJobIds,
+    getTrainedModelsIds,
     getAllJobObjects,
     getJobObject,
     createAnomalyDetectionJob,
