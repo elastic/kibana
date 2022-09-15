@@ -14,6 +14,13 @@ import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 
 export function notificationsRoutes({ router, routeGuard }: RouteInitialization) {
+  /**
+   * @apiGroup Notifications
+   *
+   * @api {get} /api/ml/notifications Get notifications
+   * @apiName GetNotifications
+   * @apiDescription Retrieves notifications based on provided criteria.
+   */
   router.get(
     {
       path: '/api/ml/notifications',
@@ -39,6 +46,13 @@ export function notificationsRoutes({ router, routeGuard }: RouteInitialization)
     })
   );
 
+  /**
+   * @apiGroup Notifications
+   *
+   * @api {get} /api/ml/notifications/count Get notification counts
+   * @apiName GetNotificationCounts
+   * @apiDescription Counts notifications by level.
+   */
   router.get(
     {
       path: '/api/ml/notifications/count',
