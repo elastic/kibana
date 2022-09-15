@@ -30,6 +30,13 @@ const InputCaptureContainer = styled.div`
     // out right combination of pseudo selectors
     outline: none !important;
   }
+
+  .textSelectionBoundaryHelper {
+    opacity: 0;
+    position: absolute;
+    top: -100vh;
+    left: -100vw;
+  }
 `;
 
 /**
@@ -84,6 +91,8 @@ export const InputCapture = memo<InputCaptureProps>(
               focusEleRef.current?.contains(selection.anchorNode)
             : false;
 
+        // De-select any text that might be currently selected on the screen now
+        // that we have captured the selection text.
         selection?.removeAllRanges();
 
         if (!selection || selectionText.length === 0 || !isSelectionWithinInputCapture) {
@@ -148,6 +157,9 @@ export const InputCapture = memo<InputCaptureProps>(
           selection: getTextSelection(),
           eventDetails,
         });
+
+        ev.stopPropagation();
+        ev.preventDefault();
       },
       [getTextSelection, onCapture]
     );
@@ -207,7 +219,14 @@ export const InputCapture = memo<InputCaptureProps>(
           onBlur={handleOnBlur}
           onFocus={handleOnFocus}
         >
+          {/*
+            This div.textSelectionBoundaryHelper and the one below help to ensure that when the user
+            selects the start or end of the input text, that the node that are returned in the
+            `Selection` object for 'focusNode` and `anchorNode` are within the input capture area.
+          */}
+          <div className="textSelectionBoundaryHelper"> </div>
           {children}
+          <div className="textSelectionBoundaryHelper"> </div>
         </div>
       </InputCaptureContainer>
     );
