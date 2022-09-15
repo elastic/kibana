@@ -515,6 +515,11 @@ export const RulesList = ({
     return unsnoozeRule({ http, id: rule.id, scheduleIds });
   };
 
+  const onSearchPopulate = (value: string) => {
+    setInputText(value);
+    setSearchText(value);
+  };
+
   const filterOptions = sortBy(Object.entries(groupRuleTypesByProducer())).map(
     ([groupName, ruleTypesOptions]) => ({
       groupName: getProducerFeatureName(groupName) ?? capitalize(groupName),
@@ -637,7 +642,7 @@ export const RulesList = ({
             fullWidth
             isClearable
             data-test-subj="ruleSearchField"
-            value={searchText}
+            value={inputText}
             onChange={(e) => {
               setInputText(e.target.value);
               if (e.target.value === '') {
@@ -944,7 +949,7 @@ export const RulesList = ({
           onClearSelection();
           await loadData();
         }}
-        onSearchPopulate={setSearchText}
+        onSearchPopulate={onSearchPopulate}
       />
       <BulkSnoozeScheduleModal
         rulesToSchedule={rulesToSchedule}
@@ -958,7 +963,7 @@ export const RulesList = ({
           onClearSelection();
           await loadData();
         }}
-        onSearchPopulate={setSearchText}
+        onSearchPopulate={onSearchPopulate}
       />
       <UpdateApiKeyModalConfirmation
         onCancel={() => {
@@ -976,7 +981,7 @@ export const RulesList = ({
           onClearSelection();
           await loadData();
         }}
-        onSearchPopulate={setSearchText}
+        onSearchPopulate={onSearchPopulate}
       />
       <EuiSpacer size="xs" />
       {getRulesList()}

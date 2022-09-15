@@ -365,6 +365,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           id="rulesListTable_selectAll"
           checked={isPageSelected}
           onChange={onSelectPage}
+          data-test-subj="checkboxSelectAll"
         />
       ),
       render: (name: string, rule: RuleTableItem) => {
@@ -373,6 +374,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
             id={`ruleListTable_select_${rule.id}}`}
             onChange={() => onSelectRow(rule)}
             checked={isRowSelected(rule)}
+            data-test-subj={`checkboxSelectRow-${rule.id}`}
           />
         );
       },
@@ -875,7 +877,11 @@ export const RulesListTable = (props: RulesListTableProps) => {
           {numberOfSelectedRules > 0 ? (
             renderSelectAllDropdown?.()
           ) : (
-            <EuiText size="xs" style={{ fontWeight: euiTheme.font.weight.semiBold }}>
+            <EuiText
+              size="xs"
+              style={{ fontWeight: euiTheme.font.weight.semiBold }}
+              data-test-subj="totalRulesCount"
+            >
               {TOTAL_RULES(formattedTotalRules, rulesState.totalItemCount)}
             </EuiText>
           )}
