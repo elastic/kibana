@@ -20,6 +20,7 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
   getDocumentTypeFilterForTransactions,
+  getDocumentTypeFilterForServiceTransactions,
   getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
@@ -38,6 +39,7 @@ interface AggregationParams {
   kuery: string;
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
+  searchAggregatedServiceMetrics: boolean;
   maxNumServices: number;
   start: number;
   end: number;
@@ -50,6 +52,7 @@ export async function getServiceTransactionStats({
   kuery,
   setup,
   searchAggregatedTransactions,
+  searchAggregatedServiceMetrics,
   maxNumServices,
   start,
   end,
@@ -58,12 +61,12 @@ export async function getServiceTransactionStats({
 }: AggregationParams) {
   const { apmEventClient } = setup;
 
-  const outcomes = getOutcomeAggregation();
+  const outcomes = getOutcomeAggregation(searchAggregatedServiceMetrics);
 
   const metrics = {
     avg_duration: {
       avg: {
-        field: getDurationFieldForTransactions(searchAggregatedTransactions),
+        field: getDurationFieldForTransactions(searchAggregatedTransactions, searchAggregatedServiceMetrics),
       },
     },
     outcomes,
@@ -74,7 +77,10 @@ export async function getServiceTransactionStats({
     {
       apm: {
         events: [
-          getProcessorEventForTransactions(searchAggregatedTransactions),
+          getProcessorEventForTransactions(
+            searchAggregatedTransactions, 
+            searchAggregatedServiceMetrics
+          ),
         ],
       },
       body: {
@@ -83,7 +89,8 @@ export async function getServiceTransactionStats({
           bool: {
             filter: [
               ...getDocumentTypeFilterForTransactions(
-                searchAggregatedTransactions
+                searchAggregatedTransactions,
+                searchAggregatedServiceMetrics
               ),
               ...rangeQuery(start, end),
               ...environmentQuery(environment),

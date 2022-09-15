@@ -24,6 +24,7 @@ export async function getServicesItems({
   kuery,
   setup,
   searchAggregatedTransactions,
+  searchAggregatedServiceMetrics,
   logger,
   start,
   end,
@@ -34,6 +35,7 @@ export async function getServicesItems({
   kuery: string;
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
+  searchAggregatedServiceMetrics: boolean;
   logger: Logger;
   start: number;
   end: number;
@@ -46,6 +48,7 @@ export async function getServicesItems({
       kuery,
       setup,
       searchAggregatedTransactions,
+      searchAggregatedServiceMetrics,
       maxNumServices: MAX_NUMBER_OF_SERVICES,
       start,
       end,
