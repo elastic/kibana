@@ -124,7 +124,8 @@ export class RenderingService {
     const stylesheetPaths = getStylesheetPaths({
       darkMode,
       themeVersion,
-      basePath: staticBaseUrl,
+      // Fallback to the server URL, if the static url is not provided
+      basePath: staticBaseUrl || serverBasePath,
       buildNum,
     });
 
