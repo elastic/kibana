@@ -195,14 +195,14 @@ export class ProjectMonitorFormatter {
       const previousMonitor = await this.getExistingMonitor(monitor.id);
 
       if (previousMonitor) {
-        await this.updateMonitor(previousMonitor, normalizedMonitor);
+        await this.updateMonitor(previousMonitor, normalizedMonitor as MonitorFields);
         this.updatedMonitors.push(monitor.id);
         if (this.staleMonitorsMap[monitor.id]) {
           this.staleMonitorsMap[monitor.id].stale = false;
         }
         this.handleStreamingMessage({ message: `${monitor.id}: monitor updated successfully` });
       } else {
-        await this.createMonitor(normalizedMonitor);
+        await this.createMonitor(normalizedMonitor as MonitorFields);
         this.createdMonitors.push(monitor.id);
         this.handleStreamingMessage({ message: `${monitor.id}: monitor created successfully` });
       }
