@@ -26,7 +26,7 @@ import { IndicatorsTableContext, IndicatorsTableContextValue } from './context';
 import { IndicatorsFlyout } from '../indicators_flyout/indicators_flyout';
 import { Pagination } from '../../hooks/use_indicators';
 import { useToolbarOptions } from './hooks/use_toolbar_options';
-import { useColumnSettings } from './hooks/use_column_settings';
+import { ColumnSettings } from './hooks/use_column_settings';
 
 export interface IndicatorsTableProps {
   indicators: Indicator[];
@@ -37,6 +37,7 @@ export interface IndicatorsTableProps {
   loading: boolean;
   indexPattern: SecuritySolutionDataViewBase;
   browserFields: BrowserFields;
+  columnSettings: ColumnSettings;
 }
 
 export const TABLE_TEST_ID = 'tiIndicatorsTable';
@@ -56,6 +57,7 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   pagination,
   loading,
   browserFields,
+  columnSettings: { columns, columnVisibility, handleResetColumns, handleToggleColumn, sorting },
 }) => {
   const [expanded, setExpanded] = useState<Indicator>();
 
@@ -88,8 +90,6 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
     ],
     [renderCellValue]
   );
-
-  const { columns, columnVisibility, handleResetColumns, handleToggleColumn } = useColumnSettings();
 
   useMemo(() => {
     columns.forEach(
@@ -147,8 +147,6 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
       <EuiDataGrid
         aria-labelledby="indicators-table"
         leadingControlColumns={leadingControlColumns}
-        columns={columns}
-        columnVisibility={columnVisibility}
         rowCount={indicatorCount}
         renderCellValue={renderCellValue}
         toolbarVisibility={toolbarOptions}
@@ -159,6 +157,9 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
         }}
         gridStyle={gridStyle}
         data-test-subj={TABLE_TEST_ID}
+        sorting={sorting}
+        columnVisibility={columnVisibility}
+        columns={columns}
       />
     );
   }, [
@@ -171,6 +172,7 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
     onChangePage,
     pagination,
     renderCellValue,
+    sorting,
     toolbarOptions,
   ]);
 

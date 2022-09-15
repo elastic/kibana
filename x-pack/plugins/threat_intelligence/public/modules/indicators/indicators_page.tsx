@@ -16,9 +16,12 @@ import { FiltersGlobal } from '../../containers/filters_global';
 import QueryBar from '../query_bar/components/query_bar';
 import { useSourcererDataView } from './hooks/use_sourcerer_data_view';
 import { FieldTypesProvider } from '../../containers/field_types_provider';
+import { useColumnSettings } from './components/indicators_table/hooks/use_column_settings';
 
 export const IndicatorsPage: VFC = () => {
   const { browserFields, indexPattern } = useSourcererDataView();
+
+  const columnSettings = useColumnSettings();
 
   const {
     timeRange,
@@ -35,6 +38,7 @@ export const IndicatorsPage: VFC = () => {
     filters,
     filterQuery,
     timeRange,
+    sorting: columnSettings.sorting.columns,
   });
 
   return (
@@ -60,9 +64,10 @@ export const IndicatorsPage: VFC = () => {
         <IndicatorsFilters filterManager={filterManager}>
           <IndicatorsBarChartWrapper timeRange={timeRange} indexPattern={indexPattern} />
           <IndicatorsTable
-            {...indicators}
             browserFields={browserFields}
             indexPattern={indexPattern}
+            columnSettings={columnSettings}
+            {...indicators}
           />
         </IndicatorsFilters>
       </DefaultPageLayout>

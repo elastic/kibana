@@ -12,6 +12,7 @@ import { StoryProvidersComponent } from '../../../../common/mocks/story_provider
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { IndicatorsTable } from './indicators_table';
 import { IndicatorsFiltersContext } from '../../context';
+import { DEFAULT_COLUMNS } from './hooks/use_column_settings';
 
 export default {
   component: IndicatorsTable,
@@ -22,6 +23,19 @@ const mockIndexPattern: DataView = undefined as unknown as DataView;
 
 const stub = () => void 0;
 
+const columnSettings = {
+  columnVisibility: {
+    visibleColumns: DEFAULT_COLUMNS.map(({ id }) => id),
+    setVisibleColumns: stub,
+  },
+  columns: DEFAULT_COLUMNS,
+  handleResetColumns: stub,
+  handleToggleColumn: stub,
+  sorting: {
+    columns: [],
+    onSort: stub,
+  },
+};
 export function WithIndicators() {
   const indicatorsFixture: Indicator[] = Array(10).fill(generateMockIndicator());
 
@@ -41,6 +55,7 @@ export function WithIndicators() {
           onChangeItemsPerPage={stub}
           indicatorCount={indicatorsFixture.length * 2}
           indexPattern={mockIndexPattern}
+          columnSettings={columnSettings}
         />
       </IndicatorsFiltersContext.Provider>
     </StoryProvidersComponent>
@@ -63,6 +78,7 @@ export function WithNoIndicators() {
         indicatorCount={0}
         loading={false}
         indexPattern={mockIndexPattern}
+        columnSettings={columnSettings}
       />
     </StoryProvidersComponent>
   );

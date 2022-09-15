@@ -59,6 +59,8 @@ describe('useColumnSettings()', () => {
             "threat.indicator.last_seen",
           ]
         `);
+
+        expect(result.current.sorting.columns).toMatchInlineSnapshot(`Array []`);
       });
     });
 
@@ -75,6 +77,14 @@ describe('useColumnSettings()', () => {
             { id: 'tags', displayAsText: 'tags' },
             { id: 'stream', displayAsText: 'stream' },
           ],
+          sortingState: {
+            columns: [
+              {
+                id: 'threat.indicator.name',
+                direction: 'asc',
+              },
+            ],
+          },
         });
       });
 
@@ -121,6 +131,17 @@ describe('useColumnSettings()', () => {
               "id": "stream",
             },
           ]
+        `);
+
+        expect(result.current.sorting.columns).toMatchInlineSnapshot(`
+          Object {
+            "columns": Array [
+              Object {
+                "direction": "asc",
+                "id": "threat.indicator.name",
+              },
+            ],
+          }
         `);
       });
     });
@@ -256,6 +277,27 @@ describe('useColumnSettings()', () => {
           Object {
             "displayAsText": "Last seen",
             "id": "threat.indicator.last_seen",
+          },
+        ]
+      `);
+    });
+  });
+
+  describe('sorting', () => {
+    it('should update internal state when onSort is called', async () => {
+      const { result } = renderUseColumnSettings();
+
+      expect(result.current.sorting.columns).toMatchInlineSnapshot(`Array []`);
+
+      await act(async () => {
+        result.current.sorting.onSort([{ id: 'threat.indicator.name', direction: 'asc' }]);
+      });
+
+      expect(result.current.sorting.columns).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "direction": "asc",
+            "id": "threat.indicator.name",
           },
         ]
       `);

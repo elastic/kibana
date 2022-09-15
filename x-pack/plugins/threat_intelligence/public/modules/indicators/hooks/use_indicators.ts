@@ -28,6 +28,7 @@ export interface UseIndicatorsParams {
   filterQuery: Query;
   filters: Filter[];
   timeRange?: TimeRange;
+  sorting: any[];
 }
 
 export interface UseIndicatorsValue {
@@ -56,6 +57,7 @@ export interface Pagination {
 export const useIndicators = ({
   filters,
   filterQuery,
+  sorting,
   timeRange,
 }: UseIndicatorsParams): UseIndicatorsValue => {
   const {
@@ -126,6 +128,7 @@ export const useIndicators = ({
                 from,
                 fields: [{ field: '*', include_unmapped: true }],
                 query: queryToExecute,
+                sort: sorting.map(({ id, direction }) => ({ [id]: direction })),
                 runtime_mappings: {
                   'threat.indicator.name': {
                     type: 'keyword',
@@ -168,7 +171,7 @@ export const useIndicators = ({
           },
         });
     },
-    [queryToExecute, searchService, selectedPatterns]
+    [queryToExecute, searchService, selectedPatterns, sorting]
   );
 
   const onChangeItemsPerPage = useCallback(
