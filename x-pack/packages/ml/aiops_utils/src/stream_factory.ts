@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import crypto from 'crypto';
 import { Stream } from 'stream';
 import * as zlib from 'zlib';
 
@@ -42,7 +43,8 @@ interface StreamFactoryReturnType<T = unknown> {
  */
 export function streamFactory<T = string>(
   headers: Headers,
-  logger: Logger
+  logger: Logger,
+  flushFix?: boolean
 ): StreamFactoryReturnType<T>;
 /**
  * Sets up a response stream with support for gzip compression depending on provided
@@ -53,7 +55,8 @@ export function streamFactory<T = string>(
  */
 export function streamFactory<T = unknown>(
   headers: Headers,
-  logger: Logger
+  logger: Logger,
+  flushFix: boolean = false
 ): StreamFactoryReturnType<T> {
   let streamType: StreamType;
   const isCompressed = acceptCompression(headers);
@@ -82,7 +85,14 @@ export function streamFactory<T = unknown>(
     }
 
     try {
-      const line = typeof d !== 'string' ? `${JSON.stringify(d)}${DELIMITER}` : d;
+      const line =
+        streamType === 'ndjson'
+          ? `${JSON.stringify({
+              ...d,
+              // This is a temporary fix for response streaming with proxy configurations that buffer responses up to 4KB in size.
+              ...(flushFix ? { flushPayload: crypto.randomBytes(4096).toString('hex') } : {}),
+            })}${DELIMITER}`
+          : d;
       stream.write(line);
     } catch (e) {
       logger.error(`Could not serialize or stream data chunk: ${e.toString()}`);
