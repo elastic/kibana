@@ -24,6 +24,13 @@ const ARIA_PLACEHOLDER_MESSAGE = i18n.translate(
   { defaultMessage: 'Enter a command' }
 );
 
+const deSelectTextOnPage = () => {
+  const selection = getSelection();
+  if (selection) {
+    selection.removeAllRanges();
+  }
+};
+
 const InputCaptureContainer = styled.div`
   .invisible-input {
     // Tried to find a way to not use '!important', but cant seem to figure
@@ -76,7 +83,7 @@ export const InputCapture = memo<InputCaptureProps>(
     // Reference to the `<div>` that take in focus (`tabIndex`)
     const focusEleRef = useRef<HTMLDivElement | null>(null);
 
-    const clipboardCaptureRef = useRef<HTMLInputElement | null>(null);
+    // const clipboardCaptureRef = useRef<HTMLInputElement | null>(null);
 
     const getTextSelection = useCallback((): string => {
       if (focusEleRef.current) {
@@ -93,10 +100,6 @@ export const InputCapture = memo<InputCaptureProps>(
               focusEleRef.current?.contains(selection.anchorNode)
             : false;
 
-        // De-select any text that might be currently selected on the screen now
-        // that we have captured the selection text.
-        selection?.removeAllRanges();
-
         if (!selection || selectionText.length === 0 || !isSelectionWithinInputCapture) {
           return '';
         }
@@ -111,9 +114,9 @@ export const InputCapture = memo<InputCaptureProps>(
       (ev) => {
         // allows for clipboard events to be captured via onPaste event handler
         if (ev.metaKey || ev.ctrlKey) {
-          if (clipboardCaptureRef.current) {
-            clipboardCaptureRef.current.focus();
-          }
+          // if (clipboardCaptureRef.current) {
+          //   clipboardCaptureRef.current.focus();
+          // }
           return;
         }
 
@@ -121,6 +124,8 @@ export const InputCapture = memo<InputCaptureProps>(
         // are at least two characters long and because we are handling `onKeyDown` we know that
         // a printable `.key` will always be just one character long.
         const newValue = /^[\w\d]{2}/.test(ev.key) ? '' : ev.key;
+
+        const currentTextSelection = getTextSelection();
 
         const eventDetails = pick(ev, [
           'key',
@@ -134,11 +139,15 @@ export const InputCapture = memo<InputCaptureProps>(
 
         onCapture({
           value: newValue,
-          selection: getTextSelection(),
+          selection: currentTextSelection,
           eventDetails,
         });
+
+        if (currentTextSelection) {
+          deSelectTextOnPage();
+        }
       },
-      [clipboardCaptureRef, getTextSelection, onCapture]
+      [getTextSelection, onCapture]
     );
 
     const handleOnPaste = useCallback<ClipboardEventHandler>(
@@ -148,6 +157,8 @@ export const InputCapture = memo<InputCaptureProps>(
 
         // Get the data the user pasted as text and remove all new line breaks from it
         const value = ev.clipboardData.getData('text').replace(/[\r\n]/g, '');
+
+        const currentTextSelection = getTextSelection();
 
         // hard-coded for use in onCapture and future keyboard functions
         const eventDetails = {
@@ -162,9 +173,13 @@ export const InputCapture = memo<InputCaptureProps>(
 
         onCapture({
           value,
-          selection: getTextSelection(),
+          selection: currentTextSelection,
           eventDetails,
         });
+
+        if (currentTextSelection) {
+          deSelectTextOnPage();
+        }
       },
       [getTextSelection, onCapture]
     );
@@ -233,15 +248,15 @@ export const InputCapture = memo<InputCaptureProps>(
           {children}
           <div className="textSelectionBoundaryHelper"> </div>
         </div>
-        <input
-          ref={clipboardCaptureRef}
-          type="text"
-          value=""
-          onPaste={handleOnPaste}
-          onChange={() => {}}
-          spellCheck="false"
-          className="textSelectionBoundaryHelper"
-        />
+        {/* <input*/}
+        {/*  ref={clipboardCaptureRef}*/}
+        {/*  type="text"*/}
+        {/*  value=""*/}
+        {/*  onPaste={handleOnPaste}*/}
+        {/*  onChange={() => {}}*/}
+        {/*  spellCheck="false"*/}
+        {/*  className="textSelectionBoundaryHelper"*/}
+        {/* />*/}
       </InputCaptureContainer>
     );
   }
