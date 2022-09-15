@@ -25,7 +25,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./cases/get_case'));
     loadTestFile(require.resolve('./cases/patch_cases'));
     loadTestFile(require.resolve('./cases/post_case'));
-    loadTestFile(require.resolve('./cases/assignees'));
     loadTestFile(require.resolve('./cases/resolve_case'));
     loadTestFile(require.resolve('./cases/reporters/get_reporters'));
     loadTestFile(require.resolve('./cases/status/get_status'));
@@ -39,13 +38,13 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./metrics/get_case_metrics_actions'));
     loadTestFile(require.resolve('./metrics/get_case_metrics_connectors'));
     loadTestFile(require.resolve('./metrics/get_cases_metrics'));
+    loadTestFile(require.resolve('./user_profiles/get_current'));
 
     /**
      * Internal routes
      */
 
     loadTestFile(require.resolve('./internal/bulk_create_attachments'));
-    loadTestFile(require.resolve('./internal/suggest_user_profiles'));
 
     /**
      * Attachments framework
