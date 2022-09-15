@@ -264,6 +264,9 @@ export interface DocLinks {
       macos_system_ext: string;
       linux_deadlock: string;
     };
+    readonly packageActionTroubleshooting: {
+      es_connection: string;
+    };
     readonly threatIntelInt: string;
     readonly responseActions: string;
   };

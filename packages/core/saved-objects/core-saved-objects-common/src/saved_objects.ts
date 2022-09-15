@@ -31,6 +31,7 @@ export type SavedObjectAttribute = SavedObjectAttributeSingle | SavedObjectAttri
  * property.
  *
  * @public
+ * @deprecated This type reduces the type safety of your code. Create an interface for your specific saved object type or use `unknown` instead.
  */
 export interface SavedObjectAttributes {
   [key: string]: SavedObjectAttribute;
@@ -76,7 +77,7 @@ export interface SavedObject<T = unknown> {
   /** Timestamp of the last time this document had been updated.  */
   updated_at?: string;
   error?: SavedObjectError;
-  /** {@inheritdoc SavedObjectAttributes} */
+  /** The data for a Saved Object is stored as an object in the `attributes` property. **/
   attributes: T;
   /** {@inheritdoc SavedObjectReference} */
   references: SavedObjectReference[];
