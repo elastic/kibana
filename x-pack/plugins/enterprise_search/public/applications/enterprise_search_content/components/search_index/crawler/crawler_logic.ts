@@ -75,7 +75,6 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
     reApplyCrawlRules: (domain) => ({ domain }),
     startCrawl: (overrides) => ({ overrides }),
     stopCrawl: () => null,
-    fetchIndex: true,
   },
   connect: {
     actions: [
@@ -98,10 +97,6 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
       const { indexName } = IndexNameLogic.values;
 
       GetCrawlerApiLogic.actions.makeRequest({ indexName });
-    },
-    fetchIndex: () => {
-      const { indexName } = IndexNameLogic.values;
-      actions.makeFetchIndexRequest({ indexName });
     },
     reApplyCrawlRules: async ({ domain }) => {
       const { indexName } = IndexNameLogic.values;
