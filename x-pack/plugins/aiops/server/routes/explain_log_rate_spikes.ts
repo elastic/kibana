@@ -19,6 +19,7 @@ import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 
 import {
   addChangePointsAction,
+  addChangePointsGroupAction,
   addChangePointsHistogramAction,
   aiopsExplainLogRateSpikesSchema,
   addErrorAction,
@@ -30,8 +31,14 @@ import { API_ENDPOINT } from '../../common/api';
 
 import type { AiopsLicense } from '../types';
 
-import { fetchFieldCandidates } from './queries/fetch_field_candidates';
 import { fetchChangePointPValues } from './queries/fetch_change_point_p_values';
+import { fetchFieldCandidates } from './queries/fetch_field_candidates';
+import { fetchFrequentItems } from './queries/fetch_frequent_items';
+import {
+  getSimpleHierarchicalTree,
+  getSimpleHierarchicalTreeLeaves,
+  markDuplicates,
+} from './queries/get_simple_hierarchical_tree';
 
 // Overall progress is a float from 0 to 1.
 const LOADED_FIELD_CANDIDATES = 0.2;
@@ -54,6 +61,8 @@ export const defineExplainLogRateSpikesRoute = (
       if (!license.isActivePlatinumLicense) {
         return response.forbidden();
       }
+
+      const groupingEnabled = !!request.body.grouping;
 
       const client = (await context.core).elasticsearch.client.asCurrentUser;
 
@@ -196,6 +205,33 @@ export const defineExplainLogRateSpikesRoute = (
         if (changePoints?.length === 0) {
           endWithUpdatedLoadingState();
           return;
+        }
+
+        if (groupingEnabled) {
+          const { fields, df } = await fetchFrequentItems(
+            client,
+            request.body.index,
+            changePoints,
+            request.body.timeFieldName,
+            request.body.deviationMin,
+            request.body.deviationMax
+          );
+
+          // Filter itemsets by significant change point field value pairs
+          const filteredDf = df.filter((fi) => {
+            const { set: currentItems } = fi;
+
+            return Object.entries(currentItems).every(([key, value]) => {
+              return changePoints.some((cp) => {
+                return cp.fieldName === key && cp.fieldValue === value;
+              });
+            });
+          });
+
+          const { root } = getSimpleHierarchicalTree(filteredDf, true, false, fields);
+          const changePointsGroups = getSimpleHierarchicalTreeLeaves(root, []);
+
+          push(addChangePointsGroupAction(markDuplicates(changePointsGroups)));
         }
 
         const histogramFields: [NumericHistogramField] = [
