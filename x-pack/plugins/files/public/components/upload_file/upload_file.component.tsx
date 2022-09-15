@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import classNames from 'classnames';
 import {
   EuiIcon,
@@ -19,7 +19,7 @@ import {
   type EuiFilePickerProps,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { i18nTexts } from '../i18n_texts';
+import { i18nTexts } from './i18n_texts';
 
 import './upload_file.scss';
 
@@ -41,7 +41,7 @@ export interface Props
   initialFilePromptText?: string;
 }
 
-export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) => {
+export const UploadFile = React.forwardRef<EuiFilePicker, Props>((props, ref) => {
   const {
     done,
     label,
@@ -64,7 +64,7 @@ export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
     ...rest
   } = props;
 
-  const cn = useMemo(() => classNames({ filesUploadFile: true }, className), [className]);
+  const cn = classNames({ filesUploadFile: true }, className);
   const id = useGeneratedHtmlId({ prefix: 'filesUploadFile' });
   const errorId = `${id}_error`;
 

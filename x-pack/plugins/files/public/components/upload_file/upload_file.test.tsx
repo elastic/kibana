@@ -20,7 +20,7 @@ import { createMockFilesClient } from '../../mocks';
 import { FileJSON } from '../../../common';
 import { FilesContext } from '../context';
 import { UploadFile, Props } from './upload_file';
-import { UploadFileUI } from './components';
+import { UploadFile as Component } from './upload_file.component';
 
 describe('UploadFile', () => {
   const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
@@ -58,7 +58,7 @@ describe('UploadFile', () => {
       actions: {
         addFiles: (files: File[]) =>
           act(async () => {
-            testBed.component.find(UploadFileUI).props().onChange(files);
+            testBed.component.find(Component).props().onChange(files);
             await sleep(1);
             testBed.component.update();
           }),

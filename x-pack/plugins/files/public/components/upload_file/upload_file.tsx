@@ -15,7 +15,7 @@ import { FilesClient } from '../../types';
 import { useFilesContext } from '../context';
 import { useBehaviorSubject } from '../use_behavior_subject';
 
-import { UploadFileUI } from './components';
+import { UploadFile as Component } from './upload_file.component';
 import { createUploadState } from './upload_state';
 
 /**
@@ -136,7 +136,7 @@ export const UploadFile: FunctionComponent<Props> = ({
   }, [onDone, onError, uploadState, files, kindId, meta, allowRepeatedUploads, clearFiles]);
 
   return (
-    <UploadFileUI
+    <Component
       ref={ref}
       ready={Boolean(files.length)}
       immediate={immediate}
