@@ -86,6 +86,7 @@ export async function getLensServices(
     attributeService,
     executionContext: coreStart.executionContext,
     http: coreStart.http,
+    uiActions: startDependencies.uiActions,
     chrome: coreStart.chrome,
     overlays: coreStart.overlays,
     uiSettings: coreStart.uiSettings,
@@ -294,7 +295,6 @@ export async function mountApp(
                 initCallback();
               }}
             />
-            ;
           </AnalyticsNoDataPageKibanaProvider>
         );
       }

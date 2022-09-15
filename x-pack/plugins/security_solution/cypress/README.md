@@ -83,7 +83,7 @@ This configuration runs cypress tests against an arbitrary host.
 
 #### integration-test (CI)
 
-This configuration is driven by [elastic/integration-test](https://github.com/elastic/integration-test) which, as part of a bigger set of tests, provisions one VM with two instances configured in CCS mode and runs the [CCS Cypress test specs](./ccs_integration).
+This configuration is driven by [elastic/integration-test](https://github.com/elastic/integration-test) which, as part of a bigger set of tests, provisions one VM with two instances configured in CCS mode and runs the [CCS Cypress test specs](./ccs_e2e).
 
 The two clusters are named `admin` and `data` and are reachable as follows:
 
@@ -280,13 +280,13 @@ If you are debugging a flaky test, a good tip is to insert a `cy.wait(<some long
 
 Below you can find the folder structure used on our Cypress tests.
 
-### ccs_integration/
+### ccs_e2e/
 
 Contains the specs that are executed in a Cross Cluster Search configuration.
 
-### integration/
+### e2e/
 
-Cypress convention. Contains the specs that are going to be executed.
+Cypress convention starting version 10 (previously known as integration). Contains the specs that are going to be executed.
 
 ### fixtures/
 
@@ -343,7 +343,7 @@ The data the tests need:
 - Is generated on the fly using our application APIs (preferred way)
 - Is ingested on the ELS instance using the `es_archiver` utility
 
-By default, when running the tests in Jenkins mode, a base set of data is ingested on the ELS instance: an empty kibana index and a set of auditbeat data (the `empty_kibana` and `auditbeat` archives, respectively). This is usually enough to cover most of the scenarios that we are testing.
+By default, when running the tests in Jenkins mode, a base set of data is ingested on the ELS instance: a set of auditbeat data (the `auditbeat` archive). This is usually enough to cover most of the scenarios that we are testing.
 
 ### How to generate a new archive
 

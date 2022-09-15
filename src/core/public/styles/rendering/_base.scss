@@ -1,0 +1,79 @@
+@import '../../mixins';
+
+/**
+ * Stretch the root element of the Kibana application to set the base-size that
+ * flexed children should keep. Only works when paired with root styles applied
+ * by core service from new platform
+ */
+
+#kibana-body {
+  // DO NOT ADD ANY OVERFLOW BEHAVIORS HERE
+  // It will break the sticky navigation
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+// Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header
+#app-fixed-viewport {
+  pointer-events: none;
+  visibility: hidden;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.kbnAppWrapper {
+  // DO NOT ADD ANY OTHER STYLES TO THIS SELECTOR
+  // This a very nested dependency happnening in "all" apps
+  display: flex;
+  flex-flow: column nowrap;
+  flex-grow: 1;
+  z-index: 0; // This effectively puts every high z-index inside the scope of this wrapper to it doesn't interfere with the header and/or overlay mask
+  position: relative; // This is temporary for apps that relied on this being present on `.application`
+}
+
+@mixin kbnAffordForHeader($headerHeight) {
+  @include euiHeaderAffordForFixed($headerHeight);
+
+  #securitySolutionStickyKQL,
+  #app-fixed-viewport {
+    top: $headerHeight;
+  }
+
+  @include euiBreakpoint('xl', 'l') {
+    .kbnStickyMenu {
+      position: sticky;
+      max-height: calc(100vh - #{$headerHeight + $euiSize});
+      top: $headerHeight + $euiSize;
+    }
+
+    .kbnSolutionNav__sidebar {
+      position: sticky;
+      max-height: calc(100vh - #{$headerHeight});
+      top: $headerHeight;
+    }
+  }
+}
+
+.kbnBody {
+  @include kbnAffordForHeader($kbnHeaderOffset);
+
+  &.kbnBody--hasHeaderBanner {
+    @include kbnAffordForHeader($kbnHeaderOffsetWithBanner);
+
+    // Prevents banners from covering full screen data grids
+    .euiDataGrid--fullScreen {
+      height: calc(100vh - #{$kbnHeaderBannerHeight});
+      top: $kbnHeaderBannerHeight;
+    }
+  }
+  &.kbnBody--chromeHidden {
+    @include kbnAffordForHeader(0);
+  }
+  &.kbnBody--chromeHidden.kbnBody--hasHeaderBanner {
+    @include kbnAffordForHeader($kbnHeaderBannerHeight);
+  }
+}

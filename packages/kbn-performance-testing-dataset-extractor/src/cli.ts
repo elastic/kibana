@@ -17,7 +17,7 @@ import { createFlagError } from '@kbn/dev-cli-errors';
 import { EsVersion, readConfigFile } from '@kbn/test';
 import path from 'path';
 import { extractor } from './extractor';
-import { ScalabilitySetup } from './types';
+import { ScalabilitySetup, TestData } from './types';
 
 interface Vars {
   [key: string]: string;
@@ -64,6 +64,8 @@ export async function runExtractor() {
         );
       }
 
+      const testData: TestData = config.get('testData');
+
       const env = config.get(`kbnTestServer.env`);
       if (
         typeof env !== 'object' ||
@@ -103,7 +105,7 @@ export async function runExtractor() {
       const withoutStaticResources = !!flags['without-static-resources'] || false;
 
       return extractor({
-        param: { journeyName, scalabilitySetup, buildId, withoutStaticResources },
+        param: { journeyName, scalabilitySetup, testData, buildId, withoutStaticResources },
         client: { baseURL, username, password },
         log,
       });

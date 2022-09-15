@@ -13,11 +13,12 @@ import { ActionParamsType, ActionTypeSecretsType, getActionType, TeamsActionType
 import { actionsConfigMock } from '../actions_config.mock';
 import { actionsMock } from '../mocks';
 import { createActionTypeRegistry } from './index.test';
-import * as utils from './lib/axios_utils';
+import * as utils from '../lib/axios_utils';
+import { ActionsConfigurationUtilities } from '../actions_config';
 
 jest.mock('axios');
-jest.mock('./lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('./lib/axios_utils');
+jest.mock('../lib/axios_utils', () => {
+  const originalUtils = jest.requireActual('../lib/axios_utils');
   return {
     ...originalUtils,
     request: jest.fn(),
@@ -34,11 +35,13 @@ const services: Services = actionsMock.createServices();
 
 let actionType: TeamsActionType;
 let mockedLogger: jest.Mocked<Logger>;
+let configurationUtilities: ActionsConfigurationUtilities;
 
 beforeAll(() => {
   const { logger, actionTypeRegistry } = createActionTypeRegistry();
   actionType = actionTypeRegistry.get<{}, ActionTypeSecretsType, ActionParamsType>(ACTION_TYPE_ID);
   mockedLogger = logger;
+  configurationUtilities = actionTypeRegistry.getUtils();
 });
 
 describe('action registration', () => {
@@ -50,20 +53,22 @@ describe('action registration', () => {
 
 describe('validateParams()', () => {
   test('should validate and pass when params is valid', () => {
-    expect(validateParams(actionType, { message: 'a message' })).toEqual({
+    expect(
+      validateParams(actionType, { message: 'a message' }, { configurationUtilities })
+    ).toEqual({
       message: 'a message',
     });
   });
 
   test('should validate and throw error when params is invalid', () => {
     expect(() => {
-      validateParams(actionType, {});
+      validateParams(actionType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action params: [message]: expected value of type [string] but got [undefined]"`
     );
 
     expect(() => {
-      validateParams(actionType, { message: 1 });
+      validateParams(actionType, { message: 1 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action params: [message]: expected value of type [string] but got [number]"`
     );
@@ -72,60 +77,76 @@ describe('validateParams()', () => {
 
 describe('validateActionTypeSecrets()', () => {
   test('should validate and pass when config is valid', () => {
-    validateSecrets(actionType, {
-      webhookUrl: 'https://example.com',
-    });
+    validateSecrets(
+      actionType,
+      {
+        webhookUrl: 'https://example.com',
+      },
+      { configurationUtilities }
+    );
   });
 
   test('should validate and throw error when config is invalid', () => {
     expect(() => {
-      validateSecrets(actionType, {});
+      validateSecrets(actionType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: [webhookUrl]: expected value of type [string] but got [undefined]"`
     );
 
     expect(() => {
-      validateSecrets(actionType, { webhookUrl: 1 });
+      validateSecrets(actionType, { webhookUrl: 1 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: [webhookUrl]: expected value of type [string] but got [number]"`
     );
 
     expect(() => {
-      validateSecrets(actionType, { webhookUrl: 'fee-fi-fo-fum' });
+      validateSecrets(actionType, { webhookUrl: 'fee-fi-fo-fum' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: error configuring teams action: unable to parse host name from webhookUrl"`
     );
   });
 
   test('should validate and pass when the teams webhookUrl is added to allowedHosts', () => {
+    const configUtils = {
+      ...actionsConfigMock.create(),
+      ensureUriAllowed: (url: string) => {
+        expect(url).toEqual('https://outlook.office.com/');
+      },
+    };
     actionType = getActionType({
       logger: mockedLogger,
-      configurationUtilities: {
-        ...actionsConfigMock.create(),
-        ensureUriAllowed: (url) => {
-          expect(url).toEqual('https://outlook.office.com/');
-        },
-      },
+      configurationUtilities: configUtils,
     });
 
-    expect(validateSecrets(actionType, { webhookUrl: 'https://outlook.office.com/' })).toEqual({
+    expect(
+      validateSecrets(
+        actionType,
+        { webhookUrl: 'https://outlook.office.com/' },
+        { configurationUtilities: configUtils }
+      )
+    ).toEqual({
       webhookUrl: 'https://outlook.office.com/',
     });
   });
 
   test('config validation returns an error if the specified URL isnt added to allowedHosts', () => {
+    const configUtils = {
+      ...actionsConfigMock.create(),
+      ensureUriAllowed: () => {
+        throw new Error(`target hostname is not added to allowedHosts`);
+      },
+    };
     actionType = getActionType({
       logger: mockedLogger,
-      configurationUtilities: {
-        ...actionsConfigMock.create(),
-        ensureUriAllowed: () => {
-          throw new Error(`target hostname is not added to allowedHosts`);
-        },
-      },
+      configurationUtilities: configUtils,
     });
 
     expect(() => {
-      validateSecrets(actionType, { webhookUrl: 'https://outlook.office.com/' });
+      validateSecrets(
+        actionType,
+        { webhookUrl: 'https://outlook.office.com/' },
+        { configurationUtilities: configUtils }
+      );
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: error configuring teams action: target hostname is not added to allowedHosts"`
     );

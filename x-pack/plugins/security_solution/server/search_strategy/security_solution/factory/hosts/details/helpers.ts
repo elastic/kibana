@@ -24,7 +24,7 @@ import type {
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 import type { EndpointAppContext } from '../../../../../endpoint/types';
-import { getPendingActionCounts } from '../../../../../endpoint/services';
+import { getPendingActionsSummary } from '../../../../../endpoint/services';
 
 export const HOST_DETAILS_FIELDS = [
   '_id',
@@ -182,9 +182,10 @@ export const getHostEndpoint = async (
     const fleetAgentId = endpointData.metadata.elastic.agent.id;
 
     const pendingActions = fleetAgentId
-      ? getPendingActionCounts(
+      ? getPendingActionsSummary(
           esClient.asInternalUser,
           endpointMetadataService,
+          logger,
           [fleetAgentId],
           endpointContext.experimentalFeatures.pendingActionResponsesWithAck
         )

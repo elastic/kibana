@@ -59,6 +59,7 @@ describe('ml_executor', () => {
       bulkCreateDuration: 0,
       createdItemsCount: 0,
       errors: [],
+      createdItems: [],
     });
   });
 

@@ -51,6 +51,7 @@ export const DatafeedPreview: FC<{
     } catch (error) {
       // fail silently
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [combinedJob]);
 
   const loadDataPreview = useCallback(async () => {
@@ -89,6 +90,7 @@ export const DatafeedPreview: FC<{
       );
       setPreviewJsonString(errorText);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [combinedJob]);
 
   return (

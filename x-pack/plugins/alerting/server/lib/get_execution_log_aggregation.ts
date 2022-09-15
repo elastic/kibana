@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { KueryNode } from '@kbn/core-saved-objects-api-server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
 import { flatMap, get } from 'lodash';
@@ -15,6 +16,8 @@ import { IExecutionLog, IExecutionLogResult } from '../../common';
 
 const DEFAULT_MAX_BUCKETS_LIMIT = 1000; // do not retrieve more than this number of executions
 
+const RULE_ID_FIELD = 'rule.id';
+const RULE_NAME_FIELD = 'rule.name';
 const PROVIDER_FIELD = 'event.provider';
 const START_FIELD = 'event.start';
 const ACTION_FIELD = 'event.action';
@@ -80,7 +83,7 @@ interface ExcludeExecuteStartAggResult extends estypes.AggregationsAggregateBase
   };
 }
 export interface IExecutionLogAggOptions {
-  filter?: string;
+  filter?: string | KueryNode;
   page: number;
   perPage: number;
   sort: estypes.Sort;
@@ -129,7 +132,8 @@ export function getExecutionLogAggregation({
 
   let dslFilterQuery: estypes.QueryDslBoolQuery['filter'];
   try {
-    dslFilterQuery = filter ? toElasticsearchQuery(fromKueryExpression(filter)) : undefined;
+    const filterKueryNode = typeof filter === 'string' ? fromKueryExpression(filter) : filter;
+    dslFilterQuery = filter ? toElasticsearchQuery(filterKueryNode) : undefined;
   } catch (err) {
     throw Boom.badRequest(`Invalid kuery syntax for filter ${filter}`);
   }
@@ -256,7 +260,14 @@ export function getExecutionLogAggregation({
                   top_hits: {
                     size: 1,
                     _source: {
-                      includes: [OUTCOME_FIELD, MESSAGE_FIELD, ERROR_MESSAGE_FIELD, VERSION_FIELD],
+                      includes: [
+                        OUTCOME_FIELD,
+                        MESSAGE_FIELD,
+                        ERROR_MESSAGE_FIELD,
+                        VERSION_FIELD,
+                        RULE_ID_FIELD,
+                        RULE_NAME_FIELD,
+                      ],
                     },
                   },
                 },
@@ -325,6 +336,9 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
       ? `${outcomeAndMessage?.message ?? ''} - ${outcomeAndMessage?.error?.message ?? ''}`
       : outcomeAndMessage?.message ?? '';
   const version = outcomeAndMessage ? outcomeAndMessage?.kibana?.version ?? '' : '';
+
+  const ruleId = outcomeAndMessage ? outcomeAndMessage?.rule?.id ?? '' : '';
+  const ruleName = outcomeAndMessage ? outcomeAndMessage?.rule?.name ?? '' : '';
   return {
     id: bucket?.key ?? '',
     timestamp: bucket?.ruleExecution?.executeStartTime.value_as_string ?? '',
@@ -343,6 +357,8 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     es_search_duration_ms: bucket?.ruleExecution?.esSearchDuration?.value ?? 0,
     schedule_delay_ms: scheduleDelayUs / Millis2Nanos,
     timed_out: timedOut,
+    rule_id: ruleId,
+    rule_name: ruleName,
   };
 }
 

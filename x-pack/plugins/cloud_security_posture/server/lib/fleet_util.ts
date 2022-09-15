@@ -7,7 +7,7 @@
 import { uniq, map } from 'lodash';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type {
-  PackagePolicyServiceInterface,
+  PackagePolicyClient,
   AgentPolicyServiceInterface,
   AgentService,
 } from '@kbn/fleet-plugin/server';
@@ -58,11 +58,14 @@ export const getCspAgentPolicies = async (
   packagePolicies: PackagePolicy[],
   agentPolicyService: AgentPolicyServiceInterface
 ): Promise<AgentPolicy[]> =>
-  agentPolicyService.getByIds(soClient, uniq(map(packagePolicies, 'policy_id')));
+  agentPolicyService.getByIds(soClient, uniq(map(packagePolicies, 'policy_id')), {
+    withPackagePolicies: true,
+    ignoreMissing: true,
+  });
 
 export const getCspPackagePolicies = (
   soClient: SavedObjectsClientContract,
-  packagePolicyService: PackagePolicyServiceInterface,
+  packagePolicyService: PackagePolicyClient,
   packageName: string,
   queryParams: Partial<BenchmarksQueryParams>
 ): Promise<ListResult<PackagePolicy>> => {

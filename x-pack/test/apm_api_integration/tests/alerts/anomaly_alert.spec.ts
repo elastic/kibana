@@ -24,7 +24,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'fetching service anomalies with a trial license',
-    { config: 'trial', archives: ['apm_mappings_only_8.0.0'] },
+    { config: 'trial', archives: [] },
     () => {
       const start = '2021-01-01T00:00:00.000Z';
       const end = '2021-01-08T00:15:00.000Z';
@@ -38,7 +38,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let ruleId: string | undefined;
 
       before(async () => {
-        const serviceA = apm.service('a', 'production', 'java').instance('a');
+        const serviceA = apm
+          .service({ name: 'a', environment: 'production', agentName: 'java' })
+          .instance('a');
 
         const events = timerange(new Date(start).getTime(), new Date(end).getTime())
           .interval('1m')
@@ -52,7 +54,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             return [
               ...range(0, count).flatMap((_) =>
                 serviceA
-                  .transaction('tx', 'request')
+                  .transaction({ transactionName: 'tx' })
                   .timestamp(timestamp)
                   .duration(duration)
                   .outcome(outcome)

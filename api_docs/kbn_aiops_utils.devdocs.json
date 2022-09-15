@@ -48,6 +48,7 @@
         ],
         "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/aiops-utils",
@@ -69,6 +70,7 @@
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -85,6 +87,7 @@
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -114,6 +117,7 @@
         ],
         "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/aiops-utils",
@@ -129,6 +133,7 @@
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -145,6 +150,7 @@
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -161,6 +167,7 @@
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -179,17 +186,20 @@
           "\nOverload to set up a string based response stream with support\nfor gzip compression depending on provided request headers.\n"
         ],
         "signature": [
-          "(headers: Headers, logger: ",
+          "(headers: ",
+          "Headers",
+          ", logger: ",
           "Logger",
           ") => StreamFactoryReturnType<T>"
         ],
         "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/aiops-utils",
             "id": "def-common.streamFactory.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "headers",
             "description": [
@@ -200,6 +210,7 @@
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -214,6 +225,7 @@
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -232,17 +244,20 @@
           "\nSets up a response stream with support for gzip compression depending on provided\nrequest headers. Any non-string data pushed to the stream will be stream as NDJSON.\n"
         ],
         "signature": [
-          "(headers: Headers, logger: ",
+          "(headers: ",
+          "Headers",
+          ", logger: ",
           "Logger",
           ") => StreamFactoryReturnType<T>"
         ],
         "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/aiops-utils",
             "id": "def-common.streamFactory.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "headers",
             "description": [
@@ -253,6 +268,7 @@
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -267,6 +283,7 @@
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -287,6 +304,7 @@
         ],
         "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/aiops-utils",
@@ -300,6 +318,7 @@
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -314,6 +333,7 @@
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -332,6 +352,7 @@
         ],
         "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/aiops-utils",
@@ -345,6 +366,7 @@
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -359,6 +381,7 @@
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -370,6 +393,7 @@
             "description": [],
             "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/aiops-utils",
@@ -383,6 +407,7 @@
                 ],
                 "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "returnComment": [],
                 "children": [
                   {
@@ -396,7 +421,8 @@
                       "S"
                     ],
                     "path": "node_modules/@types/react/index.d.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/aiops-utils",
@@ -409,7 +435,8 @@
                       "A"
                     ],
                     "path": "node_modules/@types/react/index.d.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -424,7 +451,8 @@
                   "I[\"reducer\"] extends React.Reducer<infer S, any> ? S : never"
                 ],
                 "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -446,6 +474,7 @@
         ],
         "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/aiops-utils",
@@ -461,6 +490,7 @@
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -477,6 +507,7 @@
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -488,6 +519,7 @@
             "description": [],
             "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/aiops-utils",
@@ -501,6 +533,7 @@
                 ],
                 "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "returnComment": [],
                 "children": [
                   {
@@ -514,7 +547,8 @@
                       "S"
                     ],
                     "path": "node_modules/@types/react/index.d.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/aiops-utils",
@@ -527,7 +561,8 @@
                       "A"
                     ],
                     "path": "node_modules/@types/react/index.d.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -542,7 +577,8 @@
                   "I[\"reducer\"] extends React.Reducer<infer S, any> ? S : never"
                 ],
                 "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -565,6 +601,7 @@
         ],
         "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/aiops-utils",
@@ -574,7 +611,8 @@
             "label": "endpoint",
             "description": [],
             "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/aiops-utils",
@@ -587,7 +625,8 @@
               "object"
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/aiops-utils",
@@ -601,6 +640,7 @@
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -614,7 +654,8 @@
                   "S"
                 ],
                 "path": "node_modules/@types/react/index.d.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/aiops-utils",
@@ -627,7 +668,8 @@
                   "A"
                 ],
                 "path": "node_modules/@types/react/index.d.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -645,6 +687,7 @@
         ],
         "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/aiops-utils",
@@ -654,7 +697,8 @@
             "label": "endpoint",
             "description": [],
             "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/aiops-utils",
@@ -667,7 +711,8 @@
               "object"
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/aiops-utils",
@@ -681,6 +726,7 @@
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/use_fetch_stream.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -694,7 +740,8 @@
                   "S"
                 ],
                 "path": "node_modules/@types/react/index.d.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/aiops-utils",
@@ -707,7 +754,8 @@
                   "A"
                 ],
                 "path": "node_modules/@types/react/index.d.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -725,6 +773,7 @@
         ],
         "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/aiops-utils",
@@ -734,7 +783,8 @@
             "label": "baselineMin",
             "description": [],
             "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/aiops-utils",
@@ -744,7 +794,8 @@
             "label": "baselineMax",
             "description": [],
             "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/aiops-utils",
@@ -754,7 +805,8 @@
             "label": "deviationMin",
             "description": [],
             "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/aiops-utils",
@@ -764,7 +816,8 @@
             "label": "deviationMax",
             "description": [],
             "path": "x-pack/packages/ml/aiops_utils/src/get_window_parameters.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

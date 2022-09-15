@@ -24,6 +24,7 @@
         "description": [],
         "path": "packages/core/base/core-base-server-mocks/src/core_context.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-base-server-mocks",
@@ -47,6 +48,7 @@
             ],
             "path": "packages/core/base/core-base-server-mocks/src/core_context.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -66,7 +68,8 @@
                   "> | undefined; }"
                 ],
                 "path": "packages/core/base/core-base-server-mocks/src/core_context.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }

@@ -18,7 +18,6 @@ import {
   isBinaryExpression,
 } from '@babel/types';
 import fs from 'fs';
-import glob from 'glob';
 import { promisify } from 'util';
 import normalize from 'normalize-path';
 import path from 'path';
@@ -37,7 +36,6 @@ export const readFileAsync = promisify(fs.readFile);
 export const writeFileAsync = promisify(fs.writeFile);
 export const makeDirAsync = promisify(fs.mkdir);
 export const accessAsync = promisify(fs.access);
-export const globAsync = promisify(glob);
 
 export function normalizePath(inputPath) {
   return normalize(path.relative('.', inputPath));

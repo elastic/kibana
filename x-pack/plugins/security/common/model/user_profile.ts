@@ -60,10 +60,6 @@ export interface UserProfileUserInfo {
    * Optional full name of the user.
    */
   full_name?: string;
-  /**
-   * Optional display name of the user.
-   */
-  display_name?: string;
 }
 
 /**

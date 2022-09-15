@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
-import type { Agent, AgentPolicy, PackagePolicy, SimplifiedAgentStatus } from '../../../types';
+import type { Agent, AgentPolicy, SimplifiedAgentStatus } from '../../../types';
 import {
   usePagination,
   useAuthz,
@@ -35,8 +35,12 @@ import {
   sendGetAgentTags,
 } from '../../../hooks';
 import { AgentEnrollmentFlyout, AgentPolicySummaryLine } from '../../../components';
-import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
-import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE, SO_SEARCH_LIMIT } from '../../../constants';
+import {
+  AgentStatusKueryHelper,
+  isAgentUpgradeable,
+  policyHasFleetServer,
+} from '../../../services';
+import { AGENTS_PREFIX, SO_SEARCH_LIMIT } from '../../../constants';
 import {
   AgentReassignAgentPolicyModal,
   AgentHealth,
@@ -389,10 +393,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       return false;
     }
 
-    return agentPolicy.package_policies.some(
-      (ap: string | PackagePolicy) =>
-        typeof ap !== 'string' && ap.package?.name === FLEET_SERVER_PACKAGE
-    );
+    return policyHasFleetServer(agentPolicy);
   }, [agentToUnenroll, agentPoliciesIndexedById]);
 
   // Fleet server unhealthy status

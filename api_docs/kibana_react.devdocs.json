@@ -37,6 +37,7 @@
         ],
         "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -50,6 +51,7 @@
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaReact",
@@ -70,6 +72,7 @@
                 ],
                 "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -87,6 +90,7 @@
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -102,6 +106,7 @@
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -117,6 +122,7 @@
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -148,6 +154,7 @@
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaReact",
@@ -168,6 +175,7 @@
                 ],
                 "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -189,6 +197,7 @@
                 ],
                 "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -202,10 +211,12 @@
             "label": "debouncedFetch",
             "description": [],
             "signature": [
-              "((filter: string) => Promise<void>) & _.Cancelable"
+              "((filter: string) => Promise<void>) & ",
+              "Cancelable"
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -216,7 +227,8 @@
                 "label": "filter",
                 "description": [],
                 "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -232,6 +244,7 @@
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -247,6 +260,7 @@
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -262,6 +276,7 @@
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -277,6 +292,7 @@
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -292,6 +308,7 @@
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaReact",
@@ -302,6 +319,7 @@
                 "description": [],
                 "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "kibanaReact",
@@ -311,7 +329,8 @@
                     "label": "queryText",
                     "description": [],
                     "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -330,6 +349,7 @@
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -345,6 +365,7 @@
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -360,6 +381,7 @@
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -375,6 +397,7 @@
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -390,6 +413,7 @@
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -405,6 +429,7 @@
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -422,6 +447,7 @@
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaReact",
@@ -436,6 +462,7 @@
                 ],
                 "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -453,6 +480,7 @@
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -470,6 +498,7 @@
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -485,6 +514,7 @@
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -500,6 +530,7 @@
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -525,6 +556,7 @@
         ],
         "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -535,6 +567,7 @@
             "description": [],
             "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaReact",
@@ -547,7 +580,8 @@
                   "true"
                 ],
                 "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaReact",
@@ -560,7 +594,8 @@
                   "false"
                 ],
                 "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaReact",
@@ -573,7 +608,8 @@
                   "false"
                 ],
                 "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -589,6 +625,7 @@
             ],
             "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaReact",
@@ -602,6 +639,7 @@
                 ],
                 "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -616,6 +654,7 @@
                 ],
                 "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -630,6 +669,7 @@
             "description": [],
             "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": []
           },
           {
@@ -644,6 +684,7 @@
             ],
             "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaReact",
@@ -657,6 +698,7 @@
                 ],
                 "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -674,6 +716,7 @@
             ],
             "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -700,6 +743,7 @@
         ],
         "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -715,6 +759,7 @@
             ],
             "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -737,6 +782,7 @@
         ],
         "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -752,6 +798,7 @@
             ],
             "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -786,6 +833,7 @@
         ],
         "path": "src/plugins/kibana_react/public/context/context.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -799,6 +847,7 @@
             ],
             "path": "src/plugins/kibana_react/public/context/context.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -832,6 +881,7 @@
         ],
         "path": "src/plugins/kibana_react/public/notifications/create_notifications.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -853,6 +903,7 @@
             ],
             "path": "src/plugins/kibana_react/public/notifications/create_notifications.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -886,6 +937,7 @@
         ],
         "path": "src/plugins/kibana_react/public/overlays/create_react_overlays.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -907,6 +959,7 @@
             ],
             "path": "src/plugins/kibana_react/public/overlays/create_react_overlays.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -935,6 +988,7 @@
         ],
         "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_card/elastic_agent_card.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -956,6 +1010,7 @@
             ],
             "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_card/elastic_agent_card.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -974,6 +1029,7 @@
         ],
         "path": "src/plugins/kibana_react/public/context/context.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -987,7 +1043,8 @@
               "P & { children?: React.ReactNode; }"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -1000,7 +1057,8 @@
               "any"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1027,20 +1085,9 @@
         ],
         "path": "src/plugins/kibana_react/public/page_template/page_template.tsx",
         "deprecated": true,
+        "trackAdoption": false,
         "references": [
           {
-            "plugin": "management",
-            "path": "src/plugins/management/public/components/management_app/management_app.tsx"
-          },
-          {
-            "plugin": "management",
-            "path": "src/plugins/management/public/components/management_app/management_app.tsx"
-          },
-          {
-            "plugin": "management",
-            "path": "src/plugins/management/public/components/management_app/management_app.tsx"
-          },
-          {
             "plugin": "spaces",
             "path": "x-pack/plugins/spaces/public/space_selector/space_selector.tsx"
           },
@@ -1075,78 +1122,6 @@
           {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/public/components/home/home.component.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/shared/version_mismatch/version_mismatch_page.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/shared/version_mismatch/version_mismatch_page.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/shared/version_mismatch/version_mismatch_page.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/enterprise_search_overview/components/error_connecting/error_connecting.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/enterprise_search_overview/components/error_connecting/error_connecting.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/enterprise_search_overview/components/error_connecting/error_connecting.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/enterprise_search_content/components/error_connecting/error_connecting.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/enterprise_search_content/components/error_connecting/error_connecting.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/enterprise_search_content/components/error_connecting/error_connecting.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/app_search/components/error_connecting/error_connecting.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/app_search/components/error_connecting/error_connecting.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/app_search/components/error_connecting/error_connecting.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/workplace_search/views/error_state/error_state.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/workplace_search/views/error_state/error_state.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/workplace_search/views/error_state/error_state.tsx"
           },
           {
             "plugin": "osquery",
@@ -1155,18 +1130,6 @@
           {
             "plugin": "osquery",
             "path": "x-pack/plugins/osquery/public/components/empty_state.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/home.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/home.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/home.tsx"
           }
         ],
         "children": [
@@ -1190,6 +1153,7 @@
             ],
             "path": "src/plugins/kibana_react/public/page_template/page_template.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1212,6 +1176,7 @@
         ],
         "path": "src/plugins/kibana_react/public/page_template/solution_nav/solution_nav_avatar.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -1227,6 +1192,7 @@
             ],
             "path": "src/plugins/kibana_react/public/page_template/solution_nav/solution_nav_avatar.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1245,6 +1211,7 @@
         ],
         "path": "src/plugins/kibana_react/public/theme/kibana_theme_provider.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -1258,6 +1225,7 @@
             ],
             "path": "src/plugins/kibana_react/public/theme/kibana_theme_provider.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1278,6 +1246,7 @@
         ],
         "path": "src/plugins/kibana_react/public/markdown/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -1291,6 +1260,7 @@
             ],
             "path": "src/plugins/kibana_react/public/markdown/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1311,6 +1281,7 @@
         ],
         "path": "src/plugins/kibana_react/public/markdown/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -1324,6 +1295,7 @@
             ],
             "path": "src/plugins/kibana_react/public/markdown/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1344,6 +1316,7 @@
         ],
         "path": "src/plugins/kibana_react/public/util/mount_point_portal.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -1357,6 +1330,7 @@
             ],
             "path": "src/plugins/kibana_react/public/util/mount_point_portal.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1383,6 +1357,7 @@
         ],
         "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_card/no_data_card.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -1404,6 +1379,7 @@
             ],
             "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_card/no_data_card.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1430,6 +1406,7 @@
         ],
         "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -1451,6 +1428,7 @@
             ],
             "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1469,6 +1447,7 @@
         ],
         "path": "src/plugins/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -1482,6 +1461,7 @@
             ],
             "path": "src/plugins/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1500,6 +1480,7 @@
         ],
         "path": "src/plugins/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -1513,6 +1494,7 @@
             ],
             "path": "src/plugins/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1528,19 +1510,14 @@
         "description": [],
         "signature": [
           "(history: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.ScopedHistory",
-            "text": "ScopedHistory"
-          },
+          "ScopedHistory",
           "<unknown> | ",
           "History",
           "<unknown>, to: string | LocationObject, onClickCallback?: Function | undefined) => { href: string; onClick: (event: React.MouseEvent<Element, MouseEvent>) => void; }"
         ],
         "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -1550,19 +1527,14 @@
             "label": "history",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.ScopedHistory",
-                "text": "ScopedHistory"
-              },
+              "ScopedHistory",
               "<unknown> | ",
               "History",
               "<unknown>"
             ],
             "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1577,6 +1549,7 @@
             ],
             "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1591,6 +1564,7 @@
             ],
             "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -1606,19 +1580,14 @@
         "description": [],
         "signature": [
           "(history: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.ScopedHistory",
-            "text": "ScopedHistory"
-          },
+          "ScopedHistory",
           "<unknown> | ",
           "History",
           "<unknown>, to: string | LocationObject, onClickCallback?: Function | undefined) => (event: React.MouseEvent<Element, MouseEvent>) => void"
         ],
         "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -1628,19 +1597,14 @@
             "label": "history",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.ScopedHistory",
-                "text": "ScopedHistory"
-              },
+              "ScopedHistory",
               "<unknown> | ",
               "History",
               "<unknown>"
             ],
             "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1655,6 +1619,7 @@
             ],
             "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1669,6 +1634,7 @@
             ],
             "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -1697,6 +1663,7 @@
         ],
         "path": "src/plugins/kibana_react/public/adapters/react_to_ui_component.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -1712,6 +1679,7 @@
             ],
             "path": "src/plugins/kibana_react/public/adapters/react_to_ui_component.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1734,20 +1702,9 @@
         ],
         "path": "src/plugins/kibana_react/public/app_links/redirect_app_link.tsx",
         "deprecated": true,
+        "trackAdoption": false,
         "references": [
           {
-            "plugin": "esUiShared",
-            "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx"
-          },
-          {
-            "plugin": "esUiShared",
-            "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx"
-          },
-          {
-            "plugin": "esUiShared",
-            "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx"
-          },
-          {
             "plugin": "home",
             "path": "src/plugins/home/public/application/application.tsx"
           },
@@ -1758,18 +1715,6 @@
           {
             "plugin": "home",
             "path": "src/plugins/home/public/application/application.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
           },
           {
             "plugin": "data",
@@ -1784,8 +1729,28 @@
             "path": "src/plugins/data/public/search/session/sessions_mgmt/lib/get_columns.tsx"
           },
           {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
+            "plugin": "data",
+            "path": "src/plugins/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
+          },
+          {
+            "plugin": "esUiShared",
+            "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx"
+          },
+          {
+            "plugin": "esUiShared",
+            "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx"
+          },
+          {
+            "plugin": "esUiShared",
+            "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx"
           },
           {
             "plugin": "spaces",
@@ -1794,6 +1759,34 @@
           {
             "plugin": "spaces",
             "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
+          },
+          {
+            "plugin": "spaces",
+            "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/management_section/saved_objects_edition_page.tsx"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/management_section/saved_objects_edition_page.tsx"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/management_section/saved_objects_edition_page.tsx"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/management_section/objects_table/saved_objects_table.tsx"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/management_section/objects_table/saved_objects_table.tsx"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/management_section/objects_table/saved_objects_table.tsx"
           },
           {
             "plugin": "fleet",
@@ -1984,30 +1977,6 @@
             "path": "x-pack/plugins/ux/public/application/ux_app.tsx"
           },
           {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/management_section/saved_objects_edition_page.tsx"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/management_section/saved_objects_edition_page.tsx"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/management_section/saved_objects_edition_page.tsx"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/management_section/objects_table/saved_objects_table.tsx"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/management_section/objects_table/saved_objects_table.tsx"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/management_section/objects_table/saved_objects_table.tsx"
-          },
-          {
             "plugin": "kibanaOverview",
             "path": "src/plugins/kibana_overview/public/components/add_data/add_data.tsx"
           },
@@ -2077,6 +2046,7 @@
             ],
             "path": "src/plugins/kibana_react/public/app_links/redirect_app_link.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2099,6 +2069,7 @@
         ],
         "path": "src/plugins/kibana_react/public/router/router.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -2112,6 +2083,7 @@
             ],
             "path": "src/plugins/kibana_react/public/router/router.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2142,6 +2114,7 @@
         ],
         "path": "src/plugins/kibana_react/public/util/to_mount_point.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -2157,6 +2130,7 @@
             ],
             "path": "src/plugins/kibana_react/public/util/to_mount_point.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -2177,6 +2151,7 @@
             ],
             "path": "src/plugins/kibana_react/public/util/to_mount_point.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2203,6 +2178,7 @@
         ],
         "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -2224,6 +2200,7 @@
             ],
             "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2252,6 +2229,7 @@
         ],
         "path": "src/plugins/kibana_react/public/adapters/ui_to_react_component.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -2272,6 +2250,7 @@
             ],
             "path": "src/plugins/kibana_react/public/adapters/ui_to_react_component.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2286,6 +2265,7 @@
             ],
             "path": "src/plugins/kibana_react/public/adapters/ui_to_react_component.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2312,6 +2292,7 @@
         ],
         "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -2333,6 +2314,7 @@
             ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2357,6 +2339,7 @@
         ],
         "path": "src/plugins/kibana_react/public/use_execution_context/use_execution_context.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -2371,6 +2354,7 @@
             ],
             "path": "src/plugins/kibana_react/public/use_execution_context/use_execution_context.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -2385,6 +2369,7 @@
             ],
             "path": "src/plugins/kibana_react/public/use_execution_context/use_execution_context.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2419,6 +2404,7 @@
         ],
         "path": "src/plugins/kibana_react/public/context/context.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -2437,6 +2423,7 @@
         ],
         "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -2450,6 +2437,7 @@
             ],
             "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2464,6 +2452,7 @@
             ],
             "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -2484,6 +2473,7 @@
         ],
         "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -2497,6 +2487,7 @@
             ],
             "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2511,6 +2502,7 @@
             ],
             "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -2537,6 +2529,7 @@
         ],
         "path": "src/plugins/kibana_react/public/context/context.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -2550,6 +2543,7 @@
             ],
             "path": "src/plugins/kibana_react/public/context/context.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2572,6 +2566,7 @@
         ],
         "path": "src/plugins/kibana_react/public/theme/wrap_with_theme.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -2585,6 +2580,7 @@
             ],
             "path": "src/plugins/kibana_react/public/theme/wrap_with_theme.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -2602,6 +2598,7 @@
             ],
             "path": "src/plugins/kibana_react/public/theme/wrap_with_theme.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2619,6 +2616,7 @@
         "description": [],
         "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -2632,6 +2630,7 @@
             ],
             "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -2643,16 +2642,11 @@
             "label": "chrome",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreChromePluginApi",
-                "section": "def-public.ChromeStart",
-                "text": "ChromeStart"
-              }
+              "ChromeStart"
             ],
             "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -2670,7 +2664,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2694,6 +2689,7 @@
         ],
         "path": "src/plugins/kibana_react/public/context/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -2713,7 +2709,8 @@
               "<T>"
             ],
             "path": "src/plugins/kibana_react/public/context/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -2727,6 +2724,7 @@
             ],
             "path": "src/plugins/kibana_react/public/context/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -2740,7 +2738,8 @@
                   "P & { children?: React.ReactNode; }"
                 ],
                 "path": "node_modules/@types/react/index.d.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaReact",
@@ -2753,7 +2752,8 @@
                   "any"
                 ],
                 "path": "node_modules/@types/react/index.d.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -2777,6 +2777,7 @@
             ],
             "path": "src/plugins/kibana_react/public/context/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -2790,7 +2791,8 @@
                   "P"
                 ],
                 "path": "node_modules/@types/react/index.d.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -2816,6 +2818,7 @@
         ],
         "path": "src/plugins/kibana_react/public/context/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -2828,7 +2831,8 @@
               "Services"
             ],
             "path": "src/plugins/kibana_react/public/context/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -2847,7 +2851,8 @@
               }
             ],
             "path": "src/plugins/kibana_react/public/context/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -2866,7 +2871,8 @@
               }
             ],
             "path": "src/plugins/kibana_react/public/context/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2880,6 +2886,7 @@
         "description": [],
         "path": "src/plugins/kibana_react/public/notifications/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -2924,7 +2931,8 @@
               ") => void; }"
             ],
             "path": "src/plugins/kibana_react/public/notifications/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2938,6 +2946,7 @@
         "description": [],
         "path": "src/plugins/kibana_react/public/overlays/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -2954,6 +2963,7 @@
             ],
             "path": "src/plugins/kibana_react/public/overlays/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaReact",
@@ -2967,6 +2977,7 @@
                 ],
                 "path": "src/plugins/kibana_react/public/overlays/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -2982,6 +2993,7 @@
                 ],
                 "path": "src/plugins/kibana_react/public/overlays/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -3002,6 +3014,7 @@
             ],
             "path": "src/plugins/kibana_react/public/overlays/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaReact",
@@ -3015,6 +3028,7 @@
                 ],
                 "path": "src/plugins/kibana_react/public/overlays/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -3030,6 +3044,7 @@
                 ],
                 "path": "src/plugins/kibana_react/public/overlays/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -3058,6 +3073,7 @@
         ],
         "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -3069,7 +3085,8 @@
               "\nSingle name for the current solution, used to auto-generate the title, logo, description, and button label"
             ],
             "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3084,7 +3101,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3096,7 +3114,8 @@
               "\nRequired to set the docs link for the whole solution"
             ],
             "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3111,7 +3130,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3134,7 +3154,8 @@
               "; }"
             ],
             "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3158,6 +3179,7 @@
         ],
         "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -3171,6 +3193,7 @@
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3186,6 +3209,7 @@
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaReact",
@@ -3199,6 +3223,7 @@
                 ],
                 "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3216,6 +3241,7 @@
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaReact",
@@ -3229,6 +3255,7 @@
                 ],
                 "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3242,7 +3269,8 @@
             "label": "entityName",
             "description": [],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3252,7 +3280,8 @@
             "label": "entityNamePlural",
             "description": [],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3266,6 +3295,7 @@
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaReact",
@@ -3279,6 +3309,7 @@
                 ],
                 "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3292,7 +3323,8 @@
             "label": "listingLimit",
             "description": [],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3302,7 +3334,8 @@
             "label": "initialFilter",
             "description": [],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3312,7 +3345,8 @@
             "label": "initialPageSize",
             "description": [],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3327,7 +3361,8 @@
               "JSX.Element | undefined"
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3341,7 +3376,8 @@
               "<V>[]"
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3351,7 +3387,8 @@
             "label": "tableListTitle",
             "description": [],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3364,7 +3401,8 @@
               "IToasts"
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3379,7 +3417,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3391,7 +3430,8 @@
               "\nIndicates which column should be used as the identifying cell in each row."
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3403,7 +3443,8 @@
               "\nDescribes the content of the table. If not specified, the caption will be \"This table contains {itemCount} rows.\""
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3417,7 +3458,8 @@
               "[] | undefined"
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3430,7 +3472,8 @@
               "ThemeServiceStart"
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3440,16 +3483,11 @@
             "label": "application",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.ApplicationStart",
-                "text": "ApplicationStart"
-              }
+              "ApplicationStart"
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3473,6 +3511,7 @@
         ],
         "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -3485,7 +3524,8 @@
               "V[]"
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3495,7 +3535,8 @@
             "label": "hasInitialFetchReturned",
             "description": [],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3508,7 +3549,8 @@
               "boolean | null"
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3518,7 +3560,8 @@
             "label": "isFetchingItems",
             "description": [],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3528,7 +3571,8 @@
             "label": "isDeletingItems",
             "description": [],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3538,7 +3582,8 @@
             "label": "showDeleteModal",
             "description": [],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3548,7 +3593,8 @@
             "label": "showLimitError",
             "description": [],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3562,7 +3608,8 @@
               "<Error> | undefined"
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3572,7 +3619,8 @@
             "label": "filter",
             "description": [],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3585,7 +3633,8 @@
               "string[]"
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3595,7 +3644,8 @@
             "label": "totalItems",
             "description": [],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3608,7 +3658,8 @@
               "Pagination"
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3623,7 +3674,8 @@
               "; } | undefined"
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3637,6 +3689,7 @@
         "description": [],
         "path": "src/plugins/kibana_react/public/notifications/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -3649,7 +3702,8 @@
               "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
             "path": "src/plugins/kibana_react/public/notifications/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3662,7 +3716,8 @@
               "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
             "path": "src/plugins/kibana_react/public/notifications/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3672,10 +3727,11 @@
             "label": "color",
             "description": [],
             "signature": [
-              "ToastColor | undefined"
+              "\"warning\" | \"primary\" | \"success\" | \"danger\" | undefined"
             ],
             "path": "src/plugins/kibana_react/public/notifications/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3689,7 +3745,8 @@
               " | undefined"
             ],
             "path": "src/plugins/kibana_react/public/notifications/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3702,7 +3759,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/kibana_react/public/notifications/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3715,7 +3773,8 @@
               "(() => void) | undefined"
             ],
             "path": "src/plugins/kibana_react/public/notifications/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3729,6 +3788,7 @@
         "description": [],
         "path": "src/plugins/kibana_react/public/util/to_mount_point.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -3744,7 +3804,8 @@
               "> | undefined"
             ],
             "path": "src/plugins/kibana_react/public/util/to_mount_point.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3758,6 +3819,7 @@
         "description": [],
         "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -3767,7 +3829,8 @@
             "label": "value",
             "description": [],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3780,7 +3843,8 @@
               "string | number | undefined"
             ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3800,7 +3864,8 @@
               "[] | undefined"
             ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3815,7 +3880,8 @@
               ".IModelContentChangedEvent) => void) | undefined"
             ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3831,6 +3897,7 @@
             ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaReact",
@@ -3845,6 +3912,7 @@
                 ],
                 "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3861,7 +3929,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3876,7 +3945,8 @@
               "> | undefined"
             ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3890,6 +3960,7 @@
         "description": [],
         "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -3899,7 +3970,8 @@
             "label": "label",
             "description": [],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3912,7 +3984,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3925,7 +3998,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3939,7 +4013,8 @@
               ".CompletionItemKind | undefined"
             ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -3952,7 +4027,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3972,6 +4048,7 @@
         ],
         "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3993,6 +4070,7 @@
         ],
         "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_card/elastic_agent_card.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4037,24 +4115,8 @@
         ],
         "path": "src/plugins/kibana_react/public/page_template/page_template.tsx",
         "deprecated": true,
-        "references": [
-          {
-            "plugin": "management",
-            "path": "src/plugins/management/public/components/management_app/management_app.tsx"
-          },
-          {
-            "plugin": "management",
-            "path": "src/plugins/management/public/components/management_app/management_app.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
-          }
-        ],
+        "trackAdoption": false,
+        "references": [],
         "initialIsOpen": false
       },
       {
@@ -4068,21 +4130,9 @@
           "{ analytics?: ",
           "AnalyticsServiceStart",
           " | undefined; application?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.ApplicationStart",
-            "text": "ApplicationStart"
-          },
+          "ApplicationStart",
           " | undefined; chrome?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreChromePluginApi",
-            "section": "def-public.ChromeStart",
-            "text": "ChromeStart"
-          },
+          "ChromeStart",
           " | undefined; docLinks?: ",
           "DocLinksStart",
           " | undefined; executionContext?: ",
@@ -4111,6 +4161,7 @@
         ],
         "path": "src/plugins/kibana_react/public/context/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4125,6 +4176,7 @@
         ],
         "path": "src/plugins/kibana_react/public/code_editor/languages/css/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4139,6 +4191,7 @@
         ],
         "path": "src/plugins/kibana_react/public/code_editor/languages/markdown/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4153,6 +4206,7 @@
         ],
         "path": "src/plugins/kibana_react/public/code_editor/languages/yaml/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4167,6 +4221,7 @@
         ],
         "path": "src/plugins/kibana_react/public/code_editor/languages/handlebars/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4181,6 +4236,7 @@
         ],
         "path": "src/plugins/kibana_react/public/code_editor/languages/hjson/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4195,6 +4251,7 @@
         ],
         "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4206,6 +4263,7 @@
         "description": [],
         "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4222,6 +4280,7 @@
         ],
         "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4244,6 +4303,7 @@
         ],
         "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4258,6 +4318,7 @@
         ],
         "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4274,6 +4335,7 @@
         ],
         "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4306,6 +4368,7 @@
         ],
         "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4320,6 +4383,7 @@
         ],
         "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4334,6 +4398,7 @@
         ],
         "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -4366,6 +4431,7 @@
         ],
         "path": "src/plugins/kibana_react/public/context/context.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4382,22 +4448,19 @@
         ],
         "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
         "deprecated": true,
+        "trackAdoption": false,
         "references": [
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/services/kibana_react.ts"
+            "path": "src/plugins/dashboard/public/application/embeddable/viewport/dashboard_viewport.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/plugin.tsx"
+            "path": "src/plugins/dashboard/public/application/embeddable/viewport/dashboard_viewport.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/plugin.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/plugin.tsx"
+            "path": "src/plugins/dashboard/public/application/embeddable/viewport/dashboard_viewport.tsx"
           }
         ],
         "initialIsOpen": false
@@ -4411,6 +4474,7 @@
         "description": [],
         "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -4420,7 +4484,8 @@
             "label": "restrictWidth",
             "description": [],
             "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -4433,7 +4498,8 @@
               "\"centeredBody\""
             ],
             "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -4444,6 +4510,7 @@
             "description": [],
             "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kibanaReact",
@@ -4456,7 +4523,8 @@
                   "false"
                 ],
                 "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "kibanaReact",
@@ -4469,7 +4537,8 @@
                   "\"transparent\""
                 ],
                 "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -4537,6 +4606,7 @@
         ],
         "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -4556,7 +4626,8 @@
               "<P, T>>"
             ],
             "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -4572,7 +4643,8 @@
               "<P, T>>[]"
             ],
             "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4598,6 +4670,7 @@
         ],
         "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4621,6 +4694,7 @@
         ],
         "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4649,6 +4723,7 @@
         ],
         "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -4672,6 +4747,7 @@
             ],
             "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -4704,6 +4780,7 @@
         ],
         "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -4722,6 +4799,7 @@
             ],
             "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -4741,6 +4819,7 @@
             ],
             "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -4764,6 +4843,7 @@
         ],
         "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -4778,7 +4858,8 @@
               "CSSKeyframes"
             ],
             "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -4792,7 +4873,8 @@
               "[]"
             ],
             "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4825,6 +4907,7 @@
         ],
         "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -4838,7 +4921,8 @@
               "React.ComponentProps<C> extends { theme?: T | undefined; } ? C : never"
             ],
             "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4854,6 +4938,7 @@
         "description": [],
         "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -4863,10 +4948,11 @@
             "label": "eui",
             "description": [],
             "signature": [
-              "{ euiBadgeGroupGutterTypes: { gutterExtraSmall: string; gutterSmall: string; }; euiBreadcrumbSpacing: string; euiBreadcrumbTruncateWidth: string; euiButtonEmptyTypes: { primary: string; danger: string; disabled: string; ghost: string; text: string; success: string; warning: string; }; euiCallOutTypes: { primary: string; success: string; warning: string; danger: string; }; euiCardSpacing: string; euiCardBottomNodeHeight: string; euiCardSelectButtonBorders: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardSelectButtonBackgrounds: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiCheckableCardPadding: string; euiCodeBlockPaddingModifiers: { paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiCollapsibleNavGroupLightBackgroundColor: string; euiCollapsibleNavGroupDarkBackgroundColor: string; euiCollapsibleNavGroupDarkHighContrastColor: string; euiColorPickerValueRange0: string; euiColorPickerValueRange1: string; euiColorPickerSaturationRange0: string; euiColorPickerSaturationRange1: string; euiColorPickerIndicatorSize: string; euiColorPickerWidth: string; euiColorPaletteDisplaySizes: { sizeExtraSmall: string; sizeSmall: string; sizeMedium: string; }; euiContextMenuWidth: string; euiControlBarBackground: string; euiControlBarText: string; euiControlBarBorderColor: string; euiControlBarInitialHeight: string; euiControlBarMaxHeight: string; euiControlBarHeights: { s: string; m: string; l: string; }; euiDataGridPrefix: string; euiDataGridStyles: string; euiZDataGrid: number; euiZHeaderBelowDataGrid: number; euiZDataGridCellPopover: number; euiDataGridColumnResizerWidth: string; euiDataGridPopoverMaxHeight: string; euiDataGridCellPaddingS: string; euiDataGridCellPaddingM: string; euiDataGridCellPaddingL: string; euiDataGridVerticalBorder: string; euiSuperDatePickerWidth: string; euiSuperDatePickerButtonWidth: string; euiDragAndDropSpacing: { s: string; m: string; l: string; }; euiEmptyPromptContentMaxWidth: string; gutterTypes: { gutterExtraSmall: string; gutterSmall: string; gutterMedium: string; gutterLarge: string; gutterExtraLarge: string; }; fractions: { fourths: { percentage: string; count: number; }; thirds: { percentage: string; count: number; }; halves: { percentage: string; count: number; }; single: { percentage: string; count: number; }; }; flyoutSizes: { small: { min: string; width: string; max: string; }; medium: { min: string; width: string; max: string; }; large: { min: string; width: string; max: string; }; }; euiFlyoutBorder: string; euiFlyoutPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiFilePickerTallHeight: string; euiRangeLevelColors: { primary: string; success: string; warning: string; danger: string; }; textareaResizing: { vertical: string; horizontal: string; both: string; none: string; }; euiHeaderLinksGutterSizes: { gutterXS: string; gutterS: string; gutterM: string; gutterL: string; }; euiKeyPadMenuSize: string; euiKeyPadMenuMarginSize: string; euiListGroupItemHoverBackground: string; euiListGroupItemHoverBackgroundGhost: string; euiListGroupGutterTypes: { gutterSmall: string; gutterMedium: string; }; euiListGroupItemColorTypes: { primary: string; text: string; subdued: string; ghost: string; }; euiListGroupItemSizeTypes: { xSmall: string; small: string; medium: string; large: string; }; euiMarkdownEditorMinHeight: string; euiResizableButtonTransitionSpeed: string; euiResizableButtonSize: string; euiSelectableListItemBorder: string; euiSelectableListItemPadding: string; euiSelectableTemplateSitewideTypes: { application: { color: string; 'font-weight': number; }; deployment: { color: string; 'font-weight': number; }; article: { color: string; 'font-weight': number; }; case: { color: string; 'font-weight': number; }; platform: { color: string; 'font-weight': number; }; }; euiSideNavEmphasizedBackgroundColor: string; euiSideNavRootTextcolor: string; euiSideNavBranchTextcolor: string; euiSideNavSelectedTextcolor: string; euiSideNavDisabledTextcolor: string; euiStepNumberSize: string; euiStepNumberSmallSize: string; euiStepNumberMargin: string; euiStepStatusColorsToFade: { warning: string; danger: string; disabled: string; incomplete: string; }; euiSuggestItemColors: { tint0: string; tint1: string; tint2: string; tint3: string; tint4: string; tint5: string; tint6: string; tint7: string; tint8: string; tint9: string; tint10: string; }; euiTableCellContentPadding: string; euiTableCellContentPaddingCompressed: string; euiTableCellCheckboxWidth: string; euiTableActionsAreaWidth: string; euiTableHoverColor: string; euiTableSelectedColor: string; euiTableHoverSelectedColor: string; euiTableActionsBorderColor: string; euiTableHoverClickableColor: string; euiTableFocusClickableColor: string; euiToastWidth: string; euiToastTypes: { primary: string; success: string; warning: string; danger: string; }; euiTokenGrayColor: string; euiTokenTypes: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; gray: { graphic: string; behindText: string; }; }; euiTokenTypeKeys: string; euiPopoverArrowSize: string; euiContrastRatioText: number; euiContrastRatioGraphic: number; euiContrastRatioDisabled: number; euiAnimSlightBounce: string; euiAnimSlightResistance: string; euiAnimSpeedExtraFast: string; euiAnimSpeedFast: string; euiAnimSpeedNormal: string; euiAnimSpeedSlow: string; euiAnimSpeedExtraSlow: string; euiBorderWidthThin: string; euiBorderWidthThick: string; euiBorderColor: string; euiBorderRadius: string; euiBorderRadiusSmall: string; euiBorderThick: string; euiBorderThin: string; euiBorderEditable: string; euiButtonHeight: string; euiButtonHeightSmall: string; euiButtonHeightXSmall: string; euiButtonColorDisabled: string; euiButtonColorDisabledText: string; euiButtonColorGhostDisabled: string; euiButtonTypes: { primary: string; accent: string; success: string; warning: string; danger: string; ghost: string; text: string; }; euiCodeBlockBackgroundColor: string; euiCodeBlockColor: string; euiCodeBlockSelectedBackgroundColor: string; euiCodeBlockCommentColor: string; euiCodeBlockSelectorTagColor: string; euiCodeBlockStringColor: string; euiCodeBlockTagColor: string; euiCodeBlockNameColor: string; euiCodeBlockNumberColor: string; euiCodeBlockKeywordColor: string; euiCodeBlockFunctionTitleColor: string; euiCodeBlockTypeColor: string; euiCodeBlockAttributeColor: string; euiCodeBlockSymbolColor: string; euiCodeBlockParamsColor: string; euiCodeBlockMetaColor: string; euiCodeBlockTitleColor: string; euiCodeBlockSectionColor: string; euiCodeBlockAdditionColor: string; euiCodeBlockDeletionColor: string; euiCodeBlockSelectorClassColor: string; euiCodeBlockSelectorIdColor: string; euiPaletteColorBlind: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; }; euiPaletteColorBlindKeys: string; euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVis0_behindText: string; euiColorVis1_behindText: string; euiColorVis2_behindText: string; euiColorVis3_behindText: string; euiColorVis4_behindText: string; euiColorVis5_behindText: string; euiColorVis6_behindText: string; euiColorVis7_behindText: string; euiColorVis8_behindText: string; euiColorVis9_behindText: string; euiFontWeightLight: number; euiFontWeightRegular: number; euiFontWeightMedium: number; euiFontWeightSemiBold: number; euiFontWeightBold: number; euiCodeFontWeightRegular: number; euiCodeFontWeightBold: number; euiFormMaxWidth: string; euiFormControlHeight: string; euiFormControlCompressedHeight: string; euiFormControlPadding: string; euiFormControlCompressedPadding: string; euiFormControlBorderRadius: string; euiFormControlCompressedBorderRadius: string; euiRadioSize: string; euiCheckBoxSize: string; euiCheckboxBorderRadius: string; euiSwitchHeight: string; euiSwitchWidth: string; euiSwitchThumbSize: string; euiSwitchIconHeight: string; euiSwitchHeightCompressed: string; euiSwitchWidthCompressed: string; euiSwitchThumbSizeCompressed: string; euiSwitchHeightMini: string; euiSwitchWidthMini: string; euiSwitchThumbSizeMini: string; euiFormBackgroundColor: string; euiFormBackgroundDisabledColor: string; euiFormBackgroundReadOnlyColor: string; euiFormBorderOpaqueColor: string; euiFormBorderColor: string; euiFormBorderDisabledColor: string; euiFormCustomControlDisabledIconColor: string; euiFormCustomControlBorderColor: string; euiFormControlDisabledColor: string; euiFormControlBoxShadow: string; euiFormControlPlaceholderText: string; euiFormInputGroupLabelBackground: string; euiFormInputGroupBorder: string; euiSwitchOffColor: string; euiFormControlIconSizes: { small: string; medium: string; large: string; xLarge: string; xxLarge: string; }; euiFormControlLayoutGroupInputHeight: string; euiFormControlLayoutGroupInputCompressedHeight: string; euiFormControlLayoutGroupInputCompressedBorderRadius: string; euiRangeTrackColor: string; euiRangeThumbRadius: string; euiRangeThumbHeight: string; euiRangeThumbWidth: string; euiRangeThumbBorderColor: string; euiRangeTrackWidth: string; euiRangeTrackHeight: string; euiRangeTrackBorderWidth: number; euiRangeTrackBorderColor: string; euiRangeTrackRadius: string; euiRangeDisabledOpacity: number; euiRangeHighlightHeight: string; euiHeaderBackgroundColor: string; euiHeaderDarkBackgroundColor: string; euiHeaderBorderColor: string; euiHeaderBreadcrumbColor: string; euiHeaderHeight: string; euiHeaderChildSize: string; euiHeaderHeightCompensation: string; euiPageDefaultMaxWidth: string; euiPageSidebarMinWidth: string; euiPanelPaddingModifiers: { paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiPanelBorderRadiusModifiers: { borderRadiusNone: number; borderRadiusMedium: string; }; euiPanelBackgroundColorModifiers: { transparent: string; plain: string; subdued: string; accent: string; primary: string; success: string; warning: string; danger: string; }; euiBreakpoints: { xs: number; s: string; m: string; l: string; xl: string; }; euiBreakpointKeys: string; euiShadowColor: string; euiSize: string; euiSizeXS: string; euiSizeS: string; euiSizeM: string; euiSizeL: string; euiSizeXL: string; euiSizeXXL: string; euiButtonMinWidth: string; euiScrollBar: string; euiScrollBarCorner: string; euiScrollBarCornerThin: string; euiFocusRingColor: string; euiFocusRingAnimStartColor: string; euiFocusRingAnimStartSize: string; euiFocusRingAnimStartSizeLarge: string; euiFocusRingSizeLarge: string; euiFocusRingSize: string; euiFocusTransparency: number; euiFocusTransparencyPercent: string; euiFocusBackgroundColor: string; euiTooltipBackgroundColor: string; euiTooltipBorderColor: string; euiTooltipAnimations: { top: string; left: string; bottom: string; right: string; }; euiFontFamily: string; euiCodeFontFamily: string; euiFontFeatureSettings: string; euiTextScale: string; euiFontSize: string; euiFontSizeXS: string; euiFontSizeS: string; euiFontSizeM: string; euiFontSizeL: string; euiFontSizeXL: string; euiFontSizeXXL: string; euiLineHeight: number; euiBodyLineHeight: number; euiTitles: { xxxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; s: { 'font-size': string; 'line-height': string; 'font-weight': number; }; m: { 'font-size': string; 'line-height': string; 'font-weight': number; }; l: { 'font-size': string; 'line-height': string; 'font-weight': number; }; }; euiZLevel0: number; euiZLevel1: number; euiZLevel2: number; euiZLevel3: number; euiZLevel4: number; euiZLevel5: number; euiZLevel6: number; euiZLevel7: number; euiZLevel8: number; euiZLevel9: number; euiZToastList: number; euiZModal: number; euiZMask: number; euiZNavigation: number; euiZContentMenu: number; euiZHeader: number; euiZFlyout: number; euiZMaskBelowHeader: number; euiZContent: number; euiColorGhost: string; euiColorInk: string; euiColorPrimary: string; euiColorAccent: string; euiColorSuccess: string; euiColorWarning: string; euiColorDanger: string; euiColorEmptyShade: string; euiColorLightestShade: string; euiColorLightShade: string; euiColorMediumShade: string; euiColorDarkShade: string; euiColorDarkestShade: string; euiColorFullShade: string; euiPageBackgroundColor: string; euiColorHighlight: string; euiTextColor: string; euiTitleColor: string; euiTextSubduedColor: string; euiColorDisabled: string; euiColorPrimaryText: string; euiColorSuccessText: string; euiColorAccentText: string; euiColorWarningText: string; euiColorDangerText: string; euiColorDisabledText: string; euiLinkColor: string; euiColorChartLines: string; euiColorChartBand: string; euiDatePickerCalendarWidth: string; euiDatePickerPadding: string; euiDatePickerGap: string; euiDatePickerCalendarColumns: number; euiDatePickerButtonSize: string; euiDatePickerMinControlWidth: string; euiDatePickerMaxControlWidth: string; euiButtonDefaultTransparency: number; euiButtonFontWeight: number; euiRangeHighlightColor: string; euiRangeThumbBackgroundColor: string; euiRangeTrackCompressedHeight: string; euiRangeHighlightCompressedHeight: string; euiRangeHeight: string; euiRangeCompressedHeight: string; euiStepStatusColors: { default: string; complete: string; warning: string; danger: string; }; }"
+              "{ euiBadgeGroupGutterTypes: { gutterExtraSmall: string; gutterSmall: string; }; euiButtonEmptyTypes: { primary: string; danger: string; disabled: string; ghost: string; text: string; success: string; warning: string; }; euiCallOutTypes: { primary: string; success: string; warning: string; danger: string; }; euiCardSpacing: string; euiCardBottomNodeHeight: string; euiCardSelectButtonBorders: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardSelectButtonBackgrounds: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiCheckableCardPadding: string; euiCodeBlockPaddingModifiers: { paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiCollapsibleNavGroupLightBackgroundColor: string; euiCollapsibleNavGroupDarkBackgroundColor: string; euiCollapsibleNavGroupDarkHighContrastColor: string; euiColorPickerValueRange0: string; euiColorPickerValueRange1: string; euiColorPickerSaturationRange0: string; euiColorPickerSaturationRange1: string; euiColorPickerIndicatorSize: string; euiColorPickerWidth: string; euiColorPaletteDisplaySizes: { sizeExtraSmall: string; sizeSmall: string; sizeMedium: string; }; euiContextMenuWidth: string; euiControlBarBackground: string; euiControlBarText: string; euiControlBarBorderColor: string; euiControlBarInitialHeight: string; euiControlBarMaxHeight: string; euiControlBarHeights: { s: string; m: string; l: string; }; euiDataGridPrefix: string; euiDataGridStyles: string; euiZDataGrid: number; euiZHeaderBelowDataGrid: number; euiZDataGridCellPopover: number; euiDataGridColumnResizerWidth: string; euiDataGridPopoverMaxHeight: string; euiDataGridCellPaddingS: string; euiDataGridCellPaddingM: string; euiDataGridCellPaddingL: string; euiDataGridVerticalBorder: string; euiSuperDatePickerWidth: string; euiSuperDatePickerButtonWidth: string; euiDragAndDropSpacing: { s: string; m: string; l: string; }; euiEmptyPromptContentMaxWidth: string; gutterTypes: { gutterExtraSmall: string; gutterSmall: string; gutterMedium: string; gutterLarge: string; gutterExtraLarge: string; }; fractions: { fourths: { percentage: string; count: number; }; thirds: { percentage: string; count: number; }; halves: { percentage: string; count: number; }; single: { percentage: string; count: number; }; }; flyoutSizes: { small: { min: string; width: string; max: string; }; medium: { min: string; width: string; max: string; }; large: { min: string; width: string; max: string; }; }; euiFlyoutBorder: string; euiFlyoutPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiFilePickerTallHeight: string; euiRangeLevelColors: { primary: string; success: string; warning: string; danger: string; }; textareaResizing: { vertical: string; horizontal: string; both: string; none: string; }; euiHeaderLinksGutterSizes: { gutterXS: string; gutterS: string; gutterM: string; gutterL: string; }; euiKeyPadMenuSize: string; euiKeyPadMenuMarginSize: string; euiListGroupItemHoverBackground: string; euiListGroupItemHoverBackgroundGhost: string; euiListGroupGutterTypes: { gutterSmall: string; gutterMedium: string; }; euiListGroupItemColorTypes: { primary: string; text: string; subdued: string; ghost: string; }; euiListGroupItemSizeTypes: { xSmall: string; small: string; medium: string; large: string; }; euiMarkdownEditorMinHeight: string; euiResizableButtonTransitionSpeed: string; euiResizableButtonSize: string; euiSelectableListItemBorder: string; euiSelectableListItemPadding: string; euiSelectableTemplateSitewideTypes: { application: { color: string; 'font-weight': number; }; deployment: { color: string; 'font-weight': number; }; article: { color: string; 'font-weight': number; }; case: { color: string; 'font-weight': number; }; platform: { color: string; 'font-weight': number; }; }; euiSideNavEmphasizedBackgroundColor: string; euiSideNavRootTextcolor: string; euiSideNavBranchTextcolor: string; euiSideNavSelectedTextcolor: string; euiSideNavDisabledTextcolor: string; euiStepNumberSize: string; euiStepNumberSmallSize: string; euiStepNumberMargin: string; euiStepStatusColorsToFade: { warning: string; danger: string; disabled: string; incomplete: string; }; euiSuggestItemColors: { tint0: string; tint1: string; tint2: string; tint3: string; tint4: string; tint5: string; tint6: string; tint7: string; tint8: string; tint9: string; tint10: string; }; euiTableCellContentPadding: string; euiTableCellContentPaddingCompressed: string; euiTableCellCheckboxWidth: string; euiTableActionsAreaWidth: string; euiTableHoverColor: string; euiTableSelectedColor: string; euiTableHoverSelectedColor: string; euiTableActionsBorderColor: string; euiTableHoverClickableColor: string; euiTableFocusClickableColor: string; euiPopoverArrowSize: string; euiContrastRatioText: number; euiContrastRatioGraphic: number; euiContrastRatioDisabled: number; euiAnimSlightBounce: string; euiAnimSlightResistance: string; euiAnimSpeedExtraFast: string; euiAnimSpeedFast: string; euiAnimSpeedNormal: string; euiAnimSpeedSlow: string; euiAnimSpeedExtraSlow: string; euiBorderWidthThin: string; euiBorderWidthThick: string; euiBorderColor: string; euiBorderRadius: string; euiBorderRadiusSmall: string; euiBorderThick: string; euiBorderThin: string; euiBorderEditable: string; euiButtonHeight: string; euiButtonHeightSmall: string; euiButtonHeightXSmall: string; euiButtonColorDisabled: string; euiButtonColorDisabledText: string; euiButtonColorGhostDisabled: string; euiButtonTypes: { primary: string; accent: string; success: string; warning: string; danger: string; ghost: string; text: string; }; euiCodeBlockBackgroundColor: string; euiCodeBlockColor: string; euiCodeBlockSelectedBackgroundColor: string; euiCodeBlockCommentColor: string; euiCodeBlockSelectorTagColor: string; euiCodeBlockStringColor: string; euiCodeBlockTagColor: string; euiCodeBlockNameColor: string; euiCodeBlockNumberColor: string; euiCodeBlockKeywordColor: string; euiCodeBlockFunctionTitleColor: string; euiCodeBlockTypeColor: string; euiCodeBlockAttributeColor: string; euiCodeBlockSymbolColor: string; euiCodeBlockParamsColor: string; euiCodeBlockMetaColor: string; euiCodeBlockTitleColor: string; euiCodeBlockSectionColor: string; euiCodeBlockAdditionColor: string; euiCodeBlockDeletionColor: string; euiCodeBlockSelectorClassColor: string; euiCodeBlockSelectorIdColor: string; euiPaletteColorBlind: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; }; euiPaletteColorBlindKeys: string; euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVis0_behindText: string; euiColorVis1_behindText: string; euiColorVis2_behindText: string; euiColorVis3_behindText: string; euiColorVis4_behindText: string; euiColorVis5_behindText: string; euiColorVis6_behindText: string; euiColorVis7_behindText: string; euiColorVis8_behindText: string; euiColorVis9_behindText: string; euiFontWeightLight: number; euiFontWeightRegular: number; euiFontWeightMedium: number; euiFontWeightSemiBold: number; euiFontWeightBold: number; euiCodeFontWeightRegular: number; euiCodeFontWeightBold: number; euiFormMaxWidth: string; euiFormControlHeight: string; euiFormControlCompressedHeight: string; euiFormControlPadding: string; euiFormControlCompressedPadding: string; euiFormControlBorderRadius: string; euiFormControlCompressedBorderRadius: string; euiRadioSize: string; euiCheckBoxSize: string; euiCheckboxBorderRadius: string; euiSwitchHeight: string; euiSwitchWidth: string; euiSwitchThumbSize: string; euiSwitchIconHeight: string; euiSwitchHeightCompressed: string; euiSwitchWidthCompressed: string; euiSwitchThumbSizeCompressed: string; euiSwitchHeightMini: string; euiSwitchWidthMini: string; euiSwitchThumbSizeMini: string; euiFormBackgroundColor: string; euiFormBackgroundDisabledColor: string; euiFormBackgroundReadOnlyColor: string; euiFormBorderOpaqueColor: string; euiFormBorderColor: string; euiFormBorderDisabledColor: string; euiFormCustomControlDisabledIconColor: string; euiFormCustomControlBorderColor: string; euiFormControlDisabledColor: string; euiFormControlBoxShadow: string; euiFormControlPlaceholderText: string; euiFormInputGroupLabelBackground: string; euiFormInputGroupBorder: string; euiSwitchOffColor: string; euiFormControlIconSizes: { small: string; medium: string; large: string; xLarge: string; xxLarge: string; }; euiFormControlLayoutGroupInputHeight: string; euiFormControlLayoutGroupInputCompressedHeight: string; euiFormControlLayoutGroupInputCompressedBorderRadius: string; euiRangeTrackColor: string; euiRangeThumbRadius: string; euiRangeThumbHeight: string; euiRangeThumbWidth: string; euiRangeThumbBorderColor: string; euiRangeTrackWidth: string; euiRangeTrackHeight: string; euiRangeTrackBorderWidth: number; euiRangeTrackBorderColor: string; euiRangeTrackRadius: string; euiRangeDisabledOpacity: number; euiRangeHighlightHeight: string; euiHeaderBackgroundColor: string; euiHeaderDarkBackgroundColor: string; euiHeaderBorderColor: string; euiHeaderBreadcrumbColor: string; euiHeaderHeight: string; euiHeaderChildSize: string; euiHeaderHeightCompensation: string; euiPageDefaultMaxWidth: string; euiPageSidebarMinWidth: string; euiPanelPaddingModifiers: { paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiPanelBorderRadiusModifiers: { borderRadiusNone: number; borderRadiusMedium: string; }; euiPanelBackgroundColorModifiers: { transparent: string; plain: string; subdued: string; accent: string; primary: string; success: string; warning: string; danger: string; }; euiBreakpoints: { xs: number; s: string; m: string; l: string; xl: string; }; euiBreakpointKeys: string; euiShadowColor: string; euiSize: string; euiSizeXS: string; euiSizeS: string; euiSizeM: string; euiSizeL: string; euiSizeXL: string; euiSizeXXL: string; euiButtonMinWidth: string; euiScrollBar: string; euiScrollBarCorner: string; euiScrollBarCornerThin: string; euiFocusRingColor: string; euiFocusRingAnimStartColor: string; euiFocusRingAnimStartSize: string; euiFocusRingAnimStartSizeLarge: string; euiFocusRingSizeLarge: string; euiFocusRingSize: string; euiFocusTransparency: number; euiFocusTransparencyPercent: string; euiFocusBackgroundColor: string; euiTooltipBackgroundColor: string; euiTooltipBorderColor: string; euiTooltipAnimations: { top: string; left: string; bottom: string; right: string; }; euiFontFamily: string; euiCodeFontFamily: string; euiFontFeatureSettings: string; euiTextScale: string; euiFontSize: string; euiFontSizeXS: string; euiFontSizeS: string; euiFontSizeM: string; euiFontSizeL: string; euiFontSizeXL: string; euiFontSizeXXL: string; euiLineHeight: number; euiBodyLineHeight: number; euiTitles: { xxxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; s: { 'font-size': string; 'line-height': string; 'font-weight': number; }; m: { 'font-size': string; 'line-height': string; 'font-weight': number; }; l: { 'font-size': string; 'line-height': string; 'font-weight': number; }; }; euiZLevel0: number; euiZLevel1: number; euiZLevel2: number; euiZLevel3: number; euiZLevel4: number; euiZLevel5: number; euiZLevel6: number; euiZLevel7: number; euiZLevel8: number; euiZLevel9: number; euiZToastList: number; euiZModal: number; euiZMask: number; euiZNavigation: number; euiZContentMenu: number; euiZHeader: number; euiZFlyout: number; euiZMaskBelowHeader: number; euiZContent: number; euiColorGhost: string; euiColorInk: string; euiColorPrimary: string; euiColorAccent: string; euiColorSuccess: string; euiColorWarning: string; euiColorDanger: string; euiColorEmptyShade: string; euiColorLightestShade: string; euiColorLightShade: string; euiColorMediumShade: string; euiColorDarkShade: string; euiColorDarkestShade: string; euiColorFullShade: string; euiPageBackgroundColor: string; euiColorHighlight: string; euiTextColor: string; euiTitleColor: string; euiTextSubduedColor: string; euiColorDisabled: string; euiColorPrimaryText: string; euiColorSuccessText: string; euiColorAccentText: string; euiColorWarningText: string; euiColorDangerText: string; euiColorDisabledText: string; euiLinkColor: string; euiColorChartLines: string; euiColorChartBand: string; euiDatePickerCalendarWidth: string; euiDatePickerPadding: string; euiDatePickerGap: string; euiDatePickerCalendarColumns: number; euiDatePickerButtonSize: string; euiDatePickerMinControlWidth: string; euiDatePickerMaxControlWidth: string; euiButtonDefaultTransparency: number; euiButtonFontWeight: number; euiRangeHighlightColor: string; euiRangeThumbBackgroundColor: string; euiRangeTrackCompressedHeight: string; euiRangeHighlightCompressedHeight: string; euiRangeHeight: string; euiRangeCompressedHeight: string; euiStepStatusColors: { default: string; complete: string; warning: string; danger: string; }; }"
             ],
             "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "kibanaReact",
@@ -4876,7 +4962,8 @@
             "label": "darkMode",
             "description": [],
             "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

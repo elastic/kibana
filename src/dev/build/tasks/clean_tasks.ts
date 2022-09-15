@@ -8,6 +8,7 @@
 
 import minimatch from 'minimatch';
 import { discoverBazelPackages } from '@kbn/bazel-packages';
+import { REPO_ROOT } from '@kbn/utils';
 import { deleteAll, deleteEmptyFolders, scanDelete, Task, GlobalTask } from '../lib';
 
 export const Clean: GlobalTask = {
@@ -259,9 +260,15 @@ export const DeleteBazelPackagesFromBuildRoot: Task = {
     'Deleting bazel packages outputs from build folder root as they are now installed as node_modules',
 
   async run(config, log, build) {
-    const bazelPackagesOnBuildRoot = (await discoverBazelPackages()).map((pkg) =>
-      build.resolvePath(pkg.normalizedRepoRelativeDir)
-    );
+    const bazelPackagesOnBuildRoot = (await discoverBazelPackages(REPO_ROOT)).flatMap((pkg) => {
+      const bldSrc = build.resolvePath(pkg.normalizedRepoRelativeDir);
+
+      if (pkg.manifest.type.startsWith('plugin-')) {
+        return bldSrc;
+      }
+
+      return [bldSrc, build.resolvePath('node_modules', pkg.manifest.id, 'kibana.jsonc')];
+    });
 
     await deleteAll(bazelPackagesOnBuildRoot, log);
   },

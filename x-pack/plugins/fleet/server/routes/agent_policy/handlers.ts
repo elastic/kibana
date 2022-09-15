@@ -75,6 +75,7 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
       withPackagePolicies,
       ...restOfQuery,
     });
+
     const body: GetAgentPoliciesResponse = {
       items,
       total,

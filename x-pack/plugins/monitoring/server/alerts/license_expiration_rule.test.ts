@@ -21,9 +21,11 @@ jest.mock('../lib/alerts/fetch_clusters', () => ({
   fetchClusters: jest.fn(),
 }));
 jest.mock('moment', () => {
-  const moment = function () {};
-  moment.duration = () => ({ humanize: () => 'HUMANIZED_DURATION' });
-  return moment;
+  const actual = jest.requireActual('moment');
+  return {
+    ...actual,
+    duration: () => ({ humanize: () => 'HUMANIZED_DURATION' }),
+  };
 });
 
 jest.mock('../static_globals', () => ({
@@ -69,6 +71,7 @@ describe('LicenseExpirationRule', () => {
 
   describe('execute', () => {
     function FakeDate() {}
+
     FakeDate.prototype.valueOf = () => 1;
 
     const clusterUuid = 'abc123';

@@ -20,6 +20,7 @@ import {
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import type { UserProfileWithSecurity } from '../../common';
+import { licenseMock } from '../../common/licensing/index.mock';
 import { userProfileMock } from '../../common/model/user_profile.mock';
 import { authorizationMock } from '../authorization/index.mock';
 import { securityMock } from '../mocks';
@@ -27,14 +28,13 @@ import { sessionMock } from '../session_management/session.mock';
 import { UserProfileService } from './user_profile_service';
 
 const logger = loggingSystemMock.createLogger();
-const userProfileService = new UserProfileService(logger);
-
 describe('UserProfileService', () => {
   let mockStartParams: {
     clusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>;
     session: ReturnType<typeof sessionMock.create>;
   };
   let mockAuthz: ReturnType<typeof authorizationMock.create>;
+  let userProfileService: UserProfileService;
   beforeEach(() => {
     mockStartParams = {
       clusterClient: elasticsearchServiceMock.createClusterClient(),
@@ -42,7 +42,12 @@ describe('UserProfileService', () => {
     };
     mockAuthz = authorizationMock.create();
 
-    userProfileService.setup({ authz: mockAuthz });
+    userProfileService = new UserProfileService(logger);
+
+    userProfileService.setup({
+      authz: mockAuthz,
+      license: licenseMock.create({ allowUserProfileCollaboration: true }),
+    });
   });
 
   afterEach(() => {
@@ -72,7 +77,6 @@ describe('UserProfileService', () => {
         uid: 'UID',
         user: {
           username: 'user-1',
-          display_name: 'display-name-1',
           full_name: 'full-name-1',
           realm_name: 'some-realm',
           realm_domain: 'some-domain',
@@ -201,7 +205,6 @@ describe('UserProfileService', () => {
                 "labels": Object {},
                 "uid": "UID",
                 "user": Object {
-                  "display_name": "display-name-1",
                   "email": undefined,
                   "full_name": "full-name-1",
                   "realm_domain": "some-domain",
@@ -252,7 +255,6 @@ describe('UserProfileService', () => {
                 "labels": Object {},
                 "uid": "UID",
                 "user": Object {
-                  "display_name": "display-name-1",
                   "email": undefined,
                   "full_name": "full-name-1",
                   "realm_domain": "some-domain",
@@ -334,7 +336,6 @@ describe('UserProfileService', () => {
                 "labels": Object {},
                 "uid": "some-profile-uid",
                 "user": Object {
-                  "display_name": undefined,
                   "email": "some@email",
                   "full_name": undefined,
                   "realm_domain": "some-realm-domain",
@@ -366,7 +367,6 @@ describe('UserProfileService', () => {
                 "labels": Object {},
                 "uid": "some-profile-uid",
                 "user": Object {
-                  "display_name": undefined,
                   "email": "some@email",
                   "full_name": undefined,
                   "realm_domain": "some-realm-domain",
@@ -431,7 +431,6 @@ describe('UserProfileService', () => {
                 "labels": Object {},
                 "uid": "some-profile-uid",
                 "user": Object {
-                  "display_name": undefined,
                   "email": "some@email",
                   "full_name": undefined,
                   "realm_domain": "some-realm-domain",
@@ -491,7 +490,6 @@ describe('UserProfileService', () => {
             uid: 'UID-1',
             user: {
               username: 'user-1',
-              display_name: 'display-name-1',
               full_name: 'full-name-1',
               realm_name: 'some-realm',
               realm_domain: 'some-domain',
@@ -502,7 +500,6 @@ describe('UserProfileService', () => {
             uid: 'UID-2',
             user: {
               username: 'user-2',
-              display_name: 'display-name-2',
               full_name: 'full-name-2',
               realm_name: 'some-realm',
               realm_domain: 'some-domain',
@@ -521,7 +518,6 @@ describe('UserProfileService', () => {
                             "enabled": true,
                             "uid": "UID-1",
                             "user": Object {
-                              "display_name": "display-name-1",
                               "email": undefined,
                               "full_name": "full-name-1",
                               "username": "user-1",
@@ -532,7 +528,6 @@ describe('UserProfileService', () => {
                             "enabled": true,
                             "uid": "UID-2",
                             "user": Object {
-                              "display_name": "display-name-2",
                               "email": undefined,
                               "full_name": "full-name-2",
                               "username": "user-2",
@@ -571,7 +566,6 @@ describe('UserProfileService', () => {
                   "enabled": true,
                   "uid": "UID-1",
                   "user": Object {
-                    "display_name": undefined,
                     "email": "some@email",
                     "full_name": undefined,
                     "username": "some-username",
@@ -621,7 +615,6 @@ describe('UserProfileService', () => {
             uid: 'UID-1',
             user: {
               username: 'user-1',
-              display_name: 'display-name-1',
               full_name: 'full-name-1',
               realm_name: 'some-realm',
               realm_domain: 'some-domain',
@@ -632,7 +625,6 @@ describe('UserProfileService', () => {
             uid: 'UID-2',
             user: {
               username: 'user-2',
-              display_name: 'display-name-2',
               full_name: 'full-name-2',
               realm_name: 'some-realm',
               realm_domain: 'some-domain',
@@ -651,7 +643,6 @@ describe('UserProfileService', () => {
                   "enabled": true,
                   "uid": "UID-1",
                   "user": Object {
-                    "display_name": "display-name-1",
                     "email": undefined,
                     "full_name": "full-name-1",
                     "username": "user-1",
@@ -662,7 +653,6 @@ describe('UserProfileService', () => {
                   "enabled": true,
                   "uid": "UID-2",
                   "user": Object {
-                    "display_name": "display-name-2",
                     "email": undefined,
                     "full_name": "full-name-2",
                     "username": "user-2",
@@ -703,7 +693,6 @@ describe('UserProfileService', () => {
                   "enabled": true,
                   "uid": "UID-1",
                   "user": Object {
-                    "display_name": undefined,
                     "email": "some@email",
                     "full_name": undefined,
                     "username": "some-username",
@@ -728,6 +717,23 @@ describe('UserProfileService', () => {
       const startContract = userProfileService.start(mockStartParams);
       await expect(startContract.suggest({ name: 'som', size: 101 })).rejects.toMatchInlineSnapshot(
         `[Error: Can return up to 100 suggestions, but 101 suggestions were requested.]`
+      );
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.suggestUserProfiles
+      ).not.toHaveBeenCalled();
+      expect(mockAuthz.checkUserProfilesPrivileges).not.toHaveBeenCalled();
+    });
+
+    it('fails if license does not allow profile collaboration features', async () => {
+      userProfileService = new UserProfileService(logger);
+      userProfileService.setup({
+        authz: mockAuthz,
+        license: licenseMock.create({ allowUserProfileCollaboration: false }),
+      });
+
+      const startContract = userProfileService.start(mockStartParams);
+      await expect(startContract.suggest({ name: 'som' })).rejects.toMatchInlineSnapshot(
+        `[Error: Current license doesn't support user profile collaboration APIs.]`
       );
       expect(
         mockStartParams.clusterClient.asInternalUser.security.suggestUserProfiles
@@ -797,7 +803,6 @@ describe('UserProfileService', () => {
                   "enabled": true,
                   "uid": "UID-0",
                   "user": Object {
-                    "display_name": undefined,
                     "email": "some@email",
                     "full_name": undefined,
                     "username": "some-username",
@@ -810,7 +815,6 @@ describe('UserProfileService', () => {
                   "enabled": true,
                   "uid": "UID-1",
                   "user": Object {
-                    "display_name": undefined,
                     "email": "some@email",
                     "full_name": undefined,
                     "username": "some-username",
@@ -823,7 +827,6 @@ describe('UserProfileService', () => {
                   "enabled": true,
                   "uid": "UID-8",
                   "user": Object {
-                    "display_name": undefined,
                     "email": "some@email",
                     "full_name": undefined,
                     "username": "some-username",
@@ -903,7 +906,6 @@ describe('UserProfileService', () => {
                   "enabled": true,
                   "uid": "UID-0",
                   "user": Object {
-                    "display_name": undefined,
                     "email": "some@email",
                     "full_name": undefined,
                     "username": "some-username",
@@ -916,7 +918,6 @@ describe('UserProfileService', () => {
                   "enabled": true,
                   "uid": "UID-20",
                   "user": Object {
-                    "display_name": undefined,
                     "email": "some@email",
                     "full_name": undefined,
                     "username": "some-username",
@@ -1006,7 +1007,6 @@ describe('UserProfileService', () => {
                   "enabled": true,
                   "uid": "UID-0",
                   "user": Object {
-                    "display_name": undefined,
                     "email": "some@email",
                     "full_name": undefined,
                     "username": "some-username",
@@ -1019,7 +1019,6 @@ describe('UserProfileService', () => {
                   "enabled": true,
                   "uid": "UID-1",
                   "user": Object {
-                    "display_name": undefined,
                     "email": "some@email",
                     "full_name": undefined,
                     "username": "some-username",

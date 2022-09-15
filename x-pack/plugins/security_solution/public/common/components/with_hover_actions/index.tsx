@@ -10,7 +10,7 @@ import {
   HOVER_ACTIONS_ALWAYS_SHOW_CLASS_NAME,
   IS_DRAGGING_CLASS_NAME,
 } from '@kbn/securitysolution-t-grid';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 /**
@@ -82,6 +82,7 @@ export const WithHoverActions = React.memo<Props>(
     const [isOpen, setIsOpen] = useState(hoverContent != null && alwaysShow);
     const [showHoverContent, setShowHoverContent] = useState(false);
     const [, setHoverTimeout] = useState<number | undefined>(undefined);
+    const popoverRef = useRef<EuiPopover>(null);
 
     const tryClosePopover = useCallback(() => {
       setHoverTimeout((prevHoverTimeout) => {
@@ -143,12 +144,19 @@ export const WithHoverActions = React.memo<Props>(
       setShowHoverContent(false);
     }, [closePopOverTrigger]); // NOTE: the `closePopOverTrigger` dependency here will close the hover menu whenever `closePopOverTrigger` changes
 
+    useEffect(() => {
+      // in case of dynamic content i.e when the value of hoverContent changes,
+      // we will try to reposition the popover so that the content does not collide with screen edge.
+      if (isOpen) popoverRef?.current?.positionPopoverFluid();
+    }, [hoverContent, isOpen]);
+
     return (
       <div
         className={alwaysShow ? HOVER_ACTIONS_ALWAYS_SHOW_CLASS_NAME : ''}
         onMouseLeave={onMouseLeave}
       >
         <WithHoverActionsPopover
+          ref={popoverRef}
           anchorPosition={'downCenter'}
           button={content}
           closePopover={tryClosePopover}
