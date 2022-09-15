@@ -158,7 +158,9 @@ export async function getPackageInfo({
     ? await Registry.fetchInfo(pkgName, resolvedPkgVersion).catch(() => undefined)
     : undefined;
 
-  if (packageInfo) {
+  // We need to get input only packages from source to get all fields
+  // see https://github.com/elastic/package-registry/issues/864
+  if (packageInfo && packageInfo.type !== 'input') {
     // Fix the paths
     paths =
       packageInfo.assets?.map((path) =>
@@ -170,6 +172,7 @@ export async function getPackageInfo({
       pkgVersion: resolvedPkgVersion,
       savedObjectsClient,
       installedPkg: savedObject?.attributes,
+      getPkgInfoFromArchive: packageInfo?.type === 'input',
     }));
   }
 
@@ -238,9 +241,16 @@ export async function getPackageFromSource(options: {
   pkgVersion: string;
   installedPkg?: Installation;
   savedObjectsClient: SavedObjectsClientContract;
+  getPkgInfoFromArchive?: boolean;
 }): Promise<PackageResponse> {
   const logger = appContextService.getLogger();
-  const { pkgName, pkgVersion, installedPkg, savedObjectsClient } = options;
+  const {
+    pkgName,
+    pkgVersion,
+    installedPkg,
+    savedObjectsClient,
+    getPkgInfoFromArchive = true,
+  } = options;
   let res: GetPackageResponse;
 
   // If the package is installed
@@ -283,7 +293,7 @@ export async function getPackageFromSource(options: {
     }
   } else {
     // else package is not installed or installed and missing from cache and storage and installed from registry
-    res = await Registry.getRegistryPackage(pkgName, pkgVersion);
+    res = await Registry.getRegistryPackage(pkgName, pkgVersion, { getPkgInfoFromArchive });
     logger.debug(`retrieved uninstalled package ${pkgName}-${pkgVersion} from registry`);
   }
   if (!res) {

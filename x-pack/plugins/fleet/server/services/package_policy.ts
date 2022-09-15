@@ -33,6 +33,9 @@ import {
   doesAgentPolicyAlreadyIncludePackage,
   validatePackagePolicy,
   validationHasErrors,
+  isInputOnlyPolicyTemplate,
+  getNormalizedDataStreams,
+  getNormalizedInputs,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -1268,16 +1271,20 @@ async function _compilePackagePolicyInput(
       )
     : pkgInfo.policy_templates?.[0];
 
-  if (!input.enabled || !packagePolicyTemplate || !packagePolicyTemplate.inputs?.length) {
+  if (!input.enabled || !packagePolicyTemplate) {
     return undefined;
   }
 
-  const packageInputs = packagePolicyTemplate.inputs;
+  const packageInputs = getNormalizedInputs(packagePolicyTemplate);
+
+  if (!packageInputs.length) {
+    return undefined;
+  }
+
   const packageInput = packageInputs.find((pkgInput) => pkgInput.type === input.type);
   if (!packageInput) {
     throw new Error(`Input template not found, unable to find input type ${input.type}`);
   }
-
   if (!packageInput.template_path) {
     return undefined;
   }
@@ -1357,7 +1364,7 @@ async function _compilePackageStream(
     return { ...stream, compiled_stream: undefined };
   }
 
-  const packageDataStreams = pkgInfo.data_streams;
+  const packageDataStreams = getNormalizedDataStreams(pkgInfo);
   if (!packageDataStreams) {
     throw new Error('Stream template not found, no data streams');
   }
@@ -1529,10 +1536,11 @@ export function updatePackageInputs(
       }
 
       // Ignore any inputs removed from this policy template in the new package version
-      const policyTemplateStillIncludesInput =
-        policyTemplate.inputs?.some(
-          (policyTemplateInput) => policyTemplateInput.type === input.type
-        ) ?? false;
+      const policyTemplateStillIncludesInput = isInputOnlyPolicyTemplate(policyTemplate)
+        ? policyTemplate.type === input.type
+        : policyTemplate.inputs?.some(
+            (policyTemplateInput) => policyTemplateInput.type === input.type
+          ) ?? false;
 
       return policyTemplateStillIncludesInput;
     }),

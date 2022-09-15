@@ -129,26 +129,28 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                   alignItems="flexStart"
                   justifyContent="spaceBetween"
                 >
-                  <EuiFlexItem grow={false}>
-                    <EuiSwitch
-                      label={packageInputStream.title}
-                      disabled={packagePolicyInputStream.keep_enabled}
-                      checked={packagePolicyInputStream.enabled}
-                      onChange={(e) => {
-                        const enabled = e.target.checked;
-                        updatePackagePolicyInputStream({
-                          enabled,
-                        });
-                      }}
-                    />
-                  </EuiFlexItem>
+                  {packageInfo.type !== 'input' && (
+                    <EuiFlexItem grow={false}>
+                      <EuiSwitch
+                        label={packageInputStream.title}
+                        disabled={packagePolicyInputStream.keep_enabled}
+                        checked={packagePolicyInputStream.enabled}
+                        onChange={(e) => {
+                          const enabled = e.target.checked;
+                          updatePackagePolicyInputStream({
+                            enabled,
+                          });
+                        }}
+                      />
+                    </EuiFlexItem>
+                  )}
                   {packagePolicyInputStream.release && packagePolicyInputStream.release !== 'ga' ? (
                     <EuiFlexItem grow={false}>
                       <InlineReleaseBadge release={packagePolicyInputStream.release} />
                     </EuiFlexItem>
                   ) : null}
                 </EuiFlexGroup>
-                {packageInputStream.description ? (
+                {packageInfo.type !== 'input' && packageInputStream.description ? (
                   <Fragment>
                     <EuiSpacer size="s" />
                     <EuiText size="s" color="subdued">

@@ -439,6 +439,7 @@ export function parseAndVerifyPolicyTemplates(
         title: policyTemplateTitle,
         description,
         inputs,
+        input,
         multiple,
         ...restOfProps
       } = policyTemplate;
@@ -469,8 +470,9 @@ export function parseAndVerifyPolicyTemplates(
             name,
             title: policyTemplateTitle,
             description,
-            inputs: parsedInputs,
             multiple: parsedMultiple,
+            // template can only have one of input or inputs
+            ...(!input ? { inputs: parsedInputs } : { input }),
           } as RegistryPolicyTemplate
         )
       );
