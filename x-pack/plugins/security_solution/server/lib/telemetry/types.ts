@@ -417,5 +417,7 @@ export interface TaskMetric {
   name: string;
   passed: boolean;
   time_executed_in_ms: number;
+  start_time: number;
+  end_time: number;
   error_message?: string;
 }

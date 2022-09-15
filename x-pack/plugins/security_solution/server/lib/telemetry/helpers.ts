@@ -273,9 +273,14 @@ export const createTaskMetric = (
   passed: boolean,
   startTime: number,
   errorMessage?: string
-): TaskMetric => ({
-  name,
-  passed,
-  time_executed_in_ms: Date.now() - startTime,
-  error_message: errorMessage,
-});
+): TaskMetric => {
+  const endTime = Date.now();
+  return {
+    name,
+    passed,
+    time_executed_in_ms: endTime - startTime,
+    start_time: startTime,
+    end_time: endTime,
+    error_message: errorMessage,
+  }
+};
