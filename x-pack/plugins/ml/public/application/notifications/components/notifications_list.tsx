@@ -129,7 +129,7 @@ export const NotificationsList: FC = () => {
   const columns: Array<EuiBasicTableColumn<NotificationItem>> = [
     {
       field: 'timestamp',
-      name: <FormattedMessage id={'xpack.ml.notifications.timeLabel'} defaultMessage={'Time'} />,
+      name: <FormattedMessage id="xpack.ml.notifications.timeLabel" defaultMessage="Time" />,
       sortable: true,
       truncateText: false,
       'data-test-subj': 'mlNotificationTime',
@@ -138,7 +138,7 @@ export const NotificationsList: FC = () => {
     },
     {
       field: 'level',
-      name: <FormattedMessage id={'xpack.ml.notifications.levelLabel'} defaultMessage={'Level'} />,
+      name: <FormattedMessage id="xpack.ml.notifications.levelLabel" defaultMessage="Level" />,
       sortable: true,
       truncateText: false,
       'data-test-subj': 'mlNotificationLabel',
@@ -149,7 +149,7 @@ export const NotificationsList: FC = () => {
     },
     {
       field: 'job_type',
-      name: <FormattedMessage id={'xpack.ml.notifications.typeLabel'} defaultMessage={'Type'} />,
+      name: <FormattedMessage id="xpack.ml.notifications.typeLabel" defaultMessage="Type" />,
       sortable: true,
       truncateText: false,
       'data-test-subj': 'mlNotificationType',
@@ -160,9 +160,7 @@ export const NotificationsList: FC = () => {
     },
     {
       field: 'job_id',
-      name: (
-        <FormattedMessage id={'xpack.ml.notifications.entityLabel'} defaultMessage={'Entity ID'} />
-      ),
+      name: <FormattedMessage id="xpack.ml.notifications.entityLabe" defaultMessage="Entity ID" />,
       sortable: true,
       truncateText: false,
       'data-test-subj': 'mlNotificationEntity',
@@ -170,9 +168,7 @@ export const NotificationsList: FC = () => {
     },
     {
       field: 'message',
-      name: (
-        <FormattedMessage id={'xpack.ml.notifications.messageLabel'} defaultMessage={'Message'} />
-      ),
+      name: <FormattedMessage id="xpack.ml.notifications.messageLabel" defaultMessage="Message" />,
       sortable: false,
       truncateText: false,
       'data-test-subj': 'mlNotificationMessage',
@@ -240,7 +236,7 @@ export const NotificationsList: FC = () => {
           },
           {
             value: 'system',
-            name: i18n.translate('xpack.ml.notifications.filters.type.systen', {
+            name: i18n.translate('xpack.ml.notifications.filters.type.system', {
               defaultMessage: 'System',
             }),
           },
@@ -314,8 +310,8 @@ export const NotificationsList: FC = () => {
         data-test-subj={isLoading ? 'mlNotificationsTable loading' : 'mlNotificationsTable loaded'}
         message={
           <FormattedMessage
-            id={'xpack.ml.notifications.noItemsFoundMessage'}
-            defaultMessage={'No notification found'}
+            id="xpack.ml.notifications.noItemsFoundMessage"
+            defaultMessage="No notifications found"
           />
         }
       />
