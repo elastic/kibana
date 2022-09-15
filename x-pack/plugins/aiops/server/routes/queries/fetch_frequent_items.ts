@@ -9,7 +9,6 @@ import { uniq, uniqWith, pick, isEqual } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { Query } from '@kbn/es-query';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 
@@ -26,7 +25,7 @@ function dropDuplicates(cp: ChangePoint[], uniqueFields: string[]) {
 export async function fetchFrequentItems(
   client: ElasticsearchClient,
   index: string,
-  searchQuery: Query['query'],
+  searchQuery: estypes.QueryDslQueryContainer,
   changePoints: ChangePoint[],
   timeFieldName: string,
   deviationMin: number,
