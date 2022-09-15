@@ -29,7 +29,6 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
   const dispatch = useDispatch();
   const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
   const {
-    activeTab,
     show,
     status: timelineStatus,
     updated,

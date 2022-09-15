@@ -9,18 +9,13 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 
 import { TestProviders } from '../../../../common/mock/test_providers';
-import { TimelineTabs } from '../../../../../common/types/timeline';
 import { FlyoutBottomBar } from '.';
 
 describe('FlyoutBottomBar', () => {
   test('it renders the expected bottom bar', () => {
     render(
       <TestProviders>
-        <FlyoutBottomBar
-          timelineId="test"
-          showDataproviders={true}
-          activeTab={TimelineTabs.query}
-        />
+        <FlyoutBottomBar timelineId="test" showDataproviders={true} />
       </TestProviders>
     );
 
@@ -30,11 +25,7 @@ describe('FlyoutBottomBar', () => {
   test('it renders the flyout header panel', () => {
     render(
       <TestProviders>
-        <FlyoutBottomBar
-          timelineId="test"
-          showDataproviders={true}
-          activeTab={TimelineTabs.query}
-        />
+        <FlyoutBottomBar timelineId="test" showDataproviders={true} />
       </TestProviders>
     );
 
@@ -44,11 +35,7 @@ describe('FlyoutBottomBar', () => {
   test('it hides the flyout header panel', () => {
     render(
       <TestProviders>
-        <FlyoutBottomBar
-          timelineId="test"
-          showDataproviders={false}
-          activeTab={TimelineTabs.query}
-        />
+        <FlyoutBottomBar timelineId="test" showDataproviders={false} />
       </TestProviders>
     );
 
