@@ -85,9 +85,6 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
       ['makeRequest as makeStartSyncRequest'],
       FetchIndexApiLogic,
       [
-        'apiError as fetchIndexApiError',
-        'apiReset as resetFetchIndexApi',
-        'apiSuccess as fetchIndexApiSuccess',
         'makeRequest as makeFetchIndexRequest',
       ],
     ],
