@@ -958,7 +958,7 @@ export const RulesList = ({
         idsToUpdate={rulesToUpdateAPIKey}
         idsToUpdateFilter={rulesToUpdateAPIKeyFilter}
         numberOfSelectedRules={numberOfSelectedItems}
-        apiUpdateApiKeyCall={bulkUpdateAPIKey}
+        bulkApiUpdateApiKeyCall={bulkUpdateAPIKey}
         setIsLoadingState={(isLoading: boolean) => {
           setRulesState({ ...rulesState, isLoading });
         }}
