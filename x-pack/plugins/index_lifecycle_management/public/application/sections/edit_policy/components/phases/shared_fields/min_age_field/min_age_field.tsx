@@ -148,7 +148,7 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                         return (
                           <EuiSelect
                             compressed
-                            value={unitField.value as string}
+                            value={unitValue}
                             onChange={(e) => {
                               unitField.setValue(e.target.value);
                             }}
