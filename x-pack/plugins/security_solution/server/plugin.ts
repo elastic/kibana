@@ -455,7 +455,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       registerListsServerExtension: this.lists?.registerExtension,
       featureUsageService,
     });
-    // cloudOnlyLogger.setup(this.logger, plugins.security.getIsElasticCloudDeployment());
 
     this.telemetryReceiver.start(
       core,
@@ -463,7 +462,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.kibanaIndex!,
       DEFAULT_ALERTS_INDEX,
       this.endpointAppContextService,
-      exceptionListClient,
+      exceptionListClient
     );
 
     this.telemetryEventsSender.start(
