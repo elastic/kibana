@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # ??? Should we migrate
-#     x-pack/test/functional/es_archives/timelion/feature_controls
-# !!! No, do not migrate, it's config(s) is / are not enabled.
+#     x-pack/test/functional/es_archives/logstash/example_pipelines
+# !!! No, we've found 0 saved objects that are listed in the standard_list
 # !!! It contains the following saved object(s)
 #     config
-#     index-pattern
+#     space
 
 standard_list="url,index-pattern,query,graph-workspace,tag,visualization,canvas-element,canvas-workpad,dashboard,search,lens,map,cases,uptime-dynamic-settings,osquery-saved-query,osquery-pack,infrastructure-ui-source,metrics-explorer-view,inventory-view,infrastructure-monitoring-log-view,apm-indices"
 
@@ -22,6 +22,29 @@ testFiles+=("x-pack/test/functional/apps/dashboard/group1/preserve_url.ts")
 test_config="x-pack/test/functional/apps/dashboard/group1/config.ts"
 # test_config="x-pack/test/functional/apps/discover/config.ts"
 # test_config="x-pack/test/functional/apps/visualize/config.ts"
+
+list_stragglers() {
+
+  echo "### OSS"
+  while read -r x; do
+    local a=$(grep -l '"index": ".kibana' "$x")
+    if [ -n "$a" ]; then
+      echo "${a%/mappings.json}"
+    fi
+  done <<<"$(find test/functional/fixtures/es_archiver -name mappings.json)"
+
+  echo
+  echo
+
+  echo "### X-PACK"
+  while read -r y; do
+    local b=$(grep -l '"index": ".kibana' "$y")
+    if [ -n "$b" ]; then
+      echo "${b%/mappings.json}"
+    fi
+  done <<<"$(find x-pack/test/functional/es_archives -name mappings.json)"
+
+}
 
 curl_so_count() {
   local so=${1:-search-session}
