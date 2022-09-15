@@ -171,7 +171,7 @@ export const useColumns = ({
 
   const onResetColumns = useCallback(() => {
     return onChangeVisibleColumns(defaultColumns.map((column) => column.id));
-  }, [onChangeVisibleColumns]);
+  }, [defaultColumns, onChangeVisibleColumns]);
 
   return {
     columns,
