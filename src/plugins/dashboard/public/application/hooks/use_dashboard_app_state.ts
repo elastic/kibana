@@ -13,7 +13,6 @@ import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { isFilterPinned } from '@kbn/es-query';
 
 import { DashboardConstants } from '../..';
 import { getNewDashboardTitle } from '../../dashboard_strings';

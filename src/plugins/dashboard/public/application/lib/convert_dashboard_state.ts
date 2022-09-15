@@ -11,7 +11,7 @@ import _ from 'lodash';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { ControlGroupInput } from '@kbn/controls-plugin/public';
 import { type EmbeddablePackageState, ViewMode } from '@kbn/embeddable-plugin/public';
-import { isFilterPinned, TimeRange } from '@kbn/es-query';
+import { compareFilters, isFilterPinned, migrateFilter, TimeRange } from '@kbn/es-query';
 
 import type { DashboardSavedObject } from '../../saved_dashboards';
 import { getTagsFromSavedDashboard, migrateAppState } from '.';
@@ -103,8 +103,12 @@ export const stateToDashboardContainerInput = ({
     filters: dashboardFilters,
   } = dashboardState;
 
-  const containerFilters = dashboardFilters.concat(
-    filterManager.getFilters().filter((f) => isFilterPinned(f))
+  const containerFilters = _.uniqWith(
+    [
+      ..._.cloneDeep(dashboardFilters),
+      ...filterManager.getFilters().filter((f) => isFilterPinned(f)),
+    ].map((f) => migrateFilter(f)),
+    compareFilters
   );
 
   return {
