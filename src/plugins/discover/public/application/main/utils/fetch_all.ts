@@ -9,6 +9,7 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { AppState } from '../services/discover_state';
 import { getRawRecordType } from './get_raw_record_type';
 import {
   sendCompleteMsg,
@@ -32,7 +33,6 @@ import {
 } from '../hooks/use_saved_search';
 import { DiscoverServices } from '../../../build_services';
 import { fetchSql } from './fetch_sql';
-import { AppState } from '@kbn/discover-plugin/public/application/main/services/discover_state';
 
 export interface FetchDeps {
   abortController: AbortController;
