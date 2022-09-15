@@ -114,10 +114,18 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await aiops.explainLogRateSpikes.clickRerunAnalysisButton(true);
       await aiops.explainLogRateSpikes.assertProgressTitle('Progress: 100% — Done.');
 
-      await aiops.explainLogRateSpikesAnalysisTable.assertSpikeAnalysisTableExists();
+      await aiops.explainLogRateSpikesAnalysisGroupsTable.assertSpikeAnalysisTableExists();
+
+      const analysisGroupsTable =
+        await aiops.explainLogRateSpikesAnalysisGroupsTable.parseAnalysisTable();
+
+      expect(analysisGroupsTable).to.be.eql(testData.expected.analysisGroupsTable);
+
+      await ml.testExecution.logTestStep('expand table row');
+      await aiops.explainLogRateSpikesAnalysisGroupsTable.assertExpandRowButtonExists();
+      await aiops.explainLogRateSpikesAnalysisGroupsTable.expandRow();
 
       const analysisTable = await aiops.explainLogRateSpikesAnalysisTable.parseAnalysisTable();
-
       expect(analysisTable).to.be.eql(testData.expected.analysisTable);
     });
   }

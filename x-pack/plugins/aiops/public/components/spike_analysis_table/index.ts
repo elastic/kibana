@@ -6,3 +6,4 @@
  */
 
 export { SpikeAnalysisTable } from './spike_analysis_table';
+export { SpikeAnalysisGroupsTable } from './spike_analysis_table_groups';
