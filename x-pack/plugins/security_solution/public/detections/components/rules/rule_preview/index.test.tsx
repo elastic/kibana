@@ -22,7 +22,7 @@ import {
   stepAboutDefaultValue,
   stepDefineDefaultValue,
 } from '../../../pages/detection_engine/rules/utils';
-import { usePreviewInvocationCount } from '../../../containers/detection_engine/rules/use_preview_invocation_count';
+import { usePreviewInvocationCount } from './use_preview_invocation_count';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('./use_preview_route');
@@ -35,7 +35,7 @@ jest.mock('../../../../common/containers/use_global_time', () => ({
     setQuery: jest.fn(),
   }),
 }));
-jest.mock('../../../containers/detection_engine/rules/use_preview_invocation_count');
+jest.mock('./use_preview_invocation_count');
 
 const getMockIndexPattern = (): DataViewBase => ({
   fields,
