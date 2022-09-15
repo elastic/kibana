@@ -21,6 +21,7 @@ import {
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import useDebounce from 'react-use/lib/useDebounce';
+import { SavedObjectsWarning } from '../../components/saved_objects_warning';
 import { useTimeRangeUpdates } from '../../contexts/kibana/use_timefilter';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
@@ -245,6 +246,8 @@ export const NotificationsList: FC = () => {
 
   return (
     <>
+      <SavedObjectsWarning onCloseFlyout={fetchNotifications} forceRefresh={isLoading} />
+
       <EuiSearchBar
         query={queryInstance}
         box={{
