@@ -33,12 +33,12 @@ export const transformAlertToRuleAction = ({
 });
 
 export const transformRuleToAlertResponseAction = ({
-  action_type_id, // eslint-disable-line @typescript-eslint/naming-convention
+  action_type_id: actionTypeId,
   params,
 }: RuleAlertResponseAction): RuleResponseAction => {
   return {
     params,
-    actionTypeId: action_type_id,
+    actionTypeId,
   };
 };
 

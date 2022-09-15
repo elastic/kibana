@@ -18,7 +18,6 @@ interface IProps {
   formRef: React.RefObject<ResponseActionValidatorRef>;
 }
 
-// eslint-disable-next-line react/display-name
 export const OsqueryResponseAction = React.memo((props: IProps) => {
   const { osquery } = useKibana().services;
   const OsqueryForm = useMemo(
@@ -69,3 +68,4 @@ export const OsqueryResponseAction = React.memo((props: IProps) => {
 
   return null;
 });
+OsqueryResponseAction.displayName = 'OsqueryResponseAction';

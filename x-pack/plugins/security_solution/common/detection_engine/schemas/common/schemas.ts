@@ -101,12 +101,12 @@ export const data_view_id = t.string;
 
 export const dataViewIdOrUndefined = t.union([data_view_id, t.undefined]);
 
-export const action_action_type_id = t.string;
+export const action_action_type_id = NonEmptyString;
 
 export const responseActionsCamelCase = t.array(
   t.exact(
     t.type({
-      actionTypeId: t.string,
+      actionTypeId: NonEmptyString,
       params: t.record(t.string, t.any),
     })
   )
@@ -145,12 +145,7 @@ export const output_index = t.string;
 
 export const saved_id = t.string;
 
-export const response_actions = t.array(
-  t.type({
-    action_type_id: t.string,
-    params: t.record(t.string, t.any),
-  })
-);
+export const response_actions = t.array(responseAction);
 
 export const savedIdOrUndefined = t.union([saved_id, t.undefined]);
 export type SavedIdOrUndefined = t.TypeOf<typeof savedIdOrUndefined>;

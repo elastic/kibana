@@ -18,10 +18,7 @@ export const useSupportedResponseActionTypes = () => {
   const isOsqueryEnabled = useOsqueryEnabled();
 
   useEffect(() => {
-    const actionEnabledMap: Record<string, boolean> = {
-      '.osquery': isOsqueryEnabled,
-    };
-    const supportedTypes = getSupportedResponseActions(responseActionTypes, actionEnabledMap);
+    const supportedTypes = getSupportedResponseActions(responseActionTypes);
     setSupportedResponseActionTypes(supportedTypes);
   }, [isOsqueryEnabled]);
 

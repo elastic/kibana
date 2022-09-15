@@ -84,9 +84,7 @@ export const ResponseActionAddButton = ({
 
         return (
           <EuiFlexItem grow={false} key={`keypad-${item.id}`}>
-            {/* <EuiToolTip position="top" content={item.description}>*/}
             {keyPadItem}
-            {/* </EuiToolTip>*/}
           </EuiFlexItem>
         );
       })
