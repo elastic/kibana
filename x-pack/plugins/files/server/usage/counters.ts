@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-export function getCounters(prefix: string) {
+export function getCounters(fileKind: string) {
   return {
-    DELETE: `${prefix}_delete`,
-    DELETE_ERROR: `${prefix}_delete_error`,
+    DELETE: `delete:${fileKind}`,
+    DELETE_ERROR: `delete:error:${fileKind}`,
 
-    SHARE: `${prefix}_unshare`,
-    SHARE_ERROR: `${prefix}_unshare_error`,
+    SHARE: `$unshare:${fileKind}`,
+    SHARE_ERROR: `unshare:error:${fileKind}`,
 
-    UNSHARE: `${prefix}_unshare`,
-    UNSHARE_ERROR: `${prefix}_unshare_error`,
+    UNSHARE: `unshare:${fileKind}`,
+    UNSHARE_ERROR: `unshare:error:${fileKind}`,
 
-    DOWNLOAD: `${prefix}_download`,
-    DOWNLOAD_ERROR: `${prefix}_download_error`,
+    DOWNLOAD: `download:${fileKind}`,
+    DOWNLOAD_ERROR: `download:error:${fileKind}`,
   };
 }
 
