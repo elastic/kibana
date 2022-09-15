@@ -93,7 +93,7 @@ export function DiscoverMainRoute(props: Props) {
 
         const { appStateContainer } = getState({ history, savedSearch: nextSavedSearch, services });
         const { index } = appStateContainer.getState();
-        const ip = await loadDataView(index || '', data.dataViews, config);
+        const ip = await loadDataView(data.dataViews, config, index);
 
         const ipList = ip.list;
         const dataViewData = resolveDataView(ip, nextSavedSearch.searchSource, toastNotifications);

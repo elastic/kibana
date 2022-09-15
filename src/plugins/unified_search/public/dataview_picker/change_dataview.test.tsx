@@ -49,7 +49,8 @@ describe('DataView component', () => {
       ...dataMock,
       dataViews: {
         ...dataMock.dataViews,
-        getIdsWithTitle: jest.fn(),
+        getIdsWithTitle: jest.fn().mockReturnValue([]),
+        get: jest.fn().mockReturnValue({ isPersisted: () => true }),
       },
     };
     const services = {

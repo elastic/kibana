@@ -131,26 +131,6 @@ exports[`Error POD_NAME 1`] = `undefined`;
 
 exports[`Error PROCESSOR_EVENT 1`] = `"error"`;
 
-exports[`Error PROFILE_ALLOC_OBJECTS 1`] = `undefined`;
-
-exports[`Error PROFILE_ALLOC_SPACE 1`] = `undefined`;
-
-exports[`Error PROFILE_CPU_NS 1`] = `undefined`;
-
-exports[`Error PROFILE_ID 1`] = `undefined`;
-
-exports[`Error PROFILE_INUSE_OBJECTS 1`] = `undefined`;
-
-exports[`Error PROFILE_INUSE_SPACE 1`] = `undefined`;
-
-exports[`Error PROFILE_SAMPLES_COUNT 1`] = `undefined`;
-
-exports[`Error PROFILE_STACK 1`] = `undefined`;
-
-exports[`Error PROFILE_TOP_ID 1`] = `undefined`;
-
-exports[`Error PROFILE_WALL_US 1`] = `undefined`;
-
 exports[`Error SERVICE 1`] = `
 Object {
   "language": Object {
@@ -369,26 +349,6 @@ exports[`Span PARENT_ID 1`] = `"parentId"`;
 exports[`Span POD_NAME 1`] = `undefined`;
 
 exports[`Span PROCESSOR_EVENT 1`] = `"span"`;
-
-exports[`Span PROFILE_ALLOC_OBJECTS 1`] = `undefined`;
-
-exports[`Span PROFILE_ALLOC_SPACE 1`] = `undefined`;
-
-exports[`Span PROFILE_CPU_NS 1`] = `undefined`;
-
-exports[`Span PROFILE_ID 1`] = `undefined`;
-
-exports[`Span PROFILE_INUSE_OBJECTS 1`] = `undefined`;
-
-exports[`Span PROFILE_INUSE_SPACE 1`] = `undefined`;
-
-exports[`Span PROFILE_SAMPLES_COUNT 1`] = `undefined`;
-
-exports[`Span PROFILE_STACK 1`] = `undefined`;
-
-exports[`Span PROFILE_TOP_ID 1`] = `undefined`;
-
-exports[`Span PROFILE_WALL_US 1`] = `undefined`;
 
 exports[`Span SERVICE 1`] = `
 Object {
@@ -614,26 +574,6 @@ exports[`Transaction PARENT_ID 1`] = `"parentId"`;
 exports[`Transaction POD_NAME 1`] = `undefined`;
 
 exports[`Transaction PROCESSOR_EVENT 1`] = `"transaction"`;
-
-exports[`Transaction PROFILE_ALLOC_OBJECTS 1`] = `undefined`;
-
-exports[`Transaction PROFILE_ALLOC_SPACE 1`] = `undefined`;
-
-exports[`Transaction PROFILE_CPU_NS 1`] = `undefined`;
-
-exports[`Transaction PROFILE_ID 1`] = `undefined`;
-
-exports[`Transaction PROFILE_INUSE_OBJECTS 1`] = `undefined`;
-
-exports[`Transaction PROFILE_INUSE_SPACE 1`] = `undefined`;
-
-exports[`Transaction PROFILE_SAMPLES_COUNT 1`] = `undefined`;
-
-exports[`Transaction PROFILE_STACK 1`] = `undefined`;
-
-exports[`Transaction PROFILE_TOP_ID 1`] = `undefined`;
-
-exports[`Transaction PROFILE_WALL_US 1`] = `undefined`;
 
 exports[`Transaction SERVICE 1`] = `
 Object {
