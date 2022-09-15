@@ -144,7 +144,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(packageInfo.name).to.equal('apache');
       await uninstallPackage(testPkgName, testPkgVersion);
     });
-    describe.only('Pkg verification', () => {
+    describe('Pkg verification', () => {
       it('should return validation error for unverified input only pkg', async function () {
         const res = await supertest.get(`/api/fleet/epm/packages/input_only/0.1.0`).expect(400);
         const error = res.body;
