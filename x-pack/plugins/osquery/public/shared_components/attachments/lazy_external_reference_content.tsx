@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense, useMemo } from 'react';
+import React, { lazy, Suspense } from 'react';
 import { EuiCode, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OsqueryIcon } from '../../components/osquery_icon';
@@ -33,13 +33,6 @@ export const getLazyExternalContent =
       },
     } = useKibana();
 
-    const value = useMemo(
-      () => ({
-        osquery: <EuiCode>osquery</EuiCode>,
-      }),
-      []
-    );
-
     if (!osquery.read) {
       return (
         <EuiEmptyPrompt
@@ -49,9 +42,12 @@ export const getLazyExternalContent =
           body={
             <FormattedMessage
               id="xpack.osquery.cases.permissionDenied"
-              defaultMessage=" To access this results, ask your administrator for {osquery}  Kibana
+              defaultMessage=" To access this results, ask your administrator for {osquery} Kibana
               privileges."
-              values={value}
+              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+              values={{
+                osquery: <EuiCode>osquery</EuiCode>,
+              }}
             />
           }
         />
