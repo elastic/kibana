@@ -111,6 +111,9 @@ path_prefix = 'headless_shell-' + platform.system().lower() + '_' + arch_name
 archive.write('out/headless/headless_shell', path.join(path_prefix, 'headless_shell'))
 archive.write('out/headless/libEGL.so', path.join(path_prefix, 'libEGL.so'))
 archive.write('out/headless/libGLESv2.so', path.join(path_prefix, 'libGLESv2.so'))
+archive.write('out/headless/libvk_swiftshader.so', path.join(path_prefix, 'libvk_swiftshader.so'))
+archive.write('out/headless/libvulkan.so.1', path.join(path_prefix, 'libvulkan.so.1'))
+archive.write('out/headless/vk_swiftshader_icd.json', path.join(path_prefix, 'vk_swiftshader_icd.json'))
 archive.write(en_us_locale_file_path, path.join(path_prefix, 'locales', en_us_locale_pak_file_name))
 
 archive.close()
