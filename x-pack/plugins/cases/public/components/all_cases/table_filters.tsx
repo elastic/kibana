@@ -23,6 +23,7 @@ import { CASE_LIST_CACHE_KEY } from '../../containers/constants';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
 import { AssigneesFilterPopover } from './assignees_filter';
 import { CurrentUserProfile } from '../types';
+import { useCasesFeatures } from '../../common/use_cases_features';
 
 interface CasesTableFiltersProps {
   countClosedCases: number | null;
@@ -71,6 +72,7 @@ const CasesTableFiltersComponent = ({
   const [selectedOwner, setSelectedOwner] = useState([]);
   const [selectedAssignees, setSelectedAssignees] = useState<UserProfileWithAvatar[]>([]);
   const { data: tags = [], refetch: fetchTags } = useGetTags(CASE_LIST_CACHE_KEY);
+  const { caseAssignmentAuthorized } = useCasesFeatures();
 
   const refetch = useCallback(() => {
     fetchTags();
@@ -194,12 +196,14 @@ const CasesTableFiltersComponent = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
-          <AssigneesFilterPopover
-            selectedAssignees={selectedAssignees}
-            currentUserProfile={currentUserProfile}
-            isLoading={isLoading}
-            onSelectionChange={handleSelectedAssignees}
-          />
+          {caseAssignmentAuthorized ? (
+            <AssigneesFilterPopover
+              selectedAssignees={selectedAssignees}
+              currentUserProfile={currentUserProfile}
+              isLoading={isLoading}
+              onSelectionChange={handleSelectedAssignees}
+            />
+          ) : null}
           <FilterPopover
             buttonLabel={i18n.TAGS}
             onSelectedOptionsChanged={handleSelectedTags}

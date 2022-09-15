@@ -32,6 +32,7 @@ import { getMockBuilderArgs } from '../mock';
 import { useCaseViewParams } from '../../../common/navigation';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
+import { userProfiles } from '../../../containers/user_profiles/api.mock';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/navigation/hooks');
@@ -195,12 +196,22 @@ describe('createCommentUserActionBuilder', () => {
       externalReferenceAttachmentTypeRegistry.register(getExternalReferenceAttachment());
 
       const userAction = getExternalReferenceUserAction();
+      const damagedRaccoon = userProfiles[0];
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
         externalReferenceAttachmentTypeRegistry,
         caseData: {
           ...builderArgs.caseData,
-          comments: [externalReferenceAttachment],
+          comments: [
+            {
+              ...externalReferenceAttachment,
+              createdBy: {
+                username: damagedRaccoon.user.username,
+                fullName: damagedRaccoon.user.full_name,
+                email: damagedRaccoon.user.email,
+              },
+            },
+          ],
         },
         userAction,
       });
@@ -210,7 +221,7 @@ describe('createCommentUserActionBuilder', () => {
 
       expect(result.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
       expect(result.getByTestId('copy-link-external-reference-comment-id')).toBeInTheDocument();
-      expect(result.getByTestId('user-action-username-with-avatar')).toBeInTheDocument();
+      expect(result.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
       expect(screen.getByText('added a chart')).toBeInTheDocument();
     });
 
@@ -341,6 +352,12 @@ describe('createCommentUserActionBuilder', () => {
       const attachment01 = {
         ...persistableStateAttachment,
         persistableStateAttachmentState: { test_foo: '01' },
+        createdBy: {
+          username: userProfiles[0].user.username,
+          fullName: userProfiles[0].user.full_name,
+          email: userProfiles[0].user.email,
+          profileUid: userProfiles[0].uid,
+        },
       };
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
@@ -362,7 +379,7 @@ describe('createCommentUserActionBuilder', () => {
 
       expect(result.getByTestId('comment-persistableState-.test')).toBeInTheDocument();
       expect(result.getByTestId('copy-link-persistable-state-comment-id')).toBeInTheDocument();
-      expect(result.getByTestId('user-action-username-with-avatar')).toBeInTheDocument();
+      expect(result.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
       expect(screen.getByText('added an embeddable')).toBeInTheDocument();
 
       result.unmount();

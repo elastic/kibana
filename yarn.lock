@@ -3260,6 +3260,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-ui-settings-server-internal@link:bazel-bin/packages/core/ui-settings/core-ui-settings-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-ui-settings-server-mocks@link:bazel-bin/packages/core/ui-settings/core-ui-settings-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-ui-settings-server@link:bazel-bin/packages/core/ui-settings/core-ui-settings-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-usage-data-base-server-internal@link:bazel-bin/packages/core/usage-data/core-usage-data-base-server-internal":
   version "0.0.0"
   uid ""
@@ -7268,6 +7280,18 @@
   uid ""
 
 "@types/kbn__core-ui-settings-common@link:bazel-bin/packages/core/ui-settings/core-ui-settings-common/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-ui-settings-server-internal@link:bazel-bin/packages/core/ui-settings/core-ui-settings-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-ui-settings-server-mocks@link:bazel-bin/packages/core/ui-settings/core-ui-settings-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-ui-settings-server@link:bazel-bin/packages/core/ui-settings/core-ui-settings-server/npm_module_types":
   version "0.0.0"
   uid ""
 
