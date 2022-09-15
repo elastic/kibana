@@ -22,10 +22,7 @@ import { fetchMlInferencePipelineProcessors } from '../../lib/indices/fetch_ml_i
 import { generateApiKey } from '../../lib/indices/generate_api_key';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
-import {
-  createMlInferencePipeline,
-  addSubPipelineToIndexSpecificMlPipeline,
-} from '../../utils/create_ml_inference_pipeline';
+import { createAndReferenceMlInferencePipeline, CreatedPipeline } from '../../utils/create_ml_inference_pipeline';
 import { createIndexPipelineDefinitions } from '../../utils/create_pipeline_definitions';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
@@ -321,20 +318,15 @@ export function registerIndexRoutes({
         destination_field: destinationField,
       } = request.body;
 
+      let createPipelineResult: CreatedPipeline | undefined = undefined;
       try {
         // Create the sub-pipeline for inference
-        const createPipelineResult = await createMlInferencePipeline(
+        createPipelineResult = await createAndReferenceMlInferencePipeline(
+          indexName,
           pipelineName,
           modelId,
           sourceField,
           destinationField || modelId,
-          client.asCurrentUser
-        );
-
-        // Add sub-pipeline to the index-specific ML pipeline
-        await addSubPipelineToIndexSpecificMlPipeline(
-          indexName,
-          createPipelineResult.id,
           client.asCurrentUser
         );
       } catch (error) {
@@ -353,7 +345,7 @@ export function registerIndexRoutes({
 
       return response.ok({
         body: {
-          created: pipelineName,
+          created: createPipelineResult?.id,
         },
         headers: { 'content-type': 'application/json' },
       });

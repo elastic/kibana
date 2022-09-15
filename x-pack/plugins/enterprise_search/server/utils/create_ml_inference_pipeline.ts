@@ -12,12 +12,50 @@ import { formatMlPipelineBody } from './create_pipeline_definitions';
 import { ErrorCode } from '../../common/types/error_codes';
 
 /**
- * Details of a created or updated pipeline.
+ * Details of a created pipeline.
  */
-export interface ModifiedPipeline {
+export interface CreatedPipeline {
   id: string;
   created?: boolean;
-  updated?: boolean;
+  addedToParentPipeline?: boolean;
+}
+
+/**
+ * Creates a Machine Learning Inference pipeline with the given settings, if it doesn't exist yet,
+ * then references it in the "parent" ML Inference pipeline that is associated with the index.
+ * @param indexName name of the index this pipeline corresponds to.
+ * @param pipelineName pipeline name set by the user.
+ * @param modelId model ID selected by the user.
+ * @param sourceField The document field that model will read.
+ * @param destinationField The document field that the model will write to.
+ * @param esClient the Elasticsearch Client to use when retrieving pipeline and model details.
+ */
+export const createAndReferenceMlInferencePipeline = async (
+  indexName: string,
+  pipelineName: string,
+  modelId: string,
+  sourceField: string,
+  destinationField: string,
+  esClient: ElasticsearchClient
+): Promise<CreatedPipeline> => {
+  const createPipelineResult = await createMlInferencePipeline(
+    pipelineName,
+    modelId,
+    sourceField,
+    destinationField || modelId,
+    esClient
+  );
+
+  const addSubPipelineResult = await addSubPipelineToIndexSpecificMlPipeline(
+    indexName,
+    createPipelineResult.id,
+    esClient
+  );
+
+  return Promise.resolve({
+    ...createPipelineResult,
+    addedToParentPipeline: addSubPipelineResult.addedToParentPipeline
+  });
 }
 
 /**
@@ -34,7 +72,7 @@ export const createMlInferencePipeline = async (
   sourceField: string,
   destinationField: string,
   esClient: ElasticsearchClient
-): Promise<ModifiedPipeline> => {
+): Promise<CreatedPipeline> => {
   const inferencePipelineGeneratedName = `ml-inference-${pipelineName}`;
 
   // Check that a pipeline with the same name doesn't already exist
@@ -80,7 +118,7 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
   indexName: string,
   pipelineName: string,
   esClient: ElasticsearchClient
-): Promise<ModifiedPipeline> => {
+): Promise<CreatedPipeline> => {
   const parentPipelineId = `${indexName}@ml-inference`;
 
   // Fetch the parent pipeline
@@ -97,8 +135,8 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
   // Verify the parent pipeline exists with a processors array
   if (!parentPipeline?.processors) {
     return Promise.resolve({
-      id: parentPipelineId,
-      updated: false,
+      id: pipelineName,
+      addedToParentPipeline: false,
     });
   }
 
@@ -109,8 +147,8 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
   );
   if (existingSubPipeline) {
     return Promise.resolve({
-      id: parentPipelineId,
-      updated: false,
+      id: pipelineName,
+      addedToParentPipeline: false,
     });
   }
 
@@ -127,7 +165,7 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
   });
 
   return Promise.resolve({
-    id: parentPipelineId,
-    updated: true,
+    id: pipelineName,
+    addedToParentPipeline: true,
   });
 };
