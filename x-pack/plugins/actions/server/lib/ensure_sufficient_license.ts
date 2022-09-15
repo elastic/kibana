@@ -7,11 +7,11 @@
 
 import { LICENSE_TYPE } from '@kbn/licensing-plugin/common/types';
 import { ActionType } from '../types';
-import { ServerLogActionTypeId, IndexActionTypeId } from '../builtin_action_types';
 import { ActionTypeConfig, ActionTypeSecrets, ActionTypeParams } from '../types';
 
 const CASE_ACTION_TYPE_ID = '.case';
-
+const ServerLogActionTypeId = '.server-log';
+const IndexActionTypeId = '.index';
 const ACTIONS_SCOPED_WITHIN_STACK = new Set([
   ServerLogActionTypeId,
   IndexActionTypeId,

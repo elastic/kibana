@@ -5,6 +5,7 @@
     "xpack.alerting": "plugins/alerting",
     "xpack.eventLog": "plugins/event_log",
     "xpack.stackAlerts": "plugins/stack_alerts",
+    "xpack.stackConnectors": "plugins/stack_connectors",
     "xpack.apm": "plugins/apm",
     "xpack.canvas": "plugins/canvas",
     "xpack.cases": "plugins/cases",

@@ -1313,7 +1313,7 @@ module.exports = {
     {
       // typescript for front and back end
       files: [
-        'x-pack/plugins/{alerting,stack_alerts,actions,task_manager,event_log}/**/*.{ts,tsx}',
+        'x-pack/plugins/{alerting,stack_alerts,stack_connectors,actions,task_manager,event_log}/**/*.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',

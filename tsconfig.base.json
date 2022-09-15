@@ -419,6 +419,8 @@
       "@kbn/spaces-plugin/*": ["x-pack/plugins/spaces/*"],
       "@kbn/stack-alerts-plugin": ["x-pack/plugins/stack_alerts"],
       "@kbn/stack-alerts-plugin/*": ["x-pack/plugins/stack_alerts/*"],
+      "@kbn/stack-connectors-plugin": ["x-pack/plugins/stack_connectors"],
+      "@kbn/stack-connectors-plugin/*": ["x-pack/plugins/stack_connectors/*"],
       "@kbn/synthetics-plugin": ["x-pack/plugins/synthetics"],
       "@kbn/synthetics-plugin/*": ["x-pack/plugins/synthetics/*"],
       "@kbn/task-manager-plugin": ["x-pack/plugins/task_manager"],
