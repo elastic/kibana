@@ -15,7 +15,7 @@ import { ComparatorFnNames } from '../lib';
 import { Comparator } from '../../../common/comparator_types';
 import { getComparatorSchemaType } from '../lib/comparator';
 
-// alert type parameters
+// rule type parameters
 
 export type Params = TypeOf<typeof ParamsSchema>;
 

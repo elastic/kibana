@@ -9,31 +9,31 @@ import uuid from 'uuid';
 import type { Writable } from '@kbn/utility-types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import { getAlertType, ActionGroupId } from './alert_type';
+import { getRuleType, ActionGroupId } from './rule_type';
 import { ActionContext } from './action_context';
-import { Params } from './alert_type_params';
+import { Params } from './rule_type_params';
 import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { Comparator } from '../../../common/comparator_types';
 
-describe('alertType', () => {
+describe('ruleType', () => {
   const logger = loggingSystemMock.create().get();
   const data = {
     timeSeriesQuery: jest.fn(),
   };
   const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
-  const alertType = getAlertType(logger, Promise.resolve(data));
+  const ruleType = getRuleType(logger, Promise.resolve(data));
 
   afterEach(() => {
     data.timeSeriesQuery.mockReset();
   });
 
-  it('alert type creation structure is the expected value', async () => {
-    expect(alertType.id).toBe('.index-threshold');
-    expect(alertType.name).toBe('Index threshold');
-    expect(alertType.actionGroups).toEqual([{ id: 'threshold met', name: 'Threshold met' }]);
+  it('rule type creation structure is the expected value', async () => {
+    expect(ruleType.id).toBe('.index-threshold');
+    expect(ruleType.name).toBe('Index threshold');
+    expect(ruleType.actionGroups).toEqual([{ id: 'threshold met', name: 'Threshold met' }]);
 
-    expect(alertType.actionVariables).toMatchInlineSnapshot(`
+    expect(ruleType.actionVariables).toMatchInlineSnapshot(`
       Object {
         "context": Array [
           Object {
@@ -123,11 +123,11 @@ describe('alertType', () => {
       threshold: [0],
     };
 
-    expect(alertType.validate?.params?.validate(params)).toBeTruthy();
+    expect(ruleType.validate?.params?.validate(params)).toBeTruthy();
   });
 
   it('validator fails with invalid params', async () => {
-    const paramsSchema = alertType.validate?.params;
+    const paramsSchema = ruleType.validate?.params;
     if (!paramsSchema) throw new Error('params validator not set');
 
     const params: Partial<Writable<Params>> = {
@@ -168,7 +168,7 @@ describe('alertType', () => {
       threshold: [1],
     };
 
-    await alertType.executor({
+    await ruleType.executor({
       alertId: uuid.v4(),
       executionId: uuid.v4(),
       startedAt: new Date(),
@@ -234,7 +234,7 @@ describe('alertType', () => {
       threshold: [1],
     };
 
-    await alertType.executor({
+    await ruleType.executor({
       alertId: uuid.v4(),
       executionId: uuid.v4(),
       startedAt: new Date(),
@@ -300,7 +300,7 @@ describe('alertType', () => {
       threshold: [1],
     };
 
-    await alertType.executor({
+    await ruleType.executor({
       alertId: uuid.v4(),
       executionId: uuid.v4(),
       startedAt: new Date(),
