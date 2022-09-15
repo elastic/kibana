@@ -40,6 +40,7 @@ import {
 import type { DatasourceStates, DataViewsState, VisualizationState } from '../../state_management';
 import { readFromStorage } from '../../settings_storage';
 import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
+import { isAnnotationsLayer } from '../../visualizations/xy/visualization_helpers';
 
 function getIndexPatterns(
   references?: SavedObjectReference[],
@@ -52,6 +53,9 @@ function getIndexPatterns(
     if ('isVisualizeAction' in initialContext) {
       for (const { indexPatternId } of initialContext.layers) {
         indexPatternIds.push(indexPatternId);
+      }
+      for (const l of initialContext.configuration.layers) {
+        if (isAnnotationsLayer(l)) indexPatternIds.push(l.indexPatternId);
       }
     } else {
       indexPatternIds.push(initialContext.dataViewSpec.id!);
@@ -209,6 +213,7 @@ export async function initializeSources(
       visualizationMap,
       visualizationState,
       references,
+      initialContext,
     }),
   };
 }
@@ -217,16 +222,19 @@ export function initializeVisualization({
   visualizationMap,
   visualizationState,
   references,
+  initialContext,
 }: {
   visualizationState: VisualizationState;
   visualizationMap: VisualizationMap;
   references?: SavedObjectReference[];
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
 }) {
   if (visualizationState?.activeId) {
     return (
       visualizationMap[visualizationState.activeId]?.fromPersistableState?.(
         visualizationState.state,
-        references
+        references,
+        initialContext
       ) ?? visualizationState.state
     );
   }
