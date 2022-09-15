@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { getNormalizedDataStreams } from '../../../common/services';
+
 import type {
   FullAgentPolicyOutputPermissions,
   PackageInfo,
@@ -40,7 +42,8 @@ export async function storedPackagePoliciesToAgentPermissions(
 
       const pkg = packageInfoCache.get(pkgToPkgKey(packagePolicy.package))!;
 
-      if (!pkg.data_streams || pkg.data_streams.length === 0) {
+      const dataStreams = getNormalizedDataStreams(pkg);
+      if (!dataStreams || dataStreams.length === 0) {
         return [packagePolicy.name, undefined];
       }
 
@@ -51,21 +54,21 @@ export async function storedPackagePoliciesToAgentPermissions(
           // - Endpoint doesn't store the `data_stream` metadata in
           // `packagePolicy.inputs`, so we will use _all_ data_streams from the
           // package.
-          dataStreamsForPermissions = pkg.data_streams;
+          dataStreamsForPermissions = dataStreams;
           break;
 
         case 'apm':
           // - APM doesn't store the `data_stream` metadata in
           //   `packagePolicy.inputs`, so we will use _all_ data_streams from
           //   the package.
-          dataStreamsForPermissions = pkg.data_streams;
+          dataStreamsForPermissions = dataStreams;
           break;
 
         case 'osquery_manager':
           // - Osquery manager doesn't store the `data_stream` metadata in
           //   `packagePolicy.inputs`, so we will use _all_ data_streams from
           //   the package.
-          dataStreamsForPermissions = pkg.data_streams;
+          dataStreamsForPermissions = dataStreams;
           break;
 
         default:
@@ -73,7 +76,7 @@ export async function storedPackagePoliciesToAgentPermissions(
           //   `packagePolicy.inputs[].streams[].data_stream`
           // - The rest of the metadata needs to be fetched from the
           //   `data_stream` object in the package. The link is
-          //   `packagePolicy.inputs[].type == pkg.data_streams.streams[].input`
+          //   `packagePolicy.inputs[].type == dataStreams.streams[].input`
           // - Some packages (custom logs) have a compiled dataset, stored in
           //   `input.streams.compiled_stream.data_stream.dataset`
           dataStreamsForPermissions = packagePolicy.inputs
