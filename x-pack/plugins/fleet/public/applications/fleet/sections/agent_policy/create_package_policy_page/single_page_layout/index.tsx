@@ -643,7 +643,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                       description={i18n.translate(
                         'xpack.fleet.createPackagePolicy.devtoolsRequestDescription',
                         {
-                          defaultMessage: 'This Kibana request will create a new package policy.',
+                          defaultMessage: 'This Kibana request creates a new package policy.',
                         }
                       )}
                       btnProps={{

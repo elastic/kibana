@@ -127,7 +127,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
                   description={i18n.translate(
                     'xpack.fleet.createAgentPolicy.devtoolsRequestDescription',
                     {
-                      defaultMessage: 'This Kibana request will create a new agent policy.',
+                      defaultMessage: 'This Kibana request creates a new agent policy.',
                     }
                   )}
                   request={agentPolicyContent}

@@ -666,7 +666,7 @@ export const EditPackagePolicyForm = memo<{
                           description={i18n.translate(
                             'xpack.fleet.editPackagePolicy.devtoolsRequestDescription',
                             {
-                              defaultMessage: 'This Kibana request edit a package policy.',
+                              defaultMessage: 'This Kibana request updates a package policy.',
                             }
                           )}
                           request={devtoolRequest}

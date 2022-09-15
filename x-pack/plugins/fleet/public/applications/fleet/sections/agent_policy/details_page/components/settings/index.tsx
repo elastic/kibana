@@ -231,7 +231,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                           description={i18n.translate(
                             'xpack.fleet.editAgentPolicy.devtoolsRequestDescription',
                             {
-                              defaultMessage: 'This Kibana request update an agent policy.',
+                              defaultMessage: 'This Kibana request updates an agent policy.',
                             }
                           )}
                           request={devtoolRequest}
