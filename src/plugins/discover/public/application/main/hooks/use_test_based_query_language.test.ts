@@ -246,4 +246,73 @@ describe('useTextBasedQueryLanguage', () => {
       columns: ['field1'],
     });
   });
+
+  test('it should not overwrite state column when successfully fetching after an error fetch', async () => {
+    const replaceUrlAppState = jest.fn();
+    const props = getHookProps(replaceUrlAppState, query);
+    props.stateContainer.appStateContainer.getState = jest.fn(() => {
+      return { columns: [], index: 'the-data-view-id' };
+    });
+    const { documents$ } = props;
+
+    renderHook(() => useTextBasedQueryLanguage(props));
+    documents$.next({
+      recordRawType: RecordRawType.PLAIN,
+      fetchStatus: FetchStatus.LOADING,
+      query: { sql: 'SELECT * from the-data-view-title WHERE field1=2' },
+    });
+    await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(0));
+    documents$.next({
+      recordRawType: RecordRawType.PLAIN,
+      fetchStatus: FetchStatus.COMPLETE,
+      result: [
+        {
+          id: '1',
+          raw: { field1: 1, field2: 2 },
+          flattened: { field1: 1 },
+        } as unknown as DataTableRecord,
+      ],
+      query: { sql: 'SELECT * from the-data-view-title WHERE field1=2' },
+    });
+    await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(1));
+    props.stateContainer.appStateContainer.getState = jest.fn(() => {
+      return { columns: ['field1', 'field2'], index: 'the-data-view-id' };
+    });
+    replaceUrlAppState.mockReset();
+
+    documents$.next({
+      recordRawType: RecordRawType.PLAIN,
+      fetchStatus: FetchStatus.LOADING,
+      query: { sql: 'SELECT field1; from the-data-view-title WHERE field1=2' },
+    });
+
+    documents$.next({
+      recordRawType: RecordRawType.PLAIN,
+      fetchStatus: FetchStatus.ERROR,
+    });
+
+    documents$.next({
+      recordRawType: RecordRawType.PLAIN,
+      fetchStatus: FetchStatus.LOADING,
+      query: { sql: 'SELECT field1 from the-data-view-title' },
+    });
+
+    documents$.next({
+      recordRawType: RecordRawType.PLAIN,
+      fetchStatus: FetchStatus.COMPLETE,
+      result: [
+        {
+          id: '1',
+          raw: { field1: 1 },
+          flattened: { field1: 1 },
+        } as unknown as DataTableRecord,
+      ],
+      query: { sql: 'SELECT field1 from the-data-view-title' },
+    });
+
+    await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(1));
+    expect(replaceUrlAppState).toHaveBeenCalledWith({
+      columns: ['field1'],
+    });
+  });
 });
