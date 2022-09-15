@@ -17,6 +17,15 @@ export function ExplainLogRateSpikesAnalysisGroupsTableProvider({
       await testSubjects.existOrFail(`aiopsSpikeAnalysisGroupsTable`);
     }
 
+    public async assertExpandRowButtonExists() {
+      await testSubjects.existOrFail('aiopsSpikeAnalysisGroupsTableRowExpansionButton');
+    }
+
+    public async expandRow() {
+      await testSubjects.click('aiopsSpikeAnalysisGroupsTableRowExpansionButton');
+      await testSubjects.existOrFail('aiopsSpikeAnalysisTable');
+    }
+
     public async parseAnalysisTable() {
       const table = await testSubjects.find('~aiopsSpikeAnalysisGroupsTable');
       const $ = await table.parseDomContent();

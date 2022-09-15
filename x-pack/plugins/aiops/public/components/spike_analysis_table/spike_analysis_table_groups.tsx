@@ -116,6 +116,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       ),
       render: (item: GroupTableItem) => (
         <EuiButtonIcon
+          data-test-subj={'aiopsSpikeAnalysisGroupsTableRowExpansionButton'}
           onClick={() => toggleDetails(item)}
           aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
           iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
