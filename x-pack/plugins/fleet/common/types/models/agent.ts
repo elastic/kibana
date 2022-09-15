@@ -112,7 +112,9 @@ export interface ActionStatus {
   nbAgentsActionCreated: number;
   // how many agents acknowledged the action sucessfully (completed)
   nbAgentsAck: number;
-  version: string;
+  // how many agents failed
+  nbAgentsFailed: number;
+  version?: string;
   startTime?: string;
   type?: string;
   // how many agents were actioned by the user

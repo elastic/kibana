@@ -64,7 +64,7 @@ export async function getActionStatuses(
     const complete = nbAgentsAck === nbAgentsActioned;
     const cancelledAction = cancelledActions.find((a) => a.actionId === action.actionId);
 
-    let hasErrors = false;
+    let errorCount = 0;
     try {
       // query to find errors in action results, cannot do aggregation on text type
       const res = await esClient.search({
@@ -86,7 +86,7 @@ export async function getActionStatuses(
         },
         size: 0,
       });
-      hasErrors = (res.hits.total ?? 0) > 0;
+      errorCount = (res.hits.total as number) ?? 0;
     } catch (err) {
       if (err.statusCode === 404) {
         // .fleet-actions-results does not yet exist
@@ -98,14 +98,16 @@ export async function getActionStatuses(
 
     results.push({
       ...action,
-      nbAgentsAck,
-      status: complete
-        ? 'COMPLETE'
-        : cancelledAction
-        ? 'CANCELLED'
-        : hasErrors
-        ? 'FAILED'
-        : action.status,
+      nbAgentsAck: nbAgentsAck - errorCount,
+      nbAgentsFailed: errorCount,
+      status:
+        errorCount > 0
+          ? 'FAILED'
+          : complete
+          ? 'COMPLETE'
+          : cancelledAction
+          ? 'CANCELLED'
+          : action.status,
       nbAgentsActioned,
       cancellationTime: cancelledAction?.timestamp,
       completionTime: complete ? completionTime : undefined,
@@ -195,6 +197,7 @@ async function _getActions(
           expiration: source.expiration,
           newPolicyId: source.data?.policy_id as string,
           creationTime: source['@timestamp']!,
+          nbAgentsFailed: 0,
         };
       }
 
