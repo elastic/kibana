@@ -33,6 +33,7 @@ export interface PostureTrend extends Stats {
 export interface Cluster {
   meta: {
     clusterId: string;
+    clusterName?: string;
     benchmarkName: string;
     benchmarkId: BenchmarkId;
     lastUpdate: number; // unix epoch time
@@ -101,3 +102,4 @@ export interface Benchmark {
 }
 
 export type BenchmarkId = CspRuleMetadata['benchmark']['id'];
+export type BenchmarkName = CspRuleMetadata['benchmark']['name'];

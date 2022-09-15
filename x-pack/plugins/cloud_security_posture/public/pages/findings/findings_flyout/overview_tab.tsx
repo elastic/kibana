@@ -63,7 +63,12 @@ const getDetailsList = (data: CspFinding, discoverIndexLink: string | undefined)
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.frameworkSourcesTitle', {
       defaultMessage: 'Framework Sources',
     }),
-    description: <CisKubernetesIcons benchmarkId={data.rule.benchmark.id} />,
+    description: (
+      <CisKubernetesIcons
+        benchmarkId={data.rule.benchmark.id}
+        benchmarkName={data.rule.benchmark.name}
+      />
+    ),
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.cisSectionTitle', {
