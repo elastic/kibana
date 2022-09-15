@@ -9,8 +9,6 @@
 import { getSampleDashboardInput } from '../test_helpers';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 
-import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
-import { CoreStart } from '@kbn/core/public';
 import { LibraryNotificationAction, UnlinkFromLibraryAction } from '.';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import {
@@ -19,55 +17,32 @@ import {
   isErrorEmbeddable,
   ReferenceOrValueEmbeddable,
   ViewMode,
-} from '../../services/embeddable';
+} from '@kbn/embeddable-plugin/public';
 import {
   ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
-} from '../../services/embeddable_test_samples';
-import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
-import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
+} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
+import { pluginServices } from '../../services/plugin_services';
 
-const { setup, doStart } = embeddablePluginMock.createInstance();
-setup.registerEmbeddableFactory(
-  CONTACT_CARD_EMBEDDABLE,
-  new ContactCardEmbeddableFactory((() => null) as any, {} as any)
-);
-const start = doStart();
+const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
+pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+  .fn()
+  .mockReturnValue(mockEmbeddableFactory);
 
 let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable & ReferenceOrValueEmbeddable;
-let coreStart: CoreStart;
 let unlinkAction: UnlinkFromLibraryAction;
 
 beforeEach(async () => {
-  coreStart = coreMock.createStart();
-
   unlinkAction = {
     getDisplayName: () => 'unlink from dat library',
     execute: jest.fn(),
   } as unknown as UnlinkFromLibraryAction;
 
-  const containerOptions = {
-    ExitFullScreenButton: () => null,
-    SavedObjectFinder: () => null,
-    application: {} as any,
-    embeddable: start,
-    inspector: {} as any,
-    notifications: {} as any,
-    overlays: coreStart.overlays,
-    savedObjectMetaData: {} as any,
-    uiActions: {} as any,
-    uiSettings: uiSettingsServiceMock.createStartContract(),
-    http: coreStart.http,
-    theme: coreStart.theme,
-    presentationUtil: getStubPluginServices(),
-    screenshotMode: screenshotModePluginMock.createSetupContract(),
-  };
-
-  container = new DashboardContainer(getSampleDashboardInput(), containerOptions);
+  container = new DashboardContainer(getSampleDashboardInput());
 
   const contactCardEmbeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
@@ -91,7 +66,7 @@ beforeEach(async () => {
 });
 
 test('Notification is incompatible with Error Embeddables', async () => {
-  const action = new LibraryNotificationAction(coreStart.theme, unlinkAction);
+  const action = new LibraryNotificationAction(unlinkAction);
   const errorEmbeddable = new ErrorEmbeddable(
     'Wow what an awful error',
     { id: ' 404' },
@@ -101,19 +76,19 @@ test('Notification is incompatible with Error Embeddables', async () => {
 });
 
 test('Notification is shown when embeddable on dashboard has reference type input', async () => {
-  const action = new LibraryNotificationAction(coreStart.theme, unlinkAction);
+  const action = new LibraryNotificationAction(unlinkAction);
   embeddable.updateInput(await embeddable.getInputAsRefType());
   expect(await action.isCompatible({ embeddable })).toBe(true);
 });
 
 test('Notification is not shown when embeddable input is by value', async () => {
-  const action = new LibraryNotificationAction(coreStart.theme, unlinkAction);
+  const action = new LibraryNotificationAction(unlinkAction);
   embeddable.updateInput(await embeddable.getInputAsValueType());
   expect(await action.isCompatible({ embeddable })).toBe(false);
 });
 
 test('Notification is not shown when view mode is set to view', async () => {
-  const action = new LibraryNotificationAction(coreStart.theme, unlinkAction);
+  const action = new LibraryNotificationAction(unlinkAction);
   embeddable.updateInput(await embeddable.getInputAsRefType());
   embeddable.updateInput({ viewMode: ViewMode.VIEW });
   expect(await action.isCompatible({ embeddable })).toBe(false);
