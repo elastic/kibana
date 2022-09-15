@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { upperFirst } from 'lodash';
 import {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
@@ -13,7 +14,6 @@ import {
   SavedObjectReference,
 } from '@kbn/core/public';
 import { SavedObject } from '@kbn/saved-objects-plugin/public';
-import { upperFirst } from './string_utils';
 
 /**
  * @deprecated

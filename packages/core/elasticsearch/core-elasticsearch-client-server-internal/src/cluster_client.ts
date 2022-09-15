@@ -26,6 +26,7 @@ import { ScopedClusterClient } from './scoped_cluster_client';
 import { DEFAULT_HEADERS } from './headers';
 import { createInternalErrorHandler, InternalUnauthorizedErrorHandler } from './retry_unauthorized';
 import { createTransport } from './create_transport';
+import { AgentManager } from './agent_manager';
 
 const noop = () => undefined;
 
@@ -47,6 +48,7 @@ export class ClusterClient implements ICustomClusterClient {
     authHeaders,
     getExecutionContext = noop,
     getUnauthorizedErrorHandler = noop,
+    agentManager,
   }: {
     config: ElasticsearchClientConfig;
     logger: Logger;
@@ -54,18 +56,25 @@ export class ClusterClient implements ICustomClusterClient {
     authHeaders?: IAuthHeadersStorage;
     getExecutionContext?: () => string | undefined;
     getUnauthorizedErrorHandler?: () => UnauthorizedErrorHandler | undefined;
+    agentManager: AgentManager;
   }) {
     this.config = config;
     this.authHeaders = authHeaders;
     this.getExecutionContext = getExecutionContext;
     this.getUnauthorizedErrorHandler = getUnauthorizedErrorHandler;
 
-    this.asInternalUser = configureClient(config, { logger, type, getExecutionContext });
+    this.asInternalUser = configureClient(config, {
+      logger,
+      type,
+      getExecutionContext,
+      agentManager,
+    });
     this.rootScopedClient = configureClient(config, {
       logger,
       type,
       getExecutionContext,
       scoped: true,
+      agentManager,
     });
   }
 

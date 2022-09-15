@@ -322,7 +322,7 @@ export class SecurityPlugin
       getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request),
     });
 
-    this.userProfileService.setup({ authz: this.authorizationSetup });
+    this.userProfileService.setup({ authz: this.authorizationSetup, license });
 
     setupSpacesClient({
       spaces,

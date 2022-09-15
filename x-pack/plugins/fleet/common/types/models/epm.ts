@@ -157,30 +157,46 @@ export interface RegistryImage extends PackageSpecIcon {
 }
 
 export enum RegistryPolicyTemplateKeys {
-  name = 'name',
-  title = 'title',
-  description = 'description',
-  icons = 'icons',
-  screenshots = 'screenshots',
   categories = 'categories',
   data_streams = 'data_streams',
   inputs = 'inputs',
   readme = 'readme',
   multiple = 'multiple',
+  type = 'type',
+  vars = 'vars',
+  input = 'input',
+  template_path = 'template_path',
+  name = 'name',
+  title = 'title',
+  description = 'description',
+  icons = 'icons',
+  screenshots = 'screenshots',
 }
-
-export interface RegistryPolicyTemplate {
+interface BaseTemplate {
   [RegistryPolicyTemplateKeys.name]: string;
   [RegistryPolicyTemplateKeys.title]: string;
   [RegistryPolicyTemplateKeys.description]: string;
   [RegistryPolicyTemplateKeys.icons]?: RegistryImage[];
   [RegistryPolicyTemplateKeys.screenshots]?: RegistryImage[];
+  [RegistryPolicyTemplateKeys.multiple]?: boolean;
+}
+export interface RegistryPolicyIntegrationTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.categories]?: Array<PackageSpecCategory | undefined>;
   [RegistryPolicyTemplateKeys.data_streams]?: string[];
   [RegistryPolicyTemplateKeys.inputs]?: RegistryInput[];
   [RegistryPolicyTemplateKeys.readme]?: string;
-  [RegistryPolicyTemplateKeys.multiple]?: boolean;
 }
+
+export interface RegistryPolicyInputOnlyTemplate extends BaseTemplate {
+  [RegistryPolicyTemplateKeys.type]: string;
+  [RegistryPolicyTemplateKeys.input]: string;
+  [RegistryPolicyTemplateKeys.template_path]: string;
+  [RegistryPolicyTemplateKeys.vars]?: RegistryVarsEntry[];
+}
+
+export type RegistryPolicyTemplate =
+  | RegistryPolicyIntegrationTemplate
+  | RegistryPolicyInputOnlyTemplate;
 
 export enum RegistryInputKeys {
   type = 'type',
@@ -315,7 +331,7 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.hidden]?: boolean;
   [RegistryDataStreamKeys.dataset]: string;
   [RegistryDataStreamKeys.title]: string;
-  [RegistryDataStreamKeys.release]: string;
+  [RegistryDataStreamKeys.release]: RegistryRelease;
   [RegistryDataStreamKeys.streams]?: RegistryStream[];
   [RegistryDataStreamKeys.package]: string;
   [RegistryDataStreamKeys.path]: string;
@@ -417,6 +433,14 @@ export type PackageInfo =
   | Installable<Merge<RegistryPackage, EpmPackageAdditions>>
   | Installable<Merge<ArchivePackage, EpmPackageAdditions>>;
 
+// TODO - Expand this with other experimental indexing types
+export type ExperimentalIndexingFeature = 'synthetic_source';
+
+export interface ExperimentalDataStreamFeature {
+  data_stream: string;
+  features: Record<ExperimentalIndexingFeature, boolean>;
+}
+
 export interface Installation extends SavedObjectAttributes {
   installed_kibana: KibanaAssetReference[];
   installed_es: EsAssetReference[];
@@ -433,6 +457,11 @@ export interface Installation extends SavedObjectAttributes {
   install_format_schema_version?: string;
   verification_status: PackageVerificationStatus;
   verification_key_id?: string | null;
+  // TypeScript doesn't like using the `ExperimentalDataStreamFeature` type defined above here
+  experimental_data_stream_features?: Array<{
+    data_stream: string;
+    features: Record<ExperimentalIndexingFeature, boolean>;
+  }>;
 }
 
 export interface PackageUsageStats {

@@ -10605,6 +10605,281 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.TimeBuckets",
+        "type": "Class",
+        "tags": [],
+        "label": "TimeBuckets",
+        "description": [
+          "\nHelper class for wrapping the concept of an \"Interval\",\nwhich describes a timespan that will separate moments.\n"
+        ],
+        "path": "src/plugins/data/common/search/aggs/buckets/lib/time_buckets/time_buckets.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.TimeBuckets.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/lib/time_buckets/time_buckets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.TimeBuckets.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "timeBucketConfig",
+                "description": [],
+                "signature": [
+                  "TimeBucketsConfig"
+                ],
+                "path": "src/plugins/data/common/search/aggs/buckets/lib/time_buckets/time_buckets.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.TimeBuckets.setBounds",
+            "type": "Function",
+            "tags": [],
+            "label": "setBounds",
+            "description": [
+              "\nSet the bounds that these buckets are expected to cover.\nThis is required to support interval \"auto\" as well\nas interval scaling.\n"
+            ],
+            "signature": [
+              "(input?: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRangeBounds",
+                "text": "TimeRangeBounds"
+              },
+              " | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRangeBounds",
+                "text": "TimeRangeBounds"
+              },
+              "[] | undefined) => void"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/lib/time_buckets/time_buckets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.TimeBuckets.setBounds.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "input",
+                "description": [
+                  "- an object with properties min and max,\nrepresenting the edges for the time span\nwe should cover"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataQueryPluginApi",
+                    "section": "def-common.TimeRangeBounds",
+                    "text": "TimeRangeBounds"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataQueryPluginApi",
+                    "section": "def-common.TimeRangeBounds",
+                    "text": "TimeRangeBounds"
+                  },
+                  "[] | undefined"
+                ],
+                "path": "src/plugins/data/common/search/aggs/buckets/lib/time_buckets/time_buckets.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.TimeBuckets.clearBounds",
+            "type": "Function",
+            "tags": [
+              "return"
+            ],
+            "label": "clearBounds",
+            "description": [
+              "\nClear the stored bounds\n"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/lib/time_buckets/time_buckets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.TimeBuckets.hasBounds",
+            "type": "Function",
+            "tags": [
+              "return"
+            ],
+            "label": "hasBounds",
+            "description": [
+              "\nCheck to see if we have received bounds yet\n"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/lib/time_buckets/time_buckets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.TimeBuckets.getBounds",
+            "type": "Function",
+            "tags": [
+              "return"
+            ],
+            "label": "getBounds",
+            "description": [
+              "\nReturn the current bounds, if we have any.\n\nTHIS DOES NOT CLONE THE BOUNDS, so editing them\nmay have unexpected side-effects. Always\ncall bounds.min.clone() before editing\n"
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRangeBounds",
+                "text": "TimeRangeBounds"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/lib/time_buckets/time_buckets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "- If bounds are not defined, this\nreturns undefined, else it returns the bounds\nfor these buckets. This object has two props,\nmin and max. Each property will be a moment()\nobject"
+            ]
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.TimeBuckets.setInterval",
+            "type": "Function",
+            "tags": [],
+            "label": "setInterval",
+            "description": [
+              "\nUpdate the interval at which buckets should be\ngenerated.\n\nInput can be one of the following:\n - Any object from src/legacy/ui/agg_types.js\n - \"auto\"\n - Pass a valid moment unit\n"
+            ],
+            "signature": [
+              "(input: string | Record<string, any> | null) => void"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/lib/time_buckets/time_buckets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.TimeBuckets.setInterval.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "input",
+                "description": [
+                  "- see desc"
+                ],
+                "signature": [
+                  "string | Record<string, any> | null"
+                ],
+                "path": "src/plugins/data/common/search/aggs/buckets/lib/time_buckets/time_buckets.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.TimeBuckets.getInterval",
+            "type": "Function",
+            "tags": [],
+            "label": "getInterval",
+            "description": [
+              "\nGet the interval for the buckets. If the\nnumber of buckets created by the interval set\nis larger than config:histogram:maxBars then the\ninterval will be scaled up. If the number of buckets\ncreated is less than one, the interval is scaled back.\n\nThe interval object returned is a moment.duration\nobject that has been decorated with the following\nproperties.\n\ninterval.description: a text description of the interval.\n  designed to be used list \"field per {{ desc }}\".\n    - \"minute\"\n    - \"10 days\"\n    - \"3 years\"\n\ninterval.expression: the elasticsearch expression that creates this\n  interval. If the interval does not properly form an elasticsearch\n  expression it will be forced into one.\n\ninterval.scaled: the interval was adjusted to\n  accommodate the maxBars setting.\n\ninterval.scale: the number that y-values should be\n  multiplied by"
+            ],
+            "signature": [
+              "(useNormalizedEsInterval?: boolean) => TimeBucketsInterval"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/lib/time_buckets/time_buckets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.TimeBuckets.getInterval.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "useNormalizedEsInterval",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data/common/search/aggs/buckets/lib/time_buckets/time_buckets.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.TimeBuckets.getScaledDateFormat",
+            "type": "Function",
+            "tags": [
+              "return"
+            ],
+            "label": "getScaledDateFormat",
+            "description": [
+              "\nGet a date format string that will represent dates that\nprogress at our interval.\n\nSince our interval can be as small as 1ms, the default\ndate format is usually way too much. with `dateFormat:scaled`\nusers can modify how dates are formatted within series\nproduced by TimeBuckets\n"
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/lib/time_buckets/time_buckets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "functions": [
@@ -23482,7 +23757,9 @@
             "parentPluginId": "data",
             "id": "def-common.EqlSearchStrategyRequest.options",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "options",
             "description": [],
             "signature": [
@@ -23490,8 +23767,14 @@
               " | undefined"
             ],
             "path": "src/plugins/data/common/search/strategies/eql_search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/hooks/eql/api.ts"
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -24123,7 +24406,13 @@
             "label": "buckets",
             "description": [],
             "signature": [
-              "TimeBuckets"
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.TimeBuckets",
+                "text": "TimeBuckets"
+              }
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/date_histogram.ts",
             "deprecated": false,
@@ -25041,6 +25330,24 @@
                 "text": "DataView"
               },
               " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.ISearchOptions.transport",
+            "type": "Object",
+            "tags": [],
+            "label": "transport",
+            "description": [
+              "\nTransportRequestOptions, other than `signal`, to pass through to the ES client.\nTo pass an abort signal, use {@link ISearchOptions.abortSignal}"
+            ],
+            "signature": [
+              "Omit<",
+              "TransportRequestOptions",
+              ", \"signal\"> | undefined"
             ],
             "path": "src/plugins/data/common/search/types.ts",
             "deprecated": false,

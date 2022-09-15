@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { noop } from 'lodash';
 import React, { memo, useMemo, useCallback, useState } from 'react';
 import { EuiConfirmModal, EuiLoadingSpinner } from '@elastic/eui';
 
@@ -13,33 +14,48 @@ import { useLensOpenVisualization } from '../markdown_editor/plugins/lens/use_le
 import { CANCEL_BUTTON, CONFIRM_BUTTON } from './translations';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
+const totalActions = {
+  edit: 'edit',
+  delete: 'delete',
+  quote: 'quote',
+  showLensEditor: 'showLensEditor',
+} as const;
+
+const availableActions = Object.keys(totalActions) as Array<keyof typeof totalActions>;
+
+export type Actions = typeof availableActions;
+
 export interface UserActionPropertyActionsProps {
   id: string;
-  editLabel: string;
+  actions?: Actions;
+  editLabel?: string;
   deleteLabel?: string;
   deleteConfirmTitle?: string;
-  quoteLabel: string;
+  quoteLabel?: string;
   isLoading: boolean;
-  onEdit: (id: string) => void;
+  onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
-  onQuote: (id: string) => void;
-  commentMarkdown: string;
+  onQuote?: (id: string) => void;
+  commentMarkdown?: string;
 }
 
 const UserActionPropertyActionsComponent = ({
   id,
-  editLabel,
-  quoteLabel,
-  deleteLabel,
+  actions = availableActions,
+  editLabel = '',
+  quoteLabel = '',
+  deleteLabel = '',
   deleteConfirmTitle,
   isLoading,
-  onEdit,
+  onEdit = noop,
   onDelete,
-  onQuote,
+  onQuote = noop,
   commentMarkdown,
 }: UserActionPropertyActionsProps) => {
   const { permissions } = useCasesContext();
-  const { canUseEditor, actionConfig } = useLensOpenVisualization({ comment: commentMarkdown });
+  const { canUseEditor, actionConfig } = useLensOpenVisualization({
+    comment: commentMarkdown ?? '',
+  });
   const onEditClick = useCallback(() => onEdit(id), [id, onEdit]);
   const onQuoteClick = useCallback(() => onQuote(id), [id, onQuote]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -60,10 +76,19 @@ const UserActionPropertyActionsComponent = ({
   }, []);
 
   const propertyActions = useMemo(() => {
-    const showEditPencilIcon = permissions.update;
-    const showTrashIcon = permissions.delete && deleteLabel && onDelete;
-    const showQuoteIcon = permissions.create;
-    const showLensEditor = permissions.update && canUseEditor && actionConfig;
+    const showEditPencilIcon = permissions.update && actions.includes(totalActions.edit);
+
+    const showTrashIcon = Boolean(
+      permissions.delete && deleteLabel && onDelete && actions.includes(totalActions.delete)
+    );
+
+    const showQuoteIcon = permissions.create && actions.includes(totalActions.quote);
+
+    const showLensEditor =
+      permissions.update &&
+      canUseEditor &&
+      actionConfig &&
+      actions.includes(totalActions.showLensEditor);
 
     return [
       ...(showEditPencilIcon
@@ -99,6 +124,7 @@ const UserActionPropertyActionsComponent = ({
     permissions.update,
     permissions.delete,
     permissions.create,
+    actions,
     deleteLabel,
     onDelete,
     canUseEditor,
