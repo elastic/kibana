@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esSupertest = getService('esSupertest');
-  const browser = getService('browser');
+  // const browser = getService('browser');
   const dataGrid = getService('dataGrid');
   const find = getService('find');
   const indexPatterns = getService('indexPatterns');
@@ -37,8 +37,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const logstashIndexName = 'logstash-2015.09.22';
 
   async function setDiscoverTimeRange() {
-    // await PageObjects.header.waitUntilLoadingHasFinished();
-    // await PageObjects.common.waitForTopNavToBeVisible();
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await PageObjects.common.waitForTopNavToBeVisible();
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
@@ -46,6 +46,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.common.navigateToApp('discover');
     await PageObjects.common.waitForTopNavToBeVisible();
     await PageObjects.discover.selectIndexPattern('logstash-*');
+  }
+
+  async function dismissTourPopoverIfPresent() {
+    if (await testSubjects.exists('noDataPopoverDismissButton')) {
+      await testSubjects.click('noDataPopoverDismissButton');
+    }
   }
 
   describe('discover feature controls security', () => {
@@ -141,6 +147,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('allows saving via the saved query management component popover with no saved query loaded', async () => {
         await queryBar.setQuery('response:200');
+        await dismissTourPopoverIfPresent();
         await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
         await savedQueryManagementComponent.savedQueryExistOrFail('foo');
         await savedQueryManagementComponent.closeSavedQueryManagementComponent();
@@ -181,6 +188,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           false
         );
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await dismissTourPopoverIfPresent();
         await savedQueryManagementComponent.savedQueryExistOrFail('ok2');
         await savedQueryManagementComponent.closeSavedQueryManagementComponent();
         await testSubjects.click('showQueryBarMenu');
@@ -241,7 +249,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show visualize button`, async () => {
-        await PageObjects.discover.selectIndexPattern('logstash-*');
         await setDiscoverTimeRange();
         await PageObjects.discover.waitForDocTableLoadingComplete();
         await PageObjects.discover.clickFieldListItem('bytes');
@@ -261,6 +268,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('does not allow saving via the saved query management component popover with no query loaded', async () => {
+        await dismissTourPopoverIfPresent();
         await savedQueryManagementComponent.saveNewQueryMissingOrFail();
       });
 
@@ -353,6 +361,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('does not allow saving via the saved query management component popover with no query loaded', async () => {
+        await dismissTourPopoverIfPresent();
         await savedQueryManagementComponent.saveNewQueryMissingOrFail();
       });
 
