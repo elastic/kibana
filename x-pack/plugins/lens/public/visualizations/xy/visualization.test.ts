@@ -2528,6 +2528,18 @@ describe('xy_visualization', () => {
         const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
         expect(errors).toHaveLength(4);
       });
+      it('should contain error if current annotation contains no time field set', () => {
+        const xyState = createStateWithAnnotationProps({
+          timeField: undefined,
+        });
+        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
+        expect(errors).toHaveLength(1);
+        expect(errors![0]).toEqual(
+          expect.objectContaining({
+            shortMessage: expect.stringContaining('Time field is missing'),
+          })
+        );
+      });
     });
   });
 
