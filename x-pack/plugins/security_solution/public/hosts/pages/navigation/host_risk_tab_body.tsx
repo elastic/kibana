@@ -10,6 +10,8 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { last } from 'lodash/fp';
+import { RiskEntity } from '../../../risk_score/containers/feature_status/api';
+import { RiskScoresDeprecated } from '../../../common/components/risk_score_deprecated';
 import type { HostsComponentsQueryProps } from './types';
 import * as i18n from '../translations';
 import { HostRiskInformationButtonEmpty } from '../../components/host_risk_information';
@@ -57,7 +59,7 @@ const HostRiskTabBodyComponent: React.FC<
   const { toggleStatus: contributorsToggleStatus, setToggleStatus: setContributorsToggleStatus } =
     useQueryToggle(`${QUERY_ID} contributors`);
 
-  const [loading, { data, refetch, inspect }] = useHostRiskScore({
+  const [loading, { data, refetch, inspect, isDeprecated }] = useHostRiskScore({
     filterQuery,
     onlyLatest: false,
     skip: !overTimeToggleStatus && !contributorsToggleStatus,
@@ -88,6 +90,10 @@ const HostRiskTabBodyComponent: React.FC<
   );
 
   const lastHostRiskItem = last(data);
+
+  if (isDeprecated) {
+    return <RiskScoresDeprecated entityType={RiskEntity.host} />;
+  }
 
   return (
     <>

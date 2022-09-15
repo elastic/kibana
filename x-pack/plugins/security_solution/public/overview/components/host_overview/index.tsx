@@ -10,6 +10,7 @@ import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
 import type { HostItem } from '../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../common/search_strategy';
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
@@ -82,10 +83,12 @@ export const HostOverview = React.memo<HostSummaryProps>(
       () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
       [hostName]
     );
+    const { from, to } = useGlobalTime();
 
     const [_, { data: hostRisk, isLicenseValid }] = useHostRiskScore({
       filterQuery,
       skip: hostName == null,
+      timerange: { to, from },
     });
 
     const getDefaultRenderer = useCallback(

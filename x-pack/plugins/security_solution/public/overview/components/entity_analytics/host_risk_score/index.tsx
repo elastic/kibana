@@ -17,6 +17,8 @@ import {
 
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import { RiskEntity } from '../../../../risk_score/containers/feature_status/api';
+import { RiskScoresDeprecated } from '../../../../common/components/risk_score_deprecated';
 import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
@@ -48,7 +50,7 @@ const IconWrapper = styled.span`
 `;
 
 export const EntityAnalyticsHostRiskScores = () => {
-  const { deleteQuery, setQuery } = useGlobalTime();
+  const { deleteQuery, setQuery, to, from } = useGlobalTime();
   const [updatedAt, setUpdatedAt] = useState<number>(Date.now());
   const { toggleStatus, setToggleStatus } = useQueryToggle(TABLE_QUERY_ID);
   const columns = useMemo(() => getHostRiskScoreColumns(), []);
@@ -67,15 +69,18 @@ export const EntityAnalyticsHostRiskScores = () => {
     skip: !toggleStatus,
   });
 
-  const [isTableLoading, { data, inspect, refetch, isLicenseValid, isModuleEnabled }] =
-    useHostRiskScore({
-      filterQuery: severityFilter,
-      skip: !toggleStatus,
-      pagination: {
-        cursorStart: 0,
-        querySize: 5,
-      },
-    });
+  const [
+    isTableLoading,
+    { data, inspect, refetch, isDeprecated, isLicenseValid, isModuleEnabled },
+  ] = useHostRiskScore({
+    filterQuery: severityFilter,
+    skip: !toggleStatus,
+    pagination: {
+      cursorStart: 0,
+      querySize: 5,
+    },
+    timerange: { to, from },
+  });
 
   useQueryInspector({
     queryId: TABLE_QUERY_ID,
@@ -129,6 +134,10 @@ export const EntityAnalyticsHostRiskScores = () => {
 
   if (!isModuleEnabled && !isTableLoading) {
     return <EntityAnalyticsHostRiskScoresDisable />;
+  }
+
+  if (isDeprecated) {
+    return <RiskScoresDeprecated entityType={RiskEntity.host} />;
   }
 
   return (
