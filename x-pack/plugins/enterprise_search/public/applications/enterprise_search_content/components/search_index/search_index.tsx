@@ -14,10 +14,8 @@ import { useValues } from 'kea';
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { Status } from '../../../../../common/types/api';
-import { enableIndexPipelinesTab } from '../../../../../common/ui_settings_keys';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
@@ -60,13 +58,8 @@ export const SearchIndex: React.FC = () => {
   const { tabId = SearchIndexTabId.OVERVIEW } = useParams<{
     tabId?: string;
   }>();
-  const {
-    services: { uiSettings },
-  } = useKibana();
 
   const { indexName } = useValues(IndexNameLogic);
-
-  const pipelinesEnabled = uiSettings?.get<boolean>(enableIndexPipelinesTab) ?? false;
 
   const ALL_INDICES_TABS: EuiTabbedContentTab[] = [
     {
@@ -126,21 +119,19 @@ export const SearchIndex: React.FC = () => {
     },
   ];
 
-  const PIPELINES_TAB: EuiTabbedContentTab[] = [
-    {
-      content: <SearchIndexPipelines />,
-      id: SearchIndexTabId.PIPELINES,
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.pipelinesTabLabel', {
-        defaultMessage: 'Pipelines',
-      }),
-    },
-  ];
+  const PIPELINES_TAB: EuiTabbedContentTab = {
+    content: <SearchIndexPipelines />,
+    id: SearchIndexTabId.PIPELINES,
+    name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.pipelinesTabLabel', {
+      defaultMessage: 'Pipelines',
+    }),
+  };
 
   const tabs: EuiTabbedContentTab[] = [
     ...ALL_INDICES_TABS,
     ...(isConnectorIndex(indexData) ? CONNECTOR_TABS : []),
     ...(isCrawlerIndex(indexData) ? CRAWLER_TABS : []),
-    ...(pipelinesEnabled ? PIPELINES_TAB : []),
+    PIPELINES_TAB,
   ];
 
   const selectedTab = tabs.find((tab) => tab.id === tabId);

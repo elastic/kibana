@@ -20,9 +20,10 @@ import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices } from '../../lib/indices/fetch_indices';
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/fetch_ml_inference_pipeline_processors';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
+import { createIndexPipelineDefinitions } from '../../lib/pipelines/create_pipeline_definitions';
+import { getCustomPipelines } from '../../lib/pipelines/get_custom_pipelines';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
-import { createIndexPipelineDefinitions } from '../../utils/create_pipeline_definitions';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
@@ -261,6 +262,26 @@ export function registerIndexRoutes({
 
       return response.ok({
         body: createResult,
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/pipelines',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
+      const { client } = (await context.core).elasticsearch;
+      const pipelines = await getCustomPipelines(indexName, client);
+      return response.ok({
+        body: pipelines,
         headers: { 'content-type': 'application/json' },
       });
     })
