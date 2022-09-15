@@ -216,7 +216,7 @@ export const getMonitorNamespace = (
   const spaceId = server.spaces.spacesService.getSpaceId(request);
   const kibanaNamespace = formatKibanaNamespace(spaceId);
   const namespace =
-    configuredNamespace !== DEFAULT_NAMESPACE_STRING ? configuredNamespace : kibanaNamespace;
+    configuredNamespace === DEFAULT_NAMESPACE_STRING ? kibanaNamespace : configuredNamespace;
   const { error } = isValidNamespace(namespace);
   if (error) {
     throw new Error(`Cannot save monitor. Monitor namespace is invalid: ${error}`);
