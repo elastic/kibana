@@ -7,10 +7,11 @@
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
+import { CrawlRequestOverrides } from '../../components/search_index/crawler/crawler_logic';
 
 export interface StartSyncArgs {
   connectorId: string;
-  nextSyncConfig?: object;
+  nextSyncConfig?: CrawlRequestOverrides;
 }
 
 export const startSync = async ({ connectorId, nextSyncConfig }: StartSyncArgs) => {

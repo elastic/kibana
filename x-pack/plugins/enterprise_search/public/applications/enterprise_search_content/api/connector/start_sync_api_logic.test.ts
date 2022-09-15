@@ -32,7 +32,7 @@ describe('startSync', () => {
     it('calls correct api with nextSyncConfig', async () => {
       const promise = Promise.resolve('result');
       http.post.mockReturnValue(promise);
-      const nextSyncConfig = { foo: 'bar' };
+      const nextSyncConfig = { max_crawl_depth: 3 };
       const result = startSync({ connectorId: 'connectorId', nextSyncConfig });
       const body = JSON.stringify({ nextSyncConfig: JSON.stringify(nextSyncConfig) });
       await nextTick();
