@@ -24,7 +24,6 @@ import { isIndexNotFoundError } from '../../../common/utils/exceptions';
 import type { inputsModel } from '../../../common/store';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
-import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 
 export interface RiskScoreState<T extends RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore> {
   data: undefined | StrategyResponseType<T>['data'];
