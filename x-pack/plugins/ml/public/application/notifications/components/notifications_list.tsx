@@ -289,6 +289,12 @@ export const NotificationsList: FC = () => {
                 searchable: false,
                 aggregatable: true,
               },
+              job_id: {
+                type: 'string',
+                name: 'job_id',
+                searchable: false,
+                aggregatable: true,
+              },
               message: {
                 type: 'string',
                 name: 'message',
