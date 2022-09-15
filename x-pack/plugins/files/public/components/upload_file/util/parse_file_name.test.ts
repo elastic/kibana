@@ -17,7 +17,7 @@ describe('parseFileName', () => {
 
   test('  Something_*  really -=- strange.abc.wav', () => {
     expect(parseFileName('  Something_*  really -=- strange.abc.wav')).toEqual({
-      name: 'Something__  really ___ strange',
+      name: 'Something__  really ___ strange_abc',
       mime: 'audio/wave',
     });
   });

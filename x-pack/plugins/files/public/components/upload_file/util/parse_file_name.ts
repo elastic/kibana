@@ -13,11 +13,11 @@ interface Result {
 }
 
 export function parseFileName(fileName: string): Result {
+  const withoutExt = fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
   return {
-    name: fileName
-      .slice(0, 256)
+    name: withoutExt
       .trim()
-      .replace(/\..*$/, '') // remove extension
+      .slice(0, 256)
       .replace(/[^a-z0-9\s]/gi, '_'), // replace invalid chars
     mime: mime.lookup(fileName) || undefined,
   };
