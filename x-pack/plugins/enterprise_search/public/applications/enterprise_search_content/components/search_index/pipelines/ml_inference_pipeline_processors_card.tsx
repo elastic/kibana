@@ -13,6 +13,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { InferencePipeline } from '../../../../../../common/types/pipelines';
 import { IndexNameLogic } from '../index_name_logic';
+
 import { InferencePipelineCard } from './inference_pipeline_card';
 import { PipelinesLogic } from './pipelines_logic';
 
