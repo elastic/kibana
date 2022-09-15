@@ -8,8 +8,9 @@
 import { Setup } from '../../lib/helpers/setup_request';
 import { getJavaMetricsCharts } from './by_agent/java';
 import { getDefaultMetricsCharts } from './by_agent/default';
-import { isJavaAgentName } from '../../../common/agent_name';
+import { isJavaAgentName, isServerlessAgent } from '../../../common/agent_name';
 import { GenericMetricsChart } from './fetch_and_transform_metrics';
+import { getServerlessAgentMetricCharts } from './by_agent/serverless';
 
 export async function getMetricsChartDataByAgent({
   environment,
@@ -20,6 +21,7 @@ export async function getMetricsChartDataByAgent({
   agentName,
   start,
   end,
+  serviceRuntimeName,
 }: {
   environment: string;
   kuery: string;
@@ -29,25 +31,26 @@ export async function getMetricsChartDataByAgent({
   agentName: string;
   start: number;
   end: number;
+  serviceRuntimeName?: string;
 }): Promise<GenericMetricsChart[]> {
-  if (isJavaAgentName(agentName)) {
-    return getJavaMetricsCharts({
-      environment,
-      kuery,
-      setup,
-      serviceName,
-      serviceNodeName,
-      start,
-      end,
-    });
-  }
-
-  return getDefaultMetricsCharts({
+  const options = {
     environment,
     kuery,
     setup,
     serviceName,
     start,
     end,
-  });
+  };
+  if (isJavaAgentName(agentName)) {
+    return getJavaMetricsCharts({
+      ...options,
+      serviceNodeName,
+    });
+  }
+
+  if (isServerlessAgent(serviceRuntimeName)) {
+    return getServerlessAgentMetricCharts(options);
+  }
+
+  return getDefaultMetricsCharts(options);
 }

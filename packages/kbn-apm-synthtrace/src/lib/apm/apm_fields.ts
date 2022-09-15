@@ -18,6 +18,10 @@ export type ApmApplicationMetricFields = Partial<{
   'jvm.memory.heap.used': number;
   'jvm.memory.non_heap.used': number;
   'jvm.thread.count': number;
+  'faas.billed_duration': number;
+  'faas.timeout': number;
+  'faas.coldstart_duration': number;
+  'faas.duration': number;
 }>;
 
 export type ApmUserAgentFields = Partial<{
@@ -104,6 +108,7 @@ export type ApmFields = Fields &
     'cloud.region': string;
     'host.os.platform': string;
     'faas.id': string;
+    'faas.name': string;
     'faas.coldstart': boolean;
     'faas.execution': string;
     'faas.trigger.type': string;

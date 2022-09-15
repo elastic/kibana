@@ -134,6 +134,9 @@ export const USER_AGENT_OS = 'user_agent.os.name';
 export const FAAS_ID = 'faas.id';
 export const FAAS_COLDSTART = 'faas.coldstart';
 export const FAAS_TRIGGER_TYPE = 'faas.trigger.type';
+export const FAAS_DURATION = 'faas.duration';
+export const FAAS_COLDSTART_DURATION = 'faas.coldstart_duration';
+export const FAAS_BILLED_DURATION = 'faas.billed_duration';
 
 // Metadata
 export const TIER = '_tier';
