@@ -83,9 +83,7 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
       StartSyncApiLogic,
       ['makeRequest as makeStartSyncRequest'],
       FetchIndexApiLogic,
-      [
-        'makeRequest as makeFetchIndexRequest',
-      ],
+      ['makeRequest as makeFetchIndexRequest'],
     ],
     values: [GetCrawlerApiLogic, ['status', 'data'], FetchIndexApiLogic, ['data as indexData']],
   },
