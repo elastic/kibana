@@ -68,7 +68,7 @@ export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
   const id = useGeneratedHtmlId({ prefix: 'filesUploadFile' });
   const errorId = `${id}_error`;
 
-  const renderControls = () => {
+  const controllButton = (): JSX.Element => {
     if (uploading) {
       return (
         <EuiButtonEmpty
@@ -125,6 +125,7 @@ export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
         </EuiFlexGroup>
       );
     }
+    return null;
   };
 
   return (
@@ -153,7 +154,7 @@ export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
         direction="rowReverse"
         gutterSize="m"
       >
-        <EuiFlexItem grow={false}>{renderControls()}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{controllButton()}</EuiFlexItem>
         {!done && !uploading && Boolean(errorMessage) && (
           <EuiFlexItem>
             <EuiText
