@@ -158,6 +158,9 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/plugins/apm/public/components/app/rum_dashboard @elastic/uptime
 /x-pack/test/apm_api_integration/tests/csm/ @elastic/uptime
 
+# Profiling
+/x-pack/plugins/profiling @elastic/profiling-ui
+
 # Observability onboarding tour
 /x-pack/plugins/observability/public/components/shared/tour @elastic/platform-onboarding
 /x-pack/test/functional/apps/infra/tour.ts @elastic/platform-onboarding

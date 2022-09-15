@@ -39,8 +39,6 @@ import { hostsActions } from '../../../../hosts/store';
 import { useCheckSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_check_signal_index';
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-
 import type { inputsModel } from '../../../../common/store';
 import { RiskyScoreRestartButton } from '../common/risky_score_restart_button';
 import { RiskyScoreEnableButton } from '../common/risky_score_enable_button';
@@ -61,7 +59,6 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
   const [selectedSeverity, setSelectedSeverity] = useState<RiskSeverity[]>([]);
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
   const dispatch = useDispatch();
-  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
   const severityFilter = useMemo(() => {
     const [filter] = generateSeverityFilter(selectedSeverity, RiskScoreEntity.host);
@@ -74,14 +71,15 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
     skip: !toggleStatus,
   });
 
-  const [isTableLoading, { data, inspect, refetch, isModuleEnabled }] = useHostRiskScore({
-    filterQuery: severityFilter,
-    skip: !toggleStatus,
-    pagination: {
-      cursorStart: 0,
-      querySize: 5,
-    },
-  });
+  const [isTableLoading, { data, inspect, refetch, isLicenseValid, isModuleEnabled }] =
+    useHostRiskScore({
+      filterQuery: severityFilter,
+      skip: !toggleStatus,
+      pagination: {
+        cursorStart: 0,
+        querySize: 5,
+      },
+    });
 
   const timerange = useMemo(
     () => ({
@@ -137,7 +135,7 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
     );
   }, []);
 
-  if (!riskyHostsFeatureEnabled) {
+  if (!isLicenseValid) {
     return null;
   }
 
