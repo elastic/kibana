@@ -93,7 +93,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
     const getTestId = useTestIdGenerator(dataTestSubj);
     const [isVisited, setIsVisited] = useState(false);
 
-    const enterVisitedState = useCallback(() => {
+    const handleVisited = useCallback(() => {
       onVisited?.(entry);
 
       if (!isVisited) {
@@ -144,10 +144,10 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
         onChange({ ...entry, field: newField }, entry);
 
         if (entry.value) {
-          enterVisitedState();
+          handleVisited();
         }
       },
-      [enterVisitedState, entry, onChange]
+      [handleVisited, entry, onChange]
     );
 
     const handleOperatorUpdate = useCallback(
@@ -158,8 +158,8 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
     const handleRemoveClick = useCallback(() => onRemove(entry), [entry, onRemove]);
 
     const handleValueOnBlur = useCallback(() => {
-      enterVisitedState();
-    }, [enterVisitedState]);
+      handleVisited();
+    }, [handleVisited]);
 
     return (
       <InputGroup data-test-subj={dataTestSubj}>
