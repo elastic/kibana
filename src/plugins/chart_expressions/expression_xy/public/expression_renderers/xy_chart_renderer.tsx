@@ -38,6 +38,7 @@ export type GetStartDepsFn = () => Promise<{
   activeCursor: ChartsPluginStart['activeCursor'];
   paletteService: PaletteRegistry;
   timeZone: string;
+  timeFormat: string;
   useLegacyTimeAxis: boolean;
   kibanaTheme: ThemeServiceStart;
   eventAnnotationService: EventAnnotationServiceType;
@@ -215,6 +216,7 @@ export const getXyChartRenderer = ({
               chartsThemeService={deps.theme}
               paletteService={deps.paletteService}
               timeZone={deps.timeZone}
+              timeFormat={deps.timeFormat}
               eventAnnotationService={deps.eventAnnotationService}
               useLegacyTimeAxis={deps.useLegacyTimeAxis}
               minInterval={calculateMinInterval(deps.data.datatableUtilities, config)}
