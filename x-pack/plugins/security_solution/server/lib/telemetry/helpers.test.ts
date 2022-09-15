@@ -23,13 +23,12 @@ import {
   addDefaultAdvancedPolicyConfigSettings,
   metricsResponseToValueListMetaData,
   tlog,
-  setIsElasticCloudDeployment
+  setIsElasticCloudDeployment,
 } from './helpers';
 import type { ESClusterInfo, ESLicense, ExceptionListItem } from './types';
 import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
 import { cloneDeep, set } from 'lodash';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-
 
 describe('test diagnostic telemetry scheduled task timing helper', () => {
   test('test -5 mins is returned when there is no previous task run', async () => {
@@ -931,5 +930,4 @@ describe('test tlog', () => {
     expect(logger.info).toHaveBeenCalledTimes(0);
     expect(logger.debug).toHaveBeenCalled();
   });
-
-})
+});

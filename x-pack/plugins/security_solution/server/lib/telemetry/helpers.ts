@@ -277,6 +277,6 @@ export const tlog = (logger: Logger, message: string) => {
   if (isElasticCloudDeployment) {
     logger.info(message);
   } else {
-    logger.debug(message)
+    logger.debug(message);
   }
 };

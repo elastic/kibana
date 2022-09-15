@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import {tlog, getPreviousDiagTaskTimestamp } from '../helpers';
+import { tlog, getPreviousDiagTaskTimestamp } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { TelemetryEvent } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
