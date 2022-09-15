@@ -42,7 +42,7 @@ export const CodeownersCommand: GenerateCommand = {
     }
 
     const newCodeowners = `${codeowners.slice(0, genStart)}${GENERATED_START}${pkgs
-      .map((pkg) => `${pkg.normalizedRepoRelativeDir} ${pkg.manifest.owner}`)
+      .map((pkg) => `${pkg.normalizedRepoRelativeDir} ${pkg.manifest.owner.join(' ')}`)
       .join('\n')}\n`;
 
     if (codeowners === newCodeowners) {
