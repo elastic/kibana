@@ -40,6 +40,7 @@ import {
 import { MonitorPage } from './components/monitors_page/monitor_page';
 import { apiService } from '../../utils/api_service';
 import { RunTestManually } from './components/monitor_details/run_test_manually';
+import { MonitorDetailsStatus } from './components/monitor_details/monitor_details_status';
 
 type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
@@ -103,7 +104,7 @@ const getRoutes = (
             href: '#', // FIXME
           },
         ],
-        rightSideItems: [<RunTestManually />],
+        rightSideItems: [<RunTestManually />, <MonitorDetailsStatus />],
       },
     },
     {
