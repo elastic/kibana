@@ -123,6 +123,8 @@ const expectedIndexPatterns = {
     hasRestrictions: false,
     fields,
     getFieldByName: getFieldByNameFactory(fields),
+    isPersisted: true,
+    spec: {},
   },
 };
 
@@ -2242,6 +2244,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
                 searchable: true,
               },
             ]),
+            isPersisted: true,
+            spec: {},
           },
         }}
       />
