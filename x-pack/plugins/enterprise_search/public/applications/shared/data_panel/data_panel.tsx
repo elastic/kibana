@@ -81,6 +81,7 @@ export const DataPanel: React.FC<Props> = ({
         </EuiFlexGroup>
         {subtitle && (
           <>
+            <EuiSpacer size="xs" />
             <EuiText size="s" color="subdued">
               <p>{subtitle}</p>
             </EuiText>
