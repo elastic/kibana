@@ -42,6 +42,7 @@ import type {
   PutAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
   PostBulkUpdateAgentTagsRequestSchema,
+  GetActionStatusRequestSchema,
 } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
 import * as AgentService from '../../services/agents';
@@ -364,12 +365,15 @@ export const getAvailableVersionsHandler: RequestHandler = async (context, reque
   }
 };
 
-export const getActionStatusHandler: RequestHandler = async (context, request, response) => {
+export const getActionStatusHandler: RequestHandler<
+  undefined,
+  TypeOf<typeof GetActionStatusRequestSchema.query>
+> = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   try {
-    const actionStatuses = await AgentService.getActionStatuses(esClient);
+    const actionStatuses = await AgentService.getActionStatuses(esClient, request.query);
     const body: GetActionStatusResponse = { items: actionStatuses };
     return response.ok({ body });
   } catch (error) {

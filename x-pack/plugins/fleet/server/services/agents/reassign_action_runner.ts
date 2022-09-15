@@ -102,6 +102,9 @@ export async function reassignBatch(
     created_at: now,
     type: 'POLICY_REASSIGN',
     total: options.total,
+    data: {
+      policy_id: options.newAgentPolicyId,
+    },
   });
 
   return result;

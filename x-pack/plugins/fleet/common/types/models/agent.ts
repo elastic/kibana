@@ -112,13 +112,19 @@ export interface ActionStatus {
   nbAgentsActionCreated: number;
   // how many agents acknowledged the action sucessfully (completed)
   nbAgentsAck: number;
-  version: string;
+  // how many agents failed
+  nbAgentsFailed: number;
+  version?: string;
   startTime?: string;
   type?: string;
   // how many agents were actioned by the user
   nbAgentsActioned: number;
-  status: 'complete' | 'expired' | 'cancelled' | 'failed' | 'in progress';
-  errorMessage?: string;
+  status: 'COMPLETE' | 'EXPIRED' | 'CANCELLED' | 'FAILED' | 'IN_PROGRESS';
+  expiration?: string;
+  completionTime?: string;
+  cancellationTime?: string;
+  newPolicyId?: string;
+  creationTime: string;
 }
 
 // Generated from FleetServer schema.json

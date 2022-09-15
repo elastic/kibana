@@ -22,6 +22,7 @@ import {
   PostAgentUpgradeRequestSchema,
   PostBulkAgentUpgradeRequestSchema,
   PostCancelActionRequestSchema,
+  GetActionStatusRequestSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import type { FleetConfigType } from '../..';
@@ -248,7 +249,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
   router.get(
     {
       path: AGENT_API_ROUTES.ACTION_STATUS_PATTERN,
-      validate: false,
+      validate: GetActionStatusRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },

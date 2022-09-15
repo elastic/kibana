@@ -30,6 +30,7 @@ import { MAX_TAG_DISPLAY_LENGTH, truncateTag } from '../utils';
 
 import { AgentBulkActions } from './bulk_actions';
 import type { SelectionMode } from './types';
+import { AgentActivityButton } from './agent_activity_button';
 
 const statusFilters = [
   {
@@ -91,6 +92,8 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   onClickAddAgent: () => void;
   onClickAddFleetServer: () => void;
   visibleAgents: Agent[];
+  onClickAgentActivity: () => void;
+  showAgentActivityTour: { isOpen: boolean };
 }> = ({
   agentPolicies,
   draftKuery,
@@ -114,6 +117,8 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   onClickAddAgent,
   onClickAddFleetServer,
   visibleAgents,
+  onClickAgentActivity,
+  showAgentActivityTour,
 }) => {
   // Policies state for filtering
   const [isAgentPoliciesFilterOpen, setIsAgentPoliciesFilterOpen] = useState<boolean>(false);
@@ -322,6 +327,12 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                   />
                 </EuiFilterButton>
               </EuiFilterGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <AgentActivityButton
+                onClickAgentActivity={onClickAgentActivity}
+                showAgentActivityTour={showAgentActivityTour}
+              />
             </EuiFlexItem>
             {selectedAgents.length === 0 && (
               <>

@@ -49,6 +49,9 @@ export async function reassignAgent(
     agents: [agentId],
     created_at: new Date().toISOString(),
     type: 'POLICY_REASSIGN',
+    data: {
+      policy_id: newAgentPolicyId,
+    },
   });
 }
 
