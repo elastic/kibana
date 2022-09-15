@@ -239,11 +239,13 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
                 }`}
               />
             </EuiFlexItem>
-            <div
-              css={css`
-                width: 48px;
-              `}
-            />
+            {onAddFilter ? (
+              <div
+                css={css`
+                  width: 48px;
+                `}
+              />
+            ) : null}
           </EuiFlexGroup>
         ) : null}
 
