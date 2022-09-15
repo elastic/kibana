@@ -32,7 +32,7 @@ export const CurlRequest: React.FC<CurlRequestParams> = ({
   const DEFAULT_URL = 'https://localhost:9200';
   const baseUrl =
     (cloudContext.cloudId && decodeCloudId(cloudContext.cloudId)?.elasticsearchUrl) || DEFAULT_URL;
-  const apiKeyExample = apiKey || '<Create an API Key>';
+  const apiKeyExample = apiKey || '<Replace_with_created_API_key>';
   const { name: pipelineName, ...pipelineParams } = pipeline ?? {};
   // We have to prefix the parameters with an underscore because that's what the actual pipeline looks for
   const pipelineArgs = Object.entries(pipelineParams).reduce(
