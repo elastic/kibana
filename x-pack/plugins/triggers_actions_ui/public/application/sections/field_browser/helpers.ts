@@ -6,17 +6,17 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { BrowserField, BrowserFields } from './types';
+import { BrowserFieldSearch, BrowserFieldsSearch } from './types';
 
 export const FIELD_BROWSER_WIDTH = 925;
 export const TABLE_HEIGHT = 260;
 
 /** Returns true if the specified category has at least one field */
-export const categoryHasFields = (category: Partial<BrowserField>): boolean =>
+export const categoryHasFields = (category: Partial<BrowserFieldSearch>): boolean =>
   category.fields != null && Object.keys(category.fields).length > 0;
 
 /** Returns the count of fields in the specified category */
-export const getFieldCount = (category: Partial<BrowserField> | undefined): number =>
+export const getFieldCount = (category: Partial<BrowserFieldSearch> | undefined): number =>
   category != null && category.fields != null ? Object.keys(category.fields).length : 0;
 
 /**
@@ -27,15 +27,15 @@ export function filterBrowserFieldsByFieldName({
   browserFields,
   substring,
 }: {
-  browserFields: BrowserFields;
+  browserFields: BrowserFieldsSearch;
   substring: string;
-}): BrowserFields {
+}): BrowserFieldsSearch {
   const trimmedSubstring = substring.trim();
   // an empty search param will match everything, so return the original browserFields
   if (trimmedSubstring === '') {
     return browserFields;
   }
-  const result: Record<string, Partial<BrowserField>> = {};
+  const result: Record<string, Partial<BrowserFieldSearch>> = {};
   for (const [categoryName, categoryDescriptor] of Object.entries(browserFields)) {
     if (!categoryDescriptor.fields) {
       // ignore any category that is missing fields. This is not expected to happen.
@@ -46,7 +46,7 @@ export function filterBrowserFieldsByFieldName({
     let hadAMatch = false;
 
     // The fields that matched, for this `categoryName`
-    const filteredFields: Record<string, Partial<BrowserField>> = {};
+    const filteredFields: Record<string, Partial<BrowserFieldSearch>> = {};
 
     for (const [fieldName, fieldDescriptor] of Object.entries(categoryDescriptor.fields)) {
       // For historical reasons, we consider the name as it appears on the field descriptor, not the `fieldName` (attribute name) itself.
@@ -87,12 +87,12 @@ export const filterSelectedBrowserFields = ({
   browserFields,
   columnIds,
 }: {
-  browserFields: BrowserFields;
+  browserFields: BrowserFieldsSearch;
   columnIds: string[];
-}): BrowserFields => {
+}): BrowserFieldsSearch => {
   const selectedFieldIds = new Set(columnIds);
 
-  const result: Record<string, Partial<BrowserField>> = {};
+  const result: Record<string, Partial<BrowserFieldSearch>> = {};
 
   for (const [categoryName, categoryDescriptor] of Object.entries(browserFields)) {
     if (!categoryDescriptor.fields) {
@@ -104,7 +104,7 @@ export const filterSelectedBrowserFields = ({
     let hadSelected = false;
 
     // The selected fields for this `categoryName`
-    const selectedFields: Record<string, Partial<BrowserField>> = {};
+    const selectedFields: Record<string, Partial<BrowserFieldSearch>> = {};
 
     for (const [fieldName, fieldDescriptor] of Object.entries(categoryDescriptor.fields)) {
       // For historical reasons, we consider the name as it appears on the field descriptor, not the `fieldName` (attribute name) itself.

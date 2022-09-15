@@ -6,8 +6,27 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { IFieldSubType } from '@kbn/es-query';
+import type { RuntimeField } from '@kbn/data-views-plugin/common';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 
+export interface BrowserFieldSearch {
+  aggregatable: boolean;
+  category: string;
+  description: string | null;
+  example: string | number | null;
+  fields: Readonly<Record<string, Partial<BrowserFieldSearch>>>;
+  format: string;
+  indexes: string[];
+  name: string;
+  searchable: boolean;
+  type: string;
+  subType?: IFieldSubType;
+  readFromDocValues: boolean;
+  runtimeField?: RuntimeField;
+}
+
+export type BrowserFieldsSearch = Readonly<Record<string, Partial<BrowserFieldSearch>>>;
 /**
  * An item rendered in the table
  */
