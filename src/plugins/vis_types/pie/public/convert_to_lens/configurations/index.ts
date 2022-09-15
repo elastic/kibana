@@ -20,8 +20,8 @@ const getLayers = (
     {
       layerId,
       layerType: 'data' as const,
-      primaryGroups: buckets.length > 0 ? [buckets[0]] : [],
-      secondaryGroups: buckets.length > 1 ? [buckets[1]] : [],
+      primaryGroups: buckets,
+      secondaryGroups: [],
       metric: columnsWithoutReferenced[0].columnId,
       numberDisplay: vis.params.labels.valuesFormat ?? vis.type.visConfig.labels.valuesFormat,
       categoryDisplay: vis.params.labels.position ?? vis.type.visConfig.labels.position,

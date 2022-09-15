@@ -131,15 +131,13 @@ export function suggestions({
             ? {
                 ...state.layers[0],
                 layerId: table.layerId,
-                primaryGroups: groups[0] ? [groups[0].columnId] : [],
-                secondaryGroups: groups[1] ? [groups[1].columnId] : [],
+                primaryGroups: groups.map((col) => col.columnId),
                 metric: metricColumnId,
                 layerType: layerTypes.DATA,
               }
             : {
                 layerId: table.layerId,
-                primaryGroups: groups[0] ? [groups[0].columnId] : [],
-                secondaryGroups: groups[1] ? [groups[1].columnId] : [],
+                primaryGroups: groups.map((col) => col.columnId),
                 metric: metricColumnId,
                 numberDisplay: NumberDisplay.PERCENT,
                 categoryDisplay: CategoryDisplay.DEFAULT,
