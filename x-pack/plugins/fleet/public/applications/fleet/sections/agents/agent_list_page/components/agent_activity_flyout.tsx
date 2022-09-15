@@ -237,6 +237,34 @@ const formattedTime = (time?: string) => {
   ) : null;
 };
 
+const inProgressTitle = (action: ActionStatus) => (
+  <FormattedMessage
+    id="xpack.fleet.agentActivity.inProgressTitle"
+    defaultMessage="{inProgressText} {nbAgents} {agents} {reassignText}{upgradeText}"
+    values={{
+      nbAgents:
+        action.nbAgentsAck === action.nbAgentsActioned
+          ? action.nbAgentsAck
+          : action.nbAgentsActioned - action.nbAgentsAck + ' of ' + action.nbAgentsActioned,
+      agents: action.nbAgentsActioned === 1 ? 'agent' : 'agents',
+      inProgressText: actionNames[action.type ?? 'ACTION'].inProgressText,
+      reassignText:
+        action.type === 'POLICY_REASSIGN' && action.newPolicyId ? `to ${action.newPolicyId}` : '',
+      upgradeText: action.type === 'UPGRADE' ? `to version ${action.version}` : '',
+    }}
+  />
+);
+
+const inProgressDescription = (time?: string) => (
+  <FormattedMessage
+    id="xpack.fleet.agentActivityFlyout.startedDescription"
+    defaultMessage="Started on {date}."
+    values={{
+      date: formattedTime(time),
+    }}
+  />
+);
+
 const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ action }) => {
   const completeTitle = (
     <EuiText>
@@ -275,24 +303,9 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
   } = {
     IN_PROGRESS: {
       icon: <EuiLoadingSpinner size="m" />,
-      title: (
-        <EuiText>
-          <FormattedMessage
-            id="xpack.fleet.agentActivity.inProgressTitle"
-            defaultMessage="{inProgressText} {nbAgents, plural, one {# agent} other {# agents}} {reassignText}"
-            values={{
-              nbAgents: action.nbAgentsActioned,
-              inProgressText: actionNames[action.type ?? 'ACTION'].inProgressText,
-              reassignText:
-                action.type === 'POLICY_REASSIGN' && action.newPolicyId
-                  ? `to ${action.newPolicyId}`
-                  : '',
-            }}
-          />
-        </EuiText>
-      ),
+      title: <EuiText>{inProgressTitle(action)}</EuiText>,
       titleColor: inProgressTitleColor,
-      description: null,
+      description: <EuiText color="subdued">{inProgressDescription(action.creationTime)}</EuiText>,
     },
     COMPLETE: {
       icon: <EuiIcon size="m" type="checkInCircleFilled" color="green" />,
@@ -308,9 +321,9 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
                 values={{
                   policy: action.newPolicyId,
                 }}
-              />
+              />{' '}
+              {completedDescription}
             </p>
-            <p>{completedDescription}</p>
           </EuiText>
         ) : (
           <EuiText color="subdued">{completedDescription}</EuiText>
@@ -450,14 +463,7 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
                     }}
                   />
                 ) : (
-                  <FormattedMessage
-                    id="xpack.fleet.agentActivityFlyout.upgradeTitle"
-                    defaultMessage="Upgrading {nbAgents, plural, one {# agent} other {# agents}} to version {version}"
-                    values={{
-                      nbAgents: action.nbAgentsActioned - action.nbAgentsAck,
-                      version: action.version,
-                    }}
-                  />
+                  inProgressTitle(action)
                 )}
               </EuiText>
             </EuiFlexItem>
@@ -467,16 +473,18 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
           <EuiFlexGroup direction="column" alignItems="flexStart">
             <EuiFlexItem>
               <EuiText color="subdued">
-                {isScheduled && action.startTime ? (
-                  <p>
-                    <FormattedMessage
-                      id="xpack.fleet.agentActivityFlyout.scheduledDescription"
-                      defaultMessage="Scheduled for "
-                    />
-                    <strong>{formattedTime(action.startTime)}</strong>.
-                  </p>
-                ) : null}
                 <p>
+                  {isScheduled && action.startTime ? (
+                    <>
+                      <FormattedMessage
+                        id="xpack.fleet.agentActivityFlyout.scheduledDescription"
+                        defaultMessage="Scheduled for "
+                      />
+                      <strong>{formattedTime(action.startTime)}</strong>.&nbsp;
+                    </>
+                  ) : (
+                    <>{inProgressDescription(action.creationTime)}&nbsp;</>
+                  )}
                   <FormattedMessage
                     id="xpack.fleet.agentActivityFlyout.upgradeDescription"
                     defaultMessage="{guideLink} about agent upgrades."
