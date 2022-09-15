@@ -61,7 +61,13 @@ exports[`Error ERROR_PAGE_URL 1`] = `undefined`;
 
 exports[`Error EVENT_OUTCOME 1`] = `undefined`;
 
+exports[`Error FAAS_BILLED_DURATION 1`] = `undefined`;
+
 exports[`Error FAAS_COLDSTART 1`] = `undefined`;
+
+exports[`Error FAAS_COLDSTART_DURATION 1`] = `undefined`;
+
+exports[`Error FAAS_DURATION 1`] = `undefined`;
 
 exports[`Error FAAS_ID 1`] = `undefined`;
 
@@ -130,26 +136,6 @@ exports[`Error PARENT_ID 1`] = `"parentId"`;
 exports[`Error POD_NAME 1`] = `undefined`;
 
 exports[`Error PROCESSOR_EVENT 1`] = `"error"`;
-
-exports[`Error PROFILE_ALLOC_OBJECTS 1`] = `undefined`;
-
-exports[`Error PROFILE_ALLOC_SPACE 1`] = `undefined`;
-
-exports[`Error PROFILE_CPU_NS 1`] = `undefined`;
-
-exports[`Error PROFILE_ID 1`] = `undefined`;
-
-exports[`Error PROFILE_INUSE_OBJECTS 1`] = `undefined`;
-
-exports[`Error PROFILE_INUSE_SPACE 1`] = `undefined`;
-
-exports[`Error PROFILE_SAMPLES_COUNT 1`] = `undefined`;
-
-exports[`Error PROFILE_STACK 1`] = `undefined`;
-
-exports[`Error PROFILE_TOP_ID 1`] = `undefined`;
-
-exports[`Error PROFILE_WALL_US 1`] = `undefined`;
 
 exports[`Error SERVICE 1`] = `
 Object {
@@ -304,7 +290,13 @@ exports[`Span ERROR_PAGE_URL 1`] = `undefined`;
 
 exports[`Span EVENT_OUTCOME 1`] = `"unknown"`;
 
+exports[`Span FAAS_BILLED_DURATION 1`] = `undefined`;
+
 exports[`Span FAAS_COLDSTART 1`] = `undefined`;
+
+exports[`Span FAAS_COLDSTART_DURATION 1`] = `undefined`;
+
+exports[`Span FAAS_DURATION 1`] = `undefined`;
 
 exports[`Span FAAS_ID 1`] = `undefined`;
 
@@ -369,26 +361,6 @@ exports[`Span PARENT_ID 1`] = `"parentId"`;
 exports[`Span POD_NAME 1`] = `undefined`;
 
 exports[`Span PROCESSOR_EVENT 1`] = `"span"`;
-
-exports[`Span PROFILE_ALLOC_OBJECTS 1`] = `undefined`;
-
-exports[`Span PROFILE_ALLOC_SPACE 1`] = `undefined`;
-
-exports[`Span PROFILE_CPU_NS 1`] = `undefined`;
-
-exports[`Span PROFILE_ID 1`] = `undefined`;
-
-exports[`Span PROFILE_INUSE_OBJECTS 1`] = `undefined`;
-
-exports[`Span PROFILE_INUSE_SPACE 1`] = `undefined`;
-
-exports[`Span PROFILE_SAMPLES_COUNT 1`] = `undefined`;
-
-exports[`Span PROFILE_STACK 1`] = `undefined`;
-
-exports[`Span PROFILE_TOP_ID 1`] = `undefined`;
-
-exports[`Span PROFILE_WALL_US 1`] = `undefined`;
 
 exports[`Span SERVICE 1`] = `
 Object {
@@ -539,7 +511,13 @@ exports[`Transaction ERROR_PAGE_URL 1`] = `undefined`;
 
 exports[`Transaction EVENT_OUTCOME 1`] = `"unknown"`;
 
+exports[`Transaction FAAS_BILLED_DURATION 1`] = `undefined`;
+
 exports[`Transaction FAAS_COLDSTART 1`] = `undefined`;
+
+exports[`Transaction FAAS_COLDSTART_DURATION 1`] = `undefined`;
+
+exports[`Transaction FAAS_DURATION 1`] = `undefined`;
 
 exports[`Transaction FAAS_ID 1`] = `undefined`;
 
@@ -614,26 +592,6 @@ exports[`Transaction PARENT_ID 1`] = `"parentId"`;
 exports[`Transaction POD_NAME 1`] = `undefined`;
 
 exports[`Transaction PROCESSOR_EVENT 1`] = `"transaction"`;
-
-exports[`Transaction PROFILE_ALLOC_OBJECTS 1`] = `undefined`;
-
-exports[`Transaction PROFILE_ALLOC_SPACE 1`] = `undefined`;
-
-exports[`Transaction PROFILE_CPU_NS 1`] = `undefined`;
-
-exports[`Transaction PROFILE_ID 1`] = `undefined`;
-
-exports[`Transaction PROFILE_INUSE_OBJECTS 1`] = `undefined`;
-
-exports[`Transaction PROFILE_INUSE_SPACE 1`] = `undefined`;
-
-exports[`Transaction PROFILE_SAMPLES_COUNT 1`] = `undefined`;
-
-exports[`Transaction PROFILE_STACK 1`] = `undefined`;
-
-exports[`Transaction PROFILE_TOP_ID 1`] = `undefined`;
-
-exports[`Transaction PROFILE_WALL_US 1`] = `undefined`;
 
 exports[`Transaction SERVICE 1`] = `
 Object {

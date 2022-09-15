@@ -2102,11 +2102,64 @@
           },
           {
             "parentPluginId": "uiActions",
-            "id": "def-public.VisualizeFieldContext.indexPatternId",
-            "type": "string",
+            "id": "def-public.VisualizeFieldContext.dataViewSpec",
+            "type": "Object",
             "tags": [],
-            "label": "indexPatternId",
+            "label": "dataViewSpec",
             "description": [],
+            "signature": [
+              "{ id?: string | undefined; version?: string | undefined; title?: string | undefined; timeFieldName?: string | undefined; sourceFilters?: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.SourceFilter",
+                "text": "SourceFilter"
+              },
+              "[] | undefined; fields?: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewFieldMap",
+                "text": "DataViewFieldMap"
+              },
+              " | undefined; typeMeta?: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.TypeMeta",
+                "text": "TypeMeta"
+              },
+              " | undefined; type?: string | undefined; fieldFormats?: Record<string, ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<{}, ",
+              "SerializableRecord",
+              ">> | undefined; runtimeFieldMap?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.RuntimeFieldSpec",
+                "text": "RuntimeFieldSpec"
+              },
+              "> | undefined; fieldAttrs?: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldAttrs",
+                "text": "FieldAttrs"
+              },
+              " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; }"
+            ],
             "path": "src/plugins/ui_actions/public/types.ts",
             "deprecated": false,
             "trackAdoption": false

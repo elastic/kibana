@@ -9,8 +9,7 @@ import moment from 'moment';
 import React from 'react';
 import { Story } from '@storybook/react';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { CoreStart } from '@kbn/core/public';
+import { StoryProvidersComponent } from '../../../../common/mocks/story_providers';
 import { mockKibanaTimelinesService } from '../../../../common/mocks/mock_kibana_timelines_service';
 import { ChartSeries } from '../../hooks/use_aggregated_indicators';
 import { IndicatorsBarChart } from './indicators_barchart';
@@ -58,38 +57,34 @@ const mockDateRange: TimeRangeBounds = {
 
 const mockField: string = 'threat.indicator.ip';
 
-const KibanaReactContext = createKibanaReactContext({
-  timelines: mockKibanaTimelinesService,
-} as unknown as CoreStart);
-
 export default {
   component: IndicatorsBarChart,
   title: 'IndicatorsBarChart',
 };
 
 export const Default: Story<void> = () => (
-  <KibanaReactContext.Provider>
+  <StoryProvidersComponent kibana={{ timelines: mockKibanaTimelinesService }}>
     <IndicatorsBarChart indicators={mockIndicators} field={mockField} dateRange={mockDateRange} />
-  </KibanaReactContext.Provider>
+  </StoryProvidersComponent>
 );
 
 export const NoData: Story<void> = () => (
-  <KibanaReactContext.Provider>
+  <StoryProvidersComponent kibana={{ timelines: mockKibanaTimelinesService }}>
     <IndicatorsBarChart indicators={[]} field={''} dateRange={mockDateRange} />
-  </KibanaReactContext.Provider>
+  </StoryProvidersComponent>
 );
 
 export const CustomHeight: Story<void> = () => {
   const mockHeight = '500px';
 
   return (
-    <KibanaReactContext.Provider>
+    <StoryProvidersComponent kibana={{ timelines: mockKibanaTimelinesService }}>
       <IndicatorsBarChart
         indicators={mockIndicators}
         field={mockField}
         dateRange={mockDateRange}
         height={mockHeight}
       />
-    </KibanaReactContext.Provider>
+    </StoryProvidersComponent>
   );
 };
