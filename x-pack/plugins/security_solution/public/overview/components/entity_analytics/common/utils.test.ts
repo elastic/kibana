@@ -31,11 +31,12 @@ const mockTimerange = {
   startDate: 'startDate',
   endDate: 'endDate',
 };
-
+const mockRefetch = jest.fn();
 describe('installHostRiskScoreModule', () => {
   beforeAll(async () => {
     await installHostRiskScoreModule({
       http: mockHttp,
+      refetch: mockRefetch,
       spaceId: mockSpaceId,
       timerange: mockTimerange,
     });
@@ -90,12 +91,17 @@ describe('installHostRiskScoreModule', () => {
       (bulkCreatePrebuiltSavedObjects as jest.Mock).mock.calls[0][0].options.templateName
     ).toEqual(`${RiskScoreEntity.host}RiskScoreDashboards`);
   });
+
+  it('Refresh module', () => {
+    expect(mockRefetch).toBeCalled();
+  });
 });
 
 describe(`installUserRiskScoreModule`, () => {
   beforeAll(async () => {
     await installUserRiskScoreModule({
       http: mockHttp,
+      refetch: mockRefetch,
       spaceId: `customSpace`,
       timerange: mockTimerange,
     });
@@ -145,6 +151,10 @@ describe(`installUserRiskScoreModule`, () => {
     expect(
       (bulkCreatePrebuiltSavedObjects as jest.Mock).mock.calls[0][0].options.templateName
     ).toEqual(`${RiskScoreEntity.user}RiskScoreDashboards`);
+  });
+
+  it('Refresh module', () => {
+    expect(mockRefetch).toBeCalled();
   });
 });
 
@@ -240,6 +250,7 @@ describe('Restart Transforms - Host', () => {
     await restartRiskScoreTransforms({
       http: mockHttp,
       spaceId: 'customSpace',
+      refetch: mockRefetch,
       riskScoreEntity: RiskScoreEntity.host,
     });
   });
@@ -259,6 +270,10 @@ describe('Restart Transforms - Host', () => {
       getRiskScoreLatestTransformId(RiskScoreEntity.host, mockSpaceId),
     ]);
   });
+
+  it('Refresh module', () => {
+    expect(mockRefetch).toBeCalled();
+  });
 });
 
 describe('Restart Transforms - User', () => {
@@ -266,6 +281,7 @@ describe('Restart Transforms - User', () => {
     await restartRiskScoreTransforms({
       http: mockHttp,
       spaceId: 'customSpace',
+      refetch: mockRefetch,
       riskScoreEntity: RiskScoreEntity.user,
     });
   });
@@ -284,5 +300,9 @@ describe('Restart Transforms - User', () => {
       getRiskScorePivotTransformId(RiskScoreEntity.user, mockSpaceId),
       getRiskScoreLatestTransformId(RiskScoreEntity.user, mockSpaceId),
     ]);
+  });
+
+  it('Refresh module', () => {
+    expect(mockRefetch).toBeCalled();
   });
 });

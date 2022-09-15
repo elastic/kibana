@@ -524,7 +524,7 @@ export const restartRiskScoreTransforms = async ({
 }: {
   http: HttpSetup;
   notifications?: NotificationsStart;
-  refetch: inputsModel.Refetch;
+  refetch?: inputsModel.Refetch;
   renderDocLink?: (message: string) => React.ReactNode;
   riskScoreEntity: RiskScoreEntity;
   spaceId?: string;
