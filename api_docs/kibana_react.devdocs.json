@@ -4452,19 +4452,15 @@
         "references": [
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/services/kibana_react.ts"
+            "path": "src/plugins/dashboard/public/application/embeddable/viewport/dashboard_viewport.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/plugin.tsx"
+            "path": "src/plugins/dashboard/public/application/embeddable/viewport/dashboard_viewport.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/plugin.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/plugin.tsx"
+            "path": "src/plugins/dashboard/public/application/embeddable/viewport/dashboard_viewport.tsx"
           }
         ],
         "initialIsOpen": false

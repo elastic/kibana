@@ -21,9 +21,11 @@
         "signature": [
           "(config: ",
           "ElasticsearchClientConfig",
-          ", { logger, type, scoped, getExecutionContext, }: { logger: ",
+          ", { logger, type, scoped, getExecutionContext, agentManager, }: { logger: ",
           "Logger",
-          "; type: string; scoped?: boolean | undefined; getExecutionContext?: (() => string | undefined) | undefined; }) => ",
+          "; type: string; scoped?: boolean | undefined; getExecutionContext?: (() => string | undefined) | undefined; agentManager: ",
+          "AgentManager",
+          "; }) => ",
           "default"
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/configure_client.ts",
@@ -50,7 +52,7 @@
             "id": "def-server.configureClient.$2",
             "type": "Object",
             "tags": [],
-            "label": "{\n    logger,\n    type,\n    scoped = false,\n    getExecutionContext = noop,\n  }",
+            "label": "{\n    logger,\n    type,\n    scoped = false,\n    getExecutionContext = noop,\n    agentManager,\n  }",
             "description": [],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/configure_client.ts",
             "deprecated": false,
@@ -110,6 +112,20 @@
                 "trackAdoption": false,
                 "children": [],
                 "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
+                "id": "def-server.configureClient.$2.agentManager",
+                "type": "Object",
+                "tags": [],
+                "label": "agentManager",
+                "description": [],
+                "signature": [
+                  "AgentManager"
+                ],
+                "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/configure_client.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }

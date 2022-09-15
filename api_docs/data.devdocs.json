@@ -11519,7 +11519,11 @@
           "references": [
             {
               "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/application/actions/export_csv_action.tsx"
+              "path": "src/plugins/dashboard/public/services/data/types.ts"
+            },
+            {
+              "plugin": "dashboard",
+              "path": "src/plugins/dashboard/public/services/data/data_service.ts"
             },
             {
               "plugin": "stackAlerts",

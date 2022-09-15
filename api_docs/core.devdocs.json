@@ -513,6 +513,14 @@
                 "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
               },
               {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/public/services/analytics/types.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/public/services/analytics/analytics_service.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
               },
@@ -603,6 +611,10 @@
               {
                 "plugin": "@kbn/core-status-server-internal",
                 "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/public/services/analytics/analytics.stub.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-mocks",
@@ -2161,10 +2173,6 @@
               {
                 "plugin": "dashboard",
                 "path": "src/plugins/dashboard/public/types.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/application/dashboard_router.tsx"
               },
               {
                 "plugin": "dashboard",
@@ -10700,62 +10708,6 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/common/types.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/common/types.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/common/types/modules.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/common/types/modules.ts"
-          },
-          {
             "plugin": "actions",
             "path": "x-pack/plugins/actions/server/actions_client.ts"
           },
@@ -10978,6 +10930,62 @@
           {
             "plugin": "savedSearch",
             "path": "src/plugins/saved_search/server/saved_objects/search_migrations.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/common/types.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/common/types.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/common/types/modules.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/common/types/modules.ts"
           },
           {
             "plugin": "savedObjects",
@@ -19149,6 +19157,14 @@
                 "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
               },
               {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/public/services/analytics/types.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/public/services/analytics/analytics_service.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
               },
@@ -19239,6 +19255,10 @@
               {
                 "plugin": "@kbn/core-status-server-internal",
                 "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/public/services/analytics/analytics.stub.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-mocks",
@@ -21472,13 +21492,7 @@
             "label": "uiSettings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.UiSettingsRequestHandlerContext",
-                "text": "UiSettingsRequestHandlerContext"
-              }
+              "UiSettingsRequestHandlerContext"
             ],
             "path": "src/core/server/core_route_handler_context.ts",
             "deprecated": false,
@@ -21776,13 +21790,7 @@
               "{@link UiSettingsServiceSetup}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.UiSettingsServiceSetup",
-                "text": "UiSettingsServiceSetup"
-              }
+              "UiSettingsServiceSetup"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false,
@@ -21990,13 +21998,7 @@
               "{@link UiSettingsServiceStart}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.UiSettingsServiceStart",
-                "text": "UiSettingsServiceStart"
-              }
+              "UiSettingsServiceStart"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false,
@@ -34729,7 +34731,10 @@
         "description": [
           "\nServer-side client that provides access to the advanced settings stored in elasticsearch.\nThe settings provide control over the behavior of the Kibana application.\nFor example, a user can specify how to display numeric or date fields.\nUsers can adjust the settings via Management UI.\n"
         ],
-        "path": "src/core/server/ui_settings/types.ts",
+        "signature": [
+          "IUiSettingsClient"
+        ],
+        "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -34747,7 +34752,7 @@
               "PublicUiSettingsParams",
               ">>"
             ],
-            "path": "src/core/server/ui_settings/types.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -34765,7 +34770,7 @@
             "signature": [
               "<T = any>(key: string) => Promise<T>"
             ],
-            "path": "src/core/server/ui_settings/types.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -34779,7 +34784,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/core/server/ui_settings/types.ts",
+                "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -34799,7 +34804,7 @@
             "signature": [
               "<T = any>() => Promise<Record<string, T>>"
             ],
-            "path": "src/core/server/ui_settings/types.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -34819,7 +34824,7 @@
               "UserProvidedValues",
               "<T>>>"
             ],
-            "path": "src/core/server/ui_settings/types.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -34837,7 +34842,7 @@
             "signature": [
               "(changes: Record<string, any>) => Promise<void>"
             ],
-            "path": "src/core/server/ui_settings/types.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -34851,7 +34856,7 @@
                 "signature": [
                   "Record<string, any>"
                 ],
-                "path": "src/core/server/ui_settings/types.ts",
+                "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -34871,7 +34876,7 @@
             "signature": [
               "(key: string, value: any) => Promise<void>"
             ],
-            "path": "src/core/server/ui_settings/types.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -34885,7 +34890,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/core/server/ui_settings/types.ts",
+                "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -34900,7 +34905,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "src/core/server/ui_settings/types.ts",
+                "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -34920,7 +34925,7 @@
             "signature": [
               "(key: string) => Promise<void>"
             ],
-            "path": "src/core/server/ui_settings/types.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -34934,7 +34939,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/core/server/ui_settings/types.ts",
+                "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -34954,7 +34959,7 @@
             "signature": [
               "(keys: string[]) => Promise<void>"
             ],
-            "path": "src/core/server/ui_settings/types.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -34968,7 +34973,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "src/core/server/ui_settings/types.ts",
+                "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -34988,7 +34993,7 @@
             "signature": [
               "(key: string) => boolean"
             ],
-            "path": "src/core/server/ui_settings/types.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -35002,7 +35007,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/core/server/ui_settings/types.ts",
+                "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -35022,7 +35027,7 @@
             "signature": [
               "(key: string) => boolean"
             ],
-            "path": "src/core/server/ui_settings/types.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -35036,7 +35041,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/core/server/ui_settings/types.ts",
+                "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -40041,62 +40046,6 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/common/types.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/common/types.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/common/types/modules.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/common/types/modules.ts"
-          },
-          {
             "plugin": "actions",
             "path": "x-pack/plugins/actions/server/actions_client.ts"
           },
@@ -40319,6 +40268,62 @@
           {
             "plugin": "savedSearch",
             "path": "src/plugins/saved_search/server/saved_objects/search_migrations.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/common/types.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/common/types.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/saved_dashboard_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/common/types/modules.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/common/types/modules.ts"
           },
           {
             "plugin": "savedObjects",
@@ -48664,7 +48669,10 @@
         "description": [
           "\nCore's `uiSettings` request handler context."
         ],
-        "path": "src/core/server/ui_settings/ui_settings_route_handler_context.ts",
+        "signature": [
+          "UiSettingsRequestHandlerContext"
+        ],
+        "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48676,15 +48684,9 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
-            "path": "src/core/server/ui_settings/ui_settings_route_handler_context.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -48698,7 +48700,10 @@
         "tags": [],
         "label": "UiSettingsServiceSetup",
         "description": [],
-        "path": "src/core/server/ui_settings/types.ts",
+        "signature": [
+          "UiSettingsServiceSetup"
+        ],
+        "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48716,7 +48721,7 @@
               "UiSettingsParams",
               "<unknown>>) => void"
             ],
-            "path": "src/core/server/ui_settings/types.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -48732,7 +48737,7 @@
                   "UiSettingsParams",
                   "<unknown>>"
                 ],
-                "path": "src/core/server/ui_settings/types.ts",
+                "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -48750,7 +48755,10 @@
         "tags": [],
         "label": "UiSettingsServiceStart",
         "description": [],
-        "path": "src/core/server/ui_settings/types.ts",
+        "signature": [
+          "UiSettingsServiceStart"
+        ],
+        "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48767,15 +48775,9 @@
               "(savedObjectsClient: ",
               "SavedObjectsClientContract",
               ") => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
-            "path": "src/core/server/ui_settings/types.ts",
+            "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -48789,7 +48791,7 @@
                 "signature": [
                   "SavedObjectsClientContract"
                 ],
-                "path": "src/core/server/ui_settings/types.ts",
+                "path": "node_modules/@types/kbn__core-ui-settings-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

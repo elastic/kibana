@@ -80,6 +80,17 @@
         "children": [
           {
             "parentPluginId": "expressionXY",
+            "id": "def-common.AnnotationLayerArgs.layerId",
+            "type": "string",
+            "tags": [],
+            "label": "layerId",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionXY",
             "id": "def-common.AnnotationLayerArgs.annotations",
             "type": "Array",
             "tags": [],
