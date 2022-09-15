@@ -10,6 +10,7 @@ import {
   MappingRuntimeFieldType,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import { ALL_VALUE } from '../../../types/schema';
 import {
   getSLODestinationIndexName,
   getSLOIngestPipelineName,
@@ -22,7 +23,6 @@ import {
   APMTransactionDurationSLO,
 } from '../../../types/models';
 import { TransformGenerator } from '.';
-import { ALL_VALUE } from '@kbn/observability-plugin/server/types/schema';
 
 const APM_SOURCE_INDEX = 'metrics-apm*';
 
