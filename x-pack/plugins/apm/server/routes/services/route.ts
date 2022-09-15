@@ -44,6 +44,7 @@ import {
 } from '../default_api_types';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { getServiceContainerMetadata } from './get_service_container_metadata';
+import { getServiceInstanceContainerMetadata } from './get_service_instance_container_metadata';
 import { getServicesDetailedStatistics } from './get_services_detailed_statistics';
 import { getServiceDependenciesBreakdown } from './get_service_dependencies_breakdown';
 import { getAnomalyTimeseries } from '../../lib/anomaly_detection/get_anomaly_timeseries';
@@ -272,8 +273,6 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
       start,
       end,
     });
-
-    console.log('---serviceMetadataDetails', serviceMetadataDetails);
 
     if (serviceMetadataDetails?.container?.ids) {
       const {
@@ -916,10 +915,10 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
         savedObjectsClient,
       });
 
-      const containerMetadata = await getServiceContainerMetadata({
+      const containerMetadata = await getServiceInstanceContainerMetadata({
         esClient: esClient.asCurrentUser,
         indexName,
-        containerIds: [serviceInstanceMetadataDetails.container.id],
+        containerId: serviceInstanceMetadataDetails.container.id,
         start,
         end,
       });

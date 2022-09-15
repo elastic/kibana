@@ -26,8 +26,8 @@ import {
   KUBERNETES_NAMESPACE,
   KUBERNETES_POD_NAME,
   KUBERNETES_POD_UID,
-  KUBERNETES_REPLICASET,
-  KUBERNETES_DEPLOYMENT,
+  KUBERNETES_REPLICASET_NAME,
+  KUBERNETES_DEPLOYMENT_NAME,
 } from '../../../../../common/elasticsearch_fieldnames';
 
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -79,8 +79,8 @@ const containerDetailsKeys = [
 const metricsKubernetesDetailsKeys = [
   KUBERNETES_CONTAINER_NAME,
   KUBERNETES_NAMESPACE,
-  KUBERNETES_REPLICASET,
-  KUBERNETES_DEPLOYMENT,
+  KUBERNETES_REPLICASET_NAME,
+  KUBERNETES_DEPLOYMENT_NAME,
 ];
 const cloudDetailsKeys = [
   CLOUD_AVAILABILITY_ZONE,

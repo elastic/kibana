@@ -7,8 +7,15 @@
 
 export interface Kubernetes {
   pod?: { uid?: string | null; [key: string]: unknown };
-  namespace?: string[];
-  replicaset?: string[];
-  deployment?: string[];
-  labels?: string[];
+  namespace?: string;
+  replicaset?: {
+    name?: string;
+  };
+  deployment?: {
+    name?: string;
+  };
+  container?: {
+    id?: string;
+    name?: string;
+  };
 }
