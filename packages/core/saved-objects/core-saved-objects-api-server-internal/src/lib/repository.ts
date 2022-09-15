@@ -237,7 +237,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       serializer,
       migrator,
       allowedTypes = [],
-      logger,
+      logger, // 'savedobjects-service.repository'
     } = options;
 
     // It's important that we migrate documents / mark them as up-to-date
@@ -688,7 +688,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
-
     const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
     const namespace = normalizeNamespace(options.namespace);
 
@@ -780,7 +779,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
    * @returns array BulkDeleteExpectedBulkGetResult[]: left as 400 for objects that don't have a valid type or right Either result with the object and an `esRequestIndex` if the object is of a multinamespace type.
    */
   private presortObjectsByNamespaceType(objects: SavedObjectsBulkDeleteObject[]) {
-    let bulkGetRequestIndexCounter = 0; // flag for multi-namespace objects
+    let bulkGetRequestIndexCounter = 0;
     return objects.map<BulkDeleteExpectedBulkGetResult>((object) => {
       const { type, id } = object;
       if (!this._allowedTypes.includes(type)) {
@@ -814,9 +813,9 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const { expectedBulkGetResults, namespace } = params;
     const bulkGetMultiNamespaceDocs = expectedBulkGetResults
       .filter(isRight)
-      .filter(({ value }) => value.esRequestIndex !== undefined) // only get docs that need multinamespace checks, I don't think we want to do this filtering
+      .filter(({ value }) => value.esRequestIndex !== undefined)
       .map(({ value: { type, id } }) => ({
-        _id: this._serializer.generateRawId(namespace, type, id), // prefixes the id with the space name in the api call's scope
+        _id: this._serializer.generateRawId(namespace, type, id),
         _index: this.getIndexForType(type),
         _source: ['type', 'namespaces'],
       }));
@@ -835,7 +834,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         headers: bulkGetMultiNamespaceDocsResponse.headers,
       })
     ) {
-      // I'm not sure if I want to throw here.
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
     }
     return bulkGetMultiNamespaceDocsResponse;
@@ -896,9 +894,12 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           namespaces = actualResult!._source.namespaces ?? [
             SavedObjectsUtils.namespaceIdToString(namespace),
           ];
-
+          const useForce = force && force === true ? true : false;
           // the document is shared to more than one space and can only be deleted by force.
-          if (!force && (namespaces.length > 1 || namespaces.includes(ALL_NAMESPACES_STRING))) {
+          if (
+            useForce === false &&
+            (namespaces.length > 1 || namespaces.includes(ALL_NAMESPACES_STRING))
+          ) {
             return {
               tag: 'Left',
               value: {
@@ -938,15 +939,12 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
     const namespace = normalizeNamespace(options.namespace);
     const expectedBulkGetResults = this.presortObjectsByNamespaceType(objects);
-
     const multiNamespaceDocsResponse = await this.preflightCheckForBulkDelete({
       expectedBulkGetResults,
       namespace,
     });
-
     const bulkDeleteParams: BulkDeleteParams[] = [];
 
-    // @TINA expectedBulkDeleteMultiNamespaceDocsResults is result from sorting again into Left and Right responses. Use the Right responses to create the bulk params
     const expectedBulkDeleteMultiNamespaceDocsResults =
       this.getExpectedBulkDeleteMultiNamespaceDocsResults({
         expectedBulkGetResults,
@@ -954,7 +952,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         namespace,
         force,
       });
-
+    // note that we're using a map here but we're only using it to add to the bulkDeleteParams
     expectedBulkDeleteMultiNamespaceDocsResults.map((expectedResult) => {
       if (isRight(expectedResult)) {
         bulkDeleteParams.push({
@@ -981,7 +979,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
 
     // extracted to ensure consistency in the error results returned
     let errorResult: BulkDeleteItemErrorResult;
-
     const savedObjects = await Promise.all(
       expectedBulkDeleteMultiNamespaceDocsResults.map(async (expectedResult) => {
         if (isLeft(expectedResult)) {
@@ -1030,7 +1027,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
               type,
               id,
               ...(namespaces.includes(ALL_NAMESPACES_STRING)
-                ? { namespaces: [], deleteBehavior: 'exclusive' } // delete legacy URL aliases for this type/ID for all spaces
+                ? { namespaces: [], deleteBehavior: 'exclusive' } // delete legacy URL aliases for this type/ID for all spaces not in []. Effectively, it's the same behavior ad inludisve with a defined array of namespaces.
                 : { namespaces, deleteBehavior: 'inclusive' }), // delete legacy URL aliases for this type/ID for these specific spaces. In the bulk operation, this behavior is only applicable in the case of multi-namespace isolated types.
             }).catch((err) => {
               // The object has already been deleted, but we caught an error when attempting to delete aliases.
@@ -1042,7 +1039,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           }
         }
         const successfulResult = {
-          success: true, // could also use (rawResponse.result === 'deleted')
+          success: true,
           id,
           type,
         };

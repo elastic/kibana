@@ -25,8 +25,16 @@ export interface BulkDeleteTestCase extends TestCase {
   failure?: 400 | 403 | 404;
 }
 
-const ALIAS_DELETE_INCLUSIVE = Object.freeze({ type: 'resolvetype', id: 'alias-match-newid' }); // exists in three specific spaces; deleting this should also delete the aliases that target it in the default space and space_1
-const ALIAS_DELETE_EXCLUSIVE = Object.freeze({ type: 'resolvetype', id: 'all_spaces' }); // exists in all spaces; deleting this should also delete the aliases that target it in the default space and space_1
+const ALIAS_DELETE_INCLUSIVE = Object.freeze({
+  type: 'resolvetype',
+  id: 'alias-match-newid',
+  force: true,
+}); // exists in three specific spaces; deleting this should also delete the aliases that target it in the default space and space_1
+const ALIAS_DELETE_EXCLUSIVE = Object.freeze({
+  type: 'resolvetype',
+  id: 'all_spaces',
+  force: true,
+}); // exists in all spaces; deleting this should also delete the aliases that target it in the default space and space_1
 const DOES_NOT_EXIST = Object.freeze({ type: 'dashboard', id: 'does-not-exist' });
 export const TEST_CASES: Record<string, BulkDeleteTestCase> = Object.freeze({
   ...CASES,
@@ -64,7 +72,7 @@ export function bulkDeleteTestSuiteFactory(es: Client, esArchiver: any, supertes
             const searchResponse = await es.search({
               index: '.kibana',
               body: {
-                size: 0,
+                size: 10,
                 query: { terms: { type: ['legacy-url-alias'] } },
                 track_total_hits: true,
               },
@@ -76,7 +84,7 @@ export function bulkDeleteTestSuiteFactory(es: Client, esArchiver: any, supertes
             // Eight aliases exist and they are all deleted in the bulk operation.
             // The delete behavior for multinamespace objects shared to more than one space when using force is to delete the object from all the spaces it is shared to.
             expect((searchResponse.hits.total as SearchTotalHits).value).to.eql(
-              expectAliasWasDeleted ? 8 : 8
+              expectAliasWasDeleted ? 6 : 8
             );
           }
         }
@@ -123,8 +131,9 @@ export function bulkDeleteTestSuiteFactory(es: Client, esArchiver: any, supertes
 
         for (const test of tests) {
           it(`should return ${test.responseStatusCode} ${test.title} `, async () => {
-            const requestBody = [{ type: test.request.type, id: test.request.id }];
-            const query = test.force && test.force === true ? '?force=true' : '';
+            const { type: testType, id: testId, force: testForce } = test.request;
+            const requestBody = [{ type: testType, id: testId }];
+            const query = testForce && testForce === true ? '?force=true' : '';
             await supertest
               .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_delete${query}`)
               .auth(user?.username, user?.password)
