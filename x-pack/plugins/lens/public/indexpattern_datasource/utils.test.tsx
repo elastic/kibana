@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
-import { getPrecisionErrorWarningMessages } from './utils';
+import { getPrecisionErrorWarningMessages, cloneLayer } from './utils';
 import type { IndexPatternPrivateState, GenericIndexPatternColumn } from './types';
 import type { FramePublicAPI } from '../types';
 import type { DocLinksStart } from '@kbn/core/public';
@@ -16,6 +16,7 @@ import { EuiButton } from '@elastic/eui';
 import { TermsIndexPatternColumn } from './operations';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { IndexPatternLayer } from './types';
 
 describe('indexpattern_datasource utils', () => {
   describe('getPrecisionErrorWarningMessages', () => {
@@ -194,6 +195,55 @@ describe('indexpattern_datasource utils', () => {
         type: 'rare',
         maxDocCount: 1,
       });
+    });
+  });
+
+  describe('cloneLayer', () => {
+    test('should replace ids', () => {
+      expect(
+        cloneLayer(
+          {
+            a: {
+              columns: {
+                '899ee4b6-3147-4d45-94bf-ea9c02e55d28': {
+                  params: {
+                    orderBy: {
+                      type: 'column',
+                      columnId: 'ae62cfc8-faa5-4096-a30c-f92ac59922a0',
+                    },
+                    orderDirection: 'desc',
+                  },
+                },
+                'ae62cfc8-faa5-4096-a30c-f92ac59922a0': {
+                  params: {
+                    emptyAsNull: true,
+                    justForTest: [
+                      '899ee4b6-3147-4d45-94bf-ea9c02e55d28',
+                      'ae62cfc8-faa5-4096-a30c-f92ac59922a0',
+                    ],
+                    justForTest2: [
+                      {
+                        a: '899ee4b6-3147-4d45-94bf-ea9c02e55d28',
+                        ['899ee4b6-3147-4d45-94bf-ea9c02e55d28']: [
+                          { c: 'ae62cfc8-faa5-4096-a30c-f92ac59922a0' },
+                        ],
+                      },
+                    ],
+                  },
+                },
+              },
+              columnOrder: [
+                '899ee4b6-3147-4d45-94bf-ea9c02e55d28',
+                'ae62cfc8-faa5-4096-a30c-f92ac59922a0',
+              ],
+              incompleteColumns: {},
+              indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+            },
+          } as unknown as Record<string, IndexPatternLayer>,
+          'a',
+          'b'
+        )
+      ).toMatchSnapshot();
     });
   });
 });
