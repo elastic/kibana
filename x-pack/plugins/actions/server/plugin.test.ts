@@ -472,5 +472,24 @@ describe('Actions Plugin', () => {
         );
       });
     });
+
+    describe('getActionsHealth()', () => {
+      it('should return hasPermanentEncryptionKey false if canEncrypt of encryptedSavedObjects is false', async () => {
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        expect(pluginSetup.getActionsHealth()).toEqual({ hasPermanentEncryptionKey: false });
+      });
+      it('should return hasPermanentEncryptionKey true if canEncrypt of encryptedSavedObjects is true', async () => {
+        const pluginSetup = await plugin.setup(coreSetup, {
+          ...pluginsSetup,
+          encryptedSavedObjects: {
+            ...pluginsSetup.encryptedSavedObjects,
+            canEncrypt: true,
+          },
+        });
+        expect(pluginSetup.getActionsHealth()).toEqual({ hasPermanentEncryptionKey: true });
+      });
+    });
   });
 });

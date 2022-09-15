@@ -13,6 +13,7 @@ export const aiopsExplainLogRateSpikesSchema = schema.object({
   searchQuery: schema.string(),
   timeFieldName: schema.string(),
   includeFrozen: schema.maybe(schema.boolean()),
+  grouping: schema.maybe(schema.boolean()),
   /** Analysis selection time ranges */
   baselineMin: schema.number(),
   baselineMax: schema.number(),
