@@ -9,9 +9,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiPopoverFooter,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiFlyoutFooter,
   EuiButton,
   EuiText,
   EuiProgress,
@@ -132,156 +133,160 @@ export const GuidedSetupPanel = ({ api, application }: Props) => {
   const currentStep = getCurrentStep(guideConfig.steps, guidedSetupState);
 
   return (
-    <EuiPopover
-      button={
-        <EuiButton onClick={toggleGuide} color="success" fill size="s">
-          {currentStep
-            ? i18n.translate('guidedOnboarding.guidedSetupStepButtonLabel', {
-                defaultMessage: 'Setup guide: Step {currentStep}',
-                values: {
-                  currentStep,
-                },
-              })
-            : i18n.translate('guidedOnboarding.guidedSetupButtonLabel', {
-                defaultMessage: 'Setup guide',
+    <>
+      <EuiButton onClick={toggleGuide} color="success" fill size="s">
+        {currentStep
+          ? i18n.translate('guidedOnboarding.guidedSetupStepButtonLabel', {
+              defaultMessage: 'Setup guide: Step {currentStep}',
+              values: {
+                currentStep,
+              },
+            })
+          : i18n.translate('guidedOnboarding.guidedSetupButtonLabel', {
+              defaultMessage: 'Setup guide',
+            })}
+      </EuiButton>
+
+      {isGuideOpen && (
+        <EuiFlyout ownFocus onClose={toggleGuide} aria-labelledby="onboarding-guide">
+          <EuiFlyoutHeader>
+            <EuiButtonEmpty
+              onClick={navigateToLandingPage}
+              iconSide="left"
+              iconType="arrowLeft"
+              flush="left"
+              color="text"
+            >
+              {i18n.translate('guidedOnboarding.dropdownPanel.backToGuidesLink', {
+                defaultMessage: 'Back to guides',
               })}
-        </EuiButton>
-      }
-      isOpen={isGuideOpen}
-      closePopover={() => setIsGuideOpen(false)}
-      anchorPosition="downRight"
-      hasArrow={false}
-      offset={10}
-      panelPaddingSize="l"
-    >
-      <EuiPopoverTitle>
-        <EuiButtonEmpty
-          onClick={navigateToLandingPage}
-          iconSide="left"
-          iconType="arrowLeft"
-          flush="left"
-          color="text"
-        >
-          {i18n.translate('guidedOnboarding.dropdownPanel.backToGuidesLink', {
-            defaultMessage: 'Back to guides',
-          })}
-        </EuiButtonEmpty>
-        <EuiTitle size="m">
-          <h3>{guideConfig?.title}</h3>
-        </EuiTitle>
-      </EuiPopoverTitle>
+            </EuiButtonEmpty>
 
-      <div css={guidedPanelContainerCss}>
-        <EuiText size="m">
-          <p>{guideConfig?.description}</p>
-        </EuiText>
+            <EuiSpacer size="m" />
 
-        {guideConfig.docs && (
-          <>
+            <EuiTitle size="m">
+              <h2>{guideConfig?.title}</h2>
+            </EuiTitle>
+
             <EuiSpacer size="s" />
-            <EuiLink external target="_blank" href={guideConfig.docs.url}>
-              {guideConfig.docs.text}
-            </EuiLink>
-          </>
-        )}
+            <EuiHorizontalRule margin="s" />
+          </EuiFlyoutHeader>
 
-        <EuiHorizontalRule />
+          <EuiFlyoutBody>
+            <div>
+              <EuiText size="m">
+                <p>{guideConfig?.description}</p>
+              </EuiText>
 
-        {/*
-          TODO: Progress bar should only show after the first step has been started
-          We need to make changes to the state itself in order to support this
-         */}
-        <EuiProgress
-          label={i18n.translate('guidedOnboarding.dropdownPanel.progressLabel', {
-            defaultMessage: 'Progress',
-          })}
-          value={currentStep ? currentStep - 1 : 0}
-          valueText={i18n.translate('guidedOnboarding.dropdownPanel.progressValueLabel', {
-            defaultMessage: '{stepCount} steps',
-            values: {
-              stepCount: `${currentStep ? currentStep - 1 : 0} / ${guideConfig.steps.length}`,
-            },
-          })}
-          max={guideConfig.steps.length}
-          size="l"
-        />
+              {guideConfig.docs && (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiLink external target="_blank" href={guideConfig.docs.url}>
+                    {guideConfig.docs.text}
+                  </EuiLink>
+                </>
+              )}
 
-        <EuiSpacer size="xl" />
+              <EuiHorizontalRule />
 
-        {guideConfig?.steps.map((step, index, steps) => {
-          const accordionId = htmlIdGenerator(`accordion${index}`)();
-          const stepStatus = getStepStatus(steps, index, guidedSetupState?.activeStep);
-
-          return (
-            <GuidedSetupStep
-              accordionId={accordionId}
-              stepStatus={stepStatus}
-              stepConfig={step}
-              stepNumber={index + 1}
-              navigateToStep={navigateToStep}
-            />
-          );
-        })}
-
-        <EuiPopoverFooter>
-          <EuiFlexGroup direction="column" alignItems="center" gutterSize="xs">
-            <EuiFlexItem>
-              {/* TODO: Implement exit guide modal - https://github.com/elastic/kibana/issues/139804 */}
-              <EuiButtonEmpty onClick={() => {}}>
-                {i18n.translate('guidedOnboarding.dropdownPanel.footer.exitGuideButtonLabel', {
-                  defaultMessage: 'Exit setup guide',
+              {/*
+                 TODO: Progress bar should only show after the first step has been started
+                 We need to make changes to the state itself in order to support this
+               */}
+              <EuiProgress
+                label={i18n.translate('guidedOnboarding.dropdownPanel.progressLabel', {
+                  defaultMessage: 'Progress',
                 })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+                value={currentStep ? currentStep - 1 : 0}
+                valueText={i18n.translate('guidedOnboarding.dropdownPanel.progressValueLabel', {
+                  defaultMessage: '{stepCount} steps',
+                  values: {
+                    stepCount: `${currentStep ? currentStep - 1 : 0} / ${guideConfig.steps.length}`,
+                  },
+                })}
+                max={guideConfig.steps.length}
+                size="l"
+              />
 
-            <EuiFlexItem>
-              <EuiText color="subdued" textAlign="center">
-                <FormattedMessage
-                  id="guidedOnboarding.dropdownPanel.footer.feedbackDescription"
-                  defaultMessage={`How’s onboarding? We’d love your {feedbackLink}`}
-                  values={{
-                    feedbackLink: (
-                      <EuiLink
-                        href="https://www.elastic.co/kibana/feedback"
-                        target="_blank"
-                        external
-                      >
-                        {i18n.translate(
-                          'guidedOnboarding.dropdownPanel.footer.feedbackDescription',
-                          {
-                            defaultMessage: 'feedback',
-                          }
-                        )}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </EuiText>
-            </EuiFlexItem>
+              <EuiSpacer size="xl" />
 
-            <EuiFlexItem>
-              <EuiText color="subdued" textAlign="center">
-                <FormattedMessage
-                  id="guidedOnboarding.dropdownPanel.footer.supportDescription"
-                  defaultMessage={`Other questions? We're {helpLink}`}
-                  values={{
-                    helpLink: (
-                      <EuiLink href="https://cloud.elastic.co/support " target="_blank" external>
-                        {i18n.translate(
-                          'guidedOnboarding.dropdownPanel.footer.helpTextDescription',
-                          {
-                            defaultMessage: 'here to help',
-                          }
-                        )}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPopoverFooter>
-      </div>
-    </EuiPopover>
+              {guideConfig?.steps.map((step, index, steps) => {
+                const accordionId = htmlIdGenerator(`accordion${index}`)();
+                const stepStatus = getStepStatus(steps, index, guidedSetupState?.activeStep);
+
+                return (
+                  <GuidedSetupStep
+                    accordionId={accordionId}
+                    stepStatus={stepStatus}
+                    stepConfig={step}
+                    stepNumber={index + 1}
+                    navigateToStep={navigateToStep}
+                  />
+                );
+              })}
+            </div>
+          </EuiFlyoutBody>
+
+          <EuiFlyoutFooter>
+            <EuiFlexGroup direction="column" alignItems="center" gutterSize="xs">
+              <EuiFlexItem>
+                {/* TODO: Implement exit guide modal - https://github.com/elastic/kibana/issues/139804 */}
+                <EuiButtonEmpty onClick={() => {}}>
+                  {i18n.translate('guidedOnboarding.dropdownPanel.footer.exitGuideButtonLabel', {
+                    defaultMessage: 'Exit setup guide',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+
+              <EuiFlexItem>
+                <EuiText color="subdued" textAlign="center">
+                  <FormattedMessage
+                    id="guidedOnboarding.dropdownPanel.footer.feedbackDescription"
+                    defaultMessage={`How’s onboarding? We’d love your {feedbackLink}`}
+                    values={{
+                      feedbackLink: (
+                        <EuiLink
+                          href="https://www.elastic.co/kibana/feedback"
+                          target="_blank"
+                          external
+                        >
+                          {i18n.translate(
+                            'guidedOnboarding.dropdownPanel.footer.feedbackDescription',
+                            {
+                              defaultMessage: 'feedback',
+                            }
+                          )}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </EuiText>
+              </EuiFlexItem>
+
+              <EuiFlexItem>
+                <EuiText color="subdued" textAlign="center">
+                  <FormattedMessage
+                    id="guidedOnboarding.dropdownPanel.footer.supportDescription"
+                    defaultMessage={`Other questions? We're {helpLink}`}
+                    values={{
+                      helpLink: (
+                        <EuiLink href="https://cloud.elastic.co/support " target="_blank" external>
+                          {i18n.translate(
+                            'guidedOnboarding.dropdownPanel.footer.helpTextDescription',
+                            {
+                              defaultMessage: 'here to help',
+                            }
+                          )}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
+        </EuiFlyout>
+      )}
+    </>
   );
 };
