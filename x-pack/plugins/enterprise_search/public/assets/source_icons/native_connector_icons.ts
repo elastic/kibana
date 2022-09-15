@@ -8,7 +8,7 @@
 import mongodb from './mongodb.svg';
 import mysql from './mysql.svg';
 
-export const NATIVE_CONNECTOR_ICONS = {
+export const NATIVE_CONNECTOR_ICONS: Record<string, string | undefined> = {
   mongodb,
   mysql,
-} as { [key: string]: string };
+};
