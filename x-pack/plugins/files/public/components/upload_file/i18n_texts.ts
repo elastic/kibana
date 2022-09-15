@@ -8,6 +8,9 @@
 import { i18n } from '@kbn/i18n';
 
 export const i18nTexts = {
+  defaultPickerLabel: i18n.translate('xpack.files.uploadFile.defaultFilePickerLabel', {
+    defaultMessage: 'Upload a file',
+  }),
   upload: i18n.translate('xpack.files.uploadFile.uploadButtonLabel', {
     defaultMessage: 'Upload',
   }),

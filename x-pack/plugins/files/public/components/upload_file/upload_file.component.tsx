@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import classNames from 'classnames';
 import {
   EuiIcon,
   EuiText,
   EuiButton,
   EuiSpacer,
+  useEuiTheme,
   EuiFlexItem,
   EuiFlexGroup,
   EuiFilePicker,
@@ -19,9 +19,9 @@ import {
   type EuiFilePickerProps,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { css } from '@emotion/react';
 import { i18nTexts } from './i18n_texts';
-
-import './upload_file.scss';
 
 export interface Props
   extends Omit<EuiFilePickerProps, 'onChange' | 'value' | 'initialPromptText' | 'disabled'> {
@@ -40,6 +40,8 @@ export interface Props
   allowClear?: boolean;
   initialFilePromptText?: string;
 }
+
+const { euiFormMaxWidth, euiButtonHeight, euiButtonHeightSmall } = euiThemeVars;
 
 export const UploadFile = React.forwardRef<EuiFilePicker, Props>((props, ref) => {
   const {
@@ -64,7 +66,8 @@ export const UploadFile = React.forwardRef<EuiFilePicker, Props>((props, ref) =>
     ...rest
   } = props;
 
-  const cn = classNames({ filesUploadFile: true }, className);
+  const { euiTheme } = useEuiTheme();
+  const { size } = euiTheme;
   const id = useGeneratedHtmlId({ prefix: 'filesUploadFile' });
   const errorId = `${id}_error`;
 
@@ -116,7 +119,10 @@ export const UploadFile = React.forwardRef<EuiFilePicker, Props>((props, ref) =>
       return (
         <EuiFlexGroup alignItems="center" gutterSize="none">
           <EuiIcon
-            className="filesUploadFile__successCheck"
+            css={css`
+              margin-inline: ${size.m};
+              height: ${euiButtonHeight};
+            `}
             data-test-subj="uploadSuccessIcon"
             type="checkInCircleFilled"
             color="success"
@@ -129,8 +135,16 @@ export const UploadFile = React.forwardRef<EuiFilePicker, Props>((props, ref) =>
   };
 
   return (
-    <div data-test-subj="filesUploadFile" className={cn} style={style}>
+    <div
+      data-test-subj="filesUploadFile"
+      css={css`
+        max-width: ${euiFormMaxWidth};
+      `}
+      className={className}
+      style={style}
+    >
       <EuiFilePicker
+        aria-label={i18nTexts.defaultPickerLabel}
         {...rest}
         id={id}
         ref={ref}
@@ -159,7 +173,11 @@ export const UploadFile = React.forwardRef<EuiFilePicker, Props>((props, ref) =>
           <EuiFlexItem>
             <EuiText
               data-test-subj="error"
-              className="filesUploadFile__errorMessage"
+              css={css`
+                display: flex;
+                align-items: center;
+                min-height: ${euiButtonHeightSmall};
+              `}
               size="s"
               color="danger"
             >
