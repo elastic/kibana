@@ -23,7 +23,7 @@ import {
 } from '../../common/components/with_bulk_rule_api_operations';
 import { RuleSnoozeScheduler } from './rule_snooze/scheduler';
 import { RuleTableItem, SnoozeSchedule } from '../../../../types';
-import { getFormattedBulkSnoozeResponseMessage } from '../../../lib/rule_api';
+import { useBulkEditResponse } from '../../../hooks/use_bulk_edit_response';
 import { useKibana } from '../../../../common/lib/kibana';
 
 const failureMessage = i18n.translate(
@@ -46,6 +46,7 @@ export type BulkSnoozeScheduleModalProps = {
   rulesToScheduleFilter?: string;
   onClose: () => void;
   onSave: () => void;
+  onSearchPopulate?: (filter: string) => void;
 } & BulkOperationsComponentOpts;
 
 export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => {
@@ -57,11 +58,14 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
     onSave,
     bulkSnoozeRules,
     bulkUnsnoozeRules,
+    onSearchPopulate,
   } = props;
 
   const {
     notifications: { toasts },
   } = useKibana().services;
+
+  const { showToast } = useBulkEditResponse({ onSearchPopulate });
 
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
 
@@ -80,7 +84,7 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
         filter: rulesToScheduleFilter,
         snoozeSchedule: schedule,
       });
-      toasts.addInfo(getFormattedBulkSnoozeResponseMessage(response));
+      showToast(response, 'snoozeSchedule');
     } catch (error) {
       toasts.addError(error, {
         title: failureMessage,
@@ -97,7 +101,7 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
         ids: rulesToSchedule.map((item) => item.id),
         filter: rulesToScheduleFilter,
       });
-      toasts.addInfo(getFormattedBulkSnoozeResponseMessage(response));
+      showToast(response, 'snoozeSchedule');
     } catch (error) {
       toasts.addError(error, {
         title: failureMessage,

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState, useMemo } from 'react';
 import { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '../../common/lib/kibana';
-import { getFormattedBulkUpdateApiKeyResponseMessage } from '../lib/rule_api';
+import { useBulkEditResponse } from '../hooks/use_bulk_edit_response';
 import { BulkEditResponse } from '../../types';
 
 export const UpdateApiKeyModalConfirmation = ({
@@ -22,6 +22,7 @@ export const UpdateApiKeyModalConfirmation = ({
   bulkApiUpdateApiKeyCall,
   setIsLoadingState,
   onUpdated,
+  onSearchPopulate,
 }: {
   onCancel: () => void;
   idsToUpdate: string[];
@@ -39,6 +40,7 @@ export const UpdateApiKeyModalConfirmation = ({
   }) => Promise<BulkEditResponse>;
   setIsLoadingState: (isLoading: boolean) => void;
   onUpdated: () => void;
+  onSearchPopulate?: (filter: string) => void;
 }) => {
   const {
     http,
@@ -46,6 +48,8 @@ export const UpdateApiKeyModalConfirmation = ({
   } = useKibana().services;
 
   const [updateModalFlyoutVisible, setUpdateModalVisibility] = useState<boolean>(false);
+
+  const { showToast } = useBulkEditResponse({ onSearchPopulate });
 
   useEffect(() => {
     if (idsToUpdateFilter) {
@@ -83,7 +87,7 @@ export const UpdateApiKeyModalConfirmation = ({
               filter: idsToUpdateFilter,
               http,
             });
-            toasts.addInfo(getFormattedBulkUpdateApiKeyResponseMessage(response));
+            showToast(response, 'apiKey');
           } else if (apiUpdateApiKeyCall) {
             await Promise.all(idsToUpdate.map((id) => apiUpdateApiKeyCall({ id, http })));
           }

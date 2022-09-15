@@ -637,6 +637,7 @@ export const RulesList = ({
             fullWidth
             isClearable
             data-test-subj="ruleSearchField"
+            value={searchText}
             onChange={(e) => {
               setInputText(e.target.value);
               if (e.target.value === '') {
@@ -943,6 +944,7 @@ export const RulesList = ({
           onClearSelection();
           await loadData();
         }}
+        onSearchPopulate={setSearchText}
       />
       <BulkSnoozeScheduleModal
         rulesToSchedule={rulesToSchedule}
@@ -956,6 +958,7 @@ export const RulesList = ({
           onClearSelection();
           await loadData();
         }}
+        onSearchPopulate={setSearchText}
       />
       <UpdateApiKeyModalConfirmation
         onCancel={() => {
@@ -973,6 +976,7 @@ export const RulesList = ({
           onClearSelection();
           await loadData();
         }}
+        onSearchPopulate={setSearchText}
       />
       <EuiSpacer size="xs" />
       {getRulesList()}

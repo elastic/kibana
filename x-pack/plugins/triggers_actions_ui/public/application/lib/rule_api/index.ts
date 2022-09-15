@@ -40,8 +40,4 @@ export type { BulkUnsnoozeRulesProps } from './unsnooze';
 export { unsnoozeRule, bulkUnsnoozeRules } from './unsnooze';
 export type { BulkUpdateAPIKeyProps } from './update_api_key';
 export { updateAPIKey, bulkUpdateAPIKey } from './update_api_key';
-export {
-  getFormattedBulkSnoozeResponseMessage,
-  getFormattedBulkUpdateApiKeyResponseMessage,
-} from './bulk_edit_helpers';
 export { runSoon } from './run_soon';

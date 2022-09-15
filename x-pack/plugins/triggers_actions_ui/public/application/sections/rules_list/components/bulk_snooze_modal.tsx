@@ -23,7 +23,7 @@ import {
 import { RuleTableItem, SnoozeSchedule } from '../../../../types';
 import { SnoozePanel, futureTimeToInterval } from './rule_snooze';
 import { isRuleSnoozed } from '../../../lib';
-import { getFormattedBulkSnoozeResponseMessage } from '../../../lib/rule_api';
+import { useBulkEditResponse } from '../../../hooks/use_bulk_edit_response';
 import { useKibana } from '../../../../common/lib/kibana';
 
 export type BulkSnoozeModalProps = {
@@ -31,6 +31,7 @@ export type BulkSnoozeModalProps = {
   rulesToSnoozeFilter?: string;
   onClose: () => void;
   onSave: () => void;
+  onSearchPopulate?: (filter: string) => void;
 } & BulkOperationsComponentOpts;
 
 const failureMessage = i18n.translate(
@@ -46,6 +47,7 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
     rulesToSnoozeFilter,
     onClose,
     onSave,
+    onSearchPopulate,
     bulkSnoozeRules,
     bulkUnsnoozeRules,
   } = props;
@@ -53,6 +55,8 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
   const {
     notifications: { toasts },
   } = useKibana().services;
+
+  const { showToast } = useBulkEditResponse({ onSearchPopulate });
 
   const isSnoozeModalOpen = useMemo(() => {
     if (rulesToSnoozeFilter) {
@@ -86,7 +90,7 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
         filter: rulesToSnoozeFilter,
         snoozeSchedule: schedule,
       });
-      toasts.addInfo(getFormattedBulkSnoozeResponseMessage(response));
+      showToast(response, 'snooze');
     } catch (error) {
       toasts.addError(error, {
         title: failureMessage,
@@ -103,7 +107,7 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
         filter: rulesToSnoozeFilter,
         scheduleIds,
       });
-      toasts.addInfo(getFormattedBulkSnoozeResponseMessage(response));
+      showToast(response, 'snooze');
     } catch (error) {
       toasts.addError(error, {
         title: failureMessage,

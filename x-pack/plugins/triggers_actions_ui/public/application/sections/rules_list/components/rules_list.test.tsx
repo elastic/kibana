@@ -27,6 +27,9 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { IToasts } from '@kbn/core/public';
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
+  useUiSetting$: jest.fn((value: string) => ['0,0']),
+}));
 jest.mock('../../../lib/action_connector_api', () => ({
   loadActionTypes: jest.fn(),
   loadAllActions: jest.fn(),
@@ -1385,7 +1388,7 @@ describe('rules_list component with items', () => {
   it('sorts rules when clicking the name column', async () => {
     await setup();
     wrapper
-      .find('[data-test-subj="tableHeaderCell_name_0"] .euiTableHeaderButton')
+      .find('[data-test-subj="tableHeaderCell_name_1"] .euiTableHeaderButton')
       .first()
       .simulate('click');
 
@@ -1407,7 +1410,7 @@ describe('rules_list component with items', () => {
   it('sorts rules when clicking the status control column', async () => {
     await setup();
     wrapper
-      .find('[data-test-subj="tableHeaderCell_enabled_9"] .euiTableHeaderButton')
+      .find('[data-test-subj="tableHeaderCell_enabled_10"] .euiTableHeaderButton')
       .first()
       .simulate('click');
 
@@ -1831,25 +1834,6 @@ describe('rules_list with disabled items', () => {
       wrapper.update();
     });
   }
-
-  it('renders rules list with disabled indicator if disabled due to license', async () => {
-    await setup();
-    expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
-    expect(wrapper.find('EuiTableRow')).toHaveLength(2);
-    expect(wrapper.find('EuiTableRow').at(0).prop('className')).toEqual('');
-    expect(wrapper.find('EuiTableRow').at(1).prop('className')).toEqual(
-      'actRulesList__tableRowDisabled'
-    );
-    expect(wrapper.find('EuiIconTip[data-test-subj="ruleDisabledByLicenseTooltip"]').length).toBe(
-      1
-    );
-    expect(
-      wrapper.find('EuiIconTip[data-test-subj="ruleDisabledByLicenseTooltip"]').props().type
-    ).toEqual('questionInCircle');
-    expect(
-      wrapper.find('EuiIconTip[data-test-subj="ruleDisabledByLicenseTooltip"]').props().content
-    ).toEqual('This rule type requires a Platinum license.');
-  });
 
   it('clicking the notify badge shows the snooze panel', async () => {
     await setup();

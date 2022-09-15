@@ -8,7 +8,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import moment, { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import uuid from 'uuid';
 import {
@@ -27,7 +26,6 @@ import {
   EuiIcon,
   EuiLink,
   EuiSplitPanel,
-  EuiCallOut,
 } from '@elastic/eui';
 import { RecurrenceSchedule, SnoozeSchedule } from '../../../../../types';
 import { RecurrenceScheduler } from './recurrence_scheduler';
@@ -345,26 +343,6 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
         </>
       )}
       <EuiHorizontalRule margin="m" />
-      {bulkSnoozeSchedule && (
-        <EuiCallOut
-          title={i18n.translate(
-            'xpack.triggersActionsUI.sections.rulesList.bulkEditScheduleInfoTitle',
-            {
-              defaultMessage: 'Bulk editing',
-            }
-          )}
-          iconType="alert"
-          size="s"
-          style={{ width: '400px' }}
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.rulesList.bulkEditScheduleInfo"
-            defaultMessage="We're unable to show you existing schedules while bulk editing, but you may add 1 or delete all schedules."
-          />
-        </EuiCallOut>
-      )}
-      <EuiSpacer size="m" />
-
       <EuiButton
         fill
         fullWidth

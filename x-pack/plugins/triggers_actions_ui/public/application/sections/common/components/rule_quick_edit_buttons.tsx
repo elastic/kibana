@@ -261,7 +261,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         >
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.snoozeScheduleAllTitle"
-            defaultMessage="Snooze Schedule"
+            defaultMessage="Add snooze Schedule"
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
