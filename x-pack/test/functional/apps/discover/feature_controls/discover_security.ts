@@ -37,26 +37,29 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const logstashIndexName = 'logstash-2015.09.22';
 
   async function setDiscoverTimeRange() {
-    await PageObjects.header.waitUntilLoadingHasFinished();
-    await PageObjects.common.waitForTopNavToBeVisible();
+    // await PageObjects.header.waitUntilLoadingHasFinished();
+    // await PageObjects.common.waitForTopNavToBeVisible();
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
-  async function openDiscover() {
-    await PageObjects.common.navigateToApp('discover');
-    await PageObjects.common.waitForTopNavToBeVisible();
-    await PageObjects.discover.selectIndexPattern('logstash-*');
-  }
+  // async function openDiscover() {
+  //   await PageObjects.common.navigateToApp('discover');
+  //   await PageObjects.common.waitForTopNavToBeVisible();
+  //   await PageObjects.discover.selectIndexPattern('logstash-*');
+  // }
 
   describe('discover feature controls security', () => {
     before(async () => {
-      // ensure we're logged out so we can login as the appropriate users
-      await PageObjects.security.forceLogout();
+      // // ensure we're logged out so we can login as the appropriate users
+      // await PageObjects.security.forceLogout();
 
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
       );
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+
+      // ensure we're logged out so we can login as the appropriate users
+      await PageObjects.security.forceLogout();
     });
 
     after(async () => {
@@ -216,9 +219,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
       });
 
-      beforeEach(async () => {
-        await openDiscover();
-      });
+      // beforeEach(async () => {
+      //   await openDiscover();
+      // });
 
       after(async () => {
         await security.role.delete('global_discover_read_role');
@@ -310,9 +313,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
       });
 
-      beforeEach(async () => {
-        await openDiscover();
-      });
+      // beforeEach(async () => {
+      //   await openDiscover();
+      // });
 
       after(async () => {
         await security.user.delete('global_discover_read_url_create_user');
@@ -577,8 +580,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         // switch back to the default index
-        await browser.goBack();
-        await PageObjects.discover.selectIndexPattern('logstash-*');
+        // await browser.goBack();
+        // await PageObjects.discover.selectIndexPattern('logstash-*');
       });
     });
   });
