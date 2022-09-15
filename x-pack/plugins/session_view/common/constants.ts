@@ -24,7 +24,7 @@ export const ALERT_ORIGINAL_TIME_PROPERTY = 'kibana.alert.original_time';
 export const TOTAL_BYTES_CAPTURED_PROPERTY = 'process.io.total_bytes_captured';
 export const TTY_CHAR_DEVICE_MAJOR_PROPERTY = 'process.tty.char_device.major';
 export const TTY_CHAR_DEVICE_MINOR_PROPERTY = 'process.tty.char_device.minor';
-export const HOST_BOOT_ID_PROPERTY = 'host.boot.id';
+export const HOST_ID_PROPERTY = 'host.id';
 export const TIMESTAMP_PROPERTY = '@timestamp';
 
 // page sizes

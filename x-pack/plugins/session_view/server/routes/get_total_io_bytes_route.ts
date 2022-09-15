@@ -11,6 +11,7 @@ import {
   TOTAL_BYTES_CAPTURED_PROPERTY,
   TTY_CHAR_DEVICE_MAJOR_PROPERTY,
   TTY_CHAR_DEVICE_MINOR_PROPERTY,
+  HOST_ID_PROPERTY,
 } from '../../common/constants';
 import { getTTYQueryPredicates } from './io_events_route';
 
@@ -43,7 +44,7 @@ export const registerGetTotalIOBytesRoute = (router: IRouter) => {
                 must: [
                   { term: { [TTY_CHAR_DEVICE_MAJOR_PROPERTY]: ttyPredicates.ttyMajor } },
                   { term: { [TTY_CHAR_DEVICE_MINOR_PROPERTY]: ttyPredicates.ttyMinor } },
-                  // TODO: uncomment when host.boot.id is populated in endpoint.  { term: { [HOST_BOOT_ID_PROPERTY]: ttyPredicates.bootId } },
+                  { term: { [HOST_ID_PROPERTY]: ttyPredicates.hostId } },
                   { term: { [EVENT_ACTION]: 'text_output' } },
                   {
                     range: {
