@@ -133,7 +133,7 @@ export class NotificationsService {
     function getSortCallback(
       sortField: keyof NotificationItem,
       sortDirection: 'asc' | 'desc'
-    ): (a: NotificationItem, b: NotificationItem) => any {
+    ): (a: NotificationItem, b: NotificationItem) => number {
       if (sortField === 'timestamp') {
         if (sortDirection === 'asc') {
           return (a, b) => a.timestamp - b.timestamp;
