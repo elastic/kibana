@@ -138,13 +138,12 @@ describe('Enterprise Search Managed Indices', () => {
         return Promise.reject(mockError);
       });
 
-      const response = await mockRouter.callRoute({
+      await mockRouter.callRoute({
         params: { indexName, pipelineName },
       });
 
       expect(deleteMlInferencePipeline).toHaveBeenCalledWith(indexName, pipelineName, {});
-
-      expect(response).toEqual(new Error(errorReason));
+      expect(mockRouter.response.customError).toHaveBeenCalledTimes(1);
     });
   });
 });
