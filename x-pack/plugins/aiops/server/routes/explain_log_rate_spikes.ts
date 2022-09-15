@@ -7,6 +7,7 @@
 
 import { chunk } from 'lodash';
 
+import type { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { asyncForEach } from '@kbn/std';
 import type { IRouter } from '@kbn/core/server';
@@ -212,6 +213,7 @@ export const defineExplainLogRateSpikesRoute = (
           const { fields, df } = await fetchFrequentItems(
             client,
             request.body.index,
+            JSON.parse(request.body.searchQuery) as Query['query'],
             changePoints,
             request.body.timeFieldName,
             request.body.deviationMin,

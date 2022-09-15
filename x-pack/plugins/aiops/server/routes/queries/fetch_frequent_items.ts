@@ -9,6 +9,7 @@ import { uniq, uniqWith, pick, isEqual } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import type { Query } from '@kbn/es-query';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 
@@ -25,6 +26,7 @@ function dropDuplicates(cp: ChangePoint[], uniqueFields: string[]) {
 export async function fetchFrequentItems(
   client: ElasticsearchClient,
   index: string,
+  searchQuery: Query['query'],
   changePoints: ChangePoint[],
   timeFieldName: string,
   deviationMin: number,
@@ -45,7 +47,9 @@ export async function fetchFrequentItems(
   // TODO add query params
   const query = {
     bool: {
+      minimum_should_match: 2,
       filter: [
+        searchQuery,
         {
           range: {
             [timeFieldName]: {
@@ -83,6 +87,7 @@ export async function fetchFrequentItems(
         fi: {
           // @ts-expect-error `frequent_items` is not yet part of `AggregationsAggregationContainer`
           frequent_items: {
+            minimum_set_size: 2,
             size: 200,
             minimum_support: 0.1,
             fields: aggFields,
