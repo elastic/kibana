@@ -148,8 +148,8 @@ describe('TableListView', () => {
       const { tableCellsValues } = table.getMetaData('itemsInMemTable');
 
       expect(tableCellsValues).toEqual([
-        ['Item 2', 'Item 2 description', yesterdayToString], // Comes first as it is the latest updated
-        ['Item 1', 'Item 1 description', twoDaysAgoToString],
+        ['Item 2Item 2 description', yesterdayToString], // Comes first as it is the latest updated
+        ['Item 1Item 1 description', twoDaysAgoToString],
       ]);
     });
 
@@ -185,8 +185,8 @@ describe('TableListView', () => {
 
       expect(tableCellsValues).toEqual([
         // Renders the datetime with this format: "July 28, 2022"
-        ['Item 1', 'Item 1 description', updatedAtValues[0].format('LL')],
-        ['Item 2', 'Item 2 description', updatedAtValues[1].format('LL')],
+        ['Item 1Item 1 description', updatedAtValues[0].format('LL')],
+        ['Item 2Item 2 description', updatedAtValues[1].format('LL')],
       ]);
     });
 
@@ -209,8 +209,8 @@ describe('TableListView', () => {
       const { tableCellsValues } = table.getMetaData('itemsInMemTable');
 
       expect(tableCellsValues).toEqual([
-        ['Item 1', 'Item 1 description'], // Sorted by title
-        ['Item 2', 'Item 2 description'],
+        ['Item 1Item 1 description'], // Sorted by title
+        ['Item 2Item 2 description'],
       ]);
     });
 
@@ -235,9 +235,9 @@ describe('TableListView', () => {
       const { tableCellsValues } = table.getMetaData('itemsInMemTable');
 
       expect(tableCellsValues).toEqual([
-        ['Item 2', 'Item 2 description', yesterdayToString],
-        ['Item 1', 'Item 1 description', twoDaysAgoToString],
-        ['Item 3', 'Item 3 description', '-'], // Empty column as no updatedAt provided
+        ['Item 2Item 2 description', yesterdayToString],
+        ['Item 1Item 1 description', twoDaysAgoToString],
+        ['Item 3Item 3 description', '-'], // Empty column as no updatedAt provided
       ]);
     });
   });
