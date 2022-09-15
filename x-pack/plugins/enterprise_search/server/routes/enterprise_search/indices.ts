@@ -23,6 +23,7 @@ import { createIndex } from '../../lib/indices/create_index';
 import { indexOrAliasExists } from '../../lib/indices/exists_index';
 import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices } from '../../lib/indices/fetch_indices';
+import { fetchMlInferencePipelineProcessors } from '../../lib/indices/fetch_ml_inference_pipeline_processors';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
@@ -207,7 +208,7 @@ export function registerIndexRoutes({
       } catch (e) {
         log.warn(
           i18n.translate('xpack.enterpriseSearch.server.routes.indices.existsErrorLogMessage', {
-            defaultMessage: 'An error occured while resolving request to {requestUrl}',
+            defaultMessage: 'An error occurred while resolving request to {requestUrl}',
             values: {
               requestUrl: request.url.toString(),
             },
@@ -265,6 +266,31 @@ export function registerIndexRoutes({
 
       return response.ok({
         body: createResult,
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
+      const { client } = (await context.core).elasticsearch;
+
+      const mlInferencePipelineProcessorConfigs = await fetchMlInferencePipelineProcessors(
+        client.asCurrentUser,
+        indexName
+      );
+
+      return response.ok({
+        body: mlInferencePipelineProcessorConfigs,
         headers: { 'content-type': 'application/json' },
       });
     })
