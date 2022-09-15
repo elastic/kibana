@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep, get } from 'lodash';
 import { useRef, useCallback } from 'react';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/public';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
@@ -191,7 +191,7 @@ function processCategoryResults(result: CatResponse, field: string) {
     return {
       key: b.key,
       count: b.doc_count,
-      examples: b.hit.hits.hits.map((h: any) => h._source[field]),
+      examples: b.hit.hits.hits.map((h) => get(h._source, field)),
     };
   });
   return {
