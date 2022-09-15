@@ -88,6 +88,7 @@ export const findAllListItems = async ({
         ignore_unavailable: true,
         index: listItemIndex,
         seq_no_primary_term: true,
+        size: 10000,
       });
     }
     return {

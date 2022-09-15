@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useFindListsBySize } from '@kbn/securitysolution-list-hooks';
 import { DataViewFieldBase } from '@kbn/es-query';
@@ -116,8 +116,27 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
 
   const isLoadingState = useMemo((): boolean => isLoading || loading, [isLoading, loading]);
 
+  const helpText = useMemo(() => {
+    return (
+      !allowLargeValueLists && (
+        <EuiText size="xs">
+          {i18n.LISTS_TOOLTIP_INFO}{' '}
+          <EuiLink external target="_blank" href="https://www.elastic.co/">
+            {i18n.SEE_DOCUMENTATION}
+          </EuiLink>
+        </EuiText>
+      )
+    );
+  }, [allowLargeValueLists]);
+
   return (
-    <EuiFormRow label={rowLabel} error={error} isInvalid={error != null} fullWidth>
+    <EuiFormRow
+      label={rowLabel}
+      error={error}
+      isInvalid={error != null}
+      helpText={helpText}
+      fullWidth
+    >
       <EuiComboBox
         async
         data-test-subj="valuesAutocompleteComboBox listsComboxBox"

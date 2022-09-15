@@ -13,6 +13,7 @@ import {
   MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE,
   MAXIMUM_SMALL_VALUE_LIST_SIZE,
 } from '@kbn/securitysolution-list-constants';
+import { chunk } from 'lodash';
 
 import type { ListsPluginRouter } from '../types';
 import { decodeCursor } from '../services/utils';
@@ -73,64 +74,70 @@ export const findListsBySizeRoute = (router: ListsPluginRouter): void => {
             sortOrder,
           });
 
-          const listBooleans = await Promise.all(
-            valueLists.data.map(async (valueList) => {
-              // Currently the only list types we support for exceptions
-              if (
-                valueList.type !== 'ip_range' &&
-                valueList.type !== 'ip' &&
-                valueList.type !== 'keyword'
-              ) {
-                return false;
-              }
+          const listBooleans: boolean[] = [];
 
-              const list = await listClient.findListItem({
-                currentIndexPosition: 0,
-                filter: '',
-                listId: valueList.id,
-                page: 0,
-                perPage: 0,
-                runtimeMappings: undefined,
-                searchAfter: [],
-                sortField: undefined,
-                sortOrder: undefined,
-              });
+          const chunks = chunk(valueLists.data, 10);
+          for (const listChunk of chunks) {
+            const booleans = await Promise.all(
+              listChunk.map(async (valueList) => {
+                // Currently the only list types we support for exceptions
+                if (
+                  valueList.type !== 'ip_range' &&
+                  valueList.type !== 'ip' &&
+                  valueList.type !== 'keyword'
+                ) {
+                  return false;
+                }
 
-              if (
-                valueList.type === 'ip_range' &&
-                list &&
-                list.total < MAXIMUM_SMALL_VALUE_LIST_SIZE
-              ) {
-                const rangeList = await listClient.findListItem({
+                const list = await listClient.findListItem({
                   currentIndexPosition: 0,
-                  filter: 'is_cidr: false',
+                  filter: '',
                   listId: valueList.id,
                   page: 0,
                   perPage: 0,
-                  runtimeMappings: {
-                    is_cidr: {
-                      script: `
-                        if (params._source["ip_range"] instanceof String) {
-                          emit(true);
-                        } else {
-                          emit(false);
-                        }
-                        `,
-                      type: 'boolean',
-                    },
-                  },
+                  runtimeMappings: undefined,
                   searchAfter: [],
                   sortField: undefined,
                   sortOrder: undefined,
                 });
 
-                return rangeList && rangeList.total < MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE
-                  ? true
-                  : false;
-              }
-              return list && list.total < MAXIMUM_SMALL_VALUE_LIST_SIZE ? true : false;
-            })
-          );
+                if (
+                  valueList.type === 'ip_range' &&
+                  list &&
+                  list.total < MAXIMUM_SMALL_VALUE_LIST_SIZE
+                ) {
+                  const rangeList = await listClient.findListItem({
+                    currentIndexPosition: 0,
+                    filter: 'is_cidr: false',
+                    listId: valueList.id,
+                    page: 0,
+                    perPage: 0,
+                    runtimeMappings: {
+                      is_cidr: {
+                        script: `
+                          if (params._source["ip_range"] instanceof String) {
+                            emit(true);
+                          } else {
+                            emit(false);
+                          }
+                          `,
+                        type: 'boolean',
+                      },
+                    },
+                    searchAfter: [],
+                    sortField: undefined,
+                    sortOrder: undefined,
+                  });
+
+                  return rangeList && rangeList.total < MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE
+                    ? true
+                    : false;
+                }
+                return list && list.total < MAXIMUM_SMALL_VALUE_LIST_SIZE ? true : false;
+              })
+            );
+            listBooleans.push(...booleans);
+          }
 
           const smallLists = valueLists.data.filter((valueList, index) => listBooleans[index]);
           const largeLists = valueLists.data.filter((valueList, index) => !listBooleans[index]);
