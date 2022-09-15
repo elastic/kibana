@@ -87,7 +87,7 @@ export const EndpointActionListRequestSchema = {
   query: schema.object({
     agentIds: schema.maybe(
       schema.oneOf([
-        schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 50 }),
+        schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
         schema.string({ minLength: 1 }),
       ])
     ),

@@ -117,6 +117,7 @@ export const ResponseActionsLog = memo<
     useUrlPagination();
   const {
     commands: commandsFromUrl,
+    hosts: agentIdsFromUrl,
     statuses: statusesFromUrl,
     startDate: startDateFromUrl,
     endDate: endDateFromUrl,
@@ -130,7 +131,7 @@ export const ResponseActionsLog = memo<
   const [queryParams, setQueryParams] = useState<EndpointActionListRequestQuery>({
     page: isFlyout ? 1 : paginationFromUrlParams.page,
     pageSize: isFlyout ? 10 : paginationFromUrlParams.pageSize,
-    agentIds,
+    agentIds: isFlyout ? agentIds : agentIdsFromUrl?.length ? agentIdsFromUrl : agentIds,
     commands: [],
     statuses: [],
     userIds: [],
@@ -144,12 +145,13 @@ export const ResponseActionsLog = memo<
         commands: commandsFromUrl?.length
           ? commandsFromUrl.map((commandFromUrl) => getCommandKey(commandFromUrl))
           : prevState.commands,
+        hosts: agentIdsFromUrl?.length ? agentIdsFromUrl : prevState.agentIds,
         statuses: statusesFromUrl?.length
           ? (statusesFromUrl as ResponseActionStatus[])
           : prevState.statuses,
       }));
     }
-  }, [commandsFromUrl, isFlyout, statusesFromUrl, setQueryParams]);
+  }, [commandsFromUrl, agentIdsFromUrl, isFlyout, statusesFromUrl, setQueryParams]);
 
   // date range picker state and handlers
   const { dateRangePickerState, onRefreshChange, onTimeChange } = useDateRangePicker(isFlyout);
@@ -196,6 +198,13 @@ export const ResponseActionsLog = memo<
     [setQueryParams]
   );
 
+  // handle on change hosts filter
+  const onChangeHostsFilter = useCallback(
+    (selectedAgentIds: string[]) => {
+      setQueryParams((prevState) => ({ ...prevState, agentIds: selectedAgentIds }));
+    },
+    [setQueryParams]
+  );
   // total actions
   const totalItemCount = useMemo(() => actionList?.total ?? 0, [actionList]);
 
@@ -573,11 +582,13 @@ export const ResponseActionsLog = memo<
         dateRangePickerState={dateRangePickerState}
         isDataLoading={isFetching}
         onClick={reFetchEndpointActionList}
+        onChangeHostsFilter={onChangeHostsFilter}
         onChangeCommandsFilter={onChangeCommandsFilter}
         onChangeStatusesFilter={onChangeStatusesFilter}
         onRefresh={onRefresh}
         onRefreshChange={onRefreshChange}
         onTimeChange={onTimeChange}
+        showHostsFilter={showHostNames}
       />
       {isFetched && !totalItemCount ? (
         <ManagementEmptyStateWrapper>

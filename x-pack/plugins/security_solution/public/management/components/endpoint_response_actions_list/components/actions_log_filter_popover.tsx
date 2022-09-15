@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState, useCallback, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { EuiPopover, EuiFilterButton, useGeneratedHtmlId } from '@elastic/eui';
 import { FILTER_NAMES } from '../translations';
 import type { FilterName } from './hooks';
@@ -14,25 +14,25 @@ import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 export const ActionsLogFilterPopover = memo(
   ({
     children,
+    closePopover,
     filterName,
     hasActiveFilters,
+    isPopoverOpen,
     numActiveFilters,
     numFilters,
+    onButtonClick,
   }: {
     children: React.ReactNode;
+    closePopover: () => void;
     filterName: FilterName;
     hasActiveFilters: boolean;
+    isPopoverOpen: boolean;
     numActiveFilters: number;
     numFilters: number;
+    onButtonClick: () => void;
   }) => {
     const getTestId = useTestIdGenerator('response-actions-list');
-    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-    const onButtonClick = useCallback(() => {
-      setIsPopoverOpen(!isPopoverOpen);
-    }, [setIsPopoverOpen, isPopoverOpen]);
-    const closePopover = useCallback(() => {
-      setIsPopoverOpen(false);
-    }, [setIsPopoverOpen]);
+
     const filterGroupPopoverId = useGeneratedHtmlId({
       prefix: 'filterGroupPopover',
     });
