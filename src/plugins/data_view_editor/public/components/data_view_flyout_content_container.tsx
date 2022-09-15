@@ -43,11 +43,13 @@ const IndexPatternFlyoutContentContainer = ({
       }
 
       if (saveResponse && !(saveResponse instanceof Error)) {
-        const message = i18n.translate('indexPatternEditor.saved', {
-          defaultMessage: "Saved '{indexPatternName}'",
-          values: { indexPatternName: saveResponse.getName() },
-        });
-        notifications.toasts.addSuccess(message);
+        if (persist) {
+          const message = i18n.translate('indexPatternEditor.saved', {
+            defaultMessage: "Saved '{indexPatternName}'",
+            values: { indexPatternName: saveResponse.getName() },
+          });
+          notifications.toasts.addSuccess(message);
+        }
         await onSave(saveResponse);
       }
     } catch (e) {

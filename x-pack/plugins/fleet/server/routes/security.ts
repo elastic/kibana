@@ -66,9 +66,9 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
     const { privileges } = await checkPrivileges({
       kibana: [
         security.authz.actions.api.get(`${PLUGIN_ID}-all`),
+        security.authz.actions.api.get(`${PLUGIN_ID}-setup`),
         security.authz.actions.api.get(`${INTEGRATIONS_PLUGIN_ID}-all`),
         security.authz.actions.api.get(`${INTEGRATIONS_PLUGIN_ID}-read`),
-        security.authz.actions.api.get('fleet-setup'),
       ],
     });
     const fleetAllAuth = getAuthorizationFromPrivileges(privileges.kibana, `${PLUGIN_ID}-all`);
@@ -84,14 +84,20 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
 
     return calculateAuthz({
       fleet: { all: fleetAllAuth, setup: fleetSetupAuth },
-      integrations: { all: intAllAuth, read: intReadAuth },
+      integrations: {
+        all: intAllAuth,
+        read: intReadAuth,
+      },
       isSuperuser: checkSuperuser(req),
     });
   }
 
   return calculateAuthz({
     fleet: { all: false, setup: false },
-    integrations: { all: false, read: false },
+    integrations: {
+      all: false,
+      read: false,
+    },
     isSuperuser: false,
   });
 }
@@ -118,7 +124,7 @@ function containsRequirement(authz: Authz, requirements: DeepPartialTruthy<Authz
   return true;
 }
 
-function hasRequiredFleetAuthzPrivilege(
+export function hasRequiredFleetAuthzPrivilege(
   authz: FleetAuthz,
   { fleetAuthz }: { fleetAuthz?: FleetAuthzRequirements }
 ): boolean {
@@ -146,7 +152,7 @@ type FleetAuthzRouteRegistrar<
   handler: RequestHandler<P, Q, B, Context, Method>
 ) => void;
 
-interface FleetAuthzRouteConfig {
+export interface FleetAuthzRouteConfig {
   fleetAuthz?: FleetAuthzRequirements;
 }
 
