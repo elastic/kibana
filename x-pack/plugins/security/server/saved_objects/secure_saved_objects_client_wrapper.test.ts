@@ -551,7 +551,7 @@ describe('#bulkUpdate', () => {
   test(`checks privileges for user, actions, and namespace`, async () => {
     const objects = [obj1, obj2];
     const options = { namespace };
-    const namespaces = [options.namespace];
+    const namespaces = [options.namespace]; // the bulkUpdate function always checks privileges as an array
     await expectPrivilegeCheck(client.bulkUpdate, { objects, options }, namespaces);
   });
 

@@ -22,7 +22,11 @@ export interface SavedObjectsBulkDeleteObject {
  * @public
  */
 export interface SavedObjectsBulkDeleteOptions extends SavedObjectsBaseOptions {
+  /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
+  /**
+   * Force deletion of all objects that exists in multiple namespaces, applied to all objects.
+   */
   force?: boolean;
 }
 
@@ -32,7 +36,9 @@ export interface SavedObjectsBulkDeleteOptions extends SavedObjectsBaseOptions {
 export interface SavedObjectsBulkDeleteStatus {
   id: string;
   type: string;
+  /** The status of deleting the object: true for deleted, false for error */
   success: boolean;
+  /** Reason the object could not be deleted (success is false) */
   error?: SavedObjectError;
 }
 

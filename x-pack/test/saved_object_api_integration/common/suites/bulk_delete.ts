@@ -56,7 +56,7 @@ export function bulkDeleteTestSuiteFactory(es: Client, esArchiver: any, supertes
       } else {
         // permitted
         const statuses = response.body.statuses;
-        expect(statuses).length([testCase].length); // hard coding the expectation now since I expect a response for each test case as a single request item in the array
+        expect(statuses).length([testCase].length);
         for (let i = 0; i < statuses.length; i++) {
           const object = statuses[i];
           expect(object).to.have.keys(['id', 'type', 'success']);

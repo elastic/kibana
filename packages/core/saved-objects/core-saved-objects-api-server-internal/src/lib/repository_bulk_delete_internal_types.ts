@@ -72,7 +72,7 @@ export type NewBulkItemResponse = BulkResponseItem & { error: ErrorCause & { ind
 
 /**
  * @internal
- * contains all documents for bulk delete, regardless of namespace type.
+ * @note Contains all documents for bulk delete, regardless of namespace type
  */
 export type BulkDeleteExpectedBulkGetResult = Either<
   { type: string; id: string; error: Payload },

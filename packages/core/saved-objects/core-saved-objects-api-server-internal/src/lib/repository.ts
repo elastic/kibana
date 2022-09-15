@@ -774,9 +774,10 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   }
 
   /**
-   * performs initial checks on object type validity and flags multi-namespace objects for preflight checks by adding an `esRequestIndex`
+   * Performs initial checks on object type validity and flags multi-namespace objects for preflight checks by adding an `esRequestIndex`
    * @param objects SavedObjectsBulkDeleteObject[]
-   * @returns array BulkDeleteExpectedBulkGetResult[]: left as 400 for objects that don't have a valid type or right Either result with the object and an `esRequestIndex` if the object is of a multinamespace type.
+   * @returns array BulkDeleteExpectedBulkGetResult[]
+   * @internal
    */
   private presortObjectsByNamespaceType(objects: SavedObjectsBulkDeleteObject[]) {
     let bulkGetRequestIndexCounter = 0;
@@ -807,7 +808,8 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   /**
    * Fetch multi-namespace saved objects
    * @returns MgetResponse
-   * @internalNotes multinamespace objects shared to more than one space require special handling. We fetch these docs to retrieve their namespaces.
+   * @notes multi-namespace objects shared to more than one space require special handling. We fetch these docs to retrieve their namespaces.
+   * @internal
    */
   private async preflightCheckForBulkDelete(params: PreflightCheckForBulkDeleteParams) {
     const { expectedBulkGetResults, namespace } = params;
@@ -840,9 +842,8 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   }
 
   /**
-   *
-   * @param params: ExpectedBulkDeleteMultiNamespaceDocsParams
    * @returns array of objects sorted by expected delete success or failure result
+   * @internal
    */
   private getExpectedBulkDeleteMultiNamespaceDocsResults(
     params: ExpectedBulkDeleteMultiNamespaceDocsParams
@@ -952,7 +953,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         namespace,
         force,
       });
-    // note that we're using a map here but we're only using it to add to the bulkDeleteParams
+    // bulk up the bulkDeleteParams
     expectedBulkDeleteMultiNamespaceDocsResults.map((expectedResult) => {
       if (isRight(expectedResult)) {
         bulkDeleteParams.push({
@@ -1016,9 +1017,11 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         }
 
         if (rawResponse.result === 'deleted') {
-          // `namespaces` should only exist in the expectedResult.value if the type is multinamespace.
+          // `namespaces` should only exist in the expectedResult.value if the type is multi-namespace.
           if (namespaces) {
-            // in the bulk operation, one cannot specify a namespace from which to delete an object other than the namespace that the operation is performed in. If a multinamespace object exists in more than the current space (from which the call is made), force deleting the object will delete it from all namespaces it exists in. In that case, all legacy url aliases are deleted as well. If force isn't applied, the operation fails and the object isn't deleted.
+            // in the bulk operation, one cannot specify a namespace from which to delete an object other than the namespace that the operation is performed in.
+            // If a multinamespace object exists in more than the current space (from which the call is made), force deleting the object will delete it from all namespaces it exists in.
+            // In that case, all legacy url aliases are deleted as well. If force isn't applied, the operation fails and the object isn't deleted.
             await deleteLegacyUrlAliases({
               mappings: this._mappings,
               registry: this._registry,
