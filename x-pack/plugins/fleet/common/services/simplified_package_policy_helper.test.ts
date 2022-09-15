@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { NewPackagePolicy, PackageInfo } from '../../types';
+import type { NewPackagePolicy, PackageInfo } from '../../server/types';
+
+import nginxPackageInfo from '../../server/services/package_policies/fixtures/package_info/nginx_1.5.0.json';
 
 import {
   simplifiedPackagePolicytoNewPackagePolicy,
   generateInputId,
 } from './simplified_package_policy_helper';
-import nginxPackageInfo from './fixtures/package_info/nginx_1.5.0.json';
 
 function getEnabledInputsAndStreams(newPackagePolicy: NewPackagePolicy) {
   return newPackagePolicy.inputs
