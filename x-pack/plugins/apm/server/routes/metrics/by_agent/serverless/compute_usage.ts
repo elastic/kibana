@@ -44,7 +44,7 @@ function calculateComputeUsageGBSeconds({
   }
 
   const totalMemoryGB = totalMemory / GB;
-  const faasBilledDurationSec = faasBilledDuration * 1000;
+  const faasBilledDurationSec = faasBilledDuration / 1000;
   return totalMemoryGB * faasBilledDurationSec;
 }
 
