@@ -42,7 +42,7 @@ const RiskyScoreEnableButtonComponent = ({
       : installHostRiskScoreModule
   );
 
-  const onBoardingRiskScore = useCallback(async () => {
+  const onBoardingRiskScore = useCallback(() => {
     fetch({
       http,
       theme,

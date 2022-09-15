@@ -17,8 +17,8 @@ export const getRiskScoreLatestTransformId = (
   spaceId = 'default'
 ) => `ml_${riskScoreEntity}riskscore_latest_transform_${spaceId}`;
 
-export const getIngestPipelineName = (riskScoreEntity: RiskScoreEntity) =>
-  `ml_${riskScoreEntity}riskscore_ingest_pipeline`;
+export const getIngestPipelineName = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') =>
+  `ml_${riskScoreEntity}riskscore_ingest_pipeline_${spaceId}`;
 
 export const getPivoTransformIndex = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') =>
   `ml_${riskScoreEntity}_risk_score_${spaceId}`;
@@ -154,6 +154,7 @@ export const getRiskyUserCreateReduceScriptOptions = (stringifyScript?: boolean)
  */
 export const getRiskScoreIngestPipelineOptions = (
   riskScoreEntity: RiskScoreEntity,
+  spaceId = 'default',
   stringifyScript?: boolean
 ) => {
   const processors = [
@@ -180,7 +181,7 @@ export const getRiskScoreIngestPipelineOptions = (
     },
   ];
   return {
-    name: getIngestPipelineName(riskScoreEntity),
+    name: getIngestPipelineName(riskScoreEntity, spaceId),
     processors: stringifyScript ? JSON.stringify(processors) : processors,
   };
 };

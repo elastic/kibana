@@ -117,7 +117,7 @@ export const installHostRiskScoreModule = async ({
     theme,
     renderDocLink,
     notifications,
-    options: utils.getRiskScoreIngestPipelineOptions(RiskScoreEntity.host),
+    options: utils.getRiskScoreIngestPipelineOptions(RiskScoreEntity.host, spaceId),
   });
 
   /**
@@ -274,7 +274,7 @@ export const installUserRiskScoreModule = async ({
     theme,
     renderDocLink,
     notifications,
-    options: utils.getRiskScoreIngestPipelineOptions(RiskScoreEntity.user),
+    options: utils.getRiskScoreIngestPipelineOptions(RiskScoreEntity.user, spaceId),
   });
   /**
    * console_templates/enable_user_risk_score.console
@@ -376,6 +376,7 @@ export const installUserRiskScoreModule = async ({
 export const uninstallRiskScoreModule = async ({
   http,
   notifications,
+  refetch,
   renderDocLink,
   riskScoreEntity,
   spaceId = 'default',
@@ -383,6 +384,7 @@ export const uninstallRiskScoreModule = async ({
 }: {
   http: HttpSetup;
   notifications?: NotificationsStart;
+  refetch?: inputsModel.Refetch;
   renderDocLink?: (message: string) => React.ReactNode;
   riskScoreEntity: RiskScoreEntity;
   spaceId?: string;
@@ -428,7 +430,7 @@ export const uninstallRiskScoreModule = async ({
     },
   });
 
-  const names = utils.getIngestPipelineName(riskScoreEntity);
+  const names = utils.getIngestPipelineName(riskScoreEntity, spaceId);
   const count = names.split(',').length;
 
   await deleteIngestPipelines({
@@ -447,6 +449,10 @@ export const uninstallRiskScoreModule = async ({
     notifications,
     ids: riskScoreEntity === RiskScoreEntity.user ? riskyUsersScriptIds : riskyHostsScriptIds,
   });
+
+  if (refetch) {
+    refetch();
+  }
 };
 
 export const upgradeHostRiskScoreModule = async ({
