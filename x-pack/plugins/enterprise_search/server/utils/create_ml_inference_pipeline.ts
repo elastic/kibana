@@ -8,8 +8,9 @@
 import { IngestGetPipelineResponse, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 
-import { formatMlPipelineBody } from './create_pipeline_definitions';
 import { ErrorCode } from '../../common/types/error_codes';
+
+import { formatMlPipelineBody } from './create_pipeline_definitions';
 
 /**
  * Details of a created pipeline.
@@ -54,9 +55,9 @@ export const createAndReferenceMlInferencePipeline = async (
 
   return Promise.resolve({
     ...createPipelineResult,
-    addedToParentPipeline: addSubPipelineResult.addedToParentPipeline
+    addedToParentPipeline: addSubPipelineResult.addedToParentPipeline,
   });
-}
+};
 
 /**
  * Creates a Machine Learning Inference pipeline with the given settings, if it doesn't exist yet.

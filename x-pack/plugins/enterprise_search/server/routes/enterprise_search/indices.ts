@@ -22,7 +22,10 @@ import { fetchMlInferencePipelineProcessors } from '../../lib/indices/fetch_ml_i
 import { generateApiKey } from '../../lib/indices/generate_api_key';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
-import { createAndReferenceMlInferencePipeline, CreatedPipeline } from '../../utils/create_ml_inference_pipeline';
+import {
+  createAndReferenceMlInferencePipeline,
+  CreatedPipeline,
+} from '../../utils/create_ml_inference_pipeline';
 import { createIndexPipelineDefinitions } from '../../utils/create_pipeline_definitions';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
@@ -318,7 +321,7 @@ export function registerIndexRoutes({
         destination_field: destinationField,
       } = request.body;
 
-      let createPipelineResult: CreatedPipeline | undefined = undefined;
+      let createPipelineResult: CreatedPipeline | undefined;
       try {
         // Create the sub-pipeline for inference
         createPipelineResult = await createAndReferenceMlInferencePipeline(
