@@ -118,7 +118,7 @@ export function TooltipSection({
           <EuiButton
             isDisabled
             fullWidth
-            onClick={() => { }}
+            onClick={() => {}}
             className="lnsConfigPanelAnnotations__noFieldsButton"
           >
             {i18n.translate('xpack.lens.xyChart.annotation.tooltip.noFields', {
@@ -139,17 +139,17 @@ export function TooltipSection({
     )
     .map(
       (field) =>
-      ({
-        label: field.displayName,
-        value: {
-          type: 'field',
-          field: field.name,
-          dataType: field.type,
-        },
-        exists: fieldExists(currentExistingField, field.name),
-        compatible: true,
-        'data-test-subj': `lnsXY-annotation-tooltip-fieldOption-${field.name}`,
-      } as FieldOption<FieldOptionValue>)
+        ({
+          label: field.displayName,
+          value: {
+            type: 'field',
+            field: field.name,
+            dataType: field.type,
+          },
+          exists: fieldExists(currentExistingField, field.name),
+          compatible: true,
+          'data-test-subj': `lnsXY-annotation-tooltip-fieldOption-${field.name}`,
+        } as FieldOption<FieldOptionValue>)
     )
     .sort((a, b) => a.label.localeCompare(b.label));
 
@@ -207,11 +207,11 @@ export function TooltipSection({
                           selectedOptions={
                             value
                               ? [
-                                {
-                                  label: value,
-                                  value: { type: 'field', field: value },
-                                },
-                              ]
+                                  {
+                                    label: value,
+                                    value: { type: 'field', field: value },
+                                  },
+                                ]
                               : []
                           }
                           options={options}
