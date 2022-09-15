@@ -67,8 +67,6 @@ export function updateSearchSource(
   }: {
     dataView: DataView;
     services: DiscoverServices;
-    sort?: SortOrder[];
-    useNewFieldsApi: boolean;
   }
 ) {
   const { data } = services;

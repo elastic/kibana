@@ -9,6 +9,7 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { updateSavedSearch } from './persist_saved_search';
 import { updateVolatileSearchSource } from './update_search_source';
 import { AppState } from '../services/discover_state';
 import { getRawRecordType } from './get_raw_record_type';
@@ -98,8 +99,8 @@ export function fetchAll(
 
     const isChartVisible =
       !hideChart && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP;
+    updateSavedSearch({ savedSearch, dataView, state: appState, services });
     const volatileSearchSource = searchSource.createChild();
-
     updateVolatileSearchSource(volatileSearchSource, {
       dataView: searchSource.getField('index')!,
       sort: savedSearch.sort,
