@@ -14,6 +14,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 import { EditorController, TSVB_EDITOR_NAME } from './application/editor_controller';
 
@@ -28,6 +29,7 @@ import {
   setDataViewsStart,
   setCharts,
   setUsageCollectionStart,
+  setUnifiedSearchStart,
 } from './services';
 import { getTimeseriesVisRenderer } from './timeseries_vis_renderer';
 
@@ -44,6 +46,7 @@ export interface MetricsPluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   charts: ChartsPluginStart;
   usageCollection: UsageCollectionStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 /** @internal */
@@ -69,12 +72,20 @@ export class MetricsPlugin implements Plugin<void, void> {
 
   public start(
     core: CoreStart,
-    { data, charts, dataViews, usageCollection, fieldFormats }: MetricsPluginStartDependencies
+    {
+      data,
+      charts,
+      dataViews,
+      usageCollection,
+      fieldFormats,
+      unifiedSearch,
+    }: MetricsPluginStartDependencies
   ) {
     setCharts(charts);
     setI18n(core.i18n);
     setFieldFormats(fieldFormats);
     setDataStart(data);
+    setUnifiedSearchStart(unifiedSearch);
     setDataViewsStart(dataViews);
     setCoreStart(core);
     setUsageCollectionStart(usageCollection);

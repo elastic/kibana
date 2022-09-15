@@ -22,6 +22,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ScopedHistory } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -48,6 +49,7 @@ export interface AppDependencies {
   ml: GetMlSharedImportsReturnType;
   spaces?: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export const useAppDependencies = () => {
