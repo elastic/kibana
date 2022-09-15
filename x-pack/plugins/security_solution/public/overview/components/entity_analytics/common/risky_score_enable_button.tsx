@@ -6,16 +6,17 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { inputsModel } from '../../../../common/store';
 
-import { InstallationState, installHostRiskScoreModule, installUserRiskScoreModule } from './utils';
+import { installHostRiskScoreModule, installUserRiskScoreModule } from './utils';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { useRiskyScoreToastContent } from './use_risky_score_toast_content';
+import { REQUEST_NAMES, useFetch } from '../../../../common/hooks/use_fetch';
 
 const RiskyScoreEnableButtonComponent = ({
   refetch,
@@ -31,47 +32,33 @@ const RiskyScoreEnableButtonComponent = ({
     endDate: string;
   };
 }) => {
-  const [installationState, setInstallationState] = useState<InstallationState>();
   const spaceId = useSpaceId();
   const { http, notifications, theme, dashboard } = useKibana().services;
   const { renderDocLink, renderDashboardLink } = useRiskyScoreToastContent(riskScoreEntity);
+  const { fetch, isLoading } = useFetch(
+    REQUEST_NAMES.ENABLE_RISK_SCORE,
+    riskScoreEntity === RiskScoreEntity.user
+      ? installUserRiskScoreModule
+      : installHostRiskScoreModule
+  );
 
   const onBoardingRiskScore = useCallback(async () => {
-    setInstallationState(InstallationState.Started);
-
-    if (riskScoreEntity === RiskScoreEntity.host) {
-      await installHostRiskScoreModule({
-        http,
-        theme,
-        renderDocLink,
-        renderDashboardLink,
-        dashboard,
-        notifications,
-        spaceId,
-        timerange,
-      });
-    }
-
-    if (riskScoreEntity === RiskScoreEntity.user) {
-      await installUserRiskScoreModule({
-        http,
-        theme,
-        renderDocLink,
-        renderDashboardLink,
-        dashboard,
-        notifications,
-        spaceId,
-        timerange,
-      });
-    }
-
-    setInstallationState(InstallationState.Done);
-    refetch();
+    fetch({
+      http,
+      theme,
+      refetch,
+      renderDocLink,
+      renderDashboardLink,
+      dashboard,
+      notifications,
+      spaceId,
+      timerange,
+    });
   }, [
-    riskScoreEntity,
-    refetch,
+    fetch,
     http,
     theme,
+    refetch,
     renderDocLink,
     renderDashboardLink,
     dashboard,
@@ -85,11 +72,11 @@ const RiskyScoreEnableButtonComponent = ({
       color="primary"
       fill
       onClick={onBoardingRiskScore}
-      isLoading={installationState === InstallationState.Started}
+      isLoading={isLoading}
       data-test-subj={`enable_${riskScoreEntity}_risk_score`}
       disabled={disabled}
     >
-      {installationState === InstallationState.Started ? (
+      {isLoading ? (
         <FormattedMessage
           id="xpack.securitySolution.riskyScore.enablingButtonTitle"
           defaultMessage="Enabling"

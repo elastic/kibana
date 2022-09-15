@@ -8,6 +8,7 @@ import type { HttpSetup, NotificationsStart, ThemeServiceStart } from '@kbn/core
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import * as utils from '../../../../../common/utils/risky_score_modules';
+import type { inputsModel } from '../../../../common/store';
 
 import {
   createIngestPipeline,
@@ -31,39 +32,28 @@ import {
   UNINSTALLATION_ERROR,
 } from './api/translations';
 
-export enum InstallationState {
-  Started = 'STARTED',
-  Done = 'DONE',
-}
-
-export enum UpgradeState {
-  Started = 'STARTED',
-  Done = 'DONE',
-}
-
-export enum RestartState {
-  Started = 'STARTED',
-  Done = 'DONE',
-}
-
 interface InstallRiskyScoreModule {
   dashboard?: DashboardStart;
   http: HttpSetup;
   notifications?: NotificationsStart;
+  refetch?: inputsModel.Refetch;
   renderDashboardLink?: (message: string, dashboardUrl: string) => React.ReactNode;
   renderDocLink?: (message: string) => React.ReactNode;
   spaceId?: string;
   theme?: ThemeServiceStart;
   timerange: {
-    startDate: string;
     endDate: string;
+    startDate: string;
   };
 }
+
+type UpgradeRiskyScoreModule = InstallRiskyScoreModule;
 
 export const installHostRiskScoreModule = async ({
   dashboard,
   http,
   notifications,
+  refetch,
   renderDashboardLink,
   renderDocLink,
   spaceId = 'default',
@@ -209,6 +199,7 @@ export const installHostRiskScoreModule = async ({
     transformIds,
   });
 
+  // Install dashboards and relevant saved objects
   await bulkCreatePrebuiltSavedObjects({
     http,
     theme,
@@ -221,12 +212,17 @@ export const installHostRiskScoreModule = async ({
       templateName: `${RiskScoreEntity.host}RiskScoreDashboards`,
     },
   });
+
+  if (refetch) {
+    refetch();
+  }
 };
 
 export const installUserRiskScoreModule = async ({
   dashboard,
   http,
   notifications,
+  refetch,
   renderDashboardLink,
   renderDocLink,
   spaceId = 'default',
@@ -358,6 +354,7 @@ export const installUserRiskScoreModule = async ({
     transformIds,
   });
 
+  // Install dashboards and relevant saved objects
   await bulkCreatePrebuiltSavedObjects({
     dashboard,
     http,
@@ -370,6 +367,10 @@ export const installUserRiskScoreModule = async ({
     ...timerange,
     theme,
   });
+
+  if (refetch) {
+    refetch();
+  }
 };
 
 export const uninstallRiskScoreModule = async ({
@@ -452,24 +453,13 @@ export const upgradeHostRiskScoreModule = async ({
   dashboard,
   http,
   notifications,
+  refetch,
   renderDashboardLink,
   renderDocLink,
   spaceId = 'default',
   theme,
   timerange,
-}: {
-  dashboard?: DashboardStart;
-  http: HttpSetup;
-  notifications?: NotificationsStart;
-  renderDashboardLink?: (message: string, dashboardUrl: string) => React.ReactNode;
-  renderDocLink?: (message: string) => React.ReactNode;
-  spaceId?: string;
-  theme?: ThemeServiceStart;
-  timerange: {
-    endDate: string;
-    startDate: string;
-  };
-}) => {
+}: UpgradeRiskyScoreModule) => {
   await uninstallRiskScoreModule({
     http,
     notifications,
@@ -482,6 +472,7 @@ export const upgradeHostRiskScoreModule = async ({
     dashboard,
     http,
     notifications,
+    refetch,
     renderDashboardLink,
     renderDocLink,
     spaceId,
@@ -494,24 +485,13 @@ export const upgradeUserRiskScoreModule = async ({
   dashboard,
   http,
   notifications,
+  refetch,
   renderDashboardLink,
   renderDocLink,
   spaceId = 'default',
   theme,
   timerange,
-}: {
-  dashboard?: DashboardStart;
-  http: HttpSetup;
-  notifications?: NotificationsStart;
-  renderDashboardLink?: (message: string, dashboardUrl: string) => React.ReactNode;
-  renderDocLink?: (message: string) => React.ReactNode;
-  spaceId?: string;
-  theme?: ThemeServiceStart;
-  timerange: {
-    startDate: string;
-    endDate: string;
-  };
-}) => {
+}: UpgradeRiskyScoreModule) => {
   await uninstallRiskScoreModule({
     http,
     notifications,
@@ -524,6 +504,7 @@ export const upgradeUserRiskScoreModule = async ({
     dashboard,
     http,
     notifications,
+    refetch,
     renderDashboardLink,
     renderDocLink,
     spaceId,
@@ -535,6 +516,7 @@ export const upgradeUserRiskScoreModule = async ({
 export const restartRiskScoreTransforms = async ({
   http,
   notifications,
+  refetch,
   renderDocLink,
   riskScoreEntity,
   spaceId,
@@ -542,6 +524,7 @@ export const restartRiskScoreTransforms = async ({
 }: {
   http: HttpSetup;
   notifications?: NotificationsStart;
+  refetch: inputsModel.Refetch;
   renderDocLink?: (message: string) => React.ReactNode;
   riskScoreEntity: RiskScoreEntity;
   spaceId?: string;
@@ -567,6 +550,10 @@ export const restartRiskScoreTransforms = async ({
     theme,
     transformIds,
   });
+
+  if (refetch) {
+    refetch();
+  }
 
   return res;
 };

@@ -6,14 +6,15 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { inputsModel } from '../../../../common/store';
-import { UpgradeState, upgradeHostRiskScoreModule, upgradeUserRiskScoreModule } from './utils';
+import { upgradeHostRiskScoreModule, upgradeUserRiskScoreModule } from './utils';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { useRiskyScoreToastContent } from './use_risky_score_toast_content';
+import { REQUEST_NAMES, useFetch } from '../../../../common/hooks/use_fetch';
 
 const RiskyScoreUpgradeButtonComponent = ({
   refetch,
@@ -27,44 +28,30 @@ const RiskyScoreUpgradeButtonComponent = ({
     startDate: string;
   };
 }) => {
-  const [status, setStatus] = useState<UpgradeState>();
   const spaceId = useSpaceId();
   const { http, notifications, theme, dashboard } = useKibana().services;
   const { renderDocLink, renderDashboardLink } = useRiskyScoreToastContent(riskScoreEntity);
+  const { fetch, isLoading } = useFetch(
+    REQUEST_NAMES.UPGRADE_RISK_SCORE,
+    riskScoreEntity === RiskScoreEntity.user
+      ? upgradeUserRiskScoreModule
+      : upgradeHostRiskScoreModule
+  );
 
   const upgradeHostRiskScore = useCallback(async () => {
-    setStatus(UpgradeState.Started);
-
-    if (riskScoreEntity === RiskScoreEntity.host) {
-      await upgradeHostRiskScoreModule({
-        http,
-        notifications,
-        spaceId,
-        timerange,
-        renderDashboardLink,
-        renderDocLink,
-        theme,
-        dashboard,
-      });
-    }
-
-    if (riskScoreEntity === RiskScoreEntity.user) {
-      await upgradeUserRiskScoreModule({
-        http,
-        notifications,
-        spaceId,
-        timerange,
-        renderDashboardLink,
-        renderDocLink,
-        theme,
-        dashboard,
-      });
-    }
-    setStatus(UpgradeState.Done);
-    refetch();
+    fetch({
+      http,
+      notifications,
+      spaceId,
+      timerange,
+      refetch,
+      renderDashboardLink,
+      renderDocLink,
+      theme,
+      dashboard,
+    });
   }, [
-    riskScoreEntity,
-    refetch,
+    fetch,
     http,
     notifications,
     spaceId,
@@ -73,6 +60,7 @@ const RiskyScoreUpgradeButtonComponent = ({
     renderDocLink,
     theme,
     dashboard,
+    refetch,
   ]);
 
   return (
@@ -80,10 +68,10 @@ const RiskyScoreUpgradeButtonComponent = ({
       color="primary"
       fill
       onClick={upgradeHostRiskScore}
-      isLoading={status === UpgradeState.Started}
+      isLoading={isLoading}
       data-test-subj="risk-score-upgrade"
     >
-      {status === UpgradeState.Started ? (
+      {isLoading ? (
         <FormattedMessage
           id="xpack.securitySolution.riskyScore.upgradingButtonTitle"
           defaultMessage="Upgrading"

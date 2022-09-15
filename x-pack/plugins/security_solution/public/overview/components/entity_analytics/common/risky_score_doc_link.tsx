@@ -14,7 +14,7 @@ import { LEARN_MORE } from '../host_risk_score/translations';
 
 const RiskyScoreDocLinkComponent = ({ riskScoreEntity }: { riskScoreEntity: RiskScoreEntity }) => {
   const link =
-    riskScoreEntity === RiskScoreEntity.user ? RISKY_HOSTS_DOC_LINK : RISKY_USERS_DOC_LINK;
+    riskScoreEntity === RiskScoreEntity.user ? RISKY_USERS_DOC_LINK : RISKY_HOSTS_DOC_LINK;
   return (
     <EuiLink target="_blank" href={link} external>
       {LEARN_MORE}

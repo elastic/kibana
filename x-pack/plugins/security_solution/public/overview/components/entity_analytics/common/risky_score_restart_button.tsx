@@ -6,14 +6,15 @@
  */
 
 import { EuiButtonEmpty } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { RestartState, restartRiskScoreTransforms } from './utils';
+import { restartRiskScoreTransforms } from './utils';
 import type { inputsModel } from '../../../../common/store';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { REQUEST_NAMES, useFetch } from '../../../../common/hooks/use_fetch';
 
 const RiskyScoreRestartButtonComponent = ({
   refetch,
@@ -24,30 +25,31 @@ const RiskyScoreRestartButtonComponent = ({
   riskScoreEntity: RiskScoreEntity;
   disabled?: boolean;
 }) => {
-  const [restartState, setRestartState] = useState<RestartState>();
   const { http, notifications } = useKibana().services;
   const spaceId = useSpaceId();
+  const { fetch, isLoading } = useFetch(
+    REQUEST_NAMES.RESTART_RISK_SCORE,
+    restartRiskScoreTransforms
+  );
 
   const onBoardingHostRiskScore = useCallback(async () => {
-    setRestartState(RestartState.Started);
-    await restartRiskScoreTransforms({
+    fetch({
       http,
       notifications,
       spaceId,
+      refetch,
       riskScoreEntity,
     });
-    setRestartState(RestartState.Done);
-    refetch();
-  }, [http, riskScoreEntity, notifications, refetch, spaceId]);
+  }, [fetch, http, notifications, spaceId, refetch, riskScoreEntity]);
 
   return (
     <EuiButtonEmpty
       onClick={onBoardingHostRiskScore}
-      isLoading={restartState === RestartState.Started}
+      isLoading={isLoading}
       data-test-subj="risk-score-restart"
       disabled={disabled}
     >
-      {restartState === RestartState.Started ? (
+      {isLoading ? (
         <FormattedMessage
           id="xpack.securitySolution.riskyScore.restartingButtonTitle"
           defaultMessage="Restarting"
