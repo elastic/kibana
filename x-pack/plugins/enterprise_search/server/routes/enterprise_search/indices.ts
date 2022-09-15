@@ -21,7 +21,7 @@ import { fetchIndices } from '../../lib/indices/fetch_indices';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
-import { createMlInferencePipeline } from '../../utils/create_ml_inference_pipeline';
+import { createMlInferencePipeline, addSubPipelineToIndexSpecificMlPipeline } from '../../utils/create_ml_inference_pipeline';
 import { createIndexPipelineDefinitions } from '../../utils/create_pipeline_definitions';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
@@ -283,6 +283,7 @@ export function registerIndexRoutes({
     },
 
     elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
       const { client } = (await context.core).elasticsearch;
       const {
         model_id: modelId,
@@ -292,15 +293,22 @@ export function registerIndexRoutes({
       } = request.body;
 
       try {
-        await createMlInferencePipeline(
+        // Create the sub-pipeline for inference
+        const createPipelineResult = await createMlInferencePipeline(
           pipelineName,
           modelId,
           sourceField,
           destinationField || modelId,
           client.asCurrentUser
         );
+
+        // Add sub-pipeline to the index-specific ML pipeline
+        await addSubPipelineToIndexSpecificMlPipeline(
+          indexName,
+          createPipelineResult.id,
+          client.asCurrentUser
+        );
       } catch (error) {
-        console.log('err', error);
         // Handle scenario where pipeline already exists
         if ((error as Error).message === ErrorCode.PIPELINE_ALREADY_EXISTS) {
           return createError({

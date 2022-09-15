@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IngestGetPipelineResponse, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 
 import { ErrorCode } from '../../common/types/error_codes';
@@ -12,10 +13,12 @@ import { ErrorCode } from '../../common/types/error_codes';
 import { formatMlPipelineBody } from './create_pipeline_definitions';
 
 /**
- * Details of a created pipeline.
+ * Details of a created or updated pipeline.
  */
-export interface CreatedPipeline {
-  created: string;
+export interface ModifiedPipeline {
+  id: string;
+  created?: boolean;
+  updated?: boolean;
 }
 
 /**
@@ -32,11 +35,11 @@ export const createMlInferencePipeline = async (
   sourceField: string,
   destinationField: string,
   esClient: ElasticsearchClient
-): Promise<CreatedPipeline> => {
+): Promise<ModifiedPipeline> => {
   const inferencePipelineGeneratedName = `ml-inference-${pipelineName}`;
 
   // Check that a pipeline with the same name doesn't already exist
-  let pipelineByName = {};
+  let pipelineByName: IngestGetPipelineResponse | undefined = undefined;
   try {
     pipelineByName = await esClient.ingest.getPipeline({
       id: inferencePipelineGeneratedName,
@@ -44,7 +47,7 @@ export const createMlInferencePipeline = async (
   } catch (error) {
     // Silently swallow error
   }
-  if (pipelineByName[inferencePipelineGeneratedName as keyof typeof pipelineByName]) {
+  if (pipelineByName?.[inferencePipelineGeneratedName]) {
     throw new Error(ErrorCode.PIPELINE_ALREADY_EXISTS);
   }
 
@@ -62,6 +65,63 @@ export const createMlInferencePipeline = async (
   });
 
   return Promise.resolve({
-    created: inferencePipelineGeneratedName,
+    id: inferencePipelineGeneratedName,
+    created: true,
   });
-};
+}
+
+export const addSubPipelineToIndexSpecificMlPipeline = async (
+  indexName: string,
+  pipelineName: string,
+  client: ElasticsearchClient
+): Promise<ModifiedPipeline> => {
+  const parentPipelineId = `${indexName}@ml-inference`;
+
+  // Fetch the parent pipeline
+  let parentPipeline: IngestPipeline | undefined = undefined;
+  try {
+    const pipelineResponse = await client.ingest.getPipeline({
+      id: parentPipelineId,
+    });
+    parentPipeline = pipelineResponse[parentPipelineId];
+
+  } catch (error) {
+    // Swallow error; in this case the next step will return
+  }
+
+  // Verify the parent pipeline exists with a processors array
+  if (!(parentPipeline?.processors)) {
+    return Promise.resolve({
+      id: parentPipelineId,
+      updated: false,
+    })
+  }
+
+  // Check if the sub-pipeline reference is already in the list of processors,
+  // if so, don't modify it
+  const existingSubPipeline = parentPipeline.processors
+    .find((p) => p.pipeline?.name === pipelineName)
+  if (existingSubPipeline) {
+    return Promise.resolve({
+      id: parentPipelineId,
+      updated: false,
+    })
+  }
+
+  // Add sub-processor to the ML inference parent pipeline
+  parentPipeline.processors.push({
+    pipeline: {
+      name: pipelineName
+    }
+  })
+
+  await client.ingest.putPipeline({
+    id: parentPipelineId,
+    ...parentPipeline,
+  });
+
+  return Promise.resolve({
+    id: parentPipelineId,
+    updated: true,
+  })
+}

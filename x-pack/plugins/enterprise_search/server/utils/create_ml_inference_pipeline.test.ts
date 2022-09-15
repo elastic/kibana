@@ -46,7 +46,8 @@ describe('createMlInferencePipeline util function', () => {
     );
 
     const expectedResult = {
-      created: inferencePipelineGeneratedName,
+      created: true,
+      id: inferencePipelineGeneratedName
     };
 
     const actualResult = await createMlInferencePipeline(
