@@ -238,25 +238,25 @@ export const NotificationsList: FC = () => {
         options: [
           {
             value: 'anomaly_detector',
-            name: i18n.translate('xpack.ml.notifications.filters.level.error', {
+            name: i18n.translate('xpack.ml.notifications.filters.type.anomalyDetector', {
               defaultMessage: 'Anomaly Detection',
             }),
           },
           {
             value: 'data_frame_analytics',
-            name: i18n.translate('xpack.ml.notifications.filters.level.warning', {
+            name: i18n.translate('xpack.ml.notifications.filters.type.dfa', {
               defaultMessage: 'Data Frame Analytics',
             }),
           },
           {
             value: 'inference',
-            name: i18n.translate('xpack.ml.notifications.filters.level.inference', {
+            name: i18n.translate('xpack.ml.notifications.filters.type.inference', {
               defaultMessage: 'Inference',
             }),
           },
           {
             value: 'system',
-            name: i18n.translate('xpack.ml.notifications.filters.level.info', {
+            name: i18n.translate('xpack.ml.notifications.filters.type.systen', {
               defaultMessage: 'System',
             }),
           },
