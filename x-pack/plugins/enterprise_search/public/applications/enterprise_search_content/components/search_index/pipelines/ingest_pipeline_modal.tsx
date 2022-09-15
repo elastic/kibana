@@ -65,7 +65,7 @@ export const IngestPipelineModal: React.FC<IngestPipelineModalProps> = ({
   const canCustomize = name === DEFAULT_PIPELINE_NAME;
 
   return showModal ? (
-    <EuiModal onClose={closeModal}>
+    <EuiModal onClose={closeModal} maxWidth={'40rem'}>
       <EuiModalHeader>
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>
@@ -90,7 +90,7 @@ export const IngestPipelineModal: React.FC<IngestPipelineModalProps> = ({
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
-                <EuiText color="subdued" grow={false} size="s">
+                <EuiText color="subdued" size="s">
                   {displayOnly
                     ? i18n.translate(
                         'xpack.enterpriseSearch.content.index.pipelines.ingestModal.modalBodyAPIText',
@@ -124,7 +124,7 @@ export const IngestPipelineModal: React.FC<IngestPipelineModalProps> = ({
           <EuiSpacer size="xl" />
           <EuiFlexItem>
             <EuiForm aria-labelledby="ingestPipelineHeader">
-              <EuiFormRow>
+              <EuiFormRow fullWidth>
                 <EuiText size="m" id="ingestPipelineHeader">
                   <strong>
                     {i18n.translate(
@@ -136,10 +136,11 @@ export const IngestPipelineModal: React.FC<IngestPipelineModalProps> = ({
                   </strong>
                 </EuiText>
               </EuiFormRow>
-              <EuiFormRow>
+              <EuiFormRow fullWidth>
                 <PipelineSettingsForm pipeline={pipeline} setPipeline={setPipeline} />
               </EuiFormRow>
             </EuiForm>
+            <EuiSpacer />
           </EuiFlexItem>
           {displayOnly && (
             <>
