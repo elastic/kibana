@@ -98,7 +98,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
       visualizationType: 'lnsDatatable',
     },
     coreMigrationVersion: '8.3.0',
-    id: '54dadd60-1a57-11ed-bb53-ad8c26f4d942',
+    id: '<REPLACE-WITH-ID1>',
     migrationVersion: { lens: '8.3.0' },
     references: [
       {
@@ -209,7 +209,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
       visualizationType: 'lnsXY',
     },
     coreMigrationVersion: '8.3.0',
-    id: '60454070-9a5d-11ec-9633-5f782d122340',
+    id: '<REPLACE-WITH-ID2>',
     migrationVersion: { lens: '8.3.0' },
     references: [
       {
@@ -251,7 +251,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
         '{"title":"Associated Users (Rule Breakdown)","type":"table","aggs":[{"id":"2","enabled":true,"type":"sum","params":{"field":"signal.rule.risk_score","customLabel":"Total Risk Score","emptyAsNull":false},"schema":"metric"},{"id":"1","enabled":true,"type":"count","params":{"customLabel":"Number of Hits","emptyAsNull":false},"schema":"metric"},{"id":"3","enabled":true,"type":"terms","params":{"field":"user.name","orderBy":"2","order":"desc","size":20,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing","customLabel":"User"},"schema":"split"},{"id":"4","enabled":true,"type":"terms","params":{"field":"signal.rule.name","orderBy":"2","order":"desc","size":50,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing","customLabel":"Rule Name"},"schema":"bucket"},{"id":"5","enabled":true,"type":"terms","params":{"field":"signal.rule.type","orderBy":"2","order":"desc","size":50,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing","customLabel":"Rule Type"},"schema":"bucket"}],"params":{"perPage":25,"showPartialRows":false,"showMetricsAtAllLevels":false,"showTotal":false,"showToolbar":false,"totalFunc":"sum","percentageCol":"","row":true,"autoFitRowToContent":true}}',
     },
     coreMigrationVersion: '8.3.0',
-    id: 'a62d3ed0-cf92-11eb-a0ff-1763d16cbda7',
+    id: '<REPLACE-WITH-ID3>',
     migrationVersion: { visualization: '8.3.0' },
     references: [
       {
@@ -277,7 +277,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
         '{"title":"Alerts by Hostname","type":"table","aggs":[{"id":"2","enabled":true,"type":"sum","params":{"field":"signal.rule.risk_score","customLabel":"Total Risk Score","emptyAsNull":false},"schema":"metric"},{"id":"1","enabled":true,"type":"count","params":{"customLabel":"Number of Hits","emptyAsNull":false},"schema":"metric"},{"id":"3","enabled":true,"type":"terms","params":{"field":"host.name","orderBy":"2","order":"desc","size":20,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing","customLabel":"Host"},"schema":"split"},{"id":"4","enabled":true,"type":"terms","params":{"field":"signal.rule.name","orderBy":"2","order":"desc","size":20,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing","customLabel":"Rule Name"},"schema":"bucket"},{"id":"5","enabled":true,"type":"terms","params":{"field":"signal.rule.type","orderBy":"2","order":"desc","size":20,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing","customLabel":"Rule Type"},"schema":"bucket"}],"params":{"perPage":10,"showPartialRows":false,"showMetricsAtAllLevels":false,"showTotal":false,"showToolbar":false,"totalFunc":"sum","percentageCol":"","row":true,"autoFitRowToContent":false}}',
     },
     coreMigrationVersion: '8.3.0',
-    id: '42371d00-cf7a-11eb-9a96-05d89f94ad96',
+    id: '<REPLACE-WITH-ID4>',
     migrationVersion: { visualization: '8.3.0' },
     references: [
       {
@@ -303,7 +303,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
         '{"title":"User Risk Score (Tactic Breakdown)- Verbose","type":"table","aggs":[{"id":"1","enabled":true,"type":"sum","params":{"field":"signal.rule.risk_score","customLabel":"Total Risk Score","emptyAsNull":false},"schema":"metric"},{"id":"3","enabled":true,"type":"terms","params":{"field":"user.name","orderBy":"1","order":"desc","size":40,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing","customLabel":"Username"},"schema":"split"},{"id":"5","enabled":true,"type":"terms","params":{"field":"signal.rule.threat.tactic.name","orderBy":"1","order":"desc","size":100,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":true,"missingBucketLabel":"Other","customLabel":"Tactic"},"schema":"bucket"},{"id":"6","enabled":true,"type":"terms","params":{"field":"signal.rule.threat.technique.name","orderBy":"1","order":"desc","size":100,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":true,"missingBucketLabel":"Other","customLabel":"Technique"},"schema":"bucket"},{"id":"7","enabled":true,"type":"count","params":{"customLabel":"Number of Hits","emptyAsNull":false},"schema":"metric"}],"params":{"perPage":10,"showPartialRows":false,"showMetricsAtAllLevels":false,"showTotal":false,"showToolbar":false,"totalFunc":"sum","percentageCol":"","row":true,"autoFitRowToContent":false}}',
     },
     coreMigrationVersion: '8.3.0',
-    id: '183d32f0-9a5e-11ec-90d3-1109ed409ab5',
+    id: '<REPLACE-WITH-ID5>',
     migrationVersion: { visualization: '8.3.0' },
     references: [
       {
@@ -318,7 +318,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
   {
     attributes: { color: '#6edb7f', description: '', name: 'experimental' },
     coreMigrationVersion: '8.3.0',
-    id: '93fc0f00-1a57-11ed-bb53-ad8c26f4d942',
+    id: '<REPLACE-WITH-ID6>',
     migrationVersion: { tag: '8.0.0' },
     references: [],
     type: 'tag',
@@ -343,31 +343,31 @@ export const userRiskScoreDashboards: SavedObject[] = [
       version: 1,
     },
     coreMigrationVersion: '8.3.0',
-    id: '1355b030-ca2b-11ec-962f-a3a018b7d10f',
+    id: '<REPLACE-WITH-ID8>',
     migrationVersion: { dashboard: '8.3.0' },
     references: [
       {
-        id: '60454070-9a5d-11ec-9633-5f782d122340',
+        id: '<REPLACE-WITH-ID2>',
         name: 'b3fdccab-59c1-47c8-9393-fa043e0dff83:panel_b3fdccab-59c1-47c8-9393-fa043e0dff83',
         type: 'lens',
       },
       {
-        id: 'a62d3ed0-cf92-11eb-a0ff-1763d16cbda7',
+        id: '<REPLACE-WITH-ID3>',
         name: '8d09b97c-a023-4b7e-9e9d-1c46e726a487:panel_8d09b97c-a023-4b7e-9e9d-1c46e726a487',
         type: 'visualization',
       },
       {
-        id: '42371d00-cf7a-11eb-9a96-05d89f94ad96',
+        id: '<REPLACE-WITH-ID4>',
         name: 'cae82aa1-20c8-4354-94ab-3934ac53b8fe:panel_cae82aa1-20c8-4354-94ab-3934ac53b8fe',
         type: 'visualization',
       },
       {
-        id: '183d32f0-9a5e-11ec-90d3-1109ed409ab5',
+        id: '<REPLACE-WITH-ID5>',
         name: 'ca3c8903-be5d-4265-820c-cc3d67443af2:panel_ca3c8903-be5d-4265-820c-cc3d67443af2',
         type: 'visualization',
       },
       {
-        id: '93fc0f00-1a57-11ed-bb53-ad8c26f4d942',
+        id: '<REPLACE-WITH-ID6>',
         name: 'tag-93fc0f00-1a57-11ed-bb53-ad8c26f4d942',
         type: 'tag',
       },
@@ -394,21 +394,21 @@ export const userRiskScoreDashboards: SavedObject[] = [
       version: 1,
     },
     coreMigrationVersion: '8.3.0',
-    id: '8ac3ad30-1a57-11ed-bb53-ad8c26f4d942',
+    id: '<REPLACE-WITH-ID7>',
     migrationVersion: { dashboard: '8.3.0' },
     references: [
       {
-        id: '54dadd60-1a57-11ed-bb53-ad8c26f4d942',
+        id: '<REPLACE-WITH-ID1>',
         name: '1e9c2cc7-ae0c-4ae7-8d03-8e079b5891b5:panel_1e9c2cc7-ae0c-4ae7-8d03-8e079b5891b5',
         type: 'lens',
       },
       {
-        id: '1355b030-ca2b-11ec-962f-a3a018b7d10f',
+        id: '<REPLACE-WITH-ID8>',
         name: '1e9c2cc7-ae0c-4ae7-8d03-8e079b5891b5:drilldown:DASHBOARD_TO_DASHBOARD_DRILLDOWN:d26cff88-a061-494e-abb1-958216009585:dashboardId',
         type: 'dashboard',
       },
       {
-        id: '93fc0f00-1a57-11ed-bb53-ad8c26f4d942',
+        id: '<REPLACE-WITH-ID6>',
         name: 'tag-93fc0f00-1a57-11ed-bb53-ad8c26f4d942',
         type: 'tag',
       },

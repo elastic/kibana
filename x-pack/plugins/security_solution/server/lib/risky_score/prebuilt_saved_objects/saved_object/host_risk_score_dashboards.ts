@@ -103,7 +103,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
       visualizationType: 'lnsXY',
     },
     coreMigrationVersion: '7.13.4',
-    id: 'd3f72670-d3a0-11eb-bd37-7bb50422e346',
+    id: '<REPLACE-WITH-ID1>',
     migrationVersion: { lens: '7.13.1' },
     references: [
       {
@@ -149,7 +149,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
         '{"title":"Host Risk Score (Rule Breakdown)","type":"table","aggs":[{"id":"2","enabled":true,"type":"sum","params":{"field":"signal.rule.risk_score","customLabel":"Total Risk Score"},"schema":"metric"},{"id":"1","enabled":true,"type":"count","params":{"customLabel":"Number of Hits"},"schema":"metric"},{"id":"3","enabled":true,"type":"terms","params":{"field":"host.name","orderBy":"2","order":"desc","size":20,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing","customLabel":"Host"},"schema":"split"},{"id":"4","enabled":true,"type":"terms","params":{"field":"signal.rule.name","orderBy":"2","order":"desc","size":20,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing","customLabel":"Rule Name"},"schema":"bucket"},{"id":"5","enabled":true,"type":"terms","params":{"field":"signal.rule.type","orderBy":"2","order":"desc","size":20,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing","customLabel":"Rule Type"},"schema":"bucket"}],"params":{"perPage":10,"showPartialRows":false,"showMetricsAtAllLevels":false,"showTotal":false,"showToolbar":false,"totalFunc":"sum","percentageCol":"","row":true}}',
     },
     coreMigrationVersion: '7.13.4',
-    id: '42371d00-cf7a-11eb-9a96-05d89f94ad96',
+    id: '<REPLACE-WITH-ID2>',
     migrationVersion: { visualization: '7.13.1' },
     references: [
       {
@@ -175,7 +175,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
         '{"title":"Associated Users (Rule Breakdown)","type":"table","aggs":[{"id":"2","enabled":true,"type":"sum","params":{"field":"signal.rule.risk_score","customLabel":"Total Risk Score"},"schema":"metric"},{"id":"1","enabled":true,"type":"count","params":{"customLabel":"Number of Hits"},"schema":"metric"},{"id":"3","enabled":true,"type":"terms","params":{"field":"user.name","orderBy":"2","order":"desc","size":20,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing","customLabel":"User"},"schema":"split"},{"id":"4","enabled":true,"type":"terms","params":{"field":"signal.rule.name","orderBy":"2","order":"desc","size":20,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing","customLabel":"Rule Name"},"schema":"bucket"},{"id":"5","enabled":true,"type":"terms","params":{"field":"signal.rule.type","orderBy":"2","order":"desc","size":20,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing","customLabel":"Rule Type"},"schema":"bucket"}],"params":{"perPage":10,"showPartialRows":false,"showMetricsAtAllLevels":false,"showTotal":false,"showToolbar":false,"totalFunc":"sum","percentageCol":"","row":true}}',
     },
     coreMigrationVersion: '7.13.4',
-    id: 'a62d3ed0-cf92-11eb-a0ff-1763d16cbda7',
+    id: '<REPLACE-WITH-ID3>',
     migrationVersion: { visualization: '7.13.1' },
     references: [
       {
@@ -201,7 +201,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
         '{"title":"Host Risk Score (Tactic Breakdown)- Verbose","type":"table","aggs":[{"id":"1","enabled":true,"type":"sum","params":{"field":"signal.rule.risk_score","customLabel":"Total Risk Score"},"schema":"metric"},{"id":"3","enabled":true,"type":"terms","params":{"field":"host.name","orderBy":"1","order":"desc","size":20,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":false,"missingBucketLabel":"Missing","customLabel":"Host"},"schema":"split"},{"id":"5","enabled":true,"type":"terms","params":{"field":"signal.rule.threat.tactic.name","orderBy":"1","order":"desc","size":50,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":true,"missingBucketLabel":"Other","customLabel":"Tactic"},"schema":"bucket"},{"id":"6","enabled":true,"type":"terms","params":{"field":"signal.rule.threat.technique.name","orderBy":"1","order":"desc","size":50,"otherBucket":false,"otherBucketLabel":"Other","missingBucket":true,"missingBucketLabel":"Other","customLabel":"Technique"},"schema":"bucket"},{"id":"7","enabled":true,"type":"count","params":{"customLabel":"Number of Hits"},"schema":"metric"}],"params":{"perPage":10,"showPartialRows":false,"showMetricsAtAllLevels":false,"showTotal":false,"showToolbar":false,"totalFunc":"sum","percentageCol":"","row":true}}',
     },
     coreMigrationVersion: '7.13.4',
-    id: 'b2dbc9b0-cf94-11eb-bd37-7bb50422e346',
+    id: '<REPLACE-WITH-ID4>',
     migrationVersion: { visualization: '7.13.1' },
     references: [
       {
@@ -216,7 +216,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
   {
     attributes: { color: '#D36086', description: '', name: 'experimental' },
     coreMigrationVersion: '7.13.4',
-    id: '1d00ebe0-f3b2-11eb-beb2-b91666445a94',
+    id: '<REPLACE-WITH-ID5>',
     references: [],
     type: 'tag',
     updated_at: '2021-08-18T16:27:39.980Z',
@@ -237,31 +237,31 @@ export const hostRiskScoreDashboards: SavedObject[] = [
       version: 1,
     },
     coreMigrationVersion: '7.13.4',
-    id: '6f05c8c0-cf77-11eb-9a96-05d89f94ad96',
+    id: '<REPLACE-WITH-ID6>',
     migrationVersion: { dashboard: '7.13.1' },
     references: [
       {
-        id: 'd3f72670-d3a0-11eb-bd37-7bb50422e346',
+        id: '<REPLACE-WITH-ID1>',
         name: 'e11ed08e-70d0-4c69-991a-12e20dc89440:panel_e11ed08e-70d0-4c69-991a-12e20dc89440',
         type: 'lens',
       },
       {
-        id: '42371d00-cf7a-11eb-9a96-05d89f94ad96',
+        id: '<REPLACE-WITH-ID2>',
         name: 'cae82aa1-20c8-4354-94ab-3934ac53b8fe:panel_cae82aa1-20c8-4354-94ab-3934ac53b8fe',
         type: 'visualization',
       },
       {
-        id: 'a62d3ed0-cf92-11eb-a0ff-1763d16cbda7',
+        id: '<REPLACE-WITH-ID3>',
         name: '8d09b97c-a023-4b7e-9e9d-1c46e726a487:panel_8d09b97c-a023-4b7e-9e9d-1c46e726a487',
         type: 'visualization',
       },
       {
-        id: 'b2dbc9b0-cf94-11eb-bd37-7bb50422e346',
+        id: '<REPLACE-WITH-ID4>',
         name: '0c9c8318-ebb0-47fb-919a-1836ebf232ae:panel_0c9c8318-ebb0-47fb-919a-1836ebf232ae',
         type: 'visualization',
       },
       {
-        id: '1d00ebe0-f3b2-11eb-beb2-b91666445a94',
+        id: '<REPLACE-WITH-ID5>',
         name: 'tag-1d00ebe0-f3b2-11eb-beb2-b91666445a94',
         type: 'tag',
       },
@@ -359,7 +359,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
       visualizationType: 'lnsDatatable',
     },
     coreMigrationVersion: '7.13.4',
-    id: 'dc289c10-d4ff-11eb-a0ff-1763d16cbda7',
+    id: '<REPLACE-WITH-ID7>',
     migrationVersion: { lens: '7.13.1' },
     references: [
       {
@@ -392,21 +392,21 @@ export const hostRiskScoreDashboards: SavedObject[] = [
       version: 1,
     },
     coreMigrationVersion: '7.13.4',
-    id: '27b483b0-d500-11eb-a0ff-1763d16cbda7',
+    id: '<REPLACE-WITH-ID8>',
     migrationVersion: { dashboard: '7.13.1' },
     references: [
       {
-        id: 'dc289c10-d4ff-11eb-a0ff-1763d16cbda7',
+        id: '<REPLACE-WITH-ID7>',
         name: '654d55f8-f873-4348-96cd-5dce0b56ac32:panel_654d55f8-f873-4348-96cd-5dce0b56ac32',
         type: 'lens',
       },
       {
-        id: '6f05c8c0-cf77-11eb-9a96-05d89f94ad96',
+        id: '<REPLACE-WITH-ID6>',
         name: '654d55f8-f873-4348-96cd-5dce0b56ac32:drilldown:DASHBOARD_TO_DASHBOARD_DRILLDOWN:b04e60d5-4e34-4589-af2e-8e9c3a15936f:dashboardId',
         type: 'dashboard',
       },
       {
-        id: '1d00ebe0-f3b2-11eb-beb2-b91666445a94',
+        id: '<REPLACE-WITH-ID5>',
         name: 'tag-1d00ebe0-f3b2-11eb-beb2-b91666445a94',
         type: 'tag',
       },
