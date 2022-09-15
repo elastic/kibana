@@ -150,8 +150,8 @@ describe('browser normalizers', () => {
           type: 'browser',
           project_id: projectId,
           namespace: 'test_space',
-          original_space: 'test-space',
-          custom_heartbeat_id: 'test-id-1-test-project-id-test-space',
+          original_space: 'test_space',
+          custom_heartbeat_id: 'test-id-1-test-project-id-test_space',
           timeout: null,
         },
         {
@@ -202,8 +202,8 @@ describe('browser normalizers', () => {
           type: 'browser',
           project_id: projectId,
           namespace: 'test_space',
-          original_space: 'test-space',
-          custom_heartbeat_id: 'test-id-2-test-project-id-test-space',
+          original_space: 'test_space',
+          custom_heartbeat_id: 'test-id-2-test-project-id-test_space',
           timeout: null,
         },
         {
@@ -259,8 +259,8 @@ describe('browser normalizers', () => {
           type: 'browser',
           project_id: projectId,
           namespace: 'test_space',
-          original_space: 'test-space',
-          custom_heartbeat_id: 'test-id-3-test-project-id-test-space',
+          original_space: 'test_space',
+          custom_heartbeat_id: 'test-id-3-test-project-id-test_space',
           timeout: null,
         },
       ]);
