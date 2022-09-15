@@ -22,48 +22,53 @@ import type {
 import { applyEnrichmentsToEvents } from './utils/trasnforms';
 
 export const enrichEvents: EnrichEventsFunction = async ({ services, logger, events, spaceId }) => {
-  const enrichments = [];
+  try {
+    const enrichments = [];
 
-  logger.debug('Alert enrichments started');
+    logger.debug('Alert enrichments started');
 
-  const [isHostRiskScoreIndexExist, isUserRiskScoreIndexExist] = await Promise.all([
-    getIsHostRiskScoreAvailable({ spaceId, services }),
-    getIsUserRiskScoreAvailable({ spaceId, services }),
-  ]);
+    const [isHostRiskScoreIndexExist, isUserRiskScoreIndexExist] = await Promise.all([
+      getIsHostRiskScoreAvailable({ spaceId, services }),
+      getIsUserRiskScoreAvailable({ spaceId, services }),
+    ]);
 
-  if (isHostRiskScoreIndexExist) {
-    enrichments.push(
-      createHostRiskEnrichments({
-        services,
-        logger,
-        events,
-        spaceId,
-      })
-    );
+    if (isHostRiskScoreIndexExist) {
+      enrichments.push(
+        createHostRiskEnrichments({
+          services,
+          logger,
+          events,
+          spaceId,
+        })
+      );
+    }
+
+    if (isUserRiskScoreIndexExist) {
+      enrichments.push(
+        createUserRiskEnrichments({
+          services,
+          logger,
+          events,
+          spaceId,
+        })
+      );
+    }
+
+    const allEnrichmentsResults = await Promise.allSettled(enrichments);
+
+    const allFulfilledEnrichmentsResults = allEnrichmentsResults
+      .filter((result) => result.status === 'fulfilled')
+      .map((result) => (result as PromiseFulfilledResult<EventsMapByEnrichments>)?.value);
+
+    return applyEnrichmentsToEvents({
+      events,
+      enrichmentsList: allFulfilledEnrichmentsResults,
+      logger,
+    });
+  } catch (error) {
+    logger.error(`Enrichments failed ${error}`);
+    return events;
   }
-
-  if (isUserRiskScoreIndexExist) {
-    enrichments.push(
-      createUserRiskEnrichments({
-        services,
-        logger,
-        events,
-        spaceId,
-      })
-    );
-  }
-
-  const allEnrichmentsResults = await Promise.allSettled(enrichments);
-
-  const allFulfilledEnrichmentsResults = allEnrichmentsResults
-    .filter((result) => result.status === 'fulfilled')
-    .map((result) => (result as PromiseFulfilledResult<EventsMapByEnrichments>)?.value);
-
-  return applyEnrichmentsToEvents({
-    events,
-    enrichmentsList: allFulfilledEnrichmentsResults,
-    logger,
-  });
 };
 
 export const createEnrichEventsFunction: CreateEnrichEventsFunction =
