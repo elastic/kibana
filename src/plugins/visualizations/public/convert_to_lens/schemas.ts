@@ -102,7 +102,7 @@ export const getColumnsFromVis = <T>(
     return null;
   }
 
-  const updatedMetrics = visSchemas.metric.reduce<SchemaConfig<SupportedAggregation>[]>(
+  const updatedMetrics = visSchemas.metric.reduce<Array<SchemaConfig<SupportedAggregation>>>(
     (acc, metric) => {
       if (metric.aggId && !acc.some((m) => m.aggId === metric.aggId)) {
         acc.push(metric);
