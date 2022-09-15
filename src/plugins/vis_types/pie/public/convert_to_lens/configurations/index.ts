@@ -13,7 +13,7 @@ import { Vis } from '@kbn/visualizations-plugin/public';
 const getLayers = (
   layerId: string,
   vis: Vis<PartitionVisParams>,
-  columnsWithoutReferenced: Column[],
+  metrics: string[],
   buckets: string[]
 ) => {
   return [
@@ -22,7 +22,7 @@ const getLayers = (
       layerType: 'data' as const,
       primaryGroups: buckets,
       secondaryGroups: [],
-      metric: columnsWithoutReferenced[0].columnId,
+      metric: metrics[0],
       numberDisplay: vis.params.labels.valuesFormat ?? vis.type.visConfig.labels.valuesFormat,
       categoryDisplay: vis.params.labels.position ?? vis.type.visConfig.labels.position,
       legendDisplay: vis.params.legendDisplay ?? vis.type.visConfig.legendDisplay,
@@ -54,7 +54,7 @@ export const getConfiguration = (
 ): PartitionVisConfiguration => {
   return {
     shape: vis.params.isDonut ? 'donut' : 'pie',
-    layers: getLayers(layerId, vis, columnsWithoutReferenced, buckets),
+    layers: getLayers(layerId, vis, metrics, buckets),
     palette: vis.params.palette,
   };
 };

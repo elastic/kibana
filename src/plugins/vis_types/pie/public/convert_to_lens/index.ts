@@ -65,9 +65,7 @@ export const convertToLens: ConvertPieToLensVisualization = async (vis, timefilt
       {
         indexPatternId: dataView.id!,
         layerId,
-        columns: result.columns
-          .filter((column) => column.columnId !== result.metrics[1])
-          .map(excludeMetaFromColumn),
+        columns: result.columns.map(excludeMetaFromColumn),
         columnOrder: [],
       },
     ],

@@ -341,6 +341,7 @@ function createNewLayerWithMetricAggregationFromVizEditor(
       newLayer = insertNewColumn({
         ...column,
         layer: newLayer,
+        respectOrder: true,
       });
     }
   });

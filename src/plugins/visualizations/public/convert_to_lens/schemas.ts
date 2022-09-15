@@ -188,10 +188,10 @@ export const getColumnsFromVis = <T>(
     ({ columnId }) => !isReferenced(columns, columnId)
   );
   return {
-    metrics: metrics.map(({ columnId }) => columnId),
-    buckets: [...bucketColumns, ...splitBucketColumns, ...customBucketColumns].map(
-      ({ columnId }) => columnId
-    ),
+    metrics: metrics
+      .map(({ columnId }) => columnId)
+      .filter((columnId) => !isReferenced(columns, columnId)),
+    buckets: columns.filter((c) => c.isBucketed).map(({ columnId }) => columnId),
     bucketCollapseFn: getBucketCollapseFn(visSchemas),
     columnsWithoutReferenced,
     columns,

@@ -67,3 +67,35 @@ export const LayerTypes = {
   REFERENCELINE: 'referenceLine',
   ANNOTATIONS: 'annotations',
 } as const;
+
+export const XYCurveTypes = {
+  LINEAR: 'LINEAR',
+  CURVE_MONOTONE_X: 'CURVE_MONOTONE_X',
+  CURVE_STEP_AFTER: 'CURVE_STEP_AFTER',
+} as const;
+
+export const YAxisModes = {
+  AUTO: 'auto',
+  LEFT: 'left',
+  RIGHT: 'right',
+  BOTTOM: 'bottom',
+} as const;
+
+export const SeriesTypes = {
+  BAR: 'bar',
+  LINE: 'line',
+  AREA: 'area',
+  BAR_STACKED: 'bar_stacked',
+  AREA_STACKED: 'area_stacked',
+  BAR_HORIZONTAL: 'bar_horizontal',
+  BAR_PERCENTAGE_STACKED: 'bar_percentage_stacked',
+  BAR_HORIZONTAL_STACKED: 'bar_horizontal_stacked',
+  AREA_PERCENTAGE_STACKED: 'area_percentage_stacked',
+  BAR_HORIZONTAL_PERCENTAGE_STACKED: 'bar_horizontal_percentage_stacked',
+} as const;
+
+export const FillTypes = {
+  NONE: 'none',
+  ABOVE: 'above',
+  BELOW: 'below',
+} as const;
