@@ -21,6 +21,7 @@ jest.mock('@elastic/eui', () => ({
 }));
 
 import * as eui from '@elastic/eui';
+import { waitFor } from '@testing-library/dom';
 
 describe('Discover panels resizable', () => {
   const mountComponent = ({
@@ -31,6 +32,7 @@ describe('Discover panels resizable', () => {
     minMainPanelHeight = 0,
     topPanel = <></>,
     mainPanel = <></>,
+    attachTo,
   }: {
     className?: string;
     resizeRef?: RefObject<HTMLDivElement>;
@@ -39,6 +41,7 @@ describe('Discover panels resizable', () => {
     minMainPanelHeight?: number;
     topPanel?: ReactElement;
     mainPanel?: ReactElement;
+    attachTo?: HTMLElement;
   }) => {
     return mount(
       <DiscoverPanelsResizable
@@ -49,7 +52,8 @@ describe('Discover panels resizable', () => {
         minMainPanelHeight={minMainPanelHeight}
         topPanel={topPanel}
         mainPanel={mainPanel}
-      />
+      />,
+      attachTo ? { attachTo } : undefined
     );
   };
 
@@ -156,5 +160,29 @@ describe('Discover panels resizable', () => {
     jest.spyOn(eui, 'useResizeObserver').mockReturnValue({ height: containerHeight, width: 0 });
     forceRender(component);
     expectCorrectPanelSizes(component, containerHeight, initialTopPanelHeight);
+  });
+
+  it('should blur the resize button after a resize', async () => {
+    const attachTo = document.createElement('div');
+    document.body.appendChild(attachTo);
+    const component = mountComponent({ attachTo });
+    const wrapper = component.find('[data-test-subj="dscResizableContainerWrapper"]');
+    const resizeButton = component.find('button[data-test-subj="dsc-resizable-button"]');
+    const resizeButtonInner = component.find('[data-test-subj="dscResizableButtonInner"]');
+    const mouseEvent = {
+      pageX: 0,
+      pageY: 0,
+      clientX: 0,
+      clientY: 0,
+    };
+    resizeButtonInner.simulate('mousedown', mouseEvent);
+    resizeButton.simulate('mousedown', mouseEvent);
+    (resizeButton.getDOMNode() as HTMLElement).focus();
+    wrapper.simulate('mouseup', mouseEvent);
+    resizeButton.simulate('click', mouseEvent);
+    expect(resizeButton.getDOMNode()).toHaveFocus();
+    await waitFor(() => {
+      expect(resizeButton.getDOMNode()).not.toHaveFocus();
+    });
   });
 });

@@ -107,12 +107,27 @@ export const DiscoverPanelsResizable = ({
     setPanelSizes({ topPanelSize, mainPanelSize });
   }, [containerHeight, topPanelHeight, minTopPanelHeight, minMainPanelHeight]);
 
+  const onResizeEnd = () => {
+    // We don't want the resize button to retain focus after the resize is complete,
+    // but EuiResizableContainer will force focus it onClick. To work around this we
+    // use setTimeout to wait until after onClick has been called before blurring.
+    if (resizeWithPortalsHackIsResizing && document.activeElement instanceof HTMLElement) {
+      const button = document.activeElement;
+      setTimeout(() => {
+        button.blur();
+      });
+    }
+
+    disableResizeWithPortalsHack();
+  };
+
   return (
     <div
       className="eui-fullHeight"
-      onMouseUp={disableResizeWithPortalsHack}
-      onMouseLeave={disableResizeWithPortalsHack}
-      onTouchEnd={disableResizeWithPortalsHack}
+      onMouseUp={onResizeEnd}
+      onMouseLeave={onResizeEnd}
+      onTouchEnd={onResizeEnd}
+      data-test-subj="dscResizableContainerWrapper"
     >
       <EuiResizableContainer
         className={className}
@@ -139,6 +154,7 @@ export const DiscoverPanelsResizable = ({
                 onMouseDown={enableResizeWithPortalsHack}
                 onTouchStart={enableResizeWithPortalsHack}
                 css={resizeWithPortalsHackButtonInnerCss}
+                data-test-subj="dscResizableButtonInner"
               />
             </EuiResizableButton>
             <EuiResizablePanel

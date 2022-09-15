@@ -10,7 +10,6 @@ import {
   EuiTabs,
   EuiTab,
   useEuiPaddingSize,
-  useEuiFontSize,
   EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
@@ -36,11 +35,6 @@ export const DocumentViewModeToggle = ({
   const tabsCss = css`
     padding: 0 ${useEuiPaddingSize('s')};
     background-color: ${euiThemeVars.euiPageBackgroundColor};
-
-    .dscViewModeToggle__tab .euiTab__content {
-      font-size: ${useEuiFontSize('s').fontSize};
-      line-height: ${useEuiPaddingSize('xl')};
-    }
   `;
 
   const badgeCellCss = css`
@@ -54,7 +48,7 @@ export const DocumentViewModeToggle = ({
   }
 
   return (
-    <EuiTabs size="m" css={tabsCss} data-test-subj="dscViewModeToggle">
+    <EuiTabs size="s" css={tabsCss} data-test-subj="dscViewModeToggle">
       <EuiTab
         isSelected={viewMode === VIEW_MODE.DOCUMENT_LEVEL}
         onClick={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}
