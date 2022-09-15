@@ -61,6 +61,9 @@ export const createCaseCommentSavedObjectType = ({
           email: {
             type: 'keyword',
           },
+          profile_uid: {
+            type: 'keyword',
+          },
         },
       },
       externalReferenceId: {
@@ -105,6 +108,9 @@ export const createCaseCommentSavedObjectType = ({
           email: {
             type: 'keyword',
           },
+          profile_uid: {
+            type: 'keyword',
+          },
         },
       },
       rule: {
@@ -129,6 +135,9 @@ export const createCaseCommentSavedObjectType = ({
             type: 'keyword',
           },
           email: {
+            type: 'keyword',
+          },
+          profile_uid: {
             type: 'keyword',
           },
         },

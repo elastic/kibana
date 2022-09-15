@@ -35,6 +35,9 @@ export const createCaseUserActionSavedObjectType = (
           full_name: {
             type: 'keyword',
           },
+          profile_uid: {
+            type: 'keyword',
+          },
         },
       },
       payload: {

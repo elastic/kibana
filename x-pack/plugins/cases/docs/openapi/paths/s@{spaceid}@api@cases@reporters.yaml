@@ -25,12 +25,7 @@ get:
             items:
               type: object
               properties:
-                email:
-                  type: string
-                full_name:
-                  type: string
-                username: 
-                  type: string
+                $ref: '../components/schemas/user_properties.yaml'
           examples:
             getReportersResponse:
               $ref: '../components/examples/get_reporters_response.yaml'

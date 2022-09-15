@@ -215,6 +215,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       },
                       "nullable": true,
@@ -342,6 +346,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       }
                     },
@@ -414,6 +422,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       },
                       "nullable": true,
@@ -671,6 +683,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       },
                       "nullable": true,
@@ -798,6 +814,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       }
                     },
@@ -870,6 +890,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       },
                       "nullable": true,
@@ -1119,6 +1143,10 @@
                               "username": {
                                 "type": "string",
                                 "example": "elastic"
+                              },
+                              "profile_uid": {
+                                "type": "string",
+                                "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                               }
                             },
                             "nullable": true,
@@ -1246,6 +1274,10 @@
                               "username": {
                                 "type": "string",
                                 "example": "elastic"
+                              },
+                              "profile_uid": {
+                                "type": "string",
+                                "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                               }
                             }
                           },
@@ -1318,6 +1350,10 @@
                               "username": {
                                 "type": "string",
                                 "example": "elastic"
+                              },
+                              "profile_uid": {
+                                "type": "string",
+                                "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                               }
                             },
                             "nullable": true,
@@ -2427,13 +2463,20 @@
                     "type": "object",
                     "properties": {
                       "email": {
-                        "type": "string"
+                        "type": "string",
+                        "example": null
                       },
                       "full_name": {
-                        "type": "string"
+                        "type": "string",
+                        "example": null
                       },
                       "username": {
-                        "type": "string"
+                        "type": "string",
+                        "example": "elastic"
+                      },
+                      "profile_uid": {
+                        "type": "string",
+                        "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                       }
                     }
                   }
@@ -2627,6 +2670,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       },
                       "nullable": true,
@@ -2754,6 +2801,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       }
                     },
@@ -2826,6 +2877,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       },
                       "nullable": true,
@@ -2971,6 +3026,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       },
                       "nullable": true,
@@ -3098,6 +3157,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       }
                     },
@@ -3170,6 +3233,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       },
                       "nullable": true,
@@ -3288,6 +3355,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       },
                       "nullable": true,
@@ -3415,6 +3486,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       }
                     },
@@ -3487,6 +3562,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       },
                       "nullable": true,
@@ -3698,6 +3777,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       },
                       "nullable": true,
@@ -3825,6 +3908,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       }
                     },
@@ -3897,6 +3984,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       },
                       "nullable": true,
@@ -4165,6 +4256,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       },
                       "nullable": true,
@@ -4292,6 +4387,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       }
                     },
@@ -4364,6 +4463,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       },
                       "nullable": true,
@@ -4627,6 +4730,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       },
                       "nullable": true,
@@ -4754,6 +4861,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       }
                     },
@@ -4826,6 +4937,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       },
                       "nullable": true,
@@ -5076,6 +5191,10 @@
                               "username": {
                                 "type": "string",
                                 "example": "elastic"
+                              },
+                              "profile_uid": {
+                                "type": "string",
+                                "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                               }
                             },
                             "nullable": true,
@@ -5203,6 +5322,10 @@
                               "username": {
                                 "type": "string",
                                 "example": "elastic"
+                              },
+                              "profile_uid": {
+                                "type": "string",
+                                "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                               }
                             }
                           },
@@ -5275,6 +5398,10 @@
                               "username": {
                                 "type": "string",
                                 "example": "elastic"
+                              },
+                              "profile_uid": {
+                                "type": "string",
+                                "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                               }
                             },
                             "nullable": true,
@@ -6404,13 +6531,20 @@
                     "type": "object",
                     "properties": {
                       "email": {
-                        "type": "string"
+                        "type": "string",
+                        "example": null
                       },
                       "full_name": {
-                        "type": "string"
+                        "type": "string",
+                        "example": null
                       },
                       "username": {
-                        "type": "string"
+                        "type": "string",
+                        "example": "elastic"
+                      },
+                      "profile_uid": {
+                        "type": "string",
+                        "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                       }
                     }
                   }
@@ -6613,6 +6747,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       },
                       "nullable": true,
@@ -6740,6 +6878,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       }
                     },
@@ -6812,6 +6954,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       },
                       "nullable": true,
@@ -6963,6 +7109,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       },
                       "nullable": true,
@@ -7090,6 +7240,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       }
                     },
@@ -7162,6 +7316,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       },
                       "nullable": true,
@@ -7286,6 +7444,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       },
                       "nullable": true,
@@ -7413,6 +7575,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       }
                     },
@@ -7485,6 +7651,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       },
                       "nullable": true,
@@ -7708,6 +7878,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       },
                       "nullable": true,
@@ -7835,6 +8009,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       }
                     },
@@ -7907,6 +8085,10 @@
                         "username": {
                           "type": "string",
                           "example": "elastic"
+                        },
+                        "profile_uid": {
+                          "type": "string",
+                          "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
                         }
                       },
                       "nullable": true,
@@ -8178,6 +8360,10 @@
               "username": {
                 "type": "string",
                 "example": "elastic"
+              },
+              "profile_uid": {
+                "type": "string",
+                "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
               }
             }
           },
@@ -8212,6 +8398,10 @@
               "username": {
                 "type": "string",
                 "example": "elastic"
+              },
+              "profile_uid": {
+                "type": "string",
+                "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
               }
             },
             "nullable": true
@@ -8254,6 +8444,10 @@
               "username": {
                 "type": "string",
                 "example": "elastic"
+              },
+              "profile_uid": {
+                "type": "string",
+                "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
               }
             }
           },
@@ -8289,6 +8483,10 @@
               "username": {
                 "type": "string",
                 "example": "elastic"
+              },
+              "profile_uid": {
+                "type": "string",
+                "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
               }
             }
           },
@@ -8319,6 +8517,10 @@
               "username": {
                 "type": "string",
                 "example": "elastic"
+              },
+              "profile_uid": {
+                "type": "string",
+                "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
               }
             },
             "nullable": true,
@@ -8348,6 +8550,10 @@
               "username": {
                 "type": "string",
                 "example": "elastic"
+              },
+              "profile_uid": {
+                "type": "string",
+                "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
               }
             },
             "nullable": true,
@@ -8395,6 +8601,10 @@
               "username": {
                 "type": "string",
                 "example": "elastic"
+              },
+              "profile_uid": {
+                "type": "string",
+                "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
               }
             },
             "nullable": true
@@ -9081,6 +9291,10 @@
               "username": {
                 "type": "string",
                 "example": "elastic"
+              },
+              "profile_uid": {
+                "type": "string",
+                "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
               }
             }
           },
