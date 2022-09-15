@@ -109,7 +109,6 @@ export async function getComputeUsage({
   const timeseriesData = aggregations?.timeseriesData;
 
   return {
-<<<<<<< HEAD
     title: i18n.translate('xpack.apm.agentMetrics.serverless.computeUsage', {
       defaultMessage: 'Compute usage',
     }),
@@ -122,11 +121,6 @@ export async function getComputeUsage({
           "Compute usage (in GB-seconds) is the execution time multiplied by the available memory size of your function's instances. The compute usage is a direct indicator for the costs of your serverless function.",
       }
     ),
-=======
-    title: chartBase.title,
-    key: chartBase.key,
-    yUnit: chartBase.yUnit,
->>>>>>> e5bc7be2787a219af78a707888cb5656d27e8ccf
     series:
       !timeseriesData || timeseriesData.buckets.length === 0
         ? []
@@ -137,20 +131,12 @@ export async function getComputeUsage({
                 { defaultMessage: 'Compute usage' }
               ),
               key: 'compute_usage',
-<<<<<<< HEAD
               type: 'bar',
-=======
-              type: 'linemark',
->>>>>>> e5bc7be2787a219af78a707888cb5656d27e8ccf
               overallValue: calculateComputeUsageGBSeconds({
                 faasBilledDuration: aggregations?.avgFaasBilledDuration.value,
                 totalMemory: aggregations?.avgTotalMemory.value,
               }),
-<<<<<<< HEAD
               color: getVizColorForIndex(1, theme),
-=======
-              color: getVizColorForIndex(0, theme),
->>>>>>> e5bc7be2787a219af78a707888cb5656d27e8ccf
               data: timeseriesData.buckets.map((bucket) => {
                 const computeUsage = calculateComputeUsageGBSeconds({
                   faasBilledDuration: bucket.avgFaasBilledDuration.value,
