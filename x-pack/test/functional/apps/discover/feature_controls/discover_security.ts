@@ -42,11 +42,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
-  // async function openDiscover() {
-  //   await PageObjects.common.navigateToApp('discover');
-  //   await PageObjects.common.waitForTopNavToBeVisible();
-  //   await PageObjects.discover.selectIndexPattern('logstash-*');
-  // }
+  async function openDiscover() {
+    await PageObjects.common.navigateToApp('discover');
+    await PageObjects.common.waitForTopNavToBeVisible();
+    await PageObjects.discover.selectIndexPattern('logstash-*');
+  }
 
   describe('discover feature controls security', () => {
     before(async () => {
@@ -217,11 +217,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             expectSpaceSelector: false,
           }
         );
-      });
 
-      // beforeEach(async () => {
-      //   await openDiscover();
-      // });
+        await openDiscover();
+      });
 
       after(async () => {
         await security.role.delete('global_discover_read_role');
@@ -311,11 +309,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             expectSpaceSelector: false,
           }
         );
-      });
 
-      // beforeEach(async () => {
-      //   await openDiscover();
-      // });
+        await openDiscover();
+      });
 
       after(async () => {
         await security.user.delete('global_discover_read_url_create_user');
