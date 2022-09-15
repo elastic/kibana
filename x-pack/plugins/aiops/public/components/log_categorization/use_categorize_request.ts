@@ -179,7 +179,7 @@ function processCategoryResults(result: CatResponse, field: string) {
     throw new Error('processCategoryResults failed, did not return aggregations.');
   }
 
-  const categories: Category[] = result.rawResponse.aggregations!.categories.buckets.map((b) => {
+  const categories: Category[] = result.rawResponse.aggregations.categories.buckets.map((b) => {
     sparkLinesPerCategory[b.key] =
       b.sparkline === undefined
         ? {}

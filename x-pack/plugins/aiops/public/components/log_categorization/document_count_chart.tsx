@@ -7,6 +7,7 @@
 
 import React, { FC, useMemo } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { DocumentCountChart as DocumentCountChartRoot } from '../document_count_content/document_count_chart';
 import { TotalCountHeader } from '../document_count_content/total_count_header';
 import type { Category, SparkLinesPerCategory } from './use_categorize_request';
@@ -30,6 +31,12 @@ export const DocumentCountChart: FC<Props> = ({
   selectedCategory,
   documentCountStats,
 }) => {
+  const chartPointsSplitLabel = i18n.translate(
+    'xpack.aiops.logCategorization.chartPointsSplitLabel',
+    {
+      defaultMessage: 'Selected category',
+    }
+  );
   const chartPoints = useMemo(() => {
     const category = selectedCategory ?? pinnedCategory ?? null;
     return eventRate.map(({ key, docCount }) => {
@@ -67,7 +74,7 @@ export const DocumentCountChart: FC<Props> = ({
         timeRangeEarliest={eventRate[0].key}
         timeRangeLatest={eventRate[eventRate.length - 1].key}
         interval={documentCountStats.interval}
-        changePoint={undefined}
+        chartPointsSplitLabel={chartPointsSplitLabel}
         isBrushCleared={false}
       />
     </>
