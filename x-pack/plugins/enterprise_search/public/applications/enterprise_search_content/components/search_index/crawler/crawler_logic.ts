@@ -141,11 +141,9 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
             connectorId: values.indexData.connector.id,
             nextSyncConfig: overrides,
           });
-        } else {
-          // TODO show an alert
-        }
 
-        actions.fetchCrawlerData();
+          actions.fetchCrawlerData();
+        }
       } catch (e) {
         flashAPIErrors(e);
       }

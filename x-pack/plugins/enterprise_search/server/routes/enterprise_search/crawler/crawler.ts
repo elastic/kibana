@@ -40,13 +40,16 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const date = new Date();
 
+      // last_synced is added due to unwanted crawl trigger
+      // Connector service triggers instant syncs if last_synced is nil or ""
+      // This should be prevented during the Crawler creation
       const connParams = {
         delete_existing_connector: true,
         index_name: request.body.index_name,
         is_native: true,
         language: request.body.language,
         service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
-        last_synced: date.toISOString(), // prevent Crawler start when index is created
+        last_synced: date.toISOString(),
       };
       const { client } = (await context.core).elasticsearch;
 
