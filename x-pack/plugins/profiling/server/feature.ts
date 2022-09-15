@@ -28,7 +28,7 @@ export const PROFILING_FEATURE = {
         all: [],
         read: [],
       },
-      ui: [],
+      ui: ['show'],
     },
     read: {
       app: ['kibana'],
