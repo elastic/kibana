@@ -28,12 +28,10 @@ export interface BulkDeleteTestCase extends TestCase {
 const ALIAS_DELETE_INCLUSIVE = Object.freeze({
   type: 'resolvetype',
   id: 'alias-match-newid',
-  force: true,
 }); // exists in three specific spaces; deleting this should also delete the aliases that target it in the default space and space_1
 const ALIAS_DELETE_EXCLUSIVE = Object.freeze({
   type: 'resolvetype',
   id: 'all_spaces',
-  force: true,
 }); // exists in all spaces; deleting this should also delete the aliases that target it in the default space and space_1
 const DOES_NOT_EXIST = Object.freeze({ type: 'dashboard', id: 'does-not-exist' });
 export const TEST_CASES: Record<string, BulkDeleteTestCase> = Object.freeze({
@@ -72,7 +70,7 @@ export function bulkDeleteTestSuiteFactory(es: Client, esArchiver: any, supertes
             const searchResponse = await es.search({
               index: '.kibana',
               body: {
-                size: 10,
+                size: 0,
                 query: { terms: { type: ['legacy-url-alias'] } },
                 track_total_hits: true,
               },
