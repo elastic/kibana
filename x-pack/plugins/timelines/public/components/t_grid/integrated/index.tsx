@@ -200,8 +200,9 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   const { uiSettings } = useKibana<CoreStart>().services;
 
   const [tableView, setTableView] = useState<ViewSelection>(
-    getDefaultViewSelection(storage.get(ALERTS_TABLE_VIEW_SELECTION_KEY))
+    getDefaultViewSelection({ timelineId: id, value: storage.get(ALERTS_TABLE_VIEW_SELECTION_KEY) })
   );
+
   const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
   const { queryFields, title } = useDeepEqualSelector((state) =>
     getManageTimeline(state, id ?? '')
