@@ -17,7 +17,8 @@
     "savedObjectsManagement",
     "dataViewFieldEditor",
     "dataViewEditor",
-    "expressions"
+    "expressions",
+    "unifiedFieldList"
   ],
   "optionalPlugins": [
     "home",

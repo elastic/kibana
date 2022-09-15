@@ -85,6 +85,7 @@ export interface DiscoverServices {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   locator: DiscoverAppLocator;
   expressions: ExpressionsStart;
+  charts: ChartsPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTagging?: SavedObjectsTaggingApi;
 }
@@ -132,6 +133,7 @@ export const buildServices = memoize(function (
     triggersActionsUi: plugins.triggersActionsUi,
     locator,
     expressions: plugins.expressions,
+    charts: plugins.charts,
     savedObjectsTagging: plugins.savedObjectsTaggingOss?.getTaggingApi(),
     savedObjectsManagement: plugins.savedObjectsManagement,
   };

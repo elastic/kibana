@@ -60,14 +60,15 @@ export function VisualizeGeoFieldButton(props: Props) {
     <>
       {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
       <EuiButton
+        fullWidth
         onClick={onClick}
         href={href}
         size="s"
         data-test-subj={`lensVisualize-GeoField-${props.fieldName}`}
       >
         <FormattedMessage
-          id="xpack.lens.indexPattern.fieldItem.visualizeGeoFieldLinkText"
-          defaultMessage="Visualize in Maps"
+          id="xpack.lens.indexPattern.fieldItem.visualizeGeoFieldButtonText"
+          defaultMessage="Visualize"
         />
       </EuiButton>
     </>

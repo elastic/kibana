@@ -172,6 +172,7 @@ export function getDocumentsLayoutProps(dataView: DataView) {
         language: 'kuery',
         query: '',
       },
+      filters: [],
     },
   } as unknown as DiscoverLayoutProps;
 }
@@ -186,6 +187,7 @@ export const getPlainRecordLayoutProps = (dataView: DataView) => {
       query: {
         sql: 'SELECT * FROM "kibana_sample_data_ecommerce"',
       },
+      filters: [],
     },
   } as unknown as DiscoverLayoutProps;
 };

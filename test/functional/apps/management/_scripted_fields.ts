@@ -487,12 +487,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should filter by scripted field value in Discover', async function () {
-        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
-        await log.debug('filter by "Sep 17, 2015 @ 23:00" in the expanded scripted field list');
-        await PageObjects.discover.clickFieldListPlusFilter(
-          scriptedPainlessFieldName2,
-          '1442531297065'
-        );
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const documentCell = await dataGrid.getCellElement(0, 3);
+        await documentCell.click();
+        await testSubjects.click('filterForButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async function () {

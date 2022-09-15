@@ -24,4 +24,8 @@ export { loadFieldExisting } from './services/field_existing';
 export function plugin() {
   return new UnifiedFieldListPlugin();
 }
-export type { UnifiedFieldListPluginSetup, UnifiedFieldListPluginStart } from './types';
+export type {
+  UnifiedFieldListPluginSetup,
+  UnifiedFieldListPluginStart,
+  AddFieldFilterHandler,
+} from './types';

@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 const TEST_COLUMN_NAMES = ['@message'];
 const TEST_FILTER_COLUMN_NAMES = [
-  ['extension', 'jpg'],
+  ['extension.raw', 'jpg'],
   ['geo.src', 'IN'],
 ];
 
