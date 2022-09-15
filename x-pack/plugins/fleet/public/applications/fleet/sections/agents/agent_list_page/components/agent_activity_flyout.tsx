@@ -335,11 +335,14 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
       titleColor: 'red',
       description: (
         <EuiText color="subdued">
-          {' '}
-          <FormattedMessage
-            id="xpack.fleet.agentActivityFlyout.failureDescription"
-            defaultMessage=" A problem occured during this operation."
-          />
+          <p>
+            <FormattedMessage
+              id="xpack.fleet.agentActivityFlyout.failureDescription"
+              defaultMessage=" A problem occured during this operation."
+            />
+            &nbsp;
+            {inProgressDescription(action.creationTime)}
+          </p>
         </EuiText>
       ),
     },
