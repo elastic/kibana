@@ -12,34 +12,24 @@ import { SavedSearch, SortOrder, saveSavedSearch } from '@kbn/saved-search-plugi
 import { updateSearchSource } from './update_search_source';
 import { AppState } from '../services/discover_state';
 import { DiscoverServices } from '../../../build_services';
-/**
- * Helper function to update and persist the given savedSearch
- */
-export async function persistSavedSearch(
-  savedSearch: SavedSearch,
-  {
-    dataView,
-    onError,
-    onSuccess,
-    services,
-    saveOptions,
-    state,
-  }: {
-    dataView: DataView;
-    onError: (error: Error, savedSearch: SavedSearch) => void;
-    onSuccess: (id: string) => void;
-    saveOptions: SavedObjectSaveOpts;
-    services: DiscoverServices;
-    state: AppState;
-  }
-) {
+
+export function updateSavedSearch({
+  savedSearch,
+  dataView,
+  state,
+  services,
+}: {
+  savedSearch: SavedSearch;
+  dataView: DataView;
+  state: AppState;
+  services: DiscoverServices;
+}) {
   updateSearchSource(savedSearch.searchSource, true, {
     dataView,
     services,
     sort: state.sort as SortOrder[],
     useNewFieldsApi: false,
   });
-
   savedSearch.columns = state.columns || [];
   savedSearch.sort = (state.sort as SortOrder[]) || [];
   if (state.grid) {
@@ -80,6 +70,30 @@ export async function persistSavedSearch(
     savedSearch.timeRestore || savedSearch.refreshInterval
       ? { value: refreshInterval.value, pause: refreshInterval.pause }
       : undefined;
+  return savedSearch;
+}
+/**
+ * Helper function to update and persist the given savedSearch
+ */
+export async function persistSavedSearch(
+  savedSearch: SavedSearch,
+  {
+    dataView,
+    onError,
+    onSuccess,
+    services,
+    saveOptions,
+    state,
+  }: {
+    dataView: DataView;
+    onError: (error: Error, savedSearch: SavedSearch) => void;
+    onSuccess: (id: string) => void;
+    saveOptions: SavedObjectSaveOpts;
+    services: DiscoverServices;
+    state: AppState;
+  }
+) {
+  updateSavedSearch({ savedSearch, dataView, state, services });
 
   try {
     const id = await saveSavedSearch(

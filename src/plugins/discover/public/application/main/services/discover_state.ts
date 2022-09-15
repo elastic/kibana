@@ -34,6 +34,7 @@ import {
   syncQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
 import { getSavedSearch, SavedSearch } from '@kbn/saved-search-plugin/public';
+import { updateSavedSearch } from '../utils/persist_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
@@ -209,6 +210,12 @@ export function getState({
     },
     services.uiSettings
   );
+  updateSavedSearch({
+    savedSearch,
+    dataView: savedSearch.searchSource.getField('index')!,
+    state: initialAppState,
+    services,
+  });
 
   // todo filter source depending on fields fetching flag (if no columns remain and source fetching is enabled, use default columns)
   let previousAppState: AppState = {};

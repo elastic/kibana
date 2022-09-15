@@ -9,6 +9,8 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { updateVolatileSearchSource } from './update_search_source';
+import { AppState } from '../services/discover_state';
 import { getRawRecordType } from './get_raw_record_type';
 import {
   sendCompleteMsg,
@@ -32,7 +34,7 @@ import {
 } from '../hooks/use_saved_search';
 import { DiscoverServices } from '../../../build_services';
 import { fetchSql } from './fetch_sql';
-import { AppState } from '@kbn/discover-plugin/public/application/main/services/discover_state';
+import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
 
 export interface FetchDeps {
   abortController: AbortController;
@@ -78,7 +80,6 @@ export function fetchAll(
       errorSubjects.forEach((subject) => sendErrorMsg(subject, error));
     };
   };
-
   try {
     const dataView = savedSearch.searchSource.getField('index')!;
     if (reset) {
@@ -97,19 +98,27 @@ export function fetchAll(
 
     const isChartVisible =
       !hideChart && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP;
+    const volatileSearchSource = searchSource.createChild();
+
+    updateVolatileSearchSource(volatileSearchSource, {
+      dataView: searchSource.getField('index')!,
+      sort: savedSearch.sort,
+      services,
+      useNewFieldsApi: services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
+    });
 
     // Start fetching all required requests
     const documents =
       useSql && query
         ? fetchSql(query, services.dataViews, data, services.expressions)
-        : fetchDocuments(searchSource.createChild(), fetchDeps);
+        : fetchDocuments(volatileSearchSource.createCopy(), fetchDeps);
     const charts =
       isChartVisible && !useSql
-        ? fetchChart(searchSource.createChild(), appState.interval ?? 'auto', fetchDeps)
+        ? fetchChart(volatileSearchSource.createCopy(), appState.interval ?? 'auto', fetchDeps)
         : undefined;
     const totalHits =
       !isChartVisible && !useSql
-        ? fetchTotalHits(searchSource.createChild(), fetchDeps)
+        ? fetchTotalHits(volatileSearchSource.createCopy(), fetchDeps)
         : undefined;
     /**
      * This method checks the passed in hit count and will send a PARTIAL message to main$

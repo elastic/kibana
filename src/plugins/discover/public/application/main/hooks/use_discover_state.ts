@@ -11,7 +11,7 @@ import { History } from 'history';
 import { DataViewListItem, DataViewType } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import { updateSearchSource } from '../utils/update_search_source';
+import { updateSavedSearch } from '../utils/persist_saved_search';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
 import { getState } from '../services/discover_state';
 import { DiscoverServices } from '../../../build_services';
@@ -132,32 +132,18 @@ export function useDiscoverState({
         nextDataView = (
           await loadDataView(nextState.index, services.dataViews, services.uiSettings)
         ).loaded;
-        savedSearch.searchSource.setField('index', nextDataView);
         reset();
         setDataView(nextDataView);
       }
-      updateSearchSource(savedSearch.searchSource, true, {
-        dataView: nextDataView,
-        services,
-        sort,
-        useNewFieldsApi,
-      });
+
+      updateSavedSearch({ savedSearch, dataView: nextDataView, state: nextState, services });
 
       if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged) {
         refetch$.next(undefined);
       }
     });
     return () => unsubscribe();
-  }, [
-    services,
-    refetch$,
-    data$,
-    reset,
-    savedSearch.searchSource,
-    stateContainer,
-    dataView,
-    useNewFieldsApi,
-  ]);
+  }, [dataView, refetch$, reset, savedSearch, services, stateContainer]);
 
   /**
    * Function triggered when user changes data view in the sidebar
