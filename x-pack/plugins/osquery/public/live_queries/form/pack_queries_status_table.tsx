@@ -657,7 +657,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         return itemIdToExpandedRowMapValues;
       });
     },
-    [startDate, expirationDate, agentIds, addToTimeline, handleAddToCase]
+    [startDate, expirationDate, agentIds, addToTimeline, addToCase, handleAddToCase]
   );
 
   const renderToggleResultsAction = useCallback(
