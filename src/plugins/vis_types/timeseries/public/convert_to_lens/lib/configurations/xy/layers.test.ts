@@ -17,6 +17,7 @@ import {
 } from '../../convert';
 import { getLayers } from './layers';
 import { createPanel, createSeries } from '../../__mocks__';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 describe('getLayers', () => {
   const dataSourceLayers: Record<number, Layer> = [
@@ -283,6 +284,8 @@ describe('getLayers', () => {
       ],
     ],
   ])('should return %s', (_, input, expected) => {
-    expect(getLayers(...input)).toEqual(expected.map(expect.objectContaining));
+    expect(getLayers(...input, {} as DataViewsPublicPluginStart)).toEqual(
+      expected.map(expect.objectContaining)
+    );
   });
 });
