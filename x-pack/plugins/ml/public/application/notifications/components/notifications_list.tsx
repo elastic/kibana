@@ -249,7 +249,8 @@ export const NotificationsList: FC = () => {
         query={queryInstance}
         box={{
           placeholder: i18n.translate('xpack.ml.notifications.searchPlaceholder', {
-            defaultMessage: 'Search notifications...',
+            defaultMessage:
+              'Search for notifications. Example: job_type:anomaly_detector -level:(info) Datafeed',
           }),
           incremental: true,
           schema: {
@@ -298,7 +299,7 @@ export const NotificationsList: FC = () => {
             title={
               <FormattedMessage
                 id="xpack.ml.notifications.invalidQueryError"
-                defaultMessage="Query is invalid: "
+                defaultMessage="Query is not valid: "
               />
             }
             color="danger"
