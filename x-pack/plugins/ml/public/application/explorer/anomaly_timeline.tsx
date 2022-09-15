@@ -213,7 +213,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           name: (
             <FormattedMessage
               id="xpack.ml.explorer.attachToCaseLabel"
-              defaultMessage="Attach to case"
+              defaultMessage="Add to case"
             />
           ),
           'data-test-subj': 'mlAnomalyTimelinePanelAttachToCaseButton',
@@ -225,7 +225,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           title: (
             <FormattedMessage
               id="xpack.ml.explorer.attachToCaseLabel"
-              defaultMessage="Attach to case"
+              defaultMessage="Add to case"
             />
           ),
           items: [

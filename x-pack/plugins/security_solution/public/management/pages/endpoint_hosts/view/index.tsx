@@ -692,7 +692,7 @@ export const EndpointList = () => {
       subtitle={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.pageSubTitle"
-          defaultMessage="Hosts running endpoint security"
+          defaultMessage="Hosts running Elastic Defend"
         />
       }
       headerBackComponent={routeState.backLink && backToPolicyList}

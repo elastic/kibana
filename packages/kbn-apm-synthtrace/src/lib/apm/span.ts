@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import url from 'url';
 import { BaseSpan } from './base_span';
 import { generateShortId } from '../utils/generate_id';
 import { ApmFields } from './apm_fields';
@@ -38,4 +39,47 @@ export class Span extends BaseSpan {
 
     return this;
   }
+}
+
+export function httpExitSpan({
+  spanName,
+  destinationUrl,
+}: {
+  spanName: string;
+  destinationUrl: string;
+}) {
+  // origin: 'http://opbeans-go:3000',
+  // host: 'opbeans-go:3000',
+  // hostname: 'opbeans-go',
+  // port: '3000',
+  const destination = new url.URL(destinationUrl);
+
+  const spanType = 'external';
+  const spanSubType = 'http';
+
+  return {
+    spanName,
+    spanType,
+    spanSubType,
+    'destination.address': destination.hostname,
+    'destination.port': parseInt(destination.port, 10),
+    'service.target.name': destination.host,
+    'span.destination.service.name': destination.origin,
+    'span.destination.service.resource': destination.host,
+    'span.destination.service.type': 'external',
+  };
+}
+
+export function dbExitSpan({ spanName, spanSubType }: { spanName: string; spanSubType?: string }) {
+  const spanType = 'db';
+
+  return {
+    spanName,
+    spanType,
+    spanSubType,
+    'service.target.type': spanSubType,
+    'span.destination.service.name': spanSubType,
+    'span.destination.service.resource': spanSubType,
+    'span.destination.service.type': spanType,
+  };
 }

@@ -8,7 +8,7 @@
 import {
   BulkAction,
   BulkActionEditType,
-} from '../../../../../../../../common/detection_engine/schemas/common/schemas';
+} from '../../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 
 import { computeDryRunPayload } from './compute_dry_run_payload';
 

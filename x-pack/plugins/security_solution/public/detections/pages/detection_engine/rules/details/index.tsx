@@ -26,7 +26,6 @@ import { Switch, useParams } from 'react-router-dom';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import type { ExceptionListIdentifiers } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { Dispatch } from 'redux';
@@ -38,7 +37,7 @@ import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../../common/hooks/use_selector';
-import { useKibana } from '../../../../../common/lib/kibana';
+import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import type { UpdateDateRange } from '../../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../../common/components/filters_global';
@@ -79,8 +78,11 @@ import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_l
 import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
-import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
-import { APP_UI_ID, DEFAULT_INDEX_PATTERN } from '../../../../../../common/constants';
+import {
+  APP_UI_ID,
+  DEFAULT_INDEX_KEY,
+  DEFAULT_THREAT_INDEX_KEY,
+} from '../../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../../common/containers/use_full_screen';
 import { Display } from '../../../../../hosts/pages/display';
 
@@ -127,6 +129,7 @@ import {
 } from '../../../../components/alerts_table/alerts_filter_group';
 import { useSignalHelpers } from '../../../../../common/containers/sourcerer/use_signal_helpers';
 import { HeaderPage } from '../../../../../common/components/header_page';
+import { ExceptionsViewer } from '../../../../../detection_engine/rule_exceptions/components/all_exception_items_table';
 import type { NavTab } from '../../../../../common/components/navigation/types';
 
 /**
@@ -148,6 +151,7 @@ const StyledMinHeightTabContainer = styled.div`
 export enum RuleDetailTabs {
   alerts = 'alerts',
   exceptions = 'rule_exceptions',
+  endpointExceptions = 'endpoint_exceptions',
   executionResults = 'execution_results',
   executionEvents = 'execution_events',
 }
@@ -155,6 +159,7 @@ export enum RuleDetailTabs {
 export const RULE_DETAILS_TAB_NAME: Record<string, string> = {
   [RuleDetailTabs.alerts]: detectionI18n.ALERT,
   [RuleDetailTabs.exceptions]: i18n.EXCEPTIONS_TAB,
+  [RuleDetailTabs.endpointExceptions]: i18n.ENDPOINT_EXCEPTIONS_TAB,
   [RuleDetailTabs.executionResults]: i18n.EXECUTION_RESULTS_TAB,
   [RuleDetailTabs.executionEvents]: i18n.EXECUTION_EVENTS_TAB,
 };
@@ -220,7 +225,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     runtimeMappings,
     loading: isLoadingIndexPattern,
   } = useSourcererDataView(SourcererScopeName.detections);
-
   const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams<{
     detailName: string;
@@ -247,8 +251,14 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       [RuleDetailTabs.exceptions]: {
         id: RuleDetailTabs.exceptions,
         name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.exceptions],
-        disabled: false,
+        disabled: rule == null,
         href: `/rules/id/${ruleId}/${RuleDetailTabs.exceptions}`,
+      },
+      [RuleDetailTabs.endpointExceptions]: {
+        id: RuleDetailTabs.endpointExceptions,
+        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.endpointExceptions],
+        disabled: rule == null,
+        href: `/rules/id/${ruleId}/${RuleDetailTabs.endpointExceptions}`,
       },
       [RuleDetailTabs.executionResults]: {
         id: RuleDetailTabs.executionResults,
@@ -263,10 +273,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         href: `/rules/id/${ruleId}/${RuleDetailTabs.executionEvents}`,
       },
     }),
-    [isExistingRule, ruleId]
+    [isExistingRule, rule, ruleId]
   );
 
   const [pageTabs, setTabs] = useState<Partial<Record<RuleDetailTabs, NavTab>>>(ruleDetailTabs);
+
   const { aboutRuleData, modifiedAboutRuleDetailsData, defineRuleData, scheduleRuleData } =
     rule != null
       ? getStepsData({ rule, detailsView: true })
@@ -293,6 +304,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { globalFullScreen } = useGlobalFullScreen();
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
   const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
+
+  const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
+  const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
 
   useEffect(() => {
     const fetchDataViews = async () => {
@@ -389,11 +403,19 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     if (!ruleExecutionSettings.extendedLogging.isEnabled) {
       hiddenTabs.push(RuleDetailTabs.executionEvents);
     }
+    if (rule != null) {
+      const hasEndpointList = (rule.exceptions_list ?? []).some(
+        (list) => list.type === ExceptionListTypeEnum.ENDPOINT
+      );
+      if (!hasEndpointList) {
+        hiddenTabs.push(RuleDetailTabs.endpointExceptions);
+      }
+    }
 
     const tabs = omit<Record<RuleDetailTabs, NavTab>>(hiddenTabs, ruleDetailTabs);
 
     setTabs(tabs);
-  }, [hasIndexRead, ruleDetailTabs, ruleExecutionSettings]);
+  }, [hasIndexRead, rule, ruleDetailTabs, ruleExecutionSettings]);
 
   const showUpdating = useMemo(
     () => isLoadingIndexPattern || isAlertsLoading || loading,
@@ -611,34 +633,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [setShowOnlyThreatIndicatorAlerts]
   );
 
-  const exceptionLists = useMemo((): {
-    lists: ExceptionListIdentifiers[];
-    allowedExceptionListTypes: ExceptionListTypeEnum[];
-  } => {
-    if (rule != null && rule.exceptions_list != null) {
-      return rule.exceptions_list.reduce<{
-        lists: ExceptionListIdentifiers[];
-        allowedExceptionListTypes: ExceptionListTypeEnum[];
-      }>(
-        (acc, { id, list_id: listId, namespace_type: namespaceType, type }) => {
-          const { allowedExceptionListTypes, lists } = acc;
-          const shouldAddEndpoint =
-            type === ExceptionListTypeEnum.ENDPOINT &&
-            !allowedExceptionListTypes.includes(ExceptionListTypeEnum.ENDPOINT);
-          return {
-            lists: [...lists, { id, listId, namespaceType, type }],
-            allowedExceptionListTypes: shouldAddEndpoint
-              ? [...allowedExceptionListTypes, ExceptionListTypeEnum.ENDPOINT]
-              : allowedExceptionListTypes,
-          };
-        },
-        { lists: [], allowedExceptionListTypes: [ExceptionListTypeEnum.DETECTION] }
-      );
-    } else {
-      return { lists: [], allowedExceptionListTypes: [ExceptionListTypeEnum.DETECTION] };
-    }
-  }, [rule]);
-
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     focusUtilityBarAction(containerElement.current);
   }, [containerElement]);
@@ -780,6 +774,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                             isLoading={false}
                             defaultValues={{ dataViewTitle, ...defineRuleData }}
                             kibanaDataViews={dataViewOptions}
+                            indicesConfig={indicesConfig}
+                            threatIndicesConfig={threatIndicesConfig}
                           />
                         )}
                       </StepPanel>
@@ -858,14 +854,20 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 </Route>
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.exceptions})`}>
                   <ExceptionsViewer
-                    ruleId={ruleId ?? ''}
-                    ruleName={rule?.name ?? ''}
-                    ruleIndices={rule?.index ?? DEFAULT_INDEX_PATTERN}
-                    dataViewId={rule?.data_view_id}
-                    availableListTypes={exceptionLists.allowedExceptionListTypes}
-                    commentsAccordionId={'ruleDetailsTabExceptions'}
-                    exceptionListsMeta={exceptionLists.lists}
+                    rule={rule}
+                    listType={ExceptionListTypeEnum.DETECTION}
                     onRuleChange={refreshRule}
+                    data-test-subj="exceptionTab"
+                  />
+                </Route>
+                <Route
+                  path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.endpointExceptions})`}
+                >
+                  <ExceptionsViewer
+                    rule={rule}
+                    listType={ExceptionListTypeEnum.ENDPOINT}
+                    onRuleChange={refreshRule}
+                    data-test-subj="endpointExceptionsTab"
                   />
                 </Route>
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionResults})`}>
