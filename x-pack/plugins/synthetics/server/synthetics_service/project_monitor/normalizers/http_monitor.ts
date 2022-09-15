@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { getNormalizeCommonFields } from './common_fields';
 import { NormalizedProjectProps } from './browser_monitor';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
-
 import {
   ConfigKey,
   DataStream,
   FormMonitorType,
   HTTPFields,
 } from '../../../../common/runtime_types/monitor_management';
+import { normalizeYamlConfig, getMonitorTimeout } from '.';
 
 export const getNormalizeHTTPFields = ({
   locations = [],
@@ -22,8 +21,9 @@ export const getNormalizeHTTPFields = ({
   monitor,
   projectId,
   namespace,
-}: NormalizedProjectProps): HTTPFields => {
+}: NormalizedProjectProps): { normalizedFields: HTTPFields; unsupportedKeys: string[] } => {
   const defaultFields = DEFAULT_FIELDS[DataStream.HTTP];
+  const { yamlConfig, unsupportedKeys } = normalizeYamlConfig(monitor);
 
   const commonFields = getNormalizeCommonFields({
     locations,
@@ -34,16 +34,22 @@ export const getNormalizeHTTPFields = ({
   });
 
   const normalizedFields = {
-    [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.SINGLE,
+    ...yamlConfig,
+    ...commonFields,
+    [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
+    [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.HTTP,
     [ConfigKey.URLS]: monitor.urls?.[0] || defaultFields[ConfigKey.URLS],
     [ConfigKey.MAX_REDIRECTS]:
       monitor[ConfigKey.MAX_REDIRECTS] || defaultFields[ConfigKey.MAX_REDIRECTS],
-
-    [ConfigKey.TIMEOUT]: null,
-    ...commonFields,
+    [ConfigKey.TIMEOUT]: monitor.timeout
+      ? getMonitorTimeout(monitor.timeout)
+      : defaultFields[ConfigKey.TIMEOUT],
   };
   return {
-    ...defaultFields,
-    ...normalizedFields,
+    normalizedFields: {
+      ...defaultFields,
+      ...normalizedFields,
+    },
+    unsupportedKeys,
   };
 };

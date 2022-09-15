@@ -7,12 +7,12 @@
 
 import { NormalizedProjectProps } from './browser_monitor';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
+import { normalizeYamlConfig, getMonitorTimeout } from '.';
 
 import {
   ConfigKey,
   DataStream,
   FormMonitorType,
-  SourceType,
   TCPFields,
 } from '../../../../common/runtime_types/monitor_management';
 import { getNormalizeCommonFields } from './common_fields';
@@ -23,8 +23,9 @@ export const getNormalizeTCPFields = ({
   monitor,
   projectId,
   namespace,
-}: NormalizedProjectProps): TCPFields => {
+}: NormalizedProjectProps): { normalizedFields: TCPFields; unsupportedKeys: string[] } => {
   const defaultFields = DEFAULT_FIELDS[DataStream.TCP];
+  const { yamlConfig, unsupportedKeys } = normalizeYamlConfig(monitor);
 
   const commonFields = getNormalizeCommonFields({
     locations,
@@ -35,19 +36,19 @@ export const getNormalizeTCPFields = ({
   });
 
   const normalizedFields = {
-    [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.SINGLE,
-    [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
-
-    [ConfigKey.PROJECT_ID]: projectId,
-    [ConfigKey.JOURNEY_ID]: monitor.id,
-    [ConfigKey.CUSTOM_HEARTBEAT_ID]: `${monitor.id}-${projectId}-${namespace}`,
-    [ConfigKey.TIMEOUT]: null,
-    [ConfigKey.HOSTS]: monitor[ConfigKey.HOSTS] || defaultFields[ConfigKey.HOSTS],
-
+    ...yamlConfig,
     ...commonFields,
+    [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.TCP,
+    [ConfigKey.HOSTS]: monitor[ConfigKey.HOSTS] || defaultFields[ConfigKey.HOSTS],
+    [ConfigKey.TIMEOUT]: monitor.timeout
+      ? getMonitorTimeout(monitor.timeout)
+      : defaultFields[ConfigKey.TIMEOUT],
   };
   return {
-    ...defaultFields,
-    ...normalizedFields,
+    normalizedFields: {
+      ...defaultFields,
+      ...normalizedFields,
+    },
+    unsupportedKeys,
   };
 };

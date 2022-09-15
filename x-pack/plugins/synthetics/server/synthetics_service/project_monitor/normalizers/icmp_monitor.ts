@@ -8,13 +8,13 @@
 import { getNormalizeCommonFields } from './common_fields';
 import { NormalizedProjectProps } from './browser_monitor';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
-
 import {
   ConfigKey,
   DataStream,
   FormMonitorType,
   ICMPFields,
 } from '../../../../common/runtime_types/monitor_management';
+import { normalizeYamlConfig, getMonitorTimeout } from '.';
 
 export const getNormalizeICMPFields = ({
   locations = [],
@@ -22,8 +22,9 @@ export const getNormalizeICMPFields = ({
   monitor,
   projectId,
   namespace,
-}: NormalizedProjectProps): ICMPFields => {
+}: NormalizedProjectProps): { normalizedFields: ICMPFields; unsupportedKeys: string[] } => {
   const defaultFields = DEFAULT_FIELDS[DataStream.ICMP];
+  const { yamlConfig, unsupportedKeys } = normalizeYamlConfig(monitor);
 
   const commonFields = getNormalizeCommonFields({
     locations,
@@ -34,16 +35,20 @@ export const getNormalizeICMPFields = ({
   });
 
   const normalizedFields = {
-    [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.SINGLE,
-
-    [ConfigKey.PROJECT_ID]: projectId,
-    [ConfigKey.JOURNEY_ID]: monitor.id,
-    [ConfigKey.CUSTOM_HEARTBEAT_ID]: `${monitor.id}-${projectId}-${namespace}`,
-    [ConfigKey.TIMEOUT]: null,
+    ...yamlConfig,
     ...commonFields,
+    [ConfigKey.MONITOR_TYPE]: DataStream.ICMP,
+    [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.ICMP,
+    [ConfigKey.HOSTS]: monitor.hosts?.[0] || defaultFields[ConfigKey.HOSTS],
+    [ConfigKey.TIMEOUT]: monitor.timeout
+      ? getMonitorTimeout(monitor.timeout)
+      : defaultFields[ConfigKey.TIMEOUT],
   };
   return {
-    ...defaultFields,
-    ...normalizedFields,
+    normalizedFields: {
+      ...defaultFields,
+      ...normalizedFields,
+    },
+    unsupportedKeys,
   };
 };

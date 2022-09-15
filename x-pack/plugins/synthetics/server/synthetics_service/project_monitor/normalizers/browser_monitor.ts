@@ -11,49 +11,28 @@ import {
   DataStream,
   FormMonitorType,
   Locations,
-  ProjectBrowserMonitor,
-} from '../../../../common/runtime_types/monitor_management';
+  PrivateLocation,
+  ProjectMonitor,
+} from '../../../../common/runtime_types';
 import { getNormalizeCommonFields } from './common_fields';
-import { getNormalizeICMPFields } from './icmp_monitor';
-import { getNormalizeTCPFields } from './tcp_monitor';
-import { getNormalizeHTTPFields } from './http_monitor';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
+import { getMonitorTimeout } from '.';
 
 export interface NormalizedProjectProps {
   locations: Locations;
-  privateLocations: Locations;
-  monitor: ProjectBrowserMonitor;
+  privateLocations: PrivateLocation[];
+  monitor: ProjectMonitor;
   projectId: string;
   namespace: string;
 }
 
-export const normalizeProjectMonitor = (props: NormalizedProjectProps) => {
-  const { monitor } = props;
-
-  switch (monitor.type) {
-    case DataStream.BROWSER:
-      return getNormalizeBrowserFields(props);
-
-    case DataStream.HTTP:
-      return getNormalizeHTTPFields(props);
-
-    case DataStream.TCP:
-      return getNormalizeTCPFields(props);
-
-    case DataStream.ICMP:
-      return getNormalizeICMPFields(props);
-    default:
-      throw new Error(`Unsupported monitor type ${monitor.type}`);
-  }
-};
-
-const getNormalizeBrowserFields = ({
+export const getNormalizeBrowserFields = ({
   locations = [],
   privateLocations = [],
   monitor,
   projectId,
   namespace,
-}: NormalizedProjectProps): BrowserFields => {
+}: NormalizedProjectProps): { normalizedFields: BrowserFields; unsupportedKeys: string[] } => {
   const defaultFields = DEFAULT_FIELDS[DataStream.BROWSER];
 
   const commonFields = getNormalizeCommonFields({
@@ -65,8 +44,9 @@ const getNormalizeBrowserFields = ({
   });
 
   const normalizedFields = {
+    ...commonFields,
+    [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
     [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
-    [ConfigKey.JOURNEY_ID]: monitor.id || defaultFields[ConfigKey.JOURNEY_ID],
     [ConfigKey.SOURCE_PROJECT_CONTENT]:
       monitor.content || defaultFields[ConfigKey.SOURCE_PROJECT_CONTENT],
     [ConfigKey.THROTTLING_CONFIG]: monitor.throttling
@@ -92,56 +72,15 @@ const getNormalizeBrowserFields = ({
       : defaultFields[ConfigKey.PARAMS],
     [ConfigKey.JOURNEY_FILTERS_MATCH]:
       monitor.filter?.match || defaultFields[ConfigKey.JOURNEY_FILTERS_MATCH],
-    [ConfigKey.TIMEOUT]: null,
-    ...commonFields,
+    [ConfigKey.TIMEOUT]: monitor.timeout
+      ? getMonitorTimeout(monitor.timeout)
+      : defaultFields[ConfigKey.TIMEOUT],
   };
   return {
-    ...defaultFields,
-    ...normalizedFields,
+    normalizedFields: {
+      ...defaultFields,
+      ...normalizedFields,
+    },
+    unsupportedKeys: [],
   };
-};
-
-export const normalizeProjectMonitors = ({
-  locations = [],
-  privateLocations = [],
-  monitors = [],
-  projectId,
-  namespace,
-}: {
-  locations: Locations;
-  privateLocations: Locations;
-  monitors: ProjectBrowserMonitor[];
-  projectId: string;
-  namespace: string;
-}) => {
-  return monitors.map((monitor) => {
-    return normalizeProjectMonitor({ monitor, locations, privateLocations, projectId, namespace });
-  });
-};
-
-export const getMonitorLocations = ({
-  privateLocations,
-  publicLocations,
-  monitor,
-}: {
-  monitor: ProjectBrowserMonitor;
-  privateLocations: Locations;
-  publicLocations: Locations;
-}) => {
-  const publicLocs =
-    monitor.locations?.map((id) => {
-      return publicLocations.find((location) => location.id === id);
-    }) || [];
-  const privateLocs =
-    monitor.privateLocations?.map((locationName) => {
-      return privateLocations.find(
-        (location) =>
-          location.label.toLowerCase() === locationName.toLowerCase() ||
-          location.id.toLowerCase() === locationName.toLowerCase()
-      );
-    }) || [];
-
-  return [...publicLocs, ...privateLocs].filter(
-    (location) => location !== undefined
-  ) as BrowserFields[ConfigKey.LOCATIONS];
 };

@@ -14,7 +14,7 @@ export const ProjectMonitorThrottlingConfigCodec = t.interface({
   latency: t.number,
 });
 
-export const ProjectBrowserMonitorCodec = t.intersection([
+export const ProjectMonitorCodec = t.intersection([
   t.interface({
     type: t.string,
     id: t.string,
@@ -24,6 +24,7 @@ export const ProjectBrowserMonitorCodec = t.intersection([
     locations: t.array(t.string),
   }),
   t.partial({
+    timeout: t.string,
     privateLocations: t.array(t.string),
     throttling: ProjectMonitorThrottlingConfigCodec,
     screenshot: ScreenshotOptionCodec,
@@ -45,11 +46,11 @@ export const ProjectBrowserMonitorCodec = t.intersection([
 export const ProjectMonitorsRequestCodec = t.interface({
   project: t.string,
   keep_stale: t.boolean,
-  monitors: t.array(ProjectBrowserMonitorCodec),
+  monitors: t.array(ProjectMonitorCodec),
 });
 
 export type ProjectMonitorThrottlingConfig = t.TypeOf<typeof ProjectMonitorThrottlingConfigCodec>;
 
-export type ProjectBrowserMonitor = t.TypeOf<typeof ProjectBrowserMonitorCodec>;
+export type ProjectMonitor = t.TypeOf<typeof ProjectMonitorCodec>;
 
 export type ProjectMonitorsRequest = t.TypeOf<typeof ProjectMonitorsRequestCodec>;

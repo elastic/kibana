@@ -30,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
     const projectMonitorEndpoint = kibanaServerUrl + API_URLS.SYNTHETICS_MONITORS_PROJECT;
 
     let projectMonitors: ProjectMonitorsRequest;
+    let httpProjectMonitors: ProjectMonitorsRequest;
 
     let testPolicyId = '';
     const testPrivateLocations = new PrivateLocationTestService(getService);
@@ -87,6 +88,97 @@ export default function ({ getService }: FtrProviderContext) {
 
     beforeEach(() => {
       projectMonitors = setUniqueIds(getFixtureJson('project_browser_monitor'));
+      httpProjectMonitors = setUniqueIds(getFixtureJson('project_monitor_http'));
+    });
+
+    it('project monitors - handles http monitors', async () => {
+      try {
+        const messages = await parseStreamApiResponse(
+          projectMonitorEndpoint,
+          JSON.stringify(httpProjectMonitors)
+        );
+        const journeyId = httpProjectMonitors.monitors[0].id;
+
+        expect(messages).to.have.length(2);
+        expect(messages[1].updatedMonitors).eql([]);
+        expect(messages[1].failedMonitors).eql([]);
+        expect(messages[1].createdMonitors).eql(
+          httpProjectMonitors.monitors.map((monitor) => monitor.id)
+        );
+        expect(messages[1].warnings).eql(
+          httpProjectMonitors.monitors.map((monitor) => ({
+            id: monitor.id,
+            details:
+              'The following Heartbeat options are not supported for project monitors in 8.5.0: check.response.body|unsupportedKey.nestedUnsupportedKey',
+            reason: 'Unsupported Heartbeat option',
+          }))
+        );
+
+        const createdMonitorsResponse = await Promise.all(
+          httpProjectMonitors.monitors.map((monitor) => {
+            return supertest
+              .get(API_URLS.SYNTHETICS_MONITORS)
+              .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${monitor.id}` })
+              .set('kbn-xsrf', 'true')
+              .expect(200);
+          })
+        );
+        expect(createdMonitorsResponse[0].body.monitors[0].attributes).to.eql({
+          __ui: {
+            is_tls_enabled: false,
+          },
+          'check.request.method': 'POST',
+          'check.response.status': [200],
+          config_id: '',
+          custom_heartbeat_id: `${journeyId}-bbb-default`,
+          enabled: false,
+          form_monitor_type: 'http',
+          journey_id: journeyId,
+          locations: [
+            {
+              geo: {
+                lat: 0,
+                lon: 0,
+              },
+              id: 'localhost',
+              isInvalid: false,
+              isServiceManaged: true,
+              label: 'Local Synthetics Service',
+              status: 'experimental',
+              url: 'mockDevUrl',
+            },
+          ],
+          max_redirects: '0',
+          name: 'My Monitor 2',
+          namespace: 'default',
+          origin: 'project',
+          original_space: 'default',
+          project_id: 'bbb',
+          proxy_url: '',
+          'response.include_body': 'always',
+          'response.include_headers': false,
+          revision: 1,
+          schedule: {
+            number: '60',
+            unit: 'm',
+          },
+          'service.name': '',
+          'ssl.certificate': '',
+          'ssl.certificate_authorities': '',
+          'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+          'ssl.verification_mode': 'full',
+          tags: [],
+          timeout: '80',
+          type: 'http',
+          urls: 'http://localhost:9200',
+        });
+      } finally {
+        await Promise.all([
+          projectMonitors.monitors.map((monitor) => {
+            return deleteMonitor(monitor.id, projectMonitors.project);
+          }),
+        ]);
+      }
     });
 
     it('project monitors - returns a list of successfully created monitors', async () => {
@@ -450,7 +542,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('project monitors - validates monitor type', async () => {
+    it('project monitors validates monitor type', async () => {
       try {
         const messages = await parseStreamApiResponse(
           projectMonitorEndpoint,
@@ -488,6 +580,7 @@ export default function ({ getService }: FtrProviderContext) {
                 latency: 20,
                 upload: 3,
               },
+              type: 'browser',
             },
             reason: 'Failed to save or update monitor. Configuration is not valid',
           },
@@ -502,7 +595,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('project monitors - saves space as data stream namespace', async () => {
+    it('project monitors saves space as data stream namespace', async () => {
       const username = 'admin';
       const roleName = `synthetics_admin`;
       const password = `${username}-password`;
@@ -556,7 +649,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('project monitors - formats custom id appropriately', async () => {
+    it('project monitors formats custom id appropriately', async () => {
       const username = 'admin';
       const roleName = `synthetics_admin`;
       const password = `${username}-password`;
@@ -612,7 +705,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('project monitors - is able to decrypt monitor when updated after hydration', async () => {
+    it('project monitors is able to decrypt monitor when updated after hydration', async () => {
       try {
         await supertest
           .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
@@ -665,7 +758,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('project monitors - is able to enable and disable monitors', async () => {
+    it('project monitors is able to enable and disable monitors', async () => {
       try {
         await supertest
           .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
@@ -703,7 +796,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('project monitors - returns a failed monitor when user defines a private location without fleet permissions', async () => {
+    it('project monitors returns a failed monitor when user defines a private location without fleet permissions', async () => {
       const secondMonitor = {
         ...projectMonitors.monitors[0],
         id: 'test-id-2',
@@ -783,6 +876,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           ],
           failedStaleMonitors: [],
+          warnings: [],
         });
       } finally {
         await Promise.all([
@@ -801,7 +895,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('project monitors - returns a failed monitor when user tries to delete a monitor without fleet permissions', async () => {
+    it('project monitors returns a failed monitor when user tries to delete a monitor without fleet permissions', async () => {
       const secondMonitor = {
         ...projectMonitors.monitors[0],
         id: 'test-id-2',
@@ -871,6 +965,7 @@ export default function ({ getService }: FtrProviderContext) {
               reason: 'Failed to delete stale monitor',
             },
           ],
+          warnings: [],
         });
 
         const messages2 = await parseStreamApiResponse(
@@ -891,6 +986,7 @@ export default function ({ getService }: FtrProviderContext) {
           deletedMonitors: [testMonitors[1].id],
           failedMonitors: [],
           failedStaleMonitors: [],
+          warnings: [],
         });
       } finally {
         await Promise.all([
@@ -956,6 +1052,7 @@ export default function ({ getService }: FtrProviderContext) {
             deletedMonitors: [],
             failedMonitors: [],
             failedStaleMonitors: [],
+            warnings: [],
           },
         ]);
       } finally {

@@ -6,7 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../legacy_uptime/lib/lib';
-import { ProjectBrowserMonitor } from '../../../common/runtime_types';
+import { ProjectMonitor } from '../../../common/runtime_types';
 
 import { SyntheticsStreamingRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
@@ -33,7 +33,7 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsStreamingRouteFactory =
     subject,
   }): Promise<any> => {
     try {
-      const monitors = (request.body?.monitors as ProjectBrowserMonitor[]) || [];
+      const monitors = (request.body?.monitors as ProjectMonitor[]) || [];
       const spaceId = server.spaces.spacesService.getSpaceId(request);
       const { keep_stale: keepStale, project: projectId } = request.body || {};
       const { publicLocations, privateLocations } = await getAllLocations(
@@ -67,6 +67,7 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsStreamingRouteFactory =
         deletedMonitors: pushMonitorFormatter.deletedMonitors,
         failedMonitors: pushMonitorFormatter.failedMonitors,
         failedStaleMonitors: pushMonitorFormatter.failedStaleMonitors,
+        warnings: pushMonitorFormatter.warnings,
       });
     } catch (error) {
       subject?.error(error);

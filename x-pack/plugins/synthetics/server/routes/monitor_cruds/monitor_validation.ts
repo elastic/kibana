@@ -10,8 +10,8 @@ import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
 import {
   BrowserFieldsCodec,
-  ProjectBrowserMonitorCodec,
-  ProjectBrowserMonitor,
+  ProjectMonitorCodec,
+  ProjectMonitor,
   ConfigKey,
   DataStream,
   DataStreamCodec,
@@ -82,10 +82,7 @@ export function validateMonitor(monitorFields: MonitorFields): {
   return { valid: true, reason: '', details: '', payload: monitorFields };
 }
 
-export function validateProjectMonitor(
-  monitorFields: ProjectBrowserMonitor,
-  projectId: string
-): {
+export function validateProjectMonitor(monitorFields: ProjectMonitor): {
   valid: boolean;
   reason: string;
   details: string;
@@ -98,7 +95,7 @@ export function validateProjectMonitor(
       ? 'Invalid value "[]" supplied to field "locations"'
       : '';
   // Cast it to ICMPCodec to satisfy typing. During runtime, correct codec will be used to decode.
-  const decodedMonitor = ProjectBrowserMonitorCodec.decode(monitorFields);
+  const decodedMonitor = ProjectMonitorCodec.decode(monitorFields);
 
   if (isLeft(decodedMonitor)) {
     return {

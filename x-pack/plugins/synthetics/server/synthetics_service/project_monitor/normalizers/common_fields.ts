@@ -13,7 +13,7 @@ import {
   SourceType,
 } from '../../../../common/runtime_types';
 import { DEFAULT_COMMON_FIELDS } from '../../../../common/constants/monitor_defaults';
-import { getMonitorLocations, NormalizedProjectProps } from './browser_monitor';
+import { getMonitorLocations, NormalizedProjectProps } from '.';
 
 export const getNormalizeCommonFields = ({
   locations = [],
@@ -25,7 +25,7 @@ export const getNormalizeCommonFields = ({
   const defaultFields = DEFAULT_COMMON_FIELDS;
 
   const normalizedFields = {
-    [ConfigKey.MONITOR_TYPE]: monitor.type as DataStream,
+    [ConfigKey.JOURNEY_ID]: monitor.id || defaultFields[ConfigKey.JOURNEY_ID],
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
     [ConfigKey.NAME]: monitor.name || '',
     [ConfigKey.SCHEDULE]: {
@@ -43,12 +43,23 @@ export const getNormalizeCommonFields = ({
     [ConfigKey.TAGS]: monitor.tags || defaultFields[ConfigKey.TAGS],
     [ConfigKey.NAMESPACE]: namespace || defaultFields[ConfigKey.NAMESPACE],
     [ConfigKey.ORIGINAL_SPACE]: namespace || defaultFields[ConfigKey.NAMESPACE],
-    [ConfigKey.CUSTOM_HEARTBEAT_ID]: `${monitor.id}-${projectId}-${namespace}`,
-    [ConfigKey.TIMEOUT]: null,
+    [ConfigKey.CUSTOM_HEARTBEAT_ID]: getCustomHeartbeatId(monitor, projectId, namespace, false),
     [ConfigKey.ENABLED]: monitor.enabled ?? defaultFields[ConfigKey.ENABLED],
   };
   return {
     ...defaultFields,
     ...normalizedFields,
   };
+};
+
+export const getCustomHeartbeatId = (
+  monitor: NormalizedProjectProps['monitor'],
+  projectId: string,
+  namespace: string,
+  preserveMonitorId: boolean
+) => {
+  if (monitor.type !== DataStream.BROWSER && preserveMonitorId) {
+    return monitor.id;
+  }
+  return `${monitor.id}-${projectId}-${namespace}`;
 };

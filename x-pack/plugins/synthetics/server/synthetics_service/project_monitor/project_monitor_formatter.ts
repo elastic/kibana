@@ -13,7 +13,7 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { normalizeProjectMonitor } from './normalizers/browser_monitor';
+import { normalizeProjectMonitor } from './normalizers';
 import { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
 import {
   BrowserFields,
@@ -21,8 +21,9 @@ import {
   SyntheticsMonitorWithSecrets,
   EncryptedSyntheticsMonitor,
   ServiceLocationErrors,
-  ProjectBrowserMonitor,
+  ProjectMonitor,
   Locations,
+  PrivateLocation,
   MonitorFields,
 } from '../../../common/runtime_types';
 import {
@@ -33,7 +34,10 @@ import { formatSecrets, normalizeSecrets } from '../utils/secrets';
 import { syncNewMonitor } from '../../routes/monitor_cruds/add_monitor';
 import { syncEditedMonitor } from '../../routes/monitor_cruds/edit_monitor';
 import { deleteMonitor } from '../../routes/monitor_cruds/delete_monitor';
-import { validateProjectMonitor } from '../../routes/monitor_cruds/monitor_validation';
+import {
+  validateProjectMonitor,
+  validateMonitor,
+} from '../../routes/monitor_cruds/monitor_validation';
 import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters/framework';
 
 interface StaleMonitor {
@@ -42,24 +46,25 @@ interface StaleMonitor {
   savedObjectId: string;
 }
 type StaleMonitorMap = Record<string, StaleMonitor>;
-type FailedMonitors = Array<{ id: string; reason: string; details: string; payload?: object }>;
+type Warnings = Array<{ id: string; reason: string; details: string; payload?: object }>;
 
 export class ProjectMonitorFormatter {
   private projectId: string;
   private spaceId: string;
   private keepStale: boolean;
   private locations: Locations;
-  private privateLocations: Locations;
+  private privateLocations: PrivateLocation[];
   private savedObjectsClient: SavedObjectsClientContract;
   private encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   private staleMonitorsMap: StaleMonitorMap = {};
-  private monitors: ProjectBrowserMonitor[] = [];
+  private monitors: ProjectMonitor[] = [];
   public createdMonitors: string[] = [];
   public deletedMonitors: string[] = [];
   public updatedMonitors: string[] = [];
   public staleMonitors: string[] = [];
-  public failedMonitors: FailedMonitors = [];
-  public failedStaleMonitors: FailedMonitors = [];
+  public failedMonitors: Warnings = [];
+  public failedStaleMonitors: Warnings = [];
+  public warnings: Warnings = [];
   private server: UptimeServerSetup;
   private projectFilter: string;
   private syntheticsMonitorClient: SyntheticsMonitorClient;
@@ -81,13 +86,13 @@ export class ProjectMonitorFormatter {
     subject,
   }: {
     locations: Locations;
-    privateLocations: Locations;
+    privateLocations: PrivateLocation[];
     keepStale: boolean;
     savedObjectsClient: SavedObjectsClientContract;
     encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
     projectId: string;
     spaceId: string;
-    monitors: ProjectBrowserMonitor[];
+    monitors: ProjectMonitor[];
     server: UptimeServerSetup;
     syntheticsMonitorClient: SyntheticsMonitorClient;
     request: KibanaRequest;
@@ -118,7 +123,7 @@ export class ProjectMonitorFormatter {
     await this.handleStaleMonitors();
   };
 
-  private configureProjectMonitor = async ({ monitor }: { monitor: ProjectBrowserMonitor }) => {
+  private configureProjectMonitor = async ({ monitor }: { monitor: ProjectMonitor }) => {
     try {
       const {
         integrations: { writeIntegrationPolicies },
@@ -130,8 +135,7 @@ export class ProjectMonitorFormatter {
         );
       }
 
-      // check to see if monitor already exists
-      const normalizedMonitor = normalizeProjectMonitor({
+      const { normalizedFields: normalizedMonitor, unsupportedKeys } = normalizeProjectMonitor({
         locations: this.locations,
         privateLocations: this.privateLocations,
         monitor,
@@ -139,10 +143,43 @@ export class ProjectMonitorFormatter {
         namespace: this.spaceId,
       });
 
-      const validationResult = validateProjectMonitor(monitor, this.projectId);
+      if (unsupportedKeys.length) {
+        this.warnings.push({
+          id: monitor.id,
+          reason: 'Unsupported Heartbeat option',
+          details: `The following Heartbeat options are not supported for project monitors in ${
+            this.server.kibanaVersion
+          }: ${unsupportedKeys.join('|')}`,
+        });
+      }
+
+      const validationResult = validateProjectMonitor({
+        ...monitor,
+        type: normalizedMonitor[ConfigKey.MONITOR_TYPE],
+      });
 
       if (!validationResult.valid) {
         const { reason: message, details, payload } = validationResult;
+        this.failedMonitors.push({
+          id: monitor.id,
+          reason: message,
+          details,
+          payload,
+        });
+        if (this.staleMonitorsMap[monitor.id]) {
+          this.staleMonitorsMap[monitor.id].stale = false;
+        }
+        return null;
+      }
+
+      /* with arbitrary yaml, it's important that we determine if
+       * the our normalized monitor matches the monitor saved object schema.
+       * Reporting these errors will help us spot fields that need extra formatting,
+       * like timeout */
+      const validationResult2 = validateMonitor(normalizedMonitor as MonitorFields);
+
+      if (!validationResult2.valid) {
+        const { reason: message, details, payload } = validationResult2;
         this.failedMonitors.push({
           id: monitor.id,
           reason: message,

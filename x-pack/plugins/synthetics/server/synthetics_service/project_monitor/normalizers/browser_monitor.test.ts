@@ -10,10 +10,10 @@ import {
   ScreenshotOption,
   Locations,
   LocationStatus,
-  ProjectBrowserMonitor,
+  ProjectMonitor,
 } from '../../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
-import { normalizeProjectMonitors } from './browser_monitor';
+import { normalizeProjectMonitors } from '.';
 
 describe('browser normalizers', () => {
   describe('normalize push monitors', () => {
@@ -49,7 +49,7 @@ describe('browser normalizers', () => {
         isServiceManaged: false,
       },
     ];
-    const monitors: ProjectBrowserMonitor[] = [
+    const monitors: ProjectMonitor[] = [
       {
         id: 'test-id-1',
         screenshot: ScreenshotOption.OFF,
