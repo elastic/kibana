@@ -29141,7 +29141,6 @@
     "xpack.sessionView.alertsLoadMoreButton": "Charger plus d'alertes",
     "xpack.sessionView.backToInvestigatedAlert": "Retour à l'alerte examinée",
     "xpack.sessionView.beta": "Bêta",
-    "xpack.sessionView.buttonOpenDetailPanel": "Panneau de détails",
     "xpack.sessionView.childProcesses": "Processus enfants",
     "xpack.sessionView.detailPanel.entryLeaderTooltip": "Processus meneur de session associé au terminal initial ou à l'accès à distance via SSH, SSM et d'autres protocoles d'accès à distance. Les sessions d'entrée sont également utilisées pour représenter un service démarré directement par le processus init. Dans de nombreux cas, cela équivaut à session_leader.",
     "xpack.sessionView.detailPanel.processGroupLeaderTooltip": "Meneur de groupe de processus du processus actuel.",
