@@ -282,5 +282,5 @@ export const createTaskMetric = (
     start_time: startTime,
     end_time: endTime,
     error_message: errorMessage,
-  }
+  };
 };
