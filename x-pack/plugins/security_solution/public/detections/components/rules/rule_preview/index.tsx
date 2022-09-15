@@ -34,7 +34,7 @@ import type {
   ScheduleStepRule,
   TimeframePreviewOptions,
 } from '../../../pages/detection_engine/rules/types';
-import { usePreviewInvocationCount } from '../../../containers/detection_engine/rules/use_preview_invocation_count';
+import { usePreviewInvocationCount } from './use_preview_invocation_count';
 
 export const REASONABLE_INVOCATION_COUNT = 200;
 
