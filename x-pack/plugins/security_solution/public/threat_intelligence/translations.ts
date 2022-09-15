@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const ACTION_INVESTIGATE_IN_TIMELINE = i18n.translate(
-  'xpack.threatIntelligence.investigateInTimelineTitle',
+  'xpack.securitySolution.threatIntelligence.investigateInTimelineTitle',
   {
     defaultMessage: 'Investigate in timeline',
   }
