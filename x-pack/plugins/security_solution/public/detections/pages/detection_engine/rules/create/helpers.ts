@@ -27,7 +27,7 @@ import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../common/const
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import {
   transformAlertToRuleAction,
-  transformAlertToRuleResponseAction
+  transformAlertToRuleResponseAction,
 } from '../../../../../../common/detection_engine/transform_actions';
 
 import type {

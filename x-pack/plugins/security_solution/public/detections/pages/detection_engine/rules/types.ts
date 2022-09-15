@@ -20,7 +20,10 @@ import type { DataViewBase, Filter } from '@kbn/es-query';
 import type { RuleAction, RuleResponseAction } from '@kbn/alerting-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
-import type { RuleAlertAction, RuleAlertResponseAction } from '../../../../../common/detection_engine/types';
+import type {
+  RuleAlertAction,
+  RuleAlertResponseAction,
+} from '../../../../../common/detection_engine/types';
 import type { FieldValueQueryBar } from '../../../components/rules/query_bar';
 import type { FieldValueTimeline } from '../../../components/rules/pick_timeline';
 import type { FieldValueThreshold } from '../../../components/rules/threshold_input';
