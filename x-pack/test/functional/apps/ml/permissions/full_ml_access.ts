@@ -50,6 +50,9 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.testExecution.logTestStep('should display the enabled "Overview" tab');
             await ml.navigation.assertOverviewTabEnabled(true);
 
+            await ml.testExecution.logTestStep('should display the enabled "Notifications" tab');
+            await ml.navigation.assertNotificationsTabEnabled(true);
+
             await ml.testExecution.logTestStep(
               'should display the enabled "Anomaly Detection" section correctly'
             );

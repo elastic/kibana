@@ -44,6 +44,7 @@ import type { DataRecognizerConfigResponse, Module } from '../../../../common/ty
 import { getHttp } from '../../util/dependency_cache';
 import type { RuntimeMappings } from '../../../../common/types/fields';
 import type { DatafeedValidationResponse } from '../../../../common/types/job_validation';
+import { notificationsProvider } from './notifications';
 
 export interface MlInfoResponse {
   defaults: MlServerDefaults;
@@ -729,5 +730,6 @@ export function mlApiServicesProvider(httpService: HttpService) {
     jobs: jobsApiProvider(httpService),
     savedObjects: savedObjectsApiProvider(httpService),
     trainedModels: trainedModelsApiProvider(httpService),
+    notifications: notificationsProvider(httpService),
   };
 }

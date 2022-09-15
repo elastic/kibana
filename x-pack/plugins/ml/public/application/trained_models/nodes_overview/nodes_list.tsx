@@ -165,7 +165,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
     };
   }, [items]);
 
-  let tableSettings: object = useTableSettings<NodeItem>(items, pageState, updatePageState);
+  let tableSettings: object = useTableSettings<NodeItem>(items.length, pageState, updatePageState);
 
   const search: EuiSearchBarProps = {
     query: searchQueryText,
