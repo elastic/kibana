@@ -11,6 +11,10 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
+  EuiSelect,
+  EuiCheckbox,
+  EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -25,6 +29,7 @@ import { FieldEditor, FieldEditorFormState } from './field_editor/field_editor';
 import { useFieldEditorContext } from './field_editor_context';
 import { FlyoutPanels } from './flyout_panels';
 import { FieldPreview, useFieldPreviewContext } from './preview';
+import {EuiSelectOption} from "@elastic/eui/src/components/form/select/select";
 
 const i18nTexts = {
   cancelButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutCancelButtonLabel', {
@@ -70,11 +75,66 @@ const FieldEditorFlyoutContentComponent = ({
 }: Props) => {
   const isMounted = useRef(false);
   const isEditingExistingField = !!fieldToEdit;
-  const { dataView, subfields$ } = useFieldEditorContext();
+  const { dataView, subfields$, services } = useFieldEditorContext();
 
   const {
     panel: { isVisible: isPanelVisible },
   } = useFieldPreviewContext();
+
+  const getMatchingIndexTemplates = async (title: string) => {
+    const allIndexTemplates: any = await services.http.fetch({
+      path: `/api/index_management/index_templates`,
+      method: 'get',
+    });
+    const matchingTemplates = allIndexTemplates.templates.map((t: any) => {
+      return {
+        text: t.name,
+      } as EuiSelectOption;
+    });
+    setMatchingTemplates(matchingTemplates);
+  };
+
+  const getIndexTemplate = async (title: string) => {
+    const indexTemplate = await services.http.fetch({
+      path: `/api/index_management/index_templates/${encodeURIComponent(title)}`,
+      method: 'get',
+    });
+    return indexTemplate as any;
+  };
+
+  const saveIndexTemplate = async (name: string, template: any) => {
+    const result = await services.http.fetch({
+      path: `/api/index_management/index_templates/${encodeURIComponent(name)}`,
+      method: 'put',
+      body: JSON.stringify(template),
+    });
+    return result;
+  };
+
+  const saveMappings = async (name: string, template: any) => {
+    const result = await services.http.fetch({
+      path: `/api/index_management/mapping/${encodeURIComponent(name)}`,
+      method: 'put',
+      body: JSON.stringify(template),
+    });
+    return result;
+  };
+
+  const updateMappings = (mappings: any, myData: any, ingest: boolean) => {
+    if (!ingest) {
+      if (!mappings.runtime) mappings.runtime = {};
+      mappings.runtime[myData?.name] = {
+        script: myData?.script,
+        type: myData?.type,
+      };
+    } else {
+      if (!mappings.properties) mappings.properties = {};
+      mappings.properties[myData?.name] = {
+        script: myData?.script,
+        type: myData?.type,
+      };
+    }
+  };
 
   const [formState, setFormState] = useState<FieldEditorFormState>({
     isSubmitted: false,
@@ -85,8 +145,13 @@ const FieldEditorFlyoutContentComponent = ({
       : async () => ({ isValid: false, data: {} as Field }),
   });
 
+  const [ingest, setIngest] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState('');
+
+  const [matchingTemplates, setMatchingTemplates] = useState([]);
   const [modalVisibility, setModalVisibility] = useState(defaultModalVisibility);
   const [isFormModified, setIsFormModified] = useState(false);
+  const [isPromoteVisible, setIsPromoteVisible] = useState(false);
 
   const { submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
@@ -100,6 +165,33 @@ const FieldEditorFlyoutContentComponent = ({
     }
     return !isFormModified;
   }, [isFormModified]);
+
+  const [myData, setMyData] = useState();
+  const onClickPromote = useCallback(async () => {
+    if (!isPromoteVisible) {
+      const { data } = await submit();
+      setMyData(data);
+      setIsPromoteVisible(true);
+    }
+    else {
+      // do the promotion
+
+      const indexTemplate = await getIndexTemplate(selectedTemplate);
+      if (!indexTemplate.template.mappings) indexTemplate.template.mappings = {};
+      updateMappings(indexTemplate.template.mappings, myData, ingest);
+
+      const mapping = {};
+      updateMappings(mapping, myData, ingest);
+
+      try {
+        await saveIndexTemplate(selectedTemplate, indexTemplate);
+        await saveMappings(indexTemplate.indexPatterns[0], mapping);
+        onSave({ promoted: true });
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  }, [setIsPromoteVisible, isPromoteVisible, selectedTemplate, ingest, submit, fieldToEdit, fieldToCreate]);
 
   const onClickSave = useCallback(async () => {
     const { isValid, data: updatedField } = await submit();
@@ -194,6 +286,10 @@ const FieldEditorFlyoutContentComponent = ({
     };
   }, []);
 
+  useEffect(() => {
+    getMatchingIndexTemplates(dataView.title);
+  }, [dataView.title]);
+
   return (
     <>
       <FlyoutPanels.Group
@@ -237,11 +333,58 @@ const FieldEditorFlyoutContentComponent = ({
               </EuiText>
             </FlyoutPanels.Header>
 
-            <FieldEditor
+            { !isPromoteVisible && <FieldEditor
               field={fieldToEdit ?? fieldToCreate}
               onChange={setFormState}
               onFormModifiedChange={setIsFormModified}
-            />
+            /> }
+
+            {isPromoteVisible &&
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false}>
+                    <div>
+                      {/* Title */}
+                      <EuiTitle size="xs">
+                        <h3>Promote runtime field</h3>
+                      </EuiTitle>
+                      <EuiSpacer size="xs" />
+
+                      {/* Description */}
+                      <EuiText size="s" color="subdued">
+                        Promote runtime field to the index template
+                      </EuiText>
+
+                      {/* Content */}
+                      <>
+                        <EuiSpacer size="l" />
+                        <EuiFormRow
+                          label="Select target index template"
+                          fullWidth
+                        >
+                          <EuiSelect
+                            fullWidth
+                            options={matchingTemplates}
+                            value={selectedTemplate}
+                            onChange={(e) => {
+                              setSelectedTemplate(e.target.value);
+                            }}
+                            hasNoInitialSelection={true}
+                          />
+                        </EuiFormRow>
+
+                        <EuiFormRow
+                          label="Select target index template"
+                          fullWidth
+                        >
+                          <EuiCheckbox id="ingestCheckbox" checked={ingest} onChange={(e) => {
+                            setIngest(e.target.checked);
+                          }} />
+                        </EuiFormRow>
+                      </>
+                    </div>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+            }
           </FlyoutPanels.Content>
 
           <FlyoutPanels.Footer>
@@ -259,16 +402,31 @@ const FieldEditorFlyoutContentComponent = ({
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    color="primary"
-                    onClick={onClickSave}
-                    data-test-subj="fieldSaveButton"
-                    fill
-                    disabled={hasErrors}
-                    isLoading={isSavingField || isSubmitting}
-                  >
-                    {i18nTexts.saveButtonLabel}
-                  </EuiButton>
+                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        color="primary"
+                        onClick={onClickPromote}
+                        data-test-subj=""
+                        disabled={hasErrors}
+                        isLoading={isSavingField || isSubmitting}
+                      >
+                        Promote
+                      </EuiButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      {!isPromoteVisible && <EuiButton
+                        color="primary"
+                        onClick={onClickSave}
+                        data-test-subj="fieldSaveButton"
+                        fill
+                        disabled={hasErrors}
+                        isLoading={isSavingField || isSubmitting}
+                      >
+                        {i18nTexts.saveButtonLabel}
+                      </EuiButton> }
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </>

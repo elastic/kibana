@@ -196,6 +196,7 @@ export const getFieldEditorOpener =
               fieldFormatEditors={fieldFormatEditors}
               fieldFormats={fieldFormats}
               uiSettings={uiSettings}
+              http={core.http}
             />
           </KibanaReactContextProvider>,
           { theme$: core.theme.theme$ }

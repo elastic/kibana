@@ -57,6 +57,7 @@ export interface Props {
   fieldFormatEditors: PluginStart['fieldFormatEditors'];
   fieldFormats: FieldFormatsStart;
   uiSettings: CoreStart['uiSettings'];
+  http: CoreStart['http'];
 }
 
 /**
@@ -83,6 +84,7 @@ export const FieldEditorFlyoutContentContainer = ({
   fieldFormatEditors,
   fieldFormats,
   uiSettings,
+  http,
 }: Props) => {
   const [isSaving, setIsSaving] = useState(false);
 
@@ -122,8 +124,9 @@ export const FieldEditorFlyoutContentContainer = ({
       api: apiService,
       search,
       notifications,
+      http,
     }),
-    [apiService, search, notifications]
+    [apiService, search, notifications, http]
   );
 
   const updateRuntimeField = useCallback(
@@ -141,15 +144,22 @@ export const FieldEditorFlyoutContentContainer = ({
           // eslint-disable-next-line no-empty
         } catch {}
         // rename an existing runtime field
-        if (nameHasChanged || hasChangeToOrFromComposite) {
-          dataView.removeRuntimeField(fieldToEdit!.name);
-        }
 
-        dataView.addRuntimeField(updatedField.name, {
-          type: updatedField.type as RuntimeType,
-          script,
-          fields: updatedField.fields,
-        });
+        if (!updatedField.promoted) {
+          if (nameHasChanged || hasChangeToOrFromComposite) {
+            dataView.removeRuntimeField(fieldToEdit!.name);
+          }
+
+          dataView.addRuntimeField(updatedField.name, {
+            type: updatedField.type as RuntimeType,
+            script,
+            fields: updatedField.fields,
+          });
+        } else {
+          dataView.removeRuntimeField(fieldToEdit?.name ?? fieldToCreate?.name);
+          updatedField.name = fieldToEdit?.name ?? fieldToCreate?.name;
+          await dataViews.refreshFields(dataView);
+        }
       } else {
         try {
           usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_concrete');
@@ -172,14 +182,16 @@ export const FieldEditorFlyoutContentContainer = ({
         );
       }
 
-      // Update custom label, popularity and format
-      dataView.setFieldCustomLabel(updatedField.name, updatedField.customLabel);
+      if (!updatedField.promoted) {
+        // Update custom label, popularity and format
+        dataView.setFieldCustomLabel(updatedField.name, updatedField.customLabel);
 
-      editedField.count = updatedField.popularity || 0;
-      if (updatedField.format) {
-        dataView.setFieldFormat(updatedField.name, updatedField.format!);
-      } else {
-        dataView.deleteFieldFormat(updatedField.name);
+        editedField.count = updatedField.popularity || 0;
+        if (updatedField.format) {
+          dataView.setFieldFormat(updatedField.name, updatedField.format!);
+        } else {
+          dataView.deleteFieldFormat(updatedField.name);
+        }
       }
 
       return [editedField];
