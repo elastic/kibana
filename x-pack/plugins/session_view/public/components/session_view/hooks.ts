@@ -64,10 +64,12 @@ export const useFetchSessionViewProcessEvents = (
       getNextPageParam: (lastPage, pages) => {
         const isRefetch = pages.length === 1 && jumpToCursor;
         if (isRefetch || lastPage.events.length >= PROCESS_EVENTS_PER_PAGE) {
-          const cursor = lastPage.events.filter((event) => {
+          const filtered = lastPage.events.filter((event) => {
             const action = event.event?.action;
             return action && [EventAction.fork, EventAction.exec, EventAction.end].includes(action);
-          })?.[lastPage.events.length - 1]?.['@timestamp'];
+          });
+
+          const cursor = filtered?.[filtered.length - 1]?.['@timestamp'];
 
           if (cursor) {
             return {
