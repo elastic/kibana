@@ -21,6 +21,8 @@ export default function ({ getService, getPageObjects }) {
     'visualBuilder',
     'timePicker',
   ]);
+  const fromTime = 'Oct 15, 2019 @ 00:00:01.000';
+  const toTime = 'Oct 15, 2019 @ 19:31:44.000';
 
   describe('tsvb integration', function () {
     //Since rollups can only be created once with the same name (even if you delete it),
@@ -40,10 +42,11 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/rollup/rollup.json'
       );
-      await kibanaServer.uiSettings.replace({
+      await kibanaServer.uiSettings.update({
         defaultIndex: 'rollup',
+        'metrics:allowStringIndices': true,
+        'timepicker:timeDefaults': `{ "from": "${fromTime}", "to": "${toTime}"}`,
       });
-      await kibanaServer.uiSettings.update({ 'metrics:allowStringIndices': true });
     });
 
     it('create rollup tsvb', async () => {
@@ -85,10 +88,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualBuilder.checkVisualBuilderIsPresent();
       await PageObjects.visualBuilder.clickMetric();
       await PageObjects.visualBuilder.checkMetricTabIsPresent();
-      await PageObjects.timePicker.setAbsoluteRange(
-        'Oct 15, 2019 @ 00:00:01.000',
-        'Oct 15, 2019 @ 19:31:44.000'
-      );
       await PageObjects.visualBuilder.clickPanelOptions('metric');
       await PageObjects.visualBuilder.setIndexPatternValue(rollupTargetIndexName, false);
       await PageObjects.visualBuilder.selectIndexPatternTimeField('@timestamp');
@@ -112,6 +111,7 @@ export default function ({ getService, getPageObjects }) {
         'x-pack/test/functional/fixtures/kbn_archiver/rollup/rollup.json'
       );
       await kibanaServer.uiSettings.update({ 'metrics:allowStringIndices': false });
+      await kibanaServer.uiSettings.replace({});
       await security.testUser.restoreDefaults();
     });
   });
