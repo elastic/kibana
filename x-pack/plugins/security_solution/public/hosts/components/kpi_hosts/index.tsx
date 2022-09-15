@@ -18,11 +18,11 @@ import { RISKY_HOSTS_DOC_LINK } from '../../../../common/constants';
 
 export const HostsKpiComponent = React.memo<HostsKpiProps>(
   ({ filterQuery, from, indexNames, to, setQuery, skip, updateDateRange }) => {
-    const [_, { isModuleEnabled }] = useHostRiskScore();
+    const [loading, { isLicenseValid, isModuleEnabled }] = useHostRiskScore();
 
     return (
       <>
-        {isModuleEnabled === false && (
+        {isLicenseValid && !isModuleEnabled && !loading && (
           <>
             <CallOutSwitcher
               namespace="hosts"
