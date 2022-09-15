@@ -56,7 +56,7 @@ export const deleteMlInferencePipeline = async (
       }
     }
   } catch (error) {
-    // only catch Not Found error
+    // only suppress Not Found error
     if (error.meta?.statusCode !== 404) {
       throw error;
     }
