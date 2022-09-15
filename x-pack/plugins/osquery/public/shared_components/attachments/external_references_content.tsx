@@ -5,36 +5,42 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { createContext, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import type { IExternalReferenceMetaDataProps } from './external_reference';
+import { createUseContext } from './create_use_contenxt';
+import type { IExternalReferenceMetaDataProps } from './lazy_external_reference_content';
 import { PackQueriesAttachmentWrapper } from './pack_queries_attachment_wrapper';
-import type { ServicesWrapperProps } from '../services_wrapper';
-import ServicesWrapper from '../services_wrapper';
 
-export interface AttachmentContentProps {
-  externalReferenceMetadata: IExternalReferenceMetaDataProps;
-  services: ServicesWrapperProps['services'];
-}
+const osqueryCasesContext = createContext<{ asSystemRequest: boolean }>({
+  asSystemRequest: false,
+});
+const AttachmentContent = (props: IExternalReferenceMetaDataProps) => {
+  const { externalReferenceMetadata } = props;
 
-export const AttachmentContent = (props: AttachmentContentProps) => {
-  const { services: osqueryServices, externalReferenceMetadata } = props;
+  const contextValue = useMemo(
+    () => ({
+      asSystemRequest: true,
+    }),
+    []
+  );
 
   return (
-    <ServicesWrapper services={osqueryServices}>
-      <EuiFlexGroup data-test-subj="osquery-attachment-content">
-        <EuiFlexItem>
+    <EuiFlexGroup data-test-subj="osquery-attachment-content">
+      <EuiFlexItem>
+        <osqueryCasesContext.Provider value={contextValue}>
           <PackQueriesAttachmentWrapper
             actionId={externalReferenceMetadata.actionId}
             queryId={externalReferenceMetadata.queryId}
             agentIds={externalReferenceMetadata.agentIds}
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </ServicesWrapper>
+        </osqueryCasesContext.Provider>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
+
+export const useOsqueryCasestContext = createUseContext(osqueryCasesContext, 'testCase');
 
 // eslint-disable-next-line import/no-default-export
 export { AttachmentContent as default };

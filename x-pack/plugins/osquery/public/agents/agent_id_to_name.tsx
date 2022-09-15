@@ -15,15 +15,11 @@ import { useKibana } from '../common/lib/kibana';
 
 interface AgentIdToNameProps {
   agentId: string;
-  asSystemRequest?: boolean;
 }
 
-const AgentIdToNameComponent: React.FC<AgentIdToNameProps> = ({
-  agentId,
-  asSystemRequest = false,
-}) => {
+const AgentIdToNameComponent: React.FC<AgentIdToNameProps> = ({ agentId }) => {
   const getUrlForApp = useKibana().services.application.getUrlForApp;
-  const { data } = useAgentDetails({ agentId, skip: !agentId, asSystemRequest });
+  const { data } = useAgentDetails({ agentId, skip: !agentId });
 
   return (
     <EuiToolTip position="top" content={<p>{agentId}</p>}>

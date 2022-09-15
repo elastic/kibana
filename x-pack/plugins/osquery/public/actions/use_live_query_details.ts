@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
 import { filter } from 'lodash';
+import { useOsqueryCasestContext } from '../shared_components/attachments/external_references_content';
 import { useKibana } from '../common/lib/kibana';
 import type { ESTermQuery } from '../../common/typed_json';
 import { useErrorToast } from '../common/hooks/use_error_toast';
@@ -19,7 +20,6 @@ interface UseLiveQueryDetails {
   filterQuery?: ESTermQuery | string;
   skip?: boolean;
   queryIds?: string[];
-  asSystemRequest?: boolean;
 }
 
 export interface LiveQueryDetailsItem {
@@ -54,11 +54,11 @@ export const useLiveQueryDetails = ({
   filterQuery,
   isLive = false,
   skip = false,
-  asSystemRequest = false,
   queryIds, // enable finding out specific queries only, eg. in cases
 }: UseLiveQueryDetails) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
+  const { asSystemRequest } = useOsqueryCasestContext();
 
   return useQuery<{ data: LiveQueryDetailsItem }, Error, LiveQueryDetailsItem>(
     ['liveQueries', { actionId, filterQuery, queryIds }],

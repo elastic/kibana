@@ -11,17 +11,18 @@ import { useQuery } from '@tanstack/react-query';
 import type { GetOneAgentResponse } from '@kbn/fleet-plugin/common';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
+import { useOsqueryCasestContext } from '../shared_components/attachments/external_references_content';
 
 interface UseAgentDetails {
   agentId?: string;
   silent?: boolean;
   skip?: boolean;
-  asSystemRequest?: boolean;
 }
 
-export const useAgentDetails = ({ agentId, silent, skip, asSystemRequest }: UseAgentDetails) => {
+export const useAgentDetails = ({ agentId, silent, skip }: UseAgentDetails) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
+  const { asSystemRequest } = useOsqueryCasestContext();
 
   return useQuery<GetOneAgentResponse, unknown, GetOneAgentResponse['item']>(
     ['agentDetails', agentId],

@@ -8,11 +8,9 @@
 import { EuiAvatar } from '@elastic/eui';
 import React from 'react';
 import type { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
-import { lazy } from 'react';
+import { getLazyExternalContent } from './lazy_external_reference_content';
 import type { ServicesWrapperProps } from '../services_wrapper';
 import OsqueryLogo from '../../components/osquery_icon/osquery.svg';
-
-const AttachmentContentLazy = lazy(() => import('./external_references_content'));
 
 // TODO waiting for Metadata to add "add to timeline" in here
 // const AttachmentActions: React.FC = () => (
@@ -23,12 +21,6 @@ const AttachmentContentLazy = lazy(() => import('./external_references_content')
 //     aria-label="See attachment"
 //   />
 // );
-
-export interface IExternalReferenceMetaDataProps {
-  actionId: string;
-  agentIds: string[];
-  queryId: string;
-}
 
 export const getExternalReferenceAttachmentRegular = (
   services: ServicesWrapperProps['services']
@@ -41,14 +33,6 @@ export const getExternalReferenceAttachmentRegular = (
     timelineAvatar: <EuiAvatar name="osquery" color="subdued" iconType={OsqueryLogo} />,
     // actions: <AttachmentActions />,
     // @ts-expect-error update types
-    children: (props) => (
-      <AttachmentContentLazy
-        {...props}
-        externalReferenceMetadata={
-          props.externalReferenceMetadata as unknown as IExternalReferenceMetaDataProps
-        }
-        services={services}
-      />
-    ),
+    children: getLazyExternalContent(services),
   }),
 });

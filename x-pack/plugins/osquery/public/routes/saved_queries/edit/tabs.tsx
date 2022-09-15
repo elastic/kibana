@@ -63,12 +63,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
         id: 'status',
         name: 'Status',
         content: (
-          <ActionResultsSummary
-            actionId={actionId}
-            agentIds={agentIds}
-            expirationDate={endDate}
-            asSystemRequest={!addToCase}
-          />
+          <ActionResultsSummary actionId={actionId} agentIds={agentIds} expirationDate={endDate} />
         ),
         append: failedAgentsCount ? (
           <EuiNotificationBadge className="eui-alignCenter" size="m">
