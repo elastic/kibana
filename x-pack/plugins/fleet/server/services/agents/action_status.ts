@@ -4,60 +4,122 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { ElasticsearchClient } from '@kbn/core/server';
-import pMap from 'p-map';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
-import type { FleetServerAgentAction, ActionStatus } from '../../types';
+import type { FleetServerAgentAction, ActionStatus, ListWithKuery } from '../../types';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
+import { appContextService } from '..';
 
 /**
  * Return current bulk actions
  */
-export async function getActionStatuses(esClient: ElasticsearchClient): Promise<ActionStatus[]> {
-  let actions = await _getActions(esClient);
-  const cancelledActionIds = await _getCancelledActionId(esClient);
+export async function getActionStatuses(
+  esClient: ElasticsearchClient,
+  options: ListWithKuery
+): Promise<ActionStatus[]> {
+  const actions = await _getActions(esClient, options);
+  const cancelledActions = await _getCancelledActions(esClient);
+  let acks: any;
 
-  // Fetch acknowledged result for every action
-  actions = await pMap(
-    actions,
-    async (action) => {
-      const { count } = await esClient.count({
+  try {
+    acks = await esClient.search({
+      index: AGENT_ACTIONS_RESULTS_INDEX,
+      query: {
+        bool: {
+          // There's some perf/caching advantages to using filter over must
+          // See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-filter-context.html#filter-context
+          filter: [{ terms: { action_id: actions.map((a) => a.actionId) } }],
+        },
+      },
+      size: 0,
+      aggs: {
+        ack_counts: {
+          terms: { field: 'action_id' },
+          aggs: {
+            max_timestamp: { max: { field: '@timestamp' } },
+          },
+        },
+      },
+    });
+  } catch (err) {
+    if (err.statusCode === 404) {
+      // .fleet-actions-results does not yet exist
+      appContextService.getLogger().debug(err);
+    } else {
+      throw err;
+    }
+  }
+
+  const results = [];
+
+  for (const action of actions) {
+    const matchingBucket = (acks?.aggregations?.ack_counts as any)?.buckets?.find(
+      (bucket: any) => bucket.key === action.actionId
+    );
+    const nbAgentsAck = matchingBucket?.doc_count ?? 0;
+    const completionTime = (matchingBucket?.max_timestamp as any)?.value_as_string;
+    const nbAgentsActioned = action.nbAgentsActioned || action.nbAgentsActionCreated;
+    const complete = nbAgentsAck === nbAgentsActioned;
+    const cancelledAction = cancelledActions.find((a) => a.actionId === action.actionId);
+
+    let errorCount = 0;
+    try {
+      // query to find errors in action results, cannot do aggregation on text type
+      const res = await esClient.search({
         index: AGENT_ACTIONS_RESULTS_INDEX,
-        ignore_unavailable: true,
+        track_total_hits: true,
+        rest_total_hits_as_int: true,
         query: {
           bool: {
-            must: [
+            must: [{ term: { action_id: action.actionId } }],
+            should: [
               {
-                term: {
-                  action_id: action.actionId,
+                exists: {
+                  field: 'error',
                 },
               },
             ],
+            minimum_should_match: 1,
           },
         },
+        size: 0,
       });
+      errorCount = (res.hits.total as number) ?? 0;
+    } catch (err) {
+      if (err.statusCode === 404) {
+        // .fleet-actions-results does not yet exist
+        appContextService.getLogger().debug(err);
+      } else {
+        throw err;
+      }
+    }
 
-      const nbAgentsActioned = action.nbAgentsActioned || action.nbAgentsActionCreated;
-      const complete = count === nbAgentsActioned;
-      const isCancelled = cancelledActionIds.indexOf(action.actionId) > -1;
+    results.push({
+      ...action,
+      nbAgentsAck: nbAgentsAck - errorCount,
+      nbAgentsFailed: errorCount,
+      status:
+        errorCount > 0
+          ? 'FAILED'
+          : complete
+          ? 'COMPLETE'
+          : cancelledAction
+          ? 'CANCELLED'
+          : action.status,
+      nbAgentsActioned,
+      cancellationTime: cancelledAction?.timestamp,
+      completionTime: complete ? completionTime : undefined,
+    });
+  }
 
-      return {
-        ...action,
-        nbAgentsAck: count,
-        status: complete ? 'complete' : isCancelled ? 'cancelled' : action.status,
-        nbAgentsActioned,
-      };
-    },
-    { concurrency: 20 }
-  );
-
-  return actions;
+  return results;
 }
 
-async function _getCancelledActionId(esClient: ElasticsearchClient) {
+async function _getCancelledActions(
+  esClient: ElasticsearchClient
+): Promise<Array<{ actionId: string; timestamp?: string }>> {
   const res = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
@@ -70,24 +132,26 @@ async function _getCancelledActionId(esClient: ElasticsearchClient) {
               type: 'CANCEL',
             },
           },
-          {
-            exists: {
-              field: 'agents',
-            },
-          },
         ],
       },
     },
   });
 
-  return res.hits.hits.map((hit) => hit._source?.data?.target_id as string);
+  return res.hits.hits.map((hit) => ({
+    actionId: hit._source?.data?.target_id as string,
+    timestamp: hit._source?.['@timestamp'],
+  }));
 }
 
-async function _getActions(esClient: ElasticsearchClient) {
+async function _getActions(
+  esClient: ElasticsearchClient,
+  options: ListWithKuery
+): Promise<ActionStatus[]> {
   const res = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
-    size: SO_SEARCH_LIMIT,
+    from: options.page ?? 0,
+    size: options.perPage ?? 20,
     query: {
       bool: {
         must_not: [
@@ -117,20 +181,23 @@ async function _getActions(esClient: ElasticsearchClient) {
         return acc;
       }
 
-      if (!acc[hit._source.action_id]) {
-        const startTime = hit._source?.start_time ?? hit._source?.['@timestamp'];
-        const isExpired = hit._source?.expiration
-          ? Date.parse(hit._source?.expiration) < Date.now()
-          : false;
+      const source = hit._source!;
+
+      if (!acc[source.action_id!]) {
+        const isExpired = source.expiration ? Date.parse(source.expiration) < Date.now() : false;
         acc[hit._source.action_id] = {
           actionId: hit._source.action_id,
           nbAgentsActionCreated: 0,
           nbAgentsAck: 0,
           version: hit._source.data?.version as string,
-          startTime,
-          type: hit._source?.type,
-          nbAgentsActioned: hit._source?.total ?? 0,
-          status: isExpired ? 'expired' : 'in progress',
+          startTime: source.start_time,
+          type: source.type,
+          nbAgentsActioned: source.total ?? 0,
+          status: isExpired ? 'EXPIRED' : 'IN_PROGRESS',
+          expiration: source.expiration,
+          newPolicyId: source.data?.policy_id as string,
+          creationTime: source['@timestamp']!,
+          nbAgentsFailed: 0,
         };
       }
 

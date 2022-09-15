@@ -75,6 +75,7 @@ export interface UsageStats {
   'doc_table:hideTimeColumn': boolean;
   'discover:sampleSize': number;
   'discover:sampleRowsPerPage': number;
+  'discover:showLegacyFieldTopValues': boolean;
   defaultColumns: string[];
   'context:defaultSize': number;
   'context:tieBreakerFields': string[];
