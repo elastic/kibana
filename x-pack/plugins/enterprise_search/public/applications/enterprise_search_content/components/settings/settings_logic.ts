@@ -84,9 +84,12 @@ export const SettingsLogic = kea<MakeLogicType<PipelinesValues, PipelinesActions
     apiError: (error) => flashAPIErrors(error),
     apiSuccess: (pipeline) => {
       flashSuccessToast(
-        i18n.translate('xpack.enterpriseSearch.content.indices.pipelines.successToast.title', {
-          defaultMessage: 'Default pipeline successfully updated',
-        })
+        i18n.translate(
+          'xpack.enterpriseSearch.content.indices.defaultPipelines.successToast.title',
+          {
+            defaultMessage: 'Default pipeline successfully updated',
+          }
+        )
       );
       actions.fetchDefaultPipelineSuccess(pipeline);
     },

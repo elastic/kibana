@@ -56,7 +56,7 @@ export const CustomPipelinePanel: React.FC<{
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow">
               {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.ingestPipelinesCard.customDescription',
+                'xpack.enterpriseSearch.content.indices.pipelines.ingestPipelinesCard.processorsDescription',
                 {
                   defaultMessage: '{processorsCount} Processors',
                   values: { processorsCount },

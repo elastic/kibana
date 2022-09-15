@@ -79,7 +79,7 @@ export const PipelineSettingsForm: React.FC<PipelineSettingsFormProps> = ({
           id="ingestPipelineRunMlInference"
           checked={runMLInference}
           description={i18n.translate(
-            'xpack.enterpriseSearch.content.index.pipelines.settings.reduceWhitespaceDescription',
+            'xpack.enterpriseSearch.content.index.pipelines.settings.runMlInferenceDescrition',
             {
               defaultMessage: 'Enhance your data using compatible trained ML models',
             }
