@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { packageToPackagePolicy } from '.';
 import type {
   NewPackagePolicyInput,
   NewPackagePolicyInputStream,
@@ -14,6 +13,8 @@ import type {
   PackageInfo,
 } from '../types';
 import { PackagePolicyValidationError } from '../errors';
+
+import { packageToPackagePolicy } from '.';
 
 export type SimplifiedVars = Record<string, string | string[] | boolean | number | number[] | null>;
 

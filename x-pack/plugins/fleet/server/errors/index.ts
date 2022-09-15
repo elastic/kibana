@@ -9,6 +9,7 @@
 import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
 import { IngestManagerError } from '../../common/errors';
+
 import { isESClientError } from './utils';
 
 export { defaultIngestErrorHandler, ingestErrorToResponseOptions } from './handlers';
