@@ -16,15 +16,11 @@ import type {
   SeverityMapping,
   Severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { Filter } from '@kbn/es-query';
+import type { DataViewBase, Filter } from '@kbn/es-query';
 import type { RuleAction, RuleResponseAction } from '@kbn/alerting-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
-import type { Unit } from '@kbn/datemath';
 
-import type {
-  RuleAlertAction,
-  RuleAlertResponseAction,
-} from '../../../../../common/detection_engine/types';
+import type { RuleAlertAction, RuleAlertResponseAction } from '../../../../../common/detection_engine/types';
 import type { FieldValueQueryBar } from '../../../components/rules/query_bar';
 import type { FieldValueTimeline } from '../../../components/rules/pick_timeline';
 import type { FieldValueThreshold } from '../../../components/rules/threshold_input';
@@ -149,6 +145,7 @@ export enum DataSourceType {
 export interface DefineStepRule {
   anomalyThreshold: number;
   index: string[];
+  indexPattern?: DataViewBase;
   machineLearningJobId: string[];
   queryBar: FieldValueQueryBar;
   dataViewId?: string;
@@ -248,17 +245,7 @@ export interface ActionsStepRuleJson {
   meta?: unknown;
 }
 
-export interface QuickQueryPreviewOptions {
-  timeframe: Unit;
-  timeframeEnd: moment.Moment;
-}
-
-export interface AdvancedPreviewForm {
-  interval: string;
-  lookback: string;
-}
-
-export interface AdvancedPreviewOptions {
+export interface TimeframePreviewOptions {
   timeframeStart: moment.Moment;
   timeframeEnd: moment.Moment;
   interval: string;

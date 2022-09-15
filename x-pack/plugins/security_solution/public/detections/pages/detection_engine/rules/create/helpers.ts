@@ -17,7 +17,6 @@ import type {
   List,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type {
-  ThreatMapping,
   Threats,
   ThreatSubtechnique,
   ThreatTechnique,
@@ -28,9 +27,9 @@ import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../common/const
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import {
   transformAlertToRuleAction,
-  transformAlertToRuleResponseAction,
+  transformAlertToRuleResponseAction
 } from '../../../../../../common/detection_engine/transform_actions';
-import type { Rule } from '../../../../containers/detection_engine/rules';
+
 import type {
   AboutStepRule,
   DefineStepRule,
@@ -42,16 +41,10 @@ import type {
   ActionsStepRuleJson,
   RuleStepsFormData,
   RuleStep,
-  AdvancedPreviewOptions,
 } from '../types';
 import { DataSourceType } from '../types';
-import type { FieldValueQueryBar } from '../../../../components/rules/query_bar';
 import type { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
-import { stepDefineDefaultValue } from '../../../../components/rules/step_define_rule';
-import { stepAboutDefaultValue } from '../../../../components/rules/step_about_rule/default_value';
 import { stepActionsDefaultValue } from '../../../../components/rules/step_rule_actions';
-import type { FieldValueThreshold } from '../../../../components/rules/threshold_input';
-import type { EqlOptionsSelected } from '../../../../../../common/search_strategy';
 
 export const getTimeTypeValue = (time: string): { unit: Unit; value: number } => {
   const timeObj: { unit: Unit; value: number } = {
@@ -574,89 +567,38 @@ export const formatRule = <T>(
   aboutStepData: AboutStepRule,
   scheduleData: ScheduleStepRule,
   actionsData: ActionsStepRule,
-  rule?: Rule | null
+  exceptionsList?: List[]
 ): T =>
   deepmerge.all([
     formatDefineStepData(defineStepData),
-    formatAboutStepData(aboutStepData, rule?.exceptions_list),
+    formatAboutStepData(aboutStepData, exceptionsList),
     formatScheduleStepData(scheduleData),
     formatActionsStepData(actionsData),
   ]) as unknown as T;
 
 export const formatPreviewRule = ({
-  index,
-  dataViewId,
-  dataSourceType,
-  query,
-  threatIndex,
-  threatQuery,
-  ruleType,
-  threatMapping,
-  timeFrame,
-  threshold,
-  machineLearningJobId,
-  anomalyThreshold,
-  eqlOptions,
-  newTermsFields,
-  historyWindowSize,
-  advancedOptions,
+  defineRuleData,
+  aboutRuleData,
+  scheduleRuleData,
+  exceptionsList,
 }: {
-  index: string[];
-  dataViewId?: string;
-  dataSourceType: DataSourceType;
-  threatIndex: string[];
-  query: FieldValueQueryBar;
-  threatQuery: FieldValueQueryBar;
-  ruleType: Type;
-  threatMapping: ThreatMapping;
-  timeFrame: Unit;
-  threshold: FieldValueThreshold;
-  machineLearningJobId: string[];
-  anomalyThreshold: number;
-  eqlOptions: EqlOptionsSelected;
-  newTermsFields: string[];
-  historyWindowSize: string;
-  advancedOptions?: AdvancedPreviewOptions;
+  defineRuleData: DefineStepRule;
+  aboutRuleData: AboutStepRule;
+  scheduleRuleData: ScheduleStepRule;
+  exceptionsList?: List[];
 }): CreateRulesSchema => {
-  const defineStepData = {
-    ...stepDefineDefaultValue,
-    index,
-    dataViewId,
-    dataSourceType,
-    queryBar: query,
-    ruleType,
-    threatIndex,
-    threatQueryBar: threatQuery,
-    threatMapping,
-    threshold,
-    machineLearningJobId,
-    anomalyThreshold,
-    eqlOptions,
-    newTermsFields,
-    historyWindowSize,
-  };
   const aboutStepData = {
-    ...stepAboutDefaultValue,
+    ...aboutRuleData,
     name: 'Preview Rule',
     description: 'Preview Rule',
   };
-  let scheduleStepData = {
-    from: `now-${timeFrame === 'M' ? '25h' : timeFrame === 'd' ? '65m' : '6m'}`,
-    interval: `${timeFrame === 'M' ? '1d' : timeFrame === 'd' ? '1h' : '5m'}`,
-  };
-  if (advancedOptions) {
-    scheduleStepData = {
-      interval: advancedOptions.interval,
-      from: advancedOptions.lookback,
-    };
-  }
   return {
     ...formatRule<CreateRulesSchema>(
-      defineStepData,
+      defineRuleData,
       aboutStepData,
-      scheduleStepData,
-      stepActionsDefaultValue
+      scheduleRuleData,
+      stepActionsDefaultValue,
+      exceptionsList
     ),
-    ...(!advancedOptions ? scheduleStepData : {}),
   };
 };
