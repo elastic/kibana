@@ -217,6 +217,17 @@ export const getProfileUids = (userActions: CaseUserActions[]) => {
       }
     }
 
+    if (
+      isPushedUserAction<'camelCase'>(userAction) &&
+      userAction.payload.externalService.pushedBy.profileUid != null
+    ) {
+      acc.add(userAction.payload.externalService.pushedBy.profileUid);
+    }
+
+    if (userAction.createdBy.profileUid != null) {
+      acc.add(userAction.createdBy.profileUid);
+    }
+
     return acc;
   }, new Set());
 

@@ -40,6 +40,7 @@ import {
   parseCommentString,
   getLensVisualizations,
 } from '../../common/utils/markdown_plugins/utils';
+import { dedupAssignees } from '../client/cases/utils';
 
 /**
  * Default sort field for querying saved objects.
@@ -69,7 +70,7 @@ export const transformNewCase = ({
   status: CaseStatuses.open,
   updated_at: null,
   updated_by: null,
-  assignees: newCase.assignees ?? [],
+  assignees: dedupAssignees(newCase.assignees) ?? [],
 });
 
 export const transformCases = ({
