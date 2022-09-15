@@ -366,7 +366,7 @@ export function prepareTemplate({
   pkg,
   dataStream,
 }: {
-  pkg: Pick<PackageInfo, 'name' | 'version'>;
+  pkg: Pick<PackageInfo, 'name' | 'version' | 'type'>;
   dataStream: RegistryDataStream;
 }): { componentTemplates: TemplateMap; indexTemplate: IndexTemplateEntry } {
   const { name: packageName, version: packageVersion } = pkg;

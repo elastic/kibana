@@ -2310,6 +2310,22 @@
           "trackAdoption": false,
           "children": [],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "actions",
+          "id": "def-server.PluginSetupContract.getActionsHealth",
+          "type": "Function",
+          "tags": [],
+          "label": "getActionsHealth",
+          "description": [],
+          "signature": [
+            "() => { hasPermanentEncryptionKey: boolean; }"
+          ],
+          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
