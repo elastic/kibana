@@ -70,7 +70,7 @@ export const AuthenticationPanelViewContent: React.FC = () => {
           'xpack.enterpriseSearch.crawler.authenticationPanel.configurationSavePanel.description',
           {
             defaultMessage:
-              'The authentication settings to crawl this domain have been securely saved. Delete and re-add an authentication mechanism to update these settings.',
+              'Authentication settings for crawling protected content have been saved. To update an authentication mechanism, delete settings and restart.',
           }
         )}
       </EuiText>
