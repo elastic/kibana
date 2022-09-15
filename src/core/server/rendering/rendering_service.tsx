@@ -44,12 +44,13 @@ export class RenderingService {
     uiPlugins,
   }: RenderingPrebootDeps): Promise<InternalRenderingServicePreboot> {
     http.registerRoutes<InternalRenderingRequestHandlerContext>('', (router) => {
-      const { staticBaseUrl } = http.basePath;
+      const { staticBaseUrl, serverBasePath } = http.basePath;
       registerBootstrapRoute({
         router,
         renderer: bootstrapRendererFactory({
           uiPlugins,
-          staticBaseUrl,
+          // Fallback to the server base path if a static path is not provided
+          staticBaseUrl: staticBaseUrl || serverBasePath,
           packageInfo: this.coreContext.env.packageInfo,
           auth: http.auth,
         }),
