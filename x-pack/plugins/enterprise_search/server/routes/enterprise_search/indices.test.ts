@@ -8,6 +8,7 @@
 import { MockRouter, mockDependencies } from '../../__mocks__';
 
 import { RequestHandlerContext } from '@kbn/core/server';
+
 import { ErrorCode } from '../../../common/types/error_codes';
 
 jest.mock('../../lib/indices/fetch_ml_inference_pipeline_processors', () => ({
@@ -106,7 +107,7 @@ describe('Enterprise Search Managed Indices', () => {
 
     it('fails validation without index_name', () => {
       const request = {
-        params: {}
+        params: {},
       };
       mockRouter.shouldThrow(request);
     });
@@ -114,7 +115,7 @@ describe('Enterprise Search Managed Indices', () => {
     it('fails validation without required body properties', () => {
       const request = {
         params: { indexName: 'my-index-name' },
-        body: {}
+        body: {},
       };
       mockRouter.shouldThrow(request);
     });
@@ -124,13 +125,13 @@ describe('Enterprise Search Managed Indices', () => {
         return Promise.resolve({
           id: 'ml-inference-my-pipeline-name',
           created: true,
-          addedToParentPipeline: true
+          addedToParentPipeline: true,
         });
       });
 
       await mockRouter.callRoute({
         params: { indexName: 'my-index-name' },
-        body: mockRequestBody
+        body: mockRequestBody,
       });
 
       expect(createAndReferenceMlInferencePipeline).toHaveBeenCalledWith(
@@ -144,7 +145,7 @@ describe('Enterprise Search Managed Indices', () => {
 
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: {
-          created: 'ml-inference-my-pipeline-name'
+          created: 'ml-inference-my-pipeline-name',
         },
         headers: { 'content-type': 'application/json' },
       });
@@ -157,12 +158,14 @@ describe('Enterprise Search Managed Indices', () => {
 
       await mockRouter.callRoute({
         params: { indexName: 'my-index-name' },
-        body: mockRequestBody
+        body: mockRequestBody,
       });
 
-      expect(mockRouter.response.customError).toHaveBeenCalledWith(expect.objectContaining({
-        statusCode: 409,
-      }));
+      expect(mockRouter.response.customError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          statusCode: 409,
+        })
+      );
     });
   });
 });
