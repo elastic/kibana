@@ -203,11 +203,7 @@ export const useDashboardAppState = ({
         // if there is an incoming embeddable, dashboard always needs to be in edit mode to receive it.
         ...(incomingEmbeddable ? { viewMode: ViewMode.EDIT } : {}),
       };
-      initialDashboardState.filters = initialDashboardState.filters.filter((filter) => {
-        return !isFilterPinned(filter);
-      });
       dispatchDashboardStateChange(setDashboardState(initialDashboardState));
-
       /**
        * Start syncing dashboard state with the Query, Filters and Timepicker from the Query Service.
        */

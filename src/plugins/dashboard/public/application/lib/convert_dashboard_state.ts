@@ -103,9 +103,13 @@ export const stateToDashboardContainerInput = ({
     filters: dashboardFilters,
   } = dashboardState;
 
+  const containerFilters = dashboardFilters.concat(
+    filterManager.getFilters().filter((f) => isFilterPinned(f))
+  );
+
   return {
     refreshConfig: timefilter.getRefreshInterval(),
-    filters: dashboardFilters.concat(filterManager.getFilters().filter((f) => isFilterPinned(f))),
+    filters: containerFilters,
     isFullScreenMode: fullScreenMode,
     id: savedDashboard.id || '',
     isEmbeddedExternally,
