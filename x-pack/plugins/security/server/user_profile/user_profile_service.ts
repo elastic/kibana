@@ -15,6 +15,7 @@ import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type {
+  SecurityLicense,
   UserProfile,
   UserProfileData,
   UserProfileLabels,
@@ -91,6 +92,7 @@ export interface UserProfileServiceStartInternal extends UserProfileServiceStart
 
 export interface UserProfileServiceSetupParams {
   authz: AuthorizationServiceSetupInternal;
+  license: SecurityLicense;
 }
 
 export interface UserProfileServiceStartParams {
@@ -214,10 +216,12 @@ function parseUserProfileWithSecurity<D extends UserProfileData>(
 
 export class UserProfileService {
   private authz?: AuthorizationServiceSetupInternal;
+  private license?: SecurityLicense;
   constructor(private readonly logger: Logger) {}
 
-  setup({ authz }: UserProfileServiceSetupParams) {
+  setup({ authz, license }: UserProfileServiceSetupParams) {
     this.authz = authz;
+    this.license = license;
   }
 
   start({ clusterClient, session }: UserProfileServiceStartParams) {
@@ -396,6 +400,10 @@ export class UserProfileService {
     clusterClient: IClusterClient,
     params: UserProfileSuggestParams
   ): Promise<Array<UserProfile<D>>> {
+    if (!this.license?.getFeatures().allowUserProfileCollaboration) {
+      throw Error("Current license doesn't support user profile collaboration APIs.");
+    }
+
     const { name, size = DEFAULT_SUGGESTIONS_COUNT, dataPath, requiredPrivileges } = params;
     if (size > MAX_SUGGESTIONS_COUNT) {
       throw Error(

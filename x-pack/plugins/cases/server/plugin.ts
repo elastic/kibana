@@ -172,6 +172,7 @@ export class CasePlugin {
       spaces: plugins.spaces,
       securityPluginSetup: this.securityPluginSetup,
       securityPluginStart: plugins.security,
+      licensingPluginStart: plugins.licensing,
     });
 
     this.clientFactory.initialize({
