@@ -283,15 +283,21 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const liveQueryActionId = useMemo(() => liveQueryDetails?.action_id, [liveQueryDetails]);
 
   const addToCaseButton = useCallback(
-    (payload) => (
-      <AddToCaseButton
-        queryId={payload.queryId}
-        agentIds={agentIds}
-        actionId={liveQueryActionId || ''}
-        isIcon={payload.isIcon}
-        isDisabled={payload.isDisabled}
-      />
-    ),
+    (payload) => {
+      if (liveQueryActionId) {
+        return (
+          <AddToCaseButton
+            queryId={payload.queryId}
+            agentIds={agentIds}
+            actionId={liveQueryActionId}
+            isIcon={payload.isIcon}
+            isDisabled={payload.isDisabled}
+          />
+        );
+      }
+
+      return <></>;
+    },
     [agentIds, liveQueryActionId]
   );
 

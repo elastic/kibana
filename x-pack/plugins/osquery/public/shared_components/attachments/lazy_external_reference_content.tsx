@@ -42,7 +42,7 @@ export const getLazyExternalContent =
           body={
             <FormattedMessage
               id="xpack.osquery.cases.permissionDenied"
-              defaultMessage=" To access this results, ask your administrator for {osquery} Kibana
+              defaultMessage=" To access these results, ask your administrator for {osquery} Kibana
               privileges."
               // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
               values={{
