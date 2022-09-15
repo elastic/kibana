@@ -44,7 +44,7 @@ export const initialUsersState: UsersModel = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
-          field: RiskScoreFields.riskScore,
+          field: RiskScoreFields.userRiskScore,
           direction: Direction.desc,
         },
         severitySelection: [],
