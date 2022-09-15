@@ -13,7 +13,6 @@ import {
   HOST_RISK_COLUMN,
   USER_RISK_COLUMN,
   ACTION_COLUMN,
-  CLOSE_FLYOUT,
 } from '../../screens/alerts';
 import { ENRICHED_DATA_ROW } from '../../screens/alerts_details';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
@@ -21,7 +20,11 @@ import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
-import { expandFirstAlert, scrollAlertTableColumnIntoView } from '../../tasks/alerts';
+import {
+  expandFirstAlert,
+  scrollAlertTableColumnIntoView,
+  closeAlertFlyout,
+} from '../../tasks/alerts';
 
 import { login, visit } from '../../tasks/login';
 
@@ -38,6 +41,7 @@ describe('Enrichment', () => {
   after(() => {
     esArchiverUnload('risky_hosts');
     esArchiverUnload('risky_users');
+    esArchiverUnload('risky_hosts_updated');
   });
   describe('Custom query rule', () => {
     beforeEach(() => {
@@ -63,7 +67,7 @@ describe('Enrichment', () => {
       cy.get(ENRICHED_DATA_ROW).contains('Critical').should('not.exist');
       cy.get(ENRICHED_DATA_ROW).contains('Original host risk classification').should('not.exist');
 
-      cy.get(CLOSE_FLYOUT).click();
+      closeAlertFlyout();
       esArchiverUnload('risky_hosts');
       esArchiverLoad('risky_hosts_updated');
       expandFirstAlert();
