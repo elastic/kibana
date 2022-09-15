@@ -47,7 +47,7 @@ export function elasticsearchErrorHandler<ContextType, RequestType, ResponseType
         log.error(
           i18n.translate('xpack.enterpriseSearch.server.routes.errorLogMessage', {
             defaultMessage:
-              'An error occured while resolving request to {requestUrl}: {errorMessage}',
+              'An error occurred while resolving request to {requestUrl}: {errorMessage}',
             values: {
               errorMessage: enterpriseSearchError.message,
               requestUrl: request.url.toString(),

@@ -24,9 +24,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { InferencePipeline } from '../../../../../../common/types/pipelines';
 import { HttpLogic } from '../../../../shared/http';
-
-import { InferencePipeline } from './types';
 
 export const InferencePipelineCard: React.FC<InferencePipeline> = ({
   pipelineName,
