@@ -33,7 +33,7 @@ export const AuthenticationPanel: React.FC = () => {
         title={
           <h2>
             {i18n.translate('xpack.enterpriseSearch.crawler.authenticationPanel.title', {
-              defaultMessage: 'Authentiction',
+              defaultMessage: 'Authentication',
             })}
           </h2>
         }
