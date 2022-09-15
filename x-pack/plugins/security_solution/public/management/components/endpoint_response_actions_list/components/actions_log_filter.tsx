@@ -80,7 +80,7 @@ export const ActionsLogFilter = memo(
     const sortedHostsFilterOptions = useMemo(() => {
       if (shouldPinSelectedHosts() || areHostsSelectedOnMount) {
         // pin checked items to the top
-       return orderBy('checked', 'asc', items);
+        return orderBy('checked', 'asc', items);
       }
       // return options as is for other filters
       return items;
