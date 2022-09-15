@@ -607,6 +607,8 @@ export type InferSearchResponseOf<
 > = Omit<estypes.SearchResponse<TDocument>, 'aggregations' | 'hits'> &
   (TSearchRequest['body'] extends TopLevelAggregationRequest
     ? WrapAggregationResponse<SearchResponseOf<TSearchRequest['body'], TDocument>>
+    : TSearchRequest extends TopLevelAggregationRequest
+    ? WrapAggregationResponse<SearchResponseOf<TSearchRequest, TDocument>>
     : { aggregations?: InvalidAggregationRequest }) & {
     hits: Omit<estypes.SearchResponse<TDocument>['hits'], 'total' | 'hits'> &
       (TOptions['restTotalHitsAsInt'] extends true
@@ -618,5 +620,12 @@ export type InferSearchResponseOf<
               value: number;
               relation: 'eq' | 'gte';
             };
-          }) & { hits: HitsOf<TSearchRequest['body'], TDocument> };
+          }) & {
+        hits: HitsOf<
+          TSearchRequest['body'] extends estypes.SearchRequest['body']
+            ? TSearchRequest['body']
+            : TSearchRequest,
+          TDocument
+        >;
+      };
   };

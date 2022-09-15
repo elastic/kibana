@@ -36,7 +36,7 @@ export interface RouteWithPath extends Route {
 }
 
 export interface RouteMatch<TRoute extends Route = Route> {
-  route: TRoute;
+  route: TRoute & { path: string };
   match: {
     isExact: boolean;
     path: string;
@@ -146,7 +146,7 @@ export interface Router<TRoutes extends RouteMap> {
     path: TPath,
     ...args: TypeAsArgs<TypeOf<TRoutes, TPath, false>>
   ): string;
-  getRoutePath(route: Route): string;
+  getRoutePath(route: RouteWithPath): string;
   getRoutesToMatch(path: string): FlattenRoutesOf<TRoutes>;
 }
 
