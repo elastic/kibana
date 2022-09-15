@@ -4,70 +4,92 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiRange } from '@elastic/eui';
-import React from 'react';
-import { useStyles } from './styles';
 
-type Markers = {
-  value: number;
+import React, { ChangeEvent, MouseEvent, useMemo } from 'react';
+import { EuiRange } from '@elastic/eui';
+import type { ProcessStartMarker } from '../../../../common/types/process_tree';
+import { useStyles } from './styles';
+import { Scrubber } from './scrubber';
+
+type Props = {
+  processStartMarkers: ProcessStartMarker[];
+  linesLength: number;
+  currentLine: number;
+  onChange: (e: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) => void;
+};
+
+type TTYPlayerLineMarker = {
+  line: number;
   type: 'output' | 'data_limited';
 };
 
-type Props = {
-  markers: Markers[];
-  playerLength: number;
-  playerValue: number;
-  onChange: any;
-};
-
 export const TTYPlayerControlsMarkers = ({
-  markers,
-  playerLength,
-  playerValue,
+  processStartMarkers,
+  linesLength,
+  currentLine,
   onChange,
 }: Props) => {
   const styles = useStyles();
 
+  const markers = useMemo(() => {
+    if (processStartMarkers.length < 1) {
+      return [];
+    }
+    return processStartMarkers.map(
+      ({ event, line }) =>
+        ({
+          type:
+            event.process?.io?.max_bytes_per_process_exceeded === true ? 'data_limited' : 'output',
+          line,
+        } as TTYPlayerLineMarker)
+    );
+  }, [processStartMarkers]);
+
   const markersLength = markers.length;
-  if (markersLength === 0) {
+  if (!markersLength) {
     return null;
   }
+
   const currentSelected =
-    playerValue >= markers[markersLength - 1].value
+    currentLine >= markers[markersLength - 1].line
       ? markersLength - 1
-      : markers.findIndex((marker) => marker.value >= playerValue);
-  const currentSelectedType = markers[Math.max(0, currentSelected - 1)]?.type;
+      : markers.findIndex((marker) => marker.line > currentLine) - 1;
+
+  const currentSelectedType = markers[Math.max(0, currentSelected)].type;
 
   return (
     <>
       <EuiRange
-        value={playerValue}
+        value={currentLine}
         min={0}
-        max={Math.max(0, playerLength - 1)}
+        max={Math.max(0, linesLength - 1)}
         onChange={onChange}
         fullWidth
         showRange
         css={styles.range}
-        // {...ticksProps}
       />
-      <span
+      <Scrubber
         css={styles.scrubber(currentSelectedType)}
-        style={{ left: `${(playerValue * 100) / playerLength}%` }}
+        style={{ left: `${(currentLine * 100) / linesLength}%` }}
       />
-      <div css={styles.wrapper}>
-        {markers.map(({ value, type }, idx) => {
+      <div css={styles.markersOverlay}>
+        {markers.map(({ line, type }, idx) => {
           const selected =
-            playerValue >= value &&
-            (idx === markersLength - 1 || playerValue < markers[idx + 1].value);
+            currentLine >= line &&
+            (idx === markersLength - 1 || currentLine < markers[idx + 1].line);
+
+          // markers positions are absolute, setting higher z-index on the selected one in case there
+          // are severals next to each other
           const style = {
-            left: `${(value * 100) / playerLength}%`,
+            left: `${(line * 100) / linesLength}%`,
             zIndex: selected ? 3 : 2,
           };
 
           return (
             <button
+              key={idx}
               type="button"
-              value={value}
+              value={line}
               tabIndex={-1}
               title={type}
               css={styles.marker(type, selected)}
