@@ -18,7 +18,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
       typeMeta: '{}',
     },
     coreMigrationVersion: '8.3.0',
-    id: 'ml-user-risk-score-latest-<REPLACE-WITH-SPACE>-index-pattern',
+    id: '<REPLACE-WITH-ID9>',
     migrationVersion: { 'index-pattern': '8.0.0' },
     references: [],
     type: 'index-pattern',
@@ -102,7 +102,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
     migrationVersion: { lens: '8.3.0' },
     references: [
       {
-        id: 'ml-user-risk-score-latest-<REPLACE-WITH-SPACE>-index-pattern',
+        id: '<REPLACE-WITH-ID9>',
         name: 'indexpattern-datasource-layer-b4c8cd6f-2499-4791-a0f7-01b0d3f75efc',
         type: 'index-pattern',
       },
@@ -120,7 +120,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
       typeMeta: '{}',
     },
     coreMigrationVersion: '8.3.0',
-    id: 'ml-user-risk-score-<REPLACE-WITH-SPACE>-index-pattern',
+    id: '<REPLACE-WITH-ID10>',
     migrationVersion: { 'index-pattern': '8.0.0' },
     references: [],
     type: 'index-pattern',
@@ -213,7 +213,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
     migrationVersion: { lens: '8.3.0' },
     references: [
       {
-        id: 'ml-user-risk-score-<REPLACE-WITH-SPACE>-index-pattern',
+        id: '<REPLACE-WITH-ID10>',
         name: 'indexpattern-datasource-layer-b885eaad-3c68-49ad-9891-70158d912dbd',
         type: 'index-pattern',
       },
@@ -231,7 +231,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
       typeMeta: '{}',
     },
     coreMigrationVersion: '8.3.0',
-    id: 'alerts-<REPLACE-WITH-SPACE>-index-pattern',
+    id: '<REPLACE-WITH-ID11>',
     migrationVersion: { 'index-pattern': '8.0.0' },
     references: [],
     type: 'index-pattern',
@@ -255,7 +255,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
     migrationVersion: { visualization: '8.3.0' },
     references: [
       {
-        id: 'alerts-<REPLACE-WITH-SPACE>-index-pattern',
+        id: '<REPLACE-WITH-ID11>',
         name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
         type: 'index-pattern',
       },
@@ -281,7 +281,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
     migrationVersion: { visualization: '8.3.0' },
     references: [
       {
-        id: 'alerts-<REPLACE-WITH-SPACE>-index-pattern',
+        id: '<REPLACE-WITH-ID11>',
         name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
         type: 'index-pattern',
       },
@@ -307,7 +307,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
     migrationVersion: { visualization: '8.3.0' },
     references: [
       {
-        id: 'alerts-<REPLACE-WITH-SPACE>-index-pattern',
+        id: '<REPLACE-WITH-ID11>',
         name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
         type: 'index-pattern',
       },

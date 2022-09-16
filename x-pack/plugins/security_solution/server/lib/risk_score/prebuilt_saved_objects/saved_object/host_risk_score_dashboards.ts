@@ -18,7 +18,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
       title: 'ml_host_risk_score_<REPLACE-WITH-SPACE>',
     },
     coreMigrationVersion: '7.13.4',
-    id: 'ml-host-risk-score-<REPLACE-WITH-SPACE>-index-pattern',
+    id: '<REPLACE-WITH-ID10>',
     migrationVersion: { 'index-pattern': '7.11.0' },
     references: [],
     type: 'index-pattern',
@@ -107,12 +107,12 @@ export const hostRiskScoreDashboards: SavedObject[] = [
     migrationVersion: { lens: '7.13.1' },
     references: [
       {
-        id: 'ml-host-risk-score-<REPLACE-WITH-SPACE>-index-pattern',
+        id: '<REPLACE-WITH-ID10>',
         name: 'indexpattern-datasource-current-indexpattern',
         type: 'index-pattern',
       },
       {
-        id: 'ml-host-risk-score-<REPLACE-WITH-SPACE>-index-pattern',
+        id: '<REPLACE-WITH-ID10>',
         name: 'indexpattern-datasource-layer-b885eaad-3c68-49ad-9891-70158d912dbd',
         type: 'index-pattern',
       },
@@ -129,7 +129,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
       title: '.alerts-security.alerts-<REPLACE-WITH-SPACE>',
     },
     coreMigrationVersion: '7.13.4',
-    id: 'alerts-<REPLACE-WITH-SPACE>-index-pattern',
+    id: '<REPLACE-WITH-ID11>',
     migrationVersion: { 'index-pattern': '7.11.0' },
     references: [],
     type: 'index-pattern',
@@ -153,7 +153,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
     migrationVersion: { visualization: '7.13.1' },
     references: [
       {
-        id: 'alerts-<REPLACE-WITH-SPACE>-index-pattern',
+        id: '<REPLACE-WITH-ID11>',
         name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
         type: 'index-pattern',
       },
@@ -179,7 +179,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
     migrationVersion: { visualization: '7.13.1' },
     references: [
       {
-        id: 'alerts-<REPLACE-WITH-SPACE>-index-pattern',
+        id: '<REPLACE-WITH-ID11>',
         name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
         type: 'index-pattern',
       },
@@ -205,7 +205,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
     migrationVersion: { visualization: '7.13.1' },
     references: [
       {
-        id: 'alerts-<REPLACE-WITH-SPACE>-index-pattern',
+        id: '<REPLACE-WITH-ID11>',
         name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
         type: 'index-pattern',
       },
@@ -278,7 +278,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
       title: 'ml_host_risk_score_latest_<REPLACE-WITH-SPACE>',
     },
     coreMigrationVersion: '7.13.4',
-    id: 'ml-host-risk-score-latest-<REPLACE-WITH-SPACE>-index-pattern',
+    id: '<REPLACE-WITH-ID9>',
     migrationVersion: { 'index-pattern': '7.11.0' },
     references: [],
     type: 'index-pattern',
@@ -363,12 +363,12 @@ export const hostRiskScoreDashboards: SavedObject[] = [
     migrationVersion: { lens: '7.13.1' },
     references: [
       {
-        id: 'ml-host-risk-score-latest-<REPLACE-WITH-SPACE>-index-pattern',
+        id: '<REPLACE-WITH-ID9>',
         name: 'indexpattern-datasource-current-indexpattern',
         type: 'index-pattern',
       },
       {
-        id: 'ml-host-risk-score-latest-<REPLACE-WITH-SPACE>-index-pattern',
+        id: '<REPLACE-WITH-ID9>',
         name: 'indexpattern-datasource-layer-2f34d626-d0ee-4ade-9e75-13c480699485',
         type: 'index-pattern',
       },

@@ -4,40 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import uuid from 'uuid';
-import type { FrameworkRequest } from '../../../framework';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import * as savedObjectsToCreate from '../saved_object';
 import type { SavedObjectTemplate } from '../types';
+import { findOrCreateRiskScoreTag } from './find_or_create_tag';
 
 export const bulkCreateSavedObjects = async ({
-  request,
+  savedObjectsClient,
   spaceId,
   savedObjectTemplate,
 }: {
-  request: FrameworkRequest;
+  savedObjectsClient: SavedObjectsClientContract;
   spaceId?: string;
   savedObjectTemplate: SavedObjectTemplate;
 }) => {
-  const savedObjectsClient = (await request.context.core).savedObjects.client;
   const regex = /<REPLACE-WITH-SPACE>/g;
-  const RISK_SCORE_TAG_NAME = 'Risk Score' as const;
-  const RISK_SCORE_TAG_DESCRIPTION = 'Security Solution Risk Score auto-generated tag' as const;
 
-  const {
-    id: tagId,
-    attributes: { name },
-    type,
-  } = await savedObjectsClient.create('tag', {
-    name: `${RISK_SCORE_TAG_NAME} - ${spaceId}`,
-    description: RISK_SCORE_TAG_DESCRIPTION,
-    color: '#6edb7f',
-  });
+  const riskScoreEntity =
+    savedObjectTemplate === 'userRiskScoreDashboards' ? RiskScoreEntity.user : RiskScoreEntity.host;
+  const tag = await findOrCreateRiskScoreTag({ riskScoreEntity, savedObjectsClient, spaceId });
 
   const mySavedObjects = savedObjectsToCreate[savedObjectTemplate];
 
   const idReplaceMappings: Record<string, string> = {};
-  mySavedObjects.forEach((so, i) => {
+  mySavedObjects.forEach((so) => {
     if (so.id.startsWith('<REPLACE-WITH-ID')) {
       idReplaceMappings[so.id] = uuid.v4();
     }
@@ -50,7 +42,7 @@ export const bulkCreateSavedObjects = async ({
     return {
       ...so,
       id: idReplaceMappings[so.id] ?? so.id,
-      references: [...references, { id: tagId, name, type }],
+      references: [...references, { id: tag.id, name: tag.name, type: tag.type }],
     };
   });
 

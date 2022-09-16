@@ -40,9 +40,10 @@ export const deletePrebuiltSavedObjectsRoute = (
         const spaceId = securitySolution?.getSpaceId();
 
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
+        const savedObjectsClient = (await frameworkRequest.context.core).savedObjects.client;
 
         const res = await bulkDeleteSavedObjects({
-          request: frameworkRequest,
+          savedObjectsClient,
           spaceId,
           savedObjectTemplate: templateName,
         });

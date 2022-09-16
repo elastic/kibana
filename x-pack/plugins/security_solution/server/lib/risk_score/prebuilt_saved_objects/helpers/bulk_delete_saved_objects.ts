@@ -6,19 +6,25 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { FrameworkRequest } from '../../../framework';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import * as savedObjectsToCreate from '../saved_object';
 import type { SavedObjectTemplate } from '../types';
+import { findRiskScoreTag } from './find_or_create_tag';
+import { RISK_SCORE_REPLACE_ID_MAPPINGS, getRiskScoreTagName } from './utils';
 
 const deleteSavedObject = async ({
+  checkObjectExists,
   savedObjectsClient,
   options: { type, id },
 }: {
+  checkObjectExists?: boolean;
   savedObjectsClient: SavedObjectsClientContract;
   options: { type: string; id: string };
 }) => {
   try {
-    await savedObjectsClient.get(type, id);
+    if (checkObjectExists) {
+      await savedObjectsClient.get(type, id);
+    }
     await savedObjectsClient.delete(type, id);
     return id;
   } catch (e) {
@@ -26,32 +32,121 @@ const deleteSavedObject = async ({
   }
 };
 
+const deleteSavedObjects = async ({
+  checkObjectExists,
+  savedObjects,
+  savedObjectsClient,
+  spaceId = 'default',
+}: {
+  checkObjectExists?: boolean;
+  savedObjectsClient: SavedObjectsClientContract;
+  savedObjects: Array<{ id: string; type: string }>;
+  spaceId?: string;
+}) => {
+  const result = await Promise.all(
+    savedObjects.map((so) => {
+      deleteSavedObject({
+        checkObjectExists,
+        savedObjectsClient,
+        options: { type: so.type, id: so.id },
+      });
+      return so.id;
+    })
+  );
+
+  return result;
+};
+
+const deleteSavedObjectsWithTag = async ({
+  savedObjectsClient,
+  savedObjectTypes,
+  spaceId,
+  tagId,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectTypes: string[];
+  spaceId?: string;
+  tagId: string;
+}) => {
+  const linkedSavedObjects = await savedObjectsClient.find({
+    type: savedObjectTypes,
+    hasReference: {
+      type: 'tag',
+      id: tagId,
+    },
+  });
+
+  try {
+    const deleteIds = await deleteSavedObjects({
+      savedObjectsClient,
+      savedObjects: linkedSavedObjects.saved_objects,
+      spaceId,
+    });
+    await savedObjectsClient.delete('tag', tagId);
+
+    return [...deleteIds, tagId];
+  } catch (e) {
+    return e;
+  }
+};
+
 export const bulkDeleteSavedObjects = async ({
-  request,
+  savedObjectsClient,
   spaceId,
   savedObjectTemplate,
 }: {
-  request: FrameworkRequest;
+  savedObjectsClient: SavedObjectsClientContract;
   spaceId?: string;
   savedObjectTemplate: SavedObjectTemplate;
 }) => {
-  const savedObjectsClient = (await request.context.core).savedObjects.client;
-  const regex = /<REPLACE-WITH-SPACE>/g;
-
   const savedObjects = savedObjectsToCreate[savedObjectTemplate];
+  const idReplaceMappings = RISK_SCORE_REPLACE_ID_MAPPINGS[savedObjectTemplate];
+  const riskScoreEntity =
+    savedObjectTemplate === 'userRiskScoreDashboards' ? RiskScoreEntity.user : RiskScoreEntity.host;
 
   if (savedObjects == null) {
     return new Error('Template not found.');
   }
 
-  const result = await Promise.all(
-    savedObjects.map((so) => {
-      const id = spaceId ? so.id.replace(regex, spaceId) : so.id;
+  const tagName = getRiskScoreTagName(riskScoreEntity, spaceId);
+  const tag = await findRiskScoreTag({ savedObjectsClient, search: tagName });
 
-      deleteSavedObject({ savedObjectsClient, options: { type: so.type, id } });
-      return id;
-    })
-  );
+  /**
+   * This is to delete the saved objects installed before 8.5
+   * These saved objects were created according to these mappings:
+   * prebuilt_saved_objects/helpers/utils.ts RISK_SCORE_REPLACE_ID_MAPPINGS
+   * */
+  const regex = /<REPLACE-WITH-SPACE>/g;
 
-  return result;
+  const deleteLegacySavedObjectResults = await deleteSavedObjects({
+    checkObjectExists: true,
+    savedObjectsClient,
+    spaceId,
+    savedObjects: savedObjects.map((so) => {
+      const legacyId = idReplaceMappings[so.id] ?? so.id;
+      return {
+        id: spaceId ? legacyId.replace(regex, spaceId) : legacyId,
+        type: so.type,
+      };
+    }),
+  });
+
+  let deleteSavedObjectResults = [];
+  if (tag) {
+    /**
+     * Since 8.5 all the saved objects are created with dynamic ids and all link to a tag.
+     * (As create saved objects with static ids causes conflict across different spaces)
+     * so just need to delete all the objects that links to the tag
+     * and the tag itself
+     * */
+    const savedObjectsTypes = new Set(savedObjects.map((so) => so.type));
+    deleteSavedObjectResults = await deleteSavedObjectsWithTag({
+      savedObjectsClient,
+      tagId: tag.id,
+      spaceId,
+      savedObjectTypes: Array.from(savedObjectsTypes),
+    });
+  }
+
+  return [...deleteLegacySavedObjectResults, ...deleteSavedObjectResults];
 };
