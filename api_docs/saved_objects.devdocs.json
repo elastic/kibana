@@ -649,10 +649,6 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/services/saved_objects.ts"
-          },
-          {
-            "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/application/top_nav/save_modal.tsx"
           },
           {
@@ -1561,7 +1557,15 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/services/saved_objects.ts"
+            "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx"
           },
           {
             "plugin": "dashboard",
@@ -1578,18 +1582,6 @@
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/application/lib/dashboard_tagging.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx"
           }
         ],
         "children": [

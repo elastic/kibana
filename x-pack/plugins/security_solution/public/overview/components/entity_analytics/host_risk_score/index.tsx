@@ -17,6 +17,8 @@ import {
 
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import { RiskEntity } from '../../../../risk_score/containers/feature_status/api';
+import { RiskScoresDeprecated } from '../../../../common/components/risk_score_deprecated';
 import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
@@ -40,7 +42,6 @@ import { useCheckSignalIndex } from '../../../../detections/containers/detection
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
 import { useEnableHostRiskFromUrl } from '../../../../common/hooks/use_enable_host_risk_from_url';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const TABLE_QUERY_ID = 'hostRiskDashboardTable';
 
@@ -49,14 +50,13 @@ const IconWrapper = styled.span`
 `;
 
 export const EntityAnalyticsHostRiskScores = () => {
-  const { deleteQuery, setQuery } = useGlobalTime();
+  const { deleteQuery, setQuery, to, from } = useGlobalTime();
   const [updatedAt, setUpdatedAt] = useState<number>(Date.now());
   const { toggleStatus, setToggleStatus } = useQueryToggle(TABLE_QUERY_ID);
   const columns = useMemo(() => getHostRiskScoreColumns(), []);
   const [selectedSeverity, setSelectedSeverity] = useState<RiskSeverity[]>([]);
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
   const dispatch = useDispatch();
-  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
   const severityFilter = useMemo(() => {
     const [filter] = generateSeverityFilter(selectedSeverity, RiskScoreEntity.host);
@@ -69,13 +69,17 @@ export const EntityAnalyticsHostRiskScores = () => {
     skip: !toggleStatus,
   });
 
-  const [isTableLoading, { data, inspect, refetch, isModuleEnabled }] = useHostRiskScore({
+  const [
+    isTableLoading,
+    { data, inspect, refetch, isDeprecated, isLicenseValid, isModuleEnabled },
+  ] = useHostRiskScore({
     filterQuery: severityFilter,
     skip: !toggleStatus,
     pagination: {
       cursorStart: 0,
       querySize: 5,
     },
+    timerange: { to, from },
   });
 
   useQueryInspector({
@@ -124,12 +128,16 @@ export const EntityAnalyticsHostRiskScores = () => {
     );
   }, []);
 
-  if (!riskyHostsFeatureEnabled) {
+  if (!isLicenseValid) {
     return null;
   }
 
   if (!isModuleEnabled && !isTableLoading) {
     return <EntityAnalyticsHostRiskScoresDisable />;
+  }
+
+  if (isDeprecated) {
+    return <RiskScoresDeprecated entityType={RiskEntity.host} />;
   }
 
   return (
