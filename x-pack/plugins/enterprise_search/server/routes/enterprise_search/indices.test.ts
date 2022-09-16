@@ -9,8 +9,13 @@ import { MockRouter, mockDependencies } from '../../__mocks__';
 
 import { RequestHandlerContext } from '@kbn/core/server';
 
+import { ErrorCode } from '../../../common/types/error_codes';
+
 jest.mock('../../lib/indices/fetch_ml_inference_pipeline_processors', () => ({
   fetchMlInferencePipelineProcessors: jest.fn(),
+}));
+jest.mock('../../utils/create_ml_inference_pipeline', () => ({
+  createAndReferenceMlInferencePipeline: jest.fn(),
 }));
 jest.mock('../../lib/indices/delete_ml_inference_pipeline', () => ({
   deleteMlInferencePipeline: jest.fn(),
@@ -18,17 +23,18 @@ jest.mock('../../lib/indices/delete_ml_inference_pipeline', () => ({
 
 import { deleteMlInferencePipeline } from '../../lib/indices/delete_ml_inference_pipeline';
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/fetch_ml_inference_pipeline_processors';
+import { createAndReferenceMlInferencePipeline } from '../../utils/create_ml_inference_pipeline';
 import { ElasticsearchResponseError } from '../../utils/identify_exceptions';
 
 import { registerIndexRoutes } from './indices';
 
 describe('Enterprise Search Managed Indices', () => {
+  let mockRouter: MockRouter;
   const mockClient = {
     asCurrentUser: {},
   };
 
   describe('GET /internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors', () => {
-    let mockRouter: MockRouter;
     beforeEach(() => {
       const context = {
         core: Promise.resolve({ elasticsearch: { client: mockClient } }),
@@ -78,8 +84,98 @@ describe('Enterprise Search Managed Indices', () => {
     });
   });
 
+  describe('POST /internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors', () => {
+    const mockRequestBody = {
+      model_id: 'my-model-id',
+      pipeline_name: 'my-pipeline-name',
+      source_field: 'my-source-field',
+      destination_field: 'my-dest-field',
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      const context = {
+        core: Promise.resolve({ elasticsearch: { client: mockClient } }),
+      } as jest.Mocked<RequestHandlerContext>;
+
+      mockRouter = new MockRouter({
+        context,
+        method: 'post',
+        path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors',
+      });
+
+      registerIndexRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('fails validation without index_name', () => {
+      const request = {
+        params: {},
+      };
+      mockRouter.shouldThrow(request);
+    });
+
+    it('fails validation without required body properties', () => {
+      const request = {
+        params: { indexName: 'my-index-name' },
+        body: {},
+      };
+      mockRouter.shouldThrow(request);
+    });
+
+    it('creates an ML inference pipeline', async () => {
+      (createAndReferenceMlInferencePipeline as jest.Mock).mockImplementationOnce(() => {
+        return Promise.resolve({
+          id: 'ml-inference-my-pipeline-name',
+          created: true,
+          addedToParentPipeline: true,
+        });
+      });
+
+      await mockRouter.callRoute({
+        params: { indexName: 'my-index-name' },
+        body: mockRequestBody,
+      });
+
+      expect(createAndReferenceMlInferencePipeline).toHaveBeenCalledWith(
+        'my-index-name',
+        mockRequestBody.pipeline_name,
+        mockRequestBody.model_id,
+        mockRequestBody.source_field,
+        mockRequestBody.destination_field,
+        {}
+      );
+
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: {
+          created: 'ml-inference-my-pipeline-name',
+        },
+        headers: { 'content-type': 'application/json' },
+      });
+    });
+
+    it('responds with 409 CONFLICT if the pipeline already exists', async () => {
+      (createAndReferenceMlInferencePipeline as jest.Mock).mockImplementationOnce(() => {
+        return Promise.reject(new Error(ErrorCode.PIPELINE_ALREADY_EXISTS));
+      });
+
+      await mockRouter.callRoute({
+        params: { indexName: 'my-index-name' },
+        body: mockRequestBody,
+      });
+
+      expect(mockRouter.response.customError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          statusCode: 409,
+        })
+      );
+    });
+  });
+
   describe('DELETE /internal/enterprise_search/indices/{indexName}/ml_inference/pipelines/{pipelineName}', () => {
-    let mockRouter: MockRouter;
     const indexName = 'my-index';
     const pipelineName = 'my-pipeline';
 
