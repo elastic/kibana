@@ -682,4 +682,26 @@ export class DiscoverPageObject extends FtrService {
     const button = await this.testSubjects.find('discover-dataView-switch-link');
     return button.getAttribute('title');
   }
+
+  public async getCurrentDataViewId() {
+    const currentUrl = await this.browser.getCurrentUrl();
+    if (currentUrl) {
+      const [indexSubstring] = currentUrl.match(/index:[^,]*/)!;
+      const dataViewId = decodeURIComponent(indexSubstring)
+        .replace('index:', '')
+        .replaceAll("'", '');
+      return dataViewId;
+    } else {
+      return '';
+    }
+  }
+
+  public async addRuntimeField(name: string, script: string) {
+    await this.clickAddField();
+    await this.fieldEditor.setName(name);
+    await this.fieldEditor.enableValue();
+    await this.fieldEditor.typeScript(script);
+    await this.fieldEditor.save();
+    await this.header.waitUntilLoadingHasFinished();
+  }
 }

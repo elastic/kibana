@@ -75,16 +75,13 @@ export const getTopNavLinks = ({
       defaultMessage: 'Alerts',
     }),
     run: async (anchorElement: HTMLElement) => {
-      const updatedDataView = await persistDataView(dataView);
-      if (updatedDataView) {
-        openAlertsPopover({
-          I18nContext: services.core.i18n.Context,
-          anchorElement,
-          searchSource: savedSearch.searchSource,
-          services,
-          savedQueryId: state.appStateContainer.getState().savedQuery,
-        });
-      }
+      openAlertsPopover({
+        I18nContext: services.core.i18n.Context,
+        anchorElement,
+        searchSource: savedSearch.searchSource,
+        services,
+        savedQueryId: state.appStateContainer.getState().savedQuery,
+      });
     },
     testId: 'discoverAlertsButton',
   };

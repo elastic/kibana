@@ -78,23 +78,11 @@ export function ViewAlertRoute() {
         history.push(DISCOVER_MAIN_ROUTE);
         return;
       }
-
-      const calculatedChecksum = getCurrentChecksum(fetchedAlert.params);
-      // rule params changed
-      if (openActualAlert && calculatedChecksum !== queryParams.checksum) {
-        displayRuleChangedWarn();
-      }
-      // documents might be updated or deleted
-      else if (openActualAlert && calculatedChecksum === queryParams.checksum) {
-        displayPossibleDocsDiffInfoAlert();
-      }
-
       const fetchedSearchSource = await fetchSearchSource(fetchedAlert);
       if (!fetchedSearchSource) {
         history.push(DISCOVER_MAIN_ROUTE);
         return;
       }
-
       const dataView = fetchedSearchSource.getField('index');
       const timeFieldName = dataView?.timeFieldName;
       // data view fetch error
@@ -104,6 +92,15 @@ export function ViewAlertRoute() {
         return;
       }
 
+      const calculatedChecksum = getCurrentChecksum(fetchedAlert.params);
+      // rule params changed
+      if (openActualAlert && calculatedChecksum !== queryParams.checksum) {
+        displayRuleChangedWarn();
+      } else if (openActualAlert && calculatedChecksum === queryParams.checksum) {
+        // documents might be updated or deleted
+        displayPossibleDocsDiffInfoAlert();
+      }
+      // const dataView = await dataViews.get(dataView.id!);
       const dataViewSavedObject = await core.savedObjects.client.get('index-pattern', dataView.id!);
       const alertUpdatedAt = fetchedAlert.updatedAt;
       const dataViewUpdatedAt = dataViewSavedObject.updatedAt!;
@@ -120,7 +117,7 @@ export function ViewAlertRoute() {
         : buildTimeRangeFilter(dataView, fetchedAlert, timeFieldName);
       const state: DiscoverAppLocatorParams = {
         query: fetchedSearchSource.getField('query') || data.query.queryString.getDefaultQuery(),
-        dataViewId: dataView.id,
+        dataViewSpec: dataView.toSpec(false),
         timeRange,
       };
 
