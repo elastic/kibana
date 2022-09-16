@@ -9,15 +9,16 @@
 import { MetricVisConfiguration } from '@kbn/visualizations-plugin/common';
 import { Metric, Panel, Series } from '../../../../../common/types';
 import { Column, Layer } from '../../convert';
+import { getSeriesAgg } from '../../series';
 import { getPalette } from './palette';
 
-const getMetric = (series: Series | undefined) => {
+const getMetricWithCollapseFn = (series: Series | undefined) => {
   if (!series) {
     return;
   }
-
-  const visibleMetric = series.metrics[series.metrics.length - 1];
-  return visibleMetric;
+  const { metrics, seriesAgg } = getSeriesAgg(series.metrics);
+  const visibleMetric = metrics[metrics.length - 1];
+  return { metric: visibleMetric, collapseFn: seriesAgg };
 };
 
 const findMetricColumn = (metric: Metric | undefined, columns: Column[]) => {
@@ -34,19 +35,26 @@ export const getConfigurationForMetric = (
   bucket?: Column
 ): MetricVisConfiguration | null => {
   const [primarySeries, secondarySeries] = model.series.filter(({ hidden }) => !hidden);
-  const primaryMetric = getMetric(primarySeries);
-  if (!primaryMetric) {
+
+  const primaryMetricWithCollapseFn = getMetricWithCollapseFn(primarySeries);
+
+  if (!primaryMetricWithCollapseFn || !primaryMetricWithCollapseFn.metric) {
     return null;
   }
 
-  const secondaryMetric = getMetric(secondarySeries);
-  const primaryColumn = findMetricColumn(primaryMetric, layer.columns);
-  const secondaryColumn = findMetricColumn(secondaryMetric, layer.columns);
+  const secondaryMetricWithCollapseFn = getMetricWithCollapseFn(secondarySeries);
+  const primaryColumn = findMetricColumn(primaryMetricWithCollapseFn.metric, layer.columns);
+  const secondaryColumn = findMetricColumn(secondaryMetricWithCollapseFn?.metric, layer.columns);
+
+  if (primaryMetricWithCollapseFn.collapseFn && secondaryMetricWithCollapseFn?.collapseFn) {
+    return null;
+  }
 
   const palette = getPalette(model);
   if (palette === null) {
     return null;
   }
+
   return {
     layerId: layer.layerId,
     layerType: 'data',
@@ -54,5 +62,6 @@ export const getConfigurationForMetric = (
     secondaryMetricAccessor: secondaryColumn?.columnId,
     breakdownByAccessor: bucket?.columnId,
     palette,
+    collapseFn: primaryMetricWithCollapseFn.collapseFn ?? secondaryMetricWithCollapseFn?.collapseFn,
   };
 };
