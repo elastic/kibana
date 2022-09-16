@@ -246,7 +246,7 @@ export const getExecutionKPIAggregation = () => {
       },
     },
   };
-}
+};
 
 export function getExecutionLogAggregation({
   filter,
@@ -284,7 +284,9 @@ export function getExecutionLogAggregation({
     throw Boom.badRequest(`Invalid kuery syntax for filter ${filter}`);
   }
 
-  const termSort = (sort as estypes.SortCombinations[]).filter((s) => !Object.keys(s).includes('num_errored_actions'));
+  const termSort = (sort as estypes.SortCombinations[]).filter(
+    (s) => !Object.keys(s).includes('num_errored_actions')
+  );
 
   if (!termSort.length) {
     termSort.push({
@@ -559,7 +561,7 @@ function formatExecutionKPIAggBuckets(buckets: IExecutionUuidAggBucket[] = []) {
     recoveredAlerts: 0,
     erroredActions: 0,
     triggeredActions: 0,
-  }
+  };
 
   if (!buckets?.length) {
     return initialResponse;
@@ -590,9 +592,7 @@ function formatExecutionKPIAggBuckets(buckets: IExecutionUuidAggBucket[] = []) {
   return initialResponse;
 }
 
-export function formatExecutionKPIResult(
-  results: AggregateEventsBySavedObjectResult
-) {
+export function formatExecutionKPIResult(results: AggregateEventsBySavedObjectResult) {
   const { aggregations } = results;
   if (!aggregations || !aggregations.excludeExecuteStart) {
     return EMPTY_EXECUTION_LOG_RESULT;

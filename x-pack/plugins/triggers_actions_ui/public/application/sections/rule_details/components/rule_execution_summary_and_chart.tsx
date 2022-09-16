@@ -7,15 +7,12 @@
 
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPanel, EuiStat, EuiFlexItem, EuiFlexGroup, EuiIconTip } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { RuleSummary, RuleType } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
-import {
-  formatMillisForDisplay,
-  shouldShowDurationWarning,
-} from '../../../lib/execution_duration_utils';
+import { shouldShowDurationWarning } from '../../../lib/execution_duration_utils';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,

@@ -1031,11 +1031,7 @@ export class RulesClient {
     }
   }
 
-  public async getRuleExecutionKPI({
-    id,
-    dateStart,
-    dateEnd,
-  }: GetRuleExecutionKPIParams) {
+  public async getRuleExecutionKPI({ id, dateStart, dateEnd }: GetRuleExecutionKPIParams) {
     this.logger.debug(`getRuleExecutionKPI(): getting execution KPI for rule ${id}`);
     const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
 
