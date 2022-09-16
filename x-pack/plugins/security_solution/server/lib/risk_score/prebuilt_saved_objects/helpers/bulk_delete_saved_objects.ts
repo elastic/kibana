@@ -9,7 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import * as savedObjectsToCreate from '../saved_object';
 import type { SavedObjectTemplate } from '../types';
-import { findRiskScoreTag } from './find_or_create_tag';
+import { findRiskScoreTag, findSavedObjectsWithTagReference } from './find_or_create_tag';
 import { RISK_SCORE_REPLACE_ID_MAPPINGS, getRiskScoreTagName } from './utils';
 
 const deleteSavedObject = async ({
@@ -26,9 +26,9 @@ const deleteSavedObject = async ({
       await savedObjectsClient.get(type, id);
     }
     await savedObjectsClient.delete(type, id);
-    return id;
+    return `Deleted saved object: ${id}`;
   } catch (e) {
-    return new Error(`Unable to delete ${id}`);
+    return e?.output?.payload?.message ?? `Failed to delete saved object: ${id}`;
   }
 };
 
@@ -36,21 +36,18 @@ const deleteSavedObjects = async ({
   checkObjectExists,
   savedObjects,
   savedObjectsClient,
-  spaceId = 'default',
 }: {
   checkObjectExists?: boolean;
   savedObjectsClient: SavedObjectsClientContract;
   savedObjects: Array<{ id: string; type: string }>;
-  spaceId?: string;
 }) => {
   const result = await Promise.all(
     savedObjects.map((so) => {
-      deleteSavedObject({
+      return deleteSavedObject({
         checkObjectExists,
         savedObjectsClient,
         options: { type: so.type, id: so.id },
       });
-      return so.id;
     })
   );
 
@@ -60,34 +57,29 @@ const deleteSavedObjects = async ({
 const deleteSavedObjectsWithTag = async ({
   savedObjectsClient,
   savedObjectTypes,
-  spaceId,
   tagId,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectTypes: string[];
-  spaceId?: string;
   tagId: string;
 }) => {
-  const linkedSavedObjects = await savedObjectsClient.find({
-    type: savedObjectTypes,
-    hasReference: {
-      type: 'tag',
-      id: tagId,
-    },
+  const linkedSavedObjects = await findSavedObjectsWithTagReference({
+    savedObjectsClient,
+    savedObjectTypes,
+    tagId,
   });
 
-  try {
-    const deleteIds = await deleteSavedObjects({
-      savedObjectsClient,
-      savedObjects: linkedSavedObjects.saved_objects,
-      spaceId,
-    });
-    await savedObjectsClient.delete('tag', tagId);
+  const deletedIds = await deleteSavedObjects({
+    checkObjectExists: false,
+    savedObjectsClient,
+    savedObjects: linkedSavedObjects,
+  });
+  const deletedTagId = await deleteSavedObject({
+    savedObjectsClient,
+    options: { type: 'tag', id: tagId },
+  });
 
-    return [...deleteIds, tagId];
-  } catch (e) {
-    return e;
-  }
+  return [...deletedIds, deletedTagId];
 };
 
 export const bulkDeleteSavedObjects = async ({
@@ -121,7 +113,6 @@ export const bulkDeleteSavedObjects = async ({
   const deleteLegacySavedObjectResults = await deleteSavedObjects({
     checkObjectExists: true,
     savedObjectsClient,
-    spaceId,
     savedObjects: savedObjects.map((so) => {
       const legacyId = idReplaceMappings[so.id] ?? so.id;
       return {
@@ -131,7 +122,7 @@ export const bulkDeleteSavedObjects = async ({
     }),
   });
 
-  let deleteSavedObjectResults = [];
+  let deleteSavedObjectResults: string[] = [];
   if (tag) {
     /**
      * Since 8.5 all the saved objects are created with dynamic ids and all link to a tag.
@@ -143,7 +134,6 @@ export const bulkDeleteSavedObjects = async ({
     deleteSavedObjectResults = await deleteSavedObjectsWithTag({
       savedObjectsClient,
       tagId: tag.id,
-      spaceId,
       savedObjectTypes: Array.from(savedObjectsTypes),
     });
   }

@@ -72,3 +72,23 @@ export const findOrCreateRiskScoreTag = async ({
     return { ...tag, id: tagId };
   }
 };
+
+export const findSavedObjectsWithTagReference = async ({
+  savedObjectsClient,
+  savedObjectTypes,
+  tagId,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectTypes: string | string[];
+  tagId: string;
+}) => {
+  const linkedSavedObjects = await savedObjectsClient.find({
+    type: savedObjectTypes,
+    hasReference: {
+      type: 'tag',
+      id: tagId,
+    },
+  });
+
+  return linkedSavedObjects?.saved_objects;
+};
