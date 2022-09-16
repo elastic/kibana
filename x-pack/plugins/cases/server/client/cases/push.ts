@@ -9,6 +9,8 @@ import Boom from '@hapi/boom';
 import { nodeBuilder } from '@kbn/es-query';
 import { SavedObjectsFindResponse } from '@kbn/core/server';
 
+import { UserProfile } from '@kbn/security-plugin/common';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   ActionConnector,
   CaseResponseRt,
@@ -35,6 +37,7 @@ import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
 import { buildFilter } from '../utils';
+import { ICaseResponse } from '../typedoc_interfaces';
 
 /**
  * Returns true if the case should be closed based on the configuration settings.
@@ -110,6 +113,7 @@ export const push = async (
     user,
     logger,
     authorization,
+    securityStartPlugin,
   } = clientArgs;
 
   try {
@@ -150,6 +154,8 @@ export const push = async (
           })
         : getMappingsResponse[0].attributes.mappings;
 
+    const profiles = await getProfiles(theCase, securityStartPlugin);
+
     const externalServiceIncident = await createIncident({
       actionsClient,
       theCase,
@@ -158,6 +164,7 @@ export const push = async (
       mappings,
       alerts,
       casesConnectors,
+      userProfiles: profiles,
     });
 
     const pushRes = await actionsClient.execute({
@@ -200,13 +207,13 @@ export const push = async (
     ]);
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { username, full_name, email } = user;
+    const { username, full_name, email, profile_uid } = user;
     const pushedDate = new Date().toISOString();
     const externalServiceResponse = pushRes.data as ExternalServiceResponse;
 
     const externalService = {
       pushed_at: pushedDate,
-      pushed_by: { username, full_name, email },
+      pushed_by: { username, full_name, email, profile_uid },
       connector_id: connector.id,
       connector_name: connector.name,
       external_id: externalServiceResponse.id,
@@ -225,7 +232,7 @@ export const push = async (
             ? {
                 status: CaseStatuses.closed,
                 closed_at: pushedDate,
-                closed_by: { email, full_name, username },
+                closed_by: { email, full_name, username, profile_uid },
               }
             : {}),
           ...(shouldMarkAsClosed
@@ -236,7 +243,7 @@ export const push = async (
             : {}),
           external_service: externalService,
           updated_at: pushedDate,
-          updated_by: { username, full_name, email },
+          updated_by: { username, full_name, email, profile_uid },
         },
         version: myCase.version,
         refresh: false,
@@ -250,7 +257,7 @@ export const push = async (
             attachmentId: comment.id,
             updatedAttributes: {
               pushed_at: pushedDate,
-              pushed_by: { username, full_name, email },
+              pushed_by: { username, full_name, email, profile_uid },
             },
             version: comment.version,
           })),
@@ -312,4 +319,28 @@ export const push = async (
   } catch (error) {
     throw createCaseError({ message: `Failed to push case: ${error}`, error, logger });
   }
+};
+
+const getProfiles = async (
+  caseInfo: ICaseResponse,
+  securityStartPlugin: SecurityPluginStart
+): Promise<Map<string, UserProfile> | undefined> => {
+  const uids = new Set([
+    ...(caseInfo.updated_by?.profile_uid != null ? [caseInfo.updated_by.profile_uid] : []),
+    ...(caseInfo.created_by?.profile_uid != null ? [caseInfo.created_by.profile_uid] : []),
+  ]);
+
+  if (uids.size <= 0) {
+    return;
+  }
+
+  const userProfiles =
+    (await securityStartPlugin.userProfiles.bulkGet({
+      uids,
+    })) ?? [];
+
+  return userProfiles.reduce<Map<string, UserProfile>>((acc, profile) => {
+    acc.set(profile.uid, profile);
+    return acc;
+  }, new Map());
 };
