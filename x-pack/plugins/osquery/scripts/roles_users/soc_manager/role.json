@@ -17,6 +17,8 @@
       "feature": {
         "discover": ["all"],
         "infrastructure": ["read"],
+        "observabilityCases": ["all"],
+        "securitySolutionCases": ["all"],
         "ml": ["all"],
         "siem": ["all"],
         "savedObjectsManagement": ["all"],

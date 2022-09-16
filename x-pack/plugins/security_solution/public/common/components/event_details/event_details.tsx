@@ -41,8 +41,8 @@ import { EnrichmentRangePicker } from './cti_details/enrichment_range_picker';
 import { Reason } from './reason';
 import { InvestigationGuideView } from './investigation_guide_view';
 import { Overview } from './overview';
-import type { HostRisk } from '../../../risk_score/containers';
 import { Insights } from './insights/insights';
+import { useRiskScoreData } from './use_risk_score_data';
 
 type EventViewTab = EuiTabbedContentTab;
 
@@ -86,7 +86,6 @@ interface Props {
   rawEventData: object | undefined;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
-  hostRisk: HostRisk | null;
   handleOnEventClosed: () => void;
   isReadOnly?: boolean;
 }
@@ -132,7 +131,6 @@ const EventDetailsComponent: React.FC<Props> = ({
   rawEventData,
   timelineId,
   timelineTabType,
-  hostRisk,
   handleOnEventClosed,
   isReadOnly,
 }) => {
@@ -168,6 +166,8 @@ const EventDetailsComponent: React.FC<Props> = ({
   }, [isEnrichmentsLoading, enrichmentsResponse, existingEnrichments]);
 
   const enrichmentCount = allEnrichments.length;
+
+  const { hostRisk, userRisk, isLicenseValid } = useRiskScoreData(data);
 
   const summaryTab: EventViewTab | undefined = useMemo(
     () =>
@@ -214,10 +214,11 @@ const EventDetailsComponent: React.FC<Props> = ({
                   isReadOnly={isReadOnly}
                 />
 
-                {(enrichmentCount > 0 || hostRisk) && (
+                {enrichmentCount > 0 && isLicenseValid && (
                   <ThreatSummaryView
                     isDraggable={isDraggable}
                     hostRisk={hostRisk}
+                    userRisk={userRisk}
                     browserFields={browserFields}
                     data={data}
                     eventId={id}
@@ -253,6 +254,8 @@ const EventDetailsComponent: React.FC<Props> = ({
       goToTableTab,
       handleOnEventClosed,
       isReadOnly,
+      userRisk,
+      isLicenseValid,
     ]
   );
 

@@ -11,6 +11,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { isEmpty, map, find, pickBy } from 'lodash';
 
+import type { AddToTimelinePayload } from '../../timelines/get_add_to_timeline';
 import { QueryPackSelectable } from './query_pack_selectable';
 import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
 import type {
@@ -29,6 +30,7 @@ import type { AgentSelection } from '../../agents/types';
 import { LiveQueryQueryField } from './live_query_query_field';
 import { AgentsTableField } from './agents_table_field';
 import { savedQueryDataSerializer } from '../../saved_queries/form/use_saved_query_form';
+import { AddToCaseButton } from '../../cases/add_to_cases_button';
 import { PackFieldWrapper } from '../../shared_components/osquery_response_action_type/pack_field_wrapper';
 
 export interface LiveQueryFormFields {
@@ -57,7 +59,7 @@ interface LiveQueryFormProps {
   formType?: FormType;
   enabled?: boolean;
   hideAgentsField?: boolean;
-  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
+  addToTimeline?: (payload: AddToTimelinePayload) => React.ReactElement;
 }
 
 const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
@@ -220,6 +222,27 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   );
 
   const singleQueryDetails = useMemo(() => liveQueryDetails?.queries?.[0], [liveQueryDetails]);
+  const liveQueryActionId = useMemo(() => liveQueryDetails?.action_id, [liveQueryDetails]);
+  const agentIds = useMemo(() => liveQueryDetails?.agents, [liveQueryDetails?.agents]);
+
+  const addToCaseButton = useCallback(
+    (payload) => {
+      if (liveQueryActionId) {
+        return (
+          <AddToCaseButton
+            queryId={payload.queryId}
+            agentIds={agentIds}
+            actionId={liveQueryActionId}
+            isIcon={payload.isIcon}
+            isDisabled={payload.isDisabled}
+          />
+        );
+      }
+
+      return <></>;
+    },
+    [agentIds, liveQueryActionId]
+  );
 
   const resultsStepContent = useMemo(
     () =>
@@ -230,6 +253,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           endDate={singleQueryDetails?.expiration}
           agentIds={singleQueryDetails?.agents}
           addToTimeline={addToTimeline}
+          addToCase={addToCaseButton}
         />
       ) : null,
     [
@@ -238,6 +262,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       singleQueryDetails?.agents,
       serializedData.ecs_mapping,
       addToTimeline,
+      addToCaseButton,
     ]
   );
 
@@ -325,6 +350,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
               liveQueryDetails={liveQueryDetails}
               addToTimeline={addToTimeline}
               submitButtonContent={submitButtonContent}
+              addToCase={addToCaseButton}
+              showResultsHeader
             />
           ) : (
             <>

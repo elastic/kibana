@@ -103,6 +103,13 @@ jest.mock('../../../../risk_score/containers', () => {
         isModuleEnabled: false,
       },
     ]),
+    useUserRiskScore: jest.fn().mockReturnValue([
+      true,
+      {
+        data: undefined,
+        isModuleEnabled: false,
+      },
+    ]),
   };
 });
 

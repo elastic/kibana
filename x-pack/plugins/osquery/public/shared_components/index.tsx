@@ -10,3 +10,4 @@ export { getLazyOsqueryAction } from './lazy_osquery_action';
 export { getLazyLiveQueryField } from './lazy_live_query_field';
 export { useIsOsqueryAvailableSimple } from './osquery_action/use_is_osquery_available_simple';
 export { getLazyOsqueryResponseActionTypeForm } from './lazy_osquery_action_params_form';
+export { getExternalReferenceAttachmentRegular } from './attachments/external_reference';

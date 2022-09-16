@@ -16,6 +16,8 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type { CasesUiStart, CasesUiSetup } from '@kbn/cases-plugin/public';
+import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type {
   getLazyOsqueryResults,
   getLazyLiveQueryField,
@@ -25,6 +27,7 @@ import type {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}
+
 export interface OsqueryPluginStart {
   OsqueryAction?: ReturnType<typeof getLazyOsqueryAction>;
   OsqueryResults: ReturnType<typeof getLazyOsqueryResults>;
@@ -45,10 +48,14 @@ export interface StartPlugins {
   lens?: LensPublicStart;
   security: SecurityPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  cases: CasesUiStart;
+  timelines: TimelinesUIStart;
+  appName?: string;
 }
 
 export interface SetupPlugins {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  cases?: CasesUiSetup;
 }
 
 export type StartServices = CoreStart & StartPlugins;
