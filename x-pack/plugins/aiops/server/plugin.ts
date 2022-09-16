@@ -32,7 +32,10 @@ export class AiopsPlugin
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup<AiopsPluginStartDeps>, plugins: AiopsPluginSetupDeps) {
+  public setup(
+    core: CoreSetup<AiopsPluginStartDeps, AiopsPluginSetupDeps>,
+    plugins: AiopsPluginSetupDeps
+  ) {
     this.logger.debug('aiops: Setup');
 
     // Subscribe to license changes and store the current license in `currentLicense`.
