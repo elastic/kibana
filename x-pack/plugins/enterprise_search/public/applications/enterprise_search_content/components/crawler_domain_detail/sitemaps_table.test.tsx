@@ -16,6 +16,8 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { GenericEndpointInlineEditableTable } from '../../../shared/tables/generic_endpoint_inline_editable_table';
 
+import { CrawlerDomain } from '../../api/crawler/types';
+
 import { SitemapsTable } from './sitemaps_table';
 
 describe('SitemapsTable', () => {
@@ -25,7 +27,8 @@ describe('SitemapsTable', () => {
     { id: '1', url: 'http://www.example.com/sitemap.xml' },
     { id: '2', url: 'http://www.example.com/whatever/sitemaps.xml' },
   ];
-  const domain = {
+  const domain: CrawlerDomain = {
+    auth: null,
     createdOn: '2018-01-01T00:00:00.000Z',
     documentCount: 10,
     id: '6113e1407a2f2e6f42489794',

@@ -21,6 +21,7 @@ import {
   DeleteCrawlerDomainResponse,
 } from '../../api/crawler/delete_crawler_domain_api_logic';
 import {
+  CrawlerAuth,
   CrawlerDomain,
   CrawlerDomainFromServer,
   CrawlRule,
@@ -44,13 +45,14 @@ export interface CrawlerDomainDetailValues {
   getLoading: boolean;
 }
 
-interface CrawlerDomainDetailActions {
+export interface CrawlerDomainDetailActions {
   deleteApiError(error: HttpError): HttpError;
   deleteApiSuccess(response: DeleteCrawlerDomainResponse): DeleteCrawlerDomainResponse;
   deleteDomain(): void;
   deleteMakeRequest(args: DeleteCrawlerDomainArgs): DeleteCrawlerDomainArgs;
   fetchDomainData(domainId: string): { domainId: string };
   receiveDomainData(domain: CrawlerDomain): { domain: CrawlerDomain };
+  submitAuthUpdate(auth: CrawlerAuth): { auth: CrawlerAuth };
   submitDeduplicationUpdate(payload: { enabled?: boolean; fields?: string[] }): {
     enabled: boolean;
     fields: string[];
@@ -80,6 +82,7 @@ export const CrawlerDomainDetailLogic = kea<
     deleteDomainComplete: () => true,
     fetchDomainData: (domainId) => ({ domainId }),
     receiveDomainData: (domain) => ({ domain }),
+    submitAuthUpdate: (auth) => ({ auth }),
     submitDeduplicationUpdate: ({ fields, enabled }) => ({ enabled, fields }),
     updateCrawlRules: (crawlRules) => ({ crawlRules }),
     updateEntryPoints: (entryPoints) => ({ entryPoints }),
@@ -135,7 +138,6 @@ export const CrawlerDomainDetailLogic = kea<
     deleteApiError: (error) => {
       flashAPIErrors(error);
     },
-
     fetchDomainData: async ({ domainId }) => {
       const { http } = HttpLogic.values;
       const { indexName } = IndexNameLogic.values;
@@ -143,6 +145,30 @@ export const CrawlerDomainDetailLogic = kea<
       try {
         const response = await http.get<CrawlerDomainFromServer>(
           `/internal/enterprise_search/indices/${indexName}/crawler/domains/${domainId}`
+        );
+
+        const domainData = crawlerDomainServerToClient(response);
+
+        actions.receiveDomainData(domainData);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
+    submitAuthUpdate: async ({ auth }) => {
+      const { http } = HttpLogic.values;
+      const { indexName } = IndexNameLogic.values;
+      const { domainId } = values;
+
+      const payload = {
+        auth,
+      };
+
+      try {
+        const response = await http.put<CrawlerDomainFromServer>(
+          `/internal/enterprise_search/indices/${indexName}/crawler/domains/${domainId}`,
+          {
+            body: JSON.stringify(payload),
+          }
         );
 
         const domainData = crawlerDomainServerToClient(response);

@@ -25,6 +25,7 @@ describe('EntryPointsTable', () => {
     { id: '2', value: '/foo' },
   ];
   const domain: CrawlerDomain = {
+    auth: null,
     availableDeduplicationFields: ['title', 'description'],
     crawlRules: [],
     createdOn: '2018-01-01T00:00:00.000Z',
