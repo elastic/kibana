@@ -14,7 +14,7 @@ export type ECSMappingArray = Array<{
   key: string;
   result: {
     type: string;
-    value: string;
+    value: string | string[];
   };
 }>;
 
@@ -34,7 +34,7 @@ export const convertECSMappingToObject = (ecsMapping: ECSMappingArray): ECSMappi
   );
 
 export const convertECSMappingToArray = (ecsMapping: ECSMapping | undefined): ECSMappingArray =>
-  map(ecsMapping, (value, key: string) => ({
+  map(ecsMapping, (value, key) => ({
     key,
     result: {
       type: Object.keys(value)[0],

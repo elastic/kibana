@@ -11,7 +11,6 @@ import type { Draft } from 'immer';
 import produce from 'immer';
 import { useMemo } from 'react';
 import type { ECSMapping } from '../../../common/schemas/common';
-import type { EcsMappingFormField } from '../../packs/queries/ecs_mapping_editor_field';
 import { useSavedQueries } from '../use_saved_queries';
 
 export interface SavedQuerySOFormData {
@@ -31,7 +30,7 @@ export interface SavedQueryFormData {
   interval?: number;
   platform?: string;
   version?: string[];
-  ecs_mapping: EcsMappingFormField[];
+  ecs_mapping: ECSMapping | undefined;
 }
 
 interface UseSavedQueryFormProps {

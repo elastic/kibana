@@ -21,8 +21,9 @@ import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { isEmpty, find, pickBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
+import type { AddToTimelinePayload } from '../../timelines/get_add_to_timeline';
 import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
-import type { ECSMappingArray, ECSMapping } from '../../../common/schemas/common/utils';
+import type { ECSMapping } from '../../../common/schemas/common/utils';
 import { useKibana } from '../../common/lib/kibana';
 import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import { SavedQueryFlyout } from '../../saved_queries';
@@ -35,12 +36,13 @@ import { LiveQueryQueryField } from './live_query_query_field';
 import { AgentsTableField } from './agents_table_field';
 import { PacksComboBoxField } from './packs_combobox_field';
 import { savedQueryDataSerializer } from '../../saved_queries/form/use_saved_query_form';
+import { AddToCaseButton } from '../../cases/add_to_cases_button';
 
 export interface LiveQueryFormFields {
   query?: string;
   agentSelection: AgentSelection;
   savedQueryId?: string | null;
-  ecs_mapping: ECSMappingArray;
+  ecs_mapping: ECSMapping;
   packId: string[];
 }
 
@@ -48,7 +50,7 @@ interface DefaultLiveQueryFormFields {
   query?: string;
   agentSelection?: AgentSelection;
   savedQueryId?: string | null;
-  ecs_mapping?: EcsMapping;
+  ecs_mapping?: ECSMapping;
   packId?: string;
 }
 
@@ -100,7 +102,7 @@ interface LiveQueryFormProps {
   formType?: FormType;
   enabled?: boolean;
   hideAgentsField?: boolean;
-  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
+  addToTimeline?: (payload: AddToTimelinePayload) => React.ReactElement;
 }
 
 const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
@@ -267,6 +269,26 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   );
 
   const singleQueryDetails = useMemo(() => liveQueryDetails?.queries?.[0], [liveQueryDetails]);
+  const liveQueryActionId = useMemo(() => liveQueryDetails?.action_id, [liveQueryDetails]);
+
+  const addToCaseButton = useCallback(
+    (payload) => {
+      if (liveQueryActionId) {
+        return (
+          <AddToCaseButton
+            queryId={payload.queryId}
+            agentIds={agentIds}
+            actionId={liveQueryActionId}
+            isIcon={payload.isIcon}
+            isDisabled={payload.isDisabled}
+          />
+        );
+      }
+
+      return <></>;
+    },
+    [agentIds, liveQueryActionId]
+  );
 
   const resultsStepContent = useMemo(
     () =>
@@ -277,6 +299,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           endDate={singleQueryDetails?.expiration}
           agentIds={singleQueryDetails?.agents}
           addToTimeline={addToTimeline}
+          addToCase={addToCaseButton}
         />
       ) : null,
     [
@@ -285,6 +308,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       singleQueryDetails?.agents,
       serializedData.ecs_mapping,
       addToTimeline,
+      addToCaseButton,
     ]
   );
 
@@ -309,7 +333,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       if (defaultValue?.query && canRunSingleQuery) {
         setValue('query', defaultValue.query);
         setValue('savedQueryId', defaultValue.savedQueryId);
-        setValue('ecs_mapping', defaultValue.ecs_mapping);
+        setValue('ecs_mapping', defaultValue.ecs_mapping ?? {});
 
         return;
       }
@@ -437,7 +461,9 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                       agentIds={agentIds}
                       // @ts-expect-error version string !+ string[]
                       data={liveQueryDetails?.queries ?? selectedPackData?.attributes?.queries}
+                      addToCase={addToCaseButton}
                       addToTimeline={addToTimeline}
+                      showResultsHeader
                     />
                   </EuiFlexItem>
                 </>

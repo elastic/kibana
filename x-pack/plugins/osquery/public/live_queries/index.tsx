@@ -11,6 +11,7 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { ECSMapping } from '../../common/schemas/common';
+import type { AddToTimelinePayload } from '../timelines/get_add_to_timeline';
 import { LiveQueryForm } from './form';
 import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
@@ -33,7 +34,7 @@ interface LiveQueryProps {
   hideAgentsField?: boolean;
   packId?: string;
   agentSelection?: AgentSelection;
-  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
+  addToTimeline?: (payload: AddToTimelinePayload) => React.ReactElement;
 }
 
 const LiveQueryComponent: React.FC<LiveQueryProps> = ({
