@@ -144,7 +144,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('multiple requests output', () => {
+    // Skip on cloud until issue is fixed
+    // Issue: https://github.com/elastic/kibana/issues/138762
+    describe('multiple requests output', function () {
+      this.tags(['skipCloudFailedTest']);
       const sendMultipleRequests = async (requests: string[]) => {
         await asyncForEach(requests, async (request) => {
           await PageObjects.console.enterRequest(request);
