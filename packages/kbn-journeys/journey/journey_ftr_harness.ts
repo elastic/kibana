@@ -316,7 +316,7 @@ export class JourneyFtrHarness {
   }
 
   #_ctx?: Record<string, unknown>;
-  private async getCtx() {
+  private getCtx() {
     if (this.#_ctx) {
       return this.#_ctx;
     }
