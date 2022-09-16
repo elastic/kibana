@@ -15,7 +15,7 @@ interface SVGRProps {
 /**
  * Custom component for replacing the thumb of an input of type range
  */
-export const Scrubber = ({
+export const PlayHead = ({
   title,
   titleId,
   ...props

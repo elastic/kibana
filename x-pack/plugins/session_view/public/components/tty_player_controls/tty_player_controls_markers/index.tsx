@@ -9,7 +9,7 @@ import React, { ChangeEvent, MouseEvent, useMemo } from 'react';
 import { EuiRange } from '@elastic/eui';
 import type { ProcessStartMarker } from '../../../../common/types/process_tree';
 import { useStyles } from './styles';
-import { Scrubber } from './scrubber';
+import { PlayHead } from './play_head';
 
 type Props = {
   processStartMarkers: ProcessStartMarker[];
@@ -68,8 +68,8 @@ export const TTYPlayerControlsMarkers = ({
         showRange
         css={styles.range}
       />
-      <Scrubber
-        css={styles.scrubber(currentSelectedType)}
+      <PlayHead
+        css={styles.playHead(currentSelectedType)}
         style={{ left: `${(currentLine * 100) / linesLength}%` }}
       />
       <div css={styles.markersOverlay}>

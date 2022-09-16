@@ -49,7 +49,7 @@ export const useStyles = () => {
       marginLeft: '-3.5px',
     });
 
-    const scrubberThumb: CSSObject = {
+    const playHeadThumb: CSSObject = {
       cursor: 'pointer',
       marginTop: -20,
       width: 9,
@@ -58,7 +58,7 @@ export const useStyles = () => {
     };
 
     const customThumb: CSSObject = {
-      ...scrubberThumb,
+      ...playHeadThumb,
       border: 'none',
       boxShadow: 'none',
       backgroundColor: 'transparent',
@@ -68,7 +68,7 @@ export const useStyles = () => {
     };
 
     // Custom css for input type range, overrinding some options of EuiRange
-    // The custom thumb below is visually hidden and shares the same css properties with the scrubber component
+    // The custom thumb below is visually hidden and shares the same css properties with the playHead component
     // Source (Chrome): https://developer.mozilla.org/en-US/docs/Web/CSS/::-webkit-slider-thumb
     // Source (Firefox): https://developer.mozilla.org/en-US/docs/Web/CSS/::-moz-range-thumb
     const range: CSSObject = {
@@ -92,8 +92,8 @@ export const useStyles = () => {
       },
     };
 
-    const scrubber = (type: TTYPlayerLineMarkerType): CSSObject => ({
-      ...scrubberThumb,
+    const playHead = (type: TTYPlayerLineMarkerType): CSSObject => ({
+      ...playHeadThumb,
       position: 'absolute',
       top: 16,
       fill:
@@ -106,7 +106,7 @@ export const useStyles = () => {
       marker,
       markersOverlay,
       range,
-      scrubber,
+      playHead,
     };
   }, [euiTheme]);
 
