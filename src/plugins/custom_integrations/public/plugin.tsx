@@ -17,7 +17,10 @@ import {
   CustomIntegration,
   ROUTES_APPEND_CUSTOM_INTEGRATIONS,
   ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS,
+  languageIntegrations,
 } from '../common';
+
+import { OverviewComponent } from './components/fleet_integration/overview_component';
 
 import { CustomIntegrationsServicesProvider } from './services';
 import { servicesFactory } from './services/kibana';
@@ -43,6 +46,18 @@ export class CustomIntegrationsPlugin
     startPlugins: CustomIntegrationsStartDependencies
   ): CustomIntegrationsStart {
     const services = servicesFactory({ coreStart, startPlugins });
+
+    // Set the language clients components to render in Fleet plugin under Integrations app
+    // Export component only if tje integration has exportLanguageUiComponent = true
+    const languageClientsUiComponents = new Map<string, React.FC>();
+
+    languageIntegrations.forEach((int) => {
+      if (int.exportLanguageUiComponent) {
+        const ReadmeComponent = () => <OverviewComponent packageName={`${int.id}`} />;
+        languageClientsUiComponents.set(`language_client.${int.id}`, ReadmeComponent);
+      }
+    });
+
     const ContextProvider: React.FC = ({ children }) => (
       <CustomIntegrationsServicesProvider {...services}>
         {children}
@@ -51,6 +66,7 @@ export class CustomIntegrationsPlugin
 
     return {
       ContextProvider,
+      languageClientsUiComponents,
     };
   }
 
