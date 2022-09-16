@@ -34,7 +34,7 @@ const PartitionVis: ComponentStory<FC<Props>> = ({
 }) => (
   <Render
     renderer={PartitionVisRenderer}
-    config={{ visType, syncColors, visConfig, visData: data }}
+    config={{ visType, syncColors, visConfig, visData: data, params: { listenOnChange: true } }}
     {...containerSize}
   />
 );
