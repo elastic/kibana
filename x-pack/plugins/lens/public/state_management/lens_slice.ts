@@ -295,42 +295,39 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         };
       }
     ) => {
-      // @todo: wip
+      const clonedIDsMap = new Map<string, string>();
+
+      const getNewId = (prevId: string) => {
+        if (!clonedIDsMap.has(prevId)) {
+          const newId = generateId();
+          clonedIDsMap.set(prevId, newId);
+          return newId;
+        }
+        return clonedIDsMap.get(prevId)!;
+      };
 
       if (!state.activeDatasourceId || !state.visualization.activeId) {
         return state;
       }
 
-      const datasourceAccessorsIDsMap = new Map<string, string>();
-
-      const getNewId = (prevId: string) => {
-        if (datasourceAccessorsIDsMap.has(prevId)) {
-          return datasourceAccessorsIDsMap.get(prevId)!;
-        } else {
-          const newId = generateId();
-          datasourceAccessorsIDsMap.set(prevId, newId);
-          return newId;
-        }
-      };
-
-      state.datasourceStates = mapValues(
-        state.datasourceStates,
-        (datasourceState, datasourceId) => ({
-          ...datasourceState,
-          state: datasourceMap[datasourceId!].cloneLayer(
-            datasourceState.state,
-            layerId,
-            newLayerId,
-            getNewId
-          ),
-        })
+      state.datasourceStates = mapValues(state.datasourceStates, (datasourceState, datasourceId) =>
+        datasourceId
+          ? {
+              ...datasourceState,
+              state: datasourceMap[datasourceId].cloneLayer(
+                datasourceState.state,
+                layerId,
+                newLayerId,
+                getNewId
+              ),
+            }
+          : datasourceState
       );
-
       state.visualization.state = visualizationMap[state.visualization.activeId].cloneLayer!(
         state.visualization.state,
         layerId,
         newLayerId,
-        datasourceAccessorsIDsMap
+        clonedIDsMap
       );
     },
     [removeOrClearLayer.type]: (

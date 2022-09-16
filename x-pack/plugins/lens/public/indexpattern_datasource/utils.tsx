@@ -629,7 +629,16 @@ export const cloneLayer = (
   layerId: string,
   newLayerId: string,
   getNewId: (id: string) => string
-): Record<string, IndexPatternLayer> => ({
-  ...layers,
-  [newLayerId]: renewIDs(Object.keys(layers[layerId]?.columns ?? {}), layers[layerId], getNewId),
-});
+) => {
+  if (layers[layerId]) {
+    return {
+      ...layers,
+      [newLayerId]: renewIDs(
+        Object.keys(layers[layerId]?.columns ?? {}),
+        layers[layerId],
+        getNewId
+      ),
+    };
+  }
+  return layers;
+};

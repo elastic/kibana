@@ -7,7 +7,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import {
   EuiButtonIcon,
   EuiContextMenuPanel,
@@ -55,21 +55,6 @@ const InContextMenuActions = (
     }
   }, [isPopoverOpen]);
 
-  const items = props.actions.map((i) => (
-    <EuiContextMenuItem
-      icon={<EuiIcon type={i.icon} title={i.displayName} color={i.color} />}
-      data-test-subj={i['data-test-subj']}
-      aria-label={i.displayName}
-      title={i.displayName}
-      onClick={() => {
-        closePopover();
-        i.execute();
-      }}
-    >
-      {i.displayName}
-    </EuiContextMenuItem>
-  ));
-
   return (
     <EuiOutsideClickDetector onOutsideClick={closePopover}>
       <EuiPopover
@@ -93,7 +78,23 @@ const InContextMenuActions = (
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
-        <EuiContextMenuPanel size="s" items={items} />
+        <EuiContextMenuPanel
+          size="s"
+          items={props.actions.map((i) => (
+            <EuiContextMenuItem
+              icon={<EuiIcon type={i.icon} title={i.displayName} color={i.color} />}
+              data-test-subj={i['data-test-subj']}
+              aria-label={i.displayName}
+              title={i.displayName}
+              onClick={() => {
+                closePopover();
+                i.execute();
+              }}
+            >
+              {i.displayName}
+            </EuiContextMenuItem>
+          ))}
+        />
       </EuiPopover>
     </EuiOutsideClickDetector>
   );
@@ -122,28 +123,24 @@ export const LayerButtons = (props: LayerButtonsProps) => {
 
   if (!compatibleActions.length) {
     return null;
+  }
+
+  if (compatibleActions.length > 1) {
+    return <InContextMenuActions {...props} actions={compatibleActions} />;
   } else {
-    if (compatibleActions.length > 1) {
-      return <InContextMenuActions {...props} actions={compatibleActions} />;
-    } else {
-      const {
-        displayName,
-        execute,
-        icon,
-        color,
-        'data-test-subj': dataTestSubj,
-      } = compatibleActions[0];
-      return (
-        <EuiButtonIcon
-          size="xs"
-          iconType={icon}
-          color={color}
-          data-test-subj={dataTestSubj}
-          aria-label={displayName}
-          title={displayName}
-          onClick={execute}
-        />
-      );
-    }
+    const [{ displayName, execute, icon, color, 'data-test-subj': dataTestSubj }] =
+      compatibleActions;
+
+    return (
+      <EuiButtonIcon
+        size="xs"
+        iconType={icon}
+        color={color}
+        data-test-subj={dataTestSubj}
+        aria-label={displayName}
+        title={displayName}
+        onClick={execute}
+      />
+    );
   }
 };

@@ -41,7 +41,6 @@ const SKIP_DELETE_MODAL_KEY = 'skipDeleteModal';
 const modalDescClear = i18n.translate('xpack.lens.layer.confirmModal.clearVis', {
   defaultMessage: `Clearing this layer removes the visualization and its configurations. `,
 });
-
 const modalDescVis = i18n.translate('xpack.lens.layer.confirmModal.deleteVis', {
   defaultMessage: `Deleting this layer removes the visualization and its configurations. `,
 });

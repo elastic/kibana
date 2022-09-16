@@ -6,6 +6,7 @@
  */
 import type { IconType, EuiButtonIconColor } from '@elastic/eui';
 
+/** @internal **/
 export interface LayerButtonsAction {
   displayName: string;
   execute: () => void | Promise<void>;

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`indexpattern_datasource utils cloneLayer should replace ids 1`] = `
+exports[`indexpattern_datasource utils cloneLayer should clone layer with renewing ids 1`] = `
 Object {
   "a": Object {
     "columnOrder": Array [
@@ -20,20 +20,6 @@ Object {
       "ae62cfc8-faa5-4096-a30c-f92ac59922a0": Object {
         "params": Object {
           "emptyAsNull": true,
-          "justForTest": Array [
-            "899ee4b6-3147-4d45-94bf-ea9c02e55d28",
-            "ae62cfc8-faa5-4096-a30c-f92ac59922a0",
-          ],
-          "justForTest2": Array [
-            Object {
-              "899ee4b6-3147-4d45-94bf-ea9c02e55d28": Array [
-                Object {
-                  "c": "ae62cfc8-faa5-4096-a30c-f92ac59922a0",
-                },
-              ],
-              "a": "899ee4b6-3147-4d45-94bf-ea9c02e55d28",
-            },
-          ],
         },
       },
     },
@@ -58,20 +44,6 @@ Object {
       "ae62cfc8-faa5-4096-a30c-f92ac59922a0C": Object {
         "params": Object {
           "emptyAsNull": true,
-          "justForTest": Array [
-            "899ee4b6-3147-4d45-94bf-ea9c02e55d28C",
-            "ae62cfc8-faa5-4096-a30c-f92ac59922a0C",
-          ],
-          "justForTest2": Array [
-            Object {
-              "899ee4b6-3147-4d45-94bf-ea9c02e55d28C": Array [
-                Object {
-                  "c": "ae62cfc8-faa5-4096-a30c-f92ac59922a0C",
-                },
-              ],
-              "a": "899ee4b6-3147-4d45-94bf-ea9c02e55d28C",
-            },
-          ],
         },
       },
     },

@@ -930,7 +930,7 @@ export interface Visualization<T = unknown, P = unknown> {
     layerId: string,
     newLayerId: string,
     /** @param contains map old -> new id **/
-    datasourceAccessorsIDsMap: Map<string, string>
+    clonedIDsMap: Map<string, string>
   ) => T;
   /** Optional, if the visualization supports multiple layers */
   removeLayer?: (state: T, layerId: string) => T;
