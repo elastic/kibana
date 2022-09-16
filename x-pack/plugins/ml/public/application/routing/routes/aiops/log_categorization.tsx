@@ -16,33 +16,29 @@ import { NavigateToPath } from '../../../contexts/kibana';
 
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
-import { ExplainLogRateSpikesPage as Page } from '../../../aiops/explain_log_rate_spikes';
+import { LogCategorizationPage as Page } from '../../../aiops/log_categorization';
 
 import { checkBasicLicense } from '../../../license';
 import { checkGetJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
 import { cacheDataViewsContract } from '../../../util/index_utils';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-export const explainLogRateSpikesRouteFactory = (
+export const logCategorizationRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  id: 'explain_log_rate_spikes',
-  path: '/aiops/explain_log_rate_spikes',
-  title: i18n.translate('xpack.ml.aiops.explainLogRateSpikes.docTitle', {
-    defaultMessage: 'Explain log rate spikes',
+  id: 'log_categorization',
+  path: '/aiops/log_categorization',
+  title: i18n.translate('xpack.ml.aiops.logCategorization.docTitle', {
+    defaultMessage: 'Log Pattern Analysis',
   }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp(
-      'AIOPS_BREADCRUMB_EXPLAIN_LOG_RATE_SPIKES',
-      navigateToPath,
-      basePath
-    ),
+    getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB_LOG_PATTERN_ANALYSIS', navigateToPath, basePath),
     {
-      text: i18n.translate('xpack.ml.aiopsBreadcrumbs.explainLogRateSpikesLabel', {
-        defaultMessage: 'Explain log rate spikes',
+      text: i18n.translate('xpack.ml.aiops.logCategorization.docTitle', {
+        defaultMessage: 'Log Pattern Analysis',
       }),
     },
   ],
