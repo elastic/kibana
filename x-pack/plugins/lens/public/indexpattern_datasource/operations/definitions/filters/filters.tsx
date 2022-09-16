@@ -65,7 +65,11 @@ export interface FiltersIndexPatternColumn extends BaseIndexPatternColumn {
   };
 }
 
-export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'none'> = {
+export const filtersOperation: OperationDefinition<
+  FiltersIndexPatternColumn,
+  'none',
+  FiltersIndexPatternColumn['params']
+> = {
   type: OPERATION_NAME,
   displayName: filtersLabel,
   priority: 3, // Higher than any metric
@@ -73,11 +77,11 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
   isTransferable: () => true,
 
   getDefaultLabel: () => filtersLabel,
-  buildColumn({ previousColumn }) {
-    let params = { filters: [defaultFilter] };
+  buildColumn({ previousColumn }, columnParams) {
+    let params = { filters: columnParams?.filters ?? [defaultFilter] };
     if (previousColumn?.operationType === 'terms' && 'sourceField' in previousColumn) {
       params = {
-        filters: [
+        filters: columnParams?.filters ?? [
           {
             label: '',
             input: {
