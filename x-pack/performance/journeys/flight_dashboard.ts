@@ -46,7 +46,7 @@ export const journey = new Journey({
     await page.click(subj('addSampleDataSetflights'));
     throw new Error('forced error');
     // wait for the toast acknowledging installation
-    await toasts.waitForAndClear('installed');
+    // await toasts.waitForAndClear('installed');
   })
 
   .step('Go to Flights Dashboard', async ({ page }) => {

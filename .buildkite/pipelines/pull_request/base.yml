@@ -13,7 +13,6 @@ steps:
     command: .buildkite/scripts/steps/functional/performance_playwright.sh
     agents:
       queue: c2-16
-    depends_on: build
     key: tests
     timeout_in_minutes: 60
 
