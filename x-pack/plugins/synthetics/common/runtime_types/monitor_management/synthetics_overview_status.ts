@@ -6,12 +6,10 @@
  */
 
 import * as t from 'io-ts';
-import { SnapshotType } from '../snapshot';
 
 export const OverviewStatusType = t.type({
-  snapshot: SnapshotType,
-  disabledIds: t.array(t.string),
-  enabledIds: t.array(t.string),
+  up: t.number,
+  down: t.number,
   disabledCount: t.number,
 });
 

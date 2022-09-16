@@ -30,7 +30,7 @@ export function OverviewStatus() {
             data-test-subj="xpack.uptime.synthetics.overview.status.up"
             description={upDescription}
             reverse
-            title={title(status?.snapshot.up)}
+            title={title(status?.up)}
             titleColor="success"
             titleSize="m"
           />
@@ -40,7 +40,7 @@ export function OverviewStatus() {
             data-test-subj="xpack.uptime.synthetics.overview.status.down"
             description={downDescription}
             reverse
-            title={title(status?.snapshot.down)}
+            title={title(status?.down)}
             titleColor="danger"
             titleSize="m"
           />
