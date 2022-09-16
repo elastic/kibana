@@ -289,9 +289,8 @@ export function getState({
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
     pauseAutoRefreshInterval,
     resetSavedSearch: async (id: string | undefined) => {
-      const actualId = id ?? savedSearch.id;
-
-      const newSavedSearch = await getSavedSearch(actualId, {
+      // any undefined if means it's a new saved search generated
+      const newSavedSearch = await getSavedSearch(id, {
         search: services.data.search,
         savedObjectsClient: services.core.savedObjects.client,
         spaces: services.spaces,

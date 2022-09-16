@@ -240,3 +240,128 @@ export const useSavedSearch = ({
     inspectorAdapters,
   };
 };
+
+export const getDataSubjects = ({
+  initialFetchStatus,
+  searchSessionManager,
+  services,
+  stateContainer,
+}: {
+  initialFetchStatus: FetchStatus;
+  searchSessionManager: DiscoverSearchSessionManager;
+  services: DiscoverServices;
+  stateContainer: DiscoverStateContainer;
+}) => {
+  const { data } = services;
+  const appState = stateContainer.appStateContainer.getState();
+  const { query } = appState;
+
+  const recordRawType = getRawRecordType(query);
+  const inspectorAdapters = { requests: new RequestAdapter() };
+
+  /**
+   * The observables the UI (aka React component) subscribes to get notified about
+   * the changes in the data fetching process (high level: fetching started, data was received)
+   */
+  const initialState = { fetchStatus: initialFetchStatus, recordRawType };
+  const main$: DataMain$ = new BehaviorSubject<DataMainMsg>(initialState);
+  const documents$: DataDocuments$ = new BehaviorSubject<DataDocumentsMsg>(initialState);
+  const totalHits$: DataTotalHits$ = new BehaviorSubject<DataTotalHitsMsg>(initialState);
+  const charts$: DataCharts$ = new BehaviorSubject<DataChartsMessage>(initialState);
+  const availableFields$: AvailableFields$ = new BehaviorSubject<DataAvailableFieldsMsg>(
+    initialState
+  );
+
+  const dataSubjects: SavedSearchData = {
+    main$,
+    documents$,
+    totalHits$,
+    charts$,
+    availableFields$,
+  };
+
+  /**
+   * The observable to trigger data fetching in UI
+   * By refetch$.next('reset') rows and fieldcounts are reset to allow e.g. editing of runtime fields
+   * to be processed correctly
+   */
+  const refetch$ = new Subject<DataRefetchMsg>();
+  let autoRefreshDone: AutoRefreshDoneFn | undefined;
+
+  /**
+   * This part takes care of triggering the data fetching by creating and subscribing
+   * to an observable of various possible changes in state
+   */
+
+  const savedSearch = stateContainer.savedSearch;
+  /**
+   * handler emitted by `timefilter.getAutoRefreshFetch$()`
+   * to notify when data completed loading and to start a new autorefresh loop
+   */
+  const setAutoRefreshDone = (fn: AutoRefreshDoneFn | undefined) => {
+    autoRefreshDone = fn;
+  };
+  const fetch$ = getFetch$({
+    setAutoRefreshDone,
+    data,
+    main$: dataSubjects.main$,
+    refetch$,
+    searchSessionManager,
+    initialFetchStatus,
+  });
+  let abortController: AbortController;
+
+  function subscribe() {
+    const subscription = fetch$.subscribe(async (val) => {
+      if (
+        !validateTimeRange(data.query.timefilter.timefilter.getTime(), services.toastNotifications)
+      ) {
+        return;
+      }
+      inspectorAdapters.requests.reset();
+
+      abortController?.abort();
+      abortController = new AbortController();
+      const prevAutoRefreshDone = autoRefreshDone;
+
+      await fetchAll(
+        dataSubjects,
+        savedSearch,
+        val === 'reset',
+        stateContainer.appStateContainer.getState(),
+        {
+          abortController,
+          data,
+          initialFetchStatus,
+          inspectorAdapters,
+          searchSessionId: searchSessionManager.getNextSearchSessionId(),
+          services,
+        }
+      );
+
+      // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
+      // replacing this current one, call it to make sure we tell that the auto refresh is done
+      // and a new one can be scheduled.
+      if (autoRefreshDone === prevAutoRefreshDone) {
+        // if this function was set and is executed, another refresh fetch can be triggered
+        autoRefreshDone?.();
+        autoRefreshDone = undefined;
+      }
+    });
+
+    return () => {
+      abortController?.abort();
+      subscription.unsubscribe();
+    };
+  }
+
+  const reset = () => sendResetMsg(dataSubjects, initialFetchStatus);
+
+  return {
+    refetch$,
+    data$: dataSubjects,
+    subscribe,
+    reset,
+    inspectorAdapters,
+  };
+};

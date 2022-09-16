@@ -9,7 +9,7 @@
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { DataViewType, DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import { SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
+import { SEARCH_FIELDS_FROM_SOURCE, SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import { DiscoverServices } from '../../../build_services';
 import { getSortForSearchSource } from '../../../utils/sorting';
 
@@ -22,12 +22,10 @@ export function updateVolatileSearchSource(
     dataView,
     services,
     sort,
-    useNewFieldsApi,
   }: {
     dataView: DataView;
     services: DiscoverServices;
     sort?: SortOrder[];
-    useNewFieldsApi: boolean;
   }
 ) {
   const { uiSettings, data } = services;
@@ -36,6 +34,7 @@ export function updateVolatileSearchSource(
     dataView,
     uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
   );
+  const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
   searchSource.setField('trackTotalHits', true).setField('sort', usedSort);
 
   if (dataView.type !== DataViewType.ROLLUP) {

@@ -35,7 +35,6 @@ import {
 } from '../hooks/use_saved_search';
 import { DiscoverServices } from '../../../build_services';
 import { fetchSql } from './fetch_sql';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
 
 export interface FetchDeps {
   abortController: AbortController;
@@ -105,7 +104,6 @@ export function fetchAll(
       dataView: searchSource.getField('index')!,
       sort: savedSearch.sort,
       services,
-      useNewFieldsApi: services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
     });
 
     // Start fetching all required requests
