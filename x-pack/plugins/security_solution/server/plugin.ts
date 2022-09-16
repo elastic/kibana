@@ -75,7 +75,10 @@ import previewPolicy from './lib/detection_engine/routes/index/preview_policy.js
 import { createRuleExecutionLogService } from './lib/detection_engine/rule_monitoring';
 import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
-import type { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
+import type {
+  CreateRuleOptions,
+  CreateQueryRuleAdditionalOptions,
+} from './lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRulesNotificationAlertType } from './lib/detection_engine/notifications/legacy_rules_notification_alert_type';
 // eslint-disable-next-line no-restricted-imports
@@ -98,7 +101,6 @@ import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
 import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 import { featureUsageService } from './endpoint/services/feature_usage';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
-import type { CreateQueryRuleAdditionalOptions } from './lib/detection_engine/rule_types/types';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 

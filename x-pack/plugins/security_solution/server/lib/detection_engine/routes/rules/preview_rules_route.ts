@@ -40,7 +40,11 @@ import type { RuleExecutionContext, StatusChangeArgs } from '../../rule_monitori
 
 import type { ConfigType } from '../../../../config';
 import { alertInstanceFactoryStub } from '../../signals/preview/alert_instance_factory_stub';
-import type { CreateRuleOptions, CreateSecurityRuleTypeWrapperProps } from '../../rule_types/types';
+import type {
+  CreateRuleOptions,
+  CreateSecurityRuleTypeWrapperProps,
+  CreateQueryRuleAdditionalOptions,
+} from '../../rule_types/types';
 import {
   createEqlAlertType,
   createIndicatorMatchAlertType,
@@ -53,7 +57,6 @@ import {
 import { createSecurityRuleTypeWrapper } from '../../rule_types/create_security_rule_type_wrapper';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import { wrapSearchSourceClient } from './utils/wrap_search_source_client';
-import type { CreateQueryRuleAdditionalOptions } from '../../rule_types/types';
 
 const PREVIEW_TIMEOUT_SECONDS = 60;
 

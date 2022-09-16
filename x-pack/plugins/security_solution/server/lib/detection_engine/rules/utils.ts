@@ -110,7 +110,7 @@ export const transformFromAlertThrottle = (
     if (
       rule.muteAll ||
       (rule.actions.length === 0 &&
-        !(rule.params as { responseActions: RuleResponseAction[] })?.responseActions.length)
+        !(rule.params as { responseActions: RuleResponseAction[] })?.responseActions?.length)
     ) {
       return NOTIFICATION_THROTTLE_NO_ACTIONS;
     } else if (
