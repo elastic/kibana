@@ -11,7 +11,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
-import { ApplicationStart, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
+import { ApplicationStart, Capabilities, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 
 import { ProductAccess } from '../../../../common/types';
@@ -26,6 +26,7 @@ interface KibanaLogicProps {
   config: { host?: string };
   productAccess: ProductAccess;
   // Kibana core
+  capabilities: Capabilities;
   history: ScopedHistory;
   navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
@@ -47,6 +48,7 @@ export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud'> {
 export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
   path: ['enterprise_search', 'kibana_logic'],
   reducers: ({ props }) => ({
+    capabilities: [props.capabilities || {}, {}],
     config: [props.config || {}, {}],
     charts: [props.charts, {}],
     cloud: [props.cloud || {}, {}],
