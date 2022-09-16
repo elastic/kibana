@@ -8,6 +8,7 @@ PKG_REQUIRE_NAME = "@kbn/failed-test-reporter-cli"
 SOURCE_FILES = glob(
   [
     "**/*.ts",
+    "**/*.html",
   ],
   exclude = [
     "**/*.config.js",
@@ -83,6 +84,9 @@ jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  additional_args = [
+    "--copy-files"
+  ],
 )
 
 ts_config(
