@@ -6,6 +6,7 @@
  */
 
 import type { LocatorDefinition, KibanaLocation } from '@kbn/share-plugin/public';
+import { formatNotificationsUrl } from './formatters/notifications';
 import {
   DataFrameAnalyticsExplorationUrlState,
   MlLocatorParams,
@@ -101,6 +102,9 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
         break;
       case ML_PAGES.CALENDARS_EDIT:
         path = formatEditCalendarUrl('', params.pageState);
+        break;
+      case ML_PAGES.NOTIFICATIONS:
+        path = formatNotificationsUrl('', params.pageState);
         break;
 
       default:
