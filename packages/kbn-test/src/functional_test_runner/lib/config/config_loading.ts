@@ -97,7 +97,7 @@ async function getConfigModule({
   return {
     type: 'journey',
     path: resolvedPath,
-    provider: journey.constructor.convertToFtrConfigProvider(journey.config),
+    provider: journey.constructor.convertToFtrConfigProvider(journey),
     journey,
   };
 }
