@@ -21,6 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { EuiSelectOption } from '@elastic/eui/src/components/form/select/select';
 import { euiFlyoutClassname } from '../constants';
 import type { Field } from '../types';
 import { ModifiedFieldModal, SaveFieldTypeOrNameChangedModal } from './confirm_modals';
@@ -29,7 +30,6 @@ import { FieldEditor, FieldEditorFormState } from './field_editor/field_editor';
 import { useFieldEditorContext } from './field_editor_context';
 import { FlyoutPanels } from './flyout_panels';
 import { FieldPreview, useFieldPreviewContext } from './preview';
-import {EuiSelectOption} from "@elastic/eui/src/components/form/select/select";
 
 const i18nTexts = {
   cancelButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutCancelButtonLabel', {
@@ -86,11 +86,13 @@ const FieldEditorFlyoutContentComponent = ({
       path: `/api/index_management/index_templates`,
       method: 'get',
     });
-    const matchingTemplates = allIndexTemplates.templates.filter(t => t.indexPatterns.includes(title)).map((t: any) => {
-      return {
-        text: t.name,
-      } as EuiSelectOption;
-    });
+    const matchingTemplates = allIndexTemplates.templates
+      .filter((t) => t.indexPatterns.includes(title))
+      .map((t: any) => {
+        return {
+          text: t.name,
+        } as EuiSelectOption;
+      });
     setMatchingTemplates(matchingTemplates);
   };
 
@@ -172,8 +174,7 @@ const FieldEditorFlyoutContentComponent = ({
       const { data } = await submit();
       setMyData(data);
       setIsPromoteVisible(true);
-    }
-    else {
+    } else {
       // do the promotion
 
       const indexTemplate = await getIndexTemplate(selectedTemplate);
@@ -191,7 +192,15 @@ const FieldEditorFlyoutContentComponent = ({
         console.log(e);
       }
     }
-  }, [setIsPromoteVisible, isPromoteVisible, selectedTemplate, ingest, submit, fieldToEdit, fieldToCreate]);
+  }, [
+    setIsPromoteVisible,
+    isPromoteVisible,
+    selectedTemplate,
+    ingest,
+    submit,
+    fieldToEdit,
+    fieldToCreate,
+  ]);
 
   const onClickSave = useCallback(async () => {
     const { isValid, data: updatedField } = await submit();
@@ -333,58 +342,58 @@ const FieldEditorFlyoutContentComponent = ({
               </EuiText>
             </FlyoutPanels.Header>
 
-            { !isPromoteVisible && <FieldEditor
-              field={fieldToEdit ?? fieldToCreate}
-              onChange={setFormState}
-              onFormModifiedChange={setIsFormModified}
-            /> }
+            {!isPromoteVisible && (
+              <FieldEditor
+                field={fieldToEdit ?? fieldToCreate}
+                onChange={setFormState}
+                onFormModifiedChange={setIsFormModified}
+              />
+            )}
 
-            {isPromoteVisible &&
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false}>
-                    <div>
-                      {/* Title */}
-                      <EuiTitle size="xs">
-                        <h3>Promote runtime field</h3>
-                      </EuiTitle>
-                      <EuiSpacer size="xs" />
+            {isPromoteVisible && (
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <div>
+                    {/* Title */}
+                    <EuiTitle size="xs">
+                      <h3>Promote runtime field</h3>
+                    </EuiTitle>
+                    <EuiSpacer size="xs" />
 
-                      {/* Description */}
-                      <EuiText size="s" color="subdued">
-                        Promote runtime field to the index template
-                      </EuiText>
+                    {/* Description */}
+                    <EuiText size="s" color="subdued">
+                      Promote runtime field to the index template
+                    </EuiText>
 
-                      {/* Content */}
-                      <>
-                        <EuiSpacer size="l" />
-                        <EuiFormRow
-                          label="Select target index template"
+                    {/* Content */}
+                    <>
+                      <EuiSpacer size="l" />
+                      <EuiFormRow label="Select target index template" fullWidth>
+                        <EuiSelect
                           fullWidth
-                        >
-                          <EuiSelect
-                            fullWidth
-                            options={matchingTemplates}
-                            value={selectedTemplate}
-                            onChange={(e) => {
-                              setSelectedTemplate(e.target.value);
-                            }}
-                            hasNoInitialSelection={true}
-                          />
-                        </EuiFormRow>
+                          options={matchingTemplates}
+                          value={selectedTemplate}
+                          onChange={(e) => {
+                            setSelectedTemplate(e.target.value);
+                          }}
+                          hasNoInitialSelection={true}
+                        />
+                      </EuiFormRow>
 
-                        <EuiFormRow
-                          label="Select target index template"
-                          fullWidth
-                        >
-                          <EuiCheckbox id="ingestCheckbox" checked={ingest} onChange={(e) => {
+                      <EuiFormRow label="Select target index template" fullWidth>
+                        <EuiCheckbox
+                          id="ingestCheckbox"
+                          checked={ingest}
+                          onChange={(e) => {
                             setIngest(e.target.checked);
-                          }} />
-                        </EuiFormRow>
-                      </>
-                    </div>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-            }
+                          }}
+                        />
+                      </EuiFormRow>
+                    </>
+                  </div>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
           </FlyoutPanels.Content>
 
           <FlyoutPanels.Footer>
@@ -415,16 +424,18 @@ const FieldEditorFlyoutContentComponent = ({
                       </EuiButton>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      {!isPromoteVisible && <EuiButton
-                        color="primary"
-                        onClick={onClickSave}
-                        data-test-subj="fieldSaveButton"
-                        fill
-                        disabled={hasErrors}
-                        isLoading={isSavingField || isSubmitting}
-                      >
-                        {i18nTexts.saveButtonLabel}
-                      </EuiButton> }
+                      {!isPromoteVisible && (
+                        <EuiButton
+                          color="primary"
+                          onClick={onClickSave}
+                          data-test-subj="fieldSaveButton"
+                          fill
+                          disabled={hasErrors}
+                          isLoading={isSavingField || isSubmitting}
+                        >
+                          {i18nTexts.saveButtonLabel}
+                        </EuiButton>
+                      )}
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>

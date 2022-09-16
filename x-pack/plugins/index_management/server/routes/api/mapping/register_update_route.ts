@@ -29,7 +29,6 @@ export function registerUpdateMappingRoute({ router, lib: { handleEsError } }: R
       const mapping = request.body as TemplateDeserialized;
       console.log(mapping);
       try {
-
         // Verify the template exists (ES will throw 404 if not)
         // const templateExists = await doesTemplateExist({ name, client, isLegacy });
 
@@ -39,13 +38,19 @@ export function registerUpdateMappingRoute({ router, lib: { handleEsError } }: R
 
         // Next, update index template
 
-        const indices = (await client.asCurrentUser.cat.indices({
-          index: name,
-        })).split('\n').map(i => i.split(' ')[2]).filter(i => i);
+        const indices = (
+          await client.asCurrentUser.cat.indices({
+            index: name,
+          })
+        )
+          .split('\n')
+          .map((i) => i.split(' ')[2])
+          .filter((i) => i);
         console.log(indices);
-        for (let index of indices) {
+        for (const index of indices) {
           console.log(index);
-          const indexMapping = (await client.asCurrentUser.indices.getMapping({ index }))[index].mappings;
+          const indexMapping = (await client.asCurrentUser.indices.getMapping({ index }))[index]
+            .mappings;
           console.log(indexMapping);
           if (mapping.properties) {
             indexMapping.properties = { ...indexMapping.properties, ...mapping.properties };
@@ -55,7 +60,7 @@ export function registerUpdateMappingRoute({ router, lib: { handleEsError } }: R
           console.log(indexMapping);
           const r = await client.asCurrentUser.indices.putMapping({
             index,
-            body: indexMapping
+            body: indexMapping,
           });
           console.log(r);
         }
