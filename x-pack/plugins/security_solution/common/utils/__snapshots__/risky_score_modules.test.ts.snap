@@ -298,7 +298,7 @@ exports[`getCreateMLHostPivotTransformOptions getCreateMLHostPivotTransformOptio
 Object {
   "dest": Object {
     "index": "ml_host_risk_score_customSpaceId",
-    "pipeline": "ml_hostriskscore_ingest_pipeline_default",
+    "pipeline": "ml_hostriskscore_ingest_pipeline_customSpaceId",
   },
   "frequency": "1h",
   "pivot": Object {
@@ -387,7 +387,7 @@ exports[`getCreateMLUserPivotTransformOptions getCreateMLUserPivotTransformOptio
 Object {
   "dest": Object {
     "index": "ml_user_risk_score_customSpaceId",
-    "pipeline": "ml_userriskscore_ingest_pipeline_default",
+    "pipeline": "ml_userriskscore_ingest_pipeline_customSpaceId",
   },
   "frequency": "1h",
   "pivot": Object {

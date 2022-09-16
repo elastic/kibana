@@ -59,7 +59,7 @@ describe('deletePrebuiltSavedObjects', () => {
     );
 
     expect(clients.savedObjectsClient.delete.mock.calls[1][1]).toMatchInlineSnapshot(
-      `"d3f72670-d3a0-11eb-bd37-7bb50422e346"`
+      `"<REPLACE-WITH-ID1>"`
     );
     expect(clients.savedObjectsClient.delete.mock.calls[1][0]).toMatchInlineSnapshot(`"lens"`);
 
@@ -71,7 +71,7 @@ describe('deletePrebuiltSavedObjects', () => {
     );
 
     expect(clients.savedObjectsClient.delete.mock.calls[3][1]).toMatchInlineSnapshot(
-      `"42371d00-cf7a-11eb-9a96-05d89f94ad96"`
+      `"<REPLACE-WITH-ID2>"`
     );
     expect(clients.savedObjectsClient.delete.mock.calls[3][0]).toMatchInlineSnapshot(
       `"visualization"`
@@ -94,7 +94,7 @@ describe('deletePrebuiltSavedObjects', () => {
     );
 
     expect(clients.savedObjectsClient.delete.mock.calls[1][1]).toMatchInlineSnapshot(
-      `"54dadd60-1a57-11ed-bb53-ad8c26f4d942"`
+      `"<REPLACE-WITH-ID1>"`
     );
     expect(clients.savedObjectsClient.delete.mock.calls[1][0]).toMatchInlineSnapshot(`"lens"`);
 
@@ -106,7 +106,7 @@ describe('deletePrebuiltSavedObjects', () => {
     );
 
     expect(clients.savedObjectsClient.delete.mock.calls[3][1]).toMatchInlineSnapshot(
-      `"60454070-9a5d-11ec-9633-5f782d122340"`
+      `"<REPLACE-WITH-ID2>"`
     );
     expect(clients.savedObjectsClient.delete.mock.calls[3][0]).toMatchInlineSnapshot(`"lens"`);
 
@@ -118,38 +118,38 @@ describe('deletePrebuiltSavedObjects', () => {
     );
 
     expect(clients.savedObjectsClient.delete.mock.calls[5][1]).toMatchInlineSnapshot(
-      `"a62d3ed0-cf92-11eb-a0ff-1763d16cbda7"`
+      `"<REPLACE-WITH-ID3>"`
     );
     expect(clients.savedObjectsClient.delete.mock.calls[5][0]).toMatchInlineSnapshot(
       `"visualization"`
     );
 
     expect(clients.savedObjectsClient.delete.mock.calls[6][1]).toMatchInlineSnapshot(
-      `"42371d00-cf7a-11eb-9a96-05d89f94ad96"`
+      `"<REPLACE-WITH-ID4>"`
     );
     expect(clients.savedObjectsClient.delete.mock.calls[6][0]).toMatchInlineSnapshot(
       `"visualization"`
     );
 
     expect(clients.savedObjectsClient.delete.mock.calls[7][1]).toMatchInlineSnapshot(
-      `"183d32f0-9a5e-11ec-90d3-1109ed409ab5"`
+      `"<REPLACE-WITH-ID5>"`
     );
     expect(clients.savedObjectsClient.delete.mock.calls[7][0]).toMatchInlineSnapshot(
       `"visualization"`
     );
 
     expect(clients.savedObjectsClient.delete.mock.calls[8][1]).toMatchInlineSnapshot(
-      `"93fc0f00-1a57-11ed-bb53-ad8c26f4d942"`
+      `"<REPLACE-WITH-ID6>"`
     );
     expect(clients.savedObjectsClient.delete.mock.calls[8][0]).toMatchInlineSnapshot(`"tag"`);
 
     expect(clients.savedObjectsClient.delete.mock.calls[9][1]).toMatchInlineSnapshot(
-      `"1355b030-ca2b-11ec-962f-a3a018b7d10f"`
+      `"<REPLACE-WITH-ID8>"`
     );
     expect(clients.savedObjectsClient.delete.mock.calls[9][0]).toMatchInlineSnapshot(`"dashboard"`);
 
     expect(clients.savedObjectsClient.delete.mock.calls[10][1]).toMatchInlineSnapshot(
-      `"8ac3ad30-1a57-11ed-bb53-ad8c26f4d942"`
+      `"<REPLACE-WITH-ID7>"`
     );
     expect(clients.savedObjectsClient.delete.mock.calls[10][0]).toMatchInlineSnapshot(
       `"dashboard"`
