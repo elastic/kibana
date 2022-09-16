@@ -8,6 +8,7 @@
 import { EuiLoadingContent, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
+import type { AddToTimelinePayload } from '../../timelines/get_add_to_timeline';
 import {
   AGENT_STATUS_ERROR,
   EMPTY_PROMPT,
@@ -25,7 +26,7 @@ export interface OsqueryActionProps {
   defaultValues?: {};
   formType: 'steps' | 'simple';
   hideAgentsField?: boolean;
-  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
+  addToTimeline?: (payload: AddToTimelinePayload) => React.ReactElement;
 }
 
 const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({

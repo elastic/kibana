@@ -17,6 +17,8 @@
       "feature": {
         "discover": ["read"],
         "infrastructure": ["read"],
+        "observabilityCases": ["all"],
+        "securitySolutionCases": ["all"],
         "ml": ["all"],
         "siem": ["all"],
         "osquery": ["all"],

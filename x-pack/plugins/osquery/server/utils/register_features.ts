@@ -34,7 +34,7 @@ export const registerFeatures = (features: SetupPlugins['features']) => {
           all: [],
           read: [],
         },
-        ui: ['write'],
+        ui: ['read', 'write'],
       },
       read: {
         api: [`${PLUGIN_ID}-read`],
