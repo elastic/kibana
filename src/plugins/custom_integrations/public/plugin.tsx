@@ -47,10 +47,10 @@ export class CustomIntegrationsPlugin
   ): CustomIntegrationsStart {
     const services = servicesFactory({ coreStart, startPlugins });
 
-    // Set the language clients components to render in Fleet plugin under Integrations app
-    // Export component only if tje integration has exportLanguageUiComponent = true
     const languageClientsUiComponents = new Map<string, React.FC>();
 
+    // Set the language clients components to render in Fleet plugin under Integrations app
+    // Export component only if the integration has exportLanguageUiComponent = true
     languageIntegrations.forEach((int) => {
       if (int.exportLanguageUiComponent) {
         const ReadmeComponent = () => <OverviewComponent packageName={`${int.id}`} />;
