@@ -9,7 +9,6 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import { getRawRecordType } from '../utils/get_raw_record_type';
 import { DiscoverServices } from '../../../build_services';
@@ -103,21 +102,16 @@ export interface DataAvailableFieldsMsg extends DataMsg {
  */
 export const useSavedSearch = ({
   initialFetchStatus,
-  savedSearch,
   searchSessionManager,
   services,
   stateContainer,
-  useNewFieldsApi,
 }: {
   initialFetchStatus: FetchStatus;
-  savedSearch: SavedSearch;
   searchSessionManager: DiscoverSearchSessionManager;
   services: DiscoverServices;
   stateContainer: DiscoverStateContainer;
-  useNewFieldsApi: boolean;
 }) => {
-  const { data, filterManager } = services;
-  const timefilter = data.query.timefilter.timefilter;
+  const { data } = services;
   const appState = stateContainer.appStateContainer.getState();
   const { query } = appState;
 
@@ -136,15 +130,13 @@ export const useSavedSearch = ({
   const charts$: DataCharts$ = useBehaviorSubject(initialState) as DataCharts$;
   const availableFields$: AvailableFields$ = useBehaviorSubject(initialState) as AvailableFields$;
 
-  const dataSubjects = useMemo(() => {
-    return {
-      main$,
-      documents$,
-      totalHits$,
-      charts$,
-      availableFields$,
-    };
-  }, [main$, charts$, documents$, totalHits$, availableFields$]);
+  const dataSubjects: SavedSearchData = useSingleton(() => ({
+    main$,
+    documents$,
+    totalHits$,
+    charts$,
+    availableFields$,
+  }));
 
   /**
    * The observable to trigger data fetching in UI
@@ -165,6 +157,7 @@ export const useSavedSearch = ({
    * to an observable of various possible changes in state
    */
   useEffect(() => {
+    const savedSearch = stateContainer.savedSearch;
     /**
      * handler emitted by `timefilter.getAutoRefreshFetch$()`
      * to notify when data completed loading and to start a new autorefresh loop
@@ -175,7 +168,7 @@ export const useSavedSearch = ({
     const fetch$ = getFetch$({
       setAutoRefreshDone,
       data,
-      main$,
+      main$: dataSubjects.main$,
       refetch$,
       searchSessionManager,
       initialFetchStatus,
@@ -183,7 +176,9 @@ export const useSavedSearch = ({
     let abortController: AbortController;
 
     const subscription = fetch$.subscribe(async (val) => {
-      if (!validateTimeRange(timefilter.getTime(), services.toastNotifications)) {
+      if (
+        !validateTimeRange(data.query.timefilter.timefilter.getTime(), services.toastNotifications)
+      ) {
         return;
       }
       inspectorAdapters.requests.reset();
@@ -192,14 +187,20 @@ export const useSavedSearch = ({
       abortController = new AbortController();
       const autoRefreshDone = refs.current.autoRefreshDone;
 
-      await fetchAll(dataSubjects, savedSearch, val === 'reset', appState, {
-        abortController,
-        data,
-        initialFetchStatus,
-        inspectorAdapters,
-        searchSessionId: searchSessionManager.getNextSearchSessionId(),
-        services,
-      });
+      await fetchAll(
+        dataSubjects,
+        savedSearch,
+        val === 'reset',
+        stateContainer.appStateContainer.getState(),
+        {
+          abortController,
+          data,
+          initialFetchStatus,
+          inspectorAdapters,
+          searchSessionId: searchSessionManager.getNextSearchSessionId(),
+          services,
+        }
+      );
 
       // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
       // replacing this current one, call it to make sure we tell that the auto refresh is done
@@ -216,23 +217,15 @@ export const useSavedSearch = ({
       subscription.unsubscribe();
     };
   }, [
-    appState,
     data,
-    data.query.queryString,
     dataSubjects,
-    filterManager,
     initialFetchStatus,
     inspectorAdapters,
-    main$,
     refetch$,
-    savedSearch,
     searchSessionManager,
-    searchSessionManager.newSearchSessionIdFromURL$,
     services,
-    services.toastNotifications,
     stateContainer.appStateContainer,
-    timefilter,
-    useNewFieldsApi,
+    stateContainer.savedSearch,
   ]);
 
   const reset = useCallback(

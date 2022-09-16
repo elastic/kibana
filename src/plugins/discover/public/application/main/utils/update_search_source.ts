@@ -60,7 +60,6 @@ export function updateVolatileSearchSource(
  */
 export function updateSearchSource(
   searchSource: ISearchSource,
-  persist = true,
   {
     dataView,
     services,

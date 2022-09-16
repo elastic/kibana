@@ -49,11 +49,9 @@ export function AlertsPopover({
    */
   const getParams = useCallback(() => {
     const nextSearchSource = searchSource.createCopy();
-    updateSearchSource(nextSearchSource, true, {
+    updateSearchSource(nextSearchSource, {
       dataView: searchSource.getField('index')!,
       services,
-      sort: [],
-      useNewFieldsApi: true,
     });
 
     return {

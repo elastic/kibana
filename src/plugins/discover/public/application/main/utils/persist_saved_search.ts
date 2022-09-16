@@ -24,11 +24,9 @@ export function updateSavedSearch({
   state: AppState;
   services: DiscoverServices;
 }) {
-  updateSearchSource(savedSearch.searchSource, true, {
+  updateSearchSource(savedSearch.searchSource, {
     dataView,
     services,
-    sort: state.sort as SortOrder[],
-    useNewFieldsApi: false,
   });
   savedSearch.columns = state.columns || [];
   savedSearch.sort = (state.sort as SortOrder[]) || [];

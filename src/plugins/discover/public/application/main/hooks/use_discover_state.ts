@@ -19,7 +19,6 @@ import { loadDataView } from '../utils/resolve_data_view';
 import { useSavedSearch as useSavedSearchData } from './use_saved_search';
 import {
   MODIFY_COLUMNS_ON_SWITCH,
-  SEARCH_FIELDS_FROM_SOURCE,
   SEARCH_ON_PAGE_LOAD_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../common';
@@ -42,7 +41,6 @@ export function useDiscoverState({
   dataViewList: DataViewListItem[];
 }) {
   const { uiSettings, data, filterManager, dataViews } = services;
-  const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const { timefilter } = data.query.timefilter;
 
   const [dataView, setDataView] = useState(savedSearch.searchSource.getField('index')!);
@@ -79,10 +77,8 @@ export function useDiscoverState({
   const { data$, refetch$, reset, inspectorAdapters } = useSavedSearchData({
     initialFetchStatus,
     searchSessionManager,
-    savedSearch,
     services,
     stateContainer,
-    useNewFieldsApi,
   });
   /**
    * State changes (data view, columns), when a text base query result is returned
