@@ -89,8 +89,6 @@ export type IndexPatternField = FieldSpec & {
   runtime?: boolean;
 };
 
-export type ErrorCallback = (e: { message: string }) => void;
-
 export interface PublicAPIProps<T> {
   state: T;
   layerId: string;
