@@ -13,6 +13,7 @@ export enum ErrorCode {
   CRAWLER_ALREADY_EXISTS = 'crawler_already_exists',
   INDEX_ALREADY_EXISTS = 'index_already_exists',
   INDEX_NOT_FOUND = 'index_not_found',
+  PIPELINE_ALREADY_EXISTS = 'pipeline_already_exists',
   RESOURCE_NOT_FOUND = 'resource_not_found',
   UNAUTHORIZED = 'unauthorized',
   UNCAUGHT_EXCEPTION = 'uncaught_exception',
