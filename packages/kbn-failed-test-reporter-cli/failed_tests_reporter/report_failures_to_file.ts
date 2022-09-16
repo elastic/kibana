@@ -138,10 +138,7 @@ export function reportFailuresToFile(
     );
 
     const failureHTML = Fs.readFileSync(
-      Path.resolve(
-        REPO_ROOT,
-        'packages/kbn-test/src/failed_tests_reporter/report_failures_to_file_html_template.html'
-      )
+      require.resolve('./report_failures_to_file_html_template.html')
     )
       .toString()
       .replace('$TITLE', escape(failure.name))
