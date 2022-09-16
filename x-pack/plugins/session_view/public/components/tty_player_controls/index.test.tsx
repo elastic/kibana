@@ -99,4 +99,43 @@ describe('TTYPlayerControls component', () => {
     renderResult.queryByTestId('sessionView:TTYPlayerControlsEnd')?.click();
     expect(props.onSeekLine).toHaveBeenCalledWith(10);
   });
+
+  it('render output markers', async () => {
+    renderResult = mockedContext.render(<TTYPlayerControls {...props} />);
+    expect(
+      renderResult.queryAllByRole('button', {
+        name: 'output',
+      })
+    ).toHaveLength(props.processStartMarkers.length);
+  });
+  it('render data_limited markers', async () => {
+    const processStartMarkers = [
+      { event: MOCK_PROCESS_EVENT_START, line: 0 },
+      {
+        event: {
+          process: {
+            ...MOCK_PROCESS_EVENT_MIDDLE,
+            io: {
+              max_bytes_per_process_exceeded: true,
+            },
+          },
+        },
+        line: 2,
+      },
+      { event: MOCK_PROCESS_EVENT_END, line: 4 },
+    ];
+    renderResult = mockedContext.render(
+      <TTYPlayerControls {...props} processStartMarkers={processStartMarkers} />
+    );
+    expect(
+      renderResult.queryAllByRole('button', {
+        name: 'output',
+      })
+    ).toHaveLength(2);
+    expect(
+      renderResult.queryAllByRole('button', {
+        name: 'data_limited',
+      })
+    ).toHaveLength(1);
+  });
 });
