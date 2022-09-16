@@ -11,3 +11,5 @@ export type { ScalabilityAction, ScalabilitySetup } from './journey/journey_conf
 
 export { Journey } from './journey/journey';
 export type { Step } from './journey/journey';
+
+export { JourneyScreenshots } from './journey/journey_screenshots';

@@ -11,6 +11,7 @@ import { inspect } from 'util';
 import { Page } from 'playwright';
 import callsites from 'callsites';
 import { ToolingLog } from '@kbn/tooling-log';
+import { FtrConfigProvider } from '@kbn/test';
 import { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 
 import { Auth } from '../services/auth';
@@ -18,6 +19,7 @@ import { InputDelays } from '../services/input_delays';
 import { KibanaUrl } from '../services/kibana_url';
 
 import { JourneyFtrHarness } from './journey_ftr_harness';
+import { makeFtrConfigProvider } from './journey_ftr_config';
 import { JourneyConfig, JourneyConfigOptions } from './journey_config';
 
 export interface BaseStepCtx {
@@ -27,12 +29,28 @@ export interface BaseStepCtx {
   kbnUrl: KibanaUrl;
 }
 
+export type AnyStep = Step<{}>;
+
 export interface Step<CtxExt extends object> {
   name: string;
+  index: number;
   fn(ctx: BaseStepCtx & CtxExt): Promise<void>;
 }
 
+const CONFIG_PROVIDER_CACHE = new WeakMap<Journey<any>, FtrConfigProvider>();
+
 export class Journey<CtxExt extends object> {
+  static convertToFtrConfigProvider(journey: Journey<any>) {
+    const cached = CONFIG_PROVIDER_CACHE.get(journey);
+    if (cached) {
+      return cached;
+    }
+
+    const provider = makeFtrConfigProvider(journey.config, journey.#steps);
+    CONFIG_PROVIDER_CACHE.set(journey, provider);
+    return provider;
+  }
+
   /**
    * Load a journey from a file path
    */
@@ -61,6 +79,10 @@ export class Journey<CtxExt extends object> {
 
   config: JourneyConfig<CtxExt>;
 
+  /**
+   * Create a Journey which should be exported from a file in the
+   * x-pack/performance/journeys directory.
+   */
   constructor(opts?: JourneyConfigOptions<CtxExt>) {
     const path = callsites().at(1)?.getFileName();
 
@@ -71,9 +93,18 @@ export class Journey<CtxExt extends object> {
     this.config = new JourneyConfig(path, opts);
   }
 
+  /**
+   * Define a step of this Journey. Steps are only separated from each other
+   * to aid in reading/debuging the journey and reading it's logging output.
+   *
+   * If a journey fails, a failure report will be created with a screenshot
+   * at the point of failure as well as a screenshot at the end of every
+   * step.
+   */
   step(name: string, fn: (ctx: BaseStepCtx & CtxExt) => Promise<void>) {
     this.#steps.push({
       name,
+      index: this.#steps.length,
       fn,
     });
 

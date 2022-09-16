@@ -14,22 +14,55 @@ import globby from 'globby';
 import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/utils';
 import { escape } from 'he';
+import { FtrScreenshotFilename } from '@kbn/ftr-screenshot-filename';
+import { JourneyScreenshots } from '@kbn/journeys';
 
 import { BuildkiteMetadata } from './buildkite_metadata';
 import { TestFailure } from './get_failures';
 
-export function reportFailuresToFile(
-  log: ToolingLog,
-  failures: TestFailure[],
-  bkMeta: BuildkiteMetadata
-) {
-  if (!failures?.length) {
-    return;
+interface JourneyMeta {
+  journeyName: string;
+}
+function getJourneyMetdata(rootMeta: Record<string, unknown>): JourneyMeta | undefined {
+  const { journeyName } = rootMeta;
+  if (typeof journeyName === 'string') {
+    return { journeyName };
   }
 
-  let screenshots: Array<{ path: string; name: string }>;
+  return undefined;
+}
+
+async function getJourneySnapshotHtml(log: ToolingLog, journeyMeta: JourneyMeta) {
+  let screenshots;
   try {
-    screenshots = globby
+    screenshots = await JourneyScreenshots.load(journeyMeta.journeyName);
+  } catch (error) {
+    log.error(`Failed to load journey screenshots: ${error.message}`);
+    return '';
+  }
+
+  return [
+    '<section>',
+    '<h2>Steps</h2>',
+    ...screenshots.get().flatMap(({ title, path }) => {
+      const base64 = Fs.readFileSync(path, 'base64');
+
+      return [
+        `<h3>${escape(title)}</h3>`,
+        `<img class="screenshot img-fluid img-thumbnail" src="data:image/png;base64,${base64}" />`,
+      ];
+    }),
+    '</section>',
+  ].join('\n');
+}
+
+let _allScreenshotsCache: Array<{ path: string; name: string }> | undefined;
+function getAllScreenshots(log: ToolingLog) {
+  return (_allScreenshotsCache ??= findAllScreenshots(log));
+}
+function findAllScreenshots(log: ToolingLog) {
+  try {
+    return globby
       .sync(
         [
           'test/functional/**/screenshots/failure/*.png',
@@ -45,10 +78,33 @@ export function reportFailuresToFile(
         path,
         name: Path.basename(path, Path.extname(path)),
       }));
-  } catch (e) {
-    log.error(e as Error);
-    screenshots = [];
+  } catch (error) {
+    log.error(`Failed to find screenshots: ${error.message}`);
+    return [];
   }
+}
+
+function getFtrScreenshotHtml(log: ToolingLog, failureName: string) {
+  return getAllScreenshots(log)
+    .filter((s) => s.name.startsWith(FtrScreenshotFilename.create(failureName, { ext: false })))
+    .map((s) => {
+      const base64 = Fs.readFileSync(s.path).toString('base64');
+      return `<img class="screenshot img-fluid img-thumbnail" src="data:image/png;base64,${base64}" />`;
+    })
+    .join('\n');
+}
+
+export function reportFailuresToFile(
+  log: ToolingLog,
+  failures: TestFailure[],
+  bkMeta: BuildkiteMetadata,
+  rootMeta: Record<string, unknown>
+) {
+  if (!failures?.length) {
+    return;
+  }
+
+  const journeyMeta = getJourneyMetdata(rootMeta);
 
   // Jest could, in theory, fail 1000s of tests and write 1000s of failures
   // So let's just write files for the first 20
@@ -80,18 +136,6 @@ export function reportFailuresToFile(
       null,
       2
     );
-
-    const truncatedName = failure.name.replaceAll(/[^ a-zA-Z0-9-]+/g, '').slice(0, 80);
-    const failureNameHash = createHash('sha256').update(failure.name).digest('hex');
-    const screenshotPrefix = `${truncatedName}-${failureNameHash}`;
-
-    const screenshotHtml = screenshots
-      .filter((s) => s.name.startsWith(screenshotPrefix))
-      .map((s) => {
-        const base64 = Fs.readFileSync(s.path).toString('base64');
-        return `<img class="screenshot img-fluid img-thumbnail" src="data:image/png;base64,${base64}" />`;
-      })
-      .join('\n');
 
     const failureHTML = Fs.readFileSync(
       Path.resolve(
@@ -135,7 +179,11 @@ export function reportFailuresToFile(
             : ''
         }
         <pre>${escape(failure.failure)}</pre>
-        ${screenshotHtml}
+        ${
+          journeyMeta
+            ? getJourneySnapshotHtml(log, journeyMeta)
+            : getFtrScreenshotHtml(log, failure.name)
+        }
         <pre>${escape(failure['system-out'] || '')}</pre>
       `
       );

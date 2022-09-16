@@ -163,6 +163,7 @@ export const schema = Joi.object()
       .keys({
         enabled: Joi.boolean().default(!!process.env.CI && !process.env.DISABLE_JUNIT_REPORTER),
         reportName: Joi.string(),
+        metadata: Joi.object().unknown(true).default(),
       })
       .default(),
 

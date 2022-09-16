@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { runFailedTestsReporterCli } from './run_failed_tests_reporter_cli';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-ftr-screenshot-filename'],
+};

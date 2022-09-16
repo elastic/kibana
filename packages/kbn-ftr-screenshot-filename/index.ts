@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
-require('../src/setup_node_env');
-require('@kbn/failed-test-reporter-cli');
+import * as FtrScreenshotFilename from './ftr_screenshot_filename';
+
+export { FtrScreenshotFilename };

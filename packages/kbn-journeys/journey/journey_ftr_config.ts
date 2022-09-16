@@ -13,13 +13,17 @@ import { REPO_ROOT } from '@kbn/utils';
 import { FtrConfigProviderContext, FtrConfigProvider } from '@kbn/test';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 
+import { AnyStep } from './journey';
 import { JourneyConfig } from './journey_config';
 
 // These "secret" values are intentionally written in the source. We would make the APM server accept anonymous traffic if we could
 const APM_SERVER_URL = 'https://kibana-ops-e2e-perf.apm.us-central1.gcp.cloud.es.io:443';
 const APM_PUBLIC_TOKEN = 'CTs9y3cvcfq13bQqsB';
 
-export function makeFtrConfigProvider(config: JourneyConfig<any>): FtrConfigProvider {
+export function makeFtrConfigProvider(
+  config: JourneyConfig<any>,
+  steps: AnyStep[]
+): FtrConfigProvider {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const baseConfig = (
       await readConfigFile(
@@ -68,7 +72,11 @@ export function makeFtrConfigProvider(config: JourneyConfig<any>): FtrConfigProv
       servicesRequiredForTestAnalysis: ['performance', 'journeyConfig'],
 
       junit: {
-        reportName: `SUPT Journey: ${config.getName()}`,
+        reportName: `Journey: ${config.getName()}`,
+        metadata: {
+          journeyName: config.getName(),
+          stepNames: steps.map((s) => s.name),
+        },
       },
 
       kbnTestServer: {

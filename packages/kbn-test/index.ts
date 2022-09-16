@@ -41,8 +41,6 @@ export {
 // @internal
 export { setupJUnitReportGeneration, escapeCdata } from './src/mocha';
 
-export { runFailedTestsReporterCli } from './src/failed_tests_reporter';
-
 export { CI_PARALLEL_PROCESS_PREFIX } from './src/ci_parallel_process_prefix';
 
 export * from './src/functional_test_runner';

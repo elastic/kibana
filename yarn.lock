@@ -3364,6 +3364,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/failed-test-reporter-cli@link:bazel-bin/packages/kbn-failed-test-reporter-cli":
+  version "0.0.0"
+  uid ""
+
 "@kbn/field-types@link:bazel-bin/packages/kbn-field-types":
   version "0.0.0"
   uid ""
@@ -3377,6 +3381,10 @@
   uid ""
 
 "@kbn/ftr-common-functional-services@link:bazel-bin/packages/kbn-ftr-common-functional-services":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ftr-screenshot-filename@link:bazel-bin/packages/kbn-ftr-screenshot-filename":
   version "0.0.0"
   uid ""
 
@@ -7389,6 +7397,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__failed-test-reporter-cli@link:bazel-bin/packages/kbn-failed-test-reporter-cli/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__field-types@link:bazel-bin/packages/kbn-field-types/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7398,6 +7410,10 @@
   uid ""
 
 "@types/kbn__ftr-common-functional-services@link:bazel-bin/packages/kbn-ftr-common-functional-services/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ftr-screenshot-filename@link:bazel-bin/packages/kbn-ftr-screenshot-filename/npm_module_types":
   version "0.0.0"
   uid ""
 

@@ -2,8 +2,8 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "kbn-journeys"
-PKG_REQUIRE_NAME = "@kbn/journeys"
+PKG_DIRNAME = "kbn-failed-test-reporter-cli"
+PKG_REQUIRE_NAME = "@kbn/failed-test-reporter-cli"
 
 SOURCE_FILES = glob(
   [
@@ -58,18 +58,25 @@ RUNTIME_DEPS = [
 #
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
-  "@npm//@types/node",
-  "@npm//@types/mocha",
-  "@npm//playwright",
-  "@npm//uuid",
-  "@npm//axios",
-  "@npm//callsites",
-  "@npm//rxjs",
-  "@npm//elastic-apm-node",
-  "//packages/kbn-ftr-common-functional-services:npm_module_types",
-  "//packages/kbn-ftr-screenshot-filename:npm_module_types",
-  "//packages/kbn-test:npm_module_types",
   "//packages/kbn-utils:npm_module_types",
+  "//packages/kbn-ci-stats-reporter:npm_module_types",
+  "//packages/kbn-dev-cli-runner:npm_module_types",
+  "//packages/kbn-dev-cli-errors:npm_module_types",
+  "//packages/kbn-dev-utils:npm_module_types",
+  "//packages/kbn-tooling-log:npm_module_types",
+  "//packages/kbn-ftr-screenshot-filename:npm_module_types",
+  "//packages/kbn-jest-serializers:npm_module_types",
+  "//packages/kbn-journeys:npm_module_types",
+  "@npm//@elastic/elasticsearch",
+  "@npm//@types/node",
+  "@npm//@types/he",
+  "@npm//@types/jest",
+  "@npm//@types/strip-ansi",
+  "@npm//@types/normalize-path",
+  "@npm//@types/xml2js",
+  "@npm//axios",
+  "@npm//dedent",
+  "@npm//globby",
 ]
 
 jsts_transpiler(

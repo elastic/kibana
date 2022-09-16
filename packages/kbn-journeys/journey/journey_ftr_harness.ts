@@ -6,12 +6,9 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
 import Url from 'url';
-import Fsp from 'fs/promises';
 import { inspect, format } from 'util';
 import { setTimeout } from 'timers/promises';
-import { createHash } from 'crypto';
 
 import * as Rx from 'rxjs';
 import apmNode from 'elastic-apm-node';
@@ -19,17 +16,19 @@ import playwright, { ChromiumBrowser, Page, BrowserContext, CDPSession, Request 
 import { asyncMap, asyncForEach } from '@kbn/std';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Config } from '@kbn/test';
-import { REPO_ROOT } from '@kbn/utils';
 import { EsArchiver, KibanaServer } from '@kbn/ftr-common-functional-services';
 
 import { Auth } from '../services/auth';
 import { getInputDelays } from '../services/input_delays';
 import { KibanaUrl } from '../services/kibana_url';
 
-import { Step } from './journey';
-import { JourneyConfig } from './journey_config';
+import type { Step, AnyStep } from './journey';
+import type { JourneyConfig } from './journey_config';
+import { JourneyScreenshots } from './journey_screenshots';
 
 export class JourneyFtrHarness {
+  private readonly screenshots: JourneyScreenshots;
+
   constructor(
     private readonly log: ToolingLog,
     private readonly config: Config,
@@ -37,7 +36,9 @@ export class JourneyFtrHarness {
     private readonly kibanaServer: KibanaServer,
     private readonly auth: Auth,
     private readonly journeyConfig: JourneyConfig<any>
-  ) {}
+  ) {
+    this.screenshots = new JourneyScreenshots(this.journeyConfig.getName());
+  }
 
   private browser: ChromiumBrowser | undefined;
   private page: Page | undefined;
@@ -45,14 +46,13 @@ export class JourneyFtrHarness {
   private context: BrowserContext | undefined;
   private currentSpanStack: Array<apmNode.Span | null> = [];
   private currentTransaction: apmNode.Transaction | undefined | null = undefined;
-  private readonly failedScreenshotDir = Path.resolve(REPO_ROOT, 'data/ftr_screenshots/failures');
 
   private pageTeardown$ = new Rx.Subject<Page>();
   private telemetryTrackerSubs = new Map<Page, Rx.Subscription>();
 
   private apm: apmNode.Agent | null = null;
 
-  private async beforeAll() {
+  private async setupApm() {
     const kbnTestServerEnv = this.config.get(`kbnTestServer.env`);
 
     this.apm = apmNode.start({
@@ -93,7 +93,9 @@ export class JourneyFtrHarness {
       `Journey: ${this.journeyConfig.getName()}`,
       'performance'
     );
+  }
 
+  private async setupBrowserAndPage() {
     const browser = await this.getBrowserInstance();
     this.context = await browser.newContext({ bypassCSP: true });
 
@@ -114,10 +116,44 @@ export class JourneyFtrHarness {
     await this.interceptBrowserRequests(this.page);
   }
 
-  private async afterAll() {
-    await this.tearDown();
-    await this.shutdownBrowser();
+  private async onSetup() {
+    await this.withSpan('setup', 'step', async () => {
+      await Promise.all([
+        this.setupApm(),
+        this.setupBrowserAndPage(),
+        asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
+          await this.esArchiver.load(esArchive);
+        }),
+        asyncForEach(this.journeyConfig.getKbnArchives(), async (kbnArchive) => {
+          await this.kibanaServer.importExport.load(kbnArchive);
+        }),
+      ]);
+    });
+  }
 
+  private async tearDownBrowserAndPage() {
+    if (this.browser) {
+      await this.browser.close();
+    }
+
+    if (!this.page) {
+      return;
+    }
+
+    const telemetryTracker = this.telemetryTrackerSubs.get(this.page);
+    this.telemetryTrackerSubs.delete(this.page);
+
+    if (telemetryTracker && !telemetryTracker.closed) {
+      this.log.info(`Waiting for telemetry requests, including starting within next 3 secs`);
+      this.pageTeardown$.next(this.page);
+      await new Promise<void>((resolve) => telemetryTracker.add(resolve));
+    }
+    await this.client?.detach();
+    await this.page.close();
+    await this.context?.close();
+  }
+
+  private async teardownApm() {
     if (!this.apm) {
       return;
     }
@@ -142,22 +178,37 @@ export class JourneyFtrHarness {
     }
   }
 
-  private async onStepError(err: Error, test: Mocha.Runnable) {
+  private async onTeardown() {
+    await this.withSpan('teardown', 'step', async () => {
+      await Promise.all([
+        this.tearDownBrowserAndPage(),
+        this.teardownApm(),
+        asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
+          await this.esArchiver.unload(esArchive);
+        }),
+        asyncForEach(this.journeyConfig.getKbnArchives(), async (kbnArchive) => {
+          await this.kibanaServer.importExport.unload(kbnArchive);
+        }),
+      ]);
+    });
+  }
+
+  private async onStepSuccess(step: AnyStep) {
+    if (!this.page) {
+      return;
+    }
+
+    await this.screenshots.addSuccess(step, await this.page.screenshot());
+  }
+
+  private async onStepError(step: AnyStep, err: Error) {
     if (this.currentTransaction) {
       this.currentTransaction.end(`Failure ${err.message}`);
       this.currentTransaction = undefined;
     }
 
-    if (this.page && test) {
-      const fullTitle = test.fullTitle();
-      const truncatedName = fullTitle.replaceAll(/[^ a-zA-Z0-9-]+/g, '').slice(0, 80);
-      const failureNameHash = createHash('sha256').update(fullTitle).digest('hex');
-      const screenshotName = `${truncatedName}-${failureNameHash}`;
-      const path = Path.resolve(this.failedScreenshotDir, `${screenshotName}.png`);
-
-      this.log.info('Writing screenshot to', path);
-      await Fsp.mkdir(Path.dirname(path), { recursive: true });
-      await Fsp.writeFile(path, await this.page.screenshot());
+    if (this.page) {
+      await this.screenshots.addError(step, await this.page.screenshot());
     }
   }
 
@@ -264,107 +315,59 @@ export class JourneyFtrHarness {
     });
   }
 
+  #_ctx?: Record<string, unknown>;
+  private async getCtx() {
+    if (this.#_ctx) {
+      return this.#_ctx;
+    }
+
+    const page = this.page;
+
+    if (!page) {
+      throw new Error('performance service is not properly initialized');
+    }
+
+    this.#_ctx = this.journeyConfig.getExtendedStepCtx({
+      page,
+      log: this.log,
+      inputDelays: getInputDelays(),
+      kbnUrl: new KibanaUrl(
+        new URL(
+          Url.format({
+            protocol: this.config.get('servers.kibana.protocol'),
+            hostname: this.config.get('servers.kibana.hostname'),
+            port: this.config.get('servers.kibana.port'),
+          })
+        )
+      ),
+    });
+
+    return this.#_ctx;
+  }
+
   public initMochaSuite(steps: Array<Step<any>>) {
     const journeyName = this.journeyConfig.getName();
-    const withSpan = this.withSpan.bind(this);
 
-    (this.journeyConfig.isSkipped() ? describe.skip : describe)(`Journey: ${journeyName}`, () => {
-      before(async () => {
-        await withSpan('setup', 'step', async () => {
-          await this.beforeAll();
-
-          await Promise.all([
-            asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
-              await this.esArchiver.load(esArchive);
-            }),
-            asyncForEach(this.journeyConfig.getKbnArchives(), async (kbnArchive) => {
-              await this.kibanaServer.importExport.load(kbnArchive);
-            }),
-          ]);
-        });
-      });
-
-      after(async () => {
-        await withSpan('teardown', 'step', async () => {
-          await this.afterAll();
-
-          await Promise.all([
-            asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
-              await this.esArchiver.unload(esArchive);
-            }),
-            asyncForEach(this.journeyConfig.getKbnArchives(), async (kbnArchive) => {
-              await this.kibanaServer.importExport.unload(kbnArchive);
-            }),
-          ]);
-        });
-      });
-
-      let _ctx;
-      const getCtx = () =>
-        (_ctx ??= (() => {
-          const page = this.page;
-
-          if (!page) {
-            throw new Error('performance service is not properly initialized');
-          }
-
-          return this.journeyConfig.getExtendedStepCtx({
-            page,
-            log: this.log,
-            inputDelays: getInputDelays(),
-            kbnUrl: new KibanaUrl(
-              new URL(
-                Url.format({
-                  protocol: this.config.get('servers.kibana.protocol'),
-                  hostname: this.config.get('servers.kibana.hostname'),
-                  port: this.config.get('servers.kibana.port'),
-                })
-              )
-            ),
-          });
-        })());
+    (this.journeyConfig.isSkipped() ? describe.skip : describe)(`Journey[${journeyName}]`, () => {
+      before(async () => await this.onSetup());
+      after(async () => await this.onTeardown());
 
       for (const step of steps) {
-        const spanBody = async (ctx: Mocha.Context) => {
-          try {
-            await step.fn(getCtx());
-          } catch (e) {
-            const error = new Error(`Step [${step.name}] failed: ${e.message}`);
-            error.stack = e.stack;
-            await this.onStepError(error, ctx.runnable());
-            throw error; // Rethrow error if step fails otherwise it is silently passing
-          }
-        };
-
-        it(step.name, async function () {
-          await withSpan(`step: ${step.name}`, 'step', async () => {
-            await spanBody(this);
+        it(step.name, async () => {
+          await this.withSpan(`step: ${step.name}`, 'step', async () => {
+            try {
+              await step.fn(this.getCtx());
+              await this.onStepSuccess(step);
+            } catch (e) {
+              const error = new Error(`Step [${step.name}] failed: ${e.message}`);
+              error.stack = e.stack;
+              await this.onStepError(step, error);
+              throw error; // Rethrow error if step fails otherwise it is silently passing
+            }
           });
         });
       }
     });
-  }
-
-  private async tearDown() {
-    if (this.page) {
-      const telemetryTracker = this.telemetryTrackerSubs.get(this.page);
-      this.telemetryTrackerSubs.delete(this.page);
-
-      if (telemetryTracker && !telemetryTracker.closed) {
-        this.log.info(`Waiting for telemetry requests, including starting within next 3 secs`);
-        this.pageTeardown$.next(this.page);
-        await new Promise<void>((resolve) => telemetryTracker.add(resolve));
-      }
-      await this.client?.detach();
-      await this.page.close();
-      await this.context?.close();
-    }
-  }
-
-  private async shutdownBrowser() {
-    if (this.browser) {
-      await (await this.getBrowserInstance()).close();
-    }
   }
 
   private onConsoleEvent = async (message: playwright.ConsoleMessage) => {

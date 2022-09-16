@@ -2,8 +2,8 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "kbn-journeys"
-PKG_REQUIRE_NAME = "@kbn/journeys"
+PKG_DIRNAME = "kbn-ftr-screenshot-filename"
+PKG_REQUIRE_NAME = "@kbn/ftr-screenshot-filename"
 
 SOURCE_FILES = glob(
   [
@@ -59,17 +59,8 @@ RUNTIME_DEPS = [
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
   "@npm//@types/node",
-  "@npm//@types/mocha",
-  "@npm//playwright",
-  "@npm//uuid",
-  "@npm//axios",
-  "@npm//callsites",
-  "@npm//rxjs",
-  "@npm//elastic-apm-node",
-  "//packages/kbn-ftr-common-functional-services:npm_module_types",
-  "//packages/kbn-ftr-screenshot-filename:npm_module_types",
-  "//packages/kbn-test:npm_module_types",
-  "//packages/kbn-utils:npm_module_types",
+  "@npm//@types/jest",
+  "@npm//tslib",
 ]
 
 jsts_transpiler(

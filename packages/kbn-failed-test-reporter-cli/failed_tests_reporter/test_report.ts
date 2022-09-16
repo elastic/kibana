@@ -35,6 +35,8 @@ export interface TestSuite {
     failures: string;
     /* number of skipped tests as a string */
     skipped: string;
+    /* optional JSON encoded metadata */
+    'metadata-json'?: string;
   };
   testcase?: TestCase[];
 }
@@ -91,5 +93,24 @@ export function* makeFailedTestCaseIter(report: TestReport) {
     }
 
     yield testCase as FailedTestCase;
+  }
+}
+
+export function getRootMetadata(report: TestReport): Record<string, unknown> {
+  const json =
+    ('testsuites' in report
+      ? report.testsuites?.testsuite?.[0]?.$?.['metadata-json']
+      : report.testsuite?.$?.['metadata-json']) ?? '{}';
+
+  try {
+    const obj = JSON.stringify(json);
+
+    if (typeof obj === 'object' && obj !== null) {
+      return obj;
+    }
+
+    return {};
+  } catch {
+    return {};
   }
 }

@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-require('../src/setup_node_env');
-require('@kbn/failed-test-reporter-cli');
+import './failed_tests_reporter/failed_tests_reporter_cli';
