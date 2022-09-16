@@ -87,6 +87,7 @@ export const getSavedQuerySchemaMock = (
   index: undefined,
   data_view_id: undefined,
   filters: undefined,
+  response_actions: undefined,
 });
 
 export const getRulesMlSchemaMock = (

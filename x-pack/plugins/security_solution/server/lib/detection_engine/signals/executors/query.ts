@@ -14,7 +14,6 @@ import type {
 import type { ListClient } from '@kbn/lists-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { SetupPlugins } from '../../../../../target/types/server/plugin_contract';
 import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import type { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
@@ -29,6 +28,7 @@ import { buildReasonMessageForQueryAlert } from '../reason_formatters';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { scheduleNotificationResponseActions } from '../../notifications/schedule_notification_response_actions';
+import type { SetupPlugins } from '../../../../plugin_contract';
 
 export const queryExecutor = async ({
   inputIndex,
