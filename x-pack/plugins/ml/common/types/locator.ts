@@ -271,6 +271,7 @@ export type MlLocatorState =
   | CalendarEditUrlState
   | FilterEditUrlState
   | MlGenericUrlState
+  | NotificationsUrlState
   | TrainedModelsUrlState
   | TrainedModelsNodesUrlState;
 
@@ -286,4 +287,13 @@ export type TrainedModelsUrlState = MLPageState<
 export type TrainedModelsNodesUrlState = MLPageState<
   typeof ML_PAGES.TRAINED_MODELS_NODES,
   TrainedModelsNodesQueryState | undefined
+>;
+
+export interface NotificationsQueryState {
+  level: string;
+}
+
+export type NotificationsUrlState = MLPageState<
+  typeof ML_PAGES.NOTIFICATIONS,
+  NotificationsQueryState | undefined
 >;
