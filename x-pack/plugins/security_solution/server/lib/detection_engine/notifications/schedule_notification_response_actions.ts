@@ -17,7 +17,7 @@ interface OsqueryQuery {
 }
 
 interface OsqueryResponseAction {
-  actionTypeId: string;
+  actionTypeId: '.osquery';
   params: {
     id: string;
     queries: OsqueryQuery[];
@@ -44,6 +44,10 @@ interface IAlert {
   };
 }
 
+const isOsqueryAction = (action: ResponseAction): action is OsqueryResponseAction => {
+  return action.actionTypeId === '.osquery';
+};
+
 export const scheduleNotificationResponseActions = (
   { signals, responseActions }: ScheduleNotificationActions,
   osqueryCreateAction?: SetupPlugins['osquery']['osqueryCreateAction']
@@ -52,15 +56,15 @@ export const scheduleNotificationResponseActions = (
   const agentIds = uniq(filteredAlerts.map((alert: IAlert) => alert.agent?.id));
   const alertIds = map(filteredAlerts, '_id');
 
-  responseActions.forEach((responseActionParam) => {
-    if (responseActionParam.actionTypeId === '.osquery' && osqueryCreateAction) {
+  responseActions.forEach((responseAction) => {
+    if (isOsqueryAction(responseAction) && osqueryCreateAction) {
       const {
         savedQueryId,
         packId,
         queries,
         ecs_mapping: ecsMapping,
         ...rest
-      } = (responseActionParam as OsqueryResponseAction).params;
+      } = responseAction.params;
 
       return osqueryCreateAction({
         ...rest,

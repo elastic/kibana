@@ -103,13 +103,9 @@ export const transformFromAlertThrottle = (
 ): string => {
   if (legacyRuleActions == null || (rule.actions != null && rule.actions.length > 0)) {
     if (
-      rule.params?.type === 'query' &&
-      rule.params?.responseActions &&
-      rule.params?.responseActions.length > 0
+      rule.muteAll ||
+      (rule.actions.length === 0 && !(rule.params as { responseActions: unknown })?.responseActions)
     ) {
-      return NOTIFICATION_THROTTLE_RULE;
-    }
-    if (rule.muteAll || rule.actions.length === 0) {
       return NOTIFICATION_THROTTLE_NO_ACTIONS;
     } else if (
       rule.notifyWhen === 'onActiveAlert' ||

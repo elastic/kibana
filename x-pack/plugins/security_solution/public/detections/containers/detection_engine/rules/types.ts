@@ -72,13 +72,6 @@ export const action = t.exact(
   })
 );
 
-export const responseAction = t.exact(
-  t.type({
-    action_type_id: t.string,
-    params: t.record(t.string, t.any),
-  })
-);
-
 export interface CreateRulesProps {
   rule: CreateRulesSchema;
   signal: AbortSignal;

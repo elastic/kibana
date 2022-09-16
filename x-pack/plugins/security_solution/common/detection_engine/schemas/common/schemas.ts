@@ -113,7 +113,7 @@ export const responseActionsCamelCase = t.array(
 );
 export const responseActionsOrUndefined = t.union([responseActionsCamelCase, t.undefined]);
 
-export const responseAction = t.exact(
+const responseAction = t.exact(
   t.type({
     action_type_id: action_action_type_id,
     params: t.record(t.string, t.any),
