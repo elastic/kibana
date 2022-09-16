@@ -1877,7 +1877,7 @@ export const sampleAreaVis = {
             getScaledDateFormat: () => ({}),
             getBounds: () => ({}),
             setBounds: () => {},
-            setInterval: () => {}
+            setInterval: () => {},
           },
           fieldIsTimeField: () => false,
           toSerializedFieldFormat: () => ({
