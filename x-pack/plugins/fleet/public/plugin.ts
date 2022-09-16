@@ -29,7 +29,10 @@ import { once } from 'lodash';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/public';
 
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
 
@@ -97,6 +100,7 @@ export interface FleetStartDeps {
   customIntegrations: CustomIntegrationsStart;
   share: SharePluginStart;
   cloud?: CloudStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, 'cloud'> {

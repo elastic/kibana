@@ -26,7 +26,7 @@ import QueryStringInputUI from './query_string_input';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
-import { KibanaContextProvider, withKibana } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { unifiedSearchPluginMock } from '../mocks';
 
 jest.useFakeTimers();
@@ -63,7 +63,7 @@ const createMockStorage = () => ({
   clear: jest.fn(),
 });
 
-const QueryStringInput = withKibana(QueryStringInputUI);
+const QueryStringInput = QueryStringInputUI;
 
 function wrapQueryStringInputInContext(testProps: any, storage?: any) {
   const services = {

@@ -14,10 +14,18 @@ import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/p
 import { DataView } from '@kbn/data-plugin/common';
 import type { Query } from '@kbn/es-query';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
-import { GeoContainmentAlertParams } from '../types';
-import { EntityIndexExpression } from './expressions/entity_index_expression';
-import { EntityByExpression } from './expressions/entity_by_expression';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { HttpSetup } from '@kbn/core-http-browser';
+import { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import { CoreStart } from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { STACK_ALERTS_FEATURE_ID } from '../../../../common';
 import { BoundaryIndexExpression } from './expressions/boundary_index_expression';
+import { EntityByExpression } from './expressions/entity_by_expression';
+import { EntityIndexExpression } from './expressions/entity_index_expression';
+import { GeoContainmentAlertParams } from '../types';
 
 const DEFAULT_VALUES = {
   TRACKING_EVENT: '',
@@ -33,6 +41,15 @@ const DEFAULT_VALUES = {
   BOUNDARY_NAME_FIELD: '',
   DELAY_OFFSET_WITH_UNITS: '0m',
 };
+
+interface KibanaDeps {
+  http: HttpSetup;
+  docLinks: DocLinksStart;
+  uiSettings: IUiSettingsClient;
+  notifications: CoreStart['notifications'];
+  storage: IStorageWrapper;
+  usageCollection: UsageCollectionStart;
+}
 
 function validateQuery(query: Query) {
   try {
@@ -61,6 +78,9 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
     boundaryGeoField,
     boundaryNameField,
   } = ruleParams;
+
+  const { http, docLinks, uiSettings, notifications, storage, usageCollection } =
+    useKibana<KibanaDeps>().services;
 
   const [indexPattern, _setIndexPattern] = useState<DataView>({
     id: '',
@@ -198,6 +218,17 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
               setIndexQueryInput(query);
             }
           }}
+          appName={STACK_ALERTS_FEATURE_ID}
+          deps={{
+            unifiedSearch,
+            notifications,
+            http,
+            docLinks,
+            uiSettings,
+            data,
+            storage,
+            usageCollection,
+          }}
         />
       </EuiFlexItem>
       <EuiSpacer size="l" />
@@ -241,6 +272,17 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
               }
               setBoundaryIndexQueryInput(query);
             }
+          }}
+          appName={STACK_ALERTS_FEATURE_ID}
+          deps={{
+            unifiedSearch,
+            notifications,
+            http,
+            docLinks,
+            uiSettings,
+            data,
+            storage,
+            usageCollection,
           }}
         />
       </EuiFlexItem>

@@ -97,7 +97,18 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
 
   const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { services, overlays } = kibana;
-  const { savedObjects, uiSettings } = services;
+  const {
+    savedObjects,
+    uiSettings,
+    appName,
+    unifiedSearch,
+    usageCollection,
+    data,
+    storage,
+    notifications,
+    http,
+    docLinks,
+  } = services;
   if (!overlays) return null;
 
   return (
@@ -161,6 +172,17 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
             })}
             query={query}
             onChange={setQuery}
+            appName={appName}
+            deps={{
+              unifiedSearch,
+              usageCollection,
+              data,
+              storage,
+              notifications,
+              http,
+              docLinks,
+              uiSettings,
+            }}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

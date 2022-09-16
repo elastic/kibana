@@ -13,6 +13,8 @@ import { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ApmPluginSetupDeps } from '../../plugin';
 import { ConfigSchema } from '../..';
 
@@ -25,7 +27,10 @@ export interface ApmPluginContextValue {
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   observability: ObservabilityPublicStart;
   dataViews: DataViewsPublicPluginStart;
+  data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  appName: string;
+  storage: Storage;
 }
 
 export const ApmPluginContext = createContext({} as ApmPluginContextValue);

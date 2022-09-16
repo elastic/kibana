@@ -14,6 +14,7 @@ import type {
   IUiSettingsClient,
   HttpSetup,
   ThemeServiceStart,
+  DocLinksStart,
 } from '@kbn/core/public';
 import type { Plugin as ExpressionsPlugin } from '@kbn/expressions-plugin/public';
 import type {
@@ -27,6 +28,8 @@ import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/pu
 
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimelionVisDefinition } from './timelion_vis_type';
 import {
@@ -48,6 +51,13 @@ export interface TimelionVisDependencies extends Partial<CoreStart> {
   http: HttpSetup;
   timefilter: TimefilterContract;
   theme: ThemeServiceStart;
+  appName: string;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  notifications: CoreStart['notifications'];
+  storage: IStorageWrapper;
+  data: DataPublicPluginStart;
+  usageCollection?: UsageCollectionStart;
+  docLinks: DocLinksStart;
 }
 
 /** @internal */

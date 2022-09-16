@@ -56,7 +56,9 @@ export function TraceSearchBox({
   error,
   loading,
 }: Props) {
-  const { unifiedSearch } = useApmPluginContext();
+  const { unifiedSearch, core, data, appName, storage } = useApmPluginContext();
+  const { notifications, http, docLinks, uiSettings } = core;
+
   const { dataView } = useApmDataView();
 
   return (
@@ -132,6 +134,16 @@ export function TraceSearchBox({
                           ...query,
                           query: String(e.query ?? ''),
                         });
+                      }}
+                      appName={appName}
+                      deps={{
+                        unifiedSearch,
+                        notifications,
+                        http,
+                        docLinks,
+                        uiSettings,
+                        data,
+                        storage,
                       }}
                     />
                   </form>
