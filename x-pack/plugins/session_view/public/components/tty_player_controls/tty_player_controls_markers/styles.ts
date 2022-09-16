@@ -108,7 +108,7 @@ export const useStyles = () => {
       range,
       playHead,
     };
-  }, [euiTheme]);
+  }, [euiTheme, euiVars]);
 
   return cached;
 };
