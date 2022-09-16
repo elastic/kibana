@@ -125,4 +125,9 @@ export const getPieVisTypeDefinition = ({
   hierarchicalData: true,
   requiresSearch: true,
   navigateToLens: async (vis, timefilter) => (vis ? convertToLens(vis, timefilter) : null),
+  getExpressionVariables: async (vis, timeFilter) => {
+    return {
+      canNavigateToLens: Boolean(vis?.params ? await convertToLens(vis, timeFilter) : null),
+    };
+  },
 });

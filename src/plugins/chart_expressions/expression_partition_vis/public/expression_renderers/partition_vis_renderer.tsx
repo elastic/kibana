@@ -49,7 +49,7 @@ export const getPartitionVisRenderer: (
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
   reuseDomNode: true,
-  render: async (domNode, { visConfig, visData, visType, syncColors }, handlers) => {
+  render: async (domNode, { visConfig, visData, visType, syncColors, params }, handlers) => {
     const { core, plugins } = getStartDeps();
 
     handlers.onDestroy(() => {
@@ -62,9 +62,13 @@ export const getPartitionVisRenderer: (
       const visualizationType = extractVisualizationType(executionContext);
 
       if (containerType && visualizationType) {
-        plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, [
+        const events = [
           `render_${visualizationType}_${visType}`,
-        ]);
+          params.canNavigateToLens
+            ? `render_${visualizationType}_${visType}_convertable`
+            : undefined,
+        ].filter(Boolean) as string[];
+        plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, events);
       }
       handlers.done();
     };

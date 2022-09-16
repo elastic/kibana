@@ -190,6 +190,7 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
         visType: args.isDonut ? ChartTypes.DONUT : ChartTypes.PIE,
         params: {
           listenOnChange: true,
+          canNavigateToLens: handlers.variables.canNavigateToLens as boolean
         },
       },
     };
