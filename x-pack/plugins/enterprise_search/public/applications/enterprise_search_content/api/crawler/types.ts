@@ -63,9 +63,23 @@ export enum CrawlType {
   Partial = 'partial',
 }
 
+export interface BasicCrawlerAuth {
+  password: string;
+  type: 'basic';
+  username: string;
+}
+
+export interface RawCrawlerAuth {
+  header: string;
+  type: 'raw';
+}
+
+export type CrawlerAuth = BasicCrawlerAuth | RawCrawlerAuth | null;
+
 // Server
 
 export interface CrawlerDomainFromServer {
+  auth: CrawlerAuth;
   available_deduplication_fields: string[];
   crawl_rules: CrawlRule[];
   created_on: string;
@@ -150,6 +164,7 @@ export interface DomainConfigFromServer {
 // Client
 
 export interface CrawlerDomain {
+  auth: CrawlerAuth;
   availableDeduplicationFields: string[];
   crawlRules: CrawlRule[];
   createdOn: string;

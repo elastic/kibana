@@ -185,3 +185,9 @@ export const extractErrorProperties = (error: ErrorType): AiOpsErrorObject => {
     message: '',
   };
 };
+
+export const extractErrorMessage = (error: ErrorType): string => {
+  // extract only the error message within the response error coming from Kibana, Elasticsearch, and our own ML messages
+  const errorObj = extractErrorProperties(error);
+  return errorObj.message;
+};
