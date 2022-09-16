@@ -12,13 +12,14 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import type { QueryRuleParams } from '../../schemas/rule_schemas';
 import { queryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
-import type { CreateRuleOptions, SecurityAlertType } from '../types';
+import type { SecurityAlertType, CreateQueryRuleOptions } from '../types';
 import { validateIndexPatterns } from '../utils';
 
 export const createQueryAlertType = (
-  createOptions: CreateRuleOptions
+  createOptions: CreateQueryRuleOptions
 ): SecurityAlertType<QueryRuleParams, {}, {}, 'default'> => {
-  const { eventsTelemetry, experimentalFeatures, version, osqueryCreateAction } = createOptions;
+  const { eventsTelemetry, experimentalFeatures, version, osqueryCreateAction, licensing } =
+    createOptions;
   return {
     id: QUERY_RULE_TYPE_ID,
     name: 'Custom Query Rule',
@@ -98,6 +99,7 @@ export const createQueryAlertType = (
         primaryTimestamp,
         secondaryTimestamp,
         osqueryCreateAction,
+        licensing,
       });
       return { ...result, state };
     },

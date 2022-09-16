@@ -64,6 +64,7 @@ import { previewRulesRoute } from '../lib/detection_engine/routes/rules/preview_
 import type {
   CreateRuleOptions,
   CreateSecurityRuleTypeWrapperProps,
+  CreateQueryRuleAdditionalOptions,
 } from '../lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/routes/rules/legacy_create_legacy_notification';
@@ -92,7 +93,8 @@ export const initRoutes = (
   getStartServices: StartServicesAccessor<StartPlugins>,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
   previewRuleDataClient: IRuleDataClient,
-  previewTelemetryReceiver: ITelemetryReceiver
+  previewTelemetryReceiver: ITelemetryReceiver,
+  queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions
 ) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc
@@ -110,7 +112,8 @@ export const initRoutes = (
     ruleOptions,
     securityRuleTypeOptions,
     previewRuleDataClient,
-    getStartServices
+    getStartServices,
+    queryRuleAdditionalOptions
   );
   createRuleExceptionsRoute(router);
 

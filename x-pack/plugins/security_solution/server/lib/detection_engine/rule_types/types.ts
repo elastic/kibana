@@ -24,6 +24,7 @@ import type {
   IRuleDataClient,
   IRuleDataReader,
 } from '@kbn/rule-registry-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
 import type { ConfigType } from '../../../config';
 import type { SetupPlugins } from '../../../plugin';
@@ -122,5 +123,13 @@ export interface CreateRuleOptions {
   ml?: SetupPlugins['ml'];
   eventsTelemetry?: ITelemetryEventsSender | undefined;
   version: string;
-  osqueryCreateAction?: SetupPlugins['osquery']['osqueryCreateAction'];
 }
+
+export interface CreateQueryRuleAdditionalOptions {
+  osqueryCreateAction: SetupPlugins['osquery']['osqueryCreateAction'];
+  licensing: LicensingPluginSetup;
+}
+
+export interface CreateQueryRuleOptions
+  extends CreateRuleOptions,
+    CreateQueryRuleAdditionalOptions {}

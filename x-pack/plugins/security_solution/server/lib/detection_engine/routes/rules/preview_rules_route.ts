@@ -53,6 +53,7 @@ import {
 import { createSecurityRuleTypeWrapper } from '../../rule_types/create_security_rule_type_wrapper';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import { wrapSearchSourceClient } from './utils/wrap_search_source_client';
+import type { CreateQueryRuleAdditionalOptions } from '../../rule_types/types';
 
 const PREVIEW_TIMEOUT_SECONDS = 60;
 
@@ -64,7 +65,8 @@ export const previewRulesRoute = async (
   ruleOptions: CreateRuleOptions,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
   previewRuleDataClient: IRuleDataClient,
-  getStartServices: StartServicesAccessor<StartPlugins>
+  getStartServices: StartServicesAccessor<StartPlugins>,
+  queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions
 ) => {
   router.post(
     {
@@ -281,7 +283,9 @@ export const previewRulesRoute = async (
 
         switch (previewRuleParams.type) {
           case 'query':
-            const queryAlertType = previewRuleTypeWrapper(createQueryAlertType(ruleOptions));
+            const queryAlertType = previewRuleTypeWrapper(
+              createQueryAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
+            );
             await runExecutors(
               queryAlertType.executor,
               queryAlertType.id,
@@ -300,7 +304,7 @@ export const previewRulesRoute = async (
             break;
           case 'saved_query':
             const savedQueryAlertType = previewRuleTypeWrapper(
-              createSavedQueryAlertType(ruleOptions)
+              createSavedQueryAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
             );
             await runExecutors(
               savedQueryAlertType.executor,

@@ -98,6 +98,7 @@ import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
 import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 import { featureUsageService } from './endpoint/services/feature_usage';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
+import type { CreateQueryRuleAdditionalOptions } from './lib/detection_engine/rule_types/types';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -201,6 +202,11 @@ export class Plugin implements ISecuritySolutionPlugin {
       version: pluginContext.env.packageInfo.version,
     };
 
+    const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
+      licensing: plugins.licensing,
+      osqueryCreateAction: plugins.osquery.osqueryCreateAction,
+    };
+
     const aliasesFieldMap: FieldMap = {};
     Object.entries(aadFieldConversion).forEach(([key, value]) => {
       aliasesFieldMap[key] = {
@@ -236,7 +242,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       secondaryAlias: undefined,
     });
 
-    const { osquery } = plugins;
     const securityRuleTypeOptions = {
       lists: plugins.lists,
       logger: this.logger,
@@ -251,10 +256,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(ruleOptions)));
     plugins.alerting.registerType(
       securityRuleTypeWrapper(
-        createSavedQueryAlertType({
-          ...ruleOptions,
-          ...(osquery ? { osqueryCreateAction: osquery.osqueryCreateAction } : {}),
-        })
+        createSavedQueryAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
       )
     );
     plugins.alerting.registerType(
@@ -263,10 +265,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.alerting.registerType(securityRuleTypeWrapper(createMlAlertType(ruleOptions)));
     plugins.alerting.registerType(
       securityRuleTypeWrapper(
-        createQueryAlertType({
-          ...ruleOptions,
-          ...(osquery ? { osqueryCreateAction: osquery.osqueryCreateAction } : {}),
-        })
+        createQueryAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
       )
     );
     plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType(ruleOptions)));
@@ -287,7 +286,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       core.getStartServices,
       securityRuleTypeOptions,
       previewRuleDataClient,
-      this.telemetryReceiver
+      this.telemetryReceiver,
+      queryRuleAdditionalOptions
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);

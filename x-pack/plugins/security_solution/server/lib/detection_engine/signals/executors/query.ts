@@ -14,6 +14,8 @@ import type {
 import type { ListClient } from '@kbn/lists-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { firstValueFrom } from 'rxjs';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import type { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
@@ -48,6 +50,7 @@ export const queryExecutor = async ({
   primaryTimestamp,
   secondaryTimestamp,
   osqueryCreateAction,
+  licensing,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -65,7 +68,8 @@ export const queryExecutor = async ({
   wrapHits: WrapHits;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
-  osqueryCreateAction?: SetupPlugins['osquery']['osqueryCreateAction'];
+  osqueryCreateAction: SetupPlugins['osquery']['osqueryCreateAction'];
+  licensing: LicensingPluginSetup;
 }) => {
   const ruleParams = completeRule.ruleParams;
 
@@ -100,14 +104,19 @@ export const queryExecutor = async ({
       secondaryTimestamp,
     });
 
-    if (completeRule.ruleParams.responseActions?.length && result.createdSignalsCount) {
-      scheduleNotificationResponseActions(
-        {
-          signals: result.createdSignals,
-          responseActions: completeRule.ruleParams.responseActions,
-        },
-        osqueryCreateAction
-      );
+    const license = await firstValueFrom(licensing.license$);
+    const hasGoldLicense = license.hasAtLeast('gold');
+
+    if (hasGoldLicense) {
+      if (completeRule.ruleParams.responseActions?.length && result.createdSignalsCount) {
+        scheduleNotificationResponseActions(
+          {
+            signals: result.createdSignals,
+            responseActions: completeRule.ruleParams.responseActions,
+          },
+          osqueryCreateAction
+        );
+      }
     }
 
     return result;
