@@ -1872,6 +1872,14 @@ export const sampleAreaVis = {
             extended_bounds: {},
           },
           schema: 'segment',
+          buckets: {
+            getInterval: () => ({ esUnit: 'h', esValue: '1' }),
+            getScaledDateFormat: () => ({}),
+            getBounds: () => ({}),
+            setBounds: () => {},
+            setInterval: () => {},
+          },
+          fieldIsTimeField: () => false,
           toSerializedFieldFormat: () => ({
             id: 'date',
             params: { pattern: 'HH:mm:ss.SSS' },

@@ -4544,7 +4544,7 @@
             "label": "options",
             "description": [],
             "signature": [
-              "Method extends \"get\" | \"options\" ? Required<Omit<",
+              "Method extends \"options\" | \"get\" ? Required<Omit<",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "server",
@@ -5766,7 +5766,7 @@
               "\nAdditional body options {@link RouteConfigOptionsBody}."
             ],
             "signature": [
-              "(Method extends \"get\" | \"options\" ? undefined : ",
+              "(Method extends \"options\" | \"get\" ? undefined : ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "server",
@@ -5790,7 +5790,7 @@
               "\nDefines per-route timeouts."
             ],
             "signature": [
-              "{ payload?: (Method extends \"get\" | \"options\" ? undefined : number) | undefined; idleSocket?: number | undefined; } | undefined"
+              "{ payload?: (Method extends \"options\" | \"get\" ? undefined : number) | undefined; idleSocket?: number | undefined; } | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
             "deprecated": false,
@@ -7265,7 +7265,7 @@
           "\nRoute options: If 'GET' or 'OPTIONS' method, body options won't be returned."
         ],
         "signature": [
-          "Method extends \"get\" | \"options\" ? Required<Omit<",
+          "Method extends \"options\" | \"get\" ? Required<Omit<",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -8804,7 +8804,7 @@
           "\nSet of HTTP methods not changing the state of the server."
         ],
         "signature": [
-          "\"get\" | \"options\""
+          "\"options\" | \"get\""
         ],
         "path": "packages/core/http/core-http-server/src/router/route.ts",
         "deprecated": false,
