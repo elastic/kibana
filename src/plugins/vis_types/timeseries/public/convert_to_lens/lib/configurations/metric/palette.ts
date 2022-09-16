@@ -193,6 +193,10 @@ export const getPalette = (model: Panel): PaletteOutput<CustomPaletteParams> | n
 
   const [rule] = kindOfHeadRules;
 
+  if (rule.operator === Operators.LTE) {
+    return null;
+  }
+
   if (rule.operator === Operators.LT) {
     if (tailRule.operator !== Operators.LTE) {
       return null;
