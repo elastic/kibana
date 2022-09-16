@@ -19,6 +19,7 @@ const getColumns = (
   const { showTotal, totalFunc } = params;
   return columns.map(({ columnId }) => ({
     columnId,
+    alignment: 'left' as const,
     ...(showTotal && metrics.includes(columnId) ? { summaryRow: totalFunc } : {}),
     ...(bucketCollapseFn && buckets.includes(columnId) ? { collapseFn: bucketCollapseFn } : {}),
   }));

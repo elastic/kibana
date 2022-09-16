@@ -8,7 +8,7 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPES, TimefilterContract } from '@kbn/data-plugin/public';
-import { AggBasedColumn, SchemaConfig } from '../../common';
+import { AggBasedColumn, SchemaConfig, SupportedAggregation } from '../../common';
 import { convertMetricToColumns } from '../../common/convert_to_lens/lib/metrics';
 import { convertBucketToColumns } from '../../common/convert_to_lens/lib/buckets';
 import {
@@ -102,6 +102,26 @@ export const getColumnsFromVis = <T>(
     return null;
   }
 
+  const updatedMetrics = visSchemas.metric.reduce<Array<SchemaConfig<SupportedAggregation>>>(
+    (acc, metric) => {
+      if (metric.aggId && !acc.some((m) => m.aggId === metric.aggId)) {
+        acc.push(metric);
+      }
+      return acc;
+    },
+    []
+  );
+
+  const sortMap: Record<string, number> = ['metric', ...buckets, ...splits].reduce((acc, key) => {
+    return {
+      ...acc,
+      ...(key === 'metric' ? updatedMetrics : visSchemas[key])?.reduce((newAcc, schema) => {
+        newAcc[schema.aggId] = schema.accessor;
+        return newAcc;
+      }, {}),
+    };
+  }, {});
+
   const customBuckets = getCutomBucketsFromSiblingAggs(visSchemas.metric);
 
   // doesn't support sibbling pipeline aggs with different bucket aggs
@@ -109,9 +129,9 @@ export const getColumnsFromVis = <T>(
     return null;
   }
 
-  const aggs = visSchemas.metric as Array<SchemaConfig<METRIC_TYPES>>;
+  const aggs = updatedMetrics as Array<SchemaConfig<METRIC_TYPES>>;
 
-  const metricColumns = visSchemas.metric.flatMap((m) => convertMetricToColumns(m, dataView, aggs));
+  const metricColumns = updatedMetrics.flatMap((m) => convertMetricToColumns(m, dataView, aggs));
 
   if (metricColumns.includes(null)) {
     return null;
@@ -155,7 +175,15 @@ export const getColumnsFromVis = <T>(
     return null;
   }
 
-  const columns = [...metrics, ...bucketColumns, ...splitBucketColumns, ...customBucketColumns];
+  const columns = [
+    ...metrics,
+    ...bucketColumns,
+    ...splitBucketColumns,
+    ...customBucketColumns,
+  ].sort(
+    (a, b) =>
+      Number(sortMap[a.meta.aggId.split('-')[0]]) - Number(sortMap[b.meta.aggId.split('-')[0]])
+  );
   const columnsWithoutReferenced = columns.filter(
     ({ columnId }) => !isReferenced(columns, columnId)
   );

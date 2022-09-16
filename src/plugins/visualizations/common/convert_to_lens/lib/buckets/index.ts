@@ -37,18 +37,20 @@ export const getBucketColumns = (
     label,
     isSplit = false,
     dropEmptyRowsInDateHistogram = false,
-  }: { label: string; isSplit: boolean; dropEmptyRowsInDateHistogram: boolean }
+  }: { label: string; isSplit: boolean; dropEmptyRowsInDateHistogram: boolean },
+  aggId: string = ''
 ) => {
   switch (aggType) {
     case BUCKET_TYPES.DATE_HISTOGRAM:
       return convertToDateHistogramColumn(
+        aggId,
         aggParams,
         dataView,
         isSplit,
         dropEmptyRowsInDateHistogram
       );
     case BUCKET_TYPES.FILTERS:
-      return convertToFiltersColumn(aggParams, isSplit);
+      return convertToFiltersColumn(aggId, aggParams, isSplit);
     case BUCKET_TYPES.TERMS:
       const fieldName = getFieldNameFromField((aggParams as AggParamsTerms).field);
       if (!fieldName) {
@@ -61,12 +63,14 @@ export const getBucketColumns = (
       }
       if (field.type !== 'date') {
         return convertToTermsColumn(
+          aggId,
           { aggParams: aggParams as AggParamsTerms, dataView, metricColumns, aggs },
           label,
           isSplit
         );
       } else {
         return convertToDateHistogramColumn(
+          aggId,
           {
             field: fieldName,
           },
@@ -107,6 +111,7 @@ export const convertBucketToColumns = (
       label: getLabel(currentAgg),
       isSplit,
       dropEmptyRowsInDateHistogram,
-    }
+    },
+    currentAgg.aggId
   );
 };

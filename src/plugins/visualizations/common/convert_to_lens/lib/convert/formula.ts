@@ -8,7 +8,7 @@
 
 import { SchemaConfig } from '../../..';
 import { FormulaParams } from '../../types';
-import { createColumn, getFormat } from './column';
+import { createAggregationId, createColumn, getFormat } from './column';
 import { FormulaColumn } from './types';
 
 const convertToFormulaParams = (formula: string): FormulaParams => ({
@@ -23,5 +23,6 @@ export const createFormulaColumn = (formula: string, agg: SchemaConfig): Formula
     references: [],
     params: { ...params, ...getFormat() },
     timeShift: agg.aggParams?.timeShift,
+    meta: { aggId: createAggregationId(agg) },
   };
 };
