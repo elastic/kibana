@@ -14,9 +14,9 @@ import { i18n } from '@kbn/i18n';
 import { DataPanel } from '../../../../shared/data_panel/data_panel';
 
 import { IngestPipelinesCard } from './ingest_pipelines_card';
-import { MlInferencePipelineProcessorsCard } from './ml_inference_pipeline_processors_card';
 import { AddMLInferencePipelineButton } from './ml_inference/add_ml_inference_button';
 import { AddMLInferencePipelineModal } from './ml_inference/add_ml_inference_pipeline_modal';
+import { MlInferencePipelineProcessorsCard } from './ml_inference_pipeline_processors_card';
 
 export const SearchIndexPipelines: React.FC = () => {
   const [addInferencePipelineOpen, setShowAddInferencePipeline] = React.useState<boolean>(false);
