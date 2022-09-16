@@ -1835,6 +1835,25 @@ describe('rules_list with disabled items', () => {
     });
   }
 
+  it('renders rules list with disabled indicator if disabled due to license', async () => {
+    await setup();
+    expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
+    expect(wrapper.find('EuiTableRow')).toHaveLength(2);
+    expect(wrapper.find('EuiTableRow').at(0).prop('className')).toEqual('');
+    expect(wrapper.find('EuiTableRow').at(1).prop('className')?.trim()).toEqual(
+      'actRulesList__tableRowDisabled'
+    );
+    expect(wrapper.find('EuiIconTip[data-test-subj="ruleDisabledByLicenseTooltip"]').length).toBe(
+      1
+    );
+    expect(
+      wrapper.find('EuiIconTip[data-test-subj="ruleDisabledByLicenseTooltip"]').props().type
+    ).toEqual('questionInCircle');
+    expect(
+      wrapper.find('EuiIconTip[data-test-subj="ruleDisabledByLicenseTooltip"]').props().content
+    ).toEqual('This rule type requires a Platinum license.');
+  });
+
   it('clicking the notify badge shows the snooze panel', async () => {
     await setup();
     expect(wrapper.find('[data-test-subj="snoozePanel"]').exists()).toBeFalsy();

@@ -14,11 +14,12 @@ import { DEFAULT_NUMBER_FORMAT } from '../../../constants';
 
 export interface BulkOperationPopoverProps {
   numberOfSelectedRules?: number;
+  canModifySelectedRules: boolean;
   children: JSX.Element;
 }
 
 export const BulkOperationPopover = (props: BulkOperationPopoverProps) => {
-  const { children, numberOfSelectedRules = 0 } = props;
+  const { children, numberOfSelectedRules = 0, canModifySelectedRules } = props;
 
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
@@ -37,7 +38,8 @@ export const BulkOperationPopover = (props: BulkOperationPopoverProps) => {
         <EuiButtonEmpty
           size="xs"
           iconSide="right"
-          iconType="arrowDown"
+          iconType={canModifySelectedRules ? 'arrowDown' : undefined}
+          disabled={!canModifySelectedRules}
           aria-label={SELECT_SHOW_BULK_ACTIONS_ARIA_LABEL}
           data-test-subj="showBulkActionButton"
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}

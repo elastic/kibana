@@ -67,7 +67,7 @@ import {
   bulkUpdateAPIKey,
 } from '../../../lib/rule_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
-import { hasExecuteActionsCapability } from '../../../lib/capabilities';
+import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { routeToRuleDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
@@ -89,7 +89,7 @@ import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_ke
 import { RulesListVisibleColumns } from './rules_list_column_selector';
 import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
 import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
-import { useRulesBulkEditSelect } from '../../../hooks/use_rules_bulk_edit_selection';
+import { useBulkEditSelect } from '../../../hooks/use_bulk_edit_select';
 import { runRule } from '../../../lib/run_rule';
 
 const ENTER_KEY = 13;
@@ -548,6 +548,18 @@ export const RulesList = ({
     ...getRuleTagFilter(),
   ];
 
+  const tableItems = useMemo(() => {
+    if (ruleTypesState.isInitialized === false) {
+      return [];
+    }
+    return convertRulesToTableItems({
+      rules: rulesState.data,
+      ruleTypeIndex: ruleTypesState.data,
+      canExecuteActions,
+      config,
+    });
+  }, [ruleTypesState, rulesState, canExecuteActions, config]);
+
   const {
     isAllSelected,
     selectedIds,
@@ -559,10 +571,22 @@ export const RulesList = ({
     onSelectAll,
     onSelectPage,
     onClearSelection,
-  } = useRulesBulkEditSelect({
+  } = useBulkEditSelect({
     totalItemCount: rulesState.totalItemCount,
-    itemIds: rulesState.data.map((item) => item.id),
+    items: tableItems,
   });
+
+  const authorizedToModifySelectedRules = useMemo(() => {
+    if (isAllSelected) {
+      return true;
+    }
+    const selectedIdsArray = [...selectedIds];
+    return selectedIdsArray.length
+      ? filterRulesById(rulesState.data, selectedIdsArray).every((selectedRule) =>
+          hasAllPrivilege(selectedRule, ruleTypesState.data.get(selectedRule.ruleTypeId))
+        )
+      : false;
+  }, [selectedIds, rulesState.data, ruleTypesState.data, isAllSelected]);
 
   const clearRulesToSnooze = () => {
     setRulesToSnooze([]);
@@ -578,18 +602,6 @@ export const RulesList = ({
     setRulesToUpdateAPIKey([]);
     setRulesToUpdateAPIKeyFilter('');
   };
-
-  const tableItems = useMemo(() => {
-    if (ruleTypesState.isInitialized === false) {
-      return [];
-    }
-    return convertRulesToTableItems({
-      rules: rulesState.data,
-      ruleTypeIndex: ruleTypesState.data,
-      canExecuteActions,
-      config,
-    });
-  }, [ruleTypesState, rulesState, canExecuteActions, config]);
 
   const table = (
     <>
@@ -847,7 +859,10 @@ export const RulesList = ({
         }}
         renderSelectAllDropdown={() => {
           return (
-            <BulkOperationPopover numberOfSelectedRules={numberOfSelectedItems}>
+            <BulkOperationPopover
+              numberOfSelectedRules={numberOfSelectedItems}
+              canModifySelectedRules={authorizedToModifySelectedRules}
+            >
               <RuleQuickEditButtons
                 selectedItems={convertRulesToTableItems({
                   rules: filterRulesById(rulesState.data, [...selectedIds]),

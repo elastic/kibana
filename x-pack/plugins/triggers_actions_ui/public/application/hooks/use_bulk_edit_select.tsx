@@ -68,16 +68,17 @@ const reducer = (state: BulkEditSelectionState, action: Action) => {
   }
 };
 
-interface UseRulesBulkEditSelectProps {
+interface UseBulkEditSelectProps {
   totalItemCount: number;
-  itemIds: string[];
+  items: RuleTableItem[];
 }
 
-export function useRulesBulkEditSelect({
-  totalItemCount = 0,
-  itemIds = [],
-}: UseRulesBulkEditSelectProps) {
+export function useBulkEditSelect({ totalItemCount = 0, items = [] }: UseBulkEditSelectProps) {
   const [state, dispatch] = useReducer(reducer, initialState);
+
+  const itemIds = useMemo(() => {
+    return items.map((item) => item.id);
+  }, [items]);
 
   const numberOfSelectedItems = useMemo(() => {
     const { selectedIds, isAllSelected } = state;
@@ -92,20 +93,26 @@ export function useRulesBulkEditSelect({
 
   const isPageSelected = useMemo(() => {
     const { selectedIds, isAllSelected } = state;
-    if (!itemIds.length) {
+    if (!items.length) {
       return false;
     }
-    return itemIds.every((id) => {
-      if (isAllSelected) {
-        return !selectedIds.has(id);
+    return items.every((item) => {
+      if (!item.isEditable) {
+        return true;
       }
-      return selectedIds.has(id);
+      if (isAllSelected) {
+        return !selectedIds.has(item.id);
+      }
+      return selectedIds.has(item.id);
     });
-  }, [state, itemIds]);
+  }, [state, items]);
 
   const isRowSelected = useCallback(
     (rule: RuleTableItem) => {
       const { selectedIds, isAllSelected } = state;
+      if (!rule.isEditable) {
+        return false;
+      }
       if (isAllSelected) {
         return !selectedIds.has(rule.id);
       }
@@ -124,16 +131,31 @@ export function useRulesBulkEditSelect({
 
   const onSelectPage = useCallback(() => {
     const { selectedIds, isAllSelected } = state;
-    if ((isPageSelected && isAllSelected) || (!isPageSelected && !isAllSelected)) {
-      dispatch({ type: ActionTypes.SET_SELECTION, payload: [...selectedIds, ...itemIds] });
+
+    // Select current page in non-select all mode. Ignore rules that cannot be edited
+    if (!isPageSelected && !isAllSelected) {
+      const idsToSelect = items.filter((item) => item.isEditable).map((item) => item.id);
+      dispatch({ type: ActionTypes.SET_SELECTION, payload: [...selectedIds, ...idsToSelect] });
     }
-    if ((isPageSelected && !isAllSelected) || (!isPageSelected && isAllSelected)) {
-      itemIds.forEach((id) => {
-        selectedIds.delete(id);
+    // Unselect current page in non-select all mode.
+    if (isPageSelected && !isAllSelected) {
+      items.forEach((item) => selectedIds.delete(item.id));
+      dispatch({ type: ActionTypes.SET_SELECTION, payload: [...selectedIds] });
+    }
+    // Select current page in select all mode. Ignore rules that cannot be edited
+    if (!isPageSelected && isAllSelected) {
+      items.forEach((item) => {
+        if (item.isEditable) {
+          selectedIds.delete(item.id);
+        }
       });
       dispatch({ type: ActionTypes.SET_SELECTION, payload: [...selectedIds] });
     }
-  }, [state, isPageSelected, itemIds]);
+    // Unselect current page in select all mode.
+    if (isPageSelected && isAllSelected) {
+      dispatch({ type: ActionTypes.SET_SELECTION, payload: [...selectedIds, ...itemIds] });
+    }
+  }, [state, isPageSelected, items, itemIds]);
 
   const onClearSelection = useCallback(() => {
     dispatch({ type: ActionTypes.CLEAR_SELECTION });

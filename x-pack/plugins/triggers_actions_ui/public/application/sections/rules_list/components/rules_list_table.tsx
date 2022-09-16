@@ -373,6 +373,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           <EuiCheckbox
             id={`ruleListTable_select_${rule.id}}`}
             onChange={() => onSelectRow(rule)}
+            disabled={!rule.isEditable}
             checked={isRowSelected(rule)}
             data-test-subj={`checkboxSelectRow-${rule.id}`}
           />
@@ -869,6 +870,22 @@ export const RulesListTable = (props: RulesListTableProps) => {
     [ruleTypesState, isRowSelected]
   );
 
+  const authorizedToModifyAllRules = useMemo(() => {
+    let authorized = true;
+    ruleTypesState.data.forEach((ruleType) => {
+      if (!authorized) {
+        return;
+      }
+      const allConsumersAuthorized = Object.values(ruleType.authorizedConsumers).every(
+        (authorizedConsumer) => authorizedConsumer.all
+      );
+      if (!allConsumersAuthorized) {
+        authorized = false;
+      }
+    });
+    return authorized;
+  }, [ruleTypesState]);
+
   return (
     <EuiFlexGroup gutterSize="none" direction="column">
       <EuiFlexGroup gutterSize="none" alignItems="center">
@@ -887,7 +904,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {numberOfSelectedRules > 0 && (
+          {numberOfSelectedRules > 0 && authorizedToModifyAllRules && (
             <EuiButtonEmpty
               size="xs"
               aria-label={SELECT_ALL_ARIA_LABEL}
