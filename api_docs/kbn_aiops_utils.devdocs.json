@@ -190,7 +190,7 @@
           "Headers",
           ", logger: ",
           "Logger",
-          ") => StreamFactoryReturnType<T>"
+          ", flushFix: boolean | undefined) => StreamFactoryReturnType<T>"
         ],
         "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
         "deprecated": false,
@@ -227,6 +227,21 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.streamFactory.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "flushFix",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [
@@ -248,7 +263,7 @@
           "Headers",
           ", logger: ",
           "Logger",
-          ") => StreamFactoryReturnType<T>"
+          ", flushFix: boolean) => StreamFactoryReturnType<T>"
         ],
         "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
         "deprecated": false,
@@ -280,6 +295,21 @@
             "description": [],
             "signature": [
               "Logger"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.streamFactory.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "flushFix",
+            "description": [],
+            "signature": [
+              "boolean"
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
             "deprecated": false,

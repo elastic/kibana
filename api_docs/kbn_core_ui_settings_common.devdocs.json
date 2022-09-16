@@ -395,7 +395,7 @@
           "\nA sub-set of {@link UiSettingsParams} exposed to the client-side."
         ],
         "signature": [
-          "{ options?: string[] | number[] | undefined; type?: ",
+          "{ name?: string | undefined; value?: unknown; description?: string | undefined; category?: string[] | undefined; options?: string[] | number[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; type?: ",
           {
             "pluginId": "@kbn/core-ui-settings-common",
             "scope": "common",
@@ -403,7 +403,7 @@
             "section": "def-common.UiSettingsType",
             "text": "UiSettingsType"
           },
-          " | undefined; metric?: { type: string; name: string; } | undefined; value?: unknown; description?: string | undefined; name?: string | undefined; order?: number | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
+          " | undefined; deprecation?: ",
           {
             "pluginId": "@kbn/core-ui-settings-common",
             "scope": "common",
@@ -411,7 +411,7 @@
             "section": "def-common.DeprecationSettings",
             "text": "DeprecationSettings"
           },
-          " | undefined; }"
+          " | undefined; order?: number | undefined; metric?: { type: string; name: string; } | undefined; }"
         ],
         "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
         "deprecated": false,

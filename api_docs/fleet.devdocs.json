@@ -12178,12 +12178,12 @@
           {
             "parentPluginId": "fleet",
             "id": "def-common.PackageSpecManifest.type",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "type",
             "description": [],
             "signature": [
-              "\"integration\" | undefined"
+              "\"input\" | \"integration\" | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
             "deprecated": false,
@@ -12931,180 +12931,6 @@
                 "text": "RegistryVarsEntry"
               },
               "[] | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
-        "id": "def-common.RegistryPolicyTemplate",
-        "type": "Interface",
-        "tags": [],
-        "label": "RegistryPolicyTemplate",
-        "description": [],
-        "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.RegistryPolicyTemplate.RegistryPolicyTemplateKeys.name",
-            "type": "string",
-            "tags": [],
-            "label": "[RegistryPolicyTemplateKeys.name]",
-            "description": [],
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.RegistryPolicyTemplate.RegistryPolicyTemplateKeys.title",
-            "type": "string",
-            "tags": [],
-            "label": "[RegistryPolicyTemplateKeys.title]",
-            "description": [],
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.RegistryPolicyTemplate.RegistryPolicyTemplateKeys.description",
-            "type": "string",
-            "tags": [],
-            "label": "[RegistryPolicyTemplateKeys.description]",
-            "description": [],
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.RegistryPolicyTemplate.RegistryPolicyTemplateKeys.icons",
-            "type": "Array",
-            "tags": [],
-            "label": "[RegistryPolicyTemplateKeys.icons]",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.RegistryImage",
-                "text": "RegistryImage"
-              },
-              "[] | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.RegistryPolicyTemplate.RegistryPolicyTemplateKeys.screenshots",
-            "type": "Array",
-            "tags": [],
-            "label": "[RegistryPolicyTemplateKeys.screenshots]",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.RegistryImage",
-                "text": "RegistryImage"
-              },
-              "[] | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.RegistryPolicyTemplate.RegistryPolicyTemplateKeys.categories",
-            "type": "Array",
-            "tags": [],
-            "label": "[RegistryPolicyTemplateKeys.categories]",
-            "description": [],
-            "signature": [
-              "(",
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.PackageSpecCategory",
-                "text": "PackageSpecCategory"
-              },
-              " | undefined)[] | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.RegistryPolicyTemplate.RegistryPolicyTemplateKeys.data_streams",
-            "type": "Array",
-            "tags": [],
-            "label": "[RegistryPolicyTemplateKeys.data_streams]",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.RegistryPolicyTemplate.RegistryPolicyTemplateKeys.inputs",
-            "type": "Array",
-            "tags": [],
-            "label": "[RegistryPolicyTemplateKeys.inputs]",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.RegistryInput",
-                "text": "RegistryInput"
-              },
-              "[] | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.RegistryPolicyTemplate.RegistryPolicyTemplateKeys.readme",
-            "type": "string",
-            "tags": [],
-            "label": "[RegistryPolicyTemplateKeys.readme]",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.RegistryPolicyTemplate.RegistryPolicyTemplateKeys.multiple",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "[RegistryPolicyTemplateKeys.multiple]",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -15023,13 +14849,30 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.RegistryPolicyTemplate",
+        "type": "Type",
+        "tags": [],
+        "label": "RegistryPolicyTemplate",
+        "description": [],
+        "signature": [
+          "RegistryPolicyIntegrationTemplate",
+          " | ",
+          "RegistryPolicyInputOnlyTemplate"
+        ],
+        "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.RegistrySearchResult",
         "type": "Type",
         "tags": [],
         "label": "RegistrySearchResult",
         "description": [],
         "signature": [
-          "{ type?: \"integration\" | undefined; path: string; download: string; title: string; description: string; icons?: (",
+          "{ name: string; description: string; type?: \"input\" | \"integration\" | undefined; path: string; download: string; title: string; icons?: (",
           {
             "pluginId": "fleet",
             "scope": "common",
@@ -15053,7 +14896,7 @@
             "section": "def-common.PackageSpecCategory",
             "text": "PackageSpecCategory"
           },
-          " | undefined)[] | undefined; name: string; version: string; internal?: boolean | undefined; release?: \"experimental\" | \"beta\" | \"ga\" | undefined; policy_templates?: ",
+          " | undefined)[] | undefined; version: string; internal?: boolean | undefined; release?: \"experimental\" | \"beta\" | \"ga\" | undefined; policy_templates?: ",
           {
             "pluginId": "fleet",
             "scope": "common",

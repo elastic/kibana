@@ -1,0 +1,208 @@
+{
+  "id": "guidedOnboarding",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "guidedOnboarding",
+        "id": "def-public.GuidedOnboardingState",
+        "type": "Interface",
+        "tags": [],
+        "label": "GuidedOnboardingState",
+        "description": [],
+        "path": "src/plugins/guided_onboarding/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-public.GuidedOnboardingState.activeGuide",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "activeGuide",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "guidedOnboarding",
+                "scope": "public",
+                "docId": "kibGuidedOnboardingPluginApi",
+                "section": "def-public.UseCase",
+                "text": "UseCase"
+              },
+              " | \"unset\""
+            ],
+            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-public.GuidedOnboardingState.activeStep",
+            "type": "string",
+            "tags": [],
+            "label": "activeStep",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "guidedOnboarding",
+        "id": "def-public.UseCase",
+        "type": "Type",
+        "tags": [],
+        "label": "UseCase",
+        "description": [],
+        "signature": [
+          "\"search\" | \"security\" | \"observability\""
+        ],
+        "path": "src/plugins/guided_onboarding/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "guidedOnboarding",
+      "id": "def-public.GuidedOnboardingPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "GuidedOnboardingPluginSetup",
+      "description": [],
+      "path": "src/plugins/guided_onboarding/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "guidedOnboarding",
+      "id": "def-public.GuidedOnboardingPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "GuidedOnboardingPluginStart",
+      "description": [],
+      "path": "src/plugins/guided_onboarding/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "guidedOnboarding",
+          "id": "def-public.GuidedOnboardingPluginStart.guidedOnboardingApi",
+          "type": "Object",
+          "tags": [],
+          "label": "guidedOnboardingApi",
+          "description": [],
+          "signature": [
+            "ApiService",
+            " | undefined"
+          ],
+          "path": "src/plugins/guided_onboarding/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "guidedOnboarding",
+      "id": "def-server.GuidedOnboardingPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "GuidedOnboardingPluginSetup",
+      "description": [],
+      "path": "src/plugins/guided_onboarding/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "guidedOnboarding",
+      "id": "def-server.GuidedOnboardingPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "GuidedOnboardingPluginStart",
+      "description": [],
+      "path": "src/plugins/guided_onboarding/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "guidedOnboarding",
+        "id": "def-common.API_BASE_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "API_BASE_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/guided_onboarding\""
+        ],
+        "path": "src/plugins/guided_onboarding/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "guidedOnboarding",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"guidedOnboarding\""
+        ],
+        "path": "src/plugins/guided_onboarding/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "guidedOnboarding",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"guidedOnboarding\""
+        ],
+        "path": "src/plugins/guided_onboarding/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

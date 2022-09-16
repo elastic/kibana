@@ -44,7 +44,7 @@
               "The rule to view"
             ],
             "signature": [
-              "{ params: never; tags: string[]; id: string; monitoring?: ",
+              "{ name: string; params: never; tags: string[]; id: string; monitoring?: ",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -52,7 +52,7 @@
                 "section": "def-common.RuleMonitoring",
                 "text": "RuleMonitoring"
               },
-              " | undefined; name: string; enabled: boolean; actions: ",
+              " | undefined; enabled: boolean; actions: ",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -1819,7 +1819,7 @@
                 "section": "def-common.SanitizedRule",
                 "text": "SanitizedRule"
               },
-              "<never>, \"tags\" | \"name\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
+              "<never>, \"name\" | \"tags\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
@@ -6193,7 +6193,7 @@
         "label": "SanitizedRule",
         "description": [],
         "signature": [
-          "{ params: Params; tags: string[]; id: string; monitoring?: ",
+          "{ name: string; params: Params; tags: string[]; id: string; monitoring?: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -6201,7 +6201,7 @@
             "section": "def-common.RuleMonitoring",
             "text": "RuleMonitoring"
           },
-          " | undefined; name: string; enabled: boolean; actions: ",
+          " | undefined; enabled: boolean; actions: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -6264,7 +6264,7 @@
             "section": "def-common.SanitizedRule",
             "text": "SanitizedRule"
           },
-          "<never>, \"tags\" | \"name\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
+          "<never>, \"name\" | \"tags\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,

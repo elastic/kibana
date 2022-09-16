@@ -524,6 +524,19 @@
           },
           {
             "parentPluginId": "security",
+            "id": "def-public.SecurityLicenseFeatures.allowUserProfileCollaboration",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowUserProfileCollaboration",
+            "description": [
+              "\nIndicates whether we allow user profile collaboration features (suggest and privileges checks APIs)."
+            ],
+            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
             "id": "def-public.SecurityLicenseFeatures.layout",
             "type": "CompoundType",
             "tags": [],
@@ -3961,6 +3974,19 @@
             "label": "allowSubFeaturePrivileges",
             "description": [
               "\nIndicates whether we allow sub-feature privileges."
+            ],
+            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.SecurityLicenseFeatures.allowUserProfileCollaboration",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowUserProfileCollaboration",
+            "description": [
+              "\nIndicates whether we allow user profile collaboration features (suggest and privileges checks APIs)."
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
             "deprecated": false,

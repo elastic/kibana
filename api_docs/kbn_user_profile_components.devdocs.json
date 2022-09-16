@@ -319,7 +319,7 @@
           },
           " extends Omit<",
           "EuiAvatarProps",
-          ", \"type\" | \"color\" | \"iconColor\" | \"name\" | \"iconType\" | \"iconSize\" | \"initials\" | \"initialsLength\" | \"imageUrl\">"
+          ", \"name\" | \"type\" | \"color\" | \"iconColor\" | \"iconType\" | \"iconSize\" | \"initials\" | \"initialsLength\" | \"imageUrl\">"
         ],
         "path": "packages/kbn-user-profile-components/src/user_avatar.tsx",
         "deprecated": false,

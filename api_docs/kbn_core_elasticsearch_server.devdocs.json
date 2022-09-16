@@ -883,7 +883,7 @@
               "\nA {@link ElasticsearchClient | client} to be used to query the ES cluster on behalf of the Kibana internal user"
             ],
             "signature": [
-              "{ get: { <TDocument = unknown>(this: That, params: ",
+              "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
               "GetRequest",
               " | ",
               "GetRequest",
@@ -1001,7 +1001,7 @@
               "default",
               "; security: ",
               "default",
-              "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+              "; index: { <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
               "IndexRequest",
@@ -2499,7 +2499,7 @@
               "\nA {@link ElasticsearchClient | client} to be used to query the elasticsearch cluster\non behalf of the internal Kibana user."
             ],
             "signature": [
-              "{ get: { <TDocument = unknown>(this: That, params: ",
+              "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
               "GetRequest",
               " | ",
               "GetRequest",
@@ -2617,7 +2617,7 @@
               "default",
               "; security: ",
               "default",
-              "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+              "; index: { <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
               "IndexRequest",
@@ -3703,7 +3703,7 @@
               "\nA {@link ElasticsearchClient | client} to be used to query the elasticsearch cluster\non behalf of the user that initiated the request to the Kibana server."
             ],
             "signature": [
-              "{ get: { <TDocument = unknown>(this: That, params: ",
+              "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
               "GetRequest",
               " | ",
               "GetRequest",
@@ -3821,7 +3821,7 @@
               "default",
               "; security: ",
               "default",
-              "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+              "; index: { <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
               "IndexRequest",
@@ -5154,7 +5154,7 @@
           "\nClient used to query the elasticsearch cluster.\n"
         ],
         "signature": [
-          "{ get: { <TDocument = unknown>(this: That, params: ",
+          "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
           "GetRequest",
           " | ",
           "GetRequest",
@@ -5272,7 +5272,7 @@
           "default",
           "; security: ",
           "default",
-          "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+          "; index: { <TDocument = unknown>(this: That, params: ",
           "IndexRequest",
           "<TDocument> | ",
           "IndexRequest",

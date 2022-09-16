@@ -831,7 +831,13 @@
             "text": "SchemaConfig"
           },
           ", \"params\"> & { params: {} | ",
-          "DateHistogramParams",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.DateHistogramParams",
+            "text": "DateHistogramParams"
+          },
           " | ",
           "HistogramParams",
           " | ",
