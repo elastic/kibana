@@ -160,6 +160,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
+    it('lens XY chart with reference line layer', async () => {
+      await PageObjects.lens.createLayer('referenceLine');
+      await a11y.testAppSnapshot();
+    });
+
+    it('lens XY chart with annotations layer', async () => {
+      await PageObjects.lens.createLayer('annotations');
+      await a11y.testAppSnapshot();
+    });
+
     it('saves lens chart', async () => {
       await PageObjects.lens.save(lensChartName);
       await a11y.testAppSnapshot();

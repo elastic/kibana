@@ -1650,9 +1650,9 @@
             "section": "def-common.WithoutReservedActionGroups",
             "text": "WithoutReservedActionGroups"
           },
-          "<TActionGroupIds, never>>) => Promise<void | TState>; validate?: { params?: ",
+          "<TActionGroupIds, never>>) => Promise<void | TState>; name: string; validate?: { params?: ",
           "RuleTypeParamsValidator",
-          "<TParams> | undefined; } | undefined; id: string; name: string; cancelAlertsOnRuleTimeout?: boolean | undefined; actionGroups: ",
+          "<TParams> | undefined; } | undefined; id: string; cancelAlertsOnRuleTimeout?: boolean | undefined; actionGroups: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -1911,7 +1911,7 @@
               "\nID of the Kibana feature associated with the index.\nUsed by alerts-as-data RBAC.\n\nNote from @dhurley14\nThe purpose of the `feature` param is to force the user to update\nthe data structure which contains the mapping of consumers to alerts\nas data indices. The idea is it is typed such that it forces the\nuser to go to the code and modify it. At least until a better system\nis put in place or we move the alerts as data client out of rule registry.\n"
             ],
             "signature": [
-              "\"logs\" | \"apm\" | \"uptime\" | \"siem\" | \"infrastructure\" | \"observability\""
+              "\"observability\" | \"logs\" | \"apm\" | \"uptime\" | \"siem\" | \"infrastructure\""
             ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/index_options.ts",
             "deprecated": false,

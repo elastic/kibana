@@ -2168,7 +2168,7 @@
         "label": "CreateListSchemaDecoded",
         "description": [],
         "signature": [
-          "{ type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; id: string | undefined; description: string; name: string; meta: object | undefined; serializer: string | undefined; deserializer: string | undefined; } & { version: number; }"
+          "{ name: string; description: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; id: string | undefined; meta: object | undefined; serializer: string | undefined; deserializer: string | undefined; } & { version: number; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/create_list_schema/index.ts",
         "deprecated": false,
