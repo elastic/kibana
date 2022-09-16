@@ -223,7 +223,7 @@ describe('utils', () => {
           } as unknown as SanitizedRule<RuleParams>,
           undefined
         )
-      ).toEqual(NOTIFICATION_THROTTLE_NO_ACTIONS);
+      ).toEqual(NOTIFICATION_THROTTLE_RULE);
     });
     test('returns "NOTIFICATION_THROTTLE_NO_ACTIONS" if there is empty response actions', () => {
       expect(
@@ -234,7 +234,6 @@ describe('utils', () => {
             actions: [],
             params: {
               responseActions: [],
-              type: 'query',
             },
           } as unknown as SanitizedRule<RuleParams>,
           undefined

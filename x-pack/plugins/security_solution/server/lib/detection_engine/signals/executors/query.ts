@@ -69,7 +69,7 @@ export const queryExecutor = async ({
 }) => {
   const ruleParams = completeRule.ruleParams;
 
-  return withSecuritySpan('queryExecutor', async (test) => {
+  return withSecuritySpan('queryExecutor', async () => {
     const esFilter = await getFilter({
       type: ruleParams.type,
       filters: ruleParams.filters,

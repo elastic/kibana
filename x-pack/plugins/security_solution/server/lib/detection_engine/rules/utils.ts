@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { RuleAction, RuleNotifyWhenType, SanitizedRule } from '@kbn/alerting-plugin/common';
+import type {
+  RuleAction,
+  RuleResponseAction,
+  RuleNotifyWhenType,
+  SanitizedRule,
+} from '@kbn/alerting-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { isEmpty } from 'lodash/fp';
@@ -104,7 +109,8 @@ export const transformFromAlertThrottle = (
   if (legacyRuleActions == null || (rule.actions != null && rule.actions.length > 0)) {
     if (
       rule.muteAll ||
-      (rule.actions.length === 0 && !(rule.params as { responseActions: unknown })?.responseActions)
+      (rule.actions.length === 0 &&
+        !(rule.params as { responseActions: RuleResponseAction[] })?.responseActions.length)
     ) {
       return NOTIFICATION_THROTTLE_NO_ACTIONS;
     } else if (
