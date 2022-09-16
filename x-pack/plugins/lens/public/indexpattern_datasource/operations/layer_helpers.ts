@@ -363,7 +363,7 @@ export function insertNewColumn({
   columnParams,
   initialParams,
   references,
-  respectOrder
+  respectOrder,
 }: ColumnChange): IndexPatternLayer {
   const operationDefinition = operationDefinitionMap[op];
 
@@ -396,7 +396,14 @@ export function insertNewColumn({
       : operationDefinition.buildColumn({ ...baseOptions, layer });
 
     return updateDefaultLabels(
-      addOperationFn(layer, buildColumnFn, columnId, visualizationGroups, targetGroup, respectOrder),
+      addOperationFn(
+        layer,
+        buildColumnFn,
+        columnId,
+        visualizationGroups,
+        targetGroup,
+        respectOrder
+      ),
       indexPattern
     );
   }
@@ -447,7 +454,14 @@ export function insertNewColumn({
         )
       : operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, referenceIds });
     return updateDefaultLabels(
-      addOperationFn(tempLayer, buildColumnFn, columnId, visualizationGroups, targetGroup, respectOrder),
+      addOperationFn(
+        tempLayer,
+        buildColumnFn,
+        columnId,
+        visualizationGroups,
+        targetGroup,
+        respectOrder
+      ),
       indexPattern
     );
   }

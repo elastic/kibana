@@ -111,7 +111,7 @@ export interface RenderValue {
   params: {
     listenOnChange: boolean;
     canNavigateToLens?: boolean;
-  }
+  };
 }
 
 export enum LabelPositions {

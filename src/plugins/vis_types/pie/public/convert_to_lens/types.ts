@@ -8,7 +8,10 @@
 
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import { PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
-import { NavigateToLensContext, PartitionVisConfiguration } from '@kbn/visualizations-plugin/common';
+import {
+  NavigateToLensContext,
+  PartitionVisConfiguration,
+} from '@kbn/visualizations-plugin/common';
 import { Vis } from '@kbn/visualizations-plugin/public';
 
 export type ConvertPieToLensVisualization = (

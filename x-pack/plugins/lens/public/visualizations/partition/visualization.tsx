@@ -14,6 +14,7 @@ import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
+import { PartitionVisConfiguration } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type {
   Visualization,
   OperationMetadata,
@@ -30,7 +31,6 @@ import { DimensionEditor, PieToolbar } from './toolbar';
 import { checkTableForContainsSmallValues } from './render_helpers';
 import { PieChartTypes, PieLayerState, PieVisualizationState } from '../../../common';
 import { IndexPatternLayer } from '../..';
-import { PartitionVisConfiguration } from '@kbn/visualizations-plugin/common/convert_to_lens';
 
 interface DatatableDatasourceState {
   [prop: string]: unknown;
