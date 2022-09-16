@@ -82,6 +82,9 @@ export const useStyles = () => {
       '.euiRangeHighlight__progress': {
         backgroundColor: euiVars.euiColorVis0_behindText,
       },
+      '.euiRangeSlider:focus ~ .euiRangeHighlight .euiRangeHighlight__progress': {
+        backgroundColor: euiVars.euiColorVis0_behindText,
+      },
       '.euiRangeSlider:focus:not(:focus-visible) ~ .euiRangeHighlight .euiRangeHighlight__progress':
         { backgroundColor: euiVars.euiColorVis0_behindText },
       '.euiRangeTrack::after': {
