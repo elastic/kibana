@@ -150,6 +150,7 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
         filters: params.filters,
         savedId: params.saved_id,
         dataViewId: params.data_view_id,
+        responseActions: params.response_actions?.map(transformRuleToAlertResponseAction),
       };
     }
     case 'threshold': {
@@ -259,6 +260,9 @@ const patchSavedQueryParams = (
     query: params.query ?? existingRule.query,
     filters: params.filters ?? existingRule.filters,
     savedId: params.saved_id ?? existingRule.savedId,
+    responseActions:
+      params.response_actions?.map(transformRuleToAlertResponseAction) ??
+      existingRule.responseActions,
   };
 };
 
@@ -581,6 +585,7 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
         filters: params.filters,
         saved_id: params.savedId,
         data_view_id: params.dataViewId,
+        response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
       };
     }
     case 'threshold': {

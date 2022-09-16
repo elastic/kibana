@@ -323,6 +323,7 @@ const savedQueryRuleParams = {
     data_view_id,
     query,
     filters,
+    response_actions,
   },
   defaultable: {
     language: t.keyof({ kuery: null, lucene: null }),

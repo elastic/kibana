@@ -147,6 +147,7 @@ export const getSavedQueryRuleParams = (): SavedQueryRuleParams => {
       },
     ],
     savedId: 'some-id',
+    responseActions: undefined,
   };
 };
 
