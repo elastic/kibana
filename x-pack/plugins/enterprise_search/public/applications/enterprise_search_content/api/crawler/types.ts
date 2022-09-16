@@ -103,6 +103,7 @@ export interface CrawlerDataFromServer {
   domains: CrawlerDomainFromServer[];
   events: CrawlEventFromServer[];
   most_recent_crawl_request: CrawlRequestFromServer | null;
+  user_agent: string;
 }
 
 export interface CrawlerDomainValidationResultFromServer {
@@ -187,6 +188,7 @@ export interface CrawlerData {
   domains: CrawlerDomain[];
   events: CrawlEvent[];
   mostRecentCrawlRequest: CrawlRequest | null;
+  userAgent: string;
 }
 
 export interface CrawlerDomainValidationStep {
