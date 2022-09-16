@@ -94,16 +94,6 @@ describe('DataPanel', () => {
       expect(wrapper.find(EuiTitle).prop('size')).toEqual('s');
     });
 
-    it('passes responsive to the header flex group', () => {
-      const wrapper = shallow(<DataPanel title={<h1>Test</h1>} />);
-
-      expect(wrapper.find(EuiFlexGroup).first().prop('responsive')).toEqual(false);
-
-      wrapper.setProps({ responsive: true });
-
-      expect(wrapper.find(EuiFlexGroup).first().prop('responsive')).toEqual(true);
-    });
-
     it('renders panel color based on filled flag', () => {
       const wrapper = shallow(<DataPanel title={<h1>Test</h1>} />);
 
