@@ -22,10 +22,7 @@ import { isEmpty, find, pickBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
-import type {
-  EcsMappingFormField,
-  EcsMappingSerialized,
-} from '../../packs/queries/ecs_mapping_editor_field';
+import type { ECSMappingArray, ECSMapping } from '../../../common/schemas/common/utils';
 import { useKibana } from '../../common/lib/kibana';
 import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import { SavedQueryFlyout } from '../../saved_queries';
@@ -43,7 +40,7 @@ export interface LiveQueryFormFields {
   query?: string;
   agentSelection: AgentSelection;
   savedQueryId?: string | null;
-  ecs_mapping: EcsMappingFormField[];
+  ecs_mapping: ECSMappingArray;
   packId: string[];
 }
 
@@ -51,7 +48,7 @@ interface DefaultLiveQueryFormFields {
   query?: string;
   agentSelection?: AgentSelection;
   savedQueryId?: string | null;
-  ecs_mapping?: EcsMappingSerialized;
+  ecs_mapping?: EcsMapping;
   packId?: string;
 }
 

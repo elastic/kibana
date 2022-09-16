@@ -71,15 +71,15 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
   const handleSavedQueryChange: SavedQueriesDropdownProps['onChange'] = useCallback(
     (savedQuery) => {
       if (savedQuery) {
-        formContext?.setValue('query', savedQuery.query);
-        formContext?.setValue('savedQueryId', savedQuery.savedQueryId);
-        formContext?.setValue('ecsMapping', savedQuery.ecs_mapping);
+        formContext?.resetField('query', { defaultValue: savedQuery.query });
+        formContext?.resetField('savedQueryId', { defaultValue: savedQuery.savedQueryId });
+        formContext?.resetField('ecsMapping', { defaultValue: savedQuery.ecs_mapping });
 
         if (!isEmpty(savedQuery.ecs_mapping)) {
           setAdvancedContentState('open');
         }
       } else {
-        formContext?.setValue('savedQueryId', null);
+        formContext?.resetField('savedQueryId');
       }
     },
     [formContext]
