@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { BUCKET_TYPES, IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
+import {
+  BUCKET_TYPES,
+  IAggConfig,
+  METRIC_TYPES,
+  SHARD_DELAY_AGG_NAME,
+} from '@kbn/data-plugin/common';
 import { search } from '@kbn/data-plugin/public';
 import { Vis, VisToExpressionAstParams } from './types';
 import { SchemaConfig } from '../common/types';
@@ -14,7 +19,11 @@ import { convertToSchemaConfig } from '../common';
 
 const { isDateHistogramBucketAggConfig } = search.aggs;
 
-const SUPPORTED_AGGREGATIONS = [...Object.values(METRIC_TYPES), ...Object.values(BUCKET_TYPES)];
+const SUPPORTED_AGGREGATIONS = [
+  ...Object.values(METRIC_TYPES),
+  ...Object.values(BUCKET_TYPES),
+  SHARD_DELAY_AGG_NAME,
+];
 
 type SupportedAggregation = typeof SUPPORTED_AGGREGATIONS[number];
 

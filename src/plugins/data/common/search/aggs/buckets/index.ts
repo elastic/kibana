@@ -48,3 +48,4 @@ export * from './sampler_fn';
 export * from './sampler';
 export * from './diversified_sampler_fn';
 export * from './diversified_sampler';
+export { SHARD_DELAY_AGG_NAME } from './shard_delay';
