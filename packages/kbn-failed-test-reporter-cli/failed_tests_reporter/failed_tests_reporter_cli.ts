@@ -169,7 +169,7 @@ run(
           dryRun: !flags['report-update'],
         });
 
-        reportFailuresToFile(log, failures, bkMeta, getRootMetadata(report));
+        await reportFailuresToFile(log, failures, bkMeta, getRootMetadata(report));
       }
     } finally {
       await CiStatsReporter.fromEnv(log).metrics([

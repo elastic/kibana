@@ -43,12 +43,12 @@ async function getJourneySnapshotHtml(log: ToolingLog, journeyMeta: JourneyMeta)
 
   return [
     '<section>',
-    '<h2>Steps</h2>',
+    '<h5>Steps</h5>',
     ...screenshots.get().flatMap(({ title, path }) => {
       const base64 = Fs.readFileSync(path, 'base64');
 
       return [
-        `<h3>${escape(title)}</h3>`,
+        `<p><strong>${escape(title)}</strong></p>`,
         `<img class="screenshot img-fluid img-thumbnail" src="data:image/png;base64,${base64}" />`,
       ];
     }),
@@ -67,7 +67,6 @@ function findAllScreenshots(log: ToolingLog) {
         [
           'test/functional/**/screenshots/failure/*.png',
           'x-pack/test/functional/**/screenshots/failure/*.png',
-          'data/ftr_screenshots/*.png',
         ],
         {
           cwd: REPO_ROOT,
@@ -94,7 +93,7 @@ function getFtrScreenshotHtml(log: ToolingLog, failureName: string) {
     .join('\n');
 }
 
-export function reportFailuresToFile(
+export async function reportFailuresToFile(
   log: ToolingLog,
   failures: TestFailure[],
   bkMeta: BuildkiteMetadata,
@@ -178,10 +177,17 @@ export function reportFailuresToFile(
         <pre>${escape(failure.failure)}</pre>
         ${
           journeyMeta
-            ? getJourneySnapshotHtml(log, journeyMeta)
+            ? await getJourneySnapshotHtml(log, journeyMeta)
             : getFtrScreenshotHtml(log, failure.name)
         }
-        <pre>${escape(failure['system-out'] || '')}</pre>
+        ${
+          failure['system-out']
+            ? `
+              <h5>Stdout</h5>
+              <pre>${escape(failure['system-out'] || '')}</pre>
+            `
+            : ''
+        }
       `
       );
 

@@ -103,7 +103,7 @@ export function getRootMetadata(report: TestReport): Record<string, unknown> {
       : report.testsuite?.$?.['metadata-json']) ?? '{}';
 
   try {
-    const obj = JSON.stringify(json);
+    const obj = JSON.parse(json);
 
     if (typeof obj === 'object' && obj !== null) {
       return obj;
