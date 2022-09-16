@@ -6,37 +6,17 @@
  * Side Public License, v 1.
  */
 
+import Path from 'path';
+import Fs from 'fs';
 import { createHash } from 'crypto';
-import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
-import { join, basename, resolve } from 'path';
 
+import globby from 'globby';
 import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/utils';
 import { escape } from 'he';
 
 import { BuildkiteMetadata } from './buildkite_metadata';
 import { TestFailure } from './get_failures';
-
-const findScreenshots = (dirPath: string, allScreenshots: string[] = []) => {
-  const files = readdirSync(dirPath);
-
-  for (const file of files) {
-    if (statSync(join(dirPath, file)).isDirectory()) {
-      if (file.match(/node_modules/)) {
-        continue;
-      }
-
-      allScreenshots = findScreenshots(join(dirPath, file), allScreenshots);
-    } else {
-      const fullPath = join(dirPath, file);
-      if (fullPath.match(/screenshots\/failure\/.+\.png$/)) {
-        allScreenshots.push(fullPath);
-      }
-    }
-  }
-
-  return allScreenshots;
-};
 
 export function reportFailuresToFile(
   log: ToolingLog,
@@ -47,21 +27,27 @@ export function reportFailuresToFile(
     return;
   }
 
-  let screenshots: string[];
+  let screenshots: Array<{ path: string; name: string }>;
   try {
-    screenshots = [
-      ...findScreenshots(join(REPO_ROOT, 'test', 'functional')),
-      ...findScreenshots(join(REPO_ROOT, 'x-pack', 'test', 'functional')),
-    ];
+    screenshots = globby
+      .sync(
+        [
+          'test/functional/**/screenshots/failure/*.png',
+          'x-pack/test/functional/**/screenshots/failure/*.png',
+          'data/ftr_screenshots/*.png',
+        ],
+        {
+          cwd: REPO_ROOT,
+          absolute: true,
+        }
+      )
+      .map((path) => ({
+        path,
+        name: Path.basename(path, Path.extname(path)),
+      }));
   } catch (e) {
     log.error(e as Error);
     screenshots = [];
-  }
-
-  const screenshotsByName: Record<string, string> = {};
-  for (const screenshot of screenshots) {
-    const [name] = basename(screenshot).split('.');
-    screenshotsByName[name] = screenshot;
   }
 
   // Jest could, in theory, fail 1000s of tests and write 1000s of failures
@@ -71,7 +57,7 @@ export function reportFailuresToFile(
     const filenameBase = `${
       process.env.BUILDKITE_JOB_ID ? process.env.BUILDKITE_JOB_ID + '_' : ''
     }${hash}`;
-    const dir = join('target', 'test_failures');
+    const dir = Path.join('target', 'test_failures');
 
     const failureLog = [
       ['Test:', '-----', failure.classname, failure.name, ''],
@@ -95,25 +81,20 @@ export function reportFailuresToFile(
       2
     );
 
-    let screenshot = '';
-    const truncatedName = failure.name.replace(/([^ a-zA-Z0-9-]+)/g, '_').slice(0, 80);
+    const truncatedName = failure.name.replaceAll(/[^ a-zA-Z0-9-]+/g, '').slice(0, 80);
     const failureNameHash = createHash('sha256').update(failure.name).digest('hex');
-    const screenshotName = `${truncatedName}-${failureNameHash}`;
+    const screenshotPrefix = `${truncatedName}-${failureNameHash}`;
 
-    if (screenshotsByName[screenshotName]) {
-      try {
-        screenshot = readFileSync(screenshotsByName[screenshotName]).toString('base64');
-      } catch (e) {
-        log.error(e as Error);
-      }
-    }
+    const screenshotHtml = screenshots
+      .filter((s) => s.name.startsWith(screenshotPrefix))
+      .map((s) => {
+        const base64 = Fs.readFileSync(s.path).toString('base64');
+        return `<img class="screenshot img-fluid img-thumbnail" src="data:image/png;base64,${base64}" />`;
+      })
+      .join('\n');
 
-    const screenshotHtml = screenshot
-      ? `<img class="screenshot img-fluid img-thumbnail" src="data:image/png;base64,${screenshot}" />`
-      : '';
-
-    const failureHTML = readFileSync(
-      resolve(
+    const failureHTML = Fs.readFileSync(
+      Path.resolve(
         REPO_ROOT,
         'packages/kbn-test/src/failed_tests_reporter/report_failures_to_file_html_template.html'
       )
@@ -159,9 +140,9 @@ export function reportFailuresToFile(
       `
       );
 
-    mkdirSync(dir, { recursive: true });
-    writeFileSync(join(dir, `${filenameBase}.log`), failureLog, 'utf8');
-    writeFileSync(join(dir, `${filenameBase}.html`), failureHTML, 'utf8');
-    writeFileSync(join(dir, `${filenameBase}.json`), failureJSON, 'utf8');
+    Fs.mkdirSync(dir, { recursive: true });
+    Fs.writeFileSync(Path.join(dir, `${filenameBase}.log`), failureLog, 'utf8');
+    Fs.writeFileSync(Path.join(dir, `${filenameBase}.html`), failureHTML, 'utf8');
+    Fs.writeFileSync(Path.join(dir, `${filenameBase}.json`), failureJSON, 'utf8');
   }
 }

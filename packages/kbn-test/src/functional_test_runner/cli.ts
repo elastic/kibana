@@ -15,6 +15,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import exitHook from 'exit-hook';
 
+import { readConfigFile, EsVersion } from './lib';
 import { FunctionalTestRunner } from './functional_test_runner';
 
 const makeAbsolutePath = (v: string) => Path.resolve(process.cwd(), v);
@@ -29,6 +30,20 @@ const parseInstallDir = (flags: Flags) => {
   return flag ? makeAbsolutePath(flag) : undefined;
 };
 
+function toArr(flags: Flags, key: string) {
+  const value = flags[key] || undefined;
+  if (value === undefined) {
+    return [];
+  }
+  if (Array.isArray(value)) {
+    return value;
+  }
+  if (typeof value === 'string') {
+    return [value];
+  }
+  throw createFlagError(`expected --${key} to be a string`);
+}
+
 export function runFtrCli() {
   const runStartTime = Date.now();
   const toolingLog = new ToolingLog({
@@ -38,45 +53,44 @@ export function runFtrCli() {
   const reportTime = getTimeReporter(toolingLog, 'scripts/functional_test_runner');
   run(
     async ({ flags, log }) => {
-      const esVersion = flags['es-version'] || undefined; // convert "" to undefined
-      if (esVersion !== undefined && typeof esVersion !== 'string') {
+      const esVersionInput = flags['es-version'] || undefined; // convert "" to undefined
+      if (esVersionInput !== undefined && typeof esVersionInput !== 'string') {
         throw createFlagError('expected --es-version to be a string');
       }
 
-      const configRel = flags.config;
-      if (typeof configRel !== 'string' || !configRel) {
-        throw createFlagError('--config is required');
-      }
-      const configPath = makeAbsolutePath(configRel);
-
-      const functionalTestRunner = new FunctionalTestRunner(
-        log,
-        configPath,
-        {
-          mochaOpts: {
-            bail: flags.bail,
-            dryRun: flags['dry-run'],
-            grep: flags.grep || undefined,
-            invert: flags.invert,
-          },
-          kbnTestServer: {
-            installDir: parseInstallDir(flags),
-          },
-          suiteFiles: {
-            include: toArray(flags.include as string | string[]).map(makeAbsolutePath),
-            exclude: toArray(flags.exclude as string | string[]).map(makeAbsolutePath),
-          },
-          suiteTags: {
-            include: toArray(flags['include-tag'] as string | string[]),
-            exclude: toArray(flags['exclude-tag'] as string | string[]),
-          },
-          updateBaselines: flags.updateBaselines || flags.u,
-          updateSnapshots: flags.updateSnapshots || flags.u,
-        },
-        esVersion
+      const configPaths = [...toArr(flags, 'config'), ...toArr(flags, 'journey')].map((rel) =>
+        Path.resolve(rel)
       );
+      if (configPaths.length !== 1) {
+        throw createFlagError(`Expected there to be exactly one --config/--journey flag`);
+      }
 
-      await functionalTestRunner.readConfigFile();
+      const esVersion = esVersionInput ? new EsVersion(esVersionInput) : EsVersion.getDefault();
+      const settingOverrides = {
+        mochaOpts: {
+          bail: flags.bail,
+          dryRun: flags['dry-run'],
+          grep: flags.grep || undefined,
+          invert: flags.invert,
+        },
+        kbnTestServer: {
+          installDir: parseInstallDir(flags),
+        },
+        suiteFiles: {
+          include: toArray(flags.include as string | string[]).map(makeAbsolutePath),
+          exclude: toArray(flags.exclude as string | string[]).map(makeAbsolutePath),
+        },
+        suiteTags: {
+          include: toArray(flags['include-tag'] as string | string[]),
+          exclude: toArray(flags['exclude-tag'] as string | string[]),
+        },
+        updateBaselines: flags.updateBaselines || flags.u,
+        updateSnapshots: flags.updateSnapshots || flags.u,
+      };
+
+      const config = await readConfigFile(log, esVersion, configPaths[0], settingOverrides);
+
+      const functionalTestRunner = new FunctionalTestRunner(log, config, esVersion);
 
       if (flags.throttle) {
         process.env.TEST_THROTTLE_NETWORK = '1';
@@ -139,6 +153,7 @@ export function runFtrCli() {
       flags: {
         string: [
           'config',
+          'journey',
           'grep',
           'include',
           'exclude',
@@ -159,7 +174,8 @@ export function runFtrCli() {
           'dry-run',
         ],
         help: `
-          --config=path      path to a config file
+          --config=path      path to a config file (either this or --journey is required)
+          --journey=path     path to a journey file (either this or --config is required)
           --bail             stop tests after the first failure
           --grep <pattern>   pattern used to select which tests to run
           --invert           invert grep to exclude tests

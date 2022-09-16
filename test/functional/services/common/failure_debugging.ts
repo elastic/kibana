@@ -51,12 +51,14 @@ export async function FailureDebuggingProvider({ getService }: FtrProviderContex
   async function onFailure(_: any, test: Test) {
     const fullName = test.fullTitle();
 
+    const truncatedName = fullName.replaceAll(/[^ a-zA-Z0-9-]+/g, '').slice(0, 80);
+
     // include a hash of the full title of the test in the filename so that even with truncation filenames are
     // always unique and deterministic based on the test title
     const hash = createHash('sha256').update(fullName).digest('hex');
 
     // Replace characters in test names which can't be used in filenames, like *
-    const name = `${fullName.replace(/([^ a-zA-Z0-9-]+)/g, '_').slice(0, 80)}-${hash}`;
+    const name = `${truncatedName}-${hash}`;
 
     await Promise.all([screenshots.takeForFailure(name), logCurrentUrl(), savePageHtml(name)]);
   }

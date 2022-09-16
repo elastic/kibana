@@ -3376,6 +3376,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ftr-common-functional-services@link:bazel-bin/packages/kbn-ftr-common-functional-services":
+  version "0.0.0"
+  uid ""
+
 "@kbn/generate@link:bazel-bin/packages/kbn-generate":
   version "0.0.0"
   uid ""
@@ -3425,6 +3429,10 @@
   uid ""
 
 "@kbn/jest-serializers@link:bazel-bin/packages/kbn-jest-serializers":
+  version "0.0.0"
+  uid ""
+
+"@kbn/journeys@link:bazel-bin/packages/kbn-journeys":
   version "0.0.0"
   uid ""
 
@@ -7389,6 +7397,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__ftr-common-functional-services@link:bazel-bin/packages/kbn-ftr-common-functional-services/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__generate@link:bazel-bin/packages/kbn-generate/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7438,6 +7450,10 @@
   uid ""
 
 "@types/kbn__jest-serializers@link:bazel-bin/packages/kbn-jest-serializers/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__journeys@link:bazel-bin/packages/kbn-journeys/npm_module_types":
   version "0.0.0"
   uid ""
 

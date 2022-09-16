@@ -116,6 +116,7 @@ TYPES_DEPS = [
   "@npm//jest-snapshot",
   "@npm//redux",
   "@npm//rxjs",
+  "@npm//playwright",
   "@npm//xmlbuilder",
   "@npm//@types/archiver",
   "@npm//@types/chance",
