@@ -6,7 +6,7 @@
  */
 
 import { FieldDescriptor } from '@kbn/data-views-plugin/server';
-import { BrowserFields, BrowserField } from '@kbn/rule-registry-plugin/common';
+import { BrowserFields, BrowserField } from '../../../common';
 
 const getFieldCategory = (fieldCapability: FieldDescriptor) => {
   const name = fieldCapability.name.split('.');
