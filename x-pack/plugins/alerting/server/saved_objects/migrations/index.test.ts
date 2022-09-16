@@ -2737,7 +2737,6 @@ describe('handles errors during migrations', () => {
   });
 });
 
-
 function getUpdatedAt(): string {
   const updatedAt = new Date();
   updatedAt.setHours(updatedAt.getHours() + 2);
@@ -2784,4 +2783,3 @@ function getMockData(
     type: 'alert',
   };
 }
-
