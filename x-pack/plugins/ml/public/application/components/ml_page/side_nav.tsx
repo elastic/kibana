@@ -7,8 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { EuiSideNavItemType } from '@elastic/eui';
-import { useCallback, useMemo } from 'react';
+import React, { ReactNode, useCallback, useMemo } from 'react';
 import { AIOPS_ENABLED } from '@kbn/aiops-plugin/common';
+import { NotificationsIndicator } from './notifications_indicator';
 import type { MlLocatorParams } from '../../../../common/types/locator';
 import { useUrlState } from '../../util/url_state';
 import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
@@ -19,7 +20,7 @@ import { checkPermission } from '../../capabilities/check_capabilities';
 
 export interface Tab {
   id: string;
-  name: string;
+  name: ReactNode;
   disabled?: boolean;
   items?: Tab[];
   testSubj?: string;
@@ -79,6 +80,13 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             }),
             disabled: disableLinks,
             testSubj: 'mlMainTab overview',
+          },
+          {
+            id: 'notifications',
+            pathId: ML_PAGES.NOTIFICATIONS,
+            name: <NotificationsIndicator />,
+            disabled: disableLinks,
+            testSubj: 'mlMainTab notifications',
           },
         ],
       },

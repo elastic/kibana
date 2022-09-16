@@ -55,11 +55,14 @@ export function useTextBasedQueryLanguage({
 
   useEffect(() => {
     const subscription = documents$.subscribe(async (next) => {
-      const { query } = next;
+      const { query, recordRawType } = next;
+      if (!query || next.fetchStatus === FetchStatus.ERROR) {
+        return;
+      }
       const { columns: stateColumns, index } = stateContainer.appStateContainer.getState();
       let nextColumns: string[] = [];
       const isTextBasedQueryLang =
-        next.recordRawType === 'plain' && query && isOfAggregateQueryType(query) && 'sql' in query;
+        recordRawType === 'plain' && isOfAggregateQueryType(query) && 'sql' in query;
       const hasResults = next.result?.length && next.fetchStatus === FetchStatus.COMPLETE;
       const initialFetch = !prev.current.columns.length;
 
@@ -72,8 +75,8 @@ export function useTextBasedQueryLanguage({
             !isEqual(firstRowColumns, prev.current.columns) &&
             !isEqual(query, prev.current.query)
           ) {
+            prev.current = { columns: firstRowColumns, query };
             nextColumns = firstRowColumns;
-            prev.current = { columns: nextColumns, query };
           }
           if (firstRowColumns && initialFetch) {
             prev.current = { columns: firstRowColumns, query };
