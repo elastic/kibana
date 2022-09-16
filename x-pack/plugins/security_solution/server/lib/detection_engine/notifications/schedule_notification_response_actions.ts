@@ -28,7 +28,10 @@ interface OsqueryResponseAction {
   };
 }
 
-export type ResponseAction = OsqueryResponseAction;
+export interface ResponseAction {
+  actionTypeId: string;
+  params: { [p: string]: unknown };
+}
 
 interface ScheduleNotificationActions {
   signals: unknown[];
@@ -57,18 +60,11 @@ export const scheduleNotificationResponseActions = (
         queries,
         ecs_mapping: ecsMapping,
         ...rest
-      } = responseActionParam.params;
+      } = (responseActionParam as OsqueryResponseAction).params;
+
       return osqueryCreateAction({
-        pack_id: packId,
-        queries: map(queries, (query, queryId: string) => {
-          return {
-            ...query,
-            id: queryId,
-            query: query.query,
-            ecs_mapping: query.ecs_mapping,
-          };
-        }) as unknown as OsqueryQuery[],
         ...rest,
+        queries,
         ecs_mapping: ecsMapping,
         saved_query_id: savedQueryId,
         agent_ids: agentIds,

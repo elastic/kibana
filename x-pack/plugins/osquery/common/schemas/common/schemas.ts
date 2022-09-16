@@ -95,6 +95,7 @@ export const objectQueries = t.record(
   t.string,
   t.type({
     query,
+    id,
     ecs_mapping: ecsMappingOrUndefined,
     version: versionOrUndefined,
     platform: platformOrUndefined,

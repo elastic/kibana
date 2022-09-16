@@ -79,7 +79,10 @@ const OsqueryResponseActionParamsFormComponent: React.ForwardRefExoticComponent<
             params: {
               id: watchedValues.id,
               packId: watchedValues?.packId?.length ? watchedValues?.packId[0] : undefined,
-              queries: packData?.queries,
+              queries: map(packData.queries, (query, queryId: string) => ({
+                ...query,
+                id: queryId,
+              })),
             },
           },
         });
