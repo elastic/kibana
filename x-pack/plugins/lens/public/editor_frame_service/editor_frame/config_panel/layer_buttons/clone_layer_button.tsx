@@ -26,6 +26,6 @@ export const getCloneLayerAction = (props: CloneLayerAction): LayerButtonsAction
     displayName,
     isCompatible: Boolean(props.activeVisualization.cloneLayer),
     icon: 'copy',
-    'data-test-subj': 'lnsLayerRemove',
+    'data-test-subj': `lnsLayerClone--${props.layerIndex}`,
   };
 };

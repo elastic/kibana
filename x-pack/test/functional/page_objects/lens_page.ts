@@ -1300,8 +1300,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /** resets visualization/layer or removes a layer */
     async removeLayer(index: number = 0) {
       await retry.try(async () => {
-        if (await testSubjects.exists('lnsLayerSplitButton')) {
-          await testSubjects.click('lnsLayerSplitButton');
+        if (await testSubjects.exists(`lnsLayerSplitButton--${index}`)) {
+          await testSubjects.click(`lnsLayerSplitButton--${index}`);
         }
         await testSubjects.click(`lnsLayerRemove--${index}`);
         if (await testSubjects.exists('lnsLayerRemoveModal')) {

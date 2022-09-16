@@ -39,7 +39,7 @@ const InContextMenuActions = (
     actions: LayerButtonsAction[];
   }
 ) => {
-  const dataTestSubject = 'lnsLayerSplitButton';
+  const dataTestSubject = `lnsLayerSplitButton--${props.layerIndex}`;
   const [isPopoverOpen, setPopover] = useState(false);
   const splitButtonPopoverId = useGeneratedHtmlId({
     prefix: dataTestSubject,
