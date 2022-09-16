@@ -14,6 +14,7 @@ import type {
 import type { ListClient } from '@kbn/lists-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import type { SetupPlugins } from '../../../../../target/types/server/plugin_contract';
 import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import type { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
@@ -27,6 +28,7 @@ import type { ExperimentalFeatures } from '../../../../../common/experimental_fe
 import { buildReasonMessageForQueryAlert } from '../reason_formatters';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import { scheduleNotificationResponseActions } from '../../notifications/schedule_notification_response_actions';
 
 export const queryExecutor = async ({
   inputIndex,
@@ -45,6 +47,7 @@ export const queryExecutor = async ({
   wrapHits,
   primaryTimestamp,
   secondaryTimestamp,
+  osqueryCreateAction,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -62,10 +65,11 @@ export const queryExecutor = async ({
   wrapHits: WrapHits;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
+  osqueryCreateAction?: SetupPlugins['osquery']['osqueryCreateAction'];
 }) => {
   const ruleParams = completeRule.ruleParams;
 
-  return withSecuritySpan('queryExecutor', async () => {
+  return withSecuritySpan('queryExecutor', async (test) => {
     const esFilter = await getFilter({
       type: ruleParams.type,
       filters: ruleParams.filters,
@@ -77,7 +81,7 @@ export const queryExecutor = async ({
       lists: exceptionItems,
     });
 
-    return searchAfterAndBulkCreate({
+    const result = await searchAfterAndBulkCreate({
       tuple,
       completeRule,
       services,
@@ -95,5 +99,17 @@ export const queryExecutor = async ({
       primaryTimestamp,
       secondaryTimestamp,
     });
+
+    if (completeRule.ruleParams.responseActions?.length && result.createdSignalsCount) {
+      scheduleNotificationResponseActions(
+        {
+          signals: result.createdSignals,
+          responseActions: completeRule.ruleParams.responseActions,
+        },
+        osqueryCreateAction
+      );
+    }
+
+    return result;
   });
 };

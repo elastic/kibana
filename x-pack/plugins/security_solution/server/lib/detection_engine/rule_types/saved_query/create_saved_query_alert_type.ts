@@ -17,7 +17,7 @@ import { validateIndexPatterns } from '../utils';
 export const createSavedQueryAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<SavedQueryRuleParams, {}, {}, 'default'> => {
-  const { experimentalFeatures, version } = createOptions;
+  const { experimentalFeatures, version, osqueryCreateAction } = createOptions;
   return {
     id: SAVED_QUERY_RULE_TYPE_ID,
     name: 'Saved Query Rule',
@@ -96,6 +96,7 @@ export const createSavedQueryAlertType = (
         wrapHits,
         primaryTimestamp,
         secondaryTimestamp,
+        osqueryCreateAction,
       });
       return { ...result, state };
     },

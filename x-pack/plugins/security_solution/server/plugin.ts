@@ -249,7 +249,14 @@ export class Plugin implements ISecuritySolutionPlugin {
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
 
     plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(ruleOptions)));
-    plugins.alerting.registerType(securityRuleTypeWrapper(createSavedQueryAlertType(ruleOptions)));
+    plugins.alerting.registerType(
+      securityRuleTypeWrapper(
+        createSavedQueryAlertType({
+          ...ruleOptions,
+          ...(osquery ? { osqueryCreateAction: osquery.osqueryCreateAction } : {}),
+        })
+      )
+    );
     plugins.alerting.registerType(
       securityRuleTypeWrapper(createIndicatorMatchAlertType(ruleOptions))
     );

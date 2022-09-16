@@ -183,6 +183,7 @@ const savedQuerySpecificRuleParams = t.type({
   query: queryOrUndefined,
   filters: filtersOrUndefined,
   savedId: saved_id,
+  responseActions: responseActionsOrUndefined,
 });
 export const savedQueryRuleParams = t.intersection([baseRuleParams, savedQuerySpecificRuleParams]);
 export type SavedQuerySpecificRuleParams = t.TypeOf<typeof savedQuerySpecificRuleParams>;

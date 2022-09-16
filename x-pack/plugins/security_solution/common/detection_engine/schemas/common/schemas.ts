@@ -120,8 +120,6 @@ export const responseAction = t.exact(
   })
 );
 
-export const responseActions = t.intersection([responseAction, t.undefined]);
-
 export const indexOrUndefined = t.union([index, t.undefined]);
 export type IndexOrUndefined = t.TypeOf<typeof indexOrUndefined>;
 

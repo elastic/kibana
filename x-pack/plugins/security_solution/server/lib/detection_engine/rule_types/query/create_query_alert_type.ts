@@ -8,7 +8,6 @@
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
-import { scheduleNotificationResponseActions } from '../../notifications/schedule_notification_response_actions';
 
 import type { QueryRuleParams } from '../../schemas/rule_schemas';
 import { queryRuleParams } from '../../schemas/rule_schemas';
@@ -98,17 +97,8 @@ export const createQueryAlertType = (
         runtimeMappings,
         primaryTimestamp,
         secondaryTimestamp,
+        osqueryCreateAction,
       });
-
-      if (completeRule.ruleParams.responseActions?.length && result.createdSignalsCount) {
-        scheduleNotificationResponseActions(
-          {
-            signals: result.createdSignals,
-            responseActions: completeRule.ruleParams.responseActions,
-          },
-          osqueryCreateAction
-        );
-      }
       return { ...result, state };
     },
   };
