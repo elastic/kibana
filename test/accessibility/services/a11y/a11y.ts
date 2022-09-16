@@ -6,12 +6,18 @@
  * Side Public License, v 1.
  */
 
-import chalk from 'chalk';
+import Fs from 'fs';
+import Path from 'path';
+
+import dedent from 'dedent';
 import testSubjectToCss from '@kbn/test-subj-selector';
 import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/axe-config';
+import { Test } from '@kbn/test';
+import { REPO_ROOT } from '@kbn/utils';
+import { v4 as uuid } from 'uuid';
 
-import { FtrService } from '../../ftr_provider_context';
-import { AxeReport, printResult } from './axe_report';
+import { FtrService, FtrProviderContext } from '../../ftr_provider_context';
+import { AxeReport } from './axe_report';
 // @ts-ignore JS that is run in browser as is
 import { analyzeWithAxe, analyzeWithAxeWithClient } from './analyze_with_axe';
 
@@ -22,6 +28,7 @@ interface AxeContext {
 
 interface TestOptions {
   excludeTestSubj?: string | string[];
+  skipFailures?: boolean;
 }
 
 export const normalizeResult = (report: any) => {
@@ -41,18 +48,36 @@ export const normalizeResult = (report: any) => {
  */
 export class AccessibilityService extends FtrService {
   private readonly browser = this.ctx.getService('browser');
+  private readonly log = this.ctx.getService('log');
   private readonly Wd = this.ctx.getService('__webdriver__');
+  private readonly lifecycle = this.ctx.getService('lifecycle');
+  private currentTest: Test | undefined;
+
+  constructor(ctx: FtrProviderContext) {
+    super(ctx);
+
+    this.lifecycle.beforeEachTest.add((test) => {
+      this.currentTest = test;
+    });
+  }
+
+  private readonly logPath = Path.resolve(
+    REPO_ROOT,
+    `data/ftr_a11y_report_${process.env.BUILDKITE_JOB_ID || uuid()}.txt`
+  );
 
   public async testAppSnapshot(options: TestOptions = {}) {
-    const context = this.getAxeContext(true, options.excludeTestSubj);
+    const { excludeTestSubj, skipFailures } = options;
+    const context = this.getAxeContext(true, excludeTestSubj);
     const report = await this.captureAxeReport(context);
-    this.assertValidAxeReport(report);
+    this.assertValidAxeReport(report, skipFailures);
   }
 
   public async testGlobalSnapshot(options: TestOptions = {}) {
-    const context = this.getAxeContext(false, options.excludeTestSubj);
+    const { excludeTestSubj, skipFailures } = options;
+    const context = this.getAxeContext(false, excludeTestSubj);
     const report = await this.captureAxeReport(context);
-    this.assertValidAxeReport(report);
+    this.assertValidAxeReport(report, skipFailures);
   }
 
   private getAxeContext(global: boolean, excludeTestSubj?: string | string[]): AxeContext {
@@ -65,16 +90,51 @@ export class AccessibilityService extends FtrService {
     };
   }
 
-  private assertValidAxeReport(report: AxeReport) {
-    const errorMsgs = [];
+  private assertValidAxeReport(report: AxeReport, skipFailures?: boolean) {
+    const errorMsgs: string[] = [];
 
     for (const result of report.violations) {
-      errorMsgs.push(printResult(chalk.red('VIOLATION'), result));
+      errorMsgs.push(dedent`
+        [${result.id}]: ${result.description}
+          Impact: ${result.impact}
+          Help: ${result.helpUrl}
+          Elements:
+            - ${result.nodes.map((node) => node.html).join('\n      - ')}
+      `);
     }
 
-    if (errorMsgs.length) {
+    if (!errorMsgs.length) {
+      return;
+    }
+
+    // Throw a new Error if not skipping failures
+    if (!skipFailures) {
       throw new Error(`a11y report:\n${errorMsgs.join('\n')}`);
     }
+
+    // Append to a log file if we are skipping failures
+    if (!Fs.existsSync(this.logPath)) {
+      Fs.mkdirSync(Path.dirname(this.logPath), { recursive: true });
+      Fs.writeFileSync(
+        this.logPath,
+        dedent`
+          ========================================
+          * A11Y REPORT MODE ONLY
+          ========================================
+        ` + '\n\n'
+      );
+    }
+
+    this.log.warning(
+      `Found ${errorMsgs.length} errors, writing them to the log file at ${this.logPath}`
+    );
+
+    const title = `${errorMsgs.length} errors in test ${
+      this.currentTest?.fullTitle() ?? '--unknown test---'
+    }`;
+    Fs.writeFileSync(this.logPath, `${title}:  ${errorMsgs.join('\n\n  ')}`, {
+      flag: 'a',
+    });
   }
 
   private async captureAxeReport(context: AxeContext): Promise<AxeReport> {
