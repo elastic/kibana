@@ -131,13 +131,11 @@ export const getXyVisualization = ({
   cloneLayer(state, layerId, newLayerId, clonedIDsMap) {
     const toCopyLayer = state.layers.find((l) => l.layerId === layerId);
     if (toCopyLayer) {
-      if (toCopyLayer.layerType === 'annotations') {
+      if (isAnnotationsLayer(toCopyLayer)) {
         toCopyLayer.annotations.forEach((i) => clonedIDsMap.set(i.id, generateId()));
       }
-      const newLayer = renewIDs(
-        [...clonedIDsMap.keys()],
-        toCopyLayer,
-        (id: string) => clonedIDsMap.get(id) ?? id
+      const newLayer = renewIDs(toCopyLayer, [...clonedIDsMap.keys()], (id: string) =>
+        clonedIDsMap.get(id)
       );
       newLayer.layerId = newLayerId;
       return {

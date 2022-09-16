@@ -197,9 +197,9 @@ export function inferTimeField(
 }
 
 export function renewIDs<T = unknown>(
-  forRenewIds: string[],
   obj: T,
-  getNewId: (id: string) => string
+  forRenewIds: string[],
+  getNewId: (id: string) => string | undefined
 ): T {
   obj = cloneDeep(obj);
   const recursiveFn = (
@@ -215,7 +215,7 @@ export function renewIDs<T = unknown>(
           Object.keys(item).forEach((k) => {
             let newId = k;
             if (forRenewIds.includes(k)) {
-              newId = getNewId(k);
+              newId = getNewId(k) ?? k;
               item[newId] = item[k];
               delete item[k];
             }
@@ -229,7 +229,7 @@ export function renewIDs<T = unknown>(
       typeof item === 'string' &&
       forRenewIds.includes(item)
     ) {
-      set(parent, key, getNewId(item));
+      set(parent, key, getNewId(item) ?? item);
     }
   };
   recursiveFn(obj as unknown as Serializable);

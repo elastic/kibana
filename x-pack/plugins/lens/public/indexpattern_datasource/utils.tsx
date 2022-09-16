@@ -634,8 +634,8 @@ export const cloneLayer = (
     return {
       ...layers,
       [newLayerId]: renewIDs(
-        Object.keys(layers[layerId]?.columns ?? {}),
         layers[layerId],
+        Object.keys(layers[layerId]?.columns ?? {}),
         getNewId
       ),
     };

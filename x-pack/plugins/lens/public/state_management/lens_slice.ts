@@ -298,12 +298,13 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       const clonedIDsMap = new Map<string, string>();
 
       const getNewId = (prevId: string) => {
-        if (!clonedIDsMap.has(prevId)) {
+        const inMapValue = clonedIDsMap.get(prevId);
+        if (!inMapValue) {
           const newId = generateId();
           clonedIDsMap.set(prevId, newId);
           return newId;
         }
-        return clonedIDsMap.get(prevId)!;
+        return inMapValue;
       };
 
       if (!state.activeDatasourceId || !state.visualization.activeId) {
