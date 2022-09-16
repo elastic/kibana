@@ -15,6 +15,37 @@ import {
 import { getEmptySavedObjectsResponse } from '../../../detection_engine/routes/__mocks__/request_responses';
 import { createPrebuiltSavedObjectsRoute } from './create_prebuilt_saved_objects';
 
+jest.mock('../helpers/find_or_create_tag', () => {
+  const actual = jest.requireActual('../helpers/find_or_create_tag');
+  return {
+    ...actual,
+    findOrCreateRiskScoreTag: jest.fn().mockResolvedValue({
+      id: 'tagID',
+      name: 'my tag',
+      description: 'description',
+      type: 'tag',
+    }),
+  };
+});
+
+jest.mock('uuid', () => {
+  return {
+    v4: jest
+      .fn()
+      .mockReturnValueOnce('id-1')
+      .mockReturnValueOnce('id-2')
+      .mockReturnValueOnce('id-3')
+      .mockReturnValueOnce('id-4')
+      .mockReturnValueOnce('id-5')
+      .mockReturnValueOnce('id-6')
+      .mockReturnValueOnce('id-7')
+      .mockReturnValueOnce('id-8')
+      .mockReturnValueOnce('id-9')
+      .mockReturnValueOnce('id-10')
+      .mockReturnValueOnce('id-11'),
+  };
+});
+
 const createPrebuiltSavedObjectsRequest = (savedObjectTemplate: string) =>
   requestMock.create({
     method: 'post',
@@ -28,8 +59,7 @@ describe('createPrebuiltSavedObjects', () => {
   let { clients, context } = requestContextMock.createTools();
 
   beforeEach(() => {
-    jest.resetModules();
-    jest.resetAllMocks();
+    jest.clearAllMocks();
 
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
