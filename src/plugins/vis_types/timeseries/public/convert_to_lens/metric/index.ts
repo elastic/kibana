@@ -70,7 +70,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
       seriesNum,
       reducedTimeRange
     );
-    if (!metricsColumns) {
+    if (metricsColumns === null) {
       return null;
     }
 
@@ -81,6 +81,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
       currentIndexPattern!,
       false
     );
+
     if (bucketsColumns === null) {
       return null;
     }
