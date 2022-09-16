@@ -234,7 +234,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
       mlTabs.push({
         id: 'aiops_section',
         name: i18n.translate('xpack.ml.navMenu.aiopsTabLinkText', {
-          defaultMessage: 'AIOps',
+          defaultMessage: 'AIOps Labs',
         }),
         disabled: disableLinks,
         items: [
@@ -242,10 +242,19 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             id: 'explainlogratespikes',
             pathId: ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT,
             name: i18n.translate('xpack.ml.navMenu.explainLogRateSpikesLinkText', {
-              defaultMessage: 'Explain log rate spikes',
+              defaultMessage: 'Explain Log Rate Spikes',
             }),
             disabled: disableLinks,
             testSubj: 'mlMainTab explainLogRateSpikes',
+          },
+          {
+            id: 'logCategorization',
+            pathId: ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT,
+            name: i18n.translate('xpack.ml.navMenu.logCategorizationLinkText', {
+              defaultMessage: 'Log Pattern Analysis',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab logCategorization',
           },
         ],
       });

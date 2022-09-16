@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './explain_log_rate_spikes';
-export * from './log_categorization';
+export { categorizeSchema } from './schema';
+export type { CategorizeSchema } from './schema';
