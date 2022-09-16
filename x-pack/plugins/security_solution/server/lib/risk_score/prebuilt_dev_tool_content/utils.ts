@@ -22,7 +22,7 @@ import {
   getRiskyUserCreateLevelScriptOptions,
   getRiskyUserCreateMapScriptOptions,
   getRiskyUserCreateReduceScriptOptions,
-} from '../../../../common/utils/risky_score_modules';
+} from '../../../../common/utils/risk_score_modules';
 
 const getRiskyHostPrebuiltDevToolsContent = ({ spaceId = 'default' }: { spaceId?: string }) => {
   const riskScoreEntity = RiskScoreEntity.host;

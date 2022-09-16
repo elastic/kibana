@@ -10,7 +10,7 @@ import {
   getIngestPipelineName,
   getRiskScoreLatestTransformId,
   getRiskScorePivotTransformId,
-} from '../../../../../common/utils/risky_score_modules';
+} from '../../../../../common/utils/risk_score_modules';
 import {
   bulkDeletePrebuiltSavedObjects,
   bulkCreatePrebuiltSavedObjects,

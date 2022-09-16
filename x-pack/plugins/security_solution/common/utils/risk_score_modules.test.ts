@@ -28,7 +28,7 @@ import {
   getRiskyUserCreateLevelScriptOptions,
   getRiskyUserCreateMapScriptOptions,
   getRiskyUserCreateReduceScriptOptions,
-} from './risky_score_modules';
+} from './risk_score_modules';
 
 const mockSpaceId = 'customSpaceId';
 describe('getRiskScorePivotTransformId', () => {

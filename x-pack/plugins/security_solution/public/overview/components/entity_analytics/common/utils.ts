@@ -7,7 +7,7 @@
 import type { HttpSetup, NotificationsStart, ThemeServiceStart } from '@kbn/core/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
-import * as utils from '../../../../../common/utils/risky_score_modules';
+import * as utils from '../../../../../common/utils/risk_score_modules';
 import type { inputsModel } from '../../../../common/store';
 
 import {
