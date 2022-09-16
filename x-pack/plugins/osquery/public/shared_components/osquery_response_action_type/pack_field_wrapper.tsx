@@ -6,6 +6,7 @@
  */
 
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import type { ReactElement } from 'react';
 import React, { useMemo } from 'react';
 import { find } from 'lodash';
 import { useWatch } from 'react-hook-form';
@@ -18,12 +19,16 @@ interface PackFieldWrapperProps {
   liveQueryDetails?: LiveQueryDetailsItem;
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
   submitButtonContent?: React.ReactNode;
+  addToCase?: ({ actionId }: { actionId?: string }) => ReactElement;
+  showResultsHeader?: boolean;
 }
 
 export const PackFieldWrapper = ({
   liveQueryDetails,
   addToTimeline,
   submitButtonContent,
+  addToCase,
+  showResultsHeader,
 }: PackFieldWrapperProps) => {
   const { data: packsData } = usePacks({});
   const { packId } = useWatch() as unknown as { packId: string[] };
@@ -57,6 +62,8 @@ export const PackFieldWrapper = ({
               // @ts-expect-error version string !+ string[]
               data={liveQueryDetails?.queries ?? selectedPackData?.attributes?.queries}
               addToTimeline={addToTimeline}
+              addToCase={addToCase}
+              showResultsHeader={showResultsHeader}
             />
           </EuiFlexItem>
         </>
