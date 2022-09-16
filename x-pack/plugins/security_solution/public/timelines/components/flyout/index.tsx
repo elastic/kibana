@@ -29,7 +29,6 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
   const dispatch = useDispatch();
   const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
   const {
-    activeTab,
     show,
     status: timelineStatus,
     updated,
@@ -122,7 +121,7 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
         <EuiFocusTrap disabled={!focusOwnership}>
           <Pane timelineId={timelineId} visible={show} />
         </EuiFocusTrap>
-        <FlyoutBottomBar activeTab={activeTab} timelineId={timelineId} showDataproviders={!show} />
+        <FlyoutBottomBar showTimelineHeaderPanel={!show} timelineId={timelineId} />
       </>
     </EuiOutsideClickDetector>
   );
