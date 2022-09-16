@@ -86,7 +86,7 @@ const FieldEditorFlyoutContentComponent = ({
       path: `/api/index_management/index_templates`,
       method: 'get',
     });
-    const matchingTemplates = allIndexTemplates.templates.map((t: any) => {
+    const matchingTemplates = allIndexTemplates.templates.filter(t => t.indexPatterns.includes(title)).map((t: any) => {
       return {
         text: t.name,
       } as EuiSelectOption;

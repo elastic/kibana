@@ -158,7 +158,7 @@ export const FieldEditorFlyoutContentContainer = ({
         } else {
           dataView.removeRuntimeField(fieldToEdit?.name ?? fieldToCreate?.name);
           updatedField.name = fieldToEdit?.name ?? fieldToCreate?.name;
-          await dataViews.refreshFields(dataView);
+           dataViews.refreshFields(dataView);
         }
       } else {
         try {
