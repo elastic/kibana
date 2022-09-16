@@ -18,6 +18,7 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { renewIDs } from '../../utils';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
 import { DimensionEditor } from './xy_config_panel/dimension_editor';
@@ -126,8 +127,20 @@ export const getXyVisualization = ({
     };
   },
 
-  cloneLayer(state, layerId, newLayerId) {
-    // @todo: wip
+  cloneLayer(state, layerId, newLayerId, datasourceAccessorsIDsMap) {
+    const toCopyLayer = state.layers.find((l) => l.layerId === layerId);
+    if (toCopyLayer) {
+      const newLayer = renewIDs(
+        [...datasourceAccessorsIDsMap.keys()],
+        toCopyLayer,
+        (id: string) => datasourceAccessorsIDsMap.get(id)!
+      );
+      newLayer.layerId = newLayerId;
+      return {
+        ...state,
+        layers: [...state.layers, newLayer],
+      };
+    }
     return state;
   },
 

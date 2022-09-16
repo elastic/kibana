@@ -190,10 +190,10 @@ export function getIndexPatternDatasource({
       };
     },
 
-    cloneLayer(state: IndexPatternPrivateState, layerId: string, newLayerId: string) {
+    cloneLayer(state, layerId, newLayerId, getNewId) {
       return {
         ...state,
-        layers: cloneLayer(state.layers, layerId, newLayerId),
+        layers: cloneLayer(state.layers, layerId, newLayerId, getNewId),
       };
     },
 

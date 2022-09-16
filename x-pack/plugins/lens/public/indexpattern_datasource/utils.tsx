@@ -627,12 +627,9 @@ export function getFiltersInLayer(
 export const cloneLayer = (
   layers: Record<string, IndexPatternLayer>,
   layerId: string,
-  newLayerId: string
+  newLayerId: string,
+  getNewId: (id: string) => string
 ): Record<string, IndexPatternLayer> => ({
   ...layers,
-  [newLayerId]: renewIDs(
-    Object.keys(layers[layerId]?.columns ?? {}),
-    layers[layerId],
-    (k: string) => k + 'C'
-  ),
+  [newLayerId]: renewIDs(Object.keys(layers[layerId]?.columns ?? {}), layers[layerId], getNewId),
 });

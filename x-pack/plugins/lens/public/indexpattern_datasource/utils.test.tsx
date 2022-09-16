@@ -199,7 +199,7 @@ describe('indexpattern_datasource utils', () => {
   });
 
   describe('cloneLayer', () => {
-    test('should replace ids', () => {
+    test('should clone layer with renewing ids', () => {
       expect(
         cloneLayer(
           {
@@ -217,18 +217,6 @@ describe('indexpattern_datasource utils', () => {
                 'ae62cfc8-faa5-4096-a30c-f92ac59922a0': {
                   params: {
                     emptyAsNull: true,
-                    justForTest: [
-                      '899ee4b6-3147-4d45-94bf-ea9c02e55d28',
-                      'ae62cfc8-faa5-4096-a30c-f92ac59922a0',
-                    ],
-                    justForTest2: [
-                      {
-                        a: '899ee4b6-3147-4d45-94bf-ea9c02e55d28',
-                        ['899ee4b6-3147-4d45-94bf-ea9c02e55d28']: [
-                          { c: 'ae62cfc8-faa5-4096-a30c-f92ac59922a0' },
-                        ],
-                      },
-                    ],
                   },
                 },
               },
@@ -241,7 +229,8 @@ describe('indexpattern_datasource utils', () => {
             },
           } as unknown as Record<string, IndexPatternLayer>,
           'a',
-          'b'
+          'b',
+          (id) => id + 'C'
         )
       ).toMatchSnapshot();
     });

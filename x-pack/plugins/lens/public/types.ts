@@ -265,7 +265,12 @@ export interface Datasource<T = unknown, P = unknown> {
   insertLayer: (state: T, newLayerId: string) => T;
   removeLayer: (state: T, layerId: string) => T;
   clearLayer: (state: T, layerId: string) => T;
-  cloneLayer: (state: T, layerId: string, newLayerId: string) => T;
+  cloneLayer: (
+    state: T,
+    layerId: string,
+    newLayerId: string,
+    getNewId: (id: string) => string
+  ) => T;
   getLayers: (state: T) => string[];
   removeColumn: (props: {
     prevState: T;
@@ -920,7 +925,13 @@ export interface Visualization<T = unknown, P = unknown> {
   /** Reset button on each layer triggers this */
   clearLayer: (state: T, layerId: string, indexPatternId: string) => T;
   /** Reset button on each layer triggers this */
-  cloneLayer?: (state: T, layerId: string, newLayerId: string) => T;
+  cloneLayer?: (
+    state: T,
+    layerId: string,
+    newLayerId: string,
+    /** @param contains map old -> new id **/
+    datasourceAccessorsIDsMap: Map<string, string>
+  ) => T;
   /** Optional, if the visualization supports multiple layers */
   removeLayer?: (state: T, layerId: string) => T;
   /** Track added layers in internal state */

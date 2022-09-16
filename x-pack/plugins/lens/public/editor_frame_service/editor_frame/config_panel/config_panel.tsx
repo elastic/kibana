@@ -227,7 +227,6 @@ export function LayerPanels(
           onCloneLayer={() => {
             dispatchLens(
               cloneLayer({
-                visualizationId: activeVisualization.id,
                 layerId,
               })
             );

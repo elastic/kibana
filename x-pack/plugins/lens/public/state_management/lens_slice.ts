@@ -164,8 +164,8 @@ export const removeOrClearLayer = createAction<{
 
 export const cloneLayer = createAction(
   'cloneLayer',
-  function prepare({ visualizationId, layerId }: { visualizationId: string; layerId: string }) {
-    return { payload: { newLayerId: generateId(), visualizationId, layerId } };
+  function prepare({ layerId }: { layerId: string }) {
+    return { payload: { newLayerId: generateId(), layerId } };
   }
 );
 
@@ -287,10 +287,9 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
     [cloneLayer.type]: (
       state,
       {
-        payload: { visualizationId, layerId, newLayerId },
+        payload: { layerId, newLayerId },
       }: {
         payload: {
-          visualizationId: string;
           layerId: string;
           newLayerId: string;
         };
@@ -302,39 +301,37 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         return state;
       }
 
-      const activeVisualization = visualizationMap[state.visualization.activeId];
-      const activeDatasource = datasourceMap[state.activeDatasourceId];
-      // reuse the active datasource dataView id for the new layer
-      // const currentDataViewsId = activeDatasource.getCurrentIndexPatternId(
-      //   state.datasourceStates[state.activeDatasourceId!].state
-      // );
+      const datasourceAccessorsIDsMap = new Map<string, string>();
 
-      const layerType = getLayerType(activeVisualization, state.visualization.state, layerId);
+      const getNewId = (prevId: string) => {
+        if (datasourceAccessorsIDsMap.has(prevId)) {
+          return datasourceAccessorsIDsMap.get(prevId)!;
+        } else {
+          const newId = generateId();
+          datasourceAccessorsIDsMap.set(prevId, newId);
+          return newId;
+        }
+      };
 
       state.datasourceStates = mapValues(
         state.datasourceStates,
-        (datasourceState, datasourceId) => {
-          const datasource = datasourceMap[datasourceId!];
-          return {
-            ...datasourceState,
-            state: datasource.cloneLayer(datasourceState.state, layerId, newLayerId),
-          };
-        }
+        (datasourceState, datasourceId) => ({
+          ...datasourceState,
+          state: datasourceMap[datasourceId!].cloneLayer(
+            datasourceState.state,
+            layerId,
+            newLayerId,
+            getNewId
+          ),
+        })
       );
 
-      const { activeDatasourceState, activeVisualizationState } = addInitialValueIfAvailable({
-        datasourceState: state.datasourceStates[state.activeDatasourceId].state,
-        visualizationState: state.visualization.state,
-        framePublicAPI: selectFramePublicAPI({ lens: current(state) }, datasourceMap),
-        activeVisualization,
-        activeDatasource,
+      state.visualization.state = visualizationMap[state.visualization.activeId].cloneLayer!(
+        state.visualization.state,
         layerId,
-        layerType,
-      });
-
-      state.visualization.state = activeVisualizationState;
-      state.datasourceStates[state.activeDatasourceId].state = activeDatasourceState;
-      state.stagedPreview = undefined;
+        newLayerId,
+        datasourceAccessorsIDsMap
+      );
     },
     [removeOrClearLayer.type]: (
       state,
