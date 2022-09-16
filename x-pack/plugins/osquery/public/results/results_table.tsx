@@ -318,7 +318,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             };
             const eventId = data[visibleRowIndex]?._id;
 
-            return addToTimeline({ queries: [{ field: '_id', value: eventId }], isIcon: true });
+            return addToTimeline({ query: ['_id', eventId], isIcon: true });
           },
         },
       ];
@@ -345,7 +345,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             endDate={endDate}
             startDate={startDate}
           />
-          {addToTimeline && addToTimeline({ queries: [{ field: 'action_id', value: actionId }] })}
+          {addToTimeline && addToTimeline({ query: ['action_id', actionId] })}
           {addToCase && addToCase({ actionId })}
         </>
       ),

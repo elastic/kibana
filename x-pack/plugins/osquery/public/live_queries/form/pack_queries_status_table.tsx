@@ -693,8 +693,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
       {
         available: () => addToTimeline && timelines && appName === SECURITY_APP_NAME,
         render: (item: { action_id: string }) =>
-          addToTimeline &&
-          addToTimeline({ queries: [{ field: 'action_id', value: item.action_id }], isIcon: true }),
+          addToTimeline && addToTimeline({ query: ['action_id', item.action_id], isIcon: true }),
       },
     ];
 

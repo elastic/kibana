@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { map } from 'lodash';
 import { EuiButtonEmpty } from '@elastic/eui';
 import type { ServicesWrapperProps } from '../shared_components/services_wrapper';
 
@@ -14,8 +13,8 @@ const TimelineComponent = React.memo((props) => <EuiButtonEmpty {...props} size=
 TimelineComponent.displayName = 'TimelineComponent';
 
 export interface AddToTimelinePayload {
-  queries: Array<{ field: string; value: string }>;
-  isIcon?: boolean;
+  query: [string, string];
+  isIcon?: true;
 }
 
 export const SECURITY_APP_NAME = 'Security';
@@ -30,9 +29,12 @@ export const getAddToTimeline = (
   const { getAddToTimelineButton } = timelines.getHoverActions();
 
   return (payload: AddToTimelinePayload) => {
-    const { queries, isIcon } = payload;
+    const {
+      query: [field, value],
+      isIcon,
+    } = payload;
 
-    const providers = map(queries, ({ field, value }) => ({
+    const providerA = {
       and: [],
       enabled: true,
       excluded: false,
@@ -44,11 +46,11 @@ export const getAddToTimeline = (
         value,
         operator: ':' as const,
       },
-    }));
+    };
 
     return getAddToTimelineButton({
-      dataProvider: providers,
-      field: 'action_id',
+      dataProvider: providerA,
+      field: value,
       ownFocus: false,
       ...(isIcon ? { showTooltip: true } : { Component: TimelineComponent }),
     });
