@@ -22,7 +22,7 @@ import { isEmpty, find, pickBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
-import type { ECSMappingArray, ECSMapping } from '../../../common/schemas/common/utils';
+import type { ECSMappingArray } from '../../../common/schemas/common/utils';
 import { useKibana } from '../../common/lib/kibana';
 import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import { SavedQueryFlyout } from '../../saved_queries';
