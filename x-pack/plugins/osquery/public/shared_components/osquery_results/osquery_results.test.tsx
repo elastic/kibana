@@ -17,7 +17,7 @@ import * as useAllLiveQueries from '../../actions/use_all_live_queries';
 import * as useLiveQueryDetails from '../../actions/use_live_query_details';
 import { PERMISSION_DENIED } from '../osquery_action/translations';
 import * as privileges from '../../action_results/use_action_privileges';
-import { defaultLiveQueryDetails, DETAILS_QUERY } from './test_utils';
+import { defaultLiveQueryDetails, DETAILS_QUERY, mockCasesContext } from './test_utils';
 
 jest.mock('../../common/lib/kibana');
 
@@ -53,6 +53,14 @@ const mockKibana = (permissionType: unknown = defaultPermissions) => {
     services: {
       application: {
         capabilities: permissionType,
+      },
+      cases: {
+        helpers: {
+          canUseCases: jest.fn(),
+        },
+        ui: {
+          getCasesContext: jest.fn().mockImplementation(() => mockCasesContext),
+        },
       },
       data: {
         dataViews: {

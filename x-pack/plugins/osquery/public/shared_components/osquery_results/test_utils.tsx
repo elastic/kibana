@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+
 export const DETAILS_QUERY = 'select * from uptime';
 export const DETAILS_ID = 'test-id';
 export const DETAILS_ACTION_ID = 'test-action-id';
@@ -35,3 +37,5 @@ export const defaultLiveQueryDetails = {
     status: 'completed',
   },
 } as never;
+
+export const mockCasesContext: React.FC = (props) => <>{props?.children ?? null}</>;

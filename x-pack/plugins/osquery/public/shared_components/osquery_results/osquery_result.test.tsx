@@ -20,6 +20,7 @@ import {
   DETAILS_ID,
   DETAILS_QUERY,
   DETAILS_TIMESTAMP,
+  mockCasesContext,
 } from './test_utils';
 
 jest.mock('../../common/lib/kibana');
@@ -46,6 +47,14 @@ const mockKibana = (permissionType: unknown = defaultPermissions) => {
     services: {
       application: {
         capabilities: permissionType,
+      },
+      cases: {
+        helpers: {
+          canUseCases: jest.fn(),
+        },
+        ui: {
+          getCasesContext: jest.fn().mockImplementation(() => mockCasesContext),
+        },
       },
       data: {
         dataViews: {
