@@ -46,13 +46,12 @@ export class OutputJsonHighlightRules extends JsonHighlightRules {
         token: 'comment',
         // match a comment starting with a hash at the start of the line
         // ignore status codes and status texts at the end of the line (e.g. # GET _search/foo 200, # GET _search/foo 200 OK)
-        // status codes and status texts are matched by the next rule
         regex: /#(.*?)(?=[1-5][0-9][0-9]\s(?:[\sA-Za-z]+)|(?:[1-5][0-9][0-9])|$)/,
       },
       {
         token: mapStatusCodeToBadge,
         // match status codes and status texts at the end of the line (e.g. # GET _search/foo 200, # GET _search/foo 200 OK)
-        // it allows to highlight status codes and status texts with the corresponding badge color (e.g. 200 OK -> badge.badge--success)
+        // this rule allows us to highlight them with the corresponding badge color (e.g. 200 OK -> badge.badge--success)
         regex: /([1-5][0-9][0-9]\s?[\sA-Za-z]+$)/,
       }
     );
