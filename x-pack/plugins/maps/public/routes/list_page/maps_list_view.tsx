@@ -7,6 +7,7 @@
 
 import React, { MouseEvent } from 'react';
 import { SavedObjectReference } from '@kbn/core/types';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { EuiLink } from '@elastic/eui';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
@@ -24,6 +25,7 @@ import {
   getUiSettings,
   getTheme,
   getApplication,
+  getUsageCollection,
 } from '../../kibana_services';
 import { getAppTitle } from '../../../common/i18n_getters';
 import { MapSavedObjectAttributes } from '../../../common/map_saved_object_type';
@@ -77,6 +79,7 @@ if (savedObjectsTagging) {
 
 function navigateToNewMap() {
   const navigateToApp = getNavigateToApp();
+  getUsageCollection()?.reportUiCounter(APP_ID, METRIC_TYPE.CLICK, 'create_maps_vis_editor');
   navigateToApp(APP_ID, {
     path: MAP_PATH,
   });

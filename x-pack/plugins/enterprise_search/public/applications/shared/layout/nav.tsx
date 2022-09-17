@@ -18,7 +18,7 @@ import {
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
-import { SEARCH_INDICES_PATH } from '../../enterprise_search_content/routes';
+import { SEARCH_INDICES_PATH, SETTINGS_PATH } from '../../enterprise_search_content/routes';
 import { KibanaLogic } from '../kibana';
 
 import { generateNavLink } from './nav_link_helpers';
@@ -49,6 +49,17 @@ export const useEnterpriseSearchNav = () => {
             shouldNotCreateHref: true,
             shouldShowActiveForSubroutes: true,
             to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + SEARCH_INDICES_PATH,
+          }),
+        },
+        {
+          id: 'settings',
+          name: i18n.translate('xpack.enterpriseSearch.nav.contentSettingsTitle', {
+            defaultMessage: 'Settings',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            shouldShowActiveForSubroutes: true,
+            to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + SETTINGS_PATH,
           }),
         },
       ],

@@ -61,7 +61,13 @@ exports[`Error ERROR_PAGE_URL 1`] = `undefined`;
 
 exports[`Error EVENT_OUTCOME 1`] = `undefined`;
 
+exports[`Error FAAS_BILLED_DURATION 1`] = `undefined`;
+
 exports[`Error FAAS_COLDSTART 1`] = `undefined`;
+
+exports[`Error FAAS_COLDSTART_DURATION 1`] = `undefined`;
+
+exports[`Error FAAS_DURATION 1`] = `undefined`;
 
 exports[`Error FAAS_ID 1`] = `undefined`;
 
@@ -284,7 +290,13 @@ exports[`Span ERROR_PAGE_URL 1`] = `undefined`;
 
 exports[`Span EVENT_OUTCOME 1`] = `"unknown"`;
 
+exports[`Span FAAS_BILLED_DURATION 1`] = `undefined`;
+
 exports[`Span FAAS_COLDSTART 1`] = `undefined`;
+
+exports[`Span FAAS_COLDSTART_DURATION 1`] = `undefined`;
+
+exports[`Span FAAS_DURATION 1`] = `undefined`;
 
 exports[`Span FAAS_ID 1`] = `undefined`;
 
@@ -499,7 +511,13 @@ exports[`Transaction ERROR_PAGE_URL 1`] = `undefined`;
 
 exports[`Transaction EVENT_OUTCOME 1`] = `"unknown"`;
 
+exports[`Transaction FAAS_BILLED_DURATION 1`] = `undefined`;
+
 exports[`Transaction FAAS_COLDSTART 1`] = `undefined`;
+
+exports[`Transaction FAAS_COLDSTART_DURATION 1`] = `undefined`;
+
+exports[`Transaction FAAS_DURATION 1`] = `undefined`;
 
 exports[`Transaction FAAS_ID 1`] = `undefined`;
 
