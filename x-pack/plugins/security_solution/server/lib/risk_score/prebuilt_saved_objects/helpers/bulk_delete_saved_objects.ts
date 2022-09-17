@@ -83,10 +83,12 @@ const deleteSavedObjectsWithTag = async ({
 };
 
 export const bulkDeleteSavedObjects = async ({
+  deleteAll,
   savedObjectsClient,
   spaceId,
   savedObjectTemplate,
 }: {
+  deleteAll?: boolean;
   savedObjectsClient: SavedObjectsClientContract;
   spaceId?: string;
   savedObjectTemplate: SavedObjectTemplate;
@@ -123,7 +125,7 @@ export const bulkDeleteSavedObjects = async ({
   });
 
   let deleteSavedObjectResults: string[] = [];
-  if (tag) {
+  if (tag && deleteAll) {
     /**
      * Since 8.5 all the saved objects are created with dynamic ids and all link to a tag.
      * (As create saved objects with static ids causes conflict across different spaces)

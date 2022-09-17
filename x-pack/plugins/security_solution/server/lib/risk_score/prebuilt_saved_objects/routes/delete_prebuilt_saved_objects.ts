@@ -33,6 +33,7 @@ export const deletePrebuiltSavedObjectsRoute = (
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       const { template_name: templateName } = request.params;
+      const deleteAll = request?.body?.deleteAll;
 
       try {
         const securitySolution = await context.securitySolution;
@@ -43,6 +44,7 @@ export const deletePrebuiltSavedObjectsRoute = (
         const savedObjectsClient = (await frameworkRequest.context.core).savedObjects.client;
 
         const res = await bulkDeleteSavedObjects({
+          deleteAll,
           savedObjectsClient,
           spaceId,
           savedObjectTemplate: templateName,

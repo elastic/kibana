@@ -15,13 +15,13 @@ import {
   getRiskScoreIngestPipelineOptions,
   getRiskScoreLatestTransformId,
   getRiskScorePivotTransformId,
-  getRiskyHostCreateInitScriptOptions,
-  getRiskyHostCreateLevelScriptOptions,
-  getRiskyHostCreateMapScriptOptions,
-  getRiskyHostCreateReduceScriptOptions,
-  getRiskyUserCreateLevelScriptOptions,
-  getRiskyUserCreateMapScriptOptions,
-  getRiskyUserCreateReduceScriptOptions,
+  getRiskHostCreateInitScriptOptions,
+  getRiskHostCreateLevelScriptOptions,
+  getRiskHostCreateMapScriptOptions,
+  getRiskHostCreateReduceScriptOptions,
+  getRiskUserCreateLevelScriptOptions,
+  getRiskUserCreateMapScriptOptions,
+  getRiskUserCreateReduceScriptOptions,
 } from '../../../../common/utils/risk_score_modules';
 
 const getRiskyHostPrebuiltDevToolsContent = ({ spaceId = 'default' }: { spaceId?: string }) => {
@@ -29,10 +29,10 @@ const getRiskyHostPrebuiltDevToolsContent = ({ spaceId = 'default' }: { spaceId?
   const stringifyScript = true;
   return {
     spaceId,
-    createLevelScriptOptions: getRiskyHostCreateLevelScriptOptions(stringifyScript),
-    createInitScriptOptions: getRiskyHostCreateInitScriptOptions(stringifyScript),
-    createMapScriptOptions: getRiskyHostCreateMapScriptOptions(stringifyScript),
-    createReduceScriptOptions: getRiskyHostCreateReduceScriptOptions(stringifyScript),
+    createLevelScriptOptions: getRiskHostCreateLevelScriptOptions(spaceId, stringifyScript),
+    createInitScriptOptions: getRiskHostCreateInitScriptOptions(spaceId, stringifyScript),
+    createMapScriptOptions: getRiskHostCreateMapScriptOptions(spaceId, stringifyScript),
+    createReduceScriptOptions: getRiskHostCreateReduceScriptOptions(spaceId, stringifyScript),
     createIngestPipelineOptions: getRiskScoreIngestPipelineOptions(
       riskScoreEntity,
       spaceId,
@@ -67,9 +67,9 @@ const getRiskyUserPrebuiltDevToolsContent = ({ spaceId = 'default' }: { spaceId?
   const stringifyScript = true;
   return {
     spaceId,
-    createLevelScriptOptions: getRiskyUserCreateLevelScriptOptions(stringifyScript),
-    createMapScriptOptions: getRiskyUserCreateMapScriptOptions(stringifyScript),
-    createReduceScriptOptions: getRiskyUserCreateReduceScriptOptions(stringifyScript),
+    createLevelScriptOptions: getRiskUserCreateLevelScriptOptions(spaceId, stringifyScript),
+    createMapScriptOptions: getRiskUserCreateMapScriptOptions(spaceId, stringifyScript),
+    createReduceScriptOptions: getRiskUserCreateReduceScriptOptions(spaceId, stringifyScript),
     createIngestPipelineOptions: getRiskScoreIngestPipelineOptions(
       riskScoreEntity,
       spaceId,

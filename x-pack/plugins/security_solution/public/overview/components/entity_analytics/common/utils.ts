@@ -62,55 +62,55 @@ export const installHostRiskScoreModule = async ({
 }: InstallRiskyScoreModule) => {
   /**
    * console_templates/enable_host_risk_score.console
-   * Step 1 Upload script: ml_hostriskscore_levels_script
+   * Step 1 Upload script: ml_hostriskscore_levels_script_{spaceId}
    */
   await createStoredScript({
     http,
     theme,
     renderDocLink,
     notifications,
-    options: utils.getRiskyHostCreateLevelScriptOptions(),
+    options: utils.getRiskHostCreateLevelScriptOptions(spaceId),
   });
 
   /**
    * console_templates/enable_host_risk_score.console
-   * Step 2 Upload script: ml_hostriskscore_init_script
+   * Step 2 Upload script: ml_hostriskscore_init_script_{spaceId}
    */
   await createStoredScript({
     http,
     theme,
     renderDocLink,
     notifications,
-    options: utils.getRiskyHostCreateInitScriptOptions(),
+    options: utils.getRiskHostCreateInitScriptOptions(spaceId),
   });
 
   /**
    * console_templates/enable_host_risk_score.console
-   * Step 3 Upload script: ml_hostriskscore_map_script
+   * Step 3 Upload script: ml_hostriskscore_map_script_{spaceId}
    */
   await createStoredScript({
     http,
     theme,
     renderDocLink,
     notifications,
-    options: utils.getRiskyHostCreateMapScriptOptions(),
+    options: utils.getRiskHostCreateMapScriptOptions(spaceId),
   });
 
   /**
    * console_templates/enable_host_risk_score.console
-   * Step 4 Upload script: ml_hostriskscore_reduce_script
+   * Step 4 Upload script: ml_hostriskscore_reduce_script_{spaceId}
    */
   await createStoredScript({
     http,
     theme,
     renderDocLink,
     notifications,
-    options: utils.getRiskyHostCreateReduceScriptOptions(),
+    options: utils.getRiskHostCreateReduceScriptOptions(spaceId),
   });
 
   /**
    * console_templates/enable_host_risk_score.console
-   * Step 5 Upload the ingest pipeline: ml_hostriskscore_ingest_pipeline
+   * Step 5 Upload the ingest pipeline: ml_hostriskscore_ingest_pipeline_{spaceId}
    */
   await createIngestPipeline({
     http,
@@ -231,43 +231,43 @@ export const installUserRiskScoreModule = async ({
 }: InstallRiskyScoreModule) => {
   /**
    * console_templates/enable_user_risk_score.console
-   * Step 1 Upload script: ml_userriskscore_levels_script
+   * Step 1 Upload script: ml_userriskscore_levels_script_{spaceId}
    */
   await createStoredScript({
     http,
     theme,
     renderDocLink,
     notifications,
-    options: utils.getRiskyUserCreateLevelScriptOptions(),
+    options: utils.getRiskUserCreateLevelScriptOptions(spaceId),
   });
 
   /**
    * console_templates/enable_user_risk_score.console
-   * Step 2 Upload script: ml_userriskscore_map_script
+   * Step 2 Upload script: ml_userriskscore_map_script_{spaceId}
    */
   await createStoredScript({
     http,
     theme,
     renderDocLink,
     notifications,
-    options: utils.getRiskyUserCreateMapScriptOptions(),
+    options: utils.getRiskUserCreateMapScriptOptions(spaceId),
   });
 
   /**
    * console_templates/enable_user_risk_score.console
-   * Step 3 Upload script: ml_userriskscore_reduce_script
+   * Step 3 Upload script: ml_userriskscore_reduce_script_{spaceId}
    */
   await createStoredScript({
     http,
     theme,
     renderDocLink,
     notifications,
-    options: utils.getRiskyUserCreateReduceScriptOptions(),
+    options: utils.getRiskUserCreateReduceScriptOptions(spaceId),
   });
 
   /**
    * console_templates/enable_user_risk_score.console
-   * Step 4 Upload ingest pipeline: ml_userriskscore_ingest_pipeline
+   * Step 4 Upload ingest pipeline: ml_userriskscore_ingest_pipeline_{spaceId}
    */
   await createIngestPipeline({
     http,
@@ -381,6 +381,7 @@ export const uninstallRiskScoreModule = async ({
   riskScoreEntity,
   spaceId = 'default',
   theme,
+  deleteAll,
 }: {
   http: HttpSetup;
   notifications?: NotificationsStart;
@@ -389,21 +390,42 @@ export const uninstallRiskScoreModule = async ({
   riskScoreEntity: RiskScoreEntity;
   spaceId?: string;
   theme?: ThemeServiceStart;
+  deleteAll?: boolean;
 }) => {
   const transformIds = [
     utils.getRiskScorePivotTransformId(riskScoreEntity, spaceId),
     utils.getRiskScoreLatestTransformId(riskScoreEntity, spaceId),
   ];
   const riskyHostsScriptIds = [
-    utils.getRiskyScoreLevelScriptId(RiskScoreEntity.host),
-    utils.getRiskyScoreInitScriptId(RiskScoreEntity.host),
-    utils.getRiskyScoreMapScriptId(RiskScoreEntity.host),
-    utils.getRiskyScoreReduceScriptId(RiskScoreEntity.host),
+    utils.getLegacyRiskScoreLevelScriptId(RiskScoreEntity.host),
+    utils.getLegacyRiskScoreInitScriptId(RiskScoreEntity.host),
+    utils.getLegacyRiskScoreMapScriptId(RiskScoreEntity.host),
+    utils.getLegacyRiskScoreReduceScriptId(RiskScoreEntity.host),
+    ...(deleteAll
+      ? [
+          utils.getRiskScoreLevelScriptId(RiskScoreEntity.host, spaceId),
+          utils.getRiskScoreInitScriptId(RiskScoreEntity.host, spaceId),
+          utils.getRiskScoreMapScriptId(RiskScoreEntity.host, spaceId),
+          utils.getRiskScoreReduceScriptId(RiskScoreEntity.host, spaceId),
+        ]
+      : []),
   ];
   const riskyUsersScriptIds = [
-    utils.getRiskyScoreLevelScriptId(RiskScoreEntity.user),
-    utils.getRiskyScoreMapScriptId(RiskScoreEntity.user),
-    utils.getRiskyScoreReduceScriptId(RiskScoreEntity.user),
+    utils.getLegacyRiskScoreLevelScriptId(RiskScoreEntity.user),
+    utils.getLegacyRiskScoreMapScriptId(RiskScoreEntity.user),
+    utils.getLegacyRiskScoreReduceScriptId(RiskScoreEntity.user),
+    ...(deleteAll
+      ? [
+          utils.getRiskScoreLevelScriptId(RiskScoreEntity.user, spaceId),
+          utils.getRiskScoreMapScriptId(RiskScoreEntity.user, spaceId),
+          utils.getRiskScoreReduceScriptId(RiskScoreEntity.user, spaceId),
+        ]
+      : []),
+  ];
+
+  const ingestPipelineNames = [
+    utils.getLegacyIngestPipelineName(riskScoreEntity),
+    ...(deleteAll ? [utils.getIngestPipelineName(riskScoreEntity, spaceId)] : []),
   ];
 
   await bulkDeletePrebuiltSavedObjects({
@@ -430,8 +452,7 @@ export const uninstallRiskScoreModule = async ({
     },
   });
 
-  const names = utils.getIngestPipelineName(riskScoreEntity, spaceId);
-  const count = names.split(',').length;
+  const count = ingestPipelineNames.length;
 
   await deleteIngestPipelines({
     http,
@@ -439,7 +460,7 @@ export const uninstallRiskScoreModule = async ({
     renderDocLink,
     notifications,
     errorMessage: `${UNINSTALLATION_ERROR} - ${INGEST_PIPELINE_DELETION_ERROR_MESSAGE(count)}`,
-    names,
+    names: ingestPipelineNames.join(','),
   });
 
   await deleteStoredScripts({

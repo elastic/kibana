@@ -7,7 +7,7 @@
 import type { HttpSetup } from '@kbn/core/public';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import {
-  getIngestPipelineName,
+  getLegacyIngestPipelineName,
   getRiskScoreLatestTransformId,
   getRiskScorePivotTransformId,
 } from '../../../../../common/utils/risk_score_modules';
@@ -49,19 +49,19 @@ describe('installHostRiskScoreModule', () => {
     jest.clearAllMocks();
   });
 
-  it(`Create script: ml_${RiskScoreEntity.host}riskscore_levels_script`, async () => {
+  it(`Create script: ml_${RiskScoreEntity.host}riskscore_levels_script_${mockSpaceId}`, async () => {
     expect((api.createStoredScript as jest.Mock).mock.calls[0][0].options).toMatchSnapshot();
   });
 
-  it(`Create script: ml_${RiskScoreEntity.host}riskscore_init_script`, async () => {
+  it(`Create script: ml_${RiskScoreEntity.host}riskscore_init_script_${mockSpaceId}`, async () => {
     expect((api.createStoredScript as jest.Mock).mock.calls[1][0].options).toMatchSnapshot();
   });
 
-  it(`Create script: ml_${RiskScoreEntity.host}riskscore_map_script`, async () => {
+  it(`Create script: ml_${RiskScoreEntity.host}riskscore_map_script_${mockSpaceId}`, async () => {
     expect((api.createStoredScript as jest.Mock).mock.calls[2][0].options).toMatchSnapshot();
   });
 
-  it(`Create script: ml_${RiskScoreEntity.host}riskscore_reduce_script`, async () => {
+  it(`Create script: ml_${RiskScoreEntity.host}riskscore_reduce_script_${mockSpaceId}`, async () => {
     expect((api.createStoredScript as jest.Mock).mock.calls[3][0].options).toMatchSnapshot();
   });
 
@@ -114,15 +114,15 @@ describe(`installUserRiskScoreModule`, () => {
     jest.clearAllMocks();
   });
 
-  it(`Create script: ml_${RiskScoreEntity.user}riskscore_levels_script`, async () => {
+  it(`Create script: ml_${RiskScoreEntity.user}riskscore_levels_script_${mockSpaceId}`, async () => {
     expect((api.createStoredScript as jest.Mock).mock.calls[0][0].options).toMatchSnapshot();
   });
 
-  it(`Create script: ml_${RiskScoreEntity.user}riskscore_map_script`, async () => {
+  it(`Create script: ml_${RiskScoreEntity.user}riskscore_map_script_${mockSpaceId}`, async () => {
     expect((api.createStoredScript as jest.Mock).mock.calls[1][0].options).toMatchSnapshot();
   });
 
-  it(`Create script: ml_${RiskScoreEntity.user}riskscore_reduce_script`, async () => {
+  it(`Create script: ml_${RiskScoreEntity.user}riskscore_reduce_script_${mockSpaceId}`, async () => {
     expect((api.createStoredScript as jest.Mock).mock.calls[2][0].options).toMatchSnapshot();
   });
 
@@ -187,13 +187,13 @@ describe('UninstallRiskScoreModule - Host', () => {
     ]);
   });
 
-  it('Delete ingest pipelines', () => {
+  it('Delete legacy ingest pipelines', () => {
     expect((api.deleteIngestPipelines as jest.Mock).mock.calls[0][0].names).toEqual(
-      getIngestPipelineName(RiskScoreEntity.host, mockSpaceId)
+      getLegacyIngestPipelineName(RiskScoreEntity.host)
     );
   });
 
-  it('Delete stored scripts', () => {
+  it('Delete legacy stored scripts', () => {
     expect((api.deleteStoredScripts as jest.Mock).mock.calls[0][0].ids).toMatchInlineSnapshot(`
       Array [
         "ml_hostriskscore_levels_script",
@@ -231,9 +231,9 @@ describe('uninstallRiskScoreModule - User', () => {
     ]);
   });
 
-  it('Delete ingest pipelines', () => {
+  it('Delete legacy ingest pipelines', () => {
     expect((api.deleteIngestPipelines as jest.Mock).mock.calls[0][0].names).toEqual(
-      getIngestPipelineName(RiskScoreEntity.user, mockSpaceId)
+      getLegacyIngestPipelineName(RiskScoreEntity.user)
     );
   });
 

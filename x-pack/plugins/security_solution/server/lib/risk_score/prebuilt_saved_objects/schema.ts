@@ -23,4 +23,5 @@ export const deletePrebuiltSavedObjectsSchema = {
       schema.literal('userRiskScoreDashboards'),
     ]),
   }),
+  body: schema.nullable(schema.object({ deleteAll: schema.maybe(schema.boolean()) })),
 };

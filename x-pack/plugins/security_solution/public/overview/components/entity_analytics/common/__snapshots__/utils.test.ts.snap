@@ -130,7 +130,7 @@ Object {
     },
     Object {
       "script": Object {
-        "id": "ml_hostriskscore_levels_script",
+        "id": "ml_hostriskscore_levels_script_customSpace",
         "params": Object {
           "risk_score": "host.risk.calculated_score_norm",
         },
@@ -184,10 +184,10 @@ Object {
         "scripted_metric": Object {
           "combine_script": "return state",
           "init_script": Object {
-            "id": "ml_hostriskscore_init_script",
+            "id": "ml_hostriskscore_init_script_customSpace",
           },
           "map_script": Object {
-            "id": "ml_hostriskscore_map_script",
+            "id": "ml_hostriskscore_map_script_customSpace",
           },
           "params": Object {
             "lookback_time": 72,
@@ -215,7 +215,7 @@ Object {
             "zeta_constant": 2.612,
           },
           "reduce_script": Object {
-            "id": "ml_hostriskscore_reduce_script",
+            "id": "ml_hostriskscore_reduce_script_customSpace",
           },
         },
       },
@@ -255,9 +255,9 @@ Object {
 }
 `;
 
-exports[`installHostRiskScoreModule Create script: ml_hostriskscore_init_script 1`] = `
+exports[`installHostRiskScoreModule Create script: ml_hostriskscore_init_script_customSpace 1`] = `
 Object {
-  "id": "ml_hostriskscore_init_script",
+  "id": "ml_hostriskscore_init_script_customSpace",
   "script": Object {
     "lang": "painless",
     "source": "state.rule_risk_stats = new HashMap();
@@ -268,9 +268,9 @@ state.tactic_ids = new HashSet();",
 }
 `;
 
-exports[`installHostRiskScoreModule Create script: ml_hostriskscore_levels_script 1`] = `
+exports[`installHostRiskScoreModule Create script: ml_hostriskscore_levels_script_customSpace 1`] = `
 Object {
-  "id": "ml_hostriskscore_levels_script",
+  "id": "ml_hostriskscore_levels_script_customSpace",
   "script": Object {
     "lang": "painless",
     "source": "double risk_score = (def)ctx.getByPath(params.risk_score);
@@ -293,9 +293,9 @@ else if (risk_score >= 90) {
 }
 `;
 
-exports[`installHostRiskScoreModule Create script: ml_hostriskscore_map_script 1`] = `
+exports[`installHostRiskScoreModule Create script: ml_hostriskscore_map_script_customSpace 1`] = `
 Object {
-  "id": "ml_hostriskscore_map_script",
+  "id": "ml_hostriskscore_map_script_customSpace",
   "script": Object {
     "lang": "painless",
     "source": "// Get the host variant
@@ -324,9 +324,9 @@ state.rule_risk_stats.put(rule_name, stats);",
 }
 `;
 
-exports[`installHostRiskScoreModule Create script: ml_hostriskscore_reduce_script 1`] = `
+exports[`installHostRiskScoreModule Create script: ml_hostriskscore_reduce_script_customSpace 1`] = `
 Object {
-  "id": "ml_hostriskscore_reduce_script",
+  "id": "ml_hostriskscore_reduce_script_customSpace",
   "script": Object {
     "lang": "painless",
     "source": "// Consolidating time decayed risks and tactics from across all shards
@@ -544,7 +544,7 @@ Object {
     },
     Object {
       "script": Object {
-        "id": "ml_userriskscore_levels_script",
+        "id": "ml_userriskscore_levels_script_customSpace",
         "params": Object {
           "risk_score": "user.risk.calculated_score_norm",
         },
@@ -599,7 +599,7 @@ Object {
           "combine_script": "return state",
           "init_script": "state.rule_risk_stats = new HashMap();",
           "map_script": Object {
-            "id": "ml_userriskscore_map_script",
+            "id": "ml_userriskscore_map_script_customSpace",
           },
           "params": Object {
             "max_risk": 100,
@@ -607,7 +607,7 @@ Object {
             "zeta_constant": 2.612,
           },
           "reduce_script": Object {
-            "id": "ml_userriskscore_reduce_script",
+            "id": "ml_userriskscore_reduce_script_customSpace",
           },
         },
       },
@@ -652,9 +652,9 @@ Object {
 }
 `;
 
-exports[`installUserRiskScoreModule Create script: ml_userriskscore_levels_script 1`] = `
+exports[`installUserRiskScoreModule Create script: ml_userriskscore_levels_script_customSpace 1`] = `
 Object {
-  "id": "ml_userriskscore_levels_script",
+  "id": "ml_userriskscore_levels_script_customSpace",
   "script": Object {
     "lang": "painless",
     "source": "double risk_score = (def)ctx.getByPath(params.risk_score);
@@ -677,9 +677,9 @@ else if (risk_score >= 90) {
 }
 `;
 
-exports[`installUserRiskScoreModule Create script: ml_userriskscore_map_script 1`] = `
+exports[`installUserRiskScoreModule Create script: ml_userriskscore_map_script_customSpace 1`] = `
 Object {
-  "id": "ml_userriskscore_map_script",
+  "id": "ml_userriskscore_map_script_customSpace",
   "script": Object {
     "lang": "painless",
     "source": "// Get running sum of risk score per rule name per shard\\\\\\\\
@@ -691,9 +691,9 @@ state.rule_risk_stats.put(rule_name, stats);",
 }
 `;
 
-exports[`installUserRiskScoreModule Create script: ml_userriskscore_reduce_script 1`] = `
+exports[`installUserRiskScoreModule Create script: ml_userriskscore_reduce_script_customSpace 1`] = `
 Object {
-  "id": "ml_userriskscore_reduce_script",
+  "id": "ml_userriskscore_reduce_script_customSpace",
   "script": Object {
     "lang": "painless",
     "source": "// Consolidating time decayed risks from across all shards

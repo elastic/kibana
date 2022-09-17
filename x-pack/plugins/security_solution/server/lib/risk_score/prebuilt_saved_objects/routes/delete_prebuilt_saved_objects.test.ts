@@ -34,6 +34,9 @@ const deletePrebuiltSavedObjectsRequest = (savedObjectTemplate: string) =>
     method: 'post',
     path: PREBUILT_SAVED_OBJECTS_BULK_DELETE,
     params: { template_name: savedObjectTemplate },
+    body: {
+      deleteAll: true,
+    },
   });
 
 describe('deletePrebuiltSavedObjects', () => {
@@ -137,7 +140,7 @@ describe('deletePrebuiltSavedObjects', () => {
     expect(response.status).toEqual(200);
   });
 
-  it('should delete all hostRiskScoreDashboards saved objects with given tag reference', async () => {
+  it('should delete all hostRiskScoreDashboards saved objects with given tag reference if deleteAll is true', async () => {
     const response = await server.inject(
       deletePrebuiltSavedObjectsRequest('hostRiskScoreDashboards'),
       requestContextMock.convertContext(context)
@@ -151,7 +154,7 @@ describe('deletePrebuiltSavedObjects', () => {
     expect(response.status).toEqual(200);
   });
 
-  it('should delete the tag linked to hostRiskScoreDashboards saved objects', async () => {
+  it('should delete the tag linked to hostRiskScoreDashboards saved objects if deleteAll is true', async () => {
     const response = await server.inject(
       deletePrebuiltSavedObjectsRequest('hostRiskScoreDashboards'),
       requestContextMock.convertContext(context)
@@ -241,7 +244,7 @@ describe('deletePrebuiltSavedObjects', () => {
     expect(response.status).toEqual(200);
   });
 
-  it('should delete all userRiskScoreDashboards saved objects with given tag reference', async () => {
+  it('should delete all userRiskScoreDashboards saved objects with given tag reference if deleteAll is true', async () => {
     const response = await server.inject(
       deletePrebuiltSavedObjectsRequest('userRiskScoreDashboards'),
       requestContextMock.convertContext(context)
@@ -255,7 +258,7 @@ describe('deletePrebuiltSavedObjects', () => {
     expect(response.status).toEqual(200);
   });
 
-  it('should delete the tag linked to userRiskScoreDashboards saved objects', async () => {
+  it('should delete the tag linked to userRiskScoreDashboards saved objects if deleteAll is true', async () => {
     const response = await server.inject(
       deletePrebuiltSavedObjectsRequest('userRiskScoreDashboards'),
       requestContextMock.convertContext(context)
