@@ -70,7 +70,7 @@ describe('formatMlPipelineBody util function', () => {
             model_id: modelId,
             target_field: `ml.inference.${destField}`,
             field_map: {
-              sourceField: modelInputField,
+              'my-source-field': modelInputField,
             },
           },
         },
@@ -154,7 +154,7 @@ describe('formatMlPipelineBody util function', () => {
             model_id: modelId,
             target_field: `ml.inference.${destField}`,
             field_map: {
-              sourceField: modelInputField,
+              'my-source-field': modelInputField,
             },
           },
         },
