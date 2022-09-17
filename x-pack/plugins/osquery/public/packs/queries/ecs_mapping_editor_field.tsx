@@ -18,9 +18,6 @@ import {
   reduce,
   trim,
   get,
-  xorWith,
-  isEqual,
-  filter,
 } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
