@@ -352,6 +352,16 @@ describe('When entering data into the Console input', () => {
       expect(getRightOfCursorText()).toEqual('ate');
     });
 
+    it('should select all text when ctrl or cmd + a is pressed and delete all text when delete key is pressed', () => {
+      typeKeyboardKey('{Meta>}a{/Meta}');
+
+      expect(getLeftOfCursorText()).toEqual('isolate');
+      typeKeyboardKey('{Delete}');
+
+      expect(getLeftOfCursorText()).toEqual('');
+      expect(getRightOfCursorText()).toEqual('');
+    });
+
     // FIXME:PT uncomment once task OLM task #4384 is implemented
     it.skip('should return original cursor position if input history is closed with no selection', async () => {
       typeKeyboardKey('{Enter}'); // add `isolate` to the input history
