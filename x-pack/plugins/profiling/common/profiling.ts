@@ -86,6 +86,8 @@ export interface StackFrameMetadata {
   SourceFilename: string;
   // StackFrame.LineNumber
   SourceLine: number;
+  // auto-generated - see createStackFrameMetadata
+  FunctionSourceLine: number;
 
   // Executable.FileName
   ExeFileName: string;
@@ -122,6 +124,20 @@ export function createStackFrameMetadata(
   metadata.SourcePackageHash = options.SourcePackageHash ?? '';
   metadata.SourcePackageURL = options.SourcePackageURL ?? '';
   metadata.SourceType = options.SourceType ?? 0;
+
+  // Unknown/invalid offsets are currently set to 0.
+  //
+  // In this case we leave FunctionSourceLine=0 as a flag for the UI that the
+  // FunctionSourceLine should not be displayed.
+  //
+  // As FunctionOffset=0 could also be a legit value, this work-around needs
+  // a real fix. The idea for after GA is to change FunctionOffset=-1 to
+  // indicate unknown/invalid.
+  if (metadata.FunctionOffset > 0) {
+    metadata.FunctionSourceLine = metadata.SourceLine - metadata.FunctionOffset;
+  } else {
+    metadata.FunctionSourceLine = 0;
+  }
 
   return metadata;
 }

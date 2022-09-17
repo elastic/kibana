@@ -98,32 +98,34 @@ function checkIfStringHasParentheses(s: string) {
   return /\(|\)/.test(s);
 }
 
-function getFunctionName(node: CallerCalleeNode) {
-  return node.FunctionName !== '' && !checkIfStringHasParentheses(node.FunctionName)
-    ? `${node.FunctionName}()`
-    : node.FunctionName;
+function getFunctionName(metadata: StackFrameMetadata) {
+  return metadata.FunctionName !== '' && !checkIfStringHasParentheses(metadata.FunctionName)
+    ? `${metadata.FunctionName}()`
+    : metadata.FunctionName;
 }
 
-function getExeFileName(node: CallerCalleeNode) {
-  if (node?.ExeFileName === undefined) {
+function getExeFileName(metadata: StackFrameMetadata) {
+  if (metadata?.ExeFileName === undefined) {
     return '';
   }
-  if (node.ExeFileName !== '') {
-    return node.ExeFileName;
+  if (metadata.ExeFileName !== '') {
+    return metadata.ExeFileName;
   }
-  return describeFrameType(node.FrameType);
+  return describeFrameType(metadata.FrameType);
 }
 
-function getLabel(node: CallerCalleeNode) {
-  if (node.FunctionName !== '') {
-    const sourceFilename = node.SourceFilename;
+function getLabel(metadata: StackFrameMetadata) {
+  if (metadata.FunctionName !== '') {
+    const sourceFilename = metadata.SourceFilename;
     const sourceURL = sourceFilename ? sourceFilename.split('/').pop() : '';
-    return `${getExeFileName(node)}: ${getFunctionName(node)} in ${sourceURL} #${node.SourceLine}`;
+    return `${getExeFileName(metadata)}: ${getFunctionName(metadata)} in ${sourceURL} #${
+      metadata.SourceLine
+    }`;
   }
-  return getExeFileName(node);
+  return getExeFileName(metadata);
 }
 
-function countCallees(root: CallerCalleeNode): number {
+function countCallees(root: StackFrameMetadata): number {
   let numCallees = 1;
   for (const callee of root.Callees) {
     numCallees += countCallees(callee);
@@ -158,13 +160,13 @@ export function createColumnarCallerCallee(root: CallerCalleeNode): ColumnarCall
     if (x === 0 && depth === 1) {
       columnar.Label[idx] = 'root: Represents 100% of CPU time.';
     } else {
-      columnar.Label[idx] = getLabel(node);
+      columnar.Label[idx] = getLabel(node.FrameMetadata);
     }
     columnar.Value[idx] = node.Samples;
     columnar.X[idx] = x;
     columnar.Y[idx] = depth;
 
-    const [red, green, blue, alpha] = rgbToRGBA(frameTypeToRGB(node.FrameType, x));
+    const [red, green, blue, alpha] = rgbToRGBA(frameTypeToRGB(node.FrameMetadata.FrameType, x));
     const j = 4 * idx;
     columnar.Color[j] = red;
     columnar.Color[j + 1] = green;
@@ -177,8 +179,8 @@ export function createColumnarCallerCallee(root: CallerCalleeNode): ColumnarCall
     const id = fnv.fast1a64utf(`${parentID}${node.FrameGroupID}`).toString();
 
     columnar.ID[idx] = id;
-    columnar.FrameID[idx] = node.FrameID;
-    columnar.ExecutableID[idx] = node.FileID;
+    columnar.FrameID[idx] = node.FrameMetadata.FrameID;
+    columnar.ExecutableID[idx] = node.FrameMetadata.FileID;
 
     let delta = 0;
     for (const callee of node.Callees) {

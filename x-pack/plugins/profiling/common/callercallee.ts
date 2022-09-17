@@ -186,19 +186,7 @@ export interface CallerCalleeNode {
   Callers: CallerCalleeNode[];
   Callees: CallerCalleeNode[];
 
-  FrameID: string;
-  FileID: string;
-  FrameType: number;
-  ExeFileName: string;
-  FunctionID: string;
-  FunctionName: string;
-  AddressOrLine: number;
-  FunctionSourceLine: number;
-  FunctionSourceID: string;
-  FunctionSourceURL: string;
-  SourceFilename: string;
-  SourceLine: number;
-
+  FrameMetadata: StackFrameMetadata;
   FrameGroup: FrameGroup;
   FrameGroupID: FrameGroupID;
 
@@ -213,19 +201,7 @@ export function createCallerCalleeNode(options: Partial<CallerCalleeNode> = {}):
   node.Callers = clone(options.Callers ?? []);
   node.Callees = clone(options.Callees ?? []);
 
-  node.FrameID = options.FrameID ?? '';
-  node.FileID = options.FileID ?? '';
-  node.FrameType = options.FrameType ?? 0;
-  node.ExeFileName = options.ExeFileName ?? '';
-  node.FunctionID = options.FunctionID ?? '';
-  node.FunctionName = options.FunctionName ?? '';
-  node.AddressOrLine = options.AddressOrLine ?? 0;
-  node.FunctionSourceLine = options.FunctionSourceLine ?? 0;
-  node.FunctionSourceID = options.FunctionSourceID ?? '';
-  node.FunctionSourceURL = options.FunctionSourceURL ?? '';
-  node.SourceFilename = options.SourceFilename ?? '';
-  node.SourceLine = options.SourceLine ?? 0;
-
+  node.FrameMetadata = options.FrameMetadata ?? createStackFrameMetadata();
   node.FrameGroup = options.FrameGroup ?? '';
   node.FrameGroupID = options.FrameGroupID ?? '';
 
@@ -234,37 +210,6 @@ export function createCallerCalleeNode(options: Partial<CallerCalleeNode> = {}):
   node.CountExclusive = options.CountExclusive ?? 0;
 
   return node;
-}
-
-// selectCallerCalleeData is the "standard" way of merging multiple frames into
-// one node. It simply takes the data from the first frame.
-function selectCallerCalleeData(metadata: StackFrameMetadata, node: CallerCalleeNode) {
-  node.FileID = metadata.FileID;
-  node.FrameType = metadata.FrameType;
-  node.ExeFileName = metadata.ExeFileName;
-  node.FunctionID = metadata.FunctionName;
-  node.FunctionName = metadata.FunctionName;
-  node.AddressOrLine = metadata.AddressOrLine;
-  node.FrameID = metadata.FrameID;
-
-  // Unknown/invalid offsets are currently set to 0.
-  //
-  // In this case we leave FunctionSourceLine=0 as a flag for the UI that the
-  // FunctionSourceLine should not be displayed.
-  //
-  // As FunctionOffset=0 could also be a legit value, this work-around needs
-  // a real fix. The idea for after GA is to change FunctionOffset=-1 to
-  // indicate unknown/invalid.
-  if (metadata.FunctionOffset > 0) {
-    node.FunctionSourceLine = metadata.SourceLine - metadata.FunctionOffset;
-  } else {
-    node.FunctionSourceLine = 0;
-  }
-
-  node.FunctionSourceID = metadata.SourceID;
-  node.FunctionSourceURL = metadata.SourceCodeURL;
-  node.SourceFilename = metadata.SourceFilename;
-  node.SourceLine = metadata.SourceLine;
 }
 
 function sortNodes(
@@ -292,16 +237,13 @@ export function fromCallerCalleeIntermediateNode(
   root: CallerCalleeIntermediateNode
 ): CallerCalleeNode {
   const node = createCallerCalleeNode({
+    FrameMetadata: root.FrameMetadata,
     FrameGroup: root.FrameGroup,
     FrameGroupID: root.FrameGroupID,
     Samples: root.Samples,
     CountInclusive: root.CountInclusive,
     CountExclusive: root.CountExclusive,
   });
-
-  // Populate the other fields with data from the root node. Selectors are not supposed
-  // to be able to fail.
-  selectCallerCalleeData(root.FrameMetadata, node);
 
   // Now fill the caller and callee arrays.
   // For a deterministic result we have to walk the callers / callees in a deterministic
