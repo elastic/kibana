@@ -79,8 +79,12 @@ export class JourneyScreenshots {
       } while (this.#isLocked.getValue());
     }
 
-    this.#isLocked.next(true);
-    await fn();
+    try {
+      this.#isLocked.next(true);
+      await fn();
+    } finally {
+      this.#isLocked.next(false);
+    }
   }
 
   async addError(step: AnyStep, screenshot: Buffer) {
