@@ -20,7 +20,7 @@ export interface CallerCalleeIntermediateNode {
   Callees: Map<FrameGroupID, CallerCalleeIntermediateNode>;
   FrameMetadata: StackFrameMetadata;
   FrameGroup: FrameGroup;
-  FrameGroupID: string;
+  FrameGroupID: FrameGroupID;
   Samples: number;
   CountInclusive: number;
   CountExclusive: number;
@@ -183,10 +183,10 @@ export function createCallerCalleeIntermediateRoot(
 }
 
 export interface CallerCalleeNode {
-  FrameID: string;
-  FrameGroupID: string;
   Callers: CallerCalleeNode[];
   Callees: CallerCalleeNode[];
+
+  FrameID: string;
   FileID: string;
   FrameType: number;
   ExeFileName: string;
@@ -198,6 +198,10 @@ export interface CallerCalleeNode {
   FunctionSourceURL: string;
   SourceFilename: string;
   SourceLine: number;
+
+  FrameGroup: FrameGroup;
+  FrameGroupID: FrameGroupID;
+
   Samples: number;
   CountInclusive: number;
   CountExclusive: number;
@@ -206,10 +210,10 @@ export interface CallerCalleeNode {
 export function createCallerCalleeNode(options: Partial<CallerCalleeNode> = {}): CallerCalleeNode {
   const node = {} as CallerCalleeNode;
 
-  node.FrameID = options.FrameID ?? '';
-  node.FrameGroupID = options.FrameGroupID ?? '';
   node.Callers = clone(options.Callers ?? []);
   node.Callees = clone(options.Callees ?? []);
+
+  node.FrameID = options.FrameID ?? '';
   node.FileID = options.FileID ?? '';
   node.FrameType = options.FrameType ?? 0;
   node.ExeFileName = options.ExeFileName ?? '';
@@ -221,6 +225,10 @@ export function createCallerCalleeNode(options: Partial<CallerCalleeNode> = {}):
   node.FunctionSourceURL = options.FunctionSourceURL ?? '';
   node.SourceFilename = options.SourceFilename ?? '';
   node.SourceLine = options.SourceLine ?? 0;
+
+  node.FrameGroup = options.FrameGroup ?? '';
+  node.FrameGroupID = options.FrameGroupID ?? '';
+
   node.Samples = options.Samples ?? 0;
   node.CountInclusive = options.CountInclusive ?? 0;
   node.CountExclusive = options.CountExclusive ?? 0;
@@ -284,6 +292,7 @@ export function fromCallerCalleeIntermediateNode(
   root: CallerCalleeIntermediateNode
 ): CallerCalleeNode {
   const node = createCallerCalleeNode({
+    FrameGroup: root.FrameGroup,
     FrameGroupID: root.FrameGroupID,
     Samples: root.Samples,
     CountInclusive: root.CountInclusive,
