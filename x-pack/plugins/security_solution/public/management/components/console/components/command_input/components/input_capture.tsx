@@ -130,8 +130,24 @@ export const InputCapture = memo<InputCaptureProps>(
 
     const handleOnKeyDown = useCallback<KeyboardEventHandler>(
       (ev) => {
-        // allows for clipboard events to be captured via onPaste event handler
+        // handles the ctrl + a select and allows for clipboard events to be captured via onPaste event handler
         if (ev.metaKey || ev.ctrlKey) {
+          if (ev.key === 'a') {
+            // clear any current selection
+            const selection = window.getSelection();
+            if (selection) {
+              selection.removeAllRanges();
+            }
+
+            // get the console input text selection;
+            const range = document.createRange();
+            if (focusEleRef.current) {
+              range.selectNodeContents(focusEleRef.current);
+            }
+            if (selection) {
+              selection.addRange(range);
+            }
+          }
           return;
         }
 
