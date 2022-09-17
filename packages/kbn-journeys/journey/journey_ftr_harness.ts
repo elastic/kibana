@@ -117,40 +117,39 @@ export class JourneyFtrHarness {
   }
 
   private async onSetup() {
-    await this.withSpan('setup', 'step', async () => {
-      await Promise.all([
-        this.setupApm(),
-        this.setupBrowserAndPage(),
-        asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
-          await this.esArchiver.load(esArchive);
-        }),
-        asyncForEach(this.journeyConfig.getKbnArchives(), async (kbnArchive) => {
-          await this.kibanaServer.importExport.load(kbnArchive);
-        }),
-      ]);
-    });
+    await Promise.all([
+      this.setupApm(),
+      this.setupBrowserAndPage(),
+      asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
+        await this.esArchiver.load(esArchive);
+      }),
+      asyncForEach(this.journeyConfig.getKbnArchives(), async (kbnArchive) => {
+        await this.kibanaServer.importExport.load(kbnArchive);
+      }),
+    ]);
   }
 
   private async tearDownBrowserAndPage() {
+    if (this.page) {
+      const telemetryTracker = this.telemetryTrackerSubs.get(this.page);
+      this.telemetryTrackerSubs.delete(this.page);
+
+      if (telemetryTracker && !telemetryTracker.closed) {
+        this.log.info(`Waiting for telemetry requests, including starting within next 3 secs`);
+        this.pageTeardown$.next(this.page);
+        await new Promise<void>((resolve) => telemetryTracker.add(resolve));
+      }
+
+      this.log.info('destroying page');
+      await this.client?.detach();
+      await this.page.close();
+      await this.context?.close();
+    }
+
     if (this.browser) {
+      this.log.info('closing browser');
       await this.browser.close();
     }
-
-    if (!this.page) {
-      return;
-    }
-
-    const telemetryTracker = this.telemetryTrackerSubs.get(this.page);
-    this.telemetryTrackerSubs.delete(this.page);
-
-    if (telemetryTracker && !telemetryTracker.closed) {
-      this.log.info(`Waiting for telemetry requests, including starting within next 3 secs`);
-      this.pageTeardown$.next(this.page);
-      await new Promise<void>((resolve) => telemetryTracker.add(resolve));
-    }
-    await this.client?.detach();
-    await this.page.close();
-    await this.context?.close();
   }
 
   private async teardownApm() {
@@ -167,30 +166,31 @@ export class JourneyFtrHarness {
     // @ts-expect-error
     const apmActive = apmStarted && this.apm._conf.active;
 
-    if (apmActive) {
-      this.log.info('Flushing APM');
-      await new Promise<void>((resolve) => this.apm?.flush(() => resolve()));
-      // wait for the HTTP request that apm.flush() starts, which we
-      // can't track but hope it is started within 3 seconds, node will stay
-      // alive for active requests
-      // https://github.com/elastic/apm-agent-nodejs/issues/2088
-      await setTimeout(3000);
+    if (!apmActive) {
+      this.log.warning('APM is not active');
+      return;
     }
+
+    this.log.info('Flushing APM');
+    await new Promise<void>((resolve) => this.apm?.flush(() => resolve()));
+    // wait for the HTTP request that apm.flush() starts, which we
+    // can't track but hope it is started within 3 seconds, node will stay
+    // alive for active requests
+    // https://github.com/elastic/apm-agent-nodejs/issues/2088
+    await setTimeout(3000);
   }
 
   private async onTeardown() {
-    await this.withSpan('teardown', 'step', async () => {
-      await Promise.all([
-        this.tearDownBrowserAndPage(),
-        this.teardownApm(),
-        asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
-          await this.esArchiver.unload(esArchive);
-        }),
-        asyncForEach(this.journeyConfig.getKbnArchives(), async (kbnArchive) => {
-          await this.kibanaServer.importExport.unload(kbnArchive);
-        }),
-      ]);
-    });
+    await Promise.all([
+      this.tearDownBrowserAndPage(),
+      this.teardownApm(),
+      asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
+        await this.esArchiver.unload(esArchive);
+      }),
+      asyncForEach(this.journeyConfig.getKbnArchives(), async (kbnArchive) => {
+        await this.kibanaServer.importExport.unload(kbnArchive);
+      }),
+    ]);
   }
 
   private async onStepSuccess(step: AnyStep) {
@@ -213,24 +213,32 @@ export class JourneyFtrHarness {
   }
 
   private async withSpan<T>(name: string, type: string | undefined, block: () => Promise<T>) {
+    if (!this.currentTransaction) {
+      return await block();
+    }
+
+    const span = this.apm?.startSpan(name, type ?? null, {
+      childOf: this.currentTransaction,
+    });
+    if (!span) {
+      return await block();
+    }
+
     try {
-      this.currentSpanStack.unshift(this.apm?.startSpan(name, type ?? null)!);
+      this.currentSpanStack.unshift(span);
       const result = await block();
-      if (this.currentSpanStack.length === 0) {
-        throw new Error(`No Span started`);
-      }
-      const span = this.currentSpanStack.shift();
-      span?.setOutcome('success');
-      span?.end();
+      span.setOutcome('success');
+      span.end();
       return result;
-    } catch (e) {
-      if (this.currentSpanStack.length === 0) {
-        throw new Error(`No Span started`);
+    } catch (error) {
+      span.setOutcome('failure');
+      span.end();
+      throw error;
+    } finally {
+      if (span !== this.currentSpanStack.shift()) {
+        // eslint-disable-next-line no-unsafe-finally
+        throw new Error('span stack mismatch');
       }
-      const span = this.currentSpanStack.shift();
-      span?.setOutcome('failure');
-      span?.end();
-      throw e;
     }
   }
 
