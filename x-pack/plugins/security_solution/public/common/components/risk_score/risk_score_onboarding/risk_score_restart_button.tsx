@@ -10,11 +10,11 @@ import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { restartRiskScoreTransforms } from './utils';
-import type { inputsModel } from '../../../../common/store';
-import { useSpaceId } from '../../../../common/hooks/use_space_id';
-import { useKibana } from '../../../../common/lib/kibana';
+import type { inputsModel } from '../../../store';
+import { useSpaceId } from '../../../hooks/use_space_id';
+import { useKibana } from '../../../lib/kibana';
 import type { RiskScoreEntity } from '../../../../../common/search_strategy';
-import { REQUEST_NAMES, useFetch } from '../../../../common/hooks/use_fetch';
+import { REQUEST_NAMES, useFetch } from '../../../hooks/use_fetch';
 
 const RiskScoreRestartButtonComponent = ({
   refetch,
