@@ -143,7 +143,7 @@ export function createCallerCalleeIntermediateRoot(
     const samples = traces.get(traceHash)!;
 
     // Go through the callees, reverse iteration
-    let currentNode = clone(root);
+    let currentNode = root;
     root.samples += samples;
 
     for (let i = 0; i < callees.length; i++) {
