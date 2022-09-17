@@ -133,6 +133,7 @@ export const InputCapture = memo<InputCaptureProps>(
         // handles the ctrl + a select and allows for clipboard events to be captured via onPaste event handler
         if (ev.metaKey || ev.ctrlKey) {
           if (ev.key === 'a') {
+            ev.preventDefault();
             // clear any current selection
             const selection = window.getSelection();
             if (selection) {
