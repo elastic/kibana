@@ -22,6 +22,7 @@ import { RiskScoreEntity, buildUserNamesFilter } from '../../../../common/search
 import type { UsersComponentsQueryProps } from './types';
 import { UserRiskInformationButtonEmpty } from '../../components/user_risk_information';
 import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_button_href';
+import { EntityAnalyticsUserRiskScoreDisable } from '../../../common/components/risk_score/risk_score_disabled/user_risk_score.disabled';
 
 const QUERY_ID = UserRiskScoreQueryId.USER_DETAILS_RISK_SCORE;
 
@@ -58,7 +59,7 @@ const UserRiskTabBodyComponent: React.FC<
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
     [userName]
   );
-  const [loading, { data, refetch, inspect, isDeprecated }] = useUserRiskScore({
+  const [loading, { data, refetch, inspect, isDeprecated, isModuleEnabled }] = useUserRiskScore({
     filterQuery,
     onlyLatest: false,
     skip: !overTimeToggleStatus && !contributorsToggleStatus,
@@ -87,6 +88,10 @@ const UserRiskTabBodyComponent: React.FC<
     },
     [setOverTimeToggleStatus]
   );
+
+  if (!isModuleEnabled && !loading) {
+    return <EntityAnalyticsUserRiskScoreDisable refetch={refetch} timerange={timerange} />;
+  }
 
   if (isDeprecated) {
     return (

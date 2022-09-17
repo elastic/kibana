@@ -57,28 +57,6 @@ export const VIEW_ALL = i18n.translate(
   }
 );
 
-export const ENABLE_HOST_RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.enableHostRiskScore',
-  {
-    defaultMessage: 'Enable Host Risk Score',
-  }
-);
-
-export const ENABLE_HOST_RISK_SCORE_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.enableHostRiskScoreDescription',
-  {
-    defaultMessage:
-      'Once you have enabled this feature you can get quick access to the host risk scores in this section.',
-  }
-);
-
-export const ENABLE_RISK_SCORE_POPOVER = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.enableRiskScorePopoverTitle',
-  {
-    defaultMessage: 'Alerts need to be available before enabling module',
-  }
-);
-
 export const HOST_RISK_TABLE_TOOLTIP = i18n.translate(
   'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.hostsTableTooltip',
   {

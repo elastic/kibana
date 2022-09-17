@@ -22,6 +22,7 @@ import {
 } from '../../../risk_score/containers';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { EntityAnalyticsHostRiskScoreDisable } from '../../../common/components/risk_score/risk_score_disabled/host_risk_score_disabled';
 
 const HostRiskScoreTableManage = manageQuery(HostRiskScoreTable);
 
@@ -53,14 +54,16 @@ export const HostRiskScoreQueryTabBody = ({
     setQuerySkip(!toggleStatus);
   }, [toggleStatus]);
   const { from, to } = useGlobalTime();
-  const [loading, { data, totalCount, inspect, isInspected, isDeprecated, refetch }] =
-    useHostRiskScore({
-      filterQuery,
-      skip: querySkip,
-      pagination,
-      sort,
-      timerange: { from, to },
-    });
+  const [
+    loading,
+    { data, totalCount, inspect, isInspected, isDeprecated, refetch, isModuleEnabled },
+  ] = useHostRiskScore({
+    filterQuery,
+    skip: querySkip,
+    pagination,
+    sort,
+    timerange: { from, to },
+  });
 
   const { severityCount, loading: isKpiLoading } = useHostRiskScoreKpi({
     filterQuery,
@@ -68,6 +71,10 @@ export const HostRiskScoreQueryTabBody = ({
   });
 
   const timerange = useMemo(() => ({ from, to }), [from, to]);
+
+  if (!isModuleEnabled && !loading) {
+    return <EntityAnalyticsHostRiskScoreDisable refetch={refetch} timerange={timerange} />;
+  }
 
   if (isDeprecated) {
     return (

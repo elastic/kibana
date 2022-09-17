@@ -5,15 +5,7 @@
  * 2.0.
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiPanel,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel } from '@elastic/eui';
 
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
@@ -37,14 +29,10 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { hostsActions } from '../../../../hosts/store';
-import { useCheckSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_check_signal_index';
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
-import type { inputsModel } from '../../../../common/store';
-
 import { RISKY_HOSTS_EXTERNAL_DOC_LINK } from '../../../../../common/constants';
-import { RiskScoreDocLink } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_doc_link';
-import { RiskScoreEnableButton } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_enable_button';
+import { EntityAnalyticsHostRiskScoreDisable } from '../../../../common/components/risk_score/risk_score_disabled/host_risk_score_disabled';
 
 const TABLE_QUERY_ID = 'hostRiskDashboardTable';
 
@@ -144,7 +132,7 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
   }
 
   if (!isModuleEnabled && !isTableLoading) {
-    return <EntityAnalyticsHostRiskScoresDisable refetch={refetch} timerange={timerange} />;
+    return <EntityAnalyticsHostRiskScoreDisable refetch={refetch} timerange={timerange} />;
   }
 
   if (isDeprecated) {
@@ -228,46 +216,3 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
 
 export const EntityAnalyticsHostRiskScores = React.memo(EntityAnalyticsHostRiskScoresComponent);
 EntityAnalyticsHostRiskScores.displayName = 'EntityAnalyticsHostRiskScores';
-
-const EntityAnalyticsHostRiskScoresDisableComponent = ({
-  refetch,
-  timerange,
-}: {
-  refetch: inputsModel.Refetch;
-  timerange: {
-    from: string;
-    to: string;
-  };
-}) => {
-  const { signalIndexExists } = useCheckSignalIndex();
-
-  return (
-    <EuiPanel hasBorder>
-      <HeaderSection title={<h2>{i18n.HOST_RISK_TITLE}</h2>} titleSize="s" />
-      <EuiEmptyPrompt
-        title={<h2>{i18n.ENABLE_HOST_RISK_SCORE}</h2>}
-        body={
-          <>
-            {i18n.ENABLE_HOST_RISK_SCORE_DESCRIPTION}{' '}
-            <RiskScoreDocLink external={false} riskScoreEntity={RiskScoreEntity.host} />
-          </>
-        }
-        actions={
-          <EuiToolTip content={!signalIndexExists ? i18n.ENABLE_RISK_SCORE_POPOVER : null}>
-            <RiskScoreEnableButton
-              refetch={refetch}
-              riskScoreEntity={RiskScoreEntity.host}
-              disabled={!signalIndexExists}
-              timerange={timerange}
-            />
-          </EuiToolTip>
-        }
-      />
-    </EuiPanel>
-  );
-};
-
-export const EntityAnalyticsHostRiskScoresDisable = React.memo(
-  EntityAnalyticsHostRiskScoresDisableComponent
-);
-EntityAnalyticsHostRiskScoresDisable.displayName = 'EntityAnalyticsHostRiskScoresDisable';

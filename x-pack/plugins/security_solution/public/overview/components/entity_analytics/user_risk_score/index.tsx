@@ -5,15 +5,7 @@
  * 2.0.
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiPanel,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { RiskScoresDeprecated } from '../../../../common/components/risk_score/risk_score_deprecated';
@@ -39,11 +31,8 @@ import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirec
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
 
-import type { inputsModel } from '../../../../common/store';
-import { useCheckSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_check_signal_index';
-import { RiskScoreDocLink } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_doc_link';
 import { RISKY_USERS_EXTERNAL_DOC_LINK } from '../../../../../common/constants';
-import { RiskScoreEnableButton } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_enable_button';
+import { EntityAnalyticsUserRiskScoreDisable } from '../../../../common/components/risk_score/risk_score_disabled/user_risk_score.disabled';
 
 const TABLE_QUERY_ID = 'userRiskDashboardTable';
 
@@ -142,7 +131,7 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
   }
 
   if (!isModuleEnabled && !isTableLoading) {
-    return <EntityAnalyticsUserRiskScoresDisable refetch={refetch} timerange={timerange} />;
+    return <EntityAnalyticsUserRiskScoreDisable refetch={refetch} timerange={timerange} />;
   }
 
   if (isDeprecated) {
@@ -226,46 +215,3 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
 
 export const EntityAnalyticsUserRiskScores = React.memo(EntityAnalyticsUserRiskScoresComponent);
 EntityAnalyticsUserRiskScores.displayName = 'EntityAnalyticsUserRiskScores';
-
-const EntityAnalyticsUserRiskScoresDisableComponent = ({
-  refetch,
-  timerange,
-}: {
-  refetch: inputsModel.Refetch;
-  timerange: {
-    from: string;
-    to: string;
-  };
-}) => {
-  const { signalIndexExists } = useCheckSignalIndex();
-
-  return (
-    <EuiPanel hasBorder>
-      <HeaderSection title={<h2>{i18n.USER_RISK_TITLE}</h2>} titleSize="s" />
-      <EuiEmptyPrompt
-        title={<h2>{i18n.ENABLE_USER_RISK_SCORE}</h2>}
-        body={
-          <>
-            {i18n.ENABLE_USER_RISK_SCORE_DESCRIPTION}{' '}
-            <RiskScoreDocLink external={false} riskScoreEntity={RiskScoreEntity.user} />
-          </>
-        }
-        actions={
-          <EuiToolTip content={!signalIndexExists ? i18n.ENABLE_RISK_SCORE_POPOVER : null}>
-            <RiskScoreEnableButton
-              disabled={!signalIndexExists}
-              refetch={refetch}
-              riskScoreEntity={RiskScoreEntity.user}
-              timerange={timerange}
-            />
-          </EuiToolTip>
-        }
-      />
-    </EuiPanel>
-  );
-};
-
-export const EntityAnalyticsUserRiskScoresDisable = React.memo(
-  EntityAnalyticsUserRiskScoresDisableComponent
-);
-EntityAnalyticsUserRiskScoresDisable.displayName = 'EntityAnalyticsUserRiskScoresDisable';

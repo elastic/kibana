@@ -57,28 +57,6 @@ export const VIEW_ALL = i18n.translate(
   }
 );
 
-export const ENABLE_USER_RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.usersRiskDashboard.enableUserRiskScore',
-  {
-    defaultMessage: 'Enable User Risk Score',
-  }
-);
-
-export const ENABLE_USER_RISK_SCORE_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.usersRiskDashboard.enableUserRiskScoreDescription',
-  {
-    defaultMessage:
-      'Once you have enabled this feature you can get quick access to the user risk scores in this section.',
-  }
-);
-
-export const ENABLE_RISK_SCORE_POPOVER = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.usersRiskDashboard.enableRiskScorePopoverTitle',
-  {
-    defaultMessage: 'Alerts need to be available before enabling module',
-  }
-);
-
 export const USER_RISK_TABLE_TOOLTIP = i18n.translate(
   'xpack.securitySolution.entityAnalytics.usersRiskDashboard.usersTableTooltip',
   {

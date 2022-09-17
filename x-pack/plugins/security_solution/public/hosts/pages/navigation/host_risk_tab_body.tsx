@@ -22,6 +22,7 @@ import { TopRiskScoreContributors } from '../../../common/components/top_risk_sc
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_button_href';
 import { RISKY_HOSTS_DASHBOARD_TITLE } from './constants';
+import { EntityAnalyticsHostRiskScoreDisable } from '../../../common/components/risk_score/risk_score_disabled/host_risk_score_disabled';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.euiSizeL};
@@ -58,7 +59,7 @@ const HostRiskTabBodyComponent: React.FC<
   const { toggleStatus: contributorsToggleStatus, setToggleStatus: setContributorsToggleStatus } =
     useQueryToggle(`${QUERY_ID} contributors`);
 
-  const [loading, { data, refetch, inspect, isDeprecated }] = useHostRiskScore({
+  const [loading, { data, refetch, inspect, isDeprecated, isModuleEnabled }] = useHostRiskScore({
     filterQuery,
     onlyLatest: false,
     skip: !overTimeToggleStatus && !contributorsToggleStatus,
@@ -89,6 +90,10 @@ const HostRiskTabBodyComponent: React.FC<
   );
 
   const lastHostRiskItem = last(data);
+
+  if (!isModuleEnabled && !loading) {
+    return <EntityAnalyticsHostRiskScoreDisable refetch={refetch} timerange={timerange} />;
+  }
 
   if (isDeprecated) {
     return (

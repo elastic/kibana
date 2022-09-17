@@ -24,6 +24,7 @@ import {
 } from '../../../risk_score/containers';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { EntityAnalyticsUserRiskScoreDisable } from '../../../common/components/risk_score/risk_score_disabled/user_risk_score.disabled';
 
 const UserRiskScoreTableManage = manageQuery(UserRiskScoreTable);
 
@@ -56,19 +57,25 @@ export const UserRiskScoreQueryTabBody = ({
 
   const timerange = useMemo(() => ({ from, to }), [from, to]);
 
-  const [loading, { data, totalCount, inspect, isInspected, isDeprecated, refetch }] =
-    useUserRiskScore({
-      filterQuery,
-      skip: querySkip,
-      pagination,
-      sort,
-      timerange,
-    });
+  const [
+    loading,
+    { data, totalCount, inspect, isInspected, isDeprecated, refetch, isModuleEnabled },
+  ] = useUserRiskScore({
+    filterQuery,
+    skip: querySkip,
+    pagination,
+    sort,
+    timerange,
+  });
 
   const { severityCount, loading: isKpiLoading } = useUserRiskScoreKpi({
     filterQuery,
     skip: querySkip,
   });
+
+  if (!isModuleEnabled && !loading) {
+    return <EntityAnalyticsUserRiskScoreDisable refetch={refetch} timerange={timerange} />;
+  }
 
   if (isDeprecated) {
     return (
