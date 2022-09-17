@@ -20,7 +20,7 @@ export interface CallerCalleeIntermediateNode {
   frameGroupID: string;
   callers: Map<FrameGroupID, CallerCalleeIntermediateNode>;
   callees: Map<FrameGroupID, CallerCalleeIntermediateNode>;
-  frameMetadata: Set<StackFrameMetadata>;
+  frameMetadata: StackFrameMetadata;
   samples: number;
   countInclusive: number;
   countExclusive: number;
@@ -35,7 +35,7 @@ export function createCallerCalleeIntermediateNode(
     frameGroup: createFrameGroup(frameMetadata),
     callers: new Map<FrameGroupID, CallerCalleeIntermediateNode>(),
     callees: new Map<FrameGroupID, CallerCalleeIntermediateNode>(),
-    frameMetadata: new Set<StackFrameMetadata>([frameMetadata]),
+    frameMetadata: frameMetadata,
     samples,
     countInclusive: 0,
     countExclusive: 0,
@@ -221,36 +221,33 @@ export function createCallerCalleeNode(options: Partial<CallerCalleeNode> = {}):
 
 // selectCallerCalleeData is the "standard" way of merging multiple frames into
 // one node. It simply takes the data from the first frame.
-function selectCallerCalleeData(frameMetadata: Set<StackFrameMetadata>, node: CallerCalleeNode) {
-  for (const metadata of frameMetadata) {
-    node.FileID = metadata.FileID;
-    node.FrameType = metadata.FrameType;
-    node.ExeFileName = metadata.ExeFileName;
-    node.FunctionID = metadata.FunctionName;
-    node.FunctionName = metadata.FunctionName;
-    node.AddressOrLine = metadata.AddressOrLine;
-    node.FrameID = metadata.FrameID;
+function selectCallerCalleeData(metadata: StackFrameMetadata, node: CallerCalleeNode) {
+  node.FileID = metadata.FileID;
+  node.FrameType = metadata.FrameType;
+  node.ExeFileName = metadata.ExeFileName;
+  node.FunctionID = metadata.FunctionName;
+  node.FunctionName = metadata.FunctionName;
+  node.AddressOrLine = metadata.AddressOrLine;
+  node.FrameID = metadata.FrameID;
 
-    // Unknown/invalid offsets are currently set to 0.
-    //
-    // In this case we leave FunctionSourceLine=0 as a flag for the UI that the
-    // FunctionSourceLine should not be displayed.
-    //
-    // As FunctionOffset=0 could also be a legit value, this work-around needs
-    // a real fix. The idea for after GA is to change FunctionOffset=-1 to
-    // indicate unknown/invalid.
-    if (metadata.FunctionOffset > 0) {
-      node.FunctionSourceLine = metadata.SourceLine - metadata.FunctionOffset;
-    } else {
-      node.FunctionSourceLine = 0;
-    }
-
-    node.FunctionSourceID = metadata.SourceID;
-    node.FunctionSourceURL = metadata.SourceCodeURL;
-    node.SourceFilename = metadata.SourceFilename;
-    node.SourceLine = metadata.SourceLine;
-    break;
+  // Unknown/invalid offsets are currently set to 0.
+  //
+  // In this case we leave FunctionSourceLine=0 as a flag for the UI that the
+  // FunctionSourceLine should not be displayed.
+  //
+  // As FunctionOffset=0 could also be a legit value, this work-around needs
+  // a real fix. The idea for after GA is to change FunctionOffset=-1 to
+  // indicate unknown/invalid.
+  if (metadata.FunctionOffset > 0) {
+    node.FunctionSourceLine = metadata.SourceLine - metadata.FunctionOffset;
+  } else {
+    node.FunctionSourceLine = 0;
   }
+
+  node.FunctionSourceID = metadata.SourceID;
+  node.FunctionSourceURL = metadata.SourceCodeURL;
+  node.SourceFilename = metadata.SourceFilename;
+  node.SourceLine = metadata.SourceLine;
 }
 
 function sortNodes(
