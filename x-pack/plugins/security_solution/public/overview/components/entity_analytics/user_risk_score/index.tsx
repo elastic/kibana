@@ -16,8 +16,7 @@ import {
 } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import { RiskEntity } from '../../../../risk_score/containers/feature_status/api';
-import { RiskScoresDeprecated } from '../../../../common/components/risk_score_deprecated';
+import { RiskScoresDeprecated } from '../../../../common/components/risk_score/risk_score_deprecated';
 import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { LastUpdatedAt } from '../../detection_response/utils';
@@ -37,15 +36,14 @@ import { getUserRiskScoreColumns } from './columns';
 import { useUserRiskScore, useUserRiskScoreKpi } from '../../../../risk_score/containers';
 import { UsersTableType } from '../../../../users/store/model';
 import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirect_to_users';
-import { RISKY_USERS_DOC_LINK } from '../../../../users/components/constants';
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
 
 import type { inputsModel } from '../../../../common/store';
 import { useCheckSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_check_signal_index';
-import { RiskScoreRestartButton } from '../common/risk_score_restart_button';
-import { RiskScoreEnableButton } from '../common/risk_score_enable_button';
-import { RiskScoreDocLink } from '../common/risk_score_doc_link';
+import { RiskScoreDocLink } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_doc_link';
+import { RISKY_USERS_EXTERNAL_DOC_LINK } from '../../../../../common/constants';
+import { RiskScoreEnableButton } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_enable_button';
 
 const TABLE_QUERY_ID = 'userRiskDashboardTable';
 
@@ -148,7 +146,13 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
   }
 
   if (isDeprecated) {
-    return <RiskScoresDeprecated entityType={RiskEntity.user} />;
+    return (
+      <RiskScoresDeprecated
+        entityType={RiskScoreEntity.user}
+        refetch={refetch}
+        timerange={timerange}
+      />
+    );
   }
 
   return (
@@ -167,10 +171,11 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
           {toggleStatus && (
             <EuiFlexGroup alignItems="center" gutterSize="m">
               <EuiFlexItem>
-                <RiskScoreRestartButton refetch={refetch} riskScoreEntity={RiskScoreEntity.user} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiButtonEmpty href={RISKY_USERS_DOC_LINK} target="_blank">
+                <EuiButtonEmpty
+                  rel="noopener nofollow noreferrer"
+                  href={RISKY_USERS_EXTERNAL_DOC_LINK}
+                  target="_blank"
+                >
                   {i18n.LEARN_MORE}
                 </EuiButtonEmpty>
               </EuiFlexItem>
@@ -242,7 +247,7 @@ const EntityAnalyticsUserRiskScoresDisableComponent = ({
         body={
           <>
             {i18n.ENABLE_USER_RISK_SCORE_DESCRIPTION}{' '}
-            <RiskScoreDocLink riskScoreEntity={RiskScoreEntity.user} />
+            <RiskScoreDocLink external={false} riskScoreEntity={RiskScoreEntity.user} />
           </>
         }
         actions={

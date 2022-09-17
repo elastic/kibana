@@ -8,13 +8,14 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
-import { TestProviders } from '../../../../common/mock';
-import { RiskyScoreUpgradeButton } from './risk_score_upgrade_button';
-import { upgradeHostRiskScoreModule, upgradeUserRiskScoreModule } from './utils';
+import { TestProviders } from '../../../mock/test_providers';
+
+import { RiskScoreEnableButton } from './risk_score_enable_button';
+import { installHostRiskScoreModule, installUserRiskScoreModule } from './utils';
 
 jest.mock('./utils');
 
-describe('RiskyScoreUpgradeButton', () => {
+describe('RiskScoreEnableButton', () => {
   const mockRefetch = jest.fn();
   const timerange = {
     from: 'mockStartDate',
@@ -27,7 +28,7 @@ describe('RiskyScoreUpgradeButton', () => {
     it('Renders expected children', () => {
       render(
         <TestProviders>
-          <RiskyScoreUpgradeButton
+          <RiskScoreEnableButton
             refetch={mockRefetch}
             riskScoreEntity={RiskScoreEntity.host}
             timerange={timerange}
@@ -35,14 +36,16 @@ describe('RiskyScoreUpgradeButton', () => {
         </TestProviders>
       );
 
-      expect(screen.getByTestId('risk-score-upgrade')).toBeInTheDocument();
-      expect(screen.getByTestId('risk-score-upgrade')).toHaveTextContent('Upgrade');
+      expect(screen.getByTestId(`enable_${RiskScoreEntity.host}_risk_score`)).toBeInTheDocument();
+      expect(screen.getByTestId(`enable_${RiskScoreEntity.host}_risk_score`)).toHaveTextContent(
+        'Enable'
+      );
     });
 
     it('Triggers the right installer', async () => {
       render(
         <TestProviders>
-          <RiskyScoreUpgradeButton
+          <RiskScoreEnableButton
             refetch={mockRefetch}
             riskScoreEntity={RiskScoreEntity.host}
             timerange={timerange}
@@ -51,27 +54,30 @@ describe('RiskyScoreUpgradeButton', () => {
       );
 
       await act(async () => {
-        await userEvent.click(screen.getByTestId('risk-score-upgrade'));
+        await userEvent.click(screen.getByTestId(`enable_${RiskScoreEntity.host}_risk_score`));
       });
 
-      expect(upgradeHostRiskScoreModule).toHaveBeenCalled();
+      expect(installHostRiskScoreModule).toHaveBeenCalled();
     });
 
-    it('Update button state while upgrading', async () => {
+    it('Update button state while installing', async () => {
       render(
         <TestProviders>
-          <RiskyScoreUpgradeButton
+          <RiskScoreEnableButton
             refetch={mockRefetch}
-            riskScoreEntity={RiskScoreEntity.user}
+            riskScoreEntity={RiskScoreEntity.host}
             timerange={timerange}
           />
         </TestProviders>
       );
 
-      userEvent.click(screen.getByTestId('risk-score-upgrade'));
+      userEvent.click(screen.getByTestId(`enable_${RiskScoreEntity.host}_risk_score`));
 
       await waitFor(() => {
-        expect(screen.getByTestId('risk-score-upgrade')).toHaveTextContent('Upgrading');
+        expect(screen.getByTestId(`enable_${RiskScoreEntity.host}_risk_score`)).toHaveProperty(
+          'disabled',
+          true
+        );
       });
     });
   });
@@ -80,7 +86,7 @@ describe('RiskyScoreUpgradeButton', () => {
     it('Renders expected children', () => {
       render(
         <TestProviders>
-          <RiskyScoreUpgradeButton
+          <RiskScoreEnableButton
             refetch={mockRefetch}
             riskScoreEntity={RiskScoreEntity.user}
             timerange={timerange}
@@ -88,14 +94,16 @@ describe('RiskyScoreUpgradeButton', () => {
         </TestProviders>
       );
 
-      expect(screen.getByTestId('risk-score-upgrade')).toBeInTheDocument();
-      expect(screen.getByTestId('risk-score-upgrade')).toHaveTextContent('Upgrade');
+      expect(screen.getByTestId(`enable_${RiskScoreEntity.user}_risk_score`)).toBeInTheDocument();
+      expect(screen.getByTestId(`enable_${RiskScoreEntity.user}_risk_score`)).toHaveTextContent(
+        'Enable'
+      );
     });
 
     it('Triggers the right installer', async () => {
       render(
         <TestProviders>
-          <RiskyScoreUpgradeButton
+          <RiskScoreEnableButton
             refetch={mockRefetch}
             riskScoreEntity={RiskScoreEntity.user}
             timerange={timerange}
@@ -104,16 +112,16 @@ describe('RiskyScoreUpgradeButton', () => {
       );
 
       await act(async () => {
-        await userEvent.click(screen.getByTestId('risk-score-upgrade'));
+        await userEvent.click(screen.getByTestId(`enable_${RiskScoreEntity.user}_risk_score`));
       });
 
-      expect(upgradeUserRiskScoreModule).toHaveBeenCalled();
+      expect(installUserRiskScoreModule).toHaveBeenCalled();
     });
 
-    it('Update button state while upgrading', async () => {
+    it('Update button state while installing', async () => {
       render(
         <TestProviders>
-          <RiskyScoreUpgradeButton
+          <RiskScoreEnableButton
             refetch={mockRefetch}
             riskScoreEntity={RiskScoreEntity.user}
             timerange={timerange}
@@ -121,10 +129,13 @@ describe('RiskyScoreUpgradeButton', () => {
         </TestProviders>
       );
 
-      userEvent.click(screen.getByTestId('risk-score-upgrade'));
+      userEvent.click(screen.getByTestId(`enable_${RiskScoreEntity.user}_risk_score`));
 
       await waitFor(() => {
-        expect(screen.getByTestId('risk-score-upgrade')).toHaveTextContent('Upgrading');
+        expect(screen.getByTestId(`enable_${RiskScoreEntity.user}_risk_score`)).toHaveProperty(
+          'disabled',
+          true
+        );
       });
     });
   });

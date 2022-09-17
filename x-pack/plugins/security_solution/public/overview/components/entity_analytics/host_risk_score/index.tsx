@@ -17,8 +17,7 @@ import {
 
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import { RiskEntity } from '../../../../risk_score/containers/feature_status/api';
-import { RiskScoresDeprecated } from '../../../../common/components/risk_score_deprecated';
+import { RiskScoresDeprecated } from '../../../../common/components/risk_score/risk_score_deprecated';
 import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
@@ -42,10 +41,10 @@ import { useCheckSignalIndex } from '../../../../detections/containers/detection
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
 import type { inputsModel } from '../../../../common/store';
-import { RiskScoreRestartButton } from '../common/risk_score_restart_button';
-import { RiskScoreEnableButton } from '../common/risk_score_enable_button';
-import { RISKY_HOSTS_DOC_LINK } from '../../../../../common/constants';
-import { RiskScoreDocLink } from '../common/risk_score_doc_link';
+
+import { RISKY_HOSTS_EXTERNAL_DOC_LINK } from '../../../../../common/constants';
+import { RiskScoreDocLink } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_doc_link';
+import { RiskScoreEnableButton } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_enable_button';
 
 const TABLE_QUERY_ID = 'hostRiskDashboardTable';
 
@@ -149,7 +148,13 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
   }
 
   if (isDeprecated) {
-    return <RiskScoresDeprecated entityType={RiskEntity.host} />;
+    return (
+      <RiskScoresDeprecated
+        entityType={RiskScoreEntity.host}
+        refetch={refetch}
+        timerange={timerange}
+      />
+    );
   }
 
   return (
@@ -168,10 +173,11 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
           {toggleStatus && (
             <EuiFlexGroup alignItems="center" gutterSize="m">
               <EuiFlexItem>
-                <RiskScoreRestartButton refetch={refetch} riskScoreEntity={RiskScoreEntity.host} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiButtonEmpty href={RISKY_HOSTS_DOC_LINK} target="_blank">
+                <EuiButtonEmpty
+                  rel="noopener nofollow noreferrer"
+                  href={RISKY_HOSTS_EXTERNAL_DOC_LINK}
+                  target="_blank"
+                >
                   {i18n.LEARN_MORE}
                 </EuiButtonEmpty>
               </EuiFlexItem>
@@ -243,7 +249,7 @@ const EntityAnalyticsHostRiskScoresDisableComponent = ({
         body={
           <>
             {i18n.ENABLE_HOST_RISK_SCORE_DESCRIPTION}{' '}
-            <RiskScoreDocLink riskScoreEntity={RiskScoreEntity.host} />
+            <RiskScoreDocLink external={false} riskScoreEntity={RiskScoreEntity.host} />
           </>
         }
         actions={

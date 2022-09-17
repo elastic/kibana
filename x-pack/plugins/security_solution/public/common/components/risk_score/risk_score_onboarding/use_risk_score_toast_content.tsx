@@ -8,9 +8,9 @@
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { RiskScoreEntity } from '../../../../../common/search_strategy';
-import { VIEW_DASHBOARD } from '../../overview_cti_links/translations';
 import { RiskScoreDocLink } from './risk_score_doc_link';
 
 const StyledButton = styled(EuiButton)`
@@ -21,7 +21,7 @@ export const useRiskScoreToastContent = (riskScoreEntity: RiskScoreEntity) => {
   const renderDocLink = useCallback(
     (message: string) => (
       <>
-        {message} <RiskScoreDocLink riskScoreEntity={riskScoreEntity} />
+        {message} <RiskScoreDocLink external={false} riskScoreEntity={riskScoreEntity} />
       </>
     ),
     [riskScoreEntity]
@@ -32,7 +32,10 @@ export const useRiskScoreToastContent = (riskScoreEntity: RiskScoreEntity) => {
         {message}
         <EuiSpacer size="s" />
         <StyledButton href={targetUrl} target="_blank">
-          {VIEW_DASHBOARD}
+          <FormattedMessage
+            id="xpack.securitySolution.risk_score.toast.viewDashboard"
+            defaultMessage="View dashboard"
+          />
         </StyledButton>
       </>
     ),

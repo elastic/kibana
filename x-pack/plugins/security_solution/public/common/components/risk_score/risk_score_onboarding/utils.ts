@@ -8,7 +8,7 @@ import type { HttpSetup, NotificationsStart, ThemeServiceStart } from '@kbn/core
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import * as utils from '../../../../../common/utils/risk_score_modules';
-import type { inputsModel } from '../../../../common/store';
+import type { inputsModel } from '../../../store';
 
 import {
   createIngestPipeline,
@@ -199,6 +199,16 @@ export const installHostRiskScoreModule = async ({
     transformIds,
   });
 
+  await restartRiskScoreTransforms({
+    http,
+    notifications,
+    refetch,
+    renderDocLink,
+    riskScoreEntity: RiskScoreEntity.host,
+    spaceId,
+    theme,
+  });
+
   // Install dashboards and relevant saved objects
   await bulkCreatePrebuiltSavedObjects({
     http,
@@ -354,6 +364,20 @@ export const installUserRiskScoreModule = async ({
     transformIds,
   });
 
+  /**
+   * Restart transform immediately to force it pick up the alerts data.
+   * This can effectively reduce the chance of no data appears once installation complete.
+   * */
+  await restartRiskScoreTransforms({
+    http,
+    notifications,
+    refetch,
+    renderDocLink,
+    riskScoreEntity: RiskScoreEntity.user,
+    spaceId,
+    theme,
+  });
+
   // Install dashboards and relevant saved objects
   await bulkCreatePrebuiltSavedObjects({
     dashboard,
@@ -373,7 +397,7 @@ export const installUserRiskScoreModule = async ({
   }
 };
 
-export const uninstallRiskScoreModule = async ({
+export const uninstallLegacyRiskScoreModule = async ({
   http,
   notifications,
   refetch,
@@ -381,7 +405,6 @@ export const uninstallRiskScoreModule = async ({
   riskScoreEntity,
   spaceId = 'default',
   theme,
-  deleteAll,
 }: {
   http: HttpSetup;
   notifications?: NotificationsStart;
@@ -392,45 +415,34 @@ export const uninstallRiskScoreModule = async ({
   theme?: ThemeServiceStart;
   deleteAll?: boolean;
 }) => {
-  const transformIds = [
+  const legacyTransformIds = [
     utils.getRiskScorePivotTransformId(riskScoreEntity, spaceId),
     utils.getRiskScoreLatestTransformId(riskScoreEntity, spaceId),
   ];
-  const riskyHostsScriptIds = [
+  const legacyRiskScoreHostsScriptIds = [
     utils.getLegacyRiskScoreLevelScriptId(RiskScoreEntity.host),
     utils.getLegacyRiskScoreInitScriptId(RiskScoreEntity.host),
     utils.getLegacyRiskScoreMapScriptId(RiskScoreEntity.host),
     utils.getLegacyRiskScoreReduceScriptId(RiskScoreEntity.host),
-    ...(deleteAll
-      ? [
-          utils.getRiskScoreLevelScriptId(RiskScoreEntity.host, spaceId),
-          utils.getRiskScoreInitScriptId(RiskScoreEntity.host, spaceId),
-          utils.getRiskScoreMapScriptId(RiskScoreEntity.host, spaceId),
-          utils.getRiskScoreReduceScriptId(RiskScoreEntity.host, spaceId),
-        ]
-      : []),
   ];
-  const riskyUsersScriptIds = [
+  const legacyRiskScoreUsersScriptIds = [
     utils.getLegacyRiskScoreLevelScriptId(RiskScoreEntity.user),
     utils.getLegacyRiskScoreMapScriptId(RiskScoreEntity.user),
     utils.getLegacyRiskScoreReduceScriptId(RiskScoreEntity.user),
-    ...(deleteAll
-      ? [
-          utils.getRiskScoreLevelScriptId(RiskScoreEntity.user, spaceId),
-          utils.getRiskScoreMapScriptId(RiskScoreEntity.user, spaceId),
-          utils.getRiskScoreReduceScriptId(RiskScoreEntity.user, spaceId),
-        ]
-      : []),
   ];
 
-  const ingestPipelineNames = [
-    utils.getLegacyIngestPipelineName(riskScoreEntity),
-    ...(deleteAll ? [utils.getIngestPipelineName(riskScoreEntity, spaceId)] : []),
-  ];
+  const legacyIngestPipelineNames = [utils.getLegacyIngestPipelineName(riskScoreEntity)];
 
+  /**
+   * Intended not to pass notification to bulkDeletePrebuiltSavedObjects.
+   * As the only error it can happen is saved object not found, and
+   * that is what bulkDeletePrebuiltSavedObjects wants.
+   * (Before 8.5 once an saved object was created, it was shared across different spaces.
+   * If it has been upgrade in one space, "saved object not found" will happen when upgrading other spaces.
+   * Or it could be users manually deleted the saved object.)
+   */
   await bulkDeletePrebuiltSavedObjects({
     http,
-    notifications,
     options: {
       templateName: `${riskScoreEntity}RiskScoreDashboards`,
     },
@@ -442,9 +454,9 @@ export const uninstallRiskScoreModule = async ({
     renderDocLink,
     notifications,
     errorMessage: `${UNINSTALLATION_ERROR} - ${TRANSFORM_DELETION_ERROR_MESSAGE(
-      transformIds.length
+      legacyTransformIds.length
     )}`,
-    transformIds,
+    transformIds: legacyTransformIds,
     options: {
       deleteDestIndex: true,
       deleteDestDataView: true,
@@ -452,23 +464,36 @@ export const uninstallRiskScoreModule = async ({
     },
   });
 
-  const count = ingestPipelineNames.length;
-
+  /**
+   * Intended not to pass notification to deleteIngestPipelines.
+   * As the only error it can happen is ingest pipeline not found, and
+   * that is what deleteIngestPipelines wants.
+   * (Before 8.5 once an ingest pipeline was created, it was shared across different spaces.
+   * If it has been upgrade in one space, "ingest pipeline not found" will happen when upgrading other spaces.
+   * Or it could be users manually deleted the ingest pipeline.)
+   */
   await deleteIngestPipelines({
     http,
-    theme,
-    renderDocLink,
-    notifications,
-    errorMessage: `${UNINSTALLATION_ERROR} - ${INGEST_PIPELINE_DELETION_ERROR_MESSAGE(count)}`,
-    names: ingestPipelineNames.join(','),
+    errorMessage: `${UNINSTALLATION_ERROR} - ${INGEST_PIPELINE_DELETION_ERROR_MESSAGE(
+      legacyIngestPipelineNames.length
+    )}`,
+    names: legacyIngestPipelineNames.join(','),
   });
 
+  /**
+   * Intended not to pass notification to deleteStoredScripts.
+   * As the only error it can happen is script not found, and
+   * that is what deleteStoredScripts wants.
+   * (Before 8.5 once a script was created, it was shared across different spaces.
+   * If it has been upgrade in one space, "script not found" will happen when upgrading other spaces.
+   * Or it could be users manually deleted the script.)
+   */
   await deleteStoredScripts({
     http,
-    theme,
-    renderDocLink,
-    notifications,
-    ids: riskScoreEntity === RiskScoreEntity.user ? riskyUsersScriptIds : riskyHostsScriptIds,
+    ids:
+      riskScoreEntity === RiskScoreEntity.user
+        ? legacyRiskScoreUsersScriptIds
+        : legacyRiskScoreHostsScriptIds,
   });
 
   if (refetch) {
@@ -487,7 +512,7 @@ export const upgradeHostRiskScoreModule = async ({
   theme,
   timerange,
 }: UpgradeRiskyScoreModule) => {
-  await uninstallRiskScoreModule({
+  await uninstallLegacyRiskScoreModule({
     http,
     notifications,
     renderDocLink,
@@ -519,7 +544,7 @@ export const upgradeUserRiskScoreModule = async ({
   theme,
   timerange,
 }: UpgradeRiskyScoreModule) => {
-  await uninstallRiskScoreModule({
+  await uninstallLegacyRiskScoreModule({
     http,
     notifications,
     renderDocLink,

@@ -9,8 +9,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { RiskEntity } from '../../../risk_score/containers/feature_status/api';
-import { RiskScoresDeprecated } from '../../../common/components/risk_score_deprecated';
+import { RiskScoresDeprecated } from '../../../common/components/risk_score/risk_score_deprecated';
 import * as i18n from '../translations';
 
 import { useQueryInspector } from '../../../common/components/page/manage_query';
@@ -19,7 +18,7 @@ import { TopRiskScoreContributors } from '../../../common/components/top_risk_sc
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { UserRiskScoreQueryId, useUserRiskScore } from '../../../risk_score/containers';
 import type { UserRiskScore } from '../../../../common/search_strategy';
-import { buildUserNamesFilter } from '../../../../common/search_strategy';
+import { RiskScoreEntity, buildUserNamesFilter } from '../../../../common/search_strategy';
 import type { UsersComponentsQueryProps } from './types';
 import { UserRiskInformationButtonEmpty } from '../../components/user_risk_information';
 import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_button_href';
@@ -90,7 +89,13 @@ const UserRiskTabBodyComponent: React.FC<
   );
 
   if (isDeprecated) {
-    return <RiskScoresDeprecated entityType={RiskEntity.user} />;
+    return (
+      <RiskScoresDeprecated
+        entityType={RiskScoreEntity.user}
+        refetch={refetch}
+        timerange={timerange}
+      />
+    );
   }
 
   const lastUsertRiskItem: UserRiskScore | null =

@@ -5,21 +5,34 @@
  * 2.0.
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiPanel, EuiToolTip } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPanel, EuiToolTip } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { RiskEntity } from '../../../risk_score/containers/feature_status/api';
-import { useCheckSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_check_signal_index';
-import { HeaderSection } from '../header_section';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { RiskScoreUpgradeButton } from '../risk_score_onboarding/risk_score_upgrade_button';
+import { useCheckSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_check_signal_index';
+import type { inputsModel } from '../../../store';
+import { HeaderSection } from '../../header_section';
 import * as i18n from './translations';
 
-export const RiskScoresDeprecated = ({ entityType }: { entityType: RiskEntity }) => {
+export const RiskScoresDeprecated = ({
+  entityType,
+  refetch,
+  timerange,
+}: {
+  entityType: RiskScoreEntity;
+  refetch: inputsModel.Refetch;
+  timerange: {
+    from: string;
+    to: string;
+  };
+}) => {
   const { signalIndexExists } = useCheckSignalIndex();
 
   const translations = useMemo(
     () => ({
       body: i18n.UPGRADE_RISK_SCORE_DESCRIPTION,
       signal: !signalIndexExists ? i18n.ENABLE_RISK_SCORE_POPOVER : null,
-      ...(entityType === RiskEntity.host
+      ...(entityType === RiskScoreEntity.host
         ? {
             header: i18n.HOST_RISK_TITLE,
             cta: i18n.UPGRADE_HOST_RISK_SCORE,
@@ -40,15 +53,14 @@ export const RiskScoresDeprecated = ({ entityType }: { entityType: RiskEntity })
         body={translations.body}
         actions={
           <EuiToolTip content={translations.signal}>
-            <EuiButton
-              color="primary"
-              fill
-              onClick={() => alert('Angela do the upgrade')}
-              isDisabled={!signalIndexExists}
+            <RiskScoreUpgradeButton
+              refetch={refetch}
+              riskScoreEntity={entityType}
+              disabled={!signalIndexExists}
+              timerange={timerange}
               data-test-subj={`upgrade_${entityType}_risk_score`}
-            >
-              {translations.cta}
-            </EuiButton>
+              title={translations.cta}
+            />
           </EuiToolTip>
         }
       />

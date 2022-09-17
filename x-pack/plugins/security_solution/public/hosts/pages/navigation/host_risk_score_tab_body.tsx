@@ -8,8 +8,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { noop } from 'lodash/fp';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { RiskEntity } from '../../../risk_score/containers/feature_status/api';
-import { RiskScoresDeprecated } from '../../../common/components/risk_score_deprecated';
+import { RiskScoresDeprecated } from '../../../common/components/risk_score/risk_score_deprecated';
 import type { HostsComponentsQueryProps } from './types';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { HostRiskScoreTable } from '../../components/host_risk_score_table';
@@ -22,6 +21,7 @@ import {
   useHostRiskScoreKpi,
 } from '../../../risk_score/containers';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
+import { RiskScoreEntity } from '../../../../common/search_strategy';
 
 const HostRiskScoreTableManage = manageQuery(HostRiskScoreTable);
 
@@ -67,8 +67,16 @@ export const HostRiskScoreQueryTabBody = ({
     skip: querySkip,
   });
 
+  const timerange = useMemo(() => ({ from, to }), [from, to]);
+
   if (isDeprecated) {
-    return <RiskScoresDeprecated entityType={RiskEntity.host} />;
+    return (
+      <RiskScoresDeprecated
+        refetch={refetch}
+        timerange={timerange}
+        entityType={RiskScoreEntity.host}
+      />
+    );
   }
 
   return (
