@@ -16,11 +16,11 @@ import {
 import { StackFrameMetadata, StackTraceID } from './profiling';
 
 export interface CallerCalleeIntermediateNode {
-  frameGroup: FrameGroup;
-  frameGroupID: string;
   callers: Map<FrameGroupID, CallerCalleeIntermediateNode>;
   callees: Map<FrameGroupID, CallerCalleeIntermediateNode>;
   frameMetadata: StackFrameMetadata;
+  frameGroup: FrameGroup;
+  frameGroupID: string;
   samples: number;
   countInclusive: number;
   countExclusive: number;
@@ -28,18 +28,19 @@ export interface CallerCalleeIntermediateNode {
 
 export function createCallerCalleeIntermediateNode(
   frameMetadata: StackFrameMetadata,
-  samples: number,
-  frameGroupID: string
+  frameGroup: FrameGroup,
+  frameGroupID: FrameGroupID,
+  samples: number
 ): CallerCalleeIntermediateNode {
   return {
-    frameGroup: createFrameGroup(frameMetadata),
     callers: new Map<FrameGroupID, CallerCalleeIntermediateNode>(),
     callees: new Map<FrameGroupID, CallerCalleeIntermediateNode>(),
-    frameMetadata: frameMetadata,
+    frameMetadata,
+    frameGroup,
+    frameGroupID,
     samples,
     countInclusive: 0,
     countExclusive: 0,
-    frameGroupID,
   };
 }
 
@@ -114,7 +115,9 @@ export function createCallerCalleeIntermediateRoot(
   frames: Map<StackTraceID, StackFrameMetadata[]>
 ): CallerCalleeIntermediateNode {
   // Create a node for the centered frame
-  const root = createCallerCalleeIntermediateNode(rootFrame, 0, 'root');
+  const rootFrameGroup = createFrameGroup(rootFrame);
+  const rootFrameGroupID = createFrameGroupID(rootFrameGroup);
+  const root = createCallerCalleeIntermediateNode(rootFrame, rootFrameGroup, rootFrameGroupID, 0);
 
   // Obtain only the relevant frames (e.g. frames that contain the root frame
   // somewhere). If the root frame is "empty" (e.g. fileID is zero and line
@@ -148,11 +151,17 @@ export function createCallerCalleeIntermediateRoot(
 
     for (let i = 0; i < callees.length; i++) {
       const callee = callees[i];
-      const calleeName = createFrameGroupID(createFrameGroup(callee));
-      let node = currentNode.callees.get(calleeName);
+      const calleeFrameGroup = createFrameGroup(callee);
+      const calleeFrameGroupID = createFrameGroupID(calleeFrameGroup);
+      let node = currentNode.callees.get(calleeFrameGroupID);
       if (node === undefined) {
-        node = createCallerCalleeIntermediateNode(callee, samples, calleeName);
-        currentNode.callees.set(calleeName, node);
+        node = createCallerCalleeIntermediateNode(
+          callee,
+          calleeFrameGroup,
+          calleeFrameGroupID,
+          samples
+        );
+        currentNode.callees.set(calleeFrameGroupID, node);
       } else {
         node.samples += samples;
       }

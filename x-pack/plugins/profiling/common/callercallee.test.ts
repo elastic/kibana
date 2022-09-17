@@ -11,7 +11,7 @@ import {
   createCallerCalleeIntermediateRoot,
   fromCallerCalleeIntermediateNode,
 } from './callercallee';
-import { createFrameGroupID } from './frame_group';
+import { createFrameGroup, createFrameGroupID } from './frame_group';
 import { createStackFrameMetadata, groupStackFrameMetadataByStackTrace } from './profiling';
 
 import { events, stackTraces, stackFrames, executables } from './__fixtures__/stacktraces';
@@ -27,7 +27,14 @@ describe('Caller-callee operations', () => {
       SourceLine: 30,
       ExeFileName: 'libc-2.26.so',
     });
-    const parent = createCallerCalleeIntermediateNode(parentFrame, 10, 'parent');
+    const parentFrameGroup = createFrameGroup(parentFrame);
+    const parentFrameGroupID = createFrameGroupID(parentFrameGroup);
+    const parent = createCallerCalleeIntermediateNode(
+      parentFrame,
+      parentFrameGroup,
+      parentFrameGroupID,
+      10
+    );
 
     const childFrame = createStackFrameMetadata({
       FileID: '8d8696a4fd51fa88da70d3fde138247d',
@@ -38,9 +45,24 @@ describe('Caller-callee operations', () => {
       SourceLine: 150,
       ExeFileName: 'auditd',
     });
-    const child = createCallerCalleeIntermediateNode(childFrame, 10, 'child');
+    const childFrameGroup = createFrameGroup(childFrame);
+    const childFrameGroupID = createFrameGroupID(childFrameGroup);
+    const child = createCallerCalleeIntermediateNode(
+      childFrame,
+      childFrameGroup,
+      childFrameGroupID,
+      10
+    );
 
-    const root = createCallerCalleeIntermediateNode(createStackFrameMetadata(), 10, 'root');
+    const rootFrame = createStackFrameMetadata();
+    const rootFrameGroup = createFrameGroup(rootFrame);
+    const rootFrameGroupID = createFrameGroupID(rootFrameGroup);
+    const root = createCallerCalleeIntermediateNode(
+      rootFrame,
+      rootFrameGroup,
+      rootFrameGroupID,
+      10
+    );
     root.callees.set(createFrameGroupID(child.frameGroup), child);
     root.callees.set(createFrameGroupID(parent.frameGroup), parent);
 
