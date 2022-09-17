@@ -189,7 +189,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const openAlertResults = async (ruleName: string, dataViewId?: string) => {
     await PageObjects.common.navigateToApp('discover');
     await PageObjects.header.waitUntilLoadingHasFinished();
-    await PageObjects.discover.clickNewSearchButton();
+    await PageObjects.discover.clickNewSearchButton(); // reset params
 
     await PageObjects.discover.selectIndexPattern(OUTPUT_DATA_INDEX);
 
@@ -312,7 +312,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const queryString = await queryBar.getQueryString();
       const hasFilter = await filterBar.hasFilter('message.keyword', 'msg-1');
       expect(queryString).to.be.equal('message:msg-1');
-      expect(hasFilter).to.be.equal(true); //
+      expect(hasFilter).to.be.equal(true);
 
       expect(await toasts.getToastCount()).to.be.equal(1);
       const content = await toasts.getToastContent(1);
@@ -353,6 +353,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await dataGrid.getDocCount()).to.be(1);
     });
 
+    it('should display not found index error', async () => {
+      await PageObjects.discover.selectIndexPattern(OUTPUT_DATA_INDEX);
+
+      await deleteDataView(sourceDataViewId);
+
+      // rty to open alert results after index deletion
+      await openAlertResults(RULE_NAME);
+
+      expect(await toasts.getToastCount()).to.be(1);
+      const firstContent = await toasts.getToastContent(1);
+      expect(firstContent).to.equal(
+        `Error fetching search source\nCould not locate that data view (id: ${sourceDataViewId}), click here to re-create it`
+      );
+    });
+
     it('should navigate to alert results via view in app link using adhoc data view', async () => {
       await PageObjects.discover.createAdHocDataView('search-source-', true);
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -368,7 +383,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // navigate to discover using view in app link
       await openAlertRuleInManagement('test-adhoc-alert');
-      await clickViewInApp(sourceAdHocDataViewId);
+      await testSubjects.click('ruleDetails-viewInApp');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await retry.waitFor('navigate to discover', async () => {
+        const currentDataViewId = await PageObjects.discover.getCurrentDataViewId();
+        return currentDataViewId === sourceAdHocDataViewId;
+      });
 
       const selectedDataView = await PageObjects.discover.getCurrentlySelectedDataView();
       expect(selectedDataView).to.be.equal('search-source-*');
@@ -379,7 +399,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should navigate to alert results via link provided in notification using adhoc data view', async () => {
-      await openAlertResults('test-adhoc-alert');
+      await openAlertResults('test-adhoc-alert', sourceAdHocDataViewId);
 
       expect(await toasts.getToastCount()).to.be.equal(1);
       const content = await toasts.getToastContent(1);
@@ -390,21 +410,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const selectedDataView = await PageObjects.discover.getCurrentlySelectedDataView();
       expect(selectedDataView).to.be.equal('search-source-*');
-    });
-
-    it('should display not found index error', async () => {
-      await PageObjects.discover.selectIndexPattern(OUTPUT_DATA_INDEX);
-
-      await deleteDataView(sourceDataViewId);
-
-      // rty to open alert results after index deletion
-      await openAlertResults(RULE_NAME);
-
-      expect(await toasts.getToastCount()).to.be(1);
-      const firstContent = await toasts.getToastContent(1);
-      expect(firstContent).to.equal(
-        `Error fetching search source\nCould not locate that data view (id: ${sourceDataViewId}), click here to re-create it`
-      );
     });
   });
 }

@@ -25,6 +25,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
   private readonly fieldEditor = this.ctx.getService('fieldEditor');
   private readonly queryBar = this.ctx.getService('queryBar');
+  private readonly log = this.ctx.getService('log');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
@@ -685,15 +686,11 @@ export class DiscoverPageObject extends FtrService {
 
   public async getCurrentDataViewId() {
     const currentUrl = await this.browser.getCurrentUrl();
-    if (currentUrl) {
-      const [indexSubstring] = currentUrl.match(/index:[^,]*/)!;
-      const dataViewId = decodeURIComponent(indexSubstring)
-        .replace('index:', '')
-        .replaceAll("'", '');
-      return dataViewId;
-    } else {
-      return '';
-    }
+    this.log.info('getting data view id from url', currentUrl);
+    const matchResult = currentUrl.match(/index:[^,]*/);
+    const indexSubstring = matchResult ? matchResult[0] : '';
+    const dataViewId = decodeURIComponent(indexSubstring).replace('index:', '').replaceAll("'", '');
+    return dataViewId;
   }
 
   public async addRuntimeField(name: string, script: string) {

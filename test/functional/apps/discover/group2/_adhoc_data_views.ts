@@ -119,7 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should update data view id when saving data view from hoc one', async () => {
       const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
 
-      await testSubjects.click('discoverAlertsButton');
+      await testSubjects.click('shareTopNavButton');
       await testSubjects.click('confirmModalConfirmButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
