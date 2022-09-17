@@ -63,14 +63,14 @@ describe('Caller-callee operations', () => {
       rootFrameGroupID,
       10
     );
-    root.callees.set(createFrameGroupID(child.frameGroup), child);
-    root.callees.set(createFrameGroupID(parent.frameGroup), parent);
+    root.Callees.set(createFrameGroupID(child.FrameGroup), child);
+    root.Callees.set(createFrameGroupID(parent.FrameGroup), parent);
 
     const graph = fromCallerCalleeIntermediateNode(root);
 
     // Modify original frames to verify graph does not contain references
-    parent.samples = 30;
-    child.samples = 20;
+    parent.Samples = 30;
+    child.Samples = 20;
 
     expect(graph.Callees[0].Samples).toEqual(10);
     expect(graph.Callees[1].Samples).toEqual(10);

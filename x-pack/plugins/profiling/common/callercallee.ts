@@ -16,14 +16,14 @@ import {
 import { StackFrameMetadata, StackTraceID } from './profiling';
 
 export interface CallerCalleeIntermediateNode {
-  callers: Map<FrameGroupID, CallerCalleeIntermediateNode>;
-  callees: Map<FrameGroupID, CallerCalleeIntermediateNode>;
-  frameMetadata: StackFrameMetadata;
-  frameGroup: FrameGroup;
-  frameGroupID: string;
-  samples: number;
-  countInclusive: number;
-  countExclusive: number;
+  Callers: Map<FrameGroupID, CallerCalleeIntermediateNode>;
+  Callees: Map<FrameGroupID, CallerCalleeIntermediateNode>;
+  FrameMetadata: StackFrameMetadata;
+  FrameGroup: FrameGroup;
+  FrameGroupID: string;
+  Samples: number;
+  CountInclusive: number;
+  CountExclusive: number;
 }
 
 export function createCallerCalleeIntermediateNode(
@@ -33,14 +33,14 @@ export function createCallerCalleeIntermediateNode(
   samples: number
 ): CallerCalleeIntermediateNode {
   return {
-    callers: new Map<FrameGroupID, CallerCalleeIntermediateNode>(),
-    callees: new Map<FrameGroupID, CallerCalleeIntermediateNode>(),
-    frameMetadata,
-    frameGroup,
-    frameGroupID,
-    samples,
-    countInclusive: 0,
-    countExclusive: 0,
+    Callers: new Map<FrameGroupID, CallerCalleeIntermediateNode>(),
+    Callees: new Map<FrameGroupID, CallerCalleeIntermediateNode>(),
+    FrameMetadata: frameMetadata,
+    FrameGroup: frameGroup,
+    FrameGroupID: frameGroupID,
+    Samples: samples,
+    CountInclusive: 0,
+    CountExclusive: 0,
   };
 }
 
@@ -147,13 +147,13 @@ export function createCallerCalleeIntermediateRoot(
 
     // Go through the callees, reverse iteration
     let currentNode = root;
-    root.samples += samples;
+    root.Samples += samples;
 
     for (let i = 0; i < callees.length; i++) {
       const callee = callees[i];
       const calleeFrameGroup = createFrameGroup(callee);
       const calleeFrameGroupID = createFrameGroupID(calleeFrameGroup);
-      let node = currentNode.callees.get(calleeFrameGroupID);
+      let node = currentNode.Callees.get(calleeFrameGroupID);
       if (node === undefined) {
         node = createCallerCalleeIntermediateNode(
           callee,
@@ -161,23 +161,23 @@ export function createCallerCalleeIntermediateRoot(
           calleeFrameGroupID,
           samples
         );
-        currentNode.callees.set(calleeFrameGroupID, node);
+        currentNode.Callees.set(calleeFrameGroupID, node);
       } else {
-        node.samples += samples;
+        node.Samples += samples;
       }
 
-      node.countInclusive += samples;
+      node.CountInclusive += samples;
 
       if (i === callees.length - 1) {
         // Leaf frame: sum up counts for exclusive CPU.
-        node.countExclusive += samples;
+        node.CountExclusive += samples;
       }
       currentNode = node;
     }
   }
 
-  root.countExclusive = 0;
-  root.countInclusive = root.samples;
+  root.CountExclusive = 0;
+  root.CountInclusive = root.Samples;
 
   return root;
 }
@@ -267,13 +267,13 @@ function sortNodes(
     sortedNodes.push(node);
   }
   return sortedNodes.sort((n1, n2) => {
-    if (n1.samples > n2.samples) {
+    if (n1.Samples > n2.Samples) {
       return -1;
     }
-    if (n1.samples < n2.samples) {
+    if (n1.Samples < n2.Samples) {
       return 1;
     }
-    return compareFrameGroup(n1.frameGroup, n2.frameGroup);
+    return compareFrameGroup(n1.FrameGroup, n2.FrameGroup);
   });
 }
 
@@ -284,23 +284,23 @@ export function fromCallerCalleeIntermediateNode(
   root: CallerCalleeIntermediateNode
 ): CallerCalleeNode {
   const node = createCallerCalleeNode({
-    FrameGroupID: root.frameGroupID,
-    Samples: root.samples,
-    CountInclusive: root.countInclusive,
-    CountExclusive: root.countExclusive,
+    FrameGroupID: root.FrameGroupID,
+    Samples: root.Samples,
+    CountInclusive: root.CountInclusive,
+    CountExclusive: root.CountExclusive,
   });
 
   // Populate the other fields with data from the root node. Selectors are not supposed
   // to be able to fail.
-  selectCallerCalleeData(root.frameMetadata, node);
+  selectCallerCalleeData(root.FrameMetadata, node);
 
   // Now fill the caller and callee arrays.
   // For a deterministic result we have to walk the callers / callees in a deterministic
   // order. A deterministic result allows deterministic UI views, something that users expect.
-  for (const caller of sortNodes(root.callers)) {
+  for (const caller of sortNodes(root.Callers)) {
     node.Callers.push(fromCallerCalleeIntermediateNode(caller));
   }
-  for (const callee of sortNodes(root.callees)) {
+  for (const callee of sortNodes(root.Callees)) {
     node.Callees.push(fromCallerCalleeIntermediateNode(callee));
   }
 
