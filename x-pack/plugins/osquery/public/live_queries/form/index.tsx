@@ -175,7 +175,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const { packId } = watchedValues;
 
   const queryStatus = useMemo(() => {
-    if (isError || queryState.invalid) return 'danger';
+    if (isError || queryState.error) return 'danger';
     if (isLoading) return 'loading';
     if (isSuccess) return 'complete';
 

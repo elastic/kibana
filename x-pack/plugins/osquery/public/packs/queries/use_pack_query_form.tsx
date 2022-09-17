@@ -6,12 +6,11 @@
  */
 
 import { isArray, isEmpty, xor } from 'lodash';
-
 import { useForm as useHookForm } from 'react-hook-form';
 import type { Draft } from 'immer';
 import { produce } from 'immer';
 import { useMemo } from 'react';
-import type { EcsMappingFormField } from './ecs_mapping_editor_field';
+import type { ECSMapping } from '../../../common/schemas/common';
 
 export interface UsePackQueryFormProps {
   uniqueQueryIds: string[];
@@ -24,7 +23,7 @@ export interface PackSOQueryFormData {
   interval: string;
   platform?: string | undefined;
   version?: string | undefined;
-  ecs_mapping?: PackQuerySOECSMapping[];
+  ecs_mapping?: ECSMapping;
 }
 
 export type PackQuerySOECSMapping = Array<{ field: string; value: string }>;
@@ -36,18 +35,17 @@ export interface PackQueryFormData {
   interval: number;
   platform?: string | undefined;
   version?: string[] | undefined;
-  ecs_mapping: EcsMappingFormField[];
+  ecs_mapping: ECSMapping;
 }
 
-const deserializer = (payload: PackSOQueryFormData): PackQueryFormData =>
-  ({
-    id: payload.id,
-    query: payload.query,
-    interval: payload.interval ? parseInt(payload.interval, 10) : 3600,
-    platform: payload.platform,
-    version: payload.version ? [payload.version] : [],
-    ecs_mapping: payload.ecs_mapping,
-  } as PackQueryFormData);
+const deserializer = (payload: PackSOQueryFormData): PackQueryFormData => ({
+  id: payload.id,
+  query: payload.query,
+  interval: payload.interval ? parseInt(payload.interval, 10) : 3600,
+  platform: payload.platform,
+  version: payload.version ? [payload.version] : [],
+  ecs_mapping: payload.ecs_mapping ?? {},
+});
 
 const serializer = (payload: PackQueryFormData): PackSOQueryFormData =>
   // @ts-expect-error update types

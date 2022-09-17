@@ -289,10 +289,7 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
     >
       <EuiComboBox
         onBlur={ECSField.onBlur}
-        value={ECSField.value}
-        name={ECSField.name}
         prepend={prepend}
-        inputRef={ECSField.ref}
         fullWidth
         singleSelection={SINGLE_SELECTION}
         error={ECSFieldState.error?.message}
@@ -377,7 +374,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   const { ecsMappingArray } = watch();
 
   const osqueryResultFieldValidator = useCallback(
-    (value: string): string | undefined => {
+    (value: string | string[]): string | undefined => {
       const currentMapping = ecsMappingArray && ecsMappingArray[index];
 
       if (!value?.length && currentMapping?.key?.length) {
@@ -402,7 +399,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
             {
               defaultMessage: 'The current query does not return a {columnName} field',
               values: {
-                columnName: value,
+                columnName: isArray(value) ? value[0] : value,
               },
             }
           )
@@ -575,9 +572,6 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
         <EuiFlexItem grow={false}>{Prepend}</EuiFlexItem>
         <EuiFlexItem>
           <ResultComboBox
-            onBlur={resultField.onBlur}
-            value={resultField.value}
-            name={resultField.name}
             error={resultFieldState.error?.message}
             // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
             inputRef={(ref: HTMLInputElement) => {
@@ -731,16 +725,15 @@ interface OsqueryColumn {
 
 export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEditorFieldProps) => {
   const {
-    setValue,
     setError,
     clearErrors,
-    formState: formStateRoot,
-    getFieldState: getFieldStateRoot,
     watch: watchRoot,
+    register: registerRoot,
+    setValue: setValueRoot,
   } = useFormContext<{ query: string; ecs_mapping: ECSMapping }>();
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { query, ecs_mapping } = watchRoot();
-  const ecsMappingFieldState = getFieldStateRoot('ecs_mapping', formStateRoot);
+  const [query, ecsMapping] = watchRoot(['query', 'ecs_mapping'], { ecs_mapping: {} });
+
+  registerRoot('ecs_mapping');
 
   const { control, trigger, watch, formState, resetField, getFieldState } = useForm<{
     ecsMappingArray: ECSMappingArray;
@@ -748,8 +741,8 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
     mode: 'all',
     shouldUnregister: true,
     defaultValues: {
-      ecsMappingArray: !isEmpty(convertECSMappingToArray(ecs_mapping))
-        ? [...convertECSMappingToArray(ecs_mapping), defaultEcsFormData]
+      ecsMappingArray: !isEmpty(convertECSMappingToArray(ecsMapping))
+        ? [...convertECSMappingToArray(ecsMapping), defaultEcsFormData]
         : [defaultEcsFormData],
     },
   });
@@ -758,16 +751,32 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
     name: 'ecsMappingArray',
   });
 
-  const { ecsMappingArray } = watch();
+  const ecsMappingArray = watch('ecsMappingArray');
   const ecsMappingArrayState = getFieldState('ecsMappingArray', formState);
   const [osquerySchemaOptions, setOsquerySchemaOptions] = useState<OsquerySchemaOption[]>([]);
+
+  useEffect(() => {
+    const subscription = watchRoot((data, payload) => {
+      if (payload.name === 'ecs_mapping') {
+        const parsedMapping = convertECSMappingToObject(ecsMappingArray);
+
+        if (!deepEqual(data.ecs_mapping, parsedMapping)) {
+          resetField('ecsMappingArray', {
+            defaultValue: [...convertECSMappingToArray(data.ecs_mapping), defaultEcsFormData],
+          });
+        }
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [watchRoot, ecsMappingArray, replace, resetField]);
 
   useEffect(() => {
     const subscription = watch((data) => {
       const lastEcs = last(data.ecsMappingArray);
 
       if (lastEcs?.key?.length && lastEcs?.result?.value?.length) {
-        return append(defaultEcsFormData);
+        append(defaultEcsFormData);
       }
     });
 
@@ -1006,37 +1015,14 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
   }, [query]);
 
   useEffect(() => {
-    const parsedMapping = convertECSMappingToArray(ecs_mapping);
-
-    if (
-      !ecsMappingFieldState.isTouched &&
-      !ecsMappingArrayState.isTouched &&
-      filter(
-        xorWith(parsedMapping, ecsMappingArray, isEqual),
-        (item) => isEmpty(item) || isEqual(item, defaultEcsFormData)
-      ).length
-    ) {
-      resetField('ecsMappingArray', { defaultValue: [...parsedMapping, defaultEcsFormData] });
-    }
-  }, [
-    ecsMappingArray,
-    ecsMappingArrayState.isTouched,
-    ecsMappingFieldState.isTouched,
-    ecs_mapping,
-    replace,
-    resetField,
-    setValue,
-  ]);
-
-  useEffect(() => {
     const parsedMapping = convertECSMappingToObject(ecsMappingArray);
 
-    if (ecsMappingArrayState.isDirty && !deepEqual(parsedMapping, ecs_mapping)) {
-      setValue('ecs_mapping', parsedMapping, {
+    if (ecsMappingArrayState.isDirty && !deepEqual(parsedMapping, ecsMapping)) {
+      setValueRoot('ecs_mapping', parsedMapping, {
         shouldTouch: true,
       });
     }
-  }, [ecsMappingArray, ecsMappingArrayState.isDirty, ecs_mapping, setValue]);
+  }, [setValueRoot, ecsMappingArray, ecsMappingArrayState.isDirty, ecsMapping]);
 
   useEffect(() => {
     if (!formState.isValid) {

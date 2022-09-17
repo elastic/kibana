@@ -39,11 +39,11 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
   disabled,
   handleSubmitForm,
 }) => {
-  const formContext = useFormContext();
+  const { watch, resetField } = useFormContext();
   const [advancedContentState, setAdvancedContentState] =
     useState<EuiAccordionProps['forceState']>('closed');
   const permissions = useKibana().services.application.capabilities.osquery;
-  const queryType = formContext?.watch('queryType', 'query');
+  const queryType = watch('queryType', 'query');
 
   const {
     field: { onChange, value },
@@ -71,18 +71,18 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
   const handleSavedQueryChange: SavedQueriesDropdownProps['onChange'] = useCallback(
     (savedQuery) => {
       if (savedQuery) {
-        formContext?.resetField('query', { defaultValue: savedQuery.query });
-        formContext?.resetField('savedQueryId', { defaultValue: savedQuery.savedQueryId });
-        formContext?.resetField('ecsMapping', { defaultValue: savedQuery.ecs_mapping });
+        resetField('query', { defaultValue: savedQuery.query });
+        resetField('savedQueryId', { defaultValue: savedQuery.savedQueryId });
+        resetField('ecs_mapping', { defaultValue: savedQuery.ecs_mapping ?? {} });
 
         if (!isEmpty(savedQuery.ecs_mapping)) {
           setAdvancedContentState('open');
         }
       } else {
-        formContext?.resetField('savedQueryId');
+        resetField('savedQueryId');
       }
     },
-    [formContext]
+    [resetField]
   );
 
   const handleToggle = useCallback((isOpen) => {
