@@ -142,6 +142,37 @@ export function createStackFrameMetadata(
   return metadata;
 }
 
+function checkIfStringHasParentheses(s: string) {
+  return /\(|\)/.test(s);
+}
+
+function getFunctionName(metadata: StackFrameMetadata) {
+  return metadata.FunctionName !== '' && !checkIfStringHasParentheses(metadata.FunctionName)
+    ? `${metadata.FunctionName}()`
+    : metadata.FunctionName;
+}
+
+function getExeFileName(metadata: StackFrameMetadata) {
+  if (metadata?.ExeFileName === undefined) {
+    return '';
+  }
+  if (metadata.ExeFileName !== '') {
+    return metadata.ExeFileName;
+  }
+  return describeFrameType(metadata.FrameType);
+}
+
+export function getCalleeLabel(metadata: StackFrameMetadata) {
+  if (metadata.FunctionName !== '') {
+    const sourceFilename = metadata.SourceFilename;
+    const sourceURL = sourceFilename ? sourceFilename.split('/').pop() : '';
+    return `${getExeFileName(metadata)}: ${getFunctionName(metadata)} in ${sourceURL} #${
+      metadata.SourceLine
+    }`;
+  }
+  return getExeFileName(metadata);
+}
+
 export function getCalleeFunction(frame: StackFrameMetadata): string {
   // In the best case scenario, we have the file names, source lines,
   // and function names. However we need to deal with missing function or

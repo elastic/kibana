@@ -7,7 +7,7 @@
 
 import fnv from 'fnv-plus';
 import { CallerCalleeNode } from './callercallee';
-import { describeFrameType } from './profiling';
+import { getCalleeLabel } from './profiling';
 
 interface ColumnarCallerCallee {
   Label: string[];
@@ -94,37 +94,6 @@ function normalize(n: number, lower: number, upper: number): number {
   return (n - lower) / (upper - lower);
 }
 
-function checkIfStringHasParentheses(s: string) {
-  return /\(|\)/.test(s);
-}
-
-function getFunctionName(metadata: StackFrameMetadata) {
-  return metadata.FunctionName !== '' && !checkIfStringHasParentheses(metadata.FunctionName)
-    ? `${metadata.FunctionName}()`
-    : metadata.FunctionName;
-}
-
-function getExeFileName(metadata: StackFrameMetadata) {
-  if (metadata?.ExeFileName === undefined) {
-    return '';
-  }
-  if (metadata.ExeFileName !== '') {
-    return metadata.ExeFileName;
-  }
-  return describeFrameType(metadata.FrameType);
-}
-
-function getLabel(metadata: StackFrameMetadata) {
-  if (metadata.FunctionName !== '') {
-    const sourceFilename = metadata.SourceFilename;
-    const sourceURL = sourceFilename ? sourceFilename.split('/').pop() : '';
-    return `${getExeFileName(metadata)}: ${getFunctionName(metadata)} in ${sourceURL} #${
-      metadata.SourceLine
-    }`;
-  }
-  return getExeFileName(metadata);
-}
-
 function countCallees(root: StackFrameMetadata): number {
   let numCallees = 1;
   for (const callee of root.Callees) {
@@ -160,7 +129,7 @@ export function createColumnarCallerCallee(root: CallerCalleeNode): ColumnarCall
     if (x === 0 && depth === 1) {
       columnar.Label[idx] = 'root: Represents 100% of CPU time.';
     } else {
-      columnar.Label[idx] = getLabel(node.FrameMetadata);
+      columnar.Label[idx] = getCalleeLabel(node.FrameMetadata);
     }
     columnar.Value[idx] = node.Samples;
     columnar.X[idx] = x;
