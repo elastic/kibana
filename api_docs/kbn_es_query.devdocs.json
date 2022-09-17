@@ -4331,7 +4331,7 @@
             "section": "def-common.IFieldSubType",
             "text": "IFieldSubType"
           },
-          " | undefined; script?: string | undefined; lang?: string | undefined; scripted?: boolean | undefined; }"
+          " | undefined; script?: string | undefined; lang?: string | undefined; scripted?: boolean | undefined; esTypes?: string[] | undefined; }"
         ],
         "path": "packages/kbn-es-query/src/es_query/types.ts",
         "deprecated": false,

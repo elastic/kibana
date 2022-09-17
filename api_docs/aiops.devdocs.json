@@ -43,6 +43,47 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "aiops",
+        "id": "def-public.LogCategorization",
+        "type": "Function",
+        "tags": [],
+        "label": "LogCategorization",
+        "description": [
+          "\nLazy-wrapped LogCategorizationAppStateProps React component"
+        ],
+        "signature": [
+          "(props: React.PropsWithChildren<",
+          "LogCategorizationAppStateProps",
+          ">) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogCategorization.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [
+              "- properties specifying the data on which to run the analysis."
+            ],
+            "signature": [
+              "React.PropsWithChildren<",
+              "LogCategorizationAppStateProps",
+              ">"
+            ],
+            "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],
