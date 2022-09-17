@@ -37,6 +37,7 @@ import { fetchChangePointPValues } from './queries/fetch_change_point_p_values';
 import { fetchFieldCandidates } from './queries/fetch_field_candidates';
 import { fetchFrequentItems } from './queries/fetch_frequent_items';
 import {
+  getFieldValuePairCounts,
   getSimpleHierarchicalTree,
   getSimpleHierarchicalTreeLeaves,
   markDuplicates,
@@ -233,9 +234,36 @@ export const defineExplainLogRateSpikesRoute = (
           });
 
           const { root } = getSimpleHierarchicalTree(filteredDf, true, false, fields);
-          const changePointsGroups = getSimpleHierarchicalTreeLeaves(root, []);
+          const treeLeaves = getSimpleHierarchicalTreeLeaves(root, []);
+          const fieldValuePairCounts = getFieldValuePairCounts(treeLeaves);
+          const changePointGroups = markDuplicates(treeLeaves, fieldValuePairCounts);
 
-          push(addChangePointsGroupAction(markDuplicates(changePointsGroups)));
+          // changePointGroups might miss individual changePoints that were not returned by
+          // the frequent_items agg as part of groups. Adding each one here as individual groups.
+          for (const cp of changePoints) {
+            if (
+              fieldValuePairCounts[cp.fieldName] === undefined ||
+              fieldValuePairCounts[cp.fieldName][cp.fieldValue] === undefined
+            ) {
+              changePointGroups.push({
+                docCount: cp.doc_count,
+                group: [
+                  {
+                    fieldName: cp.fieldName,
+                    fieldValue: cp.fieldValue,
+                    duplicate: false,
+                  },
+                ],
+              });
+            }
+          }
+
+          // only return groups if there's at least one group with more than one item
+          const maxItems = Math.max(...changePointGroups.map((g) => g.group.length));
+
+          if (maxItems > 1) {
+            push(addChangePointsGroupAction(changePointGroups));
+          }
         }
 
         const histogramFields: [NumericHistogramField] = [

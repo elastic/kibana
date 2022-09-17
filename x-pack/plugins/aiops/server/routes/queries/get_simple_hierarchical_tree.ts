@@ -237,29 +237,45 @@ export function getSimpleHierarchicalTreeLeaves(
     }
   }
 
+  if (leaves.length === 1 && leaves[0].group.length === 0 && leaves[0].docCount === 0) {
+    return [];
+  }
+
   return leaves;
+}
+
+type FieldValuePairCounts = Record<string, Record<string, number>>;
+/**
+ * Get a nested record of field/value pairs with counts
+ */
+export function getFieldValuePairCounts(cpgs: ChangePointGroup[]): FieldValuePairCounts {
+  return cpgs.reduce((p, cpg) => {
+    cpg.group.forEach((g) => {
+      if (p[g.fieldName] === undefined) {
+        p[g.fieldName] = {};
+      }
+      p[g.fieldName][g.fieldValue] = p[g.fieldName][g.fieldValue]
+        ? p[g.fieldName][g.fieldValue] + 1
+        : 1;
+    });
+    return p;
+  }, {} as FieldValuePairCounts);
 }
 
 /**
  * Analyse duplicate field/value pairs in change point groups.
  */
-export function markDuplicates(cpgs: ChangePointGroup[]): ChangePointGroup[] {
-  const fieldValuePairCounts: Record<string, number> = {};
-  cpgs.forEach((cpg) => {
-    cpg.group.forEach((g) => {
-      const str = `${g.fieldName}$$$$${g.fieldValue}`;
-      fieldValuePairCounts[str] = fieldValuePairCounts[str] ? fieldValuePairCounts[str] + 1 : 1;
-    });
-  });
-
+export function markDuplicates(
+  cpgs: ChangePointGroup[],
+  fieldValuePairCounts: FieldValuePairCounts
+): ChangePointGroup[] {
   return cpgs.map((cpg) => {
     return {
       ...cpg,
       group: cpg.group.map((g) => {
-        const str = `${g.fieldName}$$$$${g.fieldValue}`;
         return {
           ...g,
-          duplicate: fieldValuePairCounts[str] > 1,
+          duplicate: fieldValuePairCounts[g.fieldName][g.fieldValue] > 1,
         };
       }),
     };

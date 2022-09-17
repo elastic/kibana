@@ -162,8 +162,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   const groupItemCount = groupTableItems.reduce((p, c) => {
     return p + Object.keys(c.group).length;
   }, 0);
-  const foundGroups =
-    groupTableItems.length === 0 || (groupTableItems.length > 0 && groupItemCount > 0);
+  const foundGroups = groupTableItems.length > 0 && groupItemCount > 0;
 
   return (
     <div data-test-subj="aiopsExplainLogRateSpikesAnalysis">

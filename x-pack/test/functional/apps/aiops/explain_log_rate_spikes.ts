@@ -12,6 +12,7 @@ import type { TestData } from './types';
 import { farequoteDataViewTestData } from './test_data';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
+  const es = getService('es');
   const headerPage = getPageObject('header');
   const elasticChart = getService('elasticChart');
   const esArchiver = getService('esArchiver');
@@ -131,12 +132,51 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   }
 
   // Failing: See https://github.com/elastic/kibana/issues/140848
-  describe.skip('explain log rate spikes', function () {
+  describe('explain log rate spikes', function () {
     this.tags(['aiops']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
 
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+
+      await es.updateByQuery({
+        index: 'ft_farequote',
+        body: {
+          script: {
+            // @ts-expect-error
+            inline: 'ctx._source.custom_field = "default"',
+            lang: 'painless',
+          },
+        },
+      });
+
+      for (const i of [...Array(100)]) {
+        await es.index({
+          index: 'ft_farequote',
+          body: {
+            '@timestamp': '2016-02-09T16:19:59.000Z',
+            '@version': i,
+            airline: 'UAL',
+            custom_field: 'deviation',
+            responsetime: 10,
+            type: 'farequote',
+          },
+        });
+      }
+
+      await es.index({
+        index: 'ft_farequote',
+        body: {
+          '@timestamp': '2016-02-09T16:19:59.000Z',
+          '@version': 101,
+          airline: 'UAL',
+          custom_field: 'deviation',
+          responsetime: 10,
+          type: 'farequote',
+        },
+        refresh: 'wait_for',
+      });
+
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
