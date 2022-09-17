@@ -2,7 +2,7 @@
 
 exports[` 1`] = `
 Object {
-  "id": "ml_hostriskscore_levels_script",
+  "id": "ml_hostriskscore_levels_script_default",
   "script": Object {
     "lang": "painless",
     "source": "double risk_score = (def)ctx.getByPath(params.risk_score);
@@ -27,7 +27,7 @@ else if (risk_score >= 90) {
 
 exports[` 2`] = `
 Object {
-  "id": "ml_hostriskscore_init_script",
+  "id": "ml_hostriskscore_init_script_default",
   "script": Object {
     "lang": "painless",
     "source": "state.rule_risk_stats = new HashMap();
@@ -40,7 +40,7 @@ state.tactic_ids = new HashSet();",
 
 exports[` 3`] = `
 Object {
-  "id": "ml_hostriskscore_map_script",
+  "id": "ml_hostriskscore_map_script_default",
   "script": Object {
     "lang": "painless",
     "source": "// Get the host variant
@@ -71,7 +71,7 @@ state.rule_risk_stats.put(rule_name, stats);",
 
 exports[` 4`] = `
 Object {
-  "id": "ml_hostriskscore_reduce_script",
+  "id": "ml_hostriskscore_reduce_script_default",
   "script": Object {
     "lang": "painless",
     "source": "// Consolidating time decayed risks and tactics from across all shards
@@ -154,7 +154,7 @@ return [\\"calculated_score_norm\\": final_risk, \\"rule_risks\\": rule_stats, \
 
 exports[` 5`] = `
 Object {
-  "id": "ml_userriskscore_levels_script",
+  "id": "ml_userriskscore_levels_script_default",
   "script": Object {
     "lang": "painless",
     "source": "double risk_score = (def)ctx.getByPath(params.risk_score);
@@ -179,7 +179,7 @@ else if (risk_score >= 90) {
 
 exports[` 6`] = `
 Object {
-  "id": "ml_userriskscore_map_script",
+  "id": "ml_userriskscore_map_script_default",
   "script": Object {
     "lang": "painless",
     "source": "// Get running sum of risk score per rule name per shard\\\\\\\\
@@ -193,7 +193,7 @@ state.rule_risk_stats.put(rule_name, stats);",
 
 exports[` 7`] = `
 Object {
-  "id": "ml_userriskscore_reduce_script",
+  "id": "ml_userriskscore_reduce_script_default",
   "script": Object {
     "lang": "painless",
     "source": "// Consolidating time decayed risks from across all shards
@@ -312,10 +312,10 @@ Object {
         "scripted_metric": Object {
           "combine_script": "return state",
           "init_script": Object {
-            "id": "ml_hostriskscore_init_script",
+            "id": "ml_hostriskscore_init_script_customSpaceId",
           },
           "map_script": Object {
-            "id": "ml_hostriskscore_map_script",
+            "id": "ml_hostriskscore_map_script_customSpaceId",
           },
           "params": Object {
             "lookback_time": 72,
@@ -343,7 +343,7 @@ Object {
             "zeta_constant": 2.612,
           },
           "reduce_script": Object {
-            "id": "ml_hostriskscore_reduce_script",
+            "id": "ml_hostriskscore_reduce_script_customSpaceId",
           },
         },
       },
@@ -402,7 +402,7 @@ Object {
           "combine_script": "return state",
           "init_script": "state.rule_risk_stats = new HashMap();",
           "map_script": Object {
-            "id": "ml_userriskscore_map_script",
+            "id": "ml_userriskscore_map_script_customSpaceId",
           },
           "params": Object {
             "max_risk": 100,
@@ -410,7 +410,7 @@ Object {
             "zeta_constant": 2.612,
           },
           "reduce_script": Object {
-            "id": "ml_userriskscore_reduce_script",
+            "id": "ml_userriskscore_reduce_script_customSpaceId",
           },
         },
       },
@@ -693,7 +693,7 @@ Object {
     },
     Object {
       "script": Object {
-        "id": "ml_hostriskscore_levels_script",
+        "id": "ml_hostriskscore_levels_script_default",
         "params": Object {
           "risk_score": "host.risk.calculated_score_norm",
         },
@@ -725,7 +725,7 @@ Object {
     },
     Object {
       "script": Object {
-        "id": "ml_userriskscore_levels_script",
+        "id": "ml_userriskscore_levels_script_default",
         "params": Object {
           "risk_score": "user.risk.calculated_score_norm",
         },

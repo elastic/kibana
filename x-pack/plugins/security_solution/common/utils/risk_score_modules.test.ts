@@ -28,6 +28,11 @@ import {
   getRiskUserCreateLevelScriptOptions,
   getRiskUserCreateMapScriptOptions,
   getRiskUserCreateReduceScriptOptions,
+  getLegacyIngestPipelineName,
+  getLegacyRiskScoreLevelScriptId,
+  getLegacyRiskScoreInitScriptId,
+  getLegacyRiskScoreMapScriptId,
+  getLegacyRiskScoreReduceScriptId,
 } from './risk_score_modules';
 
 const mockSpaceId = 'customSpaceId';
@@ -82,47 +87,107 @@ describe('getLatestTransformIndex', () => {
 describe('getRiskScoreLevelScriptId', () => {
   test('getRiskScoreLevelScriptId - host', () => {
     const index = getRiskScoreLevelScriptId(RiskScoreEntity.host);
-    expect(index).toMatchInlineSnapshot(`"ml_hostriskscore_levels_script"`);
+    expect(index).toMatchInlineSnapshot(`"ml_hostriskscore_levels_script_default"`);
   });
 
   test('getRiskScoreLevelScriptId - user', () => {
     const index = getRiskScoreLevelScriptId(RiskScoreEntity.user);
-    expect(index).toMatchInlineSnapshot(`"ml_userriskscore_levels_script"`);
+    expect(index).toMatchInlineSnapshot(`"ml_userriskscore_levels_script_default"`);
   });
 });
 
 describe('getRiskScoreInitScriptId', () => {
   test('getRiskScoreInitScriptId - host', () => {
     const index = getRiskScoreInitScriptId(RiskScoreEntity.host);
-    expect(index).toMatchInlineSnapshot(`"ml_hostriskscore_init_script"`);
+    expect(index).toMatchInlineSnapshot(`"ml_hostriskscore_init_script_default"`);
   });
 
   test('getRiskScoreInitScriptId - user', () => {
     const index = getRiskScoreInitScriptId(RiskScoreEntity.user);
-    expect(index).toMatchInlineSnapshot(`"ml_userriskscore_init_script"`);
+    expect(index).toMatchInlineSnapshot(`"ml_userriskscore_init_script_default"`);
   });
 });
 
 describe('getRiskScoreMapScriptId', () => {
   test('getRiskScoreMapScriptId - host', () => {
     const index = getRiskScoreMapScriptId(RiskScoreEntity.host);
-    expect(index).toMatchInlineSnapshot(`"ml_hostriskscore_map_script"`);
+    expect(index).toMatchInlineSnapshot(`"ml_hostriskscore_map_script_default"`);
   });
 
   test('getRiskScoreMapScriptId - user', () => {
     const index = getRiskScoreMapScriptId(RiskScoreEntity.user);
-    expect(index).toMatchInlineSnapshot(`"ml_userriskscore_map_script"`);
+    expect(index).toMatchInlineSnapshot(`"ml_userriskscore_map_script_default"`);
   });
 });
 
 describe('getRiskScoreReduceScriptId', () => {
   test('getRiskScoreReduceScriptId - host', () => {
     const index = getRiskScoreReduceScriptId(RiskScoreEntity.host);
-    expect(index).toMatchInlineSnapshot(`"ml_hostriskscore_reduce_script"`);
+    expect(index).toMatchInlineSnapshot(`"ml_hostriskscore_reduce_script_default"`);
   });
 
   test('getRiskScoreReduceScriptId - user', () => {
     const index = getRiskScoreReduceScriptId(RiskScoreEntity.user);
+    expect(index).toMatchInlineSnapshot(`"ml_userriskscore_reduce_script_default"`);
+  });
+});
+
+describe('getLegacyIngestPipelineName', () => {
+  test('getLegacyIngestPipelineName - host', () => {
+    const name = getLegacyIngestPipelineName(RiskScoreEntity.host);
+    expect(name).toMatchInlineSnapshot(`"ml_hostriskscore_ingest_pipeline"`);
+  });
+
+  test('getLegacyIngestPipelineName - user', () => {
+    const name = getLegacyIngestPipelineName(RiskScoreEntity.user);
+    expect(name).toMatchInlineSnapshot(`"ml_userriskscore_ingest_pipeline"`);
+  });
+});
+
+describe('getLegacyRiskScoreLevelScriptId', () => {
+  test('getLegacyRiskScoreLevelScriptId - host', () => {
+    const index = getLegacyRiskScoreLevelScriptId(RiskScoreEntity.host);
+    expect(index).toMatchInlineSnapshot(`"ml_hostriskscore_levels_script"`);
+  });
+
+  test('getLegacyRiskScoreLevelScriptId - user', () => {
+    const index = getLegacyRiskScoreLevelScriptId(RiskScoreEntity.user);
+    expect(index).toMatchInlineSnapshot(`"ml_userriskscore_levels_script"`);
+  });
+});
+
+describe('getLegacyRiskScoreInitScriptId', () => {
+  test('getLegacyRiskScoreInitScriptId - host', () => {
+    const index = getLegacyRiskScoreInitScriptId(RiskScoreEntity.host);
+    expect(index).toMatchInlineSnapshot(`"ml_hostriskscore_init_script"`);
+  });
+
+  test('getLegacyRiskScoreInitScriptId - user', () => {
+    const index = getLegacyRiskScoreInitScriptId(RiskScoreEntity.user);
+    expect(index).toMatchInlineSnapshot(`"ml_userriskscore_init_script"`);
+  });
+});
+
+describe('getLegacyRiskScoreMapScriptId', () => {
+  test('getLegacyRiskScoreMapScriptId - host', () => {
+    const index = getLegacyRiskScoreMapScriptId(RiskScoreEntity.host);
+    expect(index).toMatchInlineSnapshot(`"ml_hostriskscore_map_script"`);
+  });
+
+  test('getLegacyRiskScoreMapScriptId - user', () => {
+    const index = getLegacyRiskScoreMapScriptId(RiskScoreEntity.user);
+    expect(index).toMatchInlineSnapshot(`"ml_userriskscore_map_script"`);
+  });
+});
+
+describe('getLegacyRiskScoreReduceScriptId', () => {
+  test('getLegacyRiskScoreReduceScriptId - host', () => {
+    const index = getLegacyRiskScoreReduceScriptId(RiskScoreEntity.host);
+    expect(index).toMatchInlineSnapshot(`"ml_hostriskscore_reduce_script"`);
+  });
+
+  test('getLegacyRiskScoreReduceScriptId - user', () => {
+    const index = getLegacyRiskScoreReduceScriptId(RiskScoreEntity.user);
     expect(index).toMatchInlineSnapshot(`"ml_userriskscore_reduce_script"`);
   });
 });
