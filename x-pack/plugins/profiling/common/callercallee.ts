@@ -267,6 +267,12 @@ function sortNodes(
     sortedNodes.push(node);
   }
   return sortedNodes.sort((n1, n2) => {
+    if (n1.samples > n2.samples) {
+      return -1;
+    }
+    if (n1.samples < n2.samples) {
+      return 1;
+    }
     return compareFrameGroup(n1.frameGroup, n2.frameGroup);
   });
 }

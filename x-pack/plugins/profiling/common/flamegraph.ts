@@ -180,8 +180,6 @@ export function createColumnarCallerCallee(root: CallerCalleeNode): ColumnarCall
     columnar.FrameID[idx] = node.FrameID;
     columnar.ExecutableID[idx] = node.FileID;
 
-    node.Callees.sort((a: CallerCalleeNode, b: CallerCalleeNode) => b.Samples - a.Samples);
-
     let delta = 0;
     for (const callee of node.Callees) {
       delta += callee.Samples;
