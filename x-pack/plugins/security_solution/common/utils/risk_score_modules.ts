@@ -25,7 +25,7 @@ export const getRiskScoreLatestTransformId = (
 export const getIngestPipelineName = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') =>
   `ml_${riskScoreEntity}riskscore_ingest_pipeline_${spaceId}`;
 
-export const getPivoTransformIndex = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') =>
+export const getPivotTransformIndex = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') =>
   `ml_${riskScoreEntity}_risk_score_${spaceId}`;
 
 export const getLatestTransformIndex = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') =>
@@ -293,7 +293,7 @@ export const getCreateRiskScoreIndicesOptions = ({
     },
   };
   return {
-    index: getPivoTransformIndex(riskScoreEntity, spaceId),
+    index: getPivotTransformIndex(riskScoreEntity, spaceId),
     mappings: stringifyScript ? JSON.stringify(mappings) : mappings,
   };
 };
@@ -380,7 +380,7 @@ export const getCreateMLHostPivotTransformOptions = ({
 }) => {
   const options = {
     dest: {
-      index: getPivoTransformIndex(RiskScoreEntity.host, spaceId),
+      index: getPivotTransformIndex(RiskScoreEntity.host, spaceId),
       pipeline: getIngestPipelineName(RiskScoreEntity.host, spaceId),
     },
     frequency: '1h',
@@ -479,7 +479,7 @@ export const getCreateMLUserPivotTransformOptions = ({
 }) => {
   const options = {
     dest: {
-      index: getPivoTransformIndex(RiskScoreEntity.user, spaceId),
+      index: getPivotTransformIndex(RiskScoreEntity.user, spaceId),
       pipeline: getIngestPipelineName(RiskScoreEntity.user, spaceId),
     },
     frequency: '1h',
@@ -571,7 +571,7 @@ export const getCreateLatestTransformOptions = ({
       unique_key: [`${riskScoreEntity}.name`],
     },
     source: {
-      index: [getPivoTransformIndex(riskScoreEntity, spaceId)],
+      index: [getPivotTransformIndex(riskScoreEntity, spaceId)],
     },
     sync: {
       time: {

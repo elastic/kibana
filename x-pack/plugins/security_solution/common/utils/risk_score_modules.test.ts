@@ -14,7 +14,7 @@ import {
   getCreateRiskScoreLatestIndicesOptions,
   getIngestPipelineName,
   getLatestTransformIndex,
-  getPivoTransformIndex,
+  getPivotTransformIndex,
   getRiskScoreIngestPipelineOptions,
   getRiskScorePivotTransformId,
   getRiskHostCreateInitScriptOptions,
@@ -60,14 +60,14 @@ describe('getIngestPipelineName', () => {
   });
 });
 
-describe('getPivoTransformIndex', () => {
-  test('getPivoTransformIndex - host', () => {
-    const index = getPivoTransformIndex(RiskScoreEntity.host, mockSpaceId);
+describe('getPivotTransformIndex', () => {
+  test('getPivotTransformIndex - host', () => {
+    const index = getPivotTransformIndex(RiskScoreEntity.host, mockSpaceId);
     expect(index).toMatchInlineSnapshot(`"ml_host_risk_score_customSpaceId"`);
   });
 
-  test('getPivoTransformIndex - user', () => {
-    const index = getPivoTransformIndex(RiskScoreEntity.user, mockSpaceId);
+  test('getPivotTransformIndex - user', () => {
+    const index = getPivotTransformIndex(RiskScoreEntity.user, mockSpaceId);
     expect(index).toMatchInlineSnapshot(`"ml_user_risk_score_customSpaceId"`);
   });
 });
