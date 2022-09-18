@@ -6,7 +6,6 @@
  */
 
 import { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../../../common/constants';
 import { getIndicesStats } from './indices_stats_collector';
 import { cspmUsageSchema } from './schema';
 import { CspmUsage } from './types';
@@ -19,11 +18,10 @@ export function registerIndicesCounterCollector(usageCollection?: UsageCollectio
 
   // create usage collector
   const indicesCounterCollector = usageCollection.makeUsageCollector<CspmUsage>({
-    type: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+    type: 'cloud_security_posture',
     isReady: () => true,
     fetch: async (collectorFetchContext: CollectorFetchContext) => {
       const indicesStats = await getIndicesStats(collectorFetchContext.esClient);
-      console.log({ indicesStats });
       return {
         indices: indicesStats,
       };
