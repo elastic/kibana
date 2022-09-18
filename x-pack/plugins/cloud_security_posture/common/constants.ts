@@ -18,6 +18,7 @@ export const CSP_LATEST_FINDINGS_DATA_VIEW = 'logs-cloud_security_posture.findin
 
 export const FINDINGS_INDEX_NAME = 'logs-cloud_security_posture.findings';
 export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-default*';
+export const FINDINGS_INDEX_DEFAULT_NS = 'logs-cloud_security_posture.findings-default';
 
 export const LATEST_FINDINGS_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.findings_latest';
 export const LATEST_FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings_latest-*';
@@ -43,5 +44,13 @@ export const INTERNAL_FEATURE_FLAGS = {
 export const CSP_RULE_SAVED_OBJECT_TYPE = 'csp_rule';
 export const CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE = 'csp-rule-template';
 
-export const CLOUDBEAT_VANILLA = 'cloudbeat/cis_k8s'; // Integration input
-export const CLOUDBEAT_EKS = 'cloudbeat/cis_eks'; // Integration input
+export const CLOUDBEAT_VANILLA = 'cloudbeat/vanilla'; // Integration input
+export const INTEGRATION_CIS_K8S = 'cis_k8s'; // rule template benchmark id
+
+export const CLOUDBEAT_EKS = 'cloudbeat/eks'; // Integration input
+export const INTEGRATION_CIS_EKS = 'cis_eks'; // rule template benchmark id
+
+export const CIS_INTEGRATION_INPUTS_MAP = {
+  [CLOUDBEAT_VANILLA]: INTEGRATION_CIS_K8S,
+  [CLOUDBEAT_EKS]: INTEGRATION_CIS_EKS,
+} as const;
