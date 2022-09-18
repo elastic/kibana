@@ -1,0 +1,29 @@
+{
+  "id": "profiling",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "profiling",
+    "githubTeam": "profiling-ui"
+  },
+  "description": "",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "navigation",
+    "data",
+    "kibanaUtils",
+    "share",
+    "observability",
+    "features",
+    "kibanaReact",
+    "unifiedSearch",
+    "dataViews",
+    "charts"
+  ],
+  "optionalPlugins": [],
+  "configPath": [
+    "xpack",
+    "profiling"
+  ]
+}

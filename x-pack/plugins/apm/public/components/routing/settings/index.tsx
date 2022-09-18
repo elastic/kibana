@@ -20,6 +20,7 @@ import { CustomLinkOverview } from '../../app/settings/custom_link';
 import { Schema } from '../../app/settings/schema';
 import { AnomalyDetection } from '../../app/settings/anomaly_detection';
 import { AgentKeys } from '../../app/settings/agent_keys';
+import { GeneralSettings } from '../../app/settings/general_settings';
 
 function page({
   title,
@@ -54,6 +55,14 @@ export const settings = {
       </Breadcrumb>
     ),
     children: {
+      '/settings/general-settings': page({
+        title: i18n.translate(
+          'xpack.apm.views.settings.generalSettings.title',
+          { defaultMessage: 'General settings' }
+        ),
+        element: <GeneralSettings />,
+        tab: 'general-settings',
+      }),
       '/settings/agent-configuration': page({
         tab: 'agent-configuration',
         title: i18n.translate(
@@ -133,7 +142,7 @@ export const settings = {
         tab: 'agent-keys',
       }),
       '/settings': {
-        element: <Redirect to="/settings/agent-configuration" />,
+        element: <Redirect to="/settings/general-settings" />,
       },
     },
   },
