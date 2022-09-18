@@ -6,7 +6,7 @@
  */
 
 import fnv from 'fnv-plus';
-import { CallerCalleeNode } from './callercallee';
+import { CallerCalleeNode, sortCallerCalleeNodes } from './callercallee';
 import { getCalleeLabel } from './profiling';
 
 interface ColumnarCallerCallee {
@@ -94,9 +94,9 @@ function normalize(n: number, lower: number, upper: number): number {
   return (n - lower) / (upper - lower);
 }
 
-function countCallees(root: StackFrameMetadata): number {
+function countCallees(root: CallerCalleeNode): number {
   let numCallees = 1;
-  for (const callee of root.Callees) {
+  for (const [_, callee] of root.Callees) {
     numCallees += countCallees(callee);
   }
   return numCallees;
@@ -151,14 +151,18 @@ export function createColumnarCallerCallee(root: CallerCalleeNode): ColumnarCall
     columnar.FrameID[idx] = node.FrameMetadata.FrameID;
     columnar.ExecutableID[idx] = node.FrameMetadata.FileID;
 
+    // For a deterministic result we have to walk the callers / callees in a deterministic
+    // order. A deterministic result allows deterministic UI views, something that users expect.
+    const callees = sortCallerCalleeNodes(node.Callees);
+
     let delta = 0;
-    for (const callee of node.Callees) {
+    for (const callee of callees) {
       delta += callee.Samples;
     }
 
-    for (let i = node.Callees.length - 1; i >= 0; i--) {
-      delta -= node.Callees[i].Samples;
-      queue.push({ x: x + delta, depth: depth + 1, node: node.Callees[i], parentID: id });
+    for (let i = callees.length - 1; i >= 0; i--) {
+      delta -= callees[i].Samples;
+      queue.push({ x: x + delta, depth: depth + 1, node: callees[i], parentID: id });
     }
 
     idx++;

@@ -8,10 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
-import {
-  createCallerCalleeIntermediateRoot,
-  fromCallerCalleeIntermediateNode,
-} from '../../common/callercallee';
+import { createCallerCalleeGraph } from '../../common/callercallee';
 import {
   createColumnarCallerCallee,
   createFlameGraph,
@@ -74,28 +71,18 @@ export function registerFlameChartSearchRoute({ router, logger }: RouteRegisterP
 
           const t1 = new Date().getTime();
           const rootFrame = createStackFrameMetadata();
-          const intermediateRoot = createCallerCalleeIntermediateRoot(
-            rootFrame,
-            stackTraceEvents,
-            frameMetadataForTraces
-          );
-          logger.info(
-            `creating intermediate caller-callee graph took ${new Date().getTime() - t1} ms`
-          );
+          const root = createCallerCalleeGraph(rootFrame, stackTraceEvents, frameMetadataForTraces);
+          logger.info(`creating caller-callee graph took ${new Date().getTime() - t1} ms`);
 
           const t2 = new Date().getTime();
-          const root = fromCallerCalleeIntermediateNode(intermediateRoot);
-          logger.info(`creating caller-callee graph took ${new Date().getTime() - t2} ms`);
+          const columnar = createColumnarCallerCallee(root);
+          logger.info(`creating columnar caller-callee graph took ${new Date().getTime() - t2} ms`);
 
           const t3 = new Date().getTime();
-          const columnar = createColumnarCallerCallee(root);
-          logger.info(`creating columnar caller-callee graph took ${new Date().getTime() - t3} ms`);
+          const fg = createFlameGraph(columnar);
+          logger.info(`creating flamegraph took ${new Date().getTime() - t3} ms`);
 
-          const t4 = new Date().getTime();
-          const flamegraph = createFlameGraph(columnar);
-          logger.info(`creating flamegraph took ${new Date().getTime() - t4} ms`);
-
-          return flamegraph;
+          return fg;
         });
 
         // sampleRate is 1/5^N, with N being the downsampled index the events were fetched from.

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { clone } from 'lodash';
 import {
   compareFrameGroup,
   createFrameGroup,
@@ -73,9 +72,9 @@ function sortRelevantTraces(relevantTraces: Map<StackTraceID, RelevantTrace>): S
   });
 }
 
-export interface CallerCalleeIntermediateNode {
-  Callers: Map<FrameGroupID, CallerCalleeIntermediateNode>;
-  Callees: Map<FrameGroupID, CallerCalleeIntermediateNode>;
+export interface CallerCalleeNode {
+  Callers: Map<FrameGroupID, CallerCalleeNode>;
+  Callees: Map<FrameGroupID, CallerCalleeNode>;
   FrameMetadata: StackFrameMetadata;
   FrameGroup: FrameGroup;
   FrameGroupID: FrameGroupID;
@@ -84,15 +83,15 @@ export interface CallerCalleeIntermediateNode {
   CountExclusive: number;
 }
 
-export function createCallerCalleeIntermediateNode(
+export function createCallerCalleeNode(
   frameMetadata: StackFrameMetadata,
   frameGroup: FrameGroup,
   frameGroupID: FrameGroupID,
   samples: number
-): CallerCalleeIntermediateNode {
+): CallerCalleeNode {
   return {
-    Callers: new Map<FrameGroupID, CallerCalleeIntermediateNode>(),
-    Callees: new Map<FrameGroupID, CallerCalleeIntermediateNode>(),
+    Callers: new Map<FrameGroupID, CallerCalleeNode>(),
+    Callees: new Map<FrameGroupID, CallerCalleeNode>(),
     FrameMetadata: frameMetadata,
     FrameGroup: frameGroup,
     FrameGroupID: frameGroupID,
@@ -102,22 +101,22 @@ export function createCallerCalleeIntermediateNode(
   };
 }
 
-// createCallerCalleeIntermediateRoot creates a graph in the internal
-// representation from a StackFrameMetadata that identifies the "centered"
-// function and the trace results that provide traces and the number of times
-// that the trace has been seen.
+// createCallerCalleeGraph creates a graph in the internal representation
+// from a StackFrameMetadata that identifies the "centered" function and
+// the trace results that provide traces and the number of times that the
+// trace has been seen.
 //
 // The resulting data structure contains all of the data, but is not yet in the
 // form most easily digestible by others.
-export function createCallerCalleeIntermediateRoot(
+export function createCallerCalleeGraph(
   rootFrame: StackFrameMetadata,
   traces: Map<StackTraceID, number>,
   frames: Map<StackTraceID, StackFrameMetadata[]>
-): CallerCalleeIntermediateNode {
+): CallerCalleeNode {
   // Create a node for the centered frame
   const rootFrameGroup = createFrameGroup(rootFrame);
   const rootFrameGroupID = createFrameGroupID(rootFrameGroup);
-  const root = createCallerCalleeIntermediateNode(rootFrame, rootFrameGroup, rootFrameGroupID, 0);
+  const root = createCallerCalleeNode(rootFrame, rootFrameGroup, rootFrameGroupID, 0);
 
   // Obtain only the relevant frames (e.g. frames that contain the root frame
   // somewhere). If the root frame is "empty" (e.g. fileID is zero and line
@@ -156,12 +155,7 @@ export function createCallerCalleeIntermediateRoot(
       const calleeFrameGroupID = createFrameGroupID(calleeFrameGroup);
       let node = currentNode.Callees.get(calleeFrameGroupID);
       if (node === undefined) {
-        node = createCallerCalleeIntermediateNode(
-          callee,
-          calleeFrameGroup,
-          calleeFrameGroupID,
-          samples
-        );
+        node = createCallerCalleeNode(callee, calleeFrameGroup, calleeFrameGroupID, samples);
         currentNode.Callees.set(calleeFrameGroupID, node);
       } else {
         node.Samples += samples;
@@ -183,41 +177,11 @@ export function createCallerCalleeIntermediateRoot(
   return root;
 }
 
-export interface CallerCalleeNode {
-  Callers: CallerCalleeNode[];
-  Callees: CallerCalleeNode[];
-
-  FrameMetadata: StackFrameMetadata;
-  FrameGroup: FrameGroup;
-  FrameGroupID: FrameGroupID;
-
-  Samples: number;
-  CountInclusive: number;
-  CountExclusive: number;
-}
-
-export function createCallerCalleeNode(options: Partial<CallerCalleeNode> = {}): CallerCalleeNode {
-  const node = {} as CallerCalleeNode;
-
-  node.Callers = clone(options.Callers ?? []);
-  node.Callees = clone(options.Callees ?? []);
-
-  node.FrameMetadata = options.FrameMetadata ?? createStackFrameMetadata();
-  node.FrameGroup = options.FrameGroup ?? '';
-  node.FrameGroupID = options.FrameGroupID ?? '';
-
-  node.Samples = options.Samples ?? 0;
-  node.CountInclusive = options.CountInclusive ?? 0;
-  node.CountExclusive = options.CountExclusive ?? 0;
-
-  return node;
-}
-
-function sortNodes(
-  nodes: Map<FrameGroupID, CallerCalleeIntermediateNode>
-): CallerCalleeIntermediateNode[] {
-  const sortedNodes = new Array<CallerCalleeIntermediateNode>();
-  for (const node of nodes.values()) {
+export function sortCallerCalleeNodes(
+  nodes: Map<FrameGroupID, CallerCalleeNode>
+): CallerCalleeNode[] {
+  const sortedNodes = new Array<CallerCalleeNode>();
+  for (const [_, node] of nodes) {
     sortedNodes.push(node);
   }
   return sortedNodes.sort((n1, n2) => {
@@ -229,32 +193,4 @@ function sortNodes(
     }
     return compareFrameGroup(n1.FrameGroup, n2.FrameGroup);
   });
-}
-
-// fromCallerCalleeIntermediateNode is used to convert the intermediate representation
-// of the diagram into the format that is easily JSONified and more easily consumed by
-// others.
-export function fromCallerCalleeIntermediateNode(
-  root: CallerCalleeIntermediateNode
-): CallerCalleeNode {
-  const node = createCallerCalleeNode({
-    FrameMetadata: root.FrameMetadata,
-    FrameGroup: root.FrameGroup,
-    FrameGroupID: root.FrameGroupID,
-    Samples: root.Samples,
-    CountInclusive: root.CountInclusive,
-    CountExclusive: root.CountExclusive,
-  });
-
-  // Now fill the caller and callee arrays.
-  // For a deterministic result we have to walk the callers / callees in a deterministic
-  // order. A deterministic result allows deterministic UI views, something that users expect.
-  for (const caller of sortNodes(root.Callers)) {
-    node.Callers.push(fromCallerCalleeIntermediateNode(caller));
-  }
-  for (const callee of sortNodes(root.Callees)) {
-    node.Callees.push(fromCallerCalleeIntermediateNode(callee));
-  }
-
-  return node;
 }

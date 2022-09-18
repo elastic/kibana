@@ -6,77 +6,13 @@
  */
 
 import { sum } from 'lodash';
-import {
-  createCallerCalleeIntermediateNode,
-  createCallerCalleeIntermediateRoot,
-  fromCallerCalleeIntermediateNode,
-} from './callercallee';
-import { createFrameGroup, createFrameGroupID } from './frame_group';
+import { createCallerCalleeGraph } from './callercallee';
 import { createStackFrameMetadata, groupStackFrameMetadataByStackTrace } from './profiling';
 
 import { events, stackTraces, stackFrames, executables } from './__fixtures__/stacktraces';
 
 describe('Caller-callee operations', () => {
   test('1', () => {
-    const parentFrame = createStackFrameMetadata({
-      FileID: '6bc50d345244d5956f93a1b88f41874d',
-      FrameType: 3,
-      AddressOrLine: 971740,
-      FunctionName: 'epoll_wait',
-      SourceID: 'd670b496cafcaea431a23710fb5e4f58',
-      SourceLine: 30,
-      ExeFileName: 'libc-2.26.so',
-    });
-    const parentFrameGroup = createFrameGroup(parentFrame);
-    const parentFrameGroupID = createFrameGroupID(parentFrameGroup);
-    const parent = createCallerCalleeIntermediateNode(
-      parentFrame,
-      parentFrameGroup,
-      parentFrameGroupID,
-      10
-    );
-
-    const childFrame = createStackFrameMetadata({
-      FileID: '8d8696a4fd51fa88da70d3fde138247d',
-      FrameType: 3,
-      AddressOrLine: 67000,
-      FunctionName: 'epoll_poll',
-      SourceID: 'f0a7901dcefed6cc8992a324b9df733c',
-      SourceLine: 150,
-      ExeFileName: 'auditd',
-    });
-    const childFrameGroup = createFrameGroup(childFrame);
-    const childFrameGroupID = createFrameGroupID(childFrameGroup);
-    const child = createCallerCalleeIntermediateNode(
-      childFrame,
-      childFrameGroup,
-      childFrameGroupID,
-      10
-    );
-
-    const rootFrame = createStackFrameMetadata();
-    const rootFrameGroup = createFrameGroup(rootFrame);
-    const rootFrameGroupID = createFrameGroupID(rootFrameGroup);
-    const root = createCallerCalleeIntermediateNode(
-      rootFrame,
-      rootFrameGroup,
-      rootFrameGroupID,
-      10
-    );
-    root.Callees.set(createFrameGroupID(child.FrameGroup), child);
-    root.Callees.set(createFrameGroupID(parent.FrameGroup), parent);
-
-    const graph = fromCallerCalleeIntermediateNode(root);
-
-    // Modify original frames to verify graph does not contain references
-    parent.Samples = 30;
-    child.Samples = 20;
-
-    expect(graph.Callees[0].Samples).toEqual(10);
-    expect(graph.Callees[1].Samples).toEqual(10);
-  });
-
-  test('2', () => {
     const totalSamples = sum([...events.values()]);
 
     const rootFrame = createStackFrameMetadata();
@@ -85,12 +21,7 @@ describe('Caller-callee operations', () => {
       stackFrames,
       executables
     );
-    const intermediateRoot = createCallerCalleeIntermediateRoot(
-      rootFrame,
-      events,
-      frameMetadataForTraces
-    );
-    const root = fromCallerCalleeIntermediateNode(intermediateRoot);
+    const root = createCallerCalleeGraph(rootFrame, events, frameMetadataForTraces);
 
     expect(root.Samples).toEqual(totalSamples);
     expect(root.CountInclusive).toEqual(totalSamples);
