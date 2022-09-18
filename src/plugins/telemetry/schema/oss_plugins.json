@@ -202,6 +202,34 @@
         }
       }
     },
+    "cloud_provider": {
+      "properties": {
+        "name": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The name of the cloud provider"
+          }
+        },
+        "vm_type": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The VM instance type"
+          }
+        },
+        "region": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The cloud provider region"
+          }
+        },
+        "zone": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The availability zone within the region"
+          }
+        }
+      }
+    },
     "application_usage": {
       "properties": {
         "dashboards": {
@@ -6494,34 +6522,6 @@
         }
       }
     },
-    "cloud_provider": {
-      "properties": {
-        "name": {
-          "type": "keyword",
-          "_meta": {
-            "description": "The name of the cloud provider"
-          }
-        },
-        "vm_type": {
-          "type": "keyword",
-          "_meta": {
-            "description": "The VM instance type"
-          }
-        },
-        "region": {
-          "type": "keyword",
-          "_meta": {
-            "description": "The cloud provider region"
-          }
-        },
-        "zone": {
-          "type": "keyword",
-          "_meta": {
-            "description": "The availability zone within the region"
-          }
-        }
-      }
-    },
     "core": {
       "properties": {
         "config": {
@@ -8782,53 +8782,6 @@
         }
       }
     },
-    "ui_counters": {
-      "properties": {
-        "dailyEvents": {
-          "type": "array",
-          "items": {
-            "properties": {
-              "appName": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "Name of the app reporting ui counts."
-                }
-              },
-              "eventName": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "Name of the event that happened."
-                }
-              },
-              "lastUpdatedAt": {
-                "type": "date",
-                "_meta": {
-                  "description": "Time at which the metric was last updated."
-                }
-              },
-              "fromTimestamp": {
-                "type": "date",
-                "_meta": {
-                  "description": "Time at which the metric was captured."
-                }
-              },
-              "counterType": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "The type of counter used."
-                }
-              },
-              "total": {
-                "type": "integer",
-                "_meta": {
-                  "description": "The total number of times the event happened."
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "ui_metric": {
       "properties": {
         "console": {
@@ -9890,6 +9843,53 @@
                 "type": "long",
                 "_meta": {
                   "description": "The value of the event"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ui_counters": {
+      "properties": {
+        "dailyEvents": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "appName": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Name of the app reporting ui counts."
+                }
+              },
+              "eventName": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Name of the event that happened."
+                }
+              },
+              "lastUpdatedAt": {
+                "type": "date",
+                "_meta": {
+                  "description": "Time at which the metric was last updated."
+                }
+              },
+              "fromTimestamp": {
+                "type": "date",
+                "_meta": {
+                  "description": "Time at which the metric was captured."
+                }
+              },
+              "counterType": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The type of counter used."
+                }
+              },
+              "total": {
+                "type": "integer",
+                "_meta": {
+                  "description": "The total number of times the event happened."
                 }
               }
             }
