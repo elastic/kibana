@@ -15,35 +15,6 @@ import {
 } from './frame_group';
 import { StackFrameMetadata, StackTraceID } from './profiling';
 
-export interface CallerCalleeIntermediateNode {
-  Callers: Map<FrameGroupID, CallerCalleeIntermediateNode>;
-  Callees: Map<FrameGroupID, CallerCalleeIntermediateNode>;
-  FrameMetadata: StackFrameMetadata;
-  FrameGroup: FrameGroup;
-  FrameGroupID: FrameGroupID;
-  Samples: number;
-  CountInclusive: number;
-  CountExclusive: number;
-}
-
-export function createCallerCalleeIntermediateNode(
-  frameMetadata: StackFrameMetadata,
-  frameGroup: FrameGroup,
-  frameGroupID: FrameGroupID,
-  samples: number
-): CallerCalleeIntermediateNode {
-  return {
-    Callers: new Map<FrameGroupID, CallerCalleeIntermediateNode>(),
-    Callees: new Map<FrameGroupID, CallerCalleeIntermediateNode>(),
-    FrameMetadata: frameMetadata,
-    FrameGroup: frameGroup,
-    FrameGroupID: frameGroupID,
-    Samples: samples,
-    CountInclusive: 0,
-    CountExclusive: 0,
-  };
-}
-
 interface RelevantTrace {
   frames: StackFrameMetadata[];
   index: number;
@@ -100,6 +71,35 @@ function sortRelevantTraces(relevantTraces: Map<StackTraceID, RelevantTrace>): S
     if (t1 > t2) return 1;
     return 0;
   });
+}
+
+export interface CallerCalleeIntermediateNode {
+  Callers: Map<FrameGroupID, CallerCalleeIntermediateNode>;
+  Callees: Map<FrameGroupID, CallerCalleeIntermediateNode>;
+  FrameMetadata: StackFrameMetadata;
+  FrameGroup: FrameGroup;
+  FrameGroupID: FrameGroupID;
+  Samples: number;
+  CountInclusive: number;
+  CountExclusive: number;
+}
+
+export function createCallerCalleeIntermediateNode(
+  frameMetadata: StackFrameMetadata,
+  frameGroup: FrameGroup,
+  frameGroupID: FrameGroupID,
+  samples: number
+): CallerCalleeIntermediateNode {
+  return {
+    Callers: new Map<FrameGroupID, CallerCalleeIntermediateNode>(),
+    Callees: new Map<FrameGroupID, CallerCalleeIntermediateNode>(),
+    FrameMetadata: frameMetadata,
+    FrameGroup: frameGroup,
+    FrameGroupID: frameGroupID,
+    Samples: samples,
+    CountInclusive: 0,
+    CountExclusive: 0,
+  };
 }
 
 // createCallerCalleeIntermediateRoot creates a graph in the internal
