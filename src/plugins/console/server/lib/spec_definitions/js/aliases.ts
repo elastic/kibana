@@ -14,6 +14,8 @@ export const aliases = (specService: SpecDefinitionsService) => {
     routing: '1',
     search_routing: '1,2',
     index_routing: '1',
+    is_write_index: false,
+    is_hidden: false,
   };
   specService.addGlobalAutocompleteRules('aliases', {
     '*': aliasRules,

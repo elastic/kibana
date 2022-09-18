@@ -123,6 +123,11 @@ describe('AlertsTable', () => {
       expect(getByTestId('toolbar-updated-at')).not.toBe(null);
     });
 
+    it('should show alerts count', () => {
+      const { getByTestId } = render(<AlertsTableWithLocale {...tableProps} />);
+      expect(getByTestId('toolbar-alerts-count')).not.toBe(null);
+    });
+
     describe('leading control columns', () => {
       it('should return at least the flyout action control', async () => {
         const wrapper = render(<AlertsTableWithLocale {...tableProps} />);

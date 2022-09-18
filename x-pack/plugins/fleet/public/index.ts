@@ -42,6 +42,8 @@ export type {
   PackagePolicyResponseExtension,
   PackagePolicyResponseExtensionComponent,
   PackagePolicyResponseExtensionComponentProps,
+  PackageGenericErrorsListProps,
+  PackageGenericErrorsListComponent,
   UIExtensionPoint,
   UIExtensionRegistrationCallback,
   UIExtensionsStorage,
