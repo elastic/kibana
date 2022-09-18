@@ -24,7 +24,7 @@ const RiskScoresNoDataDetectedComponent = ({ entityType }: { entityType: RiskSco
   );
 
   return (
-    <EuiPanel hasBorder>
+    <EuiPanel data-test-subj={`${entityType}-risk-score-no-data-detected`} hasBorder>
       <HeaderSection title={<RiskScoreHeaderTitle riskScoreEntity={entityType} />} titleSize="s" />
       <EuiEmptyPrompt title={<h2>{translations.title}</h2>} body={translations.body} />
     </EuiPanel>

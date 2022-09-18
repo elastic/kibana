@@ -19,9 +19,13 @@ import {
   HOSTS_DONUT_CHART,
   HOSTS_TABLE,
   HOSTS_TABLE_ROWS,
+  HOST_RISK_SCORE_NO_DATA_DETECTED,
+  UPGRADE_HOST_RISK_SCORE_BUTTON,
+  UPGRADE_USER_RISK_SCORE_BUTTON,
   USERS_DONUT_CHART,
   USERS_TABLE,
   USERS_TABLE_ROWS,
+  USER_RISK_SCORE_NO_DATA_DETECTED,
 } from '../../screens/entity_analytics';
 import { openRiskTableFilterAndSelectTheLowOption } from '../../tasks/host_risk';
 
@@ -42,6 +46,65 @@ describe('Entity Analytics Dashboard', () => {
 
     it('shows enable user risk button', () => {
       cy.get(ENABLE_USER_RISK_SCORE_BUTTON).should('be.visible');
+    });
+  });
+
+  describe('Host Risk Score enabled but still no data', () => {
+    before(() => {
+      esArchiverLoad('risky_hosts_no_data');
+      visit(ENTITY_ANALYTICS_URL);
+    });
+
+    after(() => {
+      esArchiverUnload('risky_hosts_no_data');
+    });
+
+    it('shows no data detected propmpt', () => {
+      cy.get(HOST_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
+    });
+  });
+
+  describe('User Risk Score enabled but still no data', () => {
+    before(() => {
+      esArchiverLoad('risky_users_no_data');
+      visit(ENTITY_ANALYTICS_URL);
+    });
+
+    after(() => {
+      esArchiverUnload('risky_users_no_data');
+    });
+
+    it('shows no data detected propmpt', () => {
+      cy.get(USER_RISK_SCORE_NO_DATA_DETECTED).should('be.visible');
+    });
+  });
+
+  describe('With hosts Legacy data', () => {
+    before(() => {
+      esArchiverLoad('risky_hosts_legacy_data');
+      visit(ENTITY_ANALYTICS_URL);
+    });
+
+    after(() => {
+      esArchiverUnload('risky_hosts_legacy_data');
+    });
+
+    it('shows upgrade host risk button', () => {
+      cy.get(UPGRADE_HOST_RISK_SCORE_BUTTON).should('be.visible');
+    });
+  });
+
+  describe('With users Legacy data', () => {
+    before(() => {
+      esArchiverLoad('risky_users_legacy_data');
+      visit(ENTITY_ANALYTICS_URL);
+    });
+
+    after(() => {
+      esArchiverUnload('risky_users_legacy_data');
+    });
+    it('shows upgrade user risk button', () => {
+      cy.get(UPGRADE_USER_RISK_SCORE_BUTTON).should('be.visible');
     });
   });
 

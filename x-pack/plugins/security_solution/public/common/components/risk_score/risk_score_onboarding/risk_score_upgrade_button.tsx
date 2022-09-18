@@ -76,7 +76,7 @@ const RiskScoreUpgradeButtonComponent = ({
     <>
       <EuiButton
         color="primary"
-        data-test-subj="risk-score-upgrade"
+        data-test-subj={`${riskScoreEntity}-risk-score-upgrade`}
         disabled={disabled}
         fill
         isLoading={isLoading}
@@ -86,7 +86,7 @@ const RiskScoreUpgradeButtonComponent = ({
       </EuiButton>
       {isModalVisible && (
         <EuiConfirmModal
-          data-test-subj="risk-score-upgrade-confirmation-modal"
+          data-test-subj={`${riskScoreEntity}-risk-score-upgrade-confirmation-modal`}
           title={title}
           onCancel={closeModal}
           onConfirm={upgradeRiskScore}
@@ -104,7 +104,7 @@ const RiskScoreUpgradeButtonComponent = ({
           }
           confirmButtonText={
             <FormattedMessage
-              data-test-subj="risk-score-upgrade-confirmation-button"
+              data-test-subj={`${riskScoreEntity}-risk-score-upgrade-confirmation-button`}
               id="xpack.securitySolution.riskScore.upgradeConfirmation.confirm"
               defaultMessage="Erase data and Upgrade"
             />

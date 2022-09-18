@@ -43,8 +43,8 @@ describe('RiskScoreUpgradeButton', () => {
         </TestProviders>
       );
 
-      expect(screen.getByTestId('risk-score-upgrade')).toBeInTheDocument();
-      expect(screen.getByTestId('risk-score-upgrade')).toHaveTextContent(hostTestProps.title);
+      expect(screen.getByTestId('host-risk-score-upgrade')).toBeInTheDocument();
+      expect(screen.getByTestId('host-risk-score-upgrade')).toHaveTextContent(hostTestProps.title);
     });
 
     it('Triggers the confirmation modal before upgrading', async () => {
@@ -55,15 +55,17 @@ describe('RiskScoreUpgradeButton', () => {
       );
 
       await act(async () => {
-        await userEvent.click(screen.getByTestId('risk-score-upgrade'));
+        await userEvent.click(screen.getByTestId('host-risk-score-upgrade'));
       });
 
-      expect(screen.getByTestId('risk-score-upgrade-confirmation-modal')).toBeInTheDocument();
+      expect(screen.getByTestId('host-risk-score-upgrade-confirmation-modal')).toBeInTheDocument();
       await act(async () => {
         await userEvent.click(screen.getByText('Erase data and Upgrade'));
       });
 
-      expect(screen.queryByTestId('risk-score-upgrade-confirmation-modal')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('host-risk-score-upgrade-confirmation-modal')
+      ).not.toBeInTheDocument();
 
       expect(upgradeUserRiskScoreModule).not.toHaveBeenCalled();
       expect(upgradeHostRiskScoreModule).toHaveBeenCalled();
@@ -77,7 +79,7 @@ describe('RiskScoreUpgradeButton', () => {
       );
 
       await act(async () => {
-        await userEvent.click(screen.getByTestId('risk-score-upgrade'));
+        await userEvent.click(screen.getByTestId('host-risk-score-upgrade'));
       });
 
       expect(screen.getByText('Preserve data')).toHaveProperty(
@@ -93,10 +95,10 @@ describe('RiskScoreUpgradeButton', () => {
         </TestProviders>
       );
 
-      userEvent.click(screen.getByTestId('risk-score-upgrade'));
+      userEvent.click(screen.getByTestId('host-risk-score-upgrade'));
       userEvent.click(screen.getByText('Erase data and Upgrade'));
       await waitFor(() => {
-        expect(screen.getByTestId('risk-score-upgrade')).toHaveProperty('disabled', true);
+        expect(screen.getByTestId('host-risk-score-upgrade')).toHaveProperty('disabled', true);
       });
     });
   });
@@ -109,8 +111,8 @@ describe('RiskScoreUpgradeButton', () => {
         </TestProviders>
       );
 
-      expect(screen.getByTestId('risk-score-upgrade')).toBeInTheDocument();
-      expect(screen.getByTestId('risk-score-upgrade')).toHaveTextContent(userTestProps.title);
+      expect(screen.getByTestId('user-risk-score-upgrade')).toBeInTheDocument();
+      expect(screen.getByTestId('user-risk-score-upgrade')).toHaveTextContent(userTestProps.title);
     });
 
     it('Triggers the confirmation modal before upgrading', async () => {
@@ -121,15 +123,17 @@ describe('RiskScoreUpgradeButton', () => {
       );
 
       await act(async () => {
-        await userEvent.click(screen.getByTestId('risk-score-upgrade'));
+        await userEvent.click(screen.getByTestId('user-risk-score-upgrade'));
       });
 
-      expect(screen.getByTestId('risk-score-upgrade-confirmation-modal')).toBeInTheDocument();
+      expect(screen.getByTestId('user-risk-score-upgrade-confirmation-modal')).toBeInTheDocument();
       await act(async () => {
         await userEvent.click(screen.getByText('Erase data and Upgrade'));
       });
 
-      expect(screen.queryByTestId('risk-score-upgrade-confirmation-modal')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('user-risk-score-upgrade-confirmation-modal')
+      ).not.toBeInTheDocument();
       expect(upgradeHostRiskScoreModule).not.toHaveBeenCalled();
       expect(upgradeUserRiskScoreModule).toHaveBeenCalled();
     });
@@ -142,7 +146,7 @@ describe('RiskScoreUpgradeButton', () => {
       );
 
       await act(async () => {
-        await userEvent.click(screen.getByTestId('risk-score-upgrade'));
+        await userEvent.click(screen.getByTestId('user-risk-score-upgrade'));
       });
 
       expect(screen.getByText('Preserve data')).toHaveProperty(
@@ -158,10 +162,10 @@ describe('RiskScoreUpgradeButton', () => {
         </TestProviders>
       );
 
-      userEvent.click(screen.getByTestId('risk-score-upgrade'));
+      userEvent.click(screen.getByTestId('user-risk-score-upgrade'));
       userEvent.click(screen.getByText('Erase data and Upgrade'));
       await waitFor(() => {
-        expect(screen.getByTestId('risk-score-upgrade')).toHaveProperty('disabled', true);
+        expect(screen.getByTestId('user-risk-score-upgrade')).toHaveProperty('disabled', true);
       });
     });
   });
