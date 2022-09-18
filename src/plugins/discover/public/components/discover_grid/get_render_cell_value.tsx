@@ -6,50 +6,44 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, useContext, useEffect, useMemo } from 'react';
-import classnames from 'classnames';
-import { i18n } from '@kbn/i18n';
-import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
+  EuiButtonIcon,
   EuiDataGridCellValueElementProps,
   EuiDescriptionList,
-  EuiDescriptionListTitle,
   EuiDescriptionListDescription,
-  EuiButtonIcon,
+  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { DiscoverGridContext } from './discover_grid_context';
+import { i18n } from '@kbn/i18n';
+import { euiDarkVars as themeDark, euiLightVars as themeLight } from '@kbn/ui-theme';
+import classnames from 'classnames';
+import React, { Fragment, useContext, useEffect } from 'react';
+import { DataTableRecord, EsHitRecord } from '../../types';
+import { formatHit } from '../../utils/format_hit';
+import { formatFieldValue } from '../../utils/format_value';
 import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from './constants';
-import { formatFieldValue } from '../../utils/format_value';
-import { formatHit } from '../../utils/format_hit';
-import { DataTableRecord, EsHitRecord } from '../../types';
-import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { MAX_DOC_FIELDS_DISPLAYED } from '../../../common';
+import { DiscoverGridContext } from './discover_grid_context';
 
-const CELL_CLASS = 'dscDiscoverGrid__cellValue';
+export const CELL_CLASS = 'dscDiscoverGrid__cellValue';
 
 export const getRenderCellValueFn =
   (
-    dataView: DataView,
-    rows: DataTableRecord[] | undefined,
     useNewFieldsApi: boolean,
     fieldsToShow: string[],
     maxDocFieldsDisplayed: number,
-    closePopover: () => void
+    closePopover: () => void,
+    fieldFormats: FieldFormatsStart
   ) =>
   ({ rowIndex, columnId, isDetails, setCellProps }: EuiDataGridCellValueElementProps) => {
-    const { uiSettings, fieldFormats } = useDiscoverServices();
-
-    const maxEntries = useMemo(() => uiSettings.get(MAX_DOC_FIELDS_DISPLAYED), [uiSettings]);
+    const ctx = useContext(DiscoverGridContext);
+    const { dataView, rows } = ctx;
 
     const row = rows ? rows[rowIndex] : undefined;
-
     const field = dataView.fields.getByName(columnId);
-    const ctx = useContext(DiscoverGridContext);
 
     useEffect(() => {
       if (row?.isAnchor) {
@@ -102,7 +96,7 @@ export const getRenderCellValueFn =
             0,
             maxDocFieldsDisplayed
           )
-        : formatHit(row, dataView, fieldsToShow, maxEntries, fieldFormats);
+        : formatHit(row, dataView, fieldsToShow, maxDocFieldsDisplayed, fieldFormats);
 
       return (
         <EuiDescriptionList

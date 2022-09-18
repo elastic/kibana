@@ -9,4 +9,5 @@
 export enum VIEW_MODE {
   DOCUMENT_LEVEL = 'documents',
   AGGREGATED_LEVEL = 'aggregated',
+  LOG_EXPLORER = 'logExplorer',
 }
