@@ -36,13 +36,6 @@ export const USER_NAME = i18n.translate(
   }
 );
 
-export const USER_RISK_TITLE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.usersRiskDashboard.title',
-  {
-    defaultMessage: 'User Risk Scores',
-  }
-);
-
 export const TOTAL_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.usersRiskDashboard.totalLabel',
   {
@@ -54,14 +47,6 @@ export const VIEW_ALL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.usersRiskDashboard.viewAllLabel',
   {
     defaultMessage: 'View all',
-  }
-);
-
-export const USER_RISK_TABLE_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.usersRiskDashboard.usersTableTooltip',
-  {
-    defaultMessage:
-      'The user risk table is not affected by the time range. This table shows the latest recorded risk score for each user.',
   }
 );
 

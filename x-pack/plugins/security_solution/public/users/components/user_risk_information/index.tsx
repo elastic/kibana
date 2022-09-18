@@ -108,7 +108,7 @@ const UserRiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => voi
           values={{
             UserRiskScoreDocumentationLink: (
               <RiskScoreDocLink
-                external={true}
+                external={false}
                 riskScoreEntity={RiskScoreEntity.user}
                 title={
                   <FormattedMessage

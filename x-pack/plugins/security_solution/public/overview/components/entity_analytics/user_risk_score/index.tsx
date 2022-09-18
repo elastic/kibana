@@ -5,9 +5,8 @@
  * 2.0.
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
 import { RiskScoresDeprecated } from '../../../../common/components/risk_score/risk_score_deprecated';
 import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
@@ -33,12 +32,9 @@ import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_bor
 
 import { RISKY_USERS_EXTERNAL_DOC_LINK } from '../../../../../common/constants';
 import { EntityAnalyticsUserRiskScoreDisable } from '../../../../common/components/risk_score/risk_score_disabled/user_risk_score.disabled';
+import { RiskScoreHeaderTitle } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_header_title';
 
 const TABLE_QUERY_ID = 'userRiskDashboardTable';
-
-const IconWrapper = styled.span`
-  margin-left: ${({ theme }) => theme.eui.euiSizeS};
-`;
 
 const EntityAnalyticsUserRiskScoresComponent = () => {
   const { deleteQuery, setQuery, from, to } = useGlobalTime();
@@ -109,23 +105,6 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
     return [onClick, href];
   }, [dispatch, getSecuritySolutionLinkProps]);
 
-  const headerTitle = useMemo(() => {
-    return (
-      <>
-        {i18n.USER_RISK_TITLE}
-        <IconWrapper>
-          <EuiIconTip
-            color="subdued"
-            content={i18n.USER_RISK_TABLE_TOOLTIP}
-            position="right"
-            size="l"
-            type="iInCircle"
-          />
-        </IconWrapper>
-      </>
-    );
-  }, []);
-
   if (!isLicenseValid) {
     return null;
   }
@@ -148,7 +127,7 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
     <InspectButtonContainer>
       <EuiPanel hasBorder data-test-subj="entity_analytics_users">
         <HeaderSection
-          title={headerTitle}
+          title={<RiskScoreHeaderTitle riskScoreEntity={RiskScoreEntity.user} />}
           titleSize="s"
           subtitle={
             <LastUpdatedAt isUpdating={isTableLoading || isKpiLoading} updatedAt={updatedAt} />

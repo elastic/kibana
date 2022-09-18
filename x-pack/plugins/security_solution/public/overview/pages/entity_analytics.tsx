@@ -30,15 +30,7 @@ const EntityAnalyticsComponent = () => {
       {indicesExist ? (
         <>
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">
-            <HeaderPage
-              title={i18n.ENTITY_ANALYTICS_TITLE}
-              badgeOptions={{
-                text: i18n.TECHNICAL_PREVIEW,
-                color: 'white',
-                size: 's',
-                beta: true,
-              }}
-            >
+            <HeaderPage title={i18n.ENTITY_ANALYTICS_TITLE}>
               <SiemSearchBar
                 id={InputsModelId.global}
                 indexPattern={indexPattern}

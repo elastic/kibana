@@ -5,10 +5,9 @@
  * 2.0.
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
 import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
 import { RiskScoresDeprecated } from '../../../../common/components/risk_score/risk_score_deprecated';
 import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
@@ -33,12 +32,9 @@ import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
 import { RISKY_HOSTS_EXTERNAL_DOC_LINK } from '../../../../../common/constants';
 import { EntityAnalyticsHostRiskScoreDisable } from '../../../../common/components/risk_score/risk_score_disabled/host_risk_score_disabled';
+import { RiskScoreHeaderTitle } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_header_title';
 
 const TABLE_QUERY_ID = 'hostRiskDashboardTable';
-
-const IconWrapper = styled.span`
-  margin-left: ${({ theme }) => theme.eui.euiSizeS};
-`;
 
 const EntityAnalyticsHostRiskScoresComponent = () => {
   const { deleteQuery, setQuery, from, to } = useGlobalTime();
@@ -110,23 +106,6 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
     return [onClick, href];
   }, [dispatch, getSecuritySolutionLinkProps]);
 
-  const headerTitle = useMemo(() => {
-    return (
-      <>
-        {i18n.HOST_RISK_TITLE}
-        <IconWrapper>
-          <EuiIconTip
-            color="subdued"
-            content={i18n.HOST_RISK_TABLE_TOOLTIP}
-            position="right"
-            size="l"
-            type="iInCircle"
-          />
-        </IconWrapper>
-      </>
-    );
-  }, []);
-
   if (!isLicenseValid) {
     return null;
   }
@@ -149,7 +128,7 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
     <InspectButtonContainer>
       <EuiPanel hasBorder data-test-subj="entity_analytics_hosts">
         <HeaderSection
-          title={headerTitle}
+          title={<RiskScoreHeaderTitle riskScoreEntity={RiskScoreEntity.host} />}
           titleSize="s"
           subtitle={
             <LastUpdatedAt isUpdating={isTableLoading || isKpiLoading} updatedAt={updatedAt} />

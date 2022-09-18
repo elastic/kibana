@@ -13,6 +13,7 @@ import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { RiskScoreEnableButton } from '../risk_score_onboarding/risk_score_enable_button';
 import type { inputsModel } from '../../../store';
 import * as i18n from './translations';
+import { RiskScoreHeaderTitle } from '../risk_score_onboarding/risk_score_header_title';
 
 const EntityAnalyticsHostRiskScoreDisableComponent = ({
   refetch,
@@ -28,7 +29,10 @@ const EntityAnalyticsHostRiskScoreDisableComponent = ({
 
   return (
     <EuiPanel hasBorder>
-      <HeaderSection title={<h2>{i18n.HOST_RISK_TITLE}</h2>} titleSize="s" />
+      <HeaderSection
+        title={<RiskScoreHeaderTitle riskScoreEntity={RiskScoreEntity.host} />}
+        titleSize="s"
+      />
       <EuiEmptyPrompt
         title={<h2>{i18n.ENABLE_HOST_RISK_SCORE}</h2>}
         body={

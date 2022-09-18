@@ -36,13 +36,6 @@ export const HOST_NAME = i18n.translate(
   }
 );
 
-export const HOST_RISK_TITLE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.title',
-  {
-    defaultMessage: 'Host Risk Scores',
-  }
-);
-
 export const TOTAL_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.totalLabel',
   {
@@ -54,14 +47,6 @@ export const VIEW_ALL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.viewAllLabel',
   {
     defaultMessage: 'View all',
-  }
-);
-
-export const HOST_RISK_TABLE_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.hostsTableTooltip',
-  {
-    defaultMessage:
-      'The host risk table is not affected by the time range. This table shows the latest recorded risk score for each host.',
   }
 );
 

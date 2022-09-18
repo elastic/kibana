@@ -131,7 +131,7 @@ const HostRiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => voi
           values={{
             HostRiskScoreDocumentationLink: (
               <RiskScoreDocLink
-                external={true}
+                external={false}
                 riskScoreEntity={RiskScoreEntity.host}
                 title={
                   <FormattedMessage

@@ -38,7 +38,7 @@ export const UsersKpiComponent = React.memo<UsersKpiProps>(
                   <>
                     {i18n.LEARN_MORE}{' '}
                     <RiskScoreDocLink
-                      external={true}
+                      external={false}
                       riskScoreEntity={RiskScoreEntity.user}
                       title={i18n.USER_RISK_DATA}
                     />

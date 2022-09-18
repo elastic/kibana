@@ -15,6 +15,7 @@ import type { HostRisk } from '../../../../risk_score/containers';
 import { getEmptyValue } from '../../empty_value';
 import { RiskScoreDocLink } from '../../risk_score/risk_score_onboarding/risk_score_doc_link';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { RiskScoreHeaderTitle } from '../../risk_score/risk_score_onboarding/risk_score_header_title';
 
 const HostRiskSummaryComponent: React.FC<{
   hostRisk: HostRisk;
@@ -22,7 +23,13 @@ const HostRiskSummaryComponent: React.FC<{
   <>
     <EuiPanel hasBorder paddingSize="s" grow={false}>
       <ThreatSummaryPanelHeader
-        title={i18n.HOST_RISK_DATA_TITLE}
+        title={
+          <RiskScoreHeaderTitle
+            title={i18n.HOST_RISK_DATA_TITLE}
+            riskScoreEntity={RiskScoreEntity.host}
+            showTooltip={false}
+          />
+        }
         toolTipContent={
           <FormattedMessage
             id="xpack.securitySolution.alertDetails.overview.hostDataTooltipContent"
@@ -30,7 +37,7 @@ const HostRiskSummaryComponent: React.FC<{
             values={{
               hostRiskScoreDocumentationLink: (
                 <RiskScoreDocLink
-                  external={true}
+                  external={false}
                   riskScoreEntity={RiskScoreEntity.host}
                   title={
                     <FormattedMessage
@@ -50,7 +57,13 @@ const HostRiskSummaryComponent: React.FC<{
       {!hostRisk.loading && (
         <>
           <EnrichedDataRow
-            field={i18n.HOST_RISK_CLASSIFICATION}
+            field={
+              <RiskScoreHeaderTitle
+                title={i18n.HOST_RISK_CLASSIFICATION}
+                riskScoreEntity={RiskScoreEntity.host}
+                showTooltip={false}
+              />
+            }
             value={
               hostRisk.result && hostRisk.result.length > 0 ? (
                 <RiskScore

@@ -13,6 +13,7 @@ import { useCheckSignalIndex } from '../../../../detections/containers/detection
 import type { inputsModel } from '../../../store';
 import { HeaderSection } from '../../header_section';
 import * as i18n from './translations';
+import { RiskScoreHeaderTitle } from '../risk_score_onboarding/risk_score_header_title';
 
 export const RiskScoresDeprecated = ({
   entityType,
@@ -34,11 +35,9 @@ export const RiskScoresDeprecated = ({
       signal: !signalIndexExists ? i18n.ENABLE_RISK_SCORE_POPOVER : null,
       ...(entityType === RiskScoreEntity.host
         ? {
-            header: i18n.HOST_RISK_TITLE,
             cta: i18n.UPGRADE_HOST_RISK_SCORE,
           }
         : {
-            header: i18n.USER_RISK_TITLE,
             cta: i18n.UPGRADE_USER_RISK_SCORE,
           }),
     }),
@@ -47,7 +46,7 @@ export const RiskScoresDeprecated = ({
 
   return (
     <EuiPanel hasBorder>
-      <HeaderSection title={<h2>{translations.header}</h2>} titleSize="s" />
+      <HeaderSection title={<RiskScoreHeaderTitle riskScoreEntity={entityType} />} titleSize="s" />
       <EuiEmptyPrompt
         title={<h2>{translations.cta}</h2>}
         body={translations.body}

@@ -7,14 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const HOST_RISK_TITLE = i18n.translate('xpack.securitySolution.riskDeprecated.hosts.title', {
-  defaultMessage: 'Host Risk Score',
-});
-
-export const USER_RISK_TITLE = i18n.translate('xpack.securitySolution.riskDeprecated.users.title', {
-  defaultMessage: 'User Risk Scores',
-});
-
 export const UPGRADE_HOST_RISK_SCORE = i18n.translate(
   'xpack.securitySolution.riskDeprecated.hosts.upgradeHostRiskScore',
   {
