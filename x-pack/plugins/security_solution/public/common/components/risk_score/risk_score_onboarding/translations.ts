@@ -14,29 +14,29 @@ export const TECHNICAL_PREVIEW = i18n.translate(
 );
 
 export const HOST_WARNING_TITLE = i18n.translate(
-  'xpack.securitySolution.overview.riskyHostsDashboardWarningPanelTitle',
+  'xpack.securitySolution.riskScore.hostsDashboardWarningPanelTitle',
   {
     defaultMessage: 'No host risk score data available to display',
   }
 );
 
 export const USER_WARNING_TITLE = i18n.translate(
-  'xpack.securitySolution.overview.riskyHostsDashboardWarningPanelTitle',
+  'xpack.securitySolution.riskScore.usersDashboardWarningPanelTitle',
   {
     defaultMessage: 'No user risk score data available to display',
   }
 );
 
 export const HOST_WARNING_BODY = i18n.translate(
-  'xpack.securitySolution.overview.riskyHostsDashboardWarningPanelBody',
+  'xpack.securitySolution.riskScore.hostsDashboardWarningPanelBody',
   {
     defaultMessage: `We haven't detected any host risk score data from the hosts in your environment for the selected time range.`,
   }
 );
 
 export const USER_WARNING_BODY = i18n.translate(
-  'xpack.securitySolution.overview.riskyHostsDashboardWarningPanelBody',
+  'xpack.securitySolution.riskScore.usersDashboardWarningPanelBody',
   {
-    defaultMessage: `We haven't detected any user risk score data from the hosts in your environment for the selected time range.`,
+    defaultMessage: `We haven't detected any user risk score data from the users in your environment for the selected time range.`,
   }
 );

@@ -40,7 +40,13 @@ export const UserRiskScoreQueryTabBody = ({
   const { activePage, limit, sort } = useDeepEqualSelector((state: State) =>
     getUserRiskScoreSelector(state)
   );
-
+  const getUserRiskScoreFilterQuerySelector = useMemo(
+    () => usersSelectors.userRiskScoreSeverityFilterSelector(),
+    []
+  );
+  const userSeveritySelectionRedux = useDeepEqualSelector((state: State) =>
+    getUserRiskScoreFilterQuerySelector(state)
+  );
   const pagination = useMemo(
     () => ({
       cursorStart: activePage * limit,
@@ -88,7 +94,7 @@ export const UserRiskScoreQueryTabBody = ({
     );
   }
 
-  if (isModuleEnabled && data && data.length === 0) {
+  if (isModuleEnabled && userSeveritySelectionRedux.length === 0 && data && data.length === 0) {
     return <RiskScoresNoDataDetected entityType={RiskScoreEntity.user} />;
   }
 

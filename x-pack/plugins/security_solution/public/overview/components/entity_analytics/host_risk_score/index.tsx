@@ -125,7 +125,7 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
     );
   }
 
-  if (isModuleEnabled && data && data.length === 0) {
+  if (isModuleEnabled && selectedSeverity.length === 0 && data && data.length === 0) {
     return <RiskScoresNoDataDetected entityType={RiskScoreEntity.host} />;
   }
 

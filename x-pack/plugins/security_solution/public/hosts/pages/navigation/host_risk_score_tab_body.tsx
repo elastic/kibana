@@ -29,16 +29,21 @@ const HostRiskScoreTableManage = manageQuery(HostRiskScoreTable);
 
 export const HostRiskScoreQueryTabBody = ({
   deleteQuery,
-  endDate,
   filterQuery,
   skip,
   setQuery,
-  startDate,
   type,
 }: HostsComponentsQueryProps) => {
   const getHostRiskScoreSelector = useMemo(() => hostsSelectors.hostRiskScoreSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state: State) =>
     getHostRiskScoreSelector(state, hostsModel.HostsType.page)
+  );
+  const getHostRiskScoreFilterQuerySelector = useMemo(
+    () => hostsSelectors.hostRiskScoreSeverityFilterSelector(),
+    []
+  );
+  const severitySelectionRedux = useDeepEqualSelector((state: State) =>
+    getHostRiskScoreFilterQuerySelector(state, hostsModel.HostsType.page)
   );
 
   const pagination = useMemo(
@@ -55,6 +60,7 @@ export const HostRiskScoreQueryTabBody = ({
     setQuerySkip(!toggleStatus);
   }, [toggleStatus]);
   const { from, to } = useGlobalTime();
+
   const [
     loading,
     { data, totalCount, inspect, isInspected, isDeprecated, refetch, isModuleEnabled },
@@ -87,7 +93,7 @@ export const HostRiskScoreQueryTabBody = ({
     );
   }
 
-  if (isModuleEnabled && data && data.length === 0) {
+  if (isModuleEnabled && severitySelectionRedux.length === 0 && data && data.length === 0) {
     return <RiskScoresNoDataDetected entityType={RiskScoreEntity.host} />;
   }
 

@@ -24,6 +24,9 @@ import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_butt
 import { RISKY_HOSTS_DASHBOARD_TITLE } from './constants';
 import { EntityAnalyticsHostRiskScoreDisable } from '../../../common/components/risk_score/risk_score_disabled/host_risk_score_disabled';
 import { RiskScoresNoDataDetected } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { hostsModel, hostsSelectors } from '../../store';
+import type { State } from '../../../common/store';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.euiSizeL};
@@ -36,6 +39,13 @@ const HostRiskTabBodyComponent: React.FC<
     hostName: string;
   }
 > = ({ hostName, startDate, endDate, setQuery, deleteQuery }) => {
+  const getHostRiskScoreFilterQuerySelector = useMemo(
+    () => hostsSelectors.hostRiskScoreSeverityFilterSelector(),
+    []
+  );
+  const severitySelectionRedux = useDeepEqualSelector((state: State) =>
+    getHostRiskScoreFilterQuerySelector(state, hostsModel.HostsType.details)
+  );
   const { buttonHref } = useDashboardButtonHref({
     from: startDate,
     to: endDate,
@@ -106,7 +116,7 @@ const HostRiskTabBodyComponent: React.FC<
     );
   }
 
-  if (isModuleEnabled && data && data.length === 0) {
+  if (isModuleEnabled && severitySelectionRedux.length === 0 && data && data.length === 0) {
     return <RiskScoresNoDataDetected entityType={RiskScoreEntity.host} />;
   }
 

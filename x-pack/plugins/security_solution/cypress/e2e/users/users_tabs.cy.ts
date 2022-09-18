@@ -24,11 +24,14 @@ describe('Users stats and tables', () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('users');
+
+    esArchiverLoad('risky_users');
     login();
     visit(USERS_URL);
   });
   after(() => {
     esArchiverUnload('users');
+    esArchiverUnload('risky_users');
   });
 
   describe('Users page tabs', () => {
