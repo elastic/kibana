@@ -8,7 +8,6 @@ import React, { useMemo } from 'react';
 import {
   Criteria,
   EuiButtonEmpty,
-  EuiSwitch,
   EuiTableFieldDataColumnType,
   EuiBasicTable,
   EuiBasicTableProps,
@@ -62,10 +61,10 @@ export const RulesTable = ({
     pageSizeOptions: [10, 25, 100],
   };
 
-  const selection: EuiBasicTableProps<RuleSavedObject>['selection'] = {
-    selectable: () => true,
-    onSelectionChange: setSelectedRules,
-  };
+  // const selection: EuiBasicTableProps<RuleSavedObject>['selection'] = {
+  //   selectable: () => true,
+  //   onSelectionChange: setSelectedRules,
+  // };
 
   const onTableChange = ({ page: pagination }: Criteria<RuleSavedObject>) => {
     if (!pagination) return;
@@ -93,8 +92,8 @@ export const RulesTable = ({
       columns={columns}
       pagination={euiPagination}
       onChange={onTableChange}
-      isSelectable={true}
-      selection={selection}
+      // isSelectable={true}
+      // selection={selection}
       itemId={(v) => v.id}
       rowProps={rowProps}
     />
@@ -146,29 +145,29 @@ const getColumns = ({
     width: '15%',
     render: (timestamp) => <TimestampTableCell timestamp={timestamp} />,
   },
-  {
-    field: 'attributes.enabled',
-    name: i18n.translate('xpack.csp.rules.rulesTable.enabledColumnLabel', {
-      defaultMessage: 'Enabled',
-    }),
-    render: (enabled, rule) => (
-      <EuiSwitch
-        disabled={!canUpdate}
-        showLabel={false}
-        label={
-          enabled
-            ? i18n.translate('xpack.csp.rules.rulesTable.enabledColumn.disableSwitchLabel', {
-                defaultMessage: 'Disable',
-              })
-            : i18n.translate('xpack.csp.rules.rulesTable.enabledColumn.enableSwitchLabel', {
-                defaultMessage: 'Enable',
-              })
-        }
-        checked={enabled}
-        onChange={() => toggleRule(rule)}
-        data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.id)}
-      />
-    ),
-    width: '10%',
-  },
+  // {
+  //   field: 'attributes.enabled',
+  //   name: i18n.translate('xpack.csp.rules.rulesTable.enabledColumnLabel', {
+  //     defaultMessage: 'Enabled',
+  //   }),
+  //   render: (enabled, rule) => (
+  //     <EuiSwitch
+  //       disabled={!canUpdate}
+  //       showLabel={false}
+  //       label={
+  //         enabled
+  //           ? i18n.translate('xpack.csp.rules.rulesTable.enabledColumn.disableSwitchLabel', {
+  //               defaultMessage: 'Disable',
+  //             })
+  //           : i18n.translate('xpack.csp.rules.rulesTable.enabledColumn.enableSwitchLabel', {
+  //               defaultMessage: 'Enable',
+  //             })
+  //       }
+  //       checked={enabled}
+  //       onChange={() => toggleRule(rule)}
+  //       data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.id)}
+  //     />
+  //   ),
+  //   width: '10%',
+  // },
 ];

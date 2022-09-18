@@ -5,20 +5,17 @@
  * 2.0.
  */
 import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
-import { type EuiBasicTable, EuiPanel, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { type EuiBasicTable, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
 import {
   extractErrorMessage,
   createCspRuleSearchFilterByPackagePolicy,
   isNonNullable,
 } from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
-import { RulesBottomBar } from './rules_bottom_bar';
 import { RulesTableHeader } from './rules_table_header';
 import {
   useFindCspRules,
-  useBulkUpdateCspRules,
   type RuleSavedObject,
   type RulesQuery,
   type RulesQueryResult,
@@ -118,14 +115,14 @@ export const RulesContainer = () => {
     perPage: MAX_ITEMS_PER_PAGE,
   });
 
-  const { mutate: bulkUpdate, isLoading: isUpdating } = useBulkUpdateCspRules();
+  // const { mutate: bulkUpdate, isLoading: isUpdating } = useBulkUpdateCspRules();
 
   const rulesPageData = useMemo(
     () => getRulesPageData({ data, error, status }, changedRules, rulesQuery),
     [data, error, status, changedRules, rulesQuery]
   );
 
-  const hasChanges = !!changedRules.size;
+  // const hasChanges = !!changedRules.size;
 
   const selectAll = () => {
     if (!tableRef.current) return;
@@ -155,11 +152,11 @@ export const RulesContainer = () => {
 
   const toggleRule = (rule: RuleSavedObject) => toggleRules([rule], !rule.attributes.enabled);
 
-  const bulkUpdateRules = () =>
-    bulkUpdate({
-      savedObjectRules: [...changedRules].map(([, savedObjectRule]) => savedObjectRule),
-      packagePolicyId: params.packagePolicyId,
-    });
+  // const bulkUpdateRules = () =>
+  //   bulkUpdate({
+  //     savedObjectRules: [...changedRules].map(([, savedObjectRule]) => savedObjectRule),
+  //     packagePolicyId: params.packagePolicyId,
+  //   });
 
   const discardChanges = useCallback(() => setChangedRules(new Map()), []);
 
@@ -174,15 +171,15 @@ export const RulesContainer = () => {
 
   return (
     <div data-test-subj={TEST_SUBJECTS.CSP_RULES_CONTAINER}>
-      <EuiCallOut
-        size="m"
-        title={i18n.translate('xpack.csp.rules.rulesContainerCallout.dataUpdateCalloutTitle', {
-          defaultMessage:
-            'Please note, any changes to your benchmark rules will take effect the next time your resources are evaluated. This can take up to ~5 hours',
-        })}
-        iconType="iInCircle"
-      />
-      <EuiSpacer />
+      {/* <EuiCallOut*/}
+      {/*  size="m"*/}
+      {/*  title={i18n.translate('xpack.csp.rules.rulesContainerCallout.dataUpdateCalloutTitle', {*/}
+      {/*    defaultMessage:*/}
+      {/*      'Please note, any changes to your benchmark rules will take effect the next time your resources are evaluated. This can take up to ~5 hours',*/}
+      {/*  })}*/}
+      {/*  iconType="iInCircle"*/}
+      {/* />*/}
+      {/* <EuiSpacer />*/}
       <EuiPanel hasBorder hasShadow={false}>
         <RulesTableHeader
           search={(value) => setRulesQuery((currentQuery) => ({ ...currentQuery, search: value }))}
@@ -225,18 +222,18 @@ export const RulesContainer = () => {
           canUpdate={canUpdate}
         />
       </EuiPanel>
-      {hasChanges && (
-        <>
-          {/* spacers to lift the table enough so the bar won't hide the pagination */}
-          <EuiSpacer size="xxl" />
-          <EuiSpacer size="xxl" />
-          <RulesBottomBar
-            onSave={bulkUpdateRules}
-            onCancel={discardChanges}
-            isLoading={isUpdating}
-          />
-        </>
-      )}
+      {/* {hasChanges && (*/}
+      {/*  <>*/}
+      {/*    /!* spacers to lift the table enough so the bar won't hide the pagination *!/*/}
+      {/*    <EuiSpacer size="xxl" />*/}
+      {/*    <EuiSpacer size="xxl" />*/}
+      {/*    <RulesBottomBar*/}
+      {/*      onSave={bulkUpdateRules}*/}
+      {/*      onCancel={discardChanges}*/}
+      {/*      isLoading={isUpdating}*/}
+      {/*    />*/}
+      {/*  </>*/}
+      {/* )}*/}
       {selectedRuleId && (
         <RuleFlyout
           rule={changedRules.get(selectedRuleId) || rulesPageData.rules_map.get(selectedRuleId)!}

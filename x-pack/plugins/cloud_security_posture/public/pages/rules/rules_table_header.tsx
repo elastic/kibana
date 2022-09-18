@@ -5,21 +5,11 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import {
-  EuiFieldSearch,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
 import useDebounce from 'react-use/lib/useDebounce';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import * as TEST_SUBJECTS from './test_subjects';
-import { RulesBulkActionsMenu } from './rules_bulk_actions_menu';
 
 interface RulesTableToolbarProps {
   search(value: string): void;
@@ -40,9 +30,9 @@ interface CounterProps {
   count: number;
 }
 
-interface ButtonProps {
-  onClick(): void;
-}
+// interface ButtonProps {
+//   onClick(): void;
+// }
 
 const LastModificationLabel = ({ lastModified }: { lastModified: string }) => (
   <EuiText size="s">
@@ -73,18 +63,18 @@ export const RulesTableHeader = ({
     <EuiSpacer />
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false} wrap>
       <Counters total={totalRulesCount} selected={selectedRulesCount} />
-      <SelectAllToggle
-        isSelectAll={selectedRulesCount === totalRulesCount}
-        clear={clearSelection}
-        select={selectAll}
-      />
-      <BulkMenu
-        canUpdate={canUpdate}
-        bulkEnable={bulkEnable}
-        bulkDisable={bulkDisable}
-        selectedRulesCount={selectedRulesCount}
-      />
-      <RefreshButton onClick={refresh} />
+      {/* <SelectAllToggle*/}
+      {/*  isSelectAll={selectedRulesCount === totalRulesCount}*/}
+      {/*  clear={clearSelection}*/}
+      {/*  select={selectAll}*/}
+      {/* />*/}
+      {/* <BulkMenu*/}
+      {/*  canUpdate={canUpdate}*/}
+      {/*  bulkEnable={bulkEnable}*/}
+      {/*  bulkDisable={bulkDisable}*/}
+      {/*  selectedRulesCount={selectedRulesCount}*/}
+      {/* />*/}
+      {/* <RefreshButton onClick={refresh} />*/}
       <SearchField isSearching={isSearching} searchValue={searchValue} search={search} />
     </EuiFlexGroup>
   </div>
@@ -93,55 +83,55 @@ export const RulesTableHeader = ({
 const Counters = ({ total, selected }: { total: number; selected: number }) => (
   <EuiFlexItem grow={false} style={{ flexDirection: 'row', fontVariantNumeric: 'tabular-nums' }}>
     <TotalRulesCount count={total} />
-    {Spacer}
-    <SelectedRulesCount count={selected} />
+    {/* {Spacer}*/}
+    {/* <SelectedRulesCount count={selected} />*/}
   </EuiFlexItem>
 );
 
-const SelectAllToggle = ({
-  isSelectAll,
-  select,
-  clear,
-}: {
-  select(): void;
-  clear(): void;
-  isSelectAll: boolean;
-}) => (
-  <EuiFlexItem grow={false}>
-    {isSelectAll ? <ClearSelectionButton onClick={clear} /> : <SelectAllButton onClick={select} />}
-  </EuiFlexItem>
-);
-
-const BulkMenu = ({
-  bulkEnable,
-  bulkDisable,
-  selectedRulesCount,
-  canUpdate,
-}: Pick<
-  RulesTableToolbarProps,
-  'bulkDisable' | 'bulkEnable' | 'selectedRulesCount' | 'canUpdate'
->) => (
-  <EuiFlexItem grow={false}>
-    <RulesBulkActionsMenu
-      items={[
-        {
-          icon: 'eye',
-          disabled: !selectedRulesCount || !canUpdate,
-          children: <ActivateRulesMenuItemText count={selectedRulesCount} />,
-          'data-test-subj': TEST_SUBJECTS.CSP_RULES_TABLE_BULK_ENABLE_BUTTON,
-          onClick: bulkEnable,
-        },
-        {
-          icon: 'eyeClosed',
-          disabled: !selectedRulesCount || !canUpdate,
-          children: <DeactivateRulesMenuItemText count={selectedRulesCount} />,
-          'data-test-subj': TEST_SUBJECTS.CSP_RULES_TABLE_BULK_DISABLE_BUTTON,
-          onClick: bulkDisable,
-        },
-      ]}
-    />
-  </EuiFlexItem>
-);
+// const SelectAllToggle = ({
+//   isSelectAll,
+//   select,
+//   clear,
+// }: {
+//   select(): void;
+//   clear(): void;
+//   isSelectAll: boolean;
+// }) => (
+//   <EuiFlexItem grow={false}>
+//     {isSelectAll ? <ClearSelectionButton onClick={clear} /> : <SelectAllButton onClick={select} />}
+//   </EuiFlexItem>
+// );
+//
+// const BulkMenu = ({
+//   bulkEnable,
+//   bulkDisable,
+//   selectedRulesCount,
+//   canUpdate,
+// }: Pick<
+//   RulesTableToolbarProps,
+//   'bulkDisable' | 'bulkEnable' | 'selectedRulesCount' | 'canUpdate'
+// >) => (
+//   <EuiFlexItem grow={false}>
+//     <RulesBulkActionsMenu
+//       items={[
+//         {
+//           icon: 'eye',
+//           disabled: !selectedRulesCount || !canUpdate,
+//           children: <ActivateRulesMenuItemText count={selectedRulesCount} />,
+//           'data-test-subj': TEST_SUBJECTS.CSP_RULES_TABLE_BULK_ENABLE_BUTTON,
+//           onClick: bulkEnable,
+//         },
+//         {
+//           icon: 'eyeClosed',
+//           disabled: !selectedRulesCount || !canUpdate,
+//           children: <DeactivateRulesMenuItemText count={selectedRulesCount} />,
+//           'data-test-subj': TEST_SUBJECTS.CSP_RULES_TABLE_BULK_DISABLE_BUTTON,
+//           onClick: bulkDisable,
+//         },
+//       ]}
+//     />
+//   </EuiFlexItem>
+// );
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -177,29 +167,29 @@ const TotalRulesCount = ({ count }: CounterProps) => (
   />
 );
 
-const SelectedRulesCount = ({ count }: CounterProps) => (
-  <FormattedMessage
-    id="xpack.csp.rules.header.selectedRulesCount"
-    defaultMessage="Selected {rules}"
-    values={{ rules: <RulesCountBold count={count} /> }}
-  />
-);
+// const SelectedRulesCount = ({ count }: CounterProps) => (
+//   <FormattedMessage
+//     id="xpack.csp.rules.header.selectedRulesCount"
+//     defaultMessage="Selected {rules}"
+//     values={{ rules: <RulesCountBold count={count} /> }}
+//   />
+// );
 
-const ActivateRulesMenuItemText = ({ count }: CounterProps) => (
-  <FormattedMessage
-    id="xpack.csp.rules.activateAllButtonLabel"
-    defaultMessage="Activate {count, plural, one {# rule} other {# rules}}"
-    values={{ count }}
-  />
-);
-
-const DeactivateRulesMenuItemText = ({ count }: CounterProps) => (
-  <FormattedMessage
-    id="xpack.csp.rules.deactivateAllButtonLabel"
-    defaultMessage="Deactivate {count, plural, one {# rule} other {# rules}}"
-    values={{ count }}
-  />
-);
+// const ActivateRulesMenuItemText = ({ count }: CounterProps) => (
+//   <FormattedMessage
+//     id="xpack.csp.rules.activateAllButtonLabel"
+//     defaultMessage="Activate {count, plural, one {# rule} other {# rules}}"
+//     values={{ count }}
+//   />
+// );
+//
+// const DeactivateRulesMenuItemText = ({ count }: CounterProps) => (
+//   <FormattedMessage
+//     id="xpack.csp.rules.deactivateAllButtonLabel"
+//     defaultMessage="Deactivate {count, plural, one {# rule} other {# rules}}"
+//     values={{ count }}
+//   />
+// );
 
 const RulesCountBold = ({ count }: CounterProps) => (
   <>
@@ -212,49 +202,49 @@ const RulesCountBold = ({ count }: CounterProps) => (
   </>
 );
 
-const ClearSelectionButton = ({ onClick }: ButtonProps) => (
-  <EuiButtonEmpty
-    onClick={onClick}
-    iconType={'cross'}
-    data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE_CLEAR_SELECTION_BUTTON}
-  >
-    <FormattedMessage
-      id="xpack.csp.rules.clearSelectionButtonLabel"
-      defaultMessage="Clear Selection"
-    />
-  </EuiButtonEmpty>
-);
+// const ClearSelectionButton = ({ onClick }: ButtonProps) => (
+//   <EuiButtonEmpty
+//     onClick={onClick}
+//     iconType={'cross'}
+//     data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE_CLEAR_SELECTION_BUTTON}
+//   >
+//     <FormattedMessage
+//       id="xpack.csp.rules.clearSelectionButtonLabel"
+//       defaultMessage="Clear Selection"
+//     />
+//   </EuiButtonEmpty>
+// );
+//
+// const SelectAllButton = ({ onClick }: ButtonProps) => (
+//   <EuiButtonEmpty
+//     onClick={onClick}
+//     iconType={'pagesSelect'}
+//     data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE_SELECT_ALL_BUTTON}
+//   >
+//     <FormattedMessage id="xpack.csp.rules.selectAllButtonLabel" defaultMessage="Select All" />
+//   </EuiButtonEmpty>
+// );
+//
+// const RefreshButton = ({ onClick }: ButtonProps) => (
+//   <EuiFlexItem grow={false}>
+//     <EuiButtonEmpty
+//       onClick={onClick}
+//       iconType={'refresh'}
+//       data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE_REFRESH_BUTTON}
+//     >
+//       <FormattedMessage
+//         id="xpack.csp.rules.rulesTable.refreshButtonLabel"
+//         defaultMessage="Refresh"
+//       />
+//     </EuiButtonEmpty>
+//   </EuiFlexItem>
+// );
 
-const SelectAllButton = ({ onClick }: ButtonProps) => (
-  <EuiButtonEmpty
-    onClick={onClick}
-    iconType={'pagesSelect'}
-    data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE_SELECT_ALL_BUTTON}
-  >
-    <FormattedMessage id="xpack.csp.rules.selectAllButtonLabel" defaultMessage="Select All" />
-  </EuiButtonEmpty>
-);
-
-const RefreshButton = ({ onClick }: ButtonProps) => (
-  <EuiFlexItem grow={false}>
-    <EuiButtonEmpty
-      onClick={onClick}
-      iconType={'refresh'}
-      data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE_REFRESH_BUTTON}
-    >
-      <FormattedMessage
-        id="xpack.csp.rules.rulesTable.refreshButtonLabel"
-        defaultMessage="Refresh"
-      />
-    </EuiButtonEmpty>
-  </EuiFlexItem>
-);
-
-const Spacer = (
-  <span
-    css={css`
-      border-right: 1px solid;
-      margin: 0px 8px;
-    `}
-  />
-);
+// const Spacer = (
+//   <span
+//     css={css`
+//       border-right: 1px solid;
+//       margin: 0px 8px;
+//     `}
+//   />
+// );

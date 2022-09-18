@@ -16,7 +16,6 @@ import {
   EuiDescriptionList,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiSwitch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getRuleList } from '../findings/findings_flyout/rule_tab';
@@ -102,19 +101,19 @@ const RuleOverviewTab = ({
   canUpdate: RuleFlyoutProps['canUpdate'];
 }) => (
   <EuiFlexGroup direction="column">
-    <EuiFlexItem>
-      <span>
-        <EuiSwitch
-          disabled={!canUpdate}
-          label={i18n.translate('xpack.csp.rules.ruleFlyout.overviewTab.activatedSwitchLabel', {
-            defaultMessage: 'Activated',
-          })}
-          checked={rule.attributes.enabled}
-          onChange={toggleRule}
-          data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.id)}
-        />
-      </span>
-    </EuiFlexItem>
+    {/* <EuiFlexItem>*/}
+    {/*  <span>*/}
+    {/*    <EuiSwitch*/}
+    {/*      disabled={!canUpdate}*/}
+    {/*      label={i18n.translate('xpack.csp.rules.ruleFlyout.overviewTab.activatedSwitchLabel', {*/}
+    {/*        defaultMessage: 'Activated',*/}
+    {/*      })}*/}
+    {/*      checked={rule.attributes.enabled}*/}
+    {/*      onChange={toggleRule}*/}
+    {/*      data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.id)}*/}
+    {/*    />*/}
+    {/*  </span>*/}
+    {/* </EuiFlexItem>*/}
     <EuiFlexItem>
       <EuiDescriptionList listItems={getRuleList(rule.attributes.metadata)} />
     </EuiFlexItem>
