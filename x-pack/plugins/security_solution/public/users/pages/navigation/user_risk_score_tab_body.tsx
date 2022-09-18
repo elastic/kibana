@@ -88,7 +88,7 @@ export const UserRiskScoreQueryTabBody = ({
     );
   }
 
-  if (isModuleEnabled && data?.length === 0) {
+  if (isModuleEnabled && data && data.length === 0) {
     return <RiskScoresNoDataDetected entityType={RiskScoreEntity.user} />;
   }
 
