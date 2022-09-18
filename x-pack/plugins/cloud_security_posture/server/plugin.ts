@@ -47,7 +47,7 @@ import {
   scheduleFindingsStatsTask,
   setupFindingsStatsTask,
 } from './tasks/findings_stats_task';
-import { registerIndicesCounterCollector } from './collectors/register';
+import { registerIndicesCounterCollector } from './lib/telemetry/collectors/register';
 
 export class CspPlugin
   implements

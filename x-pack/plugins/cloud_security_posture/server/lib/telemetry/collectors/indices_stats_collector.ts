@@ -9,20 +9,8 @@ import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   FINDINGS_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
-} from '../../common/constants';
-
-export interface CspmIndicesStats {
-  findings: IndexStats;
-  latest_findings: IndexStats;
-  score: IndexStats;
-}
-
-export interface IndexStats {
-  doc_count: number;
-  deleted: number;
-  size_in_bytes: number;
-  latest_doc_timestamp: string;
-}
+} from '../../../../common/constants';
+import { CspmIndicesStats, IndexStats } from './types';
 
 export const getIndicesStats = async (esClient: ElasticsearchClient): Promise<CspmIndicesStats> => {
   return {
@@ -35,7 +23,13 @@ export const getIndicesStats = async (esClient: ElasticsearchClient): Promise<Cs
 export const getIndexStats = async (
   esClient: ElasticsearchClient,
   index: string
-): Promise<IndexStats> => {
+): Promise<IndexStats | {}> => {
+  const isLatestIndexExists = await esClient.indices.exists({
+    index,
+  });
+
+  if (!isLatestIndexExists) return {};
+
   const indexStats = await getIndexDocCount(esClient, index);
   return {
     doc_count: indexStats._all.primaries?.docs ? indexStats._all.primaries?.docs?.count : 0,
@@ -69,5 +63,5 @@ const getLatestDocTimestamp = async (esClient: ElasticsearchClient, index: strin
 
   const latestEventTimestamp = latestTimestamp.hits?.hits[0]?.fields;
 
-  return latestEventTimestamp ? latestEventTimestamp['@timestamp'][0] : '';
+  return latestEventTimestamp ? latestEventTimestamp['@timestamp'][0] : null;
 };
