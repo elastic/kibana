@@ -9,6 +9,7 @@ import { APP_UI_ID } from '../../../../common/constants';
 export const REQUEST_NAMES = {
   SECURITY_DASHBOARDS: `${APP_UI_ID} fetch security dashboards`,
   ANOMALIES_TABLE: `${APP_UI_ID} fetch anomalies table data`,
+  GET_RISK_SCORE_DEPRECATED: `${APP_UI_ID} fetch is risk score deprecated`,
 } as const;
 
 export type RequestName = typeof REQUEST_NAMES[keyof typeof REQUEST_NAMES];
