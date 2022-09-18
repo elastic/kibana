@@ -36,7 +36,7 @@ export interface Cluster {
     clusterName?: string;
     benchmarkName: string;
     benchmarkId: BenchmarkId;
-    lastUpdate: number; // unix epoch time
+    lastUpdate: string;
   };
   stats: Stats;
   groupedFindingsEvaluation: GroupedFindingsEvaluation[];
