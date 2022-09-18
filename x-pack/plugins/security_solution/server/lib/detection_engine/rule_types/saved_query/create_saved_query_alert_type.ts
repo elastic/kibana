@@ -9,14 +9,14 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import type { CompleteRule, SavedQueryRuleParams } from '../../schemas/rule_schemas';
-import { savedQueryRuleParams } from '../../schemas/rule_schemas';
+import type { CompleteRule, UnifiedQueryRuleParams } from '../../schemas/rule_schemas';
+import { unifiedQueryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { validateIndexPatterns } from '../utils';
 export const createSavedQueryAlertType = (
   createOptions: CreateRuleOptions
-): SecurityAlertType<SavedQueryRuleParams, {}, {}, 'default'> => {
+): SecurityAlertType<UnifiedQueryRuleParams, {}, {}, 'default'> => {
   const { experimentalFeatures, version } = createOptions;
   return {
     id: SAVED_QUERY_RULE_TYPE_ID,
@@ -24,7 +24,7 @@ export const createSavedQueryAlertType = (
     validate: {
       params: {
         validate: (object: unknown) => {
-          const [validated, errors] = validateNonExact(object, savedQueryRuleParams);
+          const [validated, errors] = validateNonExact(object, unifiedQueryRuleParams);
           if (errors != null) {
             throw new Error(errors);
           }
@@ -82,7 +82,7 @@ export const createSavedQueryAlertType = (
       const result = await queryExecutor({
         inputIndex,
         runtimeMappings,
-        completeRule: completeRule as CompleteRule<SavedQueryRuleParams>,
+        completeRule: completeRule as CompleteRule<UnifiedQueryRuleParams>,
         tuple,
         exceptionItems,
         experimentalFeatures,

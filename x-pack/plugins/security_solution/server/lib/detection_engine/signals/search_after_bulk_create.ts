@@ -27,7 +27,6 @@ import { withSecuritySpan } from '../../../utils/with_security_span';
 export const searchAfterAndBulkCreate = async ({
   buildReasonMessage,
   bulkCreate,
-  completeRule,
   enrichment = identity,
   eventsTelemetry,
   exceptionsList,

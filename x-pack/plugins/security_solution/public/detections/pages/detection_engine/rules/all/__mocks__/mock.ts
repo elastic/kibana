@@ -220,6 +220,7 @@ export const mockDefineStepRule = (): DefineStepRule => ({
   dataSourceType: DataSourceType.IndexPatterns,
   newTermsFields: ['host.ip'],
   historyWindowSize: '7d',
+  shouldLoadQueryDynamically: false,
 });
 
 export const mockScheduleStepRule = (): ScheduleStepRule => ({

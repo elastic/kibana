@@ -162,6 +162,7 @@ export interface DefineStepRule {
   dataSourceType: DataSourceType;
   newTermsFields: string[];
   historyWindowSize: string;
+  shouldLoadQueryDynamically: boolean;
 }
 
 export interface ScheduleStepRule {

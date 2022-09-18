@@ -176,12 +176,14 @@ export const getDescriptionItem = (
     const filters = addFilterStateIfNotThere(get('queryBar.filters', data) ?? []);
     const query = get('queryBar.query.query', data);
     const savedId = get('queryBar.saved_id', data);
+    const savedQueryName = get('queryBar.title', data);
     return buildQueryBarDescription({
       field,
       filters,
       filterManager,
       query,
       savedId,
+      savedQueryName,
       indexPatterns,
     });
   } else if (field === 'eqlOptions') {

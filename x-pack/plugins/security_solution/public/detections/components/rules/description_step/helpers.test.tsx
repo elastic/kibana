@@ -179,6 +179,7 @@ describe('helpers', () => {
         ...mockQueryBar,
         query: '',
         filters: [],
+        title: 'test title',
       };
       const result: ListItems[] = buildQueryBarDescription({
         field: 'queryBar',
@@ -186,9 +187,10 @@ describe('helpers', () => {
         filterManager: mockFilterManager,
         query: mockQueryBarWithSavedId.query,
         savedId: mockQueryBarWithSavedId.saved_id,
+        savedQueryName: mockQueryBarWithSavedId.title,
       });
-      expect(result[0].title).toEqual(<>{i18n.SAVED_ID_LABEL} </>);
-      expect(result[0].description).toEqual(<>{mockQueryBarWithSavedId.saved_id} </>);
+      expect(result[0].title).toEqual(<>{i18n.SAVED_QUERY_NAME_LABEL} </>);
+      expect(result[0].description).toEqual(<>{mockQueryBarWithSavedId.title} </>);
     });
   });
 

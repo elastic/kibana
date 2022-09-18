@@ -18,11 +18,7 @@ import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import type { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
-import type {
-  CompleteRule,
-  SavedQueryRuleParams,
-  QueryRuleParams,
-} from '../../schemas/rule_schemas';
+import type { CompleteRule, UnifiedQueryRuleParams } from '../../schemas/rule_schemas';
 import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForQueryAlert } from '../reason_formatters';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
@@ -48,7 +44,7 @@ export const queryExecutor = async ({
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
-  completeRule: CompleteRule<QueryRuleParams> | CompleteRule<SavedQueryRuleParams>;
+  completeRule: CompleteRule<UnifiedQueryRuleParams>;
   tuple: RuleRangeTuple;
   exceptionItems: ExceptionListItemSchema[];
   listClient: ListClient;
@@ -79,7 +75,6 @@ export const queryExecutor = async ({
 
     return searchAfterAndBulkCreate({
       tuple,
-      completeRule,
       services,
       listClient,
       exceptionsList: exceptionItems,

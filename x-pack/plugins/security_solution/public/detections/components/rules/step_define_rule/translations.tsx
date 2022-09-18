@@ -14,6 +14,13 @@ export const CUSTOM_QUERY_REQUIRED = i18n.translate(
   }
 );
 
+export const SAVED_QUERY_REQUIRED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.savedQueryFieldRequiredError',
+  {
+    defaultMessage: 'Failed to load the saved query. Select a new one or add a custom query.',
+  }
+);
+
 export const EQL_QUERY_REQUIRED = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.eqlQueryFieldRequiredError',
   {
@@ -68,6 +75,13 @@ export const EQL_QUERY_BAR_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.EqlQueryBarLabel',
   {
     defaultMessage: 'EQL query',
+  }
+);
+
+export const SAVED_QUERY_CHECKBOX_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.SavedQueryCheckboxLabel',
+  {
+    defaultMessage: 'Saved query',
   }
 );
 

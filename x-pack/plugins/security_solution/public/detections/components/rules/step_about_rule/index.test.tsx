@@ -58,6 +58,7 @@ export const stepDefineStepMLRule: DefineStepRule = {
   dataSourceType: DataSourceType.IndexPatterns,
   newTermsFields: ['host.ip'],
   historyWindowSize: '7d',
+  shouldLoadQueryDynamically: false,
 };
 
 describe('StepAboutRuleComponent', () => {
