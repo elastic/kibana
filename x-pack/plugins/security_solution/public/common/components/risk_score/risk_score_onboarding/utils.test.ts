@@ -21,7 +21,7 @@ import {
   installHostRiskScoreModule,
   installUserRiskScoreModule,
   restartRiskScoreTransforms,
-  uninstallRiskScoreModule,
+  uninstallLegacyRiskScoreModule,
 } from './utils';
 
 jest.mock('../../../../risk_score/containers/onboarding/api');
@@ -161,9 +161,9 @@ describe(`installUserRiskScoreModule`, () => {
   });
 });
 
-describe('UninstallRiskScoreModule - Host', () => {
+describe('uninstallLegacyRiskScoreModule - Host', () => {
   beforeAll(async () => {
-    await uninstallRiskScoreModule({
+    await uninstallLegacyRiskScoreModule({
       http: mockHttp,
       spaceId: 'customSpace',
       riskScoreEntity: RiskScoreEntity.host,
@@ -205,9 +205,9 @@ describe('UninstallRiskScoreModule - Host', () => {
   });
 });
 
-describe('uninstallRiskScoreModule - User', () => {
+describe('uninstallLegacyRiskScoreModule - User', () => {
   beforeAll(async () => {
-    await uninstallRiskScoreModule({
+    await uninstallLegacyRiskScoreModule({
       http: mockHttp,
       spaceId: mockSpaceId,
       riskScoreEntity: RiskScoreEntity.user,

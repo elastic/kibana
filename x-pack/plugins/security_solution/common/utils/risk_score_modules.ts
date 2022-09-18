@@ -42,8 +42,10 @@ export const getRiskScoreReduceScriptId = (riskScoreEntity: RiskScoreEntity, spa
 
 /**
  * These scripts and Ingest pipeline were not space awared before 8.5.
- * They messed up each other across different spaces.
- * We need to keep track of the old ids, so we can delete them during upgrade.
+ * They were shared across spaces and therefore affected each other.
+ * New scripts and ingest pipeline are all independent in each space, so these ids
+ * are Deprecated.
+ * But We still need to keep track of the old ids, so we can delete them during upgrade.
  */
 export const getLegacyIngestPipelineName = (riskScoreEntity: RiskScoreEntity) =>
   `ml_${riskScoreEntity}riskscore_ingest_pipeline`;
