@@ -12,12 +12,14 @@ import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { v4 as uuidV4 } from 'uuid';
+import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import {
   ConfigKey,
   MonitorFields,
   SyntheticsMonitor,
   EncryptedSyntheticsMonitor,
+  PrivateLocation,
 } from '../../../common/runtime_types';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
@@ -48,6 +50,8 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     // usually id is auto generated, but this is useful for testing
     const { id } = request.query;
 
+    const spaceId = server.spaces.spacesService.getSpaceId(request);
+
     const monitor: SyntheticsMonitor = request.body as SyntheticsMonitor;
     const monitorType = monitor[ConfigKey.MONITOR_TYPE];
     const monitorWithDefaults = {
@@ -62,6 +66,10 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       return response.badRequest({ body: { message, attributes: { details, ...payload } } });
     }
 
+    const privateLocations: PrivateLocation[] = await getSyntheticsPrivateLocations(
+      savedObjectsClient
+    );
+
     try {
       const { errors, newMonitor } = await syncNewMonitor({
         normalizedMonitor: monitorWithDefaults,
@@ -71,6 +79,8 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         savedObjectsClient,
         request,
         id,
+        privateLocations,
+        spaceId,
       });
 
       if (errors && errors.length > 0) {
@@ -129,6 +139,8 @@ export const syncNewMonitor = async ({
   savedObjectsClient,
   request,
   normalizedMonitor,
+  privateLocations,
+  spaceId,
 }: {
   id?: string;
   monitor: SyntheticsMonitor;
@@ -137,6 +149,8 @@ export const syncNewMonitor = async ({
   syntheticsMonitorClient: SyntheticsMonitorClient;
   savedObjectsClient: SavedObjectsClientContract;
   request: KibanaRequest;
+  privateLocations: PrivateLocation[];
+  spaceId: string;
 }) => {
   const newMonitorId = id ?? uuidV4();
 
@@ -149,14 +163,15 @@ export const syncNewMonitor = async ({
       savedObjectsClient,
     });
 
-    const syncErrorsPromise = syntheticsMonitorClient.addMonitor(
-      monitor as MonitorFields,
-      newMonitorId,
+    const syncErrorsPromise = syntheticsMonitorClient.addMonitors(
+      [{ monitor: monitor as MonitorFields, id: newMonitorId }],
       request,
-      savedObjectsClient
+      savedObjectsClient,
+      privateLocations,
+      spaceId
     );
 
-    const [monitorSavedObjectN, syncErrors] = await Promise.all([
+    const [monitorSavedObjectN, { syncErrors }] = await Promise.all([
       newMonitorPromise,
       syncErrorsPromise,
     ]);

@@ -18,7 +18,7 @@ import { PrivateLocationTestService } from './services/private_location_test_ser
 import { comparePolicies, getTestProjectSyntheticsPolicy } from './sample_data/test_policy';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('[PUT] /api/uptime/service/monitors', function () {
+  describe('ProjectMonitors', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
@@ -123,10 +123,10 @@ export default function ({ getService }: FtrProviderContext) {
           JSON.stringify(projectMonitors)
         );
 
-        expect(messages).to.have.length(2);
-        expect(messages[1].createdMonitors).eql([]);
-        expect(messages[1].failedMonitors).eql([]);
-        expect(messages[1].updatedMonitors).eql(
+        expect(messages).to.have.length(1);
+        expect(messages[0].createdMonitors).eql([]);
+        expect(messages[0].failedMonitors).eql([]);
+        expect(messages[0].updatedMonitors).eql(
           projectMonitors.monitors.map((monitor) => monitor.id)
         );
       } finally {
@@ -232,12 +232,12 @@ export default function ({ getService }: FtrProviderContext) {
           JSON.stringify(projectMonitors)
         );
 
-        expect(messages).to.have.length(2);
-        expect(messages[1].createdMonitors).eql([]);
-        expect(messages[1].failedMonitors).eql([]);
-        expect(messages[1].deletedMonitors).eql([]);
-        expect(messages[1].updatedMonitors).eql([projectMonitors.monitors[0].id]);
-        expect(messages[1].staleMonitors).eql([secondMonitor.id]);
+        expect(messages).to.have.length(1);
+        expect(messages[0].createdMonitors).eql([]);
+        expect(messages[0].failedMonitors).eql([]);
+        expect(messages[0].deletedMonitors).eql([]);
+        expect(messages[0].updatedMonitors).eql([projectMonitors.monitors[0].id]);
+        expect(messages[0].staleMonitors).eql([secondMonitor.id]);
         // does not delete the stale monitor
         const getResponse = await supertest
           .get(API_URLS.SYNTHETICS_MONITORS)
@@ -280,7 +280,8 @@ export default function ({ getService }: FtrProviderContext) {
             keep_stale: false,
           })
         );
-        expect(messages).to.have.length(3);
+
+        expect(messages).to.have.length(2);
 
         // expect monitor to have been deleted
         const getResponse = await supertest
@@ -293,12 +294,12 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { monitors } = getResponse.body;
         expect(monitors[0]).eql(undefined);
-        expect(messages[1]).eql(`Monitor ${secondMonitor.id} deleted successfully`);
-        expect(messages[2].createdMonitors).eql([]);
-        expect(messages[2].failedMonitors).eql([]);
-        expect(messages[2].updatedMonitors).eql([projectMonitors.monitors[0].id]);
-        expect(messages[2].deletedMonitors).eql([secondMonitor.id]);
-        expect(messages[2].staleMonitors).eql([]);
+        expect(messages[0]).eql(`Monitor ${secondMonitor.id} deleted successfully`);
+        expect(messages[1].createdMonitors).eql([]);
+        expect(messages[1].failedMonitors).eql([]);
+        expect(messages[1].updatedMonitors).eql([projectMonitors.monitors[0].id]);
+        expect(messages[1].deletedMonitors).eql([secondMonitor.id]);
+        expect(messages[1].staleMonitors).eql([]);
       } finally {
         await Promise.all([
           testMonitors.map((monitor) => {
@@ -648,8 +649,8 @@ export default function ({ getService }: FtrProviderContext) {
           projectMonitorEndpoint,
           JSON.stringify(projectMonitors)
         );
-        expect(messages).to.have.length(2);
-        expect(messages[1].updatedMonitors).eql([projectMonitors.monitors[0].id]);
+        expect(messages).to.have.length(1);
+        expect(messages[0].updatedMonitors).eql([projectMonitors.monitors[0].id]);
 
         // ensure that monitor can still be decrypted
         await supertest
@@ -744,8 +745,8 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         expect(messages).to.have.length(3);
-        expect(messages[0]).to.eql(`${testMonitors[0].id}: monitor created successfully`);
-        expect(messages[1]).to.eql('test-id-2: failed to create or update monitor');
+        expect(messages[0]).to.eql('test-id-2: failed to create or update monitor');
+        expect(messages[1]).to.eql(`1 monitor created successfully.`);
         expect(messages[2]).to.eql({
           createdMonitors: [testMonitors[0].id],
           updatedMonitors: [],
@@ -945,10 +946,9 @@ export default function ({ getService }: FtrProviderContext) {
             monitors: testMonitors,
           })
         );
-        expect(messages).to.have.length(3);
+        expect(messages).to.have.length(2);
         expect(messages).to.eql([
-          `${testMonitors[0].id}: monitor created successfully`,
-          'test-id-2: monitor created successfully',
+          `2 monitors created successfully.`,
           {
             createdMonitors: [testMonitors[0].id, 'test-id-2'],
             updatedMonitors: [],
