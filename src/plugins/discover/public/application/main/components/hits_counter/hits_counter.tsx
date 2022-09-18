@@ -98,7 +98,11 @@ export function HitsCounter({
           <EuiButtonEmpty
             iconType="refresh"
             data-test-subj="resetSavedSearch"
-            onClick={() => stateContainer.resetSavedSearch()}
+            onClick={() =>
+              stateContainer.actions.resetSavedSearch(
+                stateContainer.savedSearchContainer.savedSearch$.getValue().id || ''
+              )
+            }
             size="s"
             aria-label={i18n.translate('discover.reloadSavedSearchButton', {
               defaultMessage: 'Reset search',

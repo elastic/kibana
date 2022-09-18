@@ -9,6 +9,7 @@ import { merge } from 'rxjs';
 import { debounceTime, filter, skip, tap } from 'rxjs/operators';
 
 import type { AutoRefreshDoneFn, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { addLog } from '../../../utils/addLog';
 import { FetchStatus } from '../../types';
 import { DataMain$, DataRefetch$ } from '../hooks/use_saved_search';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
@@ -54,14 +55,9 @@ export function getFetch$({
     ),
     data.query.queryString.getUpdates$(),
     searchSessionManager.newSearchSessionIdFromURL$.pipe(filter((sessionId) => !!sessionId))
-  ).pipe(debounceTime(100));
-
-  /**
-   * Skip initial fetch when discover:searchOnPageLoad is disabled.
-   */
-  if (initialFetchStatus === FetchStatus.UNINITIALIZED) {
-    fetch$ = fetch$.pipe(skip(1));
-  }
+  )
+    .pipe(tap(() => addLog('👁️ fetch$ triggered')))
+    .pipe(debounceTime(100));
 
   return fetch$;
 }

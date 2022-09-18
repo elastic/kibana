@@ -25,7 +25,7 @@ async function saveDataSource({
   savedSearch,
   saveOptions,
   services,
-  state,
+  stateContainer,
   navigateOrReloadSavedSearch,
 }: {
   dataView: DataView;
@@ -33,7 +33,7 @@ async function saveDataSource({
   savedSearch: SavedSearch;
   saveOptions: SaveSavedSearchOptions;
   services: DiscoverServices;
-  state: DiscoverStateContainer;
+  stateContainer: DiscoverStateContainer;
   navigateOrReloadSavedSearch: boolean;
 }) {
   const prevSavedSearchId = savedSearch.id;
@@ -53,7 +53,7 @@ async function saveDataSource({
           navigateTo(`/view/${encodeURIComponent(id)}`);
         } else {
           // Update defaults so that "reload saved query" functions correctly
-          state.resetAppState(savedSearch);
+          stateContainer.actions.resetSavedSearch(savedSearch.id || '');
           services.chrome.docTitle.change(savedSearch.title!);
 
           setBreadcrumbsTitle(
@@ -85,7 +85,7 @@ async function saveDataSource({
     onSuccess,
     saveOptions,
     services,
-    state: state.appStateContainer.getState(),
+    state: stateContainer.appStateContainer.getState(),
   });
 }
 
@@ -94,7 +94,7 @@ export async function onSaveSearch({
   navigateTo,
   savedSearch,
   services,
-  state,
+  stateContainer,
   onClose,
   onSaveCb,
 }: {
@@ -102,7 +102,7 @@ export async function onSaveSearch({
   navigateTo: (path: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
-  state: DiscoverStateContainer;
+  stateContainer: DiscoverStateContainer;
   onClose?: () => void;
   onSaveCb?: () => void;
 }) {
@@ -134,7 +134,7 @@ export async function onSaveSearch({
     savedSearch.timeRestore = newTimeRestore;
     savedSearch.rowsPerPage = uiSettings.get(DOC_TABLE_LEGACY)
       ? currentRowsPerPage
-      : state.appStateContainer.getState().rowsPerPage;
+      : stateContainer.appStateContainer.getState().rowsPerPage;
     if (savedObjectsTagging) {
       savedSearch.tags = newTags;
     }
@@ -150,7 +150,7 @@ export async function onSaveSearch({
       services,
       navigateTo,
       savedSearch,
-      state,
+      stateContainer,
       navigateOrReloadSavedSearch,
     });
     // If the save wasn't successful, put the original values back.
@@ -163,7 +163,7 @@ export async function onSaveSearch({
         savedSearch.tags = currentTags;
       }
     } else {
-      state.resetInitialAppState();
+      stateContainer.resetInitialAppState();
     }
     onSaveCb?.();
     return response;

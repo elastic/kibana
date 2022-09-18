@@ -20,7 +20,7 @@ import {
   getSavedSearch,
   getSavedSearchFullPathUrl,
 } from '@kbn/saved-search-plugin/public';
-import { getState } from './services/discover_state';
+import { getDiscoverStateContainer } from './services/discover_state';
 import { loadDataView, resolveDataView } from './utils/resolve_data_view';
 import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/breadcrumbs';
@@ -61,6 +61,9 @@ export function DiscoverMainRoute(props: Props) {
   const [hasUserDataView, setHasUserDataView] = useState(false);
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const { id } = useParams<DiscoverLandingParams>();
+  useEffect(() => {
+    setSavedSearch(undefined);
+  }, [id]);
 
   useExecutionContext(core.executionContext, {
     type: 'application',
@@ -91,7 +94,7 @@ export function DiscoverMainRoute(props: Props) {
           return;
         }
 
-        const { appStateContainer } = getState({ history, savedSearch: nextSavedSearch, services });
+        const { appStateContainer } = getDiscoverStateContainer({ history, savedSearch: nextSavedSearch, services });
         const { index } = appStateContainer.getState();
         const ip = await loadDataView(index || '', data.dataViews, config);
 

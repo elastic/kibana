@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useHistory } from 'react-router-dom';
-import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
+import type { Query, AggregateQuery } from '@kbn/es-query';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_SQL } from '../../../../../common';
@@ -22,10 +21,6 @@ export type DiscoverTopNavProps = Pick<DiscoverLayoutProps, 'dataView' | 'naviga
   onOpenInspector: () => void;
   query?: Query | AggregateQuery;
   savedQuery?: string;
-  updateQuery: (
-    payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
-    isUpdate?: boolean
-  ) => void;
   stateContainer: DiscoverStateContainer;
   onChangeDataView: (dataView: string) => void;
   isPlainRecord: boolean;
@@ -39,15 +34,13 @@ export const DiscoverTopNav = ({
   query,
   savedQuery,
   stateContainer,
-  updateQuery,
   navigateTo,
   onChangeDataView,
   isPlainRecord,
   textBasedLanguageModeErrors,
   onFieldEdited,
 }: DiscoverTopNavProps) => {
-  const history = useHistory();
-  const savedSearch = stateContainer.savedSearch;
+  const savedSearch = stateContainer.savedSearchContainer.savedSearch$.getValue();
 
   const showDatePicker = useMemo(
     () => dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP,
@@ -62,17 +55,6 @@ export const DiscoverTopNav = ({
   const closeDataViewEditor = useRef<() => void | undefined>();
 
   const { AggregateQueryTopNavMenu } = navigation.ui;
-
-  const onOpenSavedSearch = useCallback(
-    (newSavedSearchId: string) => {
-      if (savedSearch.id && savedSearch.id === newSavedSearchId) {
-        stateContainer.resetSavedSearch(savedSearch.id);
-      } else {
-        history.push(`/view/${encodeURIComponent(newSavedSearchId)}`);
-      }
-    },
-    [history, savedSearch.id, stateContainer]
-  );
 
   useEffect(() => {
     return () => {
@@ -135,36 +117,12 @@ export const DiscoverTopNav = ({
         navigateTo,
         savedSearch,
         services,
-        state: stateContainer,
+        stateContainer,
         onOpenInspector,
-        onOpenSavedSearch,
         isPlainRecord,
       }),
-    [
-      dataView,
-      navigateTo,
-      savedSearch,
-      services,
-      stateContainer,
-      onOpenInspector,
-      onOpenSavedSearch,
-      isPlainRecord,
-    ]
+    [stateContainer, dataView, navigateTo, savedSearch, services, onOpenInspector, isPlainRecord]
   );
-
-  const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
-    const { appStateContainer, setAppState } = stateContainer;
-    if (newSavedQueryId) {
-      setAppState({ savedQuery: newSavedQueryId });
-    } else {
-      // remove savedQueryId from state
-      const newState = {
-        ...appStateContainer.getState(),
-      };
-      delete newState.savedQuery;
-      appStateContainer.set(newState);
-    }
-  };
   const setMenuMountPoint = useMemo(() => {
     return getHeaderActionMenuMounter();
   }, []);
@@ -193,7 +151,7 @@ export const DiscoverTopNav = ({
         services,
         dataView,
         navigateTo,
-        state: stateContainer,
+        stateContainer,
         onClose: onCancel,
         onSaveCb: onSave,
       });
@@ -206,8 +164,8 @@ export const DiscoverTopNav = ({
       appName="discover"
       config={topNavMenu}
       indexPatterns={[dataView]}
-      onQuerySubmit={updateQuery}
-      onSavedQueryIdChange={updateSavedQueryId}
+      onQuerySubmit={stateContainer.actions.onUpdateQuery}
+      onSavedQueryIdChange={stateContainer.actions.updateSavedQueryId}
       query={query}
       setMenuMountPoint={setMenuMountPoint}
       savedQueryId={savedQuery}

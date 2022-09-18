@@ -20,13 +20,14 @@ import {
 import {
   createKbnUrlStateStorage,
   createStateContainer,
-  IKbnUrlStateStorage,
+  createStateContainerReactHelpers,
   ReduxLikeStateContainer,
   StateContainer,
   syncState,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
 import {
+  AutoRefreshDoneFn,
   connectToQueryState,
   DataPublicPluginStart,
   QueryState,
@@ -34,6 +35,11 @@ import {
   syncQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
 import { getSavedSearch, SavedSearch } from '@kbn/saved-search-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { TimeRange } from '@kbn/data-plugin/common';
+import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
+import { FetchStatus } from '../../types';
 import { updateSavedSearch } from '../utils/persist_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { getStateDefaults } from '../utils/get_state_defaults';
@@ -44,6 +50,22 @@ import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../locator
 import { VIEW_MODE } from '../../../components/view_mode_toggle';
 import { cleanupUrlState } from '../utils/cleanup_url_state';
 import { getValidFilters } from '../../../utils/get_valid_filters';
+import { DiscoverSearchSessionManager } from './discover_search_session';
+import { getRawRecordType } from '../utils/get_raw_record_type';
+import { getFetch$ } from '../utils/get_fetch_observable';
+import { validateTimeRange } from '../utils/validate_time_range';
+import { fetchAll } from '../utils/fetch_all';
+import { sendResetMsg } from '../hooks/use_saved_search_messages';
+import {
+  DataAvailableFieldsMsg,
+  DataChartsMessage,
+  DataDocumentsMsg,
+  DataMainMsg,
+  DataRefetch$,
+  DataRefetchMsg,
+  DataTotalHitsMsg,
+  SavedSearchData,
+} from '../hooks/use_saved_search';
 
 export interface AppState {
   /**
@@ -124,13 +146,25 @@ interface GetStateParams {
 
 export interface DiscoverStateContainer {
   /**
-   * kbnUrlStateStorage
-   */
-  kbnUrlStateStorage: IKbnUrlStateStorage;
-  /**
    * App state, the _a part of the URL
    */
   appStateContainer: ReduxLikeStateContainer<AppState>;
+
+  savedSearchContainer: {
+    savedSearch$: BehaviorSubject<SavedSearch>;
+    set: (savedSearch: SavedSearch) => void;
+    reset: (id: string | undefined) => Promise<SavedSearch>;
+  };
+
+  dataState: {
+    fetch: () => void;
+    data$: SavedSearchData;
+    refetch$: DataRefetch$;
+    subscribe: () => () => void;
+    reset: () => void;
+    inspectorAdapters: { requests: RequestAdapter };
+    initialFetchStatus: FetchStatus;
+  };
   /**
    * Initialize state with filters and query,  start state syncing
    */
@@ -163,28 +197,77 @@ export interface DiscoverStateContainer {
    * Returns whether the current app state is different to the initial state
    */
   isAppStateDirty: () => boolean;
-  /**
-   * Reset AppState by the given savedSearch discarding all changes
-   */
-  resetAppState: (nextSavedSearch: SavedSearch) => void;
-  /**
-   * Pause the auto refresh interval without pushing an entry to history
-   */
-  pauseAutoRefreshInterval: () => Promise<void>;
 
-  getSavedSearch: () => SavedSearch;
-  savedSearch: SavedSearch;
-  resetSavedSearch: (id?: string) => Promise<void>;
+  actions: {
+    resetSavedSearch: (id: string) => void;
+    onOpenSavedSearch: (newSavedSearchId: string) => void;
+    onUpdateQuery: (
+      payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
+      isUpdate?: boolean
+    ) => void;
+    updateSavedQueryId: (newSavedQueryId: string | undefined) => void;
+    /**
+     * Pause the auto refresh interval without pushing an entry to history
+     */
+    pauseAutoRefreshInterval: () => Promise<void>;
+    fetch: (reset?: boolean) => void;
+  };
 }
+
+export const {
+  Provider,
+  Consumer,
+  context,
+  useContainer,
+  useState,
+  useTransitions,
+  useSelector,
+  connect,
+} = createStateContainerReactHelpers<ReduxLikeStateContainer<AppState>>();
 
 const APP_STATE_URL_KEY = '_a';
 const GLOBAL_STATE_URL_KEY = '_g';
+
+function getSavedSearchContainer({
+  savedSearch,
+  services,
+}: {
+  savedSearch: SavedSearch;
+  services: DiscoverServices;
+}) {
+  const savedSearch$ = new BehaviorSubject(savedSearch);
+  const set = (newSavedSearch: SavedSearch) => {
+    savedSearch$.next(newSavedSearch);
+  };
+  const reset = async (id: string | undefined) => {
+    // any undefined if means it's a new saved search generated
+    const newSavedSearch = await getSavedSearch(id, {
+      search: services.data.search,
+      savedObjectsClient: services.core.savedObjects.client,
+      spaces: services.spaces,
+      savedObjectsTagging: services.savedObjectsTagging,
+    });
+
+    restoreStateFromSavedSearch({
+      savedSearch: newSavedSearch,
+      timefilter: services.timefilter,
+    });
+
+    savedSearch$.next(newSavedSearch);
+    return newSavedSearch;
+  };
+  return {
+    savedSearch$,
+    set,
+    reset,
+  };
+}
 
 /**
  * Builds and returns appState and globalState containers and helper functions
  * Used to sync URL with UI state
  */
-export function getState({
+export function getDiscoverStateContainer({
   history,
   savedSearch,
   services,
@@ -195,10 +278,20 @@ export function getState({
     savedSearch,
     services,
   });
+  const savedSearchContainer = getSavedSearchContainer({ savedSearch, services });
+  const savedSearch$ = savedSearchContainer.savedSearch$;
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
     history,
     ...(toasts && withNotifyOnErrors(toasts)),
+  });
+
+  /**
+   * Search session logic
+   */
+  const searchSessionManager = new DiscoverSearchSessionManager({
+    history,
+    session: services.data.search.session,
   });
 
   const appStateFromUrl = cleanupUrlState(stateStorage.get(APP_STATE_URL_KEY) as AppStateUrl);
@@ -260,106 +353,125 @@ export function getState({
     }
   };
 
+  const initializeAndSync = () => {
+    const dataView = savedSearchContainer.savedSearch$.getValue().searchSource.getField('index');
+    const { filterManager, data } = services;
+    if (appStateContainer.getState().index !== dataView?.id) {
+      // used data view is different than the given by url/state which is invalid
+      setState(appStateContainerModified, { index: dataView?.id });
+    }
+    // sync initial app filters from state to filterManager
+    const filters = appStateContainer.getState().filters;
+    if (filters) {
+      filterManager.setAppFilters(cloneDeep(filters));
+    }
+    const query = appStateContainer.getState().query;
+    if (query) {
+      data.query.queryString.setQuery(query);
+    }
+
+    const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
+      data.query,
+      appStateContainer,
+      {
+        filters: FilterStateStore.APP_STATE,
+        query: true,
+      }
+    );
+
+    // syncs `_g` portion of url with query services
+    const { stop: stopSyncingGlobalStateWithUrl } = syncQueryStateWithUrl(data.query, stateStorage);
+
+    // some filters may not be valid for this context, so update
+    // the filter manager with a modified list of valid filters
+    const currentFilters = filterManager.getFilters();
+    const validFilters = getValidFilters(dataView!, currentFilters);
+    if (!isEqual(currentFilters, validFilters)) {
+      filterManager.setFilters(validFilters);
+    }
+
+    const { start, stop } = syncAppState();
+
+    replaceUrlAppState({}).then(() => {
+      start();
+    });
+
+    return () => {
+      stopSyncingQueryAppStateWithStateContainer();
+      stopSyncingGlobalStateWithUrl();
+      stop();
+    };
+  };
+  const dataStateContainer = getDataState({
+    services,
+    searchSessionManager,
+    appStateContainer,
+    savedSearch$,
+  });
+
   return {
-    kbnUrlStateStorage: stateStorage,
     appStateContainer: appStateContainerModified,
+    dataState: dataStateContainer,
+    savedSearchContainer,
     startSync: () => {
       const { start, stop } = syncAppState();
       start();
       return stop;
     },
     setAppState: (newPartial: AppState) => setState(appStateContainerModified, newPartial),
-    getSavedSearch: () => {
-      return savedSearch;
-    },
-    savedSearch,
     replaceUrlAppState,
     resetInitialAppState: () => {
       initialAppState = appStateContainer.getState();
     },
-    resetAppState: (nextSavedSearch: SavedSearch) => {
-      const defaultState = handleSourceColumnState(
-        getStateDefaults({ savedSearch: nextSavedSearch, services }),
-        services.uiSettings
-      );
-      setState(appStateContainerModified, defaultState);
-    },
     getPreviousAppState: () => previousAppState,
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
-    pauseAutoRefreshInterval,
-    resetSavedSearch: async (id: string | undefined) => {
-      // any undefined if means it's a new saved search generated
-      const newSavedSearch = await getSavedSearch(id, {
-        search: services.data.search,
-        savedObjectsClient: services.core.savedObjects.client,
-        spaces: services.spaces,
-        savedObjectsTagging: services.savedObjectsTagging,
-      });
-
-      const newAppState = getStateDefaults({
-        savedSearch: newSavedSearch,
-        services,
-      });
-
-      restoreStateFromSavedSearch({
-        savedSearch: newSavedSearch,
-        timefilter: services.timefilter,
-      });
-
-      await replaceUrlAppState(newAppState);
-    },
-    initializeAndSync: () => {
-      const dataView = savedSearch.searchSource.getField('index');
-      const { filterManager, data } = services;
-      if (appStateContainer.getState().index !== dataView?.id) {
-        // used data view is different than the given by url/state which is invalid
-        setState(appStateContainerModified, { index: dataView?.id });
-      }
-      // sync initial app filters from state to filterManager
-      const filters = appStateContainer.getState().filters;
-      if (filters) {
-        filterManager.setAppFilters(cloneDeep(filters));
-      }
-      const query = appStateContainer.getState().query;
-      if (query) {
-        data.query.queryString.setQuery(query);
-      }
-
-      const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
-        data.query,
-        appStateContainer,
-        {
-          filters: FilterStateStore.APP_STATE,
-          query: true,
+    initializeAndSync,
+    actions: {
+      resetSavedSearch: async (id) => {
+        const nextSavedSearch = await savedSearchContainer.reset(id);
+        const newAppState = handleSourceColumnState(
+          getStateDefaults({
+            savedSearch: nextSavedSearch,
+            services,
+          }),
+          services.uiSettings
+        );
+        await replaceUrlAppState(newAppState);
+      },
+      onOpenSavedSearch: (newSavedSearchId: string) => {
+        if (savedSearch.id && savedSearch.id === newSavedSearchId) {
+          savedSearchContainer.reset(savedSearch.id);
+        } else {
+          history.push(`/view/${encodeURIComponent(newSavedSearchId)}`);
         }
-      );
-
-      // syncs `_g` portion of url with query services
-      const { stop: stopSyncingGlobalStateWithUrl } = syncQueryStateWithUrl(
-        data.query,
-        stateStorage
-      );
-
-      // some filters may not be valid for this context, so update
-      // the filter manager with a modified list of valid filters
-      const currentFilters = filterManager.getFilters();
-      const validFilters = getValidFilters(dataView!, currentFilters);
-      if (!isEqual(currentFilters, validFilters)) {
-        filterManager.setFilters(validFilters);
-      }
-
-      const { start, stop } = syncAppState();
-
-      replaceUrlAppState({}).then(() => {
-        start();
-      });
-
-      return () => {
-        stopSyncingQueryAppStateWithStateContainer();
-        stopSyncingGlobalStateWithUrl();
-        stop();
-      };
+      },
+      pauseAutoRefreshInterval,
+      updateSavedQueryId: (newSavedQueryId: string | undefined) => {
+        if (newSavedQueryId) {
+          setState(appStateContainerModified, { savedQuery: newSavedQueryId });
+        } else {
+          // remove savedQueryId from state
+          const newState = {
+            ...appStateContainer.getState(),
+          };
+          delete newState.savedQuery;
+          appStateContainer.set(newState);
+        }
+      },
+      /**
+       * Function triggered when the user changes the query in the search bar
+       */
+      onUpdateQuery: (_, isUpdate?: boolean) => {
+        if (isUpdate === false) {
+          searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
+          dataStateContainer.refetch$.next(undefined);
+        }
+      },
+      fetch: (reset?: boolean) => {
+        const msg = reset ? 'reset' : undefined;
+        dataStateContainer.refetch$.next(msg);
+      },
     },
   };
 }
@@ -480,5 +592,132 @@ function createUrlGeneratorState({
     useHash: false,
     viewMode: appState.viewMode,
     hideAggregatedPreview: appState.hideAggregatedPreview,
+  };
+}
+
+function getDataState({
+  services,
+  searchSessionManager,
+  appStateContainer,
+  savedSearch$,
+}: {
+  services: DiscoverServices;
+  searchSessionManager: DiscoverSearchSessionManager;
+  appStateContainer: ReduxLikeStateContainer<AppState>;
+  savedSearch$: BehaviorSubject<SavedSearch>;
+}) {
+  const { data } = services;
+  const inspectorAdapters = { requests: new RequestAdapter() };
+  const appState = appStateContainer.getState();
+  const recordRawType = getRawRecordType(appState.query);
+  /**
+   * The observable to trigger data fetching in UI
+   * By refetch$.next('reset') rows and fieldcounts are reset to allow e.g. editing of runtime fields
+   * to be processed correctly
+   */
+  const refetch$ = new Subject<DataRefetchMsg>();
+  const shouldSearchOnPageLoad =
+    services.uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
+    savedSearch$.getValue().id !== undefined ||
+    services.timefilter.getRefreshInterval().pause === false ||
+    searchSessionManager.hasSearchSessionIdInURL();
+  const initialFetchStatus = shouldSearchOnPageLoad
+    ? FetchStatus.LOADING
+    : FetchStatus.UNINITIALIZED;
+
+  /**
+   * The observables the UI (aka React component) subscribes to get notified about
+   * the changes in the data fetching process (high level: fetching started, data was received)
+   */
+  const initialState = { fetchStatus: initialFetchStatus, recordRawType };
+  const dataSubjects: SavedSearchData = {
+    main$: new BehaviorSubject<DataMainMsg>(initialState),
+    documents$: new BehaviorSubject<DataDocumentsMsg>(initialState),
+    totalHits$: new BehaviorSubject<DataTotalHitsMsg>(initialState),
+    charts$: new BehaviorSubject<DataChartsMessage>(initialState),
+    availableFields$: new BehaviorSubject<DataAvailableFieldsMsg>(initialState),
+  };
+
+  let autoRefreshDone: AutoRefreshDoneFn | undefined;
+  /**
+   * handler emitted by `timefilter.getAutoRefreshFetch$()`
+   * to notify when data completed loading and to start a new autorefresh loop
+   */
+  const setAutoRefreshDone = (fn: AutoRefreshDoneFn | undefined) => {
+    autoRefreshDone = fn;
+  };
+  const fetch$ = getFetch$({
+    setAutoRefreshDone,
+    data,
+    main$: dataSubjects.main$,
+    refetch$,
+    searchSessionManager,
+    initialFetchStatus,
+  });
+  let abortController: AbortController;
+
+  function subscribe() {
+    const subscription = fetch$.subscribe(async (val) => {
+      if (
+        !validateTimeRange(data.query.timefilter.timefilter.getTime(), services.toastNotifications)
+      ) {
+        return;
+      }
+      inspectorAdapters.requests.reset();
+
+      abortController?.abort();
+      abortController = new AbortController();
+      const prevAutoRefreshDone = autoRefreshDone;
+
+      await fetchAll(
+        dataSubjects,
+        savedSearch$.getValue(),
+        val === 'reset',
+        appStateContainer.getState(),
+        {
+          abortController,
+          data,
+          initialFetchStatus,
+          inspectorAdapters,
+          searchSessionId: searchSessionManager.getNextSearchSessionId(),
+          services,
+        }
+      );
+
+      // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
+      // replacing this current one, call it to make sure we tell that the auto refresh is done
+      // and a new one can be scheduled.
+      if (autoRefreshDone === prevAutoRefreshDone) {
+        // if this function was set and is executed, another refresh fetch can be triggered
+        autoRefreshDone?.();
+        autoRefreshDone = undefined;
+      }
+    });
+
+    return () => {
+      abortController?.abort();
+      subscription.unsubscribe();
+    };
+  }
+
+  const fetchQuery = (resetQuery?: boolean) => {
+    if (resetQuery) {
+      refetch$.next('reset');
+    } else {
+      refetch$.next(undefined);
+    }
+    return refetch$;
+  };
+
+  const reset = () => sendResetMsg(dataSubjects, initialFetchStatus);
+
+  return {
+    fetch: fetchQuery,
+    data$: dataSubjects,
+    refetch$,
+    subscribe,
+    reset,
+    inspectorAdapters,
+    initialFetchStatus,
   };
 }

@@ -11,7 +11,7 @@ import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { savedSearchMock, savedSearchMockWithSQL } from '../../../__mocks__/saved_search';
 import { RecordRawType, useSavedSearch } from './use_saved_search';
-import { getState } from '../services/discover_state';
+import { getDiscoverStateContainer } from '../services/discover_state';
 import { useDiscoverState } from './use_discover_state';
 import { FetchStatus } from '../../types';
 import { dataViewMock } from '../../../__mocks__/data_view';
@@ -20,7 +20,7 @@ import { DataViewListItem } from '@kbn/data-views-plugin/common';
 describe('test useSavedSearch', () => {
   test('useSavedSearch return is valid', async () => {
     const { history, searchSessionManager } = createSearchSessionMock();
-    const stateContainer = getState({
+    const stateContainer = getDiscoverStateContainer({
       savedSearch: savedSearchMock,
       services: discoverServiceMock,
       history,
@@ -46,7 +46,7 @@ describe('test useSavedSearch', () => {
   });
   test('refetch$ triggers a search', async () => {
     const { history, searchSessionManager } = createSearchSessionMock();
-    const stateContainer = getState({
+    const stateContainer = getDiscoverStateContainer({
       savedSearch: savedSearchMock,
       services: discoverServiceMock,
       history,
@@ -90,7 +90,7 @@ describe('test useSavedSearch', () => {
 
   test('reset sets back to initial state', async () => {
     const { history, searchSessionManager } = createSearchSessionMock();
-    const stateContainer = getState({
+    const stateContainer = getDiscoverStateContainer({
       savedSearch: savedSearchMock,
       services: discoverServiceMock,
       history,
@@ -134,7 +134,7 @@ describe('test useSavedSearch', () => {
 
   test('useSavedSearch returns plain record raw type', async () => {
     const { history, searchSessionManager } = createSearchSessionMock();
-    const stateContainer = getState({
+    const stateContainer = getDiscoverStateContainer({
       savedSearch: savedSearchMockWithSQL,
       services: discoverServiceMock,
       history,
