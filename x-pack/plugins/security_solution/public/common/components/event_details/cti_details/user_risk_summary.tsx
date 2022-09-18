@@ -58,13 +58,7 @@ const UserRiskSummaryComponent: React.FC<{
       {!userRisk.loading && (
         <>
           <EnrichedDataRow
-            field={
-              <RiskScoreHeaderTitle
-                title={i18n.USER_RISK_CLASSIFICATION}
-                riskScoreEntity={RiskScoreEntity.user}
-                showTooltip={false}
-              />
-            }
+            field={i18n.USER_RISK_CLASSIFICATION}
             value={
               userRisk.result && userRisk.result.length > 0 ? (
                 <RiskScore

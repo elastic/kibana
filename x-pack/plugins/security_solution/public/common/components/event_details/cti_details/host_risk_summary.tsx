@@ -57,13 +57,7 @@ const HostRiskSummaryComponent: React.FC<{
       {!hostRisk.loading && (
         <>
           <EnrichedDataRow
-            field={
-              <RiskScoreHeaderTitle
-                title={i18n.HOST_RISK_CLASSIFICATION}
-                riskScoreEntity={RiskScoreEntity.host}
-                showTooltip={false}
-              />
-            }
+            field={i18n.HOST_RISK_CLASSIFICATION}
             value={
               hostRisk.result && hostRisk.result.length > 0 ? (
                 <RiskScore
