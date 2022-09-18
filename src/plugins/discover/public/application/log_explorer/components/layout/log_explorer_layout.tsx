@@ -57,8 +57,6 @@ export function LogExplorerLayout({ dataViewList, savedSearch }: LogExplorerLayo
     dataView,
     onChangeDataView,
     onDataViewCreated,
-    resetSavedSearch,
-    searchSource,
     state,
     stateContainer,
     navigateTo,
@@ -139,11 +137,8 @@ export function LogExplorerLayout({ dataViewList, savedSearch }: LogExplorerLayo
         query={state.query}
         navigateTo={navigateTo}
         savedQuery={state.savedQuery}
-        savedSearch={savedSearch}
-        searchSource={searchSource}
         stateContainer={stateContainer}
         // updateQuery={onUpdateQuery} - TODO: respond to query updates
-        resetSavedSearch={resetSavedSearch}
         onChangeDataView={onChangeDataView}
         onFieldEdited={onFieldEdited}
         // isPlainRecord={isPlainRecord} - SQL

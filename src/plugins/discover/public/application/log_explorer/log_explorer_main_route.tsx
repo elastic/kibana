@@ -25,7 +25,7 @@ import {
   getSavedSearch,
   getSavedSearchFullPathUrl,
 } from '@kbn/saved-search-plugin/public';
-import { getState } from '../main/services/discover_state';
+import { getDiscoverStateContainer } from '../main/services/discover_state';
 import { loadDataView, resolveDataView } from '../main/utils/resolve_data_view';
 import { LogExplorerMainApp } from './log_explorer_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/breadcrumbs';
@@ -102,11 +102,11 @@ export function DiscoverLogExplorerRoute({ isDev }: Props) {
           return;
         }
 
-        const { appStateContainer } = getState({ history, uiSettings: config });
+        const { appStateContainer } = getDiscoverStateContainer({ history, uiSettings: config });
         const { index } = appStateContainer.getState();
         const ip = await loadDataView(index || '', data.dataViews, config);
 
-        const ipList = ip.list as Array<SavedObject<DataViewAttributes>>;
+        const ipList = ip.list;
         const dataViewData = resolveDataView(ip, searchSource, toastNotifications);
 
         setdataViewList(ipList);
