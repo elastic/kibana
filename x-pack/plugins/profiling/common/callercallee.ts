@@ -143,13 +143,14 @@ export function createCallerCalleeIntermediateRoot(
     //
     // We currently assume there are no callers.
     const callees = trace.frames;
+    const numCallees = callees.length;
     const samples = traces.get(traceHash)!;
 
     // Go through the callees, reverse iteration
     let currentNode = root;
     root.Samples += samples;
 
-    for (let i = 0; i < callees.length; i++) {
+    for (let i = 0; i < numCallees; i++) {
       const callee = callees[i];
       const calleeFrameGroup = createFrameGroup(callee);
       const calleeFrameGroupID = createFrameGroupID(calleeFrameGroup);
@@ -168,7 +169,7 @@ export function createCallerCalleeIntermediateRoot(
 
       node.CountInclusive += samples;
 
-      if (i === callees.length - 1) {
+      if (i === numCallees - 1) {
         // Leaf frame: sum up counts for exclusive CPU.
         node.CountExclusive += samples;
       }
