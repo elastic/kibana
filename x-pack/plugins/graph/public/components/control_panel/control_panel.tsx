@@ -40,6 +40,7 @@ interface ControlPanelProps {
   mergeCandidates: TermIntersect[];
   onSetControl: (control: ControlType) => void;
   selectSelected: (node: WorkspaceNode) => void;
+  toggleTimebar?: () => void;
 }
 
 interface ControlPanelStateProps {
@@ -57,6 +58,7 @@ const ControlPanelComponent = ({
   mergeCandidates,
   onSetControl,
   selectSelected,
+  toggleTimebar,
 }: ControlPanelProps & ControlPanelStateProps) => {
   const hasNodes = workspace.nodes.length === 0;
 
@@ -83,6 +85,7 @@ const ControlPanelComponent = ({
         workspace={workspace}
         liveResponseFields={liveResponseFields}
         onSetControl={onSetControl}
+        toggleTimebar={toggleTimebar}
       />
 
       <div>

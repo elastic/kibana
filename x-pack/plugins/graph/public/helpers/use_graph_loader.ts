@@ -14,6 +14,7 @@ import type {
   GraphExploreCallback,
   GraphSearchCallback,
   SearchRequest,
+  TimeRange,
 } from '../types';
 import { formatHttpError } from './format_http_error';
 
@@ -104,10 +105,63 @@ export const useGraphLoader = ({ toastNotifications, coreStart }: UseGraphLoader
     [coreStart.http, handleHttpError]
   );
 
+  const getTimeExtents = useCallback(
+    (
+      indexName: string,
+      timeField: string,
+      filters: Record<string, unknown>,
+      responseHandler: (timeRange: TimeRange) => void
+    ) => {
+      const request = {
+        body: JSON.stringify({
+          index: indexName,
+          body: {
+            size: 0,
+            aggs: {
+              extents: {
+                filter: {
+                  bool: {
+                    must: [],
+                    should: [],
+                    must_not: [],
+                    filter: [filters],
+                  },
+                },
+                aggs: {
+                  min_date: { min: { field: timeField } },
+                  max_date: { max: { field: timeField } },
+                },
+              },
+            },
+          },
+        }),
+      };
+      setLoading(true);
+      coreStart.http
+        .post<{
+          resp: {
+            aggregations: {
+              extents: Record<'max_date' | 'min_date', { value: number; value_as_string: string }>;
+            };
+          };
+        }>('../api/graph/timeExtents', request)
+        .then(({ resp }) => {
+          responseHandler({
+            from: resp.aggregations.extents.min_date.value_as_string,
+            to: resp.aggregations.extents.max_date.value_as_string,
+          });
+        })
+        .catch(handleHttpError)
+        .finally(() => setLoading(false));
+    },
+    [coreStart.http, handleHttpError]
+  );
+
   return {
     loading,
     callNodeProxy,
     callSearchNodeProxy,
+    getTimeExtents,
     handleSearchQueryError,
   };
 };

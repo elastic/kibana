@@ -16,6 +16,7 @@ import { registerSearchRoute } from './routes/search';
 import { registerExploreRoute } from './routes/explore';
 import { registerSampleData } from './sample_data';
 import { graphWorkspace } from './saved_objects';
+import { registerTimeExtentsRoute } from './routes/time_extents';
 
 export class GraphPlugin implements Plugin {
   private licenseState: LicenseState | null = null;
@@ -79,6 +80,7 @@ export class GraphPlugin implements Plugin {
     const router = core.http.createRouter();
     registerSearchRoute({ licenseState, router });
     registerExploreRoute({ licenseState, router });
+    registerTimeExtentsRoute({ licenseState, router });
   }
 
   public start(core: CoreStart, { licensing }: { licensing: LicensingPluginStart }) {

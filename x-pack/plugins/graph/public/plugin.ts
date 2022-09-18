@@ -26,6 +26,7 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { checkLicense } from '../common/check_license';
 import { ConfigSchema } from '../config';
 
@@ -37,6 +38,7 @@ export interface GraphPluginStartDependencies {
   navigation: NavigationStart;
   licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
+  lens: LensPublicStart;
   savedObjects: SavedObjectsStart;
   home?: HomePublicPluginStart;
   spaces?: SpacesApi;
@@ -107,6 +109,7 @@ export class GraphPlugin
           savedObjects: pluginsStart.savedObjects,
           uiSettings: core.uiSettings,
           spaces: pluginsStart.spaces,
+          lens: pluginsStart.lens,
         });
       },
     });

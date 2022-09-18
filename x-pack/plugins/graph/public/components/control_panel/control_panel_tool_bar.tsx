@@ -14,12 +14,14 @@ interface ControlPanelToolBarProps {
   workspace: Workspace;
   liveResponseFields: WorkspaceField[];
   onSetControl: (action: ControlType) => void;
+  toggleTimebar?: () => void;
 }
 
 export const ControlPanelToolBar = ({
   workspace,
   onSetControl,
   liveResponseFields,
+  toggleTimebar,
 }: ControlPanelToolBarProps) => {
   const haveNodes = workspace.nodes.length === 0;
 
@@ -66,6 +68,10 @@ export const ControlPanelToolBar = ({
     }
   );
 
+  const toggleTimebarMsg = i18n.translate('xpack.graph.sidebar.topMenu.toggleTimebarTooltip', {
+    defaultMessage: 'Toggle timebar',
+  });
+
   const onUndoClick = () => workspace.undo();
   const onRedoClick = () => workspace.redo();
   const onExpandButtonClick = () => {
@@ -84,6 +90,9 @@ export const ControlPanelToolBar = ({
   const onPauseLayoutClick = () => {
     workspace.stopLayout();
     workspace.changeHandler();
+  };
+  const onToggleTimebar = () => {
+    toggleTimebar?.();
   };
 
   return (
@@ -221,6 +230,20 @@ export const ControlPanelToolBar = ({
               onClick={onPauseLayoutClick}
             >
               <span className="kuiIcon fa-pause" />
+            </button>
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+      {workspace.nodes.length > 0 && toggleTimebar && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={toggleTimebarMsg}>
+            <button
+              data-test-subj="toggleTimebar"
+              className="kuiButton kuiButton--basic kuiButton--small"
+              aria-label={toggleTimebarMsg}
+              onClick={onToggleTimebar}
+            >
+              <span className="kuiIcon fa-clock-o" />
             </button>
           </EuiToolTip>
         </EuiFlexItem>

@@ -21,16 +21,17 @@ import {
 } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
 import React from 'react';
+import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
+import { SpacesApi } from '@kbn/spaces-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DataPlugin, DataViewsContract } from '@kbn/data-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import './index.scss';
 import('./font_awesome');
-import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
-import { SpacesApi } from '@kbn/spaces-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { GraphSavePolicy } from './types';
 import { graphRouter } from './router';
 import { checkLicense } from '../common/check_license';
@@ -66,6 +67,7 @@ export interface GraphDependencies {
   uiSettings: IUiSettingsClient;
   history: ScopedHistory<unknown>;
   spaces?: SpacesApi;
+  lens: LensPublicStart;
 }
 
 export type GraphServices = Omit<GraphDependencies, 'element' | 'history'>;
