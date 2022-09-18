@@ -12,8 +12,8 @@ import {
   EuiHideFor,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
   EuiSpacer,
+  EuiPageContent_Deprecated,
 } from '@elastic/eui';
 import type { SavedObject } from '@kbn/data-plugin/public';
 import type { DataViewAttributes } from '@kbn/data-views-plugin/public';
@@ -38,7 +38,6 @@ import { useFieldCounts } from '../../hooks/use_field_counts';
 import { LogExplorer } from './log_explorer';
 import { LogExplorerHistogram } from './log_explorer_histogram';
 import { hasActiveFilter } from '../../../main/components/layout/utils';
-
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 const LogExplorerHistogramMemoized = React.memo(LogExplorerHistogram);
@@ -192,7 +191,7 @@ export function LogExplorerLayout({ dataViewList, savedSearch }: LogExplorerLayo
             </EuiFlexItem>
           </EuiHideFor>
           <EuiFlexItem className="dscPageContent__wrapper" style={{ paddingRight: 0 }}>
-            <EuiPageContent
+            <EuiPageContent_Deprecated
               verticalPosition={contentCentered ? 'center' : undefined}
               horizontalPosition={contentCentered ? 'center' : undefined}
               paddingSize="none"
@@ -224,7 +223,7 @@ export function LogExplorerLayout({ dataViewList, savedSearch }: LogExplorerLayo
                   <LogExplorer savedSearch={savedSearch} stateMachine={entriesActor} />
                 </EuiFlexGroup>
               )}
-            </EuiPageContent>
+            </EuiPageContent_Deprecated>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <LogExplorerHistogramMemoized

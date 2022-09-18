@@ -14,7 +14,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { SavedSearch, getSavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import { getState } from '../../../main/services/discover_state';
+import { getDiscoverStateContainer } from '../../../main/services/discover_state';
 import { getStateDefaults } from '../../../main/utils/get_state_defaults';
 import { loadDataView } from '../../../main/utils/resolve_data_view';
 import { MODIFY_COLUMNS_ON_SWITCH, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
@@ -43,18 +43,17 @@ export function useDiscoverState({
     data,
     filterManager,
     dataViews,
-    storage,
     chrome,
     docLinks,
     spaces,
     core: {
-      notifications: { toasts },
       savedObjects: { client: savedObjectsClient },
     },
     history,
     trackUiMetric,
     capabilities,
   } = useDiscoverServices();
+  const services = useDiscoverServices();
 
   const usedHistory = useHistory();
 
@@ -67,20 +66,12 @@ export function useDiscoverState({
 
   const stateContainer = useMemo(
     () =>
-      getState({
-        getStateDefaults: () =>
-          getStateDefaults({
-            config,
-            data,
-            savedSearch,
-            storage,
-          }),
-        storeInSessionStorage: config.get('state:storeInSessionStorage'),
+      getDiscoverStateContainer({
         history: usedHistory,
-        toasts,
-        uiSettings: config,
+        savedSearch,
+        services,
       }),
-    [config, data, usedHistory, savedSearch, toasts, storage]
+    [services, usedHistory, savedSearch]
   );
 
   const { appStateContainer } = stateContainer;
@@ -92,7 +83,7 @@ export function useDiscoverState({
    * or dataView / savedSearch switch
    */
   useEffect(() => {
-    const stopSync = stateContainer.initializeAndSync(dataView, filterManager, data);
+    const stopSync = stateContainer.initializeAndSync();
     setState(stateContainer.appStateContainer.getState());
 
     return () => stopSync();
@@ -136,15 +127,13 @@ export function useDiscoverState({
       const newDataView = newSavedSearch.searchSource.getField('index') || dataView;
       newSavedSearch.searchSource.setField('index', newDataView);
       const newAppState = getStateDefaults({
-        config,
-        data,
+        services,
         savedSearch: newSavedSearch,
-        storage,
       });
       await stateContainer.replaceUrlAppState(newAppState);
       setState(newAppState);
     },
-    [dataView, config, data, storage, stateContainer, spaces, savedObjectsClient]
+    [data.search, savedObjectsClient, spaces, dataView, services, stateContainer]
   );
 
   /**
@@ -191,7 +180,7 @@ export function useDiscoverState({
   /**
    * Url / Routing logic
    */
-  useUrl({ history: usedHistory, resetSavedSearch });
+  useUrl({ history: usedHistory, stateContainer });
 
   /**
    * SavedSearch dependant initialisation

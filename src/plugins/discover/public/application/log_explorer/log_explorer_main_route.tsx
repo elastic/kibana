@@ -8,7 +8,6 @@
 import React, { useEffect, useState, memo, useCallback } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { SavedObject } from '@kbn/data-plugin/public';
-import { ISearchSource } from '@kbn/data-plugin/public';
 import {
   DataViewAttributes,
   DataViewSavedObjectConflictError,
@@ -80,7 +79,7 @@ export function DiscoverLogExplorerRoute({ isDev }: Props) {
   }, []);
 
   const loadDefaultOrCurrentdataView = useCallback(
-    async (searchSource: ISearchSource) => {
+    async (currentSavedSearch: SavedSearch) => {
       try {
         const hasUserDataViewValue = await data.dataViews.hasData
           .hasUserDataView()
@@ -102,12 +101,20 @@ export function DiscoverLogExplorerRoute({ isDev }: Props) {
           return;
         }
 
-        const { appStateContainer } = getDiscoverStateContainer({ history, uiSettings: config });
+        const { appStateContainer } = getDiscoverStateContainer({
+          history,
+          services,
+          savedSearch: currentSavedSearch,
+        });
         const { index } = appStateContainer.getState();
         const ip = await loadDataView(index || '', data.dataViews, config);
 
         const ipList = ip.list;
-        const dataViewData = resolveDataView(ip, searchSource, toastNotifications);
+        const dataViewData = resolveDataView(
+          ip,
+          currentSavedSearch.searchSource,
+          toastNotifications
+        );
 
         setdataViewList(ipList);
 
@@ -116,7 +123,7 @@ export function DiscoverLogExplorerRoute({ isDev }: Props) {
         setError(e);
       }
     },
-    [config, data.dataViews, history, isDev, toastNotifications]
+    [config, data.dataViews, history, isDev, savedSearch, services, toastNotifications]
   );
 
   const loadSavedSearch = useCallback(async () => {
@@ -127,7 +134,7 @@ export function DiscoverLogExplorerRoute({ isDev }: Props) {
         spaces: services.spaces,
       });
 
-      const loadeddataView = await loadDefaultOrCurrentdataView(currentSavedSearch.searchSource);
+      const loadeddataView = await loadDefaultOrCurrentdataView(currentSavedSearch);
 
       if (!loadeddataView) {
         return;
