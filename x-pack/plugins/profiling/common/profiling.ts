@@ -212,8 +212,9 @@ export function groupStackFrameMetadataByStackTrace(
 ): Map<StackTraceID, StackFrameMetadata[]> {
   const frameMetadataForTraces = new Map<StackTraceID, StackFrameMetadata[]>();
   for (const [stackTraceID, trace] of stackTraces) {
-    const frameMetadata = new Array<StackFrameMetadata>();
-    for (let i = 0; i < trace.FrameIDs.length; i++) {
+    const numFramesPerTrace = trace.FrameIDs.length;
+    const frameMetadata = new Array<StackFrameMetadata>(numFramesPerTrace);
+    for (let i = 0; i < numFramesPerTrace; i++) {
       const frameID = trace.FrameIDs[i];
       const fileID = trace.FileIDs[i];
       const addressOrLine = trace.AddressOrLines[i];
@@ -232,7 +233,7 @@ export function groupStackFrameMetadataByStackTrace(
         ExeFileName: executable.FileName,
       });
 
-      frameMetadata.push(metadata);
+      frameMetadata[i] = metadata;
     }
     frameMetadataForTraces.set(stackTraceID, frameMetadata);
   }
