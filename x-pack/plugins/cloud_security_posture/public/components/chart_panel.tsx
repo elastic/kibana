@@ -64,7 +64,7 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
         <EuiFlexItem grow={false}>
           {title && (
             <EuiTitle size="xs">
-              <h3>{title}</h3>
+              <h3 style={{ lineHeight: 'initial' }}>{title}</h3>
             </EuiTitle>
           )}
         </EuiFlexItem>

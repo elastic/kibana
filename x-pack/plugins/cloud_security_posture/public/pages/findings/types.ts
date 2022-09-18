@@ -30,6 +30,10 @@ export interface FindingsBaseEsQuery {
 // TODO: this needs to be defined in a versioned schema
 export interface CspFinding {
   '@timestamp': string;
+  cluster_id: string;
+  cluster?: {
+    name?: string;
+  };
   result: CspFindingResult;
   resource: CspFindingResource;
   rule: CspRuleMetadata;

@@ -85,7 +85,7 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
           }}
         />
       </EuiFlexItem>
-      {INTERNAL_FEATURE_FLAGS.manageRules && (
+      {INTERNAL_FEATURE_FLAGS.showManageRulesMock && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty>
             <FormattedMessage
