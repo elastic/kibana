@@ -13,10 +13,15 @@ import {
 import { CspmIndicesStats, IndexStats } from './types';
 
 export const getIndicesStats = async (esClient: ElasticsearchClient): Promise<CspmIndicesStats> => {
+  const [findings, latestFindings, score] = await Promise.all([
+    getIndexStats(esClient, FINDINGS_INDEX_DEFAULT_NS),
+    getIndexStats(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS),
+    getIndexStats(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS),
+  ]);
   return {
-    findings: await getIndexStats(esClient, FINDINGS_INDEX_DEFAULT_NS),
-    latest_findings: await getIndexStats(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS),
-    score: await getIndexStats(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS),
+    findings,
+    latest_findings: latestFindings,
+    score,
   };
 };
 
