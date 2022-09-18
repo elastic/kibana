@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { isEmpty, reduce, map } from 'lodash';
+import { isEmpty, reduce } from 'lodash';
+import type { DefaultValues } from 'react-hook-form';
 import type { ECSMapping } from './schemas';
 
 export type { ECSMapping };
@@ -33,11 +34,23 @@ export const convertECSMappingToObject = (ecsMapping: ECSMappingArray): ECSMappi
     {} as ECSMapping
   );
 
-export const convertECSMappingToArray = (ecsMapping: ECSMapping | undefined): ECSMappingArray =>
-  map(ecsMapping, (value, key) => ({
-    key,
-    result: {
-      type: Object.keys(value)[0],
-      value: Object.values(value)[0],
+export const convertECSMappingToArray = (
+  ecsMapping: DefaultValues<ECSMapping> | undefined
+): ECSMappingArray =>
+  reduce(
+    ecsMapping,
+    (acc, value, key) => {
+      if (value) {
+        acc.push({
+          key,
+          result: {
+            type: Object.keys(value)[0],
+            value: Object.values(value as string | string[])[0],
+          },
+        });
+      }
+
+      return acc;
     },
-  }));
+    [] as ECSMappingArray
+  );

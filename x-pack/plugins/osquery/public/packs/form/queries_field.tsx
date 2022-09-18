@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
 import { produce } from 'immer';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import deepEqual from 'fast-deep-equal';
 
 import type { FieldHook } from '../../shared_imports';
 import { PackQueriesTable } from '../pack_queries_table';
@@ -242,4 +243,4 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
   );
 };
 
-export const QueriesField = React.memo(QueriesFieldComponent);
+export const QueriesField = React.memo(QueriesFieldComponent, deepEqual);

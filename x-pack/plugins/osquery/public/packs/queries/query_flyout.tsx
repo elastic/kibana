@@ -60,8 +60,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   const {
     handleSubmit,
     formState: { isSubmitting },
-    reset,
-    clearErrors,
+    resetField,
   } = hooksForm;
   const onSubmit = (payload: PackQueryFormData) => {
     const serializedData: PackSOQueryFormData = serializer(payload);
@@ -72,18 +71,17 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   const handleSetQueryValue = useCallback(
     (savedQuery) => {
       if (savedQuery) {
-        clearErrors('id');
-        reset({
-          id: savedQuery.id,
-          query: savedQuery.query,
-          platform: savedQuery.platform ? savedQuery.platform : 'linux,windows,darwin',
-          version: savedQuery.version ? [savedQuery.version] : [],
-          interval: savedQuery.interval,
-          ecs_mapping: savedQuery.ecs_mapping,
+        resetField('id', { defaultValue: savedQuery.id });
+        resetField('query', { defaultValue: savedQuery.query });
+        resetField('platform', {
+          defaultValue: savedQuery.platform ? savedQuery.platform : 'linux,windows,darwin',
         });
+        resetField('version', { defaultValue: savedQuery.version ? [savedQuery.version] : [] });
+        resetField('interval', { defaultValue: savedQuery.interval ? savedQuery.interval : 3600 });
+        resetField('ecs_mapping', { defaultValue: savedQuery.ecs_mapping ?? {} });
       }
     },
-    [clearErrors, reset]
+    [resetField]
   );
   /* Avoids accidental closing of the flyout when the user clicks outside of the flyout */
   const maskProps = useMemo(() => ({ onClick: () => ({}) }), []);

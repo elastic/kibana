@@ -285,7 +285,6 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
       isDisabled={euiFieldProps.isDisabled}
     >
       <EuiComboBox
-        onBlur={ECSField.onBlur}
         prepend={prepend}
         fullWidth
         singleSelection={SINGLE_SELECTION}
@@ -304,7 +303,7 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
   );
 };
 
-export const ECSComboboxField = React.memo(ECSComboboxFieldComponent);
+export const ECSComboboxField = React.memo(ECSComboboxFieldComponent, deepEqual);
 
 const OSQUERY_COLUMN_VALUE_TYPE_OPTIONS = [
   {
@@ -593,7 +592,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   );
 };
 
-export const OsqueryColumnField = React.memo(OsqueryColumnFieldComponent);
+export const OsqueryColumnField = React.memo(OsqueryColumnFieldComponent, deepEqual);
 
 export interface ECSMappingEditorFieldProps {
   euiFieldProps?: EuiComboBoxProps<{}>;
@@ -748,37 +747,41 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
     name: 'ecsMappingArray',
   });
 
-  const ecsMappingArray = watch('ecsMappingArray');
+  const formValue = watch();
   const ecsMappingArrayState = getFieldState('ecsMappingArray', formState);
   const [osquerySchemaOptions, setOsquerySchemaOptions] = useState<OsquerySchemaOption[]>([]);
 
   useEffect(() => {
     const subscription = watchRoot((data, payload) => {
       if (payload.name === 'ecs_mapping') {
-        const parsedMapping = convertECSMappingToObject(ecsMappingArray);
-
+        const parsedMapping = convertECSMappingToObject(formValue.ecsMappingArray);
         if (!deepEqual(data.ecs_mapping, parsedMapping)) {
           resetField('ecsMappingArray', {
             defaultValue: [...convertECSMappingToArray(data.ecs_mapping), defaultEcsFormData],
           });
+          replace([...convertECSMappingToArray(data.ecs_mapping), defaultEcsFormData]);
         }
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [watchRoot, ecsMappingArray, replace, resetField]);
+  }, [watchRoot, ecsMapping, replace, resetField, formValue.ecsMappingArray]);
 
   useEffect(() => {
-    const subscription = watch((data) => {
-      const lastEcs = last(data.ecsMappingArray);
-
-      if (lastEcs?.key?.length && lastEcs?.result?.value?.length) {
-        append(defaultEcsFormData);
+    const subscription = watch((data, payload) => {
+      if (data?.ecsMappingArray) {
+        const lastEcsIndex = data?.ecsMappingArray?.length - 1;
+        if (payload.name?.startsWith(`ecsMappingArray.${lastEcsIndex}.`)) {
+          const lastEcs = last(data.ecsMappingArray);
+          if (lastEcs?.key?.length && lastEcs?.result?.value?.length) {
+            append(defaultEcsFormData);
+          }
+        }
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [watch, append]);
+  }, [formValue, append, watch]);
 
   useEffect(() => {
     if (!query?.length) {
@@ -1012,14 +1015,13 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
   }, [query]);
 
   useEffect(() => {
-    const parsedMapping = convertECSMappingToObject(ecsMappingArray);
-
+    const parsedMapping = convertECSMappingToObject(formValue.ecsMappingArray);
     if (ecsMappingArrayState.isDirty && !deepEqual(parsedMapping, ecsMapping)) {
       setValueRoot('ecs_mapping', parsedMapping, {
         shouldTouch: true,
       });
     }
-  }, [setValueRoot, ecsMappingArray, ecsMappingArrayState.isDirty, ecsMapping]);
+  }, [setValueRoot, formValue, ecsMappingArrayState.isDirty, ecsMapping]);
 
   useEffect(() => {
     if (!formState.isValid) {

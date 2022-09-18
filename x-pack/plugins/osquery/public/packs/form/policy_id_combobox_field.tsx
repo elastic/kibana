@@ -11,6 +11,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal';
 
 import type { GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
 import type { FieldHook } from '../../shared_imports';
@@ -150,4 +151,4 @@ const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
   );
 };
 
-export const PolicyIdComboBoxField = React.memo(PolicyIdComboBoxFieldComponent);
+export const PolicyIdComboBoxField = React.memo(PolicyIdComboBoxFieldComponent, deepEqual);
