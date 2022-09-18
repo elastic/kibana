@@ -13,7 +13,7 @@ import type {
   AggregationsTopHitsAggregate,
   SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
-import { CspFinding } from '../../../public/pages/findings/types';
+import { CspFinding } from '../../../common/schemas/csp_finding';
 import type { Cluster } from '../../../common/types';
 import {
   getFailedFindingsFromAggs,
@@ -66,8 +66,6 @@ export const getClustersQuery = (query: QueryDslQueryContainer, pitId: string): 
 
 export const getClustersFromAggs = (clusters: ClusterBucket[]): ClusterWithoutTrend[] =>
   clusters.map((cluster) => {
-    // get cluster's meta data
-
     const latestFindingHit: SearchHit<CspFinding> = cluster.latestFindingTopHit.hits.hits[0];
     if (!latestFindingHit._source) throw new Error('Missing findings top hits');
 
