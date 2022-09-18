@@ -51,12 +51,12 @@ describe('Entity Analytics Dashboard', () => {
 
   describe('Host Risk Score enabled but still no data', () => {
     before(() => {
-      esArchiverLoad('risky_hosts_no_data');
+      esArchiverLoad('risk_hosts_no_data');
       visit(ENTITY_ANALYTICS_URL);
     });
 
     after(() => {
-      esArchiverUnload('risky_hosts_no_data');
+      esArchiverUnload('risk_hosts_no_data');
     });
 
     it('shows no data detected propmpt', () => {
@@ -66,12 +66,12 @@ describe('Entity Analytics Dashboard', () => {
 
   describe('User Risk Score enabled but still no data', () => {
     before(() => {
-      esArchiverLoad('risky_users_no_data');
+      esArchiverLoad('risk_users_no_data');
       visit(ENTITY_ANALYTICS_URL);
     });
 
     after(() => {
-      esArchiverUnload('risky_users_no_data');
+      esArchiverUnload('risk_users_no_data');
     });
 
     it('shows no data detected propmpt', () => {
@@ -81,12 +81,12 @@ describe('Entity Analytics Dashboard', () => {
 
   describe('With hosts Legacy data', () => {
     before(() => {
-      esArchiverLoad('risky_hosts_legacy_data');
+      esArchiverLoad('risk_hosts_legacy_data');
       visit(ENTITY_ANALYTICS_URL);
     });
 
     after(() => {
-      esArchiverUnload('risky_hosts_legacy_data');
+      esArchiverUnload('risk_hosts_legacy_data');
     });
 
     it('shows upgrade host risk button', () => {
@@ -96,12 +96,12 @@ describe('Entity Analytics Dashboard', () => {
 
   describe('With users Legacy data', () => {
     before(() => {
-      esArchiverLoad('risky_users_legacy_data');
+      esArchiverLoad('risk_users_legacy_data');
       visit(ENTITY_ANALYTICS_URL);
     });
 
     after(() => {
-      esArchiverUnload('risky_users_legacy_data');
+      esArchiverUnload('risk_users_legacy_data');
     });
     it('shows upgrade user risk button', () => {
       cy.get(UPGRADE_USER_RISK_SCORE_BUTTON).should('be.visible');
@@ -110,12 +110,12 @@ describe('Entity Analytics Dashboard', () => {
 
   describe('With host risk data', () => {
     before(() => {
-      esArchiverLoad('risky_hosts');
+      esArchiverLoad('risk_hosts');
       visit(ENTITY_ANALYTICS_URL);
     });
 
     after(() => {
-      esArchiverUnload('risky_hosts');
+      esArchiverUnload('risk_hosts');
     });
 
     it('renders donut chart', () => {
@@ -137,12 +137,12 @@ describe('Entity Analytics Dashboard', () => {
 
   describe('With user risk data', () => {
     before(() => {
-      esArchiverLoad('risky_users');
+      esArchiverLoad('risk_users');
       visit(ENTITY_ANALYTICS_URL);
     });
 
     after(() => {
-      esArchiverUnload('risky_users');
+      esArchiverUnload('risk_users');
     });
 
     it('renders donut chart', () => {

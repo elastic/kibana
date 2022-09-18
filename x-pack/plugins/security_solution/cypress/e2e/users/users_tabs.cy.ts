@@ -25,13 +25,13 @@ describe('Users stats and tables', () => {
     cleanKibana();
     esArchiverLoad('users');
 
-    esArchiverLoad('risky_users');
+    esArchiverLoad('risk_users');
     login();
     visit(USERS_URL);
   });
   after(() => {
     esArchiverUnload('users');
-    esArchiverUnload('risky_users');
+    esArchiverUnload('risk_users');
   });
 
   describe('Users page tabs', () => {
