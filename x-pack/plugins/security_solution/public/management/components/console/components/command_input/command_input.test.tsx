@@ -352,9 +352,15 @@ describe('When entering data into the Console input', () => {
       expect(getRightOfCursorText()).toEqual('ate');
     });
 
-    it('should select all text when ctrl or cmd + a is pressed and delete all text when delete key is pressed', () => {
-      typeKeyboardKey('{Meta>}a{/Meta}');
-      const selection = window.getSelection();
+    it('should select all text when ctrl or cmd + a is pressed', () => {
+      typeKeyboardKey('{ctrl>}a{/ctrl}');
+      let selection = window.getSelection();
+      expect(selection!.toString()).toEqual('isolate');
+
+      selection!.removeAllRanges();
+
+      typeKeyboardKey('{meta>}a{/meta}');
+      selection = window.getSelection();
       expect(selection!.toString()).toEqual('isolate');
     });
 
