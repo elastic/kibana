@@ -354,12 +354,8 @@ describe('When entering data into the Console input', () => {
 
     it('should select all text when ctrl or cmd + a is pressed and delete all text when delete key is pressed', () => {
       typeKeyboardKey('{Meta>}a{/Meta}');
-
-      expect(getLeftOfCursorText()).toEqual('isolate');
-      typeKeyboardKey('{Delete}');
-
-      expect(getLeftOfCursorText()).toEqual('');
-      expect(getRightOfCursorText()).toEqual('');
+      const selection = window.getSelection();
+      expect(selection!.toString()).toEqual('isolate');
     });
 
     // FIXME:PT uncomment once task OLM task #4384 is implemented
