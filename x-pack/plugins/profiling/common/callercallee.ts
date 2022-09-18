@@ -34,8 +34,8 @@ function selectRelevantTraces(
 ): Map<StackTraceID, RelevantTrace> {
   const result = new Map<StackTraceID, RelevantTrace>();
   const rootString = createFrameGroupID(createFrameGroup(rootFrame));
-  for (const [stackTraceID, frameMetadata] of frames) {
-    if (rootFrame.FileID === '' && rootFrame.AddressOrLine === 0) {
+  if (rootFrame.FileID === '' && rootFrame.AddressOrLine === 0) {
+    for (const [stackTraceID, frameMetadata] of frames) {
       // If the root frame is empty, every trace is relevant, and all elements
       // of the trace are relevant. This means that the index is set to the
       // length of the frameMetadata, implying that in the absence of a root
@@ -44,7 +44,9 @@ function selectRelevantTraces(
         frames: frameMetadata,
         index: frameMetadata.length,
       } as RelevantTrace);
-    } else {
+    }
+  } else {
+    for (const [stackTraceID, frameMetadata] of frames) {
       // Search for the right index of the root frame in the frameMetadata, and
       // set it in the result.
       for (let i = 0; i < frameMetadata.length; i++) {
