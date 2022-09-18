@@ -29,6 +29,7 @@ export interface ClusterBucket extends FailedFindingsQueryResult, KeyDocCount {
   passed_findings: {
     doc_count: number;
   };
+  clusterName: Aggregation<KeyDocCount>;
   benchmarkName: Aggregation<KeyDocCount>;
   benchmarkId: Aggregation<KeyDocCount<BenchmarkId>>;
   timestamps: Aggregation<KeyDocCount<UnixEpochTime>>;
@@ -49,6 +50,11 @@ export const getClustersQuery = (query: QueryDslQueryContainer, pitId: string): 
         field: 'cluster_id',
       },
       aggs: {
+        clusterName: {
+          terms: {
+            field: 'cluster.name',
+          },
+        },
         benchmarkName: {
           terms: {
             field: 'rule.benchmark.name',
@@ -78,6 +84,13 @@ export const getClustersQuery = (query: QueryDslQueryContainer, pitId: string): 
   },
 });
 
+const getClusterName = (clusterNames: ClusterBucket['clusterName']) => {
+  if (Array.isArray(clusterNames.buckets) && !!clusterNames.buckets.length) {
+    return clusterNames.buckets[0].key;
+  }
+  return 'Mock Cluster Name';
+};
+
 export const getClustersFromAggs = (clusters: ClusterBucket[]): ClusterWithoutTrend[] =>
   clusters.map((cluster) => {
     // get cluster's meta data
@@ -94,6 +107,7 @@ export const getClustersFromAggs = (clusters: ClusterBucket[]): ClusterWithoutTr
 
     const meta = {
       clusterId: cluster.key,
+      clusterName: getClusterName(cluster.clusterName),
       benchmarkName: benchmarkNames[0].key,
       benchmarkId: benchmarkIds[0].key,
       lastUpdate: timestamps[0].key,

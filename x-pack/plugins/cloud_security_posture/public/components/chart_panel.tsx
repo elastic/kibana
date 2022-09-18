@@ -63,7 +63,7 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
       <EuiFlexGroup direction="column" gutterSize="none" style={{ height: '100%' }}>
         <EuiFlexItem grow={false}>
           {title && (
-            <EuiTitle size="s">
+            <EuiTitle size="xs">
               <h3>{title}</h3>
             </EuiTitle>
           )}
