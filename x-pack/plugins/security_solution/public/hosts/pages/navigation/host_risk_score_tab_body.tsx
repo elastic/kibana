@@ -23,6 +23,7 @@ import {
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 import { EntityAnalyticsHostRiskScoreDisable } from '../../../common/components/risk_score/risk_score_disabled/host_risk_score_disabled';
+import { RiskScoresNoDataDetected } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
 
 const HostRiskScoreTableManage = manageQuery(HostRiskScoreTable);
 
@@ -84,6 +85,10 @@ export const HostRiskScoreQueryTabBody = ({
         entityType={RiskScoreEntity.host}
       />
     );
+  }
+
+  if (isModuleEnabled && data?.length === 0) {
+    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.host} />;
   }
 
   return (

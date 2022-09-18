@@ -33,6 +33,7 @@ import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_bor
 import { RISKY_HOSTS_EXTERNAL_DOC_LINK } from '../../../../../common/constants';
 import { EntityAnalyticsHostRiskScoreDisable } from '../../../../common/components/risk_score/risk_score_disabled/host_risk_score_disabled';
 import { RiskScoreHeaderTitle } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_header_title';
+import { RiskScoresNoDataDetected } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
 
 const TABLE_QUERY_ID = 'hostRiskDashboardTable';
 
@@ -122,6 +123,10 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
         timerange={timerange}
       />
     );
+  }
+
+  if (isModuleEnabled && data?.length === 0) {
+    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.host} />;
   }
 
   return (

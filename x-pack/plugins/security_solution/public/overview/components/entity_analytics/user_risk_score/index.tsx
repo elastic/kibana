@@ -33,6 +33,7 @@ import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_bor
 import { RISKY_USERS_EXTERNAL_DOC_LINK } from '../../../../../common/constants';
 import { EntityAnalyticsUserRiskScoreDisable } from '../../../../common/components/risk_score/risk_score_disabled/user_risk_score.disabled';
 import { RiskScoreHeaderTitle } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_header_title';
+import { RiskScoresNoDataDetected } from '../../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
 
 const TABLE_QUERY_ID = 'userRiskDashboardTable';
 
@@ -121,6 +122,10 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
         timerange={timerange}
       />
     );
+  }
+
+  if (isModuleEnabled && data?.length === 0) {
+    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.user} />;
   }
 
   return (

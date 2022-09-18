@@ -23,6 +23,7 @@ import type { UsersComponentsQueryProps } from './types';
 import { UserRiskInformationButtonEmpty } from '../../components/user_risk_information';
 import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_button_href';
 import { EntityAnalyticsUserRiskScoreDisable } from '../../../common/components/risk_score/risk_score_disabled/user_risk_score.disabled';
+import { RiskScoresNoDataDetected } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
 
 const QUERY_ID = UserRiskScoreQueryId.USER_DETAILS_RISK_SCORE;
 
@@ -101,6 +102,10 @@ const UserRiskTabBodyComponent: React.FC<
         timerange={timerange}
       />
     );
+  }
+
+  if (isModuleEnabled && data?.length === 0) {
+    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.user} />;
   }
 
   const lastUsertRiskItem: UserRiskScore | null =

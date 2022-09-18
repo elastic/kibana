@@ -25,6 +25,7 @@ import {
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 import { EntityAnalyticsUserRiskScoreDisable } from '../../../common/components/risk_score/risk_score_disabled/user_risk_score.disabled';
+import { RiskScoresNoDataDetected } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
 
 const UserRiskScoreTableManage = manageQuery(UserRiskScoreTable);
 
@@ -85,6 +86,10 @@ export const UserRiskScoreQueryTabBody = ({
         timerange={timerange}
       />
     );
+  }
+
+  if (isModuleEnabled && data?.length === 0) {
+    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.user} />;
   }
 
   return (

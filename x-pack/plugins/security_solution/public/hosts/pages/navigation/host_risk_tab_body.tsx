@@ -23,6 +23,7 @@ import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_button_href';
 import { RISKY_HOSTS_DASHBOARD_TITLE } from './constants';
 import { EntityAnalyticsHostRiskScoreDisable } from '../../../common/components/risk_score/risk_score_disabled/host_risk_score_disabled';
+import { RiskScoresNoDataDetected } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.euiSizeL};
@@ -103,6 +104,10 @@ const HostRiskTabBodyComponent: React.FC<
         timerange={timerange}
       />
     );
+  }
+
+  if (isModuleEnabled && data?.length === 0) {
+    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.host} />;
   }
 
   return (
