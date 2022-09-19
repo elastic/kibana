@@ -15,6 +15,7 @@ interface OsqueryQuery {
   query: string;
   ecs_mapping: Record<string, Record<'field', string>>;
   version: string;
+  interval?: number;
   platform: string;
 }
 

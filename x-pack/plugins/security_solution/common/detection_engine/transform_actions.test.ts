@@ -11,6 +11,7 @@ import {
   transformRuleToAlertResponseAction,
   transformAlertToRuleResponseAction,
 } from './transform_actions';
+import { RESPONSE_ACTION_TYPES } from './rule_response_actions/schemas';
 
 describe('transform_actions', () => {
   test('it should transform RuleAlertAction[] to RuleAction[]', () => {
@@ -46,8 +47,10 @@ describe('transform_actions', () => {
   });
   test('it should transform ResponseAction[] to RuleResponseAction[]', () => {
     const ruleAction = {
-      action_type_id: 'action_type_id',
-      params: {},
+      action_type_id: RESPONSE_ACTION_TYPES.OSQUERY,
+      params: {
+        id: 'test',
+      },
     };
     const alertAction = transformRuleToAlertResponseAction(ruleAction);
     expect(alertAction).toEqual({
@@ -58,8 +61,10 @@ describe('transform_actions', () => {
 
   test('it should transform RuleResponseAction[] to ResponseAction[]', () => {
     const alertAction = {
-      actionTypeId: 'actionTypeId',
-      params: {},
+      actionTypeId: RESPONSE_ACTION_TYPES.OSQUERY,
+      params: {
+        id: 'test',
+      },
     };
     const ruleAction = transformAlertToRuleResponseAction(alertAction);
     expect(ruleAction).toEqual({

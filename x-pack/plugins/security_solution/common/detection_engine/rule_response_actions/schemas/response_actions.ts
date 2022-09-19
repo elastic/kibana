@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';
+import { OsqueryParams } from './osquery';
 
 export enum RESPONSE_ACTION_TYPES {
   OSQUERY = '.osquery',
 }
+
 export const SUPPORTED_RESPONSE_ACTION_TYPES = Object.values(RESPONSE_ACTION_TYPES);
 
+// When we create new response action types, create a union of types
 const ResponseActionRuleParam = t.exact(
   t.type({
-    actionTypeId: NonEmptyString,
-    params: t.record(t.string, t.any),
+    actionTypeId: t.literal(RESPONSE_ACTION_TYPES.OSQUERY),
+    params: OsqueryParams,
   })
 );
 export type RuleResponseAction = t.TypeOf<typeof ResponseActionRuleParam>;
@@ -26,10 +28,11 @@ export const ResponseActionRuleParamsOrUndefined = t.union([
   t.undefined,
 ]);
 
+// When we create new response action types, create a union of types
 const ResponseAction = t.exact(
   t.type({
-    action_type_id: NonEmptyString,
-    params: t.record(t.string, t.any),
+    action_type_id: t.literal(RESPONSE_ACTION_TYPES.OSQUERY),
+    params: OsqueryParams,
   })
 );
 

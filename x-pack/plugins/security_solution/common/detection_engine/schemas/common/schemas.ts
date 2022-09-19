@@ -101,8 +101,6 @@ export const data_view_id = t.string;
 
 export const dataViewIdOrUndefined = t.union([data_view_id, t.undefined]);
 
-export const action_action_type_id = NonEmptyString;
-
 export const indexOrUndefined = t.union([index, t.undefined]);
 export type IndexOrUndefined = t.TypeOf<typeof indexOrUndefined>;
 
