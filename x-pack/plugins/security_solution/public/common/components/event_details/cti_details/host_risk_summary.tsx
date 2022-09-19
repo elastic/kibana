@@ -46,16 +46,19 @@ const HostRiskSummaryComponent: React.FC<{
 
         {hostRisk.loading && <EuiLoadingSpinner data-test-subj="loading" />}
 
-
         {!hostRisk.loading && (
           <>
             {currentHostRiskScore && (
               <>
                 <EnrichedDataRow
                   field={i18n.CURRENT_HOST_RISK_CLASSIFICATION}
-                  value={currentHostRiskScore ? (<RiskScore severity={currentHostRiskScore} hideBackgroundColor />) : (
-                    getEmptyValue()
-                  )}
+                  value={
+                    currentHostRiskScore ? (
+                      <RiskScore severity={currentHostRiskScore} hideBackgroundColor />
+                    ) : (
+                      getEmptyValue()
+                    )
+                  }
                 />
               </>
             )}

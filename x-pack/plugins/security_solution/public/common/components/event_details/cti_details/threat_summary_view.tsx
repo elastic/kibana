@@ -157,7 +157,7 @@ const ThreatSummaryViewComponent: React.FC<{
 
       <EuiFlexGroup direction="column" gutterSize="m" style={{ flexGrow: 0 }}>
         <EuiFlexItem grow={false}>
-          <HostRiskSummary hostRisk={hostRisk} originalHostRisk={originalHostRisk}  />
+          <HostRiskSummary hostRisk={hostRisk} originalHostRisk={originalHostRisk} />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
