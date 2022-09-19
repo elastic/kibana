@@ -91,12 +91,12 @@ describe('DiscoverGrid', () => {
       component = getComponent();
     });
 
-    test('no documents are selected initially', async () => {
+    test('no records are selected initially', async () => {
       expect(getSelectedDocNr(component)).toBe(0);
       expect(getDisplayedDocNr(component)).toBe(5);
     });
 
-    test('Allows selection/deselection of multiple documents', async () => {
+    test('Allows selection/deselection of multiple records', async () => {
       await toggleDocSelection(component, esHits[0]);
       expect(getSelectedDocNr(component)).toBe(1);
       await toggleDocSelection(component, esHits[1]);
@@ -105,7 +105,7 @@ describe('DiscoverGrid', () => {
       expect(getSelectedDocNr(component)).toBe(1);
     });
 
-    test('deselection of all selected documents', async () => {
+    test('deselection of all selected records', async () => {
       await toggleDocSelection(component, esHits[0]);
       await toggleDocSelection(component, esHits[1]);
       expect(getSelectedDocNr(component)).toBe(2);
@@ -114,7 +114,7 @@ describe('DiscoverGrid', () => {
       expect(getSelectedDocNr(component)).toBe(0);
     });
 
-    test('showing only selected documents and undo selection', async () => {
+    test('showing only selected records and undo selection', async () => {
       await toggleDocSelection(component, esHits[0]);
       await toggleDocSelection(component, esHits[1]);
       expect(getSelectedDocNr(component)).toBe(2);
@@ -127,7 +127,7 @@ describe('DiscoverGrid', () => {
       expect(getDisplayedDocNr(component)).toBe(5);
     });
 
-    test('showing selected documents, underlying data changes, all documents are displayed, selection is gone', async () => {
+    test('showing selected records, underlying data changes, all records are displayed, selection is gone', async () => {
       await toggleDocSelection(component, esHits[0]);
       await toggleDocSelection(component, esHits[1]);
       expect(getSelectedDocNr(component)).toBe(2);
@@ -153,7 +153,7 @@ describe('DiscoverGrid', () => {
       expect(getSelectedDocNr(component)).toBe(0);
     });
 
-    test('showing only selected documents and remove filter deselecting each doc manually', async () => {
+    test('showing only selected records and remove filter deselecting each doc manually', async () => {
       await toggleDocSelection(component, esHits[0]);
       findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
       findTestSubject(component, 'dscGridShowSelectedDocuments').simulate('click');
@@ -164,7 +164,7 @@ describe('DiscoverGrid', () => {
       expect(getDisplayedDocNr(component)).toBe(5);
     });
 
-    test('copying selected documents to clipboard', async () => {
+    test('copying selected records to clipboard', async () => {
       await toggleDocSelection(component, esHits[0]);
       findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
       expect(component.find(EuiCopy).prop('textToCopy')).toMatchInlineSnapshot(

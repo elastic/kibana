@@ -90,7 +90,7 @@ export function DiscoverGridDocumentToolbarBtn({
             setIsFilterActive(false);
           }}
         >
-          <FormattedMessage id="discover.showAllDocuments" defaultMessage="Show all documents" />
+          <FormattedMessage id="discover.showAllDocuments" defaultMessage="Show all records" />
         </EuiContextMenuItem>
       ) : (
         <EuiContextMenuItem
@@ -104,7 +104,7 @@ export function DiscoverGridDocumentToolbarBtn({
         >
           <FormattedMessage
             id="discover.showSelectedDocumentsOnly"
-            defaultMessage="Show selected documents only"
+            defaultMessage="Show selected records only"
           />
         </EuiContextMenuItem>
       ),
@@ -123,7 +123,7 @@ export function DiscoverGridDocumentToolbarBtn({
           <EuiContextMenuItem key="copyJSON" icon="copyClipboard" onClick={copy}>
             <FormattedMessage
               id="discover.copyToClipboardJSON"
-              defaultMessage="Copy documents to clipboard (JSON)"
+              defaultMessage="Copy records to clipboard (JSON)"
             />
           </EuiContextMenuItem>
         )}
@@ -177,7 +177,7 @@ export function DiscoverGridDocumentToolbarBtn({
         >
           <FormattedMessage
             id="discover.selectedDocumentsNumber"
-            defaultMessage="{nr} documents selected"
+            defaultMessage="{nr} records selected"
             values={{ nr: selectedDocs.length }}
           />
         </EuiButtonEmpty>

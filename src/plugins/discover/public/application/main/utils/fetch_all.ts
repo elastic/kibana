@@ -50,7 +50,7 @@ export interface FetchDeps {
 
 /**
  * This function starts fetching all required queries in Discover. This will be the query to load the individual
- * documents, and depending on whether a chart is shown either the aggregation query to load the chart data
+ * records, and depending on whether a chart is shown either the aggregation query to load the chart data
  * or a query to retrieve just the total hits.
  *
  * This method returns a promise, which will resolve (without a value), as soon as all queries that have been started

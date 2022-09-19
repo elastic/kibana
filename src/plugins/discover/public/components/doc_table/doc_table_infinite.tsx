@@ -64,7 +64,7 @@ const DocTableInfiniteContent = ({
                 >
                   <FormattedMessage
                     id="discover.howToSeeOtherMatchingDocumentsDescription"
-                    defaultMessage="These are the first {sampleSize} documents matching
+                    defaultMessage="These are the first {sampleSize} records matching
 your search, refine your search to see others."
                     values={{ sampleSize }}
                   />

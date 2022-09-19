@@ -207,8 +207,8 @@ export function DiscoverChart({
           <section
             ref={(element) => (chartRef.current.element = element)}
             tabIndex={-1}
-            aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
-              defaultMessage: 'Histogram of found documents',
+            aria-label={i18n.translate('discover.histogramOfFoundRecordsAriaLabel', {
+              defaultMessage: 'Histogram of found records',
             })}
             className="dscTimechart"
           >

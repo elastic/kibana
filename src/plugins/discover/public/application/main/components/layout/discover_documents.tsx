@@ -152,10 +152,10 @@ function DiscoverDocumentsComponent({
   }
 
   return (
-    <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel">
+    <EuiFlexItem className="dscTable" aria-labelledby="recordsAriaLabel">
       <EuiScreenReaderOnly>
-        <h2 id="documentsAriaLabel">
-          <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
+        <h2 id="recordsAriaLabel">
+          <FormattedMessage id="discover.recordsAriaLabel" defaultMessage="Records" />
         </h2>
       </EuiScreenReaderOnly>
       {isLegacy && rows && rows.length && (
