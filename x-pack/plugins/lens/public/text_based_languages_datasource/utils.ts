@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { type AggregateQuery, getIndexPatternFromSQLQuery } from '@kbn/es-query';
 import type { IndexPatternRef } from './types';
 
 export async function loadIndexPatternRefs(
@@ -21,4 +22,15 @@ export async function loadIndexPatternRefs(
     .sort((a, b) => {
       return a.title.localeCompare(b.title);
     });
+}
+
+export function getIndexPatternFromTextBasedQuery(query: AggregateQuery): string {
+  let indexPattern = '';
+  // sql queries
+  if ('sql' in query) {
+    indexPattern = getIndexPatternFromSQLQuery(query.sql);
+  }
+  // other textbased queries....
+
+  return indexPattern;
 }

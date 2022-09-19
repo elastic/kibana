@@ -641,28 +641,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       }
       const updater = datasourceMap[payload.newDatasourceId].insertLayer;
       const currentVizId = ids[0];
-      // const datasourceStates = {
-      //   ...state.datasourceStates,
-      // };
-      // Object.entries(current(state).datasourceStates).forEach(([datasourceId, datasourceState]) => {
-      //   if (datasourceId === payload.newDatasourceId) {
-      //     const newDatasourceState = datasourceState
-      //       ? datasourceState.state
-      //       : datasourceMap[datasourceId].createEmptyLayer(payload.currentIndexPatternId ?? '');
 
-      //     datasourceStates[datasourceId] = {
-      //       ...datasourceState,
-      //       state: datasourceMap[datasourceId].insertLayer(newDatasourceState, currentVizId),
-      //     };
-      //   } else {
-      //     datasourceStates[datasourceId] = {
-      //       ...datasourceState,
-      //       state: datasourceMap[datasourceId].createEmptyLayer(
-      //         payload.currentIndexPatternId ?? ''
-      //       ),
-      //     };
-      //   }
-      // });
       const datasourceState = current(state).datasourceStates[payload.newDatasourceId]
         ? current(state).datasourceStates[payload.newDatasourceId]?.state
         : datasourceMap[payload.newDatasourceId].createEmptyLayer(
@@ -678,7 +657,6 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
             isLoading: false,
           },
         },
-        // datasourceStates,
         activeDatasourceId: payload.newDatasourceId,
         visualization: {
           ...visualization,

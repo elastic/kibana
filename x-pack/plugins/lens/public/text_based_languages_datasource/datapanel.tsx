@@ -14,7 +14,7 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 
-import { isOfAggregateQueryType, getIndexPatternFromSQLQuery } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { FieldButton } from '@kbn/react-field';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -26,7 +26,7 @@ import type {
   TextBasedLanguagesLayerColumn,
 } from './types';
 import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
-import { loadIndexPatternRefs } from './utils';
+import { loadIndexPatternRefs, getIndexPatternFromTextBasedQuery } from './utils';
 import { DragDrop } from '../drag_drop';
 import { LensFieldIcon } from '../shared_components';
 import { ChildDragDropProvider } from '../drag_drop';
@@ -57,15 +57,17 @@ export function TextBasedLanguagesDataPanel({
   useEffect(() => {
     async function fetchData() {
       // sql text based language
-      if (query && isOfAggregateQueryType(query) && 'sql' in query && !isEqual(query, prevQuery)) {
+      if (query && isOfAggregateQueryType(query) && !isEqual(query, prevQuery)) {
         const indexPatternRefs: IndexPatternRef[] = await loadIndexPatternRefs(dataViews);
         const errors: Error[] = [];
         const layerIds = Object.keys(state.layers);
         const newLayerId = layerIds.length > 0 ? layerIds[0] : generateId();
-        const indexPattern = getIndexPatternFromSQLQuery(query.sql);
+        // fetch the pattern from the query
+        const indexPattern = getIndexPatternFromTextBasedQuery(query);
+        // get the id of the dataview
         const index = indexPatternRefs.find((r) => r.title === indexPattern)?.id ?? '';
         let columnsFromQuery: DatatableColumn[] = [];
-        let unique: TextBasedLanguagesLayerColumn[] = [];
+        let columns: TextBasedLanguagesLayerColumn[] = [];
         let timeFieldName;
         try {
           const table = await fetchDataFromAggregateQuery(query, dataViews, data, expressions);
@@ -73,23 +75,10 @@ export function TextBasedLanguagesDataPanel({
           timeFieldName = dataView.timeFieldName;
           columnsFromQuery = table?.columns ?? [];
           const existingColumns = state.layers[newLayerId].allColumns;
-          const columns = [
+          columns = [
             ...existingColumns,
             ...columnsFromQuery.map((c) => ({ columnId: c.id, fieldName: c.id, meta: c.meta })),
           ];
-          const uniqueIds: string[] = [];
-
-          unique = columns.filter((col) => {
-            const isDuplicate = uniqueIds.includes(col.columnId);
-
-            if (!isDuplicate) {
-              uniqueIds.push(col.columnId);
-
-              return true;
-            }
-
-            return false;
-          });
         } catch (e) {
           errors.push(e);
         }
@@ -100,7 +89,7 @@ export function TextBasedLanguagesDataPanel({
               index,
               query,
               columns: state.layers[newLayerId].columns ?? [],
-              allColumns: unique,
+              allColumns: columns,
               timeField: timeFieldName,
               errors,
             },

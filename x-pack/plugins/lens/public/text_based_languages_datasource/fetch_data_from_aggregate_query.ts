@@ -11,7 +11,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { queryStateToExpressionAst } from '@kbn/data-plugin/common';
+import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
 
 interface TextBasedLanguagesErrorResponse {
   error: {
@@ -29,7 +29,7 @@ export function fetchDataFromAggregateQuery(
   inputQuery?: Query
 ) {
   const timeRange = data.query.timefilter.timefilter.getTime();
-  return queryStateToExpressionAst({
+  return textBasedQueryStateToAstWithValidation({
     filters,
     query,
     time: timeRange,
