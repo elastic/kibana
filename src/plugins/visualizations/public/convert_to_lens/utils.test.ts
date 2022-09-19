@@ -20,6 +20,7 @@ import {
   getBucketCollapseFn,
   getBucketColumns,
   getColumnsWithoutReferenced,
+  getMetricsWithoutDuplicates,
   isReferenced,
   isValidVis,
 } from './utils';
@@ -372,5 +373,44 @@ describe('isValidVis', () => {
     };
 
     expect(isValidVis(visSchemas, [])).toBeFalsy();
+  });
+});
+
+describe('getMetricsWithoutDuplicates', () => {
+  const duplicatedAggId = 'some-agg-id';
+  const baseMetric = {
+    accessor: 0,
+    label: '',
+    format: {
+      id: undefined,
+      params: undefined,
+    },
+    params: {},
+  };
+
+  const metric1: SchemaConfig<METRIC_TYPES.AVG> = {
+    ...baseMetric,
+    aggType: METRIC_TYPES.AVG,
+    aggId: duplicatedAggId,
+  };
+
+  const metric2: SchemaConfig<METRIC_TYPES.SUM> = {
+    ...baseMetric,
+    aggType: METRIC_TYPES.SUM,
+    aggId: 'some-other-id',
+  };
+
+  const metric3: SchemaConfig<METRIC_TYPES.MAX> = {
+    ...baseMetric,
+    aggType: METRIC_TYPES.MAX,
+    aggId: duplicatedAggId,
+  };
+
+  test('should remove aggs with same aggIds', () => {
+    expect(getMetricsWithoutDuplicates([metric1, metric2, metric3])).toEqual([metric1, metric2]);
+  });
+
+  test('should return array if no duplicates', () => {
+    expect(getMetricsWithoutDuplicates([metric2, metric3])).toEqual([metric2, metric3]);
   });
 });
