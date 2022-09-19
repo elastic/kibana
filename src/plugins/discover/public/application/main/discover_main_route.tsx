@@ -98,6 +98,7 @@ export function DiscoverMainRoute(props: Props) {
         const ip = await loadDataView(
           data.dataViews,
           config,
+          true,
           index,
           props.historyLocationState?.dataViewSpec
         );

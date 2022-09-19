@@ -80,6 +80,7 @@ export function getDataViewId(
 export async function loadDataView(
   dataViews: DataViewsContract,
   config: IUiSettingsClient,
+  initialLoad: boolean,
   id?: string,
   dataViewSpec?: DataViewSpec
 ): Promise<DataViewData> {
@@ -104,12 +105,23 @@ export async function loadDataView(
     fetchId = dataViewSpec.id!;
   }
 
-  const actualId = getDataViewId(id, dataViewList, config.get('defaultIndex'));
+  // on initial load
+  if (initialLoad) {
+    const actualId = getDataViewId(fetchId, dataViewList, config.get('defaultIndex'));
+    return {
+      list: dataViewList || [],
+      loaded: await dataViews.get(actualId),
+      stateVal: fetchId,
+      stateValFound: !!fetchId && actualId === fetchId,
+    };
+  }
+
+  // on data view change
   return {
     list: dataViewList || [],
-    loaded: await dataViews.get(actualId),
+    loaded: await dataViews.get(fetchId!),
     stateVal: fetchId,
-    stateValFound: !!fetchId && actualId === fetchId,
+    stateValFound: !!fetchId,
   };
 }
 
