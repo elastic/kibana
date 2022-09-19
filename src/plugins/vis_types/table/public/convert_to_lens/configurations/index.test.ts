@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AggTypes } from '@kbn/vis-type-table-plugin/common';
+import { AggTypes } from '../../../common';
 import { getConfiguration } from '.';
 
 const params = {
