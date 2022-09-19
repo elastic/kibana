@@ -53,6 +53,9 @@ export const args = ({
     '--hide-scrollbars',
     // allow screenshot clip region to go outside of the viewport
     `--mainFrameClipsContent=false`,
+
+    // messing around with options...
+    '--enable-features=Vulkan,UseSkiaRenderer',
   ];
 
   if (windowSize) {
