@@ -20,7 +20,6 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
   getDocumentTypeFilterForTransactions,
-  getDocumentTypeFilterForServiceTransactions,
   getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
@@ -66,7 +65,10 @@ export async function getServiceTransactionStats({
   const metrics = {
     avg_duration: {
       avg: {
-        field: getDurationFieldForTransactions(searchAggregatedTransactions, searchAggregatedServiceMetrics),
+        field: getDurationFieldForTransactions(
+          searchAggregatedTransactions,
+          searchAggregatedServiceMetrics
+        ),
       },
     },
     outcomes,
@@ -78,7 +80,7 @@ export async function getServiceTransactionStats({
       apm: {
         events: [
           getProcessorEventForTransactions(
-            searchAggregatedTransactions, 
+            searchAggregatedTransactions,
             searchAggregatedServiceMetrics
           ),
         ],
