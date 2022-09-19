@@ -272,6 +272,30 @@
               "type": "long"
             }
           }
+        },
+        "count_connector_types_by_action_run_outcome_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "properties": {
+                "success": {
+                  "type": "long"
+                },
+                "failure": {
+                  "type": "long"
+                },
+                "unknown": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "avg_actions_run_duration_by_connector_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            }
+          }
         }
       }
     },
@@ -1713,23 +1737,6 @@
             }
           }
         },
-        "count_connector_types_by_action_run_outcome_per_day": {
-          "properties": {
-            "DYNAMIC_KEY": {
-              "properties": {
-                "success": {
-                  "type": "long"
-                },
-                "failure": {
-                  "type": "long"
-                },
-                "unknown": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
         "avg_execution_time_per_day": {
           "type": "long"
         },
@@ -2044,13 +2051,6 @@
               "type": "long"
             },
             "xpack__ml__anomaly_detection_jobs_health": {
-              "type": "long"
-            }
-          }
-        },
-        "avg_actions_run_duration_by_connector_type_per_day": {
-          "properties": {
-            "DYNAMIC_KEY": {
               "type": "long"
             }
           }
@@ -2919,13 +2919,6 @@
         }
       }
     },
-    "cloud": {
-      "properties": {
-        "isCloudEnabled": {
-          "type": "boolean"
-        }
-      }
-    },
     "cases": {
       "properties": {
         "cases": {
@@ -3196,6 +3189,13 @@
               }
             }
           }
+        }
+      }
+    },
+    "cloud": {
+      "properties": {
+        "isCloudEnabled": {
+          "type": "boolean"
         }
       }
     },
@@ -3600,62 +3600,6 @@
                     }
                   }
                 }
-              }
-            }
-          }
-        }
-      }
-    },
-    "rollups": {
-      "properties": {
-        "index_patterns": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "Counts all the rollup index patterns"
-              }
-            }
-          }
-        },
-        "saved_searches": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "Counts all the rollup saved searches"
-              }
-            }
-          }
-        },
-        "visualizations": {
-          "properties": {
-            "saved_searches": {
-              "properties": {
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Counts all the visualizations that are based on rollup saved searches"
-                  }
-                },
-                "lens_total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Counts all the lens visualizations that are based on rollup saved searches"
-                  }
-                }
-              }
-            },
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "Counts all the visualizations that are based on rollup index patterns"
-              }
-            },
-            "lens_total": {
-              "type": "long",
-              "_meta": {
-                "description": "Counts all the lens visualizations that are based on rollup index patterns"
               }
             }
           }
@@ -6410,6 +6354,62 @@
                 "avg": {
                   "type": "float"
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "rollups": {
+      "properties": {
+        "index_patterns": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the rollup index patterns"
+              }
+            }
+          }
+        },
+        "saved_searches": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the rollup saved searches"
+              }
+            }
+          }
+        },
+        "visualizations": {
+          "properties": {
+            "saved_searches": {
+              "properties": {
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Counts all the visualizations that are based on rollup saved searches"
+                  }
+                },
+                "lens_total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Counts all the lens visualizations that are based on rollup saved searches"
+                  }
+                }
+              }
+            },
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the visualizations that are based on rollup index patterns"
+              }
+            },
+            "lens_total": {
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the lens visualizations that are based on rollup index patterns"
               }
             }
           }
