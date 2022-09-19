@@ -31,6 +31,7 @@ export type DynamicPage =
   | 'integration_details_settings'
   | 'integration_details_custom'
   | 'integration_details_language_clients'
+  | 'integration_details_api_reference'
   | 'integration_policy_edit'
   | 'integration_policy_upgrade'
   | 'policy_details'
@@ -91,6 +92,7 @@ export const INTEGRATIONS_ROUTING_PATHS = {
   integration_details_assets: '/detail/:pkgkey/assets',
   integration_details_settings: '/detail/:pkgkey/settings',
   integration_details_custom: '/detail/:pkgkey/custom',
+  integration_details_api_reference: '/detail/:pkgkey/api-reference',
   integration_details_language_clients: '/language_clients/:pkgkey/overview',
   integration_policy_edit: '/edit-integration/:packagePolicyId',
   integration_policy_upgrade: '/edit-integration/:packagePolicyId',
@@ -144,6 +146,10 @@ export const pagePathGetters: {
   integration_details_custom: ({ pkgkey, integration }) => [
     INTEGRATIONS_BASE_PATH,
     `/detail/${pkgkey}/custom${integration ? `?integration=${integration}` : ''}`,
+  ],
+  integration_details_api_reference: ({ pkgkey, integration }) => [
+    INTEGRATIONS_BASE_PATH,
+    `/detail/${pkgkey}/api-reference${integration ? `?integration=${integration}` : ''}`,
   ],
   integration_policy_edit: ({ packagePolicyId }) => [
     INTEGRATIONS_BASE_PATH,
