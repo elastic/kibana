@@ -10,8 +10,8 @@
               "instance_configuration_id": "gcp.integrationsserver.1",
               "zone_count": 1,
               "size": {
-                "value": 512,
-                "resource": "memory"
+                "resource": "memory",
+                "value": 1024
               }
             }
           ],
@@ -50,7 +50,7 @@
                   "data": "hot"
                 }
               },
-              "instance_configuration_id": "gcp.data.highmem.1",
+              "instance_configuration_id": "gcp.data.highio.1",
               "node_roles": [
                 "master",
                 "ingest",
@@ -63,15 +63,6 @@
               "size": {
                 "value": 2048,
                 "resource": "memory"
-              },
-              "autoscaling_max": {
-                "value": 8192,
-                "resource": "memory"
-              },
-              "autoscaling_policy_override_json": {
-                "proactive_storage": {
-                  "forecast_window": "30 m"
-                }
               }
             },
             {
@@ -88,12 +79,8 @@
               ],
               "id": "warm",
               "size": {
-                "value": 0,
-                "resource": "memory"
-              },
-              "autoscaling_max": {
-                "value": 2048,
-                "resource": "memory"
+                "resource": "memory",
+                "value": 0
               }
             },
             {
@@ -110,12 +97,8 @@
               ],
               "id": "cold",
               "size": {
-                "value": 0,
-                "resource": "memory"
-              },
-              "autoscaling_max": {
-                "value": 0,
-                "resource": "memory"
+                "resource": "memory",
+                "value": 0
               }
             },
             {
@@ -131,12 +114,8 @@
               ],
               "id": "frozen",
               "size": {
-                "value": 0,
-                "resource": "memory"
-              },
-              "autoscaling_max": {
-                "value": 0,
-                "resource": "memory"
+                "resource": "memory",
+                "value": 0
               }
             },
             {
@@ -160,14 +139,6 @@
                 "remote_cluster_client"
               ],
               "id": "ml",
-              "autoscaling_min": {
-                "value": 1024,
-                "resource": "memory"
-              },
-              "autoscaling_max": {
-                "value": 1024,
-                "resource": "memory"
-              },
               "size": {
                 "value": 1024,
                 "resource": "memory"
@@ -179,7 +150,7 @@
             "enabled_built_in_plugins": []
           },
           "deployment_template": {
-            "id": "gcp-memory-optimized-v2"
+            "id": "gcp-io-optimized-v2"
           }
         },
         "ref_id": "main-elasticsearch"
@@ -236,9 +207,7 @@
       }
     ]
   },
-  "settings": {
-    "autoscaling_enabled": true
-  },
+  "settings": {},
   "name": null,
   "metadata": {
     "system_owned": false
