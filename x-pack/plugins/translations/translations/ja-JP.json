@@ -26028,7 +26028,6 @@
     "xpack.securitySolution.detectionEngine.alerts.createNewTermsTimelineFailureTitle": "新しい用語アラートタイムラインを作成できませんでした",
     "xpack.securitySolution.detectionEngine.alerts.createThresholdTimelineFailureTitle": "しきい値アラートタイムラインを作成できませんでした",
     "xpack.securitySolution.detectionEngine.alerts.documentTypeTitle": "アラート",
-    "xpack.securitySolution.detectionEngine.alerts.fetchExceptionsFailure": "例外の取得エラーです。",
     "xpack.securitySolution.detectionEngine.alerts.histogram.allOthersGroupingLabel": "その他すべて",
     "xpack.securitySolution.detectionEngine.alerts.histogram.headerTitle": "傾向",
     "xpack.securitySolution.detectionEngine.alerts.histogram.notAvailableTooltip": "傾向ビューでは使用できません",

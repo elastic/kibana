@@ -66,7 +66,6 @@ export const createSavedQueryAlertType = (
           runtimeMappings,
           completeRule,
           tuple,
-          exceptionItems,
           listClient,
           ruleExecutionLogger,
           searchAfterSize,
@@ -74,6 +73,8 @@ export const createSavedQueryAlertType = (
           wrapHits,
           primaryTimestamp,
           secondaryTimestamp,
+          exceptionFilter,
+          unprocessedExceptions,
         },
         services,
         state,
@@ -84,7 +85,6 @@ export const createSavedQueryAlertType = (
         runtimeMappings,
         completeRule: completeRule as CompleteRule<UnifiedQueryRuleParams>,
         tuple,
-        exceptionItems,
         experimentalFeatures,
         listClient,
         ruleExecutionLogger,
@@ -96,6 +96,8 @@ export const createSavedQueryAlertType = (
         wrapHits,
         primaryTimestamp,
         secondaryTimestamp,
+        exceptionFilter,
+        unprocessedExceptions,
       });
       return { ...result, state };
     },
