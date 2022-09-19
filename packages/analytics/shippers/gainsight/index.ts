@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { gainSightShipper } from './gainSight_shipper';
-export type { gainSightShipperConfig } from './gainSight_shipper';
-export type { gainSightSnippetConfig } from './load_snippet';
+export { GainSightShipper } from './src/gainsight_shipper';
+export type { GainSightShipperConfig } from './src/gainsight_shipper';
+export type { GainSightSnippetConfig } from './src/load_snippet';

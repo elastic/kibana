@@ -15,19 +15,17 @@ export interface GainSightSnippetConfig {
   /**
    * The gainSight account id.
    */
-  id: string;
-   /**
+  gainSightOrgId: string;
+  /**
    * The URL to load the gainSight client from. Falls back to `web-sdk.aptrinsic.com` if not specified.
    */
   scriptUrl?: string;
 }
-
-
 export function loadSnippet({
-  id,
-  scriptUrl = "https://web-sdk.aptrinsic.com/api/aptrinsic.js"
+  gainSightOrgId,
+  scriptUrl = 'web-sdk.aptrinsic.com/api/aptrinsic.js'
 }: GainSightSnippetConfig): GainSightApi {
-    /* eslint-disable dot-notation,prettier/prettier,@typescript-eslint/no-shadow,prefer-rest-params,@typescript-eslint/no-unused-expressions */
+  /* eslint-disable dot-notation,prettier/prettier,prefer-rest-params,@typescript-eslint/no-unused-expressions */
   (function(n,t,a,e,co){
     var i="aptrinsic";
     // @ts-expect-error
@@ -38,7 +36,7 @@ export function loadSnippet({
     var c=t.getElementsByTagName("script")[0];
     // @ts-expect-error
     c.parentNode.insertBefore(r,c)
-  })(window,document,scriptUrl,id);
+  })(window,document,scriptUrl,gainSightOrgId);
 
 
 

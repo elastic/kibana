@@ -7,17 +7,16 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { gainSightApiMock } from './gainSight_shipper.test.mocks';
-import { gainSightShipper } from './gainSight_shipper';
+import { gainSightApiMock } from './gainsight_shipper.test.mocks';
+import { GainSightShipper } from './gainsight_shipper';
 
 describe('gainSightShipper', () => {
-  let gainSightShipper: gainSightShipper;
+  let gainSightShipper: GainSightShipper;
 
   beforeEach(() => {
     jest.resetAllMocks();
-    gainSightShipper = new gainSightShipper(
+    gainSightShipper = new GainSightShipper(
       {
-        debug: true,
         gainSightOrgId: 'test-org-id',
       },
       {
@@ -54,7 +53,7 @@ describe('gainSightShipper', () => {
     describe('FS.setUserVars', () => {
       test('calls `setUserVars` when isElasticCloudUser: true is provided', () => {
         gainSightShipper.extendContext({ isElasticCloudUser: true });
-        expect(gainSightApiMock.setUserVars).toHaveBeenCalledWith({
+        expect(gainSightApiMock.identify).toHaveBeenCalledWith({
           // eslint-disable-next-line @typescript-eslint/naming-convention
           isElasticCloudUser_bool: true,
         });
@@ -62,7 +61,7 @@ describe('gainSightShipper', () => {
 
       test('calls `setUserVars` when isElasticCloudUser: false is provided', () => {
         gainSightShipper.extendContext({ isElasticCloudUser: false });
-        expect(gainSightApiMock.setUserVars).toHaveBeenCalledWith({
+        expect(gainSightApiMock.identify).toHaveBeenCalledWith({
           // eslint-disable-next-line @typescript-eslint/naming-convention
           isElasticCloudUser_bool: false,
         });
@@ -72,7 +71,7 @@ describe('gainSightShipper', () => {
     describe('FS.setVars', () => {
       test('calls `setVars` when version is provided', () => {
         gainSightShipper.extendContext({ version: '1.2.3' });
-        expect(gainSightApiMock.setVars).toHaveBeenCalledWith('page', {
+        expect(gainSightApiMock.track).toHaveBeenCalledWith('page', {
           version_str: '1.2.3',
           version_major_int: 1,
           version_minor_int: 2,
@@ -82,7 +81,7 @@ describe('gainSightShipper', () => {
 
       test('calls `setVars` when cloudId is provided', () => {
         gainSightShipper.extendContext({ cloudId: 'test-es-org-id' });
-        expect(gainSightApiMock.setVars).toHaveBeenCalledWith('page', {
+        expect(gainSightApiMock.track).toHaveBeenCalledWith('page', {
           // eslint-disable-next-line @typescript-eslint/naming-convention
           cloudId_str: 'test-es-org-id',
           org_id_str: 'test-es-org-id',
@@ -91,7 +90,7 @@ describe('gainSightShipper', () => {
 
       test('merges both: version and cloudId if both are provided', () => {
         gainSightShipper.extendContext({ version: '1.2.3', cloudId: 'test-es-org-id' });
-        expect(gainSightApiMock.setVars).toHaveBeenCalledWith('page', {
+        expect(gainSightApiMock.track).toHaveBeenCalledWith('page', {
           // eslint-disable-next-line @typescript-eslint/naming-convention
           cloudId_str: 'test-es-org-id',
           org_id_str: 'test-es-org-id',
@@ -110,7 +109,7 @@ describe('gainSightShipper', () => {
           foo: 'bar',
         };
         gainSightShipper.extendContext(context);
-        expect(gainSightApiMock.setVars).toHaveBeenCalledWith('page', {
+        expect(gainSightApiMock.track).toHaveBeenCalledWith('page', {
           version_str: '1.2.3',
           version_major_int: 1,
           version_minor_int: 2,
@@ -155,55 +154,12 @@ describe('gainSightShipper', () => {
         },
       ]);
 
-      expect(gainSightApiMock.event).toHaveBeenCalledTimes(2);
-      expect(gainSightApiMock.event).toHaveBeenCalledWith('test-event-1', {
+      expect(gainSightApiMock.track).toHaveBeenCalledTimes(2);
+      expect(gainSightApiMock.track).toHaveBeenCalledWith('test-event-1', {
         test_str: 'test-1',
       });
-      expect(gainSightApiMock.event).toHaveBeenCalledWith('test-event-2', {
+      expect(gainSightApiMock.track).toHaveBeenCalledWith('test-event-2', {
         other_property_str: 'test-2',
-      });
-    });
-
-    test('filters the events by the allow-list', () => {
-      gainSightShipper = new gainSightShipper(
-        {
-          eventTypesAllowlist: ['valid-event-1', 'valid-event-2'],
-          debug: true,
-          gainSightOrgId: 'test-org-id',
-        },
-        {
-          logger: loggerMock.create(),
-          sendTo: 'staging',
-          isDev: true,
-        }
-      );
-      gainSightShipper.reportEvents([
-        {
-          event_type: 'test-event-1', // Should be filtered out.
-          timestamp: '2020-01-01T00:00:00.000Z',
-          properties: { test: 'test-1' },
-          context: { pageName: 'test-page-1' },
-        },
-        {
-          event_type: 'valid-event-1',
-          timestamp: '2020-01-01T00:00:00.000Z',
-          properties: { test: 'test-1' },
-          context: { pageName: 'test-page-1' },
-        },
-        {
-          event_type: 'valid-event-2',
-          timestamp: '2020-01-01T00:00:00.000Z',
-          properties: { test: 'test-2' },
-          context: { pageName: 'test-page-1' },
-        },
-      ]);
-
-      expect(gainSightApiMock.event).toHaveBeenCalledTimes(2);
-      expect(gainSightApiMock.event).toHaveBeenCalledWith('valid-event-1', {
-        test_str: 'test-1',
-      });
-      expect(gainSightApiMock.event).toHaveBeenCalledWith('valid-event-2', {
-        test_str: 'test-2',
       });
     });
   });

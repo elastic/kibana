@@ -11,12 +11,12 @@
  */
 export interface GainSightApi {
   init: boolean;
-  /**
-   * Identify a User
-   * @param userId
-   * @param userVars
-   */
+  aptrinsic: (functionId: string, options?: any) => void
   identify(userId: string, userVars?: Record<string, unknown>): void;
+  track(event: string, data?: any): void
+  consent: (isOptedIn: boolean) => void
+  restart: () => void
+  shutdown: () => void
 }
 
 declare global {

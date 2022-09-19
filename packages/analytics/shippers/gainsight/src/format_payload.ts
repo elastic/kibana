@@ -9,7 +9,7 @@
 import moment from 'moment';
 
 // https://help.gainSight.com/hc/en-us/articles/360020623234#reserved-properties
-const gainSight_RESERVED_PROPERTIES = [
+const GAINSIGHT_RESERVED_PROPERTIES = [
   'uid',
   'displayName',
   'email',
@@ -34,7 +34,7 @@ export function formatPayload(context: object): Record<string, unknown> {
       )
       // Transform key names according to the gainSight needs
       .map(([key, value]) => {
-        if (gainSight_RESERVED_PROPERTIES.includes(key)) {
+        if (GAINSIGHT_RESERVED_PROPERTIES.includes(key)) {
           return [key, value];
         }
         if (isRecord(value)) {
