@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import { BUCKET_TYPES, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import {
   AggBasedColumn,
@@ -21,6 +21,7 @@ import {
   getBucketColumns,
   getColumnsWithoutReferenced,
   isReferenced,
+  isValidVis,
 } from './utils';
 import { Schemas } from '../vis_schemas';
 
@@ -247,5 +248,129 @@ describe('getBucketColumns', () => {
       ...returnValue,
     ]);
     expect(mockConvertBucketToColumns).toBeCalledTimes(2);
+  });
+});
+
+describe('isValidVis', () => {
+  const metricKey = 'metric';
+  const bucketKey = 'group';
+
+  test("should return true, if metrics doesn't contain sibling aggs", () => {
+    const metric1: SchemaConfig<METRIC_TYPES.AVG> = {
+      accessor: 0,
+      label: '',
+      format: {
+        id: undefined,
+        params: undefined,
+      },
+      params: {},
+      aggType: METRIC_TYPES.AVG,
+    };
+
+    const visSchemas: Schemas = {
+      [metricKey]: [metric1],
+      [bucketKey]: [],
+    };
+
+    expect(isValidVis(visSchemas, [])).toBeTruthy();
+  });
+
+  test('should return true, if metrics contain only one sibling agg and no splits is specified', () => {
+    const metric1: SchemaConfig<METRIC_TYPES.AVG_BUCKET> = {
+      accessor: 0,
+      label: '',
+      format: {
+        id: undefined,
+        params: undefined,
+      },
+      params: {},
+      aggType: METRIC_TYPES.AVG_BUCKET,
+    };
+
+    const visSchemas: Schemas = {
+      [metricKey]: [metric1],
+      [bucketKey]: [],
+    };
+
+    expect(isValidVis(visSchemas, [])).toBeTruthy();
+  });
+
+  test('should return true, if metrics contain multiple sibling aggs of the same type', () => {
+    const metric1: SchemaConfig<METRIC_TYPES.AVG_BUCKET> = {
+      accessor: 0,
+      label: '',
+      format: {
+        id: undefined,
+        params: undefined,
+      },
+      params: {},
+      aggType: METRIC_TYPES.AVG_BUCKET,
+    };
+
+    const visSchemas: Schemas = {
+      [metricKey]: [metric1, metric1],
+      [bucketKey]: [],
+    };
+
+    expect(isValidVis(visSchemas, [])).toBeTruthy();
+  });
+
+  test('should return false, if metrics contain sibling agg and splits', () => {
+    const metric1: SchemaConfig<METRIC_TYPES.AVG_BUCKET> = {
+      accessor: 0,
+      label: '',
+      format: {
+        id: undefined,
+        params: undefined,
+      },
+      params: {},
+      aggType: METRIC_TYPES.AVG_BUCKET,
+    };
+    const splitBucket: SchemaConfig<BUCKET_TYPES.TERMS> = {
+      accessor: 0,
+      label: '',
+      format: {
+        id: undefined,
+        params: undefined,
+      },
+      params: {},
+      aggType: BUCKET_TYPES.TERMS,
+    };
+    const visSchemas: Schemas = {
+      [metricKey]: [metric1, metric1],
+      [bucketKey]: [splitBucket],
+    };
+
+    expect(isValidVis(visSchemas, [bucketKey])).toBeFalsy();
+  });
+
+  test('should return false, if metrics contain multiple sibling aggs with different types', () => {
+    const metric1: SchemaConfig<METRIC_TYPES.AVG_BUCKET> = {
+      accessor: 0,
+      label: '',
+      format: {
+        id: undefined,
+        params: undefined,
+      },
+      params: {},
+      aggType: METRIC_TYPES.AVG_BUCKET,
+    };
+    const metric2: SchemaConfig<METRIC_TYPES.SUM_BUCKET> = {
+      accessor: 0,
+      label: '',
+      format: {
+        id: undefined,
+        params: undefined,
+      },
+      params: {},
+      aggType: METRIC_TYPES.SUM_BUCKET,
+    };
+
+    const visSchemas: Schemas = {
+      [metricKey]: [metric1, metric2],
+      [bucketKey]: [],
+    };
+
+    expect(isValidVis(visSchemas, [])).toBeFalsy();
   });
 });
