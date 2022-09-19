@@ -164,7 +164,7 @@ export function TooltipSection({
       <div
         style={{
           backgroundColor: isDragging ? 'transparent' : euiTheme.colors.lightestShade,
-          borderRadius: euiTheme.size.xs,
+          borderRadius: euiTheme.border.radius.small,
         }}
       >
         <DragDropBuckets

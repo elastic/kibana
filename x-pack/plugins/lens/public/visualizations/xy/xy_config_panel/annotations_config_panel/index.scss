@@ -10,11 +10,6 @@
   min-width: 56px; // makes both labels ("from" and "to") the same width
 }
 
-.lnsConfigPanelAnnotations__noFieldsPrompt {
-  font-weight: $euiFontWeightLight;
-  font-size: $euiFontSizeS;
-  color: $euiColorMediumShade;
-}
 
 .lnsConfigPanelAnnotations__addButton {
   margin-top: $euiSizeXS;
@@ -22,7 +17,7 @@
 
 .lnsConfigPanelAnnotations__droppable {
   padding: $euiSizeXS;
-  border-radius: $euiBorderRadius;
+  border-radius: $euiBorderRadiusSmall;
 }
 
 .lnsConfigPanelAnnotations__fieldPicker {
