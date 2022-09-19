@@ -13,7 +13,7 @@ import {
   FormMonitorType,
   HTTPFields,
 } from '../../../../common/runtime_types/monitor_management';
-import { normalizeYamlConfig, getMonitorTimeout, getOptionalArrayField } from './common_fields';
+import { normalizeYamlConfig, getValueInSeconds, getOptionalArrayField } from './common_fields';
 
 export const getNormalizeHTTPFields = ({
   locations = [],
@@ -42,7 +42,7 @@ export const getNormalizeHTTPFields = ({
     [ConfigKey.MAX_REDIRECTS]:
       monitor[ConfigKey.MAX_REDIRECTS] || defaultFields[ConfigKey.MAX_REDIRECTS],
     [ConfigKey.TIMEOUT]: monitor.timeout
-      ? getMonitorTimeout(monitor.timeout)
+      ? getValueInSeconds(monitor.timeout)
       : defaultFields[ConfigKey.TIMEOUT],
   };
   return {

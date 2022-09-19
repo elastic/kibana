@@ -57,6 +57,7 @@
       "response": {
         "include_body": "always"
       },
+      "tags": "tag2,tag2",
       "response.include_headers": false,
       "check.response": {
         "status": [

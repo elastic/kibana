@@ -93,16 +93,29 @@ export const getMonitorLocations = ({
   ) as BrowserFields[ConfigKey.LOCATIONS];
 };
 
-export const getMonitorTimeout = (timeout: string) => {
+export const getValueInSeconds = (value: string) => {
   const keyMap = {
     h: 60 * 60,
     m: 60,
     s: 1,
   };
-  const key = timeout.slice(-1) as 'h' | 'm' | 's';
-  const time = parseInt(timeout.slice(0, -1), 10);
-  const timeoutInSeconds = time * (keyMap[key] || 1);
-  return typeof timeoutInSeconds === 'number' ? `${timeoutInSeconds}` : null;
+  const key = value.slice(-1) as 'h' | 'm' | 's';
+  const time = parseInt(value.slice(0, -1), 10);
+  const valueInSeconds = time * (keyMap[key] || 1);
+  return typeof valueInSeconds === 'number' ? `${valueInSeconds}` : null;
+};
+
+/**
+ * Accounts for array values that are optionally defined as a comma seperated list
+ *
+ * @param {Array | string} [value]
+ * @returns {array} Returns an array
+ */
+export const getOptionalListField = (value?: string[] | string): string[] => {
+  if (Array.isArray(value)) {
+    return value;
+  }
+  return value ? value.split(',') : [];
 };
 
 /**
@@ -111,20 +124,9 @@ export const getMonitorTimeout = (timeout: string) => {
  * @param {Array | string} [value]
  * @returns {string} Returns first item when the value is an array, or the value itself
  */
-export const getOptionalArrayField = (value: string[] | string = '') =>
-  Array.isArray(value) ? value[0] : value;
-
-/**
- * Accounts for array values that are optionally defined as a comma seperated list
- *
- * @param {Array | string} [value]
- * @returns {array} Returns first item when the value is an array, or the value itself
- */
-export const getOptionalListField = (value?: string[] | string): string[] => {
-  if (Array.isArray(value)) {
-    return value;
-  }
-  return value ? value.split(',') : [];
+export const getOptionalArrayField = (value: string[] | string = '') => {
+  const array = getOptionalListField(value);
+  return array[0];
 };
 
 /**

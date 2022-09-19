@@ -14,7 +14,7 @@ import {
   FormMonitorType,
   ICMPFields,
 } from '../../../../common/runtime_types/monitor_management';
-import { normalizeYamlConfig, getMonitorTimeout } from './common_fields';
+import { normalizeYamlConfig, getValueInSeconds, getOptionalArrayField } from './common_fields';
 
 export const getNormalizeICMPFields = ({
   locations = [],
@@ -39,10 +39,14 @@ export const getNormalizeICMPFields = ({
     ...commonFields,
     [ConfigKey.MONITOR_TYPE]: DataStream.ICMP,
     [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.ICMP,
-    [ConfigKey.HOSTS]: monitor.hosts?.[0] || defaultFields[ConfigKey.HOSTS],
+    [ConfigKey.HOSTS]:
+      getOptionalArrayField(monitor[ConfigKey.HOSTS]) || defaultFields[ConfigKey.HOSTS],
     [ConfigKey.TIMEOUT]: monitor.timeout
-      ? getMonitorTimeout(monitor.timeout)
+      ? getValueInSeconds(monitor.timeout)
       : defaultFields[ConfigKey.TIMEOUT],
+    [ConfigKey.WAIT]: monitor.wait
+      ? getValueInSeconds(monitor.wait) || defaultFields[ConfigKey.WAIT]
+      : defaultFields[ConfigKey.WAIT],
   };
   return {
     normalizedFields: {

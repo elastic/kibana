@@ -31,6 +31,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     let projectMonitors: ProjectMonitorsRequest;
     let httpProjectMonitors: ProjectMonitorsRequest;
+    let tcpProjectMonitors: ProjectMonitorsRequest;
+    let icmpProjectMonitors: ProjectMonitorsRequest;
 
     let testPolicyId = '';
     const testPrivateLocations = new PrivateLocationTestService(getService);
@@ -88,12 +90,14 @@ export default function ({ getService }: FtrProviderContext) {
 
     beforeEach(() => {
       projectMonitors = setUniqueIds(getFixtureJson('project_browser_monitor'));
-      httpProjectMonitors = setUniqueIds(getFixtureJson('project_monitor_http'));
+      httpProjectMonitors = setUniqueIds(getFixtureJson('project_http_monitor'));
+      tcpProjectMonitors = setUniqueIds(getFixtureJson('project_tcp_monitor'));
+      icmpProjectMonitors = setUniqueIds(getFixtureJson('project_icmp_monitor'));
     });
 
     it('project monitors - handles http monitors', async () => {
-      const journeyId = httpProjectMonitors.monitors[1].id;
       const kibanaVersion = await kibanaServer.version.get();
+      const successfulMonitors = [httpProjectMonitors.monitors[1]];
 
       try {
         const messages = await parseStreamApiResponse(
@@ -101,10 +105,10 @@ export default function ({ getService }: FtrProviderContext) {
           JSON.stringify(httpProjectMonitors)
         );
 
-        expect(messages).to.have.length(2);
-        expect(messages[1].updatedMonitors).eql([]);
-        expect(messages[1].createdMonitors).eql([journeyId]);
-        expect(messages[1].failedMonitors).eql([
+        expect(messages).to.have.length(3);
+        expect(messages[2].updatedMonitors).eql([]);
+        expect(messages[2].createdMonitors).eql(successfulMonitors.map((monitor) => monitor.id));
+        expect(messages[2].failedMonitors).eql([
           {
             id: httpProjectMonitors.monitors[0].id,
             details: `The following Heartbeat options are not supported for ${httpProjectMonitors.monitors[0].type} project monitors in ${kibanaVersion}: check.response.body|unsupportedKey.nestedUnsupportedKey`,
@@ -112,63 +116,245 @@ export default function ({ getService }: FtrProviderContext) {
           },
         ]);
 
-        const createdMonitorsResponse = await supertest
-          .get(API_URLS.SYNTHETICS_MONITORS)
-          .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+        for (const monitor of successfulMonitors) {
+          const journeyId = monitor.id;
+          const createdMonitorsResponse = await supertest
+            .get(API_URLS.SYNTHETICS_MONITORS)
+            .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
+            .set('kbn-xsrf', 'true')
+            .expect(200);
 
-        expect(createdMonitorsResponse.body.monitors[0].attributes).to.eql({
-          __ui: {
-            is_tls_enabled: false,
-          },
-          'check.request.method': 'POST',
-          'check.response.status': [200],
-          config_id: '',
-          custom_heartbeat_id: `${journeyId}-bbb-default`,
-          enabled: false,
-          form_monitor_type: 'http',
-          journey_id: journeyId,
-          locations: [
-            {
-              geo: {
-                lat: 0,
-                lon: 0,
-              },
-              id: 'localhost',
-              isInvalid: false,
-              isServiceManaged: true,
-              label: 'Local Synthetics Service',
-              status: 'experimental',
-              url: 'mockDevUrl',
+          expect(createdMonitorsResponse.body.monitors[0].attributes).to.eql({
+            __ui: {
+              is_tls_enabled: false,
             },
-          ],
-          max_redirects: '0',
-          name: 'My Monitor 3',
-          namespace: 'default',
-          origin: 'project',
-          original_space: 'default',
-          project_id: 'bbb',
-          proxy_url: '',
-          'response.include_body': 'always',
-          'response.include_headers': false,
-          revision: 1,
-          schedule: {
-            number: '60',
-            unit: 'm',
-          },
-          'service.name': '',
-          'ssl.certificate': '',
-          'ssl.certificate_authorities': '',
-          'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
-          'ssl.verification_mode': 'full',
-          tags: [],
-          timeout: '80',
-          type: 'http',
-          urls: 'http://localhost:9200',
-        });
+            'check.request.method': 'POST',
+            'check.response.status': ['200'],
+            config_id: '',
+            custom_heartbeat_id: `${journeyId}-bbb-default`,
+            enabled: false,
+            form_monitor_type: 'http',
+            journey_id: journeyId,
+            locations: [
+              {
+                geo: {
+                  lat: 0,
+                  lon: 0,
+                },
+                id: 'localhost',
+                isInvalid: false,
+                isServiceManaged: true,
+                label: 'Local Synthetics Service',
+                status: 'experimental',
+                url: 'mockDevUrl',
+              },
+            ],
+            max_redirects: '0',
+            name: monitor.name,
+            namespace: 'default',
+            origin: 'project',
+            original_space: 'default',
+            project_id: 'bbb',
+            proxy_url: '',
+            'response.include_body': 'always',
+            'response.include_headers': false,
+            revision: 1,
+            schedule: {
+              number: '60',
+              unit: 'm',
+            },
+            'service.name': '',
+            'ssl.certificate': '',
+            'ssl.certificate_authorities': '',
+            'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+            'ssl.verification_mode': 'full',
+            tags: Array.isArray(monitor.tags) ? monitor.tags : monitor.tags?.split(','),
+            timeout: '80',
+            type: 'http',
+            urls: Array.isArray(monitor.urls) ? monitor.urls?.[0] : monitor.urls,
+          });
+        }
       } finally {
-        await deleteMonitor(journeyId, projectMonitors.project);
+        await Promise.all([
+          successfulMonitors.map((monitor) => {
+            return deleteMonitor(monitor.id, httpProjectMonitors.project);
+          }),
+        ]);
+      }
+    });
+
+    it('project monitors - handles tcp monitors', async () => {
+      const successfulMonitors = [tcpProjectMonitors.monitors[0], tcpProjectMonitors.monitors[1]];
+      const kibanaVersion = await kibanaServer.version.get();
+
+      try {
+        const messages = await parseStreamApiResponse(
+          projectMonitorEndpoint,
+          JSON.stringify(tcpProjectMonitors)
+        );
+
+        expect(messages).to.have.length(4);
+        expect(messages[3].updatedMonitors).eql([]);
+        expect(messages[3].createdMonitors).eql(successfulMonitors.map((monitor) => monitor.id));
+        expect(messages[3].failedMonitors).eql([
+          {
+            id: tcpProjectMonitors.monitors[2].id,
+            details: `The following Heartbeat options are not supported for ${tcpProjectMonitors.monitors[0].type} project monitors in ${kibanaVersion}: ports|unsupportedKey.nestedUnsupportedKey`,
+            reason: 'Unsupported Heartbeat option',
+          },
+        ]);
+
+        for (const monitor of successfulMonitors) {
+          const journeyId = monitor.id;
+          const createdMonitorsResponse = await supertest
+            .get(API_URLS.SYNTHETICS_MONITORS)
+            .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+
+          expect(createdMonitorsResponse.body.monitors[0].attributes).to.eql({
+            __ui: {
+              is_tls_enabled: false,
+            },
+            config_id: '',
+            custom_heartbeat_id: `${journeyId}-bbb-default`,
+            enabled: true,
+            form_monitor_type: 'tcp',
+            journey_id: journeyId,
+            locations: [
+              {
+                geo: {
+                  lat: 0,
+                  lon: 0,
+                },
+                id: 'localhost',
+                isInvalid: false,
+                isServiceManaged: true,
+                label: 'Local Synthetics Service',
+                status: 'experimental',
+                url: 'mockDevUrl',
+              },
+            ],
+            name: monitor.name,
+            namespace: 'default',
+            origin: 'project',
+            original_space: 'default',
+            project_id: 'bbb',
+            revision: 1,
+            schedule: {
+              number: '1',
+              unit: 'm',
+            },
+            proxy_url: '',
+            proxy_use_local_resolver: false,
+            'service.name': '',
+            'ssl.certificate': '',
+            'ssl.certificate_authorities': '',
+            'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+            'ssl.verification_mode': 'full',
+            tags: Array.isArray(monitor.tags) ? monitor.tags : monitor.tags?.split(','),
+            timeout: '16',
+            type: 'tcp',
+            hosts: Array.isArray(monitor.hosts) ? monitor.hosts?.[0] : monitor.hosts,
+          });
+        }
+      } finally {
+        await Promise.all([
+          successfulMonitors.map((monitor) => {
+            return deleteMonitor(monitor.id, tcpProjectMonitors.project);
+          }),
+        ]);
+      }
+    });
+
+    it('project monitors - handles icmp monitors', async () => {
+      const successfulMonitors = [icmpProjectMonitors.monitors[0], icmpProjectMonitors.monitors[1]];
+      const kibanaVersion = await kibanaServer.version.get();
+
+      try {
+        const messages = await parseStreamApiResponse(
+          projectMonitorEndpoint,
+          JSON.stringify(icmpProjectMonitors)
+        );
+
+        expect(messages).to.have.length(4);
+        expect(messages[3].updatedMonitors).eql([]);
+        expect(messages[3].createdMonitors).eql(successfulMonitors.map((monitor) => monitor.id));
+        expect(messages[3].failedMonitors).eql([
+          {
+            id: icmpProjectMonitors.monitors[2].id,
+            details: `The following Heartbeat options are not supported for ${icmpProjectMonitors.monitors[0].type} project monitors in ${kibanaVersion}: unsupportedKey.nestedUnsupportedKey`,
+            reason: 'Unsupported Heartbeat option',
+          },
+        ]);
+
+        for (const monitor of successfulMonitors) {
+          const journeyId = monitor.id;
+          const createdMonitorsResponse = await supertest
+            .get(API_URLS.SYNTHETICS_MONITORS)
+            .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+
+          expect(createdMonitorsResponse.body.monitors[0].attributes).to.eql({
+            config_id: '',
+            custom_heartbeat_id: `${journeyId}-bbb-default`,
+            enabled: true,
+            form_monitor_type: 'icmp',
+            journey_id: journeyId,
+            locations: [
+              {
+                geo: {
+                  lat: 0,
+                  lon: 0,
+                },
+                id: 'localhost',
+                isInvalid: false,
+                isServiceManaged: true,
+                label: 'Local Synthetics Service',
+                status: 'experimental',
+                url: 'mockDevUrl',
+              },
+              {
+                agentPolicyId: testPolicyId,
+                concurrentMonitors: 1,
+                geo: {
+                  lat: '',
+                  lon: '',
+                },
+                id: testPolicyId,
+                isInvalid: false,
+                isServiceManaged: false,
+                label: 'Test private location 0',
+              },
+            ],
+            name: monitor.name,
+            namespace: 'default',
+            origin: 'project',
+            original_space: 'default',
+            project_id: 'bbb',
+            revision: 1,
+            schedule: {
+              number: '1',
+              unit: 'm',
+            },
+            'service.name': '',
+            tags: Array.isArray(monitor.tags) ? monitor.tags : monitor.tags?.split(','),
+            timeout: '16',
+            type: 'icmp',
+            hosts: Array.isArray(monitor.hosts) ? monitor.hosts?.[0] : monitor.hosts,
+            wait:
+              monitor.wait?.slice(-1) === 's'
+                ? monitor.wait?.slice(0, -1)
+                : `${parseInt(monitor.wait?.slice(0, -1) || '1', 10) * 60}`,
+          });
+        }
+      } finally {
+        await Promise.all([
+          successfulMonitors.map((monitor) => {
+            return deleteMonitor(monitor.id, icmpProjectMonitors.project);
+          }),
+        ]);
       }
     });
 
@@ -891,9 +1077,9 @@ export default function ({ getService }: FtrProviderContext) {
         privateLocations: ['Test private location 0'],
       };
       const testMonitors = [projectMonitors.monitors[0], secondMonitor];
-      const username = 'admin';
+      const username = 'test-username';
       const roleName = 'uptime read only';
-      const password = `${username}-password`;
+      const password = `test-password`;
       try {
         await security.role.create(roleName, {
           kibana: [
@@ -1085,9 +1271,9 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              testPolicyId
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            }-${testPolicyId}`
         );
         expect(packagePolicy.name).eql(
           `${projectMonitors.monitors[0].id}-${projectMonitors.project}-default-Test private location 0`
@@ -1109,10 +1295,10 @@ export default function ({ getService }: FtrProviderContext) {
       } finally {
         await deleteMonitor(projectMonitors.monitors[0].id, projectMonitors.project);
 
-        const apiResponsePolicy2 = await supertest.get(
+        const packagesResponse = await supertest.get(
           '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
         );
-        expect(apiResponsePolicy2.body.items.length).eql(0);
+        expect(packagesResponse.body.items.length).eql(0);
       }
     });
 
@@ -1143,9 +1329,9 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              testPolicyId
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            }-${testPolicyId}`
         );
 
         expect(packagePolicy.policy_id).eql(testPolicyId);
@@ -1178,9 +1364,9 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy2 = apiResponsePolicy2.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              testPolicyId
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            }-${testPolicyId}`
         );
 
         expect(packagePolicy2).eql(undefined);

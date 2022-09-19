@@ -151,6 +151,9 @@ export class ProjectMonitorFormatter {
             monitor.type
           } project monitors in ${this.server.kibanaVersion}: ${unsupportedKeys.join('|')}`,
         });
+        this.handleStreamingMessage({
+          message: `${monitor.id}: failed to create or update monitor`,
+        });
         return null;
       }
 

@@ -7,7 +7,7 @@
 
 import { NormalizedProjectProps } from './browser_monitor';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
-import { normalizeYamlConfig, getMonitorTimeout } from './common_fields';
+import { normalizeYamlConfig, getValueInSeconds } from './common_fields';
 
 import {
   ConfigKey,
@@ -43,7 +43,7 @@ export const getNormalizeTCPFields = ({
     [ConfigKey.HOSTS]:
       getOptionalArrayField(monitor[ConfigKey.HOSTS]) || defaultFields[ConfigKey.HOSTS],
     [ConfigKey.TIMEOUT]: monitor.timeout
-      ? getMonitorTimeout(monitor.timeout)
+      ? getValueInSeconds(monitor.timeout)
       : defaultFields[ConfigKey.TIMEOUT],
   };
   return {
