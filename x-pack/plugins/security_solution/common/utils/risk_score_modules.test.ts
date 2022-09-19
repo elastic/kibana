@@ -36,277 +36,131 @@ import {
 } from './risk_score_modules';
 
 const mockSpaceId = 'customSpaceId';
-describe('getRiskScorePivotTransformId', () => {
-  test('getRiskScorePivotTransformId - host', () => {
-    const id = getRiskScorePivotTransformId(RiskScoreEntity.host, mockSpaceId);
-    expect(id).toMatchInlineSnapshot(`"ml_hostriskscore_pivot_transform_customSpaceId"`);
+
+describe.each([[RiskScoreEntity.host], [RiskScoreEntity.user]])('Risk Score Modules', (entity) => {
+  test(`getRiskScorePivotTransformId - ${entity}`, () => {
+    const id = getRiskScorePivotTransformId(entity, mockSpaceId);
+    expect(id).toMatchInlineSnapshot(`"ml_${entity}riskscore_pivot_transform_customSpaceId"`);
   });
-
-  test('getRiskScorePivotTransformId - user', () => {
-    const id = getRiskScorePivotTransformId(RiskScoreEntity.user, mockSpaceId);
-    expect(id).toMatchInlineSnapshot(`"ml_userriskscore_pivot_transform_customSpaceId"`);
+  test(`getIngestPipelineName - ${entity}`, () => {
+    const name = getIngestPipelineName(entity);
+    expect(name).toMatchInlineSnapshot(`"ml_${entity}riskscore_ingest_pipeline_default"`);
   });
-});
-
-describe('getIngestPipelineName', () => {
-  test('getIngestPipelineName - host', () => {
-    const name = getIngestPipelineName(RiskScoreEntity.host);
-    expect(name).toMatchInlineSnapshot(`"ml_hostriskscore_ingest_pipeline_default"`);
+  test(`getPivotTransformIndex - ${entity}`, () => {
+    const index = getPivotTransformIndex(entity, mockSpaceId);
+    expect(index).toMatchInlineSnapshot(`"ml_${entity}_risk_score_customSpaceId"`);
   });
-
-  test('getIngestPipelineName - user', () => {
-    const name = getIngestPipelineName(RiskScoreEntity.user);
-    expect(name).toMatchInlineSnapshot(`"ml_userriskscore_ingest_pipeline_default"`);
+  test(`getLatestTransformIndex - ${entity}`, () => {
+    const index = getLatestTransformIndex(entity, mockSpaceId);
+    expect(index).toMatchInlineSnapshot(`"ml_${entity}_risk_score_latest_customSpaceId"`);
   });
-});
-
-describe('getPivotTransformIndex', () => {
-  test('getPivotTransformIndex - host', () => {
-    const index = getPivotTransformIndex(RiskScoreEntity.host, mockSpaceId);
-    expect(index).toMatchInlineSnapshot(`"ml_host_risk_score_customSpaceId"`);
+  test(`getRiskScoreLevelScriptId - ${entity}`, () => {
+    const index = getRiskScoreLevelScriptId(entity);
+    expect(index).toMatchInlineSnapshot(`"ml_${entity}riskscore_levels_script_default"`);
   });
-
-  test('getPivotTransformIndex - user', () => {
-    const index = getPivotTransformIndex(RiskScoreEntity.user, mockSpaceId);
-    expect(index).toMatchInlineSnapshot(`"ml_user_risk_score_customSpaceId"`);
+  test(`getRiskScoreInitScriptId - ${entity}`, () => {
+    const index = getRiskScoreInitScriptId(entity);
+    expect(index).toMatchInlineSnapshot(`"ml_${entity}riskscore_init_script_default"`);
   });
-});
-
-describe('getLatestTransformIndex', () => {
-  test('getLatestTransformIndex - host', () => {
-    const index = getLatestTransformIndex(RiskScoreEntity.host, mockSpaceId);
-    expect(index).toMatchInlineSnapshot(`"ml_host_risk_score_latest_customSpaceId"`);
+  test(`getRiskScoreMapScriptId - ${entity}`, () => {
+    const index = getRiskScoreMapScriptId(entity);
+    expect(index).toMatchInlineSnapshot(`"ml_${entity}riskscore_map_script_default"`);
   });
-
-  test('getLatestTransformIndex - user', () => {
-    const index = getLatestTransformIndex(RiskScoreEntity.user, mockSpaceId);
-    expect(index).toMatchInlineSnapshot(`"ml_user_risk_score_latest_customSpaceId"`);
+  test(`getRiskScoreReduceScriptId - ${entity}`, () => {
+    const index = getRiskScoreReduceScriptId(entity);
+    expect(index).toMatchInlineSnapshot(`"ml_${entity}riskscore_reduce_script_default"`);
   });
-});
-
-describe('getRiskScoreLevelScriptId', () => {
-  test('getRiskScoreLevelScriptId - host', () => {
-    const index = getRiskScoreLevelScriptId(RiskScoreEntity.host);
-    expect(index).toMatchInlineSnapshot(`"ml_hostriskscore_levels_script_default"`);
+  test(`getLegacyIngestPipelineName - ${entity}`, () => {
+    const name = getLegacyIngestPipelineName(entity);
+    expect(name).toMatchInlineSnapshot(`"ml_${entity}riskscore_ingest_pipeline"`);
   });
-
-  test('getRiskScoreLevelScriptId - user', () => {
-    const index = getRiskScoreLevelScriptId(RiskScoreEntity.user);
-    expect(index).toMatchInlineSnapshot(`"ml_userriskscore_levels_script_default"`);
+  test(`getLegacyRiskScoreLevelScriptId - ${entity}`, () => {
+    const index = getLegacyRiskScoreLevelScriptId(entity);
+    expect(index).toMatchInlineSnapshot(`"ml_${entity}riskscore_levels_script"`);
   });
-});
-
-describe('getRiskScoreInitScriptId', () => {
-  test('getRiskScoreInitScriptId - host', () => {
-    const index = getRiskScoreInitScriptId(RiskScoreEntity.host);
-    expect(index).toMatchInlineSnapshot(`"ml_hostriskscore_init_script_default"`);
+  test(`getLegacyRiskScoreInitScriptId - ${entity}`, () => {
+    const index = getLegacyRiskScoreInitScriptId(entity);
+    expect(index).toMatchInlineSnapshot(`"ml_${entity}riskscore_init_script"`);
   });
-
-  test('getRiskScoreInitScriptId - user', () => {
-    const index = getRiskScoreInitScriptId(RiskScoreEntity.user);
-    expect(index).toMatchInlineSnapshot(`"ml_userriskscore_init_script_default"`);
+  test(`getLegacyRiskScoreMapScriptId - ${entity}`, () => {
+    const index = getLegacyRiskScoreMapScriptId(entity);
+    expect(index).toMatchInlineSnapshot(`"ml_${entity}riskscore_map_script"`);
   });
-});
-
-describe('getRiskScoreMapScriptId', () => {
-  test('getRiskScoreMapScriptId - host', () => {
-    const index = getRiskScoreMapScriptId(RiskScoreEntity.host);
-    expect(index).toMatchInlineSnapshot(`"ml_hostriskscore_map_script_default"`);
+  test(`getLegacyRiskScoreReduceScriptId - ${entity}`, () => {
+    const index = getLegacyRiskScoreReduceScriptId(entity);
+    expect(index).toMatchInlineSnapshot(`"ml_${entity}riskscore_reduce_script"`);
   });
-
-  test('getRiskScoreMapScriptId - user', () => {
-    const index = getRiskScoreMapScriptId(RiskScoreEntity.user);
-    expect(index).toMatchInlineSnapshot(`"ml_userriskscore_map_script_default"`);
-  });
-});
-
-describe('getRiskScoreReduceScriptId', () => {
-  test('getRiskScoreReduceScriptId - host', () => {
-    const index = getRiskScoreReduceScriptId(RiskScoreEntity.host);
-    expect(index).toMatchInlineSnapshot(`"ml_hostriskscore_reduce_script_default"`);
-  });
-
-  test('getRiskScoreReduceScriptId - user', () => {
-    const index = getRiskScoreReduceScriptId(RiskScoreEntity.user);
-    expect(index).toMatchInlineSnapshot(`"ml_userriskscore_reduce_script_default"`);
-  });
-});
-
-describe('getLegacyIngestPipelineName', () => {
-  test('getLegacyIngestPipelineName - host', () => {
-    const name = getLegacyIngestPipelineName(RiskScoreEntity.host);
-    expect(name).toMatchInlineSnapshot(`"ml_hostriskscore_ingest_pipeline"`);
-  });
-
-  test('getLegacyIngestPipelineName - user', () => {
-    const name = getLegacyIngestPipelineName(RiskScoreEntity.user);
-    expect(name).toMatchInlineSnapshot(`"ml_userriskscore_ingest_pipeline"`);
-  });
-});
-
-describe('getLegacyRiskScoreLevelScriptId', () => {
-  test('getLegacyRiskScoreLevelScriptId - host', () => {
-    const index = getLegacyRiskScoreLevelScriptId(RiskScoreEntity.host);
-    expect(index).toMatchInlineSnapshot(`"ml_hostriskscore_levels_script"`);
-  });
-
-  test('getLegacyRiskScoreLevelScriptId - user', () => {
-    const index = getLegacyRiskScoreLevelScriptId(RiskScoreEntity.user);
-    expect(index).toMatchInlineSnapshot(`"ml_userriskscore_levels_script"`);
-  });
-});
-
-describe('getLegacyRiskScoreInitScriptId', () => {
-  test('getLegacyRiskScoreInitScriptId - host', () => {
-    const index = getLegacyRiskScoreInitScriptId(RiskScoreEntity.host);
-    expect(index).toMatchInlineSnapshot(`"ml_hostriskscore_init_script"`);
-  });
-
-  test('getLegacyRiskScoreInitScriptId - user', () => {
-    const index = getLegacyRiskScoreInitScriptId(RiskScoreEntity.user);
-    expect(index).toMatchInlineSnapshot(`"ml_userriskscore_init_script"`);
-  });
-});
-
-describe('getLegacyRiskScoreMapScriptId', () => {
-  test('getLegacyRiskScoreMapScriptId - host', () => {
-    const index = getLegacyRiskScoreMapScriptId(RiskScoreEntity.host);
-    expect(index).toMatchInlineSnapshot(`"ml_hostriskscore_map_script"`);
-  });
-
-  test('getLegacyRiskScoreMapScriptId - user', () => {
-    const index = getLegacyRiskScoreMapScriptId(RiskScoreEntity.user);
-    expect(index).toMatchInlineSnapshot(`"ml_userriskscore_map_script"`);
-  });
-});
-
-describe('getLegacyRiskScoreReduceScriptId', () => {
-  test('getLegacyRiskScoreReduceScriptId - host', () => {
-    const index = getLegacyRiskScoreReduceScriptId(RiskScoreEntity.host);
-    expect(index).toMatchInlineSnapshot(`"ml_hostriskscore_reduce_script"`);
-  });
-
-  test('getLegacyRiskScoreReduceScriptId - user', () => {
-    const index = getLegacyRiskScoreReduceScriptId(RiskScoreEntity.user);
-    expect(index).toMatchInlineSnapshot(`"ml_userriskscore_reduce_script"`);
-  });
-});
-
-describe('getRiskHostCreateLevelScriptOptions', () => {
-  const options = getRiskHostCreateLevelScriptOptions();
-  expect(options).toMatchSnapshot();
-});
-
-describe('getRiskHostCreateInitScriptOptions', () => {
-  const options = getRiskHostCreateInitScriptOptions();
-  expect(options).toMatchSnapshot();
-});
-
-describe('getRiskHostCreateMapScriptOptions', () => {
-  const options = getRiskHostCreateMapScriptOptions();
-  expect(options).toMatchSnapshot();
-});
-
-describe('getRiskHostCreateReduceScriptOptions', () => {
-  const options = getRiskHostCreateReduceScriptOptions();
-  expect(options).toMatchSnapshot();
-});
-
-describe('getRiskUserCreateLevelScriptOptions', () => {
-  const options = getRiskUserCreateLevelScriptOptions();
-  expect(options).toMatchSnapshot();
-});
-
-describe('getRiskUserCreateMapScriptOptions', () => {
-  const options = getRiskUserCreateMapScriptOptions();
-  expect(options).toMatchSnapshot();
-});
-
-describe('getRiskUserCreateReduceScriptOptions', () => {
-  const options = getRiskUserCreateReduceScriptOptions();
-  expect(options).toMatchSnapshot();
-});
-
-describe('getRiskScoreIngestPipelineOptions', () => {
-  test('getRiskScoreIngestPipelineOptions - host', () => {
-    const options = getRiskScoreIngestPipelineOptions(RiskScoreEntity.host);
+  test(`getRiskScoreIngestPipelineOptions - ${entity}`, () => {
+    const options = getRiskScoreIngestPipelineOptions(entity);
     expect(options).toMatchSnapshot();
   });
-
-  test('getRiskScoreIngestPipelineOptions - user', () => {
-    const options = getRiskScoreIngestPipelineOptions(RiskScoreEntity.user);
-    expect(options).toMatchSnapshot();
-  });
-});
-
-describe('getCreateRiskScoreIndicesOptions', () => {
-  test('getCreateRiskScoreIndicesOptions - host', () => {
+  test(`getCreateRiskScoreIndicesOptions - ${entity}`, () => {
     const options = getCreateRiskScoreIndicesOptions({
       spaceId: mockSpaceId,
-      riskScoreEntity: RiskScoreEntity.host,
+      riskScoreEntity: entity,
     });
     expect(options).toMatchSnapshot();
   });
-
-  test('getCreateRiskScoreIndicesOptions - user', () => {
-    const options = getCreateRiskScoreIndicesOptions({
-      spaceId: mockSpaceId,
-      riskScoreEntity: RiskScoreEntity.user,
-    });
-    expect(options).toMatchSnapshot();
-  });
-});
-
-describe('getCreateRiskScoreLatestIndicesOptions', () => {
-  test('getCreateRiskScoreLatestIndicesOptions - host', () => {
+  test(`getCreateRiskScoreLatestIndicesOptions - ${entity}`, () => {
     const options = getCreateRiskScoreLatestIndicesOptions({
       spaceId: mockSpaceId,
-      riskScoreEntity: RiskScoreEntity.host,
+      riskScoreEntity: entity,
     });
     expect(options).toMatchSnapshot();
   });
-
-  test('getCreateRiskScoreLatestIndicesOptions - user', () => {
-    const options = getCreateRiskScoreLatestIndicesOptions({
-      spaceId: mockSpaceId,
-      riskScoreEntity: RiskScoreEntity.user,
-    });
-    expect(options).toMatchSnapshot();
-  });
-});
-
-describe('getCreateMLHostPivotTransformOptions', () => {
-  test('getCreateMLHostPivotTransformOptions', () => {
-    const options = getCreateMLHostPivotTransformOptions({
-      spaceId: mockSpaceId,
-    });
-    expect(options).toMatchSnapshot();
-  });
-});
-
-describe('getCreateMLUserPivotTransformOptions', () => {
-  test('getCreateMLUserPivotTransformOptions', () => {
-    const options = getCreateMLUserPivotTransformOptions({
-      spaceId: mockSpaceId,
-    });
-    expect(options).toMatchSnapshot();
-  });
-});
-
-describe('getCreateLatestTransformOptions', () => {
-  test('getCreateLatestTransformOptions - host', () => {
+  test(`getCreateLatestTransformOptions - ${entity}`, () => {
     const options = getCreateLatestTransformOptions({
       spaceId: mockSpaceId,
-      riskScoreEntity: RiskScoreEntity.host,
+      riskScoreEntity: entity,
     });
+    expect(options).toMatchSnapshot();
+  });
+  test(`getCreateML${
+    entity.charAt(0).toUpperCase() + entity.slice(1)
+  }PivotTransformOptions`, () => {
+    const fn =
+      entity === RiskScoreEntity.host
+        ? getCreateMLHostPivotTransformOptions
+        : getCreateMLUserPivotTransformOptions;
+    const options = fn({
+      spaceId: mockSpaceId,
+    });
+    expect(options).toMatchSnapshot();
+  });
+  test(`getRisk${entity.charAt(0).toUpperCase() + entity.slice(1)}CreateLevelScriptOptions`, () => {
+    const fn =
+      entity === RiskScoreEntity.host
+        ? getRiskHostCreateLevelScriptOptions
+        : getRiskUserCreateLevelScriptOptions;
+    const options = fn();
+    expect(options).toMatchSnapshot();
+  });
+  test(`getRisk${entity.charAt(0).toUpperCase() + entity.slice(1)}CreateMapScriptOptions`, () => {
+    const fn =
+      entity === RiskScoreEntity.host
+        ? getRiskHostCreateMapScriptOptions
+        : getRiskUserCreateMapScriptOptions;
+    const options = fn();
+    expect(options).toMatchSnapshot();
+  });
+  test(`getRisk${
+    entity.charAt(0).toUpperCase() + entity.slice(1)
+  }CreateReduceScriptOptions`, () => {
+    const fn =
+      entity === RiskScoreEntity.host
+        ? getRiskHostCreateReduceScriptOptions
+        : getRiskUserCreateReduceScriptOptions;
+    const options = fn();
     expect(options).toMatchSnapshot();
   });
 
-  test('getCreateLatestTransformOptions - user', () => {
-    const options = getCreateLatestTransformOptions({
-      spaceId: mockSpaceId,
-      riskScoreEntity: RiskScoreEntity.user,
+  /**
+   * User risk score doesn't have init script, so we only check for host
+   */
+  if (entity === RiskScoreEntity.host) {
+    test(`getRiskHostCreateInitScriptOptions`, () => {
+      const options = getRiskHostCreateInitScriptOptions();
+      expect(options).toMatchSnapshot();
     });
-    expect(options).toMatchSnapshot();
-  });
+  }
 });

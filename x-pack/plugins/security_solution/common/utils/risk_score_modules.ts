@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_ALERTS_INDEX } from '../constants';
 import { RiskScoreEntity, RiskScoreFields } from '../search_strategy';
 
 /**
@@ -30,6 +31,8 @@ export const getPivotTransformIndex = (riskScoreEntity: RiskScoreEntity, spaceId
 
 export const getLatestTransformIndex = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') =>
   `ml_${riskScoreEntity}_risk_score_latest_${spaceId}`;
+
+export const getAlertsIndex = (spaceId = 'default') => `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
 
 export const getRiskScoreLevelScriptId = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') =>
   `ml_${riskScoreEntity}riskscore_levels_script_${spaceId}`;
@@ -440,7 +443,7 @@ export const getCreateMLHostPivotTransformOptions = ({
       },
     },
     source: {
-      index: [`.alerts-security.alerts-${spaceId}`],
+      index: [getAlertsIndex(spaceId)],
       query: {
         bool: {
           filter: [
@@ -517,7 +520,7 @@ export const getCreateMLUserPivotTransformOptions = ({
       },
     },
     source: {
-      index: [`.alerts-security.alerts-${spaceId}`],
+      index: [getAlertsIndex(spaceId)],
       query: {
         bool: {
           filter: [
