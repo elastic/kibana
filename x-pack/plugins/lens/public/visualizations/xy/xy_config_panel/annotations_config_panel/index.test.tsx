@@ -63,6 +63,7 @@ describe('AnnotationsPanel', () => {
           layerId: 'annotation',
           indexPatternId: 'indexPattern1',
           annotations: [customLineStaticAnnotation],
+          ignoreGlobalFilters: true,
         },
       ],
     };
@@ -137,6 +138,7 @@ describe('AnnotationsPanel', () => {
         layerId: 'annotation',
         layerType: 'annotations',
         indexPatternId: 'indexPattern1',
+        ignoreGlobalFilters: true,
       };
       const component = mount(
         <AnnotationsPanel
@@ -215,6 +217,7 @@ describe('AnnotationsPanel', () => {
             indexPatternId: 'indexPattern1',
             layerId: 'annotation',
             layerType: 'annotations',
+            ignoreGlobalFilters: true,
           },
         ],
       });
@@ -239,6 +242,7 @@ describe('AnnotationsPanel', () => {
             indexPatternId: 'indexPattern1',
             layerId: 'annotation',
             layerType: 'annotations',
+            ignoreGlobalFilters: true,
           },
         ],
       });
@@ -268,6 +272,7 @@ describe('AnnotationsPanel', () => {
         layerId: 'annotation',
         layerType: 'annotations',
         indexPatternId: indexPattern.id,
+        ignoreGlobalFilters: true,
       };
       const frameMock = createMockFramePublicAPI({
         datasourceLayers: {},
@@ -292,16 +297,16 @@ describe('AnnotationsPanel', () => {
       );
 
       expect(
-        component.find('[data-test-subj="annotation-query-based-field-picker"]').exists()
+        component.find('[data-test-subj="lnsXY-annotation-query-based-field-picker"]').exists()
       ).toBeTruthy();
       expect(
-        component.find('[data-test-subj="annotation-query-based-query-input"]').exists()
+        component.find('[data-test-subj="lnsXY-annotation-query-based-query-input"]').exists()
       ).toBeTruthy();
 
       // The provided indexPattern has 2 date fields
       expect(
         component
-          .find('[data-test-subj="annotation-query-based-field-picker"]')
+          .find('[data-test-subj="lnsXY-annotation-query-based-field-picker"]')
           .at(0)
           .prop('options')
       ).toHaveLength(2);

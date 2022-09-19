@@ -562,6 +562,7 @@ describe('#toExpression', () => {
             layerType: layerTypes.ANNOTATIONS,
             annotations: [],
             indexPatternId: 'my-indexPattern',
+            ignoreGlobalFilters: true,
           },
         ],
       },

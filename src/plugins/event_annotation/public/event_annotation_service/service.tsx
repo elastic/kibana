@@ -91,6 +91,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
         textField,
         filter,
         extraFields,
+        ignoreGlobalFilters,
       } = annotation;
       expressions.push({
         type: 'expression' as const,
@@ -110,6 +111,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
               textField: textVisibility && textField ? [textField] : [],
               filter: filter ? [queryToAst(filter)] : [],
               extraFields: extraFields || [],
+              ignoreGlobalFilters: [Boolean(ignoreGlobalFilters)],
             },
           },
         ],
