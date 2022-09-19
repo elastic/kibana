@@ -55,7 +55,6 @@ interface OwnProps {
   to: string;
   filterGroup?: Status;
 }
-import { useLicense } from '../../../common/hooks/use_license';
 
 type AlertsTableComponentProps = OwnProps & PropsFromRedux;
 
