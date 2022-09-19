@@ -280,7 +280,7 @@ export const SessionView = ({
                     id="xpack.sessionView.ttyToggle"
                     defaultMessage="{kb}Kb of tty output"
                     values={{
-                      kb: Math.round(totalTTYOutputBytes.total / 1024)
+                      kb: Math.round(totalTTYOutputBytes.total / 1024),
                     }}
                   />
                 }
