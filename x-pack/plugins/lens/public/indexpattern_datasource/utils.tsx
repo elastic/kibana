@@ -515,7 +515,7 @@ export function getFiltersInLayer(
     return {
       error: i18n.translate('xpack.lens.indexPattern.adHocDataViewError', {
         defaultMessage:
-          '"Explore data in Discover" does not support unsaved data views. Save the data view to switch to Discover.',
+          'You have unsaved data views. To explore the data in Discover, save the data views.',
       }),
     };
   }
