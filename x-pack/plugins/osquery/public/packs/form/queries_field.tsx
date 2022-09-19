@@ -12,26 +12,35 @@ import { produce } from 'immer';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
+import { useController, useFormContext, useWatch } from 'react-hook-form';
 
-import type { FieldHook } from '../../shared_imports';
 import { PackQueriesTable } from '../pack_queries_table';
 import { QueryFlyout } from '../queries/query_flyout';
 import { OsqueryPackUploader } from './pack_uploader';
 import { getSupportedPlatforms } from '../queries/platforms/helpers';
-import type { PackItem } from '../types';
 import type { PackQueryFormData } from '../queries/use_pack_query_form';
 
 interface QueriesFieldProps {
-  handleNameChange: (name: string) => void;
-  field: FieldHook<PackItem['queries'], PackQueryFormData[]>;
   euiFieldProps: EuiComboBoxProps<{}>;
 }
 
-const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
-  field,
-  handleNameChange,
-  euiFieldProps,
-}) => {
+const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) => {
+  const {
+    field: { onChange, value: fieldValue },
+  } = useController<{ queries: PackQueryFormData[] }, 'queries'>({
+    name: 'queries',
+    defaultValue: [],
+    rules: {},
+  });
+
+  const { setValue } = useFormContext();
+  const { name: packName } = useWatch();
+
+  const handleNameChange = useCallback(
+    (newName: string) => isEmpty(packName) && setValue('name', newName),
+    [packName, setValue]
+  );
+
   const isReadOnly = !!euiFieldProps?.isDisabled;
   const [showAddQueryFlyout, setShowAddQueryFlyout] = useState(false);
   const [showEditQueryFlyout, setShowEditQueryFlyout] = useState<number>(-1);
@@ -41,15 +50,13 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
   const handleHideAddFlyout = useCallback(() => setShowAddQueryFlyout(false), []);
   const handleHideEditFlyout = useCallback(() => setShowEditQueryFlyout(-1), []);
 
-  const { setValue } = field;
-
   const handleDeleteClick = useCallback(
     (query) => {
-      const streamIndex = findIndex(field.value, ['id', query.id]);
+      const streamIndex = findIndex(fieldValue, ['id', query.id]);
 
       if (streamIndex > -1) {
-        setValue(
-          produce((draft) => {
+        onChange(
+          produce((draft: PackQueryFormData[]) => {
             pullAt(draft, [streamIndex]);
 
             return draft;
@@ -57,24 +64,24 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
         );
       }
     },
-    [field.value, setValue]
+    [fieldValue, onChange]
   );
 
   const handleEditClick = useCallback(
     (query) => {
-      const streamIndex = findIndex(field.value, ['id', query.id]);
+      const streamIndex = findIndex(fieldValue, ['id', query.id]);
 
       setShowEditQueryFlyout(streamIndex);
     },
-    [field.value]
+    [fieldValue]
   );
 
   const handleEditQuery = useCallback(
     (updatedQuery) =>
       new Promise<void>((resolve) => {
         if (showEditQueryFlyout >= 0) {
-          setValue(
-            produce((draft) => {
+          onChange(
+            produce((draft: PackQueryFormData[]) => {
               draft[showEditQueryFlyout].id = updatedQuery.id;
               draft[showEditQueryFlyout].interval = updatedQuery.interval;
               draft[showEditQueryFlyout].query = updatedQuery.query;
@@ -118,14 +125,14 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
         handleHideEditFlyout();
         resolve();
       }),
-    [handleHideEditFlyout, setValue, showEditQueryFlyout]
+    [handleHideEditFlyout, onChange, showEditQueryFlyout]
   );
 
   const handleAddQuery = useCallback(
     (newQuery) =>
       new Promise<void>((resolve) => {
-        setValue(
-          produce((draft) => {
+        onChange(
+          produce((draft: PackQueryFormData[]) => {
             draft.push(newQuery);
 
             return draft;
@@ -134,24 +141,24 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
         handleHideAddFlyout();
         resolve();
       }),
-    [handleHideAddFlyout, setValue]
+    [handleHideAddFlyout, onChange]
   );
 
   const handleDeleteQueries = useCallback(() => {
-    setValue(
-      produce((draft) => {
+    onChange(
+      produce((draft: PackQueryFormData[]) => {
         pullAllBy(draft, tableSelectedItems, 'id');
 
         return draft;
       })
     );
     setTableSelectedItems([]);
-  }, [setValue, tableSelectedItems]);
+  }, [onChange, tableSelectedItems]);
 
   const handlePackUpload = useCallback(
-    (parsedContent, packName) => {
-      setValue(
-        produce((draft) => {
+    (parsedContent, uploadedPackName) => {
+      onChange(
+        produce((draft: PackQueryFormData[]) => {
           forEach(parsedContent.queries, (newQuery, newQueryId) => {
             draft.push(
               // @ts-expect-error update types
@@ -174,17 +181,17 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
         })
       );
 
-      handleNameChange(packName);
+      handleNameChange(uploadedPackName);
     },
-    [handleNameChange, setValue]
+    [handleNameChange, onChange]
   );
 
-  const tableData = useMemo(() => (field.value?.length ? field.value : []), [field.value]);
+  const tableData = useMemo(() => (fieldValue?.length ? fieldValue : []), [fieldValue]);
 
   const uniqueQueryIds = useMemo<string[]>(
     () =>
-      field.value && field.value.length
-        ? field.value.reduce((acc, query) => {
+      fieldValue && fieldValue.length
+        ? fieldValue.reduce((acc, query) => {
             if (query?.id) {
               acc.push(query.id);
             }
@@ -192,7 +199,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
             return acc;
           }, [] as string[])
         : [],
-    [field.value]
+    [fieldValue]
   );
 
   return (
@@ -225,7 +232,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
           <EuiSpacer />
         </>
       )}
-      {field.value?.length ? (
+      {fieldValue?.length ? (
         <PackQueriesTable
           data={tableData}
           isReadOnly={isReadOnly}
@@ -248,7 +255,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
         <QueryFlyout
           uniqueQueryIds={uniqueQueryIds}
           // @ts-expect-error update types
-          defaultValue={field.value[showEditQueryFlyout]}
+          defaultValue={value[showEditQueryFlyout]}
           onSave={handleEditQuery}
           onClose={handleHideEditFlyout}
         />

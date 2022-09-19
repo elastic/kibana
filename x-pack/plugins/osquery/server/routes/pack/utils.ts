@@ -18,7 +18,9 @@ export const convertPackQueriesToSO = (queries) =>
       const ecsMapping = value.ecs_mapping && convertECSMappingToArray(value.ecs_mapping);
       acc.push({
         id: key,
-        ...pick(value, ['name', 'query', 'interval', 'snapshot', 'removed', 'platform', 'version']),
+        ...pick(value, ['name', 'query', 'interval', 'platform', 'version']),
+        ...(value.snapshot !== undefined ? { snapshot: value.snapshot } : {}),
+        ...(value.removed !== undefined ? { removed: value.removed } : {}),
         ...(ecsMapping ? { ecs_mapping: ecsMapping } : {}),
       });
 
@@ -29,8 +31,8 @@ export const convertPackQueriesToSO = (queries) =>
       name: string;
       query: string;
       interval: number;
-      snapshot: boolean;
-      removed: boolean;
+      snapshot?: boolean;
+      removed?: boolean;
       ecs_mapping?: Record<string, unknown>;
     }>
   );
@@ -46,7 +48,7 @@ export const convertSOQueriesToPack = (queries, options?: { removeMultiLines?: b
         ...rest,
         query: options?.removeMultiLines ? removeMultilines(query) : query,
         ...(!isEmpty(ecs_mapping) ? { ecs_mapping: convertECSMappingToObject(ecs_mapping) } : {}),
-        ...(platform === DEFAULT_PLATFORM ? {} : { platform }),
+        ...(platform === DEFAULT_PLATFORM || platform === undefined ? {} : { platform }),
       };
 
       return acc;
