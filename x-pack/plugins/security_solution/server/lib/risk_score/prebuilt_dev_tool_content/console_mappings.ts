@@ -6,6 +6,6 @@
  */
 
 export const consoleMappings = {
-  enable_host_risk_score: 'enable_host_risk_score.console',
-  enable_user_risk_score: 'enable_user_risk_score.console',
+  enable_host_risk_score: 'enable_host_risk_score.mustache',
+  enable_user_risk_score: 'enable_user_risk_score.mustache',
 };
