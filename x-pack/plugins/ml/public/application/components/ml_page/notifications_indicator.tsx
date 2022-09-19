@@ -8,14 +8,23 @@
 import React, { FC, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge, EuiToolTip, EuiIcon } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiNotificationBadge,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { timer, combineLatest, of } from 'rxjs';
 import { switchMap, filter, catchError } from 'rxjs/operators';
+import { css } from '@emotion/react';
 import { useAsObservable } from '../../hooks';
 import { NotificationsCountResponse } from '../../../../common/types/notifications';
 import { useMlKibana } from '../../contexts/kibana';
 import { useStorage } from '../../contexts/storage';
 import { ML_NOTIFICATIONS_LAST_CHECKED_AT } from '../../../../common/types/storage';
+
+const NOTIFICATIONS_CHECK_INTERVAL = 60000;
 
 export const NotificationsIndicator: FC = () => {
   const {
@@ -23,6 +32,7 @@ export const NotificationsIndicator: FC = () => {
       mlServices: { mlApiServices },
     },
   } = useMlKibana();
+  const { euiTheme } = useEuiTheme();
   const [lastCheckedAt] = useStorage(ML_NOTIFICATIONS_LAST_CHECKED_AT);
 
   const lastCheckedAt$ = useAsObservable(lastCheckedAt);
@@ -30,9 +40,9 @@ export const NotificationsIndicator: FC = () => {
   const [notificationsCounts, setNotificationsCounts] = useState<NotificationsCountResponse>();
 
   useEffect(function startPollingNotifications() {
-    const sub = combineLatest([
+    const subscription = combineLatest([
       lastCheckedAt$.pipe(filter((v): v is number => !!v)),
-      timer(0, 5000),
+      timer(0, NOTIFICATIONS_CHECK_INTERVAL),
     ])
       .pipe(
         switchMap(([lastChecked]) =>
@@ -48,7 +58,7 @@ export const NotificationsIndicator: FC = () => {
       });
 
     return () => {
-      sub.unsubscribe();
+      subscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -92,13 +102,20 @@ export const NotificationsIndicator: FC = () => {
               />
             }
           >
-            <EuiIcon
-              type="bell"
-              size={'s'}
+            <svg
+              css={css`
+                display: block;
+              `}
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
               aria-label={i18n.translate('xpack.ml.notificationsIndicator.unreadIcon', {
                 defaultMessage: 'Unread notifications indicator.',
               })}
-            />
+              fill={euiTheme.colors.primary}
+            >
+              <circle cx="8" cy="8" r="4" />
+            </svg>
           </EuiToolTip>
         </EuiFlexItem>
       ) : null}
