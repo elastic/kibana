@@ -42,7 +42,7 @@ interface StaleMonitor {
   savedObjectId: string;
 }
 type StaleMonitorMap = Record<string, StaleMonitor>;
-type FailedMonitors = Array<{ id: string; reason: string; details: string; payload?: object }>;
+type FailedMonitors = Array<{ id?: string; reason: string; details: string; payload?: object }>;
 
 export const INSUFFICIENT_FLEET_PERMISSIONS =
   'Insufficient permissions. In order to configure private locations, you must have Fleet and Integrations write permissions. To resolve, please generate a new API key with a user who has Fleet and Integrations write permissions.';
@@ -282,7 +282,6 @@ export class ProjectMonitorFormatter {
           });
         } else {
           this.failedMonitors.push({
-            id: `${monitors.length}`,
             reason: `Failed to create ${monitors.length} monitors`,
             details: 'Failed to create monitors',
             payload: monitors,
@@ -295,7 +294,6 @@ export class ProjectMonitorFormatter {
     } catch (e) {
       this.server.logger.error(e);
       this.failedMonitors.push({
-        id: `${monitors.length}`,
         reason: `Failed to create ${monitors.length} monitors`,
         details: e.message,
         payload: monitors,
@@ -323,7 +321,6 @@ export class ProjectMonitorFormatter {
     } catch (e) {
       this.server.logger.error(e);
       this.failedMonitors.push({
-        id: `${monitors.length}`,
         reason: 'Failed to update monitors',
         details: e.message,
         payload: monitors,
