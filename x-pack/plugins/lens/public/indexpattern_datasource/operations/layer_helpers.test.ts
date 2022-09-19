@@ -1385,6 +1385,7 @@ describe('state_helpers', () => {
     it('should execute adjustments for other columns when creating a reference', () => {
       const termsColumn: TermsIndexPatternColumn = {
         label: 'Top values of source',
+        customLabel: true,
         dataType: 'string',
         isBucketed: true,
 
