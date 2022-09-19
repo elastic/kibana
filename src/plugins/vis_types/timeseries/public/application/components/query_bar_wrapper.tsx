@@ -10,11 +10,11 @@ import React, { useEffect, useState } from 'react';
 
 import { QueryStringInput, QueryStringInputProps } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { TimelionVisDependencies } from '@kbn/vis-type-timelion-plugin/public/plugin';
 import type { IndexPatternValue } from '../../../common/types';
 
 import { getDataViewsStart } from '../../services';
 import { fetchIndexPattern, isStringTypeIndexPattern } from '../../../common/index_patterns_utils';
+import { TimeseriesVisDependencies } from '../../plugin';
 
 type QueryBarWrapperProps = Pick<QueryStringInputProps, 'query' | 'onChange' | 'isInvalid'> & {
   indexPatterns: IndexPatternValue[];
@@ -31,7 +31,7 @@ export function QueryBarWrapper({
   const dataViews = getDataViewsStart();
   const [indexes, setIndexes] = useState<QueryStringInputProps['indexPatterns']>([]);
 
-  const kibana = useKibana<TimelionVisDependencies>();
+  const kibana = useKibana<TimeseriesVisDependencies>();
   const {
     appName,
     unifiedSearch,
