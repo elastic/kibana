@@ -105,7 +105,7 @@ describe('field_items', () => {
 
   describe('getFieldColumns', () => {
     const onToggleColumn = jest.fn();
-    const getFieldColumnsParams = { onToggleColumn, onHide: () => {} };
+    const getFieldColumnsParams = { onToggleColumn, onHide: () => {}, shouldShowDescriptionColumn: true };
 
     beforeEach(() => {
       onToggleColumn.mockClear();
@@ -194,6 +194,27 @@ describe('field_items', () => {
       expect(getByTestId(`field-${timestampFieldId}-checkbox`)).toBeInTheDocument();
       expect(getByTestId(`field-${timestampFieldId}-name`)).toBeInTheDocument();
       expect(getByTestId(`field-${timestampFieldId}-description`)).toBeInTheDocument();
+      expect(getByTestId(`field-${timestampFieldId}-category`)).toBeInTheDocument();
+    });
+
+    it('should render default columns without description column', () => {
+      const timestampField = mockBrowserFields.base.fields![timestampFieldId];
+      const fieldItems = getFieldItems({
+        selectedCategoryIds: ['base'],
+        browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
+        columnIds: [],
+      });
+
+      const columns = getFieldColumns({ ...getFieldColumnsParams, shouldShowDescriptionColumn: false });
+      const { getByTestId, getAllByText } = render(
+        <EuiInMemoryTable items={fieldItems} itemId="name" columns={columns} />
+      );
+
+      expect(getAllByText('Name').at(0)).toBeInTheDocument();
+      expect(getAllByText('Category').at(0)).toBeInTheDocument();
+
+      expect(getByTestId(`field-${timestampFieldId}-checkbox`)).toBeInTheDocument();
+      expect(getByTestId(`field-${timestampFieldId}-name`)).toBeInTheDocument();
       expect(getByTestId(`field-${timestampFieldId}-category`)).toBeInTheDocument();
     });
 
