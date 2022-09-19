@@ -154,6 +154,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     const ruleExecutionLogService = createRuleExecutionLogService(config, logger, core, plugins);
     ruleExecutionLogService.registerEventLogProvider();
 
+    const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
+      licensing: plugins.licensing,
+      osqueryCreateAction: plugins.osquery.osqueryCreateAction,
+    };
+
     const requestContextFactory = new RequestContextFactory({
       config,
       logger,
@@ -202,11 +207,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       ml: plugins.ml,
       eventsTelemetry: this.telemetryEventsSender,
       version: pluginContext.env.packageInfo.version,
-    };
-
-    const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
-      licensing: plugins.licensing,
-      osqueryCreateAction: plugins.osquery.osqueryCreateAction,
     };
 
     const aliasesFieldMap: FieldMap = {};
@@ -288,8 +288,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       core.getStartServices,
       securityRuleTypeOptions,
       previewRuleDataClient,
-      this.telemetryReceiver,
-      queryRuleAdditionalOptions
+      this.telemetryReceiver
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);

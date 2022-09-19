@@ -40,11 +40,7 @@ import type { RuleExecutionContext, StatusChangeArgs } from '../../rule_monitori
 
 import type { ConfigType } from '../../../../config';
 import { alertInstanceFactoryStub } from '../../signals/preview/alert_instance_factory_stub';
-import type {
-  CreateRuleOptions,
-  CreateSecurityRuleTypeWrapperProps,
-  CreateQueryRuleAdditionalOptions,
-} from '../../rule_types/types';
+import type { CreateRuleOptions, CreateSecurityRuleTypeWrapperProps } from '../../rule_types/types';
 import {
   createEqlAlertType,
   createIndicatorMatchAlertType,
@@ -68,8 +64,7 @@ export const previewRulesRoute = async (
   ruleOptions: CreateRuleOptions,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
   previewRuleDataClient: IRuleDataClient,
-  getStartServices: StartServicesAccessor<StartPlugins>,
-  queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions
+  getStartServices: StartServicesAccessor<StartPlugins>
 ) => {
   router.post(
     {
@@ -93,6 +88,8 @@ export const previewRulesRoute = async (
         const searchSourceClient = await data.search.searchSource.asScoped(request);
         const savedObjectsClient = coreContext.savedObjects.client;
         const siemClient = (await context.securitySolution).getAppClient();
+        const { getQueryRuleAdditionalOptions: queryRuleAdditionalOptions } =
+          await context.securitySolution;
 
         const timeframeEnd = request.body.timeframeEnd;
         let invocationCount = request.body.invocationCount;

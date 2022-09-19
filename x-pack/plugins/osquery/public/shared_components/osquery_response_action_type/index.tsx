@@ -27,6 +27,7 @@ import { PackFieldWrapper } from './pack_field_wrapper';
 import { usePack } from '../../packs/use_pack';
 
 const OSQUERY_TYPE = '.osquery';
+
 interface OsqueryResponseActionsParamsFormProps {
   item: ArrayItem;
 }
@@ -43,6 +44,11 @@ interface OsqueryResponseActionsParamsFormFields {
   ecs_mapping: EcsMappingFormField[];
   query: string;
   packId?: string[];
+  queries?: Array<{
+    id: string;
+    ecs_mapping: EcsMappingFormField[];
+    query: string;
+  }>;
 }
 
 const OsqueryResponseActionParamsFormComponent: React.ForwardRefExoticComponent<
@@ -73,17 +79,19 @@ const OsqueryResponseActionParamsFormComponent: React.ForwardRefExoticComponent<
   );
   const onSubmit = useCallback(async () => {
     try {
-      if (queryType === 'pack' && packData) {
+      if (queryType === 'pack') {
         context.updateFieldValues({
           [item.path]: {
             actionTypeId: OSQUERY_TYPE,
             params: {
               id: watchedValues.id,
               packId: watchedValues?.packId?.length ? watchedValues?.packId[0] : undefined,
-              queries: map(packData.queries, (query, queryId: string) => ({
-                ...query,
-                id: queryId,
-              })),
+              queries: packData
+                ? map(packData.queries, (query, queryId: string) => ({
+                    ...query,
+                    id: queryId,
+                  }))
+                : watchedValues.queries,
             },
           },
         });
@@ -110,6 +118,7 @@ const OsqueryResponseActionParamsFormComponent: React.ForwardRefExoticComponent<
     watchedValues.ecs_mapping,
     watchedValues.id,
     watchedValues?.packId,
+    watchedValues.queries,
     watchedValues.query,
     watchedValues.savedQueryId,
   ]);
