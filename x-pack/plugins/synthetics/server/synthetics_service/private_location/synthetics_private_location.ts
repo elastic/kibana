@@ -277,11 +277,6 @@ export class SyntheticsPrivateLocation {
 
     const allPrivateLocations: PrivateLocation[] = await getSyntheticsPrivateLocations(soClient);
 
-    await this.checkPermissions(
-      request,
-      `Unable to delete Synthetics package policy for monitor. Fleet write permissions are needed to use Synthetics private locations.`
-    );
-
     if (soClient && esClient) {
       const policyIdsToDelete = [];
       for (const config of configs) {
@@ -305,9 +300,15 @@ export class SyntheticsPrivateLocation {
           }
         }
       }
-      await this.server.fleet.packagePolicyService.delete(soClient, esClient, policyIdsToDelete, {
-        force: true,
-      });
+      if (policyIdsToDelete.length > 0) {
+        await this.checkPermissions(
+          request,
+          `Unable to delete Synthetics package policy for monitor. Fleet write permissions are needed to use Synthetics private locations.`
+        );
+        await this.server.fleet.packagePolicyService.delete(soClient, esClient, policyIdsToDelete, {
+          force: true,
+        });
+      }
     }
   }
 

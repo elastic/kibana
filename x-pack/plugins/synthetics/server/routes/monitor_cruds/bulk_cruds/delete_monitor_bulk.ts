@@ -5,6 +5,11 @@
  * 2.0.
  */
 import { SavedObjectsClientContract, KibanaRequest } from '@kbn/core/server';
+import { SavedObject } from '@kbn/core-saved-objects-common';
+import {
+  formatTelemetryDeleteEvent,
+  sendTelemetryEvents,
+} from '../../telemetry/monitor_upgrade_sender';
 import { ConfigKey, MonitorFields, SyntheticsMonitor } from '../../../../common/runtime_types';
 import { UptimeServerSetup } from '../../../legacy_uptime/lib/adapters';
 import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -13,23 +18,19 @@ import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 export const deleteMonitorBulk = async ({
   savedObjectsClient,
   server,
-  monitorIds,
+  monitors,
   syntheticsMonitorClient,
   request,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   server: UptimeServerSetup;
-  monitorIds: string[];
+  monitors: Array<SavedObject<SyntheticsMonitor>>;
   syntheticsMonitorClient: SyntheticsMonitorClient;
   request: KibanaRequest;
 }) => {
+  const { logger, telemetry, kibanaVersion } = server;
+
   try {
-    const encryptedMonitors = await savedObjectsClient.bulkGet<SyntheticsMonitor>(
-      monitorIds.map((id) => ({ id, type: syntheticsMonitorType }))
-    );
-
-    const monitors = encryptedMonitors.saved_objects;
-
     const deleteSyncPromise = syntheticsMonitorClient.deleteMonitors(
       monitors.map((normalizedMonitor) => ({
         ...normalizedMonitor.attributes,
@@ -45,6 +46,20 @@ export const deleteMonitorBulk = async ({
     );
 
     const [errors] = await Promise.all([deleteSyncPromise, ...deletePromises]);
+
+    monitors.forEach((monitor) => {
+      sendTelemetryEvents(
+        logger,
+        telemetry,
+        formatTelemetryDeleteEvent(
+          monitor,
+          kibanaVersion,
+          new Date().toISOString(),
+          Boolean((monitor.attributes as MonitorFields)[ConfigKey.SOURCE_INLINE]),
+          errors
+        )
+      );
+    });
 
     return errors;
   } catch (e) {
