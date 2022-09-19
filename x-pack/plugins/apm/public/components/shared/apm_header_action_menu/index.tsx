@@ -14,6 +14,7 @@ import {
 import { apmLabsButton } from '@kbn/observability-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { EuiBetaBadge } from '@elastic/eui';
 import { getAlertingCapabilities } from '../../alerting/get_alerting_capabilities';
 import { getLegacyApmHref } from '../links/apm/apm_link';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -22,7 +23,6 @@ import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
 import { useServiceName } from '../../../hooks/use_service_name';
 import { InspectorHeaderLink } from './inspector_header_link';
 import { Labs } from './labs';
-import { EuiBetaBadge } from '@elastic/eui';
 
 export function ApmHeaderActionMenu() {
   const { core, plugins } = useApmPluginContext();
