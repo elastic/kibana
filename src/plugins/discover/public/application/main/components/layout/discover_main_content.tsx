@@ -35,7 +35,7 @@ import { DiscoverPanels, DISCOVER_PANELS_MODE } from './discover_panels';
 const DiscoverChartMemoized = React.memo(DiscoverChart);
 const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);
 
-export const HISTOGRAM_HEIGHT_KEY = 'discover:histogramheight';
+export const HISTOGRAM_HEIGHT_KEY = 'discover:histogramHeight';
 
 export interface DiscoverMainContentProps {
   isPlainRecord: boolean;

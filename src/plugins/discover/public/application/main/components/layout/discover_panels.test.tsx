@@ -39,6 +39,7 @@ describe('Discover panels component', () => {
         minMainPanelHeight={minMainPanelHeight}
         topPanel={topPanel}
         mainPanel={mainPanel}
+        onTopPanelHeightChange={jest.fn()}
       />
     );
   };

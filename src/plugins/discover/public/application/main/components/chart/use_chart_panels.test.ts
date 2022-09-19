@@ -26,6 +26,7 @@ describe('test useChartPanels', () => {
     const panels: EuiContextMenuPanelDescriptor[] = result.current;
     const panel0: EuiContextMenuPanelDescriptor = result.current[0];
     expect(panels.length).toBe(1);
+    expect(panel0!.items).toHaveLength(1);
     expect(panel0!.items![0].icon).toBe('eye');
   });
   test('useChartsPanel when hideChart is false', async () => {
@@ -35,13 +36,32 @@ describe('test useChartPanels', () => {
         onChangeInterval: jest.fn(),
         closePopover: jest.fn(),
         onResetChartHeight: jest.fn(),
-        hideChart: true,
+        hideChart: false,
         interval: 'auto',
       });
     });
     const panels: EuiContextMenuPanelDescriptor[] = result.current;
     const panel0: EuiContextMenuPanelDescriptor = result.current[0];
     expect(panels.length).toBe(2);
+    expect(panel0!.items).toHaveLength(3);
     expect(panel0!.items![0].icon).toBe('eyeClosed');
+    expect(panel0!.items![1].icon).toBe('refresh');
+  });
+  test('onResetChartHeight is called when the reset chart height button is clicked', async () => {
+    const onResetChartHeight = jest.fn();
+    const { result } = renderHook(() => {
+      return useChartPanels({
+        toggleHideChart: jest.fn(),
+        onChangeInterval: jest.fn(),
+        closePopover: jest.fn(),
+        onResetChartHeight,
+        hideChart: false,
+        interval: 'auto',
+      });
+    });
+    const panel0: EuiContextMenuPanelDescriptor = result.current[0];
+    const resetChartHeightButton = panel0!.items![1];
+    (resetChartHeightButton.onClick as Function)();
+    expect(onResetChartHeight).toBeCalled();
   });
 });
