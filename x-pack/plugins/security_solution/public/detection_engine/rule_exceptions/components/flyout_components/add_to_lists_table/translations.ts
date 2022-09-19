@@ -8,37 +8,16 @@
 import { i18n } from '@kbn/i18n';
 
 export const ADD_TO_LISTS_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.exceptions.common.addToListsDescription',
+  'xpack.securitySolution.exceptions.flyoutComponents.addToListsTableSelection.addToListsDescription',
   {
     defaultMessage:
       'Select shared exception list to add to. We will make a copy of this exception if multiple lists are selected.',
   }
 );
 
-export const ADD_TO_LIST_EMPTY_TITLE = i18n.translate(
-  'xpack.securitySolution.exceptions.common.addToListEmptyValue',
-  {
-    defaultMessage: 'No exception lists',
-  }
-);
-
-export const ADD_TO_LIST_EMPTY_BODY = i18n.translate(
-  'xpack.securitySolution.exceptions.common.addToListEmptyValue',
-  {
-    defaultMessage: "Looks like you don't have any lists. Create a list first to add items to.",
-  }
-);
-
 export const VIEW_LIST_DETAIL_ACTION = i18n.translate(
-  'xpack.securitySolution.exceptions.common.viewListDetailActionLabel',
+  'xpack.securitySolution.exceptions.flyoutComponents.addToListsTableSelection.viewListDetailActionLabel',
   {
     defaultMessage: 'View list detail',
-  }
-);
-
-export const ERROR_EXCEPTION_LISTS = i18n.translate(
-  'xpack.securitySolution.exceptions.common.errorFetching',
-  {
-    defaultMessage: 'Error fetching exception lists',
   }
 );

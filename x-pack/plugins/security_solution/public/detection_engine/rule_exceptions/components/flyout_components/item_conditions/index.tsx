@@ -245,7 +245,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
         allowLargeValueLists,
         httpService: http,
         autocompleteService: unifiedSearch.autocomplete,
-        exceptionListItems,
+        exceptionListItems: [],
         listType: exceptionListType,
         osTypes,
         listId: listIdToUse,
@@ -260,6 +260,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
         idAria: 'alertExceptionBuilder',
         onChange: handleBuilderOnChange,
         isDisabled: isExceptionBuilderFormDisabled,
+        allowCustomFieldOptions: !isEndpointException,
       })}
     </>
   );

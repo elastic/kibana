@@ -24,7 +24,6 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
   initiallySelectedRules,
   onRuleSelectionChange,
 }): JSX.Element => {
-  // Fetch rules
   const { data: { rules } = { rules: [], total: 0 }, isFetched } = useFindRules({
     isInMemorySorting: true,
     filterOptions: undefined,

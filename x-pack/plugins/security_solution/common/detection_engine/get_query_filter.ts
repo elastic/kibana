@@ -6,10 +6,7 @@
  */
 
 import type { Language } from '@kbn/securitysolution-io-ts-alerting-types';
-import type {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 import { buildExceptionFilter } from '@kbn/securitysolution-list-utils';
 import type { Filter, EsQueryConfig, DataViewBase } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
@@ -22,7 +19,7 @@ export const getQueryFilter = (
   language: Language,
   filters: unknown,
   index: Index,
-  lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
+  lists: ExceptionsBuilderReturnExceptionItem[],
   excludeExceptions: boolean = true
 ): ESBoolQuery => {
   const indexPattern: DataViewBase = {

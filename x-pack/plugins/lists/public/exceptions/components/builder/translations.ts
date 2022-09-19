@@ -80,6 +80,6 @@ export const CUSTOM_COMBOBOX_OPTION_TEXT = i18n.translate(
   'xpack.lists.exceptions.comboBoxCustomOptionText',
   {
     defaultMessage:
-      'Select a field from the list. If your field isn’t available, create a custom one.',
+      'Select a field from the list. If your field is not available, create a custom one.',
   }
 );

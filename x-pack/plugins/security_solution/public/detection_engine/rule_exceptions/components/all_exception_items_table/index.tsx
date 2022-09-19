@@ -57,7 +57,6 @@ const initialState: State = {
   exceptionToEdit: null,
   currenFlyout: null,
   viewerState: 'loading',
-  isEndpointOnly: false,
 };
 
 export interface GetExceptionItemProps {
@@ -85,7 +84,9 @@ const ExceptionsViewerComponent = ({
   const exceptionListsToQuery = useMemo(
     () =>
       rule != null && rule.exceptions_list != null
-        ? rule.exceptions_list.filter(({ type }) => listTypes.includes(type))
+        ? rule.exceptions_list.filter(({ type }) =>
+            listTypes.includes(type as ExceptionListTypeEnum)
+          )
         : [],
     [listTypes, rule]
   );
@@ -95,13 +96,10 @@ const ExceptionsViewerComponent = ({
   );
 
   // Reducer state
-  const [
-    { exceptions, pagination, currenFlyout, exceptionToEdit, viewerState, isEndpointOnly },
-    dispatch,
-  ] = useReducer(allExceptionItemsReducer(), {
-    ...initialState,
-    isEndpointOnly: isEndpointSpecified,
-  });
+  const [{ exceptions, pagination, currenFlyout, exceptionToEdit, viewerState }, dispatch] =
+    useReducer(allExceptionItemsReducer(), {
+      ...initialState,
+    });
 
   // Reducer actions
   const setExceptions = useCallback(
@@ -350,7 +348,7 @@ const ExceptionsViewerComponent = ({
         <AddExceptionFlyout
           rules={[rule]}
           isBulkAction={false}
-          isEndpointItem={isEndpointOnly}
+          isEndpointItem={isEndpointSpecified}
           onCancel={handleCancelExceptionItemFlyout}
           onConfirm={handleConfirmExceptionFlyout}
           data-test-subj="addExceptionItemFlyout"
@@ -363,7 +361,7 @@ const ExceptionsViewerComponent = ({
           {!STATES_SEARCH_HIDDEN.includes(viewerState) && (
             <ExceptionsViewerSearchBar
               canAddException={isReadOnly}
-              isEndpoint={isEndpointOnly}
+              isEndpoint={isEndpointSpecified}
               isSearching={viewerState === 'searching'}
               onSearch={handleSearch}
               onAddExceptionClick={handleAddException}
@@ -381,7 +379,7 @@ const ExceptionsViewerComponent = ({
             isReadOnly={isReadOnly}
             disableActions={isReadOnly || viewerState === 'deleting'}
             exceptions={exceptions}
-            isEndpoint={isEndpointOnly}
+            isEndpoint={isEndpointSpecified}
             ruleReferences={allReferences}
             viewerState={viewerState}
             onDeleteException={handleDeleteException}

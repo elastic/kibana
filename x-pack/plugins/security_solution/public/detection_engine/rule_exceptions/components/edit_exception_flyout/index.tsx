@@ -53,7 +53,7 @@ import * as i18n from './translations';
 import * as sharedI18n from '../../utils/translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { useAddOrUpdateException } from '../../logic/use_add_exception';
+import { useCreateOrUpdateException } from '../../logic/use_create_update_exception';
 import { ExceptionItemComments } from '../item_comments';
 import {
   enrichExistingExceptionItemWithComments,
@@ -74,8 +74,8 @@ interface EditExceptionFlyoutProps {
   dataViewId?: string;
   exceptionItem: ExceptionListItemSchema;
   exceptionListType: ExceptionListType;
-  onCancel: () => void;
-  onConfirm: () => void;
+  onCancel: (arg: boolean) => void;
+  onConfirm: (arg: boolean) => void;
   onRuleChange?: () => void;
 }
 
@@ -215,7 +215,7 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
     onConfirm();
   }, [addSuccess, onConfirm]);
 
-  const [{ isLoading: addExceptionIsLoading }, addOrUpdateExceptionItems] = useAddOrUpdateException(
+  const [{ isLoading: addExceptionIsLoading }, addOrUpdateExceptionItems] = useCreateOrUpdateException(
     {
       http,
       onSuccess: handleExceptionUpdateSuccess,

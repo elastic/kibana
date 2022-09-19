@@ -108,9 +108,10 @@ const ExceptionsAddToListsComponent: React.FC<ExceptionsAddToListsComponentProps
           onTableChange={({ page: { index } }: CriteriaWithPagination<never>) =>
             setPagination({ pageIndex: index })
           }
-          sorting={true}
           selection={selectionValue}
-          isSelectable={true}
+          isSelectable
+          sorting
+          data-test-subj="addExceptionToSharedListsTable"
         />
       </>
     </EuiPanel>

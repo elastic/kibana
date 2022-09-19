@@ -11,6 +11,7 @@ import { mount } from 'enzyme';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { FieldComponent } from '.';
 import { fields, getField } from '../fields/index.mock';
+import { act } from '@testing-library/react';
 
 describe('field', () => {
   test('it renders disabled if "isDisabled" is true', () => {
@@ -139,6 +140,41 @@ describe('field', () => {
         scripted: false,
         searchable: true,
         type: 'string',
+      },
+    ]);
+  });
+
+  test('it allows custom user input if "acceptsCustomOptions" is "true"', () => {
+    const mockOnChange = jest.fn();
+    const wrapper = mount(
+      <FieldComponent
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        isClearable={false}
+        isDisabled={false}
+        isLoading={false}
+        onChange={mockOnChange}
+        placeholder="Placeholder text"
+        selectedField={undefined}
+        acceptsCustomOptions
+      />
+    );
+
+    act(() => {
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onCreateOption: (a: string) => void;
+        }
+      ).onCreateOption('custom');
+    });
+
+    expect(mockOnChange).toHaveBeenCalledWith([
+      {
+        name: 'custom',
+        type: 'text',
       },
     ]);
   });

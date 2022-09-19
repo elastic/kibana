@@ -63,6 +63,7 @@ interface BuilderExceptionListItemProps {
   onlyShowListOperators?: boolean;
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
+  allowCustomOptions?: boolean;
 }
 
 export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionListItemProps>(
@@ -85,6 +86,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
     onlyShowListOperators = false,
     isDisabled = false,
     operatorsList,
+    allowCustomOptions = false,
   }) => {
     const handleEntryChange = useCallback(
       (entry: BuilderEntry, entryIndex: number): void => {
@@ -97,7 +99,6 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
           ...exceptionItem,
           entries: updatedEntries,
         };
-        console.log({updatedExceptionItem})
         onChangeExceptionItem(updatedExceptionItem, exceptionItemIndex);
       },
       [onChangeExceptionItem, exceptionItem, exceptionItemIndex]
@@ -118,9 +119,9 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
     const entries = useMemo((): FormattedBuilderEntry[] => {
       const hasIndexPatternAndEntries = indexPattern != null && exceptionItem.entries.length > 0;
       return hasIndexPatternAndEntries
-        ? getFormattedBuilderEntries(indexPattern, exceptionItem.entries)
+        ? getFormattedBuilderEntries(indexPattern, exceptionItem.entries, allowCustomOptions)
         : [];
-    }, [exceptionItem.entries, indexPattern]);
+    }, [exceptionItem.entries, indexPattern, allowCustomOptions]);
 
     return (
       <EuiFlexItem>
@@ -158,6 +159,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                             exceptionItemIndex === 0 && index === 0 && item.nested !== 'child'
                           }
                           operatorsList={operatorsList}
+                          allowCustomOptions={allowCustomOptions}
                         />
                       </MyOverflowContainer>
                       <BuilderEntryDeleteButtonComponent

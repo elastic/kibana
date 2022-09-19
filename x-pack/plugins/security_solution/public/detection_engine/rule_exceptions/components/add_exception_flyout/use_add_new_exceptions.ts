@@ -16,8 +16,8 @@ import * as i18n from './translations';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { AlertData } from '../../utils/types';
 import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
-import { useAddOrUpdateException } from '../../logic/use_add_exception';
-import { useAddRuleException } from '../../logic/use_add_rule_exception';
+import { useCreateOrUpdateException } from '../../logic/use_create_update_exception';
+import { useAddRuleDefaultException } from '../../logic/use_add_rule_exception';
 import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
 
 export interface AddNewExceptionItemHookProps {
@@ -45,8 +45,8 @@ export type ReturnUseAddNewExceptionItems = [boolean, AddNewExceptionItemHookFun
 export const useAddNewExceptionItems = (): ReturnUseAddNewExceptionItems => {
   const { addSuccess, addError, addWarning } = useAppToasts();
   const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
-  const [isAddRuleExceptionLoading, addRuleExceptions] = useAddRuleException();
-  const [isAddingExceptions, addSharedExceptions] = useAddOrUpdateException();
+  const [isAddRuleExceptionLoading, addRuleExceptions] = useAddRuleDefaultException();
+  const [isAddingExceptions, addSharedExceptions] = useCreateOrUpdateException();
 
   const [isLoading, setIsLoading] = useState(false);
   const addNewExceptionsRef = useRef<AddNewExceptionItemHookFuncProps | null>(null);
@@ -82,10 +82,11 @@ export const useAddNewExceptionItems = (): ReturnUseAddNewExceptionItems => {
 
           if (closeAlerts != null && (bulkCloseAlerts || closeSingleAlert)) {
             const alertIdToClose = closeSingleAlert && alertData ? alertData._id : undefined;
-            await Promise.all(
-              selectedRulesToAddTo.map(async (rule) =>
-                closeAlerts(rule.rule_id, itemsToAdd, alertIdToClose, bulkCloseIndex)
-              )
+            await closeAlerts(
+              selectedRulesToAddTo.map(({ rule_id: ruleId }) => ruleId),
+              itemsToAdd,
+              alertIdToClose,
+              bulkCloseIndex
             );
           }
         } else if (addToSharedLists && addSharedExceptions != null) {
@@ -105,10 +106,11 @@ export const useAddNewExceptionItems = (): ReturnUseAddNewExceptionItems => {
             (bulkCloseAlerts || closeSingleAlert)
           ) {
             const alertIdToClose = closeSingleAlert && alertData ? alertData._id : undefined;
-            await Promise.all(
-              rules.map(async (rule) =>
-                closeAlerts(rule.rule_id, itemsToAdd, alertIdToClose, bulkCloseIndex)
-              )
+            await closeAlerts(
+              rules.map(({ rule_id: ruleId }) => ruleId),
+              itemsToAdd,
+              alertIdToClose,
+              bulkCloseIndex
             );
           }
         }

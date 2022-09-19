@@ -8,15 +8,13 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-
 import { ExceptionsViewerSearchBar } from './search_bar';
 
 describe('ExceptionsViewerSearchBar', () => {
   it('it does not display add exception button if user is read only', () => {
     const wrapper = mount(
       <ExceptionsViewerSearchBar
-        listType={ExceptionListTypeEnum.DETECTION}
+        isEndpoint={false}
         onSearch={jest.fn()}
         onAddExceptionClick={jest.fn()}
         isSearching={false}
@@ -32,7 +30,7 @@ describe('ExceptionsViewerSearchBar', () => {
     const wrapper = mount(
       <ExceptionsViewerSearchBar
         canAddException={false}
-        listType={ExceptionListTypeEnum.DETECTION}
+        isEndpoint={false}
         isSearching={false}
         onSearch={jest.fn()}
         onAddExceptionClick={mockOnAddExceptionClick}
@@ -44,7 +42,7 @@ describe('ExceptionsViewerSearchBar', () => {
     expect(wrapper.find('[data-test-subj="exceptionsHeaderAddExceptionBtn"]').at(0).text()).toEqual(
       'Add rule exception'
     );
-    expect(mockOnAddExceptionClick).toHaveBeenCalledWith('detection');
+    expect(mockOnAddExceptionClick).toHaveBeenCalled();
   });
 
   it('it invokes "onAddExceptionClick" when user selects to add an endpoint exception item', () => {
@@ -52,7 +50,7 @@ describe('ExceptionsViewerSearchBar', () => {
     const wrapper = mount(
       <ExceptionsViewerSearchBar
         canAddException={false}
-        listType={ExceptionListTypeEnum.ENDPOINT}
+        isEndpoint={true}
         isSearching={false}
         onSearch={jest.fn()}
         onAddExceptionClick={mockOnAddExceptionClick}
@@ -64,6 +62,6 @@ describe('ExceptionsViewerSearchBar', () => {
     expect(wrapper.find('[data-test-subj="exceptionsHeaderAddExceptionBtn"]').at(0).text()).toEqual(
       'Add endpoint exception'
     );
-    expect(mockOnAddExceptionClick).toHaveBeenCalledWith('endpoint');
+    expect(mockOnAddExceptionClick).toHaveBeenCalled();
   });
 });

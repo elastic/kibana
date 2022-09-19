@@ -52,6 +52,7 @@ export const getAddToListsTableColumns = () => [
       );
     },
   },
+  // TODO: This will need to be updated once PR goes in with list details page
   {
     name: 'Actions',
     actions: [

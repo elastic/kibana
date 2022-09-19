@@ -9,7 +9,6 @@ import { useEffect, useRef, useState } from 'react';
 
 import type { CreateRuleExceptionListItemSchema } from '../../../../common/detection_engine/schemas/request';
 import { addRuleExceptions } from '../../../detections/containers/detection_engine/rules/api';
-import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import type { Rule } from '../../../detections/containers/detection_engine/rules/types';
 
 /**
@@ -30,9 +29,7 @@ export type ReturnUseAddRuleException = [boolean, AddRuleExceptionsFunc | null];
  * Hook for adding exceptions to a rule default exception list
  *
  */
-export const useAddRuleException = (): ReturnUseAddRuleException => {
-  const { addSuccess, addError } = useAppToasts();
-
+export const useAddRuleDefaultException = (): ReturnUseAddRuleException => {
   const [isLoading, setIsLoading] = useState(false);
   const addRuleExceptionFunc = useRef<AddRuleExceptionsFunc | null>(null);
 
@@ -58,13 +55,13 @@ export const useAddRuleException = (): ReturnUseAddRuleException => {
 
       setIsLoading(false);
     };
-
     addRuleExceptionFunc.current = addExceptionItemsToRule;
+
     return (): void => {
       setIsLoading(false);
       abortCtrl.abort();
     };
-  }, [addError, addSuccess]);
+  }, []);
 
   return [isLoading, addRuleExceptionFunc.current];
 };

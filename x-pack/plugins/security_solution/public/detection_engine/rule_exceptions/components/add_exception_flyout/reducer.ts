@@ -205,6 +205,14 @@ export const createExceptionItemsReducer =
           listType,
         };
       }
+      case 'setDisableBulkCloseAlerts': {
+        const { disableBulkCloseAlerts } = action;
+
+        return {
+          ...state,
+          disableBulkClose: disableBulkCloseAlerts,
+        };
+      }
       default:
         return state;
     }

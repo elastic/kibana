@@ -75,6 +75,7 @@ export interface EntryItemProps {
   setWarningsExist: (arg: boolean) => void;
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
+  allowCustomOptions?: boolean;
 }
 
 export const BuilderEntryItem: React.FC<EntryItemProps> = ({
@@ -93,6 +94,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   showLabel,
   isDisabled = false,
   operatorsList,
+  allowCustomOptions = false,
 }): JSX.Element => {
   const handleError = useCallback(
     (err: boolean): void => {
@@ -109,9 +111,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
 
   const handleFieldChange = useCallback(
     ([newField]: DataViewFieldBase[]): void => {
-      console.log({ newField });
       const { updatedEntry, index } = getEntryOnFieldChange(entry, newField);
-      console.log({ updatedEntry, index });
       onChange(updatedEntry, index);
     },
     [onChange, entry]
@@ -165,9 +165,9 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   const isFieldComponentDisabled = useMemo(
     (): boolean =>
       isDisabled ||
-      indexPattern == null ||
-      (indexPattern != null && indexPattern.fields.length === 0),
-    [isDisabled, indexPattern]
+      (!allowCustomOptions &&
+        (indexPattern == null || (indexPattern != null && indexPattern.fields.length === 0))),
+    [isDisabled, indexPattern, allowCustomOptions]
   );
 
   const renderFieldInput = useCallback(
@@ -202,7 +202,11 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           <EuiFormRow
             fullWidth
             label={i18n.FIELD}
-            helpText={entry.nested == null ? i18n.CUSTOM_COMBOBOX_OPTION_TEXT : undefined}
+            helpText={
+              entry.nested == null && allowCustomOptions
+                ? i18n.CUSTOM_COMBOBOX_OPTION_TEXT
+                : undefined
+            }
             data-test-subj="exceptionBuilderEntryFieldFormRow"
           >
             {comboBox}
@@ -213,7 +217,11 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           <EuiFormRow
             fullWidth
             label={''}
-            helpText={entry.nested == null ? i18n.CUSTOM_COMBOBOX_OPTION_TEXT : undefined}
+            helpText={
+              entry.nested == null && allowCustomOptions
+                ? i18n.CUSTOM_COMBOBOX_OPTION_TEXT
+                : undefined
+            }
             data-test-subj="exceptionBuilderEntryFieldFormRow"
           >
             {comboBox}
@@ -229,6 +237,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
       handleFieldChange,
       osTypes,
       isDisabled,
+      allowCustomOptions,
     ]
   );
 

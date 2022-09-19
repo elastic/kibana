@@ -79,13 +79,12 @@ export const FieldComponent: React.FC<OperatorProps> = ({
   }, [setIsTouched]);
 
   const handleCreateCustomOption = useCallback(
-    (val = []) => {
+    (val: string) => {
       const normalizedSearchValue = val.trim().toLowerCase();
 
       if (!normalizedSearchValue) {
         return;
       }
-
       setCustomOption({ name: val, type: 'text' });
       onChange([{ name: val, type: 'text' }]);
     },

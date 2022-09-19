@@ -7,15 +7,12 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
 import { updateAlertStatus } from '../../../detections/containers/detection_engine/alerts/api';
 import { getUpdateAlertsQuery } from '../../../detections/components/alerts_table/actions';
 import {
-  buildAlertsFilter,
+  buildMultiRuleAlertsFilter,
   buildAlertStatusesFilter,
 } from '../../../detections/components/alerts_table/default_config';
 import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
@@ -28,15 +25,15 @@ import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 /**
  * Closes alerts.
  *
- * @param ruleStaticId static id of the rule (rule.ruleId, not rule.id) where the exception updates will be applied
+ * @param ruleStaticIds static id of the rules (rule.ruleId, not rule.id) where the exception updates will be applied
  * @param exceptionItemsToAddOrUpdate array of ExceptionListItemSchema to add or update
  * @param alertIdToClose - optional string representing alert to close
  * @param bulkCloseIndex - optional index used to create bulk close query
  *
  */
 export type AddOrUpdateExceptionItemsFunc = (
-  ruleStaticId: string,
-  exceptionItemsToAddOrUpdate: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
+  ruleStaticIds: string[],
+  exceptionItemsToAddOrUpdate: ExceptionsBuilderReturnExceptionItem[],
   alertIdToClose?: string,
   bulkCloseIndex?: Index
 ) => Promise<void>;
@@ -45,7 +42,6 @@ export type ReturnUseCloseAlertsFromExceptions = [boolean, AddOrUpdateExceptionI
 
 /**
  * Hook for closing alerts from exceptions
- *
  */
 export const useCloseAlertsFromExceptions = (): ReturnUseCloseAlertsFromExceptions => {
   const { addSuccess, addError, addWarning } = useAppToasts();
@@ -53,10 +49,10 @@ export const useCloseAlertsFromExceptions = (): ReturnUseCloseAlertsFromExceptio
   const [isLoading, setIsLoading] = useState(false);
   const closeAlertsRef = useRef<AddOrUpdateExceptionItemsFunc | null>(null);
   const closeAlerts = useCallback<AddOrUpdateExceptionItemsFunc>(
-    async (ruleStaticId, exceptionItemsToAddOrUpdate, alertIdToClose, bulkCloseIndex) => {
+    async (ruleStaticIds, exceptionItemsToAddOrUpdate, alertIdToClose, bulkCloseIndex) => {
       if (closeAlertsRef.current != null) {
         closeAlertsRef.current(
-          ruleStaticId,
+          ruleStaticIds,
           exceptionItemsToAddOrUpdate,
           alertIdToClose,
           bulkCloseIndex
@@ -70,8 +66,8 @@ export const useCloseAlertsFromExceptions = (): ReturnUseCloseAlertsFromExceptio
     let isSubscribed = true;
     const abortCtrl = new AbortController();
 
-    const onUpdateExceptionItemsAndAlertStatus: AddOrUpdateExceptionItemsFunc = async (
-      ruleStaticId,
+    const onUpdateAlerts: AddOrUpdateExceptionItemsFunc = async (
+      ruleStaticIds,
       exceptionItemsToAddOrUpdate,
       alertIdToClose,
       bulkCloseIndex
@@ -98,7 +94,7 @@ export const useCloseAlertsFromExceptions = (): ReturnUseCloseAlertsFromExceptio
           const filter = getQueryFilter(
             '',
             'kuery',
-            [...buildAlertsFilter(ruleStaticId), ...alertStatusFilter],
+            [...buildMultiRuleAlertsFilter(ruleStaticIds), ...alertStatusFilter],
             bulkCloseIndex,
             prepareExceptionItemsForBulkClose(exceptionItemsToAddOrUpdate),
             false
@@ -139,7 +135,7 @@ export const useCloseAlertsFromExceptions = (): ReturnUseCloseAlertsFromExceptio
       }
     };
 
-    closeAlertsRef.current = onUpdateExceptionItemsAndAlertStatus;
+    closeAlertsRef.current = onUpdateAlerts;
     return (): void => {
       isSubscribed = false;
       abortCtrl.abort();

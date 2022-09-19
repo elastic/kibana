@@ -27,6 +27,7 @@ import { Filter } from '@kbn/es-query';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { hasLargeValueList } from '../has_large_value_list';
+import { ExceptionsBuilderReturnExceptionItem } from '../types';
 
 type NonListEntry = EntryMatch | EntryMatchAny | EntryNested | EntryExists | EntryMatchWildcard;
 interface ExceptionListItemNonLargeList extends ExceptionListItemSchema {
@@ -145,7 +146,7 @@ export const buildExceptionFilter = ({
   chunkSize,
   alias = null,
 }: {
-  lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
+  lists: ExceptionsBuilderReturnExceptionItem[];
   excludeExceptions: boolean;
   chunkSize: number;
   alias: string | null;

@@ -8,7 +8,7 @@
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 
 import { AddExceptionFlyout } from '.';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
@@ -16,12 +16,14 @@ import { useAsync } from '@kbn/securitysolution-hook-utils';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { createStubIndexPattern, stubIndexPattern } from '@kbn/data-plugin/common/stubs';
-import { useAddOrUpdateException } from '../../logic/use_add_exception';
-import { useFetchOrCreateRuleExceptionList } from '../../logic/use_fetch_or_create_rule_exception_list';
+import { useCreateOrUpdateException } from '../../logic/use_create_update_exception';
+import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import * as helpers from '../../utils/helpers';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
+import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
+import * as i18n from './translations';
 
 import { TestProviders } from '../../../../common/mock';
 
@@ -36,8 +38,8 @@ jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/source');
 jest.mock('../../../../detections/containers/detection_engine/rules');
-jest.mock('../../logic/use_add_exception');
-jest.mock('../../logic/use_fetch_or_create_rule_exception_list');
+jest.mock('../../logic/use_create_update_exception');
+jest.mock('../../logic/use_exception_flyout_data');
 jest.mock('@kbn/securitysolution-hook-utils', () => ({
   ...jest.requireActual('@kbn/securitysolution-hook-utils'),
   useAsync: jest.fn(),
@@ -49,15 +51,21 @@ const mockGetExceptionBuilderComponentLazy = getExceptionBuilderComponentLazy as
   ReturnType<typeof getExceptionBuilderComponentLazy>
 >;
 const mockUseAsync = useAsync as jest.Mock<ReturnType<typeof useAsync>>;
-const mockUseAddOrUpdateException = useAddOrUpdateException as jest.Mock<
-  ReturnType<typeof useAddOrUpdateException>
+const mockUseAddOrUpdateException = useCreateOrUpdateException as jest.Mock<
+  ReturnType<typeof useCreateOrUpdateException>
 >;
-const mockUseFetchOrCreateRuleExceptionList = useFetchOrCreateRuleExceptionList as jest.Mock<
-  ReturnType<typeof useFetchOrCreateRuleExceptionList>
+const mockFetchIndexPatterns = useFetchIndexPatterns as jest.Mock<
+  ReturnType<typeof useFetchIndexPatterns>
 >;
 const mockUseSignalIndex = useSignalIndex as jest.Mock<Partial<ReturnType<typeof useSignalIndex>>>;
 const mockUseFetchIndex = useFetchIndex as jest.Mock;
 const mockUseRuleAsync = useRuleAsync as jest.Mock;
+
+const alertDataMock: AlertData = {
+  '@timestamp': '1234567890',
+  _id: 'test-id',
+  file: { path: 'test/path' },
+};
 
 describe('When the add exception modal is opened', () => {
   const ruleName = 'test rule';
@@ -77,11 +85,12 @@ describe('When the add exception modal is opened', () => {
       result: true,
     }));
 
-    mockUseAddOrUpdateException.mockImplementation(() => [{ isLoading: false }, jest.fn()]);
-    mockUseFetchOrCreateRuleExceptionList.mockImplementation(() => [
-      false,
-      getExceptionListSchemaMock(),
-    ]);
+    mockUseAddOrUpdateException.mockImplementation(() => [false, jest.fn()]);
+    mockFetchIndexPatterns.mockImplementation(() => ({
+      isLoading: false,
+      indexPatterns: stubIndexPattern,
+    }));
+
     mockUseSignalIndex.mockImplementation(() => ({
       loading: false,
       signalIndexName: 'mock-siem-signals-index',
@@ -102,312 +111,170 @@ describe('When the add exception modal is opened', () => {
     jest.restoreAllMocks();
   });
 
-  describe('exception list type of "endpoint"', () => {
-    it('displays proper flyout title', () => {})
-
-    it('renders OS selection options', () => {})
-
-    it('does not render options to add exception to a rule or shared list', () => {})
-  })
-
-  describe('behaviors that are not dependent on the number of rules present', () => {
-    it('should show the loading spinner', () => {
-      expect(wrapper.find('[data-test-subj="loadingAddExceptionFlyout"]').exists()).toBeTruthy();
-    });
-
-    it('allows user to add an item name', () => {})
-
-    it('does not render OS selection options for exception list type of "detection"', () => {})
-
-    it('does not render OS selection options for exception list type of "rule_default"', () => {})
-
-    it('renders options to add exception to a rule or shared list when exception list type is not "endpoint"', () => {})
-
-    it('allows user to add a comment', () => {})
-
-    it('displays alert close actions if "showAlertCloseOptions" is "true"', () => {})
-  })
-
-  describe('when no rules are passed in', () => {
-    it('allows large value lists', () => {})
-
-    it('defaults to selecting add to rule option, displaying rules selection table', () => {});
-
-    it('allows user to change selection from add to rules to add to shared lists option', () => {
-      // check that it updates the listType
-    });
-  })
-
-  describe('when a single rule is passed in', () => {
-    it('does not allow large value list selection for query rule', () => {})
-    it('does not allow large value list selection if EQL rule', () => {})
-    it('does not allow large value list selection if threshold rule', () => {})
-    it('does not allow large value list selection if new trems rule', () => {})
-    it('defaults to selecting add to rule radio option', () => {});
-    it('disables add to shared lists option if rule has no shared exception lists attached already', () => {})
-    it('allows user to change selection from add to rule to add to shared lists option', () => {
-      // check that it updates the listType
-    });
-  });
-
-  describe('when multiple rules are passed in', () => {
-    it('allows large value lists', () => {});
-    it('defaults to selecting add to rules radio option', () => {})
-    it('disables add to shared lists option if rules have no shared lists in common', () => { })
-    it('allows user to change selection from add to rule to add to shared lists option', () => {
-      // check that it updates the listType
-    });
-  });
-
   describe('when the modal is loading', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
       // Mocks one of the hooks as loading
-      mockUseFetchIndex.mockImplementation(() => [
-        true,
-        {
-          indexPatterns: stubIndexPattern,
-        },
-      ]);
+      mockFetchIndexPatterns.mockImplementation(() => ({
+        isLoading: true,
+        indexPatterns: { fields: [], title: 'foo' },
+      }));
+
       wrapper = mount(
         <TestProviders>
           <AddExceptionFlyout
-            ruleId={'123'}
-            ruleIndices={[]}
-            ruleName={ruleName}
-            exceptionListType={'endpoint'}
+            rules={[{ ...getRulesSchemaMock() } as Rule]}
+            isBulkAction={false}
+            alertData={undefined}
+            isAlertDataLoading={undefined}
+            alertStatus={undefined}
+            isEndpointItem={false}
+            showAlertCloseOptions
             onCancel={jest.fn()}
             onConfirm={jest.fn()}
           />
         </TestProviders>
       );
     });
+
     it('should show the loading spinner', () => {
       expect(wrapper.find('[data-test-subj="loadingAddExceptionFlyout"]').exists()).toBeTruthy();
     });
   });
 
-  describe('when there is no alert data passed to an endpoint list exception', () => {
-    let wrapper: ReactWrapper;
-    beforeEach(async () => {
-      wrapper = mount(
-        <TestProviders>
-          <AddExceptionFlyout
-            ruleId={'123'}
-            ruleIndices={['filebeat-*']}
-            ruleName={ruleName}
-            exceptionListType={'endpoint'}
-            onCancel={jest.fn()}
-            onConfirm={jest.fn()}
-          />
-        </TestProviders>
-      );
-      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
-      await waitFor(() => callProps.onChange({ exceptionItems: [] }));
-    });
-    it('has the add exception button disabled', () => {
-      expect(
-        wrapper.find('button[data-test-subj="add-exception-confirm-button"]').getDOMNode()
-      ).toBeDisabled();
-    });
-    it('should render the exception builder', () => {
-      expect(wrapper.find('[data-test-subj="alertExceptionBuilder"]').exists()).toBeTruthy();
-    });
-    it('should not render the close on add exception checkbox', () => {
-      expect(
-        wrapper.find('[data-test-subj="close-alert-on-add-add-exception-checkbox"]').exists()
-      ).toBeFalsy();
-    });
-    it('should contain the endpoint specific documentation text', () => {
-      expect(wrapper.find('[data-test-subj="add-exception-endpoint-text"]').exists()).toBeTruthy();
-    });
-    it('should render the os selection dropdown', () => {
-      expect(wrapper.find('[data-test-subj="osSelectionDropdown"]').exists()).toBeTruthy();
-    });
-  });
+  describe('exception list type of "endpoint"', () => {
+    describe('common functionality to test regardless of alert input', () => {
+      let wrapper: ReactWrapper;
+      beforeEach(async () => {
+        wrapper = mount(
+          <TestProviders>
+            <AddExceptionFlyout
+              rules={[
+                {
+                  ...getRulesSchemaMock(),
+                  index: ['filebeat-*'],
+                  exceptions_list: [
+                    {
+                      id: 'endpoint_list',
+                      list_id: 'endpoint_list',
+                      namespace_type: 'agnostic',
+                      type: 'endpoint',
+                    },
+                  ],
+                } as Rule,
+              ]}
+              isBulkAction={false}
+              alertData={undefined}
+              isAlertDataLoading={undefined}
+              alertStatus={undefined}
+              isEndpointItem
+              showAlertCloseOptions
+              onCancel={jest.fn()}
+              onConfirm={jest.fn()}
+            />
+          </TestProviders>
+        );
+        const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+        await waitFor(() =>
+          callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
+        );
+      });
 
-  describe('when there is alert data passed to an endpoint list exception', () => {
-    let wrapper: ReactWrapper;
-    beforeEach(async () => {
-      const alertDataMock: AlertData = {
-        '@timestamp': '1234567890',
-        _id: 'test-id',
-        file: { path: 'test/path' },
-      };
-      wrapper = mount(
-        <TestProviders>
-          <AddExceptionFlyout
-            ruleId={'123'}
-            ruleIndices={['filebeat-*']}
-            ruleName={ruleName}
-            exceptionListType={'endpoint'}
-            onCancel={jest.fn()}
-            onConfirm={jest.fn()}
-            alertData={alertDataMock}
-          />
-        </TestProviders>
-      );
-      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
-      await waitFor(() =>
-        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
-      );
-    });
-    it('has the add exception button enabled', () => {
-      expect(
-        wrapper.find('button[data-test-subj="add-exception-confirm-button"]').getDOMNode()
-      ).not.toBeDisabled();
-    });
-    it('should render the exception builder', () => {
-      expect(wrapper.find('[data-test-subj="alertExceptionBuilder"]').exists()).toBeTruthy();
-    });
-    it('should prepopulate endpoint items', () => {
-      expect(defaultEndpointItems).toHaveBeenCalled();
-    });
-    it('should render the close on add exception checkbox', () => {
-      expect(
-        wrapper.find('[data-test-subj="close-alert-on-add-add-exception-checkbox"]').exists()
-      ).toBeTruthy();
-    });
-    it('should have the bulk close checkbox disabled', () => {
-      expect(
-        wrapper
-          .find('input[data-test-subj="bulk-close-alert-on-add-add-exception-checkbox"]')
-          .getDOMNode()
-      ).toBeDisabled();
-    });
-    it('should contain the endpoint specific documentation text', () => {
-      expect(wrapper.find('[data-test-subj="add-exception-endpoint-text"]').exists()).toBeTruthy();
-    });
-    it('should not display the eql sequence callout', () => {
-      expect(wrapper.find('[data-test-subj="eqlSequenceCallout"]').exists()).not.toBeTruthy();
-    });
-    it('should not render the os selection dropdown', () => {
-      expect(wrapper.find('[data-test-subj="osSelectionDropdown"]').exists()).toBeFalsy();
-    });
-  });
+      it('displays proper flyout and button text', () => {
+        expect(wrapper.find('[data-test-subj="exceptionFlyoutTitle"]').at(1).text()).toEqual(
+          i18n.ADD_ENDPOINT_EXCEPTION
+        );
+        expect(wrapper.find('[data-test-subj="addExceptionConfirmButton"]').at(1).text()).toEqual(
+          i18n.ADD_ENDPOINT_EXCEPTION
+        );
+      });
 
-  describe('when there is alert data passed to a detection list exception', () => {
-    let wrapper: ReactWrapper;
-    beforeEach(async () => {
-      const alertDataMock: AlertData = {
-        '@timestamp': '1234567890',
-        _id: 'test-id',
-        file: { path: 'test/path' },
-      };
-      wrapper = mount(
-        <TestProviders>
-          <AddExceptionFlyout
-            ruleId={'123'}
-            ruleIndices={['filebeat-*']}
-            ruleName={ruleName}
-            exceptionListType={'detection'}
-            onCancel={jest.fn()}
-            onConfirm={jest.fn()}
-            alertData={alertDataMock}
-          />
-        </TestProviders>
-      );
-      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
-      await waitFor(() =>
-        callProps.onChange({ exceptionItems: [getExceptionListItemSchemaMock()] })
-      );
-    });
-    it('has the add exception button enabled', () => {
-      expect(
-        wrapper.find('button[data-test-subj="add-exception-confirm-button"]').getDOMNode()
-      ).not.toBeDisabled();
-    });
-    it('should render the exception builder', () => {
-      expect(wrapper.find('[data-test-subj="alertExceptionBuilder"]').exists()).toBeTruthy();
-    });
-    it('should not prepopulate endpoint items', () => {
-      expect(defaultEndpointItems).not.toHaveBeenCalled();
-    });
-    it('should render the close on add exception checkbox', () => {
-      expect(
-        wrapper.find('[data-test-subj="close-alert-on-add-add-exception-checkbox"]').exists()
-      ).toBeTruthy();
-    });
-    it('should have the bulk close checkbox disabled', () => {
-      expect(
-        wrapper
-          .find('input[data-test-subj="bulk-close-alert-on-add-add-exception-checkbox"]')
-          .getDOMNode()
-      ).toBeDisabled();
-    });
-    it('should not display the eql sequence callout', () => {
-      expect(wrapper.find('[data-test-subj="eqlSequenceCallout"]').exists()).not.toBeTruthy();
-    });
-  });
+      it('should render item name input', () => {
+        expect(wrapper.find('[data-test-subj="exceptionFlyoutNameInput"]').exists()).toBeTruthy();
+      });
 
-  describe('when there is an exception being created on a sequence eql rule type', () => {
-    let wrapper: ReactWrapper;
-    beforeEach(async () => {
-      mockUseRuleAsync.mockImplementation(() => ({
-        rule: {
-          ...getRulesEqlSchemaMock(),
-          query:
-            'sequence [process where process.name = "test.exe"] [process where process.name = "explorer.exe"]',
-        },
-      }));
-      const alertDataMock: AlertData = {
-        '@timestamp': '1234567890',
-        _id: 'test-id',
-        file: { path: 'test/path' },
-      };
-      wrapper = mount(
-        <TestProviders>
-          <AddExceptionFlyout
-            ruleId={'123'}
-            ruleIndices={['filebeat-*']}
-            ruleName={ruleName}
-            exceptionListType={'detection'}
-            onCancel={jest.fn()}
-            onConfirm={jest.fn()}
-            alertData={alertDataMock}
-          />
-        </TestProviders>
-      );
-      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
-      await waitFor(() =>
-        callProps.onChange({ exceptionItems: [getExceptionListItemSchemaMock()] })
-      );
-    });
-    it('has the add exception button enabled', () => {
-      expect(
-        wrapper.find('button[data-test-subj="add-exception-confirm-button"]').getDOMNode()
-      ).not.toBeDisabled();
-    });
-    it('should render the exception builder', () => {
-      expect(wrapper.find('[data-test-subj="alertExceptionBuilder"]').exists()).toBeTruthy();
-    });
-    it('should not prepopulate endpoint items', () => {
-      expect(defaultEndpointItems).not.toHaveBeenCalled();
-    });
-    it('should render the close on add exception checkbox', () => {
-      expect(
-        wrapper.find('[data-test-subj="close-alert-on-add-add-exception-checkbox"]').exists()
-      ).toBeTruthy();
-    });
-    it('should have the bulk close checkbox disabled', () => {
-      expect(
-        wrapper
-          .find('input[data-test-subj="bulk-close-alert-on-add-add-exception-checkbox"]')
-          .getDOMNode()
-      ).toBeDisabled();
-    });
-    it('should display the eql sequence callout', () => {
-      expect(wrapper.find('[data-test-subj="eqlSequenceCallout"]').exists()).toBeTruthy();
-    });
-  });
+      it('should render the exception builder', () => {
+        expect(wrapper.find('[data-test-subj="alertExceptionBuilder"]').exists()).toBeTruthy();
+      });
 
-  describe('when there is bulk-closeable alert data passed to an endpoint list exception', () => {
-    let wrapper: ReactWrapper;
+      it('does NOT render options to add exception to a rule or shared list', () => {
+        expect(
+          wrapper.find('[data-test-subj="exceptionItemAddToRuleOrListSection"]').exists()
+        ).toBeFalsy();
+      });
 
-    beforeEach(async () => {
-      mockUseFetchIndex.mockImplementation(() => [
-        false,
-        {
+      it('should contain the endpoint specific documentation text', () => {
+        expect(wrapper.find('[data-test-subj="addExceptionEndpointText"]').exists()).toBeTruthy();
+      });
+
+      it('should NOT display the eql sequence callout', () => {
+        expect(wrapper.find('[data-test-subj="eqlSequenceCallout"]').exists()).not.toBeTruthy();
+      });
+    });
+
+    describe('alert data is passed in', () => {
+      let wrapper: ReactWrapper;
+      beforeEach(async () => {
+        wrapper = mount(
+          <TestProviders>
+            <AddExceptionFlyout
+              rules={[
+                {
+                  ...getRulesSchemaMock(),
+                  index: ['filebeat-*'],
+                  exceptions_list: [
+                    {
+                      id: 'endpoint_list',
+                      list_id: 'endpoint_list',
+                      namespace_type: 'agnostic',
+                      type: 'endpoint',
+                    },
+                  ],
+                } as Rule,
+              ]}
+              isBulkAction={false}
+              alertData={alertDataMock}
+              isAlertDataLoading={false}
+              alertStatus="open"
+              isEndpointItem
+              showAlertCloseOptions
+              onCancel={jest.fn()}
+              onConfirm={jest.fn()}
+            />
+          </TestProviders>
+        );
+        const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+        await waitFor(() =>
+          callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
+        );
+      });
+
+      it('should prepopulate endpoint items', () => {
+        expect(defaultEndpointItems).toHaveBeenCalled();
+      });
+
+      it('should render the close single alert checkbox', () => {
+        expect(
+          wrapper.find('[data-test-subj="closeAlertOnAddExceptionCheckbox"]').exists()
+        ).toBeTruthy();
+      });
+
+      it('should have the bulk close alerts checkbox disabled', () => {
+        expect(
+          wrapper.find('input[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]').getDOMNode()
+        ).toBeDisabled();
+      });
+
+      it('should NOT render the os selection dropdown', () => {
+        expect(wrapper.find('[data-test-subj="osSelectionDropdown"]').exists()).toBeFalsy();
+      });
+    });
+
+    describe('bulk closeable alert data is passed in', () => {
+      let wrapper: ReactWrapper;
+      beforeEach(async () => {
+        mockFetchIndexPatterns.mockImplementation(() => ({
+          isLoading: false,
           indexPatterns: createStubIndexPattern({
             spec: {
               id: '1234',
@@ -446,104 +313,586 @@ describe('When the add exception modal is opened', () => {
               },
             },
           }),
-        },
-      ]);
+        }));
+        wrapper = mount(
+          <TestProviders>
+            <AddExceptionFlyout
+              rules={[
+                {
+                  ...getRulesSchemaMock(),
+                  index: ['filebeat-*'],
+                  exceptions_list: [
+                    {
+                      id: 'endpoint_list',
+                      list_id: 'endpoint_list',
+                      namespace_type: 'agnostic',
+                      type: 'endpoint',
+                    },
+                  ],
+                } as Rule,
+              ]}
+              isBulkAction={false}
+              alertData={alertDataMock}
+              isAlertDataLoading={false}
+              alertStatus="open"
+              isEndpointItem
+              showAlertCloseOptions
+              onCancel={jest.fn()}
+              onConfirm={jest.fn()}
+            />
+          </TestProviders>
+        );
+        const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+        await waitFor(() =>
+          callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
+        );
+      });
 
-      const alertDataMock: AlertData = {
-        '@timestamp': '1234567890',
-        _id: 'test-id',
-        file: { path: 'test/path' },
-      };
-      wrapper = mount(
-        <TestProviders>
-          <AddExceptionFlyout
-            ruleId={'123'}
-            ruleIndices={['filebeat-*']}
-            ruleName={ruleName}
-            exceptionListType={'endpoint'}
-            onCancel={jest.fn()}
-            onConfirm={jest.fn()}
-            alertData={alertDataMock}
-            isAlertDataLoading={false}
-          />
-        </TestProviders>
-      );
+      it('has the add exception button enabled', async () => {
+        expect(
+          wrapper.find('button[data-test-subj="addExceptionConfirmButton"]').getDOMNode()
+        ).not.toBeDisabled();
+      });
 
-      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
-      await waitFor(() => {
-        return callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
+      it('should prepopulate endpoint items', () => {
+        expect(defaultEndpointItems).toHaveBeenCalled();
+      });
+
+      it('should render the close single alert checkbox', () => {
+        expect(
+          wrapper.find('[data-test-subj="closeAlertOnAddExceptionCheckbox"]').exists()
+        ).toBeTruthy();
+      });
+
+      it('should have the bulk close checkbox enabled', () => {
+        expect(
+          wrapper.find('input[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]').getDOMNode()
+        ).not.toBeDisabled();
+      });
+
+      describe('when a "is in list" entry is added', () => {
+        it('should have the bulk close checkbox disabled', async () => {
+          const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+
+          await waitFor(() =>
+            callProps.onChange({
+              exceptionItems: [
+                ...callProps.exceptionListItems,
+                {
+                  ...getExceptionListItemSchemaMock(),
+                  entries: [
+                    { field: 'event.code', operator: 'included', type: 'list' },
+                  ] as EntriesArray,
+                },
+              ],
+            })
+          );
+
+          expect(
+            wrapper
+              .find('input[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]')
+              .getDOMNode()
+          ).toBeDisabled();
+        });
       });
     });
-    it('has the add exception button enabled', async () => {
-      expect(
-        wrapper.find('button[data-test-subj="add-exception-confirm-button"]').getDOMNode()
-      ).not.toBeDisabled();
-    });
-    it('should render the exception builder', () => {
-      expect(wrapper.find('[data-test-subj="alertExceptionBuilder"]').exists()).toBeTruthy();
-    });
-    it('should prepopulate endpoint items', () => {
-      expect(defaultEndpointItems).toHaveBeenCalled();
-    });
-    it('should render the close on add exception checkbox', () => {
-      expect(
-        wrapper.find('[data-test-subj="close-alert-on-add-add-exception-checkbox"]').exists()
-      ).toBeTruthy();
-    });
-    it('should contain the endpoint specific documentation text', () => {
-      expect(wrapper.find('[data-test-subj="add-exception-endpoint-text"]').exists()).toBeTruthy();
-    });
-    it('should have the bulk close checkbox enabled', () => {
-      expect(
-        wrapper
-          .find('input[data-test-subj="bulk-close-alert-on-add-add-exception-checkbox"]')
-          .getDOMNode()
-      ).not.toBeDisabled();
-    });
-    describe('when a "is in list" entry is added', () => {
-      it('should have the bulk close checkbox disabled', async () => {
-        const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
 
-        await waitFor(() =>
-          callProps.onChange({
-            exceptionItems: [
-              ...callProps.exceptionListItems,
-              {
-                ...getExceptionListItemSchemaMock(),
-                entries: [
-                  { field: 'event.code', operator: 'included', type: 'list' },
-                ] as EntriesArray,
-              },
-            ],
-          })
+    describe('alert data NOT passed in', () => {
+      let wrapper: ReactWrapper;
+      beforeEach(async () => {
+        wrapper = mount(
+          <TestProviders>
+            <AddExceptionFlyout
+              rules={[
+                {
+                  ...getRulesSchemaMock(),
+                  index: ['filebeat-*'],
+                  exceptions_list: [
+                    {
+                      id: 'endpoint_list',
+                      list_id: 'endpoint_list',
+                      namespace_type: 'agnostic',
+                      type: 'endpoint',
+                    },
+                  ],
+                } as Rule,
+              ]}
+              isBulkAction={false}
+              alertData={undefined}
+              isAlertDataLoading={undefined}
+              alertStatus={undefined}
+              isEndpointItem
+              showAlertCloseOptions
+              onCancel={jest.fn()}
+              onConfirm={jest.fn()}
+            />
+          </TestProviders>
         );
+        const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+        await waitFor(() =>
+          callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
+        );
+      });
 
+      it('should NOT render the close single alert checkbox', () => {
         expect(
-          wrapper
-            .find('input[data-test-subj="bulk-close-alert-on-add-add-exception-checkbox"]')
-            .getDOMNode()
+          wrapper.find('[data-test-subj="closeAlertOnAddExceptionCheckbox"]').exists()
+        ).toBeFalsy();
+      });
+
+      it('should render the os selection dropdown', () => {
+        expect(wrapper.find('[data-test-subj="osSelectionDropdown"]').exists()).toBeTruthy();
+      });
+    });
+  });
+
+  describe('exception list type is NOT "endpoint" ("rule_default" or "detection")', () => {
+    describe('common features to test regardless of alert input', () => {
+      let wrapper: ReactWrapper;
+      beforeEach(async () => {
+        wrapper = mount(
+          <TestProviders>
+            <AddExceptionFlyout
+              rules={[
+                {
+                  ...getRulesSchemaMock(),
+                  exceptions_list: [],
+                } as Rule,
+              ]}
+              isBulkAction={false}
+              alertData={alertDataMock}
+              isAlertDataLoading={false}
+              alertStatus="open"
+              isEndpointItem={false}
+              showAlertCloseOptions
+              onCancel={jest.fn()}
+              onConfirm={jest.fn()}
+            />
+          </TestProviders>
+        );
+        const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+        await waitFor(() =>
+          callProps.onChange({ exceptionItems: [getExceptionListItemSchemaMock()] })
+        );
+      });
+
+      it('displays proper flyout and button text', () => {
+        expect(wrapper.find('[data-test-subj="exceptionFlyoutTitle"]').at(1).text()).toEqual(
+          i18n.CREATE_RULE_EXCEPTION
+        );
+        expect(wrapper.find('[data-test-subj="addExceptionConfirmButton"]').at(1).text()).toEqual(
+          i18n.CREATE_RULE_EXCEPTION
+        );
+      });
+
+      it('should NOT prepopulate items', () => {
+        expect(defaultEndpointItems).not.toHaveBeenCalled();
+      });
+
+      // button is disabled until there are exceptions, a name, and selection made on
+      // add to rule or lists section
+      it('has the add exception button disabled', () => {
+        expect(
+          wrapper.find('button[data-test-subj="addExceptionConfirmButton"]').getDOMNode()
+        ).toBeDisabled();
+      });
+
+      it('should render item name input', () => {
+        expect(wrapper.find('[data-test-subj="exceptionFlyoutNameInput"]').exists()).toBeTruthy();
+      });
+
+      it('should NOT render the os selection dropdown', () => {
+        expect(wrapper.find('[data-test-subj="osSelectionDropdown"]').exists()).toBeFalsy();
+      });
+
+      it('should render the exception builder', () => {
+        expect(wrapper.find('[data-test-subj="alertExceptionBuilder"]').exists()).toBeTruthy();
+      });
+
+      it('renders options to add exception to a rule or shared list and has "add to rule" selected by default', () => {
+        expect(
+          wrapper.find('[data-test-subj="exceptionItemAddToRuleOrListSection"]').exists()
+        ).toBeTruthy();
+        expect(
+          wrapper.find('[data-test-subj="addToRuleOptionsRadio"] input').getDOMNode()
+        ).toHaveAttribute('selected');
+      });
+
+      it('should NOT contain the endpoint specific documentation text', () => {
+        expect(wrapper.find('[data-test-subj="addExceptionEndpointText"]').exists()).toBeFalsy();
+      });
+
+      it('should NOT display the eql sequence callout', () => {
+        expect(wrapper.find('[data-test-subj="eqlSequenceCallout"]').exists()).not.toBeTruthy();
+      });
+    });
+
+    describe('alert data is passed in', () => {
+      let wrapper: ReactWrapper;
+      beforeEach(async () => {
+        wrapper = mount(
+          <TestProviders>
+            <AddExceptionFlyout
+              rules={[
+                {
+                  ...getRulesSchemaMock(),
+                  exceptions_list: [],
+                } as Rule,
+              ]}
+              isBulkAction={false}
+              alertData={alertDataMock}
+              isAlertDataLoading={false}
+              alertStatus="open"
+              isEndpointItem={false}
+              showAlertCloseOptions
+              onCancel={jest.fn()}
+              onConfirm={jest.fn()}
+            />
+          </TestProviders>
+        );
+        const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+        await waitFor(() =>
+          callProps.onChange({ exceptionItems: [getExceptionListItemSchemaMock()] })
+        );
+      });
+
+      it('should render the close single alert checkbox', () => {
+        expect(
+          wrapper.find('[data-test-subj="closeAlertOnAddExceptionCheckbox"]').exists()
+        ).toBeTruthy();
+        expect(
+          wrapper.find('input[data-test-subj="closeAlertOnAddExceptionCheckbox"]').getDOMNode()
+        ).not.toBeDisabled();
+      });
+
+      it('should have the bulk close checkbox disabled', () => {
+        expect(
+          wrapper.find('input[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]').getDOMNode()
+        ).toBeDisabled();
+      });
+    });
+
+    describe('bulk closeable alert data is passed in', () => {
+      let wrapper: ReactWrapper;
+      beforeEach(async () => {
+        mockFetchIndexPatterns.mockImplementation(() => ({
+          isLoading: false,
+          indexPatterns: createStubIndexPattern({
+            spec: {
+              id: '1234',
+              title: 'filebeat-*',
+              fields: {
+                'event.code': {
+                  name: 'event.code',
+                  type: 'string',
+                  aggregatable: true,
+                  searchable: true,
+                },
+                'file.path.caseless': {
+                  name: 'file.path.caseless',
+                  type: 'string',
+                  aggregatable: true,
+                  searchable: true,
+                },
+                subject_name: {
+                  name: 'subject_name',
+                  type: 'string',
+                  aggregatable: true,
+                  searchable: true,
+                },
+                trusted: {
+                  name: 'trusted',
+                  type: 'string',
+                  aggregatable: true,
+                  searchable: true,
+                },
+                'file.hash.sha256': {
+                  name: 'file.hash.sha256',
+                  type: 'string',
+                  aggregatable: true,
+                  searchable: true,
+                },
+              },
+            },
+          }),
+        }));
+        wrapper = mount(
+          <TestProviders>
+            <AddExceptionFlyout
+              rules={[
+                {
+                  ...getRulesSchemaMock(),
+                  index: ['filebeat-*'],
+                  exceptions_list: [
+                    {
+                      id: 'endpoint_list',
+                      list_id: 'endpoint_list',
+                      namespace_type: 'agnostic',
+                      type: 'endpoint',
+                    },
+                  ],
+                } as Rule,
+              ]}
+              isBulkAction={false}
+              alertData={alertDataMock}
+              isAlertDataLoading={false}
+              alertStatus="open"
+              isEndpointItem={false}
+              showAlertCloseOptions
+              onCancel={jest.fn()}
+              onConfirm={jest.fn()}
+            />
+          </TestProviders>
+        );
+        const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+        await waitFor(() =>
+          callProps.onChange({ exceptionItems: [getExceptionListItemSchemaMock()] })
+        );
+      });
+
+      it('should render the close single alert checkbox', () => {
+        expect(
+          wrapper.find('[data-test-subj="closeAlertOnAddExceptionCheckbox"]').exists()
+        ).toBeTruthy();
+        expect(
+          wrapper.find('input[data-test-subj="closeAlertOnAddExceptionCheckbox"]').getDOMNode()
+        ).not.toBeDisabled();
+      });
+
+      it('should have the bulk close checkbox enabled', () => {
+        expect(
+          wrapper.find('input[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]').getDOMNode()
+        ).not.toBeDisabled();
+      });
+
+      describe('when a "is in list" entry is added', () => {
+        it('should have the bulk close checkbox disabled', async () => {
+          const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+
+          await waitFor(() =>
+            callProps.onChange({
+              exceptionItems: [
+                ...callProps.exceptionListItems,
+                {
+                  ...getExceptionListItemSchemaMock(),
+                  entries: [
+                    { field: 'event.code', operator: 'included', type: 'list' },
+                  ] as EntriesArray,
+                },
+              ],
+            })
+          );
+
+          expect(
+            wrapper
+              .find('input[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]')
+              .getDOMNode()
+          ).toBeDisabled();
+        });
+      });
+    });
+
+    describe('alert data NOT passed in', () => {
+      let wrapper: ReactWrapper;
+      beforeEach(async () => {
+        wrapper = mount(
+          <TestProviders>
+            <AddExceptionFlyout
+              rules={[
+                {
+                  ...getRulesSchemaMock(),
+                  index: ['filebeat-*'],
+                  exceptions_list: [
+                    {
+                      id: 'endpoint_list',
+                      list_id: 'endpoint_list',
+                      namespace_type: 'agnostic',
+                      type: 'endpoint',
+                    },
+                  ],
+                } as Rule,
+              ]}
+              isBulkAction={false}
+              alertData={undefined}
+              isAlertDataLoading={undefined}
+              alertStatus={undefined}
+              isEndpointItem={false}
+              showAlertCloseOptions
+              onCancel={jest.fn()}
+              onConfirm={jest.fn()}
+            />
+          </TestProviders>
+        );
+        const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+        await waitFor(() =>
+          callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
+        );
+      });
+
+      it('should NOT render the close single alert checkbox', () => {
+        expect(
+          wrapper.find('[data-test-subj="closeAlertOnAddExceptionCheckbox"]').exists()
+        ).toBeFalsy();
+      });
+
+      it('should have the bulk close checkbox disabled', () => {
+        expect(
+          wrapper.find('input[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]').getDOMNode()
         ).toBeDisabled();
       });
     });
   });
 
-  test('when there are exception builder errors submit button is disabled', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <AddExceptionFlyout
-          ruleId={'123'}
-          ruleIndices={['filebeat-*']}
-          ruleName={ruleName}
-          exceptionListType={'endpoint'}
-          onCancel={jest.fn()}
-          onConfirm={jest.fn()}
-        />
-      </TestProviders>
-    );
-    const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
-    await waitFor(() => callProps.onChange({ exceptionItems: [], errorExists: true }));
-    expect(
-      wrapper.find('button[data-test-subj="add-exception-confirm-button"]').getDOMNode()
-    ).toBeDisabled();
+  describe('when no rules are passed in', () => {
+    let wrapper: ReactWrapper;
+    beforeEach(async () => {
+      wrapper = mount(
+        <TestProviders>
+          <AddExceptionFlyout
+            rules={null}
+            isBulkAction={false}
+            alertData={undefined}
+            isAlertDataLoading={undefined}
+            alertStatus={undefined}
+            isEndpointItem={false}
+            showAlertCloseOptions
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+          />
+        </TestProviders>
+      );
+      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+      await waitFor(() =>
+        callProps.onChange({ exceptionItems: [getExceptionListItemSchemaMock()] })
+      );
+    });
+
+    it('allows large value lists', () => {
+      expect(wrapper.find('[data-test-subj="addExceptionToRulesTable"]').exists()).toBeTruthy();
+    });
+
+    it('defaults to selecting add to rule option, displaying rules selection table', () => {
+      expect(wrapper.find('[data-test-subj="addExceptionToRulesTable"]').exists()).toBeTruthy();
+      expect(
+        wrapper.find('[data-test-subj="addToRuleOptionsRadio"] input').getDOMNode()
+      ).toHaveAttribute('selected');
+    });
+
+    it('allows user to change selection from add to rules to add to shared lists option', () => {
+      act(() => {
+        wrapper.find('[data-test-subj="addToListsRadioOption"] label').simulate('click');
+      });
+
+      // check that it updates the listType
+      expect(
+        wrapper.find('[data-test-subj="addExceptionToSharedListsTable"]').exists()
+      ).toBeTruthy();
+      expect(wrapper.find('input[id="add_to_lists"]').getDOMNode()).toHaveAttribute('selected');
+    });
+  });
+
+  describe('when a single rule is passed in', () => {
+    it('does not allow large value list selection for query rule', () => {});
+    it('does not allow large value list selection if EQL rule', () => {});
+    it('does not allow large value list selection if threshold rule', () => {});
+    it('does not allow large value list selection if new trems rule', () => {});
+    it('defaults to selecting add to rule radio option', () => {});
+    it('disables add to shared lists option if rule has no shared exception lists attached already', () => {});
+    it('allows user to change selection from add to rule to add to shared lists option', () => {
+      // check that it updates the listType
+    });
+  });
+
+  describe('when multiple rules are passed in', () => {
+    it('allows large value lists', () => {});
+    it('defaults to selecting add to rules radio option', () => {});
+    it('disables add to shared lists option if rules have no shared lists in common', () => {});
+    it('allows user to change selection from add to rule to add to shared lists option', () => {
+      // check that it updates the listType
+    });
+  });
+
+  describe('when there is an exception being created on a sequence eql rule type', () => {
+    let wrapper: ReactWrapper;
+    beforeEach(async () => {
+      wrapper = mount(
+        <TestProviders>
+          <AddExceptionFlyout
+            rules={[
+              {
+                ...getRulesEqlSchemaMock(),
+                query:
+                  'sequence [process where process.name = "test.exe"] [process where process.name = "explorer.exe"]',
+              } as Rule,
+            ]}
+            isBulkAction={false}
+            alertData={alertDataMock}
+            isAlertDataLoading={false}
+            alertStatus="open"
+            isEndpointItem={false}
+            showAlertCloseOptions
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+          />
+        </TestProviders>
+      );
+      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+      await waitFor(() =>
+        callProps.onChange({ exceptionItems: [getExceptionListItemSchemaMock()] })
+      );
+    });
+
+    it('should render the exception builder', () => {
+      expect(wrapper.find('[data-test-subj="alertExceptionBuilder"]').exists()).toBeTruthy();
+    });
+
+    it('should not prepopulate endpoint items', () => {
+      expect(defaultEndpointItems).not.toHaveBeenCalled();
+    });
+
+    it('should render the close single alert checkbox', () => {
+      expect(
+        wrapper.find('[data-test-subj="closeAlertOnAddExceptionCheckbox"]').exists()
+      ).toBeTruthy();
+    });
+
+    it('should have the bulk close checkbox disabled', () => {
+      expect(
+        wrapper.find('input[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]').getDOMNode()
+      ).toBeDisabled();
+    });
+
+    it('should display the eql sequence callout', () => {
+      expect(wrapper.find('[data-test-subj="eqlSequenceCallout"]').exists()).toBeTruthy();
+    });
+  });
+
+  describe('error states', () => {
+    test('when there are exception builder errors submit button is disabled', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <AddExceptionFlyout
+            rules={[
+              {
+                ...getRulesSchemaMock(),
+              } as Rule,
+            ]}
+            isBulkAction={false}
+            alertData={undefined}
+            isAlertDataLoading={undefined}
+            alertStatus={undefined}
+            isEndpointItem={false}
+            showAlertCloseOptions
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+          />
+        </TestProviders>
+      );
+      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+      await waitFor(() => callProps.onChange({ exceptionItems: [], errorExists: true }));
+      expect(
+        wrapper.find('button[data-test-subj="addExceptionConfirmButton"]').getDOMNode()
+      ).toBeDisabled();
+    });
   });
 });

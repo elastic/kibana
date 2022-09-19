@@ -108,7 +108,7 @@ describe('ExceptionsViewer', () => {
               },
             ],
           }}
-          listType={ExceptionListTypeEnum.DETECTION}
+          listTypes={[ExceptionListTypeEnum.DETECTION]}
         />
       </TestProviders>
     );
@@ -145,7 +145,7 @@ describe('ExceptionsViewer', () => {
               },
             ],
           }}
-          listType={ExceptionListTypeEnum.DETECTION}
+          listTypes={[ExceptionListTypeEnum.DETECTION]}
         />
       </TestProviders>
     );
@@ -155,7 +155,7 @@ describe('ExceptionsViewer', () => {
     ).toBeTruthy();
   });
 
-  it('it renders no endpoint items screen when "currentState" is "empty" and "listType" is "endpoint"', () => {
+  it('it renders no endpoint items screen when "currentState" is "empty" and "listTypes" includes only "endpoint"', () => {
     (useReducer as jest.Mock).mockReturnValue([
       {
         exceptions: [],
@@ -182,7 +182,7 @@ describe('ExceptionsViewer', () => {
               },
             ],
           }}
-          listType={ExceptionListTypeEnum.ENDPOINT}
+          listTypes={[ExceptionListTypeEnum.ENDPOINT]}
         />
       </TestProviders>
     );
@@ -194,11 +194,11 @@ describe('ExceptionsViewer', () => {
       i18n.EXCEPTION_EMPTY_PROMPT_ENDPOINT_BUTTON
     );
     expect(
-      wrapper.find('[data-test-subj="exceptionItemViewerEmptyPrompts-empty-endpoint"]').exists()
+      wrapper.find('[data-test-subj="exceptionItemViewerEmptyPrompts-empty"]').exists()
     ).toBeTruthy();
   });
 
-  it('it renders no exception items screen when "currentState" is "empty" and "listType" is "detection"', () => {
+  it('it renders no exception items screen when "currentState" is "empty" and "listTypes" includes "detection"', () => {
     (useReducer as jest.Mock).mockReturnValue([
       {
         exceptions: [],
@@ -225,7 +225,7 @@ describe('ExceptionsViewer', () => {
               },
             ],
           }}
-          listType={ExceptionListTypeEnum.DETECTION}
+          listTypes={[ExceptionListTypeEnum.DETECTION]}
         />
       </TestProviders>
     );
@@ -267,7 +267,7 @@ describe('ExceptionsViewer', () => {
             },
           ],
         }}
-        listType={ExceptionListTypeEnum.DETECTION}
+        listTypes={[ExceptionListTypeEnum.DETECTION]}
       />
     );
 
@@ -300,7 +300,7 @@ describe('ExceptionsViewer', () => {
             },
           ],
         }}
-        listType={ExceptionListTypeEnum.DETECTION}
+        listTypes={[ExceptionListTypeEnum.DETECTION]}
       />
     );
 

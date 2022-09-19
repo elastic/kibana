@@ -76,7 +76,7 @@ export interface OnChangeProps {
 export interface ExceptionBuilderProps {
   allowLargeValueLists: boolean;
   autocompleteService: AutocompleteStart;
-  exceptionListItems: ExceptionsBuilderReturnExceptionItem[];
+  exceptionListItems: ExceptionsBuilderExceptionItem[];
   httpService: HttpStart;
   osTypes?: OsTypeArray;
   indexPatterns: DataViewBase;
@@ -96,6 +96,7 @@ export interface ExceptionBuilderProps {
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
   exceptionItemName?: string;
+  allowCustomFieldOptions?: boolean;
 }
 
 export const ExceptionBuilderComponent = ({
@@ -118,6 +119,7 @@ export const ExceptionBuilderComponent = ({
   isDisabled = false,
   osTypes,
   operatorsList,
+  allowCustomFieldOptions = false,
 }: ExceptionBuilderProps): JSX.Element => {
   const [
     {
@@ -372,10 +374,6 @@ export const ExceptionBuilderComponent = ({
     });
   }, [onChange, exceptionsToDelete, memoExceptionItems, errorExists, warningExists]);
 
-  // useEffect(() => {
-  //   setUpdateExceptions([]);
-  // }, [osTypes, setUpdateExceptions]);
-
   // Defaults builder to never be sans entry, instead
   // always falls back to an empty entry if user deletes all
   useEffect(() => {
@@ -439,6 +437,7 @@ export const ExceptionBuilderComponent = ({
                 osTypes={osTypes}
                 isDisabled={isDisabled}
                 operatorsList={operatorsList}
+                allowCustomOptions={allowCustomFieldOptions}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

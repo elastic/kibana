@@ -18,6 +18,7 @@ import { ExceptionsAddToListsOptions } from '../add_to_lists_options';
 export type AddToRuleListsRadioOptions = 'select_rules_to_add_to' | 'add_to_rules' | 'add_to_rule';
 
 interface ExceptionsAddToRulesOrListsComponentProps {
+  /* Rules that exception item will be added to, or whose shared lists will be used to populate add to lists option. If none passed in, user is prompted to select what rules to add exception to. */
   rules: Rule[] | null;
   selectedRadioOption: string;
   isBulkAction: boolean;

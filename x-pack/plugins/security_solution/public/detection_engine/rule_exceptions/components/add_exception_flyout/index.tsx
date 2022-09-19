@@ -490,7 +490,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
           </EuiButtonEmpty>
 
           <EuiButton
-            data-test-subj="add-exception-confirm-button"
+            data-test-subj="addExceptionConfirmButton"
             onClick={handleOnSubmit}
             isDisabled={isSubmitButtonDisabled}
             fill

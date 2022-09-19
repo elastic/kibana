@@ -10,7 +10,6 @@ import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import { ExceptionsViewerItems } from './all_items';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
@@ -31,7 +30,7 @@ describe('ExceptionsViewerItems', () => {
         <ExceptionsViewerItems
           disableActions={false}
           exceptions={[]}
-          listType={ExceptionListTypeEnum.DETECTION}
+          isEndpoint={false}
           ruleReferences={null}
           viewerState="empty"
           onCreateExceptionListItem={jest.fn()}
@@ -43,7 +42,7 @@ describe('ExceptionsViewerItems', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="exceptionItemViewerEmptyPrompts-empty-detection"]').exists()
+      wrapper.find('[data-test-subj="exceptionItemViewerEmptyPrompts-empty"]').exists()
     ).toBeTruthy();
     expect(wrapper.find('[data-test-subj="exceptionsContainer"]').exists()).toBeFalsy();
   });
@@ -55,7 +54,7 @@ describe('ExceptionsViewerItems', () => {
           <ExceptionsViewerItems
             disableActions={false}
             exceptions={[]}
-            listType={ExceptionListTypeEnum.DETECTION}
+            isEndpoint={false}
             ruleReferences={null}
             viewerState="empty_search"
             onCreateExceptionListItem={jest.fn()}
@@ -80,7 +79,7 @@ describe('ExceptionsViewerItems', () => {
           <ExceptionsViewerItems
             disableActions={false}
             exceptions={[getExceptionListItemSchemaMock()]}
-            listType={ExceptionListTypeEnum.DETECTION}
+            isEndpoint={false}
             ruleReferences={null}
             viewerState={null}
             onCreateExceptionListItem={jest.fn()}

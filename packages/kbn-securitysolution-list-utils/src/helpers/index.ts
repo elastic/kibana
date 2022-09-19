@@ -149,7 +149,7 @@ export const getNewExceptionItem = ({
 }): CreateExceptionListItemBuilderSchema => {
   return {
     comments: [],
-    description: `Exception list item for item: ${name}`,
+    description: `Exception list item`,
     entries: addIdToEntries([
       {
         field: '',
@@ -775,13 +775,15 @@ export const getCorrespondingKeywordField = ({
  * @param parent nested entries hold copy of their parent for use in various logic
  * @param parentIndex corresponds to the entry index, this might seem obvious, but
  * was added to ensure that nested items could be identified with their parent entry
+ * @param allowCustomFieldOptions determines if field must be found to match in indexPattern or not
  */
 export const getFormattedBuilderEntry = (
   indexPattern: DataViewBase,
   item: BuilderEntry,
   itemIndex: number,
   parent: EntryNested | undefined,
-  parentIndex: number | undefined
+  parentIndex: number | undefined,
+  allowCustomFieldOptions: boolean
 ): FormattedBuilderEntry => {
   const { fields } = indexPattern;
   const field = parent != null ? `${parent.field}.${item.field}` : item.field;
@@ -806,10 +808,14 @@ export const getFormattedBuilderEntry = (
       value: getEntryValue(item),
     };
   } else {
+    const fieldToUse = allowCustomFieldOptions
+      ? foundField ?? { name: item.field, type: 'keyword' }
+      : foundField;
+
     return {
       correspondingKeywordField,
       entryIndex: itemIndex,
-      field: foundField ?? { name: item.field, type: 'keyword' },
+      field: fieldToUse,
       id: item.id != null ? item.id : `${itemIndex}`,
       nested: undefined,
       operator: getExceptionOperatorSelect(item),
@@ -834,6 +840,7 @@ export const getFormattedBuilderEntry = (
 export const getFormattedBuilderEntries = (
   indexPattern: DataViewBase,
   entries: BuilderEntry[],
+  allowCustomFieldOptions: boolean,
   parent?: EntryNested,
   parentIndex?: number
 ): FormattedBuilderEntry[] => {
@@ -845,7 +852,8 @@ export const getFormattedBuilderEntries = (
         item,
         index,
         parent,
-        parentIndex
+        parentIndex,
+        allowCustomFieldOptions
       );
       return [...acc, newItemEntry];
     } else {
@@ -875,7 +883,13 @@ export const getFormattedBuilderEntries = (
       }
 
       if (isEntryNested(item)) {
-        const nestedItems = getFormattedBuilderEntries(indexPattern, item.entries, item, index);
+        const nestedItems = getFormattedBuilderEntries(
+          indexPattern,
+          item.entries,
+          allowCustomFieldOptions,
+          item,
+          index
+        );
 
         return [...acc, parentEntry, ...nestedItems];
       }
