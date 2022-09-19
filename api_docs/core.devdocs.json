@@ -15237,11 +15237,11 @@
           "\nA sub-set of {@link UiSettingsParams} exposed to the client-side."
         ],
         "signature": [
-          "{ options?: string[] | number[] | undefined; type?: ",
+          "{ name?: string | undefined; value?: unknown; description?: string | undefined; category?: string[] | undefined; options?: string[] | number[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; type?: ",
           "UiSettingsType",
-          " | undefined; metric?: { type: string; name: string; } | undefined; value?: unknown; description?: string | undefined; name?: string | undefined; order?: number | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
+          " | undefined; deprecation?: ",
           "DeprecationSettings",
-          " | undefined; }"
+          " | undefined; order?: number | undefined; metric?: { type: string; name: string; } | undefined; }"
         ],
         "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
         "deprecated": false,
@@ -27010,7 +27010,7 @@
               "\nA {@link ElasticsearchClient | client} to be used to query the ES cluster on behalf of the Kibana internal user"
             ],
             "signature": [
-              "{ get: { <TDocument = unknown>(this: That, params: ",
+              "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
               "GetRequest",
               " | ",
               "GetRequest",
@@ -27128,7 +27128,7 @@
               "default",
               "; security: ",
               "default",
-              "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+              "; index: { <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
               "IndexRequest",
@@ -32152,7 +32152,7 @@
               "\nA {@link ElasticsearchClient | client} to be used to query the elasticsearch cluster\non behalf of the internal Kibana user."
             ],
             "signature": [
-              "{ get: { <TDocument = unknown>(this: That, params: ",
+              "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
               "GetRequest",
               " | ",
               "GetRequest",
@@ -32270,7 +32270,7 @@
               "default",
               "; security: ",
               "default",
-              "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+              "; index: { <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
               "IndexRequest",
@@ -33356,7 +33356,7 @@
               "\nA {@link ElasticsearchClient | client} to be used to query the elasticsearch cluster\non behalf of the user that initiated the request to the Kibana server."
             ],
             "signature": [
-              "{ get: { <TDocument = unknown>(this: That, params: ",
+              "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
               "GetRequest",
               " | ",
               "GetRequest",
@@ -33474,7 +33474,7 @@
               "default",
               "; security: ",
               "default",
-              "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+              "; index: { <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
               "IndexRequest",
@@ -35381,7 +35381,7 @@
             "label": "options",
             "description": [],
             "signature": [
-              "Method extends \"get\" | \"options\" ? Required<Omit<",
+              "Method extends \"options\" | \"get\" ? Required<Omit<",
               "RouteConfigOptions",
               "<Method>, \"body\">> : Required<",
               "RouteConfigOptions",
@@ -35839,7 +35839,7 @@
             "label": "level",
             "description": [],
             "signature": [
-              "\"error\" | \"all\" | \"info\" | \"debug\" | \"off\" | \"trace\" | \"warn\" | \"fatal\""
+              "\"error\" | \"all\" | \"info\" | \"debug\" | \"off\" | \"warn\" | \"trace\" | \"fatal\""
             ],
             "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
             "deprecated": false,
@@ -37894,7 +37894,7 @@
             "label": "internalClient",
             "description": [],
             "signature": [
-              "{ get: { <TDocument = unknown>(this: That, params: ",
+              "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
               "GetRequest",
               " | ",
               "GetRequest",
@@ -38012,7 +38012,7 @@
               "default",
               "; security: ",
               "default",
-              "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+              "; index: { <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
               "IndexRequest",
@@ -39520,7 +39520,7 @@
               "\nAdditional body options {@link RouteConfigOptionsBody}."
             ],
             "signature": [
-              "(Method extends \"get\" | \"options\" ? undefined : ",
+              "(Method extends \"options\" | \"get\" ? undefined : ",
               "RouteConfigOptionsBody",
               ") | undefined"
             ],
@@ -39538,7 +39538,7 @@
               "\nDefines per-route timeouts."
             ],
             "signature": [
-              "{ payload?: (Method extends \"get\" | \"options\" ? undefined : number) | undefined; idleSocket?: number | undefined; } | undefined"
+              "{ payload?: (Method extends \"options\" | \"get\" ? undefined : number) | undefined; idleSocket?: number | undefined; } | undefined"
             ],
             "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
             "deprecated": false,
@@ -49921,7 +49921,7 @@
           "\nClient used to query the elasticsearch cluster.\n"
         ],
         "signature": [
-          "{ get: { <TDocument = unknown>(this: That, params: ",
+          "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
           "GetRequest",
           " | ",
           "GetRequest",
@@ -50039,7 +50039,7 @@
           "default",
           "; security: ",
           "default",
-          "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+          "; index: { <TDocument = unknown>(this: That, params: ",
           "IndexRequest",
           "<TDocument> | ",
           "IndexRequest",
@@ -51623,7 +51623,7 @@
           "\nRoute options: If 'GET' or 'OPTIONS' method, body options won't be returned."
         ],
         "signature": [
-          "Method extends \"get\" | \"options\" ? Required<Omit<",
+          "Method extends \"options\" | \"get\" ? Required<Omit<",
           "RouteConfigOptions",
           "<Method>, \"body\">> : Required<",
           "RouteConfigOptions",
@@ -52418,11 +52418,11 @@
           "\nA sub-set of {@link UiSettingsParams} exposed to the client-side."
         ],
         "signature": [
-          "{ options?: string[] | number[] | undefined; type?: ",
+          "{ name?: string | undefined; value?: unknown; description?: string | undefined; category?: string[] | undefined; options?: string[] | number[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; type?: ",
           "UiSettingsType",
-          " | undefined; metric?: { type: string; name: string; } | undefined; value?: unknown; description?: string | undefined; name?: string | undefined; order?: number | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
+          " | undefined; deprecation?: ",
           "DeprecationSettings",
-          " | undefined; }"
+          " | undefined; order?: number | undefined; metric?: { type: string; name: string; } | undefined; }"
         ],
         "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
         "deprecated": false,
@@ -52923,7 +52923,7 @@
           "\nSet of HTTP methods not changing the state of the server."
         ],
         "signature": [
-          "\"get\" | \"options\""
+          "\"options\" | \"get\""
         ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,

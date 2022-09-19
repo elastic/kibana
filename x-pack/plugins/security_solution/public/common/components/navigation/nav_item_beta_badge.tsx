@@ -10,12 +10,12 @@ import { css } from '@emotion/react';
 import { EuiBetaBadge, useEuiTheme } from '@elastic/eui';
 import { BETA } from '../../translations';
 
-export const NavItemBetaBadge = () => {
+export const NavItemBetaBadge = ({ text }: { text?: string }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
     <EuiBetaBadge
-      label={BETA}
+      label={text ?? BETA}
       size="s"
       css={css`
         margin-left: ${euiTheme.size.s};
