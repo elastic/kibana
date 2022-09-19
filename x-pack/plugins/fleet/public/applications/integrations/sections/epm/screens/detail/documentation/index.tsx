@@ -94,7 +94,7 @@ const Inputs: React.FunctionComponent<{
         if (integration && policyTemplate.name !== integration) {
           return acc;
         }
-        if (policyTemplate.inputs) {
+        if ('inputs' in policyTemplate && policyTemplate.inputs) {
           return [
             ...acc,
             ...policyTemplate.inputs.map((input) => ({
