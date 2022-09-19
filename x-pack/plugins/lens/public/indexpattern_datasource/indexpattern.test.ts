@@ -782,6 +782,7 @@ describe('IndexPattern Data Source', () => {
           "outputColumnName": Array [
             "Count of records",
           ],
+          "reducedTimeRange": Array [],
           "targetUnit": Array [
             "h",
           ],

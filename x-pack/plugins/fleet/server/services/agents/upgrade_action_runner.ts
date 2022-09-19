@@ -13,7 +13,7 @@ import { isAgentUpgradeable } from '../../../common/services';
 
 import type { Agent, BulkActionResult } from '../../types';
 
-import { HostedAgentPolicyRestrictionRelatedError, IngestManagerError } from '../../errors';
+import { HostedAgentPolicyRestrictionRelatedError, FleetError } from '../../errors';
 
 import { appContextService } from '../app_context';
 
@@ -80,7 +80,7 @@ export async function upgradeBatch(
       const isNotAllowed =
         !options.force && !isAgentUpgradeable(agent, kibanaVersion, options.version);
       if (isNotAllowed) {
-        throw new IngestManagerError(`${agent.id} is not upgradeable`);
+        throw new FleetError(`${agent.id} is not upgradeable`);
       }
 
       if (!options.force && isHostedAgent(hostedPolicies, agent)) {

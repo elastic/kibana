@@ -136,8 +136,8 @@ export async function getLatencyTimeseries({
   environment: string;
   kuery: string;
   serviceName: string;
-  transactionType: string | undefined;
-  transactionName: string | undefined;
+  transactionType?: string;
+  transactionName?: string;
   setup: Setup;
   searchAggregatedTransactions: boolean;
   latencyAggregationType: LatencyAggregationType;
