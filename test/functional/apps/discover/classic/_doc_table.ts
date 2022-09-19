@@ -141,7 +141,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(skipButtonText === activeElementText).to.be(true);
       });
 
-      describe.skip('expand a document row', async function () {
+      describe('expand a document row', async function () {
         const rowToInspect = 1;
         beforeEach(async function () {
           // close the toggle if open
@@ -195,7 +195,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(defaultMessageElResubmit).to.be.ok();
           });
         });
-        it('should show allow toggling columns from the expanded document', async function () {
+        it.skip('should show allow toggling columns from the expanded document', async function () {
           await PageObjects.discover.clickNewSearchButton();
           await testSubjects.click('dscExplorerCalloutClose');
           await retry.try(async function () {
