@@ -78,6 +78,7 @@ export async function getTraceSamples({
       },
       _source: [TRANSACTION_ID, TRACE_ID, '@timestamp'],
       body: {
+        track_total_hits: false,
         query: {
           bool: {
             filter: [
