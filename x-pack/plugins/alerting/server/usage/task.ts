@@ -141,6 +141,16 @@ export function telemetryTaskRunner(
                   count_active_by_type: totalInUse.countByType,
                   count_active_total: totalInUse.countTotal,
                   count_disabled_total: totalCountAggregations.count_total - totalInUse.countTotal,
+                  count_rules_by_execution_status:
+                    totalCountAggregations.count_rules_by_execution_status,
+                  count_rules_with_tags: totalCountAggregations.count_rules_with_tags,
+                  count_rules_by_notify_when: totalCountAggregations.count_rules_by_notify_when,
+                  count_rules_snoozed: totalCountAggregations.count_rules_snoozed,
+                  count_rules_muted: totalCountAggregations.count_rules_muted,
+                  count_rules_with_muted_alerts:
+                    totalCountAggregations.count_rules_with_muted_alerts,
+                  count_connector_types_by_consumers:
+                    totalCountAggregations.count_connector_types_by_consumers,
                   count_rules_namespaces: totalInUse.countNamespaces,
                   count_rules_executions_per_day: dailyExecutionCounts.countTotalRuleExecutions,
                   count_rules_executions_by_type_per_day:

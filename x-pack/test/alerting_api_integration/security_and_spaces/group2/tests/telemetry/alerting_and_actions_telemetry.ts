@@ -502,6 +502,32 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       expect(
         telemetry.percentile_num_alerts_by_type_per_day.p99['test__cumulative-firing']
       ).to.be.greaterThan(0);
+
+      // rules grouped by execution status
+      expect(telemetry.count_rules_by_execution_status).to.eql({
+        success: 15,
+        error: 3,
+        warning: 0,
+      });
+      // number of rules that has tags
+      expect(telemetry.count_rules_with_tags).to.be(21);
+      // rules grouped by notify when
+      expect(telemetry.count_rules_by_notify_when).to.eql({
+        on_action_group_change: 0,
+        on_active_alert: 6,
+        on_throttle_interval: 15,
+      });
+      // rules snoozed
+      expect(telemetry.count_rules_snoozed).to.be(0);
+      // rules muted
+      expect(telemetry.count_rules_muted).to.be(0);
+      // rules with muted alerts
+      expect(telemetry.count_rules_with_muted_alerts).to.be(0);
+      // Connector types grouped by consumers
+      expect(telemetry.count_connector_types_by_consumers).to.eql({
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        alertsFixture: { test__noop: 9, test__throw: 9, __slack: 3 },
+      });
     }
 
     it('should retrieve telemetry data in the expected format', async () => {

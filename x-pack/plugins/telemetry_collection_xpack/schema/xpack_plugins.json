@@ -1651,6 +1651,55 @@
             }
           }
         },
+        "count_rules_by_execution_status": {
+          "properties": {
+            "success": {
+              "type": "long"
+            },
+            "error": {
+              "type": "long"
+            },
+            "warning": {
+              "type": "long"
+            }
+          }
+        },
+        "count_rules_with_tags": {
+          "type": "long"
+        },
+        "count_rules_by_notify_when": {
+          "properties": {
+            "on_action_group_change": {
+              "type": "long"
+            },
+            "on_active_alert": {
+              "type": "long"
+            },
+            "on_throttle_interval": {
+              "type": "long"
+            }
+          }
+        },
+        "count_rules_snoozed": {
+          "type": "long"
+        },
+        "count_rules_muted": {
+          "type": "long"
+        },
+        "count_rules_with_muted_alerts": {
+          "type": "long"
+        },
+        "count_connector_types_by_consumers": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
         "avg_execution_time_per_day": {
           "type": "long"
         },

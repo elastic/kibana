@@ -12,6 +12,13 @@ import type {
   AggregationsStringTermsBucketKeys,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+
+import {
+  ConnectorsByConsumersBucket,
+  groupConnectorsByConsumers,
+} from './group_connectors_by_consumers';
+import { groupRulesByNotifyWhen } from './group_rules_by_notify_when';
+import { groupRulesByStatus } from './group_rules_by_status';
 import { AlertingUsage } from '../types';
 import { NUM_ALERTING_RULE_TYPES } from '../alerting_usage_collector';
 import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
@@ -26,6 +33,13 @@ type GetTotalCountsResults = Pick<
   AlertingUsage,
   | 'count_total'
   | 'count_by_type'
+  | 'count_rules_by_execution_status'
+  | 'count_rules_by_notify_when'
+  | 'count_rules_with_tags'
+  | 'count_rules_snoozed'
+  | 'count_rules_muted'
+  | 'count_rules_with_muted_alerts'
+  | 'count_connector_types_by_consumers'
   | 'throttle_time'
   | 'schedule_time'
   | 'throttle_time_number_s'
@@ -145,6 +159,59 @@ export async function getTotalCountAggregations({
               `,
             },
           },
+          rule_with_tags: {
+            type: 'long',
+            script: {
+              source: `
+               def rule = params._source['alert'];
+                if (rule != null && rule.tags != null) {
+                  if (rule.tags.size() > 0) {
+                    emit(1);
+                  } else {
+                    emit(0);
+                  }
+                }`,
+            },
+          },
+          rule_snoozed: {
+            type: 'long',
+            script: {
+              source: `
+                def rule = params._source['alert'];
+                if (rule != null && rule.snoozeSchedule != null) {
+                  if (rule.snoozeSchedule.size() > 0) {
+                    emit(1);
+                  } else {
+                    emit(0);
+                  }
+                }`,
+            },
+          },
+          rule_muted: {
+            type: 'long',
+            script: {
+              source: `
+                if (doc['alert.muteAll'].value == true) {
+                  emit(1);
+                } else {
+                  emit(0);
+                }`,
+            },
+          },
+          rule_with_muted_alerts: {
+            type: 'long',
+            script: {
+              source: `
+                def rule = params._source['alert'];
+                if (rule != null && rule.mutedInstanceIds != null) {
+                  if (rule.mutedInstanceIds.size() > 0) {
+                    emit(1);
+                  } else {
+                    emit(0);
+                  }
+                }`,
+            },
+          },
         },
         aggs: {
           by_rule_type_id: {
@@ -162,6 +229,39 @@ export async function getTotalCountAggregations({
           max_actions_count: { max: { field: 'rule_action_count' } },
           min_actions_count: { min: { field: 'rule_action_count' } },
           avg_actions_count: { avg: { field: 'rule_action_count' } },
+          by_execution_status: {
+            terms: {
+              field: 'alert.executionStatus.status',
+            },
+          },
+          by_notify_when: {
+            terms: {
+              field: 'alert.notifyWhen',
+            },
+          },
+          connector_types_by_consumers: {
+            terms: {
+              field: 'alert.consumer',
+            },
+            aggs: {
+              actions: {
+                nested: {
+                  path: 'alert.actions',
+                },
+                aggs: {
+                  connector_types: {
+                    terms: {
+                      field: 'alert.actions.actionTypeId',
+                    },
+                  },
+                },
+              },
+            },
+          },
+          sum_rules_with_tags: { sum: { field: 'rule_with_tags' } },
+          sum_rules_snoozed: { sum: { field: 'rule_snoozed' } },
+          sum_rules_muted: { sum: { field: 'rule_muted' } },
+          sum_rules_with_muted_alerts: { sum: { field: 'rule_with_muted_alerts' } },
         },
       },
     };
@@ -182,15 +282,41 @@ export async function getTotalCountAggregations({
       max_actions_count: AggregationsSingleMetricAggregateBase;
       min_actions_count: AggregationsSingleMetricAggregateBase;
       avg_actions_count: AggregationsSingleMetricAggregateBase;
+      by_execution_status: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
+      by_notify_when: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
+      connector_types_by_consumers: AggregationsTermsAggregateBase<ConnectorsByConsumersBucket>;
+      sum_rules_with_tags: AggregationsSingleMetricAggregateBase;
+      sum_rules_snoozed: AggregationsSingleMetricAggregateBase;
+      sum_rules_muted: AggregationsSingleMetricAggregateBase;
+      sum_rules_with_muted_alerts: AggregationsSingleMetricAggregateBase;
     };
 
     const totalRulesCount =
       typeof results.hits.total === 'number' ? results.hits.total : results.hits.total?.value;
 
+    const countRulesByExecutionStatus = groupRulesByStatus(
+      parseSimpleRuleTypeBucket(aggregations.by_execution_status.buckets)
+    );
+
+    const countRulesByNotifyWhen = groupRulesByNotifyWhen(
+      parseSimpleRuleTypeBucket(aggregations.by_notify_when.buckets)
+    );
+
+    const countConnectorTypesByConsumers = groupConnectorsByConsumers(
+      aggregations.connector_types_by_consumers.buckets
+    );
+
     return {
       hasErrors: false,
       count_total: totalRulesCount ?? 0,
       count_by_type: parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
+      count_rules_by_execution_status: countRulesByExecutionStatus,
+      count_rules_with_tags: aggregations.sum_rules_with_tags.value ?? 0,
+      count_rules_by_notify_when: countRulesByNotifyWhen,
+      count_rules_snoozed: aggregations.sum_rules_snoozed.value ?? 0,
+      count_rules_muted: aggregations.sum_rules_muted.value ?? 0,
+      count_rules_with_muted_alerts: aggregations.sum_rules_with_muted_alerts.value ?? 0,
+      count_connector_types_by_consumers: countConnectorTypesByConsumers,
       throttle_time: {
         min: `${aggregations.min_throttle_time.value ?? 0}s`,
         avg: `${aggregations.avg_throttle_time.value ?? 0}s`,
@@ -232,6 +358,17 @@ export async function getTotalCountAggregations({
       errorMessage,
       count_total: 0,
       count_by_type: {},
+      count_rules_by_execution_status: { success: 0, error: 0, warning: 0 },
+      count_rules_by_notify_when: {
+        on_throttle_interval: 0,
+        on_active_alert: 0,
+        on_action_group_change: 0,
+      },
+      count_rules_with_tags: 0,
+      count_rules_snoozed: 0,
+      count_rules_muted: 0,
+      count_rules_with_muted_alerts: 0,
+      count_connector_types_by_consumers: {},
       throttle_time: {
         min: '0s',
         avg: '0s',
