@@ -42,6 +42,7 @@ export const WorkspaceRoute = ({
     setHeaderActionMenu,
     spaces,
     indexPatterns: getIndexPatternProvider,
+    unifiedSearch,
   },
 }: WorkspaceRouteProps) => {
   /**
@@ -73,9 +74,10 @@ export const WorkspaceRoute = ({
       appName: 'graph',
       storage,
       data,
+      unifiedSearch,
       ...coreStart,
     }),
-    [coreStart, data, storage]
+    [coreStart, data, storage, unifiedSearch]
   );
 
   const [store] = useState(() =>
