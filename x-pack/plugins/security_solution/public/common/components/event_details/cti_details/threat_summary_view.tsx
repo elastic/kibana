@@ -146,6 +146,10 @@ const ThreatSummaryViewComponent: React.FC<{
     (eventDetail) => eventDetail?.field === 'host.risk.calculated_level'
   )?.values?.[0] as RiskSeverity | undefined;
 
+  const originalUserRisk = data?.find(
+    (eventDetail) => eventDetail?.field === 'user.risk.calculated_level'
+  )?.values?.[0] as RiskSeverity | undefined;
+
   return (
     <>
       <EuiHorizontalRule />
@@ -161,7 +165,7 @@ const ThreatSummaryViewComponent: React.FC<{
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <UserRiskSummary userRisk={userRisk} />
+          <UserRiskSummary userRisk={userRisk} originalUserRisk={originalUserRisk} />
         </EuiFlexItem>
 
         <EnrichmentSummary
