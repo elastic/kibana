@@ -1541,7 +1541,7 @@ export interface PackagePolicyServiceInterface {
     context: RequestHandlerContext,
     request: KibanaRequest
   ): Promise<
-    A extends 'postPackagePolicyDelete' | `packagePolicyUpdate`
+    A extends 'postPackagePolicyDelete' | `packagePolicyPostUpgrade`
       ? void
       : A extends 'packagePolicyPostCreate'
       ? PackagePolicy
