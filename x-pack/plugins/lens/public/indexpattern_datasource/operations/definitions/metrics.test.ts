@@ -195,39 +195,5 @@ describe('metrics', () => {
       expect(newAggs).toEqual(aggs);
       expect(newIdMap).toEqual(esAggsIdMap);
     });
-
-    it('should preserve operation-specific agg config params', () => {
-      const field = 'foo';
-
-      const aggs = [
-        makeEsAggBuilder('aggStdDeviation', {
-          id: 1,
-          enabled: true,
-          schema: 'metric',
-          field,
-          timeShift: undefined,
-          emptyAsNull: undefined,
-        }),
-        makeEsAggBuilder('aggStdDeviation', {
-          id: 2,
-          enabled: true,
-          schema: 'metric',
-          field,
-          timeShift: undefined,
-          emptyAsNull: undefined,
-        }),
-      ];
-
-      const { esAggsIdMap, aggsToIdsMap } = buildMapsFromAggBuilders(aggs);
-
-      const { aggs: newAggs } = standardDeviationOperation.optimizeEsAggs!(
-        aggs,
-        esAggsIdMap,
-        aggsToIdsMap
-      );
-
-      expect(newAggs).toHaveLength(1);
-      expect(newAggs[0].functions[0].getArgument('showBounds')?.[0]).toBe(false);
-    });
   });
 });

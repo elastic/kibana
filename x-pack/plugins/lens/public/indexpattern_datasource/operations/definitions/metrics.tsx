@@ -12,8 +12,6 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import {
   buildExpressionFunction,
   ExpressionAstExpressionBuilder,
-  buildExpression,
-  ExpressionAstFunction,
   ExpressionAstFunctionBuilder,
 } from '@kbn/expressions-plugin/public';
 import {
@@ -288,57 +286,17 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         }
       );
 
-      // collapse them into a single expression builders
+      // collapse them into a single expression builder
       Object.values(metricExpressionsByArgs).forEach((expressionBuilders) => {
         if (expressionBuilders.length <= 1) {
           // don't need to optimize if there aren't more than one
           return;
         }
 
-        // we're going to merge these expression builders into a single builder, so
-        // remove them from the aggs array
-        aggs = aggs.filter((aggBuilder) => !expressionBuilders.includes(aggBuilder));
-
         const [firstExpressionBuilder, ...restExpressionBuilders] = expressionBuilders;
 
-        const {
-          functions: [firstFnBuilder],
-        } = firstExpressionBuilder;
-
-        const esAggsColumnId = firstFnBuilder.getArgument('id')![0];
-
-        let ast: ExpressionAstFunction;
-
-        if (firstFnBuilder.name === 'aggFilteredMetric') {
-          ast = buildExpressionFunction<AggFunctionsMapping['aggFilteredMetric']>(
-            'aggFilteredMetric',
-            {
-              id: esAggsColumnId,
-              enabled: firstFnBuilder.getArgument('enabled')?.[0],
-              schema: firstFnBuilder.getArgument('schema')?.[0],
-              timeShift: firstFnBuilder.getArgument('timeShift')?.[0],
-              customBucket: firstFnBuilder.getArgument('customBucket')?.[0],
-              customMetric: firstFnBuilder.getArgument('customMetric')?.[0],
-            }
-          ).toAst();
-        } else {
-          ast = buildExpressionFunction(typeToFn[type], {
-            id: esAggsColumnId,
-            enabled: firstFnBuilder.getArgument('enabled')?.[0],
-            schema: firstFnBuilder.getArgument('schema')?.[0],
-            field: firstFnBuilder.getArgument('field')?.[0],
-            timeShift: firstFnBuilder.getArgument('timeShift')?.[0],
-            emptyAsNull: firstFnBuilder.getArgument('emptyAsNull')?.[0],
-            ...aggConfigParams,
-          }).toAst();
-        }
-
-        aggs.push(
-          buildExpression({
-            type: 'expression',
-            chain: [ast],
-          })
-        );
+        // throw away all but the first expression builder
+        aggs = aggs.filter((aggBuilder) => !restExpressionBuilders.includes(aggBuilder));
 
         const firstEsAggsId = aggExpressionToEsAggsIdMap.get(firstExpressionBuilder);
         if (firstEsAggsId === undefined) {
