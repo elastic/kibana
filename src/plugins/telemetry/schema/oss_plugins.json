@@ -1,207 +1,5 @@
 {
   "properties": {
-    "index-patterns": {
-      "properties": {
-        "indexPatternsCount": {
-          "type": "long"
-        },
-        "indexPatternsWithScriptedFieldCount": {
-          "type": "long"
-        },
-        "indexPatternsWithRuntimeFieldCount": {
-          "type": "long"
-        },
-        "scriptedFieldCount": {
-          "type": "long"
-        },
-        "runtimeFieldCount": {
-          "type": "long"
-        },
-        "perIndexPattern": {
-          "properties": {
-            "scriptedFieldCount": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            },
-            "runtimeFieldCount": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            },
-            "scriptedFieldLineCount": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            },
-            "runtimeFieldLineCount": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "dashboard": {
-      "properties": {
-        "panels": {
-          "properties": {
-            "total": {
-              "type": "long"
-            },
-            "by_reference": {
-              "type": "long"
-            },
-            "by_value": {
-              "type": "long"
-            },
-            "by_type": {
-              "properties": {
-                "DYNAMIC_KEY": {
-                  "properties": {
-                    "total": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The number of panels that have been added to all dashboards."
-                      }
-                    },
-                    "by_reference": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The number of \"by reference\" panels that have been added to all dashboards."
-                      }
-                    },
-                    "by_value": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The number of \"by value\" panels that have been added to all dashboards."
-                      }
-                    },
-                    "details": {
-                      "properties": {
-                        "DYNAMIC_KEY": {
-                          "type": "long",
-                          "_meta": {
-                            "description": "Collection of telemetry metrics that embeddable service reports. Embeddable service internally calls each embeddable, which in turn calls its dynamic actions, which calls each drill down attached to that embeddable."
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "controls": {
-          "properties": {
-            "total": {
-              "type": "long"
-            },
-            "by_type": {
-              "properties": {
-                "DYNAMIC_KEY": {
-                  "properties": {
-                    "total": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The number of this type of control in all Control Groups"
-                      }
-                    },
-                    "details": {
-                      "properties": {
-                        "DYNAMIC_KEY": {
-                          "type": "long",
-                          "_meta": {
-                            "description": "Collection of telemetry metrics that embeddable service reports. Will be used for details which are specific to the current control type"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "ignore_settings": {
-              "properties": {
-                "DYNAMIC_KEY": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Collection of telemetry metrics that count the number of control groups which have this ignore setting turned on"
-                  }
-                }
-              }
-            },
-            "chaining_system": {
-              "properties": {
-                "DYNAMIC_KEY": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Collection of telemetry metrics that count the number of control groups which are using this chaining system"
-                  }
-                }
-              }
-            },
-            "label_position": {
-              "properties": {
-                "DYNAMIC_KEY": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Collection of telemetry metrics that count the number of control groups which have their labels in this position"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "kql": {
-      "properties": {
-        "optInCount": {
-          "type": "long"
-        },
-        "optOutCount": {
-          "type": "long"
-        },
-        "defaultQueryLanguage": {
-          "type": "keyword"
-        }
-      }
-    },
     "application_usage": {
       "properties": {
         "dashboards": {
@@ -7736,6 +7534,485 @@
         }
       }
     },
+    "dashboard": {
+      "properties": {
+        "panels": {
+          "properties": {
+            "total": {
+              "type": "long"
+            },
+            "by_reference": {
+              "type": "long"
+            },
+            "by_value": {
+              "type": "long"
+            },
+            "by_type": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of panels that have been added to all dashboards."
+                      }
+                    },
+                    "by_reference": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of \"by reference\" panels that have been added to all dashboards."
+                      }
+                    },
+                    "by_value": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of \"by value\" panels that have been added to all dashboards."
+                      }
+                    },
+                    "details": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Collection of telemetry metrics that embeddable service reports. Embeddable service internally calls each embeddable, which in turn calls its dynamic actions, which calls each drill down attached to that embeddable."
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "controls": {
+          "properties": {
+            "total": {
+              "type": "long"
+            },
+            "by_type": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of this type of control in all Control Groups"
+                      }
+                    },
+                    "details": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Collection of telemetry metrics that embeddable service reports. Will be used for details which are specific to the current control type"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "ignore_settings": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Collection of telemetry metrics that count the number of control groups which have this ignore setting turned on"
+                  }
+                }
+              }
+            },
+            "chaining_system": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Collection of telemetry metrics that count the number of control groups which are using this chaining system"
+                  }
+                }
+              }
+            },
+            "label_position": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Collection of telemetry metrics that count the number of control groups which have their labels in this position"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "event_loop_delays": {
+      "properties": {
+        "daily": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "processId": {
+                "type": "long",
+                "_meta": {
+                  "description": "The process id of the monitored kibana instance."
+                }
+              },
+              "instanceUuid": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The uuid of the kibana instance."
+                }
+              },
+              "fromTimestamp": {
+                "type": "date",
+                "_meta": {
+                  "description": "Timestamp at which the histogram started monitoring."
+                }
+              },
+              "lastUpdatedAt": {
+                "type": "date",
+                "_meta": {
+                  "description": "Latest timestamp this histogram object was updated this day."
+                }
+              },
+              "min": {
+                "type": "long",
+                "_meta": {
+                  "description": "The minimum recorded event loop delay in ms."
+                }
+              },
+              "max": {
+                "type": "long",
+                "_meta": {
+                  "description": "The maximum recorded event loop delay in ms."
+                }
+              },
+              "mean": {
+                "type": "long",
+                "_meta": {
+                  "description": "The mean of the recorded event loop delays in ms."
+                }
+              },
+              "exceeds": {
+                "type": "long",
+                "_meta": {
+                  "description": "The number of times the event loop delay exceeded the maximum 1 hour eventloop delay threshold."
+                }
+              },
+              "stddev": {
+                "type": "long",
+                "_meta": {
+                  "description": "The standard deviation of the recorded event loop delays  in ms."
+                }
+              },
+              "percentiles": {
+                "properties": {
+                  "50": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "The 50th accumulated percentile distribution in ms"
+                    }
+                  },
+                  "75": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "The 75th accumulated percentile distribution in ms"
+                    }
+                  },
+                  "95": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "The 95th accumulated percentile distribution in ms"
+                    }
+                  },
+                  "99": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "The 99th accumulated percentile distribution in ms"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "index-patterns": {
+      "properties": {
+        "indexPatternsCount": {
+          "type": "long"
+        },
+        "indexPatternsWithScriptedFieldCount": {
+          "type": "long"
+        },
+        "indexPatternsWithRuntimeFieldCount": {
+          "type": "long"
+        },
+        "scriptedFieldCount": {
+          "type": "long"
+        },
+        "runtimeFieldCount": {
+          "type": "long"
+        },
+        "perIndexPattern": {
+          "properties": {
+            "scriptedFieldCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "runtimeFieldCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "scriptedFieldLineCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "runtimeFieldLineCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "kibana": {
+      "properties": {
+        "index": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The index storing the saved objects"
+          }
+        },
+        "dashboard": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of dashboard saved objects"
+              }
+            }
+          }
+        },
+        "visualization": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of visualization saved objects"
+              }
+            }
+          }
+        },
+        "search": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of search saved objects"
+              }
+            }
+          }
+        },
+        "index_pattern": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of index_pattern saved objects"
+              }
+            }
+          }
+        },
+        "graph_workspace": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of graph_workspace saved objects"
+              }
+            }
+          }
+        }
+      }
+    },
+    "kql": {
+      "properties": {
+        "optInCount": {
+          "type": "long"
+        },
+        "optOutCount": {
+          "type": "long"
+        },
+        "defaultQueryLanguage": {
+          "type": "keyword"
+        }
+      }
+    },
+    "localization": {
+      "properties": {
+        "locale": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The default locale set on the Kibana system"
+          }
+        },
+        "integrities": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "text",
+              "_meta": {
+                "description": "Translation file hash. If the hash is different it indicates that a custom translation file is used"
+              }
+            }
+          }
+        },
+        "labelsCount": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of translated labels"
+          }
+        }
+      }
+    },
+    "sample-data": {
+      "properties": {
+        "installed": {
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
+        },
+        "last_install_date": {
+          "type": "date"
+        },
+        "last_install_set": {
+          "type": "keyword"
+        },
+        "last_uninstall_date": {
+          "type": "date"
+        },
+        "last_uninstall_set": {
+          "type": "keyword"
+        },
+        "uninstalled": {
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
+        }
+      }
+    },
+    "saved_objects_counts": {
+      "properties": {
+        "total": {
+          "type": "long",
+          "_meta": {
+            "description": "Total number of saved objects in the cluster"
+          }
+        },
+        "by_type": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "type": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The SavedObjects type"
+                }
+              },
+              "count": {
+                "type": "long",
+                "_meta": {
+                  "description": "How many SavedObjects of that type are stored in the cluster across all Spaces"
+                }
+              }
+            }
+          }
+        },
+        "others": {
+          "type": "long",
+          "_meta": {
+            "description": "Number of SO objects outside the breakdown. If it is not 0, there may be an unexpected state of the deployment 0 and future migrations might fail."
+          }
+        },
+        "non_registered_types": {
+          "type": "array",
+          "items": {
+            "type": "keyword",
+            "_meta": {
+              "description": "List of SO types that showed up in the break down but are not registered in Kibana. They could be a potential cause of future migration failures."
+            }
+          }
+        }
+      }
+    },
+    "search": {
+      "properties": {
+        "successCount": {
+          "type": "long"
+        },
+        "errorCount": {
+          "type": "long"
+        },
+        "averageDuration": {
+          "type": "float"
+        }
+      }
+    },
+    "search-session": {
+      "properties": {
+        "transientCount": {
+          "type": "long"
+        },
+        "persistedCount": {
+          "type": "long"
+        },
+        "totalCount": {
+          "type": "long"
+        }
+      }
+    },
     "stack_management": {
       "properties": {
         "securitySolution:defaultIndex": {
@@ -8565,92 +8842,114 @@
         }
       }
     },
-    "event_loop_delays": {
+    "static_telemetry": {
       "properties": {
-        "daily": {
-          "type": "array",
-          "items": {
-            "properties": {
-              "processId": {
-                "type": "long",
-                "_meta": {
-                  "description": "The process id of the monitored kibana instance."
+        "ece": {
+          "properties": {
+            "kb_uuid": {
+              "type": "keyword"
+            },
+            "es_uuid": {
+              "type": "keyword"
+            },
+            "account_id": {
+              "type": "keyword"
+            },
+            "license": {
+              "properties": {
+                "uuid": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword"
+                },
+                "issued_to": {
+                  "type": "text"
+                },
+                "issuer": {
+                  "type": "text"
+                },
+                "issue_date_in_millis": {
+                  "type": "long"
+                },
+                "start_date_in_millis": {
+                  "type": "long"
+                },
+                "expiry_date_in_millis": {
+                  "type": "long"
+                },
+                "max_resource_units": {
+                  "type": "long"
                 }
-              },
-              "instanceUuid": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "The uuid of the kibana instance."
+              }
+            }
+          }
+        },
+        "ess": {
+          "properties": {
+            "kb_uuid": {
+              "type": "keyword"
+            },
+            "es_uuid": {
+              "type": "keyword"
+            },
+            "account_id": {
+              "type": "keyword"
+            },
+            "license": {
+              "properties": {
+                "uuid": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword"
+                },
+                "issued_to": {
+                  "type": "text"
+                },
+                "issuer": {
+                  "type": "text"
+                },
+                "issue_date_in_millis": {
+                  "type": "long"
+                },
+                "start_date_in_millis": {
+                  "type": "long"
+                },
+                "expiry_date_in_millis": {
+                  "type": "long"
+                },
+                "max_resource_units": {
+                  "type": "long"
                 }
-              },
-              "fromTimestamp": {
-                "type": "date",
-                "_meta": {
-                  "description": "Timestamp at which the histogram started monitoring."
-                }
-              },
-              "lastUpdatedAt": {
-                "type": "date",
-                "_meta": {
-                  "description": "Latest timestamp this histogram object was updated this day."
-                }
-              },
-              "min": {
-                "type": "long",
-                "_meta": {
-                  "description": "The minimum recorded event loop delay in ms."
-                }
-              },
-              "max": {
-                "type": "long",
-                "_meta": {
-                  "description": "The maximum recorded event loop delay in ms."
-                }
-              },
-              "mean": {
-                "type": "long",
-                "_meta": {
-                  "description": "The mean of the recorded event loop delays in ms."
-                }
-              },
-              "exceeds": {
-                "type": "long",
-                "_meta": {
-                  "description": "The number of times the event loop delay exceeded the maximum 1 hour eventloop delay threshold."
-                }
-              },
-              "stddev": {
-                "type": "long",
-                "_meta": {
-                  "description": "The standard deviation of the recorded event loop delays  in ms."
-                }
-              },
-              "percentiles": {
-                "properties": {
-                  "50": {
-                    "type": "long",
-                    "_meta": {
-                      "description": "The 50th accumulated percentile distribution in ms"
-                    }
-                  },
-                  "75": {
-                    "type": "long",
-                    "_meta": {
-                      "description": "The 75th accumulated percentile distribution in ms"
-                    }
-                  },
-                  "95": {
-                    "type": "long",
-                    "_meta": {
-                      "description": "The 95th accumulated percentile distribution in ms"
-                    }
-                  },
-                  "99": {
-                    "type": "long",
-                    "_meta": {
-                      "description": "The 99th accumulated percentile distribution in ms"
-                    }
-                  }
+              }
+            }
+          }
+        },
+        "eck": {
+          "properties": {
+            "operator_uuid": {
+              "type": "keyword"
+            },
+            "operator_roles": {
+              "type": "keyword"
+            },
+            "custom_operator_namespace": {
+              "type": "boolean"
+            },
+            "distribution": {
+              "type": "text"
+            },
+            "build": {
+              "properties": {
+                "hash": {
+                  "type": "text"
+                },
+                "date": {
+                  "type": "date"
+                },
+                "version": {
+                  "type": "keyword"
                 }
               }
             }
@@ -8658,133 +8957,16 @@
         }
       }
     },
-    "localization": {
+    "telemetry": {
       "properties": {
-        "locale": {
-          "type": "keyword",
-          "_meta": {
-            "description": "The default locale set on the Kibana system"
-          }
+        "opt_in_status": {
+          "type": "boolean"
         },
-        "integrities": {
-          "properties": {
-            "DYNAMIC_KEY": {
-              "type": "text",
-              "_meta": {
-                "description": "Translation file hash. If the hash is different it indicates that a custom translation file is used"
-              }
-            }
-          }
+        "usage_fetcher": {
+          "type": "keyword"
         },
-        "labelsCount": {
-          "type": "long",
-          "_meta": {
-            "description": "The number of translated labels"
-          }
-        }
-      }
-    },
-    "kibana": {
-      "properties": {
-        "index": {
-          "type": "keyword",
-          "_meta": {
-            "description": "The index storing the saved objects"
-          }
-        },
-        "dashboard": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "Total number of dashboard saved objects"
-              }
-            }
-          }
-        },
-        "visualization": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "Total number of visualization saved objects"
-              }
-            }
-          }
-        },
-        "search": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "Total number of search saved objects"
-              }
-            }
-          }
-        },
-        "index_pattern": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "Total number of index_pattern saved objects"
-              }
-            }
-          }
-        },
-        "graph_workspace": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "Total number of graph_workspace saved objects"
-              }
-            }
-          }
-        }
-      }
-    },
-    "saved_objects_counts": {
-      "properties": {
-        "total": {
-          "type": "long",
-          "_meta": {
-            "description": "Total number of saved objects in the cluster"
-          }
-        },
-        "by_type": {
-          "type": "array",
-          "items": {
-            "properties": {
-              "type": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "The SavedObjects type"
-                }
-              },
-              "count": {
-                "type": "long",
-                "_meta": {
-                  "description": "How many SavedObjects of that type are stored in the cluster across all Spaces"
-                }
-              }
-            }
-          }
-        },
-        "others": {
-          "type": "long",
-          "_meta": {
-            "description": "Number of SO objects outside the breakdown. If it is not 0, there may be an unexpected state of the deployment 0 and future migrations might fail."
-          }
-        },
-        "non_registered_types": {
-          "type": "array",
-          "items": {
-            "type": "keyword",
-            "_meta": {
-              "description": "List of SO types that showed up in the break down but are not registered in Kibana. They could be a potential cause of future migration failures."
-            }
-          }
+        "last_reported": {
+          "type": "long"
         }
       }
     },
@@ -9903,181 +10085,6 @@
         }
       }
     },
-    "usage_counters": {
-      "properties": {
-        "dailyEvents": {
-          "type": "array",
-          "items": {
-            "properties": {
-              "domainId": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "Domain name of the metric (ie plugin name)."
-                }
-              },
-              "counterName": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "Name of the counter that happened."
-                }
-              },
-              "lastUpdatedAt": {
-                "type": "date",
-                "_meta": {
-                  "description": "Time at which the metric was last updated."
-                }
-              },
-              "fromTimestamp": {
-                "type": "date",
-                "_meta": {
-                  "description": "Time at which the metric was captured."
-                }
-              },
-              "counterType": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "The type of counter used."
-                }
-              },
-              "total": {
-                "type": "integer",
-                "_meta": {
-                  "description": "The total number of times the event happened."
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "telemetry": {
-      "properties": {
-        "opt_in_status": {
-          "type": "boolean"
-        },
-        "usage_fetcher": {
-          "type": "keyword"
-        },
-        "last_reported": {
-          "type": "long"
-        }
-      }
-    },
-    "static_telemetry": {
-      "properties": {
-        "ece": {
-          "properties": {
-            "kb_uuid": {
-              "type": "keyword"
-            },
-            "es_uuid": {
-              "type": "keyword"
-            },
-            "account_id": {
-              "type": "keyword"
-            },
-            "license": {
-              "properties": {
-                "uuid": {
-                  "type": "keyword"
-                },
-                "type": {
-                  "type": "keyword"
-                },
-                "issued_to": {
-                  "type": "text"
-                },
-                "issuer": {
-                  "type": "text"
-                },
-                "issue_date_in_millis": {
-                  "type": "long"
-                },
-                "start_date_in_millis": {
-                  "type": "long"
-                },
-                "expiry_date_in_millis": {
-                  "type": "long"
-                },
-                "max_resource_units": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
-        "ess": {
-          "properties": {
-            "kb_uuid": {
-              "type": "keyword"
-            },
-            "es_uuid": {
-              "type": "keyword"
-            },
-            "account_id": {
-              "type": "keyword"
-            },
-            "license": {
-              "properties": {
-                "uuid": {
-                  "type": "keyword"
-                },
-                "type": {
-                  "type": "keyword"
-                },
-                "issued_to": {
-                  "type": "text"
-                },
-                "issuer": {
-                  "type": "text"
-                },
-                "issue_date_in_millis": {
-                  "type": "long"
-                },
-                "start_date_in_millis": {
-                  "type": "long"
-                },
-                "expiry_date_in_millis": {
-                  "type": "long"
-                },
-                "max_resource_units": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
-        "eck": {
-          "properties": {
-            "operator_uuid": {
-              "type": "keyword"
-            },
-            "operator_roles": {
-              "type": "keyword"
-            },
-            "custom_operator_namespace": {
-              "type": "boolean"
-            },
-            "distribution": {
-              "type": "text"
-            },
-            "build": {
-              "properties": {
-                "hash": {
-                  "type": "text"
-                },
-                "date": {
-                  "type": "date"
-                },
-                "version": {
-                  "type": "keyword"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "usage_collector_stats": {
       "properties": {
         "total_duration": {
@@ -10214,56 +10221,49 @@
         }
       }
     },
-    "search": {
+    "usage_counters": {
       "properties": {
-        "successCount": {
-          "type": "long"
-        },
-        "errorCount": {
-          "type": "long"
-        },
-        "averageDuration": {
-          "type": "float"
-        }
-      }
-    },
-    "search-session": {
-      "properties": {
-        "transientCount": {
-          "type": "long"
-        },
-        "persistedCount": {
-          "type": "long"
-        },
-        "totalCount": {
-          "type": "long"
-        }
-      }
-    },
-    "sample-data": {
-      "properties": {
-        "installed": {
+        "dailyEvents": {
           "type": "array",
           "items": {
-            "type": "keyword"
-          }
-        },
-        "last_install_date": {
-          "type": "date"
-        },
-        "last_install_set": {
-          "type": "keyword"
-        },
-        "last_uninstall_date": {
-          "type": "date"
-        },
-        "last_uninstall_set": {
-          "type": "keyword"
-        },
-        "uninstalled": {
-          "type": "array",
-          "items": {
-            "type": "keyword"
+            "properties": {
+              "domainId": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Domain name of the metric (ie plugin name)."
+                }
+              },
+              "counterName": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Name of the counter that happened."
+                }
+              },
+              "lastUpdatedAt": {
+                "type": "date",
+                "_meta": {
+                  "description": "Time at which the metric was last updated."
+                }
+              },
+              "fromTimestamp": {
+                "type": "date",
+                "_meta": {
+                  "description": "Time at which the metric was captured."
+                }
+              },
+              "counterType": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The type of counter used."
+                }
+              },
+              "total": {
+                "type": "integer",
+                "_meta": {
+                  "description": "The total number of times the event happened."
+                }
+              }
+            }
           }
         }
       }
