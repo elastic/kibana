@@ -28,6 +28,9 @@ export const DATE_ERR = i18n.translate('autocomplete.invalidDateError', {
   defaultMessage: 'Not a valid date',
 });
 
+export const BINARY_TYPE_NOT_SUPPORTED = i18n.translate('autocomplete.invalidBinaryType', {
+  defaultMessage: 'Binary fields are currently unsupported',
+});
 export const FIELD_SPACE_WARNING = i18n.translate('autocomplete.fieldSpaceWarning', {
   defaultMessage: "Warning: Spaces at the start or end of this value aren't being displayed.",
 });
@@ -40,4 +43,5 @@ export default {
   NUMBER_ERR,
   DATE_ERR,
   FIELD_SPACE_WARNING,
+  BINARY_TYPE_NOT_SUPPORTED,
 };

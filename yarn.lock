@@ -3588,6 +3588,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-avatar-user-profile-components@link:bazel-bin/packages/shared-ux/avatar/user_profile/impl":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-button-exit-full-screen-mocks@link:bazel-bin/packages/shared-ux/button/exit_full_screen/mocks":
   version "0.0.0"
   uid ""
@@ -7602,6 +7606,10 @@
   uid ""
 
 "@types/kbn__shared-ux-avatar-solution@link:bazel-bin/packages/shared-ux/avatar/solution/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-avatar-user-profile-components@link:bazel-bin/packages/shared-ux/avatar/user_profile/impl/npm_module_types":
   version "0.0.0"
   uid ""
 

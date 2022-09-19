@@ -434,5 +434,37 @@ export default ({ getService }: FtrProviderContext) => {
         .sort();
       expect(processPids[0]).eql([1]);
     });
+
+    describe('alerts should be be enriched', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/entity/host_risk');
+      });
+
+      it('should be enriched with host risk score', async () => {
+        const rule: NewTermsCreateSchema = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          new_terms_fields: ['host.name'],
+          from: '2019-02-19T20:42:00.000Z',
+          history_window_start: '2019-01-19T20:42:00.000Z',
+        };
+
+        const createdRule = await createRule(supertest, log, rule);
+
+        await waitForRuleSuccessOrStatus(
+          supertest,
+          log,
+          createdRule.id,
+          RuleExecutionStatus.succeeded
+        );
+
+        const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
+        expect(signalsOpen.hits.hits[0]?._source?.host?.risk?.calculated_level).to.eql('Low');
+        expect(signalsOpen.hits.hits[0]?._source?.host?.risk?.calculated_score_norm).to.eql(23);
+      });
+    });
   });
 };
