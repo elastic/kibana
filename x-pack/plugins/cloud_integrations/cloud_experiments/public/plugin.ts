@@ -26,9 +26,11 @@ export class CloudExperimentsPlugin
   private readonly clientId?: string;
   private readonly kibanaVersion: string;
   private readonly flagOverrides?: Record<string, unknown>;
+  private readonly isDev: boolean;
 
   /** Constructor of the plugin **/
   constructor(initializerContext: PluginInitializerContext) {
+    this.isDev = initializerContext.env.mode.dev;
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     const config = initializerContext.config.get<{
       launch_darkly?: { client_id: string };
@@ -74,7 +76,6 @@ export class CloudExperimentsPlugin
             .catch((err) => console.warn(err));
         }
       },
-      getVariation: this.getVariation,
     };
   }
 
@@ -116,9 +117,11 @@ export class CloudExperimentsPlugin
   private reportMetric = <Data>({ name, meta, value }: CloudExperimentsMetric<Data>): void => {
     const metricName = METRIC_NAMES[name];
     this.launchDarklyClient?.track(metricName, meta, value);
-    // eslint-disable-next-line no-console
-    console.debug(`Reported experimentation metric ${metricName}`, {
-      experimentationMetric: { name, meta, value },
-    });
+    if (this.isDev) {
+      // eslint-disable-next-line no-console
+      console.debug(`Reported experimentation metric ${metricName}`, {
+        experimentationMetric: { name, meta, value },
+      });
+    }
   };
 }

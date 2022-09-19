@@ -17,24 +17,15 @@ export interface CloudExperimentsPluginSetup {
    * Identifies the user in the A/B testing service.
    * For now, we only rely on the user ID. In the future, we may request further details for more targeted experiments.
    * @param userId The unique identifier of the user in the experiment.
-   * @param userMetadata Additional attributes to the user.
+   * @param userMetadata Additional attributes to the user. Take care to ensure these values do not contain PII.
+   *
+   * @deprecated This API will become internal as soon as we reduce the dependency graph of the `cloud` plugin,
+   * and this plugin depends on it to fetch the data.
    */
   identifyUser: (
     userId: string,
     userMetadata?: Record<string, string | boolean | number | Array<string | boolean | number>>
   ) => void;
-
-  /**
-   * Fetch the configuration assigned to variation `configKey`. If nothing is found, fallback to `defaultValue`.
-   * @param featureFlagName The name of the key to find the config variation. {@link CloudExperimentsFeatureFlagNames}.
-   * @param defaultValue The fallback value in case no variation is found.
- *
- * @public
- */
-  getVariation: <Data>(
-    featureFlagName: CloudExperimentsFeatureFlagNames,
-    defaultValue: Data
-  ) => Promise<Data>;
 }
 
 /**
@@ -55,6 +46,8 @@ export interface CloudExperimentsPluginStart {
    * Fetch the configuration assigned to variation `configKey`. If nothing is found, fallback to `defaultValue`.
    * @param featureFlagName The name of the key to find the config variation. {@link CloudExperimentsFeatureFlagNames}.
    * @param defaultValue The fallback value in case no variation is found.
+   *
+   * @public
    */
   getVariation: <Data>(
     featureFlagName: CloudExperimentsFeatureFlagNames,
@@ -63,6 +56,8 @@ export interface CloudExperimentsPluginStart {
   /**
    * Report metrics back to the A/B testing service to measure the conversion rate for each variation in the experiment.
    * @param metric {@link CloudExperimentsMetric}
+   *
+   * @public
    */
   reportMetric: <Data>(metric: CloudExperimentsMetric<Data>) => void;
 }

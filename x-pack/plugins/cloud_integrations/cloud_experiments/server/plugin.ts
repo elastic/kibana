@@ -91,7 +91,6 @@ export class CloudExperimentsPlugin
         this.launchDarklyUser = { key: userId, custom: userMetadata };
         this.launchDarklyClient?.identify(this.launchDarklyUser!);
       },
-      getVariation: this.getVariation,
     };
   }
 

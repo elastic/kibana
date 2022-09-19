@@ -66,7 +66,6 @@ describe('Cloud Experiments public plugin', () => {
       expect(setupContract).toStrictEqual(
         expect.objectContaining({
           identifyUser: expect.any(Function),
-          getVariation: expect.any(Function),
         })
       );
     });
