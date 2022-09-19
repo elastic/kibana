@@ -14,7 +14,7 @@ import {
   TRANSACTION_TYPE,
   TRANSACTION_DURATION_SUMMARY,
   TRANSACTION_FAILURE_COUNT,
-  TRANSACTION_SUCCESS_COUNT
+  TRANSACTION_SUCCESS_COUNT,
 } from '../../../../common/elasticsearch_fieldnames';
 import {
   TRANSACTION_PAGE_LOAD,
@@ -23,9 +23,7 @@ import {
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
-import {
-  calculateFailedTransactionRateFromServiceMetrics,
-} from '../../../lib/helpers/transaction_error_rate';
+import { calculateFailedTransactionRateFromServiceMetrics } from '../../../lib/helpers/transaction_error_rate';
 import { ServicesItemsSetup } from './get_services_items';
 import { serviceGroupQuery } from '../../../../common/utils/service_group_query';
 import { ServiceGroup } from '../../../../common/service_groups';
@@ -95,13 +93,13 @@ export async function getServiceAggregatedTransactionStats({
                       },
                       failure_count: {
                         sum: {
-                          field: TRANSACTION_FAILURE_COUNT
-                        }
+                          field: TRANSACTION_FAILURE_COUNT,
+                        },
                       },
                       success_count: {
                         sum: {
-                          field: TRANSACTION_SUCCESS_COUNT
-                        }
+                          field: TRANSACTION_SUCCESS_COUNT,
+                        },
                       },
                       environments: {
                         terms: {
@@ -147,7 +145,7 @@ export async function getServiceAggregatedTransactionStats({
         latency: topTransactionTypeBucket.avg_duration.value,
         transactionErrorRate: calculateFailedTransactionRateFromServiceMetrics({
           failedTransactions: topTransactionTypeBucket.failure_count.value,
-          successfulTransactions: topTransactionTypeBucket.success_count.value
+          successfulTransactions: topTransactionTypeBucket.success_count.value,
         }),
         throughput: calculateThroughputWithRange({
           start,

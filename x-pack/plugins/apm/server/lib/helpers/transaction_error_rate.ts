@@ -9,12 +9,10 @@ import {
   AggregationOptionsByType,
   AggregationResultOf,
 } from '@kbn/core/types/elasticsearch';
-import { EVENT_OUTCOME} from '../../../common/elasticsearch_fieldnames';
+import { EVENT_OUTCOME } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
 
-export const getOutcomeAggregation = (
-  searchAggregatedServiceMetrics?: boolean
-) => {
+export const getOutcomeAggregation = () => {
   return {
     terms: {
       field: EVENT_OUTCOME,
@@ -52,16 +50,13 @@ export function calculateFailedTransactionRate(
   return failedTransactions / (successfulTransactions + failedTransactions);
 }
 
-export function calculateFailedTransactionRateFromServiceMetrics(
-  {
-    failedTransactions, 
-    successfulTransactions
-  }
-  : {
-    failedTransactions: number | null;
-    successfulTransactions: number | null;
-  }
-) {
+export function calculateFailedTransactionRateFromServiceMetrics({
+  failedTransactions,
+  successfulTransactions,
+}: {
+  failedTransactions: number | null;
+  successfulTransactions: number | null;
+}) {
   failedTransactions = failedTransactions ?? 0;
   successfulTransactions = failedTransactions ?? 0;
 

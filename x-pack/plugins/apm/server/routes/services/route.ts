@@ -129,21 +129,21 @@ const servicesRoute = createApmServerRoute({
       getRandomSampler({ security, request, probability }),
     ]);
 
-    const [searchAggregatedTransactions, searchAggregatedServiceMetrics] = await Promise.all([
-      getSearchAggregatedTransactions({
-        ...setup,
-        kuery,
-        start,
-        end,
-      }),
-      getSearchAggregatedServiceMetrics({
-        ...setup,
-        kuery,
-        start,
-        end,
-      })
-    ]);
-
+    const [searchAggregatedTransactions, searchAggregatedServiceMetrics] =
+      await Promise.all([
+        getSearchAggregatedTransactions({
+          ...setup,
+          kuery,
+          start,
+          end,
+        }),
+        getSearchAggregatedServiceMetrics({
+          ...setup,
+          kuery,
+          start,
+          end,
+        }),
+      ]);
 
     return getServices({
       environment,

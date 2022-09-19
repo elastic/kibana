@@ -60,7 +60,7 @@ export async function getServiceTransactionStats({
 }: AggregationParams) {
   const { apmEventClient } = setup;
 
-  const outcomes = getOutcomeAggregation(searchAggregatedServiceMetrics);
+  const outcomes = getOutcomeAggregation();
 
   const metrics = {
     avg_duration: {
