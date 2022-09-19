@@ -29,7 +29,7 @@ export const deleteEsIndicesRoute = (router: SecuritySolutionPluginRouter) => {
       const siemResponse = buildSiemResponse(response);
 
       const { client } = (await context.core).elasticsearch;
-      const { indices = [] } = request.body;
+      const { indices } = request.body;
 
       try {
         await deleteEsIndices({ client, indices });

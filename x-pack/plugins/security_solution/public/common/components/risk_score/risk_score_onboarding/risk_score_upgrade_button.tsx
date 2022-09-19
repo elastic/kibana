@@ -55,6 +55,7 @@ const RiskScoreUpgradeButtonComponent = ({
       refetch,
       renderDashboardLink,
       renderDocLink,
+      riskScoreEntity,
       theme,
       dashboard,
     });
@@ -68,6 +69,7 @@ const RiskScoreUpgradeButtonComponent = ({
     refetch,
     renderDashboardLink,
     renderDocLink,
+    riskScoreEntity,
     theme,
     dashboard,
   ]);
