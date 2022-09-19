@@ -160,7 +160,7 @@ export const SubChart: React.FC<SubChartProps> = ({
         <EuiFlexGroup
           direction="row"
           gutterSize="m"
-          alignItems="flexStart"
+          alignItems="center"
           style={{ overflowWrap: 'anywhere' }}
         >
           <EuiFlexItem grow={false}>
@@ -170,10 +170,16 @@ export const SubChart: React.FC<SubChartProps> = ({
               </EuiText>
             </EuiBadge>
           </EuiFlexItem>
-          <EuiFlexItem grow>
-            <EuiLink href={href}>
-              <EuiText size="s">{category}</EuiText>
-            </EuiLink>
+          <EuiFlexItem grow style={{ alignItems: 'flex-start' }}>
+            {showFrames ? (
+              <EuiLink onClick={() => onShowMoreClick?.()}>
+                <EuiText size="s">{category}</EuiText>
+              </EuiLink>
+            ) : (
+              <EuiLink href={href}>
+                <EuiText size="s">{category}</EuiText>
+              </EuiLink>
+            )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{asPercentage(percentage / 100, 2)}</EuiText>
