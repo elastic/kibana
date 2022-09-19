@@ -90,7 +90,9 @@ export const SubChart: React.FC<SubChartProps> = ({
 
   const compact = !!onShowMoreClick;
 
-  const displayedFrames = compact ? metadata.slice(0, NUM_DISPLAYED_FRAMES) : metadata;
+  const displayedFrames = compact
+    ? metadata.concat().reverse().slice(0, NUM_DISPLAYED_FRAMES)
+    : metadata.concat().reverse();
 
   const hasMoreFrames = displayedFrames.length < metadata.length;
 
@@ -110,7 +112,7 @@ export const SubChart: React.FC<SubChartProps> = ({
               <>
                 <EuiFlexItem grow={false} key={frame.FrameID}>
                   <EuiFlexGroup direction="row" alignItems="center">
-                    <EuiFlexItem grow={false}>{frameIndex + 1}</EuiFlexItem>
+                    <EuiFlexItem grow={false}>{metadata.indexOf(frame) + 1}</EuiFlexItem>
                     <EuiFlexItem grow>
                       <StackFrameSummary frame={frame} />
                     </EuiFlexItem>
@@ -160,7 +162,7 @@ export const SubChart: React.FC<SubChartProps> = ({
         <EuiFlexGroup
           direction="row"
           gutterSize="m"
-          alignItems="flexStart"
+          alignItems="center"
           style={{ overflowWrap: 'anywhere' }}
         >
           <EuiFlexItem grow={false}>
@@ -170,10 +172,16 @@ export const SubChart: React.FC<SubChartProps> = ({
               </EuiText>
             </EuiBadge>
           </EuiFlexItem>
-          <EuiFlexItem grow>
-            <EuiLink href={href}>
-              <EuiText size="s">{category}</EuiText>
-            </EuiLink>
+          <EuiFlexItem grow style={{ alignItems: 'flex-start' }}>
+            {showFrames ? (
+              <EuiLink onClick={() => onShowMoreClick?.()}>
+                <EuiText size="s">{category}</EuiText>
+              </EuiLink>
+            ) : (
+              <EuiLink href={href}>
+                <EuiText size="s">{category}</EuiText>
+              </EuiLink>
+            )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{asPercentage(percentage / 100, 2)}</EuiText>
