@@ -203,16 +203,17 @@ export const useColumns = ({
 
   const onResetColumns = useCallback(() => {
     const newVisibleColumns = defaultColumns.map((column) => column.id);
+    const populatedDefaultColumns = populateColumns(defaultColumns, browserFields);
     setVisibleColumns(newVisibleColumns);
-    setColumns(defaultColumns);
+    setColumns(populatedDefaultColumns);
     persist({
       id,
       storage,
       storageAlertsTable,
-      columns: defaultColumns,
+      columns: populatedDefaultColumns,
       visibleColumns: newVisibleColumns,
     });
-  }, [defaultColumns, id, storage, storageAlertsTable]);
+  }, [browserFields, defaultColumns, id, storage, storageAlertsTable]);
 
   return {
     columns,
