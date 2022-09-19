@@ -13,7 +13,14 @@ import {
   buildExpressionFunction,
   ExpressionAstExpressionBuilder,
   buildExpression,
+  ExpressionAstFunction,
+  ExpressionAstFunctionBuilder,
 } from '@kbn/expressions-plugin/public';
+import {
+  AggFunctionsMapping,
+  ExpressionFunctionKql,
+  ExpressionFunctionLucene,
+} from '@kbn/data-plugin/public';
 import { OperationDefinition, ParamEditorProps } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -52,6 +59,22 @@ const typeToFn: Record<string, string> = {
   median: 'aggMedian',
   standard_deviation: 'aggStdDeviation',
 };
+
+function groupByKey<T>(items: T[], getKey: (item: T) => string | undefined): Record<string, T[]> {
+  const groups: Record<string, T[]> = {};
+
+  items.forEach((item) => {
+    const key = getKey(item);
+    if (key) {
+      if (!(key in groups)) {
+        groups[key] = [];
+      }
+      groups[key].push(item);
+    }
+  });
+
+  return groups;
+}
 
 const supportedTypes = ['number', 'histogram'];
 
@@ -213,23 +236,57 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       let aggs = [..._aggs];
       const esAggsIdMap = { ..._esAggsIdMap };
 
-      const metricExpressionsByArgs: Record<string, ExpressionAstExpressionBuilder[]> = {};
+      const metricType = typeToFn[type];
 
-      aggs.forEach((expressionBuilder) => {
-        const {
-          functions: [fnBuilder],
-        } = expressionBuilder;
-        if (fnBuilder.name === typeToFn[type]) {
-          const groupByKey = `${fnBuilder.getArgument('field')?.[0]}-${
-            fnBuilder.getArgument('timeShift')?.[0]
-          }-${Boolean(fnBuilder.getArgument('emptyAsNull')?.[0])}`; // boolean cooersion since "undefined" is effectively the same as "false"
-          if (!(groupByKey in metricExpressionsByArgs)) {
-            metricExpressionsByArgs[groupByKey] = [];
+      const metricExpressionsByArgs = groupByKey<ExpressionAstExpressionBuilder>(
+        aggs,
+        (expressionBuilder) => {
+          let groupKey;
+
+          const {
+            functions: [fnBuilder],
+          } = expressionBuilder;
+
+          if (fnBuilder.name === metricType) {
+            groupKey = `${fnBuilder.getArgument('field')?.[0]}-${
+              fnBuilder.getArgument('timeShift')?.[0]
+            }-${Boolean(fnBuilder.getArgument('emptyAsNull')?.[0])}`; // boolean cooersion since "undefined" is effectively the same as "false"
           }
 
-          metricExpressionsByArgs[groupByKey].push(expressionBuilder);
+          if (fnBuilder.name === 'aggFilteredMetric') {
+            const metricFnBuilder = (
+              fnBuilder.getArgument('customMetric')?.[0] as ExpressionAstExpressionBuilder
+            ).functions[0];
+
+            if (metricFnBuilder?.name === metricType) {
+              const aggFilterFnBuilder = (
+                fnBuilder.getArgument('customBucket')?.[0] as ExpressionAstExpressionBuilder
+              ).functions[0] as ExpressionAstFunctionBuilder<AggFunctionsMapping['aggFilter']>;
+
+              groupKey = `${aggFilterFnBuilder.getArgument('timeWindow')?.[0]}-${
+                metricFnBuilder.getArgument('field')?.[0]
+              }-${fnBuilder.getArgument('timeShift')?.[0]}-${Boolean(
+                metricFnBuilder.getArgument('emptyAsNull')?.[0]
+              )}`;
+
+              const filterExpression = aggFilterFnBuilder.getArgument('filter')?.[0] as
+                | ExpressionAstExpressionBuilder
+                | undefined;
+
+              if (filterExpression) {
+                const filterFnBuilder = filterExpression.functions[0] as
+                  | ExpressionAstFunctionBuilder<ExpressionFunctionKql | ExpressionFunctionLucene>
+                  | undefined;
+
+                groupKey =
+                  `${filterFnBuilder?.name}-${filterFnBuilder?.getArgument('q')?.[0]}-` + groupKey;
+              }
+            }
+          }
+
+          return groupKey;
         }
-      });
+      );
 
       // collapse them into a single expression builders
       Object.values(metricExpressionsByArgs).forEach((expressionBuilders) => {
@@ -250,18 +307,31 @@ function buildMetricOperation<T extends MetricColumn<string>>({
 
         const esAggsColumnId = firstFnBuilder.getArgument('id')![0];
 
-        const aggConfig = {
-          id: esAggsColumnId,
-          enabled: firstFnBuilder.getArgument('enabled')?.[0],
-          schema: firstFnBuilder.getArgument('schema')?.[0],
-          field: firstFnBuilder.getArgument('field')?.[0],
-          timeShift: firstFnBuilder.getArgument('timeShift')?.[0],
-          emptyAsNull: firstFnBuilder.getArgument('emptyAsNull')?.[0],
-          ...aggConfigParams,
-        };
+        let ast: ExpressionAstFunction;
 
-        // TODO - tighten the typing
-        const ast = buildExpressionFunction(typeToFn[type], aggConfig).toAst();
+        if (firstFnBuilder.name === 'aggFilteredMetric') {
+          ast = buildExpressionFunction<AggFunctionsMapping['aggFilteredMetric']>(
+            'aggFilteredMetric',
+            {
+              id: esAggsColumnId,
+              enabled: firstFnBuilder.getArgument('enabled')?.[0],
+              schema: firstFnBuilder.getArgument('schema')?.[0],
+              timeShift: firstFnBuilder.getArgument('timeShift')?.[0],
+              customBucket: firstFnBuilder.getArgument('customBucket')?.[0],
+              customMetric: firstFnBuilder.getArgument('customMetric')?.[0],
+            }
+          ).toAst();
+        } else {
+          ast = buildExpressionFunction(typeToFn[type], {
+            id: esAggsColumnId,
+            enabled: firstFnBuilder.getArgument('enabled')?.[0],
+            schema: firstFnBuilder.getArgument('schema')?.[0],
+            field: firstFnBuilder.getArgument('field')?.[0],
+            timeShift: firstFnBuilder.getArgument('timeShift')?.[0],
+            emptyAsNull: firstFnBuilder.getArgument('emptyAsNull')?.[0],
+            ...aggConfigParams,
+          }).toAst();
+        }
 
         aggs.push(
           buildExpression({
