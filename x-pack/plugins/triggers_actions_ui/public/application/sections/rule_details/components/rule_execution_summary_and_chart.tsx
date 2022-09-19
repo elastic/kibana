@@ -7,12 +7,15 @@
 
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiPanel, EuiStat, EuiFlexItem, EuiFlexGroup, EuiIconTip } from '@elastic/eui';
 import { RuleSummary, RuleType } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
-import { shouldShowDurationWarning } from '../../../lib/execution_duration_utils';
+import {
+  formatMillisForDisplay,
+  shouldShowDurationWarning,
+} from '../../../lib/execution_duration_utils';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
@@ -144,7 +147,49 @@ export const RuleExecutionSummaryAndChart = (props: RuleExecutionSummaryAndChart
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem>
+      <EuiFlexItem grow={1}>
+        <EuiPanel
+          data-test-subj="avgExecutionDurationPanel"
+          color={showDurationWarning ? 'warning' : 'subdued'}
+          hasBorder={false}
+        >
+          <EuiStat
+            data-test-subj="avgExecutionDurationStat"
+            titleSize="xs"
+            title={
+              <EuiFlexGroup gutterSize="xs">
+                {showDurationWarning && (
+                  <EuiFlexItem grow={false}>
+                    <EuiIconTip
+                      data-test-subj="ruleDurationWarning"
+                      anchorClassName="ruleDurationWarningIcon"
+                      type="alert"
+                      color="warning"
+                      content={i18n.translate(
+                        'xpack.triggersActionsUI.sections.ruleDetails.alertsList.ruleTypeExcessDurationMessage',
+                        {
+                          defaultMessage: `Duration exceeds the rule's expected run time.`,
+                        }
+                      )}
+                      position="top"
+                    />
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem grow={false} data-test-subj="ruleEventLogListAvgDuration">
+                  {formatMillisForDisplay(computedRuleSummary.executionDuration.average)}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+            description={i18n.translate(
+              'xpack.triggersActionsUI.sections.ruleDetails.alertsList.avgDurationDescription',
+              {
+                defaultMessage: `Average duration`,
+              }
+            )}
+          />
+        </EuiPanel>
+      </EuiFlexItem>
+      <EuiFlexItem grow={2}>
         <ExecutionDurationChart
           executionDuration={computedRuleSummary.executionDuration}
           numberOfExecutions={computedNumberOfExecutions}

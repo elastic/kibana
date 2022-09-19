@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { RuleExecutionSummaryAndChartWithApi } from './rule_execution_summary_and_chart';
 
 import { RuleSummary, RuleType } from '../../../../types';
 import { ComponentOpts as RuleApis } from '../../common/components/with_bulk_rule_api_operations';
@@ -65,18 +66,22 @@ export const RuleEventLogList = <T extends RuleEventLogListOptions>(
   return (
     <div style={ruleEventListContainerStyle} data-test-subj="ruleEventLogListContainer">
       <EuiSpacer />
+      <RuleExecutionSummaryAndChartWithApi
+        ruleId={ruleId}
+        ruleType={ruleType}
+        ruleSummary={ruleSummary}
+        numberOfExecutions={numberOfExecutions}
+        isLoadingRuleSummary={isLoadingRuleSummary}
+        refreshToken={refreshToken}
+        onChangeDuration={onChangeDuration}
+        requestRefresh={requestRefresh}
+        fetchRuleSummary={fetchRuleSummary}
+      />
       <RuleEventLogListTableWithApi
         localStorageKey={localStorageKey}
         ruleId={ruleId}
         refreshToken={refreshToken}
         overrideLoadExecutionLogAggregations={loadExecutionLogAggregations}
-        ruleType={ruleType}
-        ruleSummary={ruleSummary}
-        numberOfExecutions={numberOfExecutions}
-        isLoadingRuleSummary={isLoadingRuleSummary}
-        onChangeDuration={onChangeDuration}
-        requestRefresh={requestRefresh}
-        fetchRuleSummary={fetchRuleSummary}
       />
     </div>
   );
