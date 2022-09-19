@@ -6,13 +6,14 @@
  */
 
 import { SavedObject } from '@kbn/core-saved-objects-common';
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { SLO, StoredSLO } from '../../types/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { KibanaSavedObjectsSLORepository } from './slo_repository';
 import { createAPMTransactionDurationIndicator, createSLO } from './fixtures/slo';
+import { SLONotFound } from '../../errors';
 
 const SOME_SLO = createSLO(createAPMTransactionDurationIndicator());
 
@@ -34,6 +35,28 @@ describe('KibanaSavedObjectsSLORepository', () => {
 
   beforeEach(() => {
     soClientMock = savedObjectsClientMock.create();
+  });
+
+  describe('validation', () => {
+    it('findById throws when an SLO is not found', async () => {
+      soClientMock.get.mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      const repository = new KibanaSavedObjectsSLORepository(soClientMock);
+
+      await expect(repository.findById('inexistant-slo-id')).rejects.toThrowError(
+        new SLONotFound('SLO [inexistant-slo-id] not found')
+      );
+    });
+
+    it('deleteById throws when an SLO is not found', async () => {
+      soClientMock.delete.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError()
+      );
+      const repository = new KibanaSavedObjectsSLORepository(soClientMock);
+
+      await expect(repository.deleteById('inexistant-slo-id')).rejects.toThrowError(
+        new SLONotFound('SLO [inexistant-slo-id] not found')
+      );
+    });
   });
 
   it('saves the SLO', async () => {

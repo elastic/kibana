@@ -72,7 +72,7 @@ const deleteSLORoute = createObservabilityServerRoute({
       spaceId
     );
 
-    const deleteSLO = new DeleteSLO(repository, transformManager);
+    const deleteSLO = new DeleteSLO(repository, transformManager, esClient);
 
     await deleteSLO.execute(params.path.id);
   },
