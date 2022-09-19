@@ -25,7 +25,7 @@ import type { ExperimentalFeatures } from '../../../../../common/experimental_fe
 import { buildReasonMessageForQueryAlert } from '../reason_formatters';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import { scheduleNotificationResponseActions } from '../../notifications/schedule_notification_response_actions';
+import { scheduleNotificationResponseActions } from '../../rule_response_actions/schedule_notification_response_actions';
 import type { SetupPlugins } from '../../../../plugin_contract';
 
 export const queryExecutor = async ({

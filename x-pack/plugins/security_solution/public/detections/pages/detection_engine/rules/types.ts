@@ -34,10 +34,12 @@ import type {
   SortOrder,
   SetupGuide,
   TimestampOverride,
-  RuleResponseAction,
-  ResponseAction,
 } from '../../../../../common/detection_engine/schemas/common';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
+import type {
+  RuleResponseAction,
+  ResponseAction,
+} from '../../../../../common/detection_engine/rule_response_actions/schemas';
 
 export interface EuiBasicTableSortTypes {
   field: string;
@@ -60,6 +62,7 @@ export enum RuleStep {
   scheduleRule = 'schedule-rule',
   ruleActions = 'rule-actions',
 }
+
 export type RuleStepsOrder = [
   RuleStep.defineRule,
   RuleStep.aboutRule,

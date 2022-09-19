@@ -76,8 +76,8 @@ import {
   SetupGuide,
   newTermsFields,
   historyWindowStart,
-  ResponseActionArray,
 } from '../common';
+import { ResponseActionArray } from '../../rule_response_actions/schemas';
 
 export const createSchema = <
   Required extends t.Props,

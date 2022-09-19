@@ -78,9 +78,9 @@ import {
   newTermsFields,
   historyWindowStart,
   timestampOverrideFallbackDisabledOrUndefined,
-  ResponseActionRuleParamsOrUndefined,
 } from '../../../../common/detection_engine/schemas/common';
 import { SERVER_APP_ID } from '../../../../common/constants';
+import { ResponseActionRuleParamsOrUndefined } from '../../../../common/detection_engine/rule_response_actions/schemas';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
 

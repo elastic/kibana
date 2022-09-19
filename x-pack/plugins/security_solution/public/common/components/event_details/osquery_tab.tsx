@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/schemas/common';
+import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useKibana } from '../../lib/kibana';
 import type { AlertRawEventData } from './event_details';

@@ -6,7 +6,8 @@
  */
 
 import { map, uniq } from 'lodash';
-import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/schemas/common';
+import type { RuleResponseAction } from '../../../../common/detection_engine/rule_response_actions/schemas';
+import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import type { SetupPlugins } from '../../../plugin_contract';
 
 interface OsqueryQuery {
@@ -29,14 +30,9 @@ interface OsqueryResponseAction {
   };
 }
 
-export interface ResponseAction {
-  actionTypeId: string;
-  params: { [p: string]: unknown };
-}
-
 interface ScheduleNotificationActions {
   signals: unknown[];
-  responseActions: ResponseAction[];
+  responseActions: RuleResponseAction[];
 }
 
 interface IAlert {
@@ -45,7 +41,7 @@ interface IAlert {
   };
 }
 
-const isOsqueryAction = (action: ResponseAction): action is OsqueryResponseAction => {
+const isOsqueryAction = (action: RuleResponseAction): action is OsqueryResponseAction => {
   return action.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY;
 };
 

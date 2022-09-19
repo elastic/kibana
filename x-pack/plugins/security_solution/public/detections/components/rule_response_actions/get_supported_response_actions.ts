@@ -8,7 +8,7 @@
 import {
   SUPPORTED_RESPONSE_ACTION_TYPES,
   RESPONSE_ACTION_TYPES,
-} from '../../../../common/detection_engine/schemas/common';
+} from '../../../../common/detection_engine/rule_response_actions/schemas';
 
 export interface ResponseActionType {
   id: RESPONSE_ACTION_TYPES;
