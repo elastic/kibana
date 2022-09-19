@@ -1312,6 +1312,13 @@ paths:
         - $ref: '#/components/parameters/page_size'
         - $ref: '#/components/parameters/page_index'
         - $ref: '#/components/parameters/kuery'
+        - schema:
+            type: boolean
+          in: query
+          name: full
+          description: >-
+            When set to true, retrieve the related package policies for each
+            agent policy/
       description: ''
     post:
       summary: Agent policy - Create
@@ -3107,14 +3114,14 @@ components:
               enum:
                 - active
                 - inactive
-            packagePolicies:
-              oneOf:
-                - type: array
-                  items:
-                    type: string
-                - type: array
-                  items:
-                    $ref: '#/components/schemas/package_policy'
+            package_policies:
+              description: >-
+                This field is present only when retrieving a single agent
+                policy, or when retrieving a list of agent policy with the
+                ?full=true parameter
+              type: array
+              items:
+                $ref: '#/components/schemas/package_policy'
             updated_on:
               type: string
               format: date-time
