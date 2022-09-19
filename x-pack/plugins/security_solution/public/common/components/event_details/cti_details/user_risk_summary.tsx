@@ -20,60 +20,68 @@ import { RiskScoreHeaderTitle } from '../../risk_score/risk_score_onboarding/ris
 
 const UserRiskSummaryComponent: React.FC<{
   userRisk: UserRisk;
-}> = ({ userRisk }) => (
-  <>
-    <EuiPanel hasBorder paddingSize="s" grow={false}>
-      <ThreatSummaryPanelHeader
-        title={
-          <RiskScoreHeaderTitle
-            title={i18n.USER_RISK_DATA_TITLE}
-            riskScoreEntity={RiskScoreEntity.user}
-            showTooltip={false}
-          />
-        }
-        toolTipContent={
-          <FormattedMessage
-            id="xpack.securitySolution.alertDetails.overview.userDataTooltipContent"
-            defaultMessage="Risk classification is displayed only when available for a user. Ensure {userRiskScoreDocumentationLink} is enabled within your environment."
-            values={{
-              userRiskScoreDocumentationLink: (
-                <RiskScoreDocLink
-                  external={false}
-                  riskScoreEntity={RiskScoreEntity.user}
-                  title={
-                    <FormattedMessage
-                      id="xpack.securitySolution.alertDetails.overview.userRiskScoreLink"
-                      defaultMessage="User Risk Score"
-                    />
-                  }
+  originalUserRisk?: RiskSeverity | undefined;
+}> = ({ userRisk, originalUserRisk }) => {
+  const currentUserRiskScore = userRisk?.result?.[0]?.user?.risk?.calculated_level;
+  return (
+    <>
+      <EuiPanel hasBorder paddingSize="s" grow={false}>
+        <ThreatSummaryPanelHeader
+          title={
+            <RiskScoreHeaderTitle
+              title={i18n.USER_RISK_DATA_TITLE}
+              riskScoreEntity={RiskScoreEntity.user}
+              showTooltip={false}
+            />
+          }
+          toolTipContent={
+            <FormattedMessage
+              id="xpack.securitySolution.alertDetails.overview.userDataTooltipContent"
+              defaultMessage="Risk classification is displayed only when available for a user. Ensure {userRiskScoreDocumentationLink} is enabled within your environment."
+              values={{
+                userRiskScoreDocumentationLink: (
+                  <RiskScoreDocLink
+                    external={false}
+                    riskScoreEntity={RiskScoreEntity.user}
+                    title={
+                      <FormattedMessage
+                        id="xpack.securitySolution.alertDetails.overview.userRiskScoreLink"
+                        defaultMessage="User Risk Score"
+                      />
+                    }
+                  />
+                ),
+              }}
+            />
+          }
+        />
+
+        {userRisk.loading && <EuiLoadingSpinner data-test-subj="loading" />}
+
+        {!userRisk.loading && (
+          <>
+            <EnrichedDataRow
+              field={i18n.CURRENT_USER_RISK_CLASSIFICATION}
+              value={
+                currentUserRiskScore ? (
+                  <RiskScore severity={currentUserRiskScore as RiskSeverity} hideBackgroundColor />
+                ) : (
+                  getEmptyValue()
+                )
+              }
+            />
+            {originalUserRisk && currentUserRiskScore !== originalUserRisk && (
+              <>
+                <EnrichedDataRow
+                  field={i18n.ORIGINAL_USER_RISK_CLASSIFICATION}
+                  value={<RiskScore severity={originalUserRisk} hideBackgroundColor />}
                 />
-              ),
-            }}
-          />
-        }
-      />
-
-      {userRisk.loading && <EuiLoadingSpinner data-test-subj="loading" />}
-
-      {!userRisk.loading && (
-        <>
-          <EnrichedDataRow
-            field={i18n.USER_RISK_CLASSIFICATION}
-            value={
-              userRisk.result && userRisk.result.length > 0 ? (
-                <RiskScore
-                  severity={userRisk.result[0].user.risk.calculated_level as RiskSeverity}
-                  hideBackgroundColor
-                />
-              ) : (
-                getEmptyValue()
-              )
-            }
-          />
-        </>
-      )}
-    </EuiPanel>
-  </>
-);
-
+              </>
+            )}
+          </>
+        )}
+      </EuiPanel>
+    </>
+  );
+};
 export const UserRiskSummary = React.memo(UserRiskSummaryComponent);

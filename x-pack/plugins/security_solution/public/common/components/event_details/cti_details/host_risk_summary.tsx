@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
 import { EnrichedDataRow, ThreatSummaryPanelHeader } from './threat_summary_view';
 import { RiskScore } from '../../severity/common';
+import type { RiskSeverity } from '../../../../../common/search_strategy';
 import type { HostRisk } from '../../../../risk_score/containers';
 import { getEmptyValue } from '../../empty_value';
 import { RiskScoreDocLink } from '../../risk_score/risk_score_onboarding/risk_score_doc_link';
@@ -19,60 +20,69 @@ import { RiskScoreHeaderTitle } from '../../risk_score/risk_score_onboarding/ris
 
 const HostRiskSummaryComponent: React.FC<{
   hostRisk: HostRisk;
-}> = ({ hostRisk }) => (
-  <>
-    <EuiPanel hasBorder paddingSize="s" grow={false}>
-      <ThreatSummaryPanelHeader
-        title={
-          <RiskScoreHeaderTitle
-            title={i18n.HOST_RISK_DATA_TITLE}
-            riskScoreEntity={RiskScoreEntity.host}
-            showTooltip={false}
-          />
-        }
-        toolTipContent={
-          <FormattedMessage
-            id="xpack.securitySolution.alertDetails.overview.hostDataTooltipContent"
-            defaultMessage="Risk classification is displayed only when available for a host. Ensure {hostRiskScoreDocumentationLink} is enabled within your environment."
-            values={{
-              hostRiskScoreDocumentationLink: (
-                <RiskScoreDocLink
-                  external={false}
-                  riskScoreEntity={RiskScoreEntity.host}
-                  title={
-                    <FormattedMessage
-                      id="xpack.securitySolution.alertDetails.overview.hostRiskScoreLink"
-                      defaultMessage="Host Risk Score"
-                    />
-                  }
+  originalHostRisk?: RiskSeverity | undefined;
+}> = ({ hostRisk, originalHostRisk }) => {
+  const currentHostRiskScore = hostRisk?.result?.[0]?.host?.risk?.calculated_level;
+  return (
+    <>
+      <EuiPanel hasBorder paddingSize="s" grow={false}>
+        <ThreatSummaryPanelHeader
+          title={
+            <RiskScoreHeaderTitle
+              title={i18n.HOST_RISK_DATA_TITLE}
+              riskScoreEntity={RiskScoreEntity.host}
+              showTooltip={false}
+            />
+          }
+          toolTipContent={
+            <FormattedMessage
+              id="xpack.securitySolution.alertDetails.overview.hostDataTooltipContent"
+              defaultMessage="Risk classification is displayed only when available for a host. Ensure {hostRiskScoreDocumentationLink} is enabled within your environment."
+              values={{
+                hostRiskScoreDocumentationLink: (
+                  <RiskScoreDocLink
+                    external={false}
+                    riskScoreEntity={RiskScoreEntity.host}
+                    title={
+                      <FormattedMessage
+                        id="xpack.securitySolution.alertDetails.overview.hostRiskScoreLink"
+                        defaultMessage="Host Risk Score"
+                      />
+                    }
+                  />
+                ),
+              }}
+            />
+          }
+        />
+
+        {hostRisk.loading && <EuiLoadingSpinner data-test-subj="loading" />}
+
+        {!hostRisk.loading && (
+          <>
+            <EnrichedDataRow
+              field={i18n.CURRENT_HOST_RISK_CLASSIFICATION}
+              value={
+                currentHostRiskScore ? (
+                  <RiskScore severity={currentHostRiskScore} hideBackgroundColor />
+                ) : (
+                  getEmptyValue()
+                )
+              }
+            />
+
+            {originalHostRisk && currentHostRiskScore !== originalHostRisk && (
+              <>
+                <EnrichedDataRow
+                  field={i18n.ORIGINAL_HOST_RISK_CLASSIFICATION}
+                  value={<RiskScore severity={originalHostRisk} hideBackgroundColor />}
                 />
-              ),
-            }}
-          />
-        }
-      />
-
-      {hostRisk.loading && <EuiLoadingSpinner data-test-subj="loading" />}
-
-      {!hostRisk.loading && (
-        <>
-          <EnrichedDataRow
-            field={i18n.HOST_RISK_CLASSIFICATION}
-            value={
-              hostRisk.result && hostRisk.result.length > 0 ? (
-                <RiskScore
-                  severity={hostRisk.result[0].host.risk.calculated_level}
-                  hideBackgroundColor
-                />
-              ) : (
-                getEmptyValue()
-              )
-            }
-          />
-        </>
-      )}
-    </EuiPanel>
-  </>
-);
-
+              </>
+            )}
+          </>
+        )}
+      </EuiPanel>
+    </>
+  );
+};
 export const HostRiskSummary = React.memo(HostRiskSummaryComponent);
