@@ -411,7 +411,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.totalDocuments).to.eql(4634);
         expect(body.sampledDocuments).to.eql(100);
         expect(body.sampledValues).to.eql(100);
-        expect(body.topValues.buckets.length).to.eql(5);
+        expect(body.topValues.buckets.length).to.be.greaterThan(0);
       });
 
       it('should return top values for index pattern runtime string fields', async () => {
