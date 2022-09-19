@@ -53,6 +53,12 @@ export const axisExtentConfigFunction: ExpressionFunctionDefinition<
         defaultMessage: 'Upper bound',
       }),
     },
+    enforce: {
+      types: ['boolean'],
+      help: i18n.translate('expressionXY.axisExtentConfig.enforce.help', {
+        defaultMessage: 'Enforce extent params.',
+      }),
+    },
   },
   fn(input, args) {
     if (args.mode === AxisExtentModes.CUSTOM) {

@@ -133,6 +133,7 @@ export const ModelsList: FC<Props> = ({
     {}
   );
   const [showTestFlyout, setShowTestFlyout] = useState<ModelItem | null>(null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const getUserConfirmation = useMemo(() => getUserConfirmationProvider(overlays, theme), []);
 
   const getUserInputThreadingParams = useMemo(
@@ -206,6 +207,7 @@ export const ModelsList: FC<Props> = ({
       );
     }
     setIsLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemIdToExpandedRowMap]);
 
   useEffect(
@@ -213,6 +215,7 @@ export const ModelsList: FC<Props> = ({
       if (!refresh) return;
       fetchModelsData();
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [refresh]
   );
 
@@ -258,6 +261,7 @@ export const ModelsList: FC<Props> = ({
       );
       return false;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**
@@ -345,6 +349,7 @@ export const ModelsList: FC<Props> = ({
       description: i18n.translate('xpack.ml.inference.modelsList.startModelDeploymentActionLabel', {
         defaultMessage: 'Start deployment',
       }),
+      'data-test-subj': 'mlModelsTableRowStartDeploymentAction',
       icon: 'play',
       type: 'icon',
       isPrimary: true,
@@ -399,6 +404,7 @@ export const ModelsList: FC<Props> = ({
       description: i18n.translate('xpack.ml.inference.modelsList.stopModelDeploymentActionLabel', {
         defaultMessage: 'Stop deployment',
       }),
+      'data-test-subj': 'mlModelsTableRowStopDeploymentAction',
       icon: 'stop',
       type: 'icon',
       isPrimary: true,
@@ -497,6 +503,7 @@ export const ModelsList: FC<Props> = ({
       description: i18n.translate('xpack.ml.inference.modelsList.testModelActionLabel', {
         defaultMessage: 'Test model',
       }),
+      'data-test-subj': 'mlModelsTableRowTestAction',
       icon: 'inputOutput',
       type: 'icon',
       isPrimary: true,
@@ -690,7 +697,7 @@ export const ModelsList: FC<Props> = ({
     : undefined;
 
   const { onTableChange, pagination, sorting } = useTableSettings<ModelItem>(
-    items,
+    items.length,
     pageState,
     updatePageState
   );

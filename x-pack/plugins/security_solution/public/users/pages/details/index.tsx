@@ -7,11 +7,12 @@
 
 import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
@@ -52,7 +53,6 @@ import { UsersType } from '../../store/model';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { LandingPageComponent } from '../../../common/components/landing_page';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 const QUERY_ID = 'UsersDetailsQueryId';
 
 const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
@@ -60,7 +60,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   usersDetailsPagePath,
 }) => {
   const dispatch = useDispatch();
-  const riskyUsersFeatureEnabled = useIsExperimentalFeatureEnabled('riskyUsersEnabled');
+  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
     (state) => (getTimeline(state, TimelineId.hostsPageEvents) ?? timelineDefaults).graphEventId
@@ -118,13 +118,27 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 
   useQueryInspector({ setQuery, deleteQuery, refetch, inspect, loading, queryId: QUERY_ID });
 
+  const narrowDateRange = useCallback(
+    (score, interval) => {
+      const fromTo = scoreIntervalToDateTime(score, interval);
+      dispatch(
+        setAbsoluteRangeDatePicker({
+          id: InputsModelId.global,
+          from: fromTo.from,
+          to: fromTo.to,
+        })
+      );
+    },
+    [dispatch]
+  );
+
   return (
     <>
       {indicesExist ? (
         <>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-            <SiemSearchBar indexPattern={indexPattern} id="global" />
+            <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
@@ -156,14 +170,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                   loading={loading}
                   startDate={from}
                   endDate={to}
-                  narrowDateRange={(score, interval) => {
-                    const fromTo = scoreIntervalToDateTime(score, interval);
-                    setAbsoluteRangeDatePicker({
-                      id: 'global',
-                      from: fromTo.from,
-                      to: fromTo.to,
-                    });
-                  }}
+                  narrowDateRange={narrowDateRange}
                   indexPatterns={selectedPatterns}
                 />
               )}
@@ -175,7 +182,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               navTabs={navTabsUsersDetails(
                 detailName,
                 hasMlUserPermissions(capabilities),
-                riskyUsersFeatureEnabled
+                isPlatinumOrTrialLicense
               )}
             />
 
@@ -190,7 +197,6 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               indexPattern={indexPattern}
               isInitializing={isInitializing}
               pageFilters={usersDetailsPageFilters}
-              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
               setQuery={setQuery}
               to={to}
               type={type}

@@ -16,3 +16,9 @@ export const SuggestUserProfilesRequestRt = rt.intersection([
 ]);
 
 export type SuggestUserProfilesRequest = rt.TypeOf<typeof SuggestUserProfilesRequestRt>;
+
+export const CaseUserProfileRt = rt.type({
+  uid: rt.string,
+});
+
+export type CaseUserProfile = rt.TypeOf<typeof CaseUserProfileRt>;

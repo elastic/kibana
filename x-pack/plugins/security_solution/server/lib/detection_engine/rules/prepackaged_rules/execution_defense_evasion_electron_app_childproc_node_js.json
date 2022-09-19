@@ -17,6 +17,23 @@
     "https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/",
     "https://nodejs.org/api/child_process.html"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.category",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "35330ba2-c859-4c98-8b7f-c19159ea0e58",
   "severity": "medium",
@@ -62,5 +79,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

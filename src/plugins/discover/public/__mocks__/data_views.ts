@@ -8,6 +8,8 @@
 
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { dataViewMock } from './data_view';
+import { dataViewComplexMock } from './data_view_complex';
+import { dataViewWithTimefieldMock } from './data_view_with_timefield';
 
 export const dataViewsMock = {
   getCache: async () => {
@@ -21,4 +23,9 @@ export const dataViewsMock = {
     }
   },
   updateSavedObject: jest.fn(),
+  getIdsWithTitle: jest.fn(() => {
+    return Promise.resolve([dataViewMock, dataViewComplexMock, dataViewWithTimefieldMock]);
+  }),
+  create: jest.fn(),
+  clearInstanceCache: jest.fn(),
 } as unknown as jest.Mocked<DataViewsContract>;

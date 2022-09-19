@@ -6,12 +6,15 @@
  */
 
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { Capabilities } from '@kbn/core/public';
 
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 
 import { mockHistory } from '../react_router/state.mock';
 
 export const mockKibanaValues = {
+  capabilities: {} as Capabilities,
   config: { host: 'http://localhost:3002' },
   charts: chartPluginMock.createStartContract(),
   cloud: {
@@ -19,7 +22,13 @@ export const mockKibanaValues = {
     deployment_url: 'https://cloud.elastic.co/deployments/some-id',
   },
   history: mockHistory,
+  isCloud: false,
   navigateToUrl: jest.fn(),
+  productAccess: {
+    hasAppSearchAccess: true,
+    hasWorkplaceSearchAccess: true,
+  },
+  uiSettings: uiSettingsServiceMock.createStartContract(),
   security: securityMock.createStart(),
   setBreadcrumbs: jest.fn(),
   setChromeIsVisible: jest.fn(),

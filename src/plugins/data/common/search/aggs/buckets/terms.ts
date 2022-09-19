@@ -121,7 +121,13 @@ export const getTermsBucketAgg = () =>
       {
         name: 'shardSize',
         write: (aggConfig, output) => {
-          output.params.shard_size = aggConfig.params.shardSize;
+          if (aggConfig.params.shardSize) {
+            output.params.shard_size = aggConfig.params.shardSize;
+          } else if (aggConfig.params.size <= 10) {
+            // 25 is the default shard size set for size:10 by Elasticsearch.
+            // Setting it to 25 for every size below 10 makes sure the shard size doesn't change for sizes 1-10, keeping the top terms stable.
+            output.params.shard_size = 25;
+          }
         },
       },
       {

@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { EsArchiver } from '@kbn/es-archiver';
 import { AppSearchService, IEngine } from '../../../../services/app_search_service';
 import { Browser } from '../../../../../../../test/functional/services/common';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -15,11 +14,10 @@ export default function enterpriseSearchSetupEnginesTests({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver') as EsArchiver;
   const browser = getService('browser') as Browser;
   const retry = getService('retry');
   const appSearch = getService('appSearch') as AppSearchService;
-
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['appSearch', 'security']);
 
   describe('Engines Overview', function () {
@@ -28,14 +26,14 @@ export default function enterpriseSearchSetupEnginesTests({
     let metaEngine: IEngine;
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       engine1 = await appSearch.createEngine();
       engine2 = await appSearch.createEngine();
       metaEngine = await appSearch.createMetaEngine([engine1.name, engine2.name]);
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       appSearch.destroyEngine(engine1.name);
       appSearch.destroyEngine(engine2.name);
       appSearch.destroyEngine(metaEngine.name);

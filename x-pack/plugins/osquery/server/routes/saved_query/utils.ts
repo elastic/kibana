@@ -5,20 +5,15 @@
  * 2.0.
  */
 
-import { find, reduce } from 'lodash';
+import { find, filter, map, reduce } from 'lodash';
 import type { KibanaAssetReference } from '@kbn/fleet-plugin/common';
 
+import type { PackageClient } from '@kbn/fleet-plugin/server';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
-import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
-const getInstallation = async (osqueryContext: OsqueryAppContext) =>
-  await osqueryContext.service
-    .getPackageService()
-    ?.asInternalUser?.getInstallation(OSQUERY_INTEGRATION_NAME);
-
-export const getInstalledSavedQueriesMap = async (osqueryContext: OsqueryAppContext) => {
-  const installation = await getInstallation(osqueryContext);
+export const getInstalledSavedQueriesMap = async (packageService: PackageClient | undefined) => {
+  const installation = await packageService?.getInstallation(OSQUERY_INTEGRATION_NAME);
 
   if (installation) {
     return reduce<KibanaAssetReference, Record<string, KibanaAssetReference>>(
@@ -37,11 +32,26 @@ export const getInstalledSavedQueriesMap = async (osqueryContext: OsqueryAppCont
   return {};
 };
 
+export const getPrebuiltSavedQueryIds = async (packageService: PackageClient | undefined) => {
+  const installation = await packageService?.getInstallation(OSQUERY_INTEGRATION_NAME);
+
+  if (installation) {
+    const installationSavedQueries = filter(
+      installation.installed_kibana,
+      (item) => item.type === savedQuerySavedObjectType
+    );
+
+    return map(installationSavedQueries, 'id');
+  }
+
+  return [];
+};
+
 export const isSavedQueryPrebuilt = async (
-  osqueryContext: OsqueryAppContext,
+  packageService: PackageClient | undefined,
   savedQueryId: string
 ) => {
-  const installation = await getInstallation(osqueryContext);
+  const installation = await packageService?.getInstallation(OSQUERY_INTEGRATION_NAME);
 
   if (installation) {
     const installationSavedQueries = find(

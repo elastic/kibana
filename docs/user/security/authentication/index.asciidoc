@@ -396,7 +396,7 @@ This type of authentication is usually useful for machine-to-machine interaction
 
 [IMPORTANT]
 ============================================================================
-API keys are intended for programatic access to {kib} and {es). Do not use API keys to authenticate access via a web browser.
+API keys are intended for programmatic access to {kib} and {es}. Do not use API keys to authenticate access via a web browser.
 ============================================================================
 
 

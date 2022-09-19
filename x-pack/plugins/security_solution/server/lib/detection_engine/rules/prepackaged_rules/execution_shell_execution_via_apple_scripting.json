@@ -16,6 +16,38 @@
     "https://developer.apple.com/library/archive/technotes/tn2065/_index.html",
     "https://objectivebythesea.com/v2/talks/OBTS_v2_Thomas.pdf"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "host.id",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.parent.pid",
+      "type": "long"
+    },
+    {
+      "ecs": true,
+      "name": "process.pid",
+      "type": "long"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "d461fac0-43e8-49e2-85ea-3a58fe120b4f",
   "severity": "medium",
@@ -44,5 +76,5 @@
     }
   ],
   "type": "eql",
-  "version": 3
+  "version": 4
 }

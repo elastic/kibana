@@ -18,12 +18,12 @@ import * as i18n from './translations';
 import { RISKY_USERS_DOC_LINK } from '../constants';
 
 export const UsersKpiComponent = React.memo<UsersKpiProps>(
-  ({ filterQuery, from, indexNames, to, setQuery, skip, narrowDateRange }) => {
-    const [_, { isModuleEnabled }] = useUserRiskScore({});
+  ({ filterQuery, from, indexNames, to, setQuery, skip, updateDateRange }) => {
+    const [loading, { isLicenseValid, isModuleEnabled }] = useUserRiskScore();
 
     return (
       <>
-        {isModuleEnabled === false && (
+        {isLicenseValid && !isModuleEnabled && !loading && (
           <>
             <CallOutSwitcher
               namespace="users"
@@ -54,7 +54,7 @@ export const UsersKpiComponent = React.memo<UsersKpiProps>(
               from={from}
               indexNames={indexNames}
               to={to}
-              narrowDateRange={narrowDateRange}
+              updateDateRange={updateDateRange}
               setQuery={setQuery}
               skip={skip}
             />
@@ -66,7 +66,7 @@ export const UsersKpiComponent = React.memo<UsersKpiProps>(
               from={from}
               indexNames={indexNames}
               to={to}
-              narrowDateRange={narrowDateRange}
+              updateDateRange={updateDateRange}
               setQuery={setQuery}
               skip={skip}
             />

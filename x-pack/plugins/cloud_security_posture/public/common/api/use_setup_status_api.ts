@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery, type UseQueryOptions } from 'react-query';
+import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import { useKibana } from '../hooks/use_kibana';
 import { CspSetupStatus } from '../../../common/types';
 import { STATUS_ROUTE_PATH } from '../../../common/constants';

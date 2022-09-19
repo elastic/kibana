@@ -8,7 +8,7 @@
 import { shallowEqual, useSelector } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
-export type TypedUseSelectorHook = <TSelected, TState = unknown>(
+export type TypedUseSelectorHook = <TSelected, TState extends Record<string, unknown>>(
   selector: (state: TState) => TSelected,
   equalityFn?: (left: TSelected, right: TSelected) => boolean
 ) => TSelected;

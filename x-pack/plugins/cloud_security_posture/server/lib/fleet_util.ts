@@ -7,12 +7,12 @@
 import { uniq, map } from 'lodash';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type {
-  PackagePolicyServiceInterface,
+  PackagePolicyClient,
   AgentPolicyServiceInterface,
   AgentService,
 } from '@kbn/fleet-plugin/server';
 import type {
-  GetAgentPoliciesResponseItem,
+  GetAgentStatusResponse,
   PackagePolicy,
   AgentPolicy,
   ListResult,
@@ -33,22 +33,24 @@ const getPackageNameQuery = (packageName: string, benchmarkFilter?: string): str
   return kquery;
 };
 
-export const addRunningAgentToAgentPolicy = async (
-  agentService: AgentService,
-  agentPolicies: AgentPolicy[]
-): Promise<GetAgentPoliciesResponseItem[]> => {
-  if (!agentPolicies.length) return [];
+export type AgentStatusByAgentPolicyMap = Record<string, GetAgentStatusResponse['results']>;
 
-  return Promise.all(
-    agentPolicies.map((agentPolicy) =>
-      agentService.asInternalUser
-        .getAgentStatusForAgentPolicy(agentPolicy.id)
-        .then((agentStatus) => ({
-          ...agentPolicy,
-          agents: agentStatus.total,
-        }))
-    )
-  );
+export const getAgentStatusesByAgentPolicies = async (
+  agentService: AgentService,
+  agentPolicies: AgentPolicy[] | undefined
+): Promise<AgentStatusByAgentPolicyMap> => {
+  if (!agentPolicies?.length) return {};
+
+  const internalAgentService = agentService.asInternalUser;
+  const result: AgentStatusByAgentPolicyMap = {};
+
+  for (const agentPolicy of agentPolicies) {
+    result[agentPolicy.id] = await internalAgentService.getAgentStatusForAgentPolicy(
+      agentPolicy.id
+    );
+  }
+
+  return result;
 };
 
 export const getCspAgentPolicies = async (
@@ -56,11 +58,14 @@ export const getCspAgentPolicies = async (
   packagePolicies: PackagePolicy[],
   agentPolicyService: AgentPolicyServiceInterface
 ): Promise<AgentPolicy[]> =>
-  agentPolicyService.getByIds(soClient, uniq(map(packagePolicies, 'policy_id')));
+  agentPolicyService.getByIds(soClient, uniq(map(packagePolicies, 'policy_id')), {
+    withPackagePolicies: true,
+    ignoreMissing: true,
+  });
 
 export const getCspPackagePolicies = (
   soClient: SavedObjectsClientContract,
-  packagePolicyService: PackagePolicyServiceInterface,
+  packagePolicyService: PackagePolicyClient,
   packageName: string,
   queryParams: Partial<BenchmarksQueryParams>
 ): Promise<ListResult<PackagePolicy>> => {

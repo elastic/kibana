@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { SingleCaseMetrics, SingleCaseMetricsFeature } from './types';
 import { useToasts } from '../common/lib/kibana';
 import { getSingleCaseMetrics } from './api';

@@ -8,6 +8,8 @@
 import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 
 export interface ActionsUsage {
+  has_errors: boolean;
+  error_messages?: string[];
   alert_history_connector_enabled: boolean;
   count_total: number;
   count_by_type: Record<string, number>;

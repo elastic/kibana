@@ -9,8 +9,9 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { LICENSED_SUPPORT_URL } from '../../../../common/constants';
 import { LicensingLogic } from '../licensing';
@@ -26,7 +27,7 @@ export const NotFoundPrompt: React.FC<Props> = ({ productSupportUrl, backToLink 
   const supportUrl = hasGoldLicense ? LICENSED_SUPPORT_URL : productSupportUrl;
 
   return (
-    <EuiEmptyPrompt
+    <KibanaPageTemplate.EmptyPrompt
       iconType="logoEnterpriseSearch"
       title={
         <h1>

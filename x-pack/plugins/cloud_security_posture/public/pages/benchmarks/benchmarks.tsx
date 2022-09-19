@@ -20,6 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
+import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
 import { BenchmarksTable } from './benchmarks_table';
@@ -44,8 +45,8 @@ const AddCisIntegrationButton = () => {
       isDisabled={!cisIntegrationLink}
     >
       <FormattedMessage
-        id="xpack.csp.benchmarks.benchmarksPageHeader.addCisIntegrationButtonLabel"
-        defaultMessage="Add a CIS integration"
+        id="xpack.csp.benchmarks.benchmarksPageHeader.addKSPMIntegrationButtonLabel"
+        defaultMessage="Add a KSPM integration"
       />
     </EuiButton>
   );
@@ -140,10 +141,14 @@ export const Benchmarks = () => {
     <CloudPosturePage>
       <EuiPageHeader
         data-test-subj={TEST_SUBJ.BENCHMARKS_PAGE_HEADER}
-        pageTitle={i18n.translate(
-          'xpack.csp.benchmarks.benchmarksPageHeader.benchmarkIntegrationsTitle',
-          { defaultMessage: 'Benchmark Integrations' }
-        )}
+        pageTitle={
+          <CloudPosturePageTitle
+            title={i18n.translate(
+              'xpack.csp.benchmarks.benchmarksPageHeader.benchmarkIntegrationsTitle',
+              { defaultMessage: 'Benchmark Integrations' }
+            )}
+          />
+        }
         rightSideItems={[<AddCisIntegrationButton />]}
         bottomBorder
       />

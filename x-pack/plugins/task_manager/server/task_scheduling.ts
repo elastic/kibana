@@ -15,6 +15,7 @@ import { chunk, pick } from 'lodash';
 import { Subject } from 'rxjs';
 import agent from 'elastic-apm-node';
 import { Logger } from '@kbn/core/server';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { mustBeAllOf } from './queries/query_clauses';
 import { asOk, either, isErr, map, mapErr, promiseResult } from './lib/result_type';
 import {
@@ -48,7 +49,7 @@ import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTaskRejectedDueToCapacityError } from './task_running';
 
 const VERSION_CONFLICT_STATUS = 409;
-
+const BULK_ACTION_SIZE = 100;
 export interface TaskSchedulingOpts {
   logger: Logger;
   taskStore: TaskStore;
@@ -61,7 +62,7 @@ export interface TaskSchedulingOpts {
 /**
  * return type of TaskScheduling.bulkUpdateSchedules method
  */
-export interface BulkUpdateSchedulesResult {
+export interface BulkUpdateTaskResult {
   /**
    * list of successfully updated tasks
    */
@@ -126,7 +127,88 @@ export class TaskScheduling {
     return await this.store.schedule({
       ...modifiedTask,
       traceparent: traceparent || '',
+      enabled: modifiedTask.enabled ?? true,
     });
+  }
+
+  /**
+   * Bulk schedules a task.
+   *
+   * @param tasks - The tasks being scheduled.
+   * @returns {Promise<ConcreteTaskInstance>}
+   */
+  public async bulkSchedule(
+    taskInstances: TaskInstanceWithDeprecatedFields[],
+    options?: Record<string, unknown>
+  ): Promise<ConcreteTaskInstance[]> {
+    const traceparent =
+      agent.currentTransaction && agent.currentTransaction.type !== 'request'
+        ? agent.currentTraceparent
+        : '';
+    const modifiedTasks = await Promise.all(
+      taskInstances.map(async (taskInstance) => {
+        const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
+          ...options,
+          taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
+        });
+        return {
+          ...modifiedTask,
+          traceparent: traceparent || '',
+          enabled: modifiedTask.enabled ?? true,
+        };
+      })
+    );
+
+    return await this.store.bulkSchedule(modifiedTasks);
+  }
+
+  public async bulkDisable(taskIds: string[]) {
+    const enabledTasks = await this.bulkGetTasksHelper(taskIds, {
+      term: {
+        'task.enabled': true,
+      },
+    });
+
+    const updatedTasks = enabledTasks
+      .flatMap(({ docs }) => docs)
+      .reduce<ConcreteTaskInstance[]>((acc, task) => {
+        // if task is not enabled, no need to update it
+        if (!task.enabled) {
+          return acc;
+        }
+
+        acc.push({ ...task, enabled: false });
+        return acc;
+      }, []);
+
+    return await this.bulkUpdateTasksHelper(updatedTasks);
+  }
+
+  public async bulkEnable(taskIds: string[], runSoon: boolean = true) {
+    const disabledTasks = await this.bulkGetTasksHelper(taskIds, {
+      term: {
+        'task.enabled': false,
+      },
+    });
+
+    const updatedTasks = disabledTasks
+      .flatMap(({ docs }) => docs)
+      .reduce<ConcreteTaskInstance[]>((acc, task) => {
+        // if task is enabled, no need to update it
+        if (task.enabled) {
+          return acc;
+        }
+
+        if (runSoon) {
+          acc.push({ ...task, enabled: true, scheduledAt: new Date(), runAt: new Date() });
+        } else {
+          acc.push({ ...task, enabled: true });
+        }
+
+        return acc;
+      }, []);
+
+    return await this.bulkUpdateTasksHelper(updatedTasks);
   }
 
   /**
@@ -136,32 +218,17 @@ export class TaskScheduling {
    *
    * @param {string[]} taskIds  - list of task ids
    * @param {IntervalSchedule} schedule  - new schedule
-   * @returns {Promise<BulkUpdateSchedulesResult>}
+   * @returns {Promise<BulkUpdateTaskResult>}
    */
   public async bulkUpdateSchedules(
     taskIds: string[],
     schedule: IntervalSchedule
-  ): Promise<BulkUpdateSchedulesResult> {
-    const tasks = await pMap(
-      chunk(taskIds, 100),
-      async (taskIdsChunk) =>
-        this.store.fetch({
-          query: mustBeAllOf(
-            {
-              terms: {
-                _id: taskIdsChunk.map((taskId) => `task:${taskId}`),
-              },
-            },
-            {
-              term: {
-                'task.status': 'idle',
-              },
-            }
-          ),
-          size: 100,
-        }),
-      { concurrency: 10 }
-    );
+  ): Promise<BulkUpdateTaskResult> {
+    const tasks = await this.bulkGetTasksHelper(taskIds, {
+      term: {
+        'task.status': 'idle',
+      },
+    });
 
     const updatedTasks = tasks
       .flatMap(({ docs }) => docs)
@@ -184,7 +251,30 @@ export class TaskScheduling {
         return acc;
       }, []);
 
-    return (await this.store.bulkUpdate(updatedTasks)).reduce<BulkUpdateSchedulesResult>(
+    return await this.bulkUpdateTasksHelper(updatedTasks);
+  }
+
+  private async bulkGetTasksHelper(taskIds: string[], ...must: QueryDslQueryContainer[]) {
+    return await pMap(
+      chunk(taskIds, BULK_ACTION_SIZE),
+      async (taskIdsChunk) =>
+        this.store.fetch({
+          query: mustBeAllOf(
+            {
+              terms: {
+                _id: taskIdsChunk.map((taskId) => `task:${taskId}`),
+              },
+            },
+            ...must
+          ),
+          size: BULK_ACTION_SIZE,
+        }),
+      { concurrency: 10 }
+    );
+  }
+
+  private async bulkUpdateTasksHelper(updatedTasks: ConcreteTaskInstance[]) {
+    return (await this.store.bulkUpdate(updatedTasks)).reduce<BulkUpdateTaskResult>(
       (acc, task) => {
         if (task.tag === 'ok') {
           acc.tasks.push(task.value);
@@ -199,7 +289,7 @@ export class TaskScheduling {
   }
 
   /**
-   * Run  task.
+   * Run task.
    *
    * @param taskId - The task being scheduled.
    * @returns {Promise<RunSoonResult>}

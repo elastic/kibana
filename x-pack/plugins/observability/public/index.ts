@@ -27,10 +27,10 @@ export type {
 export {
   enableInspectEsQueries,
   enableComparisonByDefault,
-  enableInfrastructureView,
   enableServiceGroups,
   enableNewSyntheticsView,
   apmServiceGroupMaxNumberOfServices,
+  enableInfrastructureHostsView,
 } from '../common/ui_settings_keys';
 export { uptimeOverviewLocatorID } from '../common';
 
@@ -115,3 +115,5 @@ export {
 } from './components/shared/exploratory_view/configurations/constants';
 export { ExploratoryViewContextProvider } from './components/shared/exploratory_view/contexts/exploratory_view_config';
 export { fromQuery, toQuery } from './utils/url';
+
+export type { NavigationSection } from './services/navigation_registry';

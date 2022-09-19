@@ -9,7 +9,7 @@ import React from 'react';
 import { createStore } from 'redux';
 import { Provider as ReduxProvider } from 'react-redux';
 import { cloneDeep } from 'lodash';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 
 import { CanvasWorkpad, CanvasElement, CanvasAsset, CanvasPage } from '../../types';
 

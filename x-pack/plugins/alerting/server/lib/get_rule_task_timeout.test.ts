@@ -37,6 +37,7 @@ const configWithoutTimeout = {
   ...config,
   run: {
     actions: { max: 1000 },
+    alerts: { max: 1000 },
   },
 };
 

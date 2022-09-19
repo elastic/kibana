@@ -43,12 +43,21 @@ import {
   useGetPackageInfoByKey,
   sendCreateAgentPolicy,
 } from '../../../../hooks';
-import { Loading, Error, ExtensionWrapper } from '../../../../components';
+import {
+  Loading,
+  Error,
+  ExtensionWrapper,
+  DevtoolsRequestFlyoutButton,
+} from '../../../../components';
 
 import { agentPolicyFormValidation, ConfirmDeployAgentPolicyModal } from '../../components';
 import { useUIExtension } from '../../../../hooks';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../../types';
-import { pkgKeyFromPackageInfo, isVerificationError } from '../../../../services';
+import {
+  pkgKeyFromPackageInfo,
+  isVerificationError,
+  ExperimentalFeaturesService,
+} from '../../../../services';
 
 import type {
   PackagePolicyFormState,
@@ -60,13 +69,13 @@ import { IntegrationBreadcrumb } from '../components';
 
 import type { PackagePolicyValidationResults } from '../services';
 import { validatePackagePolicy, validationHasErrors } from '../services';
-
 import {
   StepConfigurePackagePolicy,
   StepDefinePackagePolicy,
   SelectedPolicyTab,
   StepSelectHosts,
 } from '../components';
+import { generateCreatePackagePolicyDevToolsRequest } from '../../services';
 
 import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
 
@@ -143,7 +152,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     namespace: 'default',
     policy_id: '',
     enabled: true,
-    output_id: '',
     inputs: [],
   });
 
@@ -549,6 +557,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     },
   ];
 
+  const { showDevtoolsRequest } = ExperimentalFeaturesService.get();
+  const devtoolRequest = useMemo(
+    () =>
+      generateCreatePackagePolicyDevToolsRequest({
+        ...packagePolicy,
+      }),
+    [packagePolicy]
+  );
+
   // Display package error if there is one
   if (packageInfoError) {
     return (
@@ -563,6 +580,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       />
     );
   }
+
   return (
     <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
       <EuiErrorBoundary>
@@ -618,6 +636,22 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                     />
                   </EuiButtonEmpty>
                 </EuiFlexItem>
+                {showDevtoolsRequest ? (
+                  <EuiFlexItem grow={false}>
+                    <DevtoolsRequestFlyoutButton
+                      request={devtoolRequest}
+                      description={i18n.translate(
+                        'xpack.fleet.createPackagePolicy.devtoolsRequestDescription',
+                        {
+                          defaultMessage: 'This Kibana request creates a new package policy.',
+                        }
+                      )}
+                      btnProps={{
+                        color: 'ghost',
+                      }}
+                    />
+                  </EuiFlexItem>
+                ) : null}
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     onClick={() => onSubmit()}

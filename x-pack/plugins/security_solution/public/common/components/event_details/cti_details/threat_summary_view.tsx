@@ -24,10 +24,12 @@ import type { CtiEnrichment } from '../../../../../common/search_strategy/securi
 import type {
   BrowserFields,
   TimelineEventsDetailsItem,
+  RiskSeverity,
 } from '../../../../../common/search_strategy';
 import { HostRiskSummary } from './host_risk_summary';
+import { UserRiskSummary } from './user_risk_summary';
 import { EnrichmentSummary } from './enrichment_summary';
-import type { HostRisk } from '../../../../risk_score/containers';
+import type { HostRisk, UserRisk } from '../../../../risk_score/containers';
 
 const UppercaseEuiTitle = styled(EuiTitle)`
   text-transform: uppercase;
@@ -125,12 +127,28 @@ const ThreatSummaryViewComponent: React.FC<{
   enrichments: CtiEnrichment[];
   eventId: string;
   timelineId: string;
-  hostRisk: HostRisk | null;
+  hostRisk: HostRisk;
+  userRisk: UserRisk;
   isDraggable?: boolean;
-}> = ({ browserFields, data, enrichments, eventId, timelineId, hostRisk, isDraggable }) => {
-  if (!hostRisk && enrichments.length === 0) {
-    return null;
-  }
+  isReadOnly?: boolean;
+}> = ({
+  browserFields,
+  data,
+  enrichments,
+  eventId,
+  timelineId,
+  hostRisk,
+  userRisk,
+  isDraggable,
+  isReadOnly,
+}) => {
+  const originalHostRisk = data?.find(
+    (eventDetail) => eventDetail?.field === 'host.risk.calculated_level'
+  )?.values?.[0] as RiskSeverity | undefined;
+
+  const originalUserRisk = data?.find(
+    (eventDetail) => eventDetail?.field === 'user.risk.calculated_level'
+  )?.values?.[0] as RiskSeverity | undefined;
 
   return (
     <>
@@ -142,11 +160,13 @@ const ThreatSummaryViewComponent: React.FC<{
       <EuiSpacer size="m" />
 
       <EuiFlexGroup direction="column" gutterSize="m" style={{ flexGrow: 0 }}>
-        {hostRisk && (
-          <EuiFlexItem grow={false}>
-            <HostRiskSummary hostRisk={hostRisk} />
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <HostRiskSummary hostRisk={hostRisk} originalHostRisk={originalHostRisk} />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <UserRiskSummary userRisk={userRisk} originalUserRisk={originalUserRisk} />
+        </EuiFlexItem>
 
         <EnrichmentSummary
           browserFields={browserFields}
@@ -155,6 +175,7 @@ const ThreatSummaryViewComponent: React.FC<{
           timelineId={timelineId}
           eventId={eventId}
           isDraggable={isDraggable}
+          isReadOnly={isReadOnly}
         />
       </EuiFlexGroup>
     </>

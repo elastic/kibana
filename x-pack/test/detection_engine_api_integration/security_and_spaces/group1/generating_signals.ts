@@ -797,6 +797,34 @@ export default ({ getService }: FtrProviderContext) => {
           const signals = await getSignalsByIds(supertest, log, [id]);
           expect(signals.hits.hits.length).eql(2);
         });
+
+        describe('EQL alerts should be be enriched', () => {
+          before(async () => {
+            await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
+          });
+
+          after(async () => {
+            await esArchiver.unload('x-pack/test/functional/es_archives/entity/host_risk');
+          });
+
+          it('should be enriched with host risk score', async () => {
+            const rule: EqlCreateSchema = {
+              ...getEqlRuleForSignalTesting(['auditbeat-*']),
+              query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
+            };
+            const { id } = await createRule(supertest, log, rule);
+            await waitForRuleSuccessOrStatus(supertest, log, id);
+            await waitForSignalsToBePresent(supertest, log, 1, [id]);
+            const signals = await getSignalsByIds(supertest, log, [id]);
+            expect(signals.hits.hits.length).eql(1);
+            const fullSignal = signals.hits.hits[0]._source;
+            if (!fullSignal) {
+              return expect(fullSignal).to.be.ok();
+            }
+            expect(fullSignal?.host?.risk?.calculated_level).to.eql('Critical');
+            expect(fullSignal?.host?.risk?.calculated_score_norm).to.eql(96);
+          });
+        });
       });
 
       describe('Threshold Rules', () => {
@@ -1019,7 +1047,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
             [ALERT_WORKFLOW_STATUS]: 'open',
-            [ALERT_REASON]: `event created high alert Signal Testing Query.`,
+            [ALERT_REASON]: `event with process sshd, created high alert Signal Testing Query.`,
             [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
             [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
             [ALERT_DEPTH]: 1,
@@ -1041,6 +1069,198 @@ export default ({ getService }: FtrProviderContext) => {
               count: 21,
               from: '2019-02-19T20:22:03.561Z',
             },
+          });
+        });
+
+        describe('Timestamp override and fallback', async () => {
+          before(async () => {
+            await esArchiver.load(
+              'x-pack/test/functional/es_archives/security_solution/timestamp_fallback'
+            );
+          });
+
+          after(async () => {
+            await esArchiver.unload(
+              'x-pack/test/functional/es_archives/security_solution/timestamp_fallback'
+            );
+          });
+
+          it('applies timestamp override when using single field', async () => {
+            const rule: ThresholdCreateSchema = {
+              ...getThresholdRuleForSignalTesting(['timestamp-fallback-test']),
+              threshold: {
+                field: 'host.name',
+                value: 1,
+              },
+              timestamp_override: 'event.ingested',
+            };
+            const { id } = await createRule(supertest, log, rule);
+            await waitForRuleSuccessOrStatus(supertest, log, id);
+            await waitForSignalsToBePresent(supertest, log, 2, [id]);
+            const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+            expect(signalsOpen.hits.hits.length).eql(4);
+
+            for (const hit of signalsOpen.hits.hits) {
+              const originalTime = hit._source?.[ALERT_ORIGINAL_TIME];
+              const hostName = hit._source?.['host.name'];
+              if (hostName === 'host-1') {
+                expect(originalTime).eql('2020-12-16T15:15:18.570Z');
+              } else if (hostName === 'host-2') {
+                expect(originalTime).eql('2020-12-16T15:16:18.570Z');
+              } else if (hostName === 'host-3') {
+                expect(originalTime).eql('2020-12-16T16:15:18.570Z');
+              } else {
+                expect(originalTime).eql('2020-12-16T16:16:18.570Z');
+              }
+            }
+          });
+
+          it('applies timestamp override when using multiple fields', async () => {
+            const rule: ThresholdCreateSchema = {
+              ...getThresholdRuleForSignalTesting(['timestamp-fallback-test']),
+              threshold: {
+                field: ['host.name', 'source.ip'],
+                value: 1,
+              },
+              timestamp_override: 'event.ingested',
+            };
+            const { id } = await createRule(supertest, log, rule);
+            await waitForRuleSuccessOrStatus(supertest, log, id);
+            await waitForSignalsToBePresent(supertest, log, 2, [id]);
+            const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+            expect(signalsOpen.hits.hits.length).eql(4);
+
+            for (const hit of signalsOpen.hits.hits) {
+              const originalTime = hit._source?.[ALERT_ORIGINAL_TIME];
+              const hostName = hit._source?.['host.name'];
+              if (hostName === 'host-1') {
+                expect(originalTime).eql('2020-12-16T15:15:18.570Z');
+              } else if (hostName === 'host-2') {
+                expect(originalTime).eql('2020-12-16T15:16:18.570Z');
+              } else if (hostName === 'host-3') {
+                expect(originalTime).eql('2020-12-16T16:15:18.570Z');
+              } else {
+                expect(originalTime).eql('2020-12-16T16:16:18.570Z');
+              }
+            }
+          });
+        });
+
+        describe('Threshold alerts should be be enriched', () => {
+          before(async () => {
+            await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
+          });
+
+          after(async () => {
+            await esArchiver.unload('x-pack/test/functional/es_archives/entity/host_risk');
+          });
+
+          it('should be enriched with host risk score', async () => {
+            const rule: ThresholdCreateSchema = {
+              ...getThresholdRuleForSignalTesting(['auditbeat-*']),
+              threshold: {
+                field: 'host.name',
+                value: 100,
+              },
+            };
+            const { id } = await createRule(supertest, log, rule);
+            await waitForRuleSuccessOrStatus(supertest, log, id);
+            await waitForSignalsToBePresent(supertest, log, 2, [id]);
+            const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+
+            expect(signalsOpen.hits.hits[0]?._source?.host?.risk?.calculated_level).to.eql('Low');
+            expect(signalsOpen.hits.hits[0]?._source?.host?.risk?.calculated_score_norm).to.eql(20);
+            expect(signalsOpen.hits.hits[1]?._source?.host?.risk?.calculated_level).to.eql(
+              'Critical'
+            );
+            expect(signalsOpen.hits.hits[1]?._source?.host?.risk?.calculated_score_norm).to.eql(96);
+          });
+        });
+      });
+
+      describe('Enrich alerts: query rule', () => {
+        describe('without index avalable', () => {
+          it('should do not have risk score fields', async () => {
+            const rule: QueryCreateSchema = {
+              ...getRuleForSignalTesting(['auditbeat-*']),
+              query: `_id:${ID}`,
+            };
+            const { id } = await createRule(supertest, log, rule);
+            await waitForRuleSuccessOrStatus(supertest, log, id);
+            await waitForSignalsToBePresent(supertest, log, 1, [id]);
+            const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+            expect(signalsOpen.hits.hits[0]?._source?.host?.risk).to.eql(undefined);
+            expect(signalsOpen.hits.hits[0]?._source?.user?.risk).to.eql(undefined);
+          });
+        });
+
+        describe('with  host risk score', () => {
+          before(async () => {
+            await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+            await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
+          });
+
+          after(async () => {
+            await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+            await esArchiver.unload('x-pack/test/functional/es_archives/entity/host_risk');
+          });
+
+          it('should host have risk score field and do not have user risk score', async () => {
+            const rule: QueryCreateSchema = {
+              ...getRuleForSignalTesting(['auditbeat-*']),
+              query: `_id:${ID} or _id:GBbXBmkBR346wHgn5_eR or _id:x10zJ2oE9v5HJNSHhyxi`,
+            };
+            const { id } = await createRule(supertest, log, rule);
+            await waitForRuleSuccessOrStatus(supertest, log, id);
+            await waitForSignalsToBePresent(supertest, log, 1, [id]);
+            const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+
+            const alerts = signalsOpen.hits.hits ?? [];
+            const firstAlert = alerts.find(
+              (alert) => alert?._source?.host?.name === 'suricata-zeek-sensor-toronto'
+            );
+            const secondAlert = alerts.find(
+              (alert) => alert?._source?.host?.name === 'suricata-sensor-london'
+            );
+            const thirdAlert = alerts.find((alert) => alert?._source?.host?.name === 'IE11WIN8_1');
+
+            expect(firstAlert?._source?.host?.risk?.calculated_level).to.eql('Critical');
+            expect(firstAlert?._source?.host?.risk?.calculated_score_norm).to.eql(96);
+            expect(firstAlert?._source?.user?.risk).to.eql(undefined);
+            expect(secondAlert?._source?.host?.risk?.calculated_level).to.eql('Low');
+            expect(secondAlert?._source?.host?.risk?.calculated_score_norm).to.eql(20);
+            expect(thirdAlert?._source?.host?.risk).to.eql(undefined);
+          });
+        });
+
+        describe('with host and risk score and user risk score', () => {
+          before(async () => {
+            await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+            await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
+            await esArchiver.load('x-pack/test/functional/es_archives/entity/user_risk');
+          });
+
+          after(async () => {
+            await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+            await esArchiver.unload('x-pack/test/functional/es_archives/entity/host_risk');
+            await esArchiver.unload('x-pack/test/functional/es_archives/entity/user_risk');
+          });
+
+          it('should have host and user risk score fields', async () => {
+            const rule: QueryCreateSchema = {
+              ...getRuleForSignalTesting(['auditbeat-*']),
+              query: `_id:${ID}`,
+            };
+            const { id } = await createRule(supertest, log, rule);
+            await waitForRuleSuccessOrStatus(supertest, log, id);
+            await waitForSignalsToBePresent(supertest, log, 1, [id]);
+            const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+            expect(signalsOpen.hits.hits[0]?._source?.host?.risk?.calculated_level).to.eql(
+              'Critical'
+            );
+            expect(signalsOpen.hits.hits[0]?._source?.host?.risk?.calculated_score_norm).to.eql(96);
+            expect(signalsOpen.hits.hits[0]?._source?.user?.risk?.calculated_level).to.eql('Low');
+            expect(signalsOpen.hits.hits[0]?._source?.user?.risk?.calculated_score_norm).to.eql(11);
           });
         });
       });

@@ -9,13 +9,17 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { OpenInDevConsoleButton } from '.';
 import { TestProviders } from '../../mock';
 
+jest.mock('../../hooks/use_space_id', () => ({
+  useSpaceId: jest.fn().mockReturnValue('myspace'),
+}));
+
 describe('OpenInDevConsoleButton', () => {
-  it('renders open in dev console link', () => {
+  it('renders an open in dev console link', () => {
     render(
       <TestProviders>
         <OpenInDevConsoleButton
           enableButton={true}
-          loadFromUrl="http://localhost:1234/test"
+          href="http://localhost:1234/test"
           tooltipContent="popover"
           title="open in dev console"
         />
@@ -24,12 +28,28 @@ describe('OpenInDevConsoleButton', () => {
     expect(screen.getByTestId('open-in-console-button')).toBeInTheDocument();
   });
 
+  it('renders a space-awared dev console link', () => {
+    render(
+      <TestProviders>
+        <OpenInDevConsoleButton
+          enableButton={true}
+          href="/s/myspace/app/dev_tools#/console?load_from=http://localhost:1234/s/myspace/test"
+          tooltipContent="popover"
+          title="open in dev console"
+        />
+      </TestProviders>
+    );
+    expect(screen.getByTestId('open-in-console-button').getAttribute('href')).toEqual(
+      '/s/myspace/app/dev_tools#/console?load_from=http://localhost:1234/s/myspace/test'
+    );
+  });
+
   it('renders a disabled button', () => {
     render(
       <TestProviders>
         <OpenInDevConsoleButton
           enableButton={false}
-          loadFromUrl="http://localhost:1234/test"
+          href="http://localhost:1234/test"
           title="open in dev console"
         />
       </TestProviders>
@@ -42,7 +62,7 @@ describe('OpenInDevConsoleButton', () => {
       <TestProviders>
         <OpenInDevConsoleButton
           enableButton={false}
-          loadFromUrl="http://localhost:1234/test"
+          href="http://localhost:1234/test"
           title="open in dev console"
           tooltipContent="tooltipContent"
         />

@@ -185,6 +185,10 @@ export const previewRulesRoute = async (
               | 'getContext'
               | 'hasContext'
             >;
+            alertLimit: {
+              getValue: () => number;
+              setLimitReached: () => void;
+            };
             done: () => { getRecoveredAlerts: () => [] };
           }
         ) => {
@@ -284,7 +288,14 @@ export const previewRulesRoute = async (
               queryAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
+              {
+                create: alertInstanceFactoryStub,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
             );
             break;
           case 'saved_query':
@@ -297,7 +308,14 @@ export const previewRulesRoute = async (
               savedQueryAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
+              {
+                create: alertInstanceFactoryStub,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
             );
             break;
           case 'threshold':
@@ -310,7 +328,14 @@ export const previewRulesRoute = async (
               thresholdAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
+              {
+                create: alertInstanceFactoryStub,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
             );
             break;
           case 'threat_match':
@@ -323,7 +348,14 @@ export const previewRulesRoute = async (
               threatMatchAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
+              {
+                create: alertInstanceFactoryStub,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
             );
             break;
           case 'eql':
@@ -334,7 +366,14 @@ export const previewRulesRoute = async (
               eqlAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
+              {
+                create: alertInstanceFactoryStub,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
             );
             break;
           case 'machine_learning':
@@ -345,7 +384,14 @@ export const previewRulesRoute = async (
               mlAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
+              {
+                create: alertInstanceFactoryStub,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
             );
             break;
           case 'new_terms':
@@ -356,7 +402,14 @@ export const previewRulesRoute = async (
               newTermsAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
+              {
+                create: alertInstanceFactoryStub,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
+                done: () => ({ getRecoveredAlerts: () => [] }),
+              }
             );
             break;
           default:

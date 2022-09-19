@@ -9,7 +9,6 @@ import type { ActionCreator } from 'typescript-fsa';
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 
-import type { InputsModelId } from '../../../common/store/inputs/constants';
 import type { UsersQueryProps } from '../types';
 import type { NavTab } from '../../../common/components/navigation/types';
 
@@ -22,11 +21,6 @@ interface UsersDetailsComponentReduxProps {
 }
 
 interface UserBodyComponentDispatchProps {
-  setAbsoluteRangeDatePicker: ActionCreator<{
-    id: InputsModelId;
-    from: string;
-    to: string;
-  }>;
   detailName: string;
   usersDetailsPagePath: string;
 }
@@ -56,9 +50,3 @@ export type UsersDetailsTabsProps = UserBodyComponentDispatchProps &
     indexPattern: DataViewBase;
     type: usersModel.UsersType;
   };
-
-export type SetAbsoluteRangeDatePicker = ActionCreator<{
-  id: InputsModelId;
-  from: string;
-  to: string;
-}>;

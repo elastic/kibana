@@ -14,8 +14,7 @@ import {
 import { Case } from '../../containers/types';
 
 export interface AttachmentViewObject<Props = {}> {
-  type?: EuiCommentProps['type'];
-  timelineIcon?: EuiCommentProps['timelineIcon'];
+  timelineAvatar?: EuiCommentProps['timelineAvatar'];
   actions?: EuiCommentProps['actions'];
   event?: EuiCommentProps['event'];
   children?: React.LazyExoticComponent<React.FC<Props>>;

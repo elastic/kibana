@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { WATCH_TYPES } from '../../constants';
 
 export function serializeJsonWatch(name, json) {

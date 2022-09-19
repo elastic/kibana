@@ -151,23 +151,6 @@ const LogstashInstructionSteps = () => {
         children: (
           <>
             <FormattedMessage
-              id="xpack.fleet.settings.logstashInstructions.addPipelineStepDescription"
-              defaultMessage="In your Logstash configuration directory, open the {pipelineFile} file and add the following configuration. Replace the path to your file."
-              values={{
-                pipelineFile: <EuiCode>pipelines.yml</EuiCode>,
-              }}
-            />
-            <EuiSpacer size="m" />
-            <EuiCodeBlock paddingSize="m" language="yaml" isCopyable>
-              {LOGSTASH_CONFIG_PIPELINES}
-            </EuiCodeBlock>
-          </>
-        ),
-      },
-      {
-        children: (
-          <>
-            <FormattedMessage
               id="xpack.fleet.settings.logstashInstructions.editPipelineStepDescription"
               defaultMessage="Next, open the {pipelineConfFile} file and insert the following content:"
               values={{
@@ -177,6 +160,23 @@ const LogstashInstructionSteps = () => {
             <EuiSpacer size="m" />
             <EuiCodeBlock paddingSize="m" language="yaml" isCopyable>
               {getLogstashPipeline(logstashApiKey.apiKey)}
+            </EuiCodeBlock>
+          </>
+        ),
+      },
+      {
+        children: (
+          <>
+            <FormattedMessage
+              id="xpack.fleet.settings.logstashInstructions.addPipelineStepDescription"
+              defaultMessage="In your Logstash configuration directory, open the {pipelineFile} file and add the following configuration. Replace the path to your file."
+              values={{
+                pipelineFile: <EuiCode>pipelines.yml</EuiCode>,
+              }}
+            />
+            <EuiSpacer size="m" />
+            <EuiCodeBlock paddingSize="m" language="yaml" isCopyable>
+              {LOGSTASH_CONFIG_PIPELINES}
             </EuiCodeBlock>
           </>
         ),

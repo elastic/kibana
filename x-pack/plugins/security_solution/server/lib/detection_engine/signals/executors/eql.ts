@@ -16,6 +16,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { buildEqlSearchRequest } from '../build_events_query';
 import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
+import { createEnrichEventsFunction } from '../enrichments';
 
 import type {
   BulkCreate,
@@ -25,7 +26,7 @@ import type {
   SearchAfterAndBulkCreateReturnType,
   SignalSource,
 } from '../types';
-import { createSearchAfterReturnType, makeFloatString } from '../utils';
+import { addToSearchAfterReturn, createSearchAfterReturnType, makeFloatString } from '../utils';
 import { buildReasonMessageForEqlAlert } from '../reason_formatters';
 import type { CompleteRule, EqlRuleParams } from '../../schemas/rule_schemas';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
@@ -115,13 +116,17 @@ export const eqlExecutor = async ({
     }
 
     if (newSignals?.length) {
-      const insertResult = await bulkCreate(newSignals);
-      result.bulkCreateTimes.push(insertResult.bulkCreateDuration);
-      result.createdSignalsCount += insertResult.createdItemsCount;
-      result.createdSignals = insertResult.createdItems;
-    }
+      const createResult = await bulkCreate(
+        newSignals,
+        undefined,
+        createEnrichEventsFunction({
+          services,
+          logger: ruleExecutionLogger,
+        })
+      );
 
-    result.success = true;
+      addToSearchAfterReturn({ current: result, next: createResult });
+    }
     return result;
   });
 };

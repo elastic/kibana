@@ -8,15 +8,16 @@ import React from 'react';
 import { EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import { Link, useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useEuiTheme } from '@elastic/eui';
 import { generatePath } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { CspFinding } from '../../../../../common/schemas/csp_finding';
+import { CloudPosturePageTitle } from '../../../../components/cloud_posture_page_title';
 import * as TEST_SUBJECTS from '../../test_subjects';
 import { PageTitle, PageTitleText } from '../../layout/findings_layout';
 import { findingsNavigation } from '../../../../common/navigation/constants';
 import { ResourceFindingsQuery, useResourceFindings } from './use_resource_findings';
 import { useUrlQuery } from '../../../../common/hooks/use_url_query';
-import type { FindingsBaseURLQuery, FindingsBaseProps, CspFinding } from '../../types';
+import type { FindingsBaseURLQuery, FindingsBaseProps } from '../../types';
 import {
   getFindingsPageSizeInfo,
   getFilters,
@@ -53,9 +54,7 @@ const BackToResourcesButton = () => (
 );
 
 export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
-  const { euiTheme } = useEuiTheme();
   const params = useParams<{ resourceId: string }>();
-
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
 
@@ -97,13 +96,15 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
         <BackToResourcesButton />
         <PageTitleText
           title={
-            <div style={{ padding: euiTheme.size.s }}>
-              <FormattedMessage
-                id="xpack.csp.findings.resourceFindings.resourceFindingsPageTitle"
-                defaultMessage="{resourceId} - Findings"
-                values={{ resourceId: params.resourceId }}
-              />
-            </div>
+            <CloudPosturePageTitle
+              title={i18n.translate(
+                'xpack.csp.findings.resourceFindings.resourceFindingsPageTitle',
+                {
+                  defaultMessage: '{resourceId} - Findings',
+                  values: { resourceId: params.resourceId },
+                }
+              )}
+            />
           }
         />
       </PageTitle>

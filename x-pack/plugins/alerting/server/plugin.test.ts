@@ -40,6 +40,9 @@ const generateAlertingConfig = (): AlertingConfig => ({
       actions: {
         max: 1000,
       },
+      alerts: {
+        max: 1000,
+      },
     },
   },
 });

@@ -11,13 +11,14 @@ import { EuiRange } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
 import { EuiFormRow } from '@elastic/eui';
 import { shallow, mount } from 'enzyme';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
 import { percentileOperation } from '.';
-import { IndexPattern, IndexPatternLayer } from '../../types';
+import { IndexPatternLayer } from '../../types';
 import { PercentileIndexPatternColumn } from './percentile';
 import { TermsIndexPatternColumn } from './terms';
 import {
@@ -26,6 +27,7 @@ import {
   ExpressionAstExpressionBuilder,
 } from '@kbn/expressions-plugin/public';
 import type { OriginalColumn } from '../../to_expression';
+import { IndexPattern } from '../../../types';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -44,6 +46,7 @@ const defaultProps = {
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
+  fieldFormats: fieldFormatsServiceMock.createStartContract(),
   unifiedSearch: unifiedSearchPluginMock.createStartContract(),
   dataViews: dataViewPluginMocks.createStartContract(),
   http: {} as HttpSetup,

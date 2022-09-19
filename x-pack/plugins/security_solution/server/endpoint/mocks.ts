@@ -45,7 +45,7 @@ import { createEndpointMetadataServiceTestContextMock } from './services/metadat
 import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 import { EndpointFleetServicesFactory } from './services/fleet';
 import { createLicenseServiceMock } from '../../common/license/mocks';
-import { createFeatureUsageServiceMock } from './services/feature_usage';
+import { createFeatureUsageServiceMock } from './services/feature_usage/mocks';
 
 /**
  * Creates a mocked EndpointAppContext.

@@ -17,7 +17,7 @@ exports[`GroupsFilterPopover renders correctly against snapshot 1`] = `
     </EuiFilterButton>
   }
   closePopover={[Function]}
-  display="inlineBlock"
+  display="inline-block"
   hasArrow={true}
   isOpen={false}
   ownFocus={true}

@@ -107,10 +107,12 @@ export interface DocLinks {
     readonly apiKeys: string;
     readonly bulkApi: string;
     readonly configuration: string;
+    readonly connectors: string;
     readonly crawlerGettingStarted: string;
     readonly crawlerManaging: string;
     readonly crawlerOverview: string;
     readonly languageAnalyzers: string;
+    readonly languageClients: string;
     readonly licenseManagement: string;
     readonly mailService: string;
     readonly start: string;
@@ -262,7 +264,11 @@ export interface DocLinks {
       macos_system_ext: string;
       linux_deadlock: string;
     };
+    readonly packageActionTroubleshooting: {
+      es_connection: string;
+    };
     readonly threatIntelInt: string;
+    readonly responseActions: string;
   };
   readonly query: {
     readonly eql: string;
@@ -336,6 +342,7 @@ export interface DocLinks {
   readonly monitoring: Record<string, string>;
   readonly reporting: Readonly<{
     cloudMinimumRequirements: string;
+    grantUserAccess: string;
     browserSystemDependencies: string;
     browserSandboxDependencies: string;
   }>;

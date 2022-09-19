@@ -12,6 +12,7 @@ import { useDispatch } from 'react-redux';
 
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { InputsModelId } from '../../../common/store/inputs/constants';
 import type { HostItem } from '../../../../common/search_strategy';
 import { LastEventIndexKey } from '../../../../common/search_strategy';
 import { SecurityPageName } from '../../../app/types';
@@ -53,7 +54,6 @@ import { ID, useHostDetails } from '../../containers/hosts/details';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { LandingPageComponent } from '../../../common/components/landing_page';
 
 const HostOverviewManage = manageQuery(HostOverview);
@@ -83,7 +83,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   );
   const getFilters = () => [...hostDetailsPageFilters, ...filters];
 
-  const narrowDateRange = useCallback<UpdateDateRange>(
+  const updateDateRange = useCallback<UpdateDateRange>(
     ({ x }) => {
       if (!x) {
         return;
@@ -91,9 +91,22 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
       const [min, max] = x;
       dispatch(
         setAbsoluteRangeDatePicker({
-          id: 'global',
+          id: InputsModelId.global,
           from: new Date(min).toISOString(),
           to: new Date(max).toISOString(),
+        })
+      );
+    },
+    [dispatch]
+  );
+  const narrowDateRange = useCallback(
+    (score, interval) => {
+      const fromTo = scoreIntervalToDateTime(score, interval);
+      dispatch(
+        setAbsoluteRangeDatePicker({
+          id: InputsModelId.global,
+          from: fromTo.from,
+          to: fromTo.to,
         })
       );
     },
@@ -121,7 +134,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     dispatch(setHostDetailsTablesActivePageToZero());
   }, [dispatch, detailName]);
 
-  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
+  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
 
   return (
     <>
@@ -129,7 +142,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
         <>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-            <SiemSearchBar indexPattern={indexPattern} id="global" />
+            <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper
@@ -165,14 +178,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                     loading={loading}
                     startDate={from}
                     endDate={to}
-                    narrowDateRange={(score, interval) => {
-                      const fromTo = scoreIntervalToDateTime(score, interval);
-                      setAbsoluteRangeDatePicker({
-                        id: 'global',
-                        from: fromTo.from,
-                        to: fromTo.to,
-                      });
-                    }}
+                    narrowDateRange={narrowDateRange}
                     setQuery={setQuery}
                     refetch={refetch}
                     inspect={inspect}
@@ -190,7 +196,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                 indexNames={selectedPatterns}
                 setQuery={setQuery}
                 to={to}
-                narrowDateRange={narrowDateRange}
+                updateDateRange={updateDateRange}
                 skip={isInitializing}
               />
 
@@ -199,7 +205,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               <SecuritySolutionTabNavigation
                 navTabs={navTabsHostDetails({
                   hasMlUserPermissions: hasMlUserPermissions(capabilities),
-                  isRiskyHostsEnabled: riskyHostsFeatureEnabled,
+                  isRiskyHostsEnabled: isPlatinumOrTrialLicense,
                   hostName: detailName,
                 })}
               />
@@ -220,7 +226,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               filterQuery={filterQuery}
               hostDetailsPagePath={hostDetailsPagePath}
               indexPattern={indexPattern}
-              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
             />
           </SecuritySolutionPageWrapper>
         </>

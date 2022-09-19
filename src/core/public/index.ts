@@ -48,6 +48,7 @@ import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
+import type { ApplicationSetup, ApplicationStart } from '@kbn/core-application-browser';
 import type {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -67,22 +68,20 @@ import type {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   ChromeUserBanner,
-  NavType,
   ChromeHelpMenuActions,
-} from './chrome';
+} from '@kbn/core-chrome-browser';
 import type {
   Plugin,
   PluginInitializer,
   PluginInitializerContext,
   PluginOpaqueId,
 } from './plugins';
-import type { ApplicationSetup, ApplicationStart } from './application';
 
 export type { PackageInfo, EnvironmentMode } from '@kbn/config';
 export type { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
 export type { CoreContext } from '@kbn/core-base-browser-internal';
+export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '@kbn/core-application-common';
 export type { CoreSystem } from './core_system';
-export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
 export type { AppCategory } from '../types';
 export type {
   UiSettingsParams,
@@ -106,7 +105,7 @@ export type {
   TelemetryCounterType,
 } from '@kbn/analytics-client';
 
-export { AppNavLinkStatus, AppStatus, ScopedHistory } from './application';
+export { AppNavLinkStatus, AppStatus } from '@kbn/core-application-browser';
 export type {
   ApplicationSetup,
   ApplicationStart,
@@ -127,9 +126,10 @@ export type {
   PublicAppDeepLinkInfo,
   NavigateToAppOptions,
   NavigateToUrlOptions,
-} from './application';
-// Export implementation only until we have a concrete mock for tests. See https://github.com/elastic/kibana/pull/137448 for more info
-export { SimpleSavedObjectImpl } from '@kbn/core-saved-objects-browser-internal';
+  ScopedHistory,
+} from '@kbn/core-application-browser';
+export { CoreScopedHistory } from '@kbn/core-application-browser-internal';
+
 export type {
   SavedObjectsClientContract,
   SimpleSavedObject,
@@ -224,7 +224,7 @@ export type {
 
 export type { MountPoint, UnmountCallback, OverlayRef } from '@kbn/core-mount-utils-browser';
 
-export { URL_MAX_LENGTH } from './core_app';
+export { URL_MAX_LENGTH } from '@kbn/core-apps-browser-internal';
 
 export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
@@ -361,7 +361,6 @@ export type {
   PluginOpaqueId,
   IUiSettingsClient,
   UiSettingsState,
-  NavType,
 };
 
 export { __kbnBootstrap__ } from './kbn_bootstrap';

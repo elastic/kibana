@@ -7,7 +7,7 @@
 import React from 'react';
 import Chance from 'chance';
 import { render, screen } from '@testing-library/react';
-import type { UseQueryResult } from 'react-query/types/react/types';
+import type { UseQueryResult } from '@tanstack/react-query';
 import { createCspBenchmarkIntegrationFixture } from '../../test/fixtures/csp_benchmark_integration';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { TestProvider } from '../../test/test_provider';
@@ -15,10 +15,12 @@ import { Benchmarks } from './benchmarks';
 import * as TEST_SUBJ from './test_subjects';
 import { useCspBenchmarkIntegrations } from './use_csp_benchmark_integrations';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
 
 jest.mock('./use_csp_benchmark_integrations');
 jest.mock('../../common/api/use_setup_status_api');
+jest.mock('../../common/hooks/use_subscription_status');
 jest.mock('../../common/navigation/use_navigate_to_cis_integration');
 const chance = new Chance();
 
@@ -31,6 +33,14 @@ describe('<Benchmarks />', () => {
         data: { status: 'indexed' },
       })
     );
+
+    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: true,
+      })
+    );
+
     (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
   });
 

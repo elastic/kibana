@@ -5,130 +5,103 @@
  * 2.0.
  */
 
+import { ExpandWildcard } from '@elastic/elasticsearch/lib/api/types';
 import {
-  ExpandWildcard,
-  IndicesIndexState,
+  IndicesGetResponse,
+  SecurityHasPrivilegesPrivileges,
   IndicesStatsIndicesStats,
-} from '@elastic/elasticsearch/lib/api/types';
-import { ByteSizeValue } from '@kbn/config-schema';
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { ElasticsearchIndexWithPrivileges } from '../../../common/types';
+import { ElasticsearchIndexWithPrivileges } from '../../../common/types/indices';
 
-export const mapIndexStats = (
-  indexData: IndicesIndexState,
-  indexStats: IndicesStatsIndicesStats,
-  indexName: string
-) => {
-  const aliases = Object.keys(indexData.aliases!);
-  const sizeInBytes = new ByteSizeValue(indexStats?.total?.store?.size_in_bytes ?? 0).toString();
+import { fetchIndexCounts } from './fetch_index_counts';
+import { fetchIndexPrivileges } from './fetch_index_privileges';
+import { fetchIndexStats } from './fetch_index_stats';
+import { expandAliases, getAlwaysShowAliases } from './utils/extract_always_show_indices';
+import { getIndexDataMapper } from './utils/get_index_data';
+import { getIndexData } from './utils/get_index_data';
 
-  const docCount = indexStats?.total?.docs?.count ?? 0;
-  const docDeleted = indexStats?.total?.docs?.deleted ?? 0;
-  const total = {
-    docs: {
-      count: docCount,
-      deleted: docDeleted,
-    },
-    store: {
-      size_in_bytes: sizeInBytes,
-    },
-  };
-  return {
-    aliases,
-    health: indexStats?.health,
-    name: indexName,
-    status: indexStats?.status,
-    total,
-    uuid: indexStats?.uuid,
-  };
-};
+export interface TotalIndexData {
+  allIndexMatches: IndicesGetResponse;
+  indexCounts: Record<string, number>;
+  indexPrivileges: Record<string, SecurityHasPrivilegesPrivileges>;
+  indicesStats: Record<string, IndicesStatsIndicesStats>;
+}
 
 export const fetchIndices = async (
   client: IScopedClusterClient,
   indexPattern: string,
   returnHiddenIndices: boolean,
-  includeAliases: boolean
+  includeAliases: boolean,
+  alwaysShowSearchPattern?: 'search-'
 ): Promise<ElasticsearchIndexWithPrivileges[]> => {
   // This call retrieves alias and settings information about indices
-  const expandWildcards: ExpandWildcard[] = returnHiddenIndices ? ['hidden', 'all'] : ['open'];
-  const totalIndices = await client.asCurrentUser.indices.get({
-    expand_wildcards: expandWildcards,
-    // for better performance only compute aliases and settings of indices but not mappings
-    features: ['aliases', 'settings'],
-    // only get specified index properties from ES to keep the response under 536MB
-    // node.js string length limit: https://github.com/nodejs/node/issues/33960
-    filter_path: ['*.aliases', '*.settings.index.hidden'],
-    index: indexPattern,
-  });
+  // If we provide an override pattern with alwaysShowSearchPattern we get everything and filter out hiddens.
+  const expandWildcards: ExpandWildcard[] =
+    returnHiddenIndices || alwaysShowSearchPattern ? ['hidden', 'all'] : ['open'];
 
-  const indexAndAliasNames = Object.keys(totalIndices).reduce((accum, indexName) => {
-    accum.push(indexName);
+  const { allIndexMatches, indexAndAliasNames, indicesNames, alwaysShowMatchNames } =
+    await getIndexData(
+      client,
+      indexPattern,
+      expandWildcards,
+      returnHiddenIndices,
+      includeAliases,
+      alwaysShowSearchPattern
+    );
 
-    if (includeAliases) {
-      const aliases = Object.keys(totalIndices[indexName].aliases!);
-      aliases.forEach((alias) => accum.push(alias));
-    }
-    return accum;
-  }, [] as string[]);
-
-  const indicesNames = returnHiddenIndices
-    ? Object.keys(totalIndices)
-    : Object.keys(totalIndices).filter(
-        (indexName) => !(totalIndices[indexName]?.settings?.index?.hidden === 'true')
-      );
   if (indicesNames.length === 0) {
     return [];
   }
 
-  const { indices: indicesStats = {} } = await client.asCurrentUser.indices.stats({
-    expand_wildcards: expandWildcards,
-    index: indexPattern,
-    metric: ['docs', 'store'],
-  });
+  const indicesStats = await fetchIndexStats(client, indexPattern, expandWildcards);
 
-  // TODO: make multiple batched requests if indicesNames.length > SOMETHING
-  const { index: indexPrivileges } = await client.asCurrentUser.security.hasPrivileges({
-    index: [
-      {
-        names: indexAndAliasNames,
-        privileges: ['read', 'manage'],
-      },
-    ],
-  });
+  const indexPrivileges = await fetchIndexPrivileges(client, indexAndAliasNames);
 
-  return indicesNames
-    .map((indexName: string) => {
-      const indexData = totalIndices[indexName];
-      const indexStats = indicesStats[indexName];
-      return mapIndexStats(indexData, indexStats, indexName);
-    })
+  const indexCounts = await fetchIndexCounts(client, indexAndAliasNames);
+  const totalIndexData: TotalIndexData = {
+    allIndexMatches,
+    indexCounts,
+    indexPrivileges,
+    indicesStats,
+  };
+
+  const regularIndexData = indicesNames
+    .map(getIndexDataMapper(totalIndexData))
     .flatMap(({ name, aliases, ...indexData }) => {
       // expand aliases and add to results
-      const indicesAndAliases = [] as ElasticsearchIndexWithPrivileges[];
-      indicesAndAliases.push({
-        name,
-        alias: false,
-        privileges: { read: false, manage: false, ...indexPrivileges[name] },
+
+      const indexEntry = {
         ...indexData,
+        alias: false,
+        count: indexCounts[name] ?? 0,
+        name,
+        privileges: { manage: false, read: false, ...indexPrivileges[name] },
+      };
+      return includeAliases
+        ? [indexEntry, ...expandAliases(name, aliases, indexData, totalIndexData)]
+        : [indexEntry];
+    });
+
+  let indicesData = regularIndexData;
+
+  if (alwaysShowSearchPattern && includeAliases) {
+    const indexNamesAlreadyIncluded = regularIndexData.map(({ name }) => name);
+
+    const itemsToInclude = getAlwaysShowAliases(indexNamesAlreadyIncluded, alwaysShowMatchNames)
+      .map(getIndexDataMapper(totalIndexData))
+      .flatMap(({ name, aliases, ...indexData }) => {
+        return expandAliases(name, aliases, indexData, totalIndexData, alwaysShowSearchPattern);
       });
 
-      if (includeAliases) {
-        aliases.forEach((alias) => {
-          indicesAndAliases.push({
-            name: alias,
-            alias: true,
-            privileges: { read: false, manage: false, ...indexPrivileges[name] },
-            ...indexData,
-          });
-        });
-      }
-      return indicesAndAliases;
-    })
-    .filter(
-      ({ name }, index, array) =>
-        // make list of aliases unique since we add an alias per index above
-        // and aliases can point to multiple indices
-        array.findIndex((engineData) => engineData.name === name) === index
-    );
+    indicesData = [...indicesData, ...itemsToInclude];
+  }
+
+  return indicesData.filter(
+    ({ name }, index, array) =>
+      // make list of aliases unique since we add an alias per index above
+      // and aliases can point to multiple indices
+      array.findIndex((engineData) => engineData.name === name) === index
+  );
 };

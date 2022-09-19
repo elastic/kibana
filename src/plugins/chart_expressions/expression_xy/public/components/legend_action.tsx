@@ -15,6 +15,7 @@ import { LegendActionPopover } from './legend_action_popover';
 import {
   DatatablesWithFormatInfo,
   getSeriesName,
+  hasMultipleLayersWithSplits,
   LayersAccessorsTitles,
   LayersFieldFormats,
 } from '../helpers';
@@ -24,7 +25,8 @@ export const getLegendAction = (
   onFilter: (data: FilterEvent['data']) => void,
   fieldFormats: LayersFieldFormats,
   formattedDatatables: DatatablesWithFormatInfo,
-  titles: LayersAccessorsTitles
+  titles: LayersAccessorsTitles,
+  singleTable?: boolean
 ): LegendAction =>
   React.memo(({ series: [xySeries] }) => {
     const series = xySeries as XYChartSeriesIdentifier;
@@ -35,6 +37,7 @@ export const getLegendAction = (
         )
       )
     );
+    const allYAccessors = dataLayers.flatMap((dataLayer) => dataLayer.accessors);
 
     if (layerIndex === -1) {
       return null;
@@ -78,11 +81,12 @@ export const getLegendAction = (
             series,
             {
               splitAccessors: layer.splitAccessors,
-              accessorsCount: layer.accessors.length,
+              accessorsCount: singleTable ? allYAccessors.length : layer.accessors.length,
               columns: table.columns,
               splitAccessorsFormats: fieldFormats[layer.layerId].splitSeriesAccessors,
               alreadyFormattedColumns: formattedDatatables[layer.layerId].formattedColumns,
               columnToLabelMap: layer.columnToLabel ? JSON.parse(layer.columnToLabel) : {},
+              multipleLayersWithSplits: hasMultipleLayersWithSplits(dataLayers),
             },
             titles
           )?.toString() || ''

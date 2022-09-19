@@ -136,7 +136,7 @@ export const useEndpointActionItems = (
                 children: (
                   <FormattedMessage
                     id="xpack.securitySolution.endpoint.actions.console"
-                    defaultMessage="Launch responder"
+                    defaultMessage="Respond"
                   />
                 ),
                 toolTipContent: !isResponderCapabilitiesEnabled

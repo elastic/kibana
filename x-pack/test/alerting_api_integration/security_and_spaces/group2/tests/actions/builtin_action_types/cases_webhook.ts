@@ -30,9 +30,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
     createIncidentMethod: 'post',
     createIncidentResponseKey: 'id',
     createIncidentUrl: 'https://coolsite.net/rest/api/2/issue',
-    getIncidentResponseCreatedDateKey: 'fields.created',
     getIncidentResponseExternalTitleKey: 'key',
-    getIncidentResponseUpdatedDateKey: 'fields.updated',
     hasAuth: true,
     headers: { ['content-type']: 'application/json', ['kbn-xsrf']: 'abcd' },
     viewIncidentUrl: 'https://coolsite.net/browse/{{{external.system.title}}}',
@@ -46,9 +44,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
     'createIncidentJson',
     'createIncidentResponseKey',
     'createIncidentUrl',
-    'getIncidentResponseCreatedDateKey',
     'getIncidentResponseExternalTitleKey',
-    'getIncidentResponseUpdatedDateKey',
     'viewIncidentUrl',
     'getIncidentUrl',
     'updateIncidentJson',
@@ -386,13 +382,15 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
             .expect(200);
 
           expect(proxyHaveBeenCalled).to.equal(true);
+          const { pushedDate, ...dataWithoutTime } = body.data;
+          body.data = dataWithoutTime;
+
           expect(body).to.eql({
             status: 'ok',
             connector_id: simulatedActionId,
             data: {
               id: '123',
               title: 'CK-1',
-              pushedDate: '2020-04-27T14:17:45.490Z',
               url: `${casesWebhookSimulatorURL}/browse/CK-1`,
             },
           });

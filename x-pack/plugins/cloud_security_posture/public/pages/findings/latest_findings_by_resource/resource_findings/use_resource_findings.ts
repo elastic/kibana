@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Pagination } from '@elastic/eui';
 import { useContext } from 'react';
 import { number } from 'io-ts';
+import { CspFinding } from '../../../../../common/schemas/csp_finding';
 import { getAggregationCount, getFindingsCountAggQuery } from '../../utils/utils';
 import { FindingsEsPitContext } from '../../es_pit/findings_es_pit_context';
 import { FINDINGS_REFETCH_INTERVAL_MS } from '../../constants';
 import { useKibana } from '../../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../latest_findings/use_latest_findings';
-import type { CspFinding, FindingsBaseEsQuery, Sort } from '../../types';
+import type { FindingsBaseEsQuery, Sort } from '../../types';
 
 interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
   resourceId: string;

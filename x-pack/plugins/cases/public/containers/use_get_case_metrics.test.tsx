@@ -48,13 +48,11 @@ describe('useGetCaseMetrics', () => {
       throw new Error('Something went wrong');
     });
 
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useGetCaseMetrics(basicCase.id, features), {
-        wrapper,
-      });
-      await waitForNextUpdate();
-      expect(spyOnGetCaseMetrics).toBeCalledWith(basicCase.id, features, abortCtrl.signal);
-      expect(addError).toHaveBeenCalled();
+    const { waitForNextUpdate } = renderHook(() => useGetCaseMetrics(basicCase.id, features), {
+      wrapper,
     });
+    await waitForNextUpdate();
+    expect(spyOnGetCaseMetrics).toBeCalledWith(basicCase.id, features, abortCtrl.signal);
+    expect(addError).toHaveBeenCalled();
   });
 });

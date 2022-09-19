@@ -13,6 +13,7 @@ import {
   isOperation,
   DropType,
   DatasourceLayers,
+  IndexPatternMap,
 } from '../../../../types';
 import {
   getCustomDropTarget,
@@ -37,6 +38,7 @@ export function DraggableDimensionButton({
   layerDatasource,
   datasourceLayers,
   registerNewButtonRef,
+  indexPatterns,
 }: {
   layerId: string;
   groupIndex: number;
@@ -47,12 +49,13 @@ export function DraggableDimensionButton({
   group: VisualizationDimensionGroupConfig;
   label: string;
   children: ReactElement;
-  layerDatasource: Datasource<unknown, unknown>;
+  layerDatasource?: Datasource<unknown, unknown>;
   datasourceLayers: DatasourceLayers;
   state: unknown;
   accessorIndex: number;
   columnId: string;
   registerNewButtonRef: (id: string, instance: HTMLDivElement | null) => void;
+  indexPatterns: IndexPatternMap;
 }) {
   const { dragging } = useContext(DragContext);
 
@@ -73,6 +76,7 @@ export function DraggableDimensionButton({
         filterOperations: group.filterOperations,
         prioritizedOperation: group.prioritizedOperation,
       },
+      indexPatterns,
     },
     sharedDatasource
   );

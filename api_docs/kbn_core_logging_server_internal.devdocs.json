@@ -25,6 +25,7 @@
         ],
         "path": "packages/core/logging/core-logging-server-internal/src/appenders/rolling_file/policies/time_interval/get_next_rolling_time.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server-internal",
@@ -38,6 +39,7 @@
             ],
             "path": "packages/core/logging/core-logging-server-internal/src/appenders/rolling_file/policies/time_interval/get_next_rolling_time.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -52,6 +54,7 @@
             ],
             "path": "packages/core/logging/core-logging-server-internal/src/appenders/rolling_file/policies/time_interval/get_next_rolling_time.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -66,6 +69,7 @@
             ],
             "path": "packages/core/logging/core-logging-server-internal/src/appenders/rolling_file/policies/time_interval/get_next_rolling_time.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -83,6 +87,7 @@
         "description": [],
         "path": "packages/core/logging/core-logging-server-internal/src/logging_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server-internal",
@@ -95,7 +100,8 @@
               "ILoggingSystem"
             ],
             "path": "packages/core/logging/core-logging-server-internal/src/logging_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -117,12 +123,13 @@
           "Type",
           "<Readonly<{} & { type: \"console\"; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; }> | Readonly<{} & { type: \"file\"; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; fileName: string; }> | Readonly<{} & { type: \"rewrite\"; policy: Readonly<{} & { type: \"meta\"; mode: \"update\" | \"remove\"; properties: Readonly<{ value?: string | number | boolean | null | undefined; } & { path: string; }>[]; }>; appenders: string[]; }> | Readonly<{} & { type: \"rolling-file\"; strategy: ",
           "NumericRollingStrategyConfig",
-          "; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; policy: Readonly<{} & { type: \"size-limit\"; size: ",
+          "; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; fileName: string; policy: Readonly<{} & { type: \"size-limit\"; size: ",
           "ByteSizeValue",
-          "; }> | Readonly<{} & { type: \"time-interval\"; interval: moment.Duration; modulate: boolean; }>; fileName: string; }>>"
+          "; }> | Readonly<{} & { type: \"time-interval\"; interval: moment.Duration; modulate: boolean; }>; }>>"
         ],
         "path": "packages/core/logging/core-logging-server-internal/src/appenders/appenders.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -142,10 +149,11 @@
           "AppenderConfigType",
           ">>; loggers: ",
           "Type",
-          "<Readonly<{} & { name: string; level: \"error\" | \"all\" | \"off\" | \"info\" | \"debug\" | \"trace\" | \"warn\" | \"fatal\"; appenders: string[]; }>[]>; }>"
+          "<Readonly<{} & { name: string; level: \"error\" | \"all\" | \"info\" | \"debug\" | \"off\" | \"warn\" | \"trace\" | \"fatal\"; appenders: string[]; }>[]>; }>"
         ],
         "path": "packages/core/logging/core-logging-server-internal/src/logging_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -165,10 +173,11 @@
           "Type",
           "<string>; level: ",
           "Type",
-          "<\"error\" | \"all\" | \"off\" | \"info\" | \"debug\" | \"trace\" | \"warn\" | \"fatal\">; }>"
+          "<\"error\" | \"all\" | \"info\" | \"debug\" | \"off\" | \"warn\" | \"trace\" | \"fatal\">; }>"
         ],
         "path": "packages/core/logging/core-logging-server-internal/src/logging_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]

@@ -16,7 +16,7 @@ export class ActionStatus {
     this.lastAcknowledged = getMoment(get(props, 'lastAcknowledged'));
     this.lastThrottled = getMoment(get(props, 'lastThrottled'));
     this.lastExecution = getMoment(get(props, 'lastExecution'));
-    this.lastExecutionSuccessful = get(props, 'lastExecutionSuccessful');
+    this.isLastExecutionSuccessful = get(props, 'isLastExecutionSuccessful');
     this.lastExecutionReason = get(props, 'lastExecutionReason');
     this.lastSuccessfulExecution = getMoment(get(props, 'lastSuccessfulExecution'));
 

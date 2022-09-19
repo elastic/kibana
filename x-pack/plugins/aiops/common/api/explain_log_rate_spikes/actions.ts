@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { ChangePoint, ChangePointHistogram } from '@kbn/ml-agg-utils';
+import type { ChangePoint, ChangePointHistogram, ChangePointGroup } from '@kbn/ml-agg-utils';
 
 export const API_ACTION_NAME = {
   ADD_CHANGE_POINTS: 'add_change_points',
   ADD_CHANGE_POINTS_HISTOGRAM: 'add_change_points_histogram',
-  ERROR: 'error',
+  ADD_CHANGE_POINTS_GROUP: 'add_change_point_group',
+  ADD_ERROR: 'add_error',
   RESET: 'reset',
   UPDATE_LOADING_STATE: 'update_loading_state',
 } as const;
@@ -44,14 +45,26 @@ export function addChangePointsHistogramAction(
   };
 }
 
-interface ApiActionError {
-  type: typeof API_ACTION_NAME.ERROR;
+interface ApiActionAddChangePointsGroup {
+  type: typeof API_ACTION_NAME.ADD_CHANGE_POINTS_GROUP;
+  payload: ChangePointGroup[];
+}
+
+export function addChangePointsGroupAction(payload: ApiActionAddChangePointsGroup['payload']) {
+  return {
+    type: API_ACTION_NAME.ADD_CHANGE_POINTS_GROUP,
+    payload,
+  };
+}
+
+interface ApiActionAddError {
+  type: typeof API_ACTION_NAME.ADD_ERROR;
   payload: string;
 }
 
-export function errorAction(payload: ApiActionError['payload']): ApiActionError {
+export function addErrorAction(payload: ApiActionAddError['payload']): ApiActionAddError {
   return {
-    type: API_ACTION_NAME.ERROR,
+    type: API_ACTION_NAME.ADD_ERROR,
     payload,
   };
 }
@@ -84,7 +97,8 @@ export function updateLoadingStateAction(
 
 export type AiopsExplainLogRateSpikesApiAction =
   | ApiActionAddChangePoints
+  | ApiActionAddChangePointsGroup
   | ApiActionAddChangePointsHistogram
-  | ApiActionError
+  | ApiActionAddError
   | ApiActionReset
   | ApiActionUpdateLoadingState;

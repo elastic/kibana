@@ -234,8 +234,8 @@ function isEndpointAdvancedPolicyValidForLicense(policy: PolicyConfig, license: 
 
   // only platinum or higher may use rollback
   if (
-    policy.windows.advanced?.alerts?.rollback.remediation.enabled !==
-    defaults.windows.advanced?.alerts?.rollback.remediation.enabled
+    policy.windows.advanced?.alerts?.rollback.self_healing.enabled !==
+    defaults.windows.advanced?.alerts?.rollback.self_healing.enabled
   ) {
     return false;
   }

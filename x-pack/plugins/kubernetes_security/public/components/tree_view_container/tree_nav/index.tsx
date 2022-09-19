@@ -117,10 +117,11 @@ export const TreeNav = () => {
             tree={tree}
             aria-label={selectedLabel}
             selected={selected}
-            onSelect={(selectionDepth, key, type) => {
+            onSelect={(selectionDepth, type, key, clusterName) => {
               const newSelectionDepth = {
                 ...selectionDepth,
                 [type]: key,
+                ...(clusterName && { clusterName }),
               };
               setSelected(
                 Object.entries(newSelectionDepth)

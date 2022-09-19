@@ -1,0 +1,82 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects a file being made immutable using the chattr binary. Making a file immutable means it cannot be deleted or renamed, no link can be created to this file, most of the file's metadata can not be modified, and the file can not be opened in write mode. Threat actors will commonly utilize this to prevent tampering or modification of their malicious files or any system files they have modified for purposes of persistence (e.g .ssh, /etc/passwd, etc.).",
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "max_signals": 33,
+  "name": "File made Immutable by Chattr",
+  "note": "",
+  "query": "process where event.type == \"start\" and user.name == \"root\" and process.executable : \"/usr/bin/chattr\" and process.args : (\"-*i*\", \"+*i*\") and not process.parent.executable: \"/lib/systemd/systemd\"\n",
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.executable",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.parent.executable",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "user.name",
+      "type": "keyword"
+    }
+  ],
+  "risk_score": 47,
+  "rule_id": "968ccab9-da51-4a87-9ce2-d3c9782fd759",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1222",
+          "name": "File and Directory Permissions Modification",
+          "reference": "https://attack.mitre.org/techniques/T1222/",
+          "subtechnique": [
+            {
+              "id": "T1222.002",
+              "name": "Linux and Mac File and Directory Permissions Modification",
+              "reference": "https://attack.mitre.org/techniques/T1222/002/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 2
+}

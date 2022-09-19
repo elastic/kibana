@@ -17,7 +17,7 @@ import { ApmTemplate } from './apm_template';
 import { ApmServerInstances } from '../../../components/apm/instances';
 import { SetupModeRenderer } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 import { APM_SYSTEM_ID } from '../../../../common/constants';
 
 interface SetupModeProps {
@@ -29,7 +29,7 @@ interface SetupModeProps {
 export const ApmInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
   const { updateTotalItemCount, getPaginationTableProps } = useTable('apm.instances');
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;

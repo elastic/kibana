@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import Chance from 'chance';
-import type { UseQueryResult } from 'react-query';
+import type { UseQueryResult } from '@tanstack/react-query';
 import { of } from 'rxjs';
 import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
 import { Findings } from './findings';
@@ -20,6 +20,7 @@ import type { DataView } from '@kbn/data-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
 import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
@@ -27,9 +28,12 @@ import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { render } from '@testing-library/react';
 import { useFindingsEsPit } from './es_pit/use_findings_es_pit';
 import { expectIdsInDoc } from '../../test/utils';
+import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 jest.mock('../../common/api/use_latest_findings_data_view');
 jest.mock('../../common/api/use_setup_status_api');
+jest.mock('../../common/hooks/use_subscription_status');
 jest.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
 jest.mock('../../common/navigation/use_navigate_to_cis_integration');
 jest.mock('./es_pit/use_findings_es_pit');
@@ -45,6 +49,13 @@ beforeEach(() => {
     setPitId: () => {},
     pitIdRef: chance.guid(),
   }));
+
+  (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+    createReactQueryResponse({
+      status: 'success',
+      data: true,
+    })
+  );
 });
 
 const renderFindingsPage = () => {
@@ -55,6 +66,8 @@ const renderFindingsPage = () => {
         unifiedSearch: unifiedSearchPluginMock.createStartContract(),
         charts: chartPluginMock.createStartContract(),
         discover: discoverPluginMock.createStartContract(),
+        fleet: fleetMock.createStartMock(),
+        licensing: licensingMock.createStart(),
       }}
     >
       <Findings />

@@ -43,7 +43,6 @@ journey('DefaultEmailSettings', async ({ page, params }) => {
   });
 
   step('clear existing settings', async () => {
-    await settings.dismissSyntheticsCallout();
     await page.waitForSelector(byTestId('"default-connectors-input-loaded"'));
     await page.waitForTimeout(10 * 1000);
     const toEmailInput = await page.$(byTestId('toEmailAddressInput'));

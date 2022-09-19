@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { PrivateLocation } from '../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
-
+import { formatKibanaNamespace } from '../../../common/formatters';
 import {
   BrowserFields,
   ConfigKey,
   DataStream,
+  FormMonitorType,
   Locations,
   ProjectBrowserMonitor,
   ScheduleUnit,
@@ -50,7 +52,7 @@ export const normalizeProjectMonitor = ({
   namespace,
 }: {
   locations: Locations;
-  privateLocations: Locations;
+  privateLocations: PrivateLocation[];
   monitor: ProjectBrowserMonitor;
   projectId: string;
   namespace: string;
@@ -58,6 +60,7 @@ export const normalizeProjectMonitor = ({
   const defaultFields = DEFAULT_FIELDS[DataStream.BROWSER];
   const normalizedFields: NormalizedPublicFields = {
     [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
+    [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
     [ConfigKey.NAME]: monitor.name || '',
     [ConfigKey.SCHEDULE]: {
@@ -99,7 +102,7 @@ export const normalizeProjectMonitor = ({
       : defaultFields[ConfigKey.PARAMS],
     [ConfigKey.JOURNEY_FILTERS_MATCH]:
       monitor.filter?.match || defaultFields[ConfigKey.JOURNEY_FILTERS_MATCH],
-    [ConfigKey.NAMESPACE]: namespace || defaultFields[ConfigKey.NAMESPACE],
+    [ConfigKey.NAMESPACE]: formatKibanaNamespace(namespace) || defaultFields[ConfigKey.NAMESPACE],
     [ConfigKey.ORIGINAL_SPACE]: namespace || defaultFields[ConfigKey.ORIGINAL_SPACE],
     [ConfigKey.CUSTOM_HEARTBEAT_ID]: `${monitor.id}-${projectId}-${namespace}`,
     [ConfigKey.TIMEOUT]: null,
@@ -119,7 +122,7 @@ export const normalizeProjectMonitors = ({
   namespace,
 }: {
   locations: Locations;
-  privateLocations: Locations;
+  privateLocations: PrivateLocation[];
   monitors: ProjectBrowserMonitor[];
   projectId: string;
   namespace: string;
@@ -135,7 +138,7 @@ export const getMonitorLocations = ({
   monitor,
 }: {
   monitor: ProjectBrowserMonitor;
-  privateLocations: Locations;
+  privateLocations: PrivateLocation[];
   publicLocations: Locations;
 }) => {
   const publicLocs =

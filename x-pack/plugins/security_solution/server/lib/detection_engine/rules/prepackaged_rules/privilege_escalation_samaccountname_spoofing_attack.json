@@ -11,7 +11,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Potential Privileged Escalation via SamAccountName Spoofing",
-  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
+  "note": "",
   "query": "iam where event.action == \"renamed-user-account\" and\n  /* machine account name renamed to user like account name */\n  winlog.event_data.OldTargetUserName : \"*$\" and not winlog.event_data.NewTargetUserName : \"*$\"\n",
   "references": [
     "https://support.microsoft.com/en-us/topic/kb5008102-active-directory-security-accounts-manager-hardening-changes-cve-2021-42278-5975b463-4c95-45e1-831a-d120004e258e",
@@ -20,8 +20,26 @@
     "https://twitter.com/exploitph/status/1469157138928914432",
     "https://exploit.ph/cve-2021-42287-cve-2021-42278-weaponisation.html"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": false,
+      "name": "winlog.event_data.NewTargetUserName",
+      "type": "unknown"
+    },
+    {
+      "ecs": false,
+      "name": "winlog.event_data.OldTargetUserName",
+      "type": "unknown"
+    }
+  ],
   "risk_score": 73,
   "rule_id": "bdcf646b-08d4-492c-870a-6c04e3700034",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "high",
   "tags": [
     "Elastic",
@@ -72,5 +90,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 4
 }

@@ -10,16 +10,10 @@ import { useContext, useEffect } from 'react';
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
 import React from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { EMPTY_VALUE } from '../../../../../common/constants';
-import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
-import { displayValue } from '../../lib/display_value';
-import { unwrapValue } from '../../lib/unwrap_value';
+import { Indicator } from '../../../../../common/types/indicator';
+import { IndicatorFieldValue } from '../indicator_field_value/indicator_field_value';
 import { IndicatorsTableContext } from './context';
 import { ActionsRowCell } from './actions_row_cell';
-
-export enum ComputedIndicatorFieldId {
-  DisplayValue = 'display_value',
-}
 
 export const cellRendererFactory = (from: number) => {
   return ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
@@ -59,10 +53,6 @@ export const cellRendererFactory = (from: number) => {
       return <ActionsRowCell indicator={indicator} />;
     }
 
-    if (columnId === ComputedIndicatorFieldId.DisplayValue) {
-      return displayValue(indicator) || EMPTY_VALUE;
-    }
-
-    return unwrapValue(indicator, columnId as RawIndicatorFieldId) || EMPTY_VALUE;
+    return <IndicatorFieldValue indicator={indicator} field={columnId} />;
   };
 };

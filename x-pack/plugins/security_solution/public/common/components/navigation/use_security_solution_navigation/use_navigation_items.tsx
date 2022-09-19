@@ -21,6 +21,9 @@ import { SecurityPageName } from '../../../../../common/constants';
 import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { useGlobalQueryString } from '../../../utils/global_query_string';
+import { useMlCapabilities } from '../../ml/hooks/use_ml_capabilities';
+import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
+import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 
 export const usePrimaryNavigationItems = ({
   navTabs,
@@ -33,7 +36,7 @@ export const usePrimaryNavigationItems = ({
     (tab: NavTab) => {
       const { id, name, disabled } = tab;
       const isSelected = selectedTabId === id;
-      const urlSearch = getSearch(tab, globalQueryString);
+      const urlSearch = getSearch(tab.id as SecurityPageName, globalQueryString);
 
       const handleClick = (ev: React.MouseEvent) => {
         ev.preventDefault();
@@ -72,6 +75,9 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
   const hasCasesReadPermissions = useGetUserCasesPermissions().read;
   const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
   const isPolicyListEnabled = useIsExperimentalFeatureEnabled('policyListEnabled');
+  const mlCapabilities = useMlCapabilities();
+  const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlUserPermissions(mlCapabilities);
+
   const uiCapabilities = useKibana().services.application.capabilities;
   return useMemo(
     () =>
@@ -91,6 +97,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
                 ...(navTabs[SecurityPageName.kubernetes] != null
                   ? [navTabs[SecurityPageName.kubernetes]]
                   : []),
+                ...(hasMlPermissions ? [navTabs[SecurityPageName.entityAnalytics]] : []),
               ],
             },
             {
@@ -113,8 +120,11 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
                 ...(navTabs[SecurityPageName.users] != null
                   ? [navTabs[SecurityPageName.users]]
                   : []),
-                navTabs[SecurityPageName.threatIntelligence],
               ],
+            },
+            {
+              ...securityNavGroup[SecurityNavGroupKey.intelligence],
+              items: [navTabs[SecurityPageName.threatIntelligenceIndicators]],
             },
             {
               ...securityNavGroup[SecurityNavGroupKey.investigate],
@@ -133,6 +143,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
                   ? [navTabs[SecurityPageName.hostIsolationExceptions]]
                   : []),
                 navTabs[SecurityPageName.blocklist],
+                navTabs[SecurityPageName.actionHistory],
                 navTabs[SecurityPageName.cloudSecurityPostureBenchmarks],
               ],
             },
@@ -151,6 +162,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
       hasCasesReadPermissions,
       canSeeHostIsolationExceptions,
       isPolicyListEnabled,
+      hasMlPermissions,
     ]
   );
 }

@@ -153,6 +153,24 @@ export const OPEN_RULE_DETAIL_TOOLTIP = i18n.translate(
     defaultMessage: 'Open rule detail',
   }
 );
+export const OPEN_CASE_DETAIL_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionResponse.openCaseDetailTooltip',
+  {
+    defaultMessage: 'Open case detail',
+  }
+);
+export const OPEN_HOST_DETAIL_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionResponse.openHostDetailTooltip',
+  {
+    defaultMessage: 'Open host detail',
+  }
+);
+export const OPEN_USER_DETAIL_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionResponse.openUserDetailTooltip',
+  {
+    defaultMessage: 'Open user detail',
+  }
+);
 
 export const OPEN_ALL_ALERTS_BUTTON = i18n.translate(
   'xpack.securitySolution.detectionResponse.openAllAlertsButton',

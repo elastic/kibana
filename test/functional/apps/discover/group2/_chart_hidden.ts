@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
 
   const defaultSettings = {
@@ -21,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover show/hide chart test', function () {
     before(async function () {
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       log.debug('load kibana index with default index pattern');
 
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');

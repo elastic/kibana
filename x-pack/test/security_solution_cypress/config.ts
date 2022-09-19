@@ -49,9 +49,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.alerting.rules.minimumScheduleInterval.value=1s',
         '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'riskyHostsEnabled',
-          'riskyUsersEnabled',
-          'insightsRelatedAlertsByProcessAncestry',
+          'threatIntelligenceEnabled',
         ])}`,
         `--home.disableWelcomeScreen=true`,
       ],

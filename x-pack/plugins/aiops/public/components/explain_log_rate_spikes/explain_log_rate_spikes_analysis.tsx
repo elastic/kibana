@@ -8,21 +8,37 @@
 import React, { useEffect, useMemo, useState, FC } from 'react';
 import { isEqual } from 'lodash';
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiEmptyPrompt,
+  EuiFormRow,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+} from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ProgressControls } from '@kbn/aiops-components';
 import { useFetchStream } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 import type { Query } from '@kbn/es-query';
 
-import { useAiOpsKibana } from '../../kibana_context';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
 import type { ApiExplainLogRateSpikes } from '../../../common/api';
 
+import { SpikeAnalysisGroupsTable } from '../spike_analysis_table';
 import { SpikeAnalysisTable } from '../spike_analysis_table';
+
+const groupResultsMessage = i18n.translate(
+  'xpack.aiops.spikeAnalysisTable.groupedSwitchLabel.groupResults',
+  {
+    defaultMessage: 'Group results',
+  }
+);
 
 /**
  * ExplainLogRateSpikes props require a data view.
@@ -52,17 +68,25 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   onSelectedChangePoint,
   selectedChangePoint,
 }) => {
-  const { services } = useAiOpsKibana();
-  const basePath = services.http?.basePath.get() ?? '';
+  const { http } = useAiopsAppContext();
+  const basePath = http.basePath.get() ?? '';
 
   const [currentAnalysisWindowParameters, setCurrentAnalysisWindowParameters] = useState<
     WindowParameters | undefined
   >();
+  const [groupResults, setGroupResults] = useState<boolean>(true);
 
-  const { cancel, start, data, isRunning, error } = useFetchStream<
-    ApiExplainLogRateSpikes,
-    typeof basePath
-  >(
+  const onSwitchToggle = (e: { target: { checked: React.SetStateAction<boolean> } }) => {
+    setGroupResults(e.target.checked);
+  };
+
+  const {
+    cancel,
+    start,
+    data,
+    isRunning,
+    errors: streamErrors,
+  } = useFetchStream<ApiExplainLogRateSpikes, typeof basePath>(
     `${basePath}/internal/aiops/explain_log_rate_spikes`,
     {
       start: earliest,
@@ -71,16 +95,13 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       // TODO Handle data view without time fields.
       timeFieldName: dataView.timeFieldName ?? '',
       index: dataView.title,
+      grouping: true,
       ...windowParameters,
     },
     { reducer: streamReducer, initialState }
   );
 
-  useEffect(() => {
-    setCurrentAnalysisWindowParameters(windowParameters);
-    start();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const errors = useMemo(() => [...streamErrors, ...data.errors], [streamErrors, data.errors]);
 
   // Start handler clears possibly hovered or pinned
   // change points on analysis refresh.
@@ -96,6 +117,40 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     start();
   }
 
+  useEffect(() => {
+    setCurrentAnalysisWindowParameters(windowParameters);
+    start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const groupTableItems = useMemo(() => {
+    const tableItems = data.changePointsGroups.map(({ group, docCount }, index) => {
+      const sortedGroup = group.sort((a, b) =>
+        a.fieldName > b.fieldName ? 1 : b.fieldName > a.fieldName ? -1 : 0
+      );
+      const dedupedGroup: Record<string, any> = {};
+      const repeatedValues: Record<string, any> = {};
+
+      sortedGroup.forEach((pair) => {
+        const { fieldName, fieldValue } = pair;
+        if (pair.duplicate === false) {
+          dedupedGroup[fieldName] = fieldValue;
+        } else {
+          repeatedValues[fieldName] = fieldValue;
+        }
+      });
+
+      return {
+        id: index,
+        docCount,
+        group: dedupedGroup,
+        repeatedValues,
+      };
+    });
+
+    return tableItems;
+  }, [data.changePointsGroups]);
+
   const shouldRerunAnalysis = useMemo(
     () =>
       currentAnalysisWindowParameters !== undefined &&
@@ -104,9 +159,14 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   );
 
   const showSpikeAnalysisTable = data?.changePoints.length > 0;
+  const groupItemCount = groupTableItems.reduce((p, c) => {
+    return p + Object.keys(c.group).length;
+  }, 0);
+  const foundGroups =
+    groupTableItems.length === 0 || (groupTableItems.length > 0 && groupItemCount > 0);
 
   return (
-    <>
+    <div data-test-subj="aiopsExplainLogRateSpikesAnalysis">
       <ProgressControls
         progress={data.loaded}
         progressMessage={data.loadingState ?? ''}
@@ -115,8 +175,21 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         onCancel={cancel}
         shouldRerunAnalysis={shouldRerunAnalysis}
       />
+      {showSpikeAnalysisTable && foundGroups && (
+        <EuiFormRow display="columnCompressedSwitch" label={groupResultsMessage}>
+          <EuiSwitch
+            showLabel={false}
+            label={''}
+            checked={groupResults}
+            onChange={onSwitchToggle}
+            compressed
+          />
+        </EuiFormRow>
+      )}
+      <EuiSpacer size="xs" />
       {!isRunning && !showSpikeAnalysisTable && (
         <EuiEmptyPrompt
+          data-test-subj="aiopsNoResultsFoundEmptyPrompt"
           title={
             <h2>
               <FormattedMessage
@@ -136,16 +209,54 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           }
         />
       )}
-      {showSpikeAnalysisTable && (
-        <SpikeAnalysisTable
+      {errors.length > 0 && (
+        <>
+          <EuiCallOut
+            title={i18n.translate('xpack.aiops.analysis.errorCallOutTitle', {
+              defaultMessage:
+                'The following {errorCount, plural, one {error} other {errors}} occurred running the analysis.',
+              values: { errorCount: errors.length },
+            })}
+            color="warning"
+            iconType="alert"
+            size="s"
+          >
+            <EuiText size="s">
+              {errors.length === 1 ? (
+                <p>{errors[0]}</p>
+              ) : (
+                <ul>
+                  {errors.map((e, i) => (
+                    <li key={i}>{e}</li>
+                  ))}
+                </ul>
+              )}
+            </EuiText>
+          </EuiCallOut>
+          <EuiSpacer size="xs" />
+        </>
+      )}
+      {showSpikeAnalysisTable && groupResults && foundGroups ? (
+        <SpikeAnalysisGroupsTable
           changePoints={data.changePoints}
+          groupTableItems={groupTableItems}
           loading={isRunning}
-          error={error}
           onPinnedChangePoint={onPinnedChangePoint}
           onSelectedChangePoint={onSelectedChangePoint}
           selectedChangePoint={selectedChangePoint}
+          dataViewId={dataView.id}
         />
-      )}
-    </>
+      ) : null}
+      {showSpikeAnalysisTable && (!groupResults || !foundGroups) ? (
+        <SpikeAnalysisTable
+          changePoints={data.changePoints}
+          loading={isRunning}
+          onPinnedChangePoint={onPinnedChangePoint}
+          onSelectedChangePoint={onSelectedChangePoint}
+          selectedChangePoint={selectedChangePoint}
+          dataViewId={dataView.id}
+        />
+      ) : null}
+    </div>
   );
 };

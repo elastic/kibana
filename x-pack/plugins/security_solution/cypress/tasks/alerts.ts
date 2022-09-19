@@ -24,9 +24,13 @@ import {
   SELECT_TABLE,
   TAKE_ACTION_POPOVER_BTN,
   TIMELINE_CONTEXT_MENU_BTN,
+  CLOSE_FLYOUT,
 } from '../screens/alerts';
 import { REFRESH_BUTTON } from '../screens/security_header';
-import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
+import {
+  ALERT_TABLE_CELL_ACTIONS_ADD_TO_TIMELINE,
+  TIMELINE_COLUMN_SPINNER,
+} from '../screens/timeline';
 import {
   UPDATE_ENRICHMENT_RANGE_BUTTON,
   ENRICHMENT_QUERY_END_INPUT,
@@ -78,6 +82,8 @@ export const expandFirstAlert = () => {
     .should('exist')
     .pipe(($el) => $el.trigger('click'));
 };
+
+export const closeAlertFlyout = () => cy.get(CLOSE_FLYOUT).click();
 
 export const viewThreatIntelTab = () => cy.get(THREAT_INTEL_TAB).click();
 
@@ -150,6 +156,11 @@ export const selectNumberOfAlerts = (numberOfAlerts: number) => {
 
 export const investigateFirstAlertInTimeline = () => {
   cy.get(SEND_ALERT_TO_TIMELINE_BTN).first().click({ force: true });
+};
+
+export const addAlertPropertyToTimeline = (propertySelector: string, rowIndex: number) => {
+  cy.get(propertySelector).eq(rowIndex).trigger('mouseover');
+  cy.get(ALERT_TABLE_CELL_ACTIONS_ADD_TO_TIMELINE).first().click({ force: true });
 };
 
 export const waitForAlerts = () => {

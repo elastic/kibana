@@ -13,17 +13,19 @@ import { useActions } from 'kea';
 import {
   SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH,
   SEARCH_INDEX_PATH,
+  SEARCH_INDEX_SELECT_CONNECTOR_PATH,
   SEARCH_INDEX_TAB_PATH,
 } from '../../routes';
 
 import { CrawlerDomainDetail } from '../crawler_domain_detail/crawler_domain_detail';
 
+import { SelectConnector } from './connector/select_connector/select_connector';
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
 import { SearchIndex } from './search_index';
 
 export const SearchIndexRouter: React.FC = () => {
-  const { indexName } = useParams<{ indexName: string }>();
+  const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
 
   const indexNameLogic = IndexNameLogic({ indexName });
   const { setIndexName } = useActions(indexNameLogic);
@@ -50,6 +52,9 @@ export const SearchIndexRouter: React.FC = () => {
       </Route>
       <Route path={SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH} exact>
         <CrawlerDomainDetail />
+      </Route>
+      <Route path={SEARCH_INDEX_SELECT_CONNECTOR_PATH} exact>
+        <SelectConnector />
       </Route>
       <Route path={SEARCH_INDEX_TAB_PATH}>
         <SearchIndex />

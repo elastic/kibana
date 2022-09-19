@@ -23,6 +23,7 @@ export type ComponentOpts = {
   onPerformingAction?: () => void;
   onActionPerformed?: () => void;
   setRulesToDelete: React.Dispatch<React.SetStateAction<string[]>>;
+  setRulesToUpdateAPIKey: React.Dispatch<React.SetStateAction<string[]>>;
 } & BulkOperationsComponentOpts;
 
 export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
@@ -34,6 +35,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   enableRules,
   disableRules,
   setRulesToDelete,
+  setRulesToUpdateAPIKey,
 }: ComponentOpts) => {
   const {
     notifications: { toasts },
@@ -44,6 +46,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   const [isEnablingRules, setIsEnablingRules] = useState<boolean>(false);
   const [isDisablingRules, setIsDisablingRules] = useState<boolean>(false);
   const [isDeletingRules, setIsDeletingRules] = useState<boolean>(false);
+  const [isUpdatingRuleAPIKeys, setIsUpdatingRuleAPIKeys] = useState<boolean>(false);
 
   const allRulesMuted = selectedItems.every(isRuleMuted);
   const allRulesDisabled = selectedItems.every(isRuleDisabled);
@@ -154,6 +157,26 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     }
   }
 
+  async function updateAPIKeysClick() {
+    onPerformingAction();
+    setIsUpdatingRuleAPIKeys(true);
+    try {
+      setRulesToUpdateAPIKey(selectedItems.map((selected: any) => selected.id));
+    } catch (e) {
+      toasts.addDanger({
+        title: i18n.translate(
+          'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToUpdateRuleAPIKeysMessage',
+          {
+            defaultMessage: 'Failed to update API keys for rule(s)',
+          }
+        ),
+      });
+    } finally {
+      setIsUpdatingRuleAPIKeys(false);
+      onActionPerformed();
+    }
+  }
+
   return (
     <EuiFlexGroup alignItems="baseline" direction="column" gutterSize="none">
       {!allRulesMuted && (
@@ -216,6 +239,19 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
           </EuiButtonEmpty>
         </EuiFlexItem>
       )}
+      <EuiFlexItem>
+        <EuiButtonEmpty
+          onClick={updateAPIKeysClick}
+          isLoading={isUpdatingRuleAPIKeys}
+          isDisabled={isPerformingAction}
+          data-test-subj="updateAPIKeys"
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.updateRuleAPIKeysTitle"
+            defaultMessage="Update API Keys"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
       <EuiFlexItem>
         <EuiButtonEmpty
           onClick={deleteSelectedItems}

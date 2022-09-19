@@ -2,6 +2,7 @@
 
 set -euo pipefail
 
+source "$(dirname "$0")/../../common/util.sh"
 export JOB=${BUILDKITE_PARALLEL_JOB:-0}
 
 # a jest failure will result in the script returning an exit code of 10
@@ -20,7 +21,7 @@ fi
 
 export TEST_TYPE
 echo "--- downloading jest test run order"
-buildkite-agent artifact download jest_run_order.json .
+download_artifact jest_run_order.json .
 configs=$(jq -r 'getpath([env.TEST_TYPE]) | .groups[env.JOB | tonumber].names | .[]' jest_run_order.json)
 
 while read -r config; do

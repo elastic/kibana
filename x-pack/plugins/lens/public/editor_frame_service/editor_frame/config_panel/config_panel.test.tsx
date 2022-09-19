@@ -25,6 +25,7 @@ import { mountWithProvider } from '../../../mocks';
 import { LayerType, layerTypes } from '../../../../common';
 import { ReactWrapper } from 'enzyme';
 import { addLayer } from '../../../state_management';
+import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
 
 jest.mock('../../../id_generator');
 
@@ -107,6 +108,7 @@ describe('ConfigPanel', () => {
           state: 'state',
         },
       },
+      indexPatternService: createIndexPatternServiceMock(),
       visualizationState: 'state',
       updateVisualization: jest.fn(),
       updateDatasource: jest.fn(),
@@ -164,7 +166,7 @@ describe('ConfigPanel', () => {
         .first()
         .instance();
       act(() => {
-        instance.find('[data-test-subj="lnsLayerRemove"]').first().simulate('click');
+        instance.find('[data-test-subj="lnsLayerRemove--0"]').first().simulate('click');
       });
       instance.update();
       act(() => {
@@ -191,7 +193,7 @@ describe('ConfigPanel', () => {
         .first()
         .instance();
       act(() => {
-        instance.find('[data-test-subj="lnsLayerRemove"]').at(0).simulate('click');
+        instance.find('[data-test-subj="lnsLayerRemove--0"]').first().simulate('click');
       });
       instance.update();
       act(() => {
@@ -217,7 +219,7 @@ describe('ConfigPanel', () => {
         .first()
         .instance();
       act(() => {
-        instance.find('[data-test-subj="lnsLayerRemove"]').at(2).simulate('click');
+        instance.find('[data-test-subj="lnsLayerRemove--1"]').first().simulate('click');
       });
       instance.update();
       act(() => {
@@ -354,11 +356,16 @@ describe('ConfigPanel', () => {
       await clickToAddLayer(instance);
 
       expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
-      expect(datasourceMap.testDatasource.initializeDimension).toHaveBeenCalledWith({}, 'newId', {
-        columnId: 'myColumn',
-        groupId: 'testGroup',
-        staticValue: 100,
-      });
+      expect(datasourceMap.testDatasource.initializeDimension).toHaveBeenCalledWith(
+        {},
+        'newId',
+        frame.dataViews.indexPatterns,
+        {
+          columnId: 'myColumn',
+          groupId: 'testGroup',
+          staticValue: 100,
+        }
+      );
     });
 
     it('should add an initial dimension value when clicking on the empty dimension button', async () => {
@@ -388,6 +395,7 @@ describe('ConfigPanel', () => {
       expect(datasourceMap.testDatasource.initializeDimension).toHaveBeenCalledWith(
         'state',
         'first',
+        frame.dataViews.indexPatterns,
         {
           groupId: 'a',
           columnId: 'newId',
@@ -445,6 +453,7 @@ describe('ConfigPanel', () => {
             a: expect.anything(),
           },
           dateRange: expect.anything(),
+          dataViews: expect.anything(),
         },
         groupId: 'a',
         layerId: 'newId',

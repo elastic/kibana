@@ -63,6 +63,7 @@ Example.args = {
   displayHealthStatus: true,
   initialSortField: ServiceInventoryFieldName.HealthStatus,
   initialSortDirection: 'desc',
+  initialPageSize: 25,
   sortFn: (sortItems) => sortItems,
 };
 
@@ -75,6 +76,7 @@ EmptyState.args = {
   displayHealthStatus: true,
   initialSortField: ServiceInventoryFieldName.HealthStatus,
   initialSortDirection: 'desc',
+  initialPageSize: 25,
   sortFn: (sortItems) => sortItems,
 };
 
@@ -83,6 +85,7 @@ export const WithHealthWarnings: Story<Args> = (args) => {
 };
 WithHealthWarnings.args = {
   isLoading: false,
+  initialPageSize: 25,
   items: items.map((item) => ({
     ...item,
     healthStatus: ServiceHealthStatus.warning,

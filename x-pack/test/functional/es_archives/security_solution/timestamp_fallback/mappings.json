@@ -30,6 +30,13 @@
               "type": "keyword"
             }
           }
+        },
+        "source": {
+          "properties": {
+            "ip": {
+              "type": "ip"
+            }
+          }
         }
       }
     }

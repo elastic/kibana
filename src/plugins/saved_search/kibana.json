@@ -1,0 +1,16 @@
+{
+  "id": "savedSearch",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "data"
+  ],
+  "requiredBundles": ["kibanaUtils"],
+  "extraPublicDirs": ["common"],
+  "owner": {
+    "name": "Data Discovery",
+    "githubTeam": "kibana-data-discovery"
+  },
+  "description": "This plugin contains the definition and helper methods around saved searches, used by discover and visualizations."
+}

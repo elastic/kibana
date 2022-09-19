@@ -40,8 +40,6 @@ const fields = {
   step3: [
     'config.getIncidentUrl',
     'config.getIncidentResponseExternalTitleKey',
-    'config.getIncidentResponseCreatedDateKey',
-    'config.getIncidentResponseUpdatedDateKey',
     'config.viewIncidentUrl',
   ],
   step4: [

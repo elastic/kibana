@@ -7,7 +7,7 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
-import { Source } from '../../../containers/metrics_source';
+import { SourceProvider } from '../../../containers/metrics_source';
 import { MetricsTimeProvider } from './hooks/use_metrics_time';
 
 export const withMetricPageProviders =
@@ -15,10 +15,10 @@ export const withMetricPageProviders =
   (props: T) =>
     (
       <EuiErrorBoundary>
-        <Source.Provider sourceId="default">
+        <SourceProvider sourceId="default">
           <MetricsTimeProvider>
             <Component {...props} />
           </MetricsTimeProvider>
-        </Source.Provider>
+        </SourceProvider>
       </EuiErrorBoundary>
     );

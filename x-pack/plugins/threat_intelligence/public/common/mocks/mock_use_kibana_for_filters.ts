@@ -42,7 +42,6 @@ export const mockUseKibanaForFilters = ({
         },
       },
       dataViews: { getFieldsForWildcard },
-      uiSettings: { get: () => ['mock-index'] },
     },
   } as any);
 

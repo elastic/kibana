@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { some, flatten, map, pick, pickBy, isEmpty } from 'lodash';
+import { some, flatten, map, pick, pickBy, isEmpty, omit } from 'lodash';
 import uuid from 'uuid';
 import moment from 'moment-timezone';
 
@@ -18,13 +18,13 @@ import { buildRouteValidation } from '../../utils/build_validation/route_validat
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
 import { createLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
 
-import { getInternalSavedObjectsClient } from '../../usage/collector';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/types';
 import { ACTIONS_INDEX } from '../../../common/constants';
 import { convertSOQueriesToPack } from '../pack/utils';
 import type { PackSavedObjectAttributes } from '../../common/types';
-import { TELEMETRY_CHANNEL_LIVE_QUERIES } from '../../lib/telemetry/constants';
+import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
 import { isSavedQueryPrebuilt } from '../saved_query/utils';
+import { getInternalSavedObjectsClient } from '../utils';
 
 export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
@@ -141,7 +141,10 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
                     query: request.body.query,
                     saved_query_id: savedQueryId,
                     saved_query_prebuilt: savedQueryId
-                      ? await isSavedQueryPrebuilt(osqueryContext, savedQueryId)
+                      ? await isSavedQueryPrebuilt(
+                          osqueryContext.service.getPackageService()?.asInternalUser,
+                          savedQueryId
+                        )
                       : undefined,
                     ecs_mapping: request.body.ecs_mapping,
                     agents: selectedAgents,
@@ -180,13 +183,10 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
           });
         }
 
-        const telemetryOptIn = await osqueryContext.telemetryEventsSender.isTelemetryOptedIn();
-
-        if (telemetryOptIn) {
-          osqueryContext.telemetryEventsSender.sendOnDemand(TELEMETRY_CHANNEL_LIVE_QUERIES, [
-            osqueryAction,
-          ]);
-        }
+        osqueryContext.telemetryEventsSender.reportEvent(TELEMETRY_EBT_LIVE_QUERY_EVENT, {
+          ...omit(osqueryAction, ['type', 'input_type', 'user_id']),
+          agents: osqueryAction.agents.length,
+        });
 
         return response.ok({
           body: { data: osqueryAction },

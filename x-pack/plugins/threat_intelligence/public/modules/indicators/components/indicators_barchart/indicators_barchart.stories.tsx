@@ -9,6 +9,8 @@ import moment from 'moment';
 import React from 'react';
 import { Story } from '@storybook/react';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
+import { StoryProvidersComponent } from '../../../../common/mocks/story_providers';
+import { mockKibanaTimelinesService } from '../../../../common/mocks/mock_kibana_timelines_service';
 import { ChartSeries } from '../../hooks/use_aggregated_indicators';
 import { IndicatorsBarChart } from './indicators_barchart';
 
@@ -45,12 +47,15 @@ const mockIndicators: ChartSeries[] = [
   },
 ];
 const validDate: string = '1 Jan 2022 00:00:00 GMT';
+
 const numberOfDays = 1;
+
 const mockDateRange: TimeRangeBounds = {
   min: moment(validDate),
   max: moment(validDate).add(numberOfDays, 'days'),
 };
-const mockHeight = '500px';
+
+const mockField: string = 'threat.indicator.ip';
 
 export default {
   component: IndicatorsBarChart,
@@ -58,13 +63,28 @@ export default {
 };
 
 export const Default: Story<void> = () => (
-  <IndicatorsBarChart indicators={mockIndicators} dateRange={mockDateRange} />
+  <StoryProvidersComponent kibana={{ timelines: mockKibanaTimelinesService }}>
+    <IndicatorsBarChart indicators={mockIndicators} field={mockField} dateRange={mockDateRange} />
+  </StoryProvidersComponent>
 );
 
 export const NoData: Story<void> = () => (
-  <IndicatorsBarChart indicators={[]} dateRange={mockDateRange} />
+  <StoryProvidersComponent kibana={{ timelines: mockKibanaTimelinesService }}>
+    <IndicatorsBarChart indicators={[]} field={''} dateRange={mockDateRange} />
+  </StoryProvidersComponent>
 );
 
-export const CustomHeight: Story<void> = () => (
-  <IndicatorsBarChart indicators={mockIndicators} dateRange={mockDateRange} height={mockHeight} />
-);
+export const CustomHeight: Story<void> = () => {
+  const mockHeight = '500px';
+
+  return (
+    <StoryProvidersComponent kibana={{ timelines: mockKibanaTimelinesService }}>
+      <IndicatorsBarChart
+        indicators={mockIndicators}
+        field={mockField}
+        dateRange={mockDateRange}
+        height={mockHeight}
+      />
+    </StoryProvidersComponent>
+  );
+};

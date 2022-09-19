@@ -12,6 +12,7 @@ import { TestProvidersComponent } from '../../../../common/mocks/test_providers'
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { BUTTON_TEST_ID } from '../open_indicator_flyout_button/open_indicator_flyout_button';
 import { TITLE_TEST_ID } from '../indicators_flyout/indicators_flyout';
+import { SecuritySolutionDataViewBase } from '../../../../types';
 
 const stub = () => {};
 
@@ -21,8 +22,22 @@ const tableProps: IndicatorsTableProps = {
   indicators: [],
   pagination: { pageSize: 10, pageIndex: 0, pageSizeOptions: [10] },
   indicatorCount: 0,
-  firstLoad: false,
   loading: false,
+  browserFields: {},
+  indexPattern: { fields: [], title: '' } as SecuritySolutionDataViewBase,
+  columnSettings: {
+    columnVisibility: {
+      visibleColumns: [],
+      setVisibleColumns: () => {},
+    },
+    columns: [],
+    handleResetColumns: () => {},
+    handleToggleColumn: () => {},
+    sorting: {
+      columns: [],
+      onSort: () => {},
+    },
+  },
 };
 
 const indicatorsFixture: Indicator[] = [
@@ -41,11 +56,11 @@ const indicatorsFixture: Indicator[] = [
 ];
 
 describe('<IndicatorsTable />', () => {
-  it('should render loading spinner on first load', async () => {
+  it('should render loading spinner when loading', async () => {
     await act(async () => {
       render(
         <TestProvidersComponent>
-          <IndicatorsTable {...tableProps} firstLoad={true} />
+          <IndicatorsTable {...tableProps} loading={true} />
         </TestProvidersComponent>
       );
     });
@@ -53,13 +68,13 @@ describe('<IndicatorsTable />', () => {
     expect(screen.queryByRole('progressbar')).toBeInTheDocument();
   });
 
-  it('should render datagrid when first load is done', async () => {
+  it('should render datagrid when loading is done', async () => {
     await act(async () => {
       render(
         <TestProvidersComponent>
           <IndicatorsTable
             {...tableProps}
-            firstLoad={false}
+            loading={false}
             indicatorCount={indicatorsFixture.length}
             indicators={indicatorsFixture}
           />

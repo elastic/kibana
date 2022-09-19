@@ -42,4 +42,5 @@ export const useViewLogInContext = (
   ];
 };
 
-export const ViewLogInContext = createContainer(useViewLogInContext);
+export const [ViewLogInContextProvider, useViewLogInProviderContext] =
+  createContainer(useViewLogInContext);

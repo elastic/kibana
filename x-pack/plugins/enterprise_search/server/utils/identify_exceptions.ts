@@ -5,20 +5,26 @@
  * 2.0.
  */
 
-interface ErrorResponse {
+export interface ElasticsearchResponseError {
   meta?: {
     body?: {
       error?: {
         type: string;
       };
     };
+    statusCode?: number;
   };
   name: 'ResponseError';
-  statusCode: string;
 }
 
-export const isIndexNotFoundException = (error: ErrorResponse) =>
+export const isIndexNotFoundException = (error: ElasticsearchResponseError) =>
   error?.meta?.body?.error?.type === 'index_not_found_exception';
 
-export const isResourceAlreadyExistsException = (error: ErrorResponse) =>
+export const isResourceAlreadyExistsException = (error: ElasticsearchResponseError) =>
   error?.meta?.body?.error?.type === 'resource_already_exists_exception';
+
+export const isResourceNotFoundException = (error: ElasticsearchResponseError) =>
+  error?.meta?.body?.error?.type === 'resource_not_found_exception';
+
+export const isUnauthorizedException = (error: ElasticsearchResponseError) =>
+  error.meta?.statusCode === 403;

@@ -60,13 +60,13 @@ describe('Custom Links', () => {
   describe('HostDetailsLink', () => {
     test('should render valid link to Host Details with hostName as the display text', () => {
       const wrapper = mount(<HostDetailsLink hostName={hostName} />);
-      expect(wrapper.find('EuiLink').prop('href')).toEqual(`/${encodeURIComponent(hostName)}`);
+      expect(wrapper.find('EuiLink').prop('href')).toEqual(`/name/${encodeURIComponent(hostName)}`);
       expect(wrapper.text()).toEqual(hostName);
     });
 
     test('should render valid link to Host Details with child text as the display text', () => {
       const wrapper = mount(<HostDetailsLink hostName={hostName}>{hostName}</HostDetailsLink>);
-      expect(wrapper.find('EuiLink').prop('href')).toEqual(`/${encodeURIComponent(hostName)}`);
+      expect(wrapper.find('EuiLink').prop('href')).toEqual(`/name/${encodeURIComponent(hostName)}`);
       expect(wrapper.text()).toEqual(hostName);
     });
   });

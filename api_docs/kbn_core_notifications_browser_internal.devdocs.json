@@ -27,6 +27,7 @@
         "description": [],
         "path": "packages/core/notifications/core-notifications-browser-internal/src/notifications_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-notifications-browser-internal",
@@ -40,6 +41,7 @@
             ],
             "path": "packages/core/notifications/core-notifications-browser-internal/src/notifications_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -58,6 +60,7 @@
             ],
             "path": "packages/core/notifications/core-notifications-browser-internal/src/notifications_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-notifications-browser-internal",
@@ -71,6 +74,7 @@
                 ],
                 "path": "packages/core/notifications/core-notifications-browser-internal/src/notifications_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -91,6 +95,7 @@
             ],
             "path": "packages/core/notifications/core-notifications-browser-internal/src/notifications_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-notifications-browser-internal",
@@ -104,6 +109,7 @@
                 ],
                 "path": "packages/core/notifications/core-notifications-browser-internal/src/notifications_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -121,6 +127,7 @@
             ],
             "path": "packages/core/notifications/core-notifications-browser-internal/src/notifications_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -149,6 +156,7 @@
         ],
         "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/toasts_api.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-notifications-browser-internal",
@@ -162,6 +170,7 @@
             ],
             "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/toasts_api.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-notifications-browser-internal",
@@ -172,6 +181,7 @@
                 "description": [],
                 "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/toasts_api.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/core-notifications-browser-internal",
@@ -184,7 +194,8 @@
                       "IUiSettingsClient"
                     ],
                     "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/toasts_api.tsx",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -209,6 +220,7 @@
             ],
             "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/toasts_api.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -229,6 +241,7 @@
             ],
             "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/toasts_api.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-notifications-browser-internal",
@@ -244,6 +257,7 @@
                 ],
                 "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/toasts_api.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -267,6 +281,7 @@
             ],
             "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/toasts_api.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-notifications-browser-internal",
@@ -283,6 +298,7 @@
                 ],
                 "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/toasts_api.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -307,6 +323,7 @@
             ],
             "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/toasts_api.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-notifications-browser-internal",
@@ -322,6 +339,7 @@
                 ],
                 "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/toasts_api.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -339,6 +357,7 @@
                 ],
                 "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/toasts_api.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -365,6 +384,7 @@
             ],
             "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/toasts_api.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-notifications-browser-internal",
@@ -380,6 +400,7 @@
                 ],
                 "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/toasts_api.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -397,6 +418,7 @@
                 ],
                 "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/toasts_api.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -423,6 +445,7 @@
             ],
             "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/toasts_api.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-notifications-browser-internal",
@@ -438,6 +461,7 @@
                 ],
                 "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/toasts_api.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -455,6 +479,7 @@
                 ],
                 "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/toasts_api.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -481,6 +506,7 @@
             ],
             "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/toasts_api.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-notifications-browser-internal",
@@ -496,6 +522,7 @@
                 ],
                 "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/toasts_api.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -513,6 +540,7 @@
                 ],
                 "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/toasts_api.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -537,6 +565,7 @@
             ],
             "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/toasts_api.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-notifications-browser-internal",
@@ -552,6 +581,7 @@
                 ],
                 "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/toasts_api.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -568,6 +598,7 @@
                 ],
                 "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/toasts_api.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -603,6 +634,7 @@
         ],
         "path": "packages/core/notifications/core-notifications-browser-internal/src/notifications_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

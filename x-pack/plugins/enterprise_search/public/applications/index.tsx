@@ -18,7 +18,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
-import { InitialAppData } from '../../common/types';
+import { InitialAppData, ProductAccess } from '../../common/types';
 import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
 
 import { externalUrl } from './shared/enterprise_search_url';
@@ -41,6 +41,12 @@ export const renderApp = (
   const { publicUrl, errorConnectingMessage, ...initialData } = data;
   externalUrl.enterpriseSearchUrl = publicUrl || config.host || '';
 
+  const noProductAccess: ProductAccess = {
+    hasAppSearchAccess: false,
+    hasWorkplaceSearchAccess: false,
+  };
+  const productAccess = data.access || noProductAccess;
+
   const EmptyContext: FC = ({ children }) => <>{children}</>;
   const CloudContext = plugins.cloud?.CloudContextProvider || EmptyContext;
 
@@ -48,9 +54,12 @@ export const renderApp = (
   const store = getContext().store;
 
   const unmountKibanaLogic = mountKibanaLogic({
+    capabilities: core.application.capabilities,
     config,
+    productAccess,
     charts: plugins.charts,
     cloud: plugins.cloud,
+    uiSettings: core.uiSettings,
     history: params.history,
     navigateToUrl: core.application.navigateToUrl,
     security: plugins.security,

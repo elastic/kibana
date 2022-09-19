@@ -8,6 +8,7 @@ import React from 'react';
 
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 
 import { AlertsTable } from './alerts_table';
@@ -103,6 +104,7 @@ describe('AlertsTable', () => {
     it('should support sorting', async () => {
       const renderResult = render(<AlertsTableWithLocale {...tableProps} />);
       userEvent.click(renderResult.container.querySelector('.euiDataGridHeaderCell__button')!);
+      await waitForEuiPopoverOpen();
       userEvent.click(renderResult.getByTestId(`dataGridHeaderCellActionGroup-${columns[0].id}`));
       userEvent.click(renderResult.getByTitle('Sort A-Z'));
       expect(fetchAlertsData.onSortChange).toHaveBeenCalledWith([
@@ -119,6 +121,11 @@ describe('AlertsTable', () => {
     it('should show when it was updated', () => {
       const { getByTestId } = render(<AlertsTableWithLocale {...tableProps} />);
       expect(getByTestId('toolbar-updated-at')).not.toBe(null);
+    });
+
+    it('should show alerts count', () => {
+      const { getByTestId } = render(<AlertsTableWithLocale {...tableProps} />);
+      expect(getByTestId('toolbar-alerts-count')).not.toBe(null);
     });
 
     describe('leading control columns', () => {

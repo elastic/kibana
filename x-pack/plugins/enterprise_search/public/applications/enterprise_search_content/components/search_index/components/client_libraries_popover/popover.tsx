@@ -14,10 +14,14 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiText,
+  EuiIcon,
+  EuiFlexItem,
+  EuiFlexGroup,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { icons } from '../../../../../../assets/client_libraries';
 import { docLinks } from '../../../../../shared/doc_links';
 
 import { OverviewLogic } from '../../overview.logic';
@@ -25,6 +29,7 @@ import { OverviewLogic } from '../../overview.logic';
 const libraries = [
   {
     href: docLinks.clientsJavaIntroduction,
+    icon: icons.java,
     key: 'java',
     text: i18n.translate(
       'xpack.enterpriseSearch.content.overview.documentExample.clientLibraries.java',
@@ -33,6 +38,7 @@ const libraries = [
   },
   {
     href: docLinks.clientsJsIntro,
+    icon: icons.javascript,
     key: 'javascript',
     text: i18n.translate(
       'xpack.enterpriseSearch.content.overview.documentExample.clientLibraries.javascript',
@@ -41,6 +47,7 @@ const libraries = [
   },
   {
     href: docLinks.clientsRubyOverview,
+    icon: icons.ruby,
     key: 'ruby',
     text: i18n.translate(
       'xpack.enterpriseSearch.content.overview.documentExample.clientLibraries.ruby',
@@ -49,6 +56,7 @@ const libraries = [
   },
   {
     href: docLinks.clientsGoIndex,
+    icon: icons.go,
     key: 'go',
     text: i18n.translate(
       'xpack.enterpriseSearch.content.overview.documentExample.clientLibraries.go',
@@ -57,6 +65,7 @@ const libraries = [
   },
   {
     href: docLinks.clientsNetIntroduction,
+    icon: icons.dotnet,
     key: 'dotnet',
     text: i18n.translate(
       'xpack.enterpriseSearch.content.overview.documentExample.clientLibraries.dotnet',
@@ -65,6 +74,7 @@ const libraries = [
   },
   {
     href: docLinks.clientsPhpGuide,
+    icon: icons.php,
     key: 'php',
     text: i18n.translate(
       'xpack.enterpriseSearch.content.overview.documentExample.clientLibraries.php',
@@ -73,6 +83,7 @@ const libraries = [
   },
   {
     href: docLinks.clientsPerlGuide,
+    icon: icons.perl,
     key: 'perl',
     text: i18n.translate(
       'xpack.enterpriseSearch.content.overview.documentExample.clientLibraries.perl',
@@ -81,6 +92,7 @@ const libraries = [
   },
   {
     href: docLinks.clientsPythonOverview,
+    icon: icons.python,
     key: 'python',
     text: i18n.translate(
       'xpack.enterpriseSearch.content.overview.documentExample.clientLibraries.python',
@@ -89,6 +101,7 @@ const libraries = [
   },
   {
     href: docLinks.clientsRustOverview,
+    icon: icons.rust,
     key: 'rust',
     text: i18n.translate(
       'xpack.enterpriseSearch.content.overview.documentExample.clientLibraries.rust',
@@ -116,15 +129,25 @@ export const ClientLibrariesPopover: React.FC = () => {
     >
       <EuiContextMenuPanel
         size="s"
-        items={libraries.map((item) => {
-          return (
-            <EuiContextMenuItem key={item.key} href={item.href} target="_blank">
-              <EuiText>
-                <p>{item.text}</p>
-              </EuiText>
-            </EuiContextMenuItem>
-          );
-        })}
+        items={libraries.map((item) => (
+          <EuiContextMenuItem
+            key={item.key}
+            href={item.href}
+            target="_blank"
+            icon={item.icon ? <EuiIcon type={item.icon} size="l" /> : undefined}
+          >
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem>
+                <EuiText>
+                  <p>{item.text}</p>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="popout" size="m" color="primary" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiContextMenuItem>
+        ))}
       />
     </EuiPopover>
   );

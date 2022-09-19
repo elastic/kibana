@@ -16,6 +16,16 @@ import type {
   CspClientPluginSetupDeps,
   CspClientPluginStartDeps,
 } from './types';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
+import { SetupContext } from './application/setup_context';
+
+const LazyCspEditPolicy = lazy(() => import('./components/fleet_extensions/policy_extension_edit'));
+const LazyCspCreatePolicy = lazy(
+  () => import('./components/fleet_extensions/policy_extension_create')
+);
+const LazyCspCustomAssets = lazy(
+  () => import('./components/fleet_extensions/custom_assets_extension')
+);
 
 const CspRouterLazy = lazy(() => import('./application/csp_router'));
 const CspRouter = (props: CspRouterProps) => (
@@ -33,21 +43,44 @@ export class CspPlugin
       CspClientPluginStartDeps
     >
 {
+  private isCloudEnabled?: boolean;
+
   public setup(
     core: CoreSetup<CspClientPluginStartDeps, CspClientPluginStart>,
     plugins: CspClientPluginSetupDeps
   ): CspClientPluginSetup {
+    this.isCloudEnabled = plugins.cloud.isCloudEnabled;
     // Return methods that should be available to other plugins
     return {};
   }
 
   public start(core: CoreStart, plugins: CspClientPluginStartDeps): CspClientPluginStart {
+    plugins.fleet.registerExtension({
+      package: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+      view: 'package-policy-create',
+      Component: LazyCspCreatePolicy,
+    });
+
+    plugins.fleet.registerExtension({
+      package: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+      view: 'package-policy-edit',
+      Component: LazyCspEditPolicy,
+    });
+
+    plugins.fleet.registerExtension({
+      package: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+      view: 'package-detail-assets',
+      Component: LazyCspCustomAssets,
+    });
+
     return {
       getCloudSecurityPostureRouter: () => (props: CspRouterProps) =>
         (
           <KibanaContextProvider services={{ ...core, ...plugins }}>
             <RedirectAppLinks coreStart={core}>
-              <CspRouter {...props} />
+              <SetupContext.Provider value={{ isCloudEnabled: this.isCloudEnabled }}>
+                <CspRouter {...props} />
+              </SetupContext.Provider>
             </RedirectAppLinks>
           </KibanaContextProvider>
         ),

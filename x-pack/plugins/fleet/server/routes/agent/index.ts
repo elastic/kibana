@@ -22,6 +22,7 @@ import {
   PostAgentUpgradeRequestSchema,
   PostBulkAgentUpgradeRequestSchema,
   PostCancelActionRequestSchema,
+  GetActionStatusRequestSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import type { FleetConfigType } from '../..';
@@ -40,6 +41,8 @@ import {
   postBulkAgentsReassignHandler,
   getAgentDataHandler,
   bulkUpdateAgentTagsHandler,
+  getAvailableVersionsHandler,
+  getActionStatusHandler,
 } from './handlers';
 import {
   postNewAgentActionHandlerBuilder,
@@ -133,6 +136,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       getAgent: AgentService.getAgentById,
       cancelAgentAction: AgentService.cancelAgentAction,
       createAgentAction: AgentService.createAgentAction,
+      getAgentActions: AgentService.getAgentActions,
     })
   );
 
@@ -148,6 +152,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       getAgent: AgentService.getAgentById,
       cancelAgentAction: AgentService.cancelAgentAction,
       createAgentAction: AgentService.createAgentAction,
+      getAgentActions: AgentService.getAgentActions,
     })
   );
 
@@ -240,6 +245,18 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     getCurrentUpgradesHandler
   );
 
+  // Current actions
+  router.get(
+    {
+      path: AGENT_API_ROUTES.ACTION_STATUS_PATTERN,
+      validate: GetActionStatusRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    getActionStatusHandler
+  );
+
   // Bulk reassign
   router.post(
     {
@@ -262,5 +279,17 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       },
     },
     postBulkAgentsUnenrollHandler
+  );
+
+  // Available versions for upgrades
+  router.get(
+    {
+      path: AGENT_API_ROUTES.AVAILABLE_VERSIONS_PATTERN,
+      validate: false,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    getAvailableVersionsHandler
   );
 };

@@ -63,6 +63,7 @@ export const EditJob: FC<EditJobProps> = ({ job, jobOverride, existingGroupIds, 
 
   useEffect(() => {
     handleValidation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formState.jobGroups]);
 
   const onSave = () => {

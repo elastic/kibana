@@ -9,15 +9,6 @@
 import { PluginInitializerContext } from '@kbn/core/public';
 import { DiscoverPlugin } from './plugin';
 
-export type { SavedSearch } from './services/saved_searches';
-export {
-  getSavedSearch,
-  getSavedSearchFullPathUrl,
-  getSavedSearchUrl,
-  getSavedSearchUrlConflictMessage,
-  throwErrorOnSavedSearchUrlConflict,
-} from './services/saved_searches';
-
 export type { DiscoverSetup, DiscoverStart } from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DiscoverPlugin(initializerContext);
@@ -29,3 +20,16 @@ export { loadSharingDataHelpers } from './utils';
 
 export { DISCOVER_APP_LOCATOR } from './locator';
 export type { DiscoverAppLocator, DiscoverAppLocatorParams } from './locator';
+
+// re-export types and static functions to give other plugins time to migrate away
+export {
+  SavedSearch,
+  getSavedSearch,
+  getSavedSearchFullPathUrl,
+  getSavedSearchUrl,
+  getSavedSearchUrlConflictMessage,
+  throwErrorOnSavedSearchUrlConflict,
+  VIEW_MODE,
+  DiscoverGridSettings,
+  DiscoverGridSettingsColumn,
+} from '@kbn/saved-search-plugin/public';

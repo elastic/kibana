@@ -20,6 +20,7 @@ import {
   DatasourceMock,
   mountWithProvider,
 } from '../../../mocks';
+import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
 
 jest.mock('../../../id_generator');
 
@@ -96,6 +97,8 @@ describe('LayerPanel', () => {
       isFullscreen: false,
       toggleFullscreen: jest.fn(),
       onEmptyDimensionAdd: jest.fn(),
+      onChangeIndexPattern: jest.fn(),
+      indexPatternService: createIndexPatternServiceMock(),
     };
   }
 
@@ -134,7 +137,7 @@ describe('LayerPanel', () => {
     it('should show the reset button when single layer', async () => {
       const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
       expect(
-        instance.find('[data-test-subj="lnsLayerRemove"]').first().props()['aria-label']
+        instance.find('[data-test-subj="lnsLayerRemove--0"]').first().props()['aria-label']
       ).toContain('Reset layer');
     });
 
@@ -143,7 +146,7 @@ describe('LayerPanel', () => {
         <LayerPanel {...getDefaultProps()} isOnlyLayer={false} />
       );
       expect(
-        instance.find('[data-test-subj="lnsLayerRemove"]').first().props()['aria-label']
+        instance.find('[data-test-subj="lnsLayerRemove--0"]').first().props()['aria-label']
       ).toContain('Delete layer');
     });
 
@@ -152,7 +155,7 @@ describe('LayerPanel', () => {
       delete layerPanelAttributes.activeVisualization.removeLayer;
       const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
       expect(
-        instance.find('[data-test-subj="lnsLayerRemove"]').first().props()['aria-label']
+        instance.find('[data-test-subj="lnsLayerRemove--0"]').first().props()['aria-label']
       ).toContain('Reset visualization');
     });
 
@@ -162,7 +165,7 @@ describe('LayerPanel', () => {
         <LayerPanel {...getDefaultProps()} onRemoveLayer={cb} />
       );
       act(() => {
-        instance.find('[data-test-subj="lnsLayerRemove"]').first().simulate('click');
+        instance.find('[data-test-subj="lnsLayerRemove--0"]').first().simulate('click');
       });
       instance.update();
       act(() => {
@@ -244,6 +247,52 @@ describe('LayerPanel', () => {
         .findWhere((e) => e.prop('error') === 'Requires field');
 
       expect(group).toHaveLength(1);
+    });
+
+    it('should tell the user to remove the correct number of dimensions', async () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'x' }],
+            filterOperations: () => true,
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGroup',
+            dimensionsTooMany: 1,
+          },
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'x' }],
+            filterOperations: () => true,
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGroup',
+            dimensionsTooMany: -1,
+          },
+          {
+            groupLabel: 'B',
+            groupId: 'b',
+            accessors: [],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup',
+            dimensionsTooMany: 3,
+          },
+        ],
+      });
+
+      const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
+
+      const groups = instance.find(EuiFormRow);
+
+      expect(groups.findWhere((e) => e.prop('error') === 'Please remove a dimension')).toHaveLength(
+        1
+      );
+      expect(
+        groups.findWhere((e) => e.prop('error') === 'Please remove 3 dimensions')
+      ).toHaveLength(1);
+      expect(groups.findWhere((e) => e.prop('error') === '')).toHaveLength(1);
     });
 
     it('should render the required warning when only one group is configured (with requiredMinDimensionCount)', async () => {

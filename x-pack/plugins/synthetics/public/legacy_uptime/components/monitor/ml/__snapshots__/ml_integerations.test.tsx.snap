@@ -2,10 +2,10 @@
 
 exports[`ML Integrations renders without errors 1`] = `
 <div
-  class="euiPopover euiPopover--anchorDownCenter"
+  class="euiPopover emotion-euiPopover"
 >
   <div
-    class="euiPopover__anchor"
+    class="euiPopover__anchor css-16vtueo-render"
   >
     <button
       aria-label="You can enable anomaly detection job or if job is already there you can manage the job or alert."

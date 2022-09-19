@@ -21,7 +21,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('creation_index_pattern', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/139781
+  describe.skip('creation_index_pattern', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
@@ -664,6 +665,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await transform.testExecution.logTestStep('starts the transform and finishes processing');
           await transform.wizard.startTransform();
+          await transform.wizard.assertErrorToastsNotExist();
           await transform.wizard.waitForProgressBarComplete();
 
           await transform.testExecution.logTestStep('returns to the management page');

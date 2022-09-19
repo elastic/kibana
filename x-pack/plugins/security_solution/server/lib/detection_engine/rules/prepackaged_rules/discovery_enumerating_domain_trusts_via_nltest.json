@@ -1,0 +1,72 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the use of nltest.exe for domain trust discovery purposes. Adversaries may use this command-line utility to enumerate domain trusts and gain insight into trust relationships, as well as the state of Domain Controller (DC) replication in a Microsoft Windows NT Domain.",
+  "false_positives": [
+    "Domain administrators may use this command-line utility for legitimate information gathering purposes, but it is not common for environments with Windows Server 2012 and newer."
+  ],
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Enumerating Domain Trusts via NLTEST.EXE",
+  "note": "",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n    process.name : \"nltest.exe\" and process.args : (\n        \"/DCLIST:*\", \"/DCNAME:*\", \"/DSGET*\",\n        \"/LSAQUERYFTI:*\", \"/PARENTDOMAIN\",\n        \"/DOMAIN_TRUSTS\", \"/BDC_QUERY:*\")\n",
+  "references": [
+    "https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/cc731935(v=ws.11)",
+    "https://redcanary.com/blog/how-one-hospital-thwarted-a-ryuk-ransomware-outbreak/"
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    }
+  ],
+  "risk_score": 23,
+  "rule_id": "84da2554-e12a-11ec-b896-f661ea17fbcd",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Discovery"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0007",
+        "name": "Discovery",
+        "reference": "https://attack.mitre.org/tactics/TA0007/"
+      },
+      "technique": [
+        {
+          "id": "T1482",
+          "name": "Domain Trust Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1482/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 2
+}

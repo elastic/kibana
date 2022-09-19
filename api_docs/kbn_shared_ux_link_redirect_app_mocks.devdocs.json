@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/shared-ux-link-redirect-app-mocks",
-        "id": "def-server.StorybookMock",
+        "id": "def-common.StorybookMock",
         "type": "Class",
         "tags": [],
         "label": "StorybookMock",
@@ -20,9 +28,9 @@
         "signature": [
           {
             "pluginId": "@kbn/shared-ux-link-redirect-app-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnSharedUxLinkRedirectAppMocksPluginApi",
-            "section": "def-server.StorybookMock",
+            "section": "def-common.StorybookMock",
             "text": "StorybookMock"
           },
           " extends ",
@@ -33,32 +41,35 @@
         ],
         "path": "packages/shared-ux/link/redirect_app/mocks/src/storybook.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-link-redirect-app-mocks",
-            "id": "def-server.StorybookMock.propArguments",
+            "id": "def-common.StorybookMock.propArguments",
             "type": "Object",
             "tags": [],
             "label": "propArguments",
             "description": [],
             "path": "packages/shared-ux/link/redirect_app/mocks/src/storybook.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": []
           },
           {
             "parentPluginId": "@kbn/shared-ux-link-redirect-app-mocks",
-            "id": "def-server.StorybookMock.serviceArguments",
+            "id": "def-common.StorybookMock.serviceArguments",
             "type": "Object",
             "tags": [],
             "label": "serviceArguments",
             "description": [],
             "path": "packages/shared-ux/link/redirect_app/mocks/src/storybook.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": []
           },
           {
             "parentPluginId": "@kbn/shared-ux-link-redirect-app-mocks",
-            "id": "def-server.StorybookMock.dependencies",
+            "id": "def-common.StorybookMock.dependencies",
             "type": "Array",
             "tags": [],
             "label": "dependencies",
@@ -67,11 +78,12 @@
               "never[]"
             ],
             "path": "packages/shared-ux/link/redirect_app/mocks/src/storybook.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/shared-ux-link-redirect-app-mocks",
-            "id": "def-server.StorybookMock.getProps",
+            "id": "def-common.StorybookMock.getProps",
             "type": "Function",
             "tags": [],
             "label": "getProps",
@@ -83,12 +95,13 @@
             ],
             "path": "packages/shared-ux/link/redirect_app/mocks/src/storybook.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
           {
             "parentPluginId": "@kbn/shared-ux-link-redirect-app-mocks",
-            "id": "def-server.StorybookMock.getServices",
+            "id": "def-common.StorybookMock.getServices",
             "type": "Function",
             "tags": [],
             "label": "getServices",
@@ -100,6 +113,7 @@
             ],
             "path": "packages/shared-ux/link/redirect_app/mocks/src/storybook.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -110,24 +124,41 @@
     "functions": [
       {
         "parentPluginId": "@kbn/shared-ux-link-redirect-app-mocks",
-        "id": "def-server.getRedirectAppLinksKibanaDependenciesMock",
+        "id": "def-common.getRedirectAppLinksKibanaDependenciesMock",
         "type": "Function",
         "tags": [],
         "label": "getRedirectAppLinksKibanaDependenciesMock",
         "description": [],
         "signature": [
-          "() => ",
+          "(params?: Partial<Params> | undefined) => ",
           "RedirectAppLinksKibanaDependencies"
         ],
         "path": "packages/shared-ux/link/redirect_app/mocks/src/jest.ts",
         "deprecated": false,
-        "children": [],
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-link-redirect-app-mocks",
+            "id": "def-common.getRedirectAppLinksKibanaDependenciesMock.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "Partial<Params> | undefined"
+            ],
+            "path": "packages/shared-ux/link/redirect_app/mocks/src/jest.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/shared-ux-link-redirect-app-mocks",
-        "id": "def-server.getRedirectAppLinksServicesMock",
+        "id": "def-common.getRedirectAppLinksServicesMock",
         "type": "Function",
         "tags": [],
         "label": "getRedirectAppLinksServicesMock",
@@ -135,24 +166,33 @@
           "\nReturns the Jest-compatible service abstractions for the `NoDataCard` Provider."
         ],
         "signature": [
-          "() => ",
+          "(params?: Partial<Params> | undefined) => ",
           "RedirectAppLinksServices"
         ],
         "path": "packages/shared-ux/link/redirect_app/mocks/src/jest.ts",
         "deprecated": false,
-        "children": [],
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-link-redirect-app-mocks",
+            "id": "def-common.getRedirectAppLinksServicesMock.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "Partial<Params> | undefined"
+            ],
+            "path": "packages/shared-ux/link/redirect_app/mocks/src/jest.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

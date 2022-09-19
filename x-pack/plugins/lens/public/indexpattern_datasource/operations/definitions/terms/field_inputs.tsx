@@ -17,11 +17,15 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DragDropBuckets, NewBucketButton } from '../shared_components/buckets';
-import { TooltipWrapper, useDebouncedValue } from '../../../../shared_components';
+import { ExistingFieldsMap, IndexPattern } from '../../../../types';
+import {
+  DragDropBuckets,
+  NewBucketButton,
+  TooltipWrapper,
+  useDebouncedValue,
+} from '../../../../shared_components';
 import { FieldSelect } from '../../../dimension_panel/field_select';
 import type { TermsIndexPatternColumn } from './types';
-import type { IndexPattern, IndexPatternPrivateState } from '../../../types';
 import type { OperationSupportMatrix } from '../../../dimension_panel';
 import { supportedTypes } from './constants';
 
@@ -31,7 +35,7 @@ export const MAX_MULTI_FIELDS_SIZE = 3;
 export interface FieldInputsProps {
   column: TermsIndexPatternColumn;
   indexPattern: IndexPattern;
-  existingFields: IndexPatternPrivateState['existingFields'];
+  existingFields: ExistingFieldsMap;
   invalidFields?: string[];
   operationSupportMatrix: Pick<OperationSupportMatrix, 'operationByField'>;
   onChange: (newValues: string[]) => void;
@@ -183,7 +187,7 @@ export function FieldInputs({
                         <FieldSelect
                           fieldIsInvalid={shouldShowError}
                           currentIndexPattern={indexPattern}
-                          existingFields={existingFields}
+                          existingFields={existingFields[indexPattern.title]}
                           operationByField={filteredOperationByField}
                           selectedOperationType={column.operationType}
                           selectedField={value}

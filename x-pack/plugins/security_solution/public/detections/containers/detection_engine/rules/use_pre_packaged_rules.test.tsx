@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { act, renderHook } from '@testing-library/react-hooks';
 import { shallow } from 'enzyme';
 import type { ReactElement } from 'react';
@@ -144,6 +143,7 @@ describe('usePrePackagedRules', () => {
       result.current.createPrePackagedRules();
       await waitForNextUpdate();
       expect(api.createPrepackagedRules).toHaveBeenCalled();
+      await waitForNextUpdate();
       expect(result.current).toEqual({
         getLoadPrebuiltRulesAndTemplatesButton:
           result.current.getLoadPrebuiltRulesAndTemplatesButton,

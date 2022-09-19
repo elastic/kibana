@@ -226,7 +226,16 @@ export const RulesContainer = () => {
         />
       </EuiPanel>
       {hasChanges && (
-        <RulesBottomBar onSave={bulkUpdateRules} onCancel={discardChanges} isLoading={isUpdating} />
+        <>
+          {/* spacers to lift the table enough so the bar won't hide the pagination */}
+          <EuiSpacer size="xxl" />
+          <EuiSpacer size="xxl" />
+          <RulesBottomBar
+            onSave={bulkUpdateRules}
+            onCancel={discardChanges}
+            isLoading={isUpdating}
+          />
+        </>
       )}
       {selectedRuleId && (
         <RuleFlyout

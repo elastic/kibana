@@ -10,9 +10,10 @@ import * as i18n from '../translations';
 import type { UsersDetailsNavTab } from './types';
 import { UsersTableType } from '../../store/model';
 import { USERS_PATH } from '../../../../common/constants';
+import { TECHNICAL_PREVIEW } from '../../../overview/pages/translations';
 
 const getTabsOnUsersDetailsUrl = (userName: string, tabName: UsersTableType) =>
-  `${USERS_PATH}/${userName}/${tabName}`;
+  `${USERS_PATH}/name/${userName}/${tabName}`;
 
 export const navTabsUsersDetails = (
   userName: string,
@@ -45,6 +46,10 @@ export const navTabsUsersDetails = (
       name: i18n.NAVIGATION_RISK_TITLE,
       href: getTabsOnUsersDetailsUrl(userName, UsersTableType.risk),
       disabled: false,
+      isBeta: true,
+      betaOptions: {
+        text: TECHNICAL_PREVIEW,
+      },
     },
   };
 

@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-empty-function */
+import { QueryClient } from '@tanstack/react-query';
 
-import { QueryClient, setLogger } from 'react-query';
-
-setLogger({
-  log: () => {},
-  warn: () => {},
-  error: () => {},
+export const queryClient = new QueryClient({
+  logger: {
+    log: () => null,
+    warn: () => null,
+    error: () => null,
+  },
 });
-
-export const queryClient = new QueryClient();

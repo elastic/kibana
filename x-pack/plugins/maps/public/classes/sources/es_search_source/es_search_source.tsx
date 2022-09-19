@@ -220,15 +220,12 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   }
 
   async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
-    let indexPatternName = this.getIndexPatternId();
     let geoFieldType = '';
     try {
-      const indexPattern = await this.getIndexPattern();
-      indexPatternName = indexPattern.title;
       const geoField = await this._getGeoField();
       geoFieldType = geoField.type;
     } catch (error) {
-      // ignore error, title will just default to id
+      // ignore error, geoFieldType will just be blank
     }
 
     return [
@@ -238,7 +235,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       },
       {
         label: getDataViewLabel(),
-        value: indexPatternName,
+        value: await this.getDisplayName(),
       },
       {
         label: i18n.translate('xpack.maps.source.esSearch.geoFieldLabel', {
