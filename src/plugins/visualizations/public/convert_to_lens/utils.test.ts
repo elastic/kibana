@@ -15,7 +15,13 @@ import {
   SchemaConfig,
   SupportedAggregation,
 } from '../../common';
-import { AvgColumn, CountColumn, Meta } from '../../common/convert_to_lens/lib';
+import {
+  AvgColumn,
+  CountColumn,
+  MaxColumn,
+  DateHistogramColumn,
+  Meta,
+} from '../../common/convert_to_lens/lib';
 import {
   getBucketCollapseFn,
   getBucketColumns,
@@ -23,6 +29,7 @@ import {
   getMetricsWithoutDuplicates,
   isReferenced,
   isValidVis,
+  sortColumns,
 } from './utils';
 import { Schemas } from '../vis_schemas';
 
@@ -412,5 +419,135 @@ describe('getMetricsWithoutDuplicates', () => {
 
   test('should return array if no duplicates', () => {
     expect(getMetricsWithoutDuplicates([metric2, metric3])).toEqual([metric2, metric3]);
+  });
+});
+
+describe('sortColumns', () => {
+  const aggId1 = '0_agg_id';
+  const aggId2 = '1_agg_id';
+  const aggId3 = '2_agg_id';
+  const aggId4 = '3_agg_id';
+  const aggId5 = '4_agg_id';
+
+  const column1: AvgColumn = {
+    sourceField: 'some-field',
+    columnId: 'col0',
+    operationType: 'average',
+    isBucketed: false,
+    isSplit: false,
+    dataType: 'string',
+    params: {},
+    meta: { aggId: aggId1 },
+  };
+
+  const column2: CountColumn = {
+    sourceField: 'document',
+    columnId: 'col1',
+    operationType: 'count',
+    isBucketed: false,
+    isSplit: false,
+    dataType: 'string',
+    params: {},
+    meta: { aggId: aggId2 },
+  };
+
+  const column3: MaxColumn = {
+    sourceField: 'some-field',
+    columnId: 'col2',
+    operationType: 'max',
+    isBucketed: false,
+    isSplit: false,
+    dataType: 'string',
+    params: {},
+    meta: { aggId: aggId3 },
+  };
+
+  const column4: DateHistogramColumn = {
+    sourceField: 'some-field',
+    columnId: 'col3',
+    operationType: 'date_histogram',
+    isBucketed: false,
+    isSplit: false,
+    dataType: 'string',
+    params: { interval: '1h' },
+    meta: { aggId: aggId4 },
+  };
+
+  const column5: DateHistogramColumn = {
+    sourceField: 'some-field',
+    columnId: 'col4',
+    operationType: 'date_histogram',
+    isBucketed: false,
+    isSplit: false,
+    dataType: 'string',
+    params: { interval: '1h' },
+    meta: { aggId: aggId5 },
+  };
+
+  const metricKey = 'metric';
+  const bucketKey = 'group';
+
+  const baseMetric = {
+    accessor: 0,
+    label: '',
+    format: {
+      id: undefined,
+      params: undefined,
+    },
+    params: {},
+  };
+  const metric1: SchemaConfig<METRIC_TYPES.AVG> = {
+    ...baseMetric,
+    accessor: 1,
+    aggType: METRIC_TYPES.AVG,
+    aggId: aggId1,
+  };
+  const metric2: SchemaConfig<METRIC_TYPES.COUNT> = {
+    ...baseMetric,
+    accessor: 2,
+    aggType: METRIC_TYPES.COUNT,
+    aggId: aggId2,
+  };
+  const metric3: SchemaConfig<METRIC_TYPES.MAX> = {
+    ...baseMetric,
+    accessor: 3,
+    aggType: METRIC_TYPES.MAX,
+    aggId: aggId3,
+  };
+
+  const bucket1: SchemaConfig<BUCKET_TYPES.DATE_HISTOGRAM> = {
+    ...baseMetric,
+    accessor: 4,
+    aggType: BUCKET_TYPES.DATE_HISTOGRAM,
+    aggId: aggId4,
+  };
+
+  const bucket2: SchemaConfig<BUCKET_TYPES.DATE_HISTOGRAM> = {
+    ...baseMetric,
+    accessor: 5,
+    aggType: BUCKET_TYPES.DATE_HISTOGRAM,
+    aggId: aggId5,
+  };
+
+  const visSchemas: Schemas = {
+    [metricKey]: [metric1, metric2, metric3],
+    [bucketKey]: [bucket1, bucket2],
+  };
+  const columns: AggBasedColumn[] = [column4, column3, column2, column5, column1];
+  const metricsWithoutDuplicates: Array<SchemaConfig<SupportedAggregation>> = [
+    metric1,
+    metric2,
+    metric3,
+  ];
+  const keys = [bucketKey];
+
+  test('should remove aggs with same aggIds', () => {
+    expect(sortColumns(columns, visSchemas, keys, metricsWithoutDuplicates)).toEqual([
+      column1,
+      column2,
+      column3,
+      column4,
+      column5,
+    ]);
   });
 });
