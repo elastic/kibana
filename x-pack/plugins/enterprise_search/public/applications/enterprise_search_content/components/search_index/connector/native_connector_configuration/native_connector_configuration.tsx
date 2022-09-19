@@ -52,6 +52,7 @@ export const NativeConnectorConfiguration: React.FC = () => {
     indexData.connector.last_synced || indexData.connector.scheduling.enabled;
   const hasResearched = hasConfigured || hasConfiguredAdvanced;
 
+  const icon = NATIVE_CONNECTOR_ICONS[nativeConnector.serviceType];
   return (
     <>
       <EuiSpacer />
@@ -59,9 +60,11 @@ export const NativeConnectorConfiguration: React.FC = () => {
         <EuiFlexItem grow={2}>
           <EuiPanel hasShadow={false} hasBorder>
             <EuiFlexGroup gutterSize="m" direction="row" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiIcon size="xl" type={NATIVE_CONNECTOR_ICONS[nativeConnector.serviceType]} />
-              </EuiFlexItem>
+              {icon && (
+                <EuiFlexItem grow={false}>
+                  <EuiIcon size="xl" type={icon} />
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={false}>
                 <EuiTitle size="m">
                   <h3>{nativeConnector.name}</h3>

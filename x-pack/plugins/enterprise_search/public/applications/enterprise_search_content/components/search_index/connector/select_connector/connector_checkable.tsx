@@ -39,6 +39,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
   serviceType,
   ...props
 }) => {
+  const icon = NATIVE_CONNECTOR_ICONS[serviceType];
   return (
     <EuiCheckableCard
       {...props}
@@ -46,9 +47,11 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
       className="connectorCheckable"
       label={
         <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={NATIVE_CONNECTOR_ICONS[serviceType]} />
-          </EuiFlexItem>
+          {icon && (
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={icon} />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
               <span>{name}</span>
