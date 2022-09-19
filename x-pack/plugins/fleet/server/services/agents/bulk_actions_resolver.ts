@@ -117,8 +117,13 @@ export class BulkActionsResolver {
           .add(Math.pow(3, retryParams.retryCount ?? 1), 's')
           .toDate(),
     });
-    appContextService.getLogger().info('Running task ' + taskId);
+    appContextService.getLogger().info('Scheduling task ' + taskId);
     return taskId;
+  }
+
+  public async removeIfExists(taskId: string) {
+    appContextService.getLogger().info('Removing task ' + taskId);
+    await this.taskManager?.removeIfExists(taskId);
   }
 }
 

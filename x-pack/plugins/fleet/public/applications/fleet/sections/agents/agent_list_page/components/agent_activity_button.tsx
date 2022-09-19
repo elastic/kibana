@@ -61,7 +61,7 @@ export const AgentActivityButton: React.FC<{
         </EuiText>
       }
       isStepOpen={agentActivityTourState.isOpen}
-      onFinish={() => setAgentActivityTourState({ isOpen: false })}
+      onFinish={onFinish}
       minWidth={360}
       maxWidth={360}
       step={1}

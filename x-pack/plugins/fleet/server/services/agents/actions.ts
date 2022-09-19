@@ -14,7 +14,11 @@ import type {
   NewAgentAction,
   FleetServerAgentAction,
 } from '../../../common/types/models';
-import { AGENT_ACTIONS_INDEX, SO_SEARCH_LIMIT } from '../../../common/constants';
+import {
+  AGENT_ACTIONS_INDEX,
+  AGENT_ACTIONS_RESULTS_INDEX,
+  SO_SEARCH_LIMIT,
+} from '../../../common/constants';
 import { AgentActionNotFoundError } from '../../errors';
 
 import { bulkUpdateAgents } from './crud';
@@ -95,6 +99,42 @@ export async function bulkCreateAgentActions(
   });
 
   return actions;
+}
+
+export async function bulkCreateAgentActionResults(
+  esClient: ElasticsearchClient,
+  results: Array<{
+    actionId: string;
+    agentId: string;
+    error: string;
+  }>
+): Promise<void> {
+  if (results.length === 0) {
+    return;
+  }
+
+  const bulkBody = results.flatMap((result) => {
+    const body = {
+      '@timestamp': new Date().toISOString(),
+      action_id: result.actionId,
+      agent_id: result.agentId,
+      error: result.error,
+    };
+
+    return [
+      {
+        create: {
+          _id: uuid.v4(),
+        },
+      },
+      body,
+    ];
+  });
+
+  await esClient.bulk({
+    index: AGENT_ACTIONS_RESULTS_INDEX,
+    body: bulkBody,
+  });
 }
 
 export async function getAgentActions(esClient: ElasticsearchClient, actionId: string) {
