@@ -32,140 +32,90 @@ describe('RiskScoreUpgradeButton', () => {
     timerange,
     title: 'upgrade',
   };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  describe('Host', () => {
+
+  describe.each([
+    [RiskScoreEntity.host, hostTestProps],
+    [RiskScoreEntity.user, userTestProps],
+  ])('%s', (riskScoreEntity, testProps) => {
     it('Renders expected children', () => {
       render(
         <TestProviders>
-          <RiskScoreUpgradeButton {...hostTestProps} />
+          <RiskScoreUpgradeButton {...testProps} />
         </TestProviders>
       );
 
-      expect(screen.getByTestId('host-risk-score-upgrade')).toBeInTheDocument();
-      expect(screen.getByTestId('host-risk-score-upgrade')).toHaveTextContent(hostTestProps.title);
+      expect(screen.getByTestId(`${riskScoreEntity}-risk-score-upgrade`)).toBeInTheDocument();
+      expect(screen.getByTestId(`${riskScoreEntity}-risk-score-upgrade`)).toHaveTextContent(
+        testProps.title
+      );
     });
 
     it('Triggers the confirmation modal before upgrading', async () => {
       render(
         <TestProviders>
-          <RiskScoreUpgradeButton {...hostTestProps} />
+          <RiskScoreUpgradeButton {...testProps} />
         </TestProviders>
       );
 
       await act(async () => {
-        await userEvent.click(screen.getByTestId('host-risk-score-upgrade'));
+        await userEvent.click(screen.getByTestId(`${riskScoreEntity}-risk-score-upgrade`));
       });
 
-      expect(screen.getByTestId('host-risk-score-upgrade-confirmation-modal')).toBeInTheDocument();
+      expect(
+        screen.getByTestId(`${riskScoreEntity}-risk-score-upgrade-confirmation-modal`)
+      ).toBeInTheDocument();
       await act(async () => {
         await userEvent.click(screen.getByText('Erase data and Upgrade'));
       });
 
       expect(
-        screen.queryByTestId('host-risk-score-upgrade-confirmation-modal')
+        screen.queryByTestId(`${riskScoreEntity}-risk-score-upgrade-confirmation-modal`)
       ).not.toBeInTheDocument();
 
-      expect(upgradeUserRiskScoreModule).not.toHaveBeenCalled();
-      expect(upgradeHostRiskScoreModule).toHaveBeenCalled();
+      if (riskScoreEntity === RiskScoreEntity.user) {
+        expect(upgradeUserRiskScoreModule).toHaveBeenCalled();
+        expect(upgradeHostRiskScoreModule).not.toHaveBeenCalled();
+      } else {
+        expect(upgradeUserRiskScoreModule).not.toHaveBeenCalled();
+        expect(upgradeHostRiskScoreModule).toHaveBeenCalled();
+      }
     });
 
     it('Shows doc link in the confirmation modal', async () => {
       render(
         <TestProviders>
-          <RiskScoreUpgradeButton {...hostTestProps} />
+          <RiskScoreUpgradeButton {...testProps} />
         </TestProviders>
       );
 
       await act(async () => {
-        await userEvent.click(screen.getByTestId('host-risk-score-upgrade'));
+        await userEvent.click(screen.getByTestId(`${riskScoreEntity}-risk-score-upgrade`));
       });
 
       expect(screen.getByText('Preserve data')).toHaveProperty(
         'href',
-        'https://www.elastic.co/guide/en/security/current/host-risk-score.html'
+        `https://www.elastic.co/guide/en/security/current/${riskScoreEntity}-risk-score.html`
       );
     });
 
     it('Update button state while upgrading', async () => {
       render(
         <TestProviders>
-          <RiskScoreUpgradeButton {...hostTestProps} />
+          <RiskScoreUpgradeButton {...testProps} />
         </TestProviders>
       );
 
-      userEvent.click(screen.getByTestId('host-risk-score-upgrade'));
+      userEvent.click(screen.getByTestId(`${riskScoreEntity}-risk-score-upgrade`));
       userEvent.click(screen.getByText('Erase data and Upgrade'));
       await waitFor(() => {
-        expect(screen.getByTestId('host-risk-score-upgrade')).toHaveProperty('disabled', true);
-      });
-    });
-  });
-
-  describe('User', () => {
-    it('Renders expected children', () => {
-      render(
-        <TestProviders>
-          <RiskScoreUpgradeButton {...userTestProps} />
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('user-risk-score-upgrade')).toBeInTheDocument();
-      expect(screen.getByTestId('user-risk-score-upgrade')).toHaveTextContent(userTestProps.title);
-    });
-
-    it('Triggers the confirmation modal before upgrading', async () => {
-      render(
-        <TestProviders>
-          <RiskScoreUpgradeButton {...userTestProps} />
-        </TestProviders>
-      );
-
-      await act(async () => {
-        await userEvent.click(screen.getByTestId('user-risk-score-upgrade'));
-      });
-
-      expect(screen.getByTestId('user-risk-score-upgrade-confirmation-modal')).toBeInTheDocument();
-      await act(async () => {
-        await userEvent.click(screen.getByText('Erase data and Upgrade'));
-      });
-
-      expect(
-        screen.queryByTestId('user-risk-score-upgrade-confirmation-modal')
-      ).not.toBeInTheDocument();
-      expect(upgradeHostRiskScoreModule).not.toHaveBeenCalled();
-      expect(upgradeUserRiskScoreModule).toHaveBeenCalled();
-    });
-
-    it('Shows doc link in the confirmation modal', async () => {
-      render(
-        <TestProviders>
-          <RiskScoreUpgradeButton {...userTestProps} />
-        </TestProviders>
-      );
-
-      await act(async () => {
-        await userEvent.click(screen.getByTestId('user-risk-score-upgrade'));
-      });
-
-      expect(screen.getByText('Preserve data')).toHaveProperty(
-        'href',
-        'https://www.elastic.co/guide/en/security/current/user-risk-score.html'
-      );
-    });
-
-    it('Update button state while upgrading', async () => {
-      render(
-        <TestProviders>
-          <RiskScoreUpgradeButton {...userTestProps} />
-        </TestProviders>
-      );
-
-      userEvent.click(screen.getByTestId('user-risk-score-upgrade'));
-      userEvent.click(screen.getByText('Erase data and Upgrade'));
-      await waitFor(() => {
-        expect(screen.getByTestId('user-risk-score-upgrade')).toHaveProperty('disabled', true);
+        expect(screen.getByTestId(`${riskScoreEntity}-risk-score-upgrade`)).toHaveProperty(
+          'disabled',
+          true
+        );
       });
     });
   });

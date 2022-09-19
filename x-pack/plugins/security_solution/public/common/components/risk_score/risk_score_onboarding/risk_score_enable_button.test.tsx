@@ -24,20 +24,19 @@ describe('RiskScoreEnableButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  describe('Host', () => {
+  describe.each([[RiskScoreEntity.host], [RiskScoreEntity.user]])('%s', (riskScoreEntity) => {
     it('Renders expected children', () => {
       render(
         <TestProviders>
           <RiskScoreEnableButton
             refetch={mockRefetch}
-            riskScoreEntity={RiskScoreEntity.host}
+            riskScoreEntity={riskScoreEntity}
             timerange={timerange}
           />
         </TestProviders>
       );
 
-      expect(screen.getByTestId(`enable_${RiskScoreEntity.host}_risk_score`)).toBeInTheDocument();
-      expect(screen.getByTestId(`enable_${RiskScoreEntity.host}_risk_score`)).toHaveTextContent(
+      expect(screen.getByTestId(`enable_${riskScoreEntity}_risk_score`)).toHaveTextContent(
         'Enable'
       );
     });
@@ -47,17 +46,21 @@ describe('RiskScoreEnableButton', () => {
         <TestProviders>
           <RiskScoreEnableButton
             refetch={mockRefetch}
-            riskScoreEntity={RiskScoreEntity.host}
+            riskScoreEntity={riskScoreEntity}
             timerange={timerange}
           />
         </TestProviders>
       );
 
       await act(async () => {
-        await userEvent.click(screen.getByTestId(`enable_${RiskScoreEntity.host}_risk_score`));
+        await userEvent.click(screen.getByTestId(`enable_${riskScoreEntity}_risk_score`));
       });
 
-      expect(installHostRiskScoreModule).toHaveBeenCalled();
+      if (riskScoreEntity === RiskScoreEntity.user) {
+        expect(installUserRiskScoreModule).toHaveBeenCalled();
+      } else {
+        expect(installHostRiskScoreModule).toHaveBeenCalled();
+      }
     });
 
     it('Update button state while installing', async () => {
@@ -65,74 +68,16 @@ describe('RiskScoreEnableButton', () => {
         <TestProviders>
           <RiskScoreEnableButton
             refetch={mockRefetch}
-            riskScoreEntity={RiskScoreEntity.host}
+            riskScoreEntity={riskScoreEntity}
             timerange={timerange}
           />
         </TestProviders>
       );
 
-      userEvent.click(screen.getByTestId(`enable_${RiskScoreEntity.host}_risk_score`));
+      userEvent.click(screen.getByTestId(`enable_${riskScoreEntity}_risk_score`));
 
       await waitFor(() => {
-        expect(screen.getByTestId(`enable_${RiskScoreEntity.host}_risk_score`)).toHaveProperty(
-          'disabled',
-          true
-        );
-      });
-    });
-  });
-
-  describe('User', () => {
-    it('Renders expected children', () => {
-      render(
-        <TestProviders>
-          <RiskScoreEnableButton
-            refetch={mockRefetch}
-            riskScoreEntity={RiskScoreEntity.user}
-            timerange={timerange}
-          />
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId(`enable_${RiskScoreEntity.user}_risk_score`)).toBeInTheDocument();
-      expect(screen.getByTestId(`enable_${RiskScoreEntity.user}_risk_score`)).toHaveTextContent(
-        'Enable'
-      );
-    });
-
-    it('Triggers the right installer', async () => {
-      render(
-        <TestProviders>
-          <RiskScoreEnableButton
-            refetch={mockRefetch}
-            riskScoreEntity={RiskScoreEntity.user}
-            timerange={timerange}
-          />
-        </TestProviders>
-      );
-
-      await act(async () => {
-        await userEvent.click(screen.getByTestId(`enable_${RiskScoreEntity.user}_risk_score`));
-      });
-
-      expect(installUserRiskScoreModule).toHaveBeenCalled();
-    });
-
-    it('Update button state while installing', async () => {
-      render(
-        <TestProviders>
-          <RiskScoreEnableButton
-            refetch={mockRefetch}
-            riskScoreEntity={RiskScoreEntity.user}
-            timerange={timerange}
-          />
-        </TestProviders>
-      );
-
-      userEvent.click(screen.getByTestId(`enable_${RiskScoreEntity.user}_risk_score`));
-
-      await waitFor(() => {
-        expect(screen.getByTestId(`enable_${RiskScoreEntity.user}_risk_score`)).toHaveProperty(
+        expect(screen.getByTestId(`enable_${riskScoreEntity}_risk_score`)).toHaveProperty(
           'disabled',
           true
         );
