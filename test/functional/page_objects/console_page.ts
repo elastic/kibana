@@ -211,21 +211,11 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async hasSuccessBadge() {
-    try {
-      const responseEditor = await this.testSubjects.find('response-editor');
-      return Boolean(await responseEditor.findByCssSelector('.ace_badge--success'));
-    } catch (e) {
-      return false;
-    }
+    return await this.find.existsByCssSelector('.ace_badge--success');
   }
 
   public async hasWarningBadge() {
-    try {
-      const responseEditor = await this.testSubjects.find('response-editor');
-      return Boolean(await responseEditor.findByCssSelector('.ace_badge--warning'));
-    } catch (e) {
-      return false;
-    }
+    return await this.find.existsByCssSelector('.ace_badge--warning');
   }
 
   public async hasInvalidSyntax() {
