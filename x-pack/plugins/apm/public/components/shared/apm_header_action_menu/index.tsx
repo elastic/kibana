@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHeaderLink,
+  EuiHeaderLinks,
+} from '@elastic/eui';
 import { apmLabsButton } from '@kbn/observability-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -17,6 +22,7 @@ import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
 import { useServiceName } from '../../../hooks/use_service_name';
 import { InspectorHeaderLink } from './inspector_header_link';
 import { Labs } from './labs';
+import { EuiBetaBadge } from '@elastic/eui';
 
 export function ApmHeaderActionMenu() {
   const { core, plugins } = useApmPluginContext();
@@ -53,21 +59,23 @@ export function ApmHeaderActionMenu() {
       <EuiHeaderLink
         color="text"
         href={apmHref('/storage-explorer')}
-        iconType="beaker"
         data-test-subj="apmStorageExplorerHeaderLink"
       >
-        {i18n.translate('xpack.apm.storageExplorerLinkLabel', {
-          defaultMessage: 'Storage Explorer',
-        })}
-      </EuiHeaderLink>
-      <EuiHeaderLink
-        color="text"
-        href={apmHref('/settings')}
-        data-test-subj="apmSettingsHeaderLink"
-      >
-        {i18n.translate('xpack.apm.settingsLinkLabel', {
-          defaultMessage: 'Settings',
-        })}
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiBetaBadge
+              size="m"
+              label="B"
+              title="Beta feature"
+              color="accent"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {i18n.translate('xpack.apm.storageExplorerLinkLabel', {
+              defaultMessage: 'Storage Explorer',
+            })}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiHeaderLink>
       {canAccessML && <AnomalyDetectionSetupLink />}
       {isAlertingAvailable && (
@@ -87,6 +95,16 @@ export function ApmHeaderActionMenu() {
       >
         {i18n.translate('xpack.apm.addDataButtonLabel', {
           defaultMessage: 'Add data',
+        })}
+      </EuiHeaderLink>
+
+      <EuiHeaderLink
+        color="text"
+        href={apmHref('/settings')}
+        data-test-subj="apmSettingsHeaderLink"
+      >
+        {i18n.translate('xpack.apm.settingsLinkLabel', {
+          defaultMessage: 'Settings',
         })}
       </EuiHeaderLink>
       <InspectorHeaderLink />

@@ -34,8 +34,8 @@ import { ServiceIcons } from '../../../shared/service_icons';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
 import { getAlertingCapabilities } from '../../../alerting/get_alerting_capabilities';
-import { BetaBadge } from '../../../shared/beta_badge';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
+import { EuiBetaBadge } from '@elastic/eui';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -276,7 +276,14 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
-      append: <BetaBadge icon="beaker" />,
+      append: (
+        <EuiBetaBadge
+          label="B"
+          title="Beta"
+          color="hollow"
+          tooltipContent="This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum."
+        />
+      ),
       label: i18n.translate('xpack.apm.home.infraTabLabel', {
         defaultMessage: 'Infrastructure',
       }),
