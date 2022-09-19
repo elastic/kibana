@@ -18,12 +18,12 @@ import {
   EuiOutsideClickDetector,
 } from '@elastic/eui';
 import type { LayerType, Visualization } from '../../../..';
-import type { LayerButtonsAction } from './types';
+import type { LayerAction } from './types';
 
-import { getCloneLayerAction } from './clone_layer_button';
-import { getRemoveLayerAction } from './remove_layer_button';
+import { getCloneLayerAction } from './clone_layer_action';
+import { getRemoveLayerAction } from './remove_layer_action';
 
-export interface LayerButtonsProps {
+export interface LayerActionsProps {
   onRemoveLayer: () => void;
   onCloneLayer: () => void;
   layerIndex: number;
@@ -35,8 +35,8 @@ export interface LayerButtonsProps {
 
 /** @internal **/
 const InContextMenuActions = (
-  props: LayerButtonsProps & {
-    actions: LayerButtonsAction[];
+  props: LayerActionsProps & {
+    actions: LayerAction[];
   }
 ) => {
   const dataTestSubject = `lnsLayerSplitButton--${props.layerIndex}`;
@@ -100,7 +100,7 @@ const InContextMenuActions = (
   );
 };
 
-export const LayerButtons = (props: LayerButtonsProps) => {
+export const LayerActions = (props: LayerActionsProps) => {
   const compatibleActions = useMemo(
     () =>
       [

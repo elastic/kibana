@@ -18,7 +18,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LayerButtons } from './layer_buttons';
+import { LayerActions } from './layer_actions';
 import { IndexPatternServiceAPI } from '../../../data_views_service/service';
 import { NativeRenderer } from '../../../native_renderer';
 import {
@@ -330,7 +330,7 @@ export function LayerPanel(
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <LayerButtons
+                <LayerActions
                   layerIndex={layerIndex}
                   isOnlyLayer={isOnlyLayer}
                   activeVisualization={activeVisualization}

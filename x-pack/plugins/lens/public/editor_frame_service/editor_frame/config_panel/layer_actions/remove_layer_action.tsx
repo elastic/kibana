@@ -22,7 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { LayerButtonsAction } from './types';
+import { LayerAction } from './types';
 import { Visualization } from '../../../../types';
 import { LOCAL_STORAGE_LENS_KEY } from '../../../../settings_storage';
 import { LayerType, layerTypes } from '../../../..';
@@ -51,12 +51,7 @@ const modalDescAnnotation = i18n.translate('xpack.lens.layer.confirmModal.delete
   defaultMessage: `Deleting this layer removes the annotations and their configurations. `,
 });
 
-const getButtonCopy = (
-  layerIndex: number,
-  layerType: LayerType,
-  canBeRemoved?: boolean,
-  isOnlyLayer?: boolean
-) => {
+const getButtonCopy = (layerType: LayerType, canBeRemoved?: boolean, isOnlyLayer?: boolean) => {
   let ariaLabel;
 
   const layerTypeCopy =
@@ -98,13 +93,11 @@ const getButtonCopy = (
     });
   } else if (isOnlyLayer) {
     ariaLabel = i18n.translate('xpack.lens.resetLayerAriaLabel', {
-      defaultMessage: 'Reset layer {index}',
-      values: { index: layerIndex + 1 },
+      defaultMessage: 'Clear layer',
     });
   } else {
     ariaLabel = i18n.translate('xpack.lens.deleteLayerAriaLabel', {
-      defaultMessage: `Delete layer {index}`,
-      values: { index: layerIndex + 1 },
+      defaultMessage: `Delete layer`,
     });
   }
 
@@ -206,9 +199,8 @@ const RemoveConfirmModal = ({
   );
 };
 
-export const getRemoveLayerAction = (props: RemoveLayerAction): LayerButtonsAction => {
+export const getRemoveLayerAction = (props: RemoveLayerAction): LayerAction => {
   const { ariaLabel, modalTitle, modalDesc } = getButtonCopy(
-    props.layerIndex,
     props.layerType || layerTypes.DATA,
     !!props.activeVisualization.removeLayer,
     props.isOnlyLayer

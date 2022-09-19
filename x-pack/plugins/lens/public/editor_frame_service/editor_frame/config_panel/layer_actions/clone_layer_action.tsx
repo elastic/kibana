@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Visualization } from '../../../..';
-import { LayerButtonsAction } from './types';
+import { LayerAction } from './types';
 
 interface CloneLayerAction {
   execute: () => void;
@@ -15,10 +15,9 @@ interface CloneLayerAction {
   activeVisualization: Visualization;
 }
 
-export const getCloneLayerAction = (props: CloneLayerAction): LayerButtonsAction => {
+export const getCloneLayerAction = (props: CloneLayerAction): LayerAction => {
   const displayName = i18n.translate('xpack.lens.cloneLayerAriaLabel', {
     defaultMessage: 'Duplicate layer',
-    values: { index: props.layerIndex + 1 },
   });
 
   return {
