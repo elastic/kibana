@@ -19,7 +19,7 @@ import { LineStyle } from '@kbn/expression-xy-plugin/common';
 import { idPrefix } from '../dimension_editor';
 
 interface LineStyleConfig {
-  lineStyle?: LineStyle;
+  lineStyle?: Exclude<LineStyle, 'dot-dashed'>;
   lineWidth?: number;
 }
 
@@ -86,7 +86,7 @@ export const LineStyleSettings = ({
               ]}
               idSelected={`${idPrefix}${currentConfig?.lineStyle || 'solid'}`}
               onChange={(id) => {
-                const newMode = id.replace(idPrefix, '') as LineStyle;
+                const newMode = id.replace(idPrefix, '') as Exclude<LineStyle, 'dot-dashed'>;
                 setConfig({ lineStyle: newMode });
               }}
               isIconOnly
