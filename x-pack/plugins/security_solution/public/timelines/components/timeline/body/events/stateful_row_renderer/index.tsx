@@ -59,7 +59,7 @@ export const StatefulRowRenderer = ({
   });
 
   const rowRenderer = useMemo(
-    () => getRowRenderer(event.ecs, rowRenderers),
+    () => getRowRenderer({ data: event.ecs, rowRenderers }),
     [event.ecs, rowRenderers]
   );
 

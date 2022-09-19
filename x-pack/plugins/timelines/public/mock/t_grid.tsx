@@ -142,5 +142,6 @@ export const eventRenderedProps: EventRenderedViewProps = {
   pageSize: 10,
   pageSizeOptions: [10, 25, 50, 100],
   rowRenderers: [],
+  timelineId: TimelineId.detectionsPage,
   totalItemCount: 100,
 };

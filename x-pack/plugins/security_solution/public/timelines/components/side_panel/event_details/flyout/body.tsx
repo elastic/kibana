@@ -9,6 +9,7 @@ import { EuiFlyoutBody } from '@elastic/eui';
 import styled from 'styled-components';
 import React from 'react';
 import { EndpointIsolateSuccess } from '../../../../../common/components/endpoint/host_isolation';
+import type { Ecs } from '../../../../../../common/ecs';
 import { HostIsolationPanel } from '../../../../../detections/components/host_isolation';
 import type {
   BrowserFields,
@@ -35,6 +36,7 @@ interface FlyoutBodyComponentProps {
   alertId: string;
   browserFields: BrowserFields;
   detailsData: TimelineEventsDetailsItem[] | null;
+  detailsEcsData: Ecs | null;
   event: { eventId: string; indexName: string };
   handleIsolationActionSuccess: () => void;
   handleOnEventClosed: HandleOnEventClosed;
@@ -55,6 +57,7 @@ const FlyoutBodyComponent = ({
   alertId,
   browserFields,
   detailsData,
+  detailsEcsData,
   event,
   handleIsolationActionSuccess,
   handleOnEventClosed,
@@ -90,6 +93,7 @@ const FlyoutBodyComponent = ({
         <ExpandableEvent
           browserFields={browserFields}
           detailsData={detailsData}
+          detailsEcsData={detailsEcsData}
           event={event}
           isAlert={isAlert}
           isDraggable={isDraggable}

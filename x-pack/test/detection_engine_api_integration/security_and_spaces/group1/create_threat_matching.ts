@@ -285,7 +285,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_ORIGINAL_EVENT_MODULE]: 'auditd',
           [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
           [ALERT_REASON]:
-            'user-login event by root on zeek-sensor-amsterdam created high alert Query with a rule id.',
+            'user-login event with source 46.101.47.213 by root on zeek-sensor-amsterdam created high alert Query with a rule id.',
           [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
           [ALERT_STATUS]: 'active',
           [ALERT_UUID]: fullSignal[ALERT_UUID],

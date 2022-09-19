@@ -12,7 +12,6 @@ import {
   EuiDataGridControlColumn,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON, ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
@@ -23,6 +22,7 @@ import styled from 'styled-components';
 
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 
+import { Ecs } from '../../../../common/ecs';
 import type { TimelineItem } from '../../../../common/search_strategy';
 import type { RowRenderer } from '../../../../common/types';
 import { RuleName } from '../../rule_name';
@@ -57,12 +57,27 @@ const StyledEuiBasicTable = styled(EuiBasicTable as BasicTableType)`
   & > div:last-child {
     height: 72px;
   }
+
+  & tr:nth-child(even) {
+    background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
+  }
+
+  & tr:nth-child(odd) {
+    background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
+  }
 `;
 
 export interface EventRenderedViewProps {
   alertToolbar: React.ReactNode;
   appId: string;
   events: TimelineItem[];
+  getRowRenderer?: ({
+    data,
+    rowRenderers,
+  }: {
+    data: Ecs;
+    rowRenderers: RowRenderer[];
+  }) => RowRenderer | null;
   leadingControlColumns: EuiDataGridControlColumn[];
   onChangePage: (newActivePage: number) => void;
   onChangeItemsPerPage: (newItemsPerPage: number) => void;
@@ -70,6 +85,7 @@ export interface EventRenderedViewProps {
   pageSize: number;
   pageSizeOptions: number[];
   rowRenderers: RowRenderer[];
+  timelineId: string;
   totalItemCount: number;
 }
 const PreferenceFormattedDateComponent = ({ value }: { value: Date }) => {
@@ -85,6 +101,7 @@ const EventRenderedViewComponent = ({
   alertToolbar,
   appId,
   events,
+  getRowRenderer,
   leadingControlColumns,
   onChangePage,
   onChangeItemsPerPage,
@@ -92,6 +109,7 @@ const EventRenderedViewComponent = ({
   pageSize,
   pageSizeOptions,
   rowRenderers,
+  timelineId,
   totalItemCount,
 }: EventRenderedViewProps) => {
   const ActionTitle = useMemo(
@@ -178,34 +196,35 @@ const EventRenderedViewComponent = ({
         render: (name: unknown, item: TimelineItem) => {
           const ecsData = get(item, 'ecs');
           const reason = get(item, `ecs.signal.reason`) ?? get(item, `ecs.${ALERT_REASON}`);
-          const rowRenderersValid = rowRenderers.filter((rowRenderer) =>
-            rowRenderer.isInstance(ecsData)
-          );
+          const rowRenderer =
+            getRowRenderer != null
+              ? getRowRenderer({ data: ecsData, rowRenderers })
+              : rowRenderers.find((x) => x.isInstance(ecsData)) ?? null;
+
           return (
             <EuiFlexGroup gutterSize="none" direction="column" className="eui-fullWidth">
-              {reason && <EuiFlexItem>{reason}</EuiFlexItem>}
-              {rowRenderersValid.length > 0 &&
-                rowRenderersValid.map((rowRenderer) => (
-                  <>
-                    <EuiHorizontalRule size="half" margin="xs" />
-                    <EventRenderedFlexItem className="eui-xScroll">
-                      <div className="eui-displayInlineBlock">
-                        {rowRenderer.renderRow({
-                          data: ecsData,
-                          isDraggable: false,
-                          timelineId: 'NONE',
-                        })}
-                      </div>
-                    </EventRenderedFlexItem>
-                  </>
-                ))}
+              {rowRenderer != null ? (
+                <EventRenderedFlexItem className="eui-xScroll">
+                  <div className="eui-displayInlineBlock">
+                    {rowRenderer.renderRow({
+                      data: ecsData,
+                      isDraggable: false,
+                      timelineId,
+                    })}
+                  </div>
+                </EventRenderedFlexItem>
+              ) : (
+                <>
+                  {reason && <EuiFlexItem data-test-subj="plain-text-reason">{reason}</EuiFlexItem>}
+                </>
+              )}
             </EuiFlexGroup>
           );
         },
         width: '60%',
       },
     ],
-    [ActionTitle, events, leadingControlColumns, rowRenderers, appId]
+    [ActionTitle, events, leadingControlColumns, appId, getRowRenderer, rowRenderers, timelineId]
   );
 
   const handleTableChange = useCallback(
