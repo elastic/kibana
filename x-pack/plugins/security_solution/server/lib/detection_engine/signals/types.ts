@@ -263,10 +263,6 @@ export interface SearchAfterAndBulkCreateParams {
     from: moment.Moment;
     maxSignals: number;
   };
-  completeRule:
-    | CompleteRule<QueryRuleParams>
-    | CompleteRule<SavedQueryRuleParams>
-    | CompleteRule<ThreatRuleParams>;
   services: RuleServices;
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
