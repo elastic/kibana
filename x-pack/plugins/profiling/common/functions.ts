@@ -5,17 +5,12 @@
  * 2.0.
  */
 import * as t from 'io-ts';
+import { compareFrameGroup, FrameGroup, FrameGroupID } from './frame_group';
 import {
-  compareFrameGroup,
-  createFrameGroup,
-  createFrameGroupID,
-  FrameGroup,
-  FrameGroupID,
-} from './frame_group';
-import {
+  createLazyStackTraceMap,
+  createStackFrameMetadata,
   Executable,
   FileID,
-  groupStackFrameMetadataByStackTrace,
   StackFrame,
   StackFrameID,
   StackFrameMetadata,
@@ -26,6 +21,7 @@ import {
 interface TopNFunctionAndFrameGroup {
   Frame: StackFrameMetadata;
   FrameGroup: FrameGroup;
+  FrameGroupID: FrameGroupID;
   CountExclusive: number;
   CountInclusive: number;
 }
@@ -48,7 +44,7 @@ export function createTopNFunctions(
   startIndex: number,
   endIndex: number
 ): TopNFunctions {
-  const metadata = groupStackFrameMetadataByStackTrace(stackTraces, stackFrames, executables);
+  const lazyStackTraceMap = createLazyStackTraceMap(stackTraces, stackFrames, executables);
 
   // The `count` associated with a frame provides the total number of
   // traces in which that node has appeared at least once. However, a
@@ -59,35 +55,56 @@ export function createTopNFunctions(
   const topNFunctions = new Map<FrameGroupID, TopNFunctionAndFrameGroup>();
 
   // Collect metadata and inclusive + exclusive counts for each distinct frame.
-  for (const [traceHash, count] of events) {
+  for (const [stackTraceID, count] of events) {
     const uniqueFrameGroupsPerEvent = new Set<FrameGroupID>();
 
     totalCount += count;
 
     // It is possible that we do not have a stacktrace for an event,
     // e.g. when stopping the host agent or on network errors.
-    const frames = metadata.get(traceHash) ?? [];
-    for (let i = 0; i < frames.length; i++) {
-      const frameGroup = createFrameGroup(frames[i]);
-      const frameGroupID = createFrameGroupID(frameGroup);
+    const lazyFrames = lazyStackTraceMap.get(stackTraceID) ?? [];
+    const numLazyFrames = lazyFrames.length;
+    for (let i = 0; i < numLazyFrames; i++) {
+      const lazyFrame = lazyFrames[i];
 
-      if (!topNFunctions.has(frameGroupID)) {
-        topNFunctions.set(frameGroupID, {
-          Frame: frames[i],
-          FrameGroup: frameGroup,
+      if (!topNFunctions.has(lazyFrame.FrameGroupID)) {
+        const j = lazyFrame.StackTraceIndex;
+        const stackTrace = stackTraces.get(stackTraceID)!;
+        const frameID = stackTrace.FrameIDs[j];
+        const fileID = stackTrace.FileIDs[j];
+        const addressOrLine = stackTrace.AddressOrLines[j];
+        const frame = stackFrames.get(frameID)!;
+        const executable = executables.get(fileID)!;
+
+        const metadata = createStackFrameMetadata({
+          FrameID: frameID,
+          FileID: fileID,
+          AddressOrLine: addressOrLine,
+          FrameType: stackTrace.Types[j],
+          FunctionName: frame.FunctionName,
+          FunctionOffset: frame.FunctionOffset,
+          SourceLine: frame.LineNumber,
+          SourceFilename: frame.FileName,
+          ExeFileName: executable.FileName,
+        });
+
+        topNFunctions.set(lazyFrame.FrameGroupID, {
+          Frame: metadata,
+          FrameGroup: lazyFrame.FrameGroup,
+          FrameGroupID: lazyFrame.FrameGroupID,
           CountExclusive: 0,
           CountInclusive: 0,
         });
       }
 
-      const topNFunction = topNFunctions.get(frameGroupID)!;
+      const topNFunction = topNFunctions.get(lazyFrame.FrameGroupID)!;
 
-      if (!uniqueFrameGroupsPerEvent.has(frameGroupID)) {
-        uniqueFrameGroupsPerEvent.add(frameGroupID);
+      if (!uniqueFrameGroupsPerEvent.has(lazyFrame.FrameGroupID)) {
+        uniqueFrameGroupsPerEvent.add(lazyFrame.FrameGroupID);
         topNFunction.CountInclusive += count;
       }
 
-      if (i === frames.length - 1) {
+      if (i === numLazyFrames - 1) {
         // Leaf frame: sum up counts for exclusive CPU.
         topNFunction.CountExclusive += count;
       }
@@ -121,7 +138,7 @@ export function createTopNFunctions(
     Frame: frameAndCount.Frame,
     CountExclusive: frameAndCount.CountExclusive,
     CountInclusive: frameAndCount.CountInclusive,
-    Id: createFrameGroupID(frameAndCount.FrameGroup),
+    Id: frameAndCount.FrameGroupID,
   }));
 
   return {

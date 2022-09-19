@@ -6,75 +6,23 @@
  */
 
 import { compareFrameGroup, createFrameGroup, createFrameGroupID } from './frame_group';
-import { createStackFrameMetadata } from './profiling';
 
 const nonSymbolizedFrameGroups = [
-  createFrameGroup(
-    createStackFrameMetadata({
-      FileID: '0x0123456789ABCDEF',
-      AddressOrLine: 102938,
-    })
-  ),
-  createFrameGroup(
-    createStackFrameMetadata({
-      FileID: '0x0123456789ABCDEF',
-      AddressOrLine: 1234,
-    })
-  ),
-  createFrameGroup(
-    createStackFrameMetadata({
-      FileID: '0x0102030405060708',
-      AddressOrLine: 1234,
-    })
-  ),
+  createFrameGroup('0x0123456789ABCDEF', 102938, '', '', ''),
+  createFrameGroup('0x0123456789ABCDEF', 1234, '', '', ''),
+  createFrameGroup('0x0102030405060708', 1234, '', '', ''),
 ];
 
 const elfSymbolizedFrameGroups = [
-  createFrameGroup(
-    createStackFrameMetadata({
-      FileID: '0x0123456789ABCDEF',
-      ExeFileName: 'libc',
-      FunctionName: 'strlen()',
-    })
-  ),
-  createFrameGroup(
-    createStackFrameMetadata({
-      FileID: '0xFEDCBA9876543210',
-      ExeFileName: 'libc',
-      FunctionName: 'strtok()',
-    })
-  ),
-  createFrameGroup(
-    createStackFrameMetadata({
-      FileID: '0xFEDCBA9876543210',
-      ExeFileName: 'myapp',
-      FunctionName: 'main()',
-    })
-  ),
+  createFrameGroup('0x0123456789ABCDEF', 0, 'libc', '', 'strlen()'),
+  createFrameGroup('0xFEDCBA9876543210', 0, 'libc', '', 'strtok()'),
+  createFrameGroup('0xFEDCBA9876543210', 0, 'myapp', '', 'main()'),
 ];
 
 const symbolizedFrameGroups = [
-  createFrameGroup(
-    createStackFrameMetadata({
-      ExeFileName: 'chrome',
-      SourceFilename: 'strlen()',
-      FunctionName: 'strlen()',
-    })
-  ),
-  createFrameGroup(
-    createStackFrameMetadata({
-      ExeFileName: 'dockerd',
-      SourceFilename: 'main()',
-      FunctionName: 'createTask()',
-    })
-  ),
-  createFrameGroup(
-    createStackFrameMetadata({
-      ExeFileName: 'oom_reaper',
-      SourceFilename: 'main()',
-      FunctionName: 'crash()',
-    })
-  ),
+  createFrameGroup('', 0, 'chrome', 'strlen()', 'strlen()'),
+  createFrameGroup('', 0, 'dockerd', 'main()', 'createTask()'),
+  createFrameGroup('', 0, 'oom_reaper', 'main()', 'crash()'),
 ];
 
 describe('Frame group operations', () => {

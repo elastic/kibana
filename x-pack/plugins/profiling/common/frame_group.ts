@@ -47,29 +47,35 @@ export type FrameGroup = EmptyFrameGroup | ElfFrameGroup | FullFrameGroup;
 // For ELF-symbolized frames, group by FunctionName, ExeFileName and FileID.
 // For non-symbolized frames, group by FileID and AddressOrLine.
 // otherwise group by ExeFileName, SourceFilename and FunctionName.
-export function createFrameGroup(frame: StackFrameMetadata): FrameGroup {
-  if (frame.FunctionName === '') {
+export function createFrameGroup(
+  fileID: StackFrameMetadata['FileID'],
+  addressOrLine: StackFrameMetadata['AddressOrLine'],
+  exeFilename: StackFrameMetadata['ExeFileName'],
+  sourceFilename: StackFrameMetadata['SourceFilename'],
+  functionName: StackFrameMetadata['FunctionName']
+): FrameGroup {
+  if (functionName === '') {
     return {
       name: FrameGroupName.EMPTY,
-      fileID: frame.FileID,
-      addressOrLine: frame.AddressOrLine,
+      fileID,
+      addressOrLine,
     } as EmptyFrameGroup;
   }
 
-  if (frame.SourceFilename === '') {
+  if (sourceFilename === '') {
     return {
       name: FrameGroupName.ELF,
-      fileID: frame.FileID,
-      exeFilename: frame.ExeFileName,
-      functionName: frame.FunctionName,
+      fileID,
+      exeFilename,
+      functionName,
     } as ElfFrameGroup;
   }
 
   return {
     name: FrameGroupName.FULL,
-    exeFilename: frame.ExeFileName,
-    functionName: frame.FunctionName,
-    sourceFilename: frame.SourceFilename,
+    exeFilename,
+    functionName,
+    sourceFilename,
   } as FullFrameGroup;
 }
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { createFrameGroup, createFrameGroupID, FrameGroup, FrameGroupID } from './frame_group';
+
 export type StackTraceID = string;
 export type StackFrameID = string;
 export type FileID = string;
@@ -201,19 +203,23 @@ export function getCalleeSource(frame: StackFrameMetadata): string {
   return frame.SourceFilename + (frame.SourceLine !== 0 ? `#${frame.SourceLine}` : '');
 }
 
-// groupStackFrameMetadataByStackTrace collects all of the per-stack-frame
-// metadata for a given set of trace IDs and their respective stack frames.
-//
-// This is similar to GetTraceMetaData in pf-storage-backend/storagebackend/storagebackendv1/reads_webservice.go
-export function groupStackFrameMetadataByStackTrace(
+export interface LazyStackFrameMetadata {
+  FrameGroup: FrameGroup;
+  FrameGroupID: FrameGroupID;
+  StackTraceIndex: number;
+}
+
+// createLazyStackTraceMap collects all of the per-stack-frame metadata for a
+// given set of trace IDs and their respective stack frames.
+export function createLazyStackTraceMap(
   stackTraces: Map<StackTraceID, StackTrace>,
   stackFrames: Map<StackFrameID, StackFrame>,
   executables: Map<FileID, Executable>
-): Map<StackTraceID, StackFrameMetadata[]> {
-  const frameMetadataForTraces = new Map<StackTraceID, StackFrameMetadata[]>();
+): Map<StackTraceID, LazyStackFrameMetadata[]> {
+  const lazyStackTraceMap = new Map<StackTraceID, LazyStackFrameMetadata[]>();
   for (const [stackTraceID, trace] of stackTraces) {
     const numFramesPerTrace = trace.FrameIDs.length;
-    const frameMetadata = new Array<StackFrameMetadata>(numFramesPerTrace);
+    const lazyFrameMetadata = new Array<LazyStackFrameMetadata>(numFramesPerTrace);
     for (let i = 0; i < numFramesPerTrace; i++) {
       const frameID = trace.FrameIDs[i];
       const fileID = trace.FileIDs[i];
@@ -221,21 +227,24 @@ export function groupStackFrameMetadataByStackTrace(
       const frame = stackFrames.get(frameID)!;
       const executable = executables.get(fileID)!;
 
-      const metadata = createStackFrameMetadata({
-        FrameID: frameID,
-        FileID: fileID,
-        AddressOrLine: addressOrLine,
-        FrameType: trace.Types[i],
-        FunctionName: frame.FunctionName,
-        FunctionOffset: frame.FunctionOffset,
-        SourceLine: frame.LineNumber,
-        SourceFilename: frame.FileName,
-        ExeFileName: executable.FileName,
-      });
+      const frameGroup = createFrameGroup(
+        fileID,
+        addressOrLine,
+        frame.FileName,
+        frame.FunctionName,
+        executable.FileName
+      );
+      const frameGroupID = createFrameGroupID(frameGroup);
 
-      frameMetadata[i] = metadata;
+      const metadata: LazyStackFrameMetadata = {
+        FrameGroup: frameGroup,
+        FrameGroupID: frameGroupID,
+        StackTraceIndex: i,
+      };
+
+      lazyFrameMetadata[i] = metadata;
     }
-    frameMetadataForTraces.set(stackTraceID, frameMetadata);
+    lazyStackTraceMap.set(stackTraceID, lazyFrameMetadata);
   }
-  return frameMetadataForTraces;
+  return lazyStackTraceMap;
 }
