@@ -184,7 +184,7 @@ export function telemetryTaskRunner(
                   avg_total_search_duration_per_day: dailyExecutionCounts.avgTotalSearchDuration,
                   avg_total_search_duration_by_type_per_day:
                     dailyExecutionCounts.avgTotalSearchDurationByType,
-                  avg_action_execution_duration_by_connector_type_per_day:
+                  avg_actions_run_duration_by_connector_type_per_day:
                     dailyActionExecutionAggregations.avgRunDurationByConnectorType,
                   count_connector_types_by_action_run_outcome_per_day:
                     dailyActionExecutionAggregations.countRunOutcomeByConnectorType,

@@ -224,7 +224,7 @@ export function createAlertingUsageCollector(
           avg_es_search_duration_by_type_per_day: {},
           avg_total_search_duration_per_day: 0,
           avg_total_search_duration_by_type_per_day: {},
-          avg_actions_run_duration_by_connector_type: {},
+          avg_actions_run_duration_by_connector_type_per_day: {},
           percentile_num_generated_actions_per_day: {
             p50: 0,
             p90: 0,
@@ -310,7 +310,7 @@ export function createAlertingUsageCollector(
       avg_es_search_duration_by_type_per_day: byTypeSchema,
       avg_total_search_duration_per_day: { type: 'long' },
       avg_total_search_duration_by_type_per_day: byTypeSchema,
-      avg_actions_run_duration_by_connector_type: { DYNAMIC_KEY: { type: 'long' } },
+      avg_actions_run_duration_by_connector_type_per_day: { DYNAMIC_KEY: { type: 'long' } },
       percentile_num_generated_actions_per_day: byPercentileSchema,
       percentile_num_generated_actions_by_type_per_day: byPercentileSchemaByType,
       percentile_num_alerts_per_day: byPercentileSchema,

@@ -70,7 +70,7 @@ export interface AlertingUsage {
   avg_es_search_duration_by_type_per_day: Record<string, number>;
   avg_total_search_duration_per_day: number;
   avg_total_search_duration_by_type_per_day: Record<string, number>;
-  avg_actions_run_duration_by_connector_type: Record<string, number>;
+  avg_actions_run_duration_by_connector_type_per_day: Record<string, number>;
   throttle_time: {
     min: string;
     avg: string;

@@ -530,10 +530,10 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       });
 
       expect(
-        telemetry.avg_action_execution_duration_by_connector_type_per_day['test__cumulative-firing']
+        telemetry.avg_actions_run_duration_by_connector_type_per_day['test__cumulative-firing']
       ).to.be.greaterThan(0);
       expect(
-        telemetry.avg_action_execution_duration_by_connector_type_per_day.test__throw
+        telemetry.avg_actions_run_duration_by_connector_type_per_day.test__throw
       ).to.be.greaterThan(0);
 
       expect(
@@ -543,6 +543,9 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       expect(
         telemetry.count_connector_types_by_action_run_outcome_per_day.test__throw.failure
       ).to.greaterThan(0);
+
+      expect(telemetry.count_rules_by_execution_status_per_day.failure).to.greaterThan(0);
+      expect(telemetry.count_rules_by_execution_status_per_day.success).to.greaterThan(0);
 
       expect(telemetry.count_rules_by_execution_status_per_day.failure).to.greaterThan(0);
       expect(telemetry.count_rules_by_execution_status_per_day.success).to.greaterThan(0);
