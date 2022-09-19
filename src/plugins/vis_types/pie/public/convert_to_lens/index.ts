@@ -34,9 +34,14 @@ export const convertToLens: ConvertPieToLensVisualization = async (vis, timefilt
   }
 
   const dataViews = getDataViewsStart();
-  const dataView = vis.data.indexPattern?.id
-    ? await dataViews.get(vis.data.indexPattern.id)
-    : await dataViews.getDefault();
+  let dataView;
+  try {
+    dataView = vis.data.indexPattern?.id
+      ? await dataViews.get(vis.data.indexPattern.id)
+      : await dataViews.getDefault();
+  } catch (err) {
+    return null;
+  }
 
   if (!dataView) {
     return null;
@@ -51,7 +56,7 @@ export const convertToLens: ConvertPieToLensVisualization = async (vis, timefilt
     return null;
   }
 
-  // doesn't suuport more than three split slice levels
+  // doesn't support more than three split slice levels
   // doesn't support pie without at least one split slice
   if (result.buckets.length > 2 || !result.buckets.length) {
     return null;
