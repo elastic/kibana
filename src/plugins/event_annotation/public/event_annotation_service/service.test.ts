@@ -157,6 +157,7 @@ describe('Event Annotation Service', () => {
                 icon: ['triangle'],
                 textVisibility: [false],
                 textField: [],
+                ignoreGlobalFilters: [false],
                 filter: [
                   {
                     chain: [
@@ -264,6 +265,7 @@ describe('Event Annotation Service', () => {
                 icon: ['triangle'],
                 textVisibility: [false],
                 textField: [],
+                ignoreGlobalFilters: [false],
                 filter: [
                   {
                     chain: [
@@ -326,6 +328,7 @@ describe('Event Annotation Service', () => {
                   icon: ['triangle'],
                   textVisibility: [textVisibility],
                   textField: expected ? [expected] : [],
+                  ignoreGlobalFilters: [false],
                   filter: [
                     {
                       chain: [

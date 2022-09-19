@@ -464,6 +464,7 @@ describe('xy_visualization', () => {
                   layerType: layerTypes.ANNOTATIONS,
                   indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation],
+                  ignoreGlobalFilters: true,
                 },
               ],
             },
@@ -475,6 +476,7 @@ describe('xy_visualization', () => {
           layerId: 'annotation',
           layerType: layerTypes.ANNOTATIONS,
           indexPatternId: 'indexPattern1',
+          ignoreGlobalFilters: true,
           annotations: [
             exampleAnnotation,
             {
@@ -502,6 +504,7 @@ describe('xy_visualization', () => {
                   layerType: layerTypes.ANNOTATIONS,
                   indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation2],
+                  ignoreGlobalFilters: true,
                 },
               ],
             },
@@ -525,6 +528,7 @@ describe('xy_visualization', () => {
           layerType: layerTypes.ANNOTATIONS,
           indexPatternId: 'indexPattern1',
           annotations: [exampleAnnotation2, { ...exampleAnnotation2, id: 'newColId' }],
+          ignoreGlobalFilters: true,
         });
       });
       it('should reorder a dimension to a annotation layer', () => {
@@ -539,6 +543,7 @@ describe('xy_visualization', () => {
                   layerType: layerTypes.ANNOTATIONS,
                   indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation, exampleAnnotation2],
+                  ignoreGlobalFilters: true,
                 },
               ],
             },
@@ -563,6 +568,7 @@ describe('xy_visualization', () => {
           layerType: layerTypes.ANNOTATIONS,
           indexPatternId: 'indexPattern1',
           annotations: [exampleAnnotation2, exampleAnnotation],
+          ignoreGlobalFilters: true,
         });
       });
 
@@ -578,12 +584,14 @@ describe('xy_visualization', () => {
                   layerType: layerTypes.ANNOTATIONS,
                   indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation],
+                  ignoreGlobalFilters: true,
                 },
                 {
                   layerId: 'second',
                   layerType: layerTypes.ANNOTATIONS,
                   indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation2],
+                  ignoreGlobalFilters: true,
                 },
               ],
             },
@@ -609,12 +617,14 @@ describe('xy_visualization', () => {
             layerType: layerTypes.ANNOTATIONS,
             indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation],
+            ignoreGlobalFilters: true,
           },
           {
             layerId: 'second',
             layerType: layerTypes.ANNOTATIONS,
             indexPatternId: 'indexPattern1',
             annotations: [{ ...exampleAnnotation, id: 'an2' }],
+            ignoreGlobalFilters: true,
           },
         ]);
       });
@@ -630,12 +640,14 @@ describe('xy_visualization', () => {
                   layerType: layerTypes.ANNOTATIONS,
                   indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation],
+                  ignoreGlobalFilters: true,
                 },
                 {
                   layerId: 'second',
                   layerType: layerTypes.ANNOTATIONS,
                   indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation2],
+                  ignoreGlobalFilters: true,
                 },
               ],
             },
@@ -661,12 +673,14 @@ describe('xy_visualization', () => {
             layerType: layerTypes.ANNOTATIONS,
             indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation2],
+            ignoreGlobalFilters: true,
           },
           {
             layerId: 'second',
             layerType: layerTypes.ANNOTATIONS,
             indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation],
+            ignoreGlobalFilters: true,
           },
         ]);
       });
@@ -682,12 +696,14 @@ describe('xy_visualization', () => {
                   layerType: layerTypes.ANNOTATIONS,
                   indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation],
+                  ignoreGlobalFilters: true,
                 },
                 {
                   layerId: 'second',
                   layerType: layerTypes.ANNOTATIONS,
                   indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation2],
+                  ignoreGlobalFilters: true,
                 },
               ],
             },
@@ -713,12 +729,14 @@ describe('xy_visualization', () => {
             layerType: layerTypes.ANNOTATIONS,
             indexPatternId: 'indexPattern1',
             annotations: [],
+            ignoreGlobalFilters: true,
           },
           {
             layerId: 'second',
             layerType: layerTypes.ANNOTATIONS,
             indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation],
+            ignoreGlobalFilters: true,
           },
         ]);
       });
@@ -734,12 +752,14 @@ describe('xy_visualization', () => {
                   layerType: layerTypes.ANNOTATIONS,
                   indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation],
+                  ignoreGlobalFilters: true,
                 },
                 {
                   layerId: 'second',
                   layerType: layerTypes.ANNOTATIONS,
                   indexPatternId: 'indexPattern1',
                   annotations: [],
+                  ignoreGlobalFilters: true,
                 },
               ],
             },
@@ -765,12 +785,14 @@ describe('xy_visualization', () => {
             layerType: layerTypes.ANNOTATIONS,
             indexPatternId: 'indexPattern1',
             annotations: [],
+            ignoreGlobalFilters: true,
           },
           {
             layerId: 'second',
             layerType: layerTypes.ANNOTATIONS,
             indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation],
+            ignoreGlobalFilters: true,
           },
         ]);
       });
@@ -851,6 +873,7 @@ describe('xy_visualization', () => {
                 layerType: layerTypes.ANNOTATIONS,
                 indexPatternId: 'indexPattern1',
                 annotations: [exampleAnnotation, { ...exampleAnnotation, id: 'an2' }],
+                ignoreGlobalFilters: true,
               },
             ],
           },
@@ -870,6 +893,7 @@ describe('xy_visualization', () => {
           layerType: layerTypes.ANNOTATIONS,
           indexPatternId: 'indexPattern1',
           annotations: [exampleAnnotation],
+          ignoreGlobalFilters: true,
         },
       ]);
     });
@@ -1590,6 +1614,7 @@ describe('xy_visualization', () => {
               layerType: layerTypes.ANNOTATIONS,
               indexPatternId: 'indexPattern1',
               annotations: [exampleAnnotation],
+              ignoreGlobalFilters: true,
             },
           ],
         };
@@ -2407,6 +2432,7 @@ describe('xy_visualization', () => {
                 layerId: 'annotation',
                 layerType: layerTypes.ANNOTATIONS,
                 annotations: [exampleAnnotation2],
+                ignoreGlobalFilters: true,
               },
             ],
           },
@@ -2427,6 +2453,7 @@ describe('xy_visualization', () => {
             layerType: layerTypes.ANNOTATIONS,
             indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation2],
+            ignoreGlobalFilters: true,
           },
         ],
       });
@@ -2444,6 +2471,7 @@ describe('xy_visualization', () => {
                 layerId: 'annotation',
                 layerType: layerTypes.ANNOTATIONS,
                 annotations: [exampleAnnotation2],
+                ignoreGlobalFilters: true,
               },
             ],
           },
@@ -2464,6 +2492,7 @@ describe('xy_visualization', () => {
             layerType: layerTypes.ANNOTATIONS,
             indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation2],
+            ignoreGlobalFilters: true,
           },
         ],
       });

@@ -55,6 +55,7 @@ describe('AnnotationsPanel', () => {
           layerId: 'annotation',
           indexPatternId: 'indexPattern1',
           annotations: [customLineStaticAnnotation],
+          ignoreGlobalFilters: true,
         },
       ],
     };
@@ -129,6 +130,7 @@ describe('AnnotationsPanel', () => {
         layerId: 'annotation',
         layerType: 'annotations',
         indexPatternId: 'indexPattern1',
+        ignoreGlobalFilters: true,
       };
       const component = mount(
         <AnnotationsPanel
@@ -207,6 +209,7 @@ describe('AnnotationsPanel', () => {
             indexPatternId: 'indexPattern1',
             layerId: 'annotation',
             layerType: 'annotations',
+            ignoreGlobalFilters: true,
           },
         ],
       });
@@ -231,6 +234,7 @@ describe('AnnotationsPanel', () => {
             indexPatternId: 'indexPattern1',
             layerId: 'annotation',
             layerType: 'annotations',
+            ignoreGlobalFilters: true,
           },
         ],
       });
@@ -260,6 +264,7 @@ describe('AnnotationsPanel', () => {
         layerId: 'annotation',
         layerType: 'annotations',
         indexPatternId: indexPattern.id,
+        ignoreGlobalFilters: true,
       };
       const frameMock = createMockFramePublicAPI({
         datasourceLayers: {},

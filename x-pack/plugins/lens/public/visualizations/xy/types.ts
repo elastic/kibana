@@ -119,6 +119,7 @@ export interface XYAnnotationLayerConfig {
   hide?: boolean;
   indexPatternId: string;
   simpleView?: boolean;
+  ignoreGlobalFilters: boolean;
 }
 
 export type XYLayerConfig =

@@ -17803,7 +17803,6 @@
     "xpack.lens.xyChart.addLayerTooltip": "使用多个图层以组合可视化类型或可视化不同的数据视图。",
     "xpack.lens.xyChart.addReferenceLineLayerLabel": "参考线",
     "xpack.lens.xyChart.addReferenceLineLayerLabelDisabledHelp": "添加一些数据以启用参考图层",
-    "xpack.lens.xyChart.annotation.name": "隐藏标注",
     "xpack.lens.xyChart.annotationDate": "标注日期",
     "xpack.lens.xyChart.annotationDate.from": "自",
     "xpack.lens.xyChart.annotationDate.to": "至",

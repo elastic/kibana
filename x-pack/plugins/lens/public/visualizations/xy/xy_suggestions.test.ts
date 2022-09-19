@@ -550,6 +550,7 @@ describe('xy_suggestions', () => {
       layerId: 'second',
       layerType: layerTypes.ANNOTATIONS,
       indexPatternId: 'indexPattern1',
+      ignoreGlobalFilters: true,
       annotations: [
         {
           id: '1',
