@@ -19,7 +19,7 @@ import type {
 import type { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
-import { defaultIngestErrorHandler } from '../../errors';
+import { defaultFleetErrorHandler } from '../../errors';
 import { isAgentUpgradeable } from '../../../common/services';
 import { getMaxVersion } from '../../../common/services/get_min_max_version';
 import { getAgentById } from '../../services/agents';
@@ -78,7 +78,7 @@ export const postAgentUpgradeHandler: RequestHandler<
     const body: PostAgentUpgradeResponse = {};
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -135,7 +135,7 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
 
     return response.ok({ body: { ...body, actionId: results.actionId } });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -148,7 +148,7 @@ export const getCurrentUpgradesHandler: RequestHandler = async (context, request
     const body: GetCurrentUpgradesResponse = { items: upgrades };
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 

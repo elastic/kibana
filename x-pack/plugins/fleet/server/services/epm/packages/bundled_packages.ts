@@ -9,7 +9,7 @@ import fs from 'fs/promises';
 import path from 'path';
 
 import type { BundledPackage } from '../../../types';
-import { IngestManagerError } from '../../../errors';
+import { FleetError } from '../../../errors';
 import { appContextService } from '../../app_context';
 import { splitPkgKey } from '../registry';
 
@@ -19,7 +19,7 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
   const bundledPackageLocation = config?.developer?.bundledPackageLocation;
 
   if (!bundledPackageLocation) {
-    throw new IngestManagerError('xpack.fleet.developer.bundledPackageLocation is not configured');
+    throw new FleetError('xpack.fleet.developer.bundledPackageLocation is not configured');
   }
 
   try {

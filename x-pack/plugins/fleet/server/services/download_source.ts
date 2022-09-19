@@ -13,7 +13,7 @@ import {
 } from '../constants';
 
 import type { DownloadSource, DownloadSourceAttributes, DownloadSourceBase } from '../types';
-import { DownloadSourceError, IngestManagerError } from '../errors';
+import { DownloadSourceError, FleetError } from '../errors';
 import { SO_SEARCH_LIMIT } from '../../common';
 
 import { agentPolicyService } from './agent_policy';
@@ -199,7 +199,7 @@ class DownloadSourceService {
           ? `Download Source '${idsWithName[0]}' already exists`
           : `Download Sources '${idsWithName.join(',')}' already exist`;
 
-        throw new IngestManagerError(`${existClause} with name '${downloadSource.name}'`);
+        throw new FleetError(`${existClause} with name '${downloadSource.name}'`);
       }
     }
   }

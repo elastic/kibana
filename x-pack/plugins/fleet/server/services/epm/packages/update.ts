@@ -12,7 +12,7 @@ import type { ExperimentalIndexingFeature } from '../../../../common/types';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type { Installation, UpdatePackageRequestSchema } from '../../../types';
-import { IngestManagerError } from '../../../errors';
+import { FleetError } from '../../../errors';
 
 import { getInstallationObject, getPackageInfo } from './get';
 
@@ -27,7 +27,7 @@ export async function updatePackage(
   const installedPackage = await getInstallationObject({ savedObjectsClient, pkgName });
 
   if (!installedPackage) {
-    throw new IngestManagerError(`package ${pkgName} is not installed`);
+    throw new FleetError(`package ${pkgName} is not installed`);
   }
 
   await savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, installedPackage.id, {
