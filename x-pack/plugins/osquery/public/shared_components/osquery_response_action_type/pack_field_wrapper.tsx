@@ -10,13 +10,21 @@ import type { ReactElement } from 'react';
 import React, { useMemo } from 'react';
 import { find } from 'lodash';
 import { useWatch } from 'react-hook-form';
+import type { EcsMappingFormField } from '../../packs/queries/ecs_mapping_editor_field';
 import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
 import { usePacks } from '../../packs/use_packs';
 import { PacksComboBoxField } from '../../live_queries/form/packs_combobox_field';
-import type { LiveQueryDetailsItem } from '../../actions/use_live_query_details';
 
 interface PackFieldWrapperProps {
-  liveQueryDetails?: LiveQueryDetailsItem;
+  liveQueryDetails?: {
+    queries?: Array<{
+      id: string;
+      query: string;
+      ecs_mapping?: EcsMappingFormField[];
+    }>;
+    action_id?: string;
+    agents?: string[];
+  };
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
   submitButtonContent?: React.ReactNode;
   addToCase?: ({ actionId }: { actionId?: string }) => ReactElement;
@@ -59,7 +67,6 @@ export const PackFieldWrapper = ({
             <PackQueriesStatusTable
               actionId={actionId}
               agentIds={agentIds}
-              // @ts-expect-error version string !+ string[]
               data={liveQueryDetails?.queries ?? selectedPackData?.attributes?.queries}
               addToTimeline={addToTimeline}
               addToCase={addToCase}

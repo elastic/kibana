@@ -184,6 +184,15 @@ const OsqueryResponseActionParamsFormComponent: React.ForwardRefExoticComponent<
     [permissions]
   );
 
+  const queryDetails = useMemo(
+    () => ({
+      queries: watchedValues.queries,
+      action_id: watchedValues.id,
+      agents: [],
+    }),
+    [watchedValues.id, watchedValues.queries]
+  );
+
   return (
     <>
       <FormProvider {...hooksForm}>
@@ -196,7 +205,11 @@ const OsqueryResponseActionParamsFormComponent: React.ForwardRefExoticComponent<
         />
         <EuiSpacer size="m" />
         {queryType === 'query' && <LiveQueryQueryField />}
-        {queryType === 'pack' && <PackFieldWrapper />}
+        {queryType === 'pack' && (
+          <PackFieldWrapper
+            liveQueryDetails={watchedValues.queries && !packData ? queryDetails : undefined}
+          />
+        )}
       </FormProvider>
     </>
   );
