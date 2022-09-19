@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`metrics optimizeEsAggs should collapse aggs with matching parameters 1`] = `
+exports[`metrics optimizeEsAggs should collapse aggs with matching parameters 2`] = `
 Array [
   Object {
     "findFunction": [Function],
@@ -177,47 +177,533 @@ Array [
 ]
 `;
 
-exports[`metrics optimizeEsAggs should collapse aggs with matching parameters 2`] = `
-Object {
-  "col-0-0": Array [
-    Object {
-      "id": "original-0",
-    },
-    Object {
-      "id": "original-1",
-    },
-  ],
-  "col-2-2": Array [
-    Object {
-      "id": "original-2",
-    },
-    Object {
-      "id": "original-3",
-    },
-  ],
-  "col-4-4": Array [
-    Object {
-      "id": "original-4",
-    },
-    Object {
-      "id": "original-5",
-    },
-  ],
-  "col-6-6": Array [
-    Object {
-      "id": "original-6",
-    },
-    Object {
-      "id": "original-7",
-    },
-  ],
-  "col-8-8": Array [
-    Object {
-      "id": "original-8",
-    },
-    Object {
-      "id": "original-9",
-    },
-  ],
-}
+exports[`metrics optimizeEsAggs should collapse filtered aggs with matching parameters 2`] = `
+Array [
+  Object {
+    "findFunction": [Function],
+    "functions": Array [
+      Object {
+        "addArgument": [Function],
+        "arguments": Object {
+          "emptyAsNull": Array [
+            false,
+          ],
+          "enabled": Array [
+            true,
+          ],
+          "field": Array [
+            "bytes",
+          ],
+          "id": Array [
+            "0",
+          ],
+          "schema": Array [
+            "metric",
+          ],
+        },
+        "getArgument": [Function],
+        "name": "aggSum",
+        "removeArgument": [Function],
+        "replaceArgument": [Function],
+        "toAst": [Function],
+        "toString": [Function],
+        "type": "expression_function_builder",
+      },
+    ],
+    "toAst": [Function],
+    "toString": [Function],
+    "type": "expression_builder",
+  },
+  Object {
+    "findFunction": [Function],
+    "functions": Array [
+      Object {
+        "addArgument": [Function],
+        "arguments": Object {
+          "customBucket": Array [
+            Object {
+              "findFunction": [Function],
+              "functions": Array [
+                Object {
+                  "addArgument": [Function],
+                  "arguments": Object {
+                    "enabled": Array [
+                      true,
+                    ],
+                    "filter": Array [
+                      Object {
+                        "findFunction": [Function],
+                        "functions": Array [
+                          Object {
+                            "addArgument": [Function],
+                            "arguments": Object {
+                              "q": Array [
+                                "geo.dest: \\"GA\\" ",
+                              ],
+                            },
+                            "getArgument": [Function],
+                            "name": "kql",
+                            "removeArgument": [Function],
+                            "replaceArgument": [Function],
+                            "toAst": [Function],
+                            "toString": [Function],
+                            "type": "expression_function_builder",
+                          },
+                        ],
+                        "toAst": [Function],
+                        "toString": [Function],
+                        "type": "expression_builder",
+                      },
+                    ],
+                    "id": Array [
+                      "2-filter",
+                    ],
+                    "schema": Array [
+                      "bucket",
+                    ],
+                  },
+                  "getArgument": [Function],
+                  "name": "aggFilter",
+                  "removeArgument": [Function],
+                  "replaceArgument": [Function],
+                  "toAst": [Function],
+                  "toString": [Function],
+                  "type": "expression_function_builder",
+                },
+              ],
+              "toAst": [Function],
+              "toString": [Function],
+              "type": "expression_builder",
+            },
+          ],
+          "customMetric": Array [
+            Object {
+              "findFunction": [Function],
+              "functions": Array [
+                Object {
+                  "addArgument": [Function],
+                  "arguments": Object {
+                    "emptyAsNull": Array [
+                      false,
+                    ],
+                    "enabled": Array [
+                      true,
+                    ],
+                    "field": Array [
+                      "bytes",
+                    ],
+                    "id": Array [
+                      "2-metric",
+                    ],
+                    "schema": Array [
+                      "metric",
+                    ],
+                  },
+                  "getArgument": [Function],
+                  "name": "aggSum",
+                  "removeArgument": [Function],
+                  "replaceArgument": [Function],
+                  "toAst": [Function],
+                  "toString": [Function],
+                  "type": "expression_function_builder",
+                },
+              ],
+              "toAst": [Function],
+              "toString": [Function],
+              "type": "expression_builder",
+            },
+          ],
+          "enabled": Array [
+            true,
+          ],
+          "id": Array [
+            "2",
+          ],
+          "schema": Array [
+            "metric",
+          ],
+        },
+        "getArgument": [Function],
+        "name": "aggFilteredMetric",
+        "removeArgument": [Function],
+        "replaceArgument": [Function],
+        "toAst": [Function],
+        "toString": [Function],
+        "type": "expression_function_builder",
+      },
+    ],
+    "toAst": [Function],
+    "toString": [Function],
+    "type": "expression_builder",
+  },
+  Object {
+    "findFunction": [Function],
+    "functions": Array [
+      Object {
+        "addArgument": [Function],
+        "arguments": Object {
+          "customBucket": Array [
+            Object {
+              "findFunction": [Function],
+              "functions": Array [
+                Object {
+                  "addArgument": [Function],
+                  "arguments": Object {
+                    "enabled": Array [
+                      true,
+                    ],
+                    "filter": Array [
+                      Object {
+                        "findFunction": [Function],
+                        "functions": Array [
+                          Object {
+                            "addArgument": [Function],
+                            "arguments": Object {
+                              "q": Array [
+                                "geo.dest: \\"AL\\" ",
+                              ],
+                            },
+                            "getArgument": [Function],
+                            "name": "kql",
+                            "removeArgument": [Function],
+                            "replaceArgument": [Function],
+                            "toAst": [Function],
+                            "toString": [Function],
+                            "type": "expression_function_builder",
+                          },
+                        ],
+                        "toAst": [Function],
+                        "toString": [Function],
+                        "type": "expression_builder",
+                      },
+                    ],
+                    "id": Array [
+                      "4-filter",
+                    ],
+                    "schema": Array [
+                      "bucket",
+                    ],
+                  },
+                  "getArgument": [Function],
+                  "name": "aggFilter",
+                  "removeArgument": [Function],
+                  "replaceArgument": [Function],
+                  "toAst": [Function],
+                  "toString": [Function],
+                  "type": "expression_function_builder",
+                },
+              ],
+              "toAst": [Function],
+              "toString": [Function],
+              "type": "expression_builder",
+            },
+          ],
+          "customMetric": Array [
+            Object {
+              "findFunction": [Function],
+              "functions": Array [
+                Object {
+                  "addArgument": [Function],
+                  "arguments": Object {
+                    "emptyAsNull": Array [
+                      false,
+                    ],
+                    "enabled": Array [
+                      true,
+                    ],
+                    "field": Array [
+                      "bytes",
+                    ],
+                    "id": Array [
+                      "4-metric",
+                    ],
+                    "schema": Array [
+                      "metric",
+                    ],
+                  },
+                  "getArgument": [Function],
+                  "name": "aggSum",
+                  "removeArgument": [Function],
+                  "replaceArgument": [Function],
+                  "toAst": [Function],
+                  "toString": [Function],
+                  "type": "expression_function_builder",
+                },
+              ],
+              "toAst": [Function],
+              "toString": [Function],
+              "type": "expression_builder",
+            },
+          ],
+          "enabled": Array [
+            true,
+          ],
+          "id": Array [
+            "4",
+          ],
+          "schema": Array [
+            "metric",
+          ],
+        },
+        "getArgument": [Function],
+        "name": "aggFilteredMetric",
+        "removeArgument": [Function],
+        "replaceArgument": [Function],
+        "toAst": [Function],
+        "toString": [Function],
+        "type": "expression_function_builder",
+      },
+    ],
+    "toAst": [Function],
+    "toString": [Function],
+    "type": "expression_builder",
+  },
+  Object {
+    "findFunction": [Function],
+    "functions": Array [
+      Object {
+        "addArgument": [Function],
+        "arguments": Object {
+          "customBucket": Array [
+            Object {
+              "findFunction": [Function],
+              "functions": Array [
+                Object {
+                  "addArgument": [Function],
+                  "arguments": Object {
+                    "enabled": Array [
+                      true,
+                    ],
+                    "filter": Array [
+                      Object {
+                        "findFunction": [Function],
+                        "functions": Array [
+                          Object {
+                            "addArgument": [Function],
+                            "arguments": Object {
+                              "q": Array [
+                                "\\"geo.dest: \\\\\\"AL\\\\\\" \\"",
+                              ],
+                            },
+                            "getArgument": [Function],
+                            "name": "lucene",
+                            "removeArgument": [Function],
+                            "replaceArgument": [Function],
+                            "toAst": [Function],
+                            "toString": [Function],
+                            "type": "expression_function_builder",
+                          },
+                        ],
+                        "toAst": [Function],
+                        "toString": [Function],
+                        "type": "expression_builder",
+                      },
+                    ],
+                    "id": Array [
+                      "6-filter",
+                    ],
+                    "schema": Array [
+                      "bucket",
+                    ],
+                  },
+                  "getArgument": [Function],
+                  "name": "aggFilter",
+                  "removeArgument": [Function],
+                  "replaceArgument": [Function],
+                  "toAst": [Function],
+                  "toString": [Function],
+                  "type": "expression_function_builder",
+                },
+              ],
+              "toAst": [Function],
+              "toString": [Function],
+              "type": "expression_builder",
+            },
+          ],
+          "customMetric": Array [
+            Object {
+              "findFunction": [Function],
+              "functions": Array [
+                Object {
+                  "addArgument": [Function],
+                  "arguments": Object {
+                    "emptyAsNull": Array [
+                      false,
+                    ],
+                    "enabled": Array [
+                      true,
+                    ],
+                    "field": Array [
+                      "bytes",
+                    ],
+                    "id": Array [
+                      "6-metric",
+                    ],
+                    "schema": Array [
+                      "metric",
+                    ],
+                  },
+                  "getArgument": [Function],
+                  "name": "aggSum",
+                  "removeArgument": [Function],
+                  "replaceArgument": [Function],
+                  "toAst": [Function],
+                  "toString": [Function],
+                  "type": "expression_function_builder",
+                },
+              ],
+              "toAst": [Function],
+              "toString": [Function],
+              "type": "expression_builder",
+            },
+          ],
+          "enabled": Array [
+            true,
+          ],
+          "id": Array [
+            "6",
+          ],
+          "schema": Array [
+            "metric",
+          ],
+        },
+        "getArgument": [Function],
+        "name": "aggFilteredMetric",
+        "removeArgument": [Function],
+        "replaceArgument": [Function],
+        "toAst": [Function],
+        "toString": [Function],
+        "type": "expression_function_builder",
+      },
+    ],
+    "toAst": [Function],
+    "toString": [Function],
+    "type": "expression_builder",
+  },
+  Object {
+    "findFunction": [Function],
+    "functions": Array [
+      Object {
+        "addArgument": [Function],
+        "arguments": Object {
+          "customBucket": Array [
+            Object {
+              "findFunction": [Function],
+              "functions": Array [
+                Object {
+                  "addArgument": [Function],
+                  "arguments": Object {
+                    "enabled": Array [
+                      true,
+                    ],
+                    "filter": Array [
+                      Object {
+                        "findFunction": [Function],
+                        "functions": Array [
+                          Object {
+                            "addArgument": [Function],
+                            "arguments": Object {
+                              "q": Array [
+                                "geo.dest: \\"AL\\" ",
+                              ],
+                            },
+                            "getArgument": [Function],
+                            "name": "kql",
+                            "removeArgument": [Function],
+                            "replaceArgument": [Function],
+                            "toAst": [Function],
+                            "toString": [Function],
+                            "type": "expression_function_builder",
+                          },
+                        ],
+                        "toAst": [Function],
+                        "toString": [Function],
+                        "type": "expression_builder",
+                      },
+                    ],
+                    "id": Array [
+                      "8-filter",
+                    ],
+                    "schema": Array [
+                      "bucket",
+                    ],
+                    "timeWindow": Array [
+                      "1m",
+                    ],
+                  },
+                  "getArgument": [Function],
+                  "name": "aggFilter",
+                  "removeArgument": [Function],
+                  "replaceArgument": [Function],
+                  "toAst": [Function],
+                  "toString": [Function],
+                  "type": "expression_function_builder",
+                },
+              ],
+              "toAst": [Function],
+              "toString": [Function],
+              "type": "expression_builder",
+            },
+          ],
+          "customMetric": Array [
+            Object {
+              "findFunction": [Function],
+              "functions": Array [
+                Object {
+                  "addArgument": [Function],
+                  "arguments": Object {
+                    "emptyAsNull": Array [
+                      false,
+                    ],
+                    "enabled": Array [
+                      true,
+                    ],
+                    "field": Array [
+                      "bytes",
+                    ],
+                    "id": Array [
+                      "8-metric",
+                    ],
+                    "schema": Array [
+                      "metric",
+                    ],
+                  },
+                  "getArgument": [Function],
+                  "name": "aggSum",
+                  "removeArgument": [Function],
+                  "replaceArgument": [Function],
+                  "toAst": [Function],
+                  "toString": [Function],
+                  "type": "expression_function_builder",
+                },
+              ],
+              "toAst": [Function],
+              "toString": [Function],
+              "type": "expression_builder",
+            },
+          ],
+          "enabled": Array [
+            true,
+          ],
+          "id": Array [
+            "8",
+          ],
+          "schema": Array [
+            "metric",
+          ],
+        },
+        "getArgument": [Function],
+        "name": "aggFilteredMetric",
+        "removeArgument": [Function],
+        "replaceArgument": [Function],
+        "toAst": [Function],
+        "toString": [Function],
+        "type": "expression_function_builder",
+      },
+    ],
+    "toAst": [Function],
+    "toString": [Function],
+    "type": "expression_builder",
+  },
+]
 `;
