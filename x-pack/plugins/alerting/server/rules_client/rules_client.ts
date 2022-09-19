@@ -2214,7 +2214,7 @@ export class RulesClient {
       });
     } else {
       // Task exists so set enabled to true
-      await this.taskManager.bulkEnableDisable([attributes.scheduledTaskId!], true);
+      await this.taskManager.bulkEnable([attributes.scheduledTaskId!]);
     }
   }
 
@@ -2362,7 +2362,7 @@ export class RulesClient {
         if (attributes.scheduledTaskId !== id) {
           await this.taskManager.removeIfExists(attributes.scheduledTaskId);
         } else {
-          await this.taskManager.bulkEnableDisable([attributes.scheduledTaskId], false);
+          await this.taskManager.bulkDisable([attributes.scheduledTaskId]);
         }
       }
     }
