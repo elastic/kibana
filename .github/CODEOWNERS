@@ -579,10 +579,10 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 
 
 # Security Asset Management
+/x-pack/plugins/osquery @elastic/security-asset-management
 /x-pack/plugins/security_solution/common/detection_engine/rule_response_actions @elastic/security-asset-management
 /x-pack/plugins/security_solution/public/detections/components/rule_response_actions @elastic/security-asset-management
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_response_actions @elastic/security-asset-management
-/x-pack/plugins/osquery @elastic/security-asset-management
 
 # Cloud Security Posture
 /x-pack/plugins/cloud_security_posture/ @elastic/kibana-cloud-security-posture
