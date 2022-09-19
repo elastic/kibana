@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { v4 as uuidV4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import {
   SavedObject,
@@ -11,7 +12,7 @@ import {
   KibanaRequest,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
-import { v4 as uuidV4 } from 'uuid';
+import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import {
   ConfigKey,
@@ -19,9 +20,13 @@ import {
   SyntheticsMonitor,
   EncryptedSyntheticsMonitor,
 } from '../../../common/runtime_types';
+import { formatKibanaNamespace } from '../../../common/formatters';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
-import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
+import {
+  DEFAULT_FIELDS,
+  DEFAULT_NAMESPACE_STRING,
+} from '../../../common/constants/monitor_defaults';
 import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { validateMonitor } from './monitor_validation';
 import { sendTelemetryEvents, formatTelemetryEvent } from '../telemetry/monitor_upgrade_sender';
@@ -36,6 +41,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     body: schema.any(),
     query: schema.object({
       id: schema.maybe(schema.string()),
+      preserve_namespace: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({
@@ -85,6 +91,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
       return response.ok({ body: newMonitor });
     } catch (getErr) {
+      server.logger.error(getErr);
       if (SavedObjectsErrorHelpers.isForbiddenError(getErr)) {
         return response.forbidden({ body: getErr });
       }
@@ -139,18 +146,28 @@ export const syncNewMonitor = async ({
   request: KibanaRequest;
 }) => {
   const newMonitorId = id ?? uuidV4();
+  const { preserve_namespace: preserveNamespace } = request.query as Record<
+    string,
+    { preserve_namespace?: boolean }
+  >;
 
   let monitorSavedObject: SavedObject<EncryptedSyntheticsMonitor> | null = null;
+  const monitorWithNamespace = {
+    ...normalizedMonitor,
+    [ConfigKey.NAMESPACE]: preserveNamespace
+      ? normalizedMonitor[ConfigKey.NAMESPACE]
+      : getMonitorNamespace(server, request, normalizedMonitor[ConfigKey.NAMESPACE]),
+  };
 
   try {
     const newMonitorPromise = createNewSavedObjectMonitor({
-      normalizedMonitor,
+      normalizedMonitor: monitorWithNamespace,
       id: newMonitorId,
       savedObjectsClient,
     });
 
     const syncErrorsPromise = syntheticsMonitorClient.addMonitor(
-      monitor as MonitorFields,
+      monitorWithNamespace as MonitorFields,
       newMonitorId,
       request,
       savedObjectsClient
@@ -185,7 +202,24 @@ export const syncNewMonitor = async ({
         request,
       });
     }
+    server.logger.error(e);
 
     throw e;
   }
+};
+
+export const getMonitorNamespace = (
+  server: UptimeServerSetup,
+  request: KibanaRequest,
+  configuredNamespace: string
+) => {
+  const spaceId = server.spaces.spacesService.getSpaceId(request);
+  const kibanaNamespace = formatKibanaNamespace(spaceId);
+  const namespace =
+    configuredNamespace === DEFAULT_NAMESPACE_STRING ? kibanaNamespace : configuredNamespace;
+  const { error } = isValidNamespace(namespace);
+  if (error) {
+    throw new Error(`Cannot save monitor. Monitor namespace is invalid: ${error}`);
+  }
+  return namespace;
 };

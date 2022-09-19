@@ -21,10 +21,10 @@ import type { DataView } from '@kbn/data-views-plugin/common';
  * @deprecated
  * @removeBy 8.8.0
  */
-export interface SavedObject {
+export interface SavedObject<T extends SavedObjectAttributes = SavedObjectAttributes> {
   _serialize: () => { attributes: SavedObjectAttributes; references: SavedObjectReference[] };
   _source: Record<string, unknown>;
-  applyESResp: (resp: EsResponse) => Promise<SavedObject>;
+  applyESResp: (resp: EsResponse) => Promise<SavedObject<T>>;
   copyOnSave: boolean;
   creationOpts: (opts: SavedObjectCreationOpts) => Record<string, unknown>;
   defaults: any;
@@ -35,7 +35,7 @@ export interface SavedObject {
   getFullPath: () => string;
   hydrateIndexPattern?: (id?: string) => Promise<null | DataView>;
   id?: string;
-  init?: () => Promise<SavedObject>;
+  init?: () => Promise<SavedObject<T>>;
   isSaving: boolean;
   isTitleChanged: () => boolean;
   lastSavedTitle: string;
