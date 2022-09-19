@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Direction, EuiBasicTableProps, Pagination, PropertySort } from '@elastic/eui';
+import { Direction, EuiBasicTableProps, Pagination } from '@elastic/eui';
 import { useCallback, useMemo } from 'react';
 import { ListingPageUrlState } from '../../../../../../../common/types/common';
 
@@ -33,11 +33,16 @@ export interface CriteriaWithPagination<T> extends Criteria<T> {
 interface UseTableSettingsReturnValue<T> {
   onTableChange: EuiBasicTableProps<T>['onChange'];
   pagination: Pagination;
-  sorting: { sort: PropertySort };
+  sorting: {
+    sort: {
+      field: keyof T;
+      direction: 'asc' | 'desc';
+    };
+  };
 }
 
 export function useTableSettings<TypeOfItem>(
-  items: TypeOfItem[],
+  totalItemCount: number,
   pageState: ListingPageUrlState,
   updatePageState: (update: Partial<ListingPageUrlState>) => void
 ): UseTableSettingsReturnValue<TypeOfItem> {
@@ -45,10 +50,15 @@ export function useTableSettings<TypeOfItem>(
 
   const onTableChange: EuiBasicTableProps<TypeOfItem>['onChange'] = useCallback(
     ({ page, sort }: CriteriaWithPagination<TypeOfItem>) => {
+      let resultSortField = sort?.field;
+      if (typeof resultSortField !== 'string') {
+        resultSortField = pageState.sortField as keyof TypeOfItem;
+      }
+
       const result = {
         pageIndex: page?.index ?? pageState.pageIndex,
         pageSize: page?.size ?? pageState.pageSize,
-        sortField: (sort?.field as string) ?? pageState.sortField,
+        sortField: resultSortField as string,
         sortDirection: sort?.direction ?? pageState.sortDirection,
       };
       updatePageState(result);
@@ -60,16 +70,16 @@ export function useTableSettings<TypeOfItem>(
     () => ({
       pageIndex,
       pageSize,
-      totalItemCount: items.length,
+      totalItemCount,
       pageSizeOptions: PAGE_SIZE_OPTIONS,
     }),
-    [items, pageIndex, pageSize]
+    [totalItemCount, pageIndex, pageSize]
   );
 
   const sorting = useMemo(
     () => ({
       sort: {
-        field: sortField as string,
+        field: sortField as keyof TypeOfItem,
         direction: sortDirection as Direction,
       },
     }),

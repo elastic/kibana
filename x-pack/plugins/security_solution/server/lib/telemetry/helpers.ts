@@ -9,6 +9,7 @@ import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
 import { merge } from 'lodash';
+import type { Logger } from '@kbn/core/server';
 import { copyAllowlistedFields, exceptionListAllowlistFields } from './filterlists';
 import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
 import type {
@@ -266,3 +267,16 @@ export const metricsResponseToValueListMetaData = ({
   used_in_indicator_match_rule_count:
     indicatorMatchMetricsResponse?.aggregations?.vl_used_in_indicator_match_rule_count?.value ?? 0,
 });
+
+export let isElasticCloudDeployment = false;
+export const setIsElasticCloudDeployment = (value: boolean) => {
+  isElasticCloudDeployment = value;
+};
+
+export const tlog = (logger: Logger, message: string) => {
+  if (isElasticCloudDeployment) {
+    logger.info(message);
+  } else {
+    logger.debug(message);
+  }
+};
