@@ -6,11 +6,12 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { tlog, getPreviousDiagTaskTimestamp } from '../helpers';
+import { tlog, getPreviousDiagTaskTimestamp, createTaskMetric } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { TelemetryEvent } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
+import { TASK_METRICS_CHANNEL } from '../constants';
 
 export function createTelemetryDiagnosticsTaskConfig() {
   return {
@@ -27,26 +28,37 @@ export function createTelemetryDiagnosticsTaskConfig() {
       sender: ITelemetryEventsSender,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      if (!taskExecutionPeriod.last) {
-        throw new Error('last execution timestamp is required');
-      }
+      const startTime = Date.now();
+      const taskName = 'Security Solution Telemetry Diagnostics task';
+      try {
+        if (!taskExecutionPeriod.last) {
+          throw new Error('last execution timestamp is required');
+        }
 
-      const response = await receiver.fetchDiagnosticAlerts(
-        taskExecutionPeriod.last,
-        taskExecutionPeriod.current
-      );
+        const response = await receiver.fetchDiagnosticAlerts(
+          taskExecutionPeriod.last,
+          taskExecutionPeriod.current
+        );
 
-      const hits = response.hits?.hits || [];
-      if (!Array.isArray(hits) || !hits.length) {
-        tlog(logger, 'no diagnostic alerts retrieved');
-        return 0;
+        const hits = response.hits?.hits || [];
+        if (!Array.isArray(hits) || !hits.length) {
+          tlog(logger, 'no diagnostic alerts retrieved');
+          return 0;
+        }
+        tlog(logger, `Received ${hits.length} diagnostic alerts`);
+        const diagAlerts: TelemetryEvent[] = hits.flatMap((h) =>
+          h._source != null ? [h._source] : []
+        );
+        sender.queueTelemetryEvents(diagAlerts);
+        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+          createTaskMetric(taskName, true, startTime),
+        ]);
+        return diagAlerts.length;
+      } catch (err) {
+        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+          createTaskMetric(taskName, false, startTime, err.message),
+        ]);
       }
-      tlog(logger, `Received ${hits.length} diagnostic alerts`);
-      const diagAlerts: TelemetryEvent[] = hits.flatMap((h) =>
-        h._source != null ? [h._source] : []
-      );
-      sender.queueTelemetryEvents(diagAlerts);
-      return diagAlerts.length;
     },
   };
 }
