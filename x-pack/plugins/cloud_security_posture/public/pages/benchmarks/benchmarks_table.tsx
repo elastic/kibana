@@ -74,18 +74,10 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
   },
   {
     field: 'rules.enabled',
-    // field: 'rules',
     name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.activeRulesColumnTitle', {
       defaultMessage: 'Active Rules',
     }),
     truncateText: true,
-    // render: ({ enabled, all }: Benchmark['rules']) => (
-    //   <FormattedMessage
-    //     id="xpack.csp.benchmark.benchmarkTable.activeRulesColumnRenderTitle"
-    //     defaultMessage="{enabled} of {all}"
-    //     values={{ enabled, all }}
-    //   />
-    // ),
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.ACTIVE_RULES,
   },
   {

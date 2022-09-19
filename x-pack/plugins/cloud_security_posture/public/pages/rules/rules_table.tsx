@@ -23,36 +23,24 @@ type RulesTableProps = Pick<
   RulesState,
   'loading' | 'error' | 'rules_page' | 'total' | 'perPage' | 'page'
 > & {
-  toggleRule(rule: RuleSavedObject): void;
-  setSelectedRules(rules: RuleSavedObject[]): void;
   setPagination(pagination: Pick<RulesState, 'perPage' | 'page'>): void;
   setSelectedRuleId(id: string | null): void;
   selectedRuleId: string | null;
-  // ForwardRef makes this ref not available in parent callbacks
-  tableRef: React.RefObject<EuiBasicTable<RuleSavedObject>>;
-  canUpdate: boolean;
 };
 
 export const RulesTable = ({
-  toggleRule,
-  setSelectedRules,
   setPagination,
   setSelectedRuleId,
   perPage: pageSize,
   rules_page: items,
   page,
-  tableRef,
   total,
   loading,
   error,
   selectedRuleId,
-  canUpdate,
 }: RulesTableProps) => {
   const { euiTheme } = useEuiTheme();
-  const columns = useMemo(
-    () => getColumns({ toggleRule, setSelectedRuleId, canUpdate }),
-    [setSelectedRuleId, toggleRule, canUpdate]
-  );
+  const columns = useMemo(() => getColumns({ setSelectedRuleId }), [setSelectedRuleId]);
 
   const euiPagination: EuiBasicTableProps<RuleSavedObject>['pagination'] = {
     pageIndex: page,
@@ -60,11 +48,6 @@ export const RulesTable = ({
     totalItemCount: total,
     pageSizeOptions: [10, 25, 100],
   };
-
-  // const selection: EuiBasicTableProps<RuleSavedObject>['selection'] = {
-  //   selectable: () => true,
-  //   onSelectionChange: setSelectedRules,
-  // };
 
   const onTableChange = ({ page: pagination }: Criteria<RuleSavedObject>) => {
     if (!pagination) return;
@@ -84,7 +67,6 @@ export const RulesTable = ({
 
   return (
     <EuiBasicTable
-      ref={tableRef}
       data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE}
       loading={loading}
       error={error}
@@ -92,22 +74,16 @@ export const RulesTable = ({
       columns={columns}
       pagination={euiPagination}
       onChange={onTableChange}
-      // isSelectable={true}
-      // selection={selection}
       itemId={(v) => v.id}
       rowProps={rowProps}
     />
   );
 };
 
-interface GetColumnProps extends Pick<RulesTableProps, 'setSelectedRuleId' | 'canUpdate'> {
-  toggleRule: (rule: RuleSavedObject) => void;
-}
+type GetColumnProps = Pick<RulesTableProps, 'setSelectedRuleId'>;
 
 const getColumns = ({
-  toggleRule,
   setSelectedRuleId,
-  canUpdate,
 }: GetColumnProps): Array<EuiTableFieldDataColumnType<RuleSavedObject>> => [
   {
     field: 'attributes.metadata.name',
@@ -145,29 +121,4 @@ const getColumns = ({
     width: '15%',
     render: (timestamp) => <TimestampTableCell timestamp={timestamp} />,
   },
-  // {
-  //   field: 'attributes.enabled',
-  //   name: i18n.translate('xpack.csp.rules.rulesTable.enabledColumnLabel', {
-  //     defaultMessage: 'Enabled',
-  //   }),
-  //   render: (enabled, rule) => (
-  //     <EuiSwitch
-  //       disabled={!canUpdate}
-  //       showLabel={false}
-  //       label={
-  //         enabled
-  //           ? i18n.translate('xpack.csp.rules.rulesTable.enabledColumn.disableSwitchLabel', {
-  //               defaultMessage: 'Disable',
-  //             })
-  //           : i18n.translate('xpack.csp.rules.rulesTable.enabledColumn.enableSwitchLabel', {
-  //               defaultMessage: 'Enable',
-  //             })
-  //       }
-  //       checked={enabled}
-  //       onChange={() => toggleRule(rule)}
-  //       data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.id)}
-  //     />
-  //   ),
-  //   width: '10%',
-  // },
 ];
