@@ -159,8 +159,15 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: false,
     description: i18n.translate('xpack.observability.enableServiceGroupsDescription', {
-      defaultMessage: '{technicalPreviewLabel} Enable the Service groups feature on APM UI',
-      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+      defaultMessage: 'Enable the Service groups feature on APM UI. {feedbackLink}.',
+      values: {
+        feedbackLink:
+          '<a href="https://ela.st/feedback-service-groups" target="_blank" rel="noopener noreferrer">' +
+          i18n.translate('core.ui_settings.params.dateFormat.optionsLinkText', {
+            defaultMessage: 'Send feedback',
+          }) +
+          '</a>',
+      },
     }),
     schema: schema.boolean(),
     requiresPageReload: true,
@@ -175,8 +182,15 @@ export const uiSettings: Record<string, UiSettings> = {
       'xpack.observability.apmServiceInventoryOptimizedSortingDescription',
       {
         defaultMessage:
-          '{technicalPreviewLabel} Default APM Service Inventory page sort (for Services without Machine Learning applied) to sort by Service Name',
-        values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+          'Default APM Service Inventory page sort (for Services without Machine Learning applied) to sort by Service Name. {feedbackLink}.',
+        values: {
+          feedbackLink:
+            '<a href="https://ela.st/feedback-apm-page-performance" target="_blank" rel="noopener noreferrer">' +
+            i18n.translate('core.ui_settings.params.dateFormat.optionsLinkText', {
+              defaultMessage: 'Send feedback',
+            }) +
+            '</a>',
+        },
       }
     ),
     schema: schema.boolean(),
@@ -203,8 +217,15 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     description: i18n.translate('xpack.observability.apmTraceExplorerTabDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL',
-      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+        'Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL. {feedbackLink}.',
+      values: {
+        feedbackLink:
+          '<a href="https://ela.st/feedback-trace-explorer" target="_blank" rel="noopener noreferrer">' +
+          i18n.translate('core.ui_settings.params.dateFormat.optionsLinkText', {
+            defaultMessage: 'Send feedback',
+          }) +
+          '</a>',
+      },
     }),
     schema: schema.boolean(),
     value: false,
@@ -219,8 +240,15 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     description: i18n.translate('xpack.observability.apmOperationsBreakdownDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} Enable the APM Operations Breakdown feature, that displays aggregates for backend operations',
-      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+        'Enable the APM Operations Breakdown feature, that displays aggregates for backend operations. {feedbackLink}.',
+      values: {
+        feedbackLink:
+          '<a href="https://ela.st/feedback-operations-breakdown" target="_blank" rel="noopener noreferrer">' +
+          i18n.translate('core.ui_settings.params.dateFormat.optionsLinkText', {
+            defaultMessage: 'Send feedback',
+          }) +
+          '</a>',
+      },
     }),
     schema: schema.boolean(),
     value: false,
