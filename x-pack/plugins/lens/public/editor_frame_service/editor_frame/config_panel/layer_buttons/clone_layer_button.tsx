@@ -17,7 +17,7 @@ interface CloneLayerAction {
 
 export const getCloneLayerAction = (props: CloneLayerAction): LayerButtonsAction => {
   const displayName = i18n.translate('xpack.lens.cloneLayerAriaLabel', {
-    defaultMessage: 'Clone layer {index}',
+    defaultMessage: 'Duplicate layer',
     values: { index: props.layerIndex + 1 },
   });
 
