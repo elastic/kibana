@@ -150,7 +150,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await retry.try(async () => {
         const executionFailureResultCallout = await testSubjects.find('executionFailureResult');
         expect(await executionFailureResultCallout.getVisibleText()).to.match(
-          /Test failed to run\nThe following error was found:\nerror posting slack message*/
+          /Test failed to run*/
         );
       });
 
