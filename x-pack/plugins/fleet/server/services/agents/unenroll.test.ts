@@ -12,6 +12,10 @@ import type { AgentPolicy } from '../../types';
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import { invalidateAPIKeys } from '../api_keys';
 
+import { appContextService } from '../app_context';
+
+import { createAppContextStartContractMock } from '../../mocks';
+
 import { unenrollAgent, unenrollAgents } from './unenroll';
 import { invalidateAPIKeysForAgents } from './unenroll_action_runner';
 
@@ -96,6 +100,13 @@ describe('unenrollAgent (singular)', () => {
 });
 
 describe('unenrollAgents (plural)', () => {
+  beforeEach(async () => {
+    appContextService.start(createAppContextStartContractMock());
+  });
+
+  afterEach(() => {
+    appContextService.stop();
+  });
   it('can unenroll from an regular agent policy', async () => {
     const { soClient, esClient } = createClientMock();
     const idsToUnenroll = [agentInRegularDoc._id, agentInRegularDoc2._id];
@@ -122,7 +133,7 @@ describe('unenrollAgents (plural)', () => {
 
     // calls ES update with correct values
     const onlyRegular = [agentInRegularDoc._id, agentInRegularDoc2._id];
-    const calledWith = esClient.bulk.mock.calls[0][0];
+    const calledWith = esClient.bulk.mock.calls[1][0];
     const ids = (calledWith as estypes.BulkRequest)?.body
       ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
@@ -133,6 +144,19 @@ describe('unenrollAgents (plural)', () => {
     for (const doc of docs!) {
       expect(doc).toHaveProperty('unenrollment_started_at');
     }
+
+    // hosted policy is updated in action results with error
+    const calledWithActionResults = esClient.bulk.mock.calls[0][0] as estypes.BulkRequest;
+    // bulk write two line per create
+    expect(calledWithActionResults.body?.length).toBe(2);
+    const expectedObject = expect.objectContaining({
+      '@timestamp': expect.anything(),
+      action_id: expect.anything(),
+      agent_id: 'agent-in-hosted-policy',
+      error:
+        'Cannot unenroll agent-in-hosted-policy from a hosted agent policy hosted-agent-policy in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
+    });
+    expect(calledWithActionResults.body?.[1] as any).toEqual(expectedObject);
   });
 
   it('cannot unenroll from a hosted agent policy with revoke=true', async () => {

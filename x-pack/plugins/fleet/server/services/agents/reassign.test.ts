@@ -12,6 +12,9 @@ import type { SavedObject } from '@kbn/core/server';
 import type { AgentPolicy } from '../../types';
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
+import { appContextService } from '../app_context';
+import { createAppContextStartContractMock } from '../../mocks';
+
 import { reassignAgent, reassignAgents } from './reassign';
 
 const agentInHostedDoc = {
@@ -81,6 +84,13 @@ describe('reassignAgent (singular)', () => {
 });
 
 describe('reassignAgents (plural)', () => {
+  beforeEach(async () => {
+    appContextService.start(createAppContextStartContractMock());
+  });
+
+  afterEach(() => {
+    appContextService.stop();
+  });
   it('agents in hosted policies are not updated', async () => {
     const { soClient, esClient } = createClientsMock();
     const idsToReassign = [agentInRegularDoc._id, agentInHostedDoc._id, agentInHostedDoc2._id];
@@ -92,6 +102,19 @@ describe('reassignAgents (plural)', () => {
     expect((calledWith as estypes.BulkRequest).body?.length).toBe(2);
     // @ts-expect-error
     expect(calledWith.body[0].update._id).toEqual(agentInRegularDoc._id);
+
+    // hosted policy is updated in action results with error
+    const calledWithActionResults = esClient.bulk.mock.calls[1][0] as estypes.BulkRequest;
+    // bulk write two line per create
+    expect(calledWithActionResults.body?.length).toBe(4);
+    const expectedObject = expect.objectContaining({
+      '@timestamp': expect.anything(),
+      action_id: expect.anything(),
+      agent_id: 'agent-in-hosted-policy',
+      error:
+        'Cannot reassign an agent from hosted agent policy hosted-agent-policy in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
+    });
+    expect(calledWithActionResults.body?.[1] as any).toEqual(expectedObject);
   });
 });
 
