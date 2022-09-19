@@ -125,7 +125,7 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
       onToggleColumn, 
       shouldShowDescriptionColumn: getShouldShowDescriptionColumn(fieldItems)
     }),
-    [getFieldTableColumns, onHide, onToggleColumn, searchInput]
+    [fieldItems, getFieldTableColumns, onHide, onToggleColumn, searchInput]
   );
   const hasActions = useMemo(() => columns.some((column) => isActionsColumn(column)), [columns]);
 
