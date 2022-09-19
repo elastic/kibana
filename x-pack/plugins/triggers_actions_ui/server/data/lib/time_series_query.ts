@@ -65,22 +65,22 @@ export async function timeSeriesQuery(
   const isGroupAgg = !!termField;
 
   let terms = termSize || DEFAULT_GROUPS;
-  terms = termLimit ? (terms > termLimit ? termLimit : terms) : terms
+  terms = termLimit ? (terms > termLimit ? termLimit : terms) : terms;
 
   let aggParent = esQuery.body;
 
   // first, add a group aggregation, if requested
   if (isGroupAgg) {
     aggParent.aggs = {
-      groupCardinalityAgg: {
-        cardinality: {
-          field: termField
-        }
-      },
       groupAgg: {
         terms: {
           field: termField,
           size: terms,
+        },
+      },
+      groupAggCount: {
+        stats_bucket: {
+          buckets_path: 'groupAgg._count',
         },
       },
     };
@@ -91,6 +91,17 @@ export async function timeSeriesQuery(
       aggParent.aggs.groupAgg.terms.order = {
         sortValueAgg: sortOrder,
       };
+    } else {
+      aggParent.aggs.groupAgg.aggs = {
+        conditionSelector: {
+          bucket_selector: {
+            buckets_path: {
+              docCount: '_count',
+            },
+            script: `params.docCount > 20`,
+          },
+        },
+      };
     }
 
     aggParent = aggParent.aggs.groupAgg;
@@ -98,6 +109,7 @@ export async function timeSeriesQuery(
 
   // next, add the time window aggregation
   aggParent.aggs = {
+    ...aggParent.aggs,
     dateAgg: {
       date_range: {
         field: timeField,
@@ -114,6 +126,16 @@ export async function timeSeriesQuery(
         field: aggField,
       },
     };
+    if (isGroupAgg) {
+      aggParent.aggs.conditionSelector = {
+        bucket_selector: {
+          buckets_path: {
+            metricValue: 'sortValueAgg',
+          },
+          script: 'params.metricValue >= 0',
+        },
+      };
+    }
   }
 
   aggParent = aggParent.aggs.dateAgg;
@@ -166,7 +188,7 @@ export function getResultFromEs(
       buckets: [{ key: 'all documents', dateAgg }],
     };
     aggregations.groupCardinalityAgg = {
-      value: 0
+      value: 0,
     };
 
     delete aggregations.dateAgg;
@@ -178,7 +200,7 @@ export function getResultFromEs(
   const numGroupsTotal = aggregations.groupCardinalityAgg?.value ?? 0;
   const result: TimeSeriesResult = {
     results: [],
-    truncated: termLimit ? (numGroupsTotal > termLimit) : false,
+    truncated: termLimit ? numGroupsTotal > termLimit : false,
   };
 
   for (const groupBucket of groupBuckets) {
