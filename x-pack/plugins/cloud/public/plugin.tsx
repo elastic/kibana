@@ -120,7 +120,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       base_url: baseUrl,
     } = this.config;
 
-    if (id) {
+    if (this.isCloudEnabled && id) {
       // We use the Hashed Cloud Deployment ID as the userId in the Cloud Experiments
       cloudExperiments?.identifyUser(sha256(id), {
         kibanaVersion: this.initializerContext.env.packageInfo.version,

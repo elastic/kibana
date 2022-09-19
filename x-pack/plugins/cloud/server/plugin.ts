@@ -60,8 +60,8 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       security?.setIsElasticCloudDeployment();
     }
 
-    if (this.config.id) {
-      // We use the Cloud Deployment ID as the userId in the Cloud Experiments
+    if (isCloudEnabled && this.config.id) {
+      // We use the Cloud ID as the userId in the Cloud Experiments
       cloudExperiments?.identifyUser(createSHA256Hash(this.config.id), {
         kibanaVersion: this.context.env.packageInfo.version,
       });
