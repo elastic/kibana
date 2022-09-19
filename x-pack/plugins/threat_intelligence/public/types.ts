@@ -18,6 +18,8 @@ import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { BrowserField } from '@kbn/triggers-actions-ui-plugin/public/application/sections/field_browser/types';
 import { DataViewBase } from '@kbn/es-query';
+import { Store } from 'redux';
+import { DataProvider } from '@kbn/timelines-plugin/common';
 
 export interface SecuritySolutionDataViewBase extends DataViewBase {
   fields: Array<FieldSpec & DataViewField>;
@@ -58,6 +60,12 @@ export interface SourcererDataView {
   loading: boolean;
 }
 
+export interface UseInvestigateInTimelineProps {
+  dataProviders: DataProvider[];
+  from: string;
+  to: string;
+}
+
 /**
  * Methods exposed from the security solution to the threat intelligence application.
  */
@@ -77,7 +85,19 @@ export interface SecuritySolutionPluginContext {
    */
   licenseService: LicenseAware;
   /**
-   * Gets Security Solution shared information like browerFields, indexPattern and selectedPatterns in DataView
+   * Gets Security Solution shared information like browerFields, indexPattern and selectedPatterns in DataView.
    */
   sourcererDataView: SourcererDataView;
+  /**
+   * Security Solution store
+   */
+  getSecuritySolutionStore: Store;
+  /**
+   * Pass UseInvestigateInTimeline functionality to TI plugin
+   */
+  getUseInvestigateInTimeline: ({
+    dataProviders,
+    from,
+    to,
+  }: UseInvestigateInTimelineProps) => () => Promise<void>;
 }

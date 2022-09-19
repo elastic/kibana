@@ -28,4 +28,12 @@ export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext 
     indexPattern: { fields: [], title: '' },
     loading: false,
   },
+  getSecuritySolutionStore: {
+    // @ts-ignore
+    dispatch: () => jest.fn(),
+  },
+  getUseInvestigateInTimeline:
+    ({ dataProviders, from, to }) =>
+    () =>
+      new Promise((resolve) => window.alert('investigate in timeline')),
 });

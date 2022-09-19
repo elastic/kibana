@@ -33,7 +33,7 @@ describe('display name generation', () => {
         if (doc['threat.indicator.file.pehash'].value!=null) { return emit(doc['threat.indicator.file.pehash'].value) }
         if (doc['threat.indicator.file.vhash'].value!=null) { return emit(doc['threat.indicator.file.vhash'].value) } }
 
-        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='url') { if (doc['threat.indicator.url.original'].value!=null) { return emit(doc['threat.indicator.url.original'].value) } }
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='url') { if (doc['threat.indicator.url.full'].value!=null) { return emit(doc['threat.indicator.url.full'].value) } }
 
         if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='domain') { if (doc['threat.indicator.url.domain'].value!=null) { return emit(doc['threat.indicator.url.domain'].value) } }
         if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='domain-name') { if (doc['threat.indicator.url.domain'].value!=null) { return emit(doc['threat.indicator.url.domain'].value) } }
@@ -83,7 +83,7 @@ describe('display name generation', () => {
         if (doc['threat.indicator.file.pehash'].value!=null) { return emit('threat.indicator.file.pehash') }
         if (doc['threat.indicator.file.vhash'].value!=null) { return emit('threat.indicator.file.vhash') } }
 
-        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='url') { if (doc['threat.indicator.url.original'].value!=null) { return emit('threat.indicator.url.original') } }
+        if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='url') { if (doc['threat.indicator.url.full'].value!=null) { return emit('threat.indicator.url.full') } }
 
         if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='domain') { if (doc['threat.indicator.url.domain'].value!=null) { return emit('threat.indicator.url.domain') } }
         if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='domain-name') { if (doc['threat.indicator.url.domain'].value!=null) { return emit('threat.indicator.url.domain') } }

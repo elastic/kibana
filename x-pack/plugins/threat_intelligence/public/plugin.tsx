@@ -7,6 +7,7 @@
 
 import { CoreStart, Plugin } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { Provider as ReduxStoreProvider } from 'react-redux';
 import React, { Suspense, VFC } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from './hooks/use_kibana';
@@ -46,15 +47,17 @@ export const createApp =
   ({ securitySolutionContext }: AppProps) =>
     (
       <IntlProvider>
-        <SecuritySolutionContext.Provider value={securitySolutionContext}>
-          <KibanaContextProvider services={services}>
-            <EnterpriseGuard>
-              <IntegrationsGuard>
-                <IndicatorsPage />
-              </IntegrationsGuard>
-            </EnterpriseGuard>
-          </KibanaContextProvider>
-        </SecuritySolutionContext.Provider>
+        <ReduxStoreProvider store={securitySolutionContext.getSecuritySolutionStore}>
+          <SecuritySolutionContext.Provider value={securitySolutionContext}>
+            <KibanaContextProvider services={services}>
+              <EnterpriseGuard>
+                <IntegrationsGuard>
+                  <IndicatorsPage />
+                </IntegrationsGuard>
+              </EnterpriseGuard>
+            </KibanaContextProvider>
+          </SecuritySolutionContext.Provider>
+        </ReduxStoreProvider>
       </IntlProvider>
     );
 
@@ -77,7 +80,9 @@ export class ThreatIntelligencePlugin implements Plugin<void, void> {
       ...plugins,
     } as Services;
 
-    return { getComponent: createApp(services) };
+    return {
+      getComponent: createApp(services),
+    };
   }
 
   public stop() {}

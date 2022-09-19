@@ -101,3 +101,9 @@ export const UNTITLED_TIMELINE_BUTTON = '[data-test-subj="flyoutOverlay"]';
 export const TIMELINE_DRAGGABLE_ITEM = '[data-test-subj="providerContainer"]';
 
 export const KQL_FILTER = '[id="popoverFor_filter0"]';
+
+export const INDICATORS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_ICON =
+  '[data-test-subj="tiIndicatorTableInvestigateInTimelineButtonIcon"]';
+
+export const INDICATOR_FLYOUT_INVESTIGATE_IN_TIMELINE_BUTTON =
+  '[data-test-subj="tiIndicatorFlyoutInvestigateInTimelineButton"]';

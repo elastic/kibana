@@ -127,6 +127,31 @@ Object {
   "asFragment": [Function],
   "baseElement": <body>
     <div>
+      <span
+        class="euiToolTipAnchor"
+      >
+        <div
+          css="[object Object]"
+        >
+          <button
+            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="plusInCircle"
+            />
+          </button>
+        </div>
+      </span>
+    </div>
+  </body>,
+  "container": <div>
+    <span
+      class="euiToolTipAnchor"
+    >
       <div
         css="[object Object]"
       >
@@ -142,24 +167,7 @@ Object {
           />
         </button>
       </div>
-    </div>
-  </body>,
-  "container": <div>
-    <div
-      css="[object Object]"
-    >
-      <button
-        class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-        type="button"
-      >
-        <span
-          aria-hidden="true"
-          class="euiButtonIcon__icon"
-          color="inherit"
-          data-euiicon-type="plusInCircle"
-        />
-      </button>
-    </div>
+    </span>
   </div>,
   "debug": [Function],
   "findAllByAltText": [Function],
@@ -220,6 +228,29 @@ Object {
   "asFragment": [Function],
   "baseElement": <body>
     <div>
+      <span
+        class="euiToolTipAnchor"
+      >
+        <button
+          aria-label="Filter In"
+          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+          data-test-subj="abc"
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="plusInCircle"
+          />
+        </button>
+      </span>
+    </div>
+  </body>,
+  "container": <div>
+    <span
+      class="euiToolTipAnchor"
+    >
       <button
         aria-label="Filter In"
         class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
@@ -233,22 +264,7 @@ Object {
           data-euiicon-type="plusInCircle"
         />
       </button>
-    </div>
-  </body>,
-  "container": <div>
-    <button
-      aria-label="Filter In"
-      class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-      data-test-subj="abc"
-      type="button"
-    >
-      <span
-        aria-hidden="true"
-        class="euiButtonIcon__icon"
-        color="inherit"
-        data-euiicon-type="plusInCircle"
-      />
-    </button>
+    </span>
   </div>,
   "debug": [Function],
   "findAllByAltText": [Function],

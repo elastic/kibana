@@ -7,8 +7,11 @@
 
 import React, { useMemo, useState, VFC } from 'react';
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiSpacer,
   EuiTab,
@@ -18,6 +21,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { InvestigateInTimelineButton } from '../../../timeline/components/investigate_in_timeline_button';
 import { DateFormatter } from '../../../../components/date_formatter/date_formatter';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { IndicatorsFlyoutJson } from './tabs/indicators_flyout_json/indicators_flyout_json';
@@ -28,6 +32,7 @@ import { IndicatorsFlyoutOverview } from './tabs/indicators_flyout_overview';
 export const TITLE_TEST_ID = 'tiIndicatorFlyoutTitle';
 export const SUBTITLE_TEST_ID = 'tiIndicatorFlyoutSubtitle';
 export const TABS_TEST_ID = 'tiIndicatorFlyoutTabs';
+export const INVESTIGATE_IN_TIMELINE_BUTTON_ID = 'tiIndicatorFlyoutInvestigateInTimelineButton';
 
 const enum TAB_IDS {
   overview,
@@ -142,6 +147,16 @@ export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({ indicator, closeF
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>{selectedTabContent}</EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <InvestigateInTimelineButton
+              data={indicator}
+              data-test-subj={INVESTIGATE_IN_TIMELINE_BUTTON_ID}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 };

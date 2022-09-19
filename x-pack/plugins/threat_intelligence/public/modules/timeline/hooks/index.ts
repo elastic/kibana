@@ -5,14 +5,4 @@
  * 2.0.
  */
 
-import { CSSObject } from '@emotion/react';
-
-export const useStyles = () => {
-  const displayNone: CSSObject = {
-    display: 'none',
-  };
-
-  return {
-    displayNone,
-  };
-};
+export * from './use_investigate_in_timeline';

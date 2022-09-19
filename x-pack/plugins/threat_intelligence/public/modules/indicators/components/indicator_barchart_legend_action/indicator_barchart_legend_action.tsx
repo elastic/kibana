@@ -6,7 +6,8 @@
  */
 
 import React, { useState, VFC } from 'react';
-import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ComponentType } from '../../../../../common/types/component_type';
 import { FilterIn } from '../../../query_bar/components/filter_in';
 import { FilterOut } from '../../../query_bar/components/filter_out';
@@ -16,6 +17,10 @@ export const POPOVER_BUTTON_TEST_ID = 'tiBarchartPopoverButton';
 export const TIMELINE_BUTTON_TEST_ID = 'tiBarchartTimelineButton';
 export const FILTER_IN_BUTTON_TEST_ID = 'tiBarchartFilterInButton';
 export const FILTER_OUT_BUTTON_TEST_ID = 'tiBarchartFilterOutButton';
+
+const BUTTON_LABEL = i18n.translate('xpack.threatIntelligence.indicator.barChart.popover', {
+  defaultMessage: 'More actions',
+});
 
 export interface IndicatorBarchartLegendActionProps {
   /**
@@ -59,12 +64,15 @@ export const IndicatorBarchartLegendAction: VFC<IndicatorBarchartLegendActionPro
     <EuiPopover
       data-test-subj={POPOVER_BUTTON_TEST_ID}
       button={
-        <EuiButtonIcon
-          iconType="boxesHorizontal"
-          iconSize="s"
-          size="xs"
-          onClick={() => setPopover(!isPopoverOpen)}
-        />
+        <EuiToolTip content={BUTTON_LABEL}>
+          <EuiButtonIcon
+            aria-label={BUTTON_LABEL}
+            iconType="boxesHorizontal"
+            iconSize="s"
+            size="xs"
+            onClick={() => setPopover(!isPopoverOpen)}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={() => setPopover(false)}

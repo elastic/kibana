@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { CSSObject } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
-export const useStyles = () => {
-  const displayNone: CSSObject = {
-    display: 'none',
-  };
-
-  return {
-    displayNone,
-  };
-};
+export const ACTION_INVESTIGATE_IN_TIMELINE = i18n.translate(
+  'xpack.securitySolution.threatIntelligence.investigateInTimelineTitle',
+  {
+    defaultMessage: 'Investigate in timeline',
+  }
+);
