@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import { CspmUsage } from './types';
+import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import type { CspmUsage } from './types';
 
 export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
   indices: {
@@ -20,7 +20,7 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       size_in_bytes: {
         type: 'long',
       },
-      latest_doc_timestamp: {
+      last_doc_timestamp: {
         type: 'date',
       },
     },
@@ -34,7 +34,7 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       size_in_bytes: {
         type: 'long',
       },
-      latest_doc_timestamp: {
+      last_doc_timestamp: {
         type: 'date',
       },
     },
@@ -48,7 +48,7 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       size_in_bytes: {
         type: 'long',
       },
-      latest_doc_timestamp: {
+      last_doc_timestamp: {
         type: 'date',
       },
     },

@@ -28,33 +28,35 @@ export const getIndicesStats = async (esClient: ElasticsearchClient): Promise<Cs
 export const getIndexStats = async (
   esClient: ElasticsearchClient,
   index: string
-): Promise<IndexStats | {}> => {
+): Promise<IndexStats | null> => {
   const isIndexExists = await esClient.indices.exists({
     index,
   });
 
-  if (!isLatestIndexExists) return {};
+  if (isIndexExists) {
+    const indexStats = await getIndexDocCount(esClient, index);
+    return {
+      doc_count: indexStats._all.primaries?.docs ? indexStats._all.primaries?.docs?.count : 0,
+      deleted: indexStats._all.primaries?.docs?.deleted
+        ? indexStats._all.primaries?.docs?.deleted
+        : 0,
+      size_in_bytes: indexStats._all.primaries?.store
+        ? indexStats._all.primaries?.store.size_in_bytes
+        : 0,
+      last_doc_timestamp: await getLatestDocTimestamp(esClient, index),
+    };
+  }
 
-  const indexStats = await getIndexDocCount(esClient, index);
-  return {
-    doc_count: indexStats._all.primaries?.docs ? indexStats._all.primaries?.docs?.count : 0,
-    deleted: indexStats._all.primaries?.docs?.deleted
-      ? indexStats._all.primaries?.docs?.deleted
-      : 0,
-    size_in_bytes: indexStats._all.primaries?.store
-      ? indexStats._all.primaries?.store.size_in_bytes
-      : 0,
-    latest_doc_timestamp: await getLatestDocTimestamp(esClient, index),
-  };
+  return null;
 };
 
-export const getIndexDocCount = async (esClient: ElasticsearchClient, index: string) => {
-  return await esClient.indices.stats({
-    index,
-  });
-};
+export const getIndexDocCount = (esClient: ElasticsearchClient, index: string) =>
+  esClient.indices.stats({ index });
 
-const getLatestDocTimestamp = async (esClient: ElasticsearchClient, index: string) => {
+const getLatestDocTimestamp = async (
+  esClient: ElasticsearchClient,
+  index: string
+): Promise<string | null> => {
   const latestTimestamp = await esClient.search({
     index,
     query: {

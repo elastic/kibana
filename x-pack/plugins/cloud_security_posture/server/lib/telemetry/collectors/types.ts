@@ -10,14 +10,14 @@ export interface CspmUsage {
 }
 
 export interface CspmIndicesStats {
-  findings: IndexStats | {};
-  latest_findings: IndexStats | {};
-  score: IndexStats | {};
+  findings: IndexStats | null;
+  latest_findings: IndexStats | null;
+  score: IndexStats | null;
 }
 
 export interface IndexStats {
   doc_count: number;
   deleted: number;
   size_in_bytes: number;
-  latest_doc_timestamp: string;
+  last_doc_timestamp: string | null;
 }

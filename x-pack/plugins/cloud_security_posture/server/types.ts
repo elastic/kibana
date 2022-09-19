@@ -29,7 +29,7 @@ import type {
   AgentPolicyServiceInterface,
   PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { FleetStartContract, FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 
