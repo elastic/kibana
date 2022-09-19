@@ -24,6 +24,7 @@ export {
   apmTraceExplorerTab,
   apmOperationsTab,
   apmLabsButton,
+  enableInfrastructureHostsView,
 } from './ui_settings_keys';
 
 export {
