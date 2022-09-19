@@ -200,6 +200,15 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
 
   const selectedCount = selectedOptions ? selectedOptions.length : 0;
 
+  const placeholder = 
+  searchPlaceholder ??
+  i18n.translate(
+    'sharedUXPackages.userProfileComponents.userProfilesSelectable.searchPlaceholder',
+    {
+      defaultMessage: 'Search',
+    }
+  )
+
   return (
     <EuiSelectable
       options={displayedOptions}
@@ -238,14 +247,7 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
       singleSelection={singleSelection}
       searchable
       searchProps={{
-        placeholder:
-          searchPlaceholder ??
-          i18n.translate(
-            'sharedUXPackages.userProfileComponents.userProfilesSelectable.searchPlaceholder',
-            {
-              defaultMessage: 'Search',
-            }
-          ),
+        placeholder,
         onChange: onSearchChange,
         isLoading,
         isClearable: !isLoading,
@@ -291,7 +293,7 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
                       />
                     )}
                   </EuiButtonEmpty>
-                ) : undefined}
+                ) : null}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
