@@ -236,11 +236,7 @@ describe('browser normalizers', () => {
               url: 'test-url',
               status: 'ga',
             },
-            {
-              id: 'germany',
-              isServiceManaged: false,
-              label: 'Germany',
-            },
+            privateLocations[0],
           ],
           name: 'test-name-3',
           params: JSON.stringify(params),

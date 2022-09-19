@@ -49,7 +49,7 @@ describe('syncEditedMonitor', () => {
       },
       packagePolicyService: {
         get: jest.fn().mockReturnValue({}),
-        buildPackagePolicyFromPackage: jest.fn(),
+        buildPackagePolicyFromPackage: jest.fn().mockReturnValue({}),
       },
     },
   } as unknown as UptimeServerSetup;
