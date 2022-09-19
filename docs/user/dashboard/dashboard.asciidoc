@@ -6,8 +6,7 @@
 [partintro]
 --
 
-The best way to understand your data is to visualize it. With dashboards, you can turn your data from one or more <<data-views, data views>> into a collection of visualizations 
-that bring clarity to your data, tell a story about your data, and allow you to focus on only the data that's important to you. You can display your data in charts, tables, maps, and more, allowing you to compare your data side-by-side, identify patterns, and make connections. 
+The best way to understand your data is to visualize it. With dashboards, you can turn your data from one or more <<data-views, data views>> into a collection of visualizations that help you monitor your data, identify important events, and gather insights. You can display your data in charts, tables, maps, and more, allowing you to compare your data side-by-side, from different points of view. 
 
 [role="screenshot"]
 image:images/dashboard_ecommerceRevenueDashboard_7.15.0.png[Example dashboard]
@@ -16,17 +15,37 @@ image:images/dashboard_ecommerceRevenueDashboard_7.15.0.png[Example dashboard]
 [[dashboard-best-practices]]
 == Dashboard best practices
 
+Before you create dashboards, review the best practices to help your users complete their tasks quickly and efficiently.
+
 [discrete]
 [[dashboard-identify-your-audience]]
-=== Identify your audience
+=== Identify your audience and goal
+
+Identify the primary dashboard users and their goals for using the dashboard. 
 
 [discrete]
 [[dashboard-define-the-organization-and-hierarchy]]
 === Define the organization and hierarchy
 
+Display the most relevant and critical visualizations at the top of the dashboard. The first visualizations that appear on the dashboard should help users complete their most important tasks quickly and efficiently. If you require additional visualizations that appear only when users scroll down the dashboard, make sure the visualizations decrease in importance. 
+
+You can also promote the importantance of visualizations by increasing the size. Larger visualizations become a primary focal point, while smaller visualizations appear less critical. Important visualizations can include current status, critical information, and warnings that require immediate attention. 
+
+You can also display visualizations with summary data at the top of the dashboard, then increase the level of detail as users scroll the dashboard. Avoid using too many visualizations. Dashboards that contain too many visualizations negatively impact performance. When your dashboards require additional visualizations, consider drilldowns, which allow you to link multiple dashboards that increase in complexity. 
+
+Group visualizations that contain related data together and in rows. For example, you have metric visualizations that display inbound and outbound traffic. To display a more detailed visualization of the data, add a bar chart that displays the inbound and outbound traffic over time. 
+
+[image]
+
+
+
 [discrete]
 [[dashboard-respect-the-aspect-ratio]]
 === Respect the aspect ratio
+
+Horizontal proportions best show trends and small variations. 
+
+When you display visualizations in narrow or short proportions, it is difficult to understand the data that is displayed. 
 
 [discrete]
 [[dashboard-choose-the-best-visualization-to-display-your-data]]
@@ -92,8 +111,6 @@ include::supported-visualizations.asciidoc[]
 include::create-dashboards-and-visualizations.asciidoc[]
 
 include::create-panels-with-editors.asciidoc[]
-
-include::lens-advanced.asciidoc[]
 
 include::create-visualizations-with-visualize-library.asciidoc[]
 
