@@ -87,7 +87,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const license = useLicense();
   const isEnterprisePlus = useLicense().isEnterprise();
   const ACTION_BUTTON_COUNT = isEnterprisePlus ? 5 : 4;
-  
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
