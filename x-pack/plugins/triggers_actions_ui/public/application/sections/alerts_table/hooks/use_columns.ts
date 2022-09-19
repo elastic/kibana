@@ -8,7 +8,7 @@
 import { EuiDataGridColumn } from '@elastic/eui';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { useCallback, useEffect, useState } from 'react';
 import { AlertsTableStorage } from '../alerts_table_state';
 import { useFetchBrowserFieldCapabilities } from './use_fetch_browser_fields_capabilities';
@@ -21,7 +21,7 @@ interface UseColumnsArgs {
   defaultColumns: EuiDataGridColumn[];
 }
 
-const fieldTypeToDataGridColumnTypeMapper = (fieldType: string) => {
+const fieldTypeToDataGridColumnTypeMapper = (fieldType: string | undefined) => {
   if (fieldType === 'date') return 'datetime';
   if (fieldType === 'number') return 'numeric';
   if (fieldType === 'object') return 'json';
@@ -47,12 +47,22 @@ const euiColumnFactory = (
 /**
  * Searches in browser fields object for a specific field
  */
-const getBrowserFieldProps = (_columnId: string, browserFields: BrowserFields) => {
-  const key = Object.keys(browserFields).find((_key) =>
-    Boolean(browserFields[_key].fields[_columnId])
-  );
+const getBrowserFieldProps = (
+  _columnId: string,
+  browserFields: BrowserFields
+): Partial<BrowserField> => {
+  for (const [, categoryDescriptor] of Object.entries(browserFields)) {
+    if (!categoryDescriptor.fields) {
+      continue;
+    }
 
-  return key ? browserFields[key].fields[_columnId] : { type: 'string' };
+    for (const [fieldName, fieldDescriptor] of Object.entries(categoryDescriptor.fields)) {
+      if (fieldName === _columnId) {
+        return fieldDescriptor;
+      }
+    }
+  }
+  return { type: 'string' };
 };
 
 /**

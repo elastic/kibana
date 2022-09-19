@@ -18,7 +18,10 @@ const getFieldCategory = (fieldCapability: FieldDescriptor) => {
   return name[0];
 };
 
-const browserFieldFactory = (fieldCapability: FieldDescriptor, category: string): BrowserField => {
+const browserFieldFactory = (
+  fieldCapability: FieldDescriptor,
+  category: string
+): Readonly<Record<string, Partial<BrowserField>>> => {
   return {
     [fieldCapability.name]: {
       ...fieldCapability,
