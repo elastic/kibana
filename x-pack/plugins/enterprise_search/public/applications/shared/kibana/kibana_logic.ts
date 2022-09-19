@@ -11,7 +11,13 @@ import { kea, MakeLogicType } from 'kea';
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
-import { ApplicationStart, Capabilities, ChromeBreadcrumb, ScopedHistory, IUiSettingsClient } from '@kbn/core/public';
+import {
+  ApplicationStart,
+  Capabilities,
+  ChromeBreadcrumb,
+  ScopedHistory,
+  IUiSettingsClient,
+} from '@kbn/core/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 
 import { ProductAccess } from '../../../../common/types';
