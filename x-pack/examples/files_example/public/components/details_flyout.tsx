@@ -67,6 +67,12 @@ export const DetailsFlyout: FunctionComponent<Props> = ({ files, file, onDismiss
               title: 'Last updated',
               description: moment(file.updated).fromNow(),
             },
+            {
+              title: 'Custom meta',
+              description: (
+                <pre>{file.meta ? JSON.stringify(file.meta, null, 2) : '<no custom metadata>'}</pre>
+              ),
+            },
           ]}
         />
         <EuiSpacer size="xl" />
