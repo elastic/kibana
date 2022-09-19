@@ -11,6 +11,7 @@ import { TestProviders } from '../../../../common/mock';
 import { EntityAnalyticsUserRiskScores } from '.';
 import { RiskSeverity } from '../../../../../common/search_strategy';
 import type { SeverityCount } from '../../../../common/components/severity/types';
+import { useUserRiskScore, useUserRiskScoreKpi } from '../../../../risk_score/containers';
 
 const mockSeverityCount: SeverityCount = {
   [RiskSeverity.low]: 1,
@@ -19,10 +20,6 @@ const mockSeverityCount: SeverityCount = {
   [RiskSeverity.unknown]: 1,
   [RiskSeverity.critical]: 1,
 };
-
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: () => true,
-}));
 
 const mockUseQueryToggle = jest
   .fn()
@@ -33,29 +30,27 @@ jest.mock('../../../../common/containers/query_toggle', () => {
   };
 });
 
-const mockUseUserRiskScore = jest
-  .fn()
-  .mockReturnValue([
-    false,
-    { data: undefined, inspect: null, refetch: () => {}, isModuleEnabled: true },
-  ]);
-jest.mock('../../../../risk_score/containers', () => {
-  return {
-    useUserRiskScoreKpi: () => ({ severityCount: mockSeverityCount, loading: false }),
-    useUserRiskScore: (params: unknown) => mockUseUserRiskScore(params),
-  };
-});
+const defaultProps = {
+  data: undefined,
+  inspect: null,
+  refetch: () => {},
+  isModuleEnabled: true,
+  isLicenseValid: true,
+};
+
+const mockUseUserRiskScore = useUserRiskScore as jest.Mock;
+const mockUseUserRiskScoreKpi = useUserRiskScoreKpi as jest.Mock;
+jest.mock('../../../../risk_score/containers');
 
 describe('EntityAnalyticsUserRiskScores', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseUserRiskScoreKpi.mockReturnValue({ severityCount: mockSeverityCount, loading: false });
+    mockUseUserRiskScore.mockReturnValue([false, defaultProps]);
   });
 
   it('renders enable button when module is disable', () => {
-    mockUseUserRiskScore.mockReturnValue([
-      false,
-      { data: undefined, inspect: null, refetch: () => {}, isModuleEnabled: false },
-    ]);
+    mockUseUserRiskScore.mockReturnValue([false, { ...defaultProps, isModuleEnabled: false }]);
     const { getByTestId } = render(
       <TestProviders>
         <EntityAnalyticsUserRiskScores />
@@ -66,10 +61,6 @@ describe('EntityAnalyticsUserRiskScores', () => {
   });
 
   it("doesn't render enable button when module is enable", () => {
-    mockUseUserRiskScore.mockReturnValue([
-      false,
-      { data: undefined, inspect: null, refetch: () => {}, isModuleEnabled: true },
-    ]);
     const { queryByTestId } = render(
       <TestProviders>
         <EntityAnalyticsUserRiskScores />
