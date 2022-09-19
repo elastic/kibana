@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { UseFormReturn, ControllerRenderProps, FormState } from 'react-hook-form';
 import {
   EuiButtonGroup,
@@ -390,11 +391,14 @@ export const FIELD: Record<string, FieldMeta> = {
         options: Object.values(locations).map((location) => ({
           label: locations?.find((loc) => location.id === loc.id)?.label,
           id: location.id,
+          key: location.id,
           isServiceManaged: location.isServiceManaged,
         })),
         selectedOptions: Object.values(field?.value as ServiceLocations).map((location) => ({
-          label: locations?.find((loc) => location.id === loc.id)?.label,
+          color: locations.some((s) => s.id === location.id) ? 'default' : 'danger',
+          label: locations?.find((loc) => location.id === loc.id)?.label ?? location.id,
           id: location.id,
+          key: location.id,
           isServiceManaged: location.isServiceManaged,
         })),
         'data-test-subj': 'syntheticsMonitorConfigLocations',
@@ -410,6 +414,28 @@ export const FIELD: Record<string, FieldMeta> = {
         },
       };
     },
+  },
+  [ConfigKey.ENABLED]: {
+    fieldKey: ConfigKey.ENABLED,
+    component: EuiSwitch,
+    label: i18n.translate('xpack.synthetics.monitorConfig.enabled.label', {
+      defaultMessage: 'Enable Monitor',
+    }),
+    controlled: true,
+    props: ({ isEdit, setValue }) => ({
+      id: 'syntheticsMontiorConfigIsEnabled',
+      label: isEdit
+        ? i18n.translate('xpack.synthetics.monitorConfig.edit.enabled.label', {
+            defaultMessage: 'Disabled monitors do not run tests.',
+          })
+        : i18n.translate('xpack.synthetics.monitorConfig.create.enabled.label', {
+            defaultMessage:
+              'Disabled monitors do not run tests. You can create a disabled monitor and enable it later.',
+          }),
+      onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+        setValue(ConfigKey.ENABLED, !!event.target.checked);
+      },
+    }),
   },
   [ConfigKey.TAGS]: {
     fieldKey: ConfigKey.TAGS,
@@ -501,6 +527,9 @@ export const FIELD: Record<string, FieldMeta> = {
     controlled: true,
     props: ({ field }) => ({
       selectedOptions: field,
+    }),
+    validation: () => ({
+      validate: (namespace) => isValidNamespace(namespace).error,
     }),
   },
   [ConfigKey.MAX_REDIRECTS]: {

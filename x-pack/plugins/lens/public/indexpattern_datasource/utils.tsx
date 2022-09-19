@@ -511,7 +511,7 @@ export function getFiltersInLayer(
   indexPattern: IndexPattern,
   timeRange: TimeRange | undefined
 ) {
-  if (indexPattern.spec) {
+  if (!indexPattern.isPersisted) {
     return {
       error: i18n.translate('xpack.lens.indexPattern.adHocDataViewError', {
         defaultMessage:
