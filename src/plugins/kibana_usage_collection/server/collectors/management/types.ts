@@ -140,6 +140,7 @@ export interface UsageStats {
   'lens:useFieldExistenceSampling': boolean;
   'metrics:allowCheckingForFailedShards': boolean;
   'observability:apmOperationsTab': boolean;
+  'observability:apmLabsButton': boolean;
   'observability:apmProgressiveLoading': string;
   'observability:apmServiceGroupMaxNumberOfServices': number;
   'observability:apmServiceInventoryOptimizedSorting': boolean;
@@ -148,4 +149,5 @@ export interface UsageStats {
   'securitySolution:showRelatedIntegrations': boolean;
   'visualization:visualize:legacyGaugeChartsLibrary': boolean;
   'enterpriseSearch:enableIndexTransformsTab': boolean;
+  'enterpriseSearch:enableBehavioralAnalyticsSection': boolean;
 }

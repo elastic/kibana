@@ -42,7 +42,7 @@ export const ConfigPanelQueryAnnotation = ({
 }) => {
   const currentIndexPattern = frame.dataViews.indexPatterns[layer.indexPatternId];
   const currentExistingFields = frame.dataViews.existingFields[currentIndexPattern.title];
-  // list only supported field by operation, remove the rest
+  // list only date fields
   const options = currentIndexPattern.fields
     .filter((field) => field.type === 'date' && field.displayName)
     .map((field) => {
@@ -84,6 +84,7 @@ export const ConfigPanelQueryAnnotation = ({
           onChange={(query: Query) => {
             onChange({ filter: { type: 'kibana_query', ...query } });
           }}
+          data-test-subj="lnsXY-annotation-query-based-query-input"
           indexPattern={currentIndexPattern}
         />
       </EuiFormRow>
@@ -114,7 +115,7 @@ export const ConfigPanelQueryAnnotation = ({
             }
           }}
           fieldIsInvalid={!fieldIsValid}
-          data-test-subj="annotation-query-based-field-picker"
+          data-test-subj="lnsXY-annotation-query-based-field-picker"
         />
       </EuiFormRow>
     </>

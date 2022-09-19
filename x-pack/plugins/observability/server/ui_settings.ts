@@ -21,6 +21,7 @@ import {
   apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
   apmOperationsTab,
+  apmLabsButton,
   enableInfrastructureHostsView,
 } from '../common/ui_settings_keys';
 
@@ -31,10 +32,12 @@ const technicalPreviewLabel = i18n.translate(
   }
 );
 
+type UiSettings = UiSettingsParams<boolean | number | string> & { showInLabs?: boolean };
+
 /**
  * uiSettings definitions for Observability.
  */
-export const uiSettings: Record<string, UiSettingsParams<boolean | number | string>> = {
+export const uiSettings: Record<string, UiSettings> = {
   [enableNewSyntheticsView]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.enableNewSyntheticsViewExperimentName', {
@@ -61,6 +64,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
       defaultMessage: 'Inspect Elasticsearch queries in API responses.',
     }),
     schema: schema.boolean(),
+    requiresPageReload: true,
   },
   [maxSuggestions]: {
     category: [observabilityFeatureId],
@@ -161,6 +165,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     }),
     schema: schema.boolean(),
     requiresPageReload: true,
+    showInLabs: true,
   },
   [apmServiceInventoryOptimizedSorting]: {
     category: [observabilityFeatureId],
@@ -179,6 +184,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     value: false,
     requiresPageReload: false,
     type: 'boolean',
+    showInLabs: true,
   },
   [apmServiceGroupMaxNumberOfServices]: {
     category: [observabilityFeatureId],
@@ -205,6 +211,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     value: false,
     requiresPageReload: true,
     type: 'boolean',
+    showInLabs: true,
   },
   [apmOperationsTab]: {
     category: [observabilityFeatureId],
@@ -215,6 +222,21 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
       defaultMessage:
         '{technicalPreviewLabel} Enable the APM Operations Breakdown feature, that displays aggregates for backend operations',
       values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+    }),
+    schema: schema.boolean(),
+    value: false,
+    requiresPageReload: true,
+    type: 'boolean',
+    showInLabs: true,
+  },
+  [apmLabsButton]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmLabs', {
+      defaultMessage: 'Enable labs button in APM',
+    }),
+    description: i18n.translate('xpack.observability.apmLabsDescription', {
+      defaultMessage:
+        'This flag determines if the viewer has access to the Labs button, a quick way to enable and disable technical preview features in APM.',
     }),
     schema: schema.boolean(),
     value: false,

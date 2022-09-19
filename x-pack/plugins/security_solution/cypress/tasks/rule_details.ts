@@ -155,7 +155,7 @@ export const goBackToAllRulesTable = () => {
   cy.get(BACK_TO_RULES).click();
 };
 
-export const getDetails = (title: string) =>
+export const getDetails = (title: string | RegExp) =>
   cy.get(DETAILS_TITLE).contains(title).next(DETAILS_DESCRIPTION);
 
 export const hasIndexPatterns = (indexPatterns: string) => {

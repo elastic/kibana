@@ -16,6 +16,7 @@ export interface GetBasicDataFromDetailsData {
   agentId?: string;
   isAlert: boolean;
   hostName: string;
+  userName: string;
   ruleName: string;
   timestamp: string;
 }
@@ -42,6 +43,11 @@ export const useBasicDataFromDetailsData = (
     [data]
   );
 
+  const userName = useMemo(
+    () => getFieldValue({ category: 'user', field: 'user.name' }, data),
+    [data]
+  );
+
   const timestamp = useMemo(
     () => getFieldValue({ category: 'base', field: '@timestamp' }, data),
     [data]
@@ -53,10 +59,11 @@ export const useBasicDataFromDetailsData = (
       agentId,
       isAlert,
       hostName,
+      userName,
       ruleName,
       timestamp,
     }),
-    [agentId, alertId, hostName, isAlert, ruleName, timestamp]
+    [agentId, alertId, hostName, isAlert, ruleName, timestamp, userName]
   );
 };
 
