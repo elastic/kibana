@@ -4,47 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SavedObject } from '@kbn/core/server';
 
-import type { AgentPolicy } from '../../types';
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
 import { appContextService } from '../app_context';
 import { createAppContextStartContractMock } from '../../mocks';
 
 import { reassignAgent, reassignAgents } from './reassign';
-
-const agentInHostedDoc = {
-  _id: 'agent-in-hosted-policy',
-  _source: { policy_id: 'hosted-agent-policy' },
-};
-const agentInHostedDoc2 = {
-  _id: 'agent-in-hosted-policy2',
-  _source: { policy_id: 'hosted-agent-policy' },
-};
-const agentInRegularDoc = {
-  _id: 'agent-in-regular-policy',
-  _source: { policy_id: 'regular-agent-policy' },
-};
-const regularAgentPolicySO = {
-  id: 'regular-agent-policy',
-  attributes: { is_managed: false },
-} as SavedObject<AgentPolicy>;
-const regularAgentPolicySO2 = {
-  id: 'regular-agent-policy-2',
-  attributes: { is_managed: false },
-} as SavedObject<AgentPolicy>;
-const hostedAgentPolicySO = {
-  id: 'hosted-agent-policy',
-  attributes: { is_managed: true },
-} as SavedObject<AgentPolicy>;
+import { createClientMock } from './action.mock';
 
 describe('reassignAgent (singular)', () => {
   it('can reassign from regular agent policy to regular', async () => {
-    const { soClient, esClient } = createClientsMock();
+    const { soClient, esClient, agentInRegularDoc, regularAgentPolicySO } = createClientMock();
     await reassignAgent(soClient, esClient, agentInRegularDoc._id, regularAgentPolicySO.id);
 
     // calls ES update with correct values
@@ -58,7 +30,7 @@ describe('reassignAgent (singular)', () => {
   });
 
   it('cannot reassign from regular agent policy to hosted', async () => {
-    const { soClient, esClient } = createClientsMock();
+    const { soClient, esClient, agentInRegularDoc, hostedAgentPolicySO } = createClientMock();
     await expect(
       reassignAgent(soClient, esClient, agentInRegularDoc._id, hostedAgentPolicySO.id)
     ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
@@ -68,7 +40,8 @@ describe('reassignAgent (singular)', () => {
   });
 
   it('cannot reassign from hosted agent policy', async () => {
-    const { soClient, esClient } = createClientsMock();
+    const { soClient, esClient, agentInHostedDoc, hostedAgentPolicySO, regularAgentPolicySO } =
+      createClientMock();
     await expect(
       reassignAgent(soClient, esClient, agentInHostedDoc._id, regularAgentPolicySO.id)
     ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
@@ -92,7 +65,14 @@ describe('reassignAgents (plural)', () => {
     appContextService.stop();
   });
   it('agents in hosted policies are not updated', async () => {
-    const { soClient, esClient } = createClientsMock();
+    const {
+      soClient,
+      esClient,
+      agentInRegularDoc,
+      agentInHostedDoc,
+      agentInHostedDoc2,
+      regularAgentPolicySO2,
+    } = createClientMock();
     const idsToReassign = [agentInRegularDoc._id, agentInHostedDoc._id, agentInHostedDoc2._id];
     await reassignAgents(soClient, esClient, { agentIds: idsToReassign }, regularAgentPolicySO2.id);
 
@@ -117,63 +97,3 @@ describe('reassignAgents (plural)', () => {
     expect(calledWithActionResults.body?.[1] as any).toEqual(expectedObject);
   });
 });
-
-function createClientsMock() {
-  const soClientMock = savedObjectsClientMock.create();
-
-  // need to mock .create & bulkCreate due to (bulk)createAgentAction(s) in reassignAgent(s)
-  // @ts-expect-error
-  soClientMock.create.mockResolvedValue({ attributes: { agent_id: 'test' } });
-  soClientMock.bulkCreate.mockImplementation(async ([{ type, attributes }]) => {
-    return {
-      saved_objects: [await soClientMock.create(type, attributes)],
-    };
-  });
-  soClientMock.bulkUpdate.mockResolvedValue({
-    saved_objects: [],
-  });
-  soClientMock.get.mockImplementation(async (_, id) => {
-    switch (id) {
-      case regularAgentPolicySO.id:
-        return regularAgentPolicySO;
-      case hostedAgentPolicySO.id:
-        return hostedAgentPolicySO;
-      case regularAgentPolicySO2.id:
-        return regularAgentPolicySO2;
-      default:
-        throw new Error(`${id} not found`);
-    }
-  });
-  soClientMock.bulkGet.mockImplementation(async (options) => {
-    return {
-      saved_objects: await Promise.all(options!.map(({ type, id }) => soClientMock.get(type, id))),
-    };
-  });
-
-  const esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  // @ts-expect-error
-  esClientMock.mget.mockResponseImplementation(() => {
-    return {
-      body: {
-        docs: [agentInHostedDoc, agentInRegularDoc, agentInHostedDoc2],
-      },
-    };
-  });
-  // @ts-expect-error
-  esClientMock.get.mockResponseImplementation(({ id }) => {
-    switch (id) {
-      case agentInHostedDoc._id:
-        return { body: agentInHostedDoc };
-      case agentInRegularDoc._id:
-        return { body: agentInRegularDoc };
-      default:
-        throw new Error(`${id} not found`);
-    }
-  });
-  esClientMock.bulk.mockResponse(
-    // @ts-expect-error not full interface
-    { items: [] }
-  );
-
-  return { soClient: soClientMock, esClient: esClientMock };
-}
