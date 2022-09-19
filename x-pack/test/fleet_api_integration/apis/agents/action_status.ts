@@ -57,7 +57,7 @@ export default function (providerContext: FtrProviderContext) {
             agents: ['agent1', 'agent2', 'agent3'],
             '@timestamp': '2022-09-15T10:00:00.000Z',
             start_time: '2022-09-15T10:00:00.000Z',
-            expiration: '2022-09-16T10:00:00.000Z',
+            expiration: '2099-09-16T10:00:00.000Z',
             data: {
               version: '8.5.0',
             },
@@ -73,7 +73,7 @@ export default function (providerContext: FtrProviderContext) {
             agents: ['agent4', 'agent5'],
             '@timestamp': '2022-09-15T10:00:00.000Z',
             start_time: '2022-09-15T10:00:00.000Z',
-            expiration: '2022-09-16T10:00:00.000Z',
+            expiration: '2099-09-16T10:00:00.000Z',
           },
         });
         // Action 3 complete
@@ -85,7 +85,7 @@ export default function (providerContext: FtrProviderContext) {
             action_id: 'action3',
             agents: ['agent1', 'agent2'],
             '@timestamp': '2022-09-15T10:00:00.000Z',
-            expiration: '2022-09-16T10:00:00.000Z',
+            expiration: '2099-09-16T10:00:00.000Z',
           },
         });
         await es.index(
@@ -136,7 +136,7 @@ export default function (providerContext: FtrProviderContext) {
             agents: ['agent1', 'agent2', 'agent3'],
             '@timestamp': '2022-09-15T10:00:00.000Z',
             start_time: '2022-09-15T10:00:00.000Z',
-            expiration: '2022-09-16T10:00:00.000Z',
+            expiration: '2099-09-16T10:00:00.000Z',
           },
         });
         await es.index({
@@ -147,7 +147,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'CANCEL',
             action_id: 'cancelaction1',
             agents: ['agent1', 'agent2', 'agent3'],
-            expiration: '2022-09-16T10:00:00.000Z',
+            expiration: '2099-09-16T10:00:00.000Z',
             data: {
               target_id: 'action5',
             },
@@ -163,7 +163,7 @@ export default function (providerContext: FtrProviderContext) {
             action_id: 'action7',
             agents: ['agent1'],
             '@timestamp': '2022-09-15T10:00:00.000Z',
-            expiration: '2022-09-16T10:00:00.000Z',
+            expiration: '2099-09-16T10:00:00.000Z',
             data: {
               policy_id: 'policy1',
             },
@@ -195,7 +195,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'UPGRADE',
             nbAgentsActioned: 5,
             status: 'IN_PROGRESS',
-            expiration: '2022-09-16T10:00:00.000Z',
+            expiration: '2099-09-16T10:00:00.000Z',
             creationTime: '2022-09-15T10:00:00.000Z',
             nbAgentsFailed: 0,
           },
@@ -206,7 +206,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'UPGRADE',
             nbAgentsActioned: 2,
             status: 'COMPLETE',
-            expiration: '2022-09-16T10:00:00.000Z',
+            expiration: '2099-09-16T10:00:00.000Z',
             creationTime: '2022-09-15T10:00:00.000Z',
             nbAgentsFailed: 0,
             completionTime: '2022-09-15T12:00:00.000Z',
@@ -230,7 +230,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'UPGRADE',
             nbAgentsActioned: 3,
             status: 'CANCELLED',
-            expiration: '2022-09-16T10:00:00.000Z',
+            expiration: '2099-09-16T10:00:00.000Z',
             creationTime: '2022-09-15T10:00:00.000Z',
             nbAgentsFailed: 0,
             cancellationTime: '2022-09-15T11:00:00.000Z',
@@ -242,7 +242,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'POLICY_REASSIGN',
             nbAgentsActioned: 1,
             status: 'FAILED',
-            expiration: '2022-09-16T10:00:00.000Z',
+            expiration: '2099-09-16T10:00:00.000Z',
             newPolicyId: 'policy1',
             creationTime: '2022-09-15T10:00:00.000Z',
             nbAgentsFailed: 1,
