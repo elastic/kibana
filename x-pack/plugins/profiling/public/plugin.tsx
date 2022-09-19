@@ -55,7 +55,7 @@ export class ProfilingPlugin implements Plugin {
           {
             // TODO: add beta badge to section label, needs support in Observability plugin
             label: i18n.translate('xpack.profiling.navigation.sectionLabel', {
-              defaultMessage: 'Profiling',
+              defaultMessage: 'Universal Profiling',
             }),
             entries: links.map((link) => {
               return {
@@ -78,7 +78,7 @@ export class ProfilingPlugin implements Plugin {
 
     coreSetup.application.register({
       id: 'profiling',
-      title: 'Profiling',
+      title: 'Universal Profiling',
       euiIconType: 'logoObservability',
       appRoute: '/app/profiling',
       category: DEFAULT_APP_CATEGORIES.observability,

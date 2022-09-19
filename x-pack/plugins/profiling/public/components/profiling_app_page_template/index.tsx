@@ -37,7 +37,7 @@ export function ProfilingAppPageTemplate({
     <ObservabilityPageTemplate
       pageHeader={{
         pageTitle: i18n.translate('xpack.profiling.appPageTemplate.pageTitle', {
-          defaultMessage: 'Profiling',
+          defaultMessage: 'Universal Profiling',
         }),
         tabs,
       }}
