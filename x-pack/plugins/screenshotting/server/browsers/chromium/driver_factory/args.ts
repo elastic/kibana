@@ -55,8 +55,8 @@ export const args = ({
     `--mainFrameClipsContent=false`,
 
     // messing around with options...
-    '--enable-features=Vulkan,UseSkiaRenderer',
-    // '--disable-3d-apis',
+    // '--enable-features=Vulkan,UseSkiaRenderer',
+    '--disable-3d-apis',
   ];
 
   if (windowSize) {
