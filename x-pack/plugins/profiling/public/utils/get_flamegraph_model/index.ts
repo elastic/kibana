@@ -80,6 +80,11 @@ export function getFlamegraphModel({
     const totalSamples = sum(primaryFlamegraph.CountExclusive);
     const comparisonTotalSamples = sum(comparisonFlamegraph.CountExclusive);
 
+    const weightComparisonSide =
+      comparisonMode === FlameGraphComparisonMode.Relative
+        ? 1
+        : primaryFlamegraph.TotalSeconds / comparisonFlamegraph.TotalSeconds;
+
     primaryFlamegraph.ID.forEach((nodeID, index) => {
       const samples = primaryFlamegraph.Value[index];
       const comparisonSamples = comparisonNodesById[nodeID]?.Value as number | undefined;
@@ -94,7 +99,11 @@ export function getFlamegraphModel({
       const denominator =
         comparisonMode === FlameGraphComparisonMode.Absolute ? totalSamples : foreground;
 
-      const interpolationValue = getInterpolationValue(foreground, background, denominator);
+      const interpolationValue = getInterpolationValue(
+        foreground,
+        background === undefined ? undefined : background * weightComparisonSide,
+        denominator
+      );
 
       const nodeColor =
         interpolationValue >= 0
