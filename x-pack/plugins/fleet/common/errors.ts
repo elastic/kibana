@@ -8,7 +8,7 @@
 
 import type { FleetErrorType } from './types';
 
-export class IngestManagerError extends Error {
+export class FleetError extends Error {
   attributes?: { type: FleetErrorType };
   constructor(message?: string, public readonly meta?: unknown) {
     super(message);
@@ -16,4 +16,4 @@ export class IngestManagerError extends Error {
   }
 }
 
-export class PackagePolicyValidationError extends IngestManagerError {}
+export class PackagePolicyValidationError extends FleetError {}
