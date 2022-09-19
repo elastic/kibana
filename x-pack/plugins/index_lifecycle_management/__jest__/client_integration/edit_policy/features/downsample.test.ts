@@ -22,33 +22,52 @@ describe('<EditPolicy /> downsample', () => {
 
     const { component } = testBed;
     component.update();
+
+    const { actions } = testBed;
+    await actions.rollover.toggleDefault();
+    await actions.togglePhase('warm');
+    await actions.togglePhase('cold');
+  });
+
+  test('enabling downsample in hot should hide readonly in hot, warm and cold', async () => {
+    const { actions } = testBed;
+
+    expect(actions.hot.readonlyExists()).toBeTruthy();
+    expect(actions.warm.readonlyExists()).toBeTruthy();
+    expect(actions.cold.readonlyExists()).toBeTruthy();
+
+    await actions.hot.downsample.toggle();
+
+    expect(actions.hot.readonlyExists()).toBeFalsy();
+    expect(actions.warm.readonlyExists()).toBeFalsy();
+    expect(actions.cold.readonlyExists()).toBeFalsy();
   });
 
   test('enabling downsample in warm should hide readonly in warm and cold', async () => {
     const { actions } = testBed;
 
-    await actions.togglePhase('warm');
-    await actions.togglePhase('cold');
-
-    expect(actions.warm.downsample.exists()).toBeTruthy();
+    expect(actions.hot.readonlyExists()).toBeTruthy();
     expect(actions.warm.readonlyExists()).toBeTruthy();
-    expect(actions.cold.downsample.exists()).toBeTruthy();
     expect(actions.cold.readonlyExists()).toBeTruthy();
 
     await actions.warm.downsample.toggle();
 
+    expect(actions.hot.readonlyExists()).toBeTruthy();
     expect(actions.warm.readonlyExists()).toBeFalsy();
     expect(actions.cold.readonlyExists()).toBeFalsy();
   });
 
-  test('enabling downsample in hot should hide readonly in hot', async () => {
+  test('enabling downsample in cold should hide readonly in cold', async () => {
     const { actions } = testBed;
-    await actions.rollover.toggleDefault();
 
-    expect(actions.hot.downsample.exists()).toBeTruthy();
     expect(actions.hot.readonlyExists()).toBeTruthy();
+    expect(actions.warm.readonlyExists()).toBeTruthy();
+    expect(actions.cold.readonlyExists()).toBeTruthy();
 
-    await actions.hot.downsample.toggle();
-    expect(actions.hot.readonlyExists()).toBeFalsy();
+    await actions.cold.downsample.toggle();
+
+    expect(actions.hot.readonlyExists()).toBeTruthy();
+    expect(actions.warm.readonlyExists()).toBeTruthy();
+    expect(actions.cold.readonlyExists()).toBeFalsy();
   });
 });
