@@ -30,7 +30,7 @@ export {
 } from './load_execution_log_aggregations';
 export {
   loadExecutionKPIAggregations,
-  LoadExecutionKPIAggregationsProps
+  LoadExecutionKPIAggregationsProps,
 } from './load_execution_kpi_aggregations';
 export type { LoadActionErrorLogProps } from './load_action_error_log';
 export { loadActionErrorLog } from './load_action_error_log';

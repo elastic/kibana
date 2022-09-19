@@ -173,7 +173,9 @@ export function withBulkRuleOperations<T>(
             http,
           })
         }
-        loadExecutionKPIAggregations={async (loadExecutionKPIAggregationProps: LoadExecutionKPIAggregationsProps) => 
+        loadExecutionKPIAggregations={async (
+          loadExecutionKPIAggregationProps: LoadExecutionKPIAggregationsProps
+        ) =>
           loadExecutionKPIAggregations({
             ...loadExecutionKPIAggregationProps,
             http,

@@ -6,14 +6,7 @@
  */
 
 import React, { useEffect, useState, useRef } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiIconTip,
-  EuiStat,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiIconTip, EuiStat, EuiSpacer } from '@elastic/eui';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
@@ -26,29 +19,24 @@ const Stat = ({
   tooltip,
   children,
 }: {
-  title: string,
-  tooltip: string,
-  children?: JSX.Element,
+  title: string;
+  tooltip: string;
+  children?: JSX.Element;
 }) => {
   return (
     <EuiPanel color="subdued">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <b>
-            {title}
-          </b>
+          <b>{title}</b>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiIconTip
-            content={tooltip}
-            position="top"
-          />
+          <EuiIconTip content={tooltip} position="top" />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
       {children}
     </EuiPanel>
-  )
+  );
 };
 
 export type RuleEventLogListKPIProps = {
@@ -59,13 +47,7 @@ export type RuleEventLogListKPIProps = {
 } & Pick<RuleApis, 'loadExecutionKPIAggregations'>;
 
 export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
-  const {
-    ruleId,
-    dateStart,
-    dateEnd,
-    refreshToken,
-    loadExecutionKPIAggregations,
-  } = props;
+  const { ruleId, dateStart, dateEnd, refreshToken, loadExecutionKPIAggregations } = props;
 
   const isInitialized = useRef(false);
 
@@ -98,7 +80,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
   }, [refreshToken]);
 
   if (isLoading || !kpi) {
-    return <CenterJustifiedSpinner />
+    return <CenterJustifiedSpinner />;
   }
 
   const getStatDescription = (element: React.ReactNode) => {
@@ -107,16 +89,13 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
         {element}
         <EuiSpacer size="s" />
       </>
-    )
-  }
+    );
+  };
 
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={4}>
-        <Stat
-          title="Response"
-          tooltip="Response status of recent rule runs"
-        >
+        <Stat title="Response" tooltip="Response status of recent rule runs">
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiStat
@@ -143,28 +122,25 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
         </Stat>
       </EuiFlexItem>
       <EuiFlexItem grow={4}>
-        <Stat
-          title="Alerts"
-          tooltip="Alert status of recent rule runs"
-        >
+        <Stat title="Alerts" tooltip="Alert status of recent rule runs">
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiStat
-                description={getStatDescription("Active")}
+                description={getStatDescription('Active')}
                 titleSize="s"
                 title={kpi.activeAlerts}
               />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiStat
-                description={getStatDescription("New")}
+                description={getStatDescription('New')}
                 titleSize="s"
                 title={kpi.newAlerts}
               />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiStat
-                description={getStatDescription("Recovered")}
+                description={getStatDescription('Recovered')}
                 titleSize="s"
                 title={kpi.recoveredAlerts}
               />
@@ -173,21 +149,18 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
         </Stat>
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
-        <Stat
-          title="Actions"
-          tooltip="Action status of recent rule runs"
-        >
+        <Stat title="Actions" tooltip="Action status of recent rule runs">
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiStat
-                description={getStatDescription("Errored")}
+                description={getStatDescription('Errored')}
                 titleSize="s"
                 title={kpi.erroredActions}
               />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiStat
-                description={getStatDescription("Triggered")}
+                description={getStatDescription('Triggered')}
                 titleSize="s"
                 title={kpi.triggeredActions}
               />

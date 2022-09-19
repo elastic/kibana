@@ -20,13 +20,10 @@ export const loadExecutionKPIAggregations = ({
   dateStart,
   dateEnd,
 }: LoadExecutionKPIAggregationsProps & { http: HttpSetup }) => {
-  return http.get<any>(
-    `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${id}/_execution_kpi`,
-    {
-      query: {
-        date_start: dateStart,
-        date_end: dateEnd,
-      },
-    }
-  );
+  return http.get<any>(`${INTERNAL_BASE_ALERTING_API_PATH}/rule/${id}/_execution_kpi`, {
+    query: {
+      date_start: dateStart,
+      date_end: dateEnd,
+    },
+  });
 };
