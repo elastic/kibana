@@ -8,6 +8,7 @@
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getServiceTransactionDetailedStatistics } from './get_service_transaction_detailed_statistics';
+import { getServiceAggregatedTransactionDetailedStatistics } from './get_service_aggregated_transaction_detailed_statistics';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 
 export async function getServicesDetailedStatistics({
@@ -16,6 +17,7 @@ export async function getServicesDetailedStatistics({
   kuery,
   setup,
   searchAggregatedTransactions,
+  searchAggregatedServiceMetrics,
   offset,
   start,
   end,
@@ -26,30 +28,59 @@ export async function getServicesDetailedStatistics({
   kuery: string;
   setup: Setup;
   searchAggregatedTransactions: boolean;
+  searchAggregatedServiceMetrics?: boolean;
   offset?: string;
   start: number;
   end: number;
   randomSampler: RandomSampler;
 }) {
-  return withApmSpan('get_service_detailed_statistics', async () => {
-    const commonProps = {
-      serviceNames,
-      environment,
-      kuery,
-      setup,
-      searchAggregatedTransactions,
-      start,
-      end,
-      randomSampler,
-    };
+  return searchAggregatedServiceMetrics
+    ? withApmSpan('get_service_aggregated_detailed_statistics', async () => {
+        const commonProps = {
+          serviceNames,
+          environment,
+          kuery,
+          setup,
+          searchAggregatedServiceMetrics,
+          start,
+          end,
+          randomSampler,
+        };
 
-    const [currentPeriod, previousPeriod] = await Promise.all([
-      getServiceTransactionDetailedStatistics(commonProps),
-      offset
-        ? getServiceTransactionDetailedStatistics({ ...commonProps, offset })
-        : Promise.resolve({}),
-    ]);
+        const [currentPeriod, previousPeriod] = await Promise.all([
+          getServiceAggregatedTransactionDetailedStatistics(commonProps),
+          offset
+            ? getServiceAggregatedTransactionDetailedStatistics({
+                ...commonProps,
+                offset,
+              })
+            : Promise.resolve({}),
+        ]);
 
-    return { currentPeriod, previousPeriod };
-  });
+        return { currentPeriod, previousPeriod };
+      })
+    : withApmSpan('get_service_detailed_statistics', async () => {
+        const commonProps = {
+          serviceNames,
+          environment,
+          kuery,
+          setup,
+          searchAggregatedTransactions,
+          start,
+          end,
+          randomSampler,
+        };
+
+        const [currentPeriod, previousPeriod] = await Promise.all([
+          getServiceTransactionDetailedStatistics(commonProps),
+          offset
+            ? getServiceTransactionDetailedStatistics({
+                ...commonProps,
+                offset,
+              })
+            : Promise.resolve({}),
+        ]);
+
+        return { currentPeriod, previousPeriod };
+      });
 }

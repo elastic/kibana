@@ -223,12 +223,21 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
       getRandomSampler({ security, request, probability }),
     ]);
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      ...setup,
-      start,
-      end,
-      kuery,
-    });
+    const [searchAggregatedTransactions, searchAggregatedServiceMetrics] =
+      await Promise.all([
+        getSearchAggregatedTransactions({
+          ...setup,
+          kuery,
+          start,
+          end,
+        }),
+        getSearchAggregatedServiceMetrics({
+          ...setup,
+          kuery,
+          start,
+          end,
+        }),
+      ]);
 
     if (!serviceNames.length) {
       throw Boom.badRequest(`serviceNames cannot be empty`);
@@ -239,6 +248,7 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
       kuery,
       setup,
       searchAggregatedTransactions,
+      searchAggregatedServiceMetrics,
       offset,
       serviceNames,
       start,
