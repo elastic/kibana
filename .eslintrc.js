@@ -897,7 +897,14 @@ module.exports = {
         ],
       },
     },
-
+    // Profiling
+    {
+      files: ['x-pack/plugins/profiling/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
+        'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^(useAsync)$' }],
+      },
+    },
     {
       // disable imports from legacy uptime plugin
       files: ['x-pack/plugins/synthetics/public/apps/synthetics/**/*.{js,mjs,ts,tsx}'],
@@ -1306,7 +1313,7 @@ module.exports = {
     {
       // typescript for front and back end
       files: [
-        'x-pack/plugins/{alerting,stack_alerts,actions,task_manager,event_log}/**/*.{ts,tsx}',
+        'x-pack/plugins/{alerting,stack_alerts,stack_connectors,actions,task_manager,event_log}/**/*.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
