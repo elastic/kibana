@@ -19,7 +19,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
 
   // FLAKY: https://github.com/elastic/kibana/issues/88796
-  describe.skip('Connectors', function () {
+  describe('Connectors', function () {
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
@@ -44,7 +44,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('.index-card');
 
-      await find.clickByCssSelector('[data-test-subj="backButton"]');
+      await find.clickByCssSelector('[data-test-subj="create-connector-flyout-back-btn"]');
 
       await testSubjects.click('.slack-card');
 
@@ -119,7 +119,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await find.clickByCssSelector('[data-test-subj="testConnectorTab"]');
 
       // test success
-      await testSubjects.setValue('documentsJsonEditor', '{ "key": "value" }');
+      await find.setValueByClass('kibanaCodeEditor', '{ "key": "value" }');
 
       await find.clickByCssSelector('[data-test-subj="executeActionButton"]:not(disabled)');
 
@@ -128,14 +128,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       await find.clickByCssSelector(
-        '[data-test-subj="cancelSaveEditedConnectorButton"]:not(disabled)'
+        '[data-test-subj="edit-connector-flyout-save-close-btn"]:not(disabled)'
       );
     });
 
     it('should test a connector and display a failure result', async () => {
       const connectorName = generateUniqueKey();
       const indexName = generateUniqueKey();
-      await createIndexConnector(connectorName, indexName);
+      await createConnector(connectorName);
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -146,19 +146,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await find.clickByCssSelector('[data-test-subj="testConnectorTab"]');
 
-      await testSubjects.setValue('documentsJsonEditor', '{ "": "value" }');
+      await find.setValue('[data-test-subj="messageTextArea"]', 'test');
 
       await find.clickByCssSelector('[data-test-subj="executeActionButton"]:not(disabled)');
 
       await retry.try(async () => {
         const executionFailureResultCallout = await testSubjects.find('executionFailureResult');
         expect(await executionFailureResultCallout.getVisibleText()).to.match(
-          /error indexing documents/
+          /Test failed to run\nThe following error was found:\nerror posting slack message*/
         );
       });
 
       await find.clickByCssSelector(
-        '[data-test-subj="cancelSaveEditedConnectorButton"]:not(disabled)'
+        '[data-test-subj="edit-connector-flyout-save-close-btn"]:not(disabled)'
       );
     });
 
@@ -173,9 +173,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
       await testSubjects.setValue('nameInput', 'some test name to cancel');
-      await testSubjects.click('cancelSaveEditedConnectorButton');
+      await testSubjects.click('edit-connector-flyout-cancel-btn');
 
-      await find.waitForDeletedByCssSelector('[data-test-subj="cancelSaveEditedConnectorButton"]');
+      await find.waitForDeletedByCssSelector('[data-test-subj="edit-connector-flyout-cancel-btn"]');
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
