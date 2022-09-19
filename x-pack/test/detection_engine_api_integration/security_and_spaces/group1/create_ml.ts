@@ -243,5 +243,25 @@ export default ({ getService }: FtrProviderContext) => {
         expect(signalsOpen.hits.hits.length).toBe(0);
       });
     });
+
+    describe('alerts should be be enriched', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/entity/host_risk');
+      });
+
+      it('should be enriched with host risk score', async () => {
+        const createdRule = await createRule(supertest, log, testRule);
+        const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
+        expect(signalsOpen.hits.hits.length).toBe(1);
+        const fullSignal = signalsOpen.hits.hits[0]._source;
+
+        expect(fullSignal?.host?.risk?.calculated_level).toBe('Low');
+        expect(fullSignal?.host?.risk?.calculated_score_norm).toBe(1);
+      });
+    });
   });
 };

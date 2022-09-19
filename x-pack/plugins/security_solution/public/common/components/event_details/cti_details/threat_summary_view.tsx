@@ -24,6 +24,7 @@ import type { CtiEnrichment } from '../../../../../common/search_strategy/securi
 import type {
   BrowserFields,
   TimelineEventsDetailsItem,
+  RiskSeverity,
 } from '../../../../../common/search_strategy';
 import { HostRiskSummary } from './host_risk_summary';
 import { UserRiskSummary } from './user_risk_summary';
@@ -141,6 +142,14 @@ const ThreatSummaryViewComponent: React.FC<{
   isDraggable,
   isReadOnly,
 }) => {
+  const originalHostRisk = data?.find(
+    (eventDetail) => eventDetail?.field === 'host.risk.calculated_level'
+  )?.values?.[0] as RiskSeverity | undefined;
+
+  const originalUserRisk = data?.find(
+    (eventDetail) => eventDetail?.field === 'user.risk.calculated_level'
+  )?.values?.[0] as RiskSeverity | undefined;
+
   return (
     <>
       <EuiHorizontalRule />
@@ -152,11 +161,11 @@ const ThreatSummaryViewComponent: React.FC<{
 
       <EuiFlexGroup direction="column" gutterSize="m" style={{ flexGrow: 0 }}>
         <EuiFlexItem grow={false}>
-          <HostRiskSummary hostRisk={hostRisk} />
+          <HostRiskSummary hostRisk={hostRisk} originalHostRisk={originalHostRisk} />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <UserRiskSummary userRisk={userRisk} />
+          <UserRiskSummary userRisk={userRisk} originalUserRisk={originalUserRisk} />
         </EuiFlexItem>
 
         <EnrichmentSummary

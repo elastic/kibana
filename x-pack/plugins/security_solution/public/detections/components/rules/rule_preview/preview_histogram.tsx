@@ -26,7 +26,7 @@ import { Panel } from '../../../../common/components/panel';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { BarChart } from '../../../../common/components/charts/barchart';
 import { usePreviewHistogram } from './use_preview_histogram';
-import { alertsPreviewDefaultModel } from '../../alerts_table/default_config';
+import { getAlertsPreviewDefaultModel } from '../../alerts_table/default_config';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
 import { TimelineId } from '../../../../../common/types';
@@ -41,6 +41,7 @@ import { InspectButtonContainer } from '../../../../common/components/inspect';
 import { timelineActions } from '../../../../timelines/store/timeline';
 import type { State } from '../../../../common/store';
 import type { TimeframePreviewOptions } from '../../../pages/detection_engine/rules/types';
+import { useLicense } from '../../../../common/hooks/use_license';
 
 const LoadingChart = styled(EuiLoadingChart)`
   display: block;
@@ -94,7 +95,7 @@ export const PreviewHistogram = ({
     indexPattern,
     ruleType,
   });
-
+  const license = useLicense();
   const {
     timeline: {
       columns,
@@ -105,7 +106,7 @@ export const PreviewHistogram = ({
       itemsPerPageOptions,
       kqlMode,
       sort,
-    } = alertsPreviewDefaultModel,
+    } = getAlertsPreviewDefaultModel(license),
   } = useSelector((state: State) => eventsViewerSelector(state, TimelineId.rulePreview));
 
   const {

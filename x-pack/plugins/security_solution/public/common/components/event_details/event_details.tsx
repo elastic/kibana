@@ -193,19 +193,20 @@ const EventDetailsComponent: React.FC<Props> = ({
                   isReadOnly={isReadOnly}
                 />
 
-                {enrichmentCount > 0 && isLicenseValid && (
-                  <ThreatSummaryView
-                    isDraggable={isDraggable}
-                    hostRisk={hostRisk}
-                    userRisk={userRisk}
-                    browserFields={browserFields}
-                    data={data}
-                    eventId={id}
-                    timelineId={timelineId}
-                    enrichments={allEnrichments}
-                    isReadOnly={isReadOnly}
-                  />
-                )}
+                {enrichmentCount > 0 ||
+                  (isLicenseValid && (hostRisk || userRisk) && (
+                    <ThreatSummaryView
+                      isDraggable={isDraggable}
+                      hostRisk={hostRisk}
+                      userRisk={userRisk}
+                      browserFields={browserFields}
+                      data={data}
+                      eventId={id}
+                      timelineId={timelineId}
+                      enrichments={allEnrichments}
+                      isReadOnly={isReadOnly}
+                    />
+                  ))}
 
                 {isEnrichmentsLoading && (
                   <>
