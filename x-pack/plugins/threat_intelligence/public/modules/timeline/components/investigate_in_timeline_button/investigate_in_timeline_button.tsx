@@ -7,6 +7,7 @@
 
 import React, { VFC } from 'react';
 import { EuiButton } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useInvestigateInTimeline } from '../../hooks/use_investigate_in_timeline';
 import { Indicator } from '../../../../../common/types/indicator';
 
@@ -40,7 +41,10 @@ export const InvestigateInTimelineButton: VFC<InvestigateInTimelineButtonProps> 
 
   return (
     <EuiButton onClick={onClick} fill {...props}>
-      Investigate in Timeline
+      <FormattedMessage
+        defaultMessage="Investigate in Timeline"
+        id="xpack.threatIntelligence.investigateInTimelineButton"
+      />
     </EuiButton>
   );
 };

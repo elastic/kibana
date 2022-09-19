@@ -6,11 +6,17 @@
  */
 
 import React, { VFC } from 'react';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useInvestigateInTimeline } from '../../hooks/use_investigate_in_timeline';
 import { Indicator } from '../../../../../common/types/indicator';
-import { useStyles } from './styles';
+
+const BUTTON_LABEL: string = i18n.translate(
+  'xpack.threatIntelligence.investigateInTimelineButtonIcon',
+  {
+    defaultMessage: 'Investigate in Timeline',
+  }
+);
 
 export interface InvestigateInTimelineButtonIconProps {
   /**
@@ -34,8 +40,6 @@ export const InvestigateInTimelineButtonIcon: VFC<InvestigateInTimelineButtonIco
   data,
   ...props
 }) => {
-  const styles = useStyles();
-
   const { onClick } = useInvestigateInTimeline({ indicator: data });
 
   if (!onClick) {
@@ -43,14 +47,9 @@ export const InvestigateInTimelineButtonIcon: VFC<InvestigateInTimelineButtonIco
   }
 
   return (
-    <div css={styles.inlineFlex}>
+    <EuiToolTip content={BUTTON_LABEL}>
       <EuiButtonIcon
-        aria-label={i18n.translate(
-          'xpack.threatIntelligence.indicator.table.investigateInTimelineButton',
-          {
-            defaultMessage: 'Investigate in Timeline',
-          }
-        )}
+        aria-label={BUTTON_LABEL}
         iconType="timeline"
         iconSize="s"
         size="xs"
@@ -58,6 +57,6 @@ export const InvestigateInTimelineButtonIcon: VFC<InvestigateInTimelineButtonIco
         onClick={onClick}
         {...props}
       />
-    </div>
+    </EuiToolTip>
   );
 };

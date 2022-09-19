@@ -5,8 +5,8 @@ Object {
   "asFragment": [Function],
   "baseElement": <body>
     <div>
-      <div
-        css="[object Object]"
+      <span
+        class="euiToolTipAnchor"
       >
         <button
           aria-label="Investigate in Timeline"
@@ -21,12 +21,12 @@ Object {
             data-euiicon-type="timeline"
           />
         </button>
-      </div>
+      </span>
     </div>
   </body>,
   "container": <div>
-    <div
-      css="[object Object]"
+    <span
+      class="euiToolTipAnchor"
     >
       <button
         aria-label="Investigate in Timeline"
@@ -41,7 +41,7 @@ Object {
           data-euiicon-type="timeline"
         />
       </button>
-    </div>
+    </span>
   </div>,
   "debug": [Function],
   "findAllByAltText": [Function],
