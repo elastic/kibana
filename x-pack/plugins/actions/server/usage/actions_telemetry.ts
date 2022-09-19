@@ -402,7 +402,7 @@ export async function getInUseTotalCount(
   }
 }
 
-function replaceFirstAndLastDotSymbols(strToReplace: string) {
+export function replaceFirstAndLastDotSymbols(strToReplace: string) {
   const hasFirstSymbolDot = strToReplace.startsWith('.');
   const appliedString = hasFirstSymbolDot ? strToReplace.replace('.', '__') : strToReplace;
   const hasLastSymbolDot = strToReplace.endsWith('.');

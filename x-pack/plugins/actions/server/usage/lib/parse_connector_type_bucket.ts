@@ -6,7 +6,7 @@
  */
 
 import { AggregationsBuckets } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { replaceDotSymbols } from '@kbn/alerting-plugin/server/usage/lib/replace_dots_with_underscores';
+import { replaceFirstAndLastDotSymbols } from '../actions_telemetry';
 
 export interface AvgActionRunDurationByConnectorTypeBucket {
   key: string;
@@ -21,7 +21,7 @@ export function parseDurationsByConnectorTypesBucket(
   return buckets.reduce((acc, connectorType) => {
     return {
       ...acc,
-      [replaceDotSymbols(connectorType.key)]: Math.round(
+      [replaceFirstAndLastDotSymbols(connectorType.key)]: Math.round(
         connectorType.duration?.average?.value || 0
       ),
     };
@@ -42,8 +42,8 @@ export function parseActionRunOutcomeByConnectorTypesBucket(
     const outcomes = connectorType.outcome?.count?.buckets ?? [];
     return {
       ...acc,
-      [replaceDotSymbols(connectorType.key)]: outcomes.reduce((accBucket, bucket) => {
-        return { ...accBucket, [replaceDotSymbols(bucket.key)]: bucket.doc_count || 0 };
+      [replaceFirstAndLastDotSymbols(connectorType.key)]: outcomes.reduce((accBucket, bucket) => {
+        return { ...accBucket, [replaceFirstAndLastDotSymbols(bucket.key)]: bucket.doc_count || 0 };
       }, {}),
     };
   }, {});
