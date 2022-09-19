@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { MakeSchemaFrom, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { get } from 'lodash';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { ActionsUsage, byServiceProviderTypeSchema, byTypeSchema } from './types';
@@ -16,6 +16,15 @@ export function createActionsUsageCollector(
   config: ActionsConfig,
   taskManager: Promise<TaskManagerStartContract>
 ) {
+  const byConnectorTypeStatusPerDaySchema: MakeSchemaFrom<ActionsUsage>['count_connector_types_by_action_run_outcome_per_day'] =
+    {
+      DYNAMIC_KEY: {
+        success: { type: 'long' },
+        failure: { type: 'long' },
+        unknown: { type: 'long' },
+      },
+    };
+
   return usageCollection.makeUsageCollector<ActionsUsage>({
     type: 'actions',
     isReady: async () => {
@@ -47,6 +56,8 @@ export function createActionsUsageCollector(
       count_actions_executions_failed_by_type_per_day: byTypeSchema,
       avg_execution_time_per_day: { type: 'long' },
       avg_execution_time_by_type_per_day: byTypeSchema,
+      count_connector_types_by_action_run_outcome_per_day: byConnectorTypeStatusPerDaySchema,
+      avg_actions_run_duration_by_connector_type_per_day: { DYNAMIC_KEY: { type: 'long' } },
     },
     fetch: async () => {
       try {
@@ -77,6 +88,8 @@ export function createActionsUsageCollector(
           count_actions_executions_failed_by_type_per_day: {},
           avg_execution_time_per_day: 0,
           avg_execution_time_by_type_per_day: {},
+          count_connector_types_by_action_run_outcome_per_day: {},
+          avg_actions_run_duration_by_connector_type_per_day: {},
         };
       }
     },

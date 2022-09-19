@@ -123,15 +123,6 @@ const byStatusPerDaySchema: MakeSchemaFrom<AlertingUsage>['count_rules_by_execut
     unknown: { type: 'long' },
   };
 
-const byConnectorTypeStatusPerDaySchema: MakeSchemaFrom<AlertingUsage>['count_connector_types_by_action_run_outcome_per_day'] =
-  {
-    DYNAMIC_KEY: {
-      success: { type: 'long' },
-      failure: { type: 'long' },
-      unknown: { type: 'long' },
-    },
-  };
-
 const byNotifyWhenSchema: MakeSchemaFrom<AlertingUsage>['count_rules_by_notify_when'] = {
   on_action_group_change: { type: 'long' },
   on_active_alert: { type: 'long' },
@@ -217,14 +208,12 @@ export function createAlertingUsageCollector(
           count_rules_with_muted_alerts: 0,
           count_connector_types_by_consumers: {},
           count_rules_by_execution_status_per_day: {},
-          count_connector_types_by_action_run_outcome_per_day: {},
           avg_execution_time_per_day: 0,
           avg_execution_time_by_type_per_day: {},
           avg_es_search_duration_per_day: 0,
           avg_es_search_duration_by_type_per_day: {},
           avg_total_search_duration_per_day: 0,
           avg_total_search_duration_by_type_per_day: {},
-          avg_actions_run_duration_by_connector_type_per_day: {},
           percentile_num_generated_actions_per_day: {
             p50: 0,
             p90: 0,
@@ -303,14 +292,12 @@ export function createAlertingUsageCollector(
       count_rules_with_muted_alerts: { type: 'long' },
       count_connector_types_by_consumers: { DYNAMIC_KEY: { DYNAMIC_KEY: { type: 'long' } } },
       count_rules_by_execution_status_per_day: byStatusPerDaySchema,
-      count_connector_types_by_action_run_outcome_per_day: byConnectorTypeStatusPerDaySchema,
       avg_execution_time_per_day: { type: 'long' },
       avg_execution_time_by_type_per_day: byTypeSchema,
       avg_es_search_duration_per_day: { type: 'long' },
       avg_es_search_duration_by_type_per_day: byTypeSchema,
       avg_total_search_duration_per_day: { type: 'long' },
       avg_total_search_duration_by_type_per_day: byTypeSchema,
-      avg_actions_run_duration_by_connector_type_per_day: { DYNAMIC_KEY: { type: 'long' } },
       percentile_num_generated_actions_per_day: byPercentileSchema,
       percentile_num_generated_actions_by_type_per_day: byPercentileSchemaByType,
       percentile_num_alerts_per_day: byPercentileSchema,

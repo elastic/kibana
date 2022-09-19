@@ -130,6 +130,10 @@ export function telemetryTaskRunner(
                 totalExecutionsPerDay.countFailedByType,
               avg_execution_time_per_day: totalExecutionsPerDay.avgExecutionTime,
               avg_execution_time_by_type_per_day: totalExecutionsPerDay.avgExecutionTimeByType,
+              avg_actions_run_duration_by_connector_type_per_day:
+                totalExecutionsPerDay.avgRunDurationByConnectorType,
+              count_connector_types_by_action_run_outcome_per_day:
+                totalExecutionsPerDay.countRunOutcomeByConnectorType,
             },
             runAt: getNextMidnight(),
           };
@@ -140,5 +144,5 @@ export function telemetryTaskRunner(
 }
 
 function getNextMidnight() {
-  return moment().add(1, 'd').startOf('d').toDate();
+  return moment().add(1, 'm').startOf('m').toDate();
 }

@@ -16,7 +16,6 @@ import {
 import { getFailedAndUnrecognizedTasksPerDay } from './lib/get_telemetry_from_task_manager';
 import { getTotalCountAggregations, getTotalCountInUse } from './lib/get_telemetry_from_kibana';
 import {
-  getActionExecutionsTelemetryPerDay,
   getExecutionsPerDayCount,
   getExecutionTimeoutsPerDayCount,
 } from './lib/get_telemetry_from_event_log';
@@ -103,7 +102,6 @@ export function telemetryTaskRunner(
           getExecutionsPerDayCount({ esClient, eventLogIndex, logger }),
           getExecutionTimeoutsPerDayCount({ esClient, eventLogIndex, logger }),
           getFailedAndUnrecognizedTasksPerDay({ esClient, taskManagerIndex, logger }),
-          getActionExecutionsTelemetryPerDay({ esClient, eventLogIndex, logger }),
         ])
           .then(
             ([
@@ -112,7 +110,6 @@ export function telemetryTaskRunner(
               dailyExecutionCounts,
               dailyExecutionTimeoutCounts,
               dailyFailedAndUnrecognizedTasks,
-              dailyActionExecutionAggregations,
             ]) => {
               const hasErrors =
                 totalCountAggregations.hasErrors ||
@@ -184,10 +181,6 @@ export function telemetryTaskRunner(
                   avg_total_search_duration_per_day: dailyExecutionCounts.avgTotalSearchDuration,
                   avg_total_search_duration_by_type_per_day:
                     dailyExecutionCounts.avgTotalSearchDurationByType,
-                  avg_actions_run_duration_by_connector_type_per_day:
-                    dailyActionExecutionAggregations.avgRunDurationByConnectorType,
-                  count_connector_types_by_action_run_outcome_per_day:
-                    dailyActionExecutionAggregations.countRunOutcomeByConnectorType,
                   percentile_num_generated_actions_per_day:
                     dailyExecutionCounts.generatedActionsPercentiles,
                   percentile_num_generated_actions_by_type_per_day:

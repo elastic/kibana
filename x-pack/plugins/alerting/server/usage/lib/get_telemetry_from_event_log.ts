@@ -17,12 +17,6 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
-  AvgActionRunDurationByConnectorTypeBucket,
-  AvgActionRunOutcomeByConnectorTypeBucket,
-  parseActionRunOutcomeByConnectorTypesBucket,
-  parseDurationsByConnectorTypesBucket,
-} from './parse_connector_type_bucket';
-import {
   NUM_ALERTING_RULE_TYPES,
   NUM_ALERTING_EXECUTION_FAILURE_REASON_TYPES,
 } from '../alerting_usage_collector';
@@ -62,21 +56,12 @@ interface GetExecutionsPerDayCountResults {
   alertsPercentilesByType: Record<string, Record<string, number>>;
   countRulesByExecutionStatus: Record<string, number>;
 }
-
-interface GetActionExecutionsTelemetryPerDay {
-  hasErrors: boolean;
-  errorMessage?: string;
-  avgRunDurationByConnectorType: Record<string, number>;
-  countRunOutcomeByConnectorType: Record<string, number>;
-}
-
 interface GetExecutionTimeoutsPerDayCountResults {
   hasErrors: boolean;
   errorMessage?: string;
   countExecutionTimeouts: number;
   countExecutionTimeoutsByType: Record<string, number>;
 }
-
 interface GetExecutionCountsExecutionFailures extends AggregationsSingleBucketAggregateBase {
   by_reason: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
 }
@@ -228,117 +213,6 @@ export async function getExecutionsPerDayCount({
       alertsPercentiles: {},
       alertsPercentilesByType: {},
       countRulesByExecutionStatus: {},
-    };
-  }
-}
-
-export async function getActionExecutionsTelemetryPerDay({
-  esClient,
-  eventLogIndex,
-  logger,
-}: Opts): Promise<GetActionExecutionsTelemetryPerDay> {
-  try {
-    const eventLogAggs = {
-      avg_run_duration_by_connector_type: {
-        nested: {
-          path: 'kibana.saved_objects',
-        },
-        aggs: {
-          connector_types: {
-            terms: {
-              field: 'kibana.saved_objects.type_id',
-            },
-            aggs: {
-              duration: {
-                reverse_nested: {},
-                aggs: {
-                  average: {
-                    avg: {
-                      field: 'event.duration',
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      count_connector_types_by_action_run_outcome_per_day: {
-        nested: {
-          path: 'kibana.saved_objects',
-        },
-        aggs: {
-          connector_types: {
-            terms: {
-              field: 'kibana.saved_objects.type_id',
-            },
-            aggs: {
-              outcome: {
-                reverse_nested: {},
-                aggs: {
-                  count: {
-                    terms: {
-                      field: 'event.outcome',
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-
-    const query = {
-      index: eventLogIndex,
-      size: 0,
-      body: {
-        query: getProviderAndActionFilterForTimeRange('execute', 'actions'),
-        aggs: eventLogAggs,
-      },
-    };
-
-    logger.debug(`query for getActionExecutionsTelemetryPerDay - ${JSON.stringify(query)}`);
-    const results = await esClient.search(query);
-
-    logger.debug(
-      `results for getActionExecutionsTelemetryPerDay query - ${JSON.stringify(results)}`
-    );
-
-    const aggregations = results.aggregations as {
-      avg_run_duration_by_connector_type: {
-        connector_types: AggregationsTermsAggregateBase<AvgActionRunDurationByConnectorTypeBucket>;
-      };
-      count_connector_types_by_action_run_outcome_per_day: {
-        connector_types: AggregationsTermsAggregateBase<AvgActionRunOutcomeByConnectorTypeBucket>;
-      };
-    };
-
-    return {
-      hasErrors: false,
-      avgRunDurationByConnectorType: parseDurationsByConnectorTypesBucket(
-        aggregations.avg_run_duration_by_connector_type.connector_types.buckets
-      ),
-      countRunOutcomeByConnectorType: parseActionRunOutcomeByConnectorTypesBucket(
-        aggregations.count_connector_types_by_action_run_outcome_per_day.connector_types.buckets
-      ),
-    };
-  } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
-    logger.warn(
-      `Error executing alerting telemetry task: getActionExecutionsTelemetryPerDay - ${JSON.stringify(
-        err
-      )}`,
-      {
-        tags: ['alerting', 'telemetry-failed'],
-        error: { stack_trace: err.stack },
-      }
-    );
-    return {
-      hasErrors: true,
-      errorMessage,
-      avgRunDurationByConnectorType: {},
-      countRunOutcomeByConnectorType: {},
     };
   }
 }

@@ -6,7 +6,7 @@
  */
 
 import { AggregationsBuckets } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { replaceDotSymbols } from './replace_dots_with_underscores';
+import { replaceDotSymbols } from '@kbn/alerting-plugin/server/usage/lib/replace_dots_with_underscores';
 
 export interface AvgActionRunDurationByConnectorTypeBucket {
   key: string;
