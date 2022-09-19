@@ -14,13 +14,13 @@ import type { ActionStatus } from '../../../../types';
 
 export function useActionStatus(onAbortSuccess: () => void, refreshAgentActivity: boolean) {
   const [currentActions, setCurrentActions] = useState<ActionStatus[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isFirstLoading, setIsFirstLoading] = useState(true);
   const { notifications, overlays } = useStartServices();
 
   const refreshActions = useCallback(async () => {
     try {
       const res = await sendGetActionStatus();
-      setIsLoading(false);
+      setIsFirstLoading(false);
       if (res.error) {
         throw res.error;
       }
@@ -39,7 +39,7 @@ export function useActionStatus(onAbortSuccess: () => void, refreshAgentActivity
     }
   }, [notifications.toasts]);
 
-  if (isLoading) {
+  if (isFirstLoading) {
     refreshActions();
   }
 
@@ -86,6 +86,6 @@ export function useActionStatus(onAbortSuccess: () => void, refreshAgentActivity
     currentActions,
     refreshActions,
     abortUpgrade,
-    isLoading,
+    isFirstLoading,
   };
 }

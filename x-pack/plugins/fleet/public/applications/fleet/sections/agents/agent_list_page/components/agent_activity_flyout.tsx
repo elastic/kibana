@@ -55,7 +55,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
     perPage: SO_SEARCH_LIMIT,
   });
 
-  const { currentActions, abortUpgrade, isLoading } = useActionStatus(
+  const { currentActions, abortUpgrade, isFirstLoading } = useActionStatus(
     onAbortSuccess,
     refreshAgentActivity
   );
@@ -108,7 +108,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
         </EuiFlyoutHeader>
 
         <FullHeightFlyoutBody>
-          {isLoading ? (
+          {isFirstLoading ? (
             <EuiFlexGroup
               direction="row"
               justifyContent={'center'}
