@@ -68,20 +68,18 @@ const TooltipAnnotationDetails = ({
     formatter: FieldFormat | undefined;
   }>;
 }) => {
-  return (
-    extraFields.length > 0 && (
-      <div className="xyAnnotationTooltip__extraFields">
-        {extraFields.map((field) => (
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem className="xyAnnotationTooltip__extraFieldsKey">{field.name}:</EuiFlexItem>
-            <EuiFlexItem className="xyAnnotationTooltip__extraFieldsValue">
-              {field.formatter ? field.formatter.convert(row[field.key]) : row[field.key]}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ))}
-      </div>
-    )
-  );
+  return extraFields.length > 0 ? (
+    <div className="xyAnnotationTooltip__extraFields">
+      {extraFields.map((field) => (
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem className="xyAnnotationTooltip__extraFieldsKey">{field.name}:</EuiFlexItem>
+          <EuiFlexItem className="xyAnnotationTooltip__extraFieldsValue">
+            {field.formatter ? field.formatter.convert(row[field.key]) : row[field.key]}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ))}
+    </div>
+  ) : null;
 };
 
 const getExtraFields = (
