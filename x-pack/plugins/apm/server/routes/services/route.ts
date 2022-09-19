@@ -19,7 +19,7 @@ import { Annotation } from '@kbn/observability-plugin/common/annotations';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import { latencyAggregationTypeRt } from '../../../common/latency_aggregation_types';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
-import { getSearchAggregatedServiceMetrics } from '../../lib/helpers/service_metrics';
+import { getAggregatedMetrics } from '../../lib/helpers/get_aggregated_metrics';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceAnnotations } from './annotations';
 import { getServices } from './get_services';
@@ -131,21 +131,15 @@ const servicesRoute = createApmServerRoute({
       getRandomSampler({ security, request, probability }),
     ]);
 
-    const [searchAggregatedTransactions, searchAggregatedServiceMetrics] =
-      await Promise.all([
-        getSearchAggregatedTransactions({
-          ...setup,
-          kuery,
-          start,
-          end,
-        }),
-        getSearchAggregatedServiceMetrics({
-          ...setup,
-          kuery,
-          start,
-          end,
-        }),
-      ]);
+    const { apmEventClient, config } = setup;
+    const { searchAggregatedTransactions, searchAggregatedServiceMetrics } =
+      await getAggregatedMetrics({
+        config,
+        apmEventClient,
+        kuery,
+        start,
+        end,
+      });
 
     return getServices({
       environment,
@@ -225,21 +219,15 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
       getRandomSampler({ security, request, probability }),
     ]);
 
-    const [searchAggregatedTransactions, searchAggregatedServiceMetrics] =
-      await Promise.all([
-        getSearchAggregatedTransactions({
-          ...setup,
-          kuery,
-          start,
-          end,
-        }),
-        getSearchAggregatedServiceMetrics({
-          ...setup,
-          kuery,
-          start,
-          end,
-        }),
-      ]);
+    const { apmEventClient, config } = setup;
+    const { searchAggregatedTransactions, searchAggregatedServiceMetrics } =
+      await getAggregatedMetrics({
+        config,
+        apmEventClient,
+        kuery,
+        start,
+        end,
+      });
 
     if (!serviceNames.length) {
       throw Boom.badRequest(`serviceNames cannot be empty`);
