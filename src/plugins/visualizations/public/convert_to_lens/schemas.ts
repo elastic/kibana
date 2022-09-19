@@ -81,6 +81,45 @@ const isValidVis = (visSchemas: Schemas, splits: Array<keyof Schemas>) => {
   return false;
 };
 
+export const getMetricsWithoutDuplicates = (metrics: Array<SchemaConfig<SupportedAggregation>>) =>
+  metrics.reduce<Array<SchemaConfig<SupportedAggregation>>>((acc, metric) => {
+    if (metric.aggId && !acc.some((m) => m.aggId === metric.aggId)) {
+      acc.push(metric);
+    }
+    return acc;
+  }, []);
+
+export const sortColumns = (
+  columns: AggBasedColumn[],
+  visSchemas: Schemas,
+  bucketsAndSplitsKeys: Array<keyof Schemas>,
+  metricsWithoutDuplicates: Array<SchemaConfig<SupportedAggregation>>
+) => {
+  const aggOrderMap: Record<string, number> = ['metric', ...bucketsAndSplitsKeys].reduce(
+    (acc, key) => {
+      return {
+        ...acc,
+        ...(key === 'metric' ? metricsWithoutDuplicates : visSchemas[key])?.reduce(
+          (newAcc, schema) => {
+            newAcc[schema.aggId] = schema.accessor;
+            return newAcc;
+          },
+          {}
+        ),
+      };
+    },
+    {}
+  );
+
+  return columns.sort(
+    (a, b) =>
+      Number(aggOrderMap[a.meta.aggId.split('-')[0]]) -
+      Number(aggOrderMap[b.meta.aggId.split('-')[0]])
+  );
+};
+
+export const getColumnIds = (columns: AggBasedColumn[]) => columns.map(({ columnId }) => columnId);
+
 export const getColumnsFromVis = <T>(
   vis: Vis<T>,
   timefilter: TimefilterContract,
@@ -102,26 +141,6 @@ export const getColumnsFromVis = <T>(
     return null;
   }
 
-  const updatedMetrics = visSchemas.metric.reduce<Array<SchemaConfig<SupportedAggregation>>>(
-    (acc, metric) => {
-      if (metric.aggId && !acc.some((m) => m.aggId === metric.aggId)) {
-        acc.push(metric);
-      }
-      return acc;
-    },
-    []
-  );
-
-  const sortMap: Record<string, number> = ['metric', ...buckets, ...splits].reduce((acc, key) => {
-    return {
-      ...acc,
-      ...(key === 'metric' ? updatedMetrics : visSchemas[key])?.reduce((newAcc, schema) => {
-        newAcc[schema.aggId] = schema.accessor;
-        return newAcc;
-      }, {}),
-    };
-  }, {});
-
   const customBuckets = getCutomBucketsFromSiblingAggs(visSchemas.metric);
 
   // doesn't support sibbling pipeline aggs with different bucket aggs
@@ -129,9 +148,12 @@ export const getColumnsFromVis = <T>(
     return null;
   }
 
-  const aggs = updatedMetrics as Array<SchemaConfig<METRIC_TYPES>>;
+  const metricsWithoutDuplicates = getMetricsWithoutDuplicates(visSchemas.metric);
+  const aggs = metricsWithoutDuplicates as Array<SchemaConfig<METRIC_TYPES>>;
 
-  const metricColumns = updatedMetrics.flatMap((m) => convertMetricToColumns(m, dataView, aggs));
+  const metricColumns = metricsWithoutDuplicates.flatMap((m) =>
+    convertMetricToColumns(m, dataView, aggs)
+  );
 
   if (metricColumns.includes(null)) {
     return null;
@@ -175,23 +197,20 @@ export const getColumnsFromVis = <T>(
     return null;
   }
 
-  const columns = [
-    ...metrics,
-    ...bucketColumns,
-    ...splitBucketColumns,
-    ...customBucketColumns,
-  ].sort(
-    (a, b) =>
-      Number(sortMap[a.meta.aggId.split('-')[0]]) - Number(sortMap[b.meta.aggId.split('-')[0]])
+  const columns = sortColumns(
+    [...metrics, ...bucketColumns, ...splitBucketColumns, ...customBucketColumns],
+    visSchemas,
+    [...buckets, ...splits],
+    metricsWithoutDuplicates
   );
+
   const columnsWithoutReferenced = columns.filter(
     ({ columnId }) => !isReferenced(columns, columnId)
   );
+
   return {
-    metrics: metrics.map(({ columnId }) => columnId),
-    buckets: [...bucketColumns, ...splitBucketColumns, ...customBucketColumns].map(
-      ({ columnId }) => columnId
-    ),
+    metrics: getColumnIds(metrics),
+    buckets: getColumnIds([...bucketColumns, ...splitBucketColumns, ...customBucketColumns]),
     bucketCollapseFn: getBucketCollapseFn(visSchemas),
     columnsWithoutReferenced,
     columns,
