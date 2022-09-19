@@ -303,7 +303,6 @@ describe('ProjectMonitorFormatter', () => {
       failedMonitors: [
         {
           details: "Cannot read properties of undefined (reading 'buildPackagePolicyFromPackage')",
-          id: '2',
           payload: payloadData,
           reason: 'Failed to create 2 monitors',
         },
@@ -359,7 +358,6 @@ describe('ProjectMonitorFormatter', () => {
       failedMonitors: [
         {
           details: "Cannot read properties of undefined (reading 'buildPackagePolicyFromPackage')",
-          id: '2',
           payload: payloadData,
           reason: 'Failed to create 2 monitors',
         },
@@ -417,7 +415,6 @@ describe('ProjectMonitorFormatter', () => {
         {
           details:
             'this.server.fleet.packagePolicyService.buildPackagePolicyFromPackage is not a function',
-          id: '2',
           reason: 'Failed to create 2 monitors',
           payload: payloadData,
         },
