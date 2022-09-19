@@ -2323,7 +2323,6 @@
     "discover.viewModes.document.label": "ドキュメント",
     "discover.viewModes.fieldStatistics.betaTitle": "ベータ",
     "discover.viewModes.fieldStatistics.label": "フィールド統計情報",
-    "discover.viewModes.legend": "表示モード",
     "embeddableApi.addPanel.savedObjectAddedToContainerSuccessMessageTitle": "{savedObjectName} が追加されました",
     "embeddableApi.attributeService.saveToLibraryError": "保存中にエラーが発生しました。エラー：{errorMessage}",
     "embeddableApi.errors.embeddableFactoryNotFound": "{type} を読み込めません。Elasticsearch と Kibana のデフォルトのディストリビューションを適切なライセンスでアップグレードしてください。",

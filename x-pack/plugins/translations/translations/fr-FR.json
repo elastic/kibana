@@ -2327,7 +2327,6 @@
     "discover.viewModes.document.label": "Documents",
     "discover.viewModes.fieldStatistics.betaTitle": "Bêta",
     "discover.viewModes.fieldStatistics.label": "Statistiques de champ",
-    "discover.viewModes.legend": "Modes d'affichage",
     "embeddableApi.addPanel.savedObjectAddedToContainerSuccessMessageTitle": "{savedObjectName} a été ajouté.",
     "embeddableApi.attributeService.saveToLibraryError": "Une erreur s'est produite lors de l'enregistrement. Erreur : {errorMessage}.",
     "embeddableApi.errors.embeddableFactoryNotFound": "Impossible de charger {type}. Veuillez effectuer une mise à niveau vers la distribution par défaut d'Elasticsearch et de Kibana avec la licence appropriée.",
