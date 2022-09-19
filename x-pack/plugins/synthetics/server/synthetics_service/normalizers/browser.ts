@@ -7,7 +7,7 @@
 
 import { PrivateLocation } from '../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
-
+import { formatKibanaNamespace } from '../../../common/formatters';
 import {
   BrowserFields,
   ConfigKey,
@@ -102,7 +102,7 @@ export const normalizeProjectMonitor = ({
       : defaultFields[ConfigKey.PARAMS],
     [ConfigKey.JOURNEY_FILTERS_MATCH]:
       monitor.filter?.match || defaultFields[ConfigKey.JOURNEY_FILTERS_MATCH],
-    [ConfigKey.NAMESPACE]: namespace || defaultFields[ConfigKey.NAMESPACE],
+    [ConfigKey.NAMESPACE]: formatKibanaNamespace(namespace) || defaultFields[ConfigKey.NAMESPACE],
     [ConfigKey.ORIGINAL_SPACE]: namespace || defaultFields[ConfigKey.ORIGINAL_SPACE],
     [ConfigKey.CUSTOM_HEARTBEAT_ID]: `${monitor.id}-${projectId}-${namespace}`,
     [ConfigKey.TIMEOUT]: null,
