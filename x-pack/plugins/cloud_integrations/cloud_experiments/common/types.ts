@@ -41,6 +41,8 @@ export type CloudExperimentsFeatureFlagNames = keyof typeof FEATURE_FLAG_NAMES;
 
 /**
  * The contract of the start lifecycle method
+ *
+ * @public
  */
 export interface CloudExperimentsPluginStart {
   /**
