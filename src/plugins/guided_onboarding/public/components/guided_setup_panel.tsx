@@ -7,7 +7,6 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { css } from '@emotion/react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -24,6 +23,7 @@ import {
   EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { ApplicationStart } from '@kbn/core-application-browser';
@@ -35,16 +35,13 @@ import type { GuideConfig, StepStatus, GuidedSetupState, StepConfig } from '../t
 import type { ApiService } from '../services/api';
 
 import { GuidedSetupStep } from './guided_setup_panel_step';
+import { setupGuidePanelStyles } from './guided_setup_panel.styles';
 
 interface Props {
   api: ApiService;
   application: ApplicationStart;
   http: HttpStart;
 }
-
-const guidedPanelContainerCss = css`
-  width: 400px;
-`;
 
 const getConfig = (state?: GuidedSetupState): GuideConfig | undefined => {
   if (state?.activeGuide && state.activeGuide !== 'unset') {
@@ -80,9 +77,12 @@ const getStepStatus = (steps: StepConfig[], stepIndex: number, activeStep?: stri
 };
 
 export const GuidedSetupPanel = ({ api, application }: Props) => {
+  const { euiTheme } = useEuiTheme();
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [guidedSetupState, setGuidedSetupState] = useState<GuidedSetupState | undefined>(undefined);
   const isFirstRender = useRef(true);
+
+  const styles = setupGuidePanelStyles(euiTheme);
 
   const toggleGuide = () => {
     setIsGuideOpen((prevIsGuideOpen) => !prevIsGuideOpen);
@@ -148,7 +148,13 @@ export const GuidedSetupPanel = ({ api, application }: Props) => {
       </EuiButton>
 
       {isGuideOpen && (
-        <EuiFlyout ownFocus onClose={toggleGuide} aria-labelledby="onboarding-guide">
+        <EuiFlyout
+          ownFocus
+          onClose={toggleGuide}
+          aria-labelledby="onboarding-guide"
+          css={styles.flyoutOverrides.flyoutContainer}
+          maskProps={{ headerZindexLocation: 'above' }}
+        >
           <EuiFlyoutHeader>
             <EuiButtonEmpty
               onClick={navigateToLandingPage}
@@ -162,8 +168,6 @@ export const GuidedSetupPanel = ({ api, application }: Props) => {
               })}
             </EuiButtonEmpty>
 
-            <EuiSpacer size="m" />
-
             <EuiTitle size="m">
               <h2>{guideConfig?.title}</h2>
             </EuiTitle>
@@ -172,7 +176,7 @@ export const GuidedSetupPanel = ({ api, application }: Props) => {
             <EuiHorizontalRule margin="s" />
           </EuiFlyoutHeader>
 
-          <EuiFlyoutBody>
+          <EuiFlyoutBody css={styles.flyoutOverrides.flyoutBody}>
             <div>
               <EuiText size="m">
                 <p>{guideConfig?.description}</p>
@@ -181,13 +185,15 @@ export const GuidedSetupPanel = ({ api, application }: Props) => {
               {guideConfig.docs && (
                 <>
                   <EuiSpacer size="s" />
-                  <EuiLink external target="_blank" href={guideConfig.docs.url}>
-                    {guideConfig.docs.text}
-                  </EuiLink>
+                  <EuiText size="m">
+                    <EuiLink external target="_blank" href={guideConfig.docs.url}>
+                      {guideConfig.docs.text}
+                    </EuiLink>
+                  </EuiText>
                 </>
               )}
 
-              <EuiHorizontalRule />
+              <EuiSpacer size="xl" />
 
               {/*
                  TODO: Progress bar should only show after the first step has been started
@@ -208,7 +214,9 @@ export const GuidedSetupPanel = ({ api, application }: Props) => {
                 size="l"
               />
 
-              <EuiSpacer size="xl" />
+              <EuiSpacer size="s" />
+
+              <EuiHorizontalRule />
 
               {guideConfig?.steps.map((step, index, steps) => {
                 const accordionId = htmlIdGenerator(`accordion${index}`)();
@@ -227,7 +235,7 @@ export const GuidedSetupPanel = ({ api, application }: Props) => {
             </div>
           </EuiFlyoutBody>
 
-          <EuiFlyoutFooter>
+          <EuiFlyoutFooter css={styles.flyoutOverrides.flyoutFooter}>
             <EuiFlexGroup direction="column" alignItems="center" gutterSize="xs">
               <EuiFlexItem>
                 {/* TODO: Implement exit guide modal - https://github.com/elastic/kibana/issues/139804 */}

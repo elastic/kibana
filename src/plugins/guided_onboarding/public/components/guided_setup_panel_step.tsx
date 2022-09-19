@@ -64,7 +64,9 @@ export const GuidedSetupStep = ({
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText css={stepTitleCss}>{stepConfig.title}</EuiText>
+        <EuiText size="m" css={stepTitleCss}>
+          {stepConfig.title}
+        </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -104,7 +106,7 @@ export const GuidedSetupStep = ({
         </>
       </EuiAccordion>
 
-      <EuiHorizontalRule margin="m" />
+      <EuiHorizontalRule margin="l" />
     </div>
   );
 };
