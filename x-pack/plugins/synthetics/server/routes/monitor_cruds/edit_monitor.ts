@@ -58,6 +58,8 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
     const monitor = request.body as SyntheticsMonitor;
     const { monitorId } = request.params;
 
+    const spaceId = server.spaces.spacesService.getSpaceId(request);
+
     try {
       const previousMonitor: SavedObject<EncryptedSyntheticsMonitor> = await savedObjectsClient.get(
         syntheticsMonitorType,
@@ -101,6 +103,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         request,
         normalizedMonitor: editedMonitor,
         monitorWithRevision: formattedMonitor,
+        spaceId,
       });
 
       // Return service sync errors in OK response
@@ -131,6 +134,7 @@ export const syncEditedMonitor = async ({
   syntheticsMonitorClient,
   savedObjectsClient,
   request,
+  spaceId,
 }: {
   normalizedMonitor: SyntheticsMonitor;
   monitorWithRevision: SyntheticsMonitorWithSecrets;
@@ -140,6 +144,7 @@ export const syncEditedMonitor = async ({
   syntheticsMonitorClient: SyntheticsMonitorClient;
   savedObjectsClient: SavedObjectsClientContract;
   request: KibanaRequest;
+  spaceId: string;
 }) => {
   try {
     const editedSOPromise = savedObjectsClient.update<MonitorFields>(
@@ -152,7 +157,8 @@ export const syncEditedMonitor = async ({
       normalizedMonitor as MonitorFields,
       previousMonitor.id,
       request,
-      savedObjectsClient
+      savedObjectsClient,
+      spaceId
     );
 
     const [editedMonitorSavedObject, errors] = await Promise.all([

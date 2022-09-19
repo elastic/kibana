@@ -47,6 +47,10 @@ describe('syncEditedMonitor', () => {
           .fn()
           .mockReturnValue({ integrations: { writeIntegrationPolicies: true } }),
       },
+      packagePolicyService: {
+        get: jest.fn().mockReturnValue({}),
+        buildPackagePolicyFromPackage: jest.fn().mockReturnValue({}),
+      },
     },
   } as unknown as UptimeServerSetup;
 
@@ -96,6 +100,7 @@ describe('syncEditedMonitor', () => {
       request: {} as unknown as KibanaRequest,
       savedObjectsClient:
         serverMock.authSavedObjectsClient as unknown as SavedObjectsClientContract,
+      spaceId: 'test-space',
     });
 
     expect(syntheticsService.editConfig).toHaveBeenCalledWith(
