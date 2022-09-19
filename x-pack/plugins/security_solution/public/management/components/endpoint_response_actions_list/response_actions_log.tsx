@@ -121,6 +121,7 @@ export const ResponseActionsLog = memo<
     statuses: statusesFromUrl,
     startDate: startDateFromUrl,
     endDate: endDateFromUrl,
+    users: usersFromUrl,
   } = useActionHistoryUrlParams();
 
   const getTestId = useTestIdGenerator('response-actions-list');
@@ -149,9 +150,10 @@ export const ResponseActionsLog = memo<
         statuses: statusesFromUrl?.length
           ? (statusesFromUrl as ResponseActionStatus[])
           : prevState.statuses,
+        userIds: usersFromUrl?.length ? usersFromUrl : prevState.userIds,
       }));
     }
-  }, [commandsFromUrl, agentIdsFromUrl, isFlyout, statusesFromUrl, setQueryParams]);
+  }, [commandsFromUrl, agentIdsFromUrl, isFlyout, statusesFromUrl, setQueryParams, usersFromUrl]);
 
   // date range picker state and handlers
   const { dateRangePickerState, onRefreshChange, onTimeChange } = useDateRangePicker(isFlyout);
@@ -205,6 +207,15 @@ export const ResponseActionsLog = memo<
     },
     [setQueryParams]
   );
+
+  // handle on change users filter
+  const onChangeUsersFilter = useCallback(
+    (selectedUserIds: string[]) => {
+      setQueryParams((prevState) => ({ ...prevState, userIds: selectedUserIds }));
+    },
+    [setQueryParams]
+  );
+
   // total actions
   const totalItemCount = useMemo(() => actionList?.total ?? 0, [actionList]);
 
@@ -585,6 +596,7 @@ export const ResponseActionsLog = memo<
         onChangeHostsFilter={onChangeHostsFilter}
         onChangeCommandsFilter={onChangeCommandsFilter}
         onChangeStatusesFilter={onChangeStatusesFilter}
+        onChangeUsersFilter={onChangeUsersFilter}
         onRefresh={onRefresh}
         onRefreshChange={onRefreshChange}
         onTimeChange={onTimeChange}

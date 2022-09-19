@@ -106,4 +106,19 @@ describe('#actionsLogFiltersFromUrlParams', () => {
       users: undefined,
     });
   });
+
+  it('should use valid user values to URL params', () => {
+    expect(
+      actionsLogFiltersFromUrlParams({
+        users: 'userA,userB',
+      })
+    ).toEqual({
+      commands: undefined,
+      endDate: undefined,
+      hosts: undefined,
+      startDate: undefined,
+      statuses: undefined,
+      users: ['userA', 'userB'],
+    });
+  });
 });
