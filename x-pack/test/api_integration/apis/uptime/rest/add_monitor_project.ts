@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import { format as formatUrl } from 'url';
 import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -124,6 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         expect(messages).to.have.length(2);
+        expect(messages[0]).eql('1 monitor updated successfully.');
         expect(messages[1].createdMonitors).eql([]);
         expect(messages[1].failedMonitors).eql([]);
         expect(messages[1].updatedMonitors).eql(
@@ -233,6 +235,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         expect(messages).to.have.length(2);
+        expect(messages[0]).eql('1 monitor updated successfully.');
         expect(messages[1].createdMonitors).eql([]);
         expect(messages[1].failedMonitors).eql([]);
         expect(messages[1].deletedMonitors).eql([]);
@@ -280,6 +283,7 @@ export default function ({ getService }: FtrProviderContext) {
             keep_stale: false,
           })
         );
+
         expect(messages).to.have.length(3);
 
         // expect monitor to have been deleted
@@ -542,7 +546,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         const { monitors } = getResponse.body;
         expect(monitors.length).eql(1);
-        expect(monitors[0].attributes[ConfigKey.NAMESPACE]).eql(SPACE_ID);
+        expect(monitors[0].attributes[ConfigKey.NAMESPACE]).eql(formatKibanaNamespace(SPACE_ID));
       } finally {
         await deleteMonitor(
           projectMonitors.monitors[0].id,
@@ -649,6 +653,7 @@ export default function ({ getService }: FtrProviderContext) {
           JSON.stringify(projectMonitors)
         );
         expect(messages).to.have.length(2);
+        expect(messages[0]).eql('1 monitor updated successfully.');
         expect(messages[1].updatedMonitors).eql([projectMonitors.monitors[0].id]);
 
         // ensure that monitor can still be decrypted
@@ -744,8 +749,8 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         expect(messages).to.have.length(3);
-        expect(messages[0]).to.eql(`${testMonitors[0].id}: monitor created successfully`);
-        expect(messages[1]).to.eql('test-id-2: failed to create or update monitor');
+        expect(messages[0]).to.eql('test-id-2: failed to create or update monitor');
+        expect(messages[1]).to.eql(`1 monitor created successfully.`);
         expect(messages[2]).to.eql({
           createdMonitors: [testMonitors[0].id],
           updatedMonitors: [],
@@ -945,10 +950,9 @@ export default function ({ getService }: FtrProviderContext) {
             monitors: testMonitors,
           })
         );
-        expect(messages).to.have.length(3);
+        expect(messages).to.have.length(2);
         expect(messages).to.eql([
-          `${testMonitors[0].id}: monitor created successfully`,
-          'test-id-2: monitor created successfully',
+          `2 monitors created successfully.`,
           {
             createdMonitors: [testMonitors[0].id, 'test-id-2'],
             updatedMonitors: [],
