@@ -172,7 +172,13 @@ export const DashboardUnsavedListing = ({
     return () => {
       canceled = true;
     };
-  }, [dashboardSessionStorage, refreshUnsavedDashboards, unsavedDashboardIds, savedObjectsClient]);
+  }, [
+    refreshUnsavedDashboards,
+    dashboardSessionStorage,
+    unsavedDashboardIds,
+    savedObjectsClient,
+    findDashboards,
+  ]);
 
   return unsavedDashboardIds.length === 0 ? null : (
     <>

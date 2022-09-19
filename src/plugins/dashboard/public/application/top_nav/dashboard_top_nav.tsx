@@ -159,7 +159,7 @@ export function DashboardTopNav({
     return () => {
       visibleSubscription.unsubscribe();
     };
-  }, [allowByValueEmbeddables, dashboardState]);
+  }, [allowByValueEmbeddables, chromeRecentlyAccessed, dashboardState, getChromeIsVisible$]);
 
   const addFromLibrary = useCallback(() => {
     if (!isErrorEmbeddable(dashboardAppState.dashboardContainer)) {
@@ -179,12 +179,13 @@ export function DashboardTopNav({
     }
   }, [
     dashboardAppState.dashboardContainer,
+    usageCollection.reportUiCounter,
     getEmbeddableFactories,
     getEmbeddableFactory,
-    usageCollection,
+    savedObjectsClient,
     notifications,
-    uiSettings,
     overlays,
+    uiSettings,
     theme,
   ]);
 
@@ -328,8 +329,10 @@ export function DashboardTopNav({
     closeAllFlyouts();
     showSaveModal(dashboardSaveModal, i18nContext);
   }, [
+    saveDashboardStateToSavedObject,
+    checkForDuplicateDashboardTitle,
     dispatchDashboardStateChange,
-
+    hasSavedObjectsTagging,
     dashboardAppState,
     closeAllFlyouts,
     i18nContext,
@@ -353,7 +356,7 @@ export function DashboardTopNav({
       if (!mounted) return;
       setState((s) => ({ ...s, isSaveInProgress: false }));
     }, DashboardConstants.CHANGE_CHECK_DEBOUNCE);
-  }, [savedObjectsClient, dashboardAppState, redirectTo, mounted]);
+  }, [dashboardAppState, saveDashboardStateToSavedObject, redirectTo, mounted]);
 
   const runClone = useCallback(() => {
     const currentState = dashboardAppState.getLatestDashboardState();
@@ -391,7 +394,12 @@ export function DashboardTopNav({
       return saveResult.id ? { id: saveResult.id } : { error: saveResult.error };
     };
     showCloneModal({ onClone, title: currentState.title });
-  }, [dashboardAppState, redirectTo]);
+  }, [
+    checkForDuplicateDashboardTitle,
+    saveDashboardStateToSavedObject,
+    dashboardAppState,
+    redirectTo,
+  ]);
 
   const showOptions = useCallback(
     (anchorElement: HTMLElement) => {

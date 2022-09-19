@@ -74,7 +74,6 @@ import { ExportCSVAction } from './application/actions/export_csv_action';
 import { dashboardFeatureCatalog } from './dashboard_strings';
 import { FiltersNotificationBadge } from './application/actions/filters_notification_badge';
 import type { DashboardMountContextProps } from './types';
-import { pluginServices } from './services/plugin_services';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -157,6 +156,7 @@ export class DashboardPlugin
         new DashboardAppLocatorDefinition({
           useHashedUrl: core.uiSettings.get('state:storeInSessionStorage'),
           getDashboardFilterFields: async (dashboardId: string) => {
+            const { pluginServices } = await import('./services/plugin_services');
             const {
               dashboardSavedObject: { loadDashboardStateFromSavedObject },
             } = pluginServices.getServices();

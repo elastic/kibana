@@ -7,7 +7,6 @@
  */
 
 export * from './filter_utils';
-export { getDashboardIdFromUrl } from './url';
 export { addHelpMenuToAppChrome } from './help_menu_util';
 export { diffDashboardState } from './diff_dashboard_state';
 export { syncDashboardUrlState } from './sync_dashboard_url_state';

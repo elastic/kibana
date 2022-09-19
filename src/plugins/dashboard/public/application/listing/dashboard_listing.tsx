@@ -113,7 +113,7 @@ export const DashboardListing = ({
     return () => {
       stopSyncingQueryServiceStateWithUrl();
     };
-  }, [title, redirectTo, query, kbnUrlStateStorage]);
+  }, [title, redirectTo, query, kbnUrlStateStorage, findDashboards]);
 
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
@@ -258,7 +258,7 @@ export const DashboardListing = ({
         hasReference,
       });
     },
-    [listingLimit, parseSearchQuery]
+    [findDashboards, listingLimit, parseSearchQuery]
   );
 
   const deleteItems = useCallback(

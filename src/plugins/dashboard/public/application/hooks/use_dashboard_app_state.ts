@@ -320,14 +320,20 @@ export const useDashboardAppState = ({
   }, [
     dashboardAppState.$triggerDashboardRefresh,
     dashboardAppState.$onDashboardStateChange,
+    loadDashboardStateFromSavedObject,
     dispatchDashboardStateChange,
     $onLastSavedStateChange,
     dashboardSessionStorage,
     dashboardCapabilities,
     isEmbeddedExternally,
+    getScreenshotContext,
     kbnUrlStateStorage,
+    setShowNoDataPage,
+    redirectLegacyUrl,
     savedDashboardId,
+    isScreenshotMode,
     getStateTransfer,
+    showNoDataPage,
     scopedHistory,
     notifications,
     kibanaVersion,
@@ -337,11 +343,6 @@ export const useDashboardAppState = ({
     history,
     search,
     query,
-    showNoDataPage,
-    setShowNoDataPage,
-    redirectLegacyUrl,
-    getScreenshotContext,
-    isScreenshotMode,
   ]);
 
   /**
