@@ -179,6 +179,16 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       sortable: false,
     },
     {
+      'data-test-subj': 'aiopsSpikeAnalysisTableColumnDocCount',
+      width: NARROW_COLUMN_WIDTH,
+      field: 'doc_count',
+      name: i18n.translate(
+        'xpack.aiops.correlations.failedTransactions.correlationsTable.docCountLabel',
+        { defaultMessage: 'Doc count' }
+      ),
+      sortable: true,
+    },
+    {
       'data-test-subj': 'aiopsSpikeAnalysisTableColumnPValue',
       width: NARROW_COLUMN_WIDTH,
       field: 'pValue',
