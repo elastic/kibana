@@ -148,4 +148,5 @@ export interface UsageStats {
   'securitySolution:showRelatedIntegrations': boolean;
   'visualization:visualize:legacyGaugeChartsLibrary': boolean;
   'enterpriseSearch:enableIndexTransformsTab': boolean;
+  'enterpriseSearch:enableBehavioralAnalyticsSection': boolean;
 }

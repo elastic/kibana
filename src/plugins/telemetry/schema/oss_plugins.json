@@ -7736,125 +7736,6 @@
         }
       }
     },
-    "event_loop_delays": {
-      "properties": {
-        "daily": {
-          "type": "array",
-          "items": {
-            "properties": {
-              "processId": {
-                "type": "long",
-                "_meta": {
-                  "description": "The process id of the monitored kibana instance."
-                }
-              },
-              "instanceUuid": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "The uuid of the kibana instance."
-                }
-              },
-              "fromTimestamp": {
-                "type": "date",
-                "_meta": {
-                  "description": "Timestamp at which the histogram started monitoring."
-                }
-              },
-              "lastUpdatedAt": {
-                "type": "date",
-                "_meta": {
-                  "description": "Latest timestamp this histogram object was updated this day."
-                }
-              },
-              "min": {
-                "type": "long",
-                "_meta": {
-                  "description": "The minimum recorded event loop delay in ms."
-                }
-              },
-              "max": {
-                "type": "long",
-                "_meta": {
-                  "description": "The maximum recorded event loop delay in ms."
-                }
-              },
-              "mean": {
-                "type": "long",
-                "_meta": {
-                  "description": "The mean of the recorded event loop delays in ms."
-                }
-              },
-              "exceeds": {
-                "type": "long",
-                "_meta": {
-                  "description": "The number of times the event loop delay exceeded the maximum 1 hour eventloop delay threshold."
-                }
-              },
-              "stddev": {
-                "type": "long",
-                "_meta": {
-                  "description": "The standard deviation of the recorded event loop delays  in ms."
-                }
-              },
-              "percentiles": {
-                "properties": {
-                  "50": {
-                    "type": "long",
-                    "_meta": {
-                      "description": "The 50th accumulated percentile distribution in ms"
-                    }
-                  },
-                  "75": {
-                    "type": "long",
-                    "_meta": {
-                      "description": "The 75th accumulated percentile distribution in ms"
-                    }
-                  },
-                  "95": {
-                    "type": "long",
-                    "_meta": {
-                      "description": "The 95th accumulated percentile distribution in ms"
-                    }
-                  },
-                  "99": {
-                    "type": "long",
-                    "_meta": {
-                      "description": "The 99th accumulated percentile distribution in ms"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "localization": {
-      "properties": {
-        "locale": {
-          "type": "keyword",
-          "_meta": {
-            "description": "The default locale set on the Kibana system"
-          }
-        },
-        "integrities": {
-          "properties": {
-            "DYNAMIC_KEY": {
-              "type": "text",
-              "_meta": {
-                "description": "Translation file hash. If the hash is different it indicates that a custom translation file is used"
-              }
-            }
-          }
-        },
-        "labelsCount": {
-          "type": "long",
-          "_meta": {
-            "description": "The number of translated labels"
-          }
-        }
-      }
-    },
     "stack_management": {
       "properties": {
         "securitySolution:defaultIndex": {
@@ -8674,6 +8555,131 @@
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
+          }
+        },
+        "enterpriseSearch:enableBehavioralAnalyticsSection": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        }
+      }
+    },
+    "event_loop_delays": {
+      "properties": {
+        "daily": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "processId": {
+                "type": "long",
+                "_meta": {
+                  "description": "The process id of the monitored kibana instance."
+                }
+              },
+              "instanceUuid": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The uuid of the kibana instance."
+                }
+              },
+              "fromTimestamp": {
+                "type": "date",
+                "_meta": {
+                  "description": "Timestamp at which the histogram started monitoring."
+                }
+              },
+              "lastUpdatedAt": {
+                "type": "date",
+                "_meta": {
+                  "description": "Latest timestamp this histogram object was updated this day."
+                }
+              },
+              "min": {
+                "type": "long",
+                "_meta": {
+                  "description": "The minimum recorded event loop delay in ms."
+                }
+              },
+              "max": {
+                "type": "long",
+                "_meta": {
+                  "description": "The maximum recorded event loop delay in ms."
+                }
+              },
+              "mean": {
+                "type": "long",
+                "_meta": {
+                  "description": "The mean of the recorded event loop delays in ms."
+                }
+              },
+              "exceeds": {
+                "type": "long",
+                "_meta": {
+                  "description": "The number of times the event loop delay exceeded the maximum 1 hour eventloop delay threshold."
+                }
+              },
+              "stddev": {
+                "type": "long",
+                "_meta": {
+                  "description": "The standard deviation of the recorded event loop delays  in ms."
+                }
+              },
+              "percentiles": {
+                "properties": {
+                  "50": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "The 50th accumulated percentile distribution in ms"
+                    }
+                  },
+                  "75": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "The 75th accumulated percentile distribution in ms"
+                    }
+                  },
+                  "95": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "The 95th accumulated percentile distribution in ms"
+                    }
+                  },
+                  "99": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "The 99th accumulated percentile distribution in ms"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "localization": {
+      "properties": {
+        "locale": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The default locale set on the Kibana system"
+          }
+        },
+        "integrities": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "text",
+              "_meta": {
+                "description": "Translation file hash. If the hash is different it indicates that a custom translation file is used"
+              }
+            }
+          }
+        },
+        "labelsCount": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of translated labels"
           }
         }
       }

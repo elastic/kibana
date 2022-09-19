@@ -59,6 +59,7 @@ export const renderApp = (
     productAccess,
     charts: plugins.charts,
     cloud: plugins.cloud,
+    uiSettings: core.uiSettings,
     history: params.history,
     navigateToUrl: core.application.navigateToUrl,
     security: plugins.security,
