@@ -45,10 +45,10 @@ jest.mock('../../../lib/action_connector_api', () => ({
 }));
 
 jest.mock('../../../lib/rule_api', () => ({
-  updateAPIKey: jest.fn(),
+  bulkUpdateAPIKey: jest.fn(),
   deleteRules: jest.fn(),
 }));
-const { updateAPIKey, deleteRules } = jest.requireMock('../../../lib/rule_api');
+const { bulkUpdateAPIKey, deleteRules } = jest.requireMock('../../../lib/rule_api');
 
 jest.mock('../../../lib/capabilities', () => ({
   hasAllPrivilege: jest.fn(() => true),
@@ -703,8 +703,8 @@ describe('rule_details', () => {
 
       confirmButton.simulate('click');
 
-      expect(updateAPIKey).toHaveBeenCalledTimes(1);
-      expect(updateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ id: rule.id }));
+      expect(bulkUpdateAPIKey).toHaveBeenCalledTimes(1);
+      expect(bulkUpdateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ ids: [rule.id] }));
     });
   });
 

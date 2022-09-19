@@ -27,6 +27,10 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { IToasts } from '@kbn/core/public';
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
+  useUiSetting: jest.fn(() => false),
+  useUiSetting$: jest.fn((value: string) => ['0,0']),
+}));
 jest.mock('../../../lib/action_connector_api', () => ({
   loadActionTypes: jest.fn(),
   loadAllActions: jest.fn(),
@@ -37,6 +41,9 @@ jest.mock('../../../lib/rule_api', () => ({
   loadRuleAggregationsWithKueryFilter: jest.fn(),
   updateAPIKey: jest.fn(),
   loadRuleTags: jest.fn(),
+  bulkSnoozeRules: jest.fn(),
+  bulkUnsnoozeRules: jest.fn(),
+  bulkUpdateAPIKey: jest.fn(),
   alertingFrameworkHealth: jest.fn(() => ({
     isSufficientlySecure: true,
     hasPermanentEncryptionKey: true,
@@ -73,7 +80,8 @@ jest.mock('../../../../common/get_experimental_features', () => ({
 
 const ruleTags = ['a', 'b', 'c', 'd'];
 
-const { loadRuleTypes, updateAPIKey, loadRuleTags } = jest.requireMock('../../../lib/rule_api');
+const { loadRuleTypes, updateAPIKey, loadRuleTags, bulkSnoozeRules, bulkUpdateAPIKey } =
+  jest.requireMock('../../../lib/rule_api');
 const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
   '../../../lib/rule_api/aggregate_kuery_filter'
 );
@@ -1385,7 +1393,7 @@ describe('rules_list component with items', () => {
   it('sorts rules when clicking the name column', async () => {
     await setup();
     wrapper
-      .find('[data-test-subj="tableHeaderCell_name_0"] .euiTableHeaderButton')
+      .find('[data-test-subj="tableHeaderCell_name_1"] .euiTableHeaderButton')
       .first()
       .simulate('click');
 
@@ -1407,7 +1415,7 @@ describe('rules_list component with items', () => {
   it('sorts rules when clicking the status control column', async () => {
     await setup();
     wrapper
-      .find('[data-test-subj="tableHeaderCell_enabled_9"] .euiTableHeaderButton')
+      .find('[data-test-subj="tableHeaderCell_enabled_10"] .euiTableHeaderButton')
       .first()
       .simulate('click');
 
@@ -1837,7 +1845,7 @@ describe('rules_list with disabled items', () => {
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
     expect(wrapper.find('EuiTableRow').at(0).prop('className')).toEqual('');
-    expect(wrapper.find('EuiTableRow').at(1).prop('className')).toEqual(
+    expect(wrapper.find('EuiTableRow').at(1).prop('className')?.trim()).toEqual(
       'actRulesList__tableRowDisabled'
     );
     expect(wrapper.find('EuiIconTip[data-test-subj="ruleDisabledByLicenseTooltip"]').length).toBe(
@@ -1865,5 +1873,175 @@ describe('rules_list with disabled items', () => {
     wrapper.find('[data-test-subj="rulesListNotifyBadge-unsnoozed"]').first().simulate('click');
 
     expect(wrapper.find('[data-test-subj="snoozePanel"]').exists()).toBeTruthy();
+  });
+});
+
+describe('Rules list bulk actions', () => {
+  let wrapper: ReactWrapper<any>;
+
+  async function setup(authorized: boolean = true) {
+    loadRulesWithKueryFilter.mockResolvedValue({
+      page: 1,
+      perPage: 10000,
+      total: 6,
+      data: mockedRulesData,
+    });
+
+    loadActionTypes.mockResolvedValue([
+      {
+        id: 'test',
+        name: 'Test',
+      },
+      {
+        id: 'test2',
+        name: 'Test2',
+      },
+    ]);
+    loadRuleTypes.mockResolvedValue([
+      ruleTypeFromApi,
+      {
+        id: 'test_rule_type_disabled_by_license',
+        name: 'some rule type that is not allowed',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+        actionVariables: { context: [], state: [] },
+        defaultActionGroupId: 'default',
+        producer: ALERTS_FEATURE_ID,
+        minimumLicenseRequired: 'platinum',
+        enabledInLicense: false,
+        authorizedConsumers: {
+          [ALERTS_FEATURE_ID]: { read: true, all: authorized },
+        },
+      },
+    ]);
+    loadAllActions.mockResolvedValue([]);
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+    wrapper = mountWithIntl(<RulesList />);
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+  }
+
+  it('renders select all button for bulk editing', async () => {
+    await setup();
+    expect(wrapper.find('[data-test-subj="totalRulesCount"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="showBulkActionButton"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="selectAllRulesButton"]').exists()).toBeFalsy();
+
+    wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
+
+    expect(wrapper.find('[data-test-subj="totalRulesCount"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="showBulkActionButton"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="selectAllRulesButton"]').exists()).toBeTruthy();
+  });
+
+  it('does not render select all button if the user is not authorized', async () => {
+    await setup(false);
+    wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
+    expect(wrapper.find('[data-test-subj="showBulkActionButton"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="selectAllRulesButton"]').exists()).toBeFalsy();
+  });
+
+  it('selects all will select all items', async () => {
+    await setup();
+    wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
+    wrapper.find('[data-test-subj="selectAllRulesButton"]').at(1).simulate('click');
+
+    mockedRulesData.forEach((rule) => {
+      expect(
+        wrapper.find(`[data-test-subj="checkboxSelectRow-${rule.id}"]`).first().prop('checked')
+      ).toBeTruthy();
+    });
+
+    wrapper.find('[data-test-subj="showBulkActionButton"]').first().simulate('click');
+
+    expect(wrapper.find('[data-test-subj="ruleQuickEditButton"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="disableAll"]').first().prop('isDisabled')).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="deleteAll"]').first().prop('isDisabled')).toBeTruthy();
+  });
+
+  it('can bulk snooze', async () => {
+    await setup();
+    wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
+    wrapper.find('[data-test-subj="selectAllRulesButton"]').at(1).simulate('click');
+    wrapper.find('[data-test-subj="showBulkActionButton"]').first().simulate('click');
+
+    // Unselect something to test filtering
+    wrapper.find('[data-test-subj="checkboxSelectRow-2"]').at(1).simulate('change');
+
+    wrapper.find('[data-test-subj="bulkSnooze"]').first().simulate('click');
+
+    expect(wrapper.find('[data-test-subj="snoozePanel"]').exists()).toBeTruthy();
+    wrapper.find('[data-test-subj="linkSnooze1h"]').first().simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(bulkSnoozeRules).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ids: [],
+        filter: 'NOT (alert.id: "alert:2")',
+      })
+    );
+  });
+
+  it('can bulk add snooze schedule', async () => {
+    await setup();
+    wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
+    wrapper.find('[data-test-subj="selectAllRulesButton"]').at(1).simulate('click');
+    wrapper.find('[data-test-subj="showBulkActionButton"]').first().simulate('click');
+
+    // Unselect something to test filtering
+    wrapper.find('[data-test-subj="checkboxSelectRow-2"]').at(1).simulate('change');
+
+    wrapper.find('[data-test-subj="bulkSnoozeSchedule"]').first().simulate('click');
+    expect(wrapper.find('[data-test-subj="ruleSnoozeScheduler"]').exists()).toBeTruthy();
+
+    wrapper.find('[data-test-subj="scheduler-saveSchedule"]').first().simulate('click');
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(bulkSnoozeRules).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ids: [],
+        filter: 'NOT (alert.id: "alert:2")',
+      })
+    );
+  });
+
+  it('can bulk update API key', async () => {
+    await setup();
+    wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
+    wrapper.find('[data-test-subj="selectAllRulesButton"]').at(1).simulate('click');
+    wrapper.find('[data-test-subj="showBulkActionButton"]').first().simulate('click');
+
+    // Unselect something to test filtering
+    wrapper.find('[data-test-subj="checkboxSelectRow-2"]').at(1).simulate('change');
+
+    wrapper.find('[data-test-subj="updateAPIKeys"]').first().simulate('click');
+    expect(wrapper.find('[data-test-subj="updateApiKeyIdsConfirmation"]').exists()).toBeTruthy();
+
+    wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(bulkUpdateAPIKey).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ids: [],
+        filter: 'NOT (alert.id: "alert:2")',
+      })
+    );
   });
 });

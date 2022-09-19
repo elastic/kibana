@@ -7,21 +7,38 @@
 
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '../../common/lib/kibana';
+import { useBulkEditResponse } from '../hooks/use_bulk_edit_response';
+import { BulkEditResponse } from '../../types';
+
 export const UpdateApiKeyModalConfirmation = ({
   onCancel,
   idsToUpdate,
+  idsToUpdateFilter,
+  numberOfSelectedRules = 0,
   apiUpdateApiKeyCall,
   setIsLoadingState,
   onUpdated,
+  onSearchPopulate,
 }: {
   onCancel: () => void;
   idsToUpdate: string[];
-  apiUpdateApiKeyCall: ({ id, http }: { id: string; http: HttpSetup }) => Promise<string>;
+  idsToUpdateFilter?: string;
+  numberOfSelectedRules?: number;
+  apiUpdateApiKeyCall: ({
+    ids,
+    http,
+    filter,
+  }: {
+    ids?: string[];
+    filter?: string;
+    http: HttpSetup;
+  }) => Promise<BulkEditResponse>;
   setIsLoadingState: (isLoading: boolean) => void;
   onUpdated: () => void;
+  onSearchPopulate?: (filter: string) => void;
 }) => {
   const {
     http,
@@ -30,9 +47,22 @@ export const UpdateApiKeyModalConfirmation = ({
 
   const [updateModalFlyoutVisible, setUpdateModalVisibility] = useState<boolean>(false);
 
+  const { showToast } = useBulkEditResponse({ onSearchPopulate });
+
   useEffect(() => {
-    setUpdateModalVisibility(idsToUpdate.length > 0);
-  }, [idsToUpdate]);
+    if (idsToUpdateFilter) {
+      setUpdateModalVisibility(true);
+    } else {
+      setUpdateModalVisibility(idsToUpdate.length > 0);
+    }
+  }, [idsToUpdate, idsToUpdateFilter]);
+
+  const numberOfIdsToUpdate = useMemo(() => {
+    if (idsToUpdateFilter) {
+      return numberOfSelectedRules;
+    }
+    return idsToUpdate.length;
+  }, [idsToUpdate, idsToUpdateFilter, numberOfSelectedRules]);
 
   return updateModalFlyoutVisible ? (
     <EuiConfirmModal
@@ -49,14 +79,12 @@ export const UpdateApiKeyModalConfirmation = ({
         setUpdateModalVisibility(false);
         setIsLoadingState(true);
         try {
-          await Promise.all(idsToUpdate.map((id) => apiUpdateApiKeyCall({ id, http })));
-          toasts.addSuccess(
-            i18n.translate('xpack.triggersActionsUI.updateApiKeyConfirmModal.successMessage', {
-              defaultMessage:
-                'API {idsToUpdate, plural, one {key} other {keys}} {idsToUpdate, plural, one {has} other {have}} been updated',
-              values: { idsToUpdate: idsToUpdate.length },
-            })
-          );
+          const response = await apiUpdateApiKeyCall({
+            ids: idsToUpdate,
+            filter: idsToUpdateFilter,
+            http,
+          });
+          showToast(response, 'apiKey');
         } catch (e) {
           toasts.addError(e, {
             title: i18n.translate(
@@ -64,7 +92,7 @@ export const UpdateApiKeyModalConfirmation = ({
               {
                 defaultMessage:
                   'Failed to update the API {idsToUpdate, plural, one {key} other {keys}}',
-                values: { idsToUpdate: idsToUpdate.length },
+                values: { idsToUpdate: numberOfIdsToUpdate },
               }
             ),
           });
@@ -88,7 +116,7 @@ export const UpdateApiKeyModalConfirmation = ({
       {i18n.translate('xpack.triggersActionsUI.updateApiKeyConfirmModal.description', {
         defaultMessage:
           'You will not be able to recover the old API {idsToUpdate, plural, one {key} other {keys}}',
-        values: { idsToUpdate: idsToUpdate.length },
+        values: { idsToUpdate: numberOfIdsToUpdate },
       })}
     </EuiConfirmModal>
   ) : null;

@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export { templateActionVariable } from './template_action_variable';
-export { isRuleSnoozed } from './is_rule_snoozed';
+export const isRuleSnoozed = (rule: { isSnoozedUntil?: Date | null; muteAll: boolean }) =>
+  Boolean(
+    (rule.isSnoozedUntil && new Date(rule.isSnoozedUntil).getTime() > Date.now()) || rule.muteAll
+  );
