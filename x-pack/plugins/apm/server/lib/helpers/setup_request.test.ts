@@ -111,6 +111,7 @@ describe('setupRequest', () => {
         {
           index: ['apm-*'],
           body: {
+            track_total_hits: 10000,
             size: 10,
             query: {
               bool: {

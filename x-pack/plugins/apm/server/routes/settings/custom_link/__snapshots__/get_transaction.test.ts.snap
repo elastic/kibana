@@ -43,6 +43,7 @@ Object {
       },
     },
     "size": 1,
+    "track_total_hits": false,
   },
   "terminate_after": 1,
 }
@@ -62,6 +63,7 @@ Object {
       },
     },
     "size": 1,
+    "track_total_hits": false,
   },
   "terminate_after": 1,
 }

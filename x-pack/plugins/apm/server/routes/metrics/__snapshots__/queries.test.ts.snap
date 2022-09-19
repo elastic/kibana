@@ -89,6 +89,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -180,6 +181,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -338,6 +340,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -429,6 +432,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -510,6 +514,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -609,6 +614,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -706,6 +712,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -870,6 +877,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -967,6 +975,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -1054,6 +1063,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -1142,6 +1152,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -1228,6 +1239,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -1381,6 +1393,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -1467,6 +1480,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -1543,6 +1557,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
