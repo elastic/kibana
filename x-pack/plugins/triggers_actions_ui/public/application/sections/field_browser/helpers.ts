@@ -163,7 +163,8 @@ export const getExampleText = (example: string | number | null | undefined): str
 /** Returns `true` if the escape key was pressed */
 export const isEscape = (event: React.KeyboardEvent): boolean => event.key === 'Escape';
 
-export const getShouldShowDescriptionColumn = (fieldItems: BrowserFieldItem[]) => !!fieldItems.find((fieldItem) => !!fieldItem.description?.trim())
+export const getShouldShowDescriptionColumn = (fieldItems: BrowserFieldItem[]) =>
+  !!fieldItems.find((fieldItem) => !!fieldItem.description?.trim());
 
 export const CATEGORY_TABLE_CLASS_NAME = 'category-table';
 export const CLOSE_BUTTON_CLASS_NAME = 'close-button';

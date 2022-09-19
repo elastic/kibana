@@ -68,8 +68,8 @@ export const getFieldItems = ({
 };
 
 const getDefaultFieldTableColumns = ({
-  highlight, 
-  shouldShowDescriptionColumn
+  highlight,
+  shouldShowDescriptionColumn,
 }: {
   highlight: string;
   shouldShowDescriptionColumn: boolean;
@@ -77,30 +77,30 @@ const getDefaultFieldTableColumns = ({
   const nameColumn = {
     field: 'name',
     name: i18n.NAME,
-    render: (name: string, { type }: {type?: string}) => (
-        <EuiFlexGroup alignItems="center" gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={type}>
-              <EuiIcon
-                data-test-subj={`field-${name}-icon`}
-                css={styles.icon}
-                type={getIconFromType(type ?? null)}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
+    render: (name: string, { type }: { type?: string }) => (
+      <EuiFlexGroup alignItems="center" gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={type}>
+            <EuiIcon
+              data-test-subj={`field-${name}-icon`}
+              css={styles.icon}
+              type={getIconFromType(type ?? null)}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <FieldName fieldId={name} highlight={highlight} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
+        <EuiFlexItem grow={false}>
+          <FieldName fieldId={name} highlight={highlight} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
     sortable: true,
     width: '225px',
-  }
+  };
   const descriptionColumn = {
     field: 'description',
     name: i18n.DESCRIPTION,
-    render: (description: string, { name, example }: { name: string, example?: string }) => (
+    render: (description: string, { name, example }: { name: string; example?: string }) => (
       <EuiToolTip content={description}>
         <>
           <EuiScreenReaderOnly data-test-subj="descriptionForScreenReaderOnly">
@@ -116,22 +116,18 @@ const getDefaultFieldTableColumns = ({
     ),
     sortable: true,
     width: '400px',
-  }
+  };
   const categoryColumn = {
     field: 'category',
     name: i18n.CATEGORY,
-    render: (category: string, { name }: {name: string}) => (
+    render: (category: string, { name }: { name: string }) => (
       <EuiBadge data-test-subj={`field-${name}-category`}>{category}</EuiBadge>
     ),
     sortable: true,
     width: '130px',
-  }
+  };
 
-  return [
-    nameColumn, 
-    ...(shouldShowDescriptionColumn ? [descriptionColumn] : []),
-    categoryColumn 
-  ]
+  return [nameColumn, ...(shouldShowDescriptionColumn ? [descriptionColumn] : []), categoryColumn];
 };
 
 /**
@@ -143,15 +139,14 @@ export const getFieldColumns = ({
   highlight = '',
   onHide,
   onToggleColumn,
-  shouldShowDescriptionColumn
+  shouldShowDescriptionColumn,
 }: {
   getFieldTableColumns?: GetFieldTableColumns;
   highlight?: string;
   onHide: () => void;
   onToggleColumn: (id: string) => void;
-  shouldShowDescriptionColumn: boolean
-}): FieldTableColumns => { 
-  return [
+  shouldShowDescriptionColumn: boolean;
+}): FieldTableColumns => [
   {
     field: 'selected',
     name: '',
@@ -173,7 +168,7 @@ export const getFieldColumns = ({
   ...(getFieldTableColumns
     ? getFieldTableColumns({ highlight, onHide })
     : getDefaultFieldTableColumns({ highlight, shouldShowDescriptionColumn })),
-]};
+];
 
 /** Returns whether the table column has actions attached to it */
 export const isActionsColumn = (column: EuiBasicTableColumn<BrowserFieldItem>): boolean => {

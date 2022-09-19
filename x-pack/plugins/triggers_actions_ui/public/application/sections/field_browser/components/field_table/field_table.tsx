@@ -7,7 +7,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiInMemoryTable, Pagination, Direction, useEuiTheme } from '@elastic/eui';
 import { getFieldColumns, getFieldItems, isActionsColumn } from '../field_items';
-import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT, getShouldShowDescriptionColumn } from '../../helpers';
+import {
+  CATEGORY_TABLE_CLASS_NAME,
+  TABLE_HEIGHT,
+  getShouldShowDescriptionColumn,
+} from '../../helpers';
 import type { BrowserFields, FieldBrowserProps, GetFieldTableColumns } from '../../types';
 import { FieldTableHeader } from './field_table_header';
 import { styles } from './field_table.styles';
@@ -118,13 +122,14 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
    * Process columns
    */
   const columns = useMemo(
-    () => getFieldColumns({ 
-      getFieldTableColumns, 
-      highlight: searchInput, 
-      onHide, 
-      onToggleColumn, 
-      shouldShowDescriptionColumn: getShouldShowDescriptionColumn(fieldItems)
-    }),
+    () =>
+      getFieldColumns({
+        getFieldTableColumns,
+        highlight: searchInput,
+        onHide,
+        onToggleColumn,
+        shouldShowDescriptionColumn: getShouldShowDescriptionColumn(fieldItems),
+      }),
     [fieldItems, getFieldTableColumns, onHide, onToggleColumn, searchInput]
   );
   const hasActions = useMemo(() => columns.some((column) => isActionsColumn(column)), [columns]);

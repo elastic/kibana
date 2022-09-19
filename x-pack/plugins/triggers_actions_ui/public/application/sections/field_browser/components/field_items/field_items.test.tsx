@@ -105,7 +105,11 @@ describe('field_items', () => {
 
   describe('getFieldColumns', () => {
     const onToggleColumn = jest.fn();
-    const getFieldColumnsParams = { onToggleColumn, onHide: () => {}, shouldShowDescriptionColumn: true };
+    const getFieldColumnsParams = {
+      onToggleColumn,
+      onHide: () => {},
+      shouldShowDescriptionColumn: true,
+    };
 
     beforeEach(() => {
       onToggleColumn.mockClear();
@@ -205,7 +209,10 @@ describe('field_items', () => {
         columnIds: [],
       });
 
-      const columns = getFieldColumns({ ...getFieldColumnsParams, shouldShowDescriptionColumn: false });
+      const columns = getFieldColumns({
+        ...getFieldColumnsParams,
+        shouldShowDescriptionColumn: false,
+      });
       const { getByTestId, getAllByText } = render(
         <EuiInMemoryTable items={fieldItems} itemId="name" columns={columns} />
       );

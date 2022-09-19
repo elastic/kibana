@@ -334,49 +334,53 @@ describe('helpers', () => {
 
   describe('getShouldShowDescriptionColumn', () => {
     test('hide description column if there is not description', () => {
-      expect(getShouldShowDescriptionColumn([
-        {
-          category: "base",
-          description: "",
-          example: undefined,
-          isRuntime: false,
-          name: "@timestamp",
-          selected: true,
-          type: "date",
-        },
-        {
-          category: "base",
-          description: "",
-          example: undefined,
-          isRuntime: false,
-          name: "_id",
-          selected: false,
-          type: "string",
-        },
-      ])).toBe(false)
-    })
+      expect(
+        getShouldShowDescriptionColumn([
+          {
+            category: 'base',
+            description: '',
+            example: undefined,
+            isRuntime: false,
+            name: '@timestamp',
+            selected: true,
+            type: 'date',
+          },
+          {
+            category: 'base',
+            description: '',
+            example: undefined,
+            isRuntime: false,
+            name: '_id',
+            selected: false,
+            type: 'string',
+          },
+        ])
+      ).toBe(false);
+    });
 
     test('show description column if there is description', () => {
-      expect(getShouldShowDescriptionColumn([
-        {
-          category: "base",
-          description: "",
-          example: undefined,
-          isRuntime: false,
-          name: "@timestamp",
-          selected: true,
-          type: "date",
-        },
-        {
-          category: "base",
-          description: "id_description",
-          example: undefined,
-          isRuntime: false,
-          name: "_id",
-          selected: false,
-          type: "string",
-        },
-      ])).toBe(true)
-    })
-  })
+      expect(
+        getShouldShowDescriptionColumn([
+          {
+            category: 'base',
+            description: '',
+            example: undefined,
+            isRuntime: false,
+            name: '@timestamp',
+            selected: true,
+            type: 'date',
+          },
+          {
+            category: 'base',
+            description: 'id_description',
+            example: undefined,
+            isRuntime: false,
+            name: '_id',
+            selected: false,
+            type: 'string',
+          },
+        ])
+      ).toBe(true);
+    });
+  });
 });
