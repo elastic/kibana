@@ -6,7 +6,11 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { LIST_DETECTION_RULE_EXCEPTION, TELEMETRY_CHANNEL_LISTS, TASK_METRICS_CHANNEL } from '../constants';
+import {
+  LIST_DETECTION_RULE_EXCEPTION,
+  TELEMETRY_CHANNEL_LISTS,
+  TASK_METRICS_CHANNEL,
+} from '../constants';
 import { batchTelemetryRecords, templateExceptionList, tlog, createTaskMetric } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
@@ -46,7 +50,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
 
         // Lists Telemetry: Detection Rules
 
-        const {body: prebuiltRules} = await receiver.fetchDetectionRules();
+        const { body: prebuiltRules } = await receiver.fetchDetectionRules();
 
         if (!prebuiltRules) {
           tlog(logger, 'no prebuilt rules found');

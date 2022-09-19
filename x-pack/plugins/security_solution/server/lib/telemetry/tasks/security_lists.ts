@@ -15,7 +15,7 @@ import {
   LIST_ENDPOINT_EVENT_FILTER,
   LIST_TRUSTED_APPLICATION,
   TELEMETRY_CHANNEL_LISTS,
-  TASK_METRICS_CHANNEL
+  TASK_METRICS_CHANNEL,
 } from '../constants';
 import type { ESClusterInfo, ESLicense } from '../types';
 import { batchTelemetryRecords, templateExceptionList, tlog, createTaskMetric } from '../helpers';
