@@ -6,11 +6,13 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { EuiSelect, EuiSelectOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/common';
+import { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
 import { SecuritySolutionDataViewBase } from '../../../../types';
 import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
+import { useStyles } from './styles';
 
 export const DROPDOWN_TEST_ID = 'tiIndicatorFieldSelectorDropdown';
 
@@ -24,36 +26,48 @@ const DEFAULT_STACK_BY_VALUE = RawIndicatorFieldId.Feed;
 
 export const IndicatorsFieldSelector = memo<IndicatorsFieldSelectorProps>(
   ({ indexPattern, valueChange, defaultStackByValue = DEFAULT_STACK_BY_VALUE }) => {
-    const [selectedField, setSelectedField] = useState<string>(defaultStackByValue);
+    const styles = useStyles();
 
-    const fields: EuiSelectOption[] = useMemo(
+    const [selectedField, setSelectedField] = useState<Array<EuiComboBoxOptionOption<string>>>([
+      {
+        label: defaultStackByValue,
+      },
+    ]);
+
+    const fields: Array<EuiComboBoxOptionOption<string>> = useMemo(
       () =>
         indexPattern
           ? indexPattern.fields.map((f: DataViewField) => ({
-              text: f.name,
-              value: f.name,
+              label: f.name,
             }))
           : [],
       [indexPattern]
     );
 
     const selectedFieldChange = useCallback(
-      (fieldName: string) => {
-        valueChange(fieldName);
-        setSelectedField(fieldName);
+      (values: Array<EuiComboBoxOptionOption<string>>) => {
+        if (!values || values.length === 0) {
+          return;
+        }
+
+        valueChange(values[0].label);
+        setSelectedField(values);
       },
       [valueChange]
     );
 
     return (
-      <EuiSelect
+      <EuiComboBox
+        css={styles.comboBox}
         data-test-subj={DROPDOWN_TEST_ID}
-        onChange={(event) => selectedFieldChange(event.target.value)}
-        options={fields}
         prepend={i18n.translate('xpack.threatIntelligence.indicator.fieldSelector.label', {
           defaultMessage: 'Stack by',
         })}
-        value={selectedField}
+        singleSelection={{ asPlainText: true }}
+        onChange={(event) => selectedFieldChange(event)}
+        options={fields}
+        selectedOptions={selectedField}
+        isClearable={false}
       />
     );
   }
