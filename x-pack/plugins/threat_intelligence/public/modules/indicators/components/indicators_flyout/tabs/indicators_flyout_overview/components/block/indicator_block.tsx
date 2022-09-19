@@ -25,7 +25,7 @@ const VisibleOnHover = euiStyled.div`
     & .actionsWrapper {
       visibility: hidden;
       display: inline-block;
-      margin-inline-start: ${theme.eui.euiSizeXS};
+      margin-inline-start: ${theme.eui.euiSizeS};
     }
 
     &:hover .actionsWrapper {

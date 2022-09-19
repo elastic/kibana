@@ -2704,6 +2704,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-table-list@link:bazel-bin/packages/content-management/table_list":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-analytics-browser-internal@link:bazel-bin/packages/core/analytics/core-analytics-browser-internal":
   version "0.0.0"
   uid ""
@@ -3581,6 +3585,10 @@
   uid ""
 
 "@kbn/shared-ux-avatar-solution@link:bazel-bin/packages/shared-ux/avatar/solution":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-avatar-user-profile-components@link:bazel-bin/packages/shared-ux/avatar/user_profile/impl":
   version "0.0.0"
   uid ""
 
@@ -5695,10 +5703,10 @@
     "@types/use-sync-external-store" "^0.0.3"
     use-sync-external-store "^1.2.0"
 
-"@testim/chrome-version@^1.1.2":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@testim/chrome-version/-/chrome-version-1.1.2.tgz#092005c5b77bd3bb6576a4677110a11485e11864"
-  integrity sha512-1c4ZOETSRpI0iBfIFUqU4KqwBAB2lHUAlBjZz/YqOHqwM9dTTzjV6Km0ZkiEiSCx/tLr1BtESIKyWWMww+RUqw==
+"@testim/chrome-version@^1.1.3":
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/@testim/chrome-version/-/chrome-version-1.1.3.tgz#fbb68696899d7b8c1b9b891eded9c04fe2cd5529"
+  integrity sha512-g697J3WxV/Zytemz8aTuKjTGYtta9+02kva3C1xc7KXB8GdbfE1akGJIsZLyY/FSh2QrnE+fiB7vmWU3XNcb6A==
 
 "@testing-library/dom@^8.0.0", "@testing-library/dom@^8.12.0":
   version "8.12.0"
@@ -6717,6 +6725,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__content-management-table-list@link:bazel-bin/packages/content-management/table_list/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-analytics-browser-internal@link:bazel-bin/packages/core/analytics/core-analytics-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7597,6 +7609,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__shared-ux-avatar-user-profile-components@link:bazel-bin/packages/shared-ux/avatar/user_profile/impl/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__shared-ux-button-exit-full-screen-mocks@link:bazel-bin/packages/shared-ux/button/exit_full_screen/mocks/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7758,6 +7774,10 @@
   uid ""
 
 "@types/kbn__test-jest-helpers@link:bazel-bin/packages/kbn-test-jest-helpers/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__test-subj-selector@link:bazel-bin/packages/kbn-test-subj-selector/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -8418,10 +8438,10 @@
   resolved "https://registry.yarnpkg.com/@types/seedrandom/-/seedrandom-2.4.28.tgz#9ce8fa048c1e8c85cb71d7fe4d704e000226036f"
   integrity sha512-SMA+fUwULwK7sd/ZJicUztiPs8F1yCPwF3O23Z9uQ32ME5Ha0NmDK9+QTsYE4O2tHXChzXomSWWeIhCnoN1LqA==
 
-"@types/selenium-webdriver@^4.1.2":
-  version "4.1.2"
-  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.2.tgz#9c6d8d6bea08b312e890aaa5915fb2228fa62486"
-  integrity sha512-NCn1vqHC2hDgZmOuiDa4xgyo3FBZuqB+wXg5t8YcwnjIi2ufGTowqcnbUAKGHxY7z/OFfv4MnaVfuJ7gJ/xBsw==
+"@types/selenium-webdriver@^4.1.5":
+  version "4.1.5"
+  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.5.tgz#ea16f2c0ff7f15828016ef62ef4623e0c7b31cfd"
+  integrity sha512-Lfu97JK5b2jAxCUHH8uMjmhUiQZCGDyVzSAskFFZuWcprtcwjMkEPZE/SiIM5hOGQJVs982BAF26a3kmw8iiJw==
   dependencies:
     "@types/ws" "*"
 
@@ -11110,16 +11130,16 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^104.0.0:
-  version "104.0.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-104.0.0.tgz#2f730f52a567280872567bf3497e1c673b6f4275"
-  integrity sha512-zbHZutN2ATo19xA6nXwwLn+KueD/5w8ap5m4b6bCb8MIaRFnyDwMbFoy7oFAjlSMpCFL3KSaZRiWUwjj//N3yQ==
+chromedriver@^105.0.1:
+  version "105.0.1"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-105.0.1.tgz#325cf05aca200328176438991d236ddb6c61711b"
+  integrity sha512-QqylH9mvl4Ybq3mmHsym7jeq/LhEi2sPtD8ffd9ixiDFdPRlh2F4vzrzK+myj1MiXb0TYJK7+OCcMEmsB3Sm/Q==
   dependencies:
-    "@testim/chrome-version" "^1.1.2"
+    "@testim/chrome-version" "^1.1.3"
     axios "^0.27.2"
-    del "^6.0.0"
+    del "^6.1.1"
     extract-zip "^2.0.1"
-    https-proxy-agent "^5.0.0"
+    https-proxy-agent "^5.0.1"
     proxy-from-env "^1.1.0"
     tcp-port-used "^1.0.1"
 
@@ -11779,10 +11799,10 @@ core-js@^2.4.0, core-js@^2.5.0, core-js@^2.6.9:
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.9.tgz#6b4b214620c834152e179323727fc19741b084f2"
   integrity sha512-HOpZf6eXmnl7la+cUdMnLvUxKNqLUzJvgIziQ0DiF3JwSImNphIqdGqzj6hIKyX04MmV0poclQ7+wjWvxQyR2A==
 
-core-js@^3.0.4, core-js@^3.25.0, core-js@^3.6.5, core-js@^3.8.2, core-js@^3.8.3:
-  version "3.25.0"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.25.0.tgz#be71d9e0dd648ffd70c44a7ec2319d039357eceb"
-  integrity sha512-CVU1xvJEfJGhyCpBrzzzU1kjCfgsGUxhEvwUV2e/cOedYWHdmluamx+knDnmhqALddMG16fZvIqvs9aijsHHaA==
+core-js@^3.0.4, core-js@^3.25.1, core-js@^3.6.5, core-js@^3.8.2, core-js@^3.8.3:
+  version "3.25.1"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.25.1.tgz#5818e09de0db8956e16bf10e2a7141e931b7c69c"
+  integrity sha512-sr0FY4lnO1hkQ4gLDr24K0DGnweGO1QwSj5BpfQjpSJPdqWalja4cTps29Y/PJVG/P7FYlPDkH3hO+Tr0CvDgQ==
 
 core-util-is@1.0.2, core-util-is@^1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
@@ -12978,7 +12998,7 @@ del@^4.1.1:
     pify "^4.0.1"
     rimraf "^2.6.3"
 
-del@^6.0.0, del@^6.1.0, del@^6.1.1:
+del@^6.1.0, del@^6.1.1:
   version "6.1.1"
   resolved "https://registry.yarnpkg.com/del/-/del-6.1.1.tgz#3b70314f1ec0aa325c6b14eb36b95786671edb7a"
   integrity sha512-ua8BhapfP0JUJKC/zV9yHHDW/rDoDxP4Zhn3AkA6/xT6gY7jYXJiaeyBZznYVujhZZET+UgcbZiQ7sN3WqcImg==
@@ -16545,6 +16565,14 @@ https-proxy-agent@5.0.0, https-proxy-agent@^5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/https-proxy-agent/-/https-proxy-agent-5.0.0.tgz#e2a90542abb68a762e0a0850f6c9edadfd8506b2"
   integrity sha512-EkYm5BcKUGiduxzSt3Eppko+PiNWNEpa4ySk9vTC6wDsQJW9rHSa+UhGNJoRYp7bz6Ht1eaRIa6QaJqO5rCFbA==
+  dependencies:
+    agent-base "6"
+    debug "4"
+
+https-proxy-agent@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/https-proxy-agent/-/https-proxy-agent-5.0.1.tgz#c59ef224a04fe8b754f3db0063a25ea30d0005d6"
+  integrity sha512-dFcAjpTQFgoLMzC2VwU+C/CbS7uRL0lWmxDITmqm7C+7F0Odmj6s9l6alZc6AELXhrnggM2CeWSXHGOdX2YtwA==
   dependencies:
     agent-base "6"
     debug "4"
@@ -22823,10 +22851,10 @@ react-helmet-async@^1.0.7:
     react-fast-compare "^3.2.0"
     shallowequal "^1.1.0"
 
-react-hook-form@^7.34.2:
-  version "7.34.2"
-  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.34.2.tgz#9ac6d1a309a7c4aaa369d1269357a70e9e9bf4de"
-  integrity sha512-1lYWbEqr0GW7HHUjMScXMidGvV0BE2RJV3ap2BL7G0EJirkqpccTaawbsvBO8GZaB3JjCeFBEbnEWI1P8ZoLRQ==
+react-hook-form@^7.35.0:
+  version "7.35.0"
+  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.35.0.tgz#b133de48fc84b1e62f9277ba79dfbacd9bb13dd3"
+  integrity sha512-9CYdOed+Itbiu5VMVxW0PK9mBR3f0gDGJcZEyUSm0eJbDymQ913TRs2gHcQZZmfTC+rtxyDFRuelMxx/+xwMcw==
 
 react-input-autosize@^3.0.0:
   version "3.0.0"
