@@ -21,7 +21,14 @@ import {
   getUserDisplayName,
   UserProfile,
 } from '@kbn/user-profile-components';
-import { UseField, FieldConfig, FieldHook } from '../../common/shared_imports';
+import { MAX_ASSIGNEES_PER_CASE } from '../../../common/constants';
+import { CaseAssignees } from '../../../common/api';
+import {
+  UseField,
+  FieldConfig,
+  FieldHook,
+  getFieldValidityAndErrorMessage,
+} from '../../common/shared_imports';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
@@ -46,9 +53,18 @@ interface FieldProps {
   onSearchComboChange: (value: string) => void;
 }
 
-const getConfig = (): FieldConfig => ({
+const getConfig = (): FieldConfig<CaseAssignees> => ({
   label: i18n.ASSIGNEES,
   defaultValue: [],
+  validations: [
+    {
+      validator: ({ value }) => {
+        if (value.length > MAX_ASSIGNEES_PER_CASE) {
+          return { message: i18n.INVALID_ASSIGNEES };
+        }
+      },
+    },
+  ],
 });
 
 const userProfileToComboBoxOption = (userProfile: UserProfileWithAvatar) => ({
@@ -72,6 +88,7 @@ const AssigneesFieldComponent: React.FC<FieldProps> = React.memo(
     onSearchComboChange,
   }) => {
     const { setValue } = field;
+    const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
     const onComboChange = useCallback(
       (currentOptions: EuiComboBoxOptionOption[]) => {
@@ -137,6 +154,8 @@ const AssigneesFieldComponent: React.FC<FieldProps> = React.memo(
             </EuiLink>
           ) : undefined
         }
+        isInvalid={isInvalid}
+        error={errorMessage}
       >
         <EuiComboBox
           fullWidth

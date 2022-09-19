@@ -33,6 +33,9 @@ import {
   doesAgentPolicyAlreadyIncludePackage,
   validatePackagePolicy,
   validationHasErrors,
+  isInputOnlyPolicyTemplate,
+  getNormalizedDataStreams,
+  getNormalizedInputs,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -58,8 +61,8 @@ import type {
 } from '../../common/types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
-  IngestManagerError,
-  ingestErrorToResponseOptions,
+  FleetError,
+  fleetErrorToResponseOptions,
   PackagePolicyIneligibleForUpgradeError,
   PackagePolicyValidationError,
   PackagePolicyRestrictionRelatedError,
@@ -134,7 +137,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     if (agentPolicy && packagePolicy.package?.name === FLEET_APM_PACKAGE) {
       const dataOutput = await getDataOutputForAgentPolicy(soClient, agentPolicy);
       if (dataOutput.type === outputType.Logstash) {
-        throw new IngestManagerError('You cannot add APM to a policy using a logstash output');
+        throw new FleetError('You cannot add APM to a policy using a logstash output');
       }
     }
     await validateIsNotHostedPolicy(soClient, packagePolicy.policy_id, options?.force);
@@ -149,7 +152,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
       // Check that the name does not exist already
       if (existingPoliciesWithName.items.length > 0) {
-        throw new IngestManagerError(
+        throw new FleetError(
           `An integration policy with the name ${packagePolicy.name} already exists. Please rename it or choose a different name.`
         );
       }
@@ -190,7 +193,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       // already contain a package policy for this package
       if (isPackageLimited(pkgInfo)) {
         if (agentPolicy && doesAgentPolicyAlreadyIncludePackage(agentPolicy, pkgInfo.name)) {
-          throw new IngestManagerError(
+          throw new FleetError(
             `Unable to create integration policy. Integration '${pkgInfo.name}' already exists on this agent policy.`
           );
         }
@@ -489,7 +492,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const filtered = (existingPoliciesWithName?.items || []).filter((p) => p.id !== id);
 
     if (filtered.length > 0) {
-      throw new IngestManagerError(
+      throw new FleetError(
         `An integration policy with the name ${packagePolicy.name} already exists. Please rename it or choose a different name.`
       );
     }
@@ -638,7 +641,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         result.push({
           id,
           success: false,
-          ...ingestErrorToResponseOptions(error),
+          ...fleetErrorToResponseOptions(error),
         });
       }
     };
@@ -689,7 +692,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       });
 
       if (!installedPackage) {
-        throw new IngestManagerError(
+        throw new FleetError(
           i18n.translate('xpack.fleet.packagePolicy.packageNotInstalledError', {
             defaultMessage: 'Package {name} is not installed',
             values: {
@@ -728,7 +731,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     packagePolicy?: PackagePolicy
   ) {
     if (!packagePolicy) {
-      throw new IngestManagerError(
+      throw new FleetError(
         i18n.translate('xpack.fleet.packagePolicy.policyNotFoundError', {
           defaultMessage: 'Package policy with id {id} not found',
           values: { id },
@@ -737,7 +740,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     if (!packagePolicy.package?.name) {
-      throw new IngestManagerError(
+      throw new FleetError(
         i18n.translate('xpack.fleet.packagePolicy.packageNotFoundError', {
           defaultMessage: 'Package policy with id {id} has no named package',
           values: { id },
@@ -801,7 +804,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         result.push({
           id,
           success: false,
-          ...ingestErrorToResponseOptions(error),
+          ...fleetErrorToResponseOptions(error),
         });
       }
     }
@@ -884,7 +887,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     } catch (error) {
       return {
         hasErrors: true,
-        ...ingestErrorToResponseOptions(error),
+        ...fleetErrorToResponseOptions(error),
       };
     }
   }
@@ -1136,7 +1139,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
 
       if (errorsThrown.length > 0) {
-        throw new IngestManagerError(
+        throw new FleetError(
           `${errorsThrown.length} encountered while executing package delete external callbacks`,
           errorsThrown
         );
@@ -1268,16 +1271,20 @@ async function _compilePackagePolicyInput(
       )
     : pkgInfo.policy_templates?.[0];
 
-  if (!input.enabled || !packagePolicyTemplate || !packagePolicyTemplate.inputs?.length) {
+  if (!input.enabled || !packagePolicyTemplate) {
     return undefined;
   }
 
-  const packageInputs = packagePolicyTemplate.inputs;
+  const packageInputs = getNormalizedInputs(packagePolicyTemplate);
+
+  if (!packageInputs.length) {
+    return undefined;
+  }
+
   const packageInput = packageInputs.find((pkgInput) => pkgInput.type === input.type);
   if (!packageInput) {
     throw new Error(`Input template not found, unable to find input type ${input.type}`);
   }
-
   if (!packageInput.template_path) {
     return undefined;
   }
@@ -1357,7 +1364,7 @@ async function _compilePackageStream(
     return { ...stream, compiled_stream: undefined };
   }
 
-  const packageDataStreams = pkgInfo.data_streams;
+  const packageDataStreams = getNormalizedDataStreams(pkgInfo);
   if (!packageDataStreams) {
     throw new Error('Stream template not found, no data streams');
   }
@@ -1529,10 +1536,11 @@ export function updatePackageInputs(
       }
 
       // Ignore any inputs removed from this policy template in the new package version
-      const policyTemplateStillIncludesInput =
-        policyTemplate.inputs?.some(
-          (policyTemplateInput) => policyTemplateInput.type === input.type
-        ) ?? false;
+      const policyTemplateStillIncludesInput = isInputOnlyPolicyTemplate(policyTemplate)
+        ? policyTemplate.type === input.type
+        : policyTemplate.inputs?.some(
+            (policyTemplateInput) => policyTemplateInput.type === input.type
+          ) ?? false;
 
       return policyTemplateStillIncludesInput;
     }),
