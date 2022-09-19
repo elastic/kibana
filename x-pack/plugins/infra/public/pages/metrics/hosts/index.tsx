@@ -21,6 +21,7 @@ import { MetricsPageTemplate } from '../page_template';
 import { hostsTitle } from '../../../translations';
 import { HostsContent } from './hosts_content';
 import { MetricsDataViewProvider } from './hooks/use_data_view';
+import { fullHeightContentStyles } from '../../../page_template.styles';
 
 export const HostsPage = () => {
   const {
@@ -63,7 +64,7 @@ export const HostsPage = () => {
               }}
               pageSectionProps={{
                 contentProps: {
-                  className: 'pageSectionContent',
+                  css: fullHeightContentStyles,
                 },
               }}
             >

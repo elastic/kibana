@@ -26,6 +26,7 @@ import { MetricsPageTemplate } from '../page_template';
 import { inventoryTitle } from '../../../translations';
 import { SavedViews } from './components/saved_views';
 import { SnapshotContainer } from './components/snapshot_container';
+import { fullHeightContentStyles } from '../../../page_template.styles';
 
 export const SnapshotPage = () => {
   const {
@@ -76,7 +77,7 @@ export const SnapshotPage = () => {
                 }}
                 pageSectionProps={{
                   contentProps: {
-                    className: 'pageSectionContent',
+                    css: fullHeightContentStyles,
                   },
                 }}
               >

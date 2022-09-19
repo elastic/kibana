@@ -13,6 +13,7 @@ import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useLogViewContext } from '../../../hooks/use_log_view';
 import { LogsPageTemplate } from '../page_template';
 import { LogsPageLogsContent } from './page_logs_content';
+import { fullHeightContentStyles } from '../../../page_template.styles';
 
 const streamTitle = i18n.translate('xpack.infra.logs.streamPageTitle', {
   defaultMessage: 'Stream',
@@ -43,7 +44,7 @@ export const StreamPageContent: React.FunctionComponent = () => {
           }}
           pageSectionProps={{
             contentProps: {
-              className: 'pageSectionContent',
+              css: fullHeightContentStyles,
             },
           }}
         >
