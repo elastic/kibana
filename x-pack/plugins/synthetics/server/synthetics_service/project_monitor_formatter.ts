@@ -435,14 +435,14 @@ export class ProjectMonitorFormatter {
               request: this.request,
             });
 
-            chunkMonitors.forEach((sm) => {
+            for (const sm of chunkMonitors) {
               const journeyId = (sm.attributes as MonitorFields)[ConfigKey.JOURNEY_ID]!;
 
               this.deletedMonitors.push(journeyId);
               this.handleStreamingMessage({
                 message: `Monitor ${journeyId} deleted successfully`,
               });
-            });
+            }
           } else {
             chunkMonitors.forEach((sm) => {
               const journeyId = (sm.attributes as MonitorFields)[ConfigKey.JOURNEY_ID]!;
@@ -473,7 +473,7 @@ export class ProjectMonitorFormatter {
     }
   };
 
-  private handleStreamingMessage = async ({ message }: { message: string }) => {
+  private handleStreamingMessage = ({ message }: { message: string }) => {
     if (this.subject) {
       this.subject?.next(message);
     }
