@@ -28,6 +28,8 @@ import {
 import { IndexViewLogic } from '../index_view_logic';
 import { SearchIndexTabId } from '../search_index';
 
+import { NATIVE_CONNECTORS } from './constants';
+
 const StatusPanel: React.FC<{ ingestionStatus: IngestionStatus }> = ({ ingestionStatus }) => (
   <EuiPanel color={ingestionStatusToColor(ingestionStatus)} hasShadow={false} paddingSize="l">
     <EuiStat
@@ -67,6 +69,9 @@ export const ConnectorOverviewPanels: React.FC = () => {
               }
             )}
             title={
+              NATIVE_CONNECTORS.find(
+                (connector) => connector.serviceType === index.connector.service_type
+              )?.name ??
               index.connector.service_type ??
               i18n.translate('xpack.enterpriseSearch.connector.connectorTypePanel.unknown.label', {
                 defaultMessage: 'Unknown',

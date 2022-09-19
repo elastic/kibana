@@ -10,16 +10,12 @@ import { i18n } from '@kbn/i18n';
 
 import { CONNECTORS_INDEX } from '../..';
 
-import {
-  ConnectorConfiguration,
-  ConnectorDocument,
-  ConnectorStatus,
-} from '../../../common/types/connectors';
+import { ConnectorDocument } from '../../../common/types/connectors';
 
-export const updateConnectorConfiguration = async (
+export const updateConnectorServiceType = async (
   client: IScopedClusterClient,
   connectorId: string,
-  configuration: ConnectorConfiguration
+  serviceType: string
 ) => {
   const connectorResult = await client.asCurrentUser.get<ConnectorDocument>({
     id: connectorId,
@@ -27,12 +23,8 @@ export const updateConnectorConfiguration = async (
   });
   const connector = connectorResult._source;
   if (connector) {
-    const status =
-      connector.status === ConnectorStatus.NEEDS_CONFIGURATION
-        ? ConnectorStatus.CONFIGURED
-        : connector.status;
     const result = await client.asCurrentUser.index<ConnectorDocument>({
-      document: { ...connector, configuration, status },
+      document: { ...connector, service_type: serviceType },
       id: connectorId,
       index: CONNECTORS_INDEX,
     });
@@ -40,7 +32,7 @@ export const updateConnectorConfiguration = async (
     return result;
   } else {
     throw new Error(
-      i18n.translate('xpack.enterpriseSearch.server.connectors.configuration.error', {
+      i18n.translate('xpack.enterpriseSearch.server.connectors.serviceType.error', {
         defaultMessage: 'Could not find document',
       })
     );

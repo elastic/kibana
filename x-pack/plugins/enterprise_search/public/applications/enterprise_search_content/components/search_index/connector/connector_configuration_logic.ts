@@ -89,13 +89,15 @@ export const ConnectorConfigurationLogic = kea<
   }),
   listeners: ({ actions, values }) => ({
     apiError: (error) => flashAPIErrors(error),
-    apiSuccess: () =>
+    apiSuccess: ({ indexName }) => {
       flashSuccessToast(
         i18n.translate(
           'xpack.enterpriseSearch.content.indices.configurationConnector.configuration.successToast.title',
           { defaultMessage: 'Configuration successfully updated' }
         )
-      ),
+      );
+      FetchIndexApiLogic.actions.makeRequest({ indexName });
+    },
     fetchIndexApiSuccess: (index) => {
       if (!values.isEditing && isConnectorIndex(index)) {
         actions.setConfigState(index.connector.configuration);
