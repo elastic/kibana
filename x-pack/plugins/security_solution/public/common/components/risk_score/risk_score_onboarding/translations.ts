@@ -30,7 +30,7 @@ export const USER_WARNING_TITLE = i18n.translate(
 export const HOST_WARNING_BODY = i18n.translate(
   'xpack.securitySolution.riskScore.hostsDashboardWarningPanelBody',
   {
-    defaultMessage: `We haven't detected any host risk score data from the hosts in your environment for the selected time range.`,
+    defaultMessage: `We haven't detected any host risk score data from the hosts in your environment.`,
   }
 );
 
