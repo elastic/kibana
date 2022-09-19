@@ -162,7 +162,7 @@ describe('Enterprise Search Managed Indices', () => {
         mockRequestBody.model_id,
         mockRequestBody.source_field,
         mockRequestBody.destination_field,
-        {}
+        mockClient.asCurrentUser
       );
 
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
@@ -228,7 +228,11 @@ describe('Enterprise Search Managed Indices', () => {
         params: { indexName, pipelineName },
       });
 
-      expect(deleteMlInferencePipeline).toHaveBeenCalledWith(indexName, pipelineName, {});
+      expect(deleteMlInferencePipeline).toHaveBeenCalledWith(
+        indexName,
+        pipelineName,
+        mockClient.asCurrentUser
+      );
 
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: mockResponse,
@@ -254,7 +258,11 @@ describe('Enterprise Search Managed Indices', () => {
         params: { indexName, pipelineName },
       });
 
-      expect(deleteMlInferencePipeline).toHaveBeenCalledWith(indexName, pipelineName, {});
+      expect(deleteMlInferencePipeline).toHaveBeenCalledWith(
+        indexName,
+        pipelineName,
+        mockClient.asCurrentUser
+      );
       expect(mockRouter.response.customError).toHaveBeenCalledTimes(1);
     });
   });
