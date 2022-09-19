@@ -316,7 +316,7 @@ export const defineExplainLogRateSpikesRoute = (
           // Some field/value pairs might not be part of the `frequent_items` result set, for example
           // because they don't co-occur with other field/value pairs or because of the limits we set on the query.
           // In this next part we identify those missing pairs and add them as individual groups.
-          const missingChangePoints = changePoints.filter((cp) => {
+          const missingChangePoints = deduplicatedChangePoints.filter((cp) => {
             return !changePointGroups.some((cpg) => {
               return cpg.group.some(
                 (d) => d.fieldName === cp.fieldName && d.fieldValue === cp.fieldValue
@@ -326,10 +326,26 @@ export const defineExplainLogRateSpikesRoute = (
 
           changePointGroups.push(
             ...missingChangePoints.map((cp) => {
-              return {
-                group: [{ fieldName: cp.fieldName, fieldValue: cp.fieldValue, duplicate: false }],
-                docCount: cp.doc_count,
-              };
+              const duplicates = groupedChangePoints.find((d) =>
+                d.group.some(
+                  (dg) => dg.fieldName === cp.fieldName && dg.fieldValue === cp.fieldValue
+                )
+              );
+              if (duplicates !== undefined) {
+                return {
+                  group: duplicates.group.map((d) => ({
+                    fieldName: d.fieldName,
+                    fieldValue: d.fieldValue,
+                    duplicate: false,
+                  })),
+                  docCount: cp.doc_count,
+                };
+              } else {
+                return {
+                  group: [{ fieldName: cp.fieldName, fieldValue: cp.fieldValue, duplicate: false }],
+                  docCount: cp.doc_count,
+                };
+              }
             })
           );
 
