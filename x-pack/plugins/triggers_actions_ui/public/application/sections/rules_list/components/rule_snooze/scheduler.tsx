@@ -254,7 +254,12 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
 
   return (
     <>
-      <EuiFlexGroup gutterSize="xs" alignItems="center" direction="column">
+      <EuiFlexGroup
+        gutterSize="xs"
+        alignItems="center"
+        direction="column"
+        data-test-subj="ruleSnoozeScheduler"
+      >
         <EuiFlexItem>
           <EuiDatePickerRange
             startDateControl={
@@ -349,6 +354,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
         disabled={!startDT || !endDT || startDT.isAfter(endDT) || startDT.isBefore(minDate)}
         onClick={onClickSaveSchedule}
         isLoading={isLoading}
+        data-test-subj="scheduler-saveSchedule"
       >
         {i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.saveSchedule', {
           defaultMessage: 'Save schedule',
@@ -363,7 +369,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
               <EuiFlexItem grow>
                 <EuiButton isLoading={isLoading} color="danger" onClick={onCancelSchedule}>
                   {i18n.translate('xpack.triggersActionsUI.sections.rulesList.deleteSchedule', {
-                    defaultMessage: 'Delete schedule',
+                    defaultMessage: 'Delete schedules',
                   })}
                 </EuiButton>
               </EuiFlexItem>

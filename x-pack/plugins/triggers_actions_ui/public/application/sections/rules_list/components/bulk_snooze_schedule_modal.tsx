@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiModal,
@@ -33,17 +34,23 @@ const failureMessage = i18n.translate(
   }
 );
 
-const confirmationTitle = i18n.translate(
-  'xpack.triggersActionsUI.sections.rulesList.bulkDeleteScheduleConfirmationTitle',
-  {
-    defaultMessage: 'Bulk delete snooze schedules',
-  }
-);
+const deleteConfirmPlural = (total: number) =>
+  i18n.translate('xpack.triggersActionsUI.sections.rulesList.bulkDeleteConfirmationPlural', {
+    defaultMessage:
+      'Delete all snooze schedules for {total, plural, one {# rule} other {# rules}}? ',
+    values: { total },
+  });
+
+const deleteConfirmSingle = (ruleName: string) =>
+  i18n.translate('xpack.triggersActionsUI.sections.rulesList.bulkDeleteConfirmationSingle', {
+    defaultMessage: 'Delete all snooze schedules for {ruleName}?',
+    values: { ruleName },
+  });
 
 export type BulkSnoozeScheduleModalProps = {
   rulesToSchedule: RuleTableItem[];
-  numberOfSelectedRules?: number;
   rulesToScheduleFilter?: string;
+  numberOfSelectedRules?: number;
   onClose: () => void;
   onSave: () => void;
   onSearchPopulate?: (filter: string) => void;
@@ -110,6 +117,13 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
     onSave();
   };
 
+  const confirmationTitle = useMemo(() => {
+    if (!rulesToScheduleFilter && numberOfSelectedRules === 1 && rulesToSchedule[0]) {
+      return deleteConfirmSingle(rulesToSchedule[0].name);
+    }
+    return deleteConfirmPlural(numberOfSelectedRules);
+  }, [rulesToSchedule, rulesToScheduleFilter, numberOfSelectedRules]);
+
   if (showConfirmation) {
     return (
       <EuiConfirmModal
@@ -119,15 +133,21 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
           onClose();
         }}
         onConfirm={onRemoveSnoozeSchedule}
-        cancelButtonText="No, don't do it"
-        confirmButtonText="Yes, do it"
+        confirmButtonText={i18n.translate(
+          'xpack.triggersActionsUI.sections.rulesList.bulkDeleteConfirmButton',
+          {
+            defaultMessage: 'Delete',
+          }
+        )}
+        cancelButtonText={i18n.translate(
+          'xpack.triggersActionsUI.sections.rulesList.bulkDeleteCancelButton',
+          {
+            defaultMessage: 'Cancel',
+          }
+        )}
         buttonColor="danger"
         defaultFocusedButton="confirm"
-      >
-        <p>
-          Are you sure you want to delete all snooze schedules for {numberOfSelectedRules} rules?
-        </p>
-      </EuiConfirmModal>
+      />
     );
   }
 
@@ -136,7 +156,10 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
       <EuiModal onClose={onClose}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            Add Snooze Schedule
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.rulesList.bulkSnoozeScheduleModal.modalTitle"
+              defaultMessage="Add snooze schedule"
+            />
             <EuiSpacer size="s" />
           </EuiModalHeaderTitle>
         </EuiModalHeader>

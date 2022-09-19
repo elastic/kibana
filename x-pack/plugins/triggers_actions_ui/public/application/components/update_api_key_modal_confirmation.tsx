@@ -19,7 +19,6 @@ export const UpdateApiKeyModalConfirmation = ({
   idsToUpdateFilter,
   numberOfSelectedRules = 0,
   apiUpdateApiKeyCall,
-  bulkApiUpdateApiKeyCall,
   setIsLoadingState,
   onUpdated,
   onSearchPopulate,
@@ -28,8 +27,7 @@ export const UpdateApiKeyModalConfirmation = ({
   idsToUpdate: string[];
   idsToUpdateFilter?: string;
   numberOfSelectedRules?: number;
-  apiUpdateApiKeyCall?: ({ id, http }: { id: string; http: HttpSetup }) => Promise<string>;
-  bulkApiUpdateApiKeyCall?: ({
+  apiUpdateApiKeyCall: ({
     ids,
     http,
     filter,
@@ -81,16 +79,12 @@ export const UpdateApiKeyModalConfirmation = ({
         setUpdateModalVisibility(false);
         setIsLoadingState(true);
         try {
-          if (bulkApiUpdateApiKeyCall) {
-            const response = await bulkApiUpdateApiKeyCall({
-              ids: idsToUpdate,
-              filter: idsToUpdateFilter,
-              http,
-            });
-            showToast(response, 'apiKey');
-          } else if (apiUpdateApiKeyCall) {
-            await Promise.all(idsToUpdate.map((id) => apiUpdateApiKeyCall({ id, http })));
-          }
+          const response = await apiUpdateApiKeyCall({
+            ids: idsToUpdate,
+            filter: idsToUpdateFilter,
+            http,
+          });
+          showToast(response, 'apiKey');
         } catch (e) {
           toasts.addError(e, {
             title: i18n.translate(

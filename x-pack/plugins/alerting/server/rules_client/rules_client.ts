@@ -21,6 +21,7 @@ import {
   isEmpty,
 } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { fromKueryExpression, KueryNode, nodeBuilder } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
@@ -1790,6 +1791,11 @@ export class RulesClient {
                   ruleActions = applyBulkEditOperation(operation, ruleActions);
                   break;
                 case 'snoozeSchedule':
+                  // Silently skip adding snooze or snooze schedules on security
+                  // rules until we implement snoozing of their rules
+                  if (attributes.consumer === AlertConsumers.SIEM) {
+                    break;
+                  }
                   if (operation.operation === 'set') {
                     const snoozeAttributes = getSnoozeAttributes(attributes, operation.value);
                     const schedules = snoozeAttributes.snoozeSchedule.filter((snooze) => snooze.id);
@@ -1804,12 +1810,14 @@ export class RulesClient {
                     };
                   }
                   if (operation.operation === 'delete') {
-                    const idsToDelete: string[] = [];
-                    attributes.snoozeSchedule?.forEach((schedule) => {
-                      if (schedule.id) {
-                        idsToDelete.push(schedule.id);
-                      }
-                    });
+                    const idsToDelete = operation.value || [];
+                    if (idsToDelete.length === 0) {
+                      attributes.snoozeSchedule?.forEach((schedule) => {
+                        if (schedule.id) {
+                          idsToDelete.push(schedule.id);
+                        }
+                      });
+                    }
                     attributes = {
                       ...attributes,
                       ...getUnsnoozeAttributes(attributes, idsToDelete),

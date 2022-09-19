@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiModal,
@@ -121,12 +122,16 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
       <EuiModal onClose={onClose}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            Snooze Notifications
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.rulesList.bulkSnoozeModal.modalTitle"
+              defaultMessage="Snooze notifications"
+            />
             <EuiSpacer size="s" />
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
           <SnoozePanel
+            hasTitle={false}
             interval={interval}
             snoozeRule={onSnoozeRule}
             unsnoozeRule={onUnsnoozeRule}

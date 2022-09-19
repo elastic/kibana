@@ -47,8 +47,9 @@ export function bulkSnoozeRules({
   snoozeSchedule,
   http,
 }: BulkSnoozeRulesProps & { http: HttpSetup }): Promise<BulkEditResponse> {
-  return http.post(`${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_edit`, {
-    body: JSON.stringify({
+  let body: string;
+  try {
+    body = JSON.stringify({
       ids: ids?.length ? ids : undefined,
       filter,
       operations: [
@@ -58,6 +59,9 @@ export function bulkSnoozeRules({
           value: rewriteSnoozeSchedule(snoozeSchedule),
         },
       ],
-    }),
-  });
+    });
+  } catch (e) {
+    throw new Error(`Unable to parse bulk snooze params: ${e}`);
+  }
+  return http.post(`${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_edit`, { body });
 }

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup, EuiIconTip } from '@elastic/eui';
 
 import { RuleTableItem } from '../../../../types';
 import {
@@ -46,9 +46,12 @@ const ButtonWithTooltip = ({
     return children;
   }
   return (
-    <EuiToolTip position="right" content={tooltip}>
-      {children}
-    </EuiToolTip>
+    <EuiFlexGroup gutterSize="none" alignItems="center">
+      <EuiFlexItem grow={false}>{children}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiIconTip position="right" color="warning" size="s" type="alert" content={tooltip} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
@@ -109,7 +112,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToEnableRulesMessage',
           {
-            defaultMessage: 'Failed to enable rule(s)',
+            defaultMessage: 'Failed to enable rules',
           }
         ),
       });
@@ -132,7 +135,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToDisableRulesMessage',
           {
-            defaultMessage: 'Failed to disable rule(s)',
+            defaultMessage: 'Failed to disable rules',
           }
         ),
       });
@@ -155,7 +158,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToDeleteRulesMessage',
           {
-            defaultMessage: 'Failed to delete rule(s)',
+            defaultMessage: 'Failed to delete rules',
           }
         ),
       });
@@ -179,7 +182,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToUpdateRuleAPIKeysMessage',
           {
-            defaultMessage: 'Failed to update API keys for rule(s)',
+            defaultMessage: 'Failed to update API keys for rules',
           }
         ),
       });
@@ -203,7 +206,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToSnoozeRules',
           {
-            defaultMessage: 'Failed to snooze/unsnooze rule(s)',
+            defaultMessage: 'Failed to snooze or unsnooze rules',
           }
         ),
       });
@@ -227,7 +230,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToSnoozeRules',
           {
-            defaultMessage: 'Failed to snooze/unsnooze rule(s)',
+            defaultMessage: 'Failed to snooze or unsnooze rules',
           }
         ),
       });
@@ -238,7 +241,12 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   }
 
   return (
-    <EuiFlexGroup alignItems="baseline" direction="column" gutterSize="none">
+    <EuiFlexGroup
+      alignItems="baseline"
+      direction="column"
+      gutterSize="none"
+      data-test-subj="ruleQuickEditButton"
+    >
       <EuiFlexItem>
         <EuiButtonEmpty
           onClick={onSnoozeAllClick}
@@ -248,7 +256,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         >
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.snoozeAllTitle"
-            defaultMessage="Snooze"
+            defaultMessage="Snooze immediately"
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -261,13 +269,18 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         >
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.snoozeScheduleAllTitle"
-            defaultMessage="Add snooze Schedule"
+            defaultMessage="Schedule snooze"
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
       <ButtonWithTooltip
         showTooltip={isAllSelected}
-        tooltip="Bulk enable/disable is unsupported when selecting all rules"
+        tooltip={i18n.translate(
+          'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.enableDisableUnsupported',
+          {
+            defaultMessage: 'Bulk enable or disable is unsupported when selecting all rules.',
+          }
+        )}
       >
         <>
           {allRulesDisabled && (
@@ -318,7 +331,12 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
       <EuiFlexItem>
         <ButtonWithTooltip
           showTooltip={isAllSelected}
-          tooltip="Bulk delete is unsupported when selecting all rules"
+          tooltip={i18n.translate(
+            'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.deleteUnsupported',
+            {
+              defaultMessage: 'Bulk delete is unsupported when selecting all rules.',
+            }
+          )}
         >
           <EuiButtonEmpty
             onClick={deleteSelectedItems}

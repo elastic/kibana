@@ -33,18 +33,13 @@ const failureMessage = (failure: number, property: string) =>
   });
 
 const snooze = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleApi.bulkEditResponse.property.snooze',
+  'xpack.triggersActionsUI.sections.ruleApi.bulkEditResponse.property.snoozeSettings',
   {
-    defaultMessage: 'snooze',
+    defaultMessage: 'snooze settings',
   }
 );
 
-const snoozeSchedule = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleApi.bulkEditResponse.property.snoozeSchedule',
-  {
-    defaultMessage: 'snooze schedule',
-  }
-);
+const snoozeSchedule = snooze;
 
 const apiKey = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleApi.bulkEditResponse.property.apiKey',
