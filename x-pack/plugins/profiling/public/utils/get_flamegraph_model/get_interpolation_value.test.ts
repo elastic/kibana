@@ -8,35 +8,38 @@ import { getInterpolationValue } from './get_interpolation_value';
 
 describe('getInterpolationValue', () => {
   it('returns 0 for no change', () => {
-    expect(getInterpolationValue(100, 100)).toBe(0);
+    expect(getInterpolationValue(8, 8)).toBe(0);
   });
 
   it('returns -1 when the background is undefined', () => {
-    expect(getInterpolationValue(100, undefined)).toBe(-1);
+    expect(getInterpolationValue(8, undefined)).toBe(1);
   });
 
   it('returns -1 when the background is 0', () => {
-    expect(getInterpolationValue(100, 0)).toBe(-1);
+    expect(getInterpolationValue(8, 0)).toBe(1);
   });
 
-  it('returns 0 when both values are 0', () => {
-    expect(getInterpolationValue(0, 0)).toBe(0);
+  it('returns 0 when both values are equal', () => {
+    expect(getInterpolationValue(1, 1)).toBe(0);
   });
 
-  it('returns the correct value on positive changes', () => {
-    expect(getInterpolationValue(100, 120)).toBeCloseTo(0.1);
-    expect(getInterpolationValue(80, 100)).toBeCloseTo(0.125);
-
-    expect(getInterpolationValue(90, 270)).toBeCloseTo(1);
+  it('returns the correct positive change', () => {
+    expect(getInterpolationValue(8, 5)).toBe(0.375);
   });
 
-  it('returns the correct value on negative changes', () => {
-    expect(getInterpolationValue(160, 120)).toBeCloseTo(-0.5);
-    expect(getInterpolationValue(150, 100)).toBeCloseTo(-2 / 3);
+  it('returns the correct negative change', () => {
+    expect(getInterpolationValue(5, 8)).toBe(-0.6);
   });
 
-  it('clamps the value', () => {
-    expect(getInterpolationValue(90, 360)).toBeCloseTo(1);
-    expect(getInterpolationValue(360, 90)).toBeCloseTo(-1);
+  it('returns the correct positive change with a denominator', () => {
+    expect(getInterpolationValue(10, 8, 50)).toBe(0.04);
+  });
+
+  it('returns the correct negative change with a denominator', () => {
+    expect(getInterpolationValue(8, 10, 50)).toBe(-0.04);
+  });
+
+  it('clamps changes', () => {
+    expect(getInterpolationValue(5, 12)).toBe(-1);
   });
 });

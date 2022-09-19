@@ -39,6 +39,7 @@ import {
 import type { DefineStepRule, RuleStepProps } from '../../../pages/detection_engine/rules/types';
 import { RuleStep, DataSourceType } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
+import type { QueryBarDefineRuleProps } from '../query_bar';
 import { QueryBarDefineRule } from '../query_bar';
 import { SelectRuleType } from '../select_rule_type';
 import { AnomalyThresholdSlider } from '../anomaly_threshold_slider';
@@ -63,6 +64,7 @@ import {
   isNewTermsRule,
   isThreatMatchRule,
   isThresholdRule,
+  isQueryRule,
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryBar } from '../eql_query_bar';
 import { DataViewSelector } from '../data_view_selector';
@@ -156,6 +158,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       'dataSourceType',
       'newTermsFields',
       'historyWindowSize',
+      'shouldLoadQueryDynamically',
     ],
     onChange: (data: DefineStepRule) => {
       if (onRuleDataChange) {
@@ -176,6 +179,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     machineLearningJobId: formMachineLearningJobId,
     dataSourceType: formDataSourceType,
     newTermsFields: formNewTermsFields,
+    shouldLoadQueryDynamically: formShouldLoadQueryDynamically,
   } = formData;
 
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
@@ -359,6 +363,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       }
     }
   }, [ruleType, previousRuleType, getFields]);
+
+  // if saved query failed to load:
+  // - reset shouldLoadFormDynamically to false, as non existent query cannot be used for loading and execution
+  const handleSavedQueryError = useCallback(() => {
+    if (!isQueryBarValid) {
+      form.setFieldValue('shouldLoadQueryDynamically', false);
+    }
+  }, [isQueryBarValid, form]);
 
   const handleSubmit = useCallback(() => {
     if (onSubmit) {
@@ -584,24 +596,28 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             <MyLabelButton
               data-test-subj="importQueryFromSavedTimeline"
               onClick={handleOpenTimelineSearch}
+              disabled={formShouldLoadQueryDynamically}
             >
               {i18n.IMPORT_TIMELINE_QUERY}
             </MyLabelButton>
           ),
         }}
         component={QueryBarDefineRule}
-        componentProps={{
-          browserFields,
-          // runtimeMappings,
-          idAria: 'detectionEngineStepDefineRuleQueryBar',
-          indexPattern,
-          isDisabled: isLoading,
-          isLoading: isIndexPatternLoading,
-          dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
-          openTimelineSearch,
-          onValidityChange: setIsQueryBarValid,
-          onCloseTimelineSearch: handleCloseTimelineSearch,
-        }}
+        componentProps={
+          {
+            browserFields,
+            idAria: 'detectionEngineStepDefineRuleQueryBar',
+            indexPattern,
+            isDisabled: isLoading || formShouldLoadQueryDynamically,
+            resetToSavedQuery: formShouldLoadQueryDynamically,
+            isLoading: isIndexPatternLoading,
+            dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
+            openTimelineSearch,
+            onValidityChange: setIsQueryBarValid,
+            onCloseTimelineSearch: handleCloseTimelineSearch,
+            onSavedQueryError: handleSavedQueryError,
+          } as QueryBarDefineRuleProps
+        }
       />
     ),
     [
@@ -612,6 +628,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       isIndexPatternLoading,
       isLoading,
       openTimelineSearch,
+      formShouldLoadQueryDynamically,
+      handleSavedQueryError,
     ]
   );
   const onOptionsChange = useCallback((field: FieldsEqlOptions, value: string | undefined) => {
@@ -718,6 +736,29 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               )}
             </>
           </RuleTypeEuiFormRow>
+
+          {isQueryRule(ruleType) && (
+            <>
+              <EuiSpacer size="s" />
+              <RuleTypeEuiFormRow
+                label={i18n.SAVED_QUERY_CHECKBOX_LABEL}
+                $isVisible={Boolean(formQuery?.saved_id)}
+                fullWidth
+              >
+                <CommonUseField
+                  path="shouldLoadQueryDynamically"
+                  componentProps={{
+                    idAria: 'detectionEngineStepDefineRuleShouldLoadQueryDynamically',
+                    'data-test-subj': 'detectionEngineStepDefineRuleShouldLoadQueryDynamically',
+                    euiFieldProps: {
+                      disabled: isLoading,
+                    },
+                  }}
+                />
+              </RuleTypeEuiFormRow>
+            </>
+          )}
+
           <RuleTypeEuiFormRow $isVisible={isMlRule(ruleType)} fullWidth>
             <>
               <UseField
