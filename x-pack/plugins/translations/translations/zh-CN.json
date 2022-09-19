@@ -2327,7 +2327,6 @@
     "discover.viewModes.document.label": "文档",
     "discover.viewModes.fieldStatistics.betaTitle": "公测版",
     "discover.viewModes.fieldStatistics.label": "字段统计信息",
-    "discover.viewModes.legend": "视图模式",
     "embeddableApi.addPanel.savedObjectAddedToContainerSuccessMessageTitle": "{savedObjectName} 已添加",
     "embeddableApi.attributeService.saveToLibraryError": "保存时出错。错误：{errorMessage}",
     "embeddableApi.errors.embeddableFactoryNotFound": "{type} 无法加载。请升级到具有适当许可的默认 Elasticsearch 和 Kibana 分发。",
