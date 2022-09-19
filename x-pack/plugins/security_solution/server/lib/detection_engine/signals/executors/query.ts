@@ -79,7 +79,6 @@ export const queryExecutor = async ({
     return searchAfterAndBulkCreate({
       tuple,
       exceptionsList: unprocessedExceptions,
-      completeRule,
       services,
       listClient,
       ruleExecutionLogger,
