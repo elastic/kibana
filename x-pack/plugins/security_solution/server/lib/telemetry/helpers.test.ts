@@ -22,10 +22,13 @@ import {
   templateExceptionList,
   addDefaultAdvancedPolicyConfigSettings,
   metricsResponseToValueListMetaData,
+  tlog,
+  setIsElasticCloudDeployment,
 } from './helpers';
 import type { ESClusterInfo, ESLicense, ExceptionListItem } from './types';
 import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
 import { cloneDeep, set } from 'lodash';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('test diagnostic telemetry scheduled task timing helper', () => {
   test('test -5 mins is returned when there is no previous task run', async () => {
@@ -905,5 +908,26 @@ describe('test metrics response to value list meta data', () => {
       included_in_exception_lists_count: 0,
       used_in_indicator_match_rule_count: 0,
     });
+  });
+});
+
+describe('test tlog', () => {
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+  });
+
+  test('should log when cloud', () => {
+    setIsElasticCloudDeployment(true);
+    tlog(logger, 'test');
+    expect(logger.info).toHaveBeenCalled();
+    setIsElasticCloudDeployment(false);
+  });
+
+  test('should NOT log when on prem', () => {
+    tlog(logger, 'test');
+    expect(logger.info).toHaveBeenCalledTimes(0);
+    expect(logger.debug).toHaveBeenCalled();
   });
 });
