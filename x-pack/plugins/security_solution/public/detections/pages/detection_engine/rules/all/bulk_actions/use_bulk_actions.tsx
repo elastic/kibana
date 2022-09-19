@@ -371,6 +371,16 @@ export const useBulkActions = ({
               icon: undefined,
             },
             {
+              key: i18n.BULK_ACTION_SET_SCHEDULE,
+              name: i18n.BULK_ACTION_SET_SCHEDULE,
+              'data-test-subj': 'setScheduleBulk',
+              disabled: isEditDisabled,
+              onClick: handleBulkEdit(BulkActionEditType.set_schedule),
+              toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
+              toolTipPosition: 'right',
+              icon: undefined,
+            },
+            {
               key: i18n.BULK_ACTION_APPLY_TIMELINE_TEMPLATE,
               name: i18n.BULK_ACTION_APPLY_TIMELINE_TEMPLATE,
               'data-test-subj': 'applyTimelineTemplateBulk',

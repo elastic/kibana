@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { RuleAlertType } from '../types';
+/* eslint-disable complexity */
 
+import moment from 'moment';
+import { parseInterval } from '@kbn/data-plugin/common/search/aggs/utils/date_interval_utils';
+import type { RuleAlertType } from '../types';
 import type { BulkActionEditForRuleParams } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { BulkActionEditType } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
-
 import { invariant } from '../../../../../common/utils/invariant';
 
 export const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
@@ -90,6 +92,23 @@ const applyBulkActionEditToRuleParams = (
         timelineTitle: action.value.timeline_title || undefined,
       };
       break;
+
+    // update look-back period in from and meta.from fields
+    case BulkActionEditType.set_schedule: {
+      const interval = parseInterval(action.value.interval) ?? moment.duration(0);
+      const parsedFrom = parseInterval(action.value.lookback) ?? moment.duration(0);
+
+      const from = parsedFrom.asSeconds() + interval.asSeconds();
+
+      ruleParams = {
+        ...ruleParams,
+        meta: {
+          ...ruleParams.meta,
+          from: action.value.lookback,
+        },
+        from: `now-${from}s`,
+      };
+    }
   }
 
   return ruleParams;

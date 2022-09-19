@@ -64,6 +64,13 @@ import {
   openBulkEditDeleteIndexPatternsForm,
   selectTimelineTemplate,
   checkTagsInTagsFilter,
+  clickUpdateScheduleMenuItem,
+  typeScheduleInterval,
+  typeScheduleLookback,
+  setScheduleLookbackTimeUnit,
+  setScheduleIntervalTimeUnit,
+  assertRuleScheduleValues,
+  assertUpdateScheduleWarningExists,
 } from '../../tasks/rules_bulk_edit';
 
 import { hasIndexPatterns, getDetails } from '../../tasks/rule_details';
@@ -482,6 +489,53 @@ describe('Detection rules, bulk edit', () => {
       // check if timeline template has been updated to selected one, by opening rule that have had timeline prior to editing
       goToTheRuleDetailsOf(RULE_NAME);
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', noneTimelineTemplate);
+    });
+  });
+
+  describe('Schedule', () => {
+    it('Updates schedule for custom rules', () => {
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      clickUpdateScheduleMenuItem();
+
+      assertUpdateScheduleWarningExists(expectedNumberOfCustomRulesToBeEdited);
+
+      typeScheduleInterval('20');
+      setScheduleIntervalTimeUnit('Hours');
+
+      typeScheduleLookback('10');
+      setScheduleLookbackTimeUnit('Minutes');
+
+      submitBulkEditForm();
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+
+      goToTheRuleDetailsOf(RULE_NAME);
+
+      assertRuleScheduleValues({
+        interval: '20h',
+        lookback: '10m',
+      });
+    });
+
+    it('Validates invalid inputs when scheduling for custom rules', () => {
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      clickUpdateScheduleMenuItem();
+
+      // Validate invalid values are corrected to minimumValue - for 0 and negative values
+      typeScheduleInterval('0');
+      setScheduleIntervalTimeUnit('Hours');
+
+      typeScheduleLookback('-5');
+      setScheduleLookbackTimeUnit('Seconds');
+
+      submitBulkEditForm();
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+
+      goToTheRuleDetailsOf(RULE_NAME);
+
+      assertRuleScheduleValues({
+        interval: '1h',
+        lookback: '1s',
+      });
     });
   });
 });

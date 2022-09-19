@@ -30,5 +30,6 @@ export * from './src/operator';
 export * from './src/positive_integer_greater_than_zero';
 export * from './src/positive_integer';
 export * from './src/string_to_positive_number';
+export * from './src/time_duration';
 export * from './src/uuid';
 export * from './src/version';

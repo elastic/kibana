@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { NonEmptyArray, enumeration } from '@kbn/securitysolution-io-ts-types';
+import { NonEmptyArray, TimeDuration, enumeration } from '@kbn/securitysolution-io-ts-types';
 
 import {
   throttle,
@@ -38,6 +38,7 @@ export enum BulkActionEditType {
   'set_timeline' = 'set_timeline',
   'add_rule_actions' = 'add_rule_actions',
   'set_rule_actions' = 'set_rule_actions',
+  'set_schedule' = 'set_schedule',
 }
 
 const bulkActionEditPayloadTags = t.type({
@@ -102,11 +103,21 @@ const bulkActionEditPayloadRuleActions = t.type({
 
 export type BulkActionEditPayloadRuleActions = t.TypeOf<typeof bulkActionEditPayloadRuleActions>;
 
+const bulkActionEditPayloadSchedule = t.type({
+  type: t.literal(BulkActionEditType.set_schedule),
+  value: t.type({
+    interval: TimeDuration,
+    lookback: TimeDuration,
+  }),
+});
+export type BulkActionEditPayloadSchedule = t.TypeOf<typeof bulkActionEditPayloadSchedule>;
+
 export const bulkActionEditPayload = t.union([
   bulkActionEditPayloadTags,
   bulkActionEditPayloadIndexPatterns,
   bulkActionEditPayloadTimeline,
   bulkActionEditPayloadRuleActions,
+  bulkActionEditPayloadSchedule,
 ]);
 
 export type BulkActionEditPayload = t.TypeOf<typeof bulkActionEditPayload>;
@@ -116,14 +127,16 @@ export type BulkActionEditPayload = t.TypeOf<typeof bulkActionEditPayload>;
  */
 export type BulkActionEditForRuleAttributes =
   | BulkActionEditPayloadTags
-  | BulkActionEditPayloadRuleActions;
+  | BulkActionEditPayloadRuleActions
+  | BulkActionEditPayloadSchedule;
 
 /**
  * actions that modify rules params
  */
 export type BulkActionEditForRuleParams =
   | BulkActionEditPayloadIndexPatterns
-  | BulkActionEditPayloadTimeline;
+  | BulkActionEditPayloadTimeline
+  | BulkActionEditPayloadSchedule;
 
 export const performBulkActionSchema = t.intersection([
   t.exact(
