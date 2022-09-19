@@ -6,13 +6,16 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
-import { EsArchiver } from '@kbn/es-archiver';
-import type { Client } from '@elastic/elasticsearch';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import { CopyResponse } from '@kbn/spaces-plugin/server/lib/copy_to_spaces';
+import {
+  SavedObjectsImportFailure,
+  SavedObjectsImportAmbiguousConflictError,
+} from '@kbn/core/server';
 import { getAggregatedSpaceData, getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
+import { getTestDataLoader } from '../lib/test_data_loader';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 type TestResponse = Record<string, any>;
 
@@ -78,11 +81,11 @@ const getDestinationWithConflicts = (originSpaceId?: string) =>
 interface Aggs extends estypes.AggregationsMultiBucketAggregateBase {
   buckets: SpaceBucket[];
 }
-export function copyToSpaceTestSuiteFactory(
-  es: Client,
-  esArchiver: EsArchiver,
-  supertest: SuperTest<any>
-) {
+export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
+  const testDataLoader = getTestDataLoader(context);
+  const supertestWithoutAuth = context.getService('supertestWithoutAuth');
+  const es = context.getService('es');
+
   const collectSpaceContents = async () => {
     const response = await getAggregatedSpaceData(es, [
       'visualization',
@@ -693,18 +696,22 @@ export function copyToSpaceTestSuiteFactory(
               if (createNewCopies) {
                 expectNewCopyResponse(response, ambiguousConflictId, title);
               } else {
+                // The `updatedAt` values cannot be determined upfront and hence asserted since we update spaces list
+                // for certain objects in the test setup.
+                const importAmbiguousConflictError = (errors as SavedObjectsImportFailure[])?.[0]
+                  .error as SavedObjectsImportAmbiguousConflictError;
                 // It doesn't matter if overwrite is enabled or not, the object will not be copied because there are two matches in the destination space
                 const destinations = [
-                  // response destinations should be sorted by updatedAt in descending order, then ID in ascending order
+                  // response destinations should be sorted by ID in ascending order
                   {
                     id: 'conflict_2_all',
                     title: 'A shared saved-object in all spaces',
-                    updatedAt: '2017-09-21T18:59:16.270Z',
+                    updatedAt: importAmbiguousConflictError?.destinations[0].updatedAt,
                   },
                   {
                     id: 'conflict_2_space_2',
                     title: 'A shared saved-object in one space',
-                    updatedAt: '2017-09-21T18:59:16.270Z',
+                    updatedAt: importAmbiguousConflictError?.destinations[1].updatedAt,
                   },
                 ];
                 expect(success).to.eql(false);
@@ -737,22 +744,20 @@ export function copyToSpaceTestSuiteFactory(
       { user = {}, spaceId = DEFAULT_SPACE_ID, tests }: CopyToSpaceTestDefinition
     ) => {
       describeFn(description, () => {
-        before(() => {
+        before(async () => {
           // test data only allows for the following spaces as the copy origin
           expect(['default', 'space_1']).to.contain(spaceId);
+
+          await testDataLoader.before();
+        });
+
+        after(async () => {
+          await testDataLoader.after();
         });
 
         describe('single-namespace types', () => {
-          beforeEach(() =>
-            esArchiver.load(
-              'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-            )
-          );
-          afterEach(() =>
-            esArchiver.unload(
-              'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-            )
-          );
+          beforeEach(async () => await testDataLoader.beforeEach());
+          afterEach(async () => await testDataLoader.afterEach());
 
           const dashboardObject = { type: 'dashboard', id: `cts_dashboard_${spaceId}` };
 
@@ -761,7 +766,7 @@ export function copyToSpaceTestSuiteFactory(
 
             await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
 
-            return supertest
+            return supertestWithoutAuth
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
               .auth(user.username, user.password)
               .send({
@@ -780,7 +785,7 @@ export function copyToSpaceTestSuiteFactory(
 
             await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
 
-            return supertest
+            return supertestWithoutAuth
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
               .auth(user.username, user.password)
               .send({
@@ -799,7 +804,7 @@ export function copyToSpaceTestSuiteFactory(
 
             await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
 
-            return supertest
+            return supertestWithoutAuth
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
               .auth(user.username, user.password)
               .send({
@@ -818,7 +823,7 @@ export function copyToSpaceTestSuiteFactory(
 
             await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
 
-            return supertest
+            return supertestWithoutAuth
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
               .auth(user.username, user.password)
               .send({
@@ -836,7 +841,7 @@ export function copyToSpaceTestSuiteFactory(
             const conflictDestination = getDestinationWithConflicts(spaceId);
             const noConflictDestination = getDestinationWithoutConflicts();
 
-            return supertest
+            return supertestWithoutAuth
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
               .auth(user.username, user.password)
               .send({
@@ -869,7 +874,7 @@ export function copyToSpaceTestSuiteFactory(
           });
 
           it(`should return ${tests.nonExistentSpace.statusCode} when copying to non-existent space`, async () => {
-            return supertest
+            return supertestWithoutAuth
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
               .auth(user.username, user.password)
               .send({
@@ -893,21 +898,13 @@ export function copyToSpaceTestSuiteFactory(
           const spaces = ['space_2'];
           const includeReferences = false;
           describe(`multi-namespace types with overwrite=${overwrite} and createNewCopies=${createNewCopies}`, () => {
-            before(() =>
-              esArchiver.load(
-                'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-              )
-            );
-            after(() =>
-              esArchiver.unload(
-                'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-              )
-            );
+            before(async () => await testDataLoader.beforeEach());
+            after(async () => await testDataLoader.afterEach());
 
             const testCases = tests.multiNamespaceTestCases(overwrite, createNewCopies);
             testCases.forEach(({ testTitle, objects, statusCode, response }) => {
               it(`should return ${statusCode} when ${testTitle}`, async () => {
-                return supertest
+                return supertestWithoutAuth
                   .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
                   .auth(user.username, user.password)
                   .send({ objects, spaces, includeReferences, createNewCopies, overwrite })

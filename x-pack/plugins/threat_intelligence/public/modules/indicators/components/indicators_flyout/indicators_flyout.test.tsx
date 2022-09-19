@@ -6,66 +6,57 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { IndicatorsFlyout, SUBTITLE_TEST_ID, TITLE_TEST_ID } from './indicators_flyout';
-import { generateMockIndicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
-import { EMPTY_VALUE } from '../../../../../common/constants';
-import { dateFormatter } from '../../../../common/utils/dates';
-import { mockUiSetting } from '../../../../common/mocks/mock_kibana_ui_settings_service';
+import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
-import { generateFieldTypeMap } from '../../../../common/mocks/mock_field_type_map';
-import { unwrapValue } from '../../lib/unwrap_value';
 
 const mockIndicator = generateMockIndicator();
-const mockFieldTypesMap = generateFieldTypeMap();
 
 describe('<IndicatorsFlyout />', () => {
-  it('should render ioc id in title and first_seen in subtitle', () => {
-    const { getByTestId } = render(
+  beforeEach(() => {
+    render(
       <TestProvidersComponent>
-        <IndicatorsFlyout
-          indicator={mockIndicator}
-          fieldTypesMap={mockFieldTypesMap}
-          closeFlyout={() => {}}
-        />
+        <IndicatorsFlyout indicator={mockIndicator} closeFlyout={() => {}} />
       </TestProvidersComponent>
-    );
-
-    expect(getByTestId(TITLE_TEST_ID).innerHTML).toContain(
-      `Indicator: ${unwrapValue(mockIndicator, RawIndicatorFieldId.Name)}`
-    );
-    expect(getByTestId(SUBTITLE_TEST_ID).innerHTML).toContain(
-      `First seen: ${dateFormatter(
-        unwrapValue(mockIndicator, RawIndicatorFieldId.FirstSeen) as string,
-        mockUiSetting('dateFormat:tz') as string,
-        mockUiSetting('dateFormat') as string
-      )}`
     );
   });
 
-  it(`should render ${EMPTY_VALUE} in on invalid indicator first_seen value`, () => {
-    const { getByTestId } = render(
-      <TestProvidersComponent>
-        <IndicatorsFlyout indicator={{ fields: {} }} fieldTypesMap={{}} closeFlyout={() => {}} />
-      </TestProvidersComponent>
-    );
+  it('should render all the tab switches', () => {
+    expect(screen.queryByTestId('tiIndicatorFlyoutTabs')).toBeInTheDocument();
 
-    expect(getByTestId(TITLE_TEST_ID).innerHTML).toContain(`Indicator: ${EMPTY_VALUE}`);
-    expect(getByTestId(SUBTITLE_TEST_ID).innerHTML).toContain(`First seen: ${EMPTY_VALUE}`);
+    const switchElement = screen.getByTestId('tiIndicatorFlyoutTabs');
+
+    expect(switchElement).toHaveTextContent(/Overview/);
+    expect(switchElement).toHaveTextContent(/Table/);
+    expect(switchElement).toHaveTextContent(/JSON/);
   });
 
-  it(`should render ${EMPTY_VALUE} in title and subtitle on invalid indicator`, () => {
-    const { getByTestId } = render(
-      <TestProvidersComponent>
-        <IndicatorsFlyout
-          indicator={{ fields: { 'threat.indicator.first_seen': ['abc'] } }}
-          fieldTypesMap={mockFieldTypesMap}
-          closeFlyout={() => {}}
-        />
-      </TestProvidersComponent>
-    );
+  describe('title and subtitle', () => {
+    describe('valid indicator', () => {
+      it('should render correct title and subtitle', async () => {
+        expect(screen.getByTestId(TITLE_TEST_ID)).toHaveTextContent('Indicator details');
+      });
+    });
 
-    expect(getByTestId(TITLE_TEST_ID).innerHTML).toContain(`Indicator: ${EMPTY_VALUE}`);
-    expect(getByTestId(SUBTITLE_TEST_ID).innerHTML).toContain(`First seen: ${EMPTY_VALUE}`);
+    describe('invalid indicator', () => {
+      beforeEach(() => {
+        cleanup();
+
+        render(
+          <TestProvidersComponent>
+            <IndicatorsFlyout
+              indicator={{ fields: {} } as unknown as Indicator}
+              closeFlyout={() => {}}
+            />
+          </TestProvidersComponent>
+        );
+      });
+
+      it('should render correct labels', () => {
+        expect(screen.getByTestId(TITLE_TEST_ID)).toHaveTextContent('Indicator details');
+        expect(screen.getByTestId(SUBTITLE_TEST_ID)).toHaveTextContent('First seen: -');
+      });
+    });
   });
 });

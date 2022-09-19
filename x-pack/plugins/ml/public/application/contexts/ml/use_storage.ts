@@ -6,25 +6,40 @@
  */
 
 import { useCallback, useState } from 'react';
+import { isDefined } from '../../../../common/types/guards';
 import { useMlKibana } from '../kibana';
 import type { MlStorageKey } from '../../../../common/types/storage';
+import { TMlStorageMapped } from '../../../../common/types/storage';
 
 /**
  * Hook for accessing and changing a value in the storage.
  * @param key - Storage key
  * @param initValue
  */
-export function useStorage<T>(key: MlStorageKey, initValue?: T): [T, (value: T) => void] {
+export function useStorage<K extends MlStorageKey, T extends TMlStorageMapped<K>>(
+  key: K,
+  initValue?: T
+): [
+  typeof initValue extends undefined
+    ? TMlStorageMapped<K>
+    : Exclude<TMlStorageMapped<K>, undefined>,
+  (value: TMlStorageMapped<K>) => void
+] {
   const {
     services: { storage },
   } = useMlKibana();
 
-  const [val, setVal] = useState<T>(storage.get(key) ?? initValue);
+  const [val, setVal] = useState(storage.get(key) ?? initValue);
 
-  const setStorage = useCallback((value: T): void => {
+  const setStorage = useCallback((value: TMlStorageMapped<K>): void => {
     try {
-      storage.set(key, value);
-      setVal(value);
+      if (isDefined(value)) {
+        storage.set(key, value);
+        setVal(value);
+      } else {
+        storage.remove(key);
+        setVal(initValue);
+      }
     } catch (e) {
       throw new Error('Unable to update storage with provided value');
     }

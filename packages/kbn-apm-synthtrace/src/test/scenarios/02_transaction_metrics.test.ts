@@ -16,7 +16,11 @@ describe('transaction metrics', () => {
   let events: Array<Record<string, any>>;
 
   beforeEach(() => {
-    const javaService = apm.service('opbeans-java', 'production', 'java');
+    const javaService = apm.service({
+      name: 'opbeans-java',
+      environment: 'production',
+      agentName: 'java',
+    });
     const javaInstance = javaService.instance('instance-1');
 
     const range = timerange(
@@ -25,7 +29,10 @@ describe('transaction metrics', () => {
     );
 
     const span = (timestamp: number) =>
-      javaInstance.transaction('GET /api/product/list').duration(1000).timestamp(timestamp);
+      javaInstance
+        .transaction({ transactionName: 'GET /api/product/list' })
+        .duration(1000)
+        .timestamp(timestamp);
 
     const processor = new StreamProcessor<ApmFields>({
       processors: [getTransactionMetrics],

@@ -43,6 +43,7 @@ import { SearchIndexTabId } from '../search_index';
 
 import { ApiKeyConfig } from './api_key_configuration';
 import { ConnectorConfigurationConfig } from './connector_configuration_config';
+import { NativeConnectorConfiguration } from './native_connector_configuration/native_connector_configuration';
 
 export const ConnectorConfiguration: React.FC = () => {
   const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
@@ -51,6 +52,10 @@ export const ConnectorConfiguration: React.FC = () => {
   const { recheckIndex } = useActions(IndexViewLogic);
   if (!isConnectorIndex(indexData)) {
     return <></>;
+  }
+
+  if (indexData.connector.is_native && indexData.connector.service_type) {
+    return <NativeConnectorConfiguration />;
   }
 
   const hasApiKey = !!(indexData.connector.api_key_id ?? apiKeyData);
