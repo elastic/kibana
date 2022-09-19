@@ -45,7 +45,7 @@ export const DocumentationPage: React.FunctionComponent<Props> = ({ packageInfo,
           <EuiText>
             <FormattedMessage
               id="xpack.fleet.epm.packageDetails.apiReference.description"
-              defaultMessage="This document all the inputs, streams and variables available to use programmatically that integration via the Fleet Kibana API. {learnMore}"
+              defaultMessage="This documents all the inputs, streams, and variables available to use this integration programmatically via the Fleet Kibana API. {learnMore}"
               values={{
                 learnMore: (
                   <EuiLink href={docLinks.links.fleet.guide}>
