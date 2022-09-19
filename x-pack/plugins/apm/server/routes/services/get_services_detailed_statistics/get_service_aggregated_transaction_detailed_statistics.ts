@@ -15,6 +15,7 @@ import {
   TRANSACTION_FAILURE_COUNT,
   TRANSACTION_SUCCESS_COUNT,
 } from '../../../../common/elasticsearch_fieldnames';
+import { withApmSpan } from '../../../utils/with_apm_span';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
@@ -27,7 +28,7 @@ import { Setup } from '../../../lib/helpers/setup_request';
 import { calculateFailedTransactionRateFromServiceMetrics } from '../../../lib/helpers/transaction_error_rate';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 
-export async function getServiceAggregatedTransactionDetailedStatistics({
+export async function getServiceAggregatedTransactionDetailedStats({
   serviceNames,
   environment,
   kuery,
@@ -181,4 +182,51 @@ export async function getServiceAggregatedTransactionDetailedStatistics({
     }) ?? [],
     'serviceName'
   );
+}
+
+export async function getServiceAggregatedDetailedStatsPeriods({
+  serviceNames,
+  environment,
+  kuery,
+  setup,
+  searchAggregatedServiceMetrics,
+  offset,
+  start,
+  end,
+  randomSampler,
+}: {
+  serviceNames: string[];
+  environment: string;
+  kuery: string;
+  setup: Setup;
+  searchAggregatedServiceMetrics: boolean;
+  offset?: string;
+  start: number;
+  end: number;
+  randomSampler: RandomSampler;
+}) {
+  return withApmSpan('get_service_aggregated_detailed_stats', async () => {
+    const commonProps = {
+      serviceNames,
+      environment,
+      kuery,
+      setup,
+      searchAggregatedServiceMetrics,
+      start,
+      end,
+      randomSampler,
+    };
+
+    const [currentPeriod, previousPeriod] = await Promise.all([
+      getServiceAggregatedTransactionDetailedStats(commonProps),
+      offset
+        ? getServiceAggregatedTransactionDetailedStats({
+            ...commonProps,
+            offset,
+          })
+        : Promise.resolve({}),
+    ]);
+
+    return { currentPeriod, previousPeriod };
+  });
 }
