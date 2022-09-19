@@ -361,6 +361,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, false, startTime, err.message),
         ]);
+        return 0;
       }
     },
   };
