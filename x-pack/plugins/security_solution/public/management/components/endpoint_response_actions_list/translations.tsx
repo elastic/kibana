@@ -112,6 +112,11 @@ export const UX_MESSAGES = Object.freeze({
       defaultMessage: 'Search {filterName}',
       values: { filterName },
     }),
+  filterEmptyMessage: (filterName: string) =>
+    i18n.translate('xpack.securitySolution.responseActionsList.list.filter.emptyMessage', {
+      defaultMessage: 'No {filterName} available',
+      values: { filterName },
+    }),
   badge: {
     successful: i18n.translate(
       'xpack.securitySolution.responseActionsList.list.item.badge.successful',
@@ -159,6 +164,9 @@ export const UX_MESSAGES = Object.freeze({
 export const FILTER_NAMES = Object.freeze({
   actions: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.actions', {
     defaultMessage: 'Actions',
+  }),
+  hosts: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.Hosts', {
+    defaultMessage: 'Hosts',
   }),
   statuses: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.statuses', {
     defaultMessage: 'Statuses',

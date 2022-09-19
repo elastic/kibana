@@ -15,10 +15,9 @@ import {
   LIST_ENDPOINT_EVENT_FILTER,
   LIST_TRUSTED_APPLICATION,
   TELEMETRY_CHANNEL_LISTS,
-  TASK_METRICS_CHANNEL,
 } from '../constants';
 import type { ESClusterInfo, ESLicense } from '../types';
-import { batchTelemetryRecords, templateExceptionList, createTaskMetric } from '../helpers';
+import { batchTelemetryRecords, templateExceptionList, tlog } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
@@ -37,97 +36,88 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
       sender: ITelemetryEventsSender,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const startTime = Date.now();
-      const taskName = 'Security Solution Lists Telemetry';
-      try {
-        let count = 0;
-        const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
-          receiver.fetchClusterInfo(),
-          receiver.fetchLicenseInfo(),
-        ]);
+      let count = 0;
 
-        const clusterInfo =
-          clusterInfoPromise.status === 'fulfilled'
-            ? clusterInfoPromise.value
-            : ({} as ESClusterInfo);
-        const licenseInfo =
-          licenseInfoPromise.status === 'fulfilled'
-            ? licenseInfoPromise.value
-            : ({} as ESLicense | undefined);
-        const FETCH_VALUE_LIST_META_DATA_INTERVAL_IN_HOURS = 24;
+      const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
+        receiver.fetchClusterInfo(),
+        receiver.fetchLicenseInfo(),
+      ]);
 
-        // Lists Telemetry: Trusted Applications
-        const trustedApps = await receiver.fetchTrustedApplications();
-        if (trustedApps?.data) {
-          const trustedAppsJson = templateExceptionList(
-            trustedApps.data,
-            clusterInfo,
-            licenseInfo,
-            LIST_TRUSTED_APPLICATION
-          );
-          logger.debug(`Trusted Apps: ${trustedAppsJson}`);
-          count += trustedAppsJson.length;
+      const clusterInfo =
+        clusterInfoPromise.status === 'fulfilled'
+          ? clusterInfoPromise.value
+          : ({} as ESClusterInfo);
+      const licenseInfo =
+        licenseInfoPromise.status === 'fulfilled'
+          ? licenseInfoPromise.value
+          : ({} as ESLicense | undefined);
+      const FETCH_VALUE_LIST_META_DATA_INTERVAL_IN_HOURS = 24;
 
-          const batches = batchTelemetryRecords(trustedAppsJson, maxTelemetryBatch);
-          for (const batch of batches) {
-            await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
-          }
-        }
-
-        // Lists Telemetry: Endpoint Exceptions
-
-        const epExceptions = await receiver.fetchEndpointList(ENDPOINT_LIST_ID);
-        if (epExceptions?.data) {
-          const epExceptionsJson = templateExceptionList(
-            epExceptions.data,
-            clusterInfo,
-            licenseInfo,
-            LIST_ENDPOINT_EXCEPTION
-          );
-          logger.debug(`EP Exceptions: ${epExceptionsJson}`);
-          count += epExceptionsJson.length;
-
-          const batches = batchTelemetryRecords(epExceptionsJson, maxTelemetryBatch);
-          for (const batch of batches) {
-            await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
-          }
-        }
-
-        // Lists Telemetry: Endpoint Event Filters
-
-        const epFilters = await receiver.fetchEndpointList(ENDPOINT_EVENT_FILTERS_LIST_ID);
-        if (epFilters?.data) {
-          const epFiltersJson = templateExceptionList(
-            epFilters.data,
-            clusterInfo,
-            licenseInfo,
-            LIST_ENDPOINT_EVENT_FILTER
-          );
-          logger.debug(`EP Event Filters: ${epFiltersJson}`);
-          count += epFiltersJson.length;
-
-          const batches = batchTelemetryRecords(epFiltersJson, maxTelemetryBatch);
-          for (const batch of batches) {
-            await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
-          }
-        }
-
-        // Value list meta data
-        const valueListMetaData = await receiver.fetchValueListMetaData(
-          FETCH_VALUE_LIST_META_DATA_INTERVAL_IN_HOURS
+      // Lists Telemetry: Trusted Applications
+      const trustedApps = await receiver.fetchTrustedApplications();
+      if (trustedApps?.data) {
+        const trustedAppsJson = templateExceptionList(
+          trustedApps.data,
+          clusterInfo,
+          licenseInfo,
+          LIST_TRUSTED_APPLICATION
         );
-        if (valueListMetaData?.total_list_count) {
-          await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, [valueListMetaData]);
+        tlog(logger, `Trusted Apps: ${trustedAppsJson}`);
+        count += trustedAppsJson.length;
+
+        const batches = batchTelemetryRecords(trustedAppsJson, maxTelemetryBatch);
+        for (const batch of batches) {
+          await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
         }
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-          createTaskMetric(taskName, true, startTime),
-        ]);
-        return count;
-      } catch (err) {
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-          createTaskMetric(taskName, true, startTime, err.message),
-        ]);
       }
+
+      // Lists Telemetry: Endpoint Exceptions
+
+      const epExceptions = await receiver.fetchEndpointList(ENDPOINT_LIST_ID);
+      if (epExceptions?.data) {
+        const epExceptionsJson = templateExceptionList(
+          epExceptions.data,
+          clusterInfo,
+          licenseInfo,
+          LIST_ENDPOINT_EXCEPTION
+        );
+        tlog(logger, `EP Exceptions: ${epExceptionsJson}`);
+        count += epExceptionsJson.length;
+
+        const batches = batchTelemetryRecords(epExceptionsJson, maxTelemetryBatch);
+        for (const batch of batches) {
+          await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
+        }
+      }
+
+      // Lists Telemetry: Endpoint Event Filters
+
+      const epFilters = await receiver.fetchEndpointList(ENDPOINT_EVENT_FILTERS_LIST_ID);
+      if (epFilters?.data) {
+        const epFiltersJson = templateExceptionList(
+          epFilters.data,
+          clusterInfo,
+          licenseInfo,
+          LIST_ENDPOINT_EVENT_FILTER
+        );
+        tlog(logger, `EP Event Filters: ${epFiltersJson}`);
+        count += epFiltersJson.length;
+
+        const batches = batchTelemetryRecords(epFiltersJson, maxTelemetryBatch);
+        for (const batch of batches) {
+          await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
+        }
+      }
+
+      // Value list meta data
+      const valueListMetaData = await receiver.fetchValueListMetaData(
+        FETCH_VALUE_LIST_META_DATA_INTERVAL_IN_HOURS
+      );
+      tlog(logger, `Value List Meta Data: ${JSON.stringify(valueListMetaData)}`);
+      if (valueListMetaData?.total_list_count) {
+        await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, [valueListMetaData]);
+      }
+      return count;
     },
   };
 }
