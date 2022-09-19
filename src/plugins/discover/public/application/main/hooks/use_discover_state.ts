@@ -44,7 +44,7 @@ export function useDiscoverState({
   setExpandedDoc: (doc?: DataTableRecord) => void;
   dataViewList: DataViewListItem[];
 }) {
-  const { uiSettings, data, filterManager, dataViews, storage } = services;
+  const { uiSettings, data, filterManager, dataViews } = services;
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const { timefilter } = data.query.timefilter;
 
@@ -60,19 +60,11 @@ export function useDiscoverState({
   const stateContainer = useMemo(
     () =>
       getState({
-        getStateDefaults: () =>
-          getStateDefaults({
-            config: uiSettings,
-            data,
-            savedSearch,
-            storage,
-          }),
-        storeInSessionStorage: uiSettings.get('state:storeInSessionStorage'),
         history,
-        toasts: services.core.notifications.toasts,
-        uiSettings,
+        savedSearch,
+        services,
       }),
-    [uiSettings, data, history, savedSearch, services.core.notifications.toasts, storage]
+    [history, savedSearch, services]
   );
 
   const { appStateContainer } = stateContainer;
@@ -231,10 +223,8 @@ export function useDiscoverState({
       const newDataView = newSavedSearch.searchSource.getField('index') || dataView;
       newSavedSearch.searchSource.setField('index', newDataView);
       const newAppState = getStateDefaults({
-        config: uiSettings,
-        data,
         savedSearch: newSavedSearch,
-        storage,
+        services,
       });
 
       restoreStateFromSavedSearch({
@@ -245,7 +235,7 @@ export function useDiscoverState({
       await stateContainer.replaceUrlAppState(newAppState);
       setState(newAppState);
     },
-    [services, dataView, uiSettings, data, storage, stateContainer]
+    [services, dataView, stateContainer]
   );
 
   /**
