@@ -51,6 +51,8 @@ const getDefaultQuery = ({
   pageSize: 10,
 });
 
+type ResourceFindingSharedValues = 'clusterId' | 'resourceId' | 'resourceSubType' | 'resourceName';
+
 const BackToResourcesButton = () => (
   <Link to={generatePath(findingsNavigation.findings_by_resource.path)}>
     <EuiButtonEmpty iconType={'arrowLeft'}>
@@ -62,9 +64,12 @@ const BackToResourcesButton = () => (
   </Link>
 );
 
-const getResourceFindingSharedValues = (
-  sharedValues: any
-): EuiDescriptionListProps['listItems'] => [
+const getResourceFindingSharedValues = (sharedValues: {
+  resourceId: string;
+  resourceSubType: string;
+  resourceName: string;
+  clusterId: string;
+}): EuiDescriptionListProps['listItems'] => [
   {
     title: i18n.translate('xpack.csp.findings.resourceFindingsSharedValues.resourceTypeTitle', {
       defaultMessage: 'Resource Type',
@@ -86,9 +91,7 @@ const getResourceFindingSharedValues = (
 ];
 
 const getSharedValues = (
-  resourceFindingsAggs?: ResourceFindingsResponseAggs<
-    'clusterId' | 'resourceId' | 'resourceSubType' | 'resourceName'
-  >
+  resourceFindingsAggs?: ResourceFindingsResponseAggs<ResourceFindingSharedValues>
 ) => {
   if (
     !resourceFindingsAggs ||
