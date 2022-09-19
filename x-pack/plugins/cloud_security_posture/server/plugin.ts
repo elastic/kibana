@@ -47,7 +47,7 @@ import {
   scheduleFindingsStatsTask,
   setupFindingsStatsTask,
 } from './tasks/findings_stats_task';
-import { registerIndicesCounterCollector } from './lib/telemetry/collectors/register';
+import { registerCspmUsageCollector } from './lib/telemetry/collectors/register';
 
 export class CspPlugin
   implements
@@ -77,7 +77,7 @@ export class CspPlugin
 
     const coreStartServices = core.getStartServices();
     this.setupCspTasks(plugins.taskManager, coreStartServices, this.logger);
-    registerIndicesCounterCollector(plugins.usageCollection);
+    registerCspmUsageCollector(plugins.usageCollection);
 
     return {};
   }

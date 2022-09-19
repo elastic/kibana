@@ -10,7 +10,7 @@ import {
   FINDINGS_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
 } from '../../../../common/constants';
-import { CspmIndicesStats, IndexStats } from './types';
+import type { CspmIndicesStats, IndexStats } from './types';
 
 export const getIndicesStats = async (esClient: ElasticsearchClient): Promise<CspmIndicesStats> => {
   const [findings, latestFindings, score] = await Promise.all([
@@ -29,7 +29,7 @@ export const getIndexStats = async (
   esClient: ElasticsearchClient,
   index: string
 ): Promise<IndexStats | {}> => {
-  const isLatestIndexExists = await esClient.indices.exists({
+  const isIndexExists = await esClient.indices.exists({
     index,
   });
 

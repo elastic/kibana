@@ -10,7 +10,7 @@ import { getIndicesStats } from './indices_stats_collector';
 import { cspmUsageSchema } from './schema';
 import { CspmUsage } from './types';
 
-export function registerIndicesCounterCollector(usageCollection?: UsageCollectionSetup): void {
+export function registerCspmUsageCollector(usageCollection?: UsageCollectionSetup): void {
   // usageCollection is an optional dependency, so make sure to return if it is not registered.
   if (!usageCollection) {
     return;
