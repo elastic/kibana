@@ -121,6 +121,7 @@ const rollBackNewMonitorBulk = async (
     );
   } catch (e) {
     // ignore errors here
+    server.logger.error(e);
   }
 };
 
