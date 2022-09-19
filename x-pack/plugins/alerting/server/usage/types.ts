@@ -42,6 +42,8 @@ export interface AlertingUsage {
   count_rules_snoozed: number;
   count_rules_muted: number;
   count_rules_with_muted_alerts: number;
+  count_rules_by_execution_status_per_day: Record<string, number>;
+  count_connector_types_by_action_run_outcome_per_day: Record<string, Record<string, number>>;
   percentile_num_generated_actions_per_day: {
     p50: number;
     p90: number;
@@ -68,6 +70,7 @@ export interface AlertingUsage {
   avg_es_search_duration_by_type_per_day: Record<string, number>;
   avg_total_search_duration_per_day: number;
   avg_total_search_duration_by_type_per_day: Record<string, number>;
+  avg_actions_run_duration_by_connector_type: Record<string, number>;
   throttle_time: {
     min: string;
     avg: string;

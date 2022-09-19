@@ -17,6 +17,12 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
+  AvgActionRunDurationByConnectorTypeBucket,
+  AvgActionRunOutcomeByConnectorTypeBucket,
+  parseActionRunOutcomeByConnectorTypesBucket,
+  parseDurationsByConnectorTypesBucket,
+} from './parse_connector_type_bucket';
+import {
   NUM_ALERTING_RULE_TYPES,
   NUM_ALERTING_EXECUTION_FAILURE_REASON_TYPES,
 } from '../alerting_usage_collector';
@@ -54,6 +60,14 @@ interface GetExecutionsPerDayCountResults {
   generatedActionsPercentilesByType: Record<string, Record<string, number>>;
   alertsPercentiles: Record<string, number>;
   alertsPercentilesByType: Record<string, Record<string, number>>;
+  countRulesByExecutionStatus: Record<string, number>;
+}
+
+interface GetActionExecutionsTelemetryPerDay {
+  hasErrors: boolean;
+  errorMessage?: string;
+  avgRunDurationByConnectorType: Record<string, number>;
+  countRunOutcomeByConnectorType: Record<string, number>;
 }
 
 interface GetExecutionTimeoutsPerDayCountResults {
@@ -145,6 +159,11 @@ export async function getExecutionsPerDayCount({
             },
             aggs: eventLogAggs,
           },
+          by_execution_status: {
+            terms: {
+              field: 'event.outcome',
+            },
+          },
         },
       },
     };
@@ -165,6 +184,7 @@ export async function getExecutionsPerDayCount({
       avg_execution_time: AggregationsSingleMetricAggregateBase;
       avg_es_search_duration: AggregationsSingleMetricAggregateBase;
       avg_total_search_duration: AggregationsSingleMetricAggregateBase;
+      by_execution_status: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
     };
 
     const aggregationsByRuleTypeId: AggregationsBuckets<GetExecutionCountsAggregationBucket> =
@@ -176,6 +196,9 @@ export async function getExecutionsPerDayCount({
       ...parseExecutionFailureByRuleType(aggregationsByRuleTypeId),
       ...parseExecutionCountAggregationResults(aggregations),
       countTotalRuleExecutions: totalRuleExecutions ?? 0,
+      countRulesByExecutionStatus: parseSimpleRuleTypeBucket(
+        aggregations.by_execution_status.buckets
+      ),
     };
   } catch (err) {
     const errorMessage = err && err.message ? err.message : err.toString();
@@ -204,6 +227,118 @@ export async function getExecutionsPerDayCount({
       generatedActionsPercentilesByType: {},
       alertsPercentiles: {},
       alertsPercentilesByType: {},
+      countRulesByExecutionStatus: {},
+    };
+  }
+}
+
+export async function getActionExecutionsTelemetryPerDay({
+  esClient,
+  eventLogIndex,
+  logger,
+}: Opts): Promise<GetActionExecutionsTelemetryPerDay> {
+  try {
+    const eventLogAggs = {
+      avg_run_duration_by_connector_type: {
+        nested: {
+          path: 'kibana.saved_objects',
+        },
+        aggs: {
+          connector_types: {
+            terms: {
+              field: 'kibana.saved_objects.type_id',
+            },
+            aggs: {
+              duration: {
+                reverse_nested: {},
+                aggs: {
+                  average: {
+                    avg: {
+                      field: 'event.duration',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      count_connector_types_by_action_run_outcome_per_day: {
+        nested: {
+          path: 'kibana.saved_objects',
+        },
+        aggs: {
+          connector_types: {
+            terms: {
+              field: 'kibana.saved_objects.type_id',
+            },
+            aggs: {
+              outcome: {
+                reverse_nested: {},
+                aggs: {
+                  count: {
+                    terms: {
+                      field: 'event.outcome',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const query = {
+      index: eventLogIndex,
+      size: 0,
+      body: {
+        query: getProviderAndActionFilterForTimeRange('execute', 'actions'),
+        aggs: eventLogAggs,
+      },
+    };
+
+    logger.debug(`query for getActionExecutionsTelemetryPerDay - ${JSON.stringify(query)}`);
+    const results = await esClient.search(query);
+
+    logger.debug(
+      `results for getActionExecutionsTelemetryPerDay query - ${JSON.stringify(results)}`
+    );
+
+    const aggregations = results.aggregations as {
+      avg_run_duration_by_connector_type: {
+        connector_types: AggregationsTermsAggregateBase<AvgActionRunDurationByConnectorTypeBucket>;
+      };
+      count_connector_types_by_action_run_outcome_per_day: {
+        connector_types: AggregationsTermsAggregateBase<AvgActionRunOutcomeByConnectorTypeBucket>;
+      };
+    };
+
+    return {
+      hasErrors: false,
+      avgRunDurationByConnectorType: parseDurationsByConnectorTypesBucket(
+        aggregations.avg_run_duration_by_connector_type.connector_types.buckets
+      ),
+      countRunOutcomeByConnectorType: parseActionRunOutcomeByConnectorTypesBucket(
+        aggregations.count_connector_types_by_action_run_outcome_per_day.connector_types.buckets
+      ),
+    };
+  } catch (err) {
+    const errorMessage = err && err.message ? err.message : err.toString();
+    logger.warn(
+      `Error executing alerting telemetry task: getActionExecutionsTelemetryPerDay - ${JSON.stringify(
+        err
+      )}`,
+      {
+        tags: ['alerting', 'telemetry-failed'],
+        error: { stack_trace: err.stack },
+      }
+    );
+    return {
+      hasErrors: true,
+      errorMessage,
+      avgRunDurationByConnectorType: {},
+      countRunOutcomeByConnectorType: {},
     };
   }
 }
@@ -313,6 +448,14 @@ export async function getExecutionTimeoutsPerDayCount({
  *   avg_total_search_duration: {         // average total search duration across executions
  *     value: 43.74647887323944,
  *   },
+ *   by_execution_status: {
+ *      "doc_count_error_upper_bound":0,
+ *      "sum_other_doc_count":0,
+ *      "buckets":[
+ *        {"key":"success","doc_count":48},
+ *        {"key":"failure","doc_count":1}
+ *      ]
+ *   }
  * }
  */
 

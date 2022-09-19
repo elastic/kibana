@@ -1700,6 +1700,36 @@
             }
           }
         },
+        "count_rules_by_execution_status_per_day": {
+          "properties": {
+            "success": {
+              "type": "long"
+            },
+            "failure": {
+              "type": "long"
+            },
+            "unknown": {
+              "type": "long"
+            }
+          }
+        },
+        "count_connector_types_by_action_run_outcome_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "properties": {
+                "success": {
+                  "type": "long"
+                },
+                "failure": {
+                  "type": "long"
+                },
+                "unknown": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
         "avg_execution_time_per_day": {
           "type": "long"
         },
@@ -2014,6 +2044,13 @@
               "type": "long"
             },
             "xpack__ml__anomaly_detection_jobs_health": {
+              "type": "long"
+            }
+          }
+        },
+        "avg_actions_run_duration_by_connector_type": {
+          "properties": {
+            "DYNAMIC_KEY": {
               "type": "long"
             }
           }

@@ -13,6 +13,7 @@ import {
   parsePercentileAggs,
   parseExecutionCountAggregationResults,
   getExecutionTimeoutsPerDayCount,
+  getActionExecutionsTelemetryPerDay,
 } from './get_telemetry_from_event_log';
 
 const elasticsearch = elasticsearchServiceMock.createStart();
@@ -1291,6 +1292,14 @@ describe('event log telemetry', () => {
           avg_total_search_duration: {
             value: 28.630434782608695,
           },
+          by_execution_status: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              { key: 'success', doc_count: 21 },
+              { key: 'failure', doc_count: 22 },
+            ],
+          },
         },
       });
 
@@ -1377,7 +1386,6 @@ describe('event log telemetry', () => {
             logs__alert__document__count: 0,
           },
         },
-
         alertsPercentilesByType: {
           p50: {
             '__index-threshold': 1,
@@ -1397,6 +1405,10 @@ describe('event log telemetry', () => {
             // eslint-disable-next-line @typescript-eslint/naming-convention
             logs__alert__document__count: 0,
           },
+        },
+        countRulesByExecutionStatus: {
+          failure: 22,
+          success: 21,
         },
         hasErrors: false,
       });
@@ -1437,6 +1449,7 @@ describe('event log telemetry', () => {
         generatedActionsPercentilesByType: {},
         alertsPercentiles: {},
         alertsPercentilesByType: {},
+        countRulesByExecutionStatus: {},
       });
     });
   });
@@ -1522,6 +1535,124 @@ describe('event log telemetry', () => {
       expect(telemetry).toStrictEqual({
         countExecutionTimeouts: 0,
         countExecutionTimeoutsByType: {},
+        errorMessage: 'oh no',
+        hasErrors: true,
+      });
+    });
+  });
+
+  describe('getActionExecutionsTelemetryPerDay', () => {
+    test('should return telemetry data from actions eventLog ', async () => {
+      esClient.search.mockResponse({
+        took: 4,
+        timed_out: false,
+        _shards: {
+          total: 1,
+          successful: 1,
+          skipped: 0,
+          failed: 0,
+        },
+        hits: {
+          total: {
+            value: 148,
+            relation: 'eq',
+          },
+          max_score: null,
+          hits: [],
+        },
+        aggregations: {
+          avg_run_duration_by_connector_type: {
+            connector_types: {
+              buckets: [
+                {
+                  key: '.slack',
+                  duration: {
+                    average: {
+                      value: 10,
+                    },
+                  },
+                },
+                {
+                  key: '.email',
+                  duration: {
+                    average: {
+                      value: 11,
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          count_connector_types_by_action_run_outcome_per_day: {
+            connector_types: {
+              buckets: [
+                {
+                  key: '.slack',
+                  outcome: {
+                    count: {
+                      buckets: [
+                        { key: 'success', doc_count: 12 },
+                        { key: 'failure', doc_count: 1 },
+                      ],
+                    },
+                  },
+                },
+                {
+                  key: '.email',
+                  outcome: {
+                    count: {
+                      buckets: [
+                        { key: 'success', doc_count: 13 },
+                        { key: 'failure', doc_count: 2 },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      const telemetry = await getActionExecutionsTelemetryPerDay({
+        esClient,
+        eventLogIndex: 'test',
+        logger,
+      });
+
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+
+      expect(telemetry).toStrictEqual({
+        hasErrors: false,
+        avgRunDurationByConnectorType: {
+          __email: 11,
+          __slack: 10,
+        },
+        countRunOutcomeByConnectorType: {
+          __email: {
+            failure: 2,
+            success: 13,
+          },
+          __slack: {
+            failure: 1,
+            success: 12,
+          },
+        },
+      });
+    });
+
+    test('should return empty results and log warning if query throws error', async () => {
+      esClient.search.mockRejectedValue(new Error('oh no'));
+
+      const telemetry = await getActionExecutionsTelemetryPerDay({
+        esClient,
+        eventLogIndex: 'test',
+        logger,
+      });
+
+      expect(telemetry).toEqual({
+        avgRunDurationByConnectorType: {},
+        countRunOutcomeByConnectorType: {},
         errorMessage: 'oh no',
         hasErrors: true,
       });
