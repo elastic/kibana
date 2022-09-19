@@ -547,8 +547,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(messages[0].updatedMonitors).eql([]);
         expect(messages[0].failedMonitors).eql([
           {
-            details:
-              'Invalid value "3m" supplied to "schedule" | Invalid value "" supplied to "tags"',
+            details: 'Invalid value "3m" supplied to "schedule"',
             id: projectMonitors.monitors[0].id,
             payload: {
               content:
