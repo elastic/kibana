@@ -166,7 +166,7 @@ describe('ConfigPanel', () => {
         .first()
         .instance();
       act(() => {
-        instance.find('[data-test-subj="lnsLayerRemove"]').first().simulate('click');
+        instance.find('[data-test-subj="lnsLayerRemove--0"]').first().simulate('click');
       });
       instance.update();
       act(() => {
@@ -193,7 +193,7 @@ describe('ConfigPanel', () => {
         .first()
         .instance();
       act(() => {
-        instance.find('[data-test-subj="lnsLayerRemove"]').at(0).simulate('click');
+        instance.find('[data-test-subj="lnsLayerRemove--0"]').first().simulate('click');
       });
       instance.update();
       act(() => {
@@ -219,7 +219,7 @@ describe('ConfigPanel', () => {
         .first()
         .instance();
       act(() => {
-        instance.find('[data-test-subj="lnsLayerRemove"]').at(2).simulate('click');
+        instance.find('[data-test-subj="lnsLayerRemove--1"]').first().simulate('click');
       });
       instance.update();
       act(() => {
