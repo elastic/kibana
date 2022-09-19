@@ -19,6 +19,7 @@ import type {
 } from '../types';
 import { TELEMETRY_CHANNEL_TIMELINE } from '../constants';
 import { resolverEntity } from '../../../endpoint/routes/resolver/entity/utils/build_resolver_entity';
+import { tlog } from '../helpers';
 
 export function createTelemetryTimelineTaskConfig() {
   return {
@@ -36,7 +37,7 @@ export function createTelemetryTimelineTaskConfig() {
     ) => {
       let counter = 0;
 
-      logger.debug(`Running task: ${taskId}`);
+      tlog(logger, `Running task: ${taskId}`);
 
       const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
         receiver.fetchClusterInfo(),
@@ -71,6 +72,7 @@ export function createTelemetryTimelineTaskConfig() {
       const aggregations = endpointAlerts?.aggregations as unknown as {
         endpoint_alert_count: { value: number };
       };
+      tlog(logger, `Endpoint alert count: ${aggregations?.endpoint_alert_count}`);
       sender.getTelemetryUsageCluster()?.incrementCounter({
         counterName: 'telemetry_endpoint_alert',
         counterType: 'endpoint_alert_count',
@@ -82,7 +84,7 @@ export function createTelemetryTimelineTaskConfig() {
         endpointAlerts.hits.hits?.length === 0 ||
         endpointAlerts.hits.hits?.length === undefined
       ) {
-        logger.debug('no endpoint alerts received. exiting telemetry task.');
+        tlog(logger, 'no endpoint alerts received. exiting telemetry task.');
         return counter;
       }
 
@@ -120,7 +122,7 @@ export function createTelemetryTimelineTaskConfig() {
         // Fetch event lineage
 
         const timelineEvents = await receiver.fetchTimelineEvents(nodeIds);
-
+        tlog(logger, `Timeline Events: ${JSON.stringify(timelineEvents)}`);
         const eventsStore = new Map<string, SafeEndpointEvent>();
         for (const event of timelineEvents.hits.hits) {
           const doc = event._source;
@@ -166,11 +168,11 @@ export function createTelemetryTimelineTaskConfig() {
           sender.sendOnDemand(TELEMETRY_CHANNEL_TIMELINE, [record]);
           counter += 1;
         } else {
-          logger.debug('no events in timeline');
+          tlog(logger, 'no events in timeline');
         }
       }
 
-      logger.debug(`sent ${counter} timelines. concluding timeline task.`);
+      tlog(logger, `sent ${counter} timelines. concluding timeline task.`);
       return counter;
     },
   };
