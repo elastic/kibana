@@ -108,7 +108,7 @@ emit("");
 ----
 
 [float]
-[[replace-nulls-with-blanks]]
+[[return-multiple-fields]]
 ===== Return multiple fields
 
 A single runtime field can also produce multiple subfields when the type `Composite` is selected. The script editor provides default types that can be customized for each subfields.
@@ -121,6 +121,9 @@ emit('subfield_a', 'Hello');
 emit('sufield_b', 42);
 ----
 
+[float]
+[[replace-nulls-with-blanks]]
+===== Replace nulls with blanks
 Replace `null` values with `None`:
 
 [source,text]
@@ -147,10 +150,6 @@ else {
 	emit("None");
 }
 ----
-
-[float]
-[[manage-runtime-fields]]
-==== Manage runtime fields
 
 [float]
 [[manage-runtime-fields]]
