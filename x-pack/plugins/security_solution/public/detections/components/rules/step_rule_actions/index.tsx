@@ -23,7 +23,7 @@ import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { isQueryRule } from '../../../../../common/detection_engine/utils';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { ResponseActionsForm } from '../../rule_response_actions/response_actions_form';
+import { ResponseActionsForm } from '../../../../detection_engine/rule_response_actions/response_actions_form';
 import type { RuleStepProps, ActionsStepRule } from '../../../pages/detection_engine/rules/types';
 import { RuleStep } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';

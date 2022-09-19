@@ -16,12 +16,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
+import { RESPONSE_ACTION_TYPES } from '../../../common/detection_engine/rule_response_actions/schemas';
 import type { ResponseActionValidatorRef } from './response_actions_form';
 import { OsqueryResponseAction } from './osquery/osquery_response_action';
 import { getActionDetails } from './constants';
-import { useFormData } from '../../../shared_imports';
-import type { ArrayItem } from '../../../shared_imports';
+import { useFormData } from '../../shared_imports';
+import type { ArrayItem } from '../../shared_imports';
 
 interface IProps {
   item: ArrayItem;

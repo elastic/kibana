@@ -11,8 +11,8 @@ import type { ResponseActionValidatorRef } from './response_actions_form';
 import type { ResponseActionType } from './get_supported_response_actions';
 import { ResponseActionAddButton } from './response_action_add_button';
 import { ResponseActionTypeForm } from './response_action_type_form';
-import type { ArrayItem } from '../../../shared_imports';
-import { UseField, useFormContext } from '../../../shared_imports';
+import type { ArrayItem } from '../../shared_imports';
+import { UseField, useFormContext } from '../../shared_imports';
 
 interface IResponseActionsListProps {
   items: ArrayItem[];

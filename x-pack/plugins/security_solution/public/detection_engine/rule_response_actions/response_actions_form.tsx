@@ -11,7 +11,7 @@ import { isEmpty, map, some } from 'lodash';
 import { ResponseActionsHeader } from './response_actions_header';
 import { ResponseActionsList } from './response_actions_list';
 
-import type { ArrayItem } from '../../../shared_imports';
+import type { ArrayItem } from '../../shared_imports';
 import { useSupportedResponseActionTypes } from './use_supported_response_action_types';
 
 export interface ResponseActionValidatorRef {

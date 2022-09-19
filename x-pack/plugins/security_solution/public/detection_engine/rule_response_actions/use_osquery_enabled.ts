@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana } from '../../common/lib/kibana';
 
 export const useOsqueryEnabled = () => {
   const { osquery } = useKibana().services;

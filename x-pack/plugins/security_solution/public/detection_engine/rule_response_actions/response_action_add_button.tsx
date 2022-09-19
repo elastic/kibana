@@ -15,9 +15,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useLicense } from '../../../common/hooks/use_license';
+import { useLicense } from '../../common/hooks/use_license';
 import type { ResponseActionType } from './get_supported_response_actions';
-import { useFormData } from '../../../shared_imports';
+import { useFormData } from '../../shared_imports';
 
 interface IResponseActionsAddButtonProps {
   supportedResponseActionTypes: ResponseActionType[];
