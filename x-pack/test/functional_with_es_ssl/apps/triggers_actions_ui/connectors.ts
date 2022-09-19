@@ -127,9 +127,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.find('executionSuccessfulResult');
       });
 
-      await find.clickByCssSelector(
-        '[data-test-subj="edit-connector-flyout-save-close-btn"]:not(disabled)'
-      );
+      await find.clickByCssSelector('[data-test-subj="edit-connector-flyout-cancel-btn"]');
     });
 
     it('should test a connector and display a failure result', async () => {
@@ -156,9 +154,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
       });
 
-      await find.clickByCssSelector(
-        '[data-test-subj="edit-connector-flyout-save-close-btn"]:not(disabled)'
-      );
+      await find.clickByCssSelector('[data-test-subj="edit-connector-flyout-cancel-btn"]');
     });
 
     it('should reset connector when canceling an edit', async () => {
