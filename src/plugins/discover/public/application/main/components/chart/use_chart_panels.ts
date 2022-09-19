@@ -23,7 +23,7 @@ export function useChartPanels({
   toggleHideChart: () => void;
   onChangeInterval: (value: string) => void;
   closePopover: () => void;
-  onResetChartHeight: () => void;
+  onResetChartHeight?: () => void;
   hideChart?: boolean;
   interval?: string;
 }) {
@@ -51,17 +51,19 @@ export function useChartPanels({
     },
   ];
   if (!hideChart) {
-    mainPanelItems.push({
-      name: i18n.translate('discover.resetChartHeight', {
-        defaultMessage: 'Reset chart height',
-      }),
-      icon: 'refresh',
-      onClick: () => {
-        onResetChartHeight();
-        closePopover();
-      },
-      'data-test-subj': 'discoverChartResetHeight',
-    });
+    if (onResetChartHeight) {
+      mainPanelItems.push({
+        name: i18n.translate('discover.resetChartHeight', {
+          defaultMessage: 'Reset chart height',
+        }),
+        icon: 'refresh',
+        onClick: () => {
+          onResetChartHeight();
+          closePopover();
+        },
+        'data-test-subj': 'discoverChartResetHeight',
+      });
+    }
 
     mainPanelItems.push({
       name: i18n.translate('discover.timeIntervalWithValue', {

@@ -47,6 +47,20 @@ describe('test useChartPanels', () => {
     expect(panel0!.items![0].icon).toBe('eyeClosed');
     expect(panel0!.items![1].icon).toBe('refresh');
   });
+  test('should not show reset chart height when onResetChartHeight is undefined', async () => {
+    const { result } = renderHook(() => {
+      return useChartPanels({
+        toggleHideChart: jest.fn(),
+        onChangeInterval: jest.fn(),
+        closePopover: jest.fn(),
+        hideChart: false,
+        interval: 'auto',
+      });
+    });
+    const panel0: EuiContextMenuPanelDescriptor = result.current[0];
+    expect(panel0!.items).toHaveLength(2);
+    expect(panel0!.items![0].icon).toBe('eyeClosed');
+  });
   test('onResetChartHeight is called when the reset chart height button is clicked', async () => {
     const onResetChartHeight = jest.fn();
     const { result } = renderHook(() => {

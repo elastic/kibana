@@ -254,6 +254,13 @@ describe('Discover main content component', () => {
         height: `${expectedHeight}px`,
       });
     });
+
+    it('should pass undefined for onResetChartHeight to DiscoverChart when panels mode is DISCOVER_PANELS_MODE.FIXED', async () => {
+      const component = await mountComponent();
+      expect(component.find(DiscoverChart).prop('onResetChartHeight')).toBeDefined();
+      setWindowWidth(component, euiThemeVars.euiBreakpoints.s);
+      expect(component.find(DiscoverChart).prop('onResetChartHeight')).toBeUndefined();
+    });
   });
 
   describe('DocumentViewModeToggle', () => {
@@ -327,7 +334,7 @@ describe('Discover main content component', () => {
       expect(storage.set).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY, newTopPanelHeight);
       expect(component.find(DiscoverPanels).prop('topPanelHeight')).toBe(newTopPanelHeight);
       act(() => {
-        component.find(DiscoverChart).prop('onResetChartHeight')();
+        component.find(DiscoverChart).prop('onResetChartHeight')!();
       });
       component.update();
       expect(storage.set).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY, defaultTopPanelHeight);

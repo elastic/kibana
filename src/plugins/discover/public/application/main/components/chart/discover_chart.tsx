@@ -57,7 +57,7 @@ export function DiscoverChart({
   hideChart?: boolean;
   interval?: string;
   appendHistogram?: ReactElement;
-  onResetChartHeight: () => void;
+  onResetChartHeight?: () => void;
 }) {
   const { data, storage } = useDiscoverServices();
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
