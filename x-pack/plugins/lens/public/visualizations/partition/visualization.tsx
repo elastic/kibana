@@ -442,14 +442,15 @@ export const getPieVisualization = ({
     return warningMessages;
   },
 
-  getSuggestionFromConvertToLensContext({ suggestions, context }) {
+  getSuggestionFromConvertToLensContext(props) {
+    const context = props.context;
     if (!isPartitionVisConfiguration(context)) {
       return;
     }
-    if (!suggestions.length) {
+    if (!props.suggestions.length) {
       return;
     }
-    const suggestionByShape = (suggestions as PartitionSuggestion[]).find(
+    const suggestionByShape = (props.suggestions as PartitionSuggestion[]).find(
       (suggestion) => suggestion.visualizationState.shape === context.configuration.shape
     );
     if (!suggestionByShape) {
