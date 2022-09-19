@@ -7,9 +7,9 @@
 
 import React, { ReactNode, VFC } from 'react';
 import { FilterManager } from '@kbn/data-plugin/public';
-import { IndicatorsFiltersContext, IndicatorsFiltersContextValue } from '../../context';
+import { FiltersContext, FiltersContextValue } from '../contexts';
 
-export interface IndicatorsFiltersProps {
+export interface FiltersContextProviderProps {
   /**
    * Get {@link FilterManager} from the useFilters hook and save it in context to use within the indicators table.
    */
@@ -23,12 +23,11 @@ export interface IndicatorsFiltersProps {
 /**
  * Container used to wrap components and share the {@link FilterManager} through React context.
  */
-export const IndicatorsFilters: VFC<IndicatorsFiltersProps> = ({ filterManager, children }) => {
-  const contextValue: IndicatorsFiltersContextValue = { filterManager };
+export const FiltersContextProvider: VFC<FiltersContextProviderProps> = ({
+  filterManager,
+  children,
+}) => {
+  const contextValue: FiltersContextValue = { filterManager };
 
-  return (
-    <IndicatorsFiltersContext.Provider value={contextValue}>
-      {children}
-    </IndicatorsFiltersContext.Provider>
-  );
+  return <FiltersContext.Provider value={contextValue}>{children}</FiltersContext.Provider>;
 };

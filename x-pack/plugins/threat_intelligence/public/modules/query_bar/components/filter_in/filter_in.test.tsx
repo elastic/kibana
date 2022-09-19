@@ -9,12 +9,12 @@ import React, { FunctionComponent } from 'react';
 import { render } from '@testing-library/react';
 import { EuiButtonIcon } from '@elastic/eui';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
-import { useIndicatorsFiltersContext } from '../../../indicators/hooks/use_indicators_filters_context';
+import { useIndicatorFiltersContext } from '../../../indicators/hooks/use_filters_context';
 import { mockIndicatorsFiltersContext } from '../../../../common/mocks/mock_indicators_filters_context';
 import { FilterIn } from '.';
 import { ComponentType } from '../../../../../common/types/component_type';
 
-jest.mock('../../../indicators/hooks/use_indicators_filters_context');
+jest.mock('../../../indicators/hooks/use_filters_context');
 
 const mockIndicator: Indicator = generateMockIndicator();
 
@@ -25,7 +25,7 @@ const mockTestId: string = 'abc';
 describe('<FilterIn />', () => {
   beforeEach(() => {
     (
-      useIndicatorsFiltersContext as jest.MockedFunction<typeof useIndicatorsFiltersContext>
+      useIndicatorFiltersContext as jest.MockedFunction<typeof useIndicatorFiltersContext>
     ).mockReturnValue(mockIndicatorsFiltersContext);
   });
 

@@ -10,7 +10,7 @@ import { Story } from '@storybook/react';
 import { StoryProvidersComponent } from '../../../../../../common/mocks/story_providers';
 import { generateMockIndicator, Indicator } from '../../../../../../../common/types/indicator';
 import { IndicatorsFlyoutOverview } from './indicators_flyout_overview';
-import { IndicatorsFiltersContext } from '../../../../context';
+import { FiltersContext } from '../../../../contexts';
 
 export default {
   component: IndicatorsFlyoutOverview,
@@ -28,9 +28,9 @@ export const Default: Story<void> = () => {
 
   return (
     <StoryProvidersComponent>
-      <IndicatorsFiltersContext.Provider value={{} as any}>
+      <FiltersContext.Provider value={{} as any}>
         <IndicatorsFlyoutOverview onViewAllFieldsInTable={() => {}} indicator={mockIndicator} />
-      </IndicatorsFiltersContext.Provider>
+      </FiltersContext.Provider>
     </StoryProvidersComponent>
   );
 };

@@ -21,7 +21,7 @@ import { SecuritySolutionPluginContext } from '../../types';
 import { getSecuritySolutionContextMock } from './mock_security_context';
 import { mockUiSetting } from './mock_kibana_ui_settings_service';
 import { SecuritySolutionContext } from '../../containers/security_solution_context';
-import { IndicatorsFiltersContext } from '../../modules/indicators/context';
+import { FiltersContext } from '../../modules/indicators/contexts';
 import { mockIndicatorsFiltersContext } from './mock_indicators_filters_context';
 import { FieldTypesContext } from '../../containers/field_types_provider';
 import { generateFieldTypeMap } from './mock_field_type_map';
@@ -130,9 +130,9 @@ export const TestProvidersComponent: FC = ({ children }) => (
       <SecuritySolutionContext.Provider value={mockSecurityContext}>
         <KibanaContext.Provider value={{ services: mockedServices } as any}>
           <I18nProvider>
-            <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
+            <FiltersContext.Provider value={mockIndicatorsFiltersContext}>
               {children}
-            </IndicatorsFiltersContext.Provider>
+            </FiltersContext.Provider>
           </I18nProvider>
         </KibanaContext.Provider>
       </SecuritySolutionContext.Provider>

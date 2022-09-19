@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { IndicatorsFiltersContext } from '../../../../../../context';
+import { FiltersContext } from '../../../../../../contexts';
 import { StoryProvidersComponent } from '../../../../../../../../common/mocks/story_providers';
 import { generateMockIndicator } from '../../../../../../../../../common/types/indicator';
 import { IndicatorBlock } from './indicator_block';
@@ -23,9 +23,9 @@ export function Default() {
 
   return (
     <StoryProvidersComponent>
-      <IndicatorsFiltersContext.Provider value={{} as any}>
+      <FiltersContext.Provider value={{} as any}>
         <IndicatorBlock indicator={mockIndicator} field={mockField} />
-      </IndicatorsFiltersContext.Provider>
+      </FiltersContext.Provider>
     </StoryProvidersComponent>
   );
 }

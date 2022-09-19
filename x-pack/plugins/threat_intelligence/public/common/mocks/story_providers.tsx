@@ -14,7 +14,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { mockIndicatorsFiltersContext } from './mock_indicators_filters_context';
 import { SecuritySolutionContext } from '../../containers/security_solution_context';
 import { getSecuritySolutionContextMock } from './mock_security_context';
-import { IndicatorsFiltersContext } from '../../modules/indicators/context';
+import { FiltersContext } from '../../modules/indicators/contexts';
 import { FieldTypesContext } from '../../containers/field_types_provider';
 import { generateFieldTypeMap } from './mock_field_type_map';
 import { mockUiSettingsService } from './mock_kibana_ui_settings_service';
@@ -83,9 +83,9 @@ export const StoryProvidersComponent: VFC<StoryProvidersComponentProps> = ({
     <EuiThemeProvider>
       <FieldTypesContext.Provider value={generateFieldTypeMap()}>
         <SecuritySolutionContext.Provider value={securitySolutionContextMock}>
-          <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
+          <FiltersContext.Provider value={mockIndicatorsFiltersContext}>
             <KibanaReactContext.Provider>{children}</KibanaReactContext.Provider>
-          </IndicatorsFiltersContext.Provider>
+          </FiltersContext.Provider>
         </SecuritySolutionContext.Provider>
       </FieldTypesContext.Provider>
     </EuiThemeProvider>

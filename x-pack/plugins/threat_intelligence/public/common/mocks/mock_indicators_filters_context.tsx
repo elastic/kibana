@@ -6,9 +6,9 @@
  */
 
 import { FilterManager } from '@kbn/data-plugin/public';
-import { IndicatorsFiltersContextValue } from '../../modules/indicators/context';
+import { FiltersContextValue } from '../../modules/indicators/contexts';
 
-export const mockIndicatorsFiltersContext: IndicatorsFiltersContextValue = {
+export const mockIndicatorsFiltersContext: FiltersContextValue = {
   filterManager: {
     getFilters: () => [],
     setFilters: () => {},

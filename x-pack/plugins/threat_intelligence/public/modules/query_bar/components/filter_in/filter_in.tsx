@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import { ComponentType } from '../../../../../common/types/component_type';
-import { useIndicatorsFiltersContext } from '../../../indicators/hooks/use_indicators_filters_context';
+import { useIndicatorFiltersContext } from '../../../indicators/hooks/use_filters_context';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../indicators/lib/field_value';
 import { FilterIn as FilterInConst, updateFiltersArray } from '../../lib/filter';
 import { Indicator } from '../../../../../common/types/indicator';
@@ -54,7 +54,7 @@ export interface FilterInProps {
 export const FilterIn: VFC<FilterInProps> = ({ data, field, type, as: Component, ...props }) => {
   const styles = useStyles();
 
-  const { filterManager } = useIndicatorsFiltersContext();
+  const { filterManager } = useIndicatorFiltersContext();
 
   const { key, value } =
     typeof data === 'string' ? { key: field, value: data } : getIndicatorFieldAndValue(data, field);

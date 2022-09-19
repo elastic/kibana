@@ -14,7 +14,7 @@ import { mockUiSettingsService } from '../../../../../../common/mocks/mock_kiban
 import { mockKibanaTimelinesService } from '../../../../../../common/mocks/mock_kibana_timelines_service';
 import { generateMockIndicator, Indicator } from '../../../../../../../common/types/indicator';
 import { IndicatorsFlyoutTable } from './indicators_flyout_table';
-import { IndicatorsFiltersContext } from '../../../../context';
+import { FiltersContext } from '../../../../contexts';
 
 export default {
   component: IndicatorsFlyoutTable,
@@ -31,9 +31,9 @@ export const Default: Story<void> = () => {
 
   return (
     <KibanaReactContext.Provider>
-      <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
+      <FiltersContext.Provider value={mockIndicatorsFiltersContext}>
         <IndicatorsFlyoutTable indicator={mockIndicator} />
-      </IndicatorsFiltersContext.Provider>
+      </FiltersContext.Provider>
     </KibanaReactContext.Provider>
   );
 };

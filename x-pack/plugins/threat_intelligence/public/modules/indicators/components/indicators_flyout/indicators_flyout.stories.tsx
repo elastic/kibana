@@ -14,7 +14,7 @@ import { mockUiSettingsService } from '../../../../common/mocks/mock_kibana_ui_s
 import { mockKibanaTimelinesService } from '../../../../common/mocks/mock_kibana_timelines_service';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { IndicatorsFlyout } from './indicators_flyout';
-import { IndicatorsFiltersContext } from '../../context';
+import { FiltersContext } from '../../contexts';
 
 export default {
   component: IndicatorsFlyout,
@@ -32,12 +32,12 @@ export const Default: Story<void> = () => {
 
   return (
     <KibanaReactContext.Provider>
-      <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
+      <FiltersContext.Provider value={mockIndicatorsFiltersContext}>
         <IndicatorsFlyout
           indicator={mockIndicator}
           closeFlyout={() => window.alert('Closing flyout')}
         />
-      </IndicatorsFiltersContext.Provider>
+      </FiltersContext.Provider>
     </KibanaReactContext.Provider>
   );
 };
@@ -45,12 +45,12 @@ export const Default: Story<void> = () => {
 export const EmptyIndicator: Story<void> = () => {
   return (
     <KibanaReactContext.Provider>
-      <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
+      <FiltersContext.Provider value={mockIndicatorsFiltersContext}>
         <IndicatorsFlyout
           indicator={{ fields: {} } as Indicator}
           closeFlyout={() => window.alert('Closing flyout')}
         />
-      </IndicatorsFiltersContext.Provider>
+      </FiltersContext.Provider>
     </KibanaReactContext.Provider>
   );
 };

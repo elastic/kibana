@@ -6,7 +6,7 @@
  */
 
 import React, { VFC } from 'react';
-import { IndicatorsFilters } from './containers/indicators_filters/indicators_filters';
+import { FiltersContextProvider } from './containers';
 import { IndicatorsBarChartWrapper } from './components/indicators_barchart_wrapper/indicators_barchart_wrapper';
 import { IndicatorsTable } from './components/indicators_table/indicators_table';
 import { useIndicators } from './hooks/use_indicators';
@@ -61,7 +61,7 @@ export const IndicatorsPage: VFC = () => {
             onSubmitDateRange={handleSubmitTimeRange}
           />
         </FiltersGlobal>
-        <IndicatorsFilters filterManager={filterManager}>
+        <FiltersContextProvider filterManager={filterManager}>
           <IndicatorsBarChartWrapper timeRange={timeRange} indexPattern={indexPattern} />
           <IndicatorsTable
             browserFields={browserFields}
@@ -69,7 +69,7 @@ export const IndicatorsPage: VFC = () => {
             columnSettings={columnSettings}
             {...indicators}
           />
-        </IndicatorsFilters>
+        </FiltersContextProvider>
       </DefaultPageLayout>
     </FieldTypesProvider>
   );

@@ -10,7 +10,7 @@ import { mockIndicatorsFiltersContext } from '../../../../../../common/mocks/moc
 import { IndicatorFieldsTable } from './indicator_fields_table';
 import { generateMockIndicator } from '../../../../../../../common/types/indicator';
 import { StoryProvidersComponent } from '../../../../../../common/mocks/story_providers';
-import { IndicatorsFiltersContext } from '../../../../context';
+import { FiltersContext } from '../../../../contexts';
 
 export default {
   component: IndicatorFieldsTable,
@@ -22,13 +22,13 @@ export function WithIndicators() {
 
   return (
     <StoryProvidersComponent>
-      <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
+      <FiltersContext.Provider value={mockIndicatorsFiltersContext}>
         <IndicatorFieldsTable
           fields={['threat.indicator.type']}
           indicator={indicator}
           search={false}
         />
-      </IndicatorsFiltersContext.Provider>
+      </FiltersContext.Provider>
     </StoryProvidersComponent>
   );
 }

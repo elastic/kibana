@@ -8,13 +8,11 @@
 import { createContext } from 'react';
 import { FilterManager } from '@kbn/data-plugin/public';
 
-export interface IndicatorsFiltersContextValue {
+export interface FiltersContextValue {
   /**
    * FilterManager is used to interact with KQL bar.
    */
   filterManager: FilterManager;
 }
 
-export const IndicatorsFiltersContext = createContext<IndicatorsFiltersContextValue | undefined>(
-  undefined
-);
+export const FiltersContext = createContext<FiltersContextValue | undefined>(undefined);
