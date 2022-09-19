@@ -31,7 +31,7 @@ pageLoadAssetSize:
   embeddableEnhanced: 22107
   enterpriseSearch: 35741
   esUiShared: 326654
-  eventAnnotation: 19334
+  eventAnnotation: 19500
   expressionError: 22127
   expressionGauge: 25000
   expressionHeatmap: 27505
@@ -86,6 +86,7 @@ pageLoadAssetSize:
   osquery: 107090
   painlessLab: 179748
   presentationUtil: 58834
+  profiling: 18628
   remoteClusters: 51327
   reporting: 57003
   rollup: 97204

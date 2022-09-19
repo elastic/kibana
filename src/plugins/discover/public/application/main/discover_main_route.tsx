@@ -8,7 +8,6 @@
 import React, { useEffect, useState, memo, useCallback } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { DataViewListItem } from '@kbn/data-plugin/public';
-import { ISearchSource } from '@kbn/data-plugin/public';
 import { DataViewSavedObjectConflictError } from '@kbn/data-views-plugin/public';
 import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
@@ -72,7 +71,7 @@ export function DiscoverMainRoute(props: Props) {
   });
 
   const loadDefaultOrCurrentDataView = useCallback(
-    async (searchSource: ISearchSource) => {
+    async (nextSavedSearch: SavedSearch) => {
       try {
         const hasUserDataViewValue = await data.dataViews.hasData
           .hasUserDataView()
@@ -94,7 +93,7 @@ export function DiscoverMainRoute(props: Props) {
           return;
         }
 
-        const { appStateContainer } = getState({ history, uiSettings: config });
+        const { appStateContainer } = getState({ history, savedSearch: nextSavedSearch, services });
         const { index } = appStateContainer.getState();
         const ip = await loadDataView(
           data.dataViews,
@@ -104,7 +103,7 @@ export function DiscoverMainRoute(props: Props) {
         );
 
         const ipList = ip.list;
-        const dataViewData = resolveDataView(ip, searchSource, toastNotifications);
+        const dataViewData = resolveDataView(ip, nextSavedSearch.searchSource, toastNotifications);
         await data.dataViews.refreshFields(dataViewData);
         setDataViewList(ipList);
 
@@ -120,6 +119,7 @@ export function DiscoverMainRoute(props: Props) {
       isDev,
       props.historyLocationState?.dataViewSpec,
       toastNotifications,
+      services,
     ]
   );
 
@@ -132,7 +132,7 @@ export function DiscoverMainRoute(props: Props) {
         savedObjectsTagging: services.savedObjectsTagging,
       });
 
-      const currentDataView = await loadDefaultOrCurrentDataView(currentSavedSearch.searchSource);
+      const currentDataView = await loadDefaultOrCurrentDataView(currentSavedSearch);
 
       if (!currentDataView) {
         return;
