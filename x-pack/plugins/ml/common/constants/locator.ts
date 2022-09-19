@@ -52,9 +52,12 @@ export const ML_PAGES = {
   FILTER_LISTS_EDIT: 'settings/filter_lists/edit_filter_list',
   ACCESS_DENIED: 'access-denied',
   OVERVIEW: 'overview',
+  NOTIFICATIONS: 'notifications',
   AIOPS: 'aiops',
   AIOPS_EXPLAIN_LOG_RATE_SPIKES: 'aiops/explain_log_rate_spikes',
   AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT: 'aiops/explain_log_rate_spikes_index_select',
+  AIOPS_LOG_CATEGORIZATION: 'aiops/log_categorization',
+  AIOPS_LOG_CATEGORIZATION_INDEX_SELECT: 'aiops/log_categorization_index_select',
 } as const;
 
 export type MlPages = typeof ML_PAGES[keyof typeof ML_PAGES];
