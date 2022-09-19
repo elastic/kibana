@@ -130,7 +130,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
   }
 
-  describe('explain log rate spikes', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/140848
+  describe.skip('explain log rate spikes', function () {
     this.tags(['aiops']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
