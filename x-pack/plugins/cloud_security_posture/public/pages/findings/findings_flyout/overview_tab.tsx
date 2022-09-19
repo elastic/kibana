@@ -19,7 +19,10 @@ import moment from 'moment';
 import type { EuiDescriptionListProps, EuiAccordionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CSP_MOMENT_FORMAT } from '../../../common/constants';
-import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
+import {
+  INTERNAL_FEATURE_FLAGS,
+  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+} from '../../../../common/constants';
 import { useLatestFindingsDataView } from '../../../common/api/use_latest_findings_data_view';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
@@ -52,6 +55,12 @@ const getDetailsList = (data: CspFinding, discoverIndexLink: string | undefined)
       defaultMessage: 'Evaluated at',
     }),
     description: moment(data['@timestamp']).format(CSP_MOMENT_FORMAT),
+  },
+  {
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.resourceIdTitle', {
+      defaultMessage: 'Resource ID',
+    }),
+    description: data.resource.id,
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.resourceNameTitle', {
@@ -152,33 +161,34 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
   );
 
   const accordions: Accordion[] = useMemo(
-    () => [
-      {
-        initialIsOpen: true,
-        title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.detailsTitle', {
-          defaultMessage: 'Details',
-        }),
-        id: 'detailsAccordion',
-        listItems: getDetailsList(data, discoverIndexLink),
-      },
-      {
-        initialIsOpen: true,
-        title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.remediationTitle', {
-          defaultMessage: 'Remediation',
-        }),
-        id: 'remediationAccordion',
-        listItems: getRemediationList(data.rule),
-      },
-      {
-        initialIsOpen: false,
-        title: i18n.translate(
-          'xpack.csp.findings.findingsFlyout.overviewTab.evidenceSourcesTitle',
-          { defaultMessage: 'Evidence' }
-        ),
-        id: 'evidenceAccordion',
-        listItems: getEvidenceList(data),
-      },
-    ],
+    () =>
+      [
+        {
+          initialIsOpen: true,
+          title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.detailsTitle', {
+            defaultMessage: 'Details',
+          }),
+          id: 'detailsAccordion',
+          listItems: getDetailsList(data, discoverIndexLink),
+        },
+        {
+          initialIsOpen: true,
+          title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.remediationTitle', {
+            defaultMessage: 'Remediation',
+          }),
+          id: 'remediationAccordion',
+          listItems: getRemediationList(data.rule),
+        },
+        INTERNAL_FEATURE_FLAGS.showFindingFlyoutEvidence && {
+          initialIsOpen: false,
+          title: i18n.translate(
+            'xpack.csp.findings.findingsFlyout.overviewTab.evidenceSourcesTitle',
+            { defaultMessage: 'Evidence' }
+          ),
+          id: 'evidenceAccordion',
+          listItems: getEvidenceList(data),
+        },
+      ].filter(Boolean) as Accordion[],
     [data, discoverIndexLink]
   );
 
