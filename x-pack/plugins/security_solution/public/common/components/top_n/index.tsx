@@ -15,7 +15,7 @@ import { InputsModelId } from '../../store/inputs/constants';
 import { useGlobalTime } from '../../containers/use_global_time';
 import type { BrowserFields } from '../../containers/source';
 import { useKibana } from '../../lib/kibana';
-import { combineQueries } from '../../lib/keury';
+import { combineQueries } from '../../lib/kuery';
 import type { inputsModel, State } from '../../store';
 import { inputsSelectors } from '../../store';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';

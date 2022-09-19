@@ -36,7 +36,7 @@ import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
 import { TimelineHeader } from '../header';
 import { calculateTotalPages } from '../helpers';
-import { combineQueries } from '../../../../common/lib/keury';
+import { combineQueries } from '../../../../common/lib/kuery';
 import { TimelineRefetch } from '../refetch_timeline';
 import type {
   ControlColumnProps,
