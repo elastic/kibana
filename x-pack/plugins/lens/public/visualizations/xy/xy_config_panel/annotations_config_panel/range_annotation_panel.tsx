@@ -39,7 +39,7 @@ export const ConfigPanelApplyAsRangeSwitch = ({
 }: {
   annotation?: ManualEventAnnotationType;
   datatableUtilities: DatatableUtilitiesService;
-  onChange: (annotations: Partial<ManualEventAnnotationType> | undefined) => void;
+  onChange: <T extends ManualEventAnnotationType>(annotations: Partial<T> | undefined) => void;
   frame: FramePublicAPI;
   state: XYState;
 }) => {

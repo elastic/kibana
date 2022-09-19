@@ -19,6 +19,8 @@ import moment from 'moment';
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { createMockDataViewsState } from '../../../../data_views_service/mocks';
 import { createMockedIndexPattern } from '../../../../indexpattern_datasource/mocks';
+import { act } from 'react-dom/test-utils';
+import { EuiButtonGroup } from '@elastic/eui';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -28,6 +30,12 @@ jest.mock('lodash', () => {
     debounce: (fn: unknown) => fn,
   };
 });
+
+jest.mock('@kbn/unified-search-plugin/public', () => ({
+  QueryStringInput: () => {
+    return 'QueryStringInput';
+  },
+}));
 
 const customLineStaticAnnotation: EventAnnotationConfig = {
   id: 'ann1',
@@ -309,6 +317,112 @@ describe('AnnotationsPanel', () => {
       expect(
         component.find('[data-test-subj="lnsXY-annotation-tooltip-add_field"]').exists()
       ).toBeTruthy();
+    });
+
+    test('should prefill timeField with the default time field when switching to query based annotations', () => {
+      const state = testState();
+      const indexPattern = createMockedIndexPattern();
+      state.layers[0] = {
+        annotations: [customLineStaticAnnotation],
+        layerId: 'annotation',
+        layerType: 'annotations',
+        ignoreGlobalFilters: true,
+        indexPatternId: indexPattern.id,
+      };
+      const frameMock = createMockFramePublicAPI({
+        datasourceLayers: {},
+        dataViews: createMockDataViewsState({
+          indexPatterns: { [indexPattern.id]: indexPattern },
+        }),
+      });
+
+      const setState = jest.fn();
+
+      const component = mount(
+        <AnnotationsPanel
+          layerId={state.layers[0].layerId}
+          frame={frameMock}
+          setState={setState}
+          accessor="ann1"
+          groupId="left"
+          state={state}
+          datatableUtilities={datatableUtilities}
+          formatFactory={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          panelRef={React.createRef()}
+        />
+      );
+
+      act(() => {
+        component
+          .find(`[data-test-subj="lns-xyAnnotation-placementType"]`)
+          .find(EuiButtonGroup)
+          .prop('onChange')!('lens_xyChart_annotation_query');
+      });
+      component.update();
+
+      expect(setState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          layers: [
+            expect.objectContaining({
+              annotations: [expect.objectContaining({ timeField: 'timestamp' })],
+            }),
+          ],
+        })
+      );
+    });
+
+    test('should fallback to the first date field available in the dataView if not time-based', () => {
+      const state = testState();
+      const indexPattern = createMockedIndexPattern({ timeFieldName: '' });
+      state.layers[0] = {
+        annotations: [customLineStaticAnnotation],
+        layerId: 'annotation',
+        layerType: 'annotations',
+        ignoreGlobalFilters: true,
+        indexPatternId: indexPattern.id,
+      };
+      const frameMock = createMockFramePublicAPI({
+        datasourceLayers: {},
+        dataViews: createMockDataViewsState({
+          indexPatterns: { [indexPattern.id]: indexPattern },
+        }),
+      });
+
+      const setState = jest.fn();
+
+      const component = mount(
+        <AnnotationsPanel
+          layerId={state.layers[0].layerId}
+          frame={frameMock}
+          setState={setState}
+          accessor="ann1"
+          groupId="left"
+          state={state}
+          datatableUtilities={datatableUtilities}
+          formatFactory={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          panelRef={React.createRef()}
+        />
+      );
+
+      act(() => {
+        component
+          .find(`[data-test-subj="lns-xyAnnotation-placementType"]`)
+          .find(EuiButtonGroup)
+          .prop('onChange')!('lens_xyChart_annotation_query');
+      });
+      component.update();
+
+      expect(setState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          layers: [
+            expect.objectContaining({
+              annotations: [expect.objectContaining({ timeField: 'timestampLabel' })],
+            }),
+          ],
+        })
+      );
     });
   });
 });

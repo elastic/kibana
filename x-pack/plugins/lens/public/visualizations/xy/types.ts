@@ -82,7 +82,7 @@ export interface YConfig {
   color?: string;
   icon?: string;
   lineWidth?: number;
-  lineStyle?: LineStyle;
+  lineStyle?: Exclude<LineStyle, 'dot-dashed'>;
   fill?: FillStyle;
   iconPosition?: IconPosition;
   textVisibility?: boolean;

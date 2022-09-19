@@ -26,7 +26,7 @@ export const ConfigPanelManualAnnotation = ({
   datatableUtilities,
 }: {
   annotation?: ManualEventAnnotationType | undefined;
-  onChange: (annotations: Partial<ManualEventAnnotationType | undefined> | undefined) => void;
+  onChange: <T extends ManualEventAnnotationType>(annotation: Partial<T> | undefined) => void;
   datatableUtilities: DatatableUtilitiesService;
   frame: FramePublicAPI;
   state: XYState;

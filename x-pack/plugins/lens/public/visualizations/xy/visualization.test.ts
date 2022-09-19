@@ -30,6 +30,7 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataViewsState } from '../../state_management';
 import { createMockedIndexPattern } from '../../indexpattern_datasource/mocks';
 import { createMockDataViewsState } from '../../data_views_service/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 const exampleAnnotation: EventAnnotationConfig = {
   id: 'an1',
@@ -81,6 +82,7 @@ const xyVisualization = getXyVisualization({
   core: coreMock.createStart(),
   storage: {} as IStorageWrapper,
   data: dataPluginMock.createStartContract(),
+  unifiedSearch: unifiedSearchPluginMock.createStartContract(),
 });
 
 describe('xy_visualization', () => {
@@ -2260,6 +2262,18 @@ describe('xy_visualization', () => {
         });
         const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
         expect(errors).toHaveLength(4);
+      });
+      it('should contain error if current annotation contains no time field set', () => {
+        const xyState = createStateWithAnnotationProps({
+          timeField: undefined,
+        });
+        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
+        expect(errors).toHaveLength(1);
+        expect(errors![0]).toEqual(
+          expect.objectContaining({
+            shortMessage: expect.stringContaining('Time field is missing'),
+          })
+        );
       });
     });
   });
