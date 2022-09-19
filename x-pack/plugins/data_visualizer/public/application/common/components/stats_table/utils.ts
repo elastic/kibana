@@ -55,7 +55,7 @@ export const calculateTableColumnsDimensions = (width?: number) => {
     breakPoint: 'large',
   };
   if (width === undefined) return defaultSettings;
-  if (width <= TABLE_BREAKPOINTS['small']) {
+  if (width <= TABLE_BREAKPOINTS.small) {
     return {
       expander: '25px',
       type: '40px',
@@ -66,7 +66,7 @@ export const calculateTableColumnsDimensions = (width?: number) => {
       breakPoint: 'small',
     };
   }
-  if (width <= TABLE_BREAKPOINTS['medium']) {
+  if (width <= TABLE_BREAKPOINTS.medium) {
     return {
       expander: '25px',
       type: '40px',
