@@ -39,6 +39,7 @@ import {
   isCspPackageInstalled,
   onPackagePolicyPostCreateCallback,
   removeCspRulesInstancesCallback,
+  OnPackagePolicyUpgradeCallback,
 } from './fleet_integration/fleet_integration';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import {
@@ -152,11 +153,11 @@ export class CspPlugin
           context: RequestHandlerContext,
           request: KibanaRequest
         ): Promise<void> => {
-          console.log('I am updating');
-
-          await setTimeout(() => {
-            console.log('I am updating');
-          }, 1000);
+          if (UpgradePackagePolicyResponse.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
+            // Get the package
+            const soClient = (await context.core).savedObjects.client;
+            await OnPackagePolicyUpgradeCallback(this.logger, packagePolicy, soClient);
+          }
         }
       );
     });

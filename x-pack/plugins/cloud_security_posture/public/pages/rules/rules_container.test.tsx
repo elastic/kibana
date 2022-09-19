@@ -70,6 +70,7 @@ const getRuleMock = ({
     attributes: {
       metadata: {
         audit: chance.sentence(),
+
         benchmark: {
           name: chance.word(),
           version: chance.sentence(),
