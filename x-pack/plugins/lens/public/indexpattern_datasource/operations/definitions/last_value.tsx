@@ -19,11 +19,11 @@ import {
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import {
   buildExpressionFunction,
-  buildExpression,
   ExpressionAstExpressionBuilder,
   ExpressionAstFunctionBuilder,
   AnyExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/public';
+import { ExpressionFunctionKql, ExpressionFunctionLucene } from '@kbn/data-plugin/common';
 import { OperationDefinition } from '.';
 import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
 import type { IndexPatternField, IndexPattern } from '../../../types';
@@ -127,6 +127,22 @@ function getExistsFilter(field: string) {
     query: `${field}: *`,
     language: 'kuery',
   };
+}
+
+function groupByKey<T>(items: T[], getKey: (item: T) => string | undefined): Record<string, T[]> {
+  const groups: Record<string, T[]> = {};
+
+  items.forEach((item) => {
+    const key = getKey(item);
+    if (key) {
+      if (!(key in groups)) {
+        groups[key] = [];
+      }
+      groups[key].push(item);
+    }
+  });
+
+  return groups;
 }
 
 export const lastValueOperation: OperationDefinition<
@@ -268,67 +284,54 @@ export const lastValueOperation: OperationDefinition<
     let aggs = [..._aggs];
     const esAggsIdMap = { ..._esAggsIdMap };
 
-    const expressionBuildersByArgs: Record<string, ExpressionAstExpressionBuilder[]> = {};
-
-    aggs.forEach((expressionBuilder) => {
+    const aggsByArgs = groupByKey<ExpressionAstExpressionBuilder>(aggs, (expressionBuilder) => {
       const {
         functions: [fnBuilder],
       } = expressionBuilder;
       if (fnBuilder.name === 'aggFilteredMetric') {
-        const customMetricFn = fnBuilder.getArgument('customMetric')?.[0].functions[0] as
+        const metricFnBuilder = fnBuilder.getArgument('customMetric')?.[0].functions[0] as
           | ExpressionAstFunctionBuilder<AnyExpressionFunctionDefinition>
           | undefined;
 
-        if (customMetricFn && ['aggTopHit', 'aggTopMetrics'].includes(customMetricFn.name)) {
-          const groupByKey = `${customMetricFn.name}-${customMetricFn.getArgument('field')?.[0]}-${
+        if (metricFnBuilder && ['aggTopHit', 'aggTopMetrics'].includes(metricFnBuilder.name)) {
+          const aggFilterFnBuilder = (
+            fnBuilder.getArgument('customBucket')?.[0] as ExpressionAstExpressionBuilder
+          ).functions[0] as ExpressionAstFunctionBuilder<AggFunctionsMapping['aggFilter']>;
+
+          let groupKey = `${metricFnBuilder.name}-${aggFilterFnBuilder.getArgument('timeWindow')}-${
+            metricFnBuilder.getArgument('field')?.[0]
+          }-${
             fnBuilder.getArgument('timeShift')?.[0] // we get this from the parent agg
           }`;
 
-          if (!(groupByKey in expressionBuildersByArgs)) {
-            expressionBuildersByArgs[groupByKey] = [];
+          const filterExpression = aggFilterFnBuilder.getArgument('filter')?.[0] as
+            | ExpressionAstExpressionBuilder
+            | undefined;
+
+          if (filterExpression) {
+            const filterFnBuilder = filterExpression.functions[0] as
+              | ExpressionAstFunctionBuilder<ExpressionFunctionKql | ExpressionFunctionLucene>
+              | undefined;
+
+            groupKey += `-${filterFnBuilder?.name}-${filterFnBuilder?.getArgument('q')?.[0]}`;
           }
 
-          expressionBuildersByArgs[groupByKey].push(expressionBuilder);
+          return groupKey;
         }
       }
     });
 
-    // collapse them into a single expression builders
-    Object.values(expressionBuildersByArgs).forEach((expressionBuilders) => {
+    // collapse them into a single expression builder
+    Object.values(aggsByArgs).forEach((expressionBuilders) => {
       if (expressionBuilders.length <= 1) {
         // don't need to optimize if there aren't more than one
         return;
       }
 
-      // we're going to merge these expression builders into a single builder, so
-      // remove them from the aggs array
-      aggs = aggs.filter((aggBuilder) => !expressionBuilders.includes(aggBuilder));
-
       const [firstExpressionBuilder, ...restExpressionBuilders] = expressionBuilders;
 
-      const firstFnBuilder = firstExpressionBuilder.functions[0] as ExpressionAstFunctionBuilder<
-        AggFunctionsMapping['aggFilteredMetric']
-      >;
-
-      const esAggsColumnId = firstFnBuilder.getArgument('id')![0];
-
-      const ast = buildExpressionFunction<AggFunctionsMapping['aggFilteredMetric']>(
-        'aggFilteredMetric',
-        {
-          id: esAggsColumnId,
-          enabled: firstFnBuilder.getArgument('enabled')?.[0],
-          customBucket: firstFnBuilder.getArgument('customBucket')?.[0],
-          customMetric: firstFnBuilder.getArgument('customMetric')?.[0],
-          timeShift: firstFnBuilder.getArgument('timeShift')?.[0],
-        }
-      ).toAst();
-
-      aggs.push(
-        buildExpression({
-          type: 'expression',
-          chain: [ast],
-        })
-      );
+      // throw away all but the first expression builder
+      aggs = aggs.filter((aggBuilder) => !restExpressionBuilders.includes(aggBuilder));
 
       const firstEsAggsId = aggExpressionToEsAggsIdMap.get(firstExpressionBuilder);
       if (firstEsAggsId === undefined) {
