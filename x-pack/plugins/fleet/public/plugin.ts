@@ -63,7 +63,7 @@ import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extensi
 
 export type { FleetConfigType } from '../common/types';
 
-import { setCustomIntegrations } from './services/custom_integrations';
+import { setCustomIntegrations, setCustomIntegrationsStart } from './services/custom_integrations';
 
 // We need to provide an object instead of void so that dependent plugins know when Fleet
 // is disabled.
@@ -267,6 +267,9 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       Component: LazyCustomLogsAssetsExtension,
     });
     const { capabilities } = core.application;
+
+    // Set the custom integrations language clients
+    setCustomIntegrationsStart(deps.customIntegrations);
 
     //  capabilities.fleetv2 returns fleet privileges and capabilities.fleet returns integrations privileges
     return {

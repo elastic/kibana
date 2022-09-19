@@ -14,6 +14,7 @@ import { IntegrationsStateContextProvider, useBreadcrumbs } from '../../hooks';
 import { EPMHomePage } from './screens/home';
 import { Detail } from './screens/detail';
 import { Policy } from './screens/policy';
+import { CustomLanguagesOverview } from './screens/detail/custom_languages_overview';
 
 export const EPMApp: React.FunctionComponent = () => {
   useBreadcrumbs('integrations');
@@ -26,6 +27,11 @@ export const EPMApp: React.FunctionComponent = () => {
       <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details}>
         <IntegrationsStateContextProvider>
           <Detail />
+        </IntegrationsStateContextProvider>
+      </Route>
+      <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_language_clients}>
+        <IntegrationsStateContextProvider>
+          <CustomLanguagesOverview />
         </IntegrationsStateContextProvider>
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations}>
