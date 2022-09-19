@@ -7,6 +7,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
+import { ENTITY_ANALYTICS } from '../../app/translations';
 import { Paywall } from '../../common/components/paywall';
 import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
@@ -34,7 +35,7 @@ const EntityAnalyticsComponent = () => {
         <>
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">
             <HeaderPage
-              title={i18n.ENTITY_ANALYTICS_TITLE}
+              title={ENTITY_ANALYTICS}
               badgeOptions={{
                 text: i18n.TECHNICAL_PREVIEW,
                 color: 'white',
