@@ -117,6 +117,7 @@ export function DiscoverSidebarComponent({
   viewMode,
   createNewDataView,
   showDataViewPicker,
+  state,
   persistDataView,
 }: DiscoverSidebarProps) {
   const { uiSettings, dataViewFieldEditor } = useDiscoverServices();
@@ -146,8 +147,8 @@ export function DiscoverSidebarComponent({
   );
 
   const getDetailsByField = useCallback(
-    (ipField: DataViewField) => getDetails(ipField, documents, columns, selectedDataView),
-    [documents, columns, selectedDataView]
+    (ipField: DataViewField) => getDetails(ipField, documents, selectedDataView),
+    [documents, selectedDataView]
   );
 
   const popularLimit = useMemo(() => uiSettings.get(FIELDS_LIMIT_SETTING), [uiSettings]);
@@ -415,6 +416,8 @@ export function DiscoverSidebarComponent({
                                 onDeleteField={deleteField}
                                 showFieldStats={showFieldStats}
                                 persistDataView={persistDataView}
+                                state={state}
+                                contextualFields={columns}
                               />
                             </li>
                           );
@@ -476,6 +479,8 @@ export function DiscoverSidebarComponent({
                                 onDeleteField={deleteField}
                                 showFieldStats={showFieldStats}
                                 persistDataView={persistDataView}
+                                state={state}
+                                contextualFields={columns}
                               />
                             </li>
                           );
@@ -506,6 +511,8 @@ export function DiscoverSidebarComponent({
                             onDeleteField={deleteField}
                             showFieldStats={showFieldStats}
                             persistDataView={persistDataView}
+                            state={state}
+                            contextualFields={columns}
                           />
                         </li>
                       );

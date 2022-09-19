@@ -39,6 +39,7 @@ import {
   trustedApplicationToTelemetryEntry,
   ruleExceptionListItemToTelemetryEvent,
   metricsResponseToValueListMetaData,
+  tlog,
 } from './helpers';
 import { Fetcher } from '../../endpoint/routes/resolver/tree/utils/fetch';
 import type { TreeOptions, TreeResponse } from '../../endpoint/routes/resolver/tree/utils/fetch';
@@ -667,7 +668,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     };
 
     const response = await this.esClient.search(query, { meta: true });
-    this.logger.debug(`received prebuilt alerts: (${response.body.hits.hits.length})`);
+    tlog(this.logger, `received prebuilt alerts: (${response.body.hits.hits.length})`);
 
     const telemetryEvents: TelemetryEvent[] = response.body.hits.hits.flatMap((h) =>
       h._source != null ? ([h._source] as TelemetryEvent[]) : []
@@ -939,7 +940,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
       return ret.license;
     } catch (err) {
-      this.logger.debug(`failed retrieving license: ${err}`);
+      tlog(this.logger, `failed retrieving license: ${err}`);
       return undefined;
     }
   }
