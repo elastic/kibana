@@ -12,7 +12,6 @@ import { useGlobalTime } from '../use_global_time';
 import type { GenericBuckets } from '../../../../common/search_strategy';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
-import { TimelineId } from '../../../../common/types';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 
@@ -21,7 +20,7 @@ const ALERT_PREVALENCE_AGG = 'countOfAlertsWithSameFieldAndValue';
 interface UseAlertPrevalenceOptions {
   field: string;
   value: string | string[] | undefined | null;
-  timelineId: string;
+  isInTimeline: boolean;
   signalIndexName: string | null;
   includeAlertIds?: boolean;
 }
@@ -36,7 +35,7 @@ interface UserAlertPrevalenceResult {
 export const useAlertPrevalence = ({
   field,
   value,
-  timelineId,
+  isInTimeline,
   signalIndexName,
   includeAlertIds = false,
 }: UseAlertPrevalenceOptions): UserAlertPrevalenceResult => {
@@ -45,7 +44,7 @@ export const useAlertPrevalence = ({
   );
   const globalTime = useGlobalTime(false);
 
-  const { to, from } = timelineId === TimelineId.active ? timelineTime : globalTime;
+  const { to, from } = isInTimeline ? timelineTime : globalTime;
   const [initialQuery] = useState(() =>
     generateAlertPrevalenceQuery(field, value, from, to, includeAlertIds)
   );

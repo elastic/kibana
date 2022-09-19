@@ -24,7 +24,8 @@ interface Props {
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem;
   eventId: string;
-  timelineId: string;
+  scopeId: string;
+  isInTimeline: boolean;
 }
 
 /**
@@ -35,29 +36,29 @@ interface Props {
  * the related alerts in a timeline investigation.
  */
 export const RelatedAlertsBySession = React.memo<Props>(
-  ({ browserFields, data, eventId, timelineId }) => {
+  ({ browserFields, data, eventId, scopeId, isInTimeline }) => {
     const { field, values } = data;
     const { error, count, alertIds } = useAlertPrevalence({
       field,
       value: values,
-      timelineId: timelineId ?? '',
+      isInTimeline,
       signalIndexName: null,
       includeAlertIds: true,
     });
 
     const { fieldFromBrowserField } = getEnrichedFieldInfo({
       browserFields,
-      contextId: timelineId,
+      contextId: scopeId,
       eventId,
       field: { id: data.field },
-      timelineId,
+      scopeId,
       item: data,
     });
 
     const cellData = useActionCellDataProvider({
       field,
       values,
-      contextId: timelineId,
+      contextId: scopeId,
       eventId,
       fieldFromBrowserField,
       fieldFormat: fieldFromBrowserField?.format,

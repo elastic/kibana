@@ -50,7 +50,7 @@ interface FlyoutBodyComponentProps {
   loading: boolean;
   rawEventData: object | undefined;
   showAlertDetails: () => void;
-  timelineId: string;
+  scopeId: string;
 }
 
 const FlyoutBodyComponent = ({
@@ -71,7 +71,7 @@ const FlyoutBodyComponent = ({
   loading,
   rawEventData,
   showAlertDetails,
-  timelineId,
+  scopeId,
 }: FlyoutBodyComponentProps) => {
   return (
     <StyledEuiFlyoutBody>
@@ -98,7 +98,7 @@ const FlyoutBodyComponent = ({
           isDraggable={isDraggable}
           loading={loading}
           rawEventData={rawEventData}
-          timelineId={timelineId}
+          scopeId={scopeId}
           timelineTabType="flyout"
           hostRisk={hostRisk}
           handleOnEventClosed={handleOnEventClosed}

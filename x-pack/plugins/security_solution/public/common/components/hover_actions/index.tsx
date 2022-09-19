@@ -12,6 +12,7 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
 import { stopPropagationAndPreventDefault } from '@kbn/timelines-plugin/public';
+import type { FilterManager } from '@kbn/data-plugin/public';
 import type { ColumnHeaderOptions, DataProvider } from '../../../../common/types/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import { SHOW_TOP_N_KEYBOARD_SHORTCUT } from './keyboard_shortcut_constants';
@@ -107,10 +108,12 @@ interface Props {
   ownFocus: boolean;
   showOwnFocus?: boolean;
   showTopN: boolean;
-  timelineId?: string | null;
+  scopeId?: string | null;
   toggleColumn?: (column: ColumnHeaderOptions) => void;
   toggleTopN: () => void;
   values?: string[] | string | null;
+  isInTimeline: boolean;
+  activeFilterManager?: FilterManager;
 }
 
 /** Returns a value for the `disabled` prop of `EuiFocusTrap` */
@@ -149,10 +152,12 @@ export const HoverActions: React.FC<Props> = React.memo(
     ownFocus,
     showOwnFocus = true,
     showTopN,
-    timelineId,
+    scopeId,
     toggleColumn,
     toggleTopN,
     values,
+    isInTimeline,
+    activeFilterManager,
   }) => {
     const [stKeyboardEvent, setStKeyboardEvent] = useState<React.KeyboardEvent>();
     const [isActive, setIsActive] = useState(false);
@@ -178,11 +183,11 @@ export const HoverActions: React.FC<Props> = React.memo(
     const defaultFocusedButtonRef = useRef<HTMLButtonElement | null>(null);
 
     useEffect(() => {
-      if (isInit.current && goGetTimelineId != null && timelineId == null) {
+      if (isInit.current && goGetTimelineId != null && scopeId == null) {
         isInit.current = false;
         goGetTimelineId(true);
       }
-    }, [goGetTimelineId, timelineId]);
+    }, [goGetTimelineId, scopeId]);
 
     useEffect(() => {
       if (ownFocus) {
@@ -215,7 +220,7 @@ export const HoverActions: React.FC<Props> = React.memo(
       [ownFocus, toggleTopN]
     );
 
-    const isCaseView = timelineId === TimelineId.casePage;
+    const isCaseView = scopeId === TimelineId.casePage;
 
     const { overflowActionItems, allActionItems } = useHoverActionItems({
       dataProvider,
@@ -237,10 +242,12 @@ export const HoverActions: React.FC<Props> = React.memo(
       ownFocus,
       showTopN,
       stKeyboardEvent,
-      timelineId,
       toggleColumn,
       toggleTopN,
       values,
+      scopeId,
+      activeFilterManager,
+      isInTimeline,
     });
 
     const Container = applyWidthAndPadding

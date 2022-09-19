@@ -13,6 +13,8 @@ import styled from 'styled-components';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useDispatch, useSelector } from 'react-redux';
 import type { DataViewBase } from '@kbn/es-query';
+import type { SortColumnTable } from '@kbn/timelines-plugin/common/types';
+import { dataTableActions } from '../../../../timelines/store/data_table';
 import { eventsViewerSelector } from '../../../../common/components/events_viewer/selectors';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -31,7 +33,7 @@ import { formatDate } from '../../../../common/components/super_date_picker';
 import { alertsPreviewDefaultModel } from '../../alerts_table/default_config';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
-import { TimelineId } from '../../../../../common/types';
+import { TableId } from '../../../../../common/types';
 import { APP_UI_ID, DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../../../common/lib/cell_actions/constants';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
@@ -40,7 +42,6 @@ import { PreviewRenderCellValue } from './preview_table_cell_renderer';
 import { getPreviewTableControlColumn } from './preview_table_control_columns';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
-import { timelineActions } from '../../../../timelines/store/timeline';
 import type { State } from '../../../../common/store';
 import type { AdvancedPreviewOptions } from '../../../pages/detection_engine/rules/types';
 
@@ -105,7 +106,7 @@ export const PreviewHistogram = ({
   });
 
   const {
-    timeline: {
+    dataTable: {
       columns,
       dataProviders,
       defaultColumns,
@@ -114,8 +115,10 @@ export const PreviewHistogram = ({
       itemsPerPageOptions,
       kqlMode,
       sort,
+      dateRange,
+      excludedRowRendererIds,
     } = alertsPreviewDefaultModel,
-  } = useSelector((state: State) => eventsViewerSelector(state, TimelineId.rulePreview));
+  } = useSelector((state: State) => eventsViewerSelector(state, TableId.rulePreview));
 
   const {
     browserFields,
@@ -147,14 +150,16 @@ export const PreviewHistogram = ({
 
   useEffect(() => {
     dispatch(
-      timelineActions.createTimeline({
+      dataTableActions.createTGrid({
         columns,
         dataViewId: selectedDataViewId,
         defaultColumns,
-        id: TimelineId.rulePreview,
+        id: TableId.rulePreview,
         indexNames: [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`],
         itemsPerPage,
-        sort,
+        sort: sort as SortColumnTable[],
+        dateRange,
+        excludedRowRendererIds,
       })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -224,7 +229,7 @@ export const PreviewHistogram = ({
             filters: [],
             globalFullScreen,
             hasAlertsCrud: false,
-            id: TimelineId.rulePreview,
+            id: TableId.rulePreview,
             indexNames: [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`],
             indexPattern: selectedIndexPattern,
             isLive: false,
@@ -249,7 +254,7 @@ export const PreviewHistogram = ({
         entityType={'events'}
         isFlyoutView
         runtimeMappings={runtimeMappings}
-        timelineId={TimelineId.rulePreview}
+        scopeId={TableId.rulePreview}
         isReadOnly
       />
     </>

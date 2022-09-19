@@ -37,7 +37,7 @@ interface FlyoutFooterProps {
   isReadOnly?: boolean;
   loadingEventDetails: boolean;
   onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
-  timelineId: string;
+  scopeId: string;
   refetchFlyoutData: () => Promise<void>;
 }
 
@@ -58,11 +58,12 @@ export const FlyoutFooterComponent = React.memo(
     isReadOnly,
     loadingEventDetails,
     onAddIsolationStatusClick,
-    timelineId,
+    scopeId,
     globalQuery,
     timelineQuery,
     refetchFlyoutData,
   }: FlyoutFooterProps & PropsFromRedux) => {
+    const isInTimeline = scopeId === TimelineId.active;
     const ruleIndex = useMemo(
       () =>
         find({ category: 'signal', field: 'signal.rule.index' }, detailsData)?.values ??
@@ -93,12 +94,12 @@ export const FlyoutFooterComponent = React.memo(
     };
 
     const refetchAll = useCallback(() => {
-      if (timelineId === TimelineId.active) {
+      if (isInTimeline) {
         refetchQuery([timelineQuery]);
       } else {
         refetchQuery(globalQuery);
       }
-    }, [timelineId, globalQuery, timelineQuery]);
+    }, [isInTimeline, timelineQuery, globalQuery]);
 
     const {
       exceptionFlyoutType,
@@ -109,7 +110,7 @@ export const FlyoutFooterComponent = React.memo(
     } = useExceptionFlyout({
       ruleIndex,
       refetch: refetchAll,
-      timelineId,
+      isInTimeline,
     });
     const { closeAddEventFilterModal, isAddEventFilterModalOpen, onAddEventFilterClick } =
       useEventFilterModal();
@@ -144,8 +145,9 @@ export const FlyoutFooterComponent = React.memo(
                   refetchFlyoutData={refetchFlyoutData}
                   refetch={refetchAll}
                   indexName={expandedEvent.indexName}
-                  timelineId={timelineId}
+                  scopeId={scopeId}
                   onOsqueryClick={setOsqueryFlyoutOpenWithAgentId}
+                  isInTimeline={isInTimeline}
                 />
               )}
             </EuiFlexItem>
@@ -183,10 +185,10 @@ export const FlyoutFooterComponent = React.memo(
 const makeMapStateToProps = () => {
   const getGlobalQueries = inputsSelectors.globalQuery();
   const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
-  const mapStateToProps = (state: State, { timelineId }: FlyoutFooterProps) => {
+  const mapStateToProps = (state: State, { scopeId }: FlyoutFooterProps) => {
     return {
       globalQuery: getGlobalQueries(state),
-      timelineQuery: getTimelineQuery(state, timelineId),
+      timelineQuery: getTimelineQuery(state, scopeId),
     };
   };
   return mapStateToProps;

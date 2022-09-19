@@ -24,6 +24,8 @@ import type { AppAction } from './actions';
 import type { Immutable } from '../../../common/endpoint/types';
 import type { State } from './types';
 import type { TimelineEpicDependencies } from '../../timelines/store/timeline/types';
+import { dataTableSelectors } from '../../timelines/store/data_table';
+import type { DataTableReducer } from '../../timelines/store/data_table';
 
 type ComposeType = typeof compose;
 declare global {
@@ -43,6 +45,7 @@ let store: Store<State, Action> | null = null;
 export const createStore = (
   state: State,
   pluginsReducer: SubPluginsInitReducer,
+  tgridReducer: DataTableReducer, // TODO: remove this param, when the table reducer will be moved to security_solution
   kibana: Observable<CoreStart>,
   storage: Storage,
   additionalMiddleware?: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>
@@ -55,6 +58,7 @@ export const createStore = (
     selectNotesByIdSelector: appSelectors.selectNotesByIdSelector,
     timelineByIdSelector: timelineSelectors.timelineByIdSelector,
     timelineTimeRangeSelector: inputsSelectors.timelineTimeRangeSelector,
+    tableByIdSelector: dataTableSelectors.tableByIdSelector,
     storage,
   };
 
@@ -65,7 +69,7 @@ export const createStore = (
   );
 
   store = createReduxStore(
-    createReducer(pluginsReducer),
+    createReducer(pluginsReducer, tgridReducer),
     state as PreloadedState<State>,
     composeEnhancers(
       applyMiddleware(epicMiddleware, telemetryMiddleware, ...(additionalMiddleware ?? []))

@@ -24,8 +24,6 @@ import {
   BulkActionsProp,
   FieldBrowserOptions,
   TGridCellAction,
-  TimelineId,
-  TimelineTabs,
 } from '../../../../common/types/timeline';
 
 import type {
@@ -47,7 +45,7 @@ import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem }
 import { Sort } from '../body/sort';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { SummaryViewSelector, ViewSelection } from '../event_rendered_view/selector';
-import { TGridLoading, TGridEmpty, TimelineContext } from '../shared';
+import { TGridLoading, TGridEmpty, TableContext } from '../shared';
 
 const TitleText = styled.span`
   margin-right: 12px;
@@ -115,7 +113,7 @@ export interface TGridIntegratedProps {
   graphOverlay?: React.ReactNode;
   hasAlertsCrud: boolean;
   height?: number;
-  id: TimelineId;
+  id: string;
   indexNames: string[];
   indexPattern: DataViewBase;
   isLive: boolean;
@@ -182,10 +180,11 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const { uiSettings } = useKibana<CoreStart>().services;
 
+  console.log(columnsHeader);
   const [tableView, setTableView] = useState<ViewSelection>('gridView');
-  const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
+  const getManageDataTable = useMemo(() => tGridSelectors.getManageDataTableById(), []);
   const { queryFields, title } = useDeepEqualSelector((state) =>
-    getManageTimeline(state, id ?? '')
+    getManageDataTable(state, id ?? '')
   );
 
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
@@ -280,7 +279,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   useEffect(() => {
     setQuery(inspect, loading, refetch);
   }, [inspect, loading, refetch, setQuery]);
-  const timelineContext = useMemo(() => ({ timelineId: id }), [id]);
+  const tableContext = useMemo(() => ({ tableId: id }), [id]);
 
   // Clear checkbox selection when new events are fetched
   useEffect(() => {
@@ -307,7 +306,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
         {graphOverlay}
 
         {canQueryTimeline && (
-          <TimelineContext.Provider value={timelineContext}>
+          <TableContext.Provider value={tableContext}>
             <EventsContainerLoading
               data-timeline-id={id}
               data-test-subj={`events-container-loading-${loading}`}
@@ -365,7 +364,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                         renderCellValue={renderCellValue}
                         rowRenderers={rowRenderers}
                         tableView={tableView}
-                        tabType={TimelineTabs.query}
+                        tabType={'query'}
                         totalItems={totalCountMinusDeleted}
                         trailingControlColumns={trailingControlColumns}
                         unit={unit}
@@ -375,7 +374,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                 )}
               </>
             </EventsContainerLoading>
-          </TimelineContext.Provider>
+          </TableContext.Provider>
         )}
       </StyledEuiPanel>
     </InspectButtonContainer>

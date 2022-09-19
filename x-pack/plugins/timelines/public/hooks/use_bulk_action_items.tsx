@@ -29,9 +29,9 @@ export const useBulkActionItems = ({
   onUpdateSuccess,
   onUpdateFailure,
   customBulkActions,
-  timelineId,
+  scopeId,
 }: BulkActionsProps) => {
-  const { updateAlertStatus } = useUpdateAlertsStatus(timelineId !== STANDALONE_ID);
+  const { updateAlertStatus } = useUpdateAlertsStatus(scopeId !== STANDALONE_ID);
   const { addSuccess, addError, addWarning } = useAppToasts();
 
   const onAlertStatusUpdateSuccess = useCallback(

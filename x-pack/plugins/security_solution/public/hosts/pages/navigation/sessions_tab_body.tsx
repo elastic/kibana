@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { TimelineId } from '../../../../common/types/timeline';
+import { TableId } from '../../../../common/types/timeline';
 import { SessionsView } from '../../../common/components/sessions_viewer';
 import { hostNameExistsFilter } from '../../../common/components/visualization_actions/utils';
 import type { AlertsComponentQueryProps } from './types';
@@ -21,7 +21,7 @@ export const SessionsTabBody = React.memo((alertsProps: AlertsComponentQueryProp
   return (
     <SessionsView
       entityType="sessions"
-      timelineId={TimelineId.hostsPageSessions}
+      tableId={TableId.hostsPageSessions}
       {...rest}
       pageFilters={hostPageFilters}
       filterQuery={filterQuery}

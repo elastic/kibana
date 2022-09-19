@@ -200,14 +200,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     return [...columnFields, ...requiredFieldsForActions];
   };
 
-  useEffect(() => {
-    dispatch(
-      timelineActions.initializeTGridSettings({
-        id: timelineId,
-      })
-    );
-  }, [dispatch, timelineId]);
-
   const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
     useTimelineEvents({
       dataViewId,
@@ -356,7 +348,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                 browserFields={browserFields}
                 runtimeMappings={runtimeMappings}
                 tabType={TimelineTabs.eql}
-                timelineId={timelineId}
+                scopeId={timelineId}
                 handleOnPanelClosed={handleOnPanelClosed}
               />
             </ScrollableFlexItem>

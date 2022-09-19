@@ -10,8 +10,8 @@ import { map, filter, ignoreElements, tap, withLatestFrom, delay } from 'rxjs/op
 import type { Epic } from 'redux-observable';
 import { get } from 'lodash/fp';
 
-import type { TimelineIdLiteral } from '../../../../common/types/timeline';
-import { addTimelineInStorage } from '../../containers/local_storage';
+import type { TableIdLiteral } from '../../../../common/types/timeline';
+import { addTableInStorage } from '../../containers/local_storage';
 
 import {
   removeColumn,
@@ -24,10 +24,11 @@ import {
   updateItemsPerPage,
   updateSort,
 } from './actions';
-import type { TimelineEpicDependencies } from './types';
-import { isNotNull } from './helpers';
+import type { TimelineEpicDependencies } from '../timeline/types';
 
-const timelineActionTypes = [
+export const isNotNull = <T>(value: T | null): value is T => value !== null;
+
+const tableActionTypes = [
   removeColumn.type,
   upsertColumn.type,
   applyDeltaToColumnWidth.type,
@@ -39,23 +40,23 @@ const timelineActionTypes = [
   setExcludedRowRendererIds.type,
 ];
 
-export const isPageTimeline = (timelineId: string | undefined): boolean =>
-  // Is not a flyout timeline
-  !(timelineId && timelineId.toLowerCase().startsWith('timeline'));
+export const isPageTimeline = (tableId: string | undefined): boolean =>
+  // Is not a flyout table
+  !(tableId && tableId.toLowerCase().startsWith('timeline'));
 
-export const createTimelineLocalStorageEpic =
+export const createDataTableLocalStorageEpic =
   <State>(): Epic<Action, Action, State, TimelineEpicDependencies<State>> =>
-  (action$, state$, { timelineByIdSelector, storage }) => {
-    const timeline$ = state$.pipe(map(timelineByIdSelector), filter(isNotNull));
+  (action$, state$, { tableByIdSelector, storage }) => {
+    const table$ = state$.pipe(map(tableByIdSelector), filter(isNotNull));
     return action$.pipe(
       delay(500),
-      withLatestFrom(timeline$),
+      withLatestFrom(table$),
       filter(([action]) => isPageTimeline(get('payload.id', action))),
-      tap(([action, timelineById]) => {
-        if (timelineActionTypes.includes(action.type)) {
+      tap(([action, tableById]) => {
+        if (tableActionTypes.includes(action.type)) {
           if (storage) {
-            const timelineId: TimelineIdLiteral = get('payload.id', action);
-            addTimelineInStorage(storage, timelineId, timelineById[timelineId]);
+            const tableId: TableIdLiteral = get('payload.id', action);
+            addTableInStorage(storage, tableId, tableById[tableId]);
           }
         }
       }),

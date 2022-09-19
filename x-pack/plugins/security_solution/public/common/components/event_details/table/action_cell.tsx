@@ -11,6 +11,7 @@ import { HoverActions } from '../../hover_actions';
 import { useActionCellDataProvider } from './use_action_cell_data_provider';
 import type { EnrichedFieldInfo } from '../types';
 import type { ColumnHeaderOptions } from '../../../../../common/types/timeline';
+import { TimelineId } from '../../../../../common/types/timeline';
 
 interface Props extends EnrichedFieldInfo {
   contextId: string;
@@ -34,7 +35,7 @@ export const ActionCell: React.FC<Props> = React.memo(
     linkValue,
     onFilterAdded,
     setIsPopoverVisible,
-    timelineId,
+    scopeId,
     toggleColumn,
     values,
     hideAddToTimeline,
@@ -83,10 +84,11 @@ export const ActionCell: React.FC<Props> = React.memo(
         onFilterAdded={onFilterAdded}
         ownFocus={hoverActionsOwnFocus}
         showTopN={showTopN}
-        timelineId={timelineId ?? timelineIdFind}
+        scopeId={scopeId ?? timelineIdFind}
         toggleColumn={toggleColumn}
         toggleTopN={toggleTopN}
         values={actionCellConfig?.values}
+        isInTimeline={scopeId === TimelineId.active}
       />
     );
   }

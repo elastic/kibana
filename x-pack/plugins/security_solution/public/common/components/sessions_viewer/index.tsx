@@ -42,7 +42,7 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
 };
 
 const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
-  timelineId,
+  tableId,
   endDate,
   entityType = 'sessions',
   pageFilters,
@@ -88,7 +88,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
         defaultModel={getSessionsDefaultModel(columns, defaultColumns)}
         end={endDate}
         entityType={entityType}
-        id={timelineId}
+        tableId={tableId}
         leadingControlColumns={leadingControlColumns}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}

@@ -14,13 +14,13 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import { Store } from 'redux';
 import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
-import { createStore, TimelineState } from '../types';
+import { createStore, TableState } from '../types';
 import { mockGlobalState } from './global_state';
 
 import { createKibanaContextProviderMock, createStartServicesMock } from './kibana_react.mock';
 import { createSecuritySolutionStorageMock, localStorageMock } from './mock_local_storage';
 
-const state: TimelineState = mockGlobalState;
+const state: TableState = mockGlobalState;
 
 interface Props {
   children: React.ReactNode;

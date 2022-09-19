@@ -37,7 +37,7 @@ interface Props {
   messageHeight?: number;
   rawEventData: object | undefined;
   timelineTabType: TimelineTabs | 'flyout';
-  timelineId: string;
+  scopeId: string;
   hostRisk: HostRisk | null;
   handleOnEventClosed: HandleOnEventClosed;
   isReadOnly?: boolean;
@@ -101,7 +101,7 @@ export const ExpandableEvent = React.memo<Props>(
   ({
     browserFields,
     event,
-    timelineId,
+    scopeId,
     timelineTabType,
     isAlert,
     isDraggable,
@@ -131,7 +131,7 @@ export const ExpandableEvent = React.memo<Props>(
             indexName={event.indexName}
             isDraggable={isDraggable}
             rawEventData={rawEventData}
-            timelineId={timelineId}
+            scopeId={scopeId}
             timelineTabType={timelineTabType}
             hostRisk={hostRisk}
             handleOnEventClosed={handleOnEventClosed}
