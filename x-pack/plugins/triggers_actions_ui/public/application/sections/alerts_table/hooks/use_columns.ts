@@ -83,6 +83,27 @@ const getColumnByColumnId = (columns: EuiDataGridColumn[], columnId: string) => 
   return columns.find(({ id }: { id: string }) => id === columnId);
 };
 
+const persist = ({
+  id,
+  storageAlertsTable,
+  columns,
+  visibleColumns,
+  storage,
+}: {
+  id: string;
+  storageAlertsTable: React.MutableRefObject<AlertsTableStorage>;
+  storage: React.MutableRefObject<IStorageWrapper>;
+  columns: EuiDataGridColumn[];
+  visibleColumns: string[];
+}) => {
+  storageAlertsTable.current = {
+    ...storageAlertsTable.current,
+    columns,
+    visibleColumns,
+  };
+  storage.current.set(id, storageAlertsTable.current);
+};
+
 export const useColumns = ({
   featureIds,
   storageAlertsTable,
@@ -110,12 +131,13 @@ export const useColumns = ({
   const onColumnsChange = useCallback(
     (newColumns: EuiDataGridColumn[], newVisibleColumns: string[]) => {
       setColumns(newColumns);
-      storageAlertsTable.current = {
-        ...storageAlertsTable.current,
+      persist({
+        id,
+        storage,
+        storageAlertsTable,
         columns: newColumns,
         visibleColumns: newVisibleColumns,
-      };
-      storage.current.set(id, storageAlertsTable.current);
+      });
     },
     [id, storage, storageAlertsTable]
   );
@@ -180,8 +202,17 @@ export const useColumns = ({
   );
 
   const onResetColumns = useCallback(() => {
-    return onChangeVisibleColumns(defaultColumns.map((column) => column.id));
-  }, [defaultColumns, onChangeVisibleColumns]);
+    const newVisibleColumns = defaultColumns.map((column) => column.id);
+    setVisibleColumns(newVisibleColumns);
+    setColumns(defaultColumns);
+    persist({
+      id,
+      storage,
+      storageAlertsTable,
+      columns: defaultColumns,
+      visibleColumns: newVisibleColumns,
+    });
+  }, [defaultColumns, id, storage, storageAlertsTable]);
 
   return {
     columns,
