@@ -37,6 +37,6 @@ export const HOST_WARNING_BODY = i18n.translate(
 export const USER_WARNING_BODY = i18n.translate(
   'xpack.securitySolution.riskScore.usersDashboardWarningPanelBody',
   {
-    defaultMessage: `We haven't detected any user risk score data from the users in your environment for the selected time range.`,
+    defaultMessage: `We haven't detected any user risk score data from the users in your environment.`,
   }
 );
