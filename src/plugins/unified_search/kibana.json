@@ -9,7 +9,7 @@
   },
   "server": true,
   "ui": true,
-  "requiredPlugins": ["dataViews", "data", "uiActions", "screenshotMode"],
+  "requiredPlugins": ["dataViews", "data", "uiActions", "screenshotMode", "usageCollection"],
   "requiredBundles": ["kibanaUtils", "kibanaReact", "data"],
   "serviceFolders": ["autocomplete"],
   "configPath": ["unifiedSearch"]
