@@ -11,7 +11,7 @@ import React from 'react';
 import { useKibana } from '../common/hooks/use_kibana';
 
 export const SubscriptionNotAllowed = () => {
-  const { http } = useKibana().services;
+  const { application } = useKibana().services;
   return (
     <EuiPageSection color="danger" alignment="center">
       <EuiEmptyPrompt
@@ -32,7 +32,9 @@ export const SubscriptionNotAllowed = () => {
               values={{
                 link: (
                   <EuiLink
-                    href={`${http.basePath.get()}/app/management/stack/license_management/home`}
+                    href={application.getUrlForApp('management', {
+                      path: 'stack/license_management/home',
+                    })}
                   >
                     <FormattedMessage
                       id="xpack.csp.subscriptionNotAllowed.promptLinkText"

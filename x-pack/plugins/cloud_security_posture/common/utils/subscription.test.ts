@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { isSubscriptionAllowed } from './subscription';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 
-const ON_PREM_ALLOWED_LICENSES = ['enterprise', 'trial'] as const;
-const ON_PREM_NOT_ALLOWED_LICENSES = ['basic', 'gold', 'platinum'] as const;
-const ALL_LICENSE_TYPES = ['basic', 'standard', 'gold', 'platinum', 'enterprise', 'trial'] as const;
+const ON_PREM_ALLOWED_LICENSES: readonly LicenseType[] = ['enterprise', 'trial'];
+const ON_PREM_NOT_ALLOWED_LICENSES: readonly LicenseType[] = ['basic', 'gold', 'platinum'];
+const ALL_LICENSE_TYPES: readonly LicenseType[] = [
+  'standard',
+  ...ON_PREM_NOT_ALLOWED_LICENSES,
+  ...ON_PREM_NOT_ALLOWED_LICENSES,
+];
 
 describe('isSubscriptionAllowed', () => {
   it('should allow any cloud subscription', () => {
