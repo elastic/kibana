@@ -18,7 +18,7 @@ import {
 import React, { useMemo } from 'react';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
-import { CspFinding } from '../types';
+import { CspFinding } from '../../../../common/schemas/csp_finding';
 
 const getDescriptionDisplay = (value: unknown) => {
   if (value === undefined) return 'undefined';

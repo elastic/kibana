@@ -6,27 +6,16 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexItem,
-  EuiPanel,
-  EuiIcon,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiText,
-  EuiButtonEmpty,
-  useEuiTheme,
-} from '@elastic/eui';
-import moment from 'moment';
+import { EuiFlexItem, EuiPanel, EuiSpacer, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { PartitionElementEvent } from '@elastic/charts';
-import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import { i18n } from '@kbn/i18n';
-import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
 import { ChartPanel } from '../../../components/chart_panel';
 import type { ComplianceDashboardData, Evaluation } from '../../../../common/types';
 import { RisksTable } from '../compliance_charts/risks_table';
-import { INTERNAL_FEATURE_FLAGS, RULE_FAILED } from '../../../../common/constants';
+import { RULE_FAILED } from '../../../../common/constants';
 import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
+import { ClusterDetailsBox } from './cluster_details_box';
 
 const cardHeight = 300;
 
@@ -60,92 +49,65 @@ export const BenchmarksSection = ({
 
   return (
     <>
-      {complianceData.clusters.map((cluster) => {
-        const shortId = cluster.meta.clusterId.slice(0, 6);
-        return (
-          <React.Fragment key={cluster.meta.clusterId}>
-            <EuiPanel hasBorder hasShadow={false} paddingSize="none">
-              <EuiFlexGroup gutterSize="none" style={{ height: cardHeight }}>
-                <EuiFlexItem grow={2} style={getIntegrationBoxStyle(euiTheme)}>
-                  <EuiFlexGroup direction="column" alignItems="center" justifyContent="spaceAround">
-                    <EuiFlexItem grow={false}>
-                      <EuiText style={{ textAlign: 'center' }}>
-                        <h4>{cluster.meta.benchmarkName}</h4>
-                      </EuiText>
-                      <EuiText style={{ textAlign: 'center' }}>
-                        <h4>{`Cluster ID ${shortId}`}</h4>
-                      </EuiText>
-                      <EuiSpacer size="xs" />
-                      <EuiText size="xs" color="subdued" style={{ textAlign: 'center' }}>
-                        <EuiIcon type="clock" />
-                        {` ${moment(cluster.meta.lastUpdate).fromNow()}`}
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <CISBenchmarkIcon type={cluster.meta.benchmarkId} />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      {INTERNAL_FEATURE_FLAGS.showManageRulesMock && (
-                        <EuiButtonEmpty>{'Manage Rules'}</EuiButtonEmpty>
-                      )}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                <EuiFlexItem
-                  grow={4}
-                  style={{ borderRight: `1px solid ${euiTheme.colors.lightShade}` }}
+      {complianceData.clusters.map((cluster) => (
+        <React.Fragment key={cluster.meta.clusterId}>
+          <EuiPanel hasBorder hasShadow={false} paddingSize="none">
+            <EuiFlexGroup gutterSize="none" style={{ height: cardHeight }}>
+              <EuiFlexItem
+                grow={2}
+                style={{
+                  borderRight: `1px solid ${euiTheme.colors.lightShade}`,
+                  borderRadius: `${euiTheme.border.radius.medium} 0 0 ${euiTheme.border.radius.medium}`,
+                  background: euiTheme.colors.lightestShade,
+                  padding: euiTheme.size.base,
+                }}
+              >
+                <ClusterDetailsBox cluster={cluster} />
+              </EuiFlexItem>
+              <EuiFlexItem
+                grow={4}
+                style={{ borderRight: `1px solid ${euiTheme.colors.lightShade}` }}
+              >
+                <ChartPanel
+                  title={i18n.translate(
+                    'xpack.csp.dashboard.benchmarkSection.complianceScorePanelTitle',
+                    { defaultMessage: 'Compliance Score' }
+                  )}
+                  hasBorder={false}
                 >
-                  <ChartPanel
-                    title={i18n.translate(
-                      'xpack.csp.dashboard.benchmarkSection.complianceScorePanelTitle',
-                      {
-                        defaultMessage: 'Compliance Score',
-                      }
-                    )}
-                    hasBorder={false}
-                  >
-                    <CloudPostureScoreChart
-                      id={`${cluster.meta.clusterId}_score_chart`}
-                      data={cluster.stats}
-                      trend={cluster.trend}
-                      partitionOnElementClick={(elements) =>
-                        handleElementClick(cluster.meta.clusterId, elements)
-                      }
-                    />
-                  </ChartPanel>
-                </EuiFlexItem>
-                <EuiFlexItem grow={4}>
-                  <ChartPanel
-                    title={i18n.translate(
-                      'xpack.csp.dashboard.benchmarkSection.failedFindingsPanelTitle',
-                      {
-                        defaultMessage: 'Failed Findings',
-                      }
-                    )}
-                    hasBorder={false}
-                  >
-                    <RisksTable
-                      data={cluster.groupedFindingsEvaluation}
-                      maxItems={3}
-                      onCellClick={(resourceTypeName) =>
-                        handleCellClick(cluster.meta.clusterId, resourceTypeName)
-                      }
-                      onViewAllClick={() => handleViewAllClick(cluster.meta.clusterId)}
-                    />
-                  </ChartPanel>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-            <EuiSpacer />
-          </React.Fragment>
-        );
-      })}
+                  <CloudPostureScoreChart
+                    id={`${cluster.meta.clusterId}_score_chart`}
+                    data={cluster.stats}
+                    trend={cluster.trend}
+                    partitionOnElementClick={(elements) =>
+                      handleElementClick(cluster.meta.clusterId, elements)
+                    }
+                  />
+                </ChartPanel>
+              </EuiFlexItem>
+              <EuiFlexItem grow={4}>
+                <ChartPanel
+                  title={i18n.translate(
+                    'xpack.csp.dashboard.benchmarkSection.failedFindingsPanelTitle',
+                    { defaultMessage: 'Failed Findings' }
+                  )}
+                  hasBorder={false}
+                >
+                  <RisksTable
+                    data={cluster.groupedFindingsEvaluation}
+                    maxItems={3}
+                    onCellClick={(resourceTypeName) =>
+                      handleCellClick(cluster.meta.clusterId, resourceTypeName)
+                    }
+                    onViewAllClick={() => handleViewAllClick(cluster.meta.clusterId)}
+                  />
+                </ChartPanel>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+          <EuiSpacer />
+        </React.Fragment>
+      ))}
     </>
   );
 };
-
-const getIntegrationBoxStyle = (euiTheme: EuiThemeComputed) => ({
-  border: `1px solid ${euiTheme.colors.lightShade}`,
-  borderRadius: `${euiTheme.border.radius.medium} 0 0 ${euiTheme.border.radius.medium}`,
-  background: euiTheme.colors.lightestShade,
-});

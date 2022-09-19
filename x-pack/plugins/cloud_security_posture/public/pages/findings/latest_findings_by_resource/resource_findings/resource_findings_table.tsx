@@ -15,13 +15,13 @@ import {
   type EuiBasicTableProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { CspFinding } from '../../../../../common/schemas/csp_finding';
 import {
   baseFindingsColumns,
   createColumnWithFilters,
   getExpandColumn,
   type OnAddFilter,
 } from '../../layout/findings_layout';
-import type { CspFinding } from '../../types';
 import { FindingsRuleFlyout } from '../../findings_flyout/findings_flyout';
 
 interface Props {
