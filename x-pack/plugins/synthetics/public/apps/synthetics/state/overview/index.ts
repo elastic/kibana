@@ -13,6 +13,7 @@ import { IHttpSerializedFetchError, serializeHttpFetchError } from '../utils/htt
 
 import { MonitorOverviewPageState } from './models';
 import {
+  clearOverviewStatusErrorAction,
   fetchMonitorOverviewAction,
   fetchOverviewStatusAction,
   quietFetchOverviewAction,
@@ -26,6 +27,7 @@ export interface MonitorOverviewState {
   loaded: boolean;
   error: IHttpSerializedFetchError | null;
   status: OverviewStatus | null;
+  statusError: IHttpSerializedFetchError | null;
 }
 
 const initialState: MonitorOverviewState = {
@@ -41,6 +43,7 @@ const initialState: MonitorOverviewState = {
   loaded: false,
   error: null,
   status: null,
+  statusError: null,
 };
 
 export const monitorOverviewReducer = createReducer(initialState, (builder) => {
@@ -74,6 +77,12 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
     })
     .addCase(fetchOverviewStatusAction.success, (state, action) => {
       state.status = action.payload;
+    })
+    .addCase(fetchOverviewStatusAction.fail, (state, action) => {
+      state.statusError = serializeHttpFetchError(action.payload);
+    })
+    .addCase(clearOverviewStatusErrorAction, (state) => {
+      state.statusError = null;
     });
 });
 

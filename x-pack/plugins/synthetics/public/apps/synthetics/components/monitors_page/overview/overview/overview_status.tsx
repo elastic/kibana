@@ -7,16 +7,28 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiStat, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { useSelector } from 'react-redux';
-import { selectOverviewStatus } from '../../../../state';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { clearOverviewStatusErrorAction, selectOverviewStatus } from '../../../../state';
+import { kibanaService } from '../../../../../../utils/kibana_service';
 
 function title(t?: number) {
   return t ?? '-';
 }
 
 export function OverviewStatus() {
-  const status = useSelector(selectOverviewStatus);
+  const { status, statusError } = useSelector(selectOverviewStatus);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (statusError) {
+      dispatch(clearOverviewStatusErrorAction());
+      kibanaService.toasts.addError(statusError.body as Error, {
+        title: 'Status fetch failed',
+        toastLifeTimeMs: 5000,
+      });
+    }
+  }, [dispatch, statusError]);
 
   return (
     <EuiPanel>

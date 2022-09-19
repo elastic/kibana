@@ -11,4 +11,6 @@ import { SyntheticsAppState } from '../root_reducer';
 
 export const selectOverviewState = (state: SyntheticsAppState) => state.overview;
 export const selectOverviewDataState = createSelector(selectOverviewState, (state) => state.data);
-export const selectOverviewStatus = (state: SyntheticsAppState) => state.overview.status;
+export const selectOverviewStatus = ({
+  overview: { status, statusError },
+}: SyntheticsAppState) => ({ status, statusError });

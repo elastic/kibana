@@ -25,3 +25,5 @@ export const quietFetchOverviewAction = createAsyncAction<
 export const fetchOverviewStatusAction = createAsyncAction<undefined, OverviewStatus>(
   'fetchOverviewStatusAction'
 );
+
+export const clearOverviewStatusErrorAction = createAction<void>('clearOverviewStatusErrorAction');
