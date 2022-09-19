@@ -58,7 +58,7 @@ export function calculateFailedTransactionRateFromServiceMetrics({
   successfulTransactions: number | null;
 }) {
   failedTransactions = failedTransactions ?? 0;
-  successfulTransactions = failedTransactions ?? 0;
+  successfulTransactions = successfulTransactions ?? 0;
 
   return failedTransactions / (successfulTransactions + failedTransactions);
 }
