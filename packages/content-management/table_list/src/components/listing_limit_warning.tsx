@@ -38,16 +38,22 @@ export function ListingLimitWarning<T>({
         iconType="help"
       >
         <p>
+          <FormattedMessage
+            id="contentManagement.tableList.listing.listingLimitExceededDescription"
+            defaultMessage="You have {totalItems} {entityNamePlural}, but your {listingLimitText} setting prevents
+    the table below from displaying more than {listingLimitValue}."
+            values={{
+              entityNamePlural,
+              totalItems,
+              listingLimitValue: listingLimit,
+              listingLimitText: <strong>listingLimit</strong>,
+            }}
+          />{' '}
           {canEditAdvancedSettings ? (
             <FormattedMessage
-              id="contentManagement.tableList.listing.listingLimitExceededDescription"
-              defaultMessage="You have {totalItems} {entityNamePlural}, but your {listingLimitText} setting prevents
-                the table below from displaying more than {listingLimitValue}. You can change this setting under {advancedSettingsLink}."
+              id="contentManagement.tableList.listing.listingLimitExceededDescriptionPermissions"
+              defaultMessage="You can change this setting under {advancedSettingsLink}."
               values={{
-                entityNamePlural,
-                totalItems,
-                listingLimitValue: listingLimit,
-                listingLimitText: <strong>listingLimit</strong>,
                 advancedSettingsLink: (
                   <EuiLink href={advancedSettingsLink}>
                     <FormattedMessage
@@ -61,14 +67,7 @@ export function ListingLimitWarning<T>({
           ) : (
             <FormattedMessage
               id="contentManagement.tableList.listing.listingLimitExceededDescriptionNoPermissions"
-              defaultMessage="You have {totalItems} {entityNamePlural}, but your {listingLimitText} setting prevents
-                  the table below from displaying more than {listingLimitValue}. Contact your system administrator to change this setting."
-              values={{
-                entityNamePlural,
-                totalItems,
-                listingLimitValue: listingLimit,
-                listingLimitText: <strong>listingLimit</strong>,
-              }}
+              defaultMessage="Contact your system administrator to change this setting."
             />
           )}
         </p>
