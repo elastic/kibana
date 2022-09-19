@@ -143,7 +143,6 @@ export const Benchmarks = () => {
         data-test-subj={TEST_SUBJ.BENCHMARKS_PAGE_HEADER}
         pageTitle={
           <CloudPosturePageTitle
-            isBeta
             title={i18n.translate(
               'xpack.csp.benchmarks.benchmarksPageHeader.benchmarkIntegrationsTitle',
               { defaultMessage: 'Benchmark Integrations' }
