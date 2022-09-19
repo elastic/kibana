@@ -76,6 +76,7 @@ export interface ProcessStartMarker {
 
 export interface IOFields {
   text?: string;
+  max_bytes_per_process_exceeded?: boolean;
 }
 
 export interface ProcessFields {

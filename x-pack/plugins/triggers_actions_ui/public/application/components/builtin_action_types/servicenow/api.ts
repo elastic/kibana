@@ -10,8 +10,8 @@ import { HttpSetup } from '@kbn/core/public';
 import {
   ActionTypeExecutorResult,
   INTERNAL_BASE_ACTION_API_PATH,
-  snExternalServiceConfig,
 } from '@kbn/actions-plugin/common';
+import { snExternalServiceConfig } from '@kbn/stack-connectors-plugin/common/servicenow_config';
 import { BASE_ACTION_API_PATH } from '../../../constants';
 import { API_INFO_ERROR } from './translations';
 import { AppInfo, RESTApiError, ServiceNowActionConnector } from './types';
@@ -43,7 +43,7 @@ export async function getChoices({
 
 /**
  * The app info url should be the same as at:
- * x-pack/plugins/actions/server/builtin_action_types/servicenow/service.ts
+ * x-pack/plugins/stack_connectors/server/connector_types/cases/servicenow/service.ts
  */
 const getAppInfoUrl = (url: string, scope: string) => `${url}/api/${scope}/elastic_api/health`;
 
