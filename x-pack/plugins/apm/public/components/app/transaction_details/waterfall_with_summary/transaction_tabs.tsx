@@ -128,7 +128,7 @@ function LogsTabContent({ transaction }: { transaction: Transaction }) {
       logView={{ type: 'log-view-reference', logViewId: 'default' }}
       startTimestamp={startTimestamp - framePaddingMs}
       endTimestamp={endTimestamp + framePaddingMs}
-      query={`trace.id:"${transaction.trace.id}" OR (not trace.id:* AND "${transaction.trace.id})"`}
+      query={`trace.id:"${transaction.trace.id}" OR (not trace.id:* AND "${transaction.trace.id}")`}
       height={640}
       columns={[
         { type: 'timestamp' },

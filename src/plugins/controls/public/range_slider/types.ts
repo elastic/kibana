@@ -26,5 +26,3 @@ export type RangeSliderReduxState = ReduxEmbeddableState<
   ControlOutput,
   RangeSliderComponentState
 >;
-
-export * from '../../common/range_slider/types';

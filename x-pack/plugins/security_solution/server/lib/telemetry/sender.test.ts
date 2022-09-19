@@ -150,6 +150,12 @@ describe('TelemetryEventsSender', () => {
           threat: {
             ignored_object: true, // this field is not allowlisted
           },
+          Persistence: {
+            name: 'foo',
+            path: '/foo/bar',
+            runatload: true,
+            args: ['foo', 'bar'],
+          },
         },
       ];
 
@@ -262,6 +268,12 @@ describe('TelemetryEventsSender', () => {
                 id: 1234,
               },
             },
+          },
+          Persistence: {
+            name: 'foo',
+            path: '/foo/bar',
+            runatload: true,
+            args: ['foo', 'bar'],
           },
         },
       ]);

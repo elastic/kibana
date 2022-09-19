@@ -18,12 +18,14 @@ import * as TEST_SUBJECTS from './test_subjects';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
 
 jest.mock('./use_csp_integration', () => ({
   useCspIntegrationInfo: jest.fn(),
 }));
 jest.mock('../../common/api/use_setup_status_api');
+jest.mock('../../common/hooks/use_subscription_status');
 jest.mock('../../common/navigation/use_navigate_to_cis_integration');
 const chance = new Chance();
 
@@ -68,6 +70,14 @@ describe('<Rules />', () => {
         data: { status: 'indexed' },
       })
     );
+
+    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: true,
+      })
+    );
+
     (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
   });
 

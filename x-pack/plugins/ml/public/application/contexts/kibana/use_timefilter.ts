@@ -34,6 +34,7 @@ export const useTimefilter = ({
     } else if (autoRefreshSelector === false) {
       timefilter.disableAutoRefreshSelector();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeRangeSelector, autoRefreshSelector]);
 
   return timefilter;
@@ -48,11 +49,12 @@ export const useRefreshIntervalUpdates = () => {
   );
 };
 
-export const useTimeRangeUpdates = () => {
+export const useTimeRangeUpdates = (absolute = false) => {
   const timefilter = useTimefilter();
 
-  return useObservable(
-    timefilter.getTimeUpdate$().pipe(map(timefilter.getTime)),
-    timefilter.getTime()
-  );
+  const getTimeCallback = absolute
+    ? timefilter.getAbsoluteTime.bind(timefilter)
+    : timefilter.getTime.bind(timefilter);
+
+  return useObservable(timefilter.getTimeUpdate$().pipe(map(getTimeCallback)), getTimeCallback());
 };

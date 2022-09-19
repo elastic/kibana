@@ -37,12 +37,14 @@ import { SearchIndexDocuments } from './documents';
 import { SearchIndexIndexMappings } from './index_mappings';
 import { IndexNameLogic } from './index_name_logic';
 import { SearchIndexOverview } from './overview';
+import { SearchIndexPipelines } from './pipelines/pipelines';
 
 export enum SearchIndexTabId {
   // all indices
   OVERVIEW = 'overview',
   DOCUMENTS = 'documents',
   INDEX_MAPPINGS = 'index_mappings',
+  PIPELINES = 'pipelines',
   // connector indices
   CONFIGURATION = 'configuration',
   SCHEDULING = 'scheduling',
@@ -117,10 +119,19 @@ export const SearchIndex: React.FC = () => {
     },
   ];
 
+  const PIPELINES_TAB: EuiTabbedContentTab = {
+    content: <SearchIndexPipelines />,
+    id: SearchIndexTabId.PIPELINES,
+    name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.pipelinesTabLabel', {
+      defaultMessage: 'Pipelines',
+    }),
+  };
+
   const tabs: EuiTabbedContentTab[] = [
     ...ALL_INDICES_TABS,
     ...(isConnectorIndex(indexData) ? CONNECTOR_TABS : []),
     ...(isCrawlerIndex(indexData) ? CRAWLER_TABS : []),
+    PIPELINES_TAB,
   ];
 
   const selectedTab = tabs.find((tab) => tab.id === tabId);

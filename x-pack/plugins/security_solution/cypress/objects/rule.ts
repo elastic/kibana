@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { RulesSchema } from '../../common/detection_engine/schemas/response';
 import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules';
 import { getMockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
 import type { CompleteTimeline } from './timeline';
 import { getTimeline, getIndicatorMatchTimelineTemplate } from './timeline';
+import type { FullResponseSchema } from '../../common/detection_engine/schemas/request';
 
 export const totalNumberOfPrebuiltRules = rawRules.length;
 
@@ -65,6 +65,10 @@ export interface CustomRule {
 export interface ThresholdRule extends CustomRule {
   thresholdField: string;
   threshold: string;
+}
+
+export interface SavedQueryRule extends CustomRule {
+  savedId: string;
 }
 
 export interface OverrideRule extends CustomRule {
@@ -488,7 +492,9 @@ export const getEditedRule = (): CustomRule => ({
   tags: [...getExistingRule().tags, 'edited'],
 });
 
-export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>): string => {
+export const expectedExportedRule = (
+  ruleResponse: Cypress.Response<FullResponseSchema>
+): string => {
   const {
     id,
     updated_at: updatedAt,
@@ -498,18 +504,27 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     name,
     risk_score: riskScore,
     severity,
-    query,
+    tags,
+    timeline_id: timelineId,
+    timeline_title: timelineTitle,
   } = ruleResponse.body;
 
+  let query: string | undefined;
+  if (ruleResponse.body.type === 'query') {
+    query = ruleResponse.body.query;
+  }
+
   // NOTE: Order of the properties in this object matters for the tests to work.
-  const rule: RulesSchema = {
+  // TODO: Follow up https://github.com/elastic/kibana/pull/137628 and add an explicit type to this object
+  // without using Partial
+  const rule: Partial<FullResponseSchema> = {
     id,
     updated_at: updatedAt,
     updated_by: updatedBy,
     created_at: createdAt,
     created_by: 'elastic',
     name,
-    tags: [],
+    tags,
     interval: '100m',
     enabled: false,
     description,
@@ -538,6 +553,8 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     query,
     throttle: 'no_actions',
     actions: [],
+    timeline_id: timelineId,
+    timeline_title: timelineTitle,
   };
 
   // NOTE: Order of the properties in this object matters for the tests to work.

@@ -16,7 +16,7 @@ let mockConsoleLog: jest.SpyInstance;
 import { createWriteStream } from 'fs';
 const mockCreateWriteStream = createWriteStream as unknown as jest.Mock<typeof createWriteStream>;
 
-import { LoggingSystem, config } from '.';
+import { LoggingSystem, config } from '..';
 
 let system: LoggingSystem;
 beforeEach(() => {

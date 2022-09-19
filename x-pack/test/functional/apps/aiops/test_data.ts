@@ -14,12 +14,13 @@ export const farequoteDataViewTestData: TestData = {
   brushTargetTimestamp: 1455033600000,
   expected: {
     totalDocCountFormatted: '86,274',
+    analysisGroupsTable: [{ group: 'airline: AAL', docCount: '297' }],
     analysisTable: [
       {
         fieldName: 'airline',
         fieldValue: 'AAL',
         logRate: 'Chart type:bar chart',
-        pValue: '4.63e-14',
+        pValue: '1.26e-13',
         impact: 'High',
       },
     ],

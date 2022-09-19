@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       field: 'bytes',
     });
 
-    await PageObjects.lens.switchToVisualization('lnsMetric');
+    await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
 
     await PageObjects.lens.waitForVisualization('legacyMtrVis');
     await PageObjects.lens.assertLegacyMetric('Average of bytes', '5,727.322');
@@ -301,7 +301,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             field: 'bytes',
           });
 
-          await PageObjects.lens.switchToVisualization('lnsMetric');
+          await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
 
           await PageObjects.lens.waitForVisualization('legacyMtrVis');
           await PageObjects.lens.assertLegacyMetric('Average of bytes', '5,727.322');
@@ -347,7 +347,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             field: 'bytes',
           });
 
-          await PageObjects.lens.switchToVisualization('lnsMetric');
+          await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
 
           await PageObjects.lens.waitForVisualization('legacyMtrVis');
           await PageObjects.lens.assertLegacyMetric('Average of bytes', '5,727.322');

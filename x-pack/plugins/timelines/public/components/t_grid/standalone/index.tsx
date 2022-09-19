@@ -6,7 +6,7 @@
  */
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -30,7 +30,7 @@ import type {
 } from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
-import { combineQueries, getCombinedFilterQuery } from '../helpers';
+import { getCombinedFilterQuery } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import type { State } from '../../../store/t_grid';
 import { useTimelineEvents } from '../../../container';
@@ -153,7 +153,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const { uiSettings } = useKibana<CoreStart>().services;
-  const [isQueryLoading, setIsQueryLoading] = useState(false);
   const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(indexNames);
 
   const getTGrid = useMemo(() => tGridSelectors.getTGridByIdSelector(), []);
@@ -165,30 +164,33 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     title,
   } = useDeepEqualSelector((state) => getTGrid(state, STANDALONE_ID ?? ''));
 
-  useEffect(() => {
-    dispatch(tGridActions.updateIsLoading({ id: STANDALONE_ID, isLoading: isQueryLoading }));
-  }, [dispatch, isQueryLoading]);
-
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
+  const esQueryConfig = getEsQueryConfig(uiSettings);
 
-  const combinedQueries = useMemo(
+  const filterQuery = useMemo(
     () =>
-      combineQueries({
-        config: getEsQueryConfig(uiSettings),
-        dataProviders: EMPTY_DATA_PROVIDERS,
-        indexPattern: indexPatterns,
+      getCombinedFilterQuery({
+        config: esQueryConfig,
         browserFields,
+        dataProviders: EMPTY_DATA_PROVIDERS,
         filters,
-        kqlQuery: query,
+        from: start,
+        indexPattern: indexPatterns,
         kqlMode: 'search',
-        isEventViewer: true,
+        kqlQuery: query,
+        to: end,
       }),
-    [uiSettings, indexPatterns, browserFields, filters, query]
+    [esQueryConfig, indexPatterns, browserFields, filters, start, end, query]
   );
 
   const canQueryTimeline = useMemo(
-    () => !indexPatternsLoading && combinedQueries != null && !isEmpty(start) && !isEmpty(end),
-    [indexPatternsLoading, combinedQueries, start, end]
+    () =>
+      filterQuery != null &&
+      indexPatternsLoading != null &&
+      !indexPatternsLoading &&
+      !isEmpty(start) &&
+      !isEmpty(end),
+    [indexPatternsLoading, filterQuery, start, end]
   );
 
   const fields = useMemo(
@@ -221,7 +223,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     entityType,
     excludeEcsData: true,
     fields,
-    filterQuery: combinedQueries?.filterQuery,
+    filterQuery,
     id: STANDALONE_ID,
     indexNames,
     limit: itemsPerPageStore,
@@ -233,6 +235,10 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     data,
   });
   setRefetch(refetch);
+
+  useEffect(() => {
+    dispatch(tGridActions.updateIsLoading({ id: STANDALONE_ID, isLoading: loading }));
+  }, [dispatch, loading]);
 
   const { hasAlertsCrud, totalSelectAllAlerts } = useMemo(() => {
     return Object.entries(consumers).reduce<{
@@ -261,31 +267,17 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   );
   const hasAlerts = totalCountMinusDeleted > 0;
 
+  // Only show the table-spanning loading indicator when the query is loading and we
+  // don't have data (e.g. for the initial fetch).
+  // Subsequent fetches (e.g. for pagination) will show a small loading indicator on
+  // top of the table and the table will display the current page until the next page
+  // is fetched. This prevents a flicker when paginating.
+  const showFullLoading = loading && !hasAlerts;
+
   const nonDeletedEvents = useMemo(
     () => events.filter((e) => !deletedEventIds.includes(e._id)),
     [deletedEventIds, events]
   );
-
-  const filterQuery = useMemo(
-    () =>
-      getCombinedFilterQuery({
-        config: getEsQueryConfig(uiSettings),
-        dataProviders: EMPTY_DATA_PROVIDERS,
-        indexPattern: indexPatterns,
-        browserFields,
-        filters,
-        kqlQuery: query,
-        kqlMode: 'search',
-        isEventViewer: true,
-        from: start,
-        to: end,
-      }),
-    [uiSettings, indexPatterns, browserFields, filters, query, start, end]
-  );
-
-  useEffect(() => {
-    setIsQueryLoading(loading);
-  }, [loading]);
 
   useEffect(() => {
     dispatch(
@@ -316,12 +308,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const isFirstUpdate = useRef(true);
-  useEffect(() => {
-    if (isFirstUpdate.current && !loading) {
-      isFirstUpdate.current = false;
-    }
-  }, [loading]);
   const timelineContext = { timelineId: STANDALONE_ID };
 
   // Clear checkbox selection when new events are fetched
@@ -338,7 +324,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   return (
     <InspectButtonContainer data-test-subj="events-viewer-panel">
       <AlertsTableWrapper>
-        {isFirstUpdate.current && <TGridLoading />}
+        {showFullLoading && <TGridLoading />}
         {canQueryTimeline ? (
           <TimelineContext.Provider value={timelineContext}>
             <EventsContainerLoading

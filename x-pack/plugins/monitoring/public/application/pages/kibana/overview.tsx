@@ -10,7 +10,7 @@ import { find } from 'lodash';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPanel,
   EuiSpacer,
   EuiFlexGroup,
