@@ -65,6 +65,7 @@ import { superUser } from './authentication/users';
 import { getPostCaseRequest, postCaseReq } from './mock';
 import { ObjectRemover as ActionsRemover } from '../../../alerting_api_integration/common/lib';
 import { getServiceNowServer } from '../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
+import { RecordingServiceNowSimulator } from '../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/servicenow_simulation';
 
 function toArray<T>(input: T | T[]): T[] {
   if (Array.isArray(input)) {
@@ -594,13 +595,15 @@ export const createCaseWithConnector = async ({
   actionsRemover,
   auth = { user: superUser, space: null },
   createCaseReq = getPostCaseRequest(),
+  headers = {},
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   serviceNowSimulatorURL: string;
   actionsRemover: ActionsRemover;
   configureReq?: Record<string, unknown>;
-  auth?: { user: User; space: string | null };
+  auth?: { user: User; space: string | null } | null;
   createCaseReq?: CasePostRequest;
+  headers?: Record<string, unknown>;
 }): Promise<{
   postedCase: CaseResponse;
   connector: CreateConnectorResponse;
@@ -612,10 +615,10 @@ export const createCaseWithConnector = async ({
       ...getServiceNowConnector(),
       config: { apiUrl: serviceNowSimulatorURL },
     },
-    auth,
+    auth: auth ?? undefined,
   });
 
-  actionsRemover.add(auth.space ?? 'default', connector.id, 'action', 'actions');
+  actionsRemover.add(auth?.space ?? 'default', connector.id, 'action', 'actions');
   const configuration = await createConfiguration(
     supertest,
     {
@@ -627,7 +630,7 @@ export const createCaseWithConnector = async ({
       ...configureReq,
     },
     200,
-    auth
+    auth ?? undefined
   );
 
   const postedCase = await createCase(
@@ -648,7 +651,8 @@ export const createCaseWithConnector = async ({
       } as CaseConnector,
     },
     200,
-    auth
+    auth,
+    headers
   );
 
   return { postedCase, connector, configuration };
@@ -658,16 +662,36 @@ export const createCase = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   params: CasePostRequest,
   expectedHttpCode: number = 200,
-  auth: { user: User; space: string | null } = { user: superUser, space: null }
+  auth: { user: User; space: string | null } | null = { user: superUser, space: null },
+  headers: Record<string, unknown> = {}
 ): Promise<CaseResponse> => {
-  const { body: theCase } = await supertest
-    .post(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}`)
-    .auth(auth.user.username, auth.user.password)
+  const apiCall = supertest.post(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}`);
+
+  setupAuth({ apiCall, headers, auth });
+
+  const { body: theCase } = await apiCall
     .set('kbn-xsrf', 'true')
+    .set(headers)
     .send(params)
     .expect(expectedHttpCode);
 
   return theCase;
+};
+
+const setupAuth = ({
+  apiCall,
+  headers,
+  auth,
+}: {
+  apiCall: SuperTest.Test;
+  headers: Record<string, unknown>;
+  auth?: { user: User; space: string | null } | null;
+}): SuperTest.Test => {
+  if (!Object.hasOwn(headers, 'Cookie') && auth != null) {
+    return apiCall.auth(auth.user.username, auth.user.password);
+  }
+
+  return apiCall;
 };
 
 /**
@@ -703,17 +727,24 @@ export const createComment = async ({
   params,
   auth = { user: superUser, space: null },
   expectedHttpCode = 200,
+  headers = {},
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   caseId: string;
   params: CommentRequest;
-  auth?: { user: User; space: string | null };
+  auth?: { user: User; space: string | null } | null;
   expectedHttpCode?: number;
+  headers?: Record<string, unknown>;
 }): Promise<CaseResponse> => {
-  const { body: theCase } = await supertest
-    .post(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments`)
-    .auth(auth.user.username, auth.user.password)
+  const apiCall = supertest.post(
+    `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/comments`
+  );
+
+  setupAuth({ apiCall, headers, auth });
+
+  const { body: theCase } = await apiCall
     .set('kbn-xsrf', 'true')
+    .set(headers)
     .send(params)
     .expect(expectedHttpCode);
 
@@ -750,16 +781,21 @@ export const updateCase = async ({
   params,
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
+  headers = {},
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   params: CasesPatchRequest;
   expectedHttpCode?: number;
-  auth?: { user: User; space: string | null };
+  auth?: { user: User; space: string | null } | null;
+  headers?: Record<string, unknown>;
 }): Promise<CaseResponse[]> => {
-  const { body: cases } = await supertest
-    .patch(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}`)
-    .auth(auth.user.username, auth.user.password)
+  const apiCall = supertest.patch(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}`);
+
+  setupAuth({ apiCall, headers, auth });
+
+  const { body: cases } = await apiCall
     .set('kbn-xsrf', 'true')
+    .set(headers)
     .send(params)
     .expect(expectedHttpCode);
 
@@ -874,18 +910,24 @@ export const updateComment = async ({
   req,
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
+  headers = {},
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   caseId: string;
   req: CommentPatchRequest;
   expectedHttpCode?: number;
-  auth?: { user: User; space: string | null };
+  auth?: { user: User; space: string | null } | null;
+  headers?: Record<string, unknown>;
 }): Promise<CaseResponse> => {
-  const { body: res } = await supertest
-    .patch(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments`)
+  const apiCall = supertest.patch(
+    `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/comments`
+  );
+
+  setupAuth({ apiCall, headers, auth });
+  const { body: res } = await apiCall
     .set('kbn-xsrf', 'true')
+    .set(headers)
     .send(req)
-    .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
 
   return res;
@@ -916,12 +958,16 @@ export const createConfiguration = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   req: CasesConfigureRequest = getConfigurationRequest(),
   expectedHttpCode: number = 200,
-  auth: { user: User; space: string | null } = { user: superUser, space: null }
+  auth: { user: User; space: string | null } | null = { user: superUser, space: null },
+  headers: Record<string, unknown> = {}
 ): Promise<CasesConfigureResponse> => {
-  const { body: configuration } = await supertest
-    .post(`${getSpaceUrlPrefix(auth.space)}${CASE_CONFIGURE_URL}`)
-    .auth(auth.user.username, auth.user.password)
+  const apiCall = supertest.post(`${getSpaceUrlPrefix(auth?.space)}${CASE_CONFIGURE_URL}`);
+
+  setupAuth({ apiCall, headers, auth });
+
+  const { body: configuration } = await apiCall
     .set('kbn-xsrf', 'true')
+    .set(headers)
     .send(req)
     .expect(expectedHttpCode);
 
@@ -975,12 +1021,16 @@ export const updateConfiguration = async (
   id: string,
   req: CasesConfigurePatch,
   expectedHttpCode: number = 200,
-  auth: { user: User; space: string | null } = { user: superUser, space: null }
+  auth: { user: User; space: string | null } | null = { user: superUser, space: null },
+  headers: Record<string, unknown> = {}
 ): Promise<CasesConfigureResponse> => {
-  const { body: configuration } = await supertest
-    .patch(`${getSpaceUrlPrefix(auth.space)}${CASE_CONFIGURE_URL}/${id}`)
-    .auth(auth.user.username, auth.user.password)
+  const apiCall = supertest.patch(`${getSpaceUrlPrefix(auth?.space)}${CASE_CONFIGURE_URL}/${id}`);
+
+  setupAuth({ apiCall, headers, auth });
+
+  const { body: configuration } = await apiCall
     .set('kbn-xsrf', 'true')
+    .set(headers)
     .send(req)
     .expect(expectedHttpCode);
 
@@ -1171,17 +1221,24 @@ export const pushCase = async ({
   connectorId,
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
+  headers = {},
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   caseId: string;
   connectorId: string;
   expectedHttpCode?: number;
-  auth?: { user: User; space: string | null };
+  auth?: { user: User; space: string | null } | null;
+  headers?: Record<string, unknown>;
 }): Promise<CaseResponse> => {
-  const { body: res } = await supertest
-    .post(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/connector/${connectorId}/_push`)
-    .auth(auth.user.username, auth.user.password)
+  const apiCall = supertest.post(
+    `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/connector/${connectorId}/_push`
+  );
+
+  setupAuth({ apiCall, headers, auth });
+
+  const { body: res } = await apiCall
     .set('kbn-xsrf', 'true')
+    .set(headers)
     .send({})
     .expect(expectedHttpCode);
 
@@ -1207,16 +1264,32 @@ export const getAlertsAttachedToCase = async ({
   return theCase;
 };
 
-export const getServiceNowSimulationServer = async (): Promise<{
-  server: http.Server;
+export const getRecordingServiceNowSimulatorServer = async (): Promise<{
+  server: RecordingServiceNowSimulator;
   url: string;
 }> => {
-  const server = await getServiceNowServer();
+  const simulator = await RecordingServiceNowSimulator.start();
+  const url = await startServiceNowSimulatorListening(simulator.server);
+
+  return { server: simulator, url };
+};
+
+const startServiceNowSimulatorListening = async (server: http.Server) => {
   const port = await getPort({ port: getPort.makeRange(9000, 9100) });
   if (!server.listening) {
     server.listen(port);
   }
   const url = `http://localhost:${port}`;
+
+  return url;
+};
+
+export const getServiceNowSimulationServer = async (): Promise<{
+  server: http.Server;
+  url: string;
+}> => {
+  const server = await getServiceNowServer();
+  const url = await startServiceNowSimulatorListening(server);
 
   return { server, url };
 };
