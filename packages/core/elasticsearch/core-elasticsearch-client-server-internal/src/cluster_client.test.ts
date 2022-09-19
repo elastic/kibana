@@ -16,7 +16,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { ClusterClient } from './cluster_client';
-import { DEFAULT_HEADERS } from './headers';
+import { DEFAULT_HEADERS, USER_AGENT_HEADER } from './headers';
 import { AgentManager } from './agent_manager';
 
 const createConfig = (

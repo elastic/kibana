@@ -49,6 +49,7 @@ export class ClusterClient implements ICustomClusterClient {
     getExecutionContext = noop,
     getUnauthorizedErrorHandler = noop,
     agentManager,
+    kibanaVersion,
   }: {
     config: ElasticsearchClientConfig;
     logger: Logger;
@@ -57,6 +58,7 @@ export class ClusterClient implements ICustomClusterClient {
     getExecutionContext?: () => string | undefined;
     getUnauthorizedErrorHandler?: () => UnauthorizedErrorHandler | undefined;
     agentManager: AgentManager;
+    kibanaVersion: string;
   }) {
     this.config = config;
     this.authHeaders = authHeaders;
@@ -68,6 +70,7 @@ export class ClusterClient implements ICustomClusterClient {
       type,
       getExecutionContext,
       agentManager,
+      kibanaVersion,
     });
     this.rootScopedClient = configureClient(config, {
       logger,
@@ -75,6 +78,7 @@ export class ClusterClient implements ICustomClusterClient {
       getExecutionContext,
       scoped: true,
       agentManager,
+      kibanaVersion,
     });
   }
 
