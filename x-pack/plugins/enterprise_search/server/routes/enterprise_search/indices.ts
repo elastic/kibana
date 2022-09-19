@@ -16,6 +16,7 @@ import { fetchConnectorByIndexName, fetchConnectors } from '../../lib/connectors
 import { fetchCrawlerByIndexName, fetchCrawlers } from '../../lib/crawler/fetch_crawlers';
 
 import { createIndex } from '../../lib/indices/create_index';
+import { deleteMlInferencePipeline } from '../../lib/indices/delete_ml_inference_pipeline';
 import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices } from '../../lib/indices/fetch_indices';
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/fetch_ml_inference_pipeline_processors';
@@ -29,7 +30,10 @@ import {
   CreatedPipeline,
 } from '../../utils/create_ml_inference_pipeline';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
-import { isIndexNotFoundException } from '../../utils/identify_exceptions';
+import {
+  isIndexNotFoundException,
+  isResourceNotFoundException,
+} from '../../utils/identify_exceptions';
 
 export function registerIndexRoutes({
   router,
@@ -446,6 +450,48 @@ export function registerIndexRoutes({
         body: createIndexResponse,
         headers: { 'content-type': 'application/json' },
       });
+    })
+  );
+
+  router.delete(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipelines/{pipelineName}',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+          pipelineName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
+      const pipelineName = decodeURIComponent(request.params.pipelineName);
+      const { client } = (await context.core).elasticsearch;
+
+      try {
+        const deleteResult = await deleteMlInferencePipeline(
+          indexName,
+          pipelineName,
+          client.asCurrentUser
+        );
+
+        return response.ok({
+          body: deleteResult,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (isResourceNotFoundException(error)) {
+          // return specific message if pipeline doesn't exist
+          return createError({
+            errorCode: ErrorCode.RESOURCE_NOT_FOUND,
+            message: error.meta?.body?.error?.reason,
+            response,
+            statusCode: 404,
+          });
+        }
+        // otherwise, let the default handler wrap it
+        throw error;
+      }
     })
   );
 }
