@@ -11,7 +11,6 @@ import { SearchAggregatedTransactionSetting } from '../../../../common/aggregate
 import {
   TRANSACTION_DURATION,
   TRANSACTION_DURATION_HISTOGRAM,
-  TRANSACTION_DURATION_SUMMARY,
   TRANSACTION_ROOT,
   PARENT_ID,
 } from '../../../../common/elasticsearch_fieldnames';
@@ -87,32 +86,25 @@ export async function getSearchAggregatedTransactions({
 }
 
 export function getDurationFieldForTransactions(
-  searchAggregatedTransactions: boolean,
-  searchAggregatedServiceMetrics?: boolean
+  searchAggregatedTransactions: boolean
 ) {
-  return searchAggregatedServiceMetrics 
-  ? TRANSACTION_DURATION_SUMMARY 
-  : searchAggregatedTransactions
+  return searchAggregatedTransactions
     ? TRANSACTION_DURATION_HISTOGRAM
     : TRANSACTION_DURATION;
 }
 
 export function getDocumentTypeFilterForTransactions(
-  searchAggregatedTransactions: boolean,
-  searchAggregatedServiceMetrics?: boolean
+  searchAggregatedTransactions: boolean
 ) {
-  return searchAggregatedServiceMetrics 
-  ? [{ exists: { field: TRANSACTION_DURATION_SUMMARY } }] 
-  : searchAggregatedTransactions
+  return searchAggregatedTransactions
     ? [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }]
     : [];
 }
 
 export function getProcessorEventForTransactions(
-  searchAggregatedTransactions: boolean,
-  searchAggregatedServiceMetrics?: boolean
+  searchAggregatedTransactions: boolean
 ): ProcessorEvent.metric | ProcessorEvent.transaction {
-  return searchAggregatedTransactions || searchAggregatedServiceMetrics
+  return searchAggregatedTransactions
     ? ProcessorEvent.metric
     : ProcessorEvent.transaction;
 }
