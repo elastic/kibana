@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  compareFrameGroup,
-  createFrameGroup,
-  createFrameGroupID,
-  FrameGroup,
-  FrameGroupID,
-} from './frame_group';
+import { createFrameGroup, createFrameGroupID, FrameGroup, FrameGroupID } from './frame_group';
 import {
   createStackFrameMetadata,
   Executable,
@@ -233,6 +227,6 @@ export function sortCallerCalleeNodes(
     if (n1.Samples < n2.Samples) {
       return 1;
     }
-    return compareFrameGroup(n1.FrameGroup, n2.FrameGroup);
+    return n1.FrameGroupID.localeCompare(n2.FrameGroupID);
   });
 }

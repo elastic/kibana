@@ -5,7 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { compareFrameGroup, FrameGroup, FrameGroupID } from './frame_group';
+import { FrameGroupID } from './frame_group';
 import {
   createLazyStackTraceMap,
   createStackFrameMetadata,
@@ -20,7 +20,6 @@ import {
 
 interface TopNFunctionAndFrameGroup {
   Frame: StackFrameMetadata;
-  FrameGroup: FrameGroup;
   FrameGroupID: FrameGroupID;
   CountExclusive: number;
   CountInclusive: number;
@@ -90,7 +89,6 @@ export function createTopNFunctions(
 
         topNFunctions.set(lazyFrame.FrameGroupID, {
           Frame: metadata,
-          FrameGroup: lazyFrame.FrameGroup,
           FrameGroupID: lazyFrame.FrameGroupID,
           CountExclusive: 0,
           CountInclusive: 0,
@@ -122,7 +120,7 @@ export function createTopNFunctions(
       if (a.CountExclusive < b.CountExclusive) {
         return -1;
       }
-      return compareFrameGroup(a.FrameGroup, b.FrameGroup);
+      return a.FrameGroupID.localeCompare(b.FrameGroupID);
     })
     .reverse();
 
