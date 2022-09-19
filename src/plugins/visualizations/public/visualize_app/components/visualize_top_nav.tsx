@@ -21,7 +21,7 @@ import type {
 } from '../types';
 import { VISUALIZE_APP_NAME } from '../../../common/constants';
 import { getTopNavConfig, isFallbackDataView } from '../utils';
-import type { NavigateToLensContext } from '../..';
+import type { NavigateToLensContext } from '../../../common';
 
 const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';
 

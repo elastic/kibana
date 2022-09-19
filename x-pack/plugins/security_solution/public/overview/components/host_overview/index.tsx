@@ -10,7 +10,8 @@ import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import type { HostItem, RiskSeverity } from '../../../../common/search_strategy';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import type { HostItem } from '../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../common/search_strategy';
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import type { DescriptionList } from '../../../../common/utility_types';
@@ -78,8 +79,16 @@ export const HostOverview = React.memo<HostSummaryProps>(
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
     const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
-    const [_, { data: hostRisk, isModuleEnabled }] = useHostRiskScore({
-      filterQuery: hostName ? buildHostNamesFilter([hostName]) : undefined,
+    const filterQuery = useMemo(
+      () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
+      [hostName]
+    );
+    const { from, to } = useGlobalTime();
+
+    const [_, { data: hostRisk, isLicenseValid }] = useHostRiskScore({
+      filterQuery,
+      skip: hostName == null,
+      timerange: { to, from },
     });
 
     const getDefaultRenderer = useCallback(
@@ -95,34 +104,32 @@ export const HostOverview = React.memo<HostSummaryProps>(
     );
 
     const [hostRiskScore, hostRiskLevel] = useMemo(() => {
-      if (isModuleEnabled) {
-        const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
-        return [
-          {
-            title: i18n.HOST_RISK_SCORE,
-            description: (
-              <>
-                {hostRiskData ? Math.round(hostRiskData.risk_stats.risk_score) : getEmptyTagValue()}
-              </>
-            ),
-          },
-
-          {
-            title: i18n.HOST_RISK_CLASSIFICATION,
-            description: (
-              <>
-                {hostRiskData ? (
-                  <RiskScore severity={hostRiskData.risk as RiskSeverity} hideBackgroundColor />
-                ) : (
-                  getEmptyTagValue()
-                )}
-              </>
-            ),
-          },
-        ];
-      }
-      return [undefined, undefined];
-    }, [hostRisk, isModuleEnabled]);
+      const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
+      return [
+        {
+          title: i18n.HOST_RISK_SCORE,
+          description: (
+            <>
+              {hostRiskData
+                ? Math.round(hostRiskData.host.risk.calculated_score_norm)
+                : getEmptyTagValue()}
+            </>
+          ),
+        },
+        {
+          title: i18n.HOST_RISK_CLASSIFICATION,
+          description: (
+            <>
+              {hostRiskData ? (
+                <RiskScore severity={hostRiskData.host.risk.calculated_level} hideBackgroundColor />
+              ) : (
+                getEmptyTagValue()
+              )}
+            </>
+          ),
+        },
+      ];
+    }, [hostRisk]);
 
     const column: DescriptionList[] = useMemo(
       () => [
@@ -262,7 +269,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
             )}
           </OverviewWrapper>
         </InspectButtonContainer>
-        {hostRiskScore && hostRiskLevel && (
+        {isLicenseValid && (
           <HostRiskOverviewWrapper
             gutterSize={isInDetailsSidePanel ? 'm' : 'none'}
             direction={isInDetailsSidePanel ? 'column' : 'row'}

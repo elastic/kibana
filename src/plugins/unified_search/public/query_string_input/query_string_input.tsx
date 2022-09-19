@@ -30,7 +30,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { compact, debounce, isEmpty, isEqual, isFunction } from 'lodash';
 import { Toast } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
-import { IDataPluginServices, getQueryLog } from '@kbn/data-plugin/public';
+import { getQueryLog } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { PersistedLog } from '@kbn/data-plugin/public';
 import { getFieldSubtypeNested, KIBANA_USER_QUERY_LANGUAGE_KEY } from '@kbn/data-plugin/common';
@@ -41,11 +41,12 @@ import { fromUser } from './from_user';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
 import type { SuggestionsListSize } from '../typeahead/suggestions_component';
+import type { IUnifiedSearchPluginServices } from '../types';
 import { SuggestionsComponent } from '../typeahead';
 import { onRaf } from '../utils';
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import { QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
-import { getTheme, getAutocomplete } from '../services';
+import { getTheme } from '../services';
 import './query_string_input.scss';
 
 export interface QueryStringInputProps {
@@ -70,6 +71,7 @@ export interface QueryStringInputProps {
   isInvalid?: boolean;
   isClearable?: boolean;
   iconType?: EuiIconProps['type'];
+  isDisabled?: boolean;
 
   /**
    * @param nonKqlMode by default if language switch is enabled, user can switch between kql and lucene syntax mode
@@ -92,7 +94,7 @@ export interface QueryStringInputProps {
 }
 
 interface Props extends QueryStringInputProps {
-  kibana: KibanaReactContextValue<IDataPluginServices>;
+  kibana: KibanaReactContextValue<IUnifiedSearchPluginServices>;
 }
 
 interface State {
@@ -201,7 +203,9 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
     const queryString = this.getQueryString();
 
     const recentSearchSuggestions = this.getRecentSearchSuggestions(queryString);
-    const hasQuerySuggestions = getAutocomplete().hasQuerySuggestions(language);
+    const hasQuerySuggestions = await this.services.unifiedSearch.autocomplete.hasQuerySuggestions(
+      language
+    );
 
     if (
       !hasQuerySuggestions ||
@@ -222,7 +226,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
       if (this.abortController) this.abortController.abort();
       this.abortController = new AbortController();
       const suggestions =
-        (await getAutocomplete().getQuerySuggestions({
+        (await this.services.unifiedSearch.autocomplete.getQuerySuggestions({
           language,
           indexPatterns,
           query: queryString,
@@ -377,7 +381,9 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
           }
           break;
         case KEY_CODES.ESC:
-          event.preventDefault();
+          if (isSuggestionsVisible) {
+            event.preventDefault();
+          }
           this.setState({ isSuggestionsVisible: false, index: null });
           break;
         case KEY_CODES.TAB:
@@ -758,6 +764,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
                 onClick={this.onClickInput}
                 onBlur={this.onInputBlur}
                 onFocus={this.handleOnFocus}
+                disabled={this.props.isDisabled}
                 className={inputClassName}
                 fullWidth
                 rows={1}
@@ -794,7 +801,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
                   />
                 </div>
               ) : null}
-              {this.props.isClearable && this.props.query.query ? (
+              {this.props.isClearable && !this.props.isDisabled && this.props.query.query ? (
                 <div className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right">
                   <button
                     type="button"

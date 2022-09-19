@@ -7,7 +7,6 @@
 
 import {
   EuiAvatar,
-  EuiBadge,
   EuiBasicTable,
   EuiButtonIcon,
   EuiDescriptionList,
@@ -26,11 +25,15 @@ import {
 import { euiStyled, css } from '@kbn/kibana-react-plugin/common';
 
 import type { HorizontalAlignment, CriteriaWithPagination } from '@elastic/eui';
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type {
+  ResponseActions,
+  ResponseActionStatus,
+} from '../../../../common/endpoint/service/response_actions/constants';
 import { getEmptyValue } from '../../../common/components/empty_value';
 import { FormattedDate } from '../../../common/components/formatted_date';
-import type { ActionDetails } from '../../../../common/endpoint/types';
+import type { ActionListApiResponse } from '../../../../common/endpoint/types';
 import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
 import { ManagementEmptyStateWrapper } from '../management_empty_state_wrapper';
 import { useGetEndpointActionList } from '../../hooks';
@@ -38,14 +41,17 @@ import { OUTPUT_MESSAGES, TABLE_COLUMN_NAMES, UX_MESSAGES } from './translations
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../common/constants';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { ActionsLogFilters } from './components/actions_log_filters';
-import { useDateRangePicker } from './components/hooks';
+import {
+  getActionStatus,
+  getUiCommand,
+  getCommandKey,
+  useDateRangePicker,
+} from './components/hooks';
+import { StatusBadge } from './components/status_badge';
+import { useActionHistoryUrlParams } from './components/use_action_history_url_params';
+import { useUrlPagination } from '../../hooks/use_url_pagination';
 
 const emptyValue = getEmptyValue();
-
-const getCommand = (
-  command: ActionDetails['command']
-): Exclude<ActionDetails['command'], 'unisolate'> | 'release' =>
-  command === 'unisolate' ? 'release' : command;
 
 // Truncated usernames
 const StyledFacetButton = euiStyled(EuiFacetButton)`
@@ -105,23 +111,50 @@ const StyledEuiCodeBlock = euiStyled(EuiCodeBlock).attrs({
 `;
 
 export const ResponseActionsLog = memo<
-  Pick<EndpointActionListRequestQuery, 'agentIds'> & { showHostNames?: boolean }
->(({ agentIds, showHostNames = false }) => {
+  Pick<EndpointActionListRequestQuery, 'agentIds'> & { showHostNames?: boolean; isFlyout?: boolean }
+>(({ agentIds, showHostNames = false, isFlyout = true }) => {
+  const { pagination: paginationFromUrlParams, setPagination: setPaginationOnUrlParams } =
+    useUrlPagination();
+  const {
+    commands: commandsFromUrl,
+    hosts: agentIdsFromUrl,
+    statuses: statusesFromUrl,
+    startDate: startDateFromUrl,
+    endDate: endDateFromUrl,
+  } = useActionHistoryUrlParams();
+
   const getTestId = useTestIdGenerator('response-actions-list');
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<{
-    [k: ActionDetails['id']]: React.ReactNode;
+    [k: ActionListApiResponse['data'][number]['id']]: React.ReactNode;
   }>({});
 
   const [queryParams, setQueryParams] = useState<EndpointActionListRequestQuery>({
-    page: 1,
-    pageSize: 10,
-    agentIds,
+    page: isFlyout ? 1 : paginationFromUrlParams.page,
+    pageSize: isFlyout ? 10 : paginationFromUrlParams.pageSize,
+    agentIds: isFlyout ? agentIds : agentIdsFromUrl?.length ? agentIdsFromUrl : agentIds,
     commands: [],
+    statuses: [],
     userIds: [],
   });
 
+  // update query state from URL params
+  useEffect(() => {
+    if (!isFlyout) {
+      setQueryParams((prevState) => ({
+        ...prevState,
+        commands: commandsFromUrl?.length
+          ? commandsFromUrl.map((commandFromUrl) => getCommandKey(commandFromUrl))
+          : prevState.commands,
+        hosts: agentIdsFromUrl?.length ? agentIdsFromUrl : prevState.agentIds,
+        statuses: statusesFromUrl?.length
+          ? (statusesFromUrl as ResponseActionStatus[])
+          : prevState.statuses,
+      }));
+    }
+  }, [commandsFromUrl, agentIdsFromUrl, isFlyout, statusesFromUrl, setQueryParams]);
+
   // date range picker state and handlers
-  const { dateRangePickerState, onRefreshChange, onTimeChange } = useDateRangePicker();
+  const { dateRangePickerState, onRefreshChange, onTimeChange } = useDateRangePicker(isFlyout);
 
   // initial fetch of list data
   const {
@@ -132,8 +165,8 @@ export const ResponseActionsLog = memo<
     refetch: reFetchEndpointActionList,
   } = useGetEndpointActionList({
     ...queryParams,
-    startDate: dateRangePickerState.startDate,
-    endDate: dateRangePickerState.endDate,
+    startDate: isFlyout ? dateRangePickerState.startDate : startDateFromUrl,
+    endDate: isFlyout ? dateRangePickerState.endDate : endDateFromUrl,
   });
 
   // handle auto refresh data
@@ -146,17 +179,38 @@ export const ResponseActionsLog = memo<
   // handle on change actions filter
   const onChangeCommandsFilter = useCallback(
     (selectedCommands: string[]) => {
-      setQueryParams((prevState) => ({ ...prevState, commands: selectedCommands }));
+      setQueryParams((prevState) => ({
+        ...prevState,
+        commands: selectedCommands as ResponseActions[],
+      }));
     },
     [setQueryParams]
   );
 
+  // handle on change actions filter
+  const onChangeStatusesFilter = useCallback(
+    (selectedStatuses: string[]) => {
+      setQueryParams((prevState) => ({
+        ...prevState,
+        statuses: selectedStatuses as ResponseActionStatus[],
+      }));
+    },
+    [setQueryParams]
+  );
+
+  // handle on change hosts filter
+  const onChangeHostsFilter = useCallback(
+    (selectedAgentIds: string[]) => {
+      setQueryParams((prevState) => ({ ...prevState, agentIds: selectedAgentIds }));
+    },
+    [setQueryParams]
+  );
   // total actions
   const totalItemCount = useMemo(() => actionList?.total ?? 0, [actionList]);
 
   // expanded tray contents
   const toggleDetails = useCallback(
-    (item: ActionDetails) => {
+    (item: ActionListApiResponse['data'][number]) => {
       const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
       if (itemIdToExpandedRowMapValues[item.id]) {
         delete itemIdToExpandedRowMapValues[item.id];
@@ -177,7 +231,7 @@ export const ResponseActionsLog = memo<
             })
           : undefined;
 
-        const command = getCommand(_command);
+        const command = getUiCommand(_command);
         const dataList = [
           {
             title: OUTPUT_MESSAGES.expandSection.placedAt,
@@ -251,7 +305,8 @@ export const ResponseActionsLog = memo<
   );
   // memoized callback for toggleDetails
   const onClickCallback = useCallback(
-    (data: ActionDetails) => () => toggleDetails(data),
+    (actionListDataItem: ActionListApiResponse['data'][number]) => () =>
+      toggleDetails(actionListDataItem),
     [toggleDetails]
   );
 
@@ -263,7 +318,7 @@ export const ResponseActionsLog = memo<
         name: TABLE_COLUMN_NAMES.time,
         width: !showHostNames ? '21%' : '15%',
         truncateText: true,
-        render: (startedAt: ActionDetails['startedAt']) => {
+        render: (startedAt: ActionListApiResponse['data'][number]['startedAt']) => {
           return (
             <FormattedDate
               fieldName={TABLE_COLUMN_NAMES.time}
@@ -278,15 +333,17 @@ export const ResponseActionsLog = memo<
         name: TABLE_COLUMN_NAMES.command,
         width: !showHostNames ? '21%' : '10%',
         truncateText: true,
-        render: (_command: ActionDetails['command']) => {
-          const command = getCommand(_command);
+        render: (_command: ActionListApiResponse['data'][number]['command']) => {
+          const command = getUiCommand(_command);
           return (
             <EuiToolTip content={command} anchorClassName="eui-textTruncate">
-              <FormattedMessage
-                id="xpack.securitySolution.responseActionsList.list.item.command"
-                defaultMessage="{command}"
-                values={{ command }}
-              />
+              <EuiText
+                size="s"
+                className="eui-textTruncate eui-fullWidth"
+                data-test-subj={getTestId('column-command')}
+              >
+                {command}
+              </EuiText>
             </EuiToolTip>
           );
         },
@@ -296,7 +353,7 @@ export const ResponseActionsLog = memo<
         name: TABLE_COLUMN_NAMES.user,
         width: !showHostNames ? '21%' : '14%',
         truncateText: true,
-        render: (userId: ActionDetails['createdBy']) => {
+        render: (userId: ActionListApiResponse['data'][number]['createdBy']) => {
           return (
             <StyledFacetButton
               icon={
@@ -326,27 +383,38 @@ export const ResponseActionsLog = memo<
         name: TABLE_COLUMN_NAMES.hosts,
         width: '20%',
         truncateText: true,
-        render: (hosts: ActionDetails['hosts']) => {
+        render: (_hosts: ActionListApiResponse['data'][number]['hosts']) => {
+          const hosts = _hosts && Object.values(_hosts);
           // join hostnames if the action is for multiple agents
           // and skip empty strings for names if any
-          const hostname =
-            hosts &&
-            Object.values(hosts)
-              .reduce<string[]>((acc, host) => {
-                if (host.name.trim()) {
-                  acc.push(host.name);
-                }
-                return acc;
-              }, [])
-              .join(', ');
+          const _hostnames = hosts
+            .reduce<string[]>((acc, host) => {
+              if (host.name.trim()) {
+                acc.push(host.name);
+              }
+              return acc;
+            }, [])
+            .join(', ');
+
+          let hostnames = _hostnames;
+          if (!_hostnames) {
+            if (hosts.length > 1) {
+              // when action was for a single agent and no host name
+              hostnames = UX_MESSAGES.unenrolled.hosts;
+            } else if (hosts.length === 1) {
+              // when action was for a multiple agents
+              // and none of them have a host name
+              hostnames = UX_MESSAGES.unenrolled.host;
+            }
+          }
           return (
-            <EuiToolTip content={hostname} anchorClassName="eui-textTruncate">
+            <EuiToolTip content={hostnames} anchorClassName="eui-textTruncate">
               <EuiText
                 size="s"
                 className="eui-textTruncate eui-fullWidth"
                 data-test-subj={getTestId('column-hostname')}
               >
-                {hostname}
+                {hostnames}
               </EuiText>
             </EuiToolTip>
           );
@@ -357,7 +425,7 @@ export const ResponseActionsLog = memo<
         name: TABLE_COLUMN_NAMES.comments,
         width: !showHostNames ? '21%' : '30%',
         truncateText: true,
-        render: (comment: ActionDetails['comment']) => {
+        render: (comment: ActionListApiResponse['data'][number]['comment']) => {
           return (
             <EuiToolTip content={comment} anchorClassName="eui-textTruncate">
               <EuiText
@@ -372,38 +440,20 @@ export const ResponseActionsLog = memo<
         },
       },
       {
-        field: 'isCompleted',
+        field: 'status',
         name: TABLE_COLUMN_NAMES.status,
         width: !showHostNames ? '15%' : '10%',
-        render: (isCompleted: ActionDetails['isCompleted'], data: ActionDetails) => {
-          const status = data.isExpired
-            ? UX_MESSAGES.badge.failed
-            : isCompleted
-            ? data.wasSuccessful
-              ? UX_MESSAGES.badge.completed
-              : UX_MESSAGES.badge.failed
-            : UX_MESSAGES.badge.pending;
+        render: (_status: ActionListApiResponse['data'][number]['status']) => {
+          const status = getActionStatus(_status);
 
           return (
             <EuiToolTip content={status} anchorClassName="eui-textTruncate">
-              <EuiBadge
-                data-test-subj={getTestId('column-status')}
+              <StatusBadge
                 color={
-                  data.isExpired
-                    ? 'danger'
-                    : isCompleted
-                    ? data.wasSuccessful
-                      ? 'success'
-                      : 'danger'
-                    : 'warning'
+                  _status === 'failed' ? 'danger' : _status === 'successful' ? 'success' : 'warning'
                 }
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.responseActionsList.list.item.status"
-                  defaultMessage="{status}"
-                  values={{ status }}
-                />
-              </EuiBadge>
+                status={status}
+              />
             </EuiToolTip>
           );
         },
@@ -418,13 +468,13 @@ export const ResponseActionsLog = memo<
             <span>{UX_MESSAGES.screenReaderExpand}</span>
           </EuiScreenReaderOnly>
         ),
-        render: (data: ActionDetails) => {
+        render: (actionListDataItem: ActionListApiResponse['data'][number]) => {
           return (
             <EuiButtonIcon
               data-test-subj={getTestId('expand-button')}
-              onClick={onClickCallback(data)}
-              aria-label={itemIdToExpandedRowMap[data.id] ? 'Collapse' : 'Expand'}
-              iconType={itemIdToExpandedRowMap[data.id] ? 'arrowUp' : 'arrowDown'}
+              onClick={onClickCallback(actionListDataItem)}
+              aria-label={itemIdToExpandedRowMap[actionListDataItem.id] ? 'Collapse' : 'Expand'}
+              iconType={itemIdToExpandedRowMap[actionListDataItem.id] ? 'arrowUp' : 'arrowDown'}
             />
           );
         },
@@ -440,31 +490,53 @@ export const ResponseActionsLog = memo<
 
   // table pagination
   const tablePagination = useMemo(() => {
+    const pageIndex = isFlyout ? (queryParams.page || 1) - 1 : paginationFromUrlParams.page - 1;
+    const pageSize = isFlyout ? queryParams.pageSize || 10 : paginationFromUrlParams.pageSize;
     return {
       // this controls the table UI page
       // to match 0-based table paging
-      pageIndex: (queryParams.page || 1) - 1,
-      pageSize: queryParams.pageSize || 10,
+      pageIndex,
+      pageSize,
       totalItemCount,
       pageSizeOptions: MANAGEMENT_PAGE_SIZE_OPTIONS as number[],
     };
-  }, [queryParams, totalItemCount]);
+  }, [
+    isFlyout,
+    paginationFromUrlParams.page,
+    paginationFromUrlParams.pageSize,
+    queryParams.page,
+    queryParams.pageSize,
+    totalItemCount,
+  ]);
 
   // handle onChange
   const handleTableOnChange = useCallback(
-    ({ page: _page }: CriteriaWithPagination<ActionDetails>) => {
+    ({ page: _page }: CriteriaWithPagination<ActionListApiResponse['data'][number]>) => {
       // table paging is 0 based
       const { index, size } = _page;
-      setQueryParams((prevState) => ({
-        ...prevState,
-        // adjust the page to conform to
-        // 1-based API page
+      // adjust the page to conform to
+      // 1-based API page
+      const pagingArgs = {
         page: index + 1,
         pageSize: size,
-      }));
+      };
+      if (isFlyout) {
+        setQueryParams((prevState) => ({
+          ...prevState,
+          ...pagingArgs,
+        }));
+      } else {
+        setQueryParams((prevState) => ({
+          ...prevState,
+          ...pagingArgs,
+        }));
+        setPaginationOnUrlParams({
+          ...pagingArgs,
+        });
+      }
       reFetchEndpointActionList();
     },
-    [reFetchEndpointActionList, setQueryParams]
+    [isFlyout, reFetchEndpointActionList, setQueryParams, setPaginationOnUrlParams]
   );
 
   // compute record ranges
@@ -506,13 +578,17 @@ export const ResponseActionsLog = memo<
   return (
     <>
       <ActionsLogFilters
+        isFlyout={isFlyout}
         dateRangePickerState={dateRangePickerState}
         isDataLoading={isFetching}
         onClick={reFetchEndpointActionList}
+        onChangeHostsFilter={onChangeHostsFilter}
         onChangeCommandsFilter={onChangeCommandsFilter}
+        onChangeStatusesFilter={onChangeStatusesFilter}
         onRefresh={onRefresh}
         onRefreshChange={onRefreshChange}
         onTimeChange={onTimeChange}
+        showHostsFilter={showHostNames}
       />
       {isFetched && !totalItemCount ? (
         <ManagementEmptyStateWrapper>

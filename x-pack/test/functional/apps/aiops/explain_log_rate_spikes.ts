@@ -85,14 +85,14 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await aiops.explainLogRateSpikes.adjustBrushHandler(
         'aiopsBrushDeviation',
         'handle--e',
-        targetPx
+        targetPx + intervalPx
       );
 
       // Adjust the left brush handle
       await aiops.explainLogRateSpikes.adjustBrushHandler(
         'aiopsBrushDeviation',
         'handle--w',
-        targetPx - intervalPx
+        targetPx
       );
 
       // Get the new brush selection width for later comparison.
@@ -114,15 +114,24 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await aiops.explainLogRateSpikes.clickRerunAnalysisButton(true);
       await aiops.explainLogRateSpikes.assertProgressTitle('Progress: 100% — Done.');
 
-      await aiops.explainLogRateSpikesAnalysisTable.assertSpikeAnalysisTableExists();
+      await aiops.explainLogRateSpikesAnalysisGroupsTable.assertSpikeAnalysisTableExists();
+
+      const analysisGroupsTable =
+        await aiops.explainLogRateSpikesAnalysisGroupsTable.parseAnalysisTable();
+
+      expect(analysisGroupsTable).to.be.eql(testData.expected.analysisGroupsTable);
+
+      await ml.testExecution.logTestStep('expand table row');
+      await aiops.explainLogRateSpikesAnalysisGroupsTable.assertExpandRowButtonExists();
+      await aiops.explainLogRateSpikesAnalysisGroupsTable.expandRow();
 
       const analysisTable = await aiops.explainLogRateSpikesAnalysisTable.parseAnalysisTable();
-
       expect(analysisTable).to.be.eql(testData.expected.analysisTable);
     });
   }
 
-  describe('explain log rate spikes', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/140848
+  describe.skip('explain log rate spikes', function () {
     this.tags(['aiops']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');

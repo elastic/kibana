@@ -21,6 +21,7 @@ export const MlPageHeader: FC = ({ children }) => {
     return () => {
       setIsHeaderMounted(false);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return <InPortal node={headerPortal}>{children}</InPortal>;

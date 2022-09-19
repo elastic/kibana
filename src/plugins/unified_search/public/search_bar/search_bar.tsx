@@ -19,9 +19,9 @@ import { Query, Filter, TimeRange, AggregateQuery, isOfQueryType } from '@kbn/es
 import { withKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import type { TimeHistoryContract, SavedQuery } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
-import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 
+import type { IUnifiedSearchPluginServices } from '../types';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
 import { QueryBarMenu, QueryBarMenuProps } from '../query_string_input/query_bar_menu';
@@ -32,7 +32,7 @@ import type { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { searchBarStyles } from './search_bar.styles';
 
 export interface SearchBarInjectedDeps {
-  kibana: KibanaReactContextValue<IDataPluginServices>;
+  kibana: KibanaReactContextValue<IUnifiedSearchPluginServices>;
   intl: InjectedIntl;
   timeHistory?: TimeHistoryContract;
   // Filter bar
@@ -96,6 +96,11 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   // defines size of suggestions query popover
   suggestionsSize?: SuggestionsListSize;
   isScreenshotMode?: boolean;
+
+  /**
+   * Disables all inputs and interactive elements,
+   */
+  isDisabled?: boolean;
 }
 
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
@@ -470,6 +475,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
         showQueryInput={this.props.showQueryInput}
         showFilterBar={this.props.showFilterBar}
         showSaveQuery={this.props.showSaveQuery}
+        isDisabled={this.props.isDisabled}
         buttonProps={{ size: this.shouldShowDatePickerAsBadge() ? 's' : 'm' }}
         indexPatterns={this.props.indexPatterns}
         timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
@@ -494,6 +500,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           indexPatterns={this.props.indexPatterns!}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
+          readOnly={this.props.isDisabled}
         />
       ) : (
         <FilterBar
@@ -503,6 +510,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           indexPatterns={this.props.indexPatterns!}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
+          isDisabled={this.props.isDisabled}
           data-test-subj="unifiedFilterBar"
         />
       );
@@ -527,6 +535,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           showAutoRefreshOnly={this.props.showAutoRefreshOnly}
           showQueryInput={this.props.showQueryInput}
           showAddFilter={this.props.showFilterBar}
+          isDisabled={this.props.isDisabled}
           onRefresh={this.props.onRefresh}
           onRefreshChange={this.props.onRefreshChange}
           onChange={this.onQueryBarChange}

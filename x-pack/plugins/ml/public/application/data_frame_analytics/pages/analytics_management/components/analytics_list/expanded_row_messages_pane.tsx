@@ -50,10 +50,12 @@ export const ExpandedRowMessagesPane: FC<Props> = ({ analyticsId, dataTestSubj }
         })
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     getMessages();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useRefreshAnalyticsList({ onRefresh: getMessages });

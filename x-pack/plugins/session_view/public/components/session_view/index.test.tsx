@@ -23,6 +23,24 @@ describe('SessionView component', () => {
   let mockedContext: AppContextTestRender;
   let mockedApi: AppContextTestRender['coreStart']['http']['get'];
 
+  beforeAll(() => {
+    // https://stackoverflow.com/questions/39830580/jest-test-fails-typeerror-window-matchmedia-is-not-a-function
+    // xtermjs is using window.matchMedia, which isn't mocked in jest by default.
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      value: jest.fn().mockImplementation((query) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: jest.fn(), // Deprecated
+        removeListener: jest.fn(), // Deprecated
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        dispatchEvent: jest.fn(),
+      })),
+    });
+  });
+
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
     mockedApi = mockedContext.coreStart.http.get;
@@ -158,10 +176,10 @@ describe('SessionView component', () => {
           if (path === PROCESS_EVENTS_ROUTE) {
             return sessionViewProcessEventsMock;
           } else if (path === GET_TOTAL_IO_BYTES_ROUTE) {
-            return 1024;
+            return { total: 1024 };
           }
 
-          return 0;
+          return { total: 0 };
         });
 
         render();
@@ -180,10 +198,10 @@ describe('SessionView component', () => {
           if (path === PROCESS_EVENTS_ROUTE) {
             return sessionViewProcessEventsMock;
           } else if (path === GET_TOTAL_IO_BYTES_ROUTE) {
-            return 0;
+            return { total: 0 };
           }
 
-          return 0;
+          return { total: 0 };
         });
 
         render();

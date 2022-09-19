@@ -59,4 +59,10 @@ describe('getTableColumnDefinition', () => {
     // we know this returns a function even if the generic column signature allows other types
     expect((sortable as Function)(savedObject)).toEqual('Tag 1');
   });
+
+  it('returns a non-sortable definition when `serverPaging` is `true`', () => {
+    const { sortable } = getTableColumnDefinition({ serverPaging: true });
+
+    expect(sortable).toEqual(false);
+  });
 });

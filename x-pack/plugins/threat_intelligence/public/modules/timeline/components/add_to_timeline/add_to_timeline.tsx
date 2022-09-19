@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import React, { useRef, VFC } from 'react';
 import { DataProvider, QueryOperator } from '@kbn/timelines-plugin/common';
 import { AddToTimelineButtonProps } from '@kbn/timelines-plugin/public';
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui/src/components/button';
+import { EuiContextMenuItem } from '@elastic/eui';
+import { ComponentType } from '../../../../../common/types/component_type';
+import { getIndicatorFieldAndValue } from '../../../indicators/lib/field_value';
 import { EMPTY_VALUE } from '../../../../../common/constants';
-import { getDisplayName } from '../../../indicators/lib/display_name';
-import { ComputedIndicatorFieldId } from '../../../indicators/components/indicators_table/cell_renderer';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { unwrapValue } from '../../../indicators/lib/unwrap_value';
-import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
+import { Indicator } from '../../../../../common/types/indicator';
 import { useStyles } from './styles';
 
 export interface AddToTimelineProps {
@@ -27,13 +27,17 @@ export interface AddToTimelineProps {
    */
   field: string;
   /**
+   * Dictates the way the FilterIn component is rendered depending on the situation in which it's used
+   */
+  type?: ComponentType;
+  /**
    * Only used with `EuiDataGrid` (see {@link AddToTimelineButtonProps}).
    */
-  component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+  as?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   /**
-   * Used as `data-test-subj` value for e2e tests.
+   * Used for unit and e2e tests.
    */
-  testId?: string;
+  ['data-test-subj']?: string;
 }
 
 /**
@@ -42,26 +46,22 @@ export interface AddToTimelineProps {
  * Leverages the built-in functionality retrieves from the timeLineService (see ThreatIntelligenceSecuritySolutionContext in x-pack/plugins/threat_intelligence/public/types.ts)
  * Clicking on the button will add a key-value pair to an Untitled timeline.
  *
+ * The component has 2 renders depending on where it's used: within a EuiContextMenu or not.
+ *
  * @returns add to timeline button or an empty component.
  */
-export const AddToTimeline: VFC<AddToTimelineProps> = ({ data, field, component, testId }) => {
+export const AddToTimeline: VFC<AddToTimelineProps> = ({ data, field, type, as, ...props }) => {
   const styles = useStyles();
+
+  const contextMenuRef = useRef<HTMLButtonElement>(null);
 
   const addToTimelineButton =
     useKibana().services.timelines.getHoverActions().getAddToTimelineButton;
 
-  let value: string | null;
-  if (typeof data === 'string') {
-    value = data;
-  } else if (field === ComputedIndicatorFieldId.DisplayName) {
-    const displayName = getDisplayName(data);
-    field = displayName.field;
-    value = displayName.value;
-  } else {
-    value = unwrapValue(data, field as RawIndicatorFieldId);
-  }
+  const { key, value } =
+    typeof data === 'string' ? { key: field, value: data } : getIndicatorFieldAndValue(data, field);
 
-  if (!value || value === EMPTY_VALUE || !field) {
+  if (!value || value === EMPTY_VALUE || !key) {
     return <></>;
   }
 
@@ -71,12 +71,12 @@ export const AddToTimeline: VFC<AddToTimelineProps> = ({ data, field, component,
     {
       and: [],
       enabled: true,
-      id: `timeline-indicator-${field}-${value}`,
+      id: `timeline-indicator-${key}-${value}`,
       name: value,
       excluded: false,
       kqlQuery: '',
       queryMatch: {
-        field,
+        field: key,
         value,
         operator,
       },
@@ -85,13 +85,36 @@ export const AddToTimeline: VFC<AddToTimelineProps> = ({ data, field, component,
 
   const addToTimelineProps: AddToTimelineButtonProps = {
     dataProvider,
-    field,
+    field: key,
     ownFocus: false,
   };
-  if (component) addToTimelineProps.Component = component;
+
+  // Use case is for the barchart legend (for example).
+  // We can't use the addToTimelineButton directly because the UI doesn't work in a EuiContextMenu.
+  // We hide it and use the defaultFocusedButtonRef props to programmatically click it.
+  if (type === ComponentType.ContextMenu) {
+    addToTimelineProps.defaultFocusedButtonRef = contextMenuRef;
+
+    return (
+      <>
+        <div css={styles.displayNone}>{addToTimelineButton(addToTimelineProps)}</div>
+        <EuiContextMenuItem
+          key="addToTimeline"
+          icon="timeline"
+          size="s"
+          onClick={() => contextMenuRef.current?.click()}
+          {...props}
+        >
+          Add to Timeline
+        </EuiContextMenuItem>
+      </>
+    );
+  }
+
+  if (as) addToTimelineProps.Component = as;
 
   return (
-    <div data-test-subj={testId} css={styles.button}>
+    <div {...props} css={styles.inlineFlex}>
       {addToTimelineButton(addToTimelineProps)}
     </div>
   );

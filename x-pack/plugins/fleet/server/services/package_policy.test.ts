@@ -45,7 +45,7 @@ import type {
 } from '../../common/types';
 import { packageToPackagePolicy } from '../../common/services';
 
-import { IngestManagerError, PackagePolicyIneligibleForUpgradeError } from '../errors';
+import { FleetError, PackagePolicyIneligibleForUpgradeError } from '../errors';
 
 import {
   preconfigurePackageInputs,
@@ -106,6 +106,7 @@ async function mockedGetInstallation(params: any) {
   let pkg;
   if (params.pkgName === 'apache') pkg = { version: '1.3.2' };
   if (params.pkgName === 'aws') pkg = { version: '0.3.3' };
+  if (params.pkgName === 'endpoint') pkg = { version: '1.0.0' };
   return Promise.resolve(pkg);
 }
 
@@ -113,7 +114,7 @@ async function mockedGetPackageInfo(params: any) {
   let pkg;
   if (params.pkgName === 'apache') pkg = { version: '1.3.2' };
   if (params.pkgName === 'aws') pkg = { version: '0.3.3' };
-  if (params.pkgName === 'endpoint') pkg = {};
+  if (params.pkgName === 'endpoint') pkg = { version: '1.0.0' };
   if (params.pkgName === 'test') {
     pkg = {
       version: '1.0.2',
@@ -1187,12 +1188,12 @@ describe('Package policy service', () => {
       });
       await expect(
         packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies)
-      ).rejects.toThrow(IngestManagerError);
+      ).rejects.toThrow(FleetError);
       expect(callingOrder).toEqual(['one', 'two']);
     });
 
     it('should provide an array of errors encountered by running external callbacks', async () => {
-      let error: IngestManagerError;
+      let error: FleetError;
       const callbackOneError = new Error('foo 1');
       const callbackTwoError = new Error('foo 2');
 
@@ -3394,7 +3395,7 @@ describe('Package policy service', () => {
 
       expect(
         packagePolicyService.getUpgradePackagePolicyInfo(savedObjectsClient, 'package-policy-id')
-      ).rejects.toEqual(new IngestManagerError('Package notinstalled is not installed'));
+      ).rejects.toEqual(new FleetError('Package notinstalled is not installed'));
     });
   });
 });
@@ -3463,6 +3464,36 @@ describe('getUpgradeDryRunDiff', () => {
 
     expect(res.hasErrors).toBeTruthy();
   });
+
+  it('should return no errors if upgrading 2 package policies', async () => {
+    savedObjectsClient.get.mockImplementation((type, id) =>
+      Promise.resolve({
+        id,
+        type: 'abcd',
+        references: [],
+        version: '0.9.0',
+        attributes: { ...createPackagePolicyMock(), name: id },
+      })
+    );
+    const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const res = await packagePolicyService.upgrade(savedObjectsClient, elasticsearchClient, [
+      'package-policy-id',
+      'package-policy-id-2',
+    ]);
+
+    expect(res).toEqual([
+      {
+        id: 'package-policy-id',
+        name: 'package-policy-id',
+        success: true,
+      },
+      {
+        id: 'package-policy-id-2',
+        name: 'package-policy-id-2',
+        success: true,
+      },
+    ]);
+  });
 });
 
 describe('_applyIndexPrivileges()', () => {
@@ -3471,6 +3502,7 @@ describe('_applyIndexPrivileges()', () => {
       type: '',
       dataset: '',
       title: '',
+      // @ts-ignore-error
       release: '',
       package: '',
       path: '',

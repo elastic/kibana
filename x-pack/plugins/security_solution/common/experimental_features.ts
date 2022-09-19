@@ -17,13 +17,10 @@ export const allowedExperimentalValues = Object.freeze({
   excludePoliciesInFilterEnabled: false,
   kubernetesEnabled: true,
   disableIsolationUIPendingStatuses: false,
-  riskyHostsEnabled: false,
-  riskyUsersEnabled: false,
   pendingActionResponsesWithAck: true,
   policyListEnabled: true,
   policyResponseInFleetEnabled: true,
   threatIntelligenceEnabled: false,
-  entityAnalyticsDashboardEnabled: false,
 
   /**
    * This is used for enabling the end-to-end tests for the security_solution telemetry.
@@ -43,7 +40,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the insights module for related alerts by process ancestry
    */
-  insightsRelatedAlertsByProcessAncestry: false,
+  insightsRelatedAlertsByProcessAncestry: true,
 
   /**
    * Enables extended rule execution logging to Event Log. When this setting is enabled:

@@ -14,10 +14,15 @@ import { TimeRange } from '@kbn/es-query';
 import { EuiLink, EuiTextColor, EuiButton, EuiSpacer } from '@elastic/eui';
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { groupBy, escape } from 'lodash';
+import { groupBy, escape, uniq } from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
+import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
 import type { FramePublicAPI, IndexPattern, StateSetter } from '../types';
-import type { IndexPatternLayer, IndexPatternPrivateState } from './types';
+import type {
+  IndexPatternLayer,
+  IndexPatternPersistedState,
+  IndexPatternPrivateState,
+} from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
 
 import {
@@ -33,12 +38,13 @@ import {
 } from './operations';
 
 import { getInvalidFieldMessage, isColumnOfType } from './operations/definitions/helpers';
-import { FiltersIndexPatternColumn, isQueryValid } from './operations/definitions/filters';
+import { FiltersIndexPatternColumn } from './operations/definitions/filters';
 import { hasField } from './pure_utils';
 import { mergeLayer } from './state_helpers';
 import { supportsRarityRanking } from './operations/definitions/terms';
 import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms/constants';
 import { getOriginalId } from '../../common/expressions';
+import { isQueryValid } from '../shared_components';
 
 export function isColumnInvalid(
   layer: IndexPatternLayer,
@@ -158,6 +164,46 @@ const accuracyModeEnabledWarning = (columnName: string, docLink: string) => (
     }}
   />
 );
+
+export function getTSDBRollupWarningMessages(
+  state: IndexPatternPersistedState,
+  warning: SearchResponseWarning
+) {
+  if (state) {
+    const hasTSDBRollupWarnings =
+      warning.type === 'shard_failure' &&
+      warning.reason.type === 'unsupported_aggregation_on_downsampled_index';
+    if (!hasTSDBRollupWarnings) {
+      return [];
+    }
+    return Object.values(state.layers).flatMap((layer) =>
+      uniq(
+        Object.values(layer.columns)
+          .filter((col) =>
+            [
+              'median',
+              'percentile',
+              'percentile_rank',
+              'last_value',
+              'unique_count',
+              'standard_deviation',
+            ].includes(col.operationType)
+          )
+          .map((col) => col.label)
+      ).map((label) =>
+        i18n.translate('xpack.lens.indexPattern.tsdbRollupWarning', {
+          defaultMessage:
+            '"{label}" does not work for all indices in the selected data view because it\'s using a function which is not supported on rolled up data. Please edit the visualization to use another function or change the time range.',
+          values: {
+            label,
+          },
+        })
+      )
+    );
+  }
+
+  return [];
+}
 
 export function getPrecisionErrorWarningMessages(
   datatableUtilities: DatatableUtilitiesService,
@@ -465,7 +511,7 @@ export function getFiltersInLayer(
   indexPattern: IndexPattern,
   timeRange: TimeRange | undefined
 ) {
-  if (indexPattern.spec) {
+  if (!indexPattern.isPersisted) {
     return {
       error: i18n.translate('xpack.lens.indexPattern.adHocDataViewError', {
         defaultMessage:

@@ -6,6 +6,7 @@
  */
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { InputsModelId } from '../../common/store/inputs/constants';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { SocTrends } from '../components/detection_response/soc_trends';
 import { SiemSearchBar } from '../../common/components/search_bar';
@@ -68,7 +69,12 @@ const DetectionResponseComponent = () => {
         <>
           <SecuritySolutionPageWrapper data-test-subj="detectionResponsePage">
             <HeaderPage title={i18n.DETECTION_RESPONSE_TITLE}>
-              <SiemSearchBar id="global" indexPattern={indexPattern} hideFilterBar hideQueryInput />
+              <SiemSearchBar
+                id={InputsModelId.global}
+                indexPattern={indexPattern}
+                hideFilterBar
+                hideQueryInput
+              />
             </HeaderPage>
 
             {isSourcererLoading ? (
