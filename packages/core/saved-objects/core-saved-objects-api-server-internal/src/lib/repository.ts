@@ -1007,15 +1007,17 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
 
       const error = getBulkOperationError(type, id, rawResponse);
       if (error) {
-        return { success: false, type, id, error };
+        errorResult = { success: false, type, id, error };
+        return errorResult;
       }
       if (rawResponse.result === 'not_found') {
-        return {
+        errorResult = {
           success: false,
           type,
           id,
           error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
         };
+        return errorResult;
       }
 
       if (rawResponse.result === 'deleted') {
