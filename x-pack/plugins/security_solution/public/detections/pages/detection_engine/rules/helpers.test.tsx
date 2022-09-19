@@ -54,6 +54,7 @@ describe('rule helpers', () => {
         dataViewId: undefined,
         index: ['auditbeat-*'],
         machineLearningJobId: [],
+        shouldLoadQueryDynamically: true,
         queryBar: {
           query: {
             query: 'user.name: root or user.name: admin',
@@ -257,6 +258,7 @@ describe('rule helpers', () => {
         },
         newTermsFields: [],
         historyWindowSize: '7d',
+        shouldLoadQueryDynamically: true,
       };
 
       expect(result).toEqual(expected);
@@ -310,6 +312,7 @@ describe('rule helpers', () => {
         },
         newTermsFields: [],
         historyWindowSize: '7d',
+        shouldLoadQueryDynamically: false,
       };
 
       expect(result).toEqual(expected);
