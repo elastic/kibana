@@ -271,7 +271,7 @@ export const formatMlPipelineBody = async (
           model_id: modelId,
           target_field: `ml.inference.${destinationField}`,
           field_map: {
-            sourceField: modelInputField,
+            [sourceField]: modelInputField,
           },
         },
       },

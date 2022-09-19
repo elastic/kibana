@@ -6,7 +6,7 @@
  */
 import { ColumnarViewModel } from '@elastic/charts';
 import d3 from 'd3';
-import { uniqueId } from 'lodash';
+import { sum, uniqueId } from 'lodash';
 import { ElasticFlameGraph, FlameGraphComparisonMode, rgbToRGBA } from '../../../common/flamegraph';
 import { getInterpolationValue } from './get_interpolation_value';
 
@@ -57,28 +57,44 @@ export function getFlamegraphModel({
       };
     });
 
-    const positiveChangeInterpolator = d3.interpolateRgb(colorNeutral, colorDanger);
+    const positiveChangeInterpolator = d3.interpolateRgb(colorNeutral, colorSuccess);
 
-    const negativeChangeInterpolator = d3.interpolateRgb(colorNeutral, colorSuccess);
+    const negativeChangeInterpolator = d3.interpolateRgb(colorNeutral, colorDanger);
 
-    const comparisonExclusive: number[] = [];
-    const comparisonInclusive: number[] = [];
+    // per @thomasdullien:
+    // In "relative" mode: Take the percentage of CPU time consumed by block A and subtract
+    // the percentage of CPU time consumed by block B. If the number is positive, linearly
+    // interpolate a color between grey and green, with the delta relative to the size of
+    // block A as percentage.
+
+    // Example 1: BlockA 8%, BlockB 5%, delta 3%. This represents a 3/8th reduction, 37.5%
+    // of the original time, so the color should be 37.5% "green".
+
+    // Example 2: BlockA 5%, BlockB 8%, delta -3%. This represents a 3/5th worsening of BlockA,
+    // so the color should be 62.5% "red". In "absolute" mode: Take the number of samples in
+    // blockA, subtract the number of samples in blockB. Divide the result by the number of
+    // samples in the first graph. The result is the amount of saturation for the color.
+    // Example 3: BlockA 10k samples, BlockB 8k samples, total samples 50k. 10k-8k = 2k, 2k/50k
+    // = 4%, therefore 4% "green".
+
+    const totalSamples = sum(primaryFlamegraph.CountExclusive);
+    const comparisonTotalSamples = sum(comparisonFlamegraph.CountExclusive);
 
     primaryFlamegraph.ID.forEach((nodeID, index) => {
-      const countInclusive = primaryFlamegraph.CountInclusive[index];
-      const countExclusive = primaryFlamegraph.CountExclusive[index];
+      const samples = primaryFlamegraph.Value[index];
+      const comparisonSamples = comparisonNodesById[nodeID]?.Value as number | undefined;
 
-      const comparisonNode = comparisonNodesById[nodeID];
-
-      comparisonExclusive![index] = comparisonNode?.CountExclusive;
-      comparisonInclusive![index] = comparisonNode?.CountInclusive;
-
-      const [foreground, background] =
+      const foreground =
+        comparisonMode === FlameGraphComparisonMode.Absolute ? samples : samples / totalSamples;
+      const background =
         comparisonMode === FlameGraphComparisonMode.Absolute
-          ? [countInclusive, comparisonNode?.CountInclusive]
-          : [countExclusive, comparisonNode?.CountExclusive];
+          ? comparisonSamples
+          : (comparisonSamples ?? 0) / comparisonTotalSamples;
 
-      const interpolationValue = getInterpolationValue(foreground, background);
+      const denominator =
+        comparisonMode === FlameGraphComparisonMode.Absolute ? totalSamples : foreground;
+
+      const interpolationValue = getInterpolationValue(foreground, background, denominator);
 
       const nodeColor =
         interpolationValue >= 0
