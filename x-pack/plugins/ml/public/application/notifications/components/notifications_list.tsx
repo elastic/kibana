@@ -21,6 +21,7 @@ import {
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import useDebounce from 'react-use/lib/useDebounce';
+import { ML_NOTIFICATIONS_MESSAGE_LEVEL } from '../../../../common/constants/notifications';
 import { ML_NOTIFICATIONS_LAST_CHECKED_AT } from '../../../../common/types/storage';
 import { useStorage } from '../../contexts/storage';
 import { SavedObjectsWarning } from '../../components/saved_objects_warning';
@@ -29,18 +30,19 @@ import { useToastNotificationService } from '../../services/toast_notification_s
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { useRefresh } from '../../routing/use_refresh';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
-import { MESSAGE_LEVEL, MessageLevel } from '../../../../common/constants/message_levels';
 import { ListingPageUrlState } from '../../../../common/types/common';
 import { usePageUrlState } from '../../util/url_state';
 import { ML_PAGES } from '../../../../common/constants/locator';
-import type { NotificationItem } from '../../../../common/types/notifications';
+import type {
+  MlNotificationMessageLevel,
+  NotificationItem,
+} from '../../../../common/types/notifications';
 import { useMlKibana } from '../../contexts/kibana';
 
-const levelBadgeMap: Record<MessageLevel, IconColor> = {
-  error: 'danger',
-  info: 'default',
-  success: 'subdued',
-  warning: 'warning',
+const levelBadgeMap: Record<MlNotificationMessageLevel, IconColor> = {
+  [ML_NOTIFICATIONS_MESSAGE_LEVEL.ERROR]: 'danger',
+  [ML_NOTIFICATIONS_MESSAGE_LEVEL.WARNING]: 'warning',
+  [ML_NOTIFICATIONS_MESSAGE_LEVEL.INFO]: 'default',
 };
 
 export const getDefaultNotificationsListState = (): ListingPageUrlState => ({
@@ -161,7 +163,7 @@ export const NotificationsList: FC = () => {
       sortable: true,
       truncateText: false,
       'data-test-subj': 'mlNotificationLabel',
-      render: (value: MessageLevel) => {
+      render: (value: MlNotificationMessageLevel) => {
         return <EuiBadge color={levelBadgeMap[value]}>{value}</EuiBadge>;
       },
       width: '100px',
@@ -172,7 +174,7 @@ export const NotificationsList: FC = () => {
       sortable: true,
       truncateText: false,
       'data-test-subj': 'mlNotificationType',
-      render: (value: MessageLevel) => {
+      render: (value: string) => {
         return <EuiBadge color={'hollow'}>{value}</EuiBadge>;
       },
       width: '200px',
@@ -205,21 +207,21 @@ export const NotificationsList: FC = () => {
         multiSelect: 'or',
         options: [
           {
-            value: MESSAGE_LEVEL.ERROR,
+            value: ML_NOTIFICATIONS_MESSAGE_LEVEL.ERROR,
             name: i18n.translate('xpack.ml.notifications.filters.level.error', {
               defaultMessage: 'Error',
             }),
             field: 'level',
           },
           {
-            value: MESSAGE_LEVEL.WARNING,
+            value: ML_NOTIFICATIONS_MESSAGE_LEVEL.WARNING,
             name: i18n.translate('xpack.ml.notifications.filters.level.warning', {
               defaultMessage: 'Warning',
             }),
             field: 'level',
           },
           {
-            value: MESSAGE_LEVEL.INFO,
+            value: ML_NOTIFICATIONS_MESSAGE_LEVEL.INFO,
             name: i18n.translate('xpack.ml.notifications.filters.level.info', {
               defaultMessage: 'Info',
             }),

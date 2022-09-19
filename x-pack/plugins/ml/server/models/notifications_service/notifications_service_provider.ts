@@ -7,7 +7,6 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { MessageLevel } from '../../../common/constants/message_levels';
 import type { MLSavedObjectService } from '../../saved_objects';
 import type { NotificationItem, NotificationSource } from '../../../common/types/notifications';
 import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
@@ -15,7 +14,8 @@ import type {
   MessagesSearchParams,
   NotificationsCountParams,
 } from '../../routes/schemas/notifications_schema';
-import {
+import type {
+  MlNotificationMessageLevel,
   NotificationsCountResponse,
   NotificationsSearchResponse,
 } from '../../../common/types/notifications';
@@ -222,7 +222,7 @@ export class NotificationsService {
 
         return Array.isArray(byLevel.buckets)
           ? byLevel.buckets.reduce((acc, curr) => {
-              acc[curr.key as MessageLevel] = curr.doc_count;
+              acc[curr.key as MlNotificationMessageLevel] = curr.doc_count;
               return acc;
             }, {} as NotificationsCountResponse)
           : ({} as NotificationsCountResponse);
@@ -233,12 +233,13 @@ export class NotificationsService {
       (acc, curr) => {
         for (const levelKey in curr) {
           if (curr.hasOwnProperty(levelKey)) {
-            acc[levelKey as MessageLevel] += curr[levelKey as MessageLevel];
+            acc[levelKey as MlNotificationMessageLevel] +=
+              curr[levelKey as MlNotificationMessageLevel];
           }
         }
         return acc;
       },
-      { error: 0, warning: 0, info: 0, success: 0 } as NotificationsCountResponse
+      { error: 0, warning: 0, info: 0 } as NotificationsCountResponse
     );
   }
 }
