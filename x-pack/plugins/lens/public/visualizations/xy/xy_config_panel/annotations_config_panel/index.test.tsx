@@ -326,6 +326,7 @@ describe('AnnotationsPanel', () => {
         annotations: [customLineStaticAnnotation],
         layerId: 'annotation',
         layerType: 'annotations',
+        ignoreGlobalFilters: true,
         indexPatternId: indexPattern.id,
       };
       const frameMock = createMockFramePublicAPI({
@@ -378,6 +379,7 @@ describe('AnnotationsPanel', () => {
         annotations: [customLineStaticAnnotation],
         layerId: 'annotation',
         layerType: 'annotations',
+        ignoreGlobalFilters: true,
         indexPatternId: indexPattern.id,
       };
       const frameMock = createMockFramePublicAPI({
