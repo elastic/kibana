@@ -117,6 +117,7 @@ export function initRoutes(
       validate: {
         body: schema.object({
           taskIds: schema.arrayOf(schema.string()),
+          runSoon: schema.boolean({ defaultValue: true }),
         }),
       },
     },
@@ -125,10 +126,10 @@ export function initRoutes(
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
     ) {
-      const { taskIds } = req.body;
+      const { taskIds, runSoon } = req.body;
       try {
         const taskManager = await taskManagerStart;
-        return res.ok({ body: await taskManager.bulkEnable(taskIds) });
+        return res.ok({ body: await taskManager.bulkEnable(taskIds, runSoon) });
       } catch (err) {
         return res.ok({ body: { taskIds, error: `${err}` } });
       }

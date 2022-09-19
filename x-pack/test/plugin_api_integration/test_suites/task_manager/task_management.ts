@@ -178,11 +178,11 @@ export default function ({ getService }: FtrProviderContext) {
         .then((response) => response.body);
     }
 
-    function bulkEnable(taskIds: string[]) {
+    function bulkEnable(taskIds: string[], runSoon: boolean) {
       return supertest
         .post('/api/sample_tasks/bulk_enable')
         .set('kbn-xsrf', 'xxx')
-        .send({ taskIds })
+        .send({ taskIds, runSoon })
         .expect(200)
         .then((response) => response.body);
     }
@@ -641,7 +641,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(await successfulRunSoonResult).to.eql({ id: longRunningTask.id });
     });
 
-    it('should disable and reenable task and run it', async () => {
+    it('should disable and reenable task and run it when runSoon = true', async () => {
       const historyItem = random(1, 100);
       const scheduledTask = await scheduleTask({
         taskType: 'sampleTask',
@@ -666,7 +666,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // re-enable the task
-      await bulkEnable([scheduledTask.id]);
+      await bulkEnable([scheduledTask.id], true);
 
       await retry.try(async () => {
         const tasks = (await currentTasks()).docs;
@@ -675,6 +675,47 @@ export default function ({ getService }: FtrProviderContext) {
 
         // should get a new document even tho original schedule interval was 30m
         expect((await historyDocs()).length).to.eql(2);
+      });
+    });
+
+    it('should disable and reenable task and not run it when runSoon = false', async () => {
+      const historyItem = random(1, 100);
+      const scheduledTask = await scheduleTask({
+        taskType: 'sampleTask',
+        schedule: { interval: '30m' },
+        params: { historyItem },
+      });
+
+      await retry.try(async () => {
+        expect((await historyDocs()).length).to.eql(1);
+        const tasks = (await currentTasks()).docs;
+
+        expect(getTaskById(tasks, scheduledTask.id).enabled).to.eql(true);
+      });
+
+      // disable the task
+      await bulkDisable([scheduledTask.id]);
+
+      await retry.try(async () => {
+        const tasks = (await currentTasks()).docs;
+
+        expect(getTaskById(tasks, scheduledTask.id).enabled).to.eql(false);
+      });
+
+      // re-enable the task
+      await bulkEnable([scheduledTask.id], false);
+
+      await retry.try(async () => {
+        const tasks = (await currentTasks()).docs;
+
+        const task = getTaskById(tasks, scheduledTask.id);
+
+        expect(task.enabled).to.eql(true);
+
+        // task runAt should be set in the future by greater than 20 minutes
+        // this assumes it takes less than 10 minutes to disable and renable the task
+        // since the schedule interval is 30 minutes
+        expect(Date.parse(task.runAt) - Date.now()).to.be.greaterThan(10 * 60 * 1000);
       });
     });
 
