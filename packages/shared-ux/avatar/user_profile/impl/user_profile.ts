@@ -57,11 +57,11 @@ export interface UserProfileUserInfo {
   /**
    * Optional full name of the user.
    */
-  full_name?: string;
+  fullName?: string;
   /**
    * Optional display name of the user.
    */
-  display_name?: string;
+  displayName?: string;
 }
 
 /**
@@ -99,16 +99,12 @@ export const USER_AVATAR_MAX_INITIALS = 2;
  * @param {UserProfileAvatarData} avatar User avatar
  */
 export function getUserAvatarColor(
-  user: Pick<UserProfileUserInfo, 'username' | 'full_name'>,
+  user: Pick<UserProfileUserInfo, 'username' | 'fullName'>,
   avatar?: UserProfileAvatarData
 ) {
-  if (avatar && avatar.color) {
-    return avatar.color;
-  }
-
   const firstCodePoint = getUserDisplayName(user).codePointAt(0) || USER_AVATAR_FALLBACK_CODE_POINT;
 
-  return VISUALIZATION_COLORS[firstCodePoint % VISUALIZATION_COLORS.length];
+  return avatar?.color ?? VISUALIZATION_COLORS[firstCodePoint % VISUALIZATION_COLORS.length];
 }
 
 /**
@@ -120,7 +116,7 @@ export function getUserAvatarColor(
  * @param {UserProfileAvatarData} avatar User avatar
  */
 export function getUserAvatarInitials(
-  user: Pick<UserProfileUserInfo, 'username' | 'full_name'>,
+  user: Pick<UserProfileUserInfo, 'username' | 'fullName'>,
   avatar?: UserProfileAvatarData
 ) {
   const words = getUserDisplayName(user).split(' ');
@@ -136,6 +132,6 @@ export function getUserAvatarInitials(
  *
  * @param {UserProfileUserInfo} user User info
  */
-export function getUserDisplayName(user: Pick<UserProfileUserInfo, 'username' | 'full_name'>) {
-  return user.full_name || user.username;
+export function getUserDisplayName(user: Pick<UserProfileUserInfo, 'username' | 'fullName'>) {
+  return user.fullName || user.username;
 }

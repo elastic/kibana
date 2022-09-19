@@ -26,20 +26,20 @@ const sampleUsers = [
   {
     username: 'Peggy',
     email: 'test@email.com',
-    full_name: 'Peggy Simms',
-    display_name: 'Peggy',
+    fullName: 'Peggy Simms',
+    displayName: 'Peggy',
   },
   {
     username: 'Martin',
     email: 'test@email.com',
-    full_name: 'Martin Gatsby',
-    display_name: 'Martin',
+    fullName: 'Martin Gatsby',
+    displayName: 'Martin',
   },
   {
     username: 'Leonardo DiCaprio',
     email: 'test@email.com',
-    full_name: 'Leonardo DiCaprio',
-    display_name: 'Leonardo DiCaprio',
+    fullName: 'Leonardo DiCaprio',
+    displayName: 'Leonardo DiCaprio',
   },
 ];
 

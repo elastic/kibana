@@ -19,7 +19,7 @@ const userProfiles = [
     user: {
       username: 'delighted_nightingale',
       email: 'delighted_nightingale@profiles.elastic.co',
-      full_name: 'Delighted Nightingale',
+      fullName: 'Delighted Nightingale',
     },
   },
   {
@@ -29,7 +29,7 @@ const userProfiles = [
     user: {
       username: 'damaged_raccoon',
       email: 'damaged_raccoon@profiles.elastic.co',
-      full_name: 'Damaged Raccoon',
+      fullName: 'Damaged Raccoon',
     },
   },
   {
@@ -39,7 +39,7 @@ const userProfiles = [
     user: {
       username: 'physical_dinosaur',
       email: 'physical_dinosaur@profiles.elastic.co',
-      full_name: 'Physical Dinosaur',
+      fullName: 'Physical Dinosaur',
     },
   },
   {
@@ -49,7 +49,7 @@ const userProfiles = [
     user: {
       username: 'wet_dingo',
       email: 'wet_dingo@profiles.elastic.co',
-      full_name: 'Wet Dingo',
+      fullName: 'Wet Dingo',
     },
   },
 ];
@@ -96,7 +96,7 @@ describe('UserProfilesPopover', () => {
                   "uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
                   "user": Object {
                     "email": "damaged_raccoon@profiles.elastic.co",
-                    "full_name": "Damaged Raccoon",
+                    "fullName": "Damaged Raccoon",
                     "username": "damaged_raccoon",
                   },
                 },
@@ -110,7 +110,7 @@ describe('UserProfilesPopover', () => {
                   "uid": "u_BOulL4QMPSyV9jg5lQI2JmCkUnokHTazBnet3xVHNv0_0",
                   "user": Object {
                     "email": "delighted_nightingale@profiles.elastic.co",
-                    "full_name": "Delighted Nightingale",
+                    "fullName": "Delighted Nightingale",
                     "username": "delighted_nightingale",
                   },
                 },

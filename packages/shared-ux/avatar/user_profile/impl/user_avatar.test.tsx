@@ -18,7 +18,7 @@ describe('UserAvatar', () => {
         user={{
           username: 'delighted_nightingale',
           email: 'delighted_nightingale@elastic.co',
-          full_name: 'Delighted Nightingale',
+          fullName: 'Delighted Nightingale',
         }}
         avatar={{
           color: '#09e8ca',
@@ -42,7 +42,7 @@ describe('UserAvatar', () => {
         user={{
           username: 'delighted_nightingale',
           email: 'delighted_nightingale@elastic.co',
-          full_name: 'Delighted Nightingale',
+          fullName: 'Delighted Nightingale',
         }}
         avatar={{
           color: '#09e8ca',
@@ -67,7 +67,7 @@ describe('UserAvatar', () => {
         user={{
           username: 'delighted_nightingale',
           email: 'delighted_nightingale@elastic.co',
-          full_name: 'Delighted Nightingale',
+          fullName: 'Delighted Nightingale',
         }}
       />
     );
