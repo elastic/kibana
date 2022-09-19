@@ -281,7 +281,7 @@ export const lastValueOperation: OperationDefinition<
 
         if (customMetricFn && ['aggTopHit', 'aggTopMetrics'].includes(customMetricFn.name)) {
           const groupByKey = `${customMetricFn.name}-${customMetricFn.getArgument('field')?.[0]}-${
-            customMetricFn.getArgument('timeShift')?.[0]
+            fnBuilder.getArgument('timeShift')?.[0] // we get this from the parent agg
           }`;
 
           if (!(groupByKey in expressionBuildersByArgs)) {
@@ -319,6 +319,7 @@ export const lastValueOperation: OperationDefinition<
           enabled: firstFnBuilder.getArgument('enabled')?.[0],
           customBucket: firstFnBuilder.getArgument('customBucket')?.[0],
           customMetric: firstFnBuilder.getArgument('customMetric')?.[0],
+          timeShift: firstFnBuilder.getArgument('timeShift')?.[0],
         }
       ).toAst();
 
