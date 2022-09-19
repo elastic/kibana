@@ -125,9 +125,12 @@ const serviceGroupRoute = createApmServerRoute({
 const serviceGroupSaveRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/service-group',
   params: t.type({
-    query: t.partial({
-      serviceGroupId: t.string,
-    }),
+    query: t.union([
+      t.partial({
+        serviceGroupId: t.string,
+      }),
+      t.undefined,
+    ]),
     body: t.type({
       groupName: t.string,
       kuery: t.string,
