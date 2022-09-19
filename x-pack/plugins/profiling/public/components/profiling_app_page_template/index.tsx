@@ -16,10 +16,12 @@ export function ProfilingAppPageTemplate({
   children,
   tabs,
   hideSearchBar = false,
+  fullHeight = false,
 }: {
   children: React.ReactElement;
   tabs: EuiPageHeaderContentProps['tabs'];
   hideSearchBar?: boolean;
+  fullHeight?: boolean;
 }) {
   const {
     start: { observability },
@@ -37,14 +39,22 @@ export function ProfilingAppPageTemplate({
     <ObservabilityPageTemplate
       pageHeader={{
         pageTitle: i18n.translate('xpack.profiling.appPageTemplate.pageTitle', {
-          defaultMessage: 'Profiling',
+          defaultMessage: 'Universal Profiling',
         }),
         tabs,
+      }}
+      pageSectionProps={{
+        contentProps: {
+          style: {
+            display: 'flex',
+            flexGrow: 1,
+          },
+        },
       }}
     >
       <EuiFlexGroup direction="column">
         {!hideSearchBar && (
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <PrimaryProfilingSearchBar />
           </EuiFlexItem>
         )}
