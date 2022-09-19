@@ -11,7 +11,7 @@ import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { useApi } from '@kbn/securitysolution-list-hooks';
+import { useApi, removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
 import type { HttpStart } from '@kbn/core/public';
 
 import { updateAlertStatus } from '../../../detections/containers/detection_engine/alerts/api';
@@ -20,7 +20,7 @@ import {
   buildAlertsFilter,
   buildAlertStatusesFilter,
 } from '../../../detections/components/alerts_table/default_config';
-import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
+import { getEsQueryFilter } from '../../../detections/containers/detection_engine/exceptions/get_es_query_filter';
 import type { Index } from '../../../../common/detection_engine/schemas/common/schemas';
 import { formatExceptionItemForUpdate, prepareExceptionItemsForBulkClose } from '../utils/helpers';
 import { useKibana } from '../../../common/lib/kibana';
@@ -133,12 +133,16 @@ export const useAddOrUpdateException = ({
             'in-progress',
           ]);
 
-          const filter = getQueryFilter(
+          const exceptionsToFilter = exceptionItemsToAddOrUpdate.map((exception) =>
+            removeIdFromExceptionItemsEntries(exception)
+          );
+
+          const filter = await getEsQueryFilter(
             '',
             'kuery',
             [...buildAlertsFilter(ruleStaticId), ...alertStatusFilter],
             bulkCloseIndex,
-            prepareExceptionItemsForBulkClose(exceptionItemsToAddOrUpdate),
+            prepareExceptionItemsForBulkClose(exceptionsToFilter),
             false
           );
 

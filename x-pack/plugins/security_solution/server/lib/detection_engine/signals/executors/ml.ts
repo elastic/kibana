@@ -13,6 +13,7 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { ListClient } from '@kbn/lists-plugin/server';
+import type { Filter } from '@kbn/es-query';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import type { CompleteRule, MachineLearningRuleParams } from '../../schemas/rule_schemas';
 import { bulkCreateMlSignals } from '../bulk_create_ml_signals';
@@ -34,21 +35,23 @@ export const mlExecutor = async ({
   tuple,
   ml,
   listClient,
-  exceptionItems,
   services,
   ruleExecutionLogger,
   bulkCreate,
   wrapHits,
+  exceptionFilter,
+  unprocessedExceptions,
 }: {
   completeRule: CompleteRule<MachineLearningRuleParams>;
   tuple: RuleRangeTuple;
   ml: SetupPlugins['ml'];
   listClient: ListClient;
-  exceptionItems: ExceptionListItemSchema[];
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
+  exceptionFilter: Filter | undefined;
+  unprocessedExceptions: ExceptionListItemSchema[];
 }) => {
   const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
@@ -98,13 +101,13 @@ export const mlExecutor = async ({
       anomalyThreshold: ruleParams.anomalyThreshold,
       from: tuple.from.toISOString(),
       to: tuple.to.toISOString(),
-      exceptionItems,
+      exceptionFilter,
     });
 
     const [filteredAnomalyHits, _] = await filterEventsAgainstList({
       listClient,
-      exceptionsList: exceptionItems,
       ruleExecutionLogger,
+      exceptionsList: unprocessedExceptions,
       events: anomalyResults.hits.hits,
     });
 

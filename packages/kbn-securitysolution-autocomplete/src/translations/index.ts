@@ -35,6 +35,14 @@ export const FIELD_SPACE_WARNING = i18n.translate('autocomplete.fieldSpaceWarnin
   defaultMessage: "Warning: Spaces at the start or end of this value aren't being displayed.",
 });
 
+export const LISTS_TOOLTIP_INFO = i18n.translate('autocomplete.listsTooltipWarning', {
+  defaultMessage: "Lists that aren't able to be processed by this rule type will be disabled.",
+});
+
+export const SEE_DOCUMENTATION = i18n.translate('autocomplete.seeDocumentation', {
+  defaultMessage: 'See Documentation',
+});
+
 // eslint-disable-next-line import/no-default-export
 export default {
   LOADING,

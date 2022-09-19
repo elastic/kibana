@@ -26059,7 +26059,6 @@
     "xpack.securitySolution.detectionEngine.alerts.createNewTermsTimelineFailureTitle": "无法创建新的字词告警时间线",
     "xpack.securitySolution.detectionEngine.alerts.createThresholdTimelineFailureTitle": "无法创建阈值告警时间线",
     "xpack.securitySolution.detectionEngine.alerts.documentTypeTitle": "告警",
-    "xpack.securitySolution.detectionEngine.alerts.fetchExceptionsFailure": "提取例外时出错。",
     "xpack.securitySolution.detectionEngine.alerts.histogram.allOthersGroupingLabel": "所有其他",
     "xpack.securitySolution.detectionEngine.alerts.histogram.headerTitle": "趋势",
     "xpack.securitySolution.detectionEngine.alerts.histogram.notAvailableTooltip": "不适用于趋势视图",

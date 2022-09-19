@@ -26053,7 +26053,6 @@
     "xpack.securitySolution.detectionEngine.alerts.createNewTermsTimelineFailureTitle": "Impossible de créer une chronologie d'alerte de nouveaux termes",
     "xpack.securitySolution.detectionEngine.alerts.createThresholdTimelineFailureTitle": "Impossible de créer une chronologie d'alerte de seuil",
     "xpack.securitySolution.detectionEngine.alerts.documentTypeTitle": "Alertes",
-    "xpack.securitySolution.detectionEngine.alerts.fetchExceptionsFailure": "Erreur lors de la récupération des exceptions.",
     "xpack.securitySolution.detectionEngine.alerts.histogram.allOthersGroupingLabel": "Toutes les autres",
     "xpack.securitySolution.detectionEngine.alerts.histogram.headerTitle": "Tendance",
     "xpack.securitySolution.detectionEngine.alerts.histogram.notAvailableTooltip": "Non disponible pour la vue de tendance",

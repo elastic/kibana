@@ -848,6 +848,68 @@ export default ({ getService }: FtrProviderContext) => {
             const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
             expect(signalsOpen.hits.hits.length).equal(0);
           });
+
+          it('generates no signals when a value list exception is added for a threshold rule', async () => {
+            const valueListId = 'value-list-id';
+            await importFile(supertest, log, 'keyword', ['zeek-sensor-amsterdam'], valueListId);
+            const rule: ThresholdCreateSchema = {
+              description: 'Detecting root and admin users',
+              name: 'Query with a rule id',
+              severity: 'high',
+              index: ['auditbeat-*'],
+              type: 'threshold',
+              risk_score: 55,
+              language: 'kuery',
+              rule_id: 'rule-1',
+              from: '1900-01-01T00:00:00.000Z',
+              query: 'host.name: "zeek-sensor-amsterdam"',
+              threshold: {
+                field: 'host.name',
+                value: 1,
+              },
+            };
+
+            const createdRule = await createRuleWithExceptionEntries(supertest, log, rule, [
+              [
+                {
+                  field: 'host.name',
+                  operator: 'included',
+                  type: 'list',
+                  list: {
+                    id: valueListId,
+                    type: 'keyword',
+                  },
+                },
+              ],
+            ]);
+            const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
+            expect(signalsOpen.hits.hits.length).equal(0);
+          });
+
+          it('generates no signals when a value list exception is added for an EQL rule', async () => {
+            const valueListId = 'value-list-id';
+            await importFile(supertest, log, 'keyword', ['zeek-sensor-amsterdam'], valueListId);
+            const rule: EqlCreateSchema = {
+              ...getEqlRuleForSignalTesting(['auditbeat-*']),
+              query: 'configuration where host.name=="zeek-sensor-amsterdam"',
+            };
+
+            const createdRule = await createRuleWithExceptionEntries(supertest, log, rule, [
+              [
+                {
+                  field: 'host.name',
+                  operator: 'included',
+                  type: 'list',
+                  list: {
+                    id: valueListId,
+                    type: 'keyword',
+                  },
+                },
+              ],
+            ]);
+            const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
+            expect(signalsOpen.hits.hits.length).equal(0);
+          });
         });
       });
     });

@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-describe('build_exceptions_filter', () => {
-  test('Tests should be ported', () => {
-    // TODO: Port all the tests from: x-pack/plugins/lists/common/exceptions/build_exceptions_filter.test.ts here once mocks are figured out and kbn package mocks are figured out
-    expect(true).toBe(true);
-  });
+import { FoundListsBySizeSchema } from '.';
+import { getListResponseMock } from '../list_schema/index.mock';
+
+export const getFoundListsBySizeSchemaMock = (): FoundListsBySizeSchema => ({
+  smallLists: [getListResponseMock()],
+  largeLists: [getListResponseMock()],
 });

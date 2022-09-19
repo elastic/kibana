@@ -6,25 +6,24 @@
  */
 
 import type { Language } from '@kbn/securitysolution-io-ts-alerting-types';
-import type {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
-import { buildExceptionFilter } from '@kbn/securitysolution-list-utils';
 import type { Filter, EsQueryConfig, DataViewBase } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
+import type { ESBoolQuery } from '../../../../common/typed_json';
+import type { Index, Query } from '../../../../common/detection_engine/schemas/common';
 
-import type { ESBoolQuery } from '../typed_json';
-import type { Query, Index } from './schemas/common/schemas';
-
-export const getQueryFilter = (
-  query: Query,
-  language: Language,
-  filters: unknown,
-  index: Index,
-  lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
-  excludeExceptions: boolean = true
-): ESBoolQuery => {
+export const getQueryFilter = ({
+  query,
+  language,
+  filters,
+  index,
+  exceptionFilter,
+}: {
+  query: Query;
+  language: Language;
+  filters: unknown;
+  index: Index;
+  exceptionFilter: Filter | undefined;
+}): ESBoolQuery => {
   const indexPattern: DataViewBase = {
     fields: [],
     title: index.join(),
@@ -36,16 +35,7 @@ export const getQueryFilter = (
     ignoreFilterIfFieldNotInIndex: false,
     dateFormatTZ: 'Zulu',
   };
-  // Assume that `indices.query.bool.max_clause_count` is at least 1024 (the default value),
-  // allowing us to make 1024-item chunks of exception list items.
-  // Discussion at https://issues.apache.org/jira/browse/LUCENE-4835 indicates that 1024 is a
-  // very conservative value.
-  const exceptionFilter = buildExceptionFilter({
-    lists,
-    excludeExceptions,
-    chunkSize: 1024,
-    alias: null,
-  });
+
   const initialQuery = { query, language };
   const allFilters = getAllFilters(filters as Filter[], exceptionFilter);
 

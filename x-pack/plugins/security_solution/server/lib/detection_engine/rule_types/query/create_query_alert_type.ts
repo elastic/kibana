@@ -66,7 +66,6 @@ export const createQueryAlertType = (
           runtimeMappings,
           completeRule,
           tuple,
-          exceptionItems,
           listClient,
           ruleExecutionLogger,
           searchAfterSize,
@@ -74,15 +73,15 @@ export const createQueryAlertType = (
           wrapHits,
           primaryTimestamp,
           secondaryTimestamp,
+          unprocessedExceptions,
+          exceptionFilter,
         },
         services,
         state,
       } = execOptions;
-
       const result = await queryExecutor({
         completeRule,
         tuple,
-        exceptionItems,
         listClient,
         experimentalFeatures,
         ruleExecutionLogger,
@@ -96,6 +95,8 @@ export const createQueryAlertType = (
         runtimeMappings,
         primaryTimestamp,
         secondaryTimestamp,
+        unprocessedExceptions,
+        exceptionFilter,
       });
       return { ...result, state };
     },

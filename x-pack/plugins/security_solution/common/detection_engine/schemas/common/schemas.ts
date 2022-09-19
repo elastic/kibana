@@ -173,7 +173,7 @@ export const status = t.keyof({
   open: null,
   closed: null,
   acknowledged: null,
-  'in-progress': null, // TODO: Remove after `acknowledged` migrations
+  'in-progress': null,
 });
 export type Status = t.TypeOf<typeof status>;
 

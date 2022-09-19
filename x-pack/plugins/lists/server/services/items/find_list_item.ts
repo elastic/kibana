@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type {
   Filter,
@@ -27,6 +28,13 @@ import {
   transformElasticToListItem,
 } from '../utils';
 
+export const getTotalHitsValue = (totalHits: number | { value: number } | undefined): number =>
+  typeof totalHits === 'undefined'
+    ? -1
+    : typeof totalHits === 'number'
+    ? totalHits
+    : totalHits.value;
+
 export interface FindListItemOptions {
   listId: ListId;
   filter: Filter;
@@ -39,6 +47,7 @@ export interface FindListItemOptions {
   esClient: ElasticsearchClient;
   listIndex: string;
   listItemIndex: string;
+  runtimeMappings: MappingRuntimeFields | undefined;
 }
 
 export const findListItem = async ({
@@ -53,6 +62,7 @@ export const findListItem = async ({
   listIndex,
   listItemIndex,
   sortOrder,
+  runtimeMappings,
 }: FindListItemOptions): Promise<FoundListItemSchema | null> => {
   const list = await getList({ esClient, id: listId, listIndex });
   if (list == null) {
@@ -69,17 +79,21 @@ export const findListItem = async ({
       index: listItemIndex,
       page,
       perPage,
+      runtimeMappings,
       searchAfter,
       sortField,
       sortOrder,
     });
 
-    const respose = await esClient.count({
+    const respose = await esClient.search({
       body: {
         query,
+        runtime_mappings: runtimeMappings,
       },
       ignore_unavailable: true,
       index: listItemIndex,
+      size: 0,
+      track_total_hits: true,
     });
 
     if (scroll.validSearchAfterFound) {
@@ -106,7 +120,7 @@ export const findListItem = async ({
         data: transformElasticToListItem({ response, type: list.type }),
         page,
         per_page: perPage,
-        total: respose.count,
+        total: getTotalHitsValue(respose.hits.total),
       };
     } else {
       return {
@@ -114,7 +128,7 @@ export const findListItem = async ({
         data: [],
         page,
         per_page: perPage,
-        total: respose.count,
+        total: getTotalHitsValue(respose.hits.total),
       };
     }
   }
