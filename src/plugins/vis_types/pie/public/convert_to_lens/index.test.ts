@@ -54,15 +54,6 @@ describe('convertToLens', () => {
     expect(result).toBeNull();
   });
 
-  test('should return null if no one split slices', async () => {
-    mockGetColumnsFromVis.mockReturnValue({
-      buckets: [],
-    });
-    const result = await convertToLens(samplePieVis as any, {} as any);
-    expect(mockGetColumnsFromVis).toBeCalledTimes(1);
-    expect(result).toBeNull();
-  });
-
   test('should state for valid vis', async () => {
     mockGetColumnsFromVis.mockReturnValue({
       buckets: ['2'],
