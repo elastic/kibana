@@ -7,7 +7,7 @@
  */
 
 import chalk from 'chalk';
-import testSubjectToCss from '@kbn/test-subj-selector';
+import { subj as testSubjectToCss } from '@kbn/test-subj-selector';
 import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/axe-config';
 
 import { FtrService } from '../../ftr_provider_context';
