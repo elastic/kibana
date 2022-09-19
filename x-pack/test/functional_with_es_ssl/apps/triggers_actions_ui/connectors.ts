@@ -134,7 +134,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should test a connector and display a failure result', async () => {
       const connectorName = generateUniqueKey();
-      const indexName = generateUniqueKey();
       await createConnector(connectorName);
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
