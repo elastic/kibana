@@ -219,8 +219,6 @@ const useFetchAlerts = ({
                   searchSubscription$.current.unsubscribe();
                 } else {
                   console.log('=======> else response::', JSON.stringify(response));
-                  dispatch({ type: 'loading', loading: false });
-                  searchSubscription$.current.unsubscribe();
                 }
               },
               error: (msg) => {
