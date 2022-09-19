@@ -13,7 +13,6 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { rawControlGroupAttributesToControlGroupInput } from '@kbn/controls-plugin/common';
 import { parseSearchSourceJSON, injectSearchSourceReferences } from '@kbn/data-plugin/public';
 import { SavedObjectAttributes, SavedObjectsClientContract, ScopedHistory } from '@kbn/core/public';
-import { migrateLegacyQuery } from '../../../application/lib/migrate_legacy_query';
 
 import { migrateLegacyQuery } from '../../../application/lib/migrate_legacy_query';
 
