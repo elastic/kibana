@@ -78,8 +78,6 @@ export function ConfirmDeleteModal<T>({
     entityNamePlural
   );
 
-  const deleteButton = isDeletingItems ? deletingBtnLabel : deleteBtnLabel;
-
   return (
     <EuiConfirmModal
       title={title}
@@ -87,7 +85,7 @@ export function ConfirmDeleteModal<T>({
       onCancel={onCancel}
       onConfirm={onConfirm}
       cancelButtonText={cancelBtnLabel}
-      confirmButtonText={deleteButton}
+      confirmButtonText={isDeletingItems ? deletingBtnLabel : deleteBtnLabel}
       defaultFocusedButton="cancel"
     >
       <p>{description}</p>
