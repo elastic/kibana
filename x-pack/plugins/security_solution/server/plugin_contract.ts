@@ -34,9 +34,11 @@ import type {
   TaskManagerStartContract as TaskManagerPluginStart,
 } from '@kbn/task-manager-plugin/server';
 import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
 export interface SecuritySolutionPluginSetupDependencies {
   alerting: AlertingPluginSetup;
+  cloud: CloudSetup;
   data: DataPluginSetup;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
   eventLog: IEventLogService;
