@@ -15,7 +15,7 @@ import { SavedObjectAttributes } from '@kbn/core-saved-objects-common';
 import { extractSearchSourceReferences, RefreshInterval } from '@kbn/data-plugin/public';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
-import { DashboardAttributes } from '../../../application';
+import type { DashboardAttributes } from '../../../application';
 import { DashboardSavedObjectRequiredServices } from '../types';
 import { DashboardConstants } from '../../../dashboard_constants';
 import { convertTimeToUTCString } from '../../../application/lib';

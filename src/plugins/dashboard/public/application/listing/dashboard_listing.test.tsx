@@ -10,7 +10,6 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import { I18nProvider } from '@kbn/i18n-react';
-import { SimpleSavedObject } from '@kbn/core/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import { DashboardListing, DashboardListingProps } from './dashboard_listing';
@@ -96,19 +95,6 @@ describe('after fetch', () => {
     const title = 'search by title';
     const props = makeDefaultProps();
     props.title = title;
-    pluginServices.getServices().dashboardSavedObject.savedObjectsClient.find = <
-      T extends unknown
-    >() => {
-      return Promise.resolve({
-        perPage: 10,
-        total: 2,
-        page: 0,
-        savedObjects: [
-          { attributes: { title: `${title}_number1` }, id: 'hello there' } as SimpleSavedObject<T>,
-          { attributes: { title: `${title}_number2` }, id: 'goodbye' } as SimpleSavedObject<T>,
-        ],
-      });
-    };
     const { component } = mountWith({ props });
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
@@ -122,16 +108,9 @@ describe('after fetch', () => {
     const title = 'search by title';
     const props = makeDefaultProps();
     props.title = title;
-    pluginServices.getServices().dashboardSavedObject.savedObjectsClient.find = <
-      T extends unknown
-    >() => {
-      return Promise.resolve({
-        perPage: 10,
-        total: 1,
-        page: 0,
-        savedObjects: [{ attributes: { title }, id: 'you_found_me' } as SimpleSavedObject<T>],
-      });
-    };
+    (
+      pluginServices.getServices().dashboardSavedObject.findDashboards.findByTitle as jest.Mock
+    ).mockResolvedValue({ id: 'you_found_me' });
     const { component } = mountWith({ props });
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));

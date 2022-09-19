@@ -7,7 +7,7 @@
  */
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { DashboardState } from './types';
+import type { DashboardState } from './types';
 
 export const DASHBOARD_STATE_STORAGE_KEY = '_a';
 export const GLOBAL_STATE_STORAGE_KEY = '_g';

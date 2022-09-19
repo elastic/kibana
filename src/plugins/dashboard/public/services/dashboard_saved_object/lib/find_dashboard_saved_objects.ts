@@ -14,7 +14,7 @@ import {
 } from '@kbn/core/public';
 
 import { DashboardConstants } from '../../..';
-import { DashboardAttributes } from '../../../application';
+import type { DashboardAttributes } from '../../../application';
 
 export interface FindDashboardSavedObjectsArgs {
   hasReference?: SavedObjectsFindOptionsReference[];

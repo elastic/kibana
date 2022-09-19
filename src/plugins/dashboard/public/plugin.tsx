@@ -9,71 +9,57 @@
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
-import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import {
   App,
   Plugin,
-  type CoreSetup,
-  type CoreStart,
   AppUpdater,
   ScopedHistory,
+  type CoreSetup,
+  type CoreStart,
   AppMountParameters,
   DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
   SavedObjectsClientContract,
 } from '@kbn/core/public';
-import {
-  CONTEXT_MENU_TRIGGER,
-  EmbeddableSetup,
-  EmbeddableStart,
-  PANEL_BADGE_TRIGGER,
-  PANEL_NOTIFICATION_TRIGGER,
-} from '@kbn/embeddable-plugin/public';
 import type {
   ScreenshotModePluginSetup,
   ScreenshotModePluginStart,
 } from '@kbn/screenshot-mode-plugin/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
-import { createKbnUrlTracker } from '@kbn/kibana-utils-plugin/public';
-import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
-import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
+import { createKbnUrlTracker } from '@kbn/kibana-utils-plugin/public';
+
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
+import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { getSavedObjectFinder, type SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
 import {
-  ClonePanelAction,
-  createDashboardContainerByValueRenderer,
   DASHBOARD_CONTAINER_TYPE,
-  DashboardContainerFactory,
+  type DashboardContainerFactory,
   DashboardContainerFactoryDefinition,
-  ExpandPanelAction,
-  ReplacePanelAction,
-  UnlinkFromLibraryAction,
-  AddToLibraryAction,
-  LibraryNotificationAction,
-  CopyToDashboardAction,
-} from './application';
-import { DashboardAppLocatorDefinition, DashboardAppLocator } from './locator';
-import { DashboardConstants } from './dashboard_constants';
-import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
-import { ExportCSVAction } from './application/actions/export_csv_action';
-import { dashboardFeatureCatalog } from './dashboard_strings';
-import { FiltersNotificationBadge } from './application/actions/filters_notification_badge';
+  createDashboardContainerByValueRenderer,
+} from './application/embeddable';
 import type { DashboardMountContextProps } from './types';
+import { DashboardConstants } from './dashboard_constants';
+import { dashboardFeatureCatalog } from './dashboard_strings';
+import { type DashboardAppLocator, DashboardAppLocatorDefinition } from './locator';
+import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -307,49 +293,14 @@ export class DashboardPlugin
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
-    const { uiSettings } = core;
-    const { uiActions, share, presentationUtil } = plugins;
-    this.startDashboardKibanaServices(core, plugins, this.initializerContext).then(() => {
-      const clonePanelAction = new ClonePanelAction(core.savedObjects);
-      uiActions.registerAction(clonePanelAction);
-      uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
-
-      const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, uiSettings);
-      const changeViewAction = new ReplacePanelAction(SavedObjectFinder);
-      uiActions.registerAction(changeViewAction);
-      uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction.id);
-
-      const panelLevelFiltersNotification = new FiltersNotificationBadge();
-      uiActions.registerAction(panelLevelFiltersNotification);
-      uiActions.attachAction(PANEL_BADGE_TRIGGER, panelLevelFiltersNotification.id);
-
-      if (share) {
-        const ExportCSVPlugin = new ExportCSVAction();
-        uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, ExportCSVPlugin);
-      }
-
-      if (this.dashboardFeatureFlagConfig?.allowByValueEmbeddables) {
-        const addToLibraryAction = new AddToLibraryAction();
-        uiActions.registerAction(addToLibraryAction);
-        uiActions.attachAction(CONTEXT_MENU_TRIGGER, addToLibraryAction.id);
-
-        const unlinkFromLibraryAction = new UnlinkFromLibraryAction();
-        uiActions.registerAction(unlinkFromLibraryAction);
-        uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkFromLibraryAction.id);
-
-        const libraryNotificationAction = new LibraryNotificationAction(unlinkFromLibraryAction);
-        uiActions.registerAction(libraryNotificationAction);
-        uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, libraryNotificationAction.id);
-
-        const copyToDashboardAction = new CopyToDashboardAction(presentationUtil.ContextProvider);
-        uiActions.registerAction(copyToDashboardAction);
-        uiActions.attachAction(CONTEXT_MENU_TRIGGER, copyToDashboardAction.id);
-      }
+    this.startDashboardKibanaServices(core, plugins, this.initializerContext).then(async () => {
+      const { buildAllDashboardActions } = await import('./application/actions');
+      buildAllDashboardActions({
+        core,
+        plugins,
+        allowByValueEmbeddables: this.dashboardFeatureFlagConfig?.allowByValueEmbeddables,
+      });
     });
-
-    const expandPanelAction = new ExpandPanelAction(); // this action does't rely on any services
-    uiActions.registerAction(expandPanelAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
 
     return {
       getDashboardContainerByValueRenderer: () => {

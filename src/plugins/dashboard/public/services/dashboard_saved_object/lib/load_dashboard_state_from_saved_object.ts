@@ -21,7 +21,7 @@ import {
   defaultDashboardState,
   createDashboardEditUrl,
 } from '../../../dashboard_constants';
-import { DashboardAttributes } from '../../../application';
+import type { DashboardAttributes } from '../../../application';
 import { DashboardSavedObjectRequiredServices } from '../types';
 import { DashboardOptions, DashboardState } from '../../../types';
 import { cleanFiltersForSerialize } from '../../../application/lib';

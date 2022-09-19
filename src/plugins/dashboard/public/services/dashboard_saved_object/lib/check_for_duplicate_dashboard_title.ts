@@ -9,7 +9,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/public';
 
 import { DashboardConstants } from '../../..';
-import { DashboardAttributes } from '../../../application';
+import type { DashboardAttributes } from '../../../application';
 import { dashboardSavedObjectErrorStrings } from '../../../dashboard_strings';
 
 export interface DashboardDuplicateTitleCheckProps {

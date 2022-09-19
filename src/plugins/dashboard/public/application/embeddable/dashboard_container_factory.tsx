@@ -29,7 +29,6 @@ import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common
 import { DashboardContainerInput } from '../..';
 import { createExtract, createInject } from '../../../common';
 import type { DashboardContainer } from './dashboard_container';
-import { pluginServices } from '../../services/plugin_services';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 
 export type DashboardContainerFactory = EmbeddableFactory<
@@ -78,6 +77,7 @@ export class DashboardContainerFactoryDefinition
     initialInput: DashboardContainerInput,
     parent?: Container
   ): Promise<DashboardContainer | ErrorEmbeddable> => {
+    const { pluginServices } = await import('../../services/plugin_services');
     const {
       embeddable: { getEmbeddableFactory },
     } = pluginServices.getServices();
