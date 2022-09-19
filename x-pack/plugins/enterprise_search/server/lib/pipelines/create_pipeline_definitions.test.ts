@@ -70,7 +70,7 @@ describe('formatMlPipelineBody util function', () => {
             model_id: modelId,
             target_field: `ml.inference.${destField}`,
             field_map: {
-              'my-source-field': modelInputField,
+              [sourceField]: modelInputField,
             },
           },
         },
@@ -113,20 +113,8 @@ describe('formatMlPipelineBody util function', () => {
   });
 
   it('should raise an error if no model found', async () => {
-    const mockResponse = {
-      error: {
-        root_cause: [
-          {
-            type: 'resource_not_found_exception',
-            reason: 'No known trained model with model_id [my-model-id]',
-          },
-        ],
-        type: 'resource_not_found_exception',
-        reason: 'No known trained model with model_id [my-model-id]',
-      },
-      status: 404,
-    };
-    mockClient.ml.getTrainedModels.mockImplementation(() => Promise.resolve(mockResponse));
+    const mockError = new Error('No known trained model with model_id [my-model-id]');
+    mockClient.ml.getTrainedModels.mockImplementation(() => Promise.reject(mockError));
     const asyncCall = formatMlPipelineBody(
       modelId,
       sourceField,
@@ -154,7 +142,7 @@ describe('formatMlPipelineBody util function', () => {
             model_id: modelId,
             target_field: `ml.inference.${destField}`,
             field_map: {
-              'my-source-field': modelInputField,
+              [sourceField]: modelInputField,
             },
           },
         },

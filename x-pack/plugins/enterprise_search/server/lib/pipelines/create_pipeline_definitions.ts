@@ -245,11 +245,8 @@ export const formatMlPipelineBody = async (
   destinationField: string,
   esClient: ElasticsearchClient
 ): Promise<MlInferencePipeline> => {
+  // this will raise a 404 if model doesn't exist
   const models = await esClient.ml.getTrainedModels({ model_id: modelId });
-  // if we didn't find this model, we can't return anything useful
-  if (models.trained_model_configs === undefined || models.trained_model_configs.length === 0) {
-    throw new Error(`Couldn't find any trained models with id [${modelId}]`);
-  }
   const model = models.trained_model_configs[0];
   // if model returned no input field, insert a placeholder
   const modelInputField =
