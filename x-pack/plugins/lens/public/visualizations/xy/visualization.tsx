@@ -20,6 +20,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { generateId } from '../../id_generator';
 import { renewIDs } from '../../utils';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
 import { DimensionEditor } from './xy_config_panel/dimension_editor';
@@ -95,6 +96,7 @@ export const getXyVisualization = ({
   useLegacyTimeAxis,
   kibanaTheme,
   eventAnnotationService,
+  unifiedSearch,
 }: {
   core: CoreStart;
   storage: IStorageWrapper;
@@ -104,6 +106,7 @@ export const getXyVisualization = ({
   fieldFormats: FieldFormatsStart;
   useLegacyTimeAxis: boolean;
   kibanaTheme: ThemeServiceStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }): Visualization<State, PersistedState> => ({
   id: XY_ID,
   visualizationTypes,
@@ -542,6 +545,7 @@ export const getXyVisualization = ({
               savedObjects: core.savedObjects,
               docLinks: core.docLinks,
               http: core.http,
+              unifiedSearch,
             }}
           >
             {dimensionEditor}
