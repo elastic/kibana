@@ -7,6 +7,7 @@
  */
 import React, { useState, useCallback, useEffect } from 'react';
 import type { DataViewAttributes } from '@kbn/data-views-plugin/public';
+import { useHistory } from 'react-router-dom';
 import type { SavedObject } from '@kbn/data-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useActor } from '@xstate/react';
@@ -16,11 +17,11 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DataTableRecord } from '../../types';
 import { StateMachineProvider as QueryDataProvider } from './hooks/query_data/use_state_machine';
 import { LOG_EXPLORER_VIRTUAL_GRID_ROWS } from './constants';
-import { DiscoverStateProvider } from './hooks/discover_state/use_discover_state';
 import { DiscoverColumnsProvider } from './hooks/discover_state/use_columns';
 import { useStateMachineContext } from './hooks/query_data/use_state_machine';
 import { DiscoverUninitialized } from '../main/components/uninitialized/uninitialized';
 import { LogExplorerLayoutProps } from './components/layout/log_explorer_layout';
+import { DiscoverStateProvider } from '../main/hooks/use_discover_state';
 
 const LogExplorerLayoutMemoized = React.memo(LogExplorerLayout);
 
@@ -37,12 +38,18 @@ export interface LogExplorerMainAppProps {
 
 export function LogExplorerMainApp({ savedSearch, dataViewList }: LogExplorerMainAppProps) {
   const { data } = useDiscoverServices();
+  const history = useHistory();
 
   // TODO: use expandedDoc state
   const [, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
   return (
-    <DiscoverStateProvider savedSearch={savedSearch} setExpandedDoc={setExpandedDoc}>
+    <DiscoverStateProvider
+      savedSearch={savedSearch}
+      setExpandedDoc={setExpandedDoc}
+      history={history}
+      dataViewList={dataViewList}
+    >
       <QueryDataProvider virtualRowCount={LOG_EXPLORER_VIRTUAL_GRID_ROWS} query={data.query}>
         <DiscoverColumnsProvider>
           <LogExplorerLayoutWrapper dataViewList={dataViewList} savedSearch={savedSearch} />

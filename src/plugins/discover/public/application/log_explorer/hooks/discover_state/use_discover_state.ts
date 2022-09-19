@@ -254,5 +254,3 @@ export function useDiscoverState({
     resetCurrentSavedSearch,
   };
 }
-
-export const [DiscoverStateProvider, useDiscoverStateContext] = createContainer(useDiscoverState);

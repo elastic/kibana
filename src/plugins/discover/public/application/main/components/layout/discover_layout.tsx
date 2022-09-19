@@ -49,6 +49,7 @@ import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stat
 import { hasActiveFilter } from './utils';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
+import { LogExplorerMainApp } from '@kbn/discover-plugin/public/application/log_explorer/log_explorer_main_app';
 
 /**
  * Local storage key for sidebar persistence state
@@ -347,18 +348,7 @@ export function DiscoverLayout({
                     </>
                   )}
                   {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
-                    <DiscoverDocuments
-                      documents$={savedSearchData$.documents$}
-                      expandedDoc={expandedDoc}
-                      dataView={dataView}
-                      navigateTo={navigateTo}
-                      onAddFilter={!isPlainRecord ? (onAddFilter as DocViewFilterFn) : undefined}
-                      savedSearch={savedSearch}
-                      setExpandedDoc={setExpandedDoc}
-                      state={state}
-                      stateContainer={stateContainer}
-                      onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
-                    />
+                    <LogExplorerMainApp dataViewList={dataViewList} savedSearch={savedSearch} />
                   ) : (
                     <FieldStatisticsTableMemoized
                       availableFields$={savedSearchData$.availableFields$}
