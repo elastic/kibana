@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo, useRef } from 'react';
-import { type EuiBasicTable, EuiPanel, EuiSpacer } from '@elastic/eui';
+import React, { useState, useMemo } from 'react';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import {
   extractErrorMessage,
@@ -67,7 +67,6 @@ export type PageUrlParams = Record<'policyId' | 'packagePolicyId', string>;
 
 export const RulesContainer = () => {
   const params = useParams<PageUrlParams>();
-  const tableRef = useRef<EuiBasicTable>(null);
   const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
   const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
     filter: createCspRuleSearchFilterByPackagePolicy({
