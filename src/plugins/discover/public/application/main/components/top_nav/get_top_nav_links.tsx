@@ -27,18 +27,16 @@ export const getTopNavLinks = ({
   navigateTo,
   savedSearch,
   services,
-  state,
+  stateContainer,
   onOpenInspector,
-  onOpenSavedSearch,
   isPlainRecord,
 }: {
   dataView: DataView;
   navigateTo: (url: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
-  state: DiscoverStateContainer;
+  stateContainer: DiscoverStateContainer;
   onOpenInspector: () => void;
-  onOpenSavedSearch: (id: string) => void;
   isPlainRecord: boolean;
 }): TopNavMenuData[] => {
   const options = {
@@ -73,7 +71,7 @@ export const getTopNavLinks = ({
         anchorElement,
         searchSource: savedSearch.searchSource,
         services,
-        savedQueryId: state.appStateContainer.getState().savedQuery,
+        savedQueryId: stateContainer.appStateContainer.getState().savedQuery,
       });
     },
     testId: 'discoverAlertsButton',
@@ -108,7 +106,7 @@ export const getTopNavLinks = ({
         services,
         dataView,
         navigateTo,
-        state,
+        stateContainer,
         onClose: () => {
           anchorElement?.focus();
         },
@@ -126,7 +124,7 @@ export const getTopNavLinks = ({
     testId: 'discoverOpenButton',
     run: () =>
       showOpenSearchPanel({
-        onOpenSavedSearch,
+        onOpenSavedSearch: stateContainer.actions.onOpenSavedSearch,
         I18nContext: services.core.i18n.Context,
         theme$: services.core.theme.theme$,
         services,
@@ -148,7 +146,7 @@ export const getTopNavLinks = ({
       }
       const sharingData = await getSharingData(
         savedSearch.searchSource,
-        state.appStateContainer.getState(),
+        stateContainer.appStateContainer.getState(),
         services
       );
 
@@ -168,7 +166,7 @@ export const getTopNavLinks = ({
               defaultMessage: 'Untitled discover search',
             }),
         },
-        isDirty: !savedSearch.id || state.isAppStateDirty(),
+        isDirty: !savedSearch.id || stateContainer.isAppStateDirty(),
         showPublicUrlSwitch,
         onClose: () => {
           anchorElement?.focus();

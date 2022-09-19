@@ -15,8 +15,6 @@ export function useStateContainer(stateContainer: DiscoverStateContainer, filter
   useEffect(() => {
     const unsubscribe = stateContainer.appStateContainer.subscribe((next) => {
       const nextState = getFilteredProps(next, filterProps);
-      console.log(nextState, state);
-      console.log(!isEqual(state, nextState));
       if (!isEqual(state, nextState)) {
         // @ts-expect-error
         if (window.ELASTIC_DISCOVER_LOGGER) {

@@ -67,9 +67,7 @@ export function DiscoverLayout({
   expandedDoc,
   navigateTo,
   onChangeDataView,
-  onUpdateQuery,
   setExpandedDoc,
-  fetchQuery,
   savedSearchData$,
   stateContainer,
 }: DiscoverLayoutProps) {
@@ -87,6 +85,7 @@ export function DiscoverLayout({
   } = useDiscoverServices();
   const { main$, charts$, totalHits$ } = savedSearchData$;
   const state = useStateContainer(stateContainer);
+  const savedSearch = stateContainer.savedSearchContainer.savedSearch$.getValue();
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
   const dataState: DataMainMsg = useDataState(main$);
 
@@ -143,10 +142,10 @@ export function DiscoverLayout({
     // prevent overlapping
     setExpandedDoc(undefined);
     const session = inspector.open(inspectorAdapters, {
-      title: stateContainer.savedSearch.title,
+      title: savedSearch.title,
     });
     setInspectorSession(session);
-  }, [setExpandedDoc, inspector, inspectorAdapters, stateContainer.savedSearch.title]);
+  }, [setExpandedDoc, inspector, inspectorAdapters, savedSearch.title]);
 
   useEffect(() => {
     return () => {
@@ -181,8 +180,8 @@ export function DiscoverLayout({
   );
 
   const onFieldEdited = useCallback(() => {
-    fetchQuery(true);
-  }, [fetchQuery]);
+    stateContainer.actions.fetch();
+  }, [stateContainer]);
 
   const onDisableFilters = useCallback(() => {
     const disabledFilters = filterManager
@@ -226,11 +225,11 @@ export function DiscoverLayout({
         tabIndex={-1}
         ref={savedSearchTitle}
       >
-        {stateContainer.savedSearch.title
+        {savedSearch.title
           ? i18n.translate('discover.pageTitleWithSavedSearch', {
               defaultMessage: 'Discover - {savedSearchTitle}',
               values: {
-                savedSearchTitle: stateContainer.savedSearch.title,
+                savedSearchTitle: savedSearch.title,
               },
             })
           : i18n.translate('discover.pageTitleWithoutSavedSearch', {
@@ -244,7 +243,6 @@ export function DiscoverLayout({
         navigateTo={navigateTo}
         savedQuery={state.savedQuery}
         stateContainer={stateContainer}
-        updateQuery={onUpdateQuery}
         onChangeDataView={onChangeDataView}
         isPlainRecord={isPlainRecord}
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
@@ -252,7 +250,7 @@ export function DiscoverLayout({
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout
-          savedSearch={stateContainer.savedSearch}
+          savedSearch={savedSearch}
           spaces={spaces}
           history={history}
         />
@@ -318,7 +316,7 @@ export function DiscoverLayout({
                 />
               )}
               {resultState === 'uninitialized' && (
-                <DiscoverUninitialized onRefresh={() => fetchQuery(false)} />
+                <DiscoverUninitialized onRefresh={() => stateContainer.dataState.fetch()} />
               )}
               {resultState === 'loading' && <LoadingSpinner />}
               {resultState === 'ready' && (
@@ -333,7 +331,7 @@ export function DiscoverLayout({
                     <>
                       <EuiFlexItem grow={false}>
                         <DiscoverChartMemoized
-                          savedSearch={stateContainer.savedSearch}
+                          savedSearch={savedSearch}
                           savedSearchDataChart$={charts$}
                           savedSearchDataTotalHits$={totalHits$}
                           stateContainer={stateContainer}
@@ -355,7 +353,7 @@ export function DiscoverLayout({
                       dataView={dataView}
                       navigateTo={navigateTo}
                       onAddFilter={!isPlainRecord ? (onAddFilter as DocViewFilterFn) : undefined}
-                      savedSearch={stateContainer.savedSearch}
+                      savedSearch={savedSearch}
                       setExpandedDoc={setExpandedDoc}
                       state={state}
                       stateContainer={stateContainer}
@@ -364,7 +362,7 @@ export function DiscoverLayout({
                   ) : (
                     <FieldStatisticsTableMemoized
                       availableFields$={savedSearchData$.availableFields$}
-                      savedSearch={stateContainer.savedSearch}
+                      savedSearch={savedSearch}
                       dataView={dataView}
                       query={state.query}
                       filters={state.filters}
@@ -372,7 +370,7 @@ export function DiscoverLayout({
                       stateContainer={stateContainer}
                       onAddFilter={!isPlainRecord ? (onAddFilter as DocViewFilterFn) : undefined}
                       trackUiMetric={trackUiMetric}
-                      fetchQuery={fetchQuery}
+                      fetchQuery={stateContainer.dataState.fetch}
                     />
                   )}
                 </EuiFlexGroup>

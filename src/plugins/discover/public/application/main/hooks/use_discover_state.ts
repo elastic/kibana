@@ -11,26 +11,22 @@ import { History } from 'history';
 import { DataViewListItem, DataViewType } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import { addLog } from '../../../utils/addLog';
 import { updateSavedSearch } from '../utils/persist_saved_search';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
-import { getState } from '../services/discover_state';
+import { getDiscoverStateContainer } from '../services/discover_state';
 import { DiscoverServices } from '../../../build_services';
 import { loadDataView } from '../utils/resolve_data_view';
-import { useSavedSearch as useSavedSearchData } from './use_saved_search';
-import {
-  MODIFY_COLUMNS_ON_SWITCH,
-  SEARCH_ON_PAGE_LOAD_SETTING,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '../../../../common';
+import { MODIFY_COLUMNS_ON_SWITCH, SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import { useSearchSession } from './use_search_session';
-import { FetchStatus } from '../../types';
 import { getDataViewAppState } from '../utils/get_switch_data_view_app_state';
 import { DataTableRecord } from '../../../types';
+import { FetchStatus } from '../../types';
 
 export function useDiscoverState({
   services,
   history,
-  savedSearch,
+  savedSearch: rootSavedSearch,
   setExpandedDoc,
   dataViewList,
 }: {
@@ -40,46 +36,37 @@ export function useDiscoverState({
   setExpandedDoc: (doc?: DataTableRecord) => void;
   dataViewList: DataViewListItem[];
 }) {
-  const { uiSettings, data, filterManager, dataViews } = services;
-  const { timefilter } = data.query.timefilter;
+  const { uiSettings, dataViews } = services;
 
-  const [dataView, setDataView] = useState(savedSearch.searchSource.getField('index')!);
+  const [savedSearch, setSavedSearch] = useState(rootSavedSearch);
+  const dataView = useMemo(() => savedSearch.searchSource.getField('index')!, [savedSearch]);
 
   const stateContainer = useMemo(
     () =>
-      getState({
+      getDiscoverStateContainer({
         history,
-        savedSearch,
+        savedSearch: rootSavedSearch,
         services,
       }),
-    [history, savedSearch, services]
+    [history, rootSavedSearch, services]
   );
 
   /**
    * Search session logic
    */
-  const searchSessionManager = useSearchSession({ services, history, stateContainer, savedSearch });
-
-  const initialFetchStatus: FetchStatus = useMemo(() => {
-    // A saved search is created on every page load, so we check the ID to see if we're loading a
-    // previously saved search or if it is just transient
-    const shouldSearchOnPageLoad =
-      uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
-      savedSearch.id !== undefined ||
-      timefilter.getRefreshInterval().pause === false ||
-      searchSessionManager.hasSearchSessionIdInURL();
-    return shouldSearchOnPageLoad ? FetchStatus.LOADING : FetchStatus.UNINITIALIZED;
-  }, [uiSettings, savedSearch.id, searchSessionManager, timefilter]);
+  useSearchSession({ services, stateContainer, savedSearch });
 
   /**
    * Data fetching logic
    */
-  const { data$, refetch$, reset, inspectorAdapters } = useSavedSearchData({
-    initialFetchStatus,
-    searchSessionManager,
-    services,
-    stateContainer,
-  });
+  const { data$, refetch$, inspectorAdapters, subscribe } = stateContainer.dataState;
+
+  useEffect(() => {
+    const unsubscribe = subscribe();
+    return () => {
+      return unsubscribe();
+    };
+  }, [subscribe]);
   /**
    * State changes (data view, columns), when a text base query result is returned
    */
@@ -94,7 +81,7 @@ export function useDiscoverState({
   /**
    * Reset to display loading spinner when savedSearch is changing
    */
-  useEffect(() => reset(), [savedSearch.id, reset]);
+  useEffect(() => stateContainer.dataState.reset(), [savedSearch.id, stateContainer]);
 
   /**
    * Sync URL state with local app state on saved search load
@@ -103,13 +90,14 @@ export function useDiscoverState({
   useEffect(() => {
     const stopSync = stateContainer.initializeAndSync();
     return () => stopSync();
-  }, [stateContainer, filterManager, data]);
+  }, [stateContainer]);
 
   /**
    * Track state changes that should trigger a fetch
    */
   useEffect(() => {
     const unsubscribe = stateContainer.appStateContainer.subscribe(async (nextState) => {
+      addLog('📦 AppStateContainer.subscribe update', nextState);
       const { hideChart, interval, sort, index } = stateContainer.getPreviousAppState();
       // chart was hidden, now it should be displayed, so data is needed
       const chartDisplayChanged = nextState.hideChart !== hideChart && hideChart;
@@ -128,24 +116,42 @@ export function useDiscoverState({
         nextDataView = (
           await loadDataView(nextState.index, services.dataViews, services.uiSettings)
         ).loaded;
-        reset();
-        setDataView(nextDataView);
+        stateContainer.dataState.reset();
+        savedSearch.searchSource.setField('index', nextDataView);
       }
 
       updateSavedSearch({ savedSearch, dataView: nextDataView, state: nextState, services });
+      stateContainer.savedSearchContainer.set({ ...savedSearch });
+      setSavedSearch({ ...savedSearch });
+      addLog('AppStateContainer.subscribe update', nextState);
 
-      if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged) {
+      if (
+        dataViewChanged &&
+        stateContainer.dataState.initialFetchStatus === FetchStatus.UNINITIALIZED
+      ) {
+        return;
+      }
+
+      if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged || dataViewChanged) {
+        addLog('📦 AppStateContainer update triggers data fetching', {
+          chartDisplayChanged,
+          chartIntervalChanged,
+          docTableSortChanged,
+          dataViewChanged,
+        });
+
         refetch$.next(undefined);
       }
     });
     return () => unsubscribe();
-  }, [dataView, refetch$, reset, savedSearch, services, stateContainer]);
+  }, [dataView, refetch$, savedSearch, services, stateContainer]);
 
   /**
    * Function triggered when user changes data view in the sidebar
    */
   const onChangeDataView = useCallback(
     async (id: string) => {
+      addLog('Change data view start', id);
       const prevAppState = stateContainer.appStateContainer.getState();
       const prevDataView = await dataViews.get(prevAppState.index!);
       const nextDataView = await dataViews.get(id);
@@ -159,33 +165,22 @@ export function useDiscoverState({
           uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
           prevAppState.query
         );
+        addLog('Change data view next app state', nextAppState);
         stateContainer.setAppState(nextAppState);
       }
       setExpandedDoc(undefined);
     },
     [uiSettings, dataViews, setExpandedDoc, stateContainer]
   );
-  /**
-   * Function triggered when the user changes the query in the search bar
-   */
-  const onUpdateQuery = useCallback(
-    (_payload, isUpdate?: boolean) => {
-      if (isUpdate === false) {
-        searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
-        refetch$.next(undefined);
-      }
-    },
-    [refetch$, searchSessionManager]
-  );
 
   /**
    * Trigger data fetching on dataView or savedSearch changes
    */
   useEffect(() => {
-    if (dataView) {
-      refetch$.next(undefined);
+    if (dataView && stateContainer.dataState.initialFetchStatus === FetchStatus.LOADING) {
+      stateContainer.dataState.refetch$.next(undefined);
     }
-  }, [initialFetchStatus, refetch$, dataView, savedSearch.id]);
+  }, [dataView, savedSearch.id, stateContainer.dataState.initialFetchStatus]);
 
   /**
    * We need to make sure the auto refresh interval is disabled for
@@ -193,30 +188,15 @@ export function useDiscoverState({
    */
   useEffect(() => {
     if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
-      stateContainer.pauseAutoRefreshInterval();
+      stateContainer.actions.pauseAutoRefreshInterval();
     }
   }, [dataView, stateContainer]);
-
-  const fetchQuery = useCallback(
-    (resetQuery?: boolean) => {
-      if (resetQuery) {
-        refetch$.next('reset');
-      } else {
-        refetch$.next(undefined);
-      }
-      return refetch$;
-    },
-    [refetch$]
-  );
 
   return {
     data$,
     dataView,
     inspectorAdapters,
-    refetch$,
-    fetchQuery,
     onChangeDataView,
-    onUpdateQuery,
     stateContainer,
   };
 }

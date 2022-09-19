@@ -7,7 +7,7 @@
  */
 
 import {
-  getState,
+  getDiscoverStateContainer,
   DiscoverStateContainer,
   createSearchSessionRestorationDataProvider,
 } from './discover_state';
@@ -27,7 +27,7 @@ describe('Test discover state', () => {
   beforeEach(async () => {
     history = createBrowserHistory();
     history.push('/');
-    state = getState({
+    state = getDiscoverStateContainer({
       savedSearch: savedSearchMock,
       services: discoverServiceMock,
       history,
@@ -89,7 +89,7 @@ describe('Test discover initial state sort handling', () => {
     history = createBrowserHistory();
     history.push('/#?_a=(sort:!(!(order_date,desc)))');
 
-    state = getState({
+    state = getDiscoverStateContainer({
       savedSearch: { ...savedSearchMock, ...{ sort: [['bytes', 'desc']] } },
       services: discoverServiceMock,
       history,
@@ -103,7 +103,7 @@ describe('Test discover initial state sort handling', () => {
     history = createBrowserHistory();
     history.push('/#?_a=(sort:!())');
     const nextSavedSearch = { ...savedSearchMock, ...{ sort: [['bytes', 'desc']] as SortOrder[] } };
-    state = getState({
+    state = getDiscoverStateContainer({
       savedSearch: nextSavedSearch,
       services: discoverServiceMock,
       history,
@@ -116,7 +116,7 @@ describe('Test discover initial state sort handling', () => {
   test('Empty sort in URL and saved search should sort by timestamp', async () => {
     history = createBrowserHistory();
     history.push('/#?_a=(sort:!())');
-    state = getState({
+    state = getDiscoverStateContainer({
       savedSearch: savedSearchMockWithTimeField,
       services: discoverServiceMock,
       history,
@@ -134,7 +134,7 @@ describe('Test discover state with legacy migration', () => {
     history.push(
       "/#?_a=(query:(query_string:(analyze_wildcard:!t,query:'type:nice%20name:%22yeah%22')))"
     );
-    state = getState({
+    state = getDiscoverStateContainer({
       savedSearch: savedSearchMock,
       services: discoverServiceMock,
       history,
@@ -158,7 +158,7 @@ describe('createSearchSessionRestorationDataProvider', () => {
   const mockDataPlugin = dataPluginMock.createStartContract();
   const searchSessionInfoProvider = createSearchSessionRestorationDataProvider({
     data: mockDataPlugin,
-    appStateContainer: getState({
+    appStateContainer: getDiscoverStateContainer({
       savedSearch: savedSearchMock,
       services: discoverServiceMock,
       history,

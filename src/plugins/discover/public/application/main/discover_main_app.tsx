@@ -13,6 +13,7 @@ import { DiscoverLayout } from './components/layout';
 import { setBreadcrumbsTitle } from '../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
 import { useDiscoverState } from './hooks/use_discover_state';
+import { Provider } from './services/discover_state';
 import { useUrl } from './hooks/use_url';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DataTableRecord } from '../../types';
@@ -47,21 +48,15 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   /**
    * State related logic
    */
-  const {
-    data$,
-    dataView,
-    inspectorAdapters,
-    onChangeDataView,
-    onUpdateQuery,
-    fetchQuery,
-    stateContainer,
-  } = useDiscoverState({
-    services,
-    history: usedHistory,
-    savedSearch,
-    setExpandedDoc,
-    dataViewList,
-  });
+  const { data$, dataView, inspectorAdapters, onChangeDataView, stateContainer } = useDiscoverState(
+    {
+      services,
+      history: usedHistory,
+      savedSearch,
+      setExpandedDoc,
+      dataViewList,
+    }
+  );
 
   /**
    * Url / Routing logic
@@ -90,18 +85,18 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 
   return (
-    <DiscoverLayoutMemoized
-      dataView={dataView}
-      dataViewList={dataViewList}
-      inspectorAdapters={inspectorAdapters}
-      expandedDoc={expandedDoc}
-      onChangeDataView={onChangeDataView}
-      onUpdateQuery={onUpdateQuery}
-      setExpandedDoc={setExpandedDoc}
-      navigateTo={navigateTo}
-      savedSearchData$={data$}
-      fetchQuery={fetchQuery}
-      stateContainer={stateContainer}
-    />
+    <Provider value={stateContainer.appStateContainer}>
+      <DiscoverLayoutMemoized
+        dataView={dataView}
+        dataViewList={dataViewList}
+        inspectorAdapters={inspectorAdapters}
+        expandedDoc={expandedDoc}
+        onChangeDataView={onChangeDataView}
+        setExpandedDoc={setExpandedDoc}
+        navigateTo={navigateTo}
+        savedSearchData$={data$}
+        stateContainer={stateContainer}
+      />
+    </Provider>
   );
 }
