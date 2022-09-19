@@ -55,7 +55,7 @@ import { whenLicenseInitialized } from '../../../licensed_features';
 import { SerializedMapState, SerializedUiState } from './types';
 import { setAutoOpenLayerWizardId } from '../../../actions/ui_actions';
 import { LayerStatsCollector, MapSettingsCollector } from '../../../../common/telemetry';
-import { getIndexPatternsFromIds } from '../../../index_pattern_util'; 
+import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 
 function setMapSettingsFromEncodedState(settings: Partial<MapSettings>) {
   const decodedCustomIcons = settings.customIcons
@@ -149,7 +149,7 @@ export class SavedMap {
         const mapState = JSON.parse(this._attributes.mapStateJSON) as SerializedMapState;
         if (mapState.adHocDataViews && mapState.adHocDataViews.length > 0) {
           const dataViewService = getIndexPatternService();
-          const promises = mapState.adHocDataViews.map(spec => {
+          const promises = mapState.adHocDataViews.map((spec) => {
             return dataViewService.create(spec);
           });
           await Promise.all(promises);
@@ -571,16 +571,16 @@ export class SavedMap {
 
   private async _getAdHocDataViews() {
     const dataViewIds: string[] = [];
-    getLayerList(this._store.getState()).forEach(layer => {
+    getLayerList(this._store.getState()).forEach((layer) => {
       dataViewIds.push(...layer.getIndexPatternIds());
     });
 
     const dataViews = await getIndexPatternsFromIds(_.uniq(dataViewIds));
     return dataViews
-      .filter(dataView => {
+      .filter((dataView) => {
         return !dataView.isPersisted();
       })
-      .map(dataView => {
+      .map((dataView) => {
         return dataView.toSpec(false);
       });
   }
