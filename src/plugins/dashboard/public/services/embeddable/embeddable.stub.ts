@@ -16,9 +16,6 @@ export const embeddableServiceFactory: EmbeddableServiceFactory = () => {
   const pluginMock = embeddablePluginMock.createStartContract();
 
   return {
-    getEmbeddableFactory: pluginMock.getEmbeddableFactory,
-    getEmbeddableFactories: pluginMock.getEmbeddableFactories,
-    getStateTransfer: pluginMock.getStateTransfer,
-    EmbeddablePanel: pluginMock.EmbeddablePanel,
+    ...pluginMock,
   };
 };

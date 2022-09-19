@@ -9,20 +9,20 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { createBrowserHistory } from 'history';
+
+import type { Filter } from '@kbn/es-query';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { EmbeddableFactory, ViewMode } from '@kbn/embeddable-plugin/public';
 import { renderHook, act, RenderHookResult } from '@testing-library/react-hooks';
 import { createKbnUrlStateStorage, defer } from '@kbn/kibana-utils-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
 
-import { DashboardConstants } from '../../dashboard_constants';
 import { DashboardAppState } from '../../types';
+import { getSampleDashboardInput } from '../test_helpers';
+import { DashboardConstants } from '../../dashboard_constants';
+import { pluginServices } from '../../services/plugin_services';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { dashboardStateStore, setDescription, setViewMode } from '../state';
 import { useDashboardAppState, UseDashboardStateProps } from './use_dashboard_app_state';
-import { getSampleDashboardInput } from '../test_helpers';
-
-import type { Filter } from '@kbn/es-query';
-import { pluginServices } from '../../services/plugin_services';
-import { EmbeddableFactory, ViewMode } from '@kbn/embeddable-plugin/public';
 
 interface SetupEmbeddableFactoryReturn {
   finalizeEmbeddableCreation: () => void;
@@ -46,20 +46,6 @@ const createDashboardAppStateProps = (): UseDashboardStateProps => ({
   showNoDataPage: false,
   setShowNoDataPage: () => {},
 });
-
-const createDashboardAppStateServices = () => {
-  const defaultDataView = { id: 'foo', fields: [{ name: 'bar' }] } as DataView;
-
-  (pluginServices.getServices().data.dataViews.getDefaultDataView as jest.Mock).mockResolvedValue(
-    defaultDataView
-  );
-  (pluginServices.getServices().data.dataViews.getDefaultId as jest.Mock).mockResolvedValue(
-    defaultDataView.id
-  );
-  (pluginServices.getServices().data.query.filterManager.getFilters as jest.Mock).mockReturnValue(
-    []
-  );
-};
 
 const setupEmbeddableFactory = (id: string): SetupEmbeddableFactoryReturn => {
   const dashboardContainer = new DashboardContainer({ ...getSampleDashboardInput(), id });
@@ -88,6 +74,17 @@ const renderDashboardAppStateHook = ({
 }: {
   partialProps?: Partial<UseDashboardStateProps>;
 }): RenderDashboardStateHookReturn => {
+  const defaultDataView = { id: 'foo', fields: [{ name: 'bar' }] } as DataView;
+  (pluginServices.getServices().data.dataViews.getDefaultDataView as jest.Mock).mockResolvedValue(
+    defaultDataView
+  );
+  (pluginServices.getServices().data.dataViews.getDefaultId as jest.Mock).mockResolvedValue(
+    defaultDataView.id
+  );
+  (pluginServices.getServices().data.query.filterManager.getFilters as jest.Mock).mockReturnValue(
+    []
+  );
+
   const props = { ...createDashboardAppStateProps(), ...(partialProps ?? {}) };
   const embeddableFactoryResult = setupEmbeddableFactory(originalDashboardEmbeddableId);
 
