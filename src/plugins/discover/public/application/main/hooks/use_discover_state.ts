@@ -193,7 +193,6 @@ export function useDiscoverState({
         const nextDataView = await loadDataView(
           services.dataViews,
           services.uiSettings,
-          false,
           nextState.index
         );
         savedSearch.searchSource.setField('index', nextDataView.loaded);

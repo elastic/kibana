@@ -80,7 +80,6 @@ export function getDataViewId(
 export async function loadDataView(
   dataViews: DataViewsContract,
   config: IUiSettingsClient,
-  initialLoad: boolean,
   id?: string,
   dataViewSpec?: DataViewSpec
 ): Promise<DataViewData> {
@@ -105,23 +104,30 @@ export async function loadDataView(
     fetchId = dataViewSpec.id!;
   }
 
-  // on initial load
-  if (initialLoad) {
-    const actualId = getDataViewId(fetchId, dataViewList, config.get('defaultIndex'));
-    return {
-      list: dataViewList || [],
-      loaded: await dataViews.get(actualId),
-      stateVal: fetchId,
-      stateValFound: !!fetchId && actualId === fetchId,
-    };
-  }
+  // try to fetch adhoc data view first
+  try {
+    const fetchedDataView = fetchId ? await dataViews.get(fetchId) : undefined;
+    if (fetchedDataView && !fetchedDataView.isPersisted()) {
+      return {
+        list: dataViewList || [],
+        loaded: fetchedDataView,
+        stateVal: id,
+        stateValFound: true,
+      };
+    }
+    // Skipping error handling, since 'get' call trying to fetch
+    // adhoc data view which only created using Promise.resolve(dataView),
+    // Any other error will be handled by the next 'get' call below.
+    // eslint-disable-next-line no-empty
+  } catch (e) {}
 
-  // on data view change
+  // fetch persisted data view
+  const actualId = getDataViewId(fetchId, dataViewList, config.get('defaultIndex'));
   return {
     list: dataViewList || [],
-    loaded: await dataViews.get(fetchId!),
+    loaded: await dataViews.get(actualId),
     stateVal: fetchId,
-    stateValFound: !!fetchId,
+    stateValFound: !!fetchId && actualId === fetchId,
   };
 }
 
