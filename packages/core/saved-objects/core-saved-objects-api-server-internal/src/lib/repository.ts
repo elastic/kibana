@@ -86,6 +86,7 @@ import {
   type IndexMapping,
   type IKibanaMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
+import pMap from 'p-map';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { createRepositoryEsClient, RepositoryEsClient } from './repository_es_client';
 import { getSearchDsl } from './search_dsl';
@@ -120,6 +121,7 @@ import type {
   BulkDeleteExpectedBulkGetResult,
   PreflightCheckForBulkDeleteParams,
   ExpectedBulkDeleteMultiNamespaceDocsParams,
+  ObjectToDeleteAliasesFor,
 } from './repository_bulk_delete_internal_types';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
@@ -139,6 +141,7 @@ export interface SavedObjectsRepositoryOptions {
 export const DEFAULT_REFRESH_SETTING = 'wait_for';
 export const DEFAULT_RETRY_COUNT = 3;
 
+const MAX_CONCURRENT_ALIAS_DELETIONS = 10;
 /**
  * @internal
  */
@@ -980,75 +983,77 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
 
     // extracted to ensure consistency in the error results returned
     let errorResult: BulkDeleteItemErrorResult;
-    const savedObjects = await Promise.all(
-      expectedBulkDeleteMultiNamespaceDocsResults.map(async (expectedResult) => {
-        if (isLeft(expectedResult)) {
-          return { ...expectedResult.value, success: false };
-        }
-        const {
+    const objectsToDeleteAliasesFor: ObjectToDeleteAliasesFor[] = [];
+
+    const savedObjects = expectedBulkDeleteMultiNamespaceDocsResults.map((expectedResult) => {
+      if (isLeft(expectedResult)) {
+        return { ...expectedResult.value, success: false };
+      }
+      const {
+        type,
+        id,
+        namespaces,
+        esRequestIndex: esBulkDeleteRequestIndex,
+      } = expectedResult.value;
+      // we assume this wouldn't happen but is needed to ensure type consistency
+      if (bulkDeleteResponse === undefined) {
+        throw new Error(
+          `Unexpected error in bulkDelete saved objects: bulkDeleteResponse is undefined`
+        );
+      }
+      const rawResponse = Object.values(
+        bulkDeleteResponse.items[esBulkDeleteRequestIndex]
+      )[0] as NewBulkItemResponse;
+
+      const error = getBulkOperationError(type, id, rawResponse);
+      if (error) {
+        return { success: false, type, id, error };
+      }
+      if (rawResponse.result === 'not_found') {
+        return {
+          success: false,
           type,
           id,
-          namespaces,
-          esRequestIndex: esBulkDeleteRequestIndex,
-        } = expectedResult.value;
-        // we assume this wouldn't happen but is needed to ensure type consistency
-        if (bulkDeleteResponse === undefined) {
-          throw new Error(
-            `Unexpected error in bulkDelete saved objects: bulkDeleteResponse is undefined`
-          );
-        }
-        const rawResponse = Object.values(
-          bulkDeleteResponse.items[esBulkDeleteRequestIndex]
-        )[0] as NewBulkItemResponse;
+          error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
+        };
+      }
 
-        const error = getBulkOperationError(type, id, rawResponse);
-        if (error) {
-          errorResult = { success: false, type, id, error };
-          return errorResult;
-        }
-        if (rawResponse.result === 'not_found') {
-          errorResult = {
-            success: false,
+      if (rawResponse.result === 'deleted') {
+        // `namespaces` should only exist in the expectedResult.value if the type is multi-namespace.
+        if (namespaces) {
+          objectsToDeleteAliasesFor.push({
             type,
             id,
-            error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
-          };
-          return errorResult;
+            ...(namespaces.includes(ALL_NAMESPACES_STRING)
+              ? { namespaces: [], deleteBehavior: 'exclusive' }
+              : { namespaces, deleteBehavior: 'inclusive' }),
+          });
         }
+      }
+      const successfulResult = {
+        success: true,
+        id,
+        type,
+      };
+      return successfulResult;
+    });
 
-        if (rawResponse.result === 'deleted') {
-          // `namespaces` should only exist in the expectedResult.value if the type is multi-namespace.
-          if (namespaces) {
-            // in the bulk operation, one cannot specify a namespace from which to delete an object other than the namespace that the operation is performed in.
-            // If a multinamespace object exists in more than the current space (from which the call is made), force deleting the object will delete it from all namespaces it exists in.
-            // In that case, all legacy url aliases are deleted as well. If force isn't applied, the operation fails and the object isn't deleted.
-            await deleteLegacyUrlAliases({
-              mappings: this._mappings,
-              registry: this._registry,
-              client: this.client,
-              getIndexForType: this.getIndexForType.bind(this),
-              type,
-              id,
-              ...(namespaces.includes(ALL_NAMESPACES_STRING)
-                ? { namespaces: [], deleteBehavior: 'exclusive' } // delete legacy URL aliases for this type/ID for all spaces not in []. Effectively, it's the same behavior ad inludisve with a defined array of namespaces.
-                : { namespaces, deleteBehavior: 'inclusive' }), // delete legacy URL aliases for this type/ID for these specific spaces. In the bulk operation, this behavior is only applicable in the case of multi-namespace isolated types.
-            }).catch((err) => {
-              // The object has already been deleted, but we caught an error when attempting to delete aliases.
-              // A consumer cannot attempt to delete the object again, so just log the error and swallow it.
-              this._logger.error(
-                `Unable to delete aliases when deleting an object: ${err.message}`
-              );
-            });
-          }
-        }
-        const successfulResult = {
-          success: true,
-          id,
-          type,
-        };
-        return successfulResult;
-      })
-    );
+    // Delete aliases if necessary, ensuring we don't have too many concurrent operations running.
+    const mapper = async ({ type, id, namespaces, deleteBehavior }: ObjectToDeleteAliasesFor) =>
+      await deleteLegacyUrlAliases({
+        mappings: this._mappings,
+        registry: this._registry,
+        client: this.client,
+        getIndexForType: this.getIndexForType.bind(this),
+        type,
+        id,
+        namespaces,
+        deleteBehavior,
+      }).catch((err) => {
+        this._logger.error(`Unable to delete aliases when deleting an object: ${err.message}`);
+      });
+    await pMap(objectsToDeleteAliasesFor, mapper, { concurrency: MAX_CONCURRENT_ALIAS_DELETIONS });
+
     return { statuses: [...savedObjects] };
   }
 

@@ -13,6 +13,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes, TransportResult } from '@elastic/elasticsearch';
 import { Either } from './internal_utils';
+import { DeleteLegacyUrlAliasesParams } from './legacy_url_aliases';
 
 /**
  * @internal
@@ -77,4 +78,9 @@ export type NewBulkItemResponse = BulkResponseItem & { error: ErrorCause & { ind
 export type BulkDeleteExpectedBulkGetResult = Either<
   { type: string; id: string; error: Payload },
   { type: string; id: string; version?: string; esRequestIndex?: number }
+>;
+
+export type ObjectToDeleteAliasesFor = Pick<
+  DeleteLegacyUrlAliasesParams,
+  'type' | 'id' | 'namespaces' | 'deleteBehavior'
 >;
