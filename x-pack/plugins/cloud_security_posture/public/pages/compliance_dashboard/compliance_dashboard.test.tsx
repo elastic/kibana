@@ -12,6 +12,7 @@ import { render } from '@testing-library/react';
 import { TestProvider } from '../../test/test_provider';
 import { ComplianceDashboard } from '.';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { useComplianceDashboardDataApi } from '../../common/api/use_compliance_dashboard_data_api';
 import { DASHBOARD_CONTAINER } from './test_subjects';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
@@ -22,6 +23,7 @@ import { expectIdsInDoc } from '../../test/utils';
 
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/api/use_compliance_dashboard_data_api');
+jest.mock('../../common/hooks/use_subscription_status');
 jest.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
 jest.mock('../../common/navigation/use_navigate_to_cis_integration');
 const chance = new Chance();
@@ -177,6 +179,13 @@ describe('<ComplianceDashboard />', () => {
       createReactQueryResponse({
         status: 'success',
         data: { status: 'indexed' },
+      })
+    );
+
+    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: true,
       })
     );
   });

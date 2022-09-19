@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -42,6 +44,7 @@ export interface CspServerPluginSetupDeps {
   data: DataPluginSetup;
   taskManager: TaskManagerSetupContract;
   security: SecurityPluginSetup;
+  cloud: CloudSetup;
   // optional
 }
 
@@ -51,6 +54,7 @@ export interface CspServerPluginStartDeps {
   fleet: FleetStartContract;
   taskManager: TaskManagerStartContract;
   security: SecurityPluginStart;
+  licensing: LicensingPluginStart;
 }
 
 export type CspServerPluginStartServices = Promise<
