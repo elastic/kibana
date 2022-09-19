@@ -774,7 +774,6 @@
     "@types/d3-selection": "^3.0.0",
     "@types/d3-shape": "^2.1.0",
     "@types/d3-time": "^2.1.1",
-    "@types/d3-time-format": "^2.1.1",
     "@types/d3-transition": "^3.0.1",
     "@types/dagre": "^0.7.47",
     "@types/dedent": "^0.7.0",
