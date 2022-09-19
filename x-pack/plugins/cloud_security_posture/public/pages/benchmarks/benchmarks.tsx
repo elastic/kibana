@@ -45,7 +45,7 @@ const AddCisIntegrationButton = () => {
       isDisabled={!cisIntegrationLink}
     >
       <FormattedMessage
-        id="xpack.csp.benchmarks.benchmarksPageHeader.addCisIntegrationButtonLabel"
+        id="xpack.csp.benchmarks.benchmarksPageHeader.addKSPMIntegrationButtonLabel"
         defaultMessage="Add a KSPM integration"
       />
     </EuiButton>
