@@ -246,10 +246,9 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
   const onCancelSchedule = useCallback(() => {
     if (bulkSnoozeSchedule) {
       onCancelSchedules([]);
-      return;
+    } else if (initialSchedule?.id) {
+      onCancelSchedules([initialSchedule.id]);
     }
-    if (!initialSchedule?.id) return;
-    onCancelSchedules([initialSchedule.id]);
   }, [initialSchedule, onCancelSchedules, bulkSnoozeSchedule]);
 
   return (
