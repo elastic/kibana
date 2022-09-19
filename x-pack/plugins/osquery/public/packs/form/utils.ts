@@ -12,10 +12,18 @@ export const convertPackQueriesToSO = (queries) =>
   reduce(
     queries,
     (acc, value, key) => {
+      // @ts-expect-error update types
       acc.push({
-        // @ts-expect-error update types
         id: key,
-        ...pick(value, ['query', 'interval', 'platform', 'version', 'ecs_mapping']),
+        ...pick(value, [
+          'query',
+          'interval',
+          'snapshot',
+          'removed',
+          'platform',
+          'version',
+          'ecs_mapping',
+        ]),
       });
 
       return acc;

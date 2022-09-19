@@ -98,6 +98,18 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
                 delete draft[showEditQueryFlyout].ecs_mapping;
               }
 
+              if (updatedQuery.snapshot) {
+                delete draft[showEditQueryFlyout].snapshot;
+                delete draft[showEditQueryFlyout].removed;
+              } else {
+                if (updatedQuery.snapshot === false) {
+                  draft[showEditQueryFlyout].snapshot = updatedQuery.snapshot;
+                  if (updatedQuery.removed !== undefined) {
+                    draft[showEditQueryFlyout].removed = updatedQuery.removed;
+                  }
+                }
+              }
+
               return draft;
             })
           );
@@ -149,9 +161,11 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
                   interval: newQuery.interval ?? parsedContent.interval ?? '3600',
                   query: newQuery.query,
                   version: newQuery.version ?? parsedContent.version,
+                  snapshot: newQuery.snapshot ?? parsedContent.snapshot,
+                  removed: newQuery.removed ?? parsedContent.removed,
                   platform: getSupportedPlatforms(newQuery.platform ?? parsedContent.platform),
                 },
-                (value) => !isEmpty(value)
+                (value) => !isEmpty(value) || value === false
               )
             );
           });

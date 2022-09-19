@@ -18,6 +18,8 @@ export interface SavedQuerySOFormData {
   description?: string;
   query?: string;
   interval?: string;
+  snapshot?: boolean;
+  removed?: boolean;
   platform?: string;
   version?: string | undefined;
   ecs_mapping?: ECSMapping | undefined;
@@ -28,6 +30,8 @@ export interface SavedQueryFormData {
   description?: string;
   query?: string;
   interval?: number;
+  snapshot?: boolean;
+  removed?: boolean;
   platform?: string;
   version?: string[];
   ecs_mapping: ECSMapping | undefined;
@@ -42,6 +46,8 @@ const deserializer = (payload: SavedQuerySOFormData): SavedQueryFormData => ({
   description: payload.description,
   query: payload.query,
   interval: payload.interval ? parseInt(payload.interval, 10) : 3600,
+  snapshot: payload.snapshot,
+  removed: payload.removed,
   platform: payload.platform,
   version: payload.version ? [payload.version] : [],
   ecs_mapping: !isEmpty(payload.ecs_mapping) ? payload.ecs_mapping : {},
@@ -64,6 +70,11 @@ export const savedQueryDataSerializer = (payload: SavedQueryFormData): SavedQuer
 
     if (draft.interval) {
       draft.interval = draft.interval + '';
+    }
+
+    if (draft.snapshot) {
+      delete draft.snapshot;
+      delete draft.removed;
     }
 
     return draft;

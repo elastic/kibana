@@ -51,7 +51,6 @@ import ECSSchema from '../../common/schemas/ecs/v8.4.0.json';
 import osquerySchema from '../../common/schemas/osquery/v5.4.0.json';
 
 import { FieldIcon } from '../../common/lib/kibana';
-import type { FormArrayField } from '../../shared_imports';
 import { OsqueryIcon } from '../../components/osquery_icon';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 

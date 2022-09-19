@@ -21,6 +21,8 @@ export interface PackSOQueryFormData {
   id: string;
   query: string;
   interval: string;
+  snapshot?: boolean;
+  removed?: boolean;
   platform?: string | undefined;
   version?: string | undefined;
   ecs_mapping?: ECSMapping;
@@ -33,6 +35,8 @@ export interface PackQueryFormData {
   description?: string;
   query: string;
   interval: number;
+  snapshot?: boolean;
+  removed?: boolean;
   platform?: string | undefined;
   version?: string[] | undefined;
   ecs_mapping: ECSMapping;
@@ -42,6 +46,8 @@ const deserializer = (payload: PackSOQueryFormData): PackQueryFormData => ({
   id: payload.id,
   query: payload.query,
   interval: payload.interval ? parseInt(payload.interval, 10) : 3600,
+  snapshot: payload.snapshot,
+  removed: payload.removed,
   platform: payload.platform,
   version: payload.version ? [payload.version] : [],
   ecs_mapping: payload.ecs_mapping ?? {},
@@ -93,6 +99,8 @@ export const usePackQueryForm = ({ uniqueQueryIds, defaultValue }: UsePackQueryF
             id: '',
             query: '',
             interval: 3600,
+            snapshot: true,
+            removed: false,
           },
     }),
   };

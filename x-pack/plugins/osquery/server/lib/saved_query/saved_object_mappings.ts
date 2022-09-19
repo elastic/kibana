@@ -64,6 +64,12 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
     interval: {
       type: 'keyword',
     },
+    snapshot: {
+      type: 'keyword',
+    },
+    removed: {
+      type: 'keyword',
+    },
     ecs_mapping: {
       type: 'object',
       enabled: false,
@@ -136,6 +142,12 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
         interval: {
           type: 'text',
         },
+        snapshot: {
+          type: 'keyword',
+        },
+        removed: {
+          type: 'keyword',
+        },
         platform: {
           type: 'keyword',
         },
@@ -203,6 +215,12 @@ export const packAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
         },
         interval: {
           type: 'text',
+        },
+        snapshot: {
+          type: 'keyword',
+        },
+        removed: {
+          type: 'keyword',
         },
         platform: {
           type: 'keyword',

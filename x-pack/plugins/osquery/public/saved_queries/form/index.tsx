@@ -23,6 +23,7 @@ import { ALL_OSQUERY_VERSIONS_OPTIONS } from '../../packs/queries/constants';
 import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
 import { PlaygroundFlyout } from './playground_flyout';
 import { CodeEditorField } from './code_editor_field';
+import { LoggingField } from '../../form/logging_field';
 
 interface SavedQueryFormProps {
   viewMode?: boolean;
@@ -92,7 +93,10 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="play" onClick={handleTogglePlayground}>
-              Test configuration
+              <FormattedMessage
+                id="xpack.osquery.savedQueries.form.packConfigSection.testConfigButtonLabel"
+                defaultMessage="Test configuration"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -122,6 +126,8 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
           <IntervalField euiFieldProps={intervalEuiFieldProps} />
           <EuiSpacer size="m" />
           <VersionField euiFieldProps={versionEuiFieldProps} />
+          <EuiSpacer size="m" />
+          <LoggingField euiFieldProps={euiFieldProps} />
         </EuiFlexItem>
         <EuiFlexItem>
           <PlatformCheckBoxGroupField euiFieldProps={euiFieldProps} />

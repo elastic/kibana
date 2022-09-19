@@ -17,7 +17,7 @@ export const convertPackQueriesToSO = (queries) =>
       const ecsMapping = value.ecs_mapping && convertECSMappingToArray(value.ecs_mapping);
       acc.push({
         id: key,
-        ...pick(value, ['name', 'query', 'interval', 'platform', 'version']),
+        ...pick(value, ['name', 'query', 'interval', 'snapshot', 'removed', 'platform', 'version']),
         ...(ecsMapping ? { ecs_mapping: ecsMapping } : {}),
       });
 
@@ -28,6 +28,8 @@ export const convertPackQueriesToSO = (queries) =>
       name: string;
       query: string;
       interval: number;
+      snapshot: boolean;
+      removed: boolean;
       ecs_mapping?: Record<string, unknown>;
     }>
   );

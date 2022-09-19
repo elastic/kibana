@@ -36,6 +36,7 @@ import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown
 import { ECSMappingEditorField } from './lazy_ecs_mapping_editor_field';
 import { useKibana } from '../../common/lib/kibana';
 import { VersionField } from '../../form';
+import { LoggingField } from '../../form/logging_field';
 
 interface QueryFlyoutProps {
   uniqueQueryIds: string[];
@@ -78,6 +79,8 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
         });
         resetField('version', { defaultValue: savedQuery.version ? [savedQuery.version] : [] });
         resetField('interval', { defaultValue: savedQuery.interval ? savedQuery.interval : 3600 });
+        resetField('snapshot', { defaultValue: savedQuery.snapshot ?? true });
+        resetField('removed');
         resetField('ecs_mapping', { defaultValue: savedQuery.ecs_mapping ?? {} });
       }
     },
@@ -142,6 +145,8 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
                   onCreateOption: undefined,
                 }}
               />
+              <EuiSpacer />
+              <LoggingField />
             </EuiFlexItem>
             <EuiFlexItem>
               <PlatformCheckBoxGroupField />
