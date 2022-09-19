@@ -11,11 +11,13 @@ import {
   EuiLink,
   EuiPanel,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { PROJECT_LABEL } from '../../common/translations';
 import {
   CommonFields,
   ConfigKey,
@@ -156,6 +158,12 @@ export const MonitorManagementList = ({
       }),
       render: (locations: ServiceLocations) =>
         locations ? <MonitorLocations locations={locations} /> : null,
+    },
+    {
+      align: 'left' as const,
+      field: ConfigKey.PROJECT_ID,
+      name: PROJECT_LABEL,
+      render: (value: string) => (value ? <EuiText size="s">{value}</EuiText> : null),
     },
     {
       align: 'left' as const,

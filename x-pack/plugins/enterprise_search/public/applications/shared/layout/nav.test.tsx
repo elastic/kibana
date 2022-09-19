@@ -41,6 +41,12 @@ describe('useEnterpriseSearchContentNav', () => {
             id: 'search_indices',
             name: 'Indices',
           },
+          {
+            href: '/app/enterprise_search/content/settings',
+            id: 'settings',
+            items: undefined,
+            name: 'Settings',
+          },
         ],
         name: 'Content',
       },

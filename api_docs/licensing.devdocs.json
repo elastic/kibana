@@ -551,6 +551,10 @@
                 "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
               },
               {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts"
               },
@@ -773,10 +777,6 @@
             {
               "plugin": "licenseManagement",
               "path": "x-pack/plugins/license_management/public/plugin.ts"
-            },
-            {
-              "plugin": "ml",
-              "path": "x-pack/plugins/ml/public/application/license/check_license.tsx"
             },
             {
               "plugin": "ml",
@@ -1806,6 +1806,10 @@
               {
                 "plugin": "apm",
                 "path": "x-pack/plugins/apm/common/license_check.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
               },
               {
                 "plugin": "security",

@@ -30,6 +30,7 @@ import type {
   RegistryStream,
   RegistryVarsEntry,
 } from '../../../../../../types';
+import { InlineReleaseBadge } from '../../../../../../components';
 import type { PackagePolicyConfigValidationResults } from '../../../services';
 import { isAdvancedVar, validationHasErrors } from '../../../services';
 import { PackagePolicyEditorDatastreamPipelines } from '../../datastream_pipelines';
@@ -123,18 +124,33 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
             <EuiFlexGroup gutterSize="none" alignItems="flexStart">
               <EuiFlexItem grow={1} />
               <EuiFlexItem grow={5}>
-                <EuiSwitch
-                  label={packageInputStream.title}
-                  disabled={packagePolicyInputStream.keep_enabled}
-                  checked={packagePolicyInputStream.enabled}
-                  onChange={(e) => {
-                    const enabled = e.target.checked;
-                    updatePackagePolicyInputStream({
-                      enabled,
-                    });
-                  }}
-                />
-                {packageInputStream.description ? (
+                <EuiFlexGroup
+                  gutterSize="none"
+                  alignItems="flexStart"
+                  justifyContent="spaceBetween"
+                >
+                  {packageInfo.type !== 'input' && (
+                    <EuiFlexItem grow={false}>
+                      <EuiSwitch
+                        label={packageInputStream.title}
+                        disabled={packagePolicyInputStream.keep_enabled}
+                        checked={packagePolicyInputStream.enabled}
+                        onChange={(e) => {
+                          const enabled = e.target.checked;
+                          updatePackagePolicyInputStream({
+                            enabled,
+                          });
+                        }}
+                      />
+                    </EuiFlexItem>
+                  )}
+                  {packagePolicyInputStream.release && packagePolicyInputStream.release !== 'ga' ? (
+                    <EuiFlexItem grow={false}>
+                      <InlineReleaseBadge release={packagePolicyInputStream.release} />
+                    </EuiFlexItem>
+                  ) : null}
+                </EuiFlexGroup>
+                {packageInfo.type !== 'input' && packageInputStream.description ? (
                   <Fragment>
                     <EuiSpacer size="s" />
                     <EuiText size="s" color="subdued">
