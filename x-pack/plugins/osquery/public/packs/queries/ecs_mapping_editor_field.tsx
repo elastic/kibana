@@ -40,7 +40,7 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
-import type { UseFormReturn } from 'react-hook-form';
+import type { UseFieldArrayRemove, UseFormReturn } from 'react-hook-form';
 import { useForm, useController, useFieldArray, useFormContext } from 'react-hook-form';
 import type { ECSMappingArray, ECSMapping } from '../../../common/schemas/common/utils';
 import {
@@ -605,7 +605,7 @@ interface ECSMappingEditorFormProps {
   control: ECSMappingFormReturn['control'];
   watch: ECSMappingFormReturn['watch'];
   trigger: ECSMappingFormReturn['trigger'];
-  onDelete?: FormArrayField['removeItem'];
+  onDelete?: UseFieldArrayRemove;
 }
 
 export const defaultEcsFormData = {

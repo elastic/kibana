@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { pick, reduce } from 'lodash';
+import { isEmpty, pick, reduce } from 'lodash';
+import { DEFAULT_PLATFORM } from '../../../common/constants';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
 
@@ -39,12 +40,13 @@ export const convertSOQueriesToPack = (queries, options?: { removeMultiLines?: b
   reduce(
     queries,
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    (acc, { id: queryId, ecs_mapping, query, ...rest }, key) => {
+    (acc, { id: queryId, ecs_mapping, query, platform, ...rest }, key) => {
       const index = queryId ? queryId : key;
       acc[index] = {
         ...rest,
         query: options?.removeMultiLines ? removeMultilines(query) : query,
-        ecs_mapping: convertECSMappingToObject(ecs_mapping),
+        ...(!isEmpty(ecs_mapping) ? { ecs_mapping: convertECSMappingToObject(ecs_mapping) } : {}),
+        ...(platform === DEFAULT_PLATFORM ? {} : { platform }),
       };
 
       return acc;

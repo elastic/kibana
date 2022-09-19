@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FormProvider } from 'react-hook-form';
 
+import { DEFAULT_PLATFORM } from '../../../common/constants';
 import { QueryIdField, IntervalField } from '../../form';
 import { CodeEditorField } from '../../saved_queries/form/code_editor_field';
 import { PlatformCheckBoxGroupField } from './platform_checkbox_group_field';
@@ -75,7 +76,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
         resetField('id', { defaultValue: savedQuery.id });
         resetField('query', { defaultValue: savedQuery.query });
         resetField('platform', {
-          defaultValue: savedQuery.platform ? savedQuery.platform : 'linux,windows,darwin',
+          defaultValue: savedQuery.platform ? savedQuery.platform : DEFAULT_PLATFORM,
         });
         resetField('version', { defaultValue: savedQuery.version ? [savedQuery.version] : [] });
         resetField('interval', { defaultValue: savedQuery.interval ? savedQuery.interval : 3600 });
