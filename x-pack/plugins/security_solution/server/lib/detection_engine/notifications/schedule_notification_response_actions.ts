@@ -6,6 +6,7 @@
  */
 
 import { map, uniq } from 'lodash';
+import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/schemas/common';
 import type { SetupPlugins } from '../../../plugin_contract';
 
 interface OsqueryQuery {
@@ -17,7 +18,7 @@ interface OsqueryQuery {
 }
 
 interface OsqueryResponseAction {
-  actionTypeId: '.osquery';
+  actionTypeId: RESPONSE_ACTION_TYPES.OSQUERY;
   params: {
     id: string;
     queries: OsqueryQuery[];
@@ -45,7 +46,7 @@ interface IAlert {
 }
 
 const isOsqueryAction = (action: ResponseAction): action is OsqueryResponseAction => {
-  return action.actionTypeId === '.osquery';
+  return action.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY;
 };
 
 export const scheduleNotificationResponseActions = (

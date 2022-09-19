@@ -21,11 +21,9 @@ import type {
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { Filter } from '@kbn/es-query';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ResponseAction } from '../../../../../common/detection_engine/schemas/common';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
-import type {
-  RuleAlertAction,
-  RuleAlertResponseAction,
-} from '../../../../../common/detection_engine/types';
+import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import {
   transformRuleToAlertAction,
@@ -75,7 +73,7 @@ export const getStepsData = ({
 export const getActionsStepsData = (
   rule: Omit<Rule, 'actions'> & {
     actions: RuleAlertAction[];
-    response_actions?: RuleAlertResponseAction[];
+    response_actions?: ResponseAction[];
   }
 ): ActionsStepRule => {
   // eslint-disable-next-line @typescript-eslint/naming-convention

@@ -355,8 +355,6 @@ export const ML_GROUP_ID = 'security' as const;
 export const LEGACY_ML_GROUP_ID = 'siem' as const;
 export const ML_GROUP_IDS = [ML_GROUP_ID, LEGACY_ML_GROUP_ID] as const;
 
-export const RESPONSE_SUPPORTED_ACTION_TYPES_IDS = ['.osquery'];
-
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions' as const;
 export const NOTIFICATION_THROTTLE_RULE = 'rule' as const;
 

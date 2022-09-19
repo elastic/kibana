@@ -44,7 +44,7 @@ describe('transform_actions', () => {
       params: alertAction.params,
     });
   });
-  test('it should transform RuleAlertResponseAction[] to RuleResponseAction[]', () => {
+  test('it should transform ResponseAction[] to RuleResponseAction[]', () => {
     const ruleAction = {
       action_type_id: 'action_type_id',
       params: {},
@@ -56,7 +56,7 @@ describe('transform_actions', () => {
     });
   });
 
-  test('it should transform RuleResponseAction[] to RuleAlertResponseAction[]', () => {
+  test('it should transform RuleResponseAction[] to ResponseAction[]', () => {
     const alertAction = {
       actionTypeId: 'actionTypeId',
       params: {},

@@ -5,19 +5,12 @@
  * 2.0.
  */
 
-import type { RuleAction, RuleResponseAction } from '@kbn/alerting-plugin/common';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
 
 export type RuleAlertAction = Omit<RuleAction, 'actionTypeId'> & {
   action_type_id: string;
 };
 
-export type RuleAlertResponseAction = Omit<RuleResponseAction, 'actionTypeId'> & {
-  action_type_id: string;
-};
-
-export enum ResponseActionsTypes {
-  OSQUERY = '.osquery',
-}
 /**
  * Defines the search types you can have from Elasticsearch within a
  * doc._source. It uses recursive types of "| SearchTypes[]" to designate

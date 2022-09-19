@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-export enum RESPONSE_ACTION_TYPES {
-  OSQUERY = '.osquery',
-}
+import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/schemas/common';
 
-export const getLogo = (actionTypeId: string) => {
+export const getActionDetails = (actionTypeId: string) => {
   switch (actionTypeId) {
-    case 'osquery':
-      return 'logoOsquery';
+    case RESPONSE_ACTION_TYPES.OSQUERY:
+      return { logo: 'logoOsquery', name: 'Osquery' };
     // update when new responseActions are provided
     default:
-      return 'logoOsquery';
+      return { logo: 'logoOsquery', name: 'Osquery' };
   }
 };

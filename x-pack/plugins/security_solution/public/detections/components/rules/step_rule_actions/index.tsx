@@ -20,6 +20,8 @@ import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { isQueryRule } from '../../../../../common/detection_engine/utils';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { ResponseActionsForm } from '../../response_actions/response_actions_form';
 import type { RuleStepProps, ActionsStepRule } from '../../../pages/detection_engine/rules/types';
@@ -42,7 +44,7 @@ import { useManageCaseAction } from './use_manage_case_action';
 interface StepRuleActionsProps extends RuleStepProps {
   defaultValues?: ActionsStepRule | null;
   actionMessageParams: ActionVariables;
-  ruleType?: string;
+  ruleType?: Type;
 }
 
 export const stepActionsDefaultValue: ActionsStepRule = {
@@ -188,19 +190,17 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     [throttle, actionMessageParams]
   );
   const displayResponseActionsOptions = useMemo(() => {
-    if (ruleType === 'query') {
-      if (throttle !== stepActionsDefaultValue.throttle) {
-        return (
-          <>
-            <UseArray path="responseActions">
-              {(params) => <ResponseActionsForm {...params} saveClickRef={saveClickRef} />}
-            </UseArray>
-          </>
-        );
-      }
+    if (isQueryRule(ruleType)) {
+      return (
+        <>
+          <UseArray path="responseActions">
+            {(params) => <ResponseActionsForm {...params} saveClickRef={saveClickRef} />}
+          </UseArray>
+        </>
+      );
     }
     return null;
-  }, [ruleType, throttle]);
+  }, [ruleType]);
   // only display the actions dropdown if the user has "read" privileges for actions
   const displayActionsDropDown = useMemo(() => {
     return application.capabilities.actions.show ? (

@@ -16,9 +16,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
+import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/schemas/common';
 import type { ResponseActionValidatorRef } from './response_actions_form';
 import { OsqueryResponseAction } from './osquery/osquery_response_action';
-import { getLogo, RESPONSE_ACTION_TYPES } from './constants';
+import { getActionDetails } from './constants';
 import { useFormData } from '../../../shared_imports';
 import type { ArrayItem } from '../../../shared_imports';
 
@@ -48,15 +49,16 @@ export const ResponseActionTypeForm = React.memo((props: IProps) => {
   }, [item, onDeleteAction]);
 
   const renderButtonContent = useMemo(() => {
+    const { logo, name } = getActionDetails(action?.actionTypeId);
     return (
       <EuiFlexGroup gutterSize="l" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon type={getLogo(action?.actionTypeId)} size="m" />
+          <EuiIcon type={logo} size="m" />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText>
             <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={false}>{action?.actionTypeId}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{name}</EuiFlexItem>
             </EuiFlexGroup>
           </EuiText>
         </EuiFlexItem>

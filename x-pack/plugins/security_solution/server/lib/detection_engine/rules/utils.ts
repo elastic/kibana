@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type {
-  RuleAction,
-  RuleResponseAction,
-  RuleNotifyWhenType,
-  SanitizedRule,
-} from '@kbn/alerting-plugin/common';
+import type { RuleAction, RuleNotifyWhenType, SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { isEmpty } from 'lodash/fp';
@@ -107,9 +102,7 @@ export const transformFromAlertThrottle = (
   legacyRuleActions: LegacyRuleActions | null | undefined
 ): string => {
   if (legacyRuleActions == null || (rule.actions != null && rule.actions.length > 0)) {
-    const noResponseActions = !(rule.params as { responseActions: RuleResponseAction[] })
-      ?.responseActions?.length;
-    if (rule.muteAll || (rule.actions.length === 0 && noResponseActions)) {
+    if (rule.muteAll || rule.actions.length === 0) {
       return NOTIFICATION_THROTTLE_NO_ACTIONS;
     } else if (
       rule.notifyWhen === 'onActiveAlert' ||

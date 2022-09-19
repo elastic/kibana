@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { RuleAction, RuleResponseAction } from '@kbn/alerting-plugin/common';
-import type { RuleAlertAction, RuleAlertResponseAction } from './types';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
+import type { ResponseAction, RuleResponseAction } from './schemas/common';
+import type { RuleAlertAction } from './types';
 
 export const transformRuleToAlertAction = ({
   group,
@@ -35,7 +36,7 @@ export const transformAlertToRuleAction = ({
 export const transformRuleToAlertResponseAction = ({
   action_type_id: actionTypeId,
   params,
-}: RuleAlertResponseAction): RuleResponseAction => {
+}: ResponseAction): RuleResponseAction => {
   return {
     params,
     actionTypeId,
@@ -45,7 +46,7 @@ export const transformRuleToAlertResponseAction = ({
 export const transformAlertToRuleResponseAction = ({
   actionTypeId,
   params,
-}: RuleResponseAction): RuleAlertResponseAction => {
+}: RuleResponseAction): ResponseAction => {
   return {
     params,
     action_type_id: actionTypeId,

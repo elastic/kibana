@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { RESPONSE_SUPPORTED_ACTION_TYPES_IDS } from '../../../../common/constants';
+import {
+  SUPPORTED_RESPONSE_ACTION_TYPES,
+  RESPONSE_ACTION_TYPES,
+} from '../../../../common/detection_engine/schemas/common';
 
 export interface ResponseActionType {
-  id: string;
+  id: RESPONSE_ACTION_TYPES;
   name: string;
   iconClass: string;
   description: string;
@@ -18,16 +21,15 @@ export const getSupportedResponseActions = (
   actionTypes: ResponseActionType[]
 ): ResponseActionType[] => {
   return actionTypes.filter((actionType) => {
-    return RESPONSE_SUPPORTED_ACTION_TYPES_IDS.includes(actionType.id);
+    return SUPPORTED_RESPONSE_ACTION_TYPES.includes(actionType.id);
   });
 };
 
 export const responseActionTypes = [
   {
-    id: '.osquery',
+    id: RESPONSE_ACTION_TYPES.OSQUERY,
     name: 'osquery',
     iconClass: 'logoOsquery',
-    description: 'Run Osquery query on each rule execution',
   },
   // { id: '.endpointSecurity', name: 'endpointSecurity', iconClass: 'logoSecurity' },
 ];

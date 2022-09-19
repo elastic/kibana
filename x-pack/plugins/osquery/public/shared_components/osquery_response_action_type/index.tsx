@@ -26,6 +26,7 @@ import { LiveQueryQueryField } from '../../live_queries/form/live_query_query_fi
 import { PackFieldWrapper } from './pack_field_wrapper';
 import { usePack } from '../../packs/use_pack';
 
+const OSQUERY_TYPE = '.osquery';
 interface OsqueryResponseActionsParamsFormProps {
   item: ArrayItem;
 }
@@ -75,7 +76,7 @@ const OsqueryResponseActionParamsFormComponent: React.ForwardRefExoticComponent<
       if (queryType === 'pack' && packData) {
         context.updateFieldValues({
           [item.path]: {
-            actionTypeId: '.osquery',
+            actionTypeId: OSQUERY_TYPE,
             params: {
               id: watchedValues.id,
               packId: watchedValues?.packId?.length ? watchedValues?.packId[0] : undefined,
@@ -89,7 +90,7 @@ const OsqueryResponseActionParamsFormComponent: React.ForwardRefExoticComponent<
       } else {
         context.updateFieldValues({
           [item.path]: {
-            actionTypeId: '.osquery',
+            actionTypeId: OSQUERY_TYPE,
             params: {
               id: watchedValues.id,
               savedQueryId: watchedValues.savedQueryId,

@@ -17,13 +17,10 @@ import type {
   Severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { DataViewBase, Filter } from '@kbn/es-query';
-import type { RuleAction, RuleResponseAction } from '@kbn/alerting-plugin/common';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
-import type {
-  RuleAlertAction,
-  RuleAlertResponseAction,
-} from '../../../../../common/detection_engine/types';
+import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import type { FieldValueQueryBar } from '../../../components/rules/query_bar';
 import type { FieldValueTimeline } from '../../../components/rules/pick_timeline';
 import type { FieldValueThreshold } from '../../../components/rules/threshold_input';
@@ -37,6 +34,8 @@ import type {
   SortOrder,
   SetupGuide,
   TimestampOverride,
+  RuleResponseAction,
+  ResponseAction,
 } from '../../../../../common/detection_engine/schemas/common';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 
@@ -242,7 +241,7 @@ export interface ScheduleStepRuleJson {
 
 export interface ActionsStepRuleJson {
   actions: RuleAlertAction[];
-  response_actions?: RuleAlertResponseAction[];
+  response_actions?: ResponseAction[];
   enabled: boolean;
   throttle?: string | null;
   meta?: unknown;
