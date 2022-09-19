@@ -56,6 +56,7 @@ export const args = ({
 
     // messing around with options...
     '--enable-features=Vulkan,UseSkiaRenderer',
+    '--disable-3d-apis',
   ];
 
   if (windowSize) {
