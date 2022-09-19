@@ -57,6 +57,7 @@ describe('Enrichment', () => {
         .should('match', /^[1-9].+$/); // Any number of alerts
       cy.get(HOST_RISK_HEADER_COLIMN).contains('host.risk.calculated_level');
       cy.get(USER_RISK_HEADER_COLIMN).contains('user.risk.calculated_level');
+      scrollAlertTableColumnIntoView(HOST_RISK_COLUMN);
       cy.get(HOST_RISK_COLUMN).contains('Low');
       scrollAlertTableColumnIntoView(USER_RISK_COLUMN);
       cy.get(USER_RISK_COLUMN).contains('Low');
