@@ -111,10 +111,10 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
   }
 
   return (
-    <ProfilingAppPageTemplate tabs={tabs} hideSearchBar={isDifferentialView}>
+    <ProfilingAppPageTemplate tabs={tabs} hideSearchBar={isDifferentialView} fullHeight>
       <EuiFlexGroup direction="column">
         {isDifferentialView ? (
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
               <EuiFlexItem grow>
                 <PrimaryAndComparisonSearchBar />
@@ -170,10 +170,10 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem>
-          <AsyncComponent {...state} style={{ height: 600 }} size="xl">
+          <AsyncComponent {...state} style={{ height: '100%' }} size="xl">
             <FlameGraph
               id="flamechart"
-              height={600}
+              height={'100%'}
               primaryFlamegraph={data?.primaryFlamegraph}
               comparisonFlamegraph={data?.comparisonFlamegraph}
               comparisonMode={comparisonMode}

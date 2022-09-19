@@ -22,6 +22,8 @@ import { RedirectAppLinks as Component } from './redirect_app_links.component';
  * </RedirectAppLinks>
  * ```
  */
-export const RedirectAppLinks: FC<{}> = ({ children }) => (
-  <Component {...useServices()}>{children}</Component>
+export const RedirectAppLinks: FC<{ className?: string }> = ({ className, children }) => (
+  <Component {...useServices()} className={className}>
+    {children}
+  </Component>
 );
