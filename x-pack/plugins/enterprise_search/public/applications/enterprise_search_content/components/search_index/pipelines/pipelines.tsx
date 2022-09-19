@@ -7,38 +7,20 @@
 
 import React from 'react';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { DataPanel } from '../../../../shared/data_panel/data_panel';
 
-import { InferencePipelineCard } from './inference_pipeline_card';
-import { InferencePipeline } from './types';
+import { IngestPipelinesCard } from './ingest_pipelines_card';
+import { AddMLInferencePipelineButton } from './ml_inference/add_ml_inference_button';
+import { AddMLInferencePipelineModal } from './ml_inference/add_ml_inference_pipeline_modal';
+import { MlInferencePipelineProcessorsCard } from './ml_inference_pipeline_processors_card';
 
 export const SearchIndexPipelines: React.FC = () => {
-  // TODO: REPLACE THIS DATA WITH REAL DATA
-
-  const inferencePipelines: InferencePipeline[] = [
-    {
-      pipelineName: 'NER Processor',
-      trainedModelName: 'elastic_dslim_bert_base_ner',
-      isDeployed: true,
-      modelType: 'pytorch',
-    },
-    {
-      pipelineName: 'Sentiment Analysis',
-      trainedModelName: 'elastic_dslim_bert_base_ner',
-      isDeployed: false,
-      modelType: 'pytorch',
-    },
-    {
-      pipelineName: 'Sentiment Analysis',
-      trainedModelName: 'elastic_dslim_bert_base_ner',
-      isDeployed: false,
-      modelType: 'pytorch',
-    },
-  ];
+  const [addInferencePipelineOpen, setShowAddInferencePipeline] = React.useState<boolean>(false);
+  const closeAddInferencePipelineModal = () => setShowAddInferencePipeline(false);
 
   return (
     <>
@@ -75,7 +57,7 @@ export const SearchIndexPipelines: React.FC = () => {
             )}
             iconType="logstashInput"
           >
-            <div />
+            <IngestPipelinesCard />
           </DataPanel>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -110,33 +92,16 @@ export const SearchIndexPipelines: React.FC = () => {
             )}
             iconType="compute"
             action={
-              <EuiButton color="success" size="s" iconType="plusInCircle">
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.indices.pipelines.mlInferencePipelines.newButton',
-                  {
-                    defaultMessage: 'Add ML inference pipeline',
-                  }
-                )}
-              </EuiButton>
+              <AddMLInferencePipelineButton onClick={() => setShowAddInferencePipeline(true)} />
             }
           >
-            {inferencePipelines.length > 0 && (
-              <EuiFlexGroup direction="column" gutterSize="s">
-                {inferencePipelines.map((item: InferencePipeline, index: number) => (
-                  <EuiFlexItem key={index}>
-                    <InferencePipelineCard
-                      trainedModelName={item.trainedModelName}
-                      pipelineName={item.pipelineName}
-                      isDeployed={item.isDeployed}
-                      modelType={item.modelType}
-                    />
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            )}
+            <MlInferencePipelineProcessorsCard />
           </DataPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {addInferencePipelineOpen && (
+        <AddMLInferencePipelineModal onClose={closeAddInferencePipelineModal} />
+      )}
     </>
   );
 };

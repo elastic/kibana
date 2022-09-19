@@ -33,6 +33,9 @@ import {
   doesAgentPolicyAlreadyIncludePackage,
   validatePackagePolicy,
   validationHasErrors,
+  isInputOnlyPolicyTemplate,
+  getNormalizedDataStreams,
+  getNormalizedInputs,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -242,24 +245,39 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       force?: true;
     }
   ): Promise<PackagePolicy[]> {
-    const agentPolicyIds = new Set(packagePolicies.map((pkgPol) => pkgPol.policy_id));
+    const agentPolicyIds = new Set(packagePolicies.map((pkgPolicy) => pkgPolicy.policy_id));
 
     for (const agentPolicyId of agentPolicyIds) {
       await validateIsNotHostedPolicy(soClient, agentPolicyId, options?.force);
     }
 
+    const packageInfos = await getPackageInfoForPackagePolicies(packagePolicies, soClient);
+
     const isoDate = new Date().toISOString();
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { saved_objects } = await soClient.bulkCreate<PackagePolicySOAttributes>(
-      packagePolicies.map((packagePolicy) => {
+      await pMap(packagePolicies, async (packagePolicy) => {
         const packagePolicyId = packagePolicy.id ?? uuid.v4();
         const agentPolicyId = packagePolicy.policy_id;
 
-        const inputs = packagePolicy.inputs.map((input) =>
+        let inputs = packagePolicy.inputs.map((input) =>
           assignStreamIdToInput(packagePolicyId, input)
         );
 
         const { id, ...pkgPolicyWithoutId } = packagePolicy;
+
+        let elasticsearch: PackagePolicy['elasticsearch'];
+        if (packagePolicy.package) {
+          const pkgInfo = packageInfos.get(
+            `${packagePolicy.package.name}-${packagePolicy.package.version}`
+          );
+
+          inputs = pkgInfo
+            ? await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs)
+            : inputs;
+
+          elasticsearch = pkgInfo?.elasticsearch;
+        }
 
         return {
           type: SAVED_OBJECT_TYPE,
@@ -267,6 +285,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           attributes: {
             ...pkgPolicyWithoutId,
             inputs,
+            elasticsearch,
             policy_id: agentPolicyId,
             revision: 1,
             created_at: isoDate,
@@ -1252,16 +1271,20 @@ async function _compilePackagePolicyInput(
       )
     : pkgInfo.policy_templates?.[0];
 
-  if (!input.enabled || !packagePolicyTemplate || !packagePolicyTemplate.inputs?.length) {
+  if (!input.enabled || !packagePolicyTemplate) {
     return undefined;
   }
 
-  const packageInputs = packagePolicyTemplate.inputs;
+  const packageInputs = getNormalizedInputs(packagePolicyTemplate);
+
+  if (!packageInputs.length) {
+    return undefined;
+  }
+
   const packageInput = packageInputs.find((pkgInput) => pkgInput.type === input.type);
   if (!packageInput) {
     throw new Error(`Input template not found, unable to find input type ${input.type}`);
   }
-
   if (!packageInput.template_path) {
     return undefined;
   }
@@ -1341,7 +1364,7 @@ async function _compilePackageStream(
     return { ...stream, compiled_stream: undefined };
   }
 
-  const packageDataStreams = pkgInfo.data_streams;
+  const packageDataStreams = getNormalizedDataStreams(pkgInfo);
   if (!packageDataStreams) {
     throw new Error('Stream template not found, no data streams');
   }
@@ -1457,6 +1480,36 @@ export interface NewPackagePolicyWithId extends NewPackagePolicy {
 
 export const packagePolicyService: PackagePolicyClient = new PackagePolicyClientImpl();
 
+async function getPackageInfoForPackagePolicies(
+  packagePolicies: NewPackagePolicyWithId[],
+  soClient: SavedObjectsClientContract
+) {
+  const pkgInfoMap = new Map<string, PackagePolicyPackage>();
+
+  packagePolicies.forEach(({ package: pkg }) => {
+    if (pkg) {
+      pkgInfoMap.set(`${pkg.name}-${pkg.version}`, pkg);
+    }
+  });
+
+  const resultMap = new Map<string, PackageInfo>();
+
+  await pMap(pkgInfoMap.keys(), async (pkgKey) => {
+    const pkgInfo = pkgInfoMap.get(pkgKey);
+    if (pkgInfo) {
+      const pkgInfoData = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: pkgInfo.name,
+        pkgVersion: pkgInfo.version,
+      });
+
+      resultMap.set(pkgKey, pkgInfoData);
+    }
+  });
+
+  return resultMap;
+}
+
 export function updatePackageInputs(
   basePackagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo,
@@ -1483,10 +1536,11 @@ export function updatePackageInputs(
       }
 
       // Ignore any inputs removed from this policy template in the new package version
-      const policyTemplateStillIncludesInput =
-        policyTemplate.inputs?.some(
-          (policyTemplateInput) => policyTemplateInput.type === input.type
-        ) ?? false;
+      const policyTemplateStillIncludesInput = isInputOnlyPolicyTemplate(policyTemplate)
+        ? policyTemplate.type === input.type
+        : policyTemplate.inputs?.some(
+            (policyTemplateInput) => policyTemplateInput.type === input.type
+          ) ?? false;
 
       return policyTemplateStillIncludesInput;
     }),
