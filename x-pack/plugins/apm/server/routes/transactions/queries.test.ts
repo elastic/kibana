@@ -11,8 +11,8 @@ import {
   SearchParamsMock,
 } from '../../utils/test_helpers';
 import { getTransactionBreakdown } from './breakdown';
-import { getTransactionTraceSamples } from './trace_samples';
 import { getTransaction } from './get_transaction';
+import { getTraceSamples } from './trace_samples';
 
 describe('transaction queries', () => {
   let mock: SearchParamsMock;
@@ -56,7 +56,7 @@ describe('transaction queries', () => {
 
   it('fetches transaction trace samples', async () => {
     mock = await inspectSearchParams((setup) =>
-      getTransactionTraceSamples({
+      getTraceSamples({
         serviceName: 'foo',
         transactionName: 'bar',
         transactionType: 'baz',
