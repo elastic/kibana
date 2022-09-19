@@ -21,7 +21,7 @@ import type {
 import type { ITelemetryReceiver } from './receiver';
 import { copyAllowlistedFields, endpointAllowlistFields } from './filterlists';
 import { createTelemetryTaskConfigs } from './tasks';
-import { createUsageCounterLabel } from './helpers';
+import { createUsageCounterLabel, tlog } from './helpers';
 import type { TelemetryEvent } from './types';
 import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
 import type { SecurityTelemetryTaskConfig } from './task';
@@ -87,7 +87,6 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
   ) {
     this.telemetrySetup = telemetrySetup;
     this.telemetryUsageCounter = telemetryUsageCounter;
-
     if (taskManager) {
       this.telemetryTasks = createTelemetryTaskConfigs().map(
         (config: SecurityTelemetryTaskConfig) => {
@@ -114,13 +113,12 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
   ) {
     this.telemetryStart = telemetryStart;
     this.receiver = receiver;
-
     if (taskManager && this.telemetryTasks) {
-      this.logger.debug(`Starting security telemetry tasks`);
+      tlog(this.logger, `Starting security telemetry tasks`);
       this.telemetryTasks.forEach((task) => task.start(taskManager));
     }
 
-    this.logger.debug(`Starting local task`);
+    tlog(this.logger, `Starting local task`);
     setTimeout(() => {
       this.sendIfDue();
       this.intervalId = setInterval(() => this.sendIfDue(), this.checkIntervalMs);
@@ -135,19 +133,21 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
 
   public queueTelemetryEvents(events: TelemetryEvent[]) {
     const qlength = this.queue.length;
-
+    tlog(this.logger, `Queue length is ${qlength}`);
     if (events.length === 0) {
+      tlog(this.logger, `No events to queue`);
       return;
     }
 
-    this.logger.debug(`Queue events`);
+    tlog(this.logger, `Queue ${events.length} events`);
 
     if (qlength >= this.maxQueueSize) {
       // we're full already
+      tlog(this.logger, `Queue length is greater than max queue size`);
       return;
     }
-
     if (events.length > this.maxQueueSize - qlength) {
+      tlog(this.logger, `Events exceed remaining queue size ${this.maxQueueSize - qlength}`);
       this.telemetryUsageCounter?.incrementCounter({
         counterName: createUsageCounterLabel(usageLabelPrefix.concat(['queue_stats'])),
         counterType: 'docs_lost',
@@ -160,6 +160,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
       });
       this.queue.push(...this.processEvents(events.slice(0, this.maxQueueSize - qlength)));
     } else {
+      tlog(this.logger, `Events fit within queue size`);
       this.queue.push(...this.processEvents(events));
     }
   }
@@ -220,7 +221,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
       const telemetryUrl = await this.fetchTelemetryPingUrl();
       const resp = await axios.get(telemetryUrl, { timeout: 3000 });
       if (resp.status === 200) {
-        this.logger.debug('[Security Telemetry] elastic telemetry services are reachable');
+        tlog(this.logger, '[Security Telemetry] elastic telemetry services are reachable');
         return true;
       }
 
@@ -244,7 +245,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
 
       this.isOptedIn = await this.isTelemetryOptedIn();
       if (!this.isOptedIn) {
-        this.logger.debug(`Telemetry is not opted-in.`);
+        tlog(this.logger, `Telemetry is not opted-in.`);
         this.queue = [];
         this.isSending = false;
         return;
@@ -252,7 +253,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
 
       this.isElasticTelemetryReachable = await this.isTelemetryServicesReachable();
       if (!this.isElasticTelemetryReachable) {
-        this.logger.debug(`Telemetry Services are not reachable.`);
+        tlog(this.logger, `Telemetry Services are not reachable.`);
         this.queue = [];
         this.isSending = false;
         return;
@@ -265,8 +266,9 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
         this.receiver?.fetchLicenseInfo(),
       ]);
 
-      this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
-      this.logger.debug(
+      tlog(this.logger, `Telemetry URL: ${telemetryUrl}`);
+      tlog(
+        this.logger,
         `cluster_uuid: ${clusterInfo?.cluster_uuid} cluster_name: ${clusterInfo?.cluster_name}`
       );
 
@@ -321,8 +323,9 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
         this.receiver?.fetchLicenseInfo(),
       ]);
 
-      this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
-      this.logger.debug(
+      tlog(this.logger, `Telemetry URL: ${telemetryUrl}`);
+      tlog(
+        this.logger,
         `cluster_uuid: ${clusterInfo?.cluster_uuid} cluster_name: ${clusterInfo?.cluster_name}`
       );
 
@@ -385,7 +388,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
     const ndjson = transformDataToNdjson(events);
 
     try {
-      this.logger.debug(`Sending ${events.length} telemetry events to ${channel}`);
+      tlog(this.logger, `Sending ${events.length} telemetry events to ${channel}`);
       const resp = await axiosInstance.post(telemetryUrl, ndjson, {
         headers: {
           'Content-Type': 'application/x-ndjson',
@@ -406,9 +409,9 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
         counterType: 'docs_sent',
         incrementBy: events.length,
       });
-      this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
+      tlog(this.logger, `Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
     } catch (err) {
-      this.logger.debug(`Error sending events: ${err}`);
+      tlog(this.logger, `Error sending events: ${err}`);
       const errorStatus = err?.response?.status;
       if (errorStatus !== undefined && errorStatus !== null) {
         this.telemetryUsageCounter?.incrementCounter({
