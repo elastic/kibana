@@ -67,7 +67,7 @@ export class EncryptedSavedObjectsPlugin
       );
     } else {
       const hashedEncryptionKey = createHash('sha3-256')
-        .update(config.encryptionKey)
+        .update(config.encryptionKey || '')
         .digest('base64');
 
       this.logger.info(
