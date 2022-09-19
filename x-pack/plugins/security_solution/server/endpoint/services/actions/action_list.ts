@@ -205,16 +205,6 @@ const getActionDetailsList = async ({
     throw err;
   }
 
-  if (actionRequests?.statusCode === 404) {
-    const err = new CustomHttpRequestError(
-      'index_not_found_exception',
-      404,
-      new Error('index_not_found_exception')
-    );
-    logger.error(err);
-    throw err;
-  }
-
   if (!actionRequests?.body?.hits?.hits)
     // return empty details array
     return { actionDetails: [], totalRecords: 0 };
