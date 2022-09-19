@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { LIST_DETECTION_RULE_EXCEPTION, TELEMETRY_CHANNEL_LISTS } from '../constants';
-import { batchTelemetryRecords, templateExceptionList } from '../helpers';
+import { batchTelemetryRecords, templateExceptionList, tlog } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
 import type { ExceptionListItem, ESClusterInfo, ESLicense, RuleSearchResult } from '../types';
@@ -27,6 +27,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
       sender: ITelemetryEventsSender,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
+      tlog(logger, 'test');
       const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
         receiver.fetchClusterInfo(),
         receiver.fetchLicenseInfo(),
@@ -46,7 +47,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
       const { body: prebuiltRules } = await receiver.fetchDetectionRules();
 
       if (!prebuiltRules) {
-        logger.debug('no prebuilt rules found');
+        tlog(logger, 'no prebuilt rules found');
         return 0;
       }
 
@@ -87,7 +88,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
         licenseInfo,
         LIST_DETECTION_RULE_EXCEPTION
       );
-
+      tlog(logger, `Detection rule exception json length ${detectionRuleExceptionsJson.length}`);
       const batches = batchTelemetryRecords(detectionRuleExceptionsJson, maxTelemetryBatch);
       for (const batch of batches) {
         await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
