@@ -10,7 +10,8 @@ import { isEmpty } from 'lodash';
 import { EuiFlexItem, EuiFlexGroup, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
-import { AdditionalEmailServices, InvalidEmailReason } from '@kbn/actions-plugin/common';
+import { InvalidEmailReason } from '@kbn/actions-plugin/common';
+import { AdditionalEmailServices } from '@kbn/stack-connectors-plugin/common';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import {
