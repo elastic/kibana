@@ -20,6 +20,11 @@ import { getUserInfo } from './authentication';
 
 type BulkGetUserProfilesParams = Omit<UserProfileBulkGetParams, 'uids'> & { uids: string[] };
 
+export const generateFakeAssignees = (num: number) =>
+  Array.from(Array(num).keys()).map((uid) => {
+    return { uid: `${uid}` };
+  });
+
 export const bulkGetUserProfiles = async ({
   supertest,
   req,

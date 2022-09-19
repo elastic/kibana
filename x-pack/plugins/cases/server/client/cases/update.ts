@@ -14,6 +14,7 @@ import { SavedObject, SavedObjectsFindResponse, SavedObjectsFindResult } from '@
 
 import { nodeBuilder } from '@kbn/es-query';
 
+import { areTotalAssigneesInvalid } from '../../../common/utils/validators';
 import {
   CasePatchRequest,
   CasesPatchRequest,
@@ -31,6 +32,7 @@ import {
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
+  MAX_ASSIGNEES_PER_CASE,
   MAX_TITLE_LENGTH,
 } from '../../../common/constants';
 
@@ -98,6 +100,27 @@ function throwIfUpdateAssigneesWithoutValidLicense(
     const ids = requestsUpdatingAssignees.map(({ updateReq }) => updateReq.id);
     throw Boom.forbidden(
       `In order to assign users to cases, you must be subscribed to an Elastic Platinum license, ids: [${ids.join(
+        ', '
+      )}]`
+    );
+  }
+}
+
+/**
+ * Throws an error if any of the requests attempt to add more than
+ * MAX_ASSIGNEES_PER_CASE to a case
+ */
+function throwIfTotalAssigneesAreInvalid(requests: UpdateRequestWithOriginalCase[]) {
+  const requestsUpdatingAssignees = requests.filter(
+    ({ updateReq }) => updateReq.assignees !== undefined
+  );
+
+  if (
+    requestsUpdatingAssignees.some(({ updateReq }) => areTotalAssigneesInvalid(updateReq.assignees))
+  ) {
+    const ids = requestsUpdatingAssignees.map(({ updateReq }) => updateReq.id);
+    throw Boom.badRequest(
+      `You cannot assign more than ${MAX_ASSIGNEES_PER_CASE} assignees to a case, ids: [${ids.join(
         ', '
       )}]`
     );
@@ -332,6 +355,7 @@ export const update = async (
     throwIfUpdateOwner(updateCases);
     throwIfTitleIsInvalid(updateCases);
     throwIfUpdateAssigneesWithoutValidLicense(updateCases, hasPlatinumLicense);
+    throwIfTotalAssigneesAreInvalid(updateCases);
 
     const updatedCases = await patchCases({ caseService, user, casesToUpdate: updateCases });
 
