@@ -215,6 +215,10 @@ export const RulesList = ({
   const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
   const [rulesToUpdateAPIKeyFilter, setRulesToUpdateAPIKeyFilter] = useState<string>('');
 
+  const [isSnoozingRules, setIsSnoozingRules] = useState<boolean>(false);
+  const [isSchedulingRules, setIsSchedulingRules] = useState<boolean>(false);
+  const [isUpdatingRuleAPIKeys, setIsUpdatingRuleAPIKeys] = useState<boolean>(false);
+
   const hasAnyAuthorizedRuleType = useMemo(() => {
     return ruleTypesState.isInitialized && ruleTypesState.data.size > 0;
   }, [ruleTypesState]);
@@ -603,6 +607,24 @@ export const RulesList = ({
     setRulesToUpdateAPIKeyFilter('');
   };
 
+  const isRulesTableLoading = useMemo(() => {
+    return (
+      rulesState.isLoading ||
+      ruleTypesState.isLoading ||
+      isPerformingAction ||
+      isSnoozingRules ||
+      isSchedulingRules ||
+      isUpdatingRuleAPIKeys
+    );
+  }, [
+    rulesState,
+    ruleTypesState,
+    isPerformingAction,
+    isSnoozingRules,
+    isSchedulingRules,
+    isUpdatingRuleAPIKeys,
+  ]);
+
   const table = (
     <>
       {rulesStatusesTotal.error > 0 ? (
@@ -684,7 +706,10 @@ export const RulesList = ({
           <EuiButton
             data-test-subj="refreshRulesButton"
             iconType="refresh"
-            onClick={loadData}
+            onClick={() => {
+              onClearSelection();
+              loadData();
+            }}
             name="refresh"
             color="primary"
           >
@@ -792,7 +817,7 @@ export const RulesList = ({
       <EuiSpacer size="s" />
       <RulesListTable
         items={tableItems}
-        isLoading={rulesState.isLoading || ruleTypesState.isLoading || isPerformingAction}
+        isLoading={isRulesTableLoading}
         rulesState={rulesState}
         ruleTypesState={ruleTypesState}
         ruleTypeRegistry={ruleTypeRegistry}
@@ -877,6 +902,9 @@ export const RulesList = ({
                   loadData();
                   setIsPerformingAction(false);
                 }}
+                isSnoozingRules={isSnoozingRules}
+                isSchedulingRules={isSchedulingRules}
+                isUpdatingRuleAPIKeys={isUpdatingRuleAPIKeys}
                 setRulesToDelete={setRulesToDelete}
                 setRulesToUpdateAPIKey={setRulesToUpdateAPIKey}
                 setRulesToSnooze={setRulesToSnooze}
@@ -956,6 +984,7 @@ export const RulesList = ({
       <BulkSnoozeModal
         rulesToSnooze={rulesToSnooze}
         rulesToSnoozeFilter={rulesToSnoozeFilter}
+        setIsLoading={setIsSnoozingRules}
         onClose={() => {
           clearRulesToSnooze();
         }}
@@ -970,6 +999,7 @@ export const RulesList = ({
         rulesToSchedule={rulesToSchedule}
         rulesToScheduleFilter={rulesToScheduleFilter}
         numberOfSelectedRules={numberOfSelectedItems}
+        setIsLoading={setIsSchedulingRules}
         onClose={() => {
           clearRulesToSchedule();
         }}
@@ -989,6 +1019,7 @@ export const RulesList = ({
         numberOfSelectedRules={numberOfSelectedItems}
         apiUpdateApiKeyCall={bulkUpdateAPIKey}
         setIsLoadingState={(isLoading: boolean) => {
+          setIsUpdatingRuleAPIKeys(isLoading);
           setRulesState({ ...rulesState, isLoading });
         }}
         onUpdated={async () => {

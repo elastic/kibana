@@ -24,6 +24,9 @@ export type ComponentOpts = {
   getFilter: () => string;
   onPerformingAction?: () => void;
   onActionPerformed?: () => void;
+  isSnoozingRules?: boolean;
+  isSchedulingRules?: boolean;
+  isUpdatingRuleAPIKeys?: boolean;
   setRulesToDelete: React.Dispatch<React.SetStateAction<string[]>>;
   setRulesToUpdateAPIKey: React.Dispatch<React.SetStateAction<string[]>>;
   setRulesToSnooze: React.Dispatch<React.SetStateAction<RuleTableItem[]>>;
@@ -61,6 +64,9 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   getFilter,
   onPerformingAction = noop,
   onActionPerformed = noop,
+  isSnoozingRules = false,
+  isSchedulingRules = false,
+  isUpdatingRuleAPIKeys = false,
   enableRules,
   disableRules,
   setRulesToDelete,
@@ -78,12 +84,14 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   const [isEnablingRules, setIsEnablingRules] = useState<boolean>(false);
   const [isDisablingRules, setIsDisablingRules] = useState<boolean>(false);
   const [isDeletingRules, setIsDeletingRules] = useState<boolean>(false);
-  const [isSnoozingRules, setIsSnoozingRules] = useState<boolean>(false);
-  const [isSchedulingRules, setIsSchedulingRules] = useState<boolean>(false);
-  const [isUpdatingRuleAPIKeys, setIsUpdatingRuleAPIKeys] = useState<boolean>(false);
 
   const isPerformingAction =
-    isEnablingRules || isDisablingRules || isDeletingRules || isSnoozingRules || isSchedulingRules;
+    isEnablingRules ||
+    isDisablingRules ||
+    isDeletingRules ||
+    isSnoozingRules ||
+    isSchedulingRules ||
+    isUpdatingRuleAPIKeys;
 
   const allRulesDisabled = useMemo(() => {
     if (isAllSelected) {
@@ -170,7 +178,6 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
 
   async function updateAPIKeysClick() {
     onPerformingAction();
-    setIsUpdatingRuleAPIKeys(true);
     try {
       if (isAllSelected) {
         setRulesToUpdateAPIKeyFilter(getFilter());
@@ -187,14 +194,12 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         ),
       });
     } finally {
-      setIsUpdatingRuleAPIKeys(false);
       onActionPerformed();
     }
   }
 
   async function onSnoozeAllClick() {
     onPerformingAction();
-    setIsSnoozingRules(true);
     try {
       if (isAllSelected) {
         setRulesToSnoozeFilter(getFilter());
@@ -211,14 +216,12 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         ),
       });
     } finally {
-      setIsSnoozingRules(false);
       onActionPerformed();
     }
   }
 
   async function onScheduleAllClick() {
     onPerformingAction();
-    setIsSchedulingRules(true);
     try {
       if (isAllSelected) {
         setRulesToScheduleFilter(getFilter());
@@ -235,7 +238,6 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         ),
       });
     } finally {
-      setIsSchedulingRules(false);
       onActionPerformed();
     }
   }
@@ -256,7 +258,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         >
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.snoozeAllTitle"
-            defaultMessage="Snooze immediately"
+            defaultMessage="Snooze now"
           />
         </EuiButtonEmpty>
       </EuiFlexItem>

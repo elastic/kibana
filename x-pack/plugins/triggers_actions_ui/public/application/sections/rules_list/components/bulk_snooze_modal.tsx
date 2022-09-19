@@ -32,6 +32,7 @@ export type BulkSnoozeModalProps = {
   rulesToSnoozeFilter?: string;
   onClose: () => void;
   onSave: () => void;
+  setIsLoading: (isLoading: boolean) => void;
   onSearchPopulate?: (filter: string) => void;
 } & BulkOperationsComponentOpts;
 
@@ -48,6 +49,7 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
     rulesToSnoozeFilter,
     onClose,
     onSave,
+    setIsLoading,
     onSearchPopulate,
     bulkSnoozeRules,
     bulkUnsnoozeRules,
@@ -85,6 +87,7 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
 
   const onSnoozeRule = async (schedule: SnoozeSchedule) => {
     onClose();
+    setIsLoading(true);
     try {
       const response = await bulkSnoozeRules({
         ids: rulesToSnooze.map((item) => item.id),
@@ -97,11 +100,13 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
         title: failureMessage,
       });
     }
+    setIsLoading(false);
     onSave();
   };
 
   const onUnsnoozeRule = async (scheduleIds?: string[]) => {
     onClose();
+    setIsLoading(true);
     try {
       const response = await bulkUnsnoozeRules({
         ids: rulesToSnooze.map((item) => item.id),
@@ -114,6 +119,7 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
         title: failureMessage,
       });
     }
+    setIsLoading(false);
     onSave();
   };
 
@@ -124,7 +130,7 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
           <EuiModalHeaderTitle>
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.rulesList.bulkSnoozeModal.modalTitle"
-              defaultMessage="Snooze notifications"
+              defaultMessage="Add snooze now"
             />
             <EuiSpacer size="s" />
           </EuiModalHeaderTitle>

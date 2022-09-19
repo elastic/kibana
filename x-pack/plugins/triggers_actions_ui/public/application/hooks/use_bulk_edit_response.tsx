@@ -48,20 +48,6 @@ const apiKey = i18n.translate(
   }
 );
 
-const copySuccess = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleApi.bulkEditResponse.copySuccess',
-  {
-    defaultMessage: 'Rule names copied.',
-  }
-);
-
-const copyFailure = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleApi.bulkEditResponse.copyFailure',
-  {
-    defaultMessage: 'Failed to copy rule names.',
-  }
-);
-
 export type BulkEditProperty = 'snooze' | 'snoozeSchedule' | 'apiKey';
 
 const translationMap: Record<BulkEditProperty, string> = {
@@ -80,25 +66,12 @@ export function useBulkEditResponse(props: UseBulkEditResponseProps) {
     notifications: { toasts },
   } = useKibana().services;
 
-  const onCopyToClipboard = useCallback(
-    async (response: BulkEditResponse) => {
-      const erroredRuleCsv = response.errors.map((error) => error.rule.name).join(',');
-      try {
-        await window.navigator.clipboard.writeText(erroredRuleCsv);
-        toasts.addSuccess(copySuccess);
-      } catch (error) {
-        toasts.addError(error, { title: copyFailure });
-      }
-    },
-    [toasts]
-  );
-
   const onSearchPopulateInternal = useCallback(
     (response: BulkEditResponse) => {
       if (!onSearchPopulate) {
         return;
       }
-      const filter = response.errors.map((error) => error.rule.name).join(' ');
+      const filter = response.errors.map((error) => error.rule.name).join(',');
       onSearchPopulate(filter);
     },
     [onSearchPopulate]
@@ -108,22 +81,6 @@ export function useBulkEditResponse(props: UseBulkEditResponseProps) {
     (response: BulkEditResponse) => {
       return (
         <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexItem grow={false}>
-            <div>
-              <EuiButtonEmpty
-                iconType="copyClipboard"
-                size="xs"
-                flush="left"
-                onClick={() => onCopyToClipboard(response)}
-                data-test-subj="bulkEditResponseCopyErrors"
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.ruleApi.bulkEditResponse.copyErrorsToClipboard"
-                  defaultMessage="Copy errored rules to clipboard"
-                />
-              </EuiButtonEmpty>
-            </div>
-          </EuiFlexItem>
           {onSearchPopulate && (
             <EuiFlexItem grow={false}>
               <div>
@@ -145,7 +102,7 @@ export function useBulkEditResponse(props: UseBulkEditResponseProps) {
         </EuiFlexGroup>
       );
     },
-    [onCopyToClipboard, onSearchPopulate, onSearchPopulateInternal]
+    [onSearchPopulate, onSearchPopulateInternal]
   );
 
   const showToast = useCallback(

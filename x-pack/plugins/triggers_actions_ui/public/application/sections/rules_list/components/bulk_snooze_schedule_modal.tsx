@@ -53,6 +53,7 @@ export type BulkSnoozeScheduleModalProps = {
   numberOfSelectedRules?: number;
   onClose: () => void;
   onSave: () => void;
+  setIsLoading: (isLoading: boolean) => void;
   onSearchPopulate?: (filter: string) => void;
 } & BulkOperationsComponentOpts;
 
@@ -65,6 +66,7 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
     onSave,
     bulkSnoozeRules,
     bulkUnsnoozeRules,
+    setIsLoading,
     onSearchPopulate,
   } = props;
 
@@ -85,6 +87,7 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
 
   const onAddSnoozeSchedule = async (schedule: SnoozeSchedule) => {
     onClose();
+    setIsLoading(true);
     try {
       const response = await bulkSnoozeRules({
         ids: rulesToSchedule.map((item) => item.id),
@@ -97,12 +100,14 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
         title: failureMessage,
       });
     }
+    setIsLoading(false);
     onSave();
   };
 
   const onRemoveSnoozeSchedule = async () => {
     setShowConfirmation(false);
     onClose();
+    setIsLoading(true);
     try {
       const response = await bulkUnsnoozeRules({
         ids: rulesToSchedule.map((item) => item.id),
@@ -115,6 +120,7 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
         title: failureMessage,
       });
     }
+    setIsLoading(false);
     onSave();
   };
 
