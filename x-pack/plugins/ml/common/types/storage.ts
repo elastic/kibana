@@ -82,6 +82,7 @@ export const ML_STORAGE_KEYS = [
   ML_GETTING_STARTED_CALLOUT_DISMISSED,
   ML_FROZEN_TIER_PREFERENCE,
   ML_ANOMALY_EXPLORER_PANELS,
+  ML_NOTIFICATIONS_LAST_CHECKED_AT,
 ];
 
 export function isMlStorageKey(key: unknown): key is MlStorageKey {
