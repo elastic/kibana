@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { GuidedSetupPanel } from './guided_setup_panel';
+export { SetupGuidePanel } from './setup_guide_panel';

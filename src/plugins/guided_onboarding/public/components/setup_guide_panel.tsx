@@ -31,11 +31,11 @@ import { HttpStart } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { guidesConfig } from '../constants';
-import type { GuideConfig, StepStatus, GuidedSetupState, StepConfig } from '../types';
+import type { GuideConfig, StepStatus, SetupGuideState, StepConfig } from '../types';
 import type { ApiService } from '../services/api';
 
-import { GuidedSetupStep } from './guided_setup_panel_step';
-import { setupGuidePanelStyles } from './guided_setup_panel.styles';
+import { SetupGuideStep } from './setup_guide_panel_step';
+import { setupGuidePanelStyles } from './setup_guide_panel.styles';
 
 interface Props {
   api: ApiService;
@@ -43,7 +43,7 @@ interface Props {
   http: HttpStart;
 }
 
-const getConfig = (state?: GuidedSetupState): GuideConfig | undefined => {
+const getConfig = (state?: SetupGuideState): GuideConfig | undefined => {
   if (state?.activeGuide && state.activeGuide !== 'unset') {
     return guidesConfig[state.activeGuide];
   }
@@ -51,7 +51,7 @@ const getConfig = (state?: GuidedSetupState): GuideConfig | undefined => {
   return undefined;
 };
 
-const getCurrentStep = (steps?: StepConfig[], state?: GuidedSetupState): number | undefined => {
+const getCurrentStep = (steps?: StepConfig[], state?: SetupGuideState): number | undefined => {
   if (steps && state?.activeStep) {
     const activeStepIndex = steps.findIndex((step: StepConfig) => step.id === state.activeStep);
     if (activeStepIndex > -1) {
@@ -76,10 +76,10 @@ const getStepStatus = (steps: StepConfig[], stepIndex: number, activeStep?: stri
   return 'complete';
 };
 
-export const GuidedSetupPanel = ({ api, application }: Props) => {
+export const SetupGuidePanel = ({ api, application }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [isGuideOpen, setIsGuideOpen] = useState(false);
-  const [guidedSetupState, setGuidedSetupState] = useState<GuidedSetupState | undefined>(undefined);
+  const [setupGuideState, setSetupGuideState] = useState<SetupGuideState | undefined>(undefined);
   const isFirstRender = useRef(true);
 
   const styles = setupGuidePanelStyles(euiTheme);
@@ -96,14 +96,15 @@ export const GuidedSetupPanel = ({ api, application }: Props) => {
   };
 
   const navigateToLandingPage = () => {
+    setIsGuideOpen(false);
     application.navigateToApp('home', { path: '#getting_started' });
   };
 
   useEffect(() => {
     const subscription = api.fetchGuideState$().subscribe((newState) => {
       if (
-        guidedSetupState?.activeGuide !== newState.activeGuide ||
-        guidedSetupState?.activeStep !== newState.activeStep
+        setupGuideState?.activeGuide !== newState.activeGuide ||
+        setupGuideState?.activeStep !== newState.activeStep
       ) {
         if (isFirstRender.current) {
           isFirstRender.current = false;
@@ -111,12 +112,12 @@ export const GuidedSetupPanel = ({ api, application }: Props) => {
           setIsGuideOpen(true);
         }
       }
-      setGuidedSetupState(newState);
+      setSetupGuideState(newState);
     });
     return () => subscription.unsubscribe();
-  }, [api, guidedSetupState?.activeGuide, guidedSetupState?.activeStep]);
+  }, [api, setupGuideState?.activeGuide, setupGuideState?.activeStep]);
 
-  const guideConfig = getConfig(guidedSetupState);
+  const guideConfig = getConfig(setupGuideState);
 
   // TODO handle loading, error state
   // https://github.com/elastic/kibana/issues/139799, https://github.com/elastic/kibana/issues/139798
@@ -130,7 +131,7 @@ export const GuidedSetupPanel = ({ api, application }: Props) => {
     );
   }
 
-  const currentStep = getCurrentStep(guideConfig.steps, guidedSetupState);
+  const currentStep = getCurrentStep(guideConfig.steps, setupGuideState);
 
   return (
     <>
@@ -220,10 +221,10 @@ export const GuidedSetupPanel = ({ api, application }: Props) => {
 
               {guideConfig?.steps.map((step, index, steps) => {
                 const accordionId = htmlIdGenerator(`accordion${index}`)();
-                const stepStatus = getStepStatus(steps, index, guidedSetupState?.activeStep);
+                const stepStatus = getStepStatus(steps, index, setupGuideState?.activeStep);
 
                 return (
-                  <GuidedSetupStep
+                  <SetupGuideStep
                     accordionId={accordionId}
                     stepStatus={stepStatus}
                     stepConfig={step}
@@ -250,7 +251,7 @@ export const GuidedSetupPanel = ({ api, application }: Props) => {
                 <EuiText color="subdued" textAlign="center">
                   <FormattedMessage
                     id="guidedOnboarding.dropdownPanel.footer.feedbackDescription"
-                    defaultMessage={`How’s onboarding? We’d love your {feedbackLink}`}
+                    defaultMessage="How's onboarding? We’d love your {feedbackLink}"
                     values={{
                       feedbackLink: (
                         <EuiLink
@@ -258,12 +259,9 @@ export const GuidedSetupPanel = ({ api, application }: Props) => {
                           target="_blank"
                           external
                         >
-                          {i18n.translate(
-                            'guidedOnboarding.dropdownPanel.footer.feedbackDescription',
-                            {
-                              defaultMessage: 'feedback',
-                            }
-                          )}
+                          {i18n.translate('guidedOnboarding.dropdownPanel.footer.feedbackLabel', {
+                            defaultMessage: 'feedback',
+                          })}
                         </EuiLink>
                       ),
                     }}
@@ -275,7 +273,7 @@ export const GuidedSetupPanel = ({ api, application }: Props) => {
                 <EuiText color="subdued" textAlign="center">
                   <FormattedMessage
                     id="guidedOnboarding.dropdownPanel.footer.supportDescription"
-                    defaultMessage={`Other questions? We're {helpLink}`}
+                    defaultMessage="Other questions? We're {helpLink}"
                     values={{
                       helpLink: (
                         <EuiLink href="https://cloud.elastic.co/support " target="_blank" external>

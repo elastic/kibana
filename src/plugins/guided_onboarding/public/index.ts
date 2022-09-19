@@ -15,6 +15,6 @@ export function plugin(ctx: PluginInitializerContext) {
 export type {
   GuidedOnboardingPluginSetup,
   GuidedOnboardingPluginStart,
-  GuidedOnboardingState,
+  SetupGuideState,
   UseCase,
 } from './types';

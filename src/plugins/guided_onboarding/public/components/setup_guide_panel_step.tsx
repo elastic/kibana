@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiText,
@@ -22,8 +21,9 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import type { StepStatus, StepConfig } from '../types';
+import { setupGuidePanelStepStyles } from './setup_guide_panel_step.styles';
 
-interface GuidedSetupStepProps {
+interface SetupGuideStepProps {
   accordionId: string;
   stepStatus: StepStatus;
   stepConfig: StepConfig;
@@ -31,28 +31,15 @@ interface GuidedSetupStepProps {
   navigateToStep: (step: StepConfig) => void;
 }
 
-export const GuidedSetupStep = ({
+export const SetupGuideStep = ({
   accordionId,
   stepStatus,
   stepNumber,
   stepConfig,
   navigateToStep,
-}: GuidedSetupStepProps) => {
+}: SetupGuideStepProps) => {
   const { euiTheme } = useEuiTheme();
-
-  const stepNumberCss = css`
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    border: 2px solid ${euiTheme.colors.success};
-    font-weight: ${euiTheme.font.weight.medium};
-    text-align: center;
-    line-height: 1.4;
-  `;
-
-  const stepTitleCss = css`
-    font-weight: ${euiTheme.font.weight.bold};
-  `;
+  const styles = setupGuidePanelStepStyles(euiTheme);
 
   const buttonContent = (
     <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="center" alignItems="center">
@@ -60,11 +47,11 @@ export const GuidedSetupStep = ({
         {stepStatus === 'complete' ? (
           <EuiIcon type="checkInCircleFilled" size="l" color={euiTheme.colors.success} />
         ) : (
-          <span css={stepNumberCss}>{stepNumber}</span>
+          <span css={styles.stepNumber}>{stepNumber}</span>
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size="m" css={stepTitleCss}>
+        <EuiText size="m" css={styles.stepTitle}>
           {stepConfig.title}
         </EuiText>
       </EuiFlexItem>

@@ -44,7 +44,7 @@ export interface GuideConfig {
   steps: StepConfig[];
 }
 
-export interface GuidedSetupState {
+export interface SetupGuideState {
   activeGuide: UseCase | 'unset';
   activeStep: string | 'unset';
 }

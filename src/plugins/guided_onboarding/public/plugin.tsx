@@ -26,7 +26,7 @@ import {
   GuidedOnboardingPluginSetup,
   GuidedOnboardingPluginStart,
 } from './types';
-import { GuidedSetupPanel } from './components';
+import { SetupGuidePanel } from './components';
 import { ApiService, apiService } from './services/api';
 
 export class GuidedOnboardingPlugin
@@ -84,7 +84,7 @@ export class GuidedOnboardingPlugin
     ReactDOM.render(
       <KibanaThemeProvider theme$={theme$}>
         <I18nProvider>
-          <GuidedSetupPanel api={api} application={application} http={http} />
+          <SetupGuidePanel api={api} application={application} http={http} />
         </I18nProvider>
       </KibanaThemeProvider>,
       targetDomElement
