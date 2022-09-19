@@ -138,16 +138,15 @@ export function createCallerCalleeGraph(
   for (const traceHash of relevantTracesSorted) {
     const trace = relevantTraces.get(traceHash)!;
 
-    // The slice of frames is ordered so that the leaf function is at index 0.
-    // This means that the "second part" of the slice are the callers, and the
-    // "first part" are the callees.
+    // The slice of frames is ordered so that the leaf function is at the
+    // highest index. This means that the "first part" of the slice are the
+    // callers, and the "second part" are the callees.
     //
     // We currently assume there are no callers.
     const callees = trace.frames;
     const numCallees = callees.length;
     const samples = traces.get(traceHash)!;
 
-    // Go through the callees, reverse iteration
     let currentNode = root;
     root.Samples += samples;
 
