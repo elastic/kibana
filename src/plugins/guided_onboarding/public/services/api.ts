@@ -7,10 +7,11 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import { BehaviorSubject, map, from, concatMap, of } from 'rxjs';
+import { BehaviorSubject, map, from, concatMap, of, Observable, firstValueFrom } from 'rxjs';
 
 import { API_BASE_PATH } from '../../common';
-import { GuidedOnboardingState } from '../types';
+import { GuidedOnboardingState, UseCase } from '../types';
+import { getNextStep, isLastStepActive } from './helpers';
 
 export class ApiService {
   private client: HttpSetup | undefined;
@@ -21,7 +22,7 @@ export class ApiService {
     this.onboardingGuideState$ = new BehaviorSubject<GuidedOnboardingState | undefined>(undefined);
   }
 
-  public fetchGuideState$() {
+  public fetchGuideState$(): Observable<GuidedOnboardingState> {
     // TODO add error handling if this.client has not been initialized or request fails
     return this.onboardingGuideState$.pipe(
       concatMap((state) =>
@@ -34,7 +35,9 @@ export class ApiService {
     );
   }
 
-  public async updateGuideState(newState: GuidedOnboardingState) {
+  public async updateGuideState(
+    newState: GuidedOnboardingState
+  ): Promise<{ state: GuidedOnboardingState } | undefined> {
     if (!this.client) {
       throw new Error('ApiService has not be initialized.');
     }
@@ -53,6 +56,35 @@ export class ApiService {
       // eslint-disable-next-line no-console
       console.error(error);
     }
+  }
+
+  public isGuideStepActive$(guideID: string, stepID: string): Observable<boolean> {
+    return this.fetchGuideState$().pipe(
+      map((state) => {
+        return state ? state.activeGuide === guideID && state.activeStep === stepID : false;
+      })
+    );
+  }
+
+  public async completeGuideStep(
+    guideID: string,
+    stepID: string
+  ): Promise<{ state: GuidedOnboardingState } | undefined> {
+    const isStepActive = await firstValueFrom(this.isGuideStepActive$(guideID, stepID));
+    if (isStepActive) {
+      if (isLastStepActive(guideID, stepID)) {
+        await this.updateGuideState({ activeGuide: guideID as UseCase, activeStep: 'completed' });
+      } else {
+        const nextStepID = getNextStep(guideID, stepID);
+        if (nextStepID !== undefined) {
+          await this.updateGuideState({
+            activeGuide: guideID as UseCase,
+            activeStep: nextStepID,
+          });
+        }
+      }
+    }
+    return undefined;
   }
 }
 
