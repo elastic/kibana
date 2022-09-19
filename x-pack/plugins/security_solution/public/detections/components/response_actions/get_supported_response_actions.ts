@@ -14,7 +14,6 @@ export interface ResponseActionType {
   id: RESPONSE_ACTION_TYPES;
   name: string;
   iconClass: string;
-  description: string;
 }
 
 export const getSupportedResponseActions = (
