@@ -8,7 +8,6 @@ import React, { useCallback, ChangeEvent, MouseEvent } from 'react';
 import {
   EuiButtonEmpty,
   EuiPanel,
-  EuiRange,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
@@ -26,6 +25,7 @@ import {
   TTY_START,
   VIEW_IN_SESSION,
 } from './translations';
+import { TTYPlayerControlsMarkers } from './tty_player_controls_markers';
 
 export interface TTYPlayerControlsDeps {
   currentProcessEvent: ProcessEvent | undefined;
@@ -71,19 +71,12 @@ export const TTYPlayerControls = ({
   }, [linesLength, onSeekLine]);
 
   const seekToPrevProcess = useCallback(() => {
-    let index = findIndex(processStartMarkers, (marker) => {
-      if (marker.line > currentLine) {
-        return true;
-      }
+    const index =
+      currentLine > processStartMarkers[processStartMarkers.length - 1].line
+        ? processStartMarkers.length
+        : findIndex(processStartMarkers, (marker) => marker.line >= currentLine);
 
-      return false;
-    });
-
-    if (index === -1) {
-      index = processStartMarkers.length - 1;
-    }
-
-    const previousMarker = processStartMarkers[index - 2];
+    const previousMarker = processStartMarkers[index - 1];
     onSeekLine(previousMarker?.line || 0);
   }, [processStartMarkers, onSeekLine, currentLine]);
 
@@ -97,7 +90,7 @@ export const TTYPlayerControls = ({
     });
 
     const nextMarker = processStartMarkers[nextIndex];
-    onSeekLine(nextMarker?.line || linesLength);
+    onSeekLine(nextMarker?.line || linesLength - 1);
   }, [processStartMarkers, onSeekLine, linesLength, currentLine]);
 
   const handleViewInSession = useCallback(() => {
@@ -180,13 +173,12 @@ export const TTYPlayerControls = ({
             />
           </EuiToolTip>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiRange
-            value={currentLine}
-            min={0}
-            max={Math.max(0, linesLength - 1)}
+        <EuiFlexItem style={{ position: 'relative' }}>
+          <TTYPlayerControlsMarkers
+            processStartMarkers={processStartMarkers}
+            linesLength={linesLength}
+            currentLine={currentLine}
             onChange={onLineChange}
-            fullWidth
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
