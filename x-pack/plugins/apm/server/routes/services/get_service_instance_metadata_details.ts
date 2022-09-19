@@ -47,6 +47,7 @@ export async function getServiceInstanceMetadataDetails({
           events: [ProcessorEvent.metric],
         },
         body: {
+          track_total_hits: false,
           terminate_after: 1,
           size: 1,
           query: {
@@ -69,6 +70,7 @@ export async function getServiceInstanceMetadataDetails({
           events: [ProcessorEvent.transaction],
         },
         body: {
+          track_total_hits: false,
           terminate_after: 1,
           size: 1,
           query: { bool: { filter } },
@@ -87,6 +89,7 @@ export async function getServiceInstanceMetadataDetails({
           events: [getProcessorEventForTransactions(true)],
         },
         body: {
+          track_total_hits: false,
           terminate_after: 1,
           size: 1,
           query: {

@@ -22,6 +22,7 @@ export async function hasHistoricalAgentData(setup: Setup) {
       ],
     },
     body: {
+      track_total_hits: 1,
       size: 0,
     },
   };

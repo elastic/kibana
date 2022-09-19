@@ -47,6 +47,7 @@ export async function getServicesFromErrorAndMetricDocuments({
         events: [ProcessorEvent.metric, ProcessorEvent.error],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {

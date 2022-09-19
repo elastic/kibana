@@ -76,6 +76,7 @@ export async function getTopDependencySpans({
         events: [ProcessorEvent.span],
       },
       body: {
+        track_total_hits: false,
         size: MAX_NUM_SPANS,
         query: {
           bool: {
@@ -123,6 +124,7 @@ export async function getTopDependencySpans({
         events: [ProcessorEvent.transaction],
       },
       body: {
+        track_total_hits: false,
         size: transactionIds.length,
         query: {
           bool: {

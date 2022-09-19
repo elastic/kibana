@@ -90,6 +90,7 @@ export async function getFailedTransactionRate({
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: { bool: { filter } },
       aggs: {

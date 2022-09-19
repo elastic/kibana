@@ -68,6 +68,7 @@ export async function runTypeCheckCli() {
         ...['--emitDeclarationOnly', 'false'],
         '--noEmit',
         '--pretty',
+        '--watch',
         ...(flags['skip-lib-check']
           ? ['--skipLibCheck', flags['skip-lib-check'] as string]
           : ['--skipLibCheck', 'false']),

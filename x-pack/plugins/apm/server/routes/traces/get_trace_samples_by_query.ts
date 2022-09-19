@@ -54,6 +54,7 @@ export async function getTraceSamplesByQuery({
             ],
           },
           body: {
+            track_total_hits: false,
             size: 0,
             query: {
               bool: {
@@ -121,6 +122,7 @@ export async function getTraceSamplesByQuery({
         events: [ProcessorEvent.transaction],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {

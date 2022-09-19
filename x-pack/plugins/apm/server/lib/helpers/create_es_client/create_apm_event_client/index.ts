@@ -43,6 +43,7 @@ export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   };
   body: {
     size: number;
+    track_total_hits: boolean | number;
   };
 };
 

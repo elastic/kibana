@@ -62,6 +62,7 @@ export const fetchDurationRanges = async ({
       events: [getEventType(chartType, searchMetrics)],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: getCommonCorrelationsQuery({
         start,

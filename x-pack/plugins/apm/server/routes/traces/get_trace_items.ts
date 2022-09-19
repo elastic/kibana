@@ -36,6 +36,7 @@ export async function getTraceItems(
       events: [ProcessorEvent.error],
     },
     body: {
+      track_total_hits: false,
       size: maxTraceItems,
       query: {
         bool: {
@@ -54,6 +55,7 @@ export async function getTraceItems(
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
     body: {
+      track_total_hits: maxTraceItems + 1,
       size: maxTraceItems,
       query: {
         bool: {
@@ -71,7 +73,6 @@ export async function getTraceItems(
         { [TRANSACTION_DURATION]: { order: 'desc' as const } },
         { [SPAN_DURATION]: { order: 'desc' as const } },
       ] as Sort,
-      track_total_hits: true,
     },
   });
 

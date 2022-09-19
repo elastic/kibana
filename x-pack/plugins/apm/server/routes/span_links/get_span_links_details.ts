@@ -68,6 +68,7 @@ async function fetchSpanLinksDetails({
       AGENT_NAME,
     ],
     body: {
+      track_total_hits: false,
       size: 1000,
       query: {
         bool: {

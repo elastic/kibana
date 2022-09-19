@@ -53,6 +53,7 @@ export const fetchFailedEventsCorrelationPValues = async ({
         events: [eventType],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {

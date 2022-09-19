@@ -74,6 +74,7 @@ export const getDestinationMap = ({
         events: [ProcessorEvent.span],
       },
       body: {
+        track_total_hits: 10_000,
         size: 0,
         query: {
           bool: {
@@ -144,6 +145,7 @@ export const getDestinationMap = ({
           events: [ProcessorEvent.transaction],
         },
         body: {
+          track_total_hits: 10_000,
           query: {
             bool: {
               filter: [
