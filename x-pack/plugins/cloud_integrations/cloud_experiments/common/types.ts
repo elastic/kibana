@@ -9,6 +9,8 @@ import { FEATURE_FLAG_NAMES, METRIC_NAMES } from './constants';
 
 /**
  * The contract of the setup lifecycle method.
+ *
+ * @public
  */
 export interface CloudExperimentsPluginSetup {
   /**
