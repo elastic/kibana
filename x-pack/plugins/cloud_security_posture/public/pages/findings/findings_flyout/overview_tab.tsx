@@ -22,7 +22,7 @@ import { CSP_MOMENT_FORMAT } from '../../../common/constants';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
 import { useLatestFindingsDataView } from '../../../common/api/use_latest_findings_data_view';
 import { useKibana } from '../../../common/hooks/use_kibana';
-import { CspFinding } from '../types';
+import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { CisKubernetesIcons, Markdown, CodeBlock } from './findings_flyout';
 
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &

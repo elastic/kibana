@@ -24,7 +24,7 @@ import {
 import { assertNever } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
-import type { CspFinding } from '../types';
+import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import { ResourceTab } from './resource_tab';
 import { JsonTab } from './json_tab';

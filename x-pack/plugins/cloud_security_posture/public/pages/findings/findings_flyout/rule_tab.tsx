@@ -8,7 +8,7 @@
 import { EuiBadge, EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { CspFinding } from '../types';
+import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { CisKubernetesIcons, Markdown } from './findings_flyout';
 
 export const getRuleList = (rule: CspFinding['rule']) => [
