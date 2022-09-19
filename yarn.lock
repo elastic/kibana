@@ -5699,10 +5699,10 @@
     "@types/use-sync-external-store" "^0.0.3"
     use-sync-external-store "^1.2.0"
 
-"@testim/chrome-version@^1.1.2":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@testim/chrome-version/-/chrome-version-1.1.2.tgz#092005c5b77bd3bb6576a4677110a11485e11864"
-  integrity sha512-1c4ZOETSRpI0iBfIFUqU4KqwBAB2lHUAlBjZz/YqOHqwM9dTTzjV6Km0ZkiEiSCx/tLr1BtESIKyWWMww+RUqw==
+"@testim/chrome-version@^1.1.3":
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/@testim/chrome-version/-/chrome-version-1.1.3.tgz#fbb68696899d7b8c1b9b891eded9c04fe2cd5529"
+  integrity sha512-g697J3WxV/Zytemz8aTuKjTGYtta9+02kva3C1xc7KXB8GdbfE1akGJIsZLyY/FSh2QrnE+fiB7vmWU3XNcb6A==
 
 "@testing-library/dom@^8.0.0", "@testing-library/dom@^8.12.0":
   version "8.12.0"
@@ -8430,10 +8430,10 @@
   resolved "https://registry.yarnpkg.com/@types/seedrandom/-/seedrandom-2.4.28.tgz#9ce8fa048c1e8c85cb71d7fe4d704e000226036f"
   integrity sha512-SMA+fUwULwK7sd/ZJicUztiPs8F1yCPwF3O23Z9uQ32ME5Ha0NmDK9+QTsYE4O2tHXChzXomSWWeIhCnoN1LqA==
 
-"@types/selenium-webdriver@^4.1.2":
-  version "4.1.2"
-  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.2.tgz#9c6d8d6bea08b312e890aaa5915fb2228fa62486"
-  integrity sha512-NCn1vqHC2hDgZmOuiDa4xgyo3FBZuqB+wXg5t8YcwnjIi2ufGTowqcnbUAKGHxY7z/OFfv4MnaVfuJ7gJ/xBsw==
+"@types/selenium-webdriver@^4.1.5":
+  version "4.1.5"
+  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.5.tgz#ea16f2c0ff7f15828016ef62ef4623e0c7b31cfd"
+  integrity sha512-Lfu97JK5b2jAxCUHH8uMjmhUiQZCGDyVzSAskFFZuWcprtcwjMkEPZE/SiIM5hOGQJVs982BAF26a3kmw8iiJw==
   dependencies:
     "@types/ws" "*"
 
@@ -11122,16 +11122,16 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^104.0.0:
-  version "104.0.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-104.0.0.tgz#2f730f52a567280872567bf3497e1c673b6f4275"
-  integrity sha512-zbHZutN2ATo19xA6nXwwLn+KueD/5w8ap5m4b6bCb8MIaRFnyDwMbFoy7oFAjlSMpCFL3KSaZRiWUwjj//N3yQ==
+chromedriver@^105.0.1:
+  version "105.0.1"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-105.0.1.tgz#325cf05aca200328176438991d236ddb6c61711b"
+  integrity sha512-QqylH9mvl4Ybq3mmHsym7jeq/LhEi2sPtD8ffd9ixiDFdPRlh2F4vzrzK+myj1MiXb0TYJK7+OCcMEmsB3Sm/Q==
   dependencies:
-    "@testim/chrome-version" "^1.1.2"
+    "@testim/chrome-version" "^1.1.3"
     axios "^0.27.2"
-    del "^6.0.0"
+    del "^6.1.1"
     extract-zip "^2.0.1"
-    https-proxy-agent "^5.0.0"
+    https-proxy-agent "^5.0.1"
     proxy-from-env "^1.1.0"
     tcp-port-used "^1.0.1"
 
@@ -12990,7 +12990,7 @@ del@^4.1.1:
     pify "^4.0.1"
     rimraf "^2.6.3"
 
-del@^6.0.0, del@^6.1.0, del@^6.1.1:
+del@^6.1.0, del@^6.1.1:
   version "6.1.1"
   resolved "https://registry.yarnpkg.com/del/-/del-6.1.1.tgz#3b70314f1ec0aa325c6b14eb36b95786671edb7a"
   integrity sha512-ua8BhapfP0JUJKC/zV9yHHDW/rDoDxP4Zhn3AkA6/xT6gY7jYXJiaeyBZznYVujhZZET+UgcbZiQ7sN3WqcImg==
@@ -16557,6 +16557,14 @@ https-proxy-agent@5.0.0, https-proxy-agent@^5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/https-proxy-agent/-/https-proxy-agent-5.0.0.tgz#e2a90542abb68a762e0a0850f6c9edadfd8506b2"
   integrity sha512-EkYm5BcKUGiduxzSt3Eppko+PiNWNEpa4ySk9vTC6wDsQJW9rHSa+UhGNJoRYp7bz6Ht1eaRIa6QaJqO5rCFbA==
+  dependencies:
+    agent-base "6"
+    debug "4"
+
+https-proxy-agent@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/https-proxy-agent/-/https-proxy-agent-5.0.1.tgz#c59ef224a04fe8b754f3db0063a25ea30d0005d6"
+  integrity sha512-dFcAjpTQFgoLMzC2VwU+C/CbS7uRL0lWmxDITmqm7C+7F0Odmj6s9l6alZc6AELXhrnggM2CeWSXHGOdX2YtwA==
   dependencies:
     agent-base "6"
     debug "4"
