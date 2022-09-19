@@ -119,7 +119,13 @@ describe('suggestions', () => {
           state: undefined,
           keptLayerIds: ['first'],
         }).map((s) => [s.hide, s.score])
-      ).toEqual([[true, 0], [true, 0], [true, 0], [true, 0], [true, 0]]);
+      ).toEqual([
+        [true, 0],
+        [true, 0],
+        [true, 0],
+        [true, 0],
+        [true, 0],
+      ]);
     });
 
     it('should hide histogram operations', () => {
@@ -148,7 +154,13 @@ describe('suggestions', () => {
           state: undefined,
           keptLayerIds: ['first'],
         }).map((s) => [s.hide, s.score])
-      ).toEqual([[true, 0], [true, 0], [true, 0], [true, 0], [true, 0]]);
+      ).toEqual([
+        [true, 0],
+        [true, 0],
+        [true, 0],
+        [true, 0],
+        [true, 0],
+      ]);
     });
 
     it('should not reject histogram operations in case of switching between partition charts', () => {

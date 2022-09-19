@@ -38,7 +38,7 @@ describe('getConfiguration', () => {
         },
       ],
       shape: 'donut',
-      palette: undefined
+      palette: undefined,
     });
   });
 });
