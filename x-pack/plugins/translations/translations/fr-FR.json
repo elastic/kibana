@@ -9568,7 +9568,6 @@
     "xpack.csp.cloudPosturePage.errorRenderer.errorTitle": "Nous n'avons pas pu récupérer vos données sur le niveau de sécurité du cloud.",
     "xpack.csp.cloudPosturePage.loadingDescription": "Chargement...",
     "xpack.csp.cloudPosturePage.packageNotInstalled.buttonLabel": "Ajouter une intégration CIS",
-    "xpack.csp.cloudPosturePage.packageNotInstalled.description": "Utilisez notre intégration CIS Kubernetes Benchmark pour mesurer votre configuration de cluster Kubernetes par rapport aux recommandations du CIS.",
     "xpack.csp.cloudPosturePage.packageNotInstalled.pageTitle": "Installer l'intégration pour commencer",
     "xpack.csp.cloudPosturePage.packageNotInstalled.solutionNameLabel": "Niveau de sécurité du cloud",
     "xpack.csp.cspEvaluationBadge.failLabel": "Échec",

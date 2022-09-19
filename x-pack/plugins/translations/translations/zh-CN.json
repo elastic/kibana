@@ -9570,7 +9570,6 @@
     "xpack.csp.cloudPosturePage.errorRenderer.errorTitle": "我们无法提取您的云安全态势数据",
     "xpack.csp.cloudPosturePage.loadingDescription": "正在加载……",
     "xpack.csp.cloudPosturePage.packageNotInstalled.buttonLabel": "添加 CIS 集成",
-    "xpack.csp.cloudPosturePage.packageNotInstalled.description": "使用我们的 CIS Kubernetes 基准集成根据 CIS 建议衡量 Kubernetes 集群设置。",
     "xpack.csp.cloudPosturePage.packageNotInstalled.pageTitle": "安装集成以开始",
     "xpack.csp.cloudPosturePage.packageNotInstalled.solutionNameLabel": "云安全态势",
     "xpack.csp.cspEvaluationBadge.failLabel": "失败",
