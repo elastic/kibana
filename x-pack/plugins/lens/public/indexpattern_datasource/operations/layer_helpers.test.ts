@@ -102,6 +102,8 @@ const indexPattern = {
   hasRestrictions: false,
   fields: indexPatternFields,
   getFieldByName: getFieldByNameFactory([...indexPatternFields, documentField]),
+  isPersisted: true,
+  spec: {},
 };
 
 describe('state_helpers', () => {
@@ -2820,6 +2822,8 @@ describe('state_helpers', () => {
       hasRestrictions: true,
       getFieldByName: getFieldByNameFactory(fields),
       fields,
+      isPersisted: true,
+      spec: {},
     };
 
     it('should switch index pattern id in layer', () => {

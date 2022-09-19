@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { Teletype } from '../../../common/types/process_tree';
 import { DEFAULT_TTY_FONT_SIZE } from '../../../common/constants';
@@ -15,6 +15,7 @@ export interface TTYTextSizerDeps {
   tty?: Teletype;
   containerHeight: number;
   fontSize: number;
+  isFullscreen: boolean;
   onFontSizeChanged(newSize: number): void;
 }
 
@@ -26,34 +27,48 @@ export const TTYTextSizer = ({
   tty,
   containerHeight,
   fontSize,
+  isFullscreen,
   onFontSizeChanged,
 }: TTYTextSizerDeps) => {
   const styles = useStyles();
-  const onFitFontSize = useMemo(() => {
-    if (tty?.rows && containerHeight) {
-      const lineHeight = DEFAULT_TTY_FONT_SIZE * LINE_HEIGHT_SCALE_RATIO;
-      const desiredHeight = tty.rows * lineHeight;
-      return DEFAULT_TTY_FONT_SIZE * (containerHeight / desiredHeight);
-    }
-
-    return DEFAULT_TTY_FONT_SIZE;
-  }, [containerHeight, tty?.rows]);
-
-  const onFit = useCallback(() => {
-    if (fontSize === onFitFontSize || onFitFontSize > DEFAULT_TTY_FONT_SIZE) {
-      onFontSizeChanged(DEFAULT_TTY_FONT_SIZE);
-    } else {
-      onFontSizeChanged(onFitFontSize);
-    }
-  }, [fontSize, onFontSizeChanged, onFitFontSize]);
+  const [fit, setFit] = useState(false);
 
   const onZoomOut = useCallback(() => {
+    setFit(false);
     onFontSizeChanged(Math.max(MINIMUM_FONT_SIZE, fontSize - 1));
   }, [fontSize, onFontSizeChanged]);
 
   const onZoomIn = useCallback(() => {
+    setFit(false);
     onFontSizeChanged(Math.min(MAXIMUM_FONT_SIZE, fontSize + 1));
   }, [fontSize, onFontSizeChanged]);
+
+  useEffect(() => {
+    if (fit && tty?.rows && containerHeight) {
+      const lineHeight = DEFAULT_TTY_FONT_SIZE * LINE_HEIGHT_SCALE_RATIO;
+      const desiredHeight = tty.rows * lineHeight;
+      const newSize = Math.floor(DEFAULT_TTY_FONT_SIZE * (containerHeight / desiredHeight));
+
+      if (newSize !== fontSize) {
+        onFontSizeChanged(newSize);
+      }
+    }
+  }, [containerHeight, fit, fontSize, onFontSizeChanged, tty?.rows]);
+
+  useEffect(() => {
+    if (isFullscreen) {
+      setFit(true);
+    }
+  }, [isFullscreen]);
+
+  const onToggleFit = useCallback(() => {
+    const newValue = !fit;
+    setFit(newValue);
+
+    if (!newValue) {
+      onFontSizeChanged(DEFAULT_TTY_FONT_SIZE);
+    }
+  }, [fit, setFit, onFontSizeChanged]);
 
   return (
     <EuiFlexGroup
@@ -70,8 +85,9 @@ export const TTYTextSizer = ({
           <EuiButtonIcon
             data-test-subj="sessionView:TTYZoomFit"
             aria-label={ZOOM_FIT}
-            iconType={onFitFontSize === fontSize ? 'expand' : 'minimize'}
-            onClick={onFit}
+            display={fit ? 'fill' : 'empty'}
+            iconType={fit ? 'expand' : 'minimize'}
+            onClick={onToggleFit}
           />
         </EuiToolTip>
       </EuiFlexItem>

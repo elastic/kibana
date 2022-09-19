@@ -44,7 +44,7 @@ describe('AssigneesFilterPopover', () => {
     await waitForEuiPopoverOpen();
 
     fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'dingo' } });
-    userEvent.click(screen.getByText('wet_dingo@elastic.co'));
+    userEvent.click(screen.getByText('WD'));
 
     expect(onSelectionChange.mock.calls[0][0]).toMatchInlineSnapshot(`
           Array [
@@ -75,7 +75,7 @@ describe('AssigneesFilterPopover', () => {
     await waitForEuiPopoverOpen();
 
     fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'dingo' } });
-    userEvent.click(screen.getByText('wet_dingo@elastic.co'));
+    userEvent.click(screen.getByText('WD'));
     userEvent.click(screen.getByText('damaged_raccoon@elastic.co'));
 
     expect(onSelectionChange.mock.calls[0][0]).toMatchInlineSnapshot(`

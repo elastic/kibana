@@ -43,6 +43,7 @@ describe('onSaveSearch', () => {
       savedSearch: savedSearchMock,
       services: serviceMock,
       state: stateMock,
+      updateAdHocDataViewId: jest.fn(),
     });
 
     expect(savedObjectsPlugin.showSaveModal).toHaveBeenCalled();
@@ -70,6 +71,7 @@ describe('onSaveSearch', () => {
       },
       services: serviceMock,
       state: stateMock,
+      updateAdHocDataViewId: jest.fn(),
     });
     expect(saveModal?.props.tags).toEqual(['tag1', 'tag2']);
   });
@@ -98,6 +100,7 @@ describe('onSaveSearch', () => {
       savedSearch,
       services: serviceMock,
       state: stateMock,
+      updateAdHocDataViewId: jest.fn(),
     });
     expect(savedSearch.tags).toEqual(['tag1', 'tag2']);
     jest
@@ -144,6 +147,7 @@ describe('onSaveSearch', () => {
         savedObjectsTagging: undefined,
       },
       state: stateMock,
+      updateAdHocDataViewId: jest.fn(),
     });
     expect(savedSearch.tags).toEqual(['tag1', 'tag2']);
     jest

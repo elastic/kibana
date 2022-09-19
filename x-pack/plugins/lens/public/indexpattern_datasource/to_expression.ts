@@ -57,7 +57,6 @@ function getExpressionForLayer(
   if (columnOrder.length === 0 || !indexPattern) {
     return null;
   }
-
   const columns = { ...layer.columns };
   // make sure the columns are in topological order
   const sortedColumns = sortedReferences(
@@ -304,25 +303,25 @@ function getExpressionForLayer(
       ([, col]) => col.operationType === 'date_histogram'
     );
 
-    const columnsWithTimeScale = firstDateHistogramColumn
-      ? columnEntries.filter(
-          ([, col]) =>
-            col.timeScale &&
-            operationDefinitionMap[col.operationType].timeScalingMode &&
-            operationDefinitionMap[col.operationType].timeScalingMode !== 'disabled'
-        )
-      : [];
+    const columnsWithTimeScale = columnEntries.filter(
+      ([, col]) =>
+        col.timeScale &&
+        operationDefinitionMap[col.operationType].timeScalingMode &&
+        operationDefinitionMap[col.operationType].timeScalingMode !== 'disabled'
+    );
+
     const timeScaleFunctions: ExpressionAstFunction[] = columnsWithTimeScale.flatMap(
       ([id, col]) => {
         const scalingCall: ExpressionAstFunction = {
           type: 'function',
           function: 'lens_time_scale',
           arguments: {
-            dateColumnId: [firstDateHistogramColumn![0]],
+            dateColumnId: firstDateHistogramColumn?.length ? [firstDateHistogramColumn[0]] : [],
             inputColumnId: [id],
             outputColumnId: [id],
             outputColumnName: [col.label],
             targetUnit: [col.timeScale!],
+            reducedTimeRange: col.reducedTimeRange ? [col.reducedTimeRange] : [],
           },
         };
 
