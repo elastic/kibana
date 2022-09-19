@@ -107,11 +107,14 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         params: schema.object({
           connectorId: schema.string(),
         }),
+        body: schema.object({
+          nextSyncConfig: schema.string(),
+        }),
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      await startConnectorSync(client, request.params.connectorId);
+      await startConnectorSync(client, request.params.connectorId, request.body.nextSyncConfig);
       return response.ok();
     })
   );
