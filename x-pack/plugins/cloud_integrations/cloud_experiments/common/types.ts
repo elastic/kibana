@@ -67,6 +67,8 @@ export type CloudExperimentsMetricNames = keyof typeof METRIC_NAMES;
 
 /**
  * Definition of the metric to report back to the A/B testing service to measure the conversions.
+ *
+ * @public
  */
 export interface CloudExperimentsMetric<Data> {
   /**
