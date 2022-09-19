@@ -19,12 +19,13 @@ export interface TimeSeriesQueryParameters {
   logger: Logger;
   esClient: ElasticsearchClient;
   query: TimeSeriesQuery;
+  termLimit?: number;
 }
 
 export async function timeSeriesQuery(
   params: TimeSeriesQueryParameters
 ): Promise<TimeSeriesResult> {
-  const { logger, esClient, query: queryParams } = params;
+  const { logger, esClient, query: queryParams, termLimit } = params;
   const { index, timeWindowSize, timeWindowUnit, interval, timeField, dateStart, dateEnd } =
     queryParams;
 
@@ -63,15 +64,23 @@ export async function timeSeriesQuery(
   const isCountAgg = aggType === 'count';
   const isGroupAgg = !!termField;
 
+  let terms = termSize || DEFAULT_GROUPS;
+  terms = termLimit ? (terms > termLimit ? termLimit : terms) : terms
+
   let aggParent = esQuery.body;
 
   // first, add a group aggregation, if requested
   if (isGroupAgg) {
     aggParent.aggs = {
+      groupCardinalityAgg: {
+        cardinality: {
+          field: termField
+        }
+      },
       groupAgg: {
         terms: {
           field: termField,
-          size: termSize || DEFAULT_GROUPS,
+          size: terms,
         },
       },
     };
@@ -133,18 +142,19 @@ export async function timeSeriesQuery(
   } catch (err) {
     // console.log('time_series_query.ts error\n', JSON.stringify(err, null, 4));
     logger.warn(`${logPrefix} error: ${getEsErrorMessage(err)}`);
-    return { results: [] };
+    return { results: [], truncated: false };
   }
 
   // console.log('time_series_query.ts response\n', JSON.stringify(esResult, null, 4));
   logger.debug(`${logPrefix} result: ${JSON.stringify(esResult)}`);
-  return getResultFromEs(isCountAgg, isGroupAgg, esResult);
+  return getResultFromEs(isCountAgg, isGroupAgg, esResult, termLimit);
 }
 
 export function getResultFromEs(
   isCountAgg: boolean,
   isGroupAgg: boolean,
-  esResult: estypes.SearchResponse<unknown>
+  esResult: estypes.SearchResponse<unknown>,
+  termLimit?: number
 ): TimeSeriesResult {
   const aggregations = esResult?.aggregations || {};
 
@@ -155,14 +165,20 @@ export function getResultFromEs(
     aggregations.groupAgg = {
       buckets: [{ key: 'all documents', dateAgg }],
     };
+    aggregations.groupCardinalityAgg = {
+      value: 0
+    };
 
     delete aggregations.dateAgg;
   }
 
   // @ts-expect-error specify aggregations type explicitly
   const groupBuckets = aggregations.groupAgg?.buckets || [];
+  // @ts-expect-error specify aggregations type explicitly
+  const numGroupsTotal = aggregations.groupCardinalityAgg?.value ?? 0;
   const result: TimeSeriesResult = {
     results: [],
+    truncated: termLimit ? (numGroupsTotal > termLimit) : false,
   };
 
   for (const groupBucket of groupBuckets) {

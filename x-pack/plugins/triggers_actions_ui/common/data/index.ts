@@ -7,6 +7,7 @@
 
 export interface TimeSeriesResult {
   results: TimeSeriesResultRow[];
+  truncated: boolean;
 }
 
 export interface TimeSeriesResultRow {

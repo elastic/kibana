@@ -175,6 +175,7 @@ export function getRuleType(
       logger,
       esClient,
       query: queryParams,
+      termLimit: alertLimit,
     });
     logger.debug(`rule ${ID}:${ruleId} "${name}" query result: ${JSON.stringify(result)}`);
 
@@ -221,7 +222,7 @@ export function getRuleType(
       logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
     }
 
-    alertFactory.alertLimit.setLimitReached(true);
+    alertFactory.alertLimit.setLimitReached(result.truncated);
 
     const { getRecoveredAlerts } = services.alertFactory.done();
     for (const recoveredAlert of getRecoveredAlerts()) {
