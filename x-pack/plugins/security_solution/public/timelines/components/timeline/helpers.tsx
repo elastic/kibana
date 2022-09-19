@@ -15,7 +15,7 @@ import {
   getTableSkipFocus,
   stopPropagationAndPreventDefault,
 } from '@kbn/timelines-plugin/public';
-import { escapeQueryValue } from '../../../common/lib/keury';
+import { escapeQueryValue } from '../../../common/lib/kuery';
 
 import type { DataProvider, DataProvidersAnd } from './data_providers/data_provider';
 import { DataProviderType, EXISTS_OPERATOR } from './data_providers/data_provider';

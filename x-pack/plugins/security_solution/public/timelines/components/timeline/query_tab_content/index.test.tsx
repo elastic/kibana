@@ -27,7 +27,7 @@ import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { Direction } from '../../../../../common/search_strategy';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
-import * as helpers from '../../../../common/lib/keury';
+import * as helpers from '../../../../common/lib/kuery';
 
 jest.mock('../../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -47,7 +47,7 @@ jest.mock('../../../../common/containers/sourcerer/use_signal_helpers', () => ({
   useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
 
-jest.mock('../../../../common/lib/keury');
+jest.mock('../../../../common/lib/kuery');
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
