@@ -15,6 +15,7 @@ import type {
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Filter } from '@kbn/es-query';
 import { buildEqlSearchRequest } from '../build_events_query';
+import { createEnrichEventsFunction } from '../enrichments';
 
 import type {
   BulkCreate,
@@ -116,7 +117,15 @@ export const eqlExecutor = async ({
     }
 
     if (newSignals?.length) {
-      const createResult = await bulkCreate(newSignals);
+      const createResult = await bulkCreate(
+        newSignals,
+        undefined,
+        createEnrichEventsFunction({
+          services,
+          logger: ruleExecutionLogger,
+        })
+      );
+
       addToSearchAfterReturn({ current: result, next: createResult });
     }
     return result;

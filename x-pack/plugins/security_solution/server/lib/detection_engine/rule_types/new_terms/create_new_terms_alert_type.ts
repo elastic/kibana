@@ -34,6 +34,7 @@ import {
   createSearchAfterReturnType,
   logUnprocessedExceptionsWarnings,
 } from '../../signals/utils';
+import { createEnrichEventsFunction } from '../../signals/enrichments';
 
 export const createNewTermsAlertType = (
   createOptions: CreateRuleOptions
@@ -282,7 +283,11 @@ export const createNewTermsAlertType = (
 
           const bulkCreateResult = await bulkCreate(
             wrappedAlerts,
-            params.maxSignals - result.createdSignalsCount
+            params.maxSignals - result.createdSignalsCount,
+            createEnrichEventsFunction({
+              services,
+              logger: ruleExecutionLogger,
+            })
           );
 
           addToSearchAfterReturn({ current: result, next: bulkCreateResult });

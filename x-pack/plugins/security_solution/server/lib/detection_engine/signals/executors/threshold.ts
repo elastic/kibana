@@ -142,6 +142,7 @@ export const thresholdExecutor = async ({
     });
 
     // Build and index new alerts
+
     const createResult = await bulkCreateThresholdSignals({
       buckets,
       completeRule,
@@ -154,6 +155,7 @@ export const thresholdExecutor = async ({
       signalHistory,
       bulkCreate,
       wrapHits,
+      ruleExecutionLogger,
     });
 
     addToSearchAfterReturn({ current: result, next: createResult });
