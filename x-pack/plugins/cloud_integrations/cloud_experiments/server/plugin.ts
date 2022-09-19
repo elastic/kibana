@@ -77,8 +77,6 @@ export class CloudExperimentsPlugin
     core: CoreSetup,
     deps: CloudExperimentsPluginSetupDeps
   ): CloudExperimentsPluginSetup {
-    this.logger.debug('cloudExperiments: Setup');
-
     if (deps.usageCollection) {
       registerUsageCollector(deps.usageCollection, () => ({
         launchDarklyClient: this.launchDarklyClient,
@@ -95,7 +93,6 @@ export class CloudExperimentsPlugin
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('cloudExperiments: Started');
     return {
       getVariation: this.getVariation,
       reportMetric: this.reportMetric,
