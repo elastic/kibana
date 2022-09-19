@@ -3616,7 +3616,7 @@
             "label": "numberDisplay",
             "description": [],
             "signature": [
-              "\"percent\" | \"hidden\" | \"value\""
+              "\"value\" | \"percent\" | \"hidden\""
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
@@ -5349,76 +5349,6 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.Visualization.updateLayersConfigurationFromContext",
-            "type": "Function",
-            "tags": [],
-            "label": "updateLayersConfigurationFromContext",
-            "description": [
-              "\nUpdate the configuration for the visualization. This is used to update the state"
-            ],
-            "signature": [
-              "((props: VisualizationConfigurationFromContextChangeProps<T>) => T) | undefined"
-            ],
-            "path": "x-pack/plugins/lens/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.updateLayersConfigurationFromContext.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "props",
-                "description": [],
-                "signature": [
-                  "VisualizationConfigurationFromContextChangeProps<T>"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.Visualization.getVisualizationSuggestionFromContext",
-            "type": "Function",
-            "tags": [],
-            "label": "getVisualizationSuggestionFromContext",
-            "description": [
-              "\nUpdate the visualization state from the context."
-            ],
-            "signature": [
-              "((props: VisualizationStateFromContextChangeProps) => ",
-              "Suggestion",
-              ") | undefined"
-            ],
-            "path": "x-pack/plugins/lens/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.getVisualizationSuggestionFromContext.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "props",
-                "description": [],
-                "signature": [
-                  "VisualizationStateFromContextChangeProps"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "lens",
             "id": "def-public.Visualization.renderDimensionEditor",
             "type": "Function",
             "tags": [],
@@ -6335,6 +6265,40 @@
                 "description": [],
                 "signature": [
                   "T"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.getSuggestionFromConvertToLensContext",
+            "type": "Function",
+            "tags": [],
+            "label": "getSuggestionFromConvertToLensContext",
+            "description": [],
+            "signature": [
+              "((props: VisualizationStateFromContextChangeProps) => ",
+              "Suggestion",
+              ") | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getSuggestionFromConvertToLensContext.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "VisualizationStateFromContextChangeProps"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
@@ -8162,7 +8126,7 @@
             "section": "def-common.GaugeState",
             "text": "GaugeState"
           },
-          ", \"goal\" | \"min\" | \"metric\" | \"max\"> & { metricAccessor?: string | undefined; minAccessor?: string | undefined; maxAccessor?: string | undefined; goalAccessor?: string | undefined; } & { layerId: string; layerType: ",
+          ", \"metric\" | \"goal\" | \"min\" | \"max\"> & { metricAccessor?: string | undefined; minAccessor?: string | undefined; maxAccessor?: string | undefined; goalAccessor?: string | undefined; } & { layerId: string; layerType: ",
           {
             "pluginId": "lens",
             "scope": "common",
@@ -8311,7 +8275,7 @@
         "label": "LensSavedObjectAttributes",
         "description": [],
         "signature": [
-          "{ title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
+          "{ description?: string | undefined; title: string; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
           "Query",
           "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; filters: ",
           "Filter",
@@ -10145,7 +10109,7 @@
         "label": "OperationTypePost712",
         "description": [],
         "signature": [
-          "\"range\" | \"min\" | \"max\" | \"filters\" | \"count\" | \"date_histogram\" | \"percentile\" | \"sum\" | \"average\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\""
+          "\"range\" | \"min\" | \"max\" | \"filters\" | \"count\" | \"date_histogram\" | \"percentile\" | \"sum\" | \"average\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\""
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
         "deprecated": false,
@@ -10160,7 +10124,7 @@
         "label": "OperationTypePre712",
         "description": [],
         "signature": [
-          "\"range\" | \"min\" | \"max\" | \"filters\" | \"count\" | \"date_histogram\" | \"percentile\" | \"sum\" | \"terms\" | \"avg\" | \"median\" | \"cumulative_sum\" | \"derivative\" | \"moving_average\" | \"last_value\" | \"counter_rate\" | \"cardinality\""
+          "\"range\" | \"min\" | \"max\" | \"filters\" | \"count\" | \"date_histogram\" | \"percentile\" | \"sum\" | \"terms\" | \"avg\" | \"median\" | \"cumulative_sum\" | \"derivative\" | \"moving_average\" | \"counter_rate\" | \"last_value\" | \"cardinality\""
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
         "deprecated": false,
@@ -11002,7 +10966,7 @@
             "label": "numberDisplay",
             "description": [],
             "signature": [
-              "\"percent\" | \"hidden\" | \"value\""
+              "\"value\" | \"percent\" | \"hidden\""
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
@@ -11407,7 +11371,7 @@
         "label": "NumberDisplayType",
         "description": [],
         "signature": [
-          "\"percent\" | \"hidden\" | \"value\""
+          "\"value\" | \"percent\" | \"hidden\""
         ],
         "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,

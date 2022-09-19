@@ -286,6 +286,20 @@
           },
           {
             "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStatsProps.color",
+            "type": "string",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
             "id": "def-public.FieldStatsProps.datatestsubj",
             "type": "string",
             "tags": [],
@@ -306,7 +320,7 @@
             "label": "overrideMissingContent",
             "description": [],
             "signature": [
-              "((params?: { noDataFound?: boolean | undefined; } | undefined) => JSX.Element | null) | undefined"
+              "((params: { element: JSX.Element; noDataFound?: boolean | undefined; }) => JSX.Element | null) | undefined"
             ],
             "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
             "deprecated": false,
@@ -323,6 +337,20 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
+                  {
+                    "parentPluginId": "unifiedFieldList",
+                    "id": "def-public.FieldStatsProps.overrideMissingContent.$1.element",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "element",
+                    "description": [],
+                    "signature": [
+                      "JSX.Element"
+                    ],
+                    "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
                   {
                     "parentPluginId": "unifiedFieldList",
                     "id": "def-public.FieldStatsProps.overrideMissingContent.$1.noDataFound",
@@ -413,6 +441,27 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStatsProps.onAddFilter",
+            "type": "Function",
+            "tags": [],
+            "label": "onAddFilter",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "unifiedFieldList",
+                "scope": "public",
+                "docId": "kibUnifiedFieldListPluginApi",
+                "section": "def-public.AddFieldFilterHandler",
+                "text": "AddFieldFilterHandler"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -722,7 +771,82 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.AddFieldFilterHandler",
+        "type": "Type",
+        "tags": [],
+        "label": "AddFieldFilterHandler",
+        "description": [],
+        "signature": [
+          "(field: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          ", value: unknown, type: \"+\" | \"-\") => void"
+        ],
+        "path": "src/plugins/unified_field_list/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.AddFieldFilterHandler.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              }
+            ],
+            "path": "src/plugins/unified_field_list/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.AddFieldFilterHandler.$2",
+            "type": "Unknown",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/unified_field_list/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.AddFieldFilterHandler.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"+\" | \"-\""
+            ],
+            "path": "src/plugins/unified_field_list/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "unifiedFieldList",

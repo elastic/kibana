@@ -72,7 +72,6 @@ export const createThreatSignal = async ({
     const result = await searchAfterAndBulkCreate({
       buildReasonMessage: buildReasonMessageForThreatMatchAlert,
       bulkCreate,
-      completeRule,
       enrichment: threatEnrichment,
       eventsTelemetry,
       exceptionsList: exceptionItems,
