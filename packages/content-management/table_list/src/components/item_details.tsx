@@ -22,6 +22,13 @@ interface Props<T extends UserContentCommonSchema> extends InheritedProps<T> {
   searchTerm?: string;
 }
 
+/**
+ * Copied from https://stackoverflow.com/a/9310752
+ */
+const escapeRegExp = (text: string) => {
+  return text.replace(/[-\[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+};
+
 export function ItemDetails<T extends UserContentCommonSchema>({
   id,
   item,
@@ -74,7 +81,7 @@ export function ItemDetails<T extends UserContentCommonSchema>({
         >
           <EuiText>
             <h4>
-              <EuiHighlight highlightAll search={searchTerm}>
+              <EuiHighlight highlightAll search={escapeRegExp(searchTerm)}>
                 {title}
               </EuiHighlight>
             </h4>
@@ -99,7 +106,7 @@ export function ItemDetails<T extends UserContentCommonSchema>({
       {Boolean(description) && (
         <EuiText size="s">
           <p>
-            <EuiHighlight highlightAll search={searchTerm}>
+            <EuiHighlight highlightAll search={escapeRegExp(searchTerm)}>
               {description!}
             </EuiHighlight>
           </p>
