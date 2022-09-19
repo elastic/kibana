@@ -235,6 +235,7 @@ export function ChangeDataView({
                 onClick={() => {
                   setPopoverIsOpen(false);
                   onDataViewCreated();
+                  // go to dataview mode
                   if (isTextBasedLangSelected) {
                     setIsTextBasedLangSelected(false);
                     // clean up the Text based language query

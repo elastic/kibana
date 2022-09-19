@@ -12,12 +12,12 @@ import { DatasourceLayerPanelProps } from '../types';
 import { TextBasedLanguagesPrivateState } from './types';
 import { ChangeIndexPattern } from '../shared_components/dataview_picker/dataview_picker';
 
-export interface IndexPatternLayerPanelProps
+export interface TextBasedLanguageLayerPanelProps
   extends DatasourceLayerPanelProps<TextBasedLanguagesPrivateState> {
   state: TextBasedLanguagesPrivateState;
 }
 
-export function LayerPanel({ state, layerId, dataViews }: IndexPatternLayerPanelProps) {
+export function LayerPanel({ state, layerId, dataViews }: TextBasedLanguageLayerPanelProps) {
   const layer = state.layers[layerId];
   const dataView = dataViews.indexPatternRefs.find((ref) => ref.id === layer.index);
   const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingDataView', {

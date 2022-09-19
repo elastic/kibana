@@ -639,7 +639,6 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         ids.push(...Object.values(layerIds));
         newVizState = activeVisualization.initialize(() => ids[0]);
       }
-      const updater = datasourceMap[payload.newDatasourceId].insertLayer;
       const currentVizId = ids[0];
 
       const datasourceState = current(state).datasourceStates[payload.newDatasourceId]
@@ -647,7 +646,10 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         : datasourceMap[payload.newDatasourceId].createEmptyLayer(
             payload.currentIndexPatternId ?? ''
           );
-      const updatedState = updater(datasourceState, currentVizId);
+      const updatedState = datasourceMap[payload.newDatasourceId].insertLayer(
+        datasourceState,
+        currentVizId
+      );
 
       return {
         ...state,

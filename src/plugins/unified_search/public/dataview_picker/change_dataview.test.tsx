@@ -105,7 +105,7 @@ describe('DataView component', () => {
     expect(addFieldSpy).toHaveBeenCalled();
   });
 
-  it('should not render the add datavuew menu if onDataViewCreated is not given', async () => {
+  it('should not render the add dataview menu if onDataViewCreated is not given', async () => {
     await act(async () => {
       const component = mount(wrapDataViewComponentInContext(props, true));
       findTestSubject(component, 'dataview-trigger').simulate('click');
@@ -113,7 +113,7 @@ describe('DataView component', () => {
     });
   });
 
-  it('should render the add datavuew menu if onDataViewCreated is given', async () => {
+  it('should render the add dataview menu if onDataViewCreated is given', async () => {
     const addDataViewSpy = jest.fn();
     const component = mount(
       wrapDataViewComponentInContext({ ...props, onDataViewCreated: addDataViewSpy }, false)
@@ -140,5 +140,22 @@ describe('DataView component', () => {
     findTestSubject(component, 'dataview-trigger').simulate('click');
     const text = component.find('[data-test-subj="select-text-based-language-panel"]');
     expect(text.length).not.toBe(0);
+  });
+
+  it('should cleanup the query is on text based mode and add new dataview', async () => {
+    const component = mount(
+      wrapDataViewComponentInContext(
+        {
+          ...props,
+          onDataViewCreated: jest.fn(),
+          textBasedLanguages: [TextBasedLanguages.ESQL, TextBasedLanguages.SQL],
+          textBasedLanguage: TextBasedLanguages.SQL,
+        },
+        false
+      )
+    );
+    findTestSubject(component, 'dataview-trigger').simulate('click');
+    component.find('[data-test-subj="dataview-create-new"]').first().simulate('click');
+    expect(props.onTextLangQuerySubmit).toHaveBeenCalled();
   });
 });
