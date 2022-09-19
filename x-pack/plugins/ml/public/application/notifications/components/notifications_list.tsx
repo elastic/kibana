@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -21,6 +21,8 @@ import {
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import useDebounce from 'react-use/lib/useDebounce';
+import { ML_NOTIFICATIONS_LAST_CHECKED_AT } from '../../../../common/types/storage';
+import { useStorage } from '../../contexts/storage';
 import { SavedObjectsWarning } from '../../components/saved_objects_warning';
 import { useTimeRangeUpdates } from '../../contexts/kibana/use_timefilter';
 import { useToastNotificationService } from '../../services/toast_notification_service';
@@ -70,6 +72,8 @@ export const NotificationsList: FC = () => {
     getDefaultNotificationsListState()
   );
 
+  const [lastCheckedAt, setLastCheckedAt] = useStorage(ML_NOTIFICATIONS_LAST_CHECKED_AT);
+
   const { onTableChange, pagination, sorting } = useTableSettings<NotificationItem>(
     totalCount,
     pageState,
@@ -116,6 +120,22 @@ export const NotificationsList: FC = () => {
 
     setIsLoading(false);
   }, [sorting, queryInstance, mlApiServices.notifications, displayErrorToast, timeRange]);
+
+  useEffect(
+    function updateLastCheckedAt() {
+      // Resolve the latest timestamp on the current page
+      const pageItemIndex = pagination.pageIndex * pagination.pageSize;
+      const currentPageItems = items.slice(pageItemIndex, pageItemIndex + pagination.pageSize);
+      const latestTimestamp = Math.max(
+        ...currentPageItems.map((v) => v.timestamp),
+        lastCheckedAt ?? 0
+      );
+      if (latestTimestamp !== lastCheckedAt && latestTimestamp !== 0) {
+        setLastCheckedAt(latestTimestamp);
+      }
+    },
+    [lastCheckedAt, setLastCheckedAt, items, pagination.pageIndex, pagination.pageSize]
+  );
 
   useDebounce(
     function refetchNotification() {
