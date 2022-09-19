@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.4.x releases.
 
+* <<release-notes-8.4.2>>
 * <<release-notes-8.4.1>>
 * <<release-notes-8.4.0>>
 //* <<release-notes-8.3.3>>
@@ -34,6 +35,74 @@ Review important information about the {kib} 8.4.x releases.
 
 --
 
+[[release-notes-8.4.2]]
+== {kib} 8.4.2
+
+coming::[8.4.2]
+
+Review the following information about the {kib} 8.4.2 release.
+
+[float]
+[[breaking-changes-8.4.2]]
+=== Breaking change
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade, review the breaking change, then mitigate the impact to your application.
+
+// tag::notable-breaking-changes[]
+There are no breaking changes in {kib} 8.4.2.
+// end::notable-breaking-changes[]
+
+To review the breaking changes in previous versions, refer to the following:
+
+{kibana-ref-all}/8.3/release-notes-8.3.0.html#breaking-changes-8.3.0[8.3.0] | {kibana-ref-all}/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0[8.2.0] | {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
+
+[float]
+[[enhancement-v8.4.2]]
+=== Enhancements
+Security::
+Logs a hash of the Saved Objects encryption key (`xpack.encryptedSavedObjects.encryptionKey`) when {kib} starts to make it easier to spot mismatched encryption keys {kibana-pull}139874[#139874]
+
+[float]
+[[fixes-v8.4.2]]
+=== Bug Fixes
+Connectors::
+The connectors table now uses "compatibility" rather than "availability" {kibana-pull}139024[#139024]
+
+Discover::
+Fixes saved search embeddable rendering {kibana-pull}140264[#140264]
+
+Elastic Security::
+For the Elastic Security 8.4.2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Fleet::
+* Applies fixes for package policy upgrade API with multiple ids {kibana-pull}140069[#140069]
+* Improves performance for many integration policies {kibana-pull}139648[#139648]
+
+Lens & Visualizations::
+* Fixes "Collapse by" for table and XY visualizations with multiple metrics in *Lens* {kibana-pull}140381[#140381]
+* Fixes action menu in *Lens* {kibana-pull}139588[#139588]
+
+Machine Learning::
+* Explain Log Rate Spikes: Histogram fixes {kibana-pull}139933[#139933]
+* Explain Log Rate Spikes: Improve streaming headers for certain proxy configs {kibana-pull}139637[#139637]
+* Fixes navigation for the Basic licence {kibana-pull}139469[#139469]
+* Corrects file.path field name in v3_windows_anomalous_script job {kibana-pull}139109[#139109]
+
+Management::
+Bfetch` response headers now include `X-Accel-Buffering: no` {kibana-pull}139534[#139534]
+
+Maps::
+* Fixes issue where percentile aggregation was not working with vector tiles {kibana-pull}140318[#140318]
+* Fixes Map app crashing on file upload request timeout {kibana-pull}139760[#139760]
+
+Monitoring::
+* Ensures GlobalState class has it's destroy() method called on unmount {kibana-pull}139908[#139908]
+* Adds KibanaThemeProvider to Stack Monitoring UI {kibana-pull}139839[#139839]
+
+Uptime::
+Fixes an issue where decryption errors caused the entire suite of monitors to fail syncing {kibana-pull}140549[#140549]
+
 [[release-notes-8.4.1]]
 == {kib} 8.4.1
 
@@ -46,9 +115,7 @@ Review the following information about the {kib} 8.4.1 release.
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade, review the breaking change, then mitigate the impact to your application.
 
-// tag::notable-breaking-changes[]
 There are no breaking changes in {kib} 8.4.1.
-// end::notable-breaking-changes[]
 
 To review the breaking changes in previous versions, refer to the following:
 
