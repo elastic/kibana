@@ -8,12 +8,8 @@ import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 import { RewriteRequestCase, verifyAccessAndContext } from './lib';
-import { GetRuleExecutionKPIParams } from '../rules_client';
+import { GetGlobalExecutionKPIParams } from '../rules_client';
 import { ILicenseState } from '../lib';
-
-const paramSchema = schema.object({
-  id: schema.string(),
-});
 
 const querySchema = schema.object({
   date_start: schema.string(),
@@ -21,7 +17,7 @@ const querySchema = schema.object({
   filter: schema.maybe(schema.string()),
 });
 
-const rewriteReq: RewriteRequestCase<GetRuleExecutionKPIParams> = ({
+const rewriteReq: RewriteRequestCase<GetGlobalExecutionKPIParams> = ({
   date_start: dateStart,
   date_end: dateEnd,
   ...rest
@@ -31,24 +27,22 @@ const rewriteReq: RewriteRequestCase<GetRuleExecutionKPIParams> = ({
   dateEnd,
 });
 
-export const getRuleExecutionKPIRoute = (
+export const getGlobalExecutionKPIRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.get(
     {
-      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_execution_kpi`,
+      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_global_execution_kpi`,
       validate: {
-        params: paramSchema,
         query: querySchema,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
-        const { id } = req.params;
         return res.ok({
-          body: await rulesClient.getRuleExecutionKPI(rewriteReq({ id, ...req.query })),
+          body: await rulesClient.getGlobalExecutionKpiWithAuth(rewriteReq(req.query)),
         });
       })
     )

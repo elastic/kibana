@@ -409,6 +409,8 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       aggs,
     };
 
+    console.log('aggregateEventsBySavedObjects', index, JSON.stringify(body, null, 2))
+
     try {
       const { aggregations } = await esClient.search<IValidatedEvent>({
         index,

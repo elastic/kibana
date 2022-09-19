@@ -156,7 +156,7 @@ const AlertsTableState = ({
       updatedAt,
     },
   ] = useFetchAlerts({
-    fields: columns.map((col) => ({ field: col.id, include_unmapped: true })),
+    fields: undefined,
     featureIds,
     query,
     pagination,

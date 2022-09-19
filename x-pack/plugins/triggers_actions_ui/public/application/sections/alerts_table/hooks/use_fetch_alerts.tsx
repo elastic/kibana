@@ -28,7 +28,7 @@ import * as i18n from './translations';
 
 export interface FetchAlertsArgs {
   featureIds: ValidFeatureId[];
-  fields: QueryDslFieldAndFormat[];
+  fields?: QueryDslFieldAndFormat[];
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   pagination: {
     pageIndex: number;
@@ -241,13 +241,11 @@ const useFetchAlerts = ({
     }
     const newAlertRequest = {
       featureIds,
-      fields,
       pagination,
       query,
       sort,
     };
     if (
-      newAlertRequest.fields.length > 0 &&
       !deepEqual(newAlertRequest, prevAlertRequest.current)
     ) {
       dispatch({

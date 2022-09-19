@@ -103,7 +103,9 @@ const ExecutionLogSortFields: Record<string, string> = {
   num_errored_actions: 'numErroredActions>_count',
 };
 
-export const getExecutionKPIAggregation = () => {
+export const getExecutionKPIAggregation = (filter?: IExecutionLogAggOptions['filter']) => {
+  const dslFilterQuery: estypes.QueryDslBoolQuery['filter'] = buildDslFilterQuery(filter);
+
   return {
     excludeExecuteStart: {
       filter: {
@@ -118,21 +120,6 @@ export const getExecutionKPIAggregation = () => {
         },
       },
       aggs: {
-        // Get total number of executions
-        executionUuidCardinality: {
-          filter: {
-            bool: {
-              must: [getProviderAndActionFilter('alerting', 'execute')],
-            },
-          },
-          aggs: {
-            executionUuidCardinality: {
-              cardinality: {
-                field: EXECUTION_UUID_FIELD,
-              },
-            },
-          },
-        },
         executionUuid: {
           // Bucket by execution UUID
           terms: {
@@ -156,30 +143,11 @@ export const getExecutionKPIAggregation = () => {
             ruleExecution: {
               filter: {
                 bool: {
+                  ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
                   must: [getProviderAndActionFilter('alerting', 'execute')],
                 },
               },
               aggs: {
-                executeStartTime: {
-                  min: {
-                    field: START_FIELD,
-                  },
-                },
-                scheduleDelay: {
-                  max: {
-                    field: SCHEDULE_DELAY_FIELD,
-                  },
-                },
-                totalSearchDuration: {
-                  max: {
-                    field: TOTAL_SEARCH_DURATION_FIELD,
-                  },
-                },
-                esSearchDuration: {
-                  max: {
-                    field: ES_SEARCH_DURATION_FIELD,
-                  },
-                },
                 numTriggeredActions: {
                   max: {
                     field: NUMBER_OF_TRIGGERED_ACTIONS_FIELD,
@@ -205,40 +173,6 @@ export const getExecutionKPIAggregation = () => {
                     field: NUMBER_OF_NEW_ALERTS_FIELD,
                   },
                 },
-                executionDuration: {
-                  max: {
-                    field: DURATION_FIELD,
-                  },
-                },
-                outcomeAndMessage: {
-                  top_hits: {
-                    size: 1,
-                    _source: {
-                      includes: [
-                        OUTCOME_FIELD,
-                        MESSAGE_FIELD,
-                        ERROR_MESSAGE_FIELD,
-                        VERSION_FIELD,
-                        RULE_ID_FIELD,
-                      ],
-                    },
-                  },
-                },
-              },
-            },
-            // If there was a timeout, this filter will return non-zero doc count
-            timeoutMessage: {
-              filter: getProviderAndActionFilter('alerting', 'execute-timeout'),
-            },
-            // Filter out execution UUID buckets where ruleExecution doc count is 0
-            minExecutionUuidBucket: {
-              bucket_selector: {
-                buckets_path: {
-                  count: 'ruleExecution._count',
-                },
-                script: {
-                  source: 'params.count > 0',
-                },
               },
             },
           },
@@ -246,7 +180,7 @@ export const getExecutionKPIAggregation = () => {
       },
     },
   };
-}
+};
 
 export function getExecutionLogAggregation({
   filter,
@@ -276,15 +210,11 @@ export function getExecutionLogAggregation({
     throw Boom.badRequest(`Invalid perPage field "${perPage}" - must be greater than 0`);
   }
 
-  let dslFilterQuery: estypes.QueryDslBoolQuery['filter'];
-  try {
-    const filterKueryNode = typeof filter === 'string' ? fromKueryExpression(filter) : filter;
-    dslFilterQuery = filter ? toElasticsearchQuery(filterKueryNode) : undefined;
-  } catch (err) {
-    throw Boom.badRequest(`Invalid kuery syntax for filter ${filter}`);
-  }
+  const dslFilterQuery: estypes.QueryDslBoolQuery['filter'] = buildDslFilterQuery(filter);
 
-  const termSort = (sort as estypes.SortCombinations[]).filter((s) => !Object.keys(s).includes('num_errored_actions'));
+  const termSort = (sort as estypes.SortCombinations[]).filter(
+    (s) => !Object.keys(s).includes('num_errored_actions')
+  );
 
   if (!termSort.length) {
     termSort.push({
@@ -332,27 +262,6 @@ export function getExecutionLogAggregation({
             order: formatSortForTermSort(termSort),
           },
           aggs: {
-            // Bucket sort to allow paging through executions
-            executionUuidSorted: {
-              bucket_sort: {
-                sort: formatSortForBucketSort(sort),
-                from: (page - 1) * perPage,
-                size: perPage,
-                gap_policy: 'insert_zeros' as estypes.AggregationsGapPolicy,
-              },
-            },
-            // Filter by action execute doc and get information from this event
-            actionExecution: {
-              filter: getProviderAndActionFilter('actions', 'execute'),
-              aggs: {
-                actionOutcomes: {
-                  terms: {
-                    field: OUTCOME_FIELD,
-                    size: 2,
-                  },
-                },
-              },
-            },
             numErroredActions: {
               filter: {
                 bool: {
@@ -375,6 +284,19 @@ export function getExecutionLogAggregation({
                   ],
                 },
               },
+            },
+            // Bucket sort to allow paging through executions
+            executionUuidSorted: {
+              bucket_sort: {
+                sort: formatSortForBucketSort(sort),
+                from: (page - 1) * perPage,
+                size: perPage,
+                gap_policy: 'insert_zeros' as estypes.AggregationsGapPolicy,
+              },
+            },
+            // Filter by action execute doc and get information from this event
+            actionExecution: {
+              filter: getProviderAndActionFilter('actions', 'execute'),
               aggs: {
                 actionOutcomes: {
                   terms: {
@@ -482,6 +404,15 @@ export function getExecutionLogAggregation({
   };
 }
 
+function buildDslFilterQuery(filter: IExecutionLogAggOptions['filter']) {
+  try {
+    const filterKueryNode = typeof filter === 'string' ? fromKueryExpression(filter) : filter;
+    return filter ? toElasticsearchQuery(filterKueryNode) : undefined;
+  } catch (err) {
+    throw Boom.badRequest(`Invalid kuery syntax for filter ${filter}`);
+  }
+}
+
 function getProviderAndActionFilter(provider: string, action: string) {
   return {
     bool: {
@@ -559,7 +490,7 @@ function formatExecutionKPIAggBuckets(buckets: IExecutionUuidAggBucket[] = []) {
     recoveredAlerts: 0,
     erroredActions: 0,
     triggeredActions: 0,
-  }
+  };
 
   if (!buckets?.length) {
     return initialResponse;
@@ -590,9 +521,7 @@ function formatExecutionKPIAggBuckets(buckets: IExecutionUuidAggBucket[] = []) {
   return initialResponse;
 }
 
-export function formatExecutionKPIResult(
-  results: AggregateEventsBySavedObjectResult
-) {
+export function formatExecutionKPIResult(results: AggregateEventsBySavedObjectResult) {
   const { aggregations } = results;
   if (!aggregations || !aggregations.excludeExecuteStart) {
     return EMPTY_EXECUTION_LOG_RESULT;

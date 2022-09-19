@@ -371,6 +371,13 @@ export interface GetRuleExecutionKPIParams {
   id: string;
   dateStart: string;
   dateEnd?: string;
+  filter?: string;
+}
+
+export interface GetGlobalExecutionKPIParams {
+  dateStart: string;
+  dateEnd?: string;
+  filter?: string;
 }
 
 export interface GetGlobalExecutionLogParams {
@@ -1031,11 +1038,68 @@ export class RulesClient {
     }
   }
 
-  public async getRuleExecutionKPI({
-    id,
+  public async getGlobalExecutionKpiWithAuth({
     dateStart,
     dateEnd,
-  }: GetRuleExecutionKPIParams) {
+    filter,
+  }: GetGlobalExecutionKPIParams) {
+    this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
+
+    let authorizationTuple;
+    try {
+      authorizationTuple = await this.authorization.getFindAuthorizationFilter(
+        AlertingAuthorizationEntity.Alert,
+        {
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'kibana.alert.rule.rule_type_id',
+            consumer: 'kibana.alert.rule.consumer',
+          },
+        }
+      );
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.GET_GLOBAL_EXECUTION_KPI,
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.GET_GLOBAL_EXECUTION_KPI,
+      })
+    );
+
+    const dateNow = new Date();
+    const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
+    const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    try {
+      const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
+        'alert',
+        authorizationTuple.filter as KueryNode,
+        {
+          start: parsedDateStart.toISOString(),
+          end: parsedDateEnd.toISOString(),
+          aggs: getExecutionKPIAggregation(filter),
+        }
+      );
+
+      return formatExecutionKPIResult(aggResult);
+    } catch (err) {
+      this.logger.debug(
+        `rulesClient.getGlobalExecutionKpiWithAuth(): error searching global execution KPI: ${err.message}`
+      );
+      throw err;
+    }
+  }
+
+  public async getRuleExecutionKPI({ id, dateStart, dateEnd, filter }: GetRuleExecutionKPIParams) {
     this.logger.debug(`getRuleExecutionKPI(): getting execution KPI for rule ${id}`);
     const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
 
@@ -1044,13 +1108,13 @@ export class RulesClient {
       await this.authorization.ensureAuthorized({
         ruleTypeId: rule.alertTypeId,
         consumer: rule.consumer,
-        operation: ReadOperations.GetExecutionKPI,
+        operation: ReadOperations.GetRuleExecutionKPI,
         entity: AlertingAuthorizationEntity.Rule,
       });
     } catch (error) {
       this.auditLogger?.log(
         ruleAuditEvent({
-          action: RuleAuditAction.GET_EXECUTION_KPI,
+          action: RuleAuditAction.GET_RULE_EXECUTION_KPI,
           savedObject: { type: 'alert', id },
           error,
         })
@@ -1060,7 +1124,7 @@ export class RulesClient {
 
     this.auditLogger?.log(
       ruleAuditEvent({
-        action: RuleAuditAction.GET_EXECUTION_KPI,
+        action: RuleAuditAction.GET_RULE_EXECUTION_KPI,
         savedObject: { type: 'alert', id },
       })
     );
@@ -1079,7 +1143,7 @@ export class RulesClient {
         {
           start: parsedDateStart.toISOString(),
           end: parsedDateEnd.toISOString(),
-          aggs: getExecutionKPIAggregation(),
+          aggs: getExecutionKPIAggregation(filter),
         },
         rule.legacyId !== null ? [rule.legacyId] : undefined
       );
@@ -1087,7 +1151,7 @@ export class RulesClient {
       return formatExecutionKPIResult(aggResult);
     } catch (err) {
       this.logger.debug(
-        `rulesClient.getExecutionLogForRule(): error searching event log for rule ${id}: ${err.message}`
+        `rulesClient.getRuleExecutionKPI(): error searching execution KPI for rule ${id}: ${err.message}`
       );
       throw err;
     }

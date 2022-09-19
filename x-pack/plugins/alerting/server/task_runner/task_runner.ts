@@ -419,8 +419,8 @@ export class TaskRunner<
         // Check if the rule type has reported that it reached the alert limit
         checkHasReachedAlertLimit();
 
-        this.alertingEventLogger.setExecutionSucceeded(`rule executed: ${ruleLabel}`);
-
+        // this.alertingEventLogger.setExecutionSucceeded(`rule executed: ${ruleLabel}`);
+        this.alertingEventLogger.setExecutionFailed(`rule failled: ${ruleLabel}`, 'failed');
         ruleRunMetricsStore.setSearchMetrics([
           wrappedScopedClusterClient.getMetrics(),
           wrappedSearchSourceClient.getMetrics(),
