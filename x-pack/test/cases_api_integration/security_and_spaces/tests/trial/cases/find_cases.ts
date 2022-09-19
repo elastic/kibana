@@ -6,6 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { Cookie } from 'tough-cookie';
+import { User } from '@kbn/cases-plugin/common/api';
+import { UserProfile } from '@kbn/security-plugin/common';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { findCasesResp, getPostCaseRequest } from '../../../../common/lib/mock';
@@ -13,6 +16,8 @@ import { findCases, createCase, deleteAllCaseItems } from '../../../../common/li
 import { secOnlySpacesAll, superUser } from '../../../../common/lib/authentication/users';
 import { suggestUserProfiles, loginUsers } from '../../../../common/lib/user_profiles';
 import { getUserInfo } from '../../../../common/lib/authentication';
+import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
+import { securitySolutionOnlyAllSpacesRole } from '../../../../common/lib/authentication/roles';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -21,18 +26,50 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('find_cases', () => {
-    afterEach(async () => {
-      await deleteAllCaseItems(es);
+    const secOnlyInfo: User = getUserInfo(secOnlySpacesAll);
+    let cookies: Cookie[];
+    let suggestedSecUsers: UserProfile[];
+
+    before(async () => {
+      await createUsersAndRoles(
+        getService,
+        [secOnlySpacesAll],
+        [securitySolutionOnlyAllSpacesRole]
+      );
     });
 
-    it('filters by reporters using the profile uid', async () => {
-      const secOnlyInfo = getUserInfo(secOnlySpacesAll);
-
-      const cookies = await loginUsers({
+    beforeEach(async () => {
+      cookies = await loginUsers({
         supertest: supertestWithoutAuth,
         users: [superUser, secOnlySpacesAll],
       });
 
+      suggestedSecUsers = await suggestUserProfiles({
+        supertest: supertestWithoutAuth,
+        req: {
+          name: secOnlyInfo.username!,
+          owners: ['securitySolutionFixture'],
+          size: 1,
+        },
+        auth: { user: superUser, space: 'space1' },
+      });
+    });
+
+    afterEach(async () => {
+      await es.security.disableUserProfile({ uid: suggestedSecUsers[0].uid, refresh: 'wait_for' });
+
+      await deleteAllCaseItems(es);
+    });
+
+    after(async () => {
+      await deleteUsersAndRoles(
+        getService,
+        [secOnlySpacesAll],
+        [securitySolutionOnlyAllSpacesRole]
+      );
+    });
+
+    it('filters by reporters using the profile uid', async () => {
       const superUserHeaders = {
         Cookie: cookies[0].cookieString(),
       };
@@ -41,7 +78,7 @@ export default ({ getService }: FtrProviderContext): void => {
         Cookie: cookies[1].cookieString(),
       };
 
-      const [, secCase, suggestedSecUsers] = await Promise.all([
+      const [, secCase] = await Promise.all([
         // create a case with super user
         createCase(
           supertestWithoutAuth,
@@ -58,16 +95,6 @@ export default ({ getService }: FtrProviderContext): void => {
           null,
           secOnlyHeaders
         ),
-        // get the profile of the security user
-        suggestUserProfiles({
-          supertest: supertestWithoutAuth,
-          req: {
-            name: secOnlyInfo.username,
-            owners: ['securitySolutionFixture'],
-            size: 1,
-          },
-          auth: { user: superUser, space: 'space1' },
-        }),
       ]);
 
       // find all cases for only the security user

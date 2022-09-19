@@ -242,7 +242,7 @@ export const observabilityOnlyRead: Role = {
  * These roles have access to all spaces.
  */
 
-export const securitySolutionOnlyAllSpacesAll: Role = {
+export const securitySolutionOnlyAllSpacesRole: Role = {
   name: 'sec_only_all_spaces',
   privileges: {
     elasticsearch: {
@@ -274,7 +274,6 @@ export const roles = [
   securitySolutionOnlyRead,
   securitySolutionOnlyDelete,
   securitySolutionOnlyNoDelete,
-  securitySolutionOnlyAllSpacesAll,
   observabilityOnlyAll,
   observabilityOnlyRead,
   testDisabledPluginAll,
