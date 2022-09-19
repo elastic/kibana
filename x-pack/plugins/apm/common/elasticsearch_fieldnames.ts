@@ -121,8 +121,20 @@ export const HOST_HOSTNAME = 'host.hostname'; // Do not use. Please use `HOST_NA
 export const HOST_NAME = 'host.name';
 export const HOST_OS_PLATFORM = 'host.os.platform';
 export const CONTAINER_ID = 'container.id';
+export const CONTAINER = 'container';
+export const CONTAINER_IMAGE = 'container.image.name';
+
+// Kubernetes
 export const KUBERNETES = 'kubernetes';
-export const POD_NAME = 'kubernetes.pod.name';
+export const KUBERNETES_CONTAINER_NAME = 'kubernetes.container.name';
+export const KUBERNETES_DEPLOYMENT = 'kubernetes.deployment';
+export const KUBERNETES_DEPLOYMENT_NAME = 'kubernetes.deployment.name';
+export const KUBERNETES_NAMESPACE_NAME = 'kubernetes.namespace.name';
+export const KUBERNETES_NAMESPACE = 'kubernetes.namespace';
+export const KUBERNETES_POD_NAME = 'kubernetes.pod.name';
+export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
+export const KUBERNETES_REPLICASET = 'kubernetes.replicaset';
+export const KUBERNETES_REPLICASET_NAME = 'kubernetes.replicaset.name';
 
 export const CLIENT_GEO_COUNTRY_ISO_CODE = 'client.geo.country_iso_code';
 
