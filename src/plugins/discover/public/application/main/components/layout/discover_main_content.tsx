@@ -106,23 +106,26 @@ export const DiscoverMainContent = ({
   const hideChart = state.hideChart || !isTimeBased;
   const showFixedPanels = useIsWithinBreakpoints(['xs', 's']) || isPlainRecord || hideChart;
   const { euiTheme } = useEuiTheme();
-  const topPanelHeight = euiTheme.base * 12;
+  const defaultTopPanelHeight = euiTheme.base * 12;
   const minTopPanelHeight = euiTheme.base * 8;
   const minMainPanelHeight = euiTheme.base * 10;
 
-  const [initialTopPanelHeight, setInitialTopPanelHeight] = useState(
-    Number(storage.get(HISTOGRAM_HEIGHT_KEY)) || topPanelHeight
+  const [topPanelHeight, setTopPanelHeight] = useState(
+    Number(storage.get(HISTOGRAM_HEIGHT_KEY)) || defaultTopPanelHeight
   );
 
   const storeTopPanelHeight = useCallback(
-    (newTopPanelHeight: number) => storage.set(HISTOGRAM_HEIGHT_KEY, newTopPanelHeight),
+    (newTopPanelHeight: number) => {
+      storage.set(HISTOGRAM_HEIGHT_KEY, newTopPanelHeight);
+      setTopPanelHeight(newTopPanelHeight);
+    },
     [storage]
   );
 
-  const resetInitialTopPanelHeight = useCallback(() => {
-    storeTopPanelHeight(topPanelHeight);
-    setInitialTopPanelHeight(topPanelHeight);
-  }, [storeTopPanelHeight, topPanelHeight]);
+  const resetTopPanelHeight = useCallback(
+    () => storeTopPanelHeight(defaultTopPanelHeight),
+    [storeTopPanelHeight, defaultTopPanelHeight]
+  );
 
   const onTopPanelHeightChange = useCallback(
     (newTopPanelHeight: number) => storeTopPanelHeight(newTopPanelHeight),
@@ -132,7 +135,7 @@ export const DiscoverMainContent = ({
   const chartClassName =
     showFixedPanels && !hideChart
       ? css`
-          height: ${topPanelHeight}px;
+          height: ${defaultTopPanelHeight}px;
         `
       : 'eui-fullHeight';
 
@@ -157,7 +160,7 @@ export const DiscoverMainContent = ({
           interval={state.interval}
           isTimeBased={isTimeBased}
           appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="m" />}
-          onResetChartHeight={resetInitialTopPanelHeight}
+          onResetChartHeight={resetTopPanelHeight}
         />
       </InPortal>
       <InPortal node={mainPanelNode}>
@@ -211,7 +214,7 @@ export const DiscoverMainContent = ({
         className="dscPageContent__inner"
         mode={panelsMode}
         resizeRef={resizeRef}
-        initialTopPanelHeight={initialTopPanelHeight}
+        topPanelHeight={topPanelHeight}
         minTopPanelHeight={minTopPanelHeight}
         minMainPanelHeight={minMainPanelHeight}
         topPanel={<OutPortal node={topPanelNode} />}
