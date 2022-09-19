@@ -481,36 +481,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       specs.forEach((spec, index) => {
         const fieldName = `${index}`;
-        it(
-          `edit field format of "${fieldName}" field to "${spec.applyFormatterType}"` +
-            spec.expectFormatterTypes
-            ? `, and check available formats types`
-            : '',
-          async () => {
-            await PageObjects.settings.filterField(fieldName);
-            await PageObjects.settings.openControlsByName(fieldName);
-            await PageObjects.settings.toggleRow('formatRow');
+        it(`edit field format of "${fieldName}" field to "${spec.applyFormatterType}"${
+          spec.expectFormatterTypes ? ', and check available formats types' : ''
+        }`, async () => {
+          await PageObjects.settings.filterField(fieldName);
+          await PageObjects.settings.openControlsByName(fieldName);
+          await PageObjects.settings.toggleRow('formatRow');
 
-            if (spec.expectFormatterTypes) {
-              expect(
-                (
-                  await Promise.all(
-                    (
-                      await (
-                        await testSubjects.find('editorSelectedFormatId')
-                      ).findAllByTagName('option')
-                    ).map((option) => option.getAttribute('value'))
-                  )
-                ).filter(Boolean)
-              ).to.eql(spec.expectFormatterTypes);
-            }
-
-            await PageObjects.settings.setFieldFormat(spec.applyFormatterType);
-            if (spec.beforeSave) {
-              await spec.beforeSave(await testSubjects.find('formatRow'));
-            }
+          if (spec.expectFormatterTypes) {
+            expect(
+              (
+                await Promise.all(
+                  (
+                    await (
+                      await testSubjects.find('editorSelectedFormatId')
+                    ).findAllByTagName('option')
+                  ).map((option) => option.getAttribute('value'))
+                )
+              ).filter(Boolean)
+            ).to.eql(spec.expectFormatterTypes);
           }
-        );
+
+          await PageObjects.settings.setFieldFormat(spec.applyFormatterType);
+          if (spec.beforeSave) {
+            await spec.beforeSave(await testSubjects.find('formatRow'));
+          }
+        });
       });
     });
 
