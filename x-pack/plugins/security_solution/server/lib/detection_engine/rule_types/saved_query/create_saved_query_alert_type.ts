@@ -16,7 +16,7 @@ import type { SecurityAlertType, CreateQueryRuleOptions } from '../types';
 import { validateIndexPatterns } from '../utils';
 
 export const createSavedQueryAlertType = (
-  createOptions: CreateRuleOptions
+  createOptions: CreateQueryRuleOptions
 ): SecurityAlertType<UnifiedQueryRuleParams, {}, {}, 'default'> => {
   const { experimentalFeatures, version, osqueryCreateAction, licensing } = createOptions;
   return {
