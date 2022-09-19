@@ -64,10 +64,8 @@ const RecentCasesWithoutQueryProvider = React.memo(({ maxCasesToShow }: RecentCa
     });
   }, [currentUser, currentUserProfile, isLoadingCurrentUserProfile, recentCasesFilterBy]);
 
-  // show the recently reported if we have the current user profile, if we don't then also show it if we aren't currently
-  // loading and we have the fallback user information
-  const showMyRecentlyReported =
-    currentUserProfile != null || (!isLoadingCurrentUserProfile && currentUser != null);
+  // show the recently reported if we have the current user profile, or if we have the fallback user information
+  const showMyRecentlyReported = currentUserProfile != null || currentUser != null;
 
   return (
     <>
@@ -115,11 +113,11 @@ const getReporterFilter = ({
   isLoadingCurrentUserProfile: boolean;
 }): { reporters: User[] } => {
   const emptyFilter = { reporters: [] };
-  if (recentCasesFilterBy !== 'myRecentlyReported' || isLoadingCurrentUserProfile) {
+  if (recentCasesFilterBy !== 'myRecentlyReported') {
     return emptyFilter;
   }
 
-  if (currentUserProfile != null) {
+  if (currentUserProfile != null && !isLoadingCurrentUserProfile) {
     return {
       reporters: [
         {

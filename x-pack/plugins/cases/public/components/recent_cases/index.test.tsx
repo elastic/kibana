@@ -13,7 +13,6 @@ import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../com
 import { useGetCasesMockState } from '../../containers/mock';
 import { useCurrentUser } from '../../common/lib/kibana/hooks';
 import { useGetCases } from '../../containers/use_get_cases';
-import { useToasts } from '../../common/lib/kibana';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 
@@ -36,9 +35,6 @@ const useGetCasesMock = useGetCases as jest.Mock;
 const useCurrentUserMock = useCurrentUser as jest.Mock;
 
 describe('RecentCases', () => {
-  const addSuccess = jest.fn();
-  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError: jest.fn() });
-
   let appMockRender: AppMockRenderer;
   beforeEach(() => {
     jest.clearAllMocks();
@@ -135,7 +131,7 @@ describe('RecentCases', () => {
     });
   });
 
-  it('sets the reporter filters correctly when it cannot find the current user profile', async () => {
+  it('sets the reporter filters to the user info without the profile uid when it cannot find the current user profile', async () => {
     useGetCurrentUserProfileMock.mockReturnValue({ data: undefined, isLoading: false });
 
     const { getByTestId } = appMockRender.render(
