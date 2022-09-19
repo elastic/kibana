@@ -32,6 +32,7 @@ import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transa
 
 const NARROW_COLUMN_WIDTH = '120px';
 const ACTIONS_COLUMN_WIDTH = '60px';
+const NOT_AVAILABLE = '--';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 const DEFAULT_SORT_FIELD = 'pValue';
@@ -169,13 +170,16 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
           </>
         </EuiToolTip>
       ),
-      render: (_, { histogram, fieldName, fieldValue }) => (
-        <MiniHistogram
-          chartData={histogram}
-          isLoading={loading && histogram === undefined}
-          label={`${fieldName}:${fieldValue}`}
-        />
-      ),
+      render: (_, { histogram, fieldName, fieldValue }) => {
+        if (!histogram) return NOT_AVAILABLE;
+        return (
+          <MiniHistogram
+            chartData={histogram}
+            isLoading={loading && histogram === undefined}
+            label={`${fieldName}:${fieldValue}`}
+          />
+        );
+      },
       sortable: false,
     },
     {
@@ -229,6 +233,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         </EuiToolTip>
       ),
       render: (_, { pValue }) => {
+        if (!pValue) return NOT_AVAILABLE;
         const label = getFailedTransactionsCorrelationImpactLabel(pValue);
         return label ? <EuiBadge color={label.color}>{label.impact}</EuiBadge> : null;
       },

@@ -22,7 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
-import { SpikeAnalysisTableExpandedRow } from './spike_analysis_table_expanded_row';
+import { SpikeAnalysisTable } from './spike_analysis_table';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 const DEFAULT_SORT_FIELD = 'docCount';
@@ -91,7 +91,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       }
 
       itemIdToExpandedRowMapValues[item.id] = (
-        <SpikeAnalysisTableExpandedRow
+        <SpikeAnalysisTable
           changePoints={expandedTableItems as ChangePoint[]}
           loading={loading}
           onPinnedChangePoint={onPinnedChangePoint}
