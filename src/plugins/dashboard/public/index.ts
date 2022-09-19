@@ -9,6 +9,11 @@
 import { PluginInitializerContext } from '@kbn/core/public';
 import { DashboardPlugin } from './plugin';
 
+export {
+  DashboardContainer,
+  DashboardContainerFactoryDefinition,
+  DASHBOARD_CONTAINER_TYPE,
+} from './application';
 export { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 
 export type { DashboardSetup, DashboardStart, DashboardFeatureFlagConfig } from './plugin';
