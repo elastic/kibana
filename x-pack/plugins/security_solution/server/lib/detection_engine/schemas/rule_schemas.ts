@@ -186,6 +186,12 @@ export const savedQueryRuleParams = t.intersection([baseRuleParams, savedQuerySp
 export type SavedQuerySpecificRuleParams = t.TypeOf<typeof savedQuerySpecificRuleParams>;
 export type SavedQueryRuleParams = t.TypeOf<typeof savedQueryRuleParams>;
 
+export const unifiedQueryRuleParams = t.intersection([
+  baseRuleParams,
+  t.union([querySpecificRuleParams, savedQuerySpecificRuleParams]),
+]);
+export type UnifiedQueryRuleParams = t.TypeOf<typeof unifiedQueryRuleParams>;
+
 const thresholdSpecificRuleParams = t.type({
   type: t.literal('threshold'),
   language: nonEqlLanguages,

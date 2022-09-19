@@ -207,6 +207,15 @@
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip", "ci:all-cypress-suites"],
       "enabled": true
+    },
+    {
+      "groupName": "Profiling",
+      "matchPackageNames": ["fnv-plus", "peggy", "@types/dagre", "@types/fnv-plus"],
+      "reviewers": ["team:profiling-ui"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "backport:skip"],
+      "enabled": true,
+      "prCreation": "immediate"
     }
   ]
 }
