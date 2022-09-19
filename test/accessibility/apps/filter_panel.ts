@@ -9,12 +9,11 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'discover', 'home']);
+  const PageObjects = getPageObjects(['common', 'discover']);
   const a11y = getService('a11y');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const retry = getService('retry');
 
   describe('Filter panel', () => {
     before(async () => {
