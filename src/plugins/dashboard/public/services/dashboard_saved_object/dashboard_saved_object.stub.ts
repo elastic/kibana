@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { DashboardAttributes } from '../../application';
 import { savedObjectsServiceMock } from '@kbn/core/public/mocks';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import { DashboardAttributes } from '../../application';
 import { FindDashboardSavedObjectsResponse } from './lib/find_dashboard_saved_objects';
 
 import { DashboardSavedObjectService } from './types';

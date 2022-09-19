@@ -100,7 +100,7 @@ export interface DashboardAppState {
 /**
  * The shared services and tools used to build a dashboard from a saved object ID.
  */
-export type DashboardBuildContext = {
+export interface DashboardBuildContext {
   locatorState?: DashboardAppLocatorParams;
   history: History;
   isEmbeddedExternally: boolean;
@@ -111,7 +111,7 @@ export type DashboardBuildContext = {
   $triggerDashboardRefresh: Subject<{ force?: boolean }>;
   $onDashboardStateChange: BehaviorSubject<DashboardState>;
   executionContext?: KibanaExecutionContext;
-};
+}
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type DashboardOptions = {
