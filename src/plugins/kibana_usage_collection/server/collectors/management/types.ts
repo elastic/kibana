@@ -75,6 +75,7 @@ export interface UsageStats {
   'doc_table:hideTimeColumn': boolean;
   'discover:sampleSize': number;
   'discover:sampleRowsPerPage': number;
+  'discover:showLegacyFieldTopValues': boolean;
   defaultColumns: string[];
   'context:defaultSize': number;
   'context:tieBreakerFields': string[];
@@ -138,6 +139,7 @@ export interface UsageStats {
   'lens:useFieldExistenceSampling': boolean;
   'metrics:allowCheckingForFailedShards': boolean;
   'observability:apmOperationsTab': boolean;
+  'observability:apmLabsButton': boolean;
   'observability:apmProgressiveLoading': string;
   'observability:apmServiceGroupMaxNumberOfServices': number;
   'observability:apmServiceInventoryOptimizedSorting': boolean;
@@ -146,4 +148,5 @@ export interface UsageStats {
   'securitySolution:showRelatedIntegrations': boolean;
   'visualization:visualize:legacyGaugeChartsLibrary': boolean;
   'enterpriseSearch:enableIndexTransformsTab': boolean;
+  'enterpriseSearch:enableBehavioralAnalyticsSection': boolean;
 }

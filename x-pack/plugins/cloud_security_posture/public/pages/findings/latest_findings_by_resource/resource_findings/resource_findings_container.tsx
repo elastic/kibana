@@ -16,6 +16,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { generatePath } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { CspInlineDescriptionList } from '../../../../components/csp_inline_description_list';
+import { CspFinding } from '../../../../../common/schemas/csp_finding';
 import { CloudPosturePageTitle } from '../../../../components/cloud_posture_page_title';
 import * as TEST_SUBJECTS from '../../test_subjects';
 import { PageTitle, PageTitleText } from '../../layout/findings_layout';
@@ -26,7 +27,7 @@ import {
   useResourceFindings,
 } from './use_resource_findings';
 import { useUrlQuery } from '../../../../common/hooks/use_url_query';
-import type { FindingsBaseURLQuery, FindingsBaseProps, CspFinding } from '../../types';
+import type { FindingsBaseURLQuery, FindingsBaseProps } from '../../types';
 import {
   getFindingsPageSizeInfo,
   getFilters,

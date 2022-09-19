@@ -10731,7 +10731,9 @@
               "\nA record of capabilities (aggregations) for an index rollup job"
             ],
             "signature": [
-              "[index: string]:  { aggs?: _.Dictionary<",
+              "[index: string]:  { aggs?: ",
+              "Dictionary",
+              "<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -11478,7 +11480,7 @@
               "label": "elasticsearchClient",
               "description": [],
               "signature": [
-                "{ get: { <TDocument = unknown>(this: That, params: ",
+                "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
                 "GetRequest",
                 " | ",
                 "GetRequest",
@@ -11596,7 +11598,7 @@
                 "default",
                 "; security: ",
                 "default",
-                "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+                "; index: { <TDocument = unknown>(this: That, params: ",
                 "IndexRequest",
                 "<TDocument> | ",
                 "IndexRequest",
@@ -19829,7 +19831,7 @@
             "tags": [],
             "label": "attributes",
             "description": [
-              "{@inheritdoc SavedObjectAttributes}"
+              "The data for a Saved Object is stored as an object in the `attributes` property."
             ],
             "signature": [
               "T"
@@ -20756,7 +20758,7 @@
         "label": "DataViewSavedObjectAttrs",
         "description": [],
         "signature": [
-          "{ type?: string | undefined; title: string; name?: string | undefined; typeMeta?: string | undefined; }"
+          "{ name?: string | undefined; type?: string | undefined; title: string; typeMeta?: string | undefined; }"
         ],
         "path": "src/plugins/data_views/common/data_views/data_views.ts",
         "deprecated": false,

@@ -160,6 +160,9 @@ function mountComponent(
       },
     } as unknown as GetStateReturn,
     setExpandedDoc: jest.fn(),
+    persistDataView: jest.fn(),
+    updateAdHocDataViewId: jest.fn(),
+    adHocDataViewList: [],
   };
 
   return mountWithIntl(
@@ -172,24 +175,27 @@ function mountComponent(
 
 describe('Discover component', () => {
   test('selected data view without time field displays no chart toggle', () => {
-    const component = mountComponent(dataViewMock);
-    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
+    const container = document.createElement('div');
+    mountComponent(dataViewMock, undefined, { attachTo: container });
+    expect(container.querySelector('[data-test-subj="discoverChartOptionsToggle"]')).toBeNull();
   });
 
   test('selected data view with time field displays chart toggle', () => {
-    const component = mountComponent(dataViewWithTimefieldMock);
-    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
+    const container = document.createElement('div');
+    mountComponent(dataViewWithTimefieldMock, undefined, { attachTo: container });
+    expect(container.querySelector('[data-test-subj="discoverChartOptionsToggle"]')).not.toBeNull();
   });
 
   test('sql query displays no chart toggle', () => {
-    const component = mountComponent(
+    const container = document.createElement('div');
+    mountComponent(
       dataViewWithTimefieldMock,
       false,
-      {},
+      { attachTo: container },
       { sql: 'SELECT * FROM test' },
       true
     );
-    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
+    expect(container.querySelector('[data-test-subj="discoverChartOptionsToggle"]')).toBeNull();
   });
 
   test('the saved search title h1 gains focus on navigate', () => {
