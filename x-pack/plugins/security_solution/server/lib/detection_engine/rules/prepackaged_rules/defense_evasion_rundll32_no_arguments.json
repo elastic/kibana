@@ -13,7 +13,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Unusual Child Processes of RunDLL32",
-  "query": "sequence with maxspan=1h\n  [process where event.type in (\"start\", \"process_started\") and\n     (process.name : \"rundll32.exe\" or process.pe.original_file_name == \"RUNDLL32.EXE\") and\n      process.args_count == 1\n  ] by process.entity_id\n  [process where event.type in (\"start\", \"process_started\") and process.parent.name : \"rundll32.exe\"\n  ] by process.parent.entity_id\n",
+  "query": "sequence with maxspan=1h\n  [process where event.type == \"start\" and\n     (process.name : \"rundll32.exe\" or process.pe.original_file_name == \"RUNDLL32.EXE\") and\n      process.args_count == 1\n  ] by process.entity_id\n  [process where event.type == \"start\" and process.parent.name : \"rundll32.exe\"\n  ] by process.parent.entity_id\n",
   "required_fields": [
     {
       "ecs": true,
@@ -51,7 +51,7 @@
       "type": "keyword"
     }
   ],
-  "risk_score": 21,
+  "risk_score": 73,
   "rule_id": "f036953a-4615-4707-a1ca-dc53bf69dcd5",
   "severity": "high",
   "tags": [
@@ -86,5 +86,5 @@
     }
   ],
   "type": "eql",
-  "version": 6
+  "version": 101
 }

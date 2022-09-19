@@ -13,7 +13,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "MacOS Installer Package Spawns Network Event",
-  "query": "sequence by host.id, user.id with maxspan=30s\n[process where event.type == \"start\" and event.action == \"exec\" and process.parent.name : (\"installer\", \"package_script_service\") and process.name : (\"bash\", \"sh\", \"zsh\", \"python\", \"osascript\", \"tclsh*\")] \n[network where event.type == \"start\" and process.name : (\"curl\", \"osascript\", \"wget\", \"python\")] \n",
+  "query": "sequence by host.id, user.id with maxspan=30s\n[process where event.type == \"start\" and event.action == \"exec\" and process.parent.name : (\"installer\", \"package_script_service\") and process.name : (\"bash\", \"sh\", \"zsh\", \"python\", \"osascript\", \"tclsh*\")]\n[network where event.type == \"start\" and process.name : (\"curl\", \"osascript\", \"wget\", \"python\")]\n",
   "references": [
     "https://redcanary.com/blog/clipping-silver-sparrows-wings",
     "https://posts.specterops.io/introducing-mystikal-4fbd2f7ae520",
@@ -51,7 +51,7 @@
       "type": "keyword"
     }
   ],
-  "risk_score": 74,
+  "risk_score": 47,
   "rule_id": "99239e7d-b0d4-46e3-8609-acafcf99f68c",
   "severity": "medium",
   "tags": [
@@ -109,5 +109,5 @@
     }
   ],
   "type": "eql",
-  "version": 6
+  "version": 100
 }

@@ -12,7 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious WMIC XSL Script Execution",
-  "query": "sequence by process.entity_id with maxspan = 2m\n[process where event.type in (\"start\", \"process_started\") and\n   (process.name : \"WMIC.exe\" or process.pe.original_file_name : \"wmic.exe\") and\n   process.args : (\"format*:*\", \"/format*:*\", \"*-format*:*\") and\n   not process.command_line : \"* /format:table *\"]\n[any where (event.category == \"library\" or (event.category == \"process\" and event.action : \"Image loaded*\")) and\n (dll.name : (\"jscript.dll\", \"vbscript.dll\") or file.name : (\"jscript.dll\", \"vbscript.dll\"))]\n",
+  "query": "sequence by process.entity_id with maxspan = 2m\n[process where event.type == \"start\" and\n   (process.name : \"WMIC.exe\" or process.pe.original_file_name : \"wmic.exe\") and\n   process.args : (\"format*:*\", \"/format*:*\", \"*-format*:*\") and\n   not process.command_line : \"* /format:table *\"]\n[any where (event.category == \"library\" or (event.category == \"process\" and event.action : \"Image loaded*\")) and\n (dll.name : (\"jscript.dll\", \"vbscript.dll\") or file.name : (\"jscript.dll\", \"vbscript.dll\"))]\n",
   "required_fields": [
     {
       "ecs": true,
@@ -65,7 +65,7 @@
       "type": "keyword"
     }
   ],
-  "risk_score": 21,
+  "risk_score": 47,
   "rule_id": "7f370d54-c0eb-4270-ac5a-9a6020585dc6",
   "severity": "medium",
   "tags": [
@@ -93,5 +93,5 @@
     }
   ],
   "type": "eql",
-  "version": 5
+  "version": 101
 }

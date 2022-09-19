@@ -40,7 +40,7 @@
       "type": "unknown"
     }
   ],
-  "risk_score": 43,
+  "risk_score": 47,
   "rule_id": "291a0de9-937a-4189-94c0-3e847c8b13e4",
   "setup": "The 'Audit Security Group Management' audit policy must be configured (Success).\nSteps to implement the logging policy with with Advanced Audit Configuration:\n\n```\nComputer Configuration >\nPolicies >\nWindows Settings >\nSecurity Settings >\nAdvanced Audit Policies Configuration >\nAudit Policies >\nAccount Management >\nAudit Security Group Management (Success)\n```\n\nMicrosoft introduced the event used in this detection rule on Windows 10 and Windows Server 2016 or later operating systems.\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "medium",
@@ -77,5 +77,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 6
+  "version": 100
 }

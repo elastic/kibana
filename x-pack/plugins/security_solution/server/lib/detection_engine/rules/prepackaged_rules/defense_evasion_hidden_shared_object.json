@@ -13,7 +13,7 @@
   "max_signals": 33,
   "name": "Creation of Hidden Shared Object File",
   "note": "",
-  "query": "file where event.action : \"creation\" and file.extension == \"so\" and file.name : \".*.so\" \n",
+  "query": "file where event.action : \"creation\" and file.extension == \"so\" and file.name : \".*.so\"\n",
   "required_fields": [
     {
       "ecs": true,
@@ -68,5 +68,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 100
 }

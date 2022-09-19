@@ -16,7 +16,7 @@
   "license": "Elastic License v2",
   "name": "Enumerating Domain Trusts via NLTEST.EXE",
   "note": "",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n    process.name : \"nltest.exe\" and process.args : (\n        \"/DCLIST:*\", \"/DCNAME:*\", \"/DSGET*\",\n        \"/LSAQUERYFTI:*\", \"/PARENTDOMAIN\",\n        \"/DOMAIN_TRUSTS\", \"/BDC_QUERY:*\")\n",
+  "query": "process where event.type == \"start\" and\n    process.name : \"nltest.exe\" and process.args : (\n        \"/DCLIST:*\", \"/DCNAME:*\", \"/DSGET*\",\n        \"/LSAQUERYFTI:*\", \"/PARENTDOMAIN\",\n        \"/DOMAIN_TRUSTS\", \"/BDC_QUERY:*\")\n",
   "references": [
     "https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/cc731935(v=ws.11)",
     "https://redcanary.com/blog/how-one-hospital-thwarted-a-ryuk-ransomware-outbreak/"
@@ -38,7 +38,7 @@
       "type": "keyword"
     }
   ],
-  "risk_score": 23,
+  "risk_score": 21,
   "rule_id": "84da2554-e12a-11ec-b896-f661ea17fbcd",
   "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "low",
@@ -68,5 +68,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 101
 }

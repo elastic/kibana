@@ -13,7 +13,7 @@
   "license": "Elastic License v2",
   "name": "Suspicious .NET Code Compilation",
   "note": "",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : (\"csc.exe\", \"vbc.exe\") and\n  process.parent.name : (\"wscript.exe\", \"mshta.exe\", \"cscript.exe\", \"wmic.exe\", \"svchost.exe\", \"rundll32.exe\", \"cmstp.exe\", \"regsvr32.exe\")\n",
+  "query": "process where event.type == \"start\" and\n  process.name : (\"csc.exe\", \"vbc.exe\") and\n  process.parent.name : (\"wscript.exe\", \"mshta.exe\", \"cscript.exe\", \"wmic.exe\", \"svchost.exe\", \"rundll32.exe\", \"cmstp.exe\", \"regsvr32.exe\")\n",
   "required_fields": [
     {
       "ecs": true,
@@ -68,5 +68,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 8
+  "version": 101
 }

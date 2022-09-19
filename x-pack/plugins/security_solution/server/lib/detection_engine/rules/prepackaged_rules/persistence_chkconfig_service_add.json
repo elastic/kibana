@@ -10,7 +10,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Chkconfig Service Add",
-  "query": "process where event.type == \"start\" and \n   (process.executable : \"/usr/sbin/chkconfig\" and process.args : \"--add\") or \n   (process.args : \"*chkconfig\" and process.args : \"--add\")\n",
+  "query": "process where event.type == \"start\" and\n   (process.executable : \"/usr/sbin/chkconfig\" and process.args : \"--add\") or\n   (process.args : \"*chkconfig\" and process.args : \"--add\")\n",
   "references": [
     "https://www.intezer.com/blog/research/lightning-framework-new-linux-threat/"
   ],
@@ -31,7 +31,7 @@
       "type": "keyword"
     }
   ],
-  "risk_score": 74,
+  "risk_score": 47,
   "rule_id": "b910f25a-2d44-47f2-a873-aabdc0d355e6",
   "severity": "medium",
   "tags": [
@@ -68,5 +68,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 100
 }

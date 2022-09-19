@@ -13,7 +13,7 @@
   "license": "Elastic License v2",
   "name": "Kubernetes Suspicious Self-Subject Review",
   "note": "",
-  "query": "kubernetes.audit.verb:\"create\" \nand kubernetes.audit.objectRef.resource:(\"selfsubjectaccessreviews\" or \"selfsubjectrulesreviews\") \nand kubernetes.audit.user.username:(system\\:serviceaccount\\:* or system\\:node\\:*) or kubernetes.audit.impersonatedUser.username:(system\\:serviceaccount\\:* or system\\:node\\:*)\n",
+  "query": "kubernetes.audit.verb:\"create\"\nand kubernetes.audit.objectRef.resource:(\"selfsubjectaccessreviews\" or \"selfsubjectrulesreviews\")\nand kubernetes.audit.user.username:(system\\:serviceaccount\\:* or system\\:node\\:*) or kubernetes.audit.impersonatedUser.username:(system\\:serviceaccount\\:* or system\\:node\\:*)\n",
   "references": [
     "https://www.paloaltonetworks.com/apps/pan/public/downloadResource?pagePath=/content/pan/en_US/resources/whitepapers/kubernetes-privilege-escalation-excessive-permissions-in-popular-platforms",
     "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#checking-api-access",
@@ -70,5 +70,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 100
 }

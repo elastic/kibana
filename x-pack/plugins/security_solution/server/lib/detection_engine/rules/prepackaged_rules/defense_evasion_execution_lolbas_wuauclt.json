@@ -13,7 +13,7 @@
   "license": "Elastic License v2",
   "name": "ImageLoad via Windows Update Auto Update Client",
   "note": "",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n  (process.pe.original_file_name == \"wuauclt.exe\" or process.name : \"wuauclt.exe\") and\n   /* necessary windows update client args to load a dll */\n   process.args : \"/RunHandlerComServer\" and process.args : \"/UpdateDeploymentProvider\" and\n   /* common paths writeable by a standard user where the target DLL can be placed */\n   process.args : (\"C:\\\\Users\\\\*.dll\", \"C:\\\\ProgramData\\\\*.dll\", \"C:\\\\Windows\\\\Temp\\\\*.dll\", \"C:\\\\Windows\\\\Tasks\\\\*.dll\")\n",
+  "query": "process where event.type == \"start\" and\n  (process.pe.original_file_name == \"wuauclt.exe\" or process.name : \"wuauclt.exe\") and\n   /* necessary windows update client args to load a dll */\n   process.args : \"/RunHandlerComServer\" and process.args : \"/UpdateDeploymentProvider\" and\n   /* common paths writeable by a standard user where the target DLL can be placed */\n   process.args : (\"C:\\\\Users\\\\*.dll\", \"C:\\\\ProgramData\\\\*.dll\", \"C:\\\\Windows\\\\Temp\\\\*.dll\", \"C:\\\\Windows\\\\Tasks\\\\*.dll\")\n",
   "references": [
     "https://dtm.uk/wuauclt/"
   ],
@@ -71,5 +71,5 @@
   "timeline_title": "Comprehensive Process Timeline",
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 9
+  "version": 101
 }

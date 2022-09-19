@@ -75,5 +75,5 @@
   "timeline_title": "Comprehensive Process Timeline",
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 16
+  "version": 100
 }

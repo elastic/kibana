@@ -80,5 +80,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 7
+  "version": 100
 }

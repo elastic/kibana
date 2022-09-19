@@ -13,7 +13,7 @@
   "license": "Elastic License v2",
   "name": "Suspicious Cmd Execution via WMI",
   "note": "",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n process.parent.name : \"WmiPrvSE.exe\" and process.name : \"cmd.exe\" and\n process.args : \"\\\\\\\\127.0.0.1\\\\*\" and process.args : (\"2>&1\", \"1>\")\n",
+  "query": "process where event.type == \"start\" and\n process.parent.name : \"WmiPrvSE.exe\" and process.name : \"cmd.exe\" and\n process.args : \"\\\\\\\\127.0.0.1\\\\*\" and process.args : (\"2>&1\", \"1>\")\n",
   "required_fields": [
     {
       "ecs": true,
@@ -66,5 +66,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 6
+  "version": 101
 }

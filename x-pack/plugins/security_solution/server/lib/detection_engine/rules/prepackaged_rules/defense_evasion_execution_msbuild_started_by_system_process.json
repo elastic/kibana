@@ -16,7 +16,7 @@
   "license": "Elastic License v2",
   "name": "Microsoft Build Engine Started by a System Process",
   "note": "",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : \"MSBuild.exe\" and\n  process.parent.name : (\"explorer.exe\", \"wmiprvse.exe\")\n",
+  "query": "process where event.type == \"start\" and\n  process.name : \"MSBuild.exe\" and\n  process.parent.name : (\"explorer.exe\", \"wmiprvse.exe\")\n",
   "required_fields": [
     {
       "ecs": true,
@@ -80,5 +80,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 12
+  "version": 101
 }

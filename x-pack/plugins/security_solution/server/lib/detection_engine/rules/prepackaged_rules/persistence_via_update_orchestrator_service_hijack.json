@@ -13,7 +13,7 @@
   "license": "Elastic License v2",
   "name": "Persistence via Update Orchestrator Service Hijack",
   "note": "",
-  "query": "process where event.type == \"start\" and\n  process.parent.executable : \"C:\\\\Windows\\\\System32\\\\svchost.exe\" and\n  process.parent.args : \"UsoSvc\" and\n  not process.executable :\n          (\"?:\\\\ProgramData\\\\Microsoft\\\\Windows\\\\UUS\\\\Packages\\\\*\\\\amd64\\\\MoUsoCoreWorker.exe\",\n          \"?:\\\\Windows\\\\System32\\\\UsoClient.exe\",\n          \"?:\\\\Windows\\\\System32\\\\MusNotification.exe\",\n          \"?:\\\\Windows\\\\System32\\\\MusNotificationUx.exe\",\n          \"?:\\\\Windows\\\\System32\\\\MusNotifyIcon.exe\",\n          \"?:\\\\Windows\\\\System32\\\\WerFault.exe\",\n          \"?:\\\\Windows\\\\System32\\\\WerMgr.exe\",\n          \"?:\\\\Windows\\\\UUS\\\\amd64\\\\MoUsoCoreWorker.exe\",\n          \"?:\\\\Windows\\\\System32\\\\MoUsoCoreWorker.exe\",\n          \"?:\\\\Windows\\\\UUS\\\\amd64\\\\UsoCoreWorker.exe\",\n          \"?:\\\\Windows\\\\System32\\\\UsoCoreWorker.exe\",\n          \"?:\\\\Program Files\\\\Common Files\\\\microsoft shared\\\\ClickToRun\\\\OfficeC2RClient.exe\")\n",
+  "query": "process where event.type == \"start\" and\n  process.parent.executable : \"C:\\\\Windows\\\\System32\\\\svchost.exe\" and\n  process.parent.args : \"UsoSvc\" and\n  not process.executable :\n          (\"?:\\\\ProgramData\\\\Microsoft\\\\Windows\\\\UUS\\\\Packages\\\\*\\\\amd64\\\\MoUsoCoreWorker.exe\",\n          \"?:\\\\Windows\\\\System32\\\\UsoClient.exe\",\n          \"?:\\\\Windows\\\\System32\\\\MusNotification.exe\",\n          \"?:\\\\Windows\\\\System32\\\\MusNotificationUx.exe\",\n          \"?:\\\\Windows\\\\System32\\\\MusNotifyIcon.exe\",\n          \"?:\\\\Windows\\\\System32\\\\WerFault.exe\",\n          \"?:\\\\Windows\\\\System32\\\\WerMgr.exe\",\n          \"?:\\\\Windows\\\\UUS\\\\amd64\\\\MoUsoCoreWorker.exe\",\n          \"?:\\\\Windows\\\\System32\\\\MoUsoCoreWorker.exe\",\n          \"?:\\\\Windows\\\\UUS\\\\amd64\\\\UsoCoreWorker.exe\",\n          \"?:\\\\Windows\\\\System32\\\\UsoCoreWorker.exe\",\n          \"?:\\\\Program Files\\\\Common Files\\\\microsoft shared\\\\ClickToRun\\\\OfficeC2RClient.exe\") and\n  not process.name : (\"MoUsoCoreWorker.exe\", \"OfficeC2RClient.exe\")\n",
   "references": [
     "https://github.com/irsl/CVE-2020-1313"
   ],
@@ -26,6 +26,11 @@
     {
       "ecs": true,
       "name": "process.executable",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
       "type": "keyword"
     },
     {
@@ -77,5 +82,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 7
+  "version": 100
 }

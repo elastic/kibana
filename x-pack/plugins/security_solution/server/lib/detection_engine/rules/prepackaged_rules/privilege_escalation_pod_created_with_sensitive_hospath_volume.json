@@ -13,7 +13,7 @@
   "license": "Elastic License v2",
   "name": "Kubernetes Pod created with a Sensitive hostPath Volume",
   "note": "",
-  "query": "kubernetes.audit.objectRef.resource:\"pods\" \n  and kubernetes.audit.verb:(\"create\" or \"update\" or \"patch\") \n  and kubernetes.audit.requestObject.spec.volumes.hostPath.path:(\"/\" or \"/proc\" or \"/root\" or \"/var\" or \"/var/run/docker.sock\" or \"/var/run/crio/crio.sock\" or \"/var/run/cri-dockerd.sock\" or \"/var/lib/kubelet\" or \"/var/lib/kubelet/pki\" or \"/var/lib/docker/overlay2\" or \"/etc\" or \"/etc/kubernetes\" or \"/etc/kubernetes/manifests\" or \"/home/admin\")\n",
+  "query": "kubernetes.audit.objectRef.resource:\"pods\"\n  and kubernetes.audit.verb:(\"create\" or \"update\" or \"patch\")\n  and kubernetes.audit.requestObject.spec.volumes.hostPath.path:(\"/\" or \"/proc\" or \"/root\" or \"/var\" or \"/var/run/docker.sock\" or \"/var/run/crio/crio.sock\" or \"/var/run/cri-dockerd.sock\" or \"/var/lib/kubelet\" or \"/var/lib/kubelet/pki\" or \"/var/lib/docker/overlay2\" or \"/etc\" or \"/etc/kubernetes\" or \"/etc/kubernetes/manifests\" or \"/home/admin\")\n",
   "references": [
     "https://blog.appsecco.com/kubernetes-namespace-breakout-using-insecure-host-path-volume-part-1-b382f2a6e216",
     "https://kubernetes.io/docs/concepts/storage/volumes/#hostpath"
@@ -65,5 +65,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 100
 }

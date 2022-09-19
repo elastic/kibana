@@ -16,7 +16,7 @@
   "license": "Elastic License v2",
   "name": "Microsoft Build Engine Using an Alternate Name",
   "note": "",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.pe.original_file_name == \"MSBuild.exe\" and\n  not process.name : \"MSBuild.exe\"\n",
+  "query": "process where event.type == \"start\" and\n  process.pe.original_file_name == \"MSBuild.exe\" and\n  not process.name : \"MSBuild.exe\"\n",
   "required_fields": [
     {
       "ecs": true,
@@ -71,5 +71,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 12
+  "version": 101
 }
