@@ -15,7 +15,7 @@ export interface PackageSpecManifest {
   description: string;
   version: string;
   license?: 'basic';
-  type?: 'integration';
+  type?: 'integration' | 'input';
   release?: 'experimental' | 'beta' | 'ga';
   categories?: Array<PackageSpecCategory | undefined>;
   conditions?: PackageSpecConditions;
@@ -25,6 +25,8 @@ export interface PackageSpecManifest {
   vars?: RegistryVarsEntry[];
   owner: { github: string };
 }
+
+export type PackageSpecPackageType = 'integration' | 'input';
 
 export type PackageSpecCategory =
   | 'aws'
