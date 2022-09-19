@@ -29,19 +29,13 @@ import {
   XYChartElementEvent,
 } from '@elastic/charts';
 import { partition } from 'lodash';
-import moment from 'moment';
 import { IconType } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
-import { Datatable, DatatableRow, RenderMode } from '@kbn/expressions-plugin/common';
+import { Datatable, RenderMode } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EmptyPlaceholder, LegendToggle } from '@kbn/charts-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import {
-  ManualPointEventAnnotationRow,
-  ManualRangeEventAnnotationOutput,
-  ManualPointEventAnnotationOutput,
-  ManualRangeEventAnnotationRow,
-} from '@kbn/event-annotation-plugin/common';
+import { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common';
 import { ChartsPluginSetup, ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import {
@@ -61,11 +55,9 @@ import type {
   ExtendedReferenceLineDecorationConfig,
   XYChartProps,
   AxisExtentConfigResult,
-  CommonXYAnnotationLayerConfig,
 } from '../../common/types';
 import {
   isHorizontalChart,
-  getAnnotationsLayers,
   getDataLayers,
   AxisConfiguration,
   getAxisPosition,
@@ -136,6 +128,7 @@ export type XYChartRenderProps = XYChartProps & {
   eventAnnotationService: EventAnnotationServiceType;
   renderComplete: () => void;
   uiState?: PersistedState;
+  timeFormat: string;
 };
 
 function getValueLabelsStyling(isHorizontal: boolean): {
@@ -192,54 +185,12 @@ function createSplitPoint(
 
 export const XYChartReportable = React.memo(XYChart);
 
-// TODO: remove this function when we start using fetch_event_annotation expression
-const convertToAnnotationsTable = (
-  layers: CommonXYAnnotationLayerConfig[],
-  minInterval?: number,
-  firstTimestamp?: number
-) => {
-  return layers
-    .flatMap(({ annotations }) =>
-      annotations.filter(
-        (a): a is ManualPointEventAnnotationOutput | ManualRangeEventAnnotationOutput =>
-          !a.isHidden && 'time' in a
-      )
-    )
-    .sort((a, b) => moment(a.time).valueOf() - moment(b.time).valueOf())
-    .map((a) => {
-      const timebucket = getRoundedTimestamp(moment(a.time).valueOf(), firstTimestamp, minInterval);
-      if (a.type === 'manual_point_event_annotation') {
-        const pointRow: ManualPointEventAnnotationRow = {
-          ...a,
-          type: 'point',
-          timebucket: moment(timebucket).toISOString(),
-        };
-        return pointRow;
-      }
-      const rangeRow: ManualRangeEventAnnotationRow = {
-        ...a,
-        type: 'range',
-      };
-      return rangeRow;
-    });
-};
-
-export const sortByTime = (a: DatatableRow, b: DatatableRow) => {
-  return 'time' in a && 'time' in b ? a.time.localeCompare(b.time) : 0;
-};
-
-const getRoundedTimestamp = (timestamp: number, firstTimestamp?: number, minInterval?: number) => {
-  if (!firstTimestamp || !minInterval) {
-    return timestamp;
-  }
-  return timestamp - ((timestamp - firstTimestamp) % minInterval);
-};
-
 export function XYChart({
   args,
   data,
   formatFactory,
   timeZone,
+  timeFormat,
   chartsThemeService,
   chartsActiveCursorService,
   paletteService,
@@ -267,6 +218,7 @@ export function XYChart({
     splitColumnAccessor,
     splitRowAccessor,
     singleTable,
+    annotations,
   } = args;
   const chartRef = useRef<Chart>(null);
   const chartTheme = chartsThemeService.useChartsTheme();
@@ -447,25 +399,19 @@ export function XYChart({
   };
 
   const referenceLineLayers = getReferenceLayers(layers);
-
-  const annotationsLayers = getAnnotationsLayers(layers);
-  const firstTable = dataLayers[0]?.table;
-
-  const columnId = dataLayers[0]?.xAccessor
-    ? getColumnByAccessor(dataLayers[0]?.xAccessor, firstTable.columns)?.id
-    : null;
-
-  const annotations = convertToAnnotationsTable(
-    annotationsLayers,
-    minInterval,
-    columnId ? firstTable.rows[0]?.[columnId] : undefined
+  const [rangeAnnotations, lineAnnotations] = partition(
+    annotations?.datatable.rows,
+    isRangeAnnotation
   );
 
-  const [rangeAnnotations, lineAnnotations] = partition(annotations, isRangeAnnotation);
+  const annotationsConfigs = annotations?.layers.flatMap((l) => l.annotations);
 
   const groupedLineAnnotations = getAnnotationsGroupedByInterval(
-    lineAnnotations as ManualPointEventAnnotationRow[],
-    xAxisFormatter
+    lineAnnotations as PointEventAnnotationRow[],
+    annotationsConfigs,
+    annotations?.datatable.columns,
+    formatFactory,
+    timeFormat
   );
 
   const visualConfigs = [
@@ -483,7 +429,10 @@ export function XYChart({
     ...groupedLineAnnotations,
   ].filter(Boolean);
 
-  const shouldHideDetails = annotationsLayers.length > 0 ? annotationsLayers[0].simpleView : false;
+  const shouldHideDetails =
+    annotations?.layers && annotations.layers.length > 0
+      ? annotations?.layers[0].simpleView
+      : false;
   const linesPaddings = !shouldHideDetails
     ? getLinesCausedPaddings(visualConfigs, yAxesMap, shouldRotate)
     : {};

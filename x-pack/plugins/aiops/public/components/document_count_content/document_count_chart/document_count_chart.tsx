@@ -27,9 +27,8 @@ import { DualBrush, DualBrushAnnotation } from '@kbn/aiops-components';
 import { getSnappedWindowParameters, getWindowParameters } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
-import type { ChangePoint } from '@kbn/ml-agg-utils';
 
-import { useAiOpsKibana } from '../../../kibana_context';
+import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 
 import { BrushBadge } from './brush_badge';
 
@@ -48,14 +47,14 @@ export interface DocumentCountChartPoint {
 }
 
 interface DocumentCountChartProps {
-  brushSelectionUpdateHandler: (d: WindowParameters, force: boolean) => void;
+  brushSelectionUpdateHandler?: (d: WindowParameters, force: boolean) => void;
   width?: number;
   chartPoints: DocumentCountChartPoint[];
   chartPointsSplit?: DocumentCountChartPoint[];
   timeRangeEarliest: number;
   timeRangeLatest: number;
   interval: number;
-  changePoint?: ChangePoint;
+  chartPointsSplitLabel: string;
   isBrushCleared: boolean;
 }
 
@@ -100,12 +99,10 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   timeRangeEarliest,
   timeRangeLatest,
   interval,
-  changePoint,
+  chartPointsSplitLabel,
   isBrushCleared,
 }) => {
-  const {
-    services: { data, uiSettings, fieldFormats, charts },
-  } = useAiOpsKibana();
+  const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
 
   const chartTheme = charts.theme.useChartsTheme();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
@@ -126,8 +123,6 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
       defaultMessage: 'other document count',
     }
   );
-
-  const splitSeriesName = `${changePoint?.fieldName}:${changePoint?.fieldValue}`;
 
   // TODO Let user choose between ZOOM and BRUSH mode.
   const [viewMode] = useState<VIEW_MODE>(VIEW_MODE.BRUSH);
@@ -200,6 +195,9 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   };
 
   const onElementClick: ElementClickListener = ([elementData]) => {
+    if (brushSelectionUpdateHandler === undefined) {
+      return;
+    }
     const startRange = (elementData as XYChartElementEvent)[0].x;
 
     const range = {
@@ -247,6 +245,9 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   }, [isBrushCleared, originalWindowParameters]);
 
   function onWindowParametersChange(wp: WindowParameters, wpPx: WindowParameters) {
+    if (brushSelectionUpdateHandler === undefined) {
+      return;
+    }
     setWindowParameters(wp);
     setWindowParametersAsPixels(wpPx);
     brushSelectionUpdateHandler(wp, false);
@@ -362,7 +363,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
           {chartPointsSplit && (
             <HistogramBarSeries
               id={`${SPEC_ID}_split`}
-              name={splitSeriesName}
+              name={chartPointsSplitLabel}
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor="time"

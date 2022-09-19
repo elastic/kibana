@@ -7,5 +7,6 @@
 
 export const CAPABILITIES_KEYS = ['logs', 'infrastructure', 'apm', 'uptime'];
 
+export const ALERTS_TABLE_ID = 'xpack.observability.overview.alert.table';
 export const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.overview.alert.tableState';
 export const ALERTS_PER_PAGE = 10;
