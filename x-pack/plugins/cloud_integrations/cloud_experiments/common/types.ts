@@ -28,9 +28,9 @@ export interface CloudExperimentsPluginSetup {
    * Fetch the configuration assigned to variation `configKey`. If nothing is found, fallback to `defaultValue`.
    * @param featureFlagName The name of the key to find the config variation. {@link CloudExperimentsFeatureFlagNames}.
    * @param defaultValue The fallback value in case no variation is found.
- *
- * @public
- */
+   *
+   * @public
+   */
   getVariation: <Data>(
     featureFlagName: CloudExperimentsFeatureFlagNames,
     defaultValue: Data
