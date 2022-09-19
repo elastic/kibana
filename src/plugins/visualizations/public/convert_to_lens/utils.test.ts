@@ -25,6 +25,7 @@ import {
 import {
   getBucketCollapseFn,
   getBucketColumns,
+  getColumnIds,
   getColumnsWithoutReferenced,
   getMetricsWithoutDuplicates,
   isReferenced,
@@ -548,6 +549,66 @@ describe('sortColumns', () => {
       column3,
       column4,
       column5,
+    ]);
+  });
+});
+
+describe('getColumnIds', () => {
+  const colId1 = '0_agg_id';
+  const colId2 = '1_agg_id';
+  const colId3 = '2_agg_id';
+  const colId4 = '3_agg_id';
+
+  const column1: AvgColumn = {
+    sourceField: 'some-field',
+    columnId: colId1,
+    operationType: 'average',
+    isBucketed: false,
+    isSplit: false,
+    dataType: 'string',
+    params: {},
+    meta: { aggId: colId1 },
+  };
+
+  const column2: CountColumn = {
+    sourceField: 'document',
+    columnId: colId2,
+    operationType: 'count',
+    isBucketed: false,
+    isSplit: false,
+    dataType: 'string',
+    params: {},
+    meta: { aggId: colId2 },
+  };
+
+  const column3: MaxColumn = {
+    sourceField: 'some-field',
+    columnId: colId3,
+    operationType: 'max',
+    isBucketed: false,
+    isSplit: false,
+    dataType: 'string',
+    params: {},
+    meta: { aggId: colId3 },
+  };
+
+  const column4: DateHistogramColumn = {
+    sourceField: 'some-field',
+    columnId: colId4,
+    operationType: 'date_histogram',
+    isBucketed: false,
+    isSplit: false,
+    dataType: 'string',
+    params: { interval: '1h' },
+    meta: { aggId: colId4 },
+  };
+
+  test('return columnIds', () => {
+    expect(getColumnIds([column1, column2, column3, column4])).toEqual([
+      colId1,
+      colId2,
+      colId3,
+      colId4,
     ]);
   });
 });
