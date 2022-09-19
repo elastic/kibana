@@ -6132,10 +6132,10 @@
   resolved "https://registry.yarnpkg.com/@types/cytoscape/-/cytoscape-3.14.0.tgz#346b5430a7a1533784bcf44fcbe6c5255b948d36"
   integrity sha512-qOhhZFGb35457vmCu9YHqwjqleraSAEikaIFmMUPWzTC7FrwkS7VR/6ymqRHW7Z8wivHuzsZDYCoePIepd69qg==
 
-"@types/d3-array@^3.0.2":
-  version "3.0.3"
-  resolved "https://registry.yarnpkg.com/@types/d3-array/-/d3-array-3.0.3.tgz#87d990bf504d14ad6b16766979d04e943c046dac"
-  integrity sha512-Reoy+pKnvsksN0lQUlcH6dOGjRZ/3WRwXR//m+/8lt1BXeI4xyaUZoqULNjyXXRuh0Mj4LNpkCvhUpQlY3X5xQ==
+"@types/d3-array@^2.12.1":
+  version "2.12.3"
+  resolved "https://registry.yarnpkg.com/@types/d3-array/-/d3-array-2.12.3.tgz#8d16d51fb04ad5a5a8ebe14eb8263a579f1efdd1"
+  integrity sha512-hN879HLPTVqZV3FQEXy7ptt083UXwguNbnxdTGzVW4y4KjX5uyNKljrQixZcSJfLyFirbpUokxpXtvR+N5+KIg==
 
 "@types/d3-brush@^3.0.0":
   version "3.0.1"
@@ -12320,19 +12320,12 @@ d3-array@1, d3-array@^1.1.1, d3-array@^1.2.0, d3-array@^1.2.4:
   dependencies:
     internmap "1 - 2"
 
-d3-array@2, d3-array@^2.3.0:
+d3-array@2, d3-array@2.12.1, d3-array@^2.3.0:
   version "2.12.1"
   resolved "https://registry.yarnpkg.com/d3-array/-/d3-array-2.12.1.tgz#e20b41aafcdffdf5d50928004ececf815a465e81"
   integrity sha512-B0ErZK/66mHtEsR1TkPEEkwdy+WDesimkM5gpZr5Dsg54BiTA5RXtYW5qTLIAcekaS9xfZrzBLF/OAkB3Qn1YQ==
   dependencies:
     internmap "^1.0.0"
-
-d3-array@3.0.2:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/d3-array/-/d3-array-3.0.2.tgz#7a65593784cfc0150eee1aba8d3e69a6fe73be7b"
-  integrity sha512-nTN4OC6ufZueotlexbxBd2z8xmG1eIfhvP2m1auH2ONps0L+AZn1r0JWuzMXZ6XgOj1VBOp7GGZmEs9NUFEBbA==
-  dependencies:
-    internmap "1 - 2"
 
 d3-brush@^3.0.0:
   version "3.0.0"
