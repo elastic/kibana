@@ -12,7 +12,7 @@ import { AggBasedColumn, SchemaConfig } from '../../common';
 import { convertMetricToColumns } from '../../common/convert_to_lens/lib/metrics';
 import { convertBucketToColumns } from '../../common/convert_to_lens/lib/buckets';
 import { getCutomBucketsFromSiblingAggs } from '../../common/convert_to_lens/lib/utils';
-import { Vis } from '../types';
+import type { Vis } from '../types';
 import { getVisSchemas, Schemas } from '../vis_schemas';
 import {
   getBucketCollapseFn,
