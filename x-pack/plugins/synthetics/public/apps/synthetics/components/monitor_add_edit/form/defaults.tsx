@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { isEqual } from 'lodash';
+import { formatKibanaNamespace } from '../../../../../../common/formatters';
 import { DEFAULT_FIELDS, DEFAULT_TLS_FIELDS } from '../constants';
 import {
   ConfigKey,
@@ -18,6 +19,7 @@ import {
 export const getDefaultFormFields = (
   spaceId: string = 'default'
 ): Record<FormMonitorType, Record<string, any>> => {
+  const kibanaNamespace = formatKibanaNamespace(spaceId);
   return {
     [FormMonitorType.MULTISTEP]: {
       ...DEFAULT_FIELDS[DataStream.BROWSER],
@@ -27,29 +29,29 @@ export const getDefaultFormFields = (
         fileName: '',
       },
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
-      [ConfigKey.NAMESPACE]: spaceId,
+      [ConfigKey.NAMESPACE]: kibanaNamespace,
     },
     [FormMonitorType.SINGLE]: {
       ...DEFAULT_FIELDS[DataStream.BROWSER],
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.SINGLE,
-      [ConfigKey.NAMESPACE]: spaceId,
+      [ConfigKey.NAMESPACE]: kibanaNamespace,
     },
     [FormMonitorType.HTTP]: {
       ...DEFAULT_FIELDS[DataStream.HTTP],
       isTLSEnabled: false,
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.HTTP,
-      [ConfigKey.NAMESPACE]: spaceId,
+      [ConfigKey.NAMESPACE]: kibanaNamespace,
     },
     [FormMonitorType.TCP]: {
       ...DEFAULT_FIELDS[DataStream.TCP],
       isTLSEnabled: false,
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.TCP,
-      [ConfigKey.NAMESPACE]: spaceId,
+      [ConfigKey.NAMESPACE]: kibanaNamespace,
     },
     [FormMonitorType.ICMP]: {
       ...DEFAULT_FIELDS[DataStream.ICMP],
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.ICMP,
-      [ConfigKey.NAMESPACE]: spaceId,
+      [ConfigKey.NAMESPACE]: kibanaNamespace,
     },
   };
 };

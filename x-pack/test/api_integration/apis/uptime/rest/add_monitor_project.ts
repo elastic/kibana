@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import { format as formatUrl } from 'url';
 import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -542,7 +543,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         const { monitors } = getResponse.body;
         expect(monitors.length).eql(1);
-        expect(monitors[0].attributes[ConfigKey.NAMESPACE]).eql(SPACE_ID);
+        expect(monitors[0].attributes[ConfigKey.NAMESPACE]).eql(formatKibanaNamespace(SPACE_ID));
       } finally {
         await deleteMonitor(
           projectMonitors.monitors[0].id,

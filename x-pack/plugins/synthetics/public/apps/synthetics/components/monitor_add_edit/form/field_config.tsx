@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { UseFormReturn, ControllerRenderProps, FormState } from 'react-hook-form';
 import {
   EuiButtonGroup,
@@ -526,6 +527,9 @@ export const FIELD: Record<string, FieldMeta> = {
     controlled: true,
     props: ({ field }) => ({
       selectedOptions: field,
+    }),
+    validation: () => ({
+      validate: (namespace) => isValidNamespace(namespace).error,
     }),
   },
   [ConfigKey.MAX_REDIRECTS]: {
