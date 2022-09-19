@@ -26,13 +26,7 @@ import type {
   EqlSequence,
 } from '../../../../common/detection_engine/types';
 import type { ITelemetryEventsSender } from '../../telemetry/sender';
-import type {
-  CompleteRule,
-  QueryRuleParams,
-  ThreatRuleParams,
-  RuleParams,
-  SavedQueryRuleParams,
-} from '../schemas/rule_schemas';
+import type { RuleParams } from '../schemas/rule_schemas';
 import type { GenericBulkCreateResponse } from '../rule_types/factories';
 import type { BuildReasonMessage } from './reason_formatters';
 import type {
@@ -262,10 +256,6 @@ export interface SearchAfterAndBulkCreateParams {
     from: moment.Moment;
     maxSignals: number;
   };
-  completeRule:
-    | CompleteRule<QueryRuleParams>
-    | CompleteRule<SavedQueryRuleParams>
-    | CompleteRule<ThreatRuleParams>;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
