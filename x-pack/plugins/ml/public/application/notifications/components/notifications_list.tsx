@@ -6,6 +6,7 @@
  */
 
 import React, { FC, useCallback, useMemo, useState, useEffect } from 'react';
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -21,11 +22,12 @@ import {
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import useDebounce from 'react-use/lib/useDebounce';
+import { isEqual } from 'lodash';
 import { ML_NOTIFICATIONS_MESSAGE_LEVEL } from '../../../../common/constants/notifications';
 import { ML_NOTIFICATIONS_LAST_CHECKED_AT } from '../../../../common/types/storage';
 import { useStorage } from '../../contexts/storage';
 import { SavedObjectsWarning } from '../../components/saved_objects_warning';
-import { useTimeRangeUpdates } from '../../contexts/kibana/use_timefilter';
+import { useTimefilter, useTimeRangeUpdates } from '../../contexts/kibana/use_timefilter';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { useRefresh } from '../../routing/use_refresh';
@@ -60,7 +62,21 @@ export const NotificationsList: FC = () => {
   } = useMlKibana();
   const { displayErrorToast } = useToastNotificationService();
 
+  const [lastCheckedAt, setLastCheckedAt] = useStorage(ML_NOTIFICATIONS_LAST_CHECKED_AT);
+  const timeFilter = useTimefilter();
   const timeRange = useTimeRangeUpdates();
+
+  useEffect(function setTimeRangeOnMount() {
+    const defaults = timeFilter.getTimeDefaults();
+
+    if (lastCheckedAt && isEqual(defaults, timeRange)) {
+      timeFilter.setTime({
+        from: moment(lastCheckedAt).toISOString(),
+        to: 'now',
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState<NotificationItem[]>([]);
@@ -73,8 +89,6 @@ export const NotificationsList: FC = () => {
     ML_PAGES.NOTIFICATIONS,
     getDefaultNotificationsListState()
   );
-
-  const [lastCheckedAt, setLastCheckedAt] = useStorage(ML_NOTIFICATIONS_LAST_CHECKED_AT);
 
   const { onTableChange, pagination, sorting } = useTableSettings<NotificationItem>(
     totalCount,
