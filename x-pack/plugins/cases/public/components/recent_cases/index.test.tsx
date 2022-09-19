@@ -13,10 +13,11 @@ import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../com
 import { useGetCasesMockState } from '../../containers/mock';
 import { useCurrentUser } from '../../common/lib/kibana/hooks';
 import { useGetCases } from '../../containers/use_get_cases';
-import * as api from '../../containers/user_profiles/api';
 import { useToasts } from '../../common/lib/kibana';
+import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
+import { userProfiles } from '../../containers/user_profiles/api.mock';
 
-jest.mock('../../containers/user_profiles/api');
+jest.mock('../../containers/user_profiles/use_get_current_user_profile');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../common/lib/kibana/hooks');
 jest.mock('../../common/navigation/hooks');
@@ -30,6 +31,7 @@ const mockData = {
   ...useGetCasesMockState,
 };
 
+const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
 const useCurrentUserMock = useCurrentUser as jest.Mock;
 
@@ -40,6 +42,10 @@ describe('RecentCases', () => {
   let appMockRender: AppMockRenderer;
   beforeEach(() => {
     jest.clearAllMocks();
+    useGetCurrentUserProfileMock.mockReturnValue({
+      data: userProfiles[0],
+      isLoading: false,
+    });
     useGetCasesMock.mockImplementation(() => mockData);
     useCurrentUserMock.mockReturnValue({
       email: 'elastic@elastic.co',
@@ -130,9 +136,7 @@ describe('RecentCases', () => {
   });
 
   it('sets the reporter filters correctly when it cannot find the current user profile', async () => {
-    const spyOnGetCurrentUserProfile = jest.spyOn(api, 'getCurrentUserProfile');
-    // @ts-expect-error expects a UserProfile type but we want to test with undefined
-    spyOnGetCurrentUserProfile.mockResolvedValue(undefined);
+    useGetCurrentUserProfileMock.mockReturnValue({ data: undefined, isLoading: false });
 
     const { getByTestId } = appMockRender.render(
       <TestProviders>

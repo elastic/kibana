@@ -25,7 +25,20 @@ export interface RecentCasesProps {
   maxCasesToShow: number;
 }
 
-const RecentCases = React.memo(({ maxCasesToShow }: RecentCasesProps) => {
+const RecentCases = React.memo((props: RecentCasesProps) => {
+  return (
+    <QueryClientProvider client={casesQueryClient}>
+      <RecentCasesWithoutQueryProvider {...props} />
+    </QueryClientProvider>
+  );
+});
+
+RecentCases.displayName = 'RecentCases';
+
+// eslint-disable-next-line import/no-default-export
+export { RecentCases as default };
+
+const RecentCasesWithoutQueryProvider = React.memo(({ maxCasesToShow }: RecentCasesProps) => {
   const currentUser = useCurrentUser();
   const { data: currentUserProfile, isLoading: isLoadingCurrentUserProfile } =
     useGetCurrentUserProfile();
@@ -57,25 +70,23 @@ const RecentCases = React.memo(({ maxCasesToShow }: RecentCasesProps) => {
     currentUserProfile != null || (!isLoadingCurrentUserProfile && currentUser != null);
 
   return (
-    <QueryClientProvider client={casesQueryClient}>
-      <>
-        <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h2>{i18n.RECENT_CASES}</h2>
-            </EuiTitle>
-          </EuiFlexItem>
+    <>
+      <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h2>{i18n.RECENT_CASES}</h2>
+          </EuiTitle>
+        </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <RecentCasesFilters
-              filterBy={recentCasesFilterBy}
-              setFilterBy={setRecentCasesFilterBy}
-              showMyRecentlyReported={showMyRecentlyReported}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiHorizontalRule margin="s" />
-      </>
+        <EuiFlexItem grow={false}>
+          <RecentCasesFilters
+            filterBy={recentCasesFilterBy}
+            setFilterBy={setRecentCasesFilterBy}
+            showMyRecentlyReported={showMyRecentlyReported}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiHorizontalRule margin="s" />
       <EuiText color="subdued" size="s">
         <RecentCasesComp filterOptions={recentCasesFilterOptions} maxCasesToShow={maxCasesToShow} />
         <EuiHorizontalRule margin="s" />
@@ -86,14 +97,11 @@ const RecentCases = React.memo(({ maxCasesToShow }: RecentCasesProps) => {
           </LinkAnchor>
         </EuiText>
       </EuiText>
-    </QueryClientProvider>
+    </>
   );
 });
 
-RecentCases.displayName = 'RecentCases';
-
-// eslint-disable-next-line import/no-default-export
-export { RecentCases as default };
+RecentCasesWithoutQueryProvider.displayName = 'RecentCases';
 
 const getReporterFilter = ({
   recentCasesFilterBy,
