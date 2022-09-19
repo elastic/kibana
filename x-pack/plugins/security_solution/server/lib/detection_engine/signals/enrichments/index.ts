@@ -19,7 +19,7 @@ import type {
   EventsMapByEnrichments,
   CreateEnrichEventsFunction,
 } from './types';
-import { applyEnrichmentsToEvents } from './utils/trasnforms';
+import { applyEnrichmentsToEvents } from './utils/transforms';
 
 export const enrichEvents: EnrichEventsFunction = async ({ services, logger, events, spaceId }) => {
   try {

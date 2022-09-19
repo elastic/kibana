@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { applyEnrichmentsToEvents, mergeEnrichments } from './trasnforms';
+import { applyEnrichmentsToEvents, mergeEnrichments } from './transforms';
 import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
 import { createAlert } from '../__mocks__/alerts';
 import type { EnrichmentFunction } from '../types';

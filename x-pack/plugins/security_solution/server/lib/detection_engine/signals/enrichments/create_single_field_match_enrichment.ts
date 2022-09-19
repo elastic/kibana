@@ -42,9 +42,9 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
     const chunksUniqueEventsValuesToSearchBy = chunk(uniqueEventsValuesToSearchBy, MAX_CLAUSES);
 
     const getAllEnrichment = chunksUniqueEventsValuesToSearchBy
-      .map((enirhcmentValuesChunk) =>
+      .map((enrichmentValuesChunk) =>
         makeSingleFieldMatchQuery({
-          values: enirhcmentValuesChunk,
+          values: enrichmentValuesChunk,
           searchByField: mappingField.enrichmentField,
         })
       )
