@@ -107,8 +107,8 @@ function throwIfUpdateAssigneesWithoutValidLicense(
 }
 
 /**
- * Throws an error if any of the requests attempt add more than MAX_ASSIGNEES_PER_CASE
- * to a case
+ * Throws an error if any of the requests attempt to add more than
+ * MAX_ASSIGNEES_PER_CASE to a case
  */
 function throwIfTotalAssigneesAreInvalid(requests: UpdateRequestWithOriginalCase[]) {
   const requestsUpdatingAssignees = requests.filter(
