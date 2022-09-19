@@ -721,6 +721,56 @@ Object {
               },
             },
           },
+          avg_run_duration_by_connector_type: {
+            connector_types: {
+              buckets: [
+                {
+                  key: '.slack',
+                  duration: {
+                    average: {
+                      value: 10,
+                    },
+                  },
+                },
+                {
+                  key: '.email',
+                  duration: {
+                    average: {
+                      value: 11,
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          count_connector_types_by_action_run_outcome_per_day: {
+            connector_types: {
+              buckets: [
+                {
+                  key: '.slack',
+                  outcome: {
+                    count: {
+                      buckets: [
+                        { key: 'success', doc_count: 12 },
+                        { key: 'failure', doc_count: 1 },
+                      ],
+                    },
+                  },
+                },
+                {
+                  key: '.email',
+                  outcome: {
+                    count: {
+                      buckets: [
+                        { key: 'success', doc_count: 13 },
+                        { key: 'failure', doc_count: 2 },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
         },
       }
     );
@@ -754,6 +804,20 @@ Object {
         __slack: 7,
       },
       countTotal: 120,
+      avgRunDurationByConnectorType: {
+        __email: 11,
+        __slack: 10,
+      },
+      countRunOutcomeByConnectorType: {
+        __email: {
+          failure: 2,
+          success: 13,
+        },
+        __slack: {
+          failure: 1,
+          success: 12,
+        },
+      },
       hasErrors: false,
     });
   });
@@ -772,9 +836,11 @@ Object {
 Object {
   "avgExecutionTime": 0,
   "avgExecutionTimeByType": Object {},
+  "avgRunDurationByConnectorType": Object {},
   "countByType": Object {},
   "countFailed": 0,
   "countFailedByType": Object {},
+  "countRunOutcomeByConnectorType": Object {},
   "countTotal": 0,
   "errorMessage": "oh no",
   "hasErrors": true,
