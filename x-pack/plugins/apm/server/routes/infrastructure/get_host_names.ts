@@ -14,7 +14,7 @@ import {
   HOST_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { ApmPluginRequestHandlerContext } from '../typings';
-import { getMetricIndices } from '../../lib/helpers/get_metric_indices';
+import { getInfraMetricIndices } from '../../lib/helpers/get_infra_metric_indices';
 
 interface Aggs extends estypes.AggregationsMultiBucketAggregateBase {
   buckets: Array<{
@@ -92,7 +92,7 @@ export const getContainerHostNames = async ({
   if (containerIds.length) {
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const savedObjectsClient = (await context.core).savedObjects.client;
-    const metricIndices = await getMetricIndices({
+    const metricIndices = await getInfraMetricIndices({
       infraPlugin: infra,
       savedObjectsClient,
     });

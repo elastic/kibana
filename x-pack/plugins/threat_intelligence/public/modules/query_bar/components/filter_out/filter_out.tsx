@@ -7,13 +7,12 @@
 
 import React, { useCallback, VFC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import { ComponentType } from '../../../../../common/types/component_type';
 import { useIndicatorsFiltersContext } from '../../../indicators/hooks/use_indicators_filters_context';
-import { getIndicatorFieldAndValue } from '../../../indicators/lib/field_value';
+import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../indicators/lib/field_value';
 import { FilterOut as FilterOutConst, updateFiltersArray } from '../../lib/filter';
-import { EMPTY_VALUE } from '../../../../../common/constants';
 import { Indicator } from '../../../../../common/types/indicator';
 import { useStyles } from './styles';
 
@@ -66,16 +65,18 @@ export const FilterOut: VFC<FilterOutProps> = ({ data, field, type, as: Componen
     filterManager.setFilters(newFilters);
   }, [filterManager, key, value]);
 
-  if (!value || value === EMPTY_VALUE || !key) {
+  if (!fieldAndValueValid(key, value)) {
     return <></>;
   }
 
   if (type === ComponentType.EuiDataGrid) {
     return (
-      <div {...props} css={styles.button}>
-        {/* @ts-ignore*/}
-        <Component aria-label={ICON_TITLE} iconType={ICON_TYPE} onClick={filterOut} />
-      </div>
+      <EuiToolTip content={ICON_TITLE}>
+        <div {...props} css={styles.button}>
+          {/* @ts-ignore*/}
+          <Component aria-label={ICON_TITLE} iconType={ICON_TYPE} onClick={filterOut} />
+        </div>
+      </EuiToolTip>
     );
   }
 
@@ -94,14 +95,16 @@ export const FilterOut: VFC<FilterOutProps> = ({ data, field, type, as: Componen
   }
 
   return (
-    <EuiButtonIcon
-      aria-label={ICON_TITLE}
-      iconType={ICON_TYPE}
-      iconSize="s"
-      size="xs"
-      color="primary"
-      onClick={filterOut}
-      {...props}
-    />
+    <EuiToolTip content={ICON_TITLE}>
+      <EuiButtonIcon
+        aria-label={ICON_TITLE}
+        iconType={ICON_TYPE}
+        iconSize="s"
+        size="xs"
+        color="primary"
+        onClick={filterOut}
+        {...props}
+      />
+    </EuiToolTip>
   );
 };
