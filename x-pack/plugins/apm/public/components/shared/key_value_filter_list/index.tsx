@@ -19,10 +19,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
+import { isEmpty } from 'lodash';
 
 interface KeyValue {
   key: string;
   value: any | undefined;
+  isFilterable: boolean;
 }
 
 const StyledEuiAccordion = styled(EuiAccordion)`
@@ -43,13 +45,8 @@ const StyledEuiDescriptionList = styled(EuiDescriptionList)`
     display: flex;
 `;
 
-const ValueContainer = styled.div`
-  display: flex;
-  align-items: center;
-`;
-
 function removeEmptyValues(items: KeyValue[]) {
-  return items.filter(({ value }) => value !== undefined);
+  return items.filter(({ value }) => !isEmpty(value));
 }
 
 export function KeyValueFilterList({
@@ -78,12 +75,12 @@ export function KeyValueFilterList({
       buttonClassName="buttonContentContainer"
     >
       <StyledEuiDescriptionList type="column">
-        {nonEmptyKeyValueList.map(({ key, value }) => {
+        {nonEmptyKeyValueList.map(({ key, value, isFilterable }) => {
           return (
             <Fragment key={key}>
               <EuiDescriptionListTitle
                 className="descriptionList__title"
-                style={{ width: '20%' }}
+                style={{ width: '20%', height: '40px' }}
               >
                 <EuiText size="s" style={{ fontWeight: 'bold' }}>
                   {key}
@@ -91,27 +88,37 @@ export function KeyValueFilterList({
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription
                 className="descriptionList__description"
-                style={{ width: '80%' }}
+                style={{ width: '80%', height: '40px' }}
               >
-                <ValueContainer>
-                  <EuiButtonEmpty
-                    onClick={() => {
-                      onClickFilter({ key, value });
-                    }}
-                    data-test-subj={`filter_by_${key}`}
-                  >
-                    <EuiToolTip
-                      position="top"
-                      content={i18n.translate(
-                        'xpack.apm.keyValueFilterList.actionFilterLabel',
-                        { defaultMessage: 'Filter by value' }
-                      )}
-                    >
-                      <EuiIcon type="filter" color="text" size="m" />
-                    </EuiToolTip>
-                  </EuiButtonEmpty>
-                  <EuiText size="s">{value}</EuiText>
-                </ValueContainer>
+                <EuiFlexGroup
+                  alignItems="baseline"
+                  responsive={false}
+                  gutterSize="none"
+                >
+                  <EuiFlexItem style={{ minWidth: '32px' }} grow={false}>
+                    {isFilterable && (
+                      <EuiButtonEmpty
+                        onClick={() => {
+                          onClickFilter({ key, value });
+                        }}
+                        data-test-subj={`filter_by_${key}`}
+                      >
+                        <EuiToolTip
+                          position="top"
+                          content={i18n.translate(
+                            'xpack.apm.keyValueFilterList.actionFilterLabel',
+                            { defaultMessage: 'Filter by value' }
+                          )}
+                        >
+                          <EuiIcon type="filter" color="text" size="m" />
+                        </EuiToolTip>
+                      </EuiButtonEmpty>
+                    )}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">{value}</EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiDescriptionListDescription>
             </Fragment>
           );

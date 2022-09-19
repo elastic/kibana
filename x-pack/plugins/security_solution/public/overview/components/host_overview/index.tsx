@@ -10,6 +10,7 @@ import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
 import type { HostItem } from '../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../common/search_strategy';
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
@@ -82,10 +83,12 @@ export const HostOverview = React.memo<HostSummaryProps>(
       () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
       [hostName]
     );
+    const { from, to } = useGlobalTime();
 
-    const [_, { data: hostRisk, isModuleEnabled }] = useHostRiskScore({
+    const [_, { data: hostRisk, isLicenseValid }] = useHostRiskScore({
       filterQuery,
       skip: hostName == null,
+      timerange: { to, from },
     });
 
     const getDefaultRenderer = useCallback(
@@ -101,39 +104,32 @@ export const HostOverview = React.memo<HostSummaryProps>(
     );
 
     const [hostRiskScore, hostRiskLevel] = useMemo(() => {
-      if (isModuleEnabled) {
-        const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
-        return [
-          {
-            title: i18n.HOST_RISK_SCORE,
-            description: (
-              <>
-                {hostRiskData
-                  ? Math.round(hostRiskData.host.risk.calculated_score_norm)
-                  : getEmptyTagValue()}
-              </>
-            ),
-          },
-
-          {
-            title: i18n.HOST_RISK_CLASSIFICATION,
-            description: (
-              <>
-                {hostRiskData ? (
-                  <RiskScore
-                    severity={hostRiskData.host.risk.calculated_level}
-                    hideBackgroundColor
-                  />
-                ) : (
-                  getEmptyTagValue()
-                )}
-              </>
-            ),
-          },
-        ];
-      }
-      return [undefined, undefined];
-    }, [hostRisk, isModuleEnabled]);
+      const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
+      return [
+        {
+          title: i18n.HOST_RISK_SCORE,
+          description: (
+            <>
+              {hostRiskData
+                ? Math.round(hostRiskData.host.risk.calculated_score_norm)
+                : getEmptyTagValue()}
+            </>
+          ),
+        },
+        {
+          title: i18n.HOST_RISK_CLASSIFICATION,
+          description: (
+            <>
+              {hostRiskData ? (
+                <RiskScore severity={hostRiskData.host.risk.calculated_level} hideBackgroundColor />
+              ) : (
+                getEmptyTagValue()
+              )}
+            </>
+          ),
+        },
+      ];
+    }, [hostRisk]);
 
     const column: DescriptionList[] = useMemo(
       () => [
@@ -273,7 +269,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
             )}
           </OverviewWrapper>
         </InspectButtonContainer>
-        {hostRiskScore && hostRiskLevel && (
+        {isLicenseValid && (
           <HostRiskOverviewWrapper
             gutterSize={isInDetailsSidePanel ? 'm' : 'none'}
             direction={isInDetailsSidePanel ? 'column' : 'row'}
