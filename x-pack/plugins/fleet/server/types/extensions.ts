@@ -14,6 +14,7 @@ import type {
   NewPackagePolicy,
   UpdatePackagePolicy,
   PackagePolicy,
+  UpgradePackagePolicyResponse,
 } from '../../common/types';
 
 export type PostPackagePolicyDeleteCallback = (
@@ -38,6 +39,13 @@ export type PutPackagePolicyUpdateCallback = (
   request: KibanaRequest
 ) => Promise<UpdatePackagePolicy>;
 
+// TODO - Ofir edit this function
+export type PostPackagePolicyPostUpgradeCallback = (
+  packagePolicy: UpgradePackagePolicyResponse,
+  context: RequestHandlerContext,
+  request: KibanaRequest
+) => Promise<void>;
+
 export type ExternalCallbackCreate = ['packagePolicyCreate', PostPackagePolicyCreateCallback];
 export type ExternalCallbackPostCreate = [
   'packagePolicyPostCreate',
@@ -45,7 +53,10 @@ export type ExternalCallbackPostCreate = [
 ];
 export type ExternalCallbackDelete = ['postPackagePolicyDelete', PostPackagePolicyDeleteCallback];
 export type ExternalCallbackUpdate = ['packagePolicyUpdate', PutPackagePolicyUpdateCallback];
-
+export type ExternalCallbackPostUpgrade = [
+  'packagePolicyPostUpgrade',
+  PostPackagePolicyPostUpgradeCallback
+];
 /**
  * Callbacks supported by the Fleet plugin
  */
@@ -53,6 +64,7 @@ export type ExternalCallback =
   | ExternalCallbackCreate
   | ExternalCallbackPostCreate
   | ExternalCallbackDelete
-  | ExternalCallbackUpdate;
+  | ExternalCallbackUpdate
+  | ExternalCallbackPostUpgrade;
 
 export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;

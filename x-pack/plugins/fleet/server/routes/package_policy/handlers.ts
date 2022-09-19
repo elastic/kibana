@@ -431,28 +431,37 @@ export const upgradePackagePolicyHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
+  let res: UpgradePackagePolicyResponse;
   try {
-    const body: UpgradePackagePolicyResponse = await packagePolicyService.upgrade(
-      soClient,
-      esClient,
-      request.body.packagePolicyIds,
-      { user }
-    );
-
-    const firstFatalError = body.find((item) => item.statusCode && item.statusCode !== 200);
-
-    if (firstFatalError) {
-      return response.customError({
-        statusCode: firstFatalError.statusCode!,
-        body: { message: firstFatalError.body!.message },
-      });
-    }
-    return response.ok({
-      body,
+    res = await packagePolicyService.upgrade(soClient, esClient, request.body.packagePolicyIds, {
+      user,
     });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }
+
+  const firstFatalError = res.find((item) => item.statusCode && item.statusCode !== 200);
+
+  if (firstFatalError) {
+    return response.customError({
+      statusCode: firstFatalError.statusCode!,
+      body: { message: firstFatalError.body!.message },
+    });
+  }
+  try {
+    await packagePolicyService.runExternalCallbacks(
+      'packagePolicyPostUpgrade',
+      res,
+      context,
+      request
+    );
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+
+  return response.ok({
+    body: res,
+  });
 };
 
 export const dryRunUpgradePackagePolicyHandler: RequestHandler<

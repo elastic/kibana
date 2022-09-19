@@ -37,6 +37,7 @@ import type {
   PostPackagePolicyDeleteCallback,
   PostPackagePolicyPostCreateCallback,
   PutPackagePolicyUpdateCallback,
+  PostPackagePolicyPostUpgradeCallback,
 } from '../types';
 import type { FleetAppContext } from '../plugin';
 import type { TelemetryEventsSender } from '../telemetry/sender';
@@ -213,6 +214,8 @@ class AppContextService {
           ? PostPackagePolicyDeleteCallback
           : T extends 'packagePolicyPostCreate'
           ? PostPackagePolicyPostCreateCallback
+          : T extends 'packagePolicyPostUpgrade'
+          ? PostPackagePolicyPostUpgradeCallback
           : PutPackagePolicyUpdateCallback
       >
     | undefined {
@@ -224,6 +227,8 @@ class AppContextService {
           ? PostPackagePolicyDeleteCallback
           : T extends 'packagePolicyPostCreate'
           ? PostPackagePolicyPostCreateCallback
+          : T extends 'packagePolicyPostUpgrade'
+          ? PostPackagePolicyPostUpgradeCallback
           : PutPackagePolicyUpdateCallback
       >;
     }

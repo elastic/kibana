@@ -30,6 +30,7 @@ export type {
   PostPackagePolicyCreateCallback,
   FleetRequestHandlerContext,
   PostPackagePolicyPostCreateCallback,
+  PostPackagePolicyPostUpgradeCallback,
 } from './types';
 export { AgentNotFoundError, FleetUnauthorizedError } from './errors';
 export { config } from './config';

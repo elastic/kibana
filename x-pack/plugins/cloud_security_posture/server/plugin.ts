@@ -15,7 +15,11 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { DeepReadonly } from 'utility-types';
-import { DeletePackagePoliciesResponse, PackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  DeletePackagePoliciesResponse,
+  PackagePolicy,
+  UpgradePackagePolicyResponse,
+} from '@kbn/fleet-plugin/common';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -131,7 +135,6 @@ export class CspPlugin
             if (deletedPackagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
               const soClient = core.savedObjects.createInternalRepository();
               await removeCspRulesInstancesCallback(deletedPackagePolicy, soClient, this.logger);
-
               const isPackageExists = await isCspPackageInstalled(soClient, this.logger);
 
               if (isPackageExists) {
@@ -139,6 +142,21 @@ export class CspPlugin
               }
             }
           }
+        }
+      );
+
+      plugins.fleet.registerExternalCallback(
+        'packagePolicyPostUpgrade',
+        async (
+          packagePolicy: UpgradePackagePolicyResponse,
+          context: RequestHandlerContext,
+          request: KibanaRequest
+        ): Promise<void> => {
+          console.log('I am updating');
+
+          await setTimeout(() => {
+            console.log('I am updating');
+          }, 1000);
         }
       );
     });

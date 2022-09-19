@@ -74,6 +74,7 @@ import type {
   DryRunPackagePolicy,
   PostPackagePolicyCreateCallback,
   PostPackagePolicyPostCreateCallback,
+  PostPackagePolicyPostUpgradeCallback,
 } from '../types';
 import type { ExternalCallback } from '..';
 
@@ -1042,11 +1043,13 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       ? DeletePackagePoliciesResponse
       : A extends 'packagePolicyPostCreate'
       ? PackagePolicy
+      : A extends 'packagePolicyPostUpgrade'
+      ? UpgradePackagePolicyResponse
       : NewPackagePolicy,
     context: RequestHandlerContext,
     request: KibanaRequest
   ): Promise<
-    A extends 'postPackagePolicyDelete'
+    A extends 'postPackagePolicyDelete' | `packagePolicyPostUpgrade`
       ? void
       : A extends 'packagePolicyPostCreate'
       ? PackagePolicy
@@ -1055,12 +1058,21 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
   public async runExternalCallbacks(
     externalCallbackType: ExternalCallback[0],
     packagePolicy: PackagePolicy | NewPackagePolicy | DeletePackagePoliciesResponse,
+    // | UpgradePackagePolicyResponse,
     context: RequestHandlerContext,
     request: KibanaRequest
   ): Promise<PackagePolicy | NewPackagePolicy | void> {
     if (externalCallbackType === 'postPackagePolicyDelete') {
       return await this.runDeleteExternalCallbacks(packagePolicy as DeletePackagePoliciesResponse);
-    } else {
+    }
+    // else if (externalCallbackType === 'packagePolicyPostUpgrade') {
+    //   return await this.runUpgradeExternalCallbacks(
+    //     packagePolicy as UpgradePackagePolicyResponse,
+    //     context,
+    //     request
+    //   );
+    // }
+    else {
       if (!Array.isArray(packagePolicy)) {
         let newData = packagePolicy;
         const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
@@ -1108,6 +1120,38 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
         // executed. Errors (if any) will be collected and `throw`n after processing the entire set
         try {
           await callback(deletedPackagePolicies);
+        } catch (error) {
+          errorsThrown.push(error);
+        }
+      }
+
+      if (errorsThrown.length > 0) {
+        throw new IngestManagerError(
+          `${errorsThrown.length} encountered while executing package delete external callbacks`,
+          errorsThrown
+        );
+      }
+    }
+  }
+
+  public async runUpgradeExternalCallbacks(
+    upgradePolicyResponse: UpgradePackagePolicyResponse,
+    context: RequestHandlerContext,
+    request: KibanaRequest
+  ): Promise<void> {
+    const externalCallbacks = appContextService.getExternalCallbacks('packagePolicyPostUpgrade');
+    const errorsThrown: Error[] = [];
+
+    if (externalCallbacks && externalCallbacks.size > 0) {
+      for (const callback of externalCallbacks) {
+        // Failures from an external callback should not prevent other external callbacks from being
+        // executed. Errors (if any) will be collected and `throw`n after processing the entire set
+        try {
+          await (callback as PostPackagePolicyPostUpgradeCallback)(
+            upgradePolicyResponse,
+            context,
+            request
+          );
         } catch (error) {
           errorsThrown.push(error);
         }
@@ -1490,13 +1534,15 @@ export interface PackagePolicyServiceInterface {
       ? DeletePackagePoliciesResponse
       : A extends 'packagePolicyPostCreate'
       ? PackagePolicy
+      : A extends 'packagePolicyPostUpgrade'
+      ? UpgradePackagePolicyResponse
       : NewPackagePolicy,
     context: RequestHandlerContext,
     request: KibanaRequest
   ): Promise<
     A extends 'postPackagePolicyDelete'
       ? void
-      : A extends 'packagePolicyPostCreate'
+      : A extends 'packagePolicyPostCreate' | `packagePolicyUpdate`
       ? PackagePolicy
       : NewPackagePolicy
   >;
