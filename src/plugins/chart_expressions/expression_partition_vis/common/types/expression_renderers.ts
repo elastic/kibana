@@ -108,10 +108,7 @@ export interface RenderValue {
   visType: ChartTypes;
   visConfig: PartitionVisParams;
   syncColors: boolean;
-  params: {
-    listenOnChange: boolean;
-    canNavigateToLens?: boolean;
-  };
+  canNavigateToLens?: boolean;
 }
 
 export enum LabelPositions {

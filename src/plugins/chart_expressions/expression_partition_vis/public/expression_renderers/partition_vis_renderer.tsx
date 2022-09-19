@@ -49,7 +49,11 @@ export const getPartitionVisRenderer: (
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
   reuseDomNode: true,
-  render: async (domNode, { visConfig, visData, visType, syncColors, params }, handlers) => {
+  render: async (
+    domNode,
+    { visConfig, visData, visType, syncColors, canNavigateToLens },
+    handlers
+  ) => {
     const { core, plugins } = getStartDeps();
 
     handlers.onDestroy(() => {
@@ -64,9 +68,7 @@ export const getPartitionVisRenderer: (
       if (containerType && visualizationType) {
         const events = [
           `render_${visualizationType}_${visType}`,
-          params.canNavigateToLens
-            ? `render_${visualizationType}_${visType}_convertable`
-            : undefined,
+          canNavigateToLens ? `render_${visualizationType}_${visType}_convertable` : undefined,
         ].filter(Boolean) as string[];
         plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, events);
       }

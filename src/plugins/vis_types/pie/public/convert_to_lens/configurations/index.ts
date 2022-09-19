@@ -7,7 +7,7 @@
  */
 
 import { PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
-import { Column, PartitionVisConfiguration } from '@kbn/visualizations-plugin/common';
+import { PartitionVisConfiguration } from '@kbn/visualizations-plugin/common';
 import { Vis } from '@kbn/visualizations-plugin/public';
 
 const getLayers = (
@@ -23,18 +23,20 @@ const getLayers = (
       primaryGroups: buckets,
       secondaryGroups: [],
       metric: metrics[0],
-      numberDisplay: vis.params.labels.valuesFormat ?? vis.type.visConfig.labels.valuesFormat,
-      categoryDisplay: vis.params.labels.position ?? vis.type.visConfig.labels.position,
-      legendDisplay: vis.params.legendDisplay ?? vis.type.visConfig.legendDisplay,
-      legendPosition: vis.params.legendPosition ?? vis.type.visConfig.legendPosition,
-      showValuesInLegend: vis.params.showValuesInLegend ?? vis.type.visConfig.showValuesInLegend,
-      nestedLegend: vis.params.nestedLegend ?? vis.type.visConfig.nestedLegend,
+      numberDisplay:
+        vis.params.labels.valuesFormat ?? vis.type.visConfig.defaults.labels.valuesFormat,
+      categoryDisplay: vis.params.labels.position ?? vis.type.visConfig.defaults.labels.position,
+      legendDisplay: vis.params.legendDisplay ?? vis.type.visConfig.defaults.legendDisplay,
+      legendPosition: vis.params.legendPosition ?? vis.type.visConfig.defaults.legendPosition,
+      showValuesInLegend:
+        vis.params.showValuesInLegend ?? vis.type.visConfig.defaults.showValuesInLegend,
+      nestedLegend: vis.params.nestedLegend ?? vis.type.visConfig.defaults.nestedLegend,
       percentDecimals:
-        vis.params.labels.percentDecimals ?? vis.type.visConfig.labels.percentDecimals,
-      emptySizeRatio: vis.params.emptySizeRatio ?? vis.type.visConfig.emptySizeRatio,
-      legendMaxLines: vis.params.maxLegendLines ?? vis.type.visConfig.maxLegendLines,
-      legendSize: vis.params.legendSize ?? vis.type.visConfig.legendSize,
-      truncateLegend: vis.params.truncateLegend ?? vis.type.visConfig.truncateLegend,
+        vis.params.labels.percentDecimals ?? vis.type.visConfig.defaults.labels.percentDecimals,
+      emptySizeRatio: vis.params.emptySizeRatio ?? vis.type.visConfig.defaults.emptySizeRatio,
+      legendMaxLines: vis.params.maxLegendLines ?? vis.type.visConfig.defaults.maxLegendLines,
+      legendSize: vis.params.legendSize ?? vis.type.visConfig.defaults.legendSize,
+      truncateLegend: vis.params.truncateLegend ?? vis.type.visConfig.defaults.truncateLegend,
     },
   ];
 };
@@ -45,11 +47,9 @@ export const getConfiguration = (
   {
     metrics,
     buckets,
-    columnsWithoutReferenced,
   }: {
     metrics: string[];
     buckets: string[];
-    columnsWithoutReferenced: Column[];
   }
 ): PartitionVisConfiguration => {
   return {

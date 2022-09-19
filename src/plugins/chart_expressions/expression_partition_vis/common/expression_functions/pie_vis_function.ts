@@ -188,9 +188,9 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
         visConfig,
         syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
         visType: args.isDonut ? ChartTypes.DONUT : ChartTypes.PIE,
+        canNavigateToLens: handlers?.variables?.canNavigateToLens as boolean,
         params: {
           listenOnChange: true,
-          canNavigateToLens: handlers?.variables?.canNavigateToLens as boolean,
         },
       },
     };
