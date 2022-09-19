@@ -14,6 +14,7 @@ export const farequoteDataViewTestData: TestData = {
   brushTargetTimestamp: 1455033600000,
   expected: {
     totalDocCountFormatted: '86,274',
+    analysisGroupsTable: [{ group: 'airline: AAL', docCount: '297' }],
     analysisTable: [
       {
         fieldName: 'airline',

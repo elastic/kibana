@@ -77,10 +77,7 @@ import { useToastNotificationService } from '../services/toast_notification_serv
 import { useMlKibana, useMlLocator } from '../contexts/kibana';
 import { useMlContext } from '../contexts/ml';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
-import {
-  AnomalyExplorerPanelsState,
-  ML_ANOMALY_EXPLORER_PANELS,
-} from '../../../common/types/storage';
+import { ML_ANOMALY_EXPLORER_PANELS } from '../../../common/types/storage';
 import { useStorage } from '../contexts/ml/use_storage';
 
 interface ExplorerPageProps {
@@ -173,8 +170,9 @@ export const Explorer: FC<ExplorerUIProps> = ({
 }) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
-  const [anomalyExplorerPanelState, setAnomalyExplorerPanelState] =
-    useStorage<AnomalyExplorerPanelsState>(ML_ANOMALY_EXPLORER_PANELS, {
+  const [anomalyExplorerPanelState, setAnomalyExplorerPanelState] = useStorage(
+    ML_ANOMALY_EXPLORER_PANELS,
+    {
       topInfluencers: {
         isCollapsed: false,
         size: 20,
@@ -182,7 +180,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
       mainPage: {
         size: 80,
       },
-    });
+    }
+  );
 
   const topInfluencersPanelRef = useRef<HTMLDivElement | null>(null);
 
