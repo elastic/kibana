@@ -24,7 +24,11 @@ import { getSLOSettingsTemplate } from '../../assets/component_templates/slo_set
 import { getSLOIndexTemplate } from '../../assets/index_templates/slo_index_templates';
 import { getSLOPipelineTemplate } from '../../assets/ingest_templates/slo_pipeline_template';
 
-export class ResourceInstaller {
+export interface ResourceInstaller {
+  ensureCommonResourcesInstalled(spaceId: string): Promise<void>;
+}
+
+export class DefaultResourceInstaller implements ResourceInstaller {
   constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
 
   public async ensureCommonResourcesInstalled(spaceId: string = 'default'): Promise<void> {
@@ -67,7 +71,9 @@ export class ResourceInstaller {
   }
 
   private getPipelinePrefix(version: number, spaceId: string): string {
-    return `${SLO_INDEX_TEMPLATE_NAME}-version-${version}-${spaceId}-`;
+    // Following https://www.elastic.co/blog/an-introduction-to-the-elastic-data-stream-naming-scheme
+    // slo-observability.sli-<version>-<namespace>.<index-date>
+    return `${SLO_INDEX_TEMPLATE_NAME}-v${version}-${spaceId}.`;
   }
 
   private async areResourcesAlreadyInstalled(): Promise<boolean> {

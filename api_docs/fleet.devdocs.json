@@ -981,6 +981,37 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-public.PackageGenericErrorsListProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "PackageGenericErrorsListProps",
+        "description": [],
+        "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackageGenericErrorsListProps.packageErrors",
+            "type": "Array",
+            "tags": [],
+            "label": "packageErrors",
+            "description": [
+              "A list of errors from a package"
+            ],
+            "signature": [
+              "FleetServerAgentComponentUnit",
+              "[]"
+            ],
+            "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-public.PackagePolicyCreateExtension",
         "type": "Interface",
         "tags": [],
@@ -1894,10 +1925,10 @@
             "id": "def-public.UIExtensionsStorage.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string]: Partial<Record<\"agent-enrollment-flyout\" | \"package-detail-assets\" | \"package-detail-custom\" | \"package-policy-create\" | \"package-policy-edit\" | \"package-policy-edit-tabs\" | \"package-policy-response\", UIExtensionPoint>>",
+            "label": "[key: string]: Partial<Record<\"agent-enrollment-flyout\" | \"package-detail-assets\" | \"package-detail-custom\" | \"package-policy-create\" | \"package-policy-edit\" | \"package-policy-edit-tabs\" | \"package-policy-response\" | \"package-generic-errors-list\", UIExtensionPoint>>",
             "description": [],
             "signature": [
-              "[key: string]:  Partial<Record<\"agent-enrollment-flyout\" | \"package-detail-assets\" | \"package-detail-custom\" | \"package-policy-create\" | \"package-policy-edit\" | \"package-policy-edit-tabs\" | \"package-policy-response\", ",
+              "[key: string]:  Partial<Record<\"agent-enrollment-flyout\" | \"package-detail-assets\" | \"package-detail-custom\" | \"package-policy-create\" | \"package-policy-edit\" | \"package-policy-edit-tabs\" | \"package-policy-response\" | \"package-generic-errors-list\", ",
               {
                 "pluginId": "fleet",
                 "scope": "public",
@@ -2032,6 +2063,39 @@
             "docId": "kibFleetPluginApi",
             "section": "def-public.PackageCustomExtensionComponentProps",
             "text": "PackageCustomExtensionComponentProps"
+          },
+          ">"
+        ],
+        "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-public.PackageGenericErrorsListComponent",
+        "type": "Type",
+        "tags": [],
+        "label": "PackageGenericErrorsListComponent",
+        "description": [
+          "\nUI Component Extension is used on the pages displaying the ability to see\na generic endpoint errors list"
+        ],
+        "signature": [
+          "React.ComponentClass<",
+          {
+            "pluginId": "fleet",
+            "scope": "public",
+            "docId": "kibFleetPluginApi",
+            "section": "def-public.PackageGenericErrorsListProps",
+            "text": "PackageGenericErrorsListProps"
+          },
+          ", any> | React.FunctionComponent<",
+          {
+            "pluginId": "fleet",
+            "scope": "public",
+            "docId": "kibFleetPluginApi",
+            "section": "def-public.PackageGenericErrorsListProps",
+            "text": "PackageGenericErrorsListProps"
           },
           ">"
         ],
@@ -2197,6 +2261,8 @@
             "text": "PackageAssetsExtension"
           },
           " | ",
+          "PackageGenericErrorsListExtension",
+          " | ",
           {
             "pluginId": "fleet",
             "scope": "public",
@@ -2290,6 +2356,8 @@
                 "section": "def-public.PackageAssetsExtension",
                 "text": "PackageAssetsExtension"
               },
+              " | ",
+              "PackageGenericErrorsListExtension",
               " | ",
               {
                 "pluginId": "fleet",
@@ -3555,6 +3623,8 @@
                   "text": "PackageAssetsExtension"
                 },
                 " | ",
+                "PackageGenericErrorsListExtension",
+                " | ",
                 {
                   "pluginId": "fleet",
                   "scope": "public",
@@ -4784,6 +4854,26 @@
             "path": "x-pack/plugins/fleet/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.FleetSetupDeps.taskManager",
+            "type": "Object",
+            "tags": [],
+            "label": "taskManager",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.TaskManagerSetupContract",
+                "text": "TaskManagerSetupContract"
+              }
+            ],
+            "path": "x-pack/plugins/fleet/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5093,18 +5183,18 @@
       },
       {
         "parentPluginId": "fleet",
-        "id": "def-server.PackagePolicyServiceInterface",
+        "id": "def-server.PackagePolicyClient",
         "type": "Interface",
         "tags": [],
-        "label": "PackagePolicyServiceInterface",
+        "label": "PackagePolicyClient",
         "description": [],
-        "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+        "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "fleet",
-            "id": "def-server.PackagePolicyServiceInterface.create",
+            "id": "def-server.PackagePolicyClient.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -5148,13 +5238,13 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+            "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.create.$1",
+                "id": "def-server.PackagePolicyClient.create.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "soClient",
@@ -5162,14 +5252,14 @@
                 "signature": [
                   "SavedObjectsClientContract"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.create.$2",
+                "id": "def-server.PackagePolicyClient.create.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "esClient",
@@ -5177,14 +5267,14 @@
                 "signature": [
                   "ElasticsearchClient"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.create.$3",
+                "id": "def-server.PackagePolicyClient.create.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "packagePolicy",
@@ -5198,25 +5288,25 @@
                     "text": "NewPackagePolicy"
                   }
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.create.$4",
+                "id": "def-server.PackagePolicyClient.create.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "fleet",
-                    "id": "def-server.PackagePolicyServiceInterface.create.$4.spaceId",
+                    "id": "def-server.PackagePolicyClient.create.$4.spaceId",
                     "type": "string",
                     "tags": [],
                     "label": "spaceId",
@@ -5224,13 +5314,13 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
                   {
                     "parentPluginId": "fleet",
-                    "id": "def-server.PackagePolicyServiceInterface.create.$4.id",
+                    "id": "def-server.PackagePolicyClient.create.$4.id",
                     "type": "string",
                     "tags": [],
                     "label": "id",
@@ -5238,13 +5328,13 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
                   {
                     "parentPluginId": "fleet",
-                    "id": "def-server.PackagePolicyServiceInterface.create.$4.user",
+                    "id": "def-server.PackagePolicyClient.create.$4.user",
                     "type": "Object",
                     "tags": [],
                     "label": "user",
@@ -5259,13 +5349,13 @@
                       },
                       " | undefined"
                     ],
-                    "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
                   {
                     "parentPluginId": "fleet",
-                    "id": "def-server.PackagePolicyServiceInterface.create.$4.bumpRevision",
+                    "id": "def-server.PackagePolicyClient.create.$4.bumpRevision",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "bumpRevision",
@@ -5273,13 +5363,13 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
                   {
                     "parentPluginId": "fleet",
-                    "id": "def-server.PackagePolicyServiceInterface.create.$4.force",
+                    "id": "def-server.PackagePolicyClient.create.$4.force",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "force",
@@ -5287,13 +5377,13 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
                   {
                     "parentPluginId": "fleet",
-                    "id": "def-server.PackagePolicyServiceInterface.create.$4.skipEnsureInstalled",
+                    "id": "def-server.PackagePolicyClient.create.$4.skipEnsureInstalled",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "skipEnsureInstalled",
@@ -5301,13 +5391,13 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
                   {
                     "parentPluginId": "fleet",
-                    "id": "def-server.PackagePolicyServiceInterface.create.$4.skipUniqueNameVerification",
+                    "id": "def-server.PackagePolicyClient.create.$4.skipUniqueNameVerification",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "skipUniqueNameVerification",
@@ -5315,13 +5405,13 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
                   {
                     "parentPluginId": "fleet",
-                    "id": "def-server.PackagePolicyServiceInterface.create.$4.overwrite",
+                    "id": "def-server.PackagePolicyClient.create.$4.overwrite",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "overwrite",
@@ -5329,13 +5419,13 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
                   {
                     "parentPluginId": "fleet",
-                    "id": "def-server.PackagePolicyServiceInterface.create.$4.packageInfo",
+                    "id": "def-server.PackagePolicyClient.create.$4.packageInfo",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "packageInfo",
@@ -5350,7 +5440,7 @@
                       },
                       " | undefined"
                     ],
-                    "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -5361,7 +5451,7 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-server.PackagePolicyServiceInterface.bulkCreate",
+            "id": "def-server.PackagePolicyClient.bulkCreate",
             "type": "Function",
             "tags": [],
             "label": "bulkCreate",
@@ -5372,14 +5462,8 @@
               ", esClient: ",
               "ElasticsearchClient",
               ", packagePolicies: ",
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.NewPackagePolicy",
-                "text": "NewPackagePolicy"
-              },
-              "[], agentPolicyId: string, options?: { user?: ",
+              "NewPackagePolicyWithId",
+              "[], options?: { user?: ",
               {
                 "pluginId": "security",
                 "scope": "common",
@@ -5387,7 +5471,7 @@
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
-              " | undefined; bumpRevision?: boolean | undefined; } | undefined) => Promise<",
+              " | undefined; bumpRevision?: boolean | undefined; force?: true | undefined; } | undefined) => Promise<",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -5397,13 +5481,13 @@
               },
               "[]>"
             ],
-            "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+            "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.bulkCreate.$1",
+                "id": "def-server.PackagePolicyClient.bulkCreate.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "soClient",
@@ -5411,14 +5495,14 @@
                 "signature": [
                   "SavedObjectsClientContract"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.bulkCreate.$2",
+                "id": "def-server.PackagePolicyClient.bulkCreate.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "esClient",
@@ -5426,62 +5510,41 @@
                 "signature": [
                   "ElasticsearchClient"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.bulkCreate.$3",
+                "id": "def-server.PackagePolicyClient.bulkCreate.$3",
                 "type": "Array",
                 "tags": [],
                 "label": "packagePolicies",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "fleet",
-                    "scope": "common",
-                    "docId": "kibFleetPluginApi",
-                    "section": "def-common.NewPackagePolicy",
-                    "text": "NewPackagePolicy"
-                  },
+                  "NewPackagePolicyWithId",
                   "[]"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.bulkCreate.$4",
-                "type": "string",
-                "tags": [],
-                "label": "agentPolicyId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.bulkCreate.$5",
+                "id": "def-server.PackagePolicyClient.bulkCreate.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "fleet",
-                    "id": "def-server.PackagePolicyServiceInterface.bulkCreate.$5.user",
+                    "id": "def-server.PackagePolicyClient.bulkCreate.$4.user",
                     "type": "Object",
                     "tags": [],
                     "label": "user",
@@ -5496,13 +5559,13 @@
                       },
                       " | undefined"
                     ],
-                    "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
                   {
                     "parentPluginId": "fleet",
-                    "id": "def-server.PackagePolicyServiceInterface.bulkCreate.$5.bumpRevision",
+                    "id": "def-server.PackagePolicyClient.bulkCreate.$4.bumpRevision",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "bumpRevision",
@@ -5510,7 +5573,21 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackagePolicyClient.bulkCreate.$4.force",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "force",
+                    "description": [],
+                    "signature": [
+                      "true | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -5521,7 +5598,7 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-server.PackagePolicyServiceInterface.get",
+            "id": "def-server.PackagePolicyClient.get",
             "type": "Function",
             "tags": [],
             "label": "get",
@@ -5539,13 +5616,13 @@
               },
               " | null>"
             ],
-            "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+            "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.get.$1",
+                "id": "def-server.PackagePolicyClient.get.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "soClient",
@@ -5553,14 +5630,14 @@
                 "signature": [
                   "SavedObjectsClientContract"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.get.$2",
+                "id": "def-server.PackagePolicyClient.get.$2",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -5568,7 +5645,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5578,7 +5655,7 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-server.PackagePolicyServiceInterface.findAllForAgentPolicy",
+            "id": "def-server.PackagePolicyClient.findAllForAgentPolicy",
             "type": "Function",
             "tags": [],
             "label": "findAllForAgentPolicy",
@@ -5596,13 +5673,13 @@
               },
               "[]>"
             ],
-            "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+            "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.findAllForAgentPolicy.$1",
+                "id": "def-server.PackagePolicyClient.findAllForAgentPolicy.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "soClient",
@@ -5610,14 +5687,14 @@
                 "signature": [
                   "SavedObjectsClientContract"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.findAllForAgentPolicy.$2",
+                "id": "def-server.PackagePolicyClient.findAllForAgentPolicy.$2",
                 "type": "string",
                 "tags": [],
                 "label": "agentPolicyId",
@@ -5625,7 +5702,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5635,7 +5712,7 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-server.PackagePolicyServiceInterface.getByIDs",
+            "id": "def-server.PackagePolicyClient.getByIDs",
             "type": "Function",
             "tags": [],
             "label": "getByIDs",
@@ -5653,13 +5730,13 @@
               },
               "[] | null>"
             ],
-            "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+            "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.getByIDs.$1",
+                "id": "def-server.PackagePolicyClient.getByIDs.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "soClient",
@@ -5667,14 +5744,14 @@
                 "signature": [
                   "SavedObjectsClientContract"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.getByIDs.$2",
+                "id": "def-server.PackagePolicyClient.getByIDs.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "ids",
@@ -5682,25 +5759,25 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.getByIDs.$3",
+                "id": "def-server.PackagePolicyClient.getByIDs.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "fleet",
-                    "id": "def-server.PackagePolicyServiceInterface.getByIDs.$3.ignoreMissing",
+                    "id": "def-server.PackagePolicyClient.getByIDs.$3.ignoreMissing",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "ignoreMissing",
@@ -5708,7 +5785,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -5719,7 +5796,7 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-server.PackagePolicyServiceInterface.list",
+            "id": "def-server.PackagePolicyClient.list",
             "type": "Function",
             "tags": [],
             "label": "list",
@@ -5753,13 +5830,13 @@
               },
               ">>"
             ],
-            "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+            "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.list.$1",
+                "id": "def-server.PackagePolicyClient.list.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "soClient",
@@ -5767,14 +5844,14 @@
                 "signature": [
                   "SavedObjectsClientContract"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.list.$2",
+                "id": "def-server.PackagePolicyClient.list.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -5788,7 +5865,7 @@
                     "text": "ListWithKuery"
                   }
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5798,7 +5875,7 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-server.PackagePolicyServiceInterface.listIds",
+            "id": "def-server.PackagePolicyClient.listIds",
             "type": "Function",
             "tags": [],
             "label": "listIds",
@@ -5824,13 +5901,13 @@
               },
               "<string>>"
             ],
-            "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+            "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.listIds.$1",
+                "id": "def-server.PackagePolicyClient.listIds.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "soClient",
@@ -5838,14 +5915,14 @@
                 "signature": [
                   "SavedObjectsClientContract"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.listIds.$2",
+                "id": "def-server.PackagePolicyClient.listIds.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -5859,7 +5936,7 @@
                     "text": "ListWithKuery"
                   }
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5869,7 +5946,7 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-server.PackagePolicyServiceInterface.update",
+            "id": "def-server.PackagePolicyClient.update",
             "type": "Function",
             "tags": [],
             "label": "update",
@@ -5905,13 +5982,13 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+            "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.update.$1",
+                "id": "def-server.PackagePolicyClient.update.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "soClient",
@@ -5919,14 +5996,14 @@
                 "signature": [
                   "SavedObjectsClientContract"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.update.$2",
+                "id": "def-server.PackagePolicyClient.update.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "esClient",
@@ -5934,14 +6011,14 @@
                 "signature": [
                   "ElasticsearchClient"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.update.$3",
+                "id": "def-server.PackagePolicyClient.update.$3",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -5949,14 +6026,14 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.update.$4",
+                "id": "def-server.PackagePolicyClient.update.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "packagePolicyUpdate",
@@ -5970,25 +6047,25 @@
                     "text": "UpdatePackagePolicy"
                   }
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.update.$5",
+                "id": "def-server.PackagePolicyClient.update.$5",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "fleet",
-                    "id": "def-server.PackagePolicyServiceInterface.update.$5.user",
+                    "id": "def-server.PackagePolicyClient.update.$5.user",
                     "type": "Object",
                     "tags": [],
                     "label": "user",
@@ -6003,13 +6080,13 @@
                       },
                       " | undefined"
                     ],
-                    "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
                   {
                     "parentPluginId": "fleet",
-                    "id": "def-server.PackagePolicyServiceInterface.update.$5.force",
+                    "id": "def-server.PackagePolicyClient.update.$5.force",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "force",
@@ -6017,7 +6094,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -6025,7 +6102,7 @@
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.update.$6",
+                "id": "def-server.PackagePolicyClient.update.$6",
                 "type": "string",
                 "tags": [],
                 "label": "currentVersion",
@@ -6033,7 +6110,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -6043,7 +6120,7 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-server.PackagePolicyServiceInterface.delete",
+            "id": "def-server.PackagePolicyClient.delete",
             "type": "Function",
             "tags": [],
             "label": "delete",
@@ -6071,13 +6148,13 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+            "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.delete.$1",
+                "id": "def-server.PackagePolicyClient.delete.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "soClient",
@@ -6085,14 +6162,14 @@
                 "signature": [
                   "SavedObjectsClientContract"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.delete.$2",
+                "id": "def-server.PackagePolicyClient.delete.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "esClient",
@@ -6100,14 +6177,14 @@
                 "signature": [
                   "ElasticsearchClient"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.delete.$3",
+                "id": "def-server.PackagePolicyClient.delete.$3",
                 "type": "Array",
                 "tags": [],
                 "label": "ids",
@@ -6115,25 +6192,25 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.delete.$4",
+                "id": "def-server.PackagePolicyClient.delete.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "fleet",
-                    "id": "def-server.PackagePolicyServiceInterface.delete.$4.user",
+                    "id": "def-server.PackagePolicyClient.delete.$4.user",
                     "type": "Object",
                     "tags": [],
                     "label": "user",
@@ -6148,13 +6225,13 @@
                       },
                       " | undefined"
                     ],
-                    "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
                   {
                     "parentPluginId": "fleet",
-                    "id": "def-server.PackagePolicyServiceInterface.delete.$4.skipUnassignFromAgentPolicies",
+                    "id": "def-server.PackagePolicyClient.delete.$4.skipUnassignFromAgentPolicies",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "skipUnassignFromAgentPolicies",
@@ -6162,13 +6239,13 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
                   {
                     "parentPluginId": "fleet",
-                    "id": "def-server.PackagePolicyServiceInterface.delete.$4.force",
+                    "id": "def-server.PackagePolicyClient.delete.$4.force",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "force",
@@ -6176,7 +6253,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -6187,7 +6264,7 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-server.PackagePolicyServiceInterface.upgrade",
+            "id": "def-server.PackagePolicyClient.upgrade",
             "type": "Function",
             "tags": [],
             "label": "upgrade",
@@ -6223,13 +6300,13 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+            "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.upgrade.$1",
+                "id": "def-server.PackagePolicyClient.upgrade.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "soClient",
@@ -6237,14 +6314,14 @@
                 "signature": [
                   "SavedObjectsClientContract"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.upgrade.$2",
+                "id": "def-server.PackagePolicyClient.upgrade.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "esClient",
@@ -6252,14 +6329,14 @@
                 "signature": [
                   "ElasticsearchClient"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.upgrade.$3",
+                "id": "def-server.PackagePolicyClient.upgrade.$3",
                 "type": "Array",
                 "tags": [],
                 "label": "ids",
@@ -6267,25 +6344,25 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.upgrade.$4",
+                "id": "def-server.PackagePolicyClient.upgrade.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "fleet",
-                    "id": "def-server.PackagePolicyServiceInterface.upgrade.$4.user",
+                    "id": "def-server.PackagePolicyClient.upgrade.$4.user",
                     "type": "Object",
                     "tags": [],
                     "label": "user",
@@ -6300,7 +6377,7 @@
                       },
                       " | undefined"
                     ],
-                    "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -6308,7 +6385,7 @@
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.upgrade.$5",
+                "id": "def-server.PackagePolicyClient.upgrade.$5",
                 "type": "Object",
                 "tags": [],
                 "label": "packagePolicy",
@@ -6323,14 +6400,14 @@
                   },
                   " | undefined"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.upgrade.$6",
+                "id": "def-server.PackagePolicyClient.upgrade.$6",
                 "type": "string",
                 "tags": [],
                 "label": "pkgVersion",
@@ -6338,7 +6415,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -6348,7 +6425,7 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-server.PackagePolicyServiceInterface.getUpgradeDryRunDiff",
+            "id": "def-server.PackagePolicyClient.getUpgradeDryRunDiff",
             "type": "Function",
             "tags": [],
             "label": "getUpgradeDryRunDiff",
@@ -6374,13 +6451,13 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+            "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.getUpgradeDryRunDiff.$1",
+                "id": "def-server.PackagePolicyClient.getUpgradeDryRunDiff.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "soClient",
@@ -6388,14 +6465,14 @@
                 "signature": [
                   "SavedObjectsClientContract"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.getUpgradeDryRunDiff.$2",
+                "id": "def-server.PackagePolicyClient.getUpgradeDryRunDiff.$2",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -6403,14 +6480,14 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.getUpgradeDryRunDiff.$3",
+                "id": "def-server.PackagePolicyClient.getUpgradeDryRunDiff.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "packagePolicy",
@@ -6425,14 +6502,14 @@
                   },
                   " | undefined"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.getUpgradeDryRunDiff.$4",
+                "id": "def-server.PackagePolicyClient.getUpgradeDryRunDiff.$4",
                 "type": "string",
                 "tags": [],
                 "label": "pkgVersion",
@@ -6440,7 +6517,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -6450,7 +6527,7 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-server.PackagePolicyServiceInterface.enrichPolicyWithDefaultsFromPackage",
+            "id": "def-server.PackagePolicyClient.enrichPolicyWithDefaultsFromPackage",
             "type": "Function",
             "tags": [],
             "label": "enrichPolicyWithDefaultsFromPackage",
@@ -6476,13 +6553,13 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+            "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.enrichPolicyWithDefaultsFromPackage.$1",
+                "id": "def-server.PackagePolicyClient.enrichPolicyWithDefaultsFromPackage.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "soClient",
@@ -6490,14 +6567,14 @@
                 "signature": [
                   "SavedObjectsClientContract"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.enrichPolicyWithDefaultsFromPackage.$2",
+                "id": "def-server.PackagePolicyClient.enrichPolicyWithDefaultsFromPackage.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "newPolicy",
@@ -6511,7 +6588,7 @@
                     "text": "NewPackagePolicy"
                   }
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6521,7 +6598,7 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-server.PackagePolicyServiceInterface.buildPackagePolicyFromPackage",
+            "id": "def-server.PackagePolicyClient.buildPackagePolicyFromPackage",
             "type": "Function",
             "tags": [],
             "label": "buildPackagePolicyFromPackage",
@@ -6541,13 +6618,13 @@
               },
               " | undefined>"
             ],
-            "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+            "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.buildPackagePolicyFromPackage.$1",
+                "id": "def-server.PackagePolicyClient.buildPackagePolicyFromPackage.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "soClient",
@@ -6555,14 +6632,14 @@
                 "signature": [
                   "SavedObjectsClientContract"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.buildPackagePolicyFromPackage.$2",
+                "id": "def-server.PackagePolicyClient.buildPackagePolicyFromPackage.$2",
                 "type": "string",
                 "tags": [],
                 "label": "pkgName",
@@ -6570,14 +6647,14 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.buildPackagePolicyFromPackage.$3",
+                "id": "def-server.PackagePolicyClient.buildPackagePolicyFromPackage.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "logger",
@@ -6586,7 +6663,7 @@
                   "Logger",
                   " | undefined"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -6596,7 +6673,7 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-server.PackagePolicyServiceInterface.runExternalCallbacks",
+            "id": "def-server.PackagePolicyClient.runExternalCallbacks",
             "type": "Function",
             "tags": [],
             "label": "runExternalCallbacks",
@@ -6654,13 +6731,13 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+            "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.runExternalCallbacks.$1",
+                "id": "def-server.PackagePolicyClient.runExternalCallbacks.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "externalCallbackType",
@@ -6668,14 +6745,14 @@
                 "signature": [
                   "A"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.runExternalCallbacks.$2",
+                "id": "def-server.PackagePolicyClient.runExternalCallbacks.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "packagePolicy",
@@ -6706,14 +6783,14 @@
                     "text": "NewPackagePolicy"
                   }
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.runExternalCallbacks.$3",
+                "id": "def-server.PackagePolicyClient.runExternalCallbacks.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "context",
@@ -6727,14 +6804,14 @@
                     "text": "RequestHandlerContext"
                   }
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.runExternalCallbacks.$4",
+                "id": "def-server.PackagePolicyClient.runExternalCallbacks.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
@@ -6743,7 +6820,7 @@
                   "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6753,7 +6830,7 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-server.PackagePolicyServiceInterface.runDeleteExternalCallbacks",
+            "id": "def-server.PackagePolicyClient.runDeleteExternalCallbacks",
             "type": "Function",
             "tags": [],
             "label": "runDeleteExternalCallbacks",
@@ -6769,13 +6846,13 @@
               },
               ") => Promise<void>"
             ],
-            "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+            "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.runDeleteExternalCallbacks.$1",
+                "id": "def-server.PackagePolicyClient.runDeleteExternalCallbacks.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "deletedPackagePolicies",
@@ -6789,7 +6866,7 @@
                     "text": "DeletePackagePoliciesResponse"
                   }
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6799,7 +6876,7 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-server.PackagePolicyServiceInterface.getUpgradePackagePolicyInfo",
+            "id": "def-server.PackagePolicyClient.getUpgradePackagePolicyInfo",
             "type": "Function",
             "tags": [],
             "label": "getUpgradePackagePolicyInfo",
@@ -6823,15 +6900,17 @@
                 "section": "def-common.PackageInfo",
                 "text": "PackageInfo"
               },
-              "; }>"
+              "; experimentalDataStreamFeatures: ",
+              "ExperimentalDataStreamFeature",
+              "[]; }>"
             ],
-            "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+            "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.getUpgradePackagePolicyInfo.$1",
+                "id": "def-server.PackagePolicyClient.getUpgradePackagePolicyInfo.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "soClient",
@@ -6839,14 +6918,14 @@
                 "signature": [
                   "SavedObjectsClientContract"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackagePolicyServiceInterface.getUpgradePackagePolicyInfo.$2",
+                "id": "def-server.PackagePolicyClient.getUpgradePackagePolicyInfo.$2",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -6854,7 +6933,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -7492,8 +7571,8 @@
               "pluginId": "fleet",
               "scope": "server",
               "docId": "kibFleetPluginApi",
-              "section": "def-server.PackagePolicyServiceInterface",
-              "text": "PackagePolicyServiceInterface"
+              "section": "def-server.PackagePolicyClient",
+              "text": "PackagePolicyClient"
             }
           ],
           "path": "x-pack/plugins/fleet/server/plugin.ts",
@@ -8914,14 +8993,14 @@
           {
             "parentPluginId": "fleet",
             "id": "def-common.FleetServerAgent.upgraded_at",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "upgraded_at",
             "description": [
               "\nDate/time the Elastic Agent was last upgraded"
             ],
             "signature": [
-              "string | null | undefined"
+              "string | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
             "deprecated": false,
@@ -8938,6 +9017,22 @@
             ],
             "signature": [
               "string | null | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.FleetServerAgent.upgrade_status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "upgrade_status",
+            "description": [
+              "\nUpgrade status"
+            ],
+            "signature": [
+              "\"completed\" | \"started\" | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
             "deprecated": false,
@@ -9111,7 +9206,7 @@
             "tags": [],
             "label": "last_checkin_status",
             "description": [
-              "\nLst checkin status"
+              "\nLast checkin status"
             ],
             "signature": [
               "\"error\" | \"online\" | \"updating\" | \"degraded\" | undefined"
@@ -10479,6 +10574,20 @@
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Installation.experimental_data_stream_features",
+            "type": "Array",
+            "tags": [],
+            "label": "experimental_data_stream_features",
+            "description": [],
+            "signature": [
+              "{ data_stream: string; features: Record<\"synthetic_source\", boolean>; }[] | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -11487,6 +11596,21 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.NewPackagePolicyInputStream.release",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "release",
+            "description": [],
+            "signature": [
+              "RegistryRelease",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.NewPackagePolicyInputStream.vars",
             "type": "Object",
             "tags": [],
@@ -11885,6 +12009,21 @@
             "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.PackagePolicyPackage.experimental_data_stream_features",
+            "type": "Array",
+            "tags": [],
+            "label": "experimental_data_stream_features",
+            "description": [],
+            "signature": [
+              "ExperimentalDataStreamFeature",
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -12039,12 +12178,12 @@
           {
             "parentPluginId": "fleet",
             "id": "def-common.PackageSpecManifest.type",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "type",
             "description": [],
             "signature": [
-              "\"integration\" | undefined"
+              "\"input\" | \"integration\" | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
             "deprecated": false,
@@ -12414,10 +12553,13 @@
           {
             "parentPluginId": "fleet",
             "id": "def-common.RegistryDataStream.RegistryDataStreamKeys.release",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "[RegistryDataStreamKeys.release]",
             "description": [],
+            "signature": [
+              "\"experimental\" | \"beta\" | \"ga\""
+            ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12789,180 +12931,6 @@
                 "text": "RegistryVarsEntry"
               },
               "[] | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
-        "id": "def-common.RegistryPolicyTemplate",
-        "type": "Interface",
-        "tags": [],
-        "label": "RegistryPolicyTemplate",
-        "description": [],
-        "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.RegistryPolicyTemplate.RegistryPolicyTemplateKeys.name",
-            "type": "string",
-            "tags": [],
-            "label": "[RegistryPolicyTemplateKeys.name]",
-            "description": [],
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.RegistryPolicyTemplate.RegistryPolicyTemplateKeys.title",
-            "type": "string",
-            "tags": [],
-            "label": "[RegistryPolicyTemplateKeys.title]",
-            "description": [],
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.RegistryPolicyTemplate.RegistryPolicyTemplateKeys.description",
-            "type": "string",
-            "tags": [],
-            "label": "[RegistryPolicyTemplateKeys.description]",
-            "description": [],
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.RegistryPolicyTemplate.RegistryPolicyTemplateKeys.icons",
-            "type": "Array",
-            "tags": [],
-            "label": "[RegistryPolicyTemplateKeys.icons]",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.RegistryImage",
-                "text": "RegistryImage"
-              },
-              "[] | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.RegistryPolicyTemplate.RegistryPolicyTemplateKeys.screenshots",
-            "type": "Array",
-            "tags": [],
-            "label": "[RegistryPolicyTemplateKeys.screenshots]",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.RegistryImage",
-                "text": "RegistryImage"
-              },
-              "[] | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.RegistryPolicyTemplate.RegistryPolicyTemplateKeys.categories",
-            "type": "Array",
-            "tags": [],
-            "label": "[RegistryPolicyTemplateKeys.categories]",
-            "description": [],
-            "signature": [
-              "(",
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.PackageSpecCategory",
-                "text": "PackageSpecCategory"
-              },
-              " | undefined)[] | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.RegistryPolicyTemplate.RegistryPolicyTemplateKeys.data_streams",
-            "type": "Array",
-            "tags": [],
-            "label": "[RegistryPolicyTemplateKeys.data_streams]",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.RegistryPolicyTemplate.RegistryPolicyTemplateKeys.inputs",
-            "type": "Array",
-            "tags": [],
-            "label": "[RegistryPolicyTemplateKeys.inputs]",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.RegistryInput",
-                "text": "RegistryInput"
-              },
-              "[] | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.RegistryPolicyTemplate.RegistryPolicyTemplateKeys.readme",
-            "type": "string",
-            "tags": [],
-            "label": "[RegistryPolicyTemplateKeys.readme]",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.RegistryPolicyTemplate.RegistryPolicyTemplateKeys.multiple",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "[RegistryPolicyTemplateKeys.multiple]",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -14881,13 +14849,30 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.RegistryPolicyTemplate",
+        "type": "Type",
+        "tags": [],
+        "label": "RegistryPolicyTemplate",
+        "description": [],
+        "signature": [
+          "RegistryPolicyIntegrationTemplate",
+          " | ",
+          "RegistryPolicyInputOnlyTemplate"
+        ],
+        "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.RegistrySearchResult",
         "type": "Type",
         "tags": [],
         "label": "RegistrySearchResult",
         "description": [],
         "signature": [
-          "{ type?: \"integration\" | undefined; path: string; download: string; title: string; description: string; icons?: (",
+          "{ name: string; description: string; type?: \"input\" | \"integration\" | undefined; path: string; download: string; title: string; icons?: (",
           {
             "pluginId": "fleet",
             "scope": "common",
@@ -14911,7 +14896,7 @@
             "section": "def-common.PackageSpecCategory",
             "text": "PackageSpecCategory"
           },
-          " | undefined)[] | undefined; name: string; version: string; internal?: boolean | undefined; release?: \"experimental\" | \"beta\" | \"ga\" | undefined; policy_templates?: ",
+          " | undefined)[] | undefined; version: string; internal?: boolean | undefined; release?: \"experimental\" | \"beta\" | \"ga\" | undefined; policy_templates?: ",
           {
             "pluginId": "fleet",
             "scope": "common",
@@ -15234,6 +15219,17 @@
             "type": "string",
             "tags": [],
             "label": "CURRENT_UPGRADES_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.AGENT_API_ROUTES.ACTION_STATUS_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "ACTION_STATUS_PATTERN",
             "description": [],
             "path": "x-pack/plugins/fleet/common/constants/routes.ts",
             "deprecated": false,
@@ -15924,6 +15920,22 @@
             "type": "Function",
             "tags": [],
             "label": "getBulkUpgradePath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.agentRouteService.getActionStatusPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getActionStatusPath",
             "description": [],
             "signature": [
               "() => string"

@@ -170,7 +170,6 @@ const LatestFindingsPageTitle = () => (
     <PageTitleText
       title={
         <CloudPosturePageTitle
-          isBeta
           title={i18n.translate('xpack.csp.findings.latestFindings.latestFindingsPageTitle', {
             defaultMessage: 'Findings',
           })}

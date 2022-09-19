@@ -20,8 +20,7 @@ import { getDeferred } from '../mocks';
 import type { ResponderCapabilities } from '../../../../common/endpoint/constants';
 import { RESPONDER_CAPABILITIES } from '../../../../common/endpoint/constants';
 
-// FLAKY: https://github.com/elastic/kibana/issues/139641
-describe.skip('When using the release action from response actions console', () => {
+describe('When using the release action from response actions console', () => {
   let render: (
     capabilities?: ResponderCapabilities[]
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
@@ -205,7 +204,8 @@ describe.skip('When using the release action from response actions console', () 
       });
     });
 
-    it('should display completion output if done (no additional API calls)', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/139641
+    it.skip('should display completion output if done (no additional API calls)', async () => {
       await render();
 
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);

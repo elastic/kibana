@@ -15,11 +15,14 @@ import {
 } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import { RiskEntity } from '../../../../risk_score/containers/feature_status/api';
+import { RiskScoresDeprecated } from '../../../../common/components/risk_score_deprecated';
 import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { LastUpdatedAt } from '../../detection_response/utils';
 import { HeaderSection } from '../../../../common/components/header_section';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { SecurityPageName } from '../../../../app/types';
 import * as i18n from './translations';
 import { generateSeverityFilter } from '../../../../hosts/store/helpers';
@@ -36,7 +39,6 @@ import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirec
 import { RISKY_USERS_DOC_LINK } from '../../../../users/components/constants';
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const TABLE_QUERY_ID = 'userRiskDashboardTable';
 
@@ -45,17 +47,16 @@ const IconWrapper = styled.span`
 `;
 
 export const EntityAnalyticsUserRiskScores = () => {
-  const { deleteQuery, setQuery } = useGlobalTime();
+  const { deleteQuery, setQuery, from, to } = useGlobalTime();
   const [updatedAt, setUpdatedAt] = useState<number>(Date.now());
   const { toggleStatus, setToggleStatus } = useQueryToggle(TABLE_QUERY_ID);
   const columns = useMemo(() => getUserRiskScoreColumns(), []);
   const [selectedSeverity, setSelectedSeverity] = useState<RiskSeverity[]>([]);
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
   const dispatch = useDispatch();
-  const riskyUsersFeatureEnabled = useIsExperimentalFeatureEnabled('riskyUsersEnabled');
 
   const severityFilter = useMemo(() => {
-    const [filter] = generateSeverityFilter(selectedSeverity);
+    const [filter] = generateSeverityFilter(selectedSeverity, RiskScoreEntity.user);
 
     return filter ? JSON.stringify(filter.query) : undefined;
   }, [selectedSeverity]);
@@ -65,13 +66,17 @@ export const EntityAnalyticsUserRiskScores = () => {
     skip: !toggleStatus,
   });
 
-  const [isTableLoading, { data, inspect, refetch, isModuleEnabled }] = useUserRiskScore({
+  const [
+    isTableLoading,
+    { data, inspect, refetch, isLicenseValid, isDeprecated, isModuleEnabled },
+  ] = useUserRiskScore({
     filterQuery: severityFilter,
     skip: !toggleStatus,
     pagination: {
       cursorStart: 0,
       querySize: 5,
     },
+    timerange: { to, from },
   });
 
   useQueryInspector({
@@ -119,12 +124,16 @@ export const EntityAnalyticsUserRiskScores = () => {
     );
   }, []);
 
-  if (!riskyUsersFeatureEnabled) {
+  if (!isLicenseValid) {
     return null;
   }
 
-  if (!isModuleEnabled) {
+  if (!isModuleEnabled && !isTableLoading) {
     return <EntityAnalyticsUserRiskScoresDisable />;
+  }
+
+  if (isDeprecated) {
+    return <RiskScoresDeprecated entityType={RiskEntity.user} />;
   }
 
   return (

@@ -198,6 +198,8 @@ export function TooltipSection({
                         onFieldSelectChange(choice, index);
                       }}
                       fieldIsInvalid={!fieldIsValid}
+                      data-test-subj={`lnsXY-annotation-tooltip-field-picker--${index}`}
+                      autoFocus={isNew && value == null}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
