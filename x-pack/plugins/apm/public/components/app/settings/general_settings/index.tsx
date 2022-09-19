@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
+import {
+  EuiBottomBar,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHealth,
+  EuiText,
+} from '@elastic/eui';
 import { LazyField } from '@kbn/advanced-settings-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -38,6 +46,7 @@ export function GeneralSettings() {
     unsavedChanges,
     saveAll,
     isSaving,
+    cleanUnsavedChanges,
   } = useApmEditableSettings(apmSettingsKeys);
 
   async function handleSave() {
@@ -76,16 +85,55 @@ export function GeneralSettings() {
           />
         );
       })}
-      <EuiButton
-        fill
-        isLoading={isSaving}
-        disabled={isEmpty(unsavedChanges)}
-        onClick={handleSave}
-      >
-        {i18n.translate('xpack.apm.labs.reload', {
-          defaultMessage: 'Reload to apply changes',
-        })}
-      </EuiButton>
+      {!isEmpty(unsavedChanges) && (
+        <EuiBottomBar paddingSize="s">
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem
+              grow={false}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}
+            >
+              <EuiHealth color="warning" />
+              <EuiText color="ghost">
+                {i18n.translate('xpack.apm.apmSettings.unsavedChanges', {
+                  defaultMessage:
+                    '{unsavedChangesCount, plural, =0{0 unsaved changes} one {1 unsaved change} other {# unsaved changes}} ',
+                  values: {
+                    unsavedChangesCount: Object.keys(unsavedChanges).length,
+                  },
+                })}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty color="ghost" onClick={cleanUnsavedChanges}>
+                    {i18n.translate(
+                      'xpack.apm.apmSettings.discardChangesButton',
+                      { defaultMessage: 'Discard changes' }
+                    )}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={handleSave}
+                    fill
+                    isLoading={isSaving}
+                    color="success"
+                    iconType="check"
+                  >
+                    {i18n.translate('xpack.apm.apmSettings.saveButton', {
+                      defaultMessage: 'Save changes',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiBottomBar>
+      )}
     </>
   );
 }
