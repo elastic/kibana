@@ -38,6 +38,7 @@ function SubchartTooltip({
         index={highlightedSubchart.Index}
         color={highlightedSubchart.Color}
         category={highlightedSubchart.Category}
+        label={highlightedSubchart.Label}
         percentage={highlightedSubchart.Percentage}
         data={highlightedSubchart.Series}
         showFrames={showFrames}
@@ -47,6 +48,7 @@ function SubchartTooltip({
         width={width}
         showAxes={false}
         onShowMoreClick={null}
+        padTitle={false}
       />
     </EuiPanel>
   );
@@ -118,7 +120,7 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
         <HistogramBarSeries
           key={chart.Category}
           id={chart.Category}
-          name={chart.Category}
+          name={chart.Label}
           data={chart.Series}
           color={chart.Color}
           xAccessor={'Timestamp'}

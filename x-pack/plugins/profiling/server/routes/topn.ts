@@ -73,6 +73,7 @@ export async function topNElasticSearchQuery({
       TotalCount: 0,
       TopN: [],
       Metadata: {},
+      Labels: {},
     };
   }
 
@@ -84,6 +85,20 @@ export async function topNElasticSearchQuery({
     topN[i].Count = (topN[i].Count ?? 0) / eventsIndex.sampleRate;
   }
 
+  const groupByBuckets = aggregations.group_by.buckets ?? [];
+
+  const labels: Record<string, string> = {};
+
+  for (const bucket of groupByBuckets) {
+    if (bucket.sample?.top[0]) {
+      labels[String(bucket.key)] = String(
+        bucket.sample.top[0].metrics[ProfilingESField.HostName] ||
+          bucket.sample.top[0].metrics[ProfilingESField.HostIP] ||
+          ''
+      );
+    }
+  }
+
   let totalSampledStackTraces = aggregations.total_count.value ?? 0;
   logger.info('total sampled stacktraces: ' + totalSampledStackTraces);
   totalSampledStackTraces = Math.floor(totalSampledStackTraces / eventsIndex.sampleRate);
@@ -93,11 +108,11 @@ export async function topNElasticSearchQuery({
       TotalCount: totalSampledStackTraces,
       TopN: topN,
       Metadata: {},
+      Labels: labels,
     };
   }
 
   const stackTraceEvents = new Map<StackTraceID, number>();
-  const groupByBuckets = aggregations.group_by.buckets ?? [];
   let totalAggregatedStackTraces = 0;
 
   for (let i = 0; i < groupByBuckets.length; i++) {
@@ -138,6 +153,7 @@ export async function topNElasticSearchQuery({
     TotalCount: totalSampledStackTraces,
     TopN: topN,
     Metadata: metadata,
+    Labels: labels,
   };
 }
 

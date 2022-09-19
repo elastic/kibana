@@ -62,7 +62,12 @@ export function StackTracesView() {
     }).then((response: TopNResponse) => {
       const totalCount = response.TotalCount;
       const samples = response.TopN;
-      const charts = groupSamplesByCategory({ samples, totalCount, metadata: response.Metadata });
+      const charts = groupSamplesByCategory({
+        samples,
+        totalCount,
+        metadata: response.Metadata,
+        labels: response.Labels,
+      });
       return {
         charts,
       };
