@@ -24,7 +24,7 @@ export function OverviewStatus() {
     if (statusError) {
       dispatch(clearOverviewStatusErrorAction());
       kibanaService.toasts.addError(statusError.body as Error, {
-        title: 'Status fetch failed',
+        title: errorToastTitle,
         toastLifeTimeMs: 5000,
       });
     }
@@ -90,3 +90,7 @@ const disabledDescription = i18n.translate(
     defaultMessage: 'Disabled',
   }
 );
+
+const errorToastTitle = i18n.translate('xpack.synthetics.overview.status.error.title', {
+  defaultMessage: 'Unable to get monitor status metrics',
+});
