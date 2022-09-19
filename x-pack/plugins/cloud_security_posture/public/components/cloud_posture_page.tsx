@@ -71,7 +71,10 @@ const packageNotInstalledRenderer = (cisIntegrationLink?: string) => (
               values={{
                 integrationFullName: (
                   <EuiLink href="https://ela.st/kspm">
-                    Kubernetes Security Posture Management
+                    <FormattedMessage
+                      id="xpack.csp.cloudPosturePage.packageNotInstalled.integrationNameLabel"
+                      defaultMessage="Kubernetes Security Posture Management"
+                    />
                   </EuiLink>
                 ),
               }}
