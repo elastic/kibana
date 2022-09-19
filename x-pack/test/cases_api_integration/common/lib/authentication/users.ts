@@ -14,9 +14,6 @@ import {
   noKibanaPrivileges as noKibanaPrivilegesRole,
   noCasesPrivilegesSpace1 as noCasesPrivilegesSpace1Role,
   securitySolutionOnlyAllSpacesAll,
-  securitySolutionOnlyReadSpacesAll,
-  observabilityOnlyAllSpacesAll,
-  observabilityOnlyReadSpacesAll,
   testDisabledPluginAll,
   securitySolutionOnlyDelete,
   securitySolutionOnlyNoDelete,
@@ -101,12 +98,23 @@ export const noCasesPrivilegesSpace1: User = {
   roles: [noCasesPrivilegesSpace1Role.name],
 };
 
+/**
+ * These users will have access to all spaces.
+ */
+
+export const secOnlySpacesAll: User = {
+  username: 'sec_only_all_spaces',
+  password: 'sec_only_all_spaces',
+  roles: [securitySolutionOnlyAllSpacesAll.name],
+};
+
 export const users = [
   superUser,
   secOnly,
   secOnlyRead,
   secOnlyDelete,
   secOnlyNoDelete,
+  secOnlySpacesAll,
   obsOnly,
   obsOnlyRead,
   obsSec,
@@ -116,43 +124,3 @@ export const users = [
   noCasesPrivilegesSpace1,
   testDisabled,
 ];
-
-/**
- * These users will have access to all spaces.
- */
-
-export const secOnlySpacesAll: User = {
-  username: 'sec_only',
-  password: 'sec_only',
-  roles: [securitySolutionOnlyAllSpacesAll.name],
-};
-
-export const secOnlyReadSpacesAll: User = {
-  username: 'sec_only_read',
-  password: 'sec_only_read',
-  roles: [securitySolutionOnlyReadSpacesAll.name],
-};
-
-export const obsOnlySpacesAll: User = {
-  username: 'obs_only',
-  password: 'obs_only',
-  roles: [observabilityOnlyAllSpacesAll.name],
-};
-
-export const obsOnlyReadSpacesAll: User = {
-  username: 'obs_only_read',
-  password: 'obs_only_read',
-  roles: [observabilityOnlyReadSpacesAll.name],
-};
-
-export const obsSecSpacesAll: User = {
-  username: 'obs_sec',
-  password: 'obs_sec',
-  roles: [securitySolutionOnlyAllSpacesAll.name, observabilityOnlyAllSpacesAll.name],
-};
-
-export const obsSecReadSpacesAll: User = {
-  username: 'obs_sec_read',
-  password: 'obs_sec_read',
-  roles: [securitySolutionOnlyReadSpacesAll.name, observabilityOnlyReadSpacesAll.name],
-};
