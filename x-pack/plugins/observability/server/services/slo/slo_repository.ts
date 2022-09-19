@@ -7,7 +7,6 @@
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
-import { SavedObject } from '@kbn/core-saved-objects-common';
 
 import { StoredSLO, SLO } from '../../types/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
