@@ -14,7 +14,6 @@ import {
   EuiIcon,
   EuiPanel,
   useEuiTheme,
-  EuiTextAlign,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -121,13 +120,11 @@ export function TooltipSection({
             paddingSize="s"
             className="lnsConfigPanelAnnotations__noFieldsPrompt"
           >
-            <EuiTextAlign textAlign="center">
-              <EuiText size="s">
-                {i18n.translate('xpack.lens.xyChart.annotation.tooltip.noFields', {
-                  defaultMessage: 'None selected',
-                })}
-              </EuiText>
-            </EuiTextAlign>
+            <EuiText color="subdued" size="s" textAlign="center">
+              {i18n.translate('xpack.lens.xyChart.annotation.tooltip.noFields', {
+                defaultMessage: 'None selected',
+              })}
+            </EuiText>
           </EuiPanel>
         </EuiFlexItem>
         {newBucketButton}
