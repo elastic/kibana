@@ -56,7 +56,6 @@ const createTestCases = (spaceId: string) => [
 ];
 
 export default function (context: FtrProviderContext) {
-
   const { addTests, createTestDefinitions } = bulkGetTestSuiteFactory(context);
   const createTests = (spaceId: string) => {
     const testCases = createTestCases(spaceId);

@@ -11,7 +11,7 @@ import { SPACES } from '../lib/spaces';
 import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
 import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
 import { FtrProviderContext } from '../ftr_provider_context';
-import {getTestDataLoader} from "../lib/test_data_loader";
+import { getTestDataLoader } from '../lib/test_data_loader';
 
 export interface BulkGetTestDefinition extends TestDefinition {
   request: Array<{ type: string; id: string }>;
@@ -35,7 +35,6 @@ const createRequest = ({ type, id, namespaces }: BulkGetTestCase) => ({
 });
 
 export function bulkGetTestSuiteFactory(context: FtrProviderContext) {
-
   const testDataLoader = getTestDataLoader(context);
   const supertest = context.getService('supertestWithoutAuth');
 
