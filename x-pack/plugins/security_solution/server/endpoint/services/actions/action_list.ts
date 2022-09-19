@@ -205,8 +205,19 @@ const getActionDetailsList = async ({
     throw err;
   }
 
-  // return empty details array
-  if (!actionRequests?.body?.hits?.hits) return { actionDetails: [], totalRecords: 0 };
+  if (actionRequests?.statusCode === 404) {
+    const err = new CustomHttpRequestError(
+      'index_not_found_exception',
+      404,
+      new Error('index_not_found_exception')
+    );
+    logger.error(err);
+    throw err;
+  }
+
+  if (!actionRequests?.body?.hits?.hits)
+    // return empty details array
+    return { actionDetails: [], totalRecords: 0 };
 
   // format endpoint actions into { type, item } structure
   const formattedActionRequests = formatEndpointActionResults(actionRequests?.body?.hits?.hits);
