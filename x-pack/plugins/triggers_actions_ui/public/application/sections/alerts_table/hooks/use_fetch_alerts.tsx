@@ -184,6 +184,7 @@ const useFetchAlerts = ({
             )
             .subscribe({
               next: (response) => {
+                console.log('=======>response:', JSON.stringify(response));
                 if (isCompleteResponse(response)) {
                   const { rawResponse } = response;
                   inspectQuery.current = {
@@ -215,6 +216,10 @@ const useFetchAlerts = ({
                 } else if (isErrorResponse(response)) {
                   dispatch({ type: 'loading', loading: false });
                   data.search.showError(new Error(i18n.ERROR_FETCH_ALERTS));
+                  searchSubscription$.current.unsubscribe();
+                } else {
+                  console.log('=======> else response::', JSON.stringify(response));
+                  dispatch({ type: 'loading', loading: false });
                   searchSubscription$.current.unsubscribe();
                 }
               },
