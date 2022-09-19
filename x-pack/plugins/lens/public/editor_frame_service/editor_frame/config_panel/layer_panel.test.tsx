@@ -149,7 +149,7 @@ describe('LayerPanel', () => {
       const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
       expect(
         instance.find('[data-test-subj="lnsLayerRemove--0"]').first().props()['aria-label']
-      ).toContain('Reset layer');
+      ).toContain('Clear layer');
     });
 
     it('should show the delete button when multiple layers', async () => {
