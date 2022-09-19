@@ -22,9 +22,11 @@ const DEFAULT_PIPELINE_VALUES = {
 
 const DEFAULT_VALUES = {
   canSetPipeline: true,
+  canUseMlInferencePipeline: false,
   defaultPipelineValues: DEFAULT_PIPELINE_VALUES,
   defaultPipelineValuesData: undefined,
   index: undefined,
+  mlInferencePipelineProcessors: undefined,
   pipelineState: DEFAULT_PIPELINE_VALUES,
   showModal: false,
 };
@@ -146,6 +148,7 @@ describe('PipelinesLogic', () => {
         });
         expect(PipelinesLogic.values).toEqual({
           ...DEFAULT_VALUES,
+          canUseMlInferencePipeline: true,
           index: {
             ...connectorIndex,
             connector: { ...connectorIndex.connector, pipeline: newPipeline },
