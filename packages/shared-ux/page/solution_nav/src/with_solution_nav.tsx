@@ -8,22 +8,18 @@
 
 import React, { ComponentType, ReactNode, useState } from 'react';
 import classNames from 'classnames';
-import { useIsWithinBreakpoints, useEuiTheme, EuiPageSidebarProps } from '@elastic/eui';
+import { useIsWithinBreakpoints, useEuiTheme } from '@elastic/eui';
+import { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template-types';
 import { SolutionNav, SolutionNavProps } from './solution_nav';
-
-import './with_solution_nav.scss';
 
 // https://reactjs.org/docs/higher-order-components.html#convention-wrap-the-display-name-for-easy-debugging
 function getDisplayName(Component: ComponentType<any>) {
   return Component.displayName || Component.name || 'UnnamedComponent';
 }
 
-// TODO: Would be nice to grab these from KibanaPageTemplate or vice-versa
-interface TemplateProps {
-  pageSideBar?: ReactNode;
-  pageSideBarProps?: Partial<EuiPageSidebarProps>;
+type TemplateProps = Pick<KibanaPageTemplateProps, 'pageSideBar' | 'pageSideBarProps'> & {
   children?: ReactNode;
-}
+};
 
 type Props<P> = P &
   TemplateProps & {

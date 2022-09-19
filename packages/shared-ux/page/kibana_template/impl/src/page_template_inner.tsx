@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import classNames from 'classnames';
 import { EuiPageTemplate } from '@elastic/eui';
 
@@ -35,6 +35,17 @@ export const KibanaPageTemplateInner: FC<Props> = ({
 }) => {
   let header;
 
+  const [offset, setOffset] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    const kibanaChrome = document
+      .querySelectorAll('[data-test-subj="kibanaChrome"]')
+      ?.item(0) as HTMLElement;
+    if (kibanaChrome) {
+      setOffset(kibanaChrome.offsetHeight);
+    }
+  }, []);
+
   if (isEmptyState && pageHeader && !children) {
     const { iconType, pageTitle, description, rightSideItems } = pageHeader;
     const title = pageTitle ? <h1>{pageTitle}</h1> : undefined;
@@ -54,15 +65,11 @@ export const KibanaPageTemplateInner: FC<Props> = ({
 
   let sideBar;
   if (pageSideBar) {
-    sideBar = (
-      <EuiPageTemplate.Sidebar
-        // TODO: Get `offset` from Kibana Chrome Header and pass directly to:
-        // sticky={{ offset }}
-        {...pageSideBarProps}
-      >
-        {pageSideBar}
-      </EuiPageTemplate.Sidebar>
-    );
+    const sideBarProps = { ...pageSideBarProps };
+    if (offset) {
+      sideBarProps.sticky = { offset };
+    }
+    sideBar = <EuiPageTemplate.Sidebar {...sideBarProps}>{pageSideBar}</EuiPageTemplate.Sidebar>;
   }
 
   const classes = getClasses(undefined, className);
