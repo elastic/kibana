@@ -85,20 +85,6 @@ export const useFieldTableColumns: UseFieldTableColumns = ({
               available: ({ isRuntime }) => isRuntime,
               'data-test-subj': 'actionEditRuntimeField',
             },
-            {
-              name: i18n.REMOVE,
-              description: i18n.REMOVE_DESCRIPTION,
-              type: 'icon',
-              icon: 'trash',
-              color: 'danger',
-              isPrimary: true,
-              onClick: ({ name }: BrowserFieldItem) => {
-                openDeleteFieldModal(name);
-                onHide();
-              },
-              available: ({ isRuntime }) => isRuntime,
-              'data-test-subj': 'actionDeleteRuntimeField',
-            },
           ]
         : [];
 
@@ -178,7 +164,7 @@ export const useFieldTableColumns: UseFieldTableColumns = ({
           : []),
       ];
     },
-    [hasFieldEditPermission, openFieldEditor, openDeleteFieldModal]
+    [hasFieldEditPermission, openFieldEditor]
   );
 
   return getFieldTableColumns;
