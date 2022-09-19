@@ -70,11 +70,6 @@ export interface JourneyConfigOptions<CtxExt> {
    */
   extraApmLabels?: Record<string, string>;
   /**
-   * Additional Kibana server CLI flags that should be passed to the
-   * Kibana instance started to run this journey.
-   */
-  extraKibanaServerArgs?: string[];
-  /**
    * A list of kbnArchives which will be automatically loaded/unloaded
    * for this journey.
    */
@@ -119,10 +114,6 @@ export class JourneyConfig<CtxExt extends object> {
 
   isXpack() {
     return this.getRepoRelPath().split(Path.sep).at(0) === 'x-pack';
-  }
-
-  getExtraKibanaServerArgs() {
-    return this.#opts.extraKibanaServerArgs ? [...this.#opts.extraKibanaServerArgs] : [];
   }
 
   getExtraApmLabels() {
