@@ -46,6 +46,7 @@ const fields = [
     scripted: false,
     filterable: true,
     aggregatable: true,
+    sortable: true,
   },
   {
     name: 'scripted',

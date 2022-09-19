@@ -24,7 +24,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 
@@ -43,7 +43,7 @@ export interface DependencyCache {
   savedObjectsClient: SavedObjectsClientContract | null;
   application: ApplicationStart | null;
   http: HttpStart | null;
-  security: SecurityPluginSetup | undefined | null;
+  security: SecurityPluginStart | undefined | null;
   i18n: I18nStart | null;
   dashboard: DashboardStart | null;
   maps: MapsStartApi | null;

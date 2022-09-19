@@ -34,6 +34,10 @@ import {
   RangeIndexPatternColumn,
   FiltersIndexPatternColumn,
   PercentileIndexPatternColumn,
+  CountIndexPatternColumn,
+  SumIndexPatternColumn,
+  AvgIndexPatternColumn,
+  MedianIndexPatternColumn,
 } from './operations';
 import { createMockedFullReference } from './operations/mocks';
 import { cloneDeep } from 'lodash';
@@ -156,6 +160,8 @@ const expectedIndexPatterns = {
     hasRestrictions: false,
     fields: fieldsOne,
     getFieldByName: getFieldByNameFactory(fieldsOne),
+    spec: {},
+    isPersisted: true,
   },
   2: {
     id: '2',
@@ -164,6 +170,8 @@ const expectedIndexPatterns = {
     hasRestrictions: true,
     fields: fieldsTwo,
     getFieldByName: getFieldByNameFactory(fieldsTwo),
+    spec: {},
+    isPersisted: true,
   },
 };
 
@@ -585,6 +593,234 @@ describe('IndexPattern Data Source', () => {
       expect((ast.chain[1].arguments.aggs[1] as Ast).chain[0].arguments.timeShift).toEqual(['1d']);
     });
 
+    it('should pass time shift and filter parameter to all children metric agg functions but respect local values, too', async () => {
+      /*
+       structure of this formula:
+       moving_average(
+        count()
+        + sum(products.price, shift='1h')
+        + differences(
+            average(products.price, kql='NOT category : * ')
+            + median(products.price),
+          kql='category : *'),
+        shift='3h')
+
+        * Outer moving average is shifted - this is inherited to the count and the average and median within the nested differences
+        * The sum has its own shift and does not respected the shift from the moving average
+        * The differences has a filter which is inherited to the median, but not the average as it has its own filter
+      */
+      const queryBaseState: IndexPatternPrivateState = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columns: {
+              col1: {
+                label: 'order_date',
+                dataType: 'date',
+                operationType: 'date_histogram',
+                sourceField: 'order_date',
+                isBucketed: true,
+                scale: 'interval',
+                params: {
+                  interval: 'auto',
+                  includeEmptyRows: true,
+                  dropPartials: false,
+                },
+              } as DateHistogramIndexPatternColumn,
+              col2X0: {
+                label:
+                  "Part of moving_average(count() + sum(products.price, shift='1h') + differences(average(products.price, kql='NOT category : * ') + median(products.price), kql='category : *'), shift='3h')",
+                dataType: 'number',
+                operationType: 'count',
+                isBucketed: false,
+                scale: 'ratio',
+                sourceField: '___records___',
+                params: {
+                  emptyAsNull: false,
+                },
+                customLabel: true,
+              } as CountIndexPatternColumn,
+              col2X1: {
+                label:
+                  "Part of moving_average(count() + sum(products.price, shift='1h') + differences(average(products.price, kql='NOT category : * ') + median(products.price), kql='category : *'), shift='3h')",
+                dataType: 'number',
+                operationType: 'sum',
+                sourceField: 'products.price',
+                isBucketed: false,
+                scale: 'ratio',
+                timeShift: '1h',
+                params: {
+                  emptyAsNull: false,
+                },
+                customLabel: true,
+              } as SumIndexPatternColumn,
+              col2X2: {
+                label:
+                  "Part of moving_average(count() + sum(products.price, shift='1h') + differences(average(products.price, kql='NOT category : * ') + median(products.price), kql='category : *'), shift='3h')",
+                dataType: 'number',
+                operationType: 'average',
+                sourceField: 'products.price',
+                isBucketed: false,
+                scale: 'ratio',
+                filter: {
+                  query: 'NOT category : * ',
+                  language: 'kuery',
+                },
+                params: {
+                  emptyAsNull: false,
+                },
+                customLabel: true,
+              } as AvgIndexPatternColumn,
+              col2X3: {
+                label:
+                  "Part of moving_average(count() + sum(products.price, shift='1h') + differences(average(products.price, kql='NOT category : * ') + median(products.price), kql='category : *'), shift='3h')",
+                dataType: 'number',
+                operationType: 'median',
+                sourceField: 'products.price',
+                isBucketed: false,
+                scale: 'ratio',
+                params: {
+                  emptyAsNull: false,
+                },
+                customLabel: true,
+              } as MedianIndexPatternColumn,
+              col2X4: {
+                label:
+                  "Part of moving_average(count() + sum(products.price, shift='1h') + differences(average(products.price, kql='NOT category : * ') + median(products.price), kql='category : *'), shift='3h')",
+                dataType: 'number',
+                operationType: 'math',
+                isBucketed: false,
+                scale: 'ratio',
+                params: {
+                  tinymathAst: {
+                    type: 'function',
+                    name: 'add',
+                    args: ['col2X2', 'col2X3'] as unknown as TinymathAST[],
+                    location: {
+                      min: 71,
+                      max: 144,
+                    },
+                    text: "average(products.price, kql='NOT category : * ') + median(products.price)",
+                  },
+                },
+                references: ['col2X2', 'col2X3'],
+                customLabel: true,
+              } as MathIndexPatternColumn,
+              col2X5: {
+                label:
+                  "Part of moving_average(count() + sum(products.price, shift='1h') + differences(average(products.price, kql='NOT category : * ') + median(products.price), kql='category : *'), shift='3h')",
+                dataType: 'number',
+                operationType: 'differences',
+                isBucketed: false,
+                scale: 'ratio',
+                references: ['col2X4'],
+                filter: {
+                  query: 'category : *',
+                  language: 'kuery',
+                },
+                customLabel: true,
+              },
+              col2X6: {
+                label:
+                  "Part of moving_average(count() + sum(products.price, shift='1h') + differences(average(products.price, kql='NOT category : * ') + median(products.price), kql='category : *'), shift='3h')",
+                dataType: 'number',
+                operationType: 'math',
+                isBucketed: false,
+                scale: 'ratio',
+                params: {
+                  tinymathAst: {
+                    type: 'function',
+                    name: 'add',
+                    args: [
+                      {
+                        type: 'function',
+                        name: 'add',
+                        args: ['col2X0', 'col2X1'] as unknown as TinymathAST[],
+                      },
+                      'col2X5',
+                    ],
+                    location: {
+                      min: 15,
+                      max: 165,
+                    },
+                    text: "count() + sum(products.price, shift='1h') + differences(average(products.price, kql='NOT category : * ') + median(products.price), kql='category : *')",
+                  },
+                },
+                references: ['col2X0', 'col2X1', 'col2X5'],
+                customLabel: true,
+              } as MathIndexPatternColumn,
+              col2X7: {
+                label:
+                  "Part of moving_average(count() + sum(products.price, shift='1h') + differences(average(products.price, kql='NOT category : * ') + median(products.price), kql='category : *'), shift='3h')",
+                dataType: 'number',
+                operationType: 'moving_average',
+                isBucketed: false,
+                scale: 'ratio',
+                references: ['col2X6'],
+                timeShift: '3h',
+                params: {
+                  window: 5,
+                },
+                customLabel: true,
+              } as MovingAverageIndexPatternColumn,
+              col2: {
+                label:
+                  "moving_average(count() + sum(products.price, shift='1h') + differences(average(products.price, kql='NOT category : * ') + median(products.price), kql='category : *'), shift='3h')",
+                dataType: 'number',
+                operationType: 'formula',
+                isBucketed: false,
+                scale: 'ratio',
+                params: {
+                  formula:
+                    "moving_average(count() + sum(products.price, shift='1h') + differences(average(products.price, kql='NOT category : * ') + median(products.price), kql='category : *'), shift='3h')",
+                  isFormulaBroken: false,
+                },
+                references: ['col2X7'],
+              } as FormulaIndexPatternColumn,
+            },
+            columnOrder: [
+              'col1',
+              'col2',
+              'col2X0',
+              'col2X1',
+              'col2X2',
+              'col2X3',
+              'col2X4',
+              'col2X5',
+              'col2X6',
+              'col2X7',
+            ],
+            incompleteColumns: {},
+          },
+        },
+      };
+
+      const ast = indexPatternDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns
+      ) as Ast;
+      const count = (ast.chain[1].arguments.aggs[1] as Ast).chain[0];
+      const sum = (ast.chain[1].arguments.aggs[2] as Ast).chain[0];
+      const average = (ast.chain[1].arguments.aggs[3] as Ast).chain[0];
+      const median = (ast.chain[1].arguments.aggs[4] as Ast).chain[0];
+      expect(count.arguments.timeShift).toEqual(['3h']);
+      expect(count.arguments.customBucket).toEqual(undefined);
+      expect(sum.arguments.timeShift).toEqual(['1h']);
+      expect(sum.arguments.customBucket).toEqual(undefined);
+      expect(average.arguments.timeShift).toEqual(['3h']);
+      expect(
+        ((average.arguments.customBucket[0] as Ast).chain[0].arguments.filter[0] as Ast).chain[0]
+          .arguments.q[0]
+      ).toEqual('NOT category : * ');
+      expect(median.arguments.timeShift).toEqual(['3h']);
+      expect(
+        ((median.arguments.customBucket[0] as Ast).chain[0].arguments.filter[0] as Ast).chain[0]
+          .arguments.q[0]
+      ).toEqual('category : *');
+    });
+
     it('should wrap filtered metrics in filtered metric aggregation', async () => {
       const queryBaseState: IndexPatternPrivateState = {
         currentIndexPatternId: '1',
@@ -778,6 +1014,7 @@ describe('IndexPattern Data Source', () => {
           "outputColumnName": Array [
             "Count of records",
           ],
+          "reducedTimeRange": Array [],
           "targetUnit": Array [
             "h",
           ],
