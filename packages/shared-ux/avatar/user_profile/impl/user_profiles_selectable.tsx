@@ -200,14 +200,14 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
 
   const selectedCount = selectedOptions ? selectedOptions.length : 0;
 
-  const placeholder = 
-  searchPlaceholder ??
-  i18n.translate(
-    'sharedUXPackages.userProfileComponents.userProfilesSelectable.searchPlaceholder',
-    {
-      defaultMessage: 'Search',
-    }
-  )
+  const placeholder =
+    searchPlaceholder ??
+    i18n.translate(
+      'sharedUXPackages.userProfileComponents.userProfilesSelectable.searchPlaceholder',
+      {
+        defaultMessage: 'Search',
+      }
+    );
 
   return (
     <EuiSelectable
