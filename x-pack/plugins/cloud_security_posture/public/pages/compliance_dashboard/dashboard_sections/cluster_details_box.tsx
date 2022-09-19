@@ -24,15 +24,16 @@ import { Cluster } from '../../../../common/types';
 import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
 import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 
+const defaultClusterTitle = i18n.translate(
+  'xpack.csp.dashboard.benchmarkSection.defaultClusterTitle',
+  { defaultMessage: 'Cluster ID' }
+);
+
 export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
   const navToFindings = useNavigateFindings();
 
   const shortId = cluster.meta.clusterId.slice(0, 6);
-  const title =
-    cluster.meta.clusterName ||
-    i18n.translate('xpack.csp.dashboard.benchmarkSection.defaultClusterTitle', {
-      defaultMessage: 'Cluster ID',
-    });
+  const title = cluster.meta.clusterName || defaultClusterTitle;
 
   const handleClusterTitleClick = (clusterId: string) => {
     navToFindings({ cluster_id: clusterId });
