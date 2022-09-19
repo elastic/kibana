@@ -36,6 +36,8 @@ export interface CloudExperimentsPluginSetup {
 /**
  * The names of the feature flags declared in Kibana.
  * Valid keys are defined in {@link FEATURE_FLAG_NAMES}. When using a new feature flag, add the name to the list.
+ *
+ * @public
  */
 export type CloudExperimentsFeatureFlagNames = keyof typeof FEATURE_FLAG_NAMES;
 
