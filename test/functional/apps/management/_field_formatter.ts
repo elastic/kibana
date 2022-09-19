@@ -21,8 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const indexPatterns = getService('indexPatterns');
   const toasts = getService('toasts');
 
-  // eslint-disable-next-line ban/ban
-  describe.only('field formatter', function () {
+  describe('field formatter', function () {
     this.tags(['skipFirefox']);
 
     before(async function () {
