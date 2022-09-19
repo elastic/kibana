@@ -10,6 +10,17 @@
   "description": "The cloud security posture plugin",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["navigation", "data", "fleet", "unifiedSearch", "taskManager", "security", "charts", "discover"],
+  "requiredPlugins": [
+    "navigation",
+    "data",
+    "fleet",
+    "unifiedSearch",
+    "taskManager",
+    "security",
+    "charts",
+    "discover",
+    "cloud",
+    "licensing"
+  ],
   "requiredBundles": ["kibanaReact"]
 }
