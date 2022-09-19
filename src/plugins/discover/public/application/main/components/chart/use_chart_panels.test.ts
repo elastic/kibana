@@ -14,7 +14,14 @@ import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 describe('test useChartPanels', () => {
   test('useChartsPanel when hideChart is true', async () => {
     const { result } = renderHook(() => {
-      return useChartPanels(jest.fn(), jest.fn(), jest.fn(), true, 'auto');
+      return useChartPanels({
+        toggleHideChart: jest.fn(),
+        onChangeInterval: jest.fn(),
+        closePopover: jest.fn(),
+        onResetChartHeight: jest.fn(),
+        hideChart: true,
+        interval: 'auto',
+      });
     });
     const panels: EuiContextMenuPanelDescriptor[] = result.current;
     const panel0: EuiContextMenuPanelDescriptor = result.current[0];
@@ -23,7 +30,14 @@ describe('test useChartPanels', () => {
   });
   test('useChartsPanel when hideChart is false', async () => {
     const { result } = renderHook(() => {
-      return useChartPanels(jest.fn(), jest.fn(), jest.fn(), false, 'auto');
+      return useChartPanels({
+        toggleHideChart: jest.fn(),
+        onChangeInterval: jest.fn(),
+        closePopover: jest.fn(),
+        onResetChartHeight: jest.fn(),
+        hideChart: true,
+        interval: 'auto',
+      });
     });
     const panels: EuiContextMenuPanelDescriptor[] = result.current;
     const panel0: EuiContextMenuPanelDescriptor = result.current[0];

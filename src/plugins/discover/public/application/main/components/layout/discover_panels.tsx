@@ -25,6 +25,7 @@ export interface DiscoverPanelsProps {
   minMainPanelHeight: number;
   topPanel: ReactElement;
   mainPanel: ReactElement;
+  onTopPanelHeightChange?: (height: number) => void;
 }
 
 const fixedModes = [DISCOVER_PANELS_MODE.SINGLE, DISCOVER_PANELS_MODE.FIXED];
@@ -38,6 +39,7 @@ export const DiscoverPanels = ({
   minMainPanelHeight,
   topPanel,
   mainPanel,
+  onTopPanelHeightChange,
 }: DiscoverPanelsProps) => {
   const panelsProps = { className, topPanel, mainPanel };
 
@@ -49,6 +51,7 @@ export const DiscoverPanels = ({
       initialTopPanelHeight={initialTopPanelHeight}
       minTopPanelHeight={minTopPanelHeight}
       minMainPanelHeight={minMainPanelHeight}
+      onTopPanelHeightChange={onTopPanelHeightChange}
       {...panelsProps}
     />
   );
