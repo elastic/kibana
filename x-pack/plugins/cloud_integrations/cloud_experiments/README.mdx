@@ -15,7 +15,7 @@ The Cloud Experiments Service provides the necessary APIs to implement A/B testi
 
 If you are developing a feature that needs to use a feature flag, or you are implementing an A/B-testing scenario, this is how you should fetch the value of your feature flags (for either server and browser side code):
 
-First, you should declare the optional dependency on this plugin (bear in mind that the plugin is disabled by default, so adding this plugin to the `requiredPlugins` will disable your plugin when this one is disabled).
+First, you should declare the optional dependency on this plugin. Do not list it in your `requiredPlugins`, as this plugin is disabled by default and only enabled in Cloud deployments. Adding it to your `requiredPlugins` will cause Kibana to refuse to start by default.
 
 ```json
 // plugin/kibana.json
