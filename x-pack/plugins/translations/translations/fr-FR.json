@@ -9549,7 +9549,6 @@
     "xpack.csp.benchmarks.benchmarkEmptyState.integrationsNotFoundTitle": "Aucune intégration Benchmark trouvée",
     "xpack.csp.benchmarks.benchmarkEmptyState.integrationsNotFoundWithFiltersTitle": "Nous n'avons trouvé aucune intégration Benchmark avec les filtres ci-dessus.",
     "xpack.csp.benchmarks.benchmarkSearchField.searchPlaceholder": "par exemple, le nom d'un benchmark",
-    "xpack.csp.benchmarks.benchmarksPageHeader.addCisIntegrationButtonLabel": "Ajouter une intégration CIS",
     "xpack.csp.benchmarks.benchmarksPageHeader.benchmarkIntegrationsTitle": "Intégrations Benchmark",
     "xpack.csp.benchmarks.benchmarksTable.activeRulesColumnTitle": "Règles actives",
     "xpack.csp.benchmarks.benchmarksTable.agentPolicyColumnTitle": "Politique d'agent",

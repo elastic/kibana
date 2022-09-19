@@ -9536,7 +9536,6 @@
     "xpack.csp.benchmarks.benchmarkEmptyState.integrationsNotFoundTitle": "ベンチマーク統合が見つかりません",
     "xpack.csp.benchmarks.benchmarkEmptyState.integrationsNotFoundWithFiltersTitle": "上記のフィルターでベンチマーク統合が見つかりませんでした。",
     "xpack.csp.benchmarks.benchmarkSearchField.searchPlaceholder": "例：ベンチマーク名",
-    "xpack.csp.benchmarks.benchmarksPageHeader.addCisIntegrationButtonLabel": "CIS統合を追加",
     "xpack.csp.benchmarks.benchmarksPageHeader.benchmarkIntegrationsTitle": "ベンチマーク統合",
     "xpack.csp.benchmarks.benchmarksTable.activeRulesColumnTitle": "アクティブなルール",
     "xpack.csp.benchmarks.benchmarksTable.agentPolicyColumnTitle": "エージェントポリシー",
