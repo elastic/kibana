@@ -12,7 +12,7 @@ import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types'
 import { API_URLS, SYNTHETICS_API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
-import { getMonitors } from '../util';
+import { getMonitors } from '../common';
 
 const querySchema = schema.object({
   page: schema.maybe(schema.number()),

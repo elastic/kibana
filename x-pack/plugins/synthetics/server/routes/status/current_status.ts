@@ -7,13 +7,14 @@
 
 import { schema } from '@kbn/config-schema';
 import datemath, { Unit } from '@kbn/datemath';
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import { IKibanaResponse, SavedObjectsClientContract } from '@kbn/core/server';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { UMServerLibs } from '../../legacy_uptime/uptime_server';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
-import { getMonitors } from '../util';
+import { getMonitors } from '../common';
 import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import { OverviewStatus } from '../../../common/runtime_types';
 
 /**
  * Helper function that converts a monitor's schedule to a value to use to generate
@@ -34,7 +35,7 @@ export async function queryMonitorStatus(
   maxLocations: number,
   maxPeriod: number,
   ids: Array<string | undefined>
-) {
+): Promise<Pick<OverviewStatus, 'up' | 'down'>> {
   const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / maxLocations);
   const pageCount = Math.ceil(ids.length / idSize);
   const promises: Array<Promise<any>> = [];
@@ -103,29 +104,19 @@ export async function queryMonitorStatus(
   }
   let up = 0;
   let down = 0;
-  let total = 0;
-  const locationMap: Record<string, Record<string, string>> = {};
   for await (const response of promises) {
-    response.aggregations?.id.buckets.forEach(
-      ({ key: id, location }: { key: string; location: any }) => {
-        if (!locationMap[id]) locationMap[id] = {};
-        location.buckets.forEach(({ key: locationName, status }: { key: string; status: any }) => {
-          const statusValue = status.hits.hits[0]._source.monitor.status;
-          if (statusValue === 'up') {
-            up += 1;
-          } else if (statusValue === 'down') {
-            down += 1;
-          }
-          locationMap[id] = {
-            ...locationMap[id],
-            [locationName]: statusValue,
-          };
-          total += 1;
-        });
-      }
-    );
+    response.aggregations?.id.buckets.forEach(({ location }: { key: string; location: any }) => {
+      location.buckets.forEach(({ status }: { key: string; status: any }) => {
+        const statusValue = status.hits.hits[0]._source.monitor.status;
+        if (statusValue === 'up') {
+          up += 1;
+        } else if (statusValue === 'down') {
+          down += 1;
+        }
+      });
+    });
   }
-  return { up, down, total, locationMap };
+  return { up, down };
 }
 
 /**
@@ -141,9 +132,8 @@ export async function getStatus(
 ) {
   let monitors;
   const enabledIds: Array<string | undefined> = [];
-  const disabledIds: Array<string | undefined> = [];
   let disabledCount = 0;
-  let page = 1;
+  let page = 500;
   let maxPeriod = 0;
   let maxLocations = 1;
   /**
@@ -155,7 +145,7 @@ export async function getStatus(
   do {
     monitors = await getMonitors(
       {
-        perPage: 500,
+        perPage: 1,
         page,
         sortField: 'name.keyword',
         sortOrder: 'asc',
@@ -166,7 +156,6 @@ export async function getStatus(
     page++;
     monitors.saved_objects.forEach((monitor) => {
       if (monitor.attributes.enabled === false) {
-        disabledIds.push(monitor.id);
         disabledCount += monitor.attributes.locations.length;
       } else {
         enabledIds.push(monitor.id);
@@ -176,7 +165,7 @@ export async function getStatus(
     });
   } while (monitors.saved_objects.length === monitors.per_page);
 
-  const { up, down, total, locationMap } = await queryMonitorStatus(
+  const { up, down } = await queryMonitorStatus(
     uptimeEsClient,
     maxLocations,
     maxPeriod,
@@ -185,12 +174,8 @@ export async function getStatus(
 
   return {
     disabledCount,
-    disabledIds,
-    enabledIds,
     up,
     down,
-    total,
-    locationMap,
   };
 }
 
@@ -205,7 +190,7 @@ export const createGetCurrentStatusRoute: SyntheticsRestApiRouteFactory = (libs:
     savedObjectsClient,
     syntheticsMonitorClient,
     response,
-  }): Promise<any> => {
+  }): Promise<IKibanaResponse<OverviewStatus>> => {
     return response.ok({
       body: await getStatus(uptimeEsClient, savedObjectsClient, syntheticsMonitorClient),
     });
