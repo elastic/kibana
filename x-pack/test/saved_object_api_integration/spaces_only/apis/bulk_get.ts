@@ -55,11 +55,9 @@ const createTestCases = (spaceId: string) => [
   { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, namespaces: [ALL_SPACES_ID] },
 ];
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+export default function (context: FtrProviderContext) {
 
-  const { addTests, createTestDefinitions } = bulkGetTestSuiteFactory(esArchiver, supertest);
+  const { addTests, createTestDefinitions } = bulkGetTestSuiteFactory(context);
   const createTests = (spaceId: string) => {
     const testCases = createTestCases(spaceId);
     return createTestDefinitions(testCases, false, { singleRequest: true });
