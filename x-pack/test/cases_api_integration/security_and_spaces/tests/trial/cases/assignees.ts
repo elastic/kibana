@@ -16,7 +16,7 @@ import {
   deleteAllCaseItems,
 } from '../../../../common/lib/utils';
 
-import { suggestUserProfiles } from '../../../../common/lib/user_profiles';
+import { generateFakeAssignees, suggestUserProfiles } from '../../../../common/lib/user_profiles';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { bulkGetUserProfiles } from '../../../../common/lib/user_profiles';
@@ -303,6 +303,36 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const updatedCase = await getCase({ supertest, caseId: postedCase.id });
       expect(updatedCase.assignees).to.eql([{ uid: '123' }]);
+    });
+
+    describe('validation', () => {
+      it('validates correctly the number of assignees when creating a case', async () => {
+        await createCase(
+          supertest,
+          getPostCaseRequest({
+            assignees: generateFakeAssignees(11),
+          }),
+          400
+        );
+      });
+
+      it('validates correctly the number of assignees when updating a case', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                assignees: generateFakeAssignees(11),
+              },
+            ],
+          },
+          expectedHttpCode: 400,
+        });
+      });
     });
   });
 };
