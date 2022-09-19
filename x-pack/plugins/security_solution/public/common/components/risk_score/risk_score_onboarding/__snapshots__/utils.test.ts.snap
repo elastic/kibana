@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`installHostRiskScoreModule Create Index: ml_host_risk_score_customSpace 1`] = `
+exports[`installRiskScoreModule - host Create Index: ml_host_risk_score_customSpace 1`] = `
 Object {
   "index": "ml_host_risk_score_customSpace",
   "mappings": Object {
@@ -54,7 +54,7 @@ Object {
 }
 `;
 
-exports[`installHostRiskScoreModule Create Index: ml_host_risk_score_latest_customSpace 1`] = `
+exports[`installRiskScoreModule - host Create Index: ml_host_risk_score_latest_customSpace 1`] = `
 Object {
   "index": "ml_host_risk_score_latest_customSpace",
   "mappings": Object {
@@ -108,7 +108,7 @@ Object {
 }
 `;
 
-exports[`installHostRiskScoreModule Create IngestPipeline: ml_hostriskscore_ingest_pipeline_customSpace 1`] = `
+exports[`installRiskScoreModule - host Create IngestPipeline: ml_hostriskscore_ingest_pipeline_customSpace 1`] = `
 Object {
   "name": "ml_hostriskscore_ingest_pipeline_customSpace",
   "processors": Array [
@@ -140,7 +140,7 @@ Object {
 }
 `;
 
-exports[`installHostRiskScoreModule Create Transform: ml_hostriskscore_latest_transform_customSpace 1`] = `
+exports[`installRiskScoreModule - host Create Transform: ml_hostriskscore_latest_transform_customSpace 1`] = `
 Object {
   "dest": Object {
     "index": "ml_host_risk_score_latest_customSpace",
@@ -166,7 +166,7 @@ Object {
 }
 `;
 
-exports[`installHostRiskScoreModule Create Transform: ml_hostriskscore_pivot_transform_customSpace 1`] = `
+exports[`installRiskScoreModule - host Create Transform: ml_hostriskscore_pivot_transform_customSpace 1`] = `
 Object {
   "dest": Object {
     "index": "ml_host_risk_score_customSpace",
@@ -255,7 +255,7 @@ Object {
 }
 `;
 
-exports[`installHostRiskScoreModule Create script: ml_hostriskscore_init_script_customSpace 1`] = `
+exports[`installRiskScoreModule - host Create script: ml_hostriskscore_init_script_customSpace 1`] = `
 Object {
   "id": "ml_hostriskscore_init_script_customSpace",
   "script": Object {
@@ -268,7 +268,7 @@ state.tactic_ids = new HashSet();",
 }
 `;
 
-exports[`installHostRiskScoreModule Create script: ml_hostriskscore_levels_script_customSpace 1`] = `
+exports[`installRiskScoreModule - host Create script: ml_hostriskscore_levels_script_customSpace 1`] = `
 Object {
   "id": "ml_hostriskscore_levels_script_customSpace",
   "script": Object {
@@ -293,7 +293,7 @@ else if (risk_score >= 90) {
 }
 `;
 
-exports[`installHostRiskScoreModule Create script: ml_hostriskscore_map_script_customSpace 1`] = `
+exports[`installRiskScoreModule - host Create script: ml_hostriskscore_map_script_customSpace 1`] = `
 Object {
   "id": "ml_hostriskscore_map_script_customSpace",
   "script": Object {
@@ -324,7 +324,7 @@ state.rule_risk_stats.put(rule_name, stats);",
 }
 `;
 
-exports[`installHostRiskScoreModule Create script: ml_hostriskscore_reduce_script_customSpace 1`] = `
+exports[`installRiskScoreModule - host Create script: ml_hostriskscore_reduce_script_customSpace 1`] = `
 Object {
   "id": "ml_hostriskscore_reduce_script_customSpace",
   "script": Object {
@@ -407,14 +407,14 @@ return [\\"calculated_score_norm\\": final_risk, \\"rule_risks\\": rule_stats, \
 }
 `;
 
-exports[`installHostRiskScoreModule Start Transforms 1`] = `
+exports[`installRiskScoreModule - host Start Transforms 1`] = `
 Array [
   "ml_hostriskscore_pivot_transform_customSpace",
   "ml_hostriskscore_latest_transform_customSpace",
 ]
 `;
 
-exports[`installUserRiskScoreModule Create Index: ml_user_risk_score_customSpace 1`] = `
+exports[`installRiskScoreModule - user Create Index: ml_user_risk_score_customSpace 1`] = `
 Object {
   "index": "ml_user_risk_score_customSpace",
   "mappings": Object {
@@ -468,7 +468,7 @@ Object {
 }
 `;
 
-exports[`installUserRiskScoreModule Create Index: ml_user_risk_score_latest_customSpace 1`] = `
+exports[`installRiskScoreModule - user Create Index: ml_user_risk_score_latest_customSpace 1`] = `
 Object {
   "index": "ml_user_risk_score_latest_customSpace",
   "mappings": Object {
@@ -522,7 +522,7 @@ Object {
 }
 `;
 
-exports[`installUserRiskScoreModule Create IngestPipeline: ml_userriskscore_ingest_pipeline_customSpace 1`] = `
+exports[`installRiskScoreModule - user Create IngestPipeline: ml_userriskscore_ingest_pipeline_customSpace 1`] = `
 Object {
   "name": "ml_userriskscore_ingest_pipeline_customSpace",
   "processors": Array [
@@ -554,7 +554,7 @@ Object {
 }
 `;
 
-exports[`installUserRiskScoreModule Create Transform: ml_userriskscore_latest_transform_customSpace 1`] = `
+exports[`installRiskScoreModule - user Create Transform: ml_userriskscore_latest_transform_customSpace 1`] = `
 Object {
   "dest": Object {
     "index": "ml_user_risk_score_latest_customSpace",
@@ -580,7 +580,7 @@ Object {
 }
 `;
 
-exports[`installUserRiskScoreModule Create Transform: ml_userriskscore_pivot_transform_customSpace 1`] = `
+exports[`installRiskScoreModule - user Create Transform: ml_userriskscore_pivot_transform_customSpace 1`] = `
 Object {
   "dest": Object {
     "index": "ml_user_risk_score_customSpace",
@@ -652,7 +652,7 @@ Object {
 }
 `;
 
-exports[`installUserRiskScoreModule Create script: ml_userriskscore_levels_script_customSpace 1`] = `
+exports[`installRiskScoreModule - user Create script: ml_userriskscore_levels_script_customSpace 1`] = `
 Object {
   "id": "ml_userriskscore_levels_script_customSpace",
   "script": Object {
@@ -677,7 +677,7 @@ else if (risk_score >= 90) {
 }
 `;
 
-exports[`installUserRiskScoreModule Create script: ml_userriskscore_map_script_customSpace 1`] = `
+exports[`installRiskScoreModule - user Create script: ml_userriskscore_map_script_customSpace 1`] = `
 Object {
   "id": "ml_userriskscore_map_script_customSpace",
   "script": Object {
@@ -691,7 +691,7 @@ state.rule_risk_stats.put(rule_name, stats);",
 }
 `;
 
-exports[`installUserRiskScoreModule Create script: ml_userriskscore_reduce_script_customSpace 1`] = `
+exports[`installRiskScoreModule - user Create script: ml_userriskscore_reduce_script_customSpace 1`] = `
 Object {
   "id": "ml_userriskscore_reduce_script_customSpace",
   "script": Object {
@@ -742,7 +742,7 @@ return [\\"calculated_score_norm\\": total_norm_risk, \\"rule_risks\\": rule_sta
 }
 `;
 
-exports[`installUserRiskScoreModule Start Transforms 1`] = `
+exports[`installRiskScoreModule - user Start Transforms 1`] = `
 Array [
   "ml_userriskscore_pivot_transform_customSpace",
   "ml_userriskscore_latest_transform_customSpace",

@@ -11,7 +11,7 @@ import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { TestProviders } from '../../../mock/test_providers';
 
 import { RiskScoreEnableButton } from './risk_score_enable_button';
-import { installHostRiskScoreModule, installUserRiskScoreModule } from './utils';
+import { installRiskScoreModule } from './utils';
 
 jest.mock('./utils');
 
@@ -56,11 +56,7 @@ describe('RiskScoreEnableButton', () => {
         await userEvent.click(screen.getByTestId(`enable_${riskScoreEntity}_risk_score`));
       });
 
-      if (riskScoreEntity === RiskScoreEntity.user) {
-        expect(installUserRiskScoreModule).toHaveBeenCalled();
-      } else {
-        expect(installHostRiskScoreModule).toHaveBeenCalled();
-      }
+      expect(installRiskScoreModule).toHaveBeenCalled();
     });
 
     it('Update button state while installing', async () => {

@@ -9,13 +9,13 @@ import { EuiButton } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import type { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { useSpaceId } from '../../../hooks/use_space_id';
 import { useKibana } from '../../../lib/kibana';
 import type { inputsModel } from '../../../store';
 import { REQUEST_NAMES, useFetch } from '../../../hooks/use_fetch';
 import { useRiskScoreToastContent } from './use_risk_score_toast_content';
-import { installHostRiskScoreModule, installUserRiskScoreModule } from './utils';
+import { installRiskScoreModule } from './utils';
 
 const RiskScoreEnableButtonComponent = ({
   refetch,
@@ -34,35 +34,32 @@ const RiskScoreEnableButtonComponent = ({
   const spaceId = useSpaceId();
   const { http, notifications, theme, dashboard } = useKibana().services;
   const { renderDocLink, renderDashboardLink } = useRiskScoreToastContent(riskScoreEntity);
-  const { fetch, isLoading } = useFetch(
-    REQUEST_NAMES.ENABLE_RISK_SCORE,
-    riskScoreEntity === RiskScoreEntity.user
-      ? installUserRiskScoreModule
-      : installHostRiskScoreModule
-  );
+  const { fetch, isLoading } = useFetch(REQUEST_NAMES.ENABLE_RISK_SCORE, installRiskScoreModule);
 
   const onBoardingRiskScore = useCallback(() => {
     fetch({
-      http,
-      theme,
-      refetch,
-      renderDocLink,
-      renderDashboardLink,
       dashboard,
+      http,
       notifications,
+      refetch,
+      renderDashboardLink,
+      renderDocLink,
+      riskScoreEntity,
       spaceId,
+      theme,
       timerange,
     });
   }, [
+    dashboard,
     fetch,
     http,
-    theme,
-    refetch,
-    renderDocLink,
-    renderDashboardLink,
-    dashboard,
     notifications,
+    refetch,
+    renderDashboardLink,
+    renderDocLink,
+    riskScoreEntity,
     spaceId,
+    theme,
     timerange,
   ]);
 

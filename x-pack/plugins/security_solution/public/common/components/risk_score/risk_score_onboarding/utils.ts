@@ -39,6 +39,7 @@ interface InstallRiskyScoreModule {
   refetch?: inputsModel.Refetch;
   renderDashboardLink?: (message: string, dashboardUrl: string) => React.ReactNode;
   renderDocLink?: (message: string) => React.ReactNode;
+  riskScoreEntity: RiskScoreEntity;
   spaceId?: string;
   theme?: ThemeServiceStart;
   timerange: {
@@ -49,7 +50,7 @@ interface InstallRiskyScoreModule {
 
 type UpgradeRiskyScoreModule = InstallRiskyScoreModule;
 
-export const installHostRiskScoreModule = async ({
+const installHostRiskScoreModule = async ({
   dashboard,
   http,
   notifications,
@@ -228,7 +229,7 @@ export const installHostRiskScoreModule = async ({
   }
 };
 
-export const installUserRiskScoreModule = async ({
+const installUserRiskScoreModule = async ({
   dashboard,
   http,
   notifications,
@@ -397,6 +398,14 @@ export const installUserRiskScoreModule = async ({
   }
 };
 
+export const installRiskScoreModule = async (settings: InstallRiskyScoreModule) => {
+  if (settings.riskScoreEntity === RiskScoreEntity.user) {
+    await installUserRiskScoreModule(settings);
+  } else {
+    await installHostRiskScoreModule(settings);
+  }
+};
+
 export const uninstallLegacyRiskScoreModule = async ({
   http,
   notifications,
@@ -520,13 +529,14 @@ export const upgradeHostRiskScoreModule = async ({
     spaceId,
     theme,
   });
-  await installHostRiskScoreModule({
+  await installRiskScoreModule({
     dashboard,
     http,
     notifications,
     refetch,
     renderDashboardLink,
     renderDocLink,
+    riskScoreEntity: RiskScoreEntity.host,
     spaceId,
     theme,
     timerange,
@@ -552,13 +562,14 @@ export const upgradeUserRiskScoreModule = async ({
     spaceId,
     theme,
   });
-  await installUserRiskScoreModule({
+  await installRiskScoreModule({
     dashboard,
     http,
     notifications,
     refetch,
     renderDashboardLink,
     renderDocLink,
+    riskScoreEntity: RiskScoreEntity.user,
     spaceId,
     theme,
     timerange,
