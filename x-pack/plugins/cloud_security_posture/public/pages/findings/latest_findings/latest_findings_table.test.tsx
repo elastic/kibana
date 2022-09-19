@@ -19,6 +19,7 @@ const chance = new Chance();
 
 const getFakeFindings = (name: string): CspFinding & { id: string } => ({
   id: chance.word(),
+  cluster_id: chance.guid(),
   result: {
     expected: {
       source: {},
