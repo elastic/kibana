@@ -157,6 +157,8 @@ export function TooltipSection({
     )
     .sort((a, b) => a.label.localeCompare(b.label));
 
+  const isDragDisabled = localValues.length < 2;
+
   return (
     <>
       <div
@@ -186,6 +188,7 @@ export function TooltipSection({
                 draggableId={value || 'newField'}
                 key={id}
                 disableInteractiveElementBlocking
+                isDragDisabled={isDragDisabled}
               >
                 {(provided) => (
                   <EuiPanel paddingSize="xs" hasShadow={false} color="transparent">
@@ -194,7 +197,7 @@ export function TooltipSection({
                       <EuiFlexItem grow={false}>
                         <EuiIcon
                           size="s"
-                          color="subdued"
+                          color={isDragDisabled ? euiTheme.colors.disabled : 'subdued'}
                           type="grab"
                           title={i18n.translate(
                             'xpack.lens.xyChart.annotation..tooltip.dragToReorder',
@@ -222,6 +225,7 @@ export function TooltipSection({
                             onFieldSelectChange(choice, index);
                           }}
                           fieldIsInvalid={!fieldIsValid}
+                          className="lnsConfigPanelAnnotations__fieldPicker"
                           data-test-subj={`lnsXY-annotation-tooltip-field-picker--${index}`}
                           autoFocus={isNew && value == null}
                         />
