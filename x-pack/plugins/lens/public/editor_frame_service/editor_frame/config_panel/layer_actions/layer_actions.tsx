@@ -15,6 +15,7 @@ import {
   useGeneratedHtmlId,
   EuiContextMenuItem,
   EuiIcon,
+  EuiText,
   EuiOutsideClickDetector,
 } from '@elastic/eui';
 import type { LayerType, Visualization } from '../../../..';
@@ -91,7 +92,9 @@ const InContextMenuActions = (
                 i.execute();
               }}
             >
-              {i.displayName}
+              <EuiText size={'s'} color={i.color}>
+                {i.displayName}
+              </EuiText>
             </EuiContextMenuItem>
           ))}
         />
