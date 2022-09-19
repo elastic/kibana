@@ -20,6 +20,7 @@ import {
 import { DeepReadonly } from 'utility-types';
 import { createCspRuleSearchFilterByPackagePolicy } from '../../common/utils/helpers';
 import {
+  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   CLOUDBEAT_VANILLA,
   CSP_RULE_SAVED_OBJECT_TYPE,
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
@@ -126,6 +127,9 @@ export const isCspPackageInstalled = async (
     return false;
   }
 };
+
+export const isCspPackage = (packageName?: string) =>
+  packageName === CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
 
 const generateRulesFromTemplates = (
   packagePolicyId: string,
