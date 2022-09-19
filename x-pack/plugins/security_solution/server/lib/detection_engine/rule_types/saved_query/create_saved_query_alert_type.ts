@@ -12,7 +12,7 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import type { CompleteRule, UnifiedQueryRuleParams } from '../../schemas/rule_schemas';
 import { unifiedQueryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
-import type { SecurityAlertType } from '../types';
+import type { CreateQueryRuleOptions, SecurityAlertType } from '../types';
 import { validateIndexPatterns } from '../utils';
 
 export const createSavedQueryAlertType = (
