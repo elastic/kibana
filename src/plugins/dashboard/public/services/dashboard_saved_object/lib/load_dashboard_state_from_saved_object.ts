@@ -10,10 +10,10 @@ import { ReactElement } from 'react';
 import { Filter } from '@kbn/es-query';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
-import { migrateLegacyQuery } from '../../../application/lib/migrate_legacy_query';
 import { rawControlGroupAttributesToControlGroupInput } from '@kbn/controls-plugin/common';
 import { parseSearchSourceJSON, injectSearchSourceReferences } from '@kbn/data-plugin/public';
 import { SavedObjectAttributes, SavedObjectsClientContract, ScopedHistory } from '@kbn/core/public';
+import { migrateLegacyQuery } from '../../../application/lib/migrate_legacy_query';
 
 import {
   DashboardConstants,
