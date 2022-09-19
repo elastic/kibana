@@ -657,7 +657,7 @@
     "@babel/traverse": "^7.19.0",
     "@babel/types": "^7.19.0",
     "@bazel/ibazel": "^0.16.2",
-    "@bazel/typescript": "4.6.2",
+    "@bazel/typescript": "5.5.1",
     "@cypress/code-coverage": "^3.10.0",
     "@cypress/snapshot": "^2.1.7",
     "@cypress/webpack-preprocessor": "^5.12.2",

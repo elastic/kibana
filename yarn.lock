@@ -1226,21 +1226,20 @@
   resolved "https://registry.yarnpkg.com/@bazel/ibazel/-/ibazel-0.16.2.tgz#05dd7f06659759fda30f87b15534f1e42f1201bb"
   integrity sha512-KgqAWMH0emL6f3xH6nqyTryoBMqlJ627LBIe9PT1PRRQPz2FtHib3FIHJPukp1slzF3hJYZvdiVwgPnHbaSOOA==
 
-"@bazel/typescript@4.6.2":
-  version "4.6.2"
-  resolved "https://registry.yarnpkg.com/@bazel/typescript/-/typescript-4.6.2.tgz#9f07b6f8cfb6b0a0e228e5971de412911c910a90"
-  integrity sha512-AUF7kq82bP6DX9Brihr/eQqvNccxVfSXosFxt80h94og5cmMyoc/euXha6rxlOBP3yWXmSo+/qjzO7o8PWJduQ==
+"@bazel/typescript@5.5.1":
+  version "5.5.1"
+  resolved "https://registry.yarnpkg.com/@bazel/typescript/-/typescript-5.5.1.tgz#2a30107f7d0b16ef486a473f204b1ffc72c4d28b"
+  integrity sha512-5CZROZMOsu4m4VZ39oZOd23XBzVg1YyJLy7rYknfJ+cNiEO8beOy+fuCw39MietN6eNEj0YyPqNaRc5B1hs/xw==
   dependencies:
-    "@bazel/worker" "4.6.2"
-    protobufjs "6.8.8"
+    "@bazel/worker" "5.5.1"
     semver "5.6.0"
     source-map-support "0.5.9"
     tsutils "3.21.0"
 
-"@bazel/worker@4.6.2":
-  version "4.6.2"
-  resolved "https://registry.yarnpkg.com/@bazel/worker/-/worker-4.6.2.tgz#0bd105344533335327c2edfa3fc65b04c39cdea8"
-  integrity sha512-DLpN6iQAH6uiUraAs4CESyqs60u55fcKmYgOOVObGuLSQQuX49Lw7XRIN90NibRPwpbBDQichWE3zfra0yKTTw==
+"@bazel/worker@5.5.1":
+  version "5.5.1"
+  resolved "https://registry.yarnpkg.com/@bazel/worker/-/worker-5.5.1.tgz#1927143f144f22ed569eece22eb14b724e7c10a9"
+  integrity sha512-3KmFRqEL/rMwKeFMZL5oCi2JbdqbO0TpJ4S+yMznjKUJ+YcwWMj1kF9/PVPD3rinBGtgQdg4EMg7zG9YF/tgWg==
   dependencies:
     google-protobuf "^3.6.1"
 
@@ -7872,7 +7871,7 @@
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.161.tgz#a21ca0777dabc6e4f44f3d07f37b765f54188b18"
   integrity sha512-EP6O3Jkr7bXvZZSZYlsgt5DIjiGr0dXP1/jVEwVLTFgg0d+3lWVQkRavYVQszV7dYUwvg0B8R0MBDpcmXg7XIA==
 
-"@types/long@^4.0.0", "@types/long@^4.0.1":
+"@types/long@^4.0.1":
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/@types/long/-/long-4.0.2.tgz#b74129719fc8d11c01868010082d483b7545591a"
   integrity sha512-MqTGEo5bj5t157U6fA/BiDynNkn0YknVdh48CMPkTSpFTVmvao5UQmm7uEF6xBEo7qIMAlY/JSleYaE6VOdpaA==
@@ -8037,7 +8036,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@16.11.41", "@types/node@>= 8", "@types/node@>=12.12.47", "@types/node@>=13.7.0", "@types/node@>=8.9.0", "@types/node@^10.1.0", "@types/node@^14.0.10", "@types/node@^14.14.31":
+"@types/node@*", "@types/node@16.11.41", "@types/node@>= 8", "@types/node@>=12.12.47", "@types/node@>=13.7.0", "@types/node@>=8.9.0", "@types/node@^14.0.10", "@types/node@^14.14.31":
   version "16.11.41"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.41.tgz#88eb485b1bfdb4c224d878b7832239536aa2f813"
   integrity sha512-mqoYK2TnVjdkGk8qXAVGc/x9nSaTpSrFaGFm43BUH3IdoBV0nta6hYaGmdOvIMlbHJbUEVen3gvwpwovAZKNdQ==
@@ -22280,25 +22279,6 @@ proto-list@~1.2.1:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/proto-list/-/proto-list-1.2.4.tgz#212d5bfe1318306a420f6402b8e26ff39647a849"
   integrity sha1-IS1b/hMYMGpCD2QCuOJv85ZHqEk=
-
-protobufjs@6.8.8:
-  version "6.8.8"
-  resolved "https://registry.yarnpkg.com/protobufjs/-/protobufjs-6.8.8.tgz#c8b4f1282fd7a90e6f5b109ed11c84af82908e7c"
-  integrity sha512-AAmHtD5pXgZfi7GMpllpO3q1Xw1OYldr+dMUlAnffGTAhqkg72WdmSY71uKBF/JuyiKs8psYbtKrhi0ASCD8qw==
-  dependencies:
-    "@protobufjs/aspromise" "^1.1.2"
-    "@protobufjs/base64" "^1.1.2"
-    "@protobufjs/codegen" "^2.0.4"
-    "@protobufjs/eventemitter" "^1.1.0"
-    "@protobufjs/fetch" "^1.1.0"
-    "@protobufjs/float" "^1.0.2"
-    "@protobufjs/inquire" "^1.1.0"
-    "@protobufjs/path" "^1.1.2"
-    "@protobufjs/pool" "^1.1.0"
-    "@protobufjs/utf8" "^1.1.0"
-    "@types/long" "^4.0.0"
-    "@types/node" "^10.1.0"
-    long "^4.0.0"
 
 protobufjs@^6.11.3:
   version "6.11.3"
