@@ -93,7 +93,6 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
         <PageTitleText
           title={
             <CloudPosturePageTitle
-              isBeta
               title={i18n.translate(
                 'xpack.csp.findings.findingsByResource.findingsByResourcePageTitle',
                 { defaultMessage: 'Findings' }

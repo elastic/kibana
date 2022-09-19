@@ -45,7 +45,7 @@ import type {
 } from '../../common/types';
 import { packageToPackagePolicy } from '../../common/services';
 
-import { IngestManagerError, PackagePolicyIneligibleForUpgradeError } from '../errors';
+import { FleetError, PackagePolicyIneligibleForUpgradeError } from '../errors';
 
 import {
   preconfigurePackageInputs,
@@ -1188,12 +1188,12 @@ describe('Package policy service', () => {
       });
       await expect(
         packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies)
-      ).rejects.toThrow(IngestManagerError);
+      ).rejects.toThrow(FleetError);
       expect(callingOrder).toEqual(['one', 'two']);
     });
 
     it('should provide an array of errors encountered by running external callbacks', async () => {
-      let error: IngestManagerError;
+      let error: FleetError;
       const callbackOneError = new Error('foo 1');
       const callbackTwoError = new Error('foo 2');
 
@@ -3395,7 +3395,7 @@ describe('Package policy service', () => {
 
       expect(
         packagePolicyService.getUpgradePackagePolicyInfo(savedObjectsClient, 'package-policy-id')
-      ).rejects.toEqual(new IngestManagerError('Package notinstalled is not installed'));
+      ).rejects.toEqual(new FleetError('Package notinstalled is not installed'));
     });
   });
 });
