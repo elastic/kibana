@@ -37,6 +37,7 @@ import { deleteMonitor } from '../../routes/monitor_cruds/delete_monitor';
 import {
   validateProjectMonitor,
   validateMonitor,
+  ValidationResult,
 } from '../../routes/monitor_cruds/monitor_validation';
 import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters/framework';
 
@@ -153,42 +154,26 @@ export class ProjectMonitorFormatter {
         return null;
       }
 
-      const validationResult = validateProjectMonitor({
-        ...monitor,
-        type: normalizedMonitor[ConfigKey.MONITOR_TYPE],
+      /* Validates that the payload sent from the synthetics agent is valid */
+      const { valid: isMonitorPayloadValid } = this.validateMonitor({
+        validationResult: validateProjectMonitor({
+          ...monitor,
+          type: normalizedMonitor[ConfigKey.MONITOR_TYPE],
+        }),
+        monitorId: monitor.id,
       });
 
-      if (!validationResult.valid) {
-        const { reason: message, details, payload } = validationResult;
-        this.failedMonitors.push({
-          id: monitor.id,
-          reason: message,
-          details,
-          payload,
-        });
-        if (this.staleMonitorsMap[monitor.id]) {
-          this.staleMonitorsMap[monitor.id].stale = false;
-        }
+      if (!isMonitorPayloadValid) {
         return null;
       }
 
-      /* with arbitrary yaml, it's important that we determine if
-       * the our normalized monitor matches the monitor saved object schema.
-       * Reporting these errors will help us spot fields that need extra formatting,
-       * like timeout */
-      const validationResult2 = validateMonitor(normalizedMonitor as MonitorFields);
+      /* Validates that the normalized monitor is a valid monitor saved object type */
+      const { valid: isNormalizedMonitorValid } = this.validateMonitor({
+        validationResult: validateMonitor(normalizedMonitor as MonitorFields),
+        monitorId: monitor.id,
+      });
 
-      if (!validationResult2.valid) {
-        const { reason: message, details, payload } = validationResult2;
-        this.failedMonitors.push({
-          id: monitor.id,
-          reason: message,
-          details,
-          payload,
-        });
-        if (this.staleMonitorsMap[monitor.id]) {
-          this.staleMonitorsMap[monitor.id].stale = false;
-        }
+      if (!isNormalizedMonitorValid) {
         return null;
       }
 
@@ -373,5 +358,27 @@ export class ProjectMonitorFormatter {
     if (this.subject) {
       this.subject?.next(message);
     }
+  };
+
+  private validateMonitor = ({
+    validationResult,
+    monitorId,
+  }: {
+    validationResult: ValidationResult;
+    monitorId: string;
+  }) => {
+    const { reason: message, details, payload: validationPayload, valid } = validationResult;
+    if (!valid) {
+      this.failedMonitors.push({
+        id: monitorId,
+        reason: message,
+        details,
+        payload: validationPayload,
+      });
+      if (this.staleMonitorsMap[monitorId]) {
+        this.staleMonitorsMap[monitorId].stale = false;
+      }
+    }
+    return validationResult;
   };
 }

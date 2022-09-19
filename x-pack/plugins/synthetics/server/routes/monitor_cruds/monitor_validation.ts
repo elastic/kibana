@@ -34,16 +34,18 @@ const monitorTypeToCodecMap: Record<DataStream, MonitorCodecType> = {
   [DataStream.BROWSER]: BrowserFieldsCodec,
 };
 
-/**
- * Validates monitor fields with respect to the relevant Codec identified by object's 'type' property.
- * @param monitorFields {MonitorFields} The mixed type representing the possible monitor payload from UI.
- */
-export function validateMonitor(monitorFields: MonitorFields): {
+export interface ValidationResult {
   valid: boolean;
   reason: string;
   details: string;
   payload: object;
-} {
+}
+
+/**
+ * Validates monitor fields with respect to the relevant Codec identified by object's 'type' property.
+ * @param monitorFields {MonitorFields} The mixed type representing the possible monitor payload from UI.
+ */
+export function validateMonitor(monitorFields: MonitorFields): ValidationResult {
   const { [ConfigKey.MONITOR_TYPE]: monitorType } = monitorFields;
 
   const decodedType = DataStreamCodec.decode(monitorType);
@@ -82,12 +84,7 @@ export function validateMonitor(monitorFields: MonitorFields): {
   return { valid: true, reason: '', details: '', payload: monitorFields };
 }
 
-export function validateProjectMonitor(monitorFields: ProjectMonitor): {
-  valid: boolean;
-  reason: string;
-  details: string;
-  payload: object;
-} {
+export function validateProjectMonitor(monitorFields: ProjectMonitor): ValidationResult {
   const locationsError =
     monitorFields.locations &&
     monitorFields.locations.length === 0 &&
