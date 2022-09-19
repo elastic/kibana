@@ -6,4 +6,12 @@
  * Side Public License, v 1.
  */
 
-export * from './table_list_view';
+const defaultConfig = require('@kbn/storybook').defaultConfig;
+
+module.exports = {
+  ...defaultConfig,
+  stories: ['../**/*.stories.tsx'],
+  reactOptions: {
+    strictMode: true,
+  },
+};

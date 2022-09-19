@@ -9,14 +9,17 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Switch, Route, Redirect, RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import type { AppMountParameters } from '@kbn/core/public';
+import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
   IKbnUrlStateStorage,
 } from '@kbn/kibana-utils-plugin/public';
+import { FormattedRelative } from '@kbn/i18n-react';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import { TableListViewKibanaProvider } from '@kbn/content-management-table-list';
 import {
   getCoreChrome,
   getCoreI18n,
@@ -67,7 +70,15 @@ function setAppChrome() {
 
 export async function renderApp(
   { element, history, onAppLeave, setHeaderActionMenu, theme$ }: AppMountParameters,
-  AppUsageTracker: React.FC
+  {
+    coreStart,
+    AppUsageTracker,
+    savedObjectsTagging,
+  }: {
+    coreStart: CoreStart;
+    savedObjectsTagging?: SavedObjectTaggingPluginStart;
+    AppUsageTracker: React.FC;
+  }
 ) {
   goToSpecifiedPath = (path) => history.push(path);
   kbnUrlStateStorage = createKbnUrlStateStorage({
@@ -117,27 +128,36 @@ export async function renderApp(
     <AppUsageTracker>
       <I18nContext>
         <KibanaThemeProvider theme$={theme$}>
-          <Router history={history}>
-            <Switch>
-              <Route path={`/map/:savedMapId`} render={renderMapApp} />
-              <Route exact path={`/map`} render={renderMapApp} />
-              // Redirect other routes to list, or if hash-containing, their non-hash equivalents
-              <Route
-                path={``}
-                render={({ location: { pathname, hash } }) => {
-                  if (hash) {
-                    // Remove leading hash
-                    const newPath = hash.substr(1);
-                    return <Redirect to={newPath} />;
-                  } else if (pathname === '/' || pathname === '') {
-                    return <ListPage stateTransfer={stateTransfer} />;
-                  } else {
-                    return <Redirect to="/" />;
-                  }
-                }}
-              />
-            </Switch>
-          </Router>
+          <TableListViewKibanaProvider
+            {...{
+              core: coreStart,
+              toMountPoint,
+              savedObjectsTagging,
+              FormattedRelative,
+            }}
+          >
+            <Router history={history}>
+              <Switch>
+                <Route path={`/map/:savedMapId`} render={renderMapApp} />
+                <Route exact path={`/map`} render={renderMapApp} />
+                // Redirect other routes to list, or if hash-containing, their non-hash equivalents
+                <Route
+                  path={``}
+                  render={({ location: { pathname, hash } }) => {
+                    if (hash) {
+                      // Remove leading hash
+                      const newPath = hash.substr(1);
+                      return <Redirect to={newPath} />;
+                    } else if (pathname === '/' || pathname === '') {
+                      return <ListPage stateTransfer={stateTransfer} />;
+                    } else {
+                      return <Redirect to="/" />;
+                    }
+                  }}
+                />
+              </Switch>
+            </Router>
+          </TableListViewKibanaProvider>
         </KibanaThemeProvider>
       </I18nContext>
     </AppUsageTracker>,

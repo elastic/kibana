@@ -190,10 +190,11 @@ export class MapsPlugin
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.kibana,
       async mount(params: AppMountParameters) {
+        const [coreStart, { savedObjectsTagging }] = await core.getStartServices();
         const UsageTracker =
           plugins.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
         const { renderApp } = await lazyLoadMapModules();
-        return renderApp(params, UsageTracker);
+        return renderApp(params, { coreStart, AppUsageTracker: UsageTracker, savedObjectsTagging });
       },
     });
 

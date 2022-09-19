@@ -11,18 +11,18 @@ import {
   EuiLink,
   EuiButton,
   EuiEmptyPrompt,
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { ApplicationStart, SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import useMount from 'react-use/lib/useMount';
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import type { SavedObjectReference } from '@kbn/core/types';
+import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
-import { TableListView, useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { TableListView, type UserContentCommonSchema } from '@kbn/content-management-table-list';
 
 import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../../types';
@@ -42,6 +42,30 @@ import { DASHBOARD_PANELS_UNSAVED_ID } from '../../services/dashboard_session_st
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
+
+interface DashboardSavedObjectUserContent extends UserContentCommonSchema {
+  attributes: {
+    title: string;
+    description?: string;
+    timeRestore: boolean;
+  };
+}
+
+const toTableListViewSavedObject = (
+  savedObject: Record<string, unknown>
+): DashboardSavedObjectUserContent => {
+  return {
+    id: savedObject.id as string,
+    updatedAt: savedObject.updatedAt! as string,
+    references: savedObject.references as SavedObjectReference[],
+    type: 'dashboard',
+    attributes: {
+      title: (savedObject.title as string) ?? '',
+      description: savedObject.description as string,
+      timeRestore: savedObject.timeRestore as boolean,
+    },
+  };
+};
 
 export interface DashboardListingProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -67,10 +91,8 @@ export const DashboardListing = ({
     dashboardCapabilities: { showWriteControls },
     dashboardSessionStorage,
     data: { query },
-    notifications: { toasts },
     savedObjects: { client },
-    savedObjectsTagging: { getSearchBarFilter, parseSearchQuery },
-    settings: { uiSettings, theme },
+    settings: { uiSettings },
   } = pluginServices.getServices();
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
@@ -121,11 +143,6 @@ export const DashboardListing = ({
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
   const defaultFilter = title ? `"${title}"` : '';
-
-  const tableColumns = useMemo(
-    () => getTableColumns(kbnUrlStateStorage, uiSettings.get('state:storeInSessionStorage')),
-    [uiSettings, kbnUrlStateStorage]
-  );
 
   const createItem = useCallback(() => {
     if (!dashboardSessionStorage.dashboardHasUnsavedEdits()) {
@@ -244,23 +261,20 @@ export const DashboardListing = ({
   ]);
 
   const fetchItems = useCallback(
-    (filter: string) => {
-      let searchTerm = filter;
-      let references: SavedObjectsFindOptionsReference[] | undefined;
-      if (parseSearchQuery) {
-        const parsed = parseSearchQuery(filter, {
-          useName: true,
+    (searchTerm: string, references?: SavedObjectsFindOptionsReference[]) => {
+      return savedDashboards
+        .find(searchTerm, {
+          hasReference: references,
+          size: listingLimit,
+        })
+        .then(({ total, hits }) => {
+          return {
+            total,
+            hits: hits.map(toTableListViewSavedObject),
+          };
         });
-        searchTerm = parsed.searchTerm;
-        references = parsed.tagReferences;
-      }
-
-      return savedDashboards.find(searchTerm, {
-        size: listingLimit,
-        hasReference: references,
-      });
     },
-    [listingLimit, savedDashboards, parseSearchQuery]
+    [listingLimit, savedDashboards]
   );
 
   const deleteItems = useCallback(
@@ -278,42 +292,32 @@ export const DashboardListing = ({
     [redirectTo]
   );
 
-  const searchFilters = useMemo(() => {
-    const searchBarFilter = getSearchBarFilter?.({ useName: true });
-    return searchBarFilter ? [searchBarFilter] : [];
-  }, [getSearchBarFilter]);
-
-  const { getEntityName, getTableCaption, getTableListTitle, getEntityNamePlural } =
-    dashboardListingTable;
+  const { getEntityName, getTableListTitle, getEntityNamePlural } = dashboardListingTable;
   return (
     <>
       {showNoDataPage && (
         <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
       )}
       {!showNoDataPage && (
-        <TableListView
+        <TableListView<DashboardSavedObjectUserContent>
           createItem={!showWriteControls ? undefined : createItem}
           deleteItems={!showWriteControls ? undefined : deleteItems}
           initialPageSize={initialPageSize}
           editItem={!showWriteControls ? undefined : editItem}
           initialFilter={initialFilter ?? defaultFilter}
-          toastNotifications={toasts}
           headingId="dashboardListingHeading"
           findItems={fetchItems}
-          rowHeader="title"
           entityNamePlural={getEntityNamePlural()}
           tableListTitle={getTableListTitle()}
-          tableCaption={getTableCaption()}
           entityName={getEntityName()}
           {...{
             emptyPrompt,
-            searchFilters,
             listingLimit,
-            tableColumns,
           }}
-          theme={theme}
-          // The below type conversion is necessary until the TableListView component allows partial services
-          application={application as unknown as ApplicationStart}
+          id="dashboard"
+          getDetailViewLink={({ id, attributes: { timeRestore } }) =>
+            getDashboardListItemLink(kbnUrlStateStorage, id, timeRestore)
+          }
         >
           <DashboardUnsavedListing
             redirectTo={redirectTo}
@@ -326,39 +330,4 @@ export const DashboardListing = ({
       )}
     </>
   );
-};
-
-const getTableColumns = (kbnUrlStateStorage: IKbnUrlStateStorage, useHash: boolean) => {
-  const {
-    savedObjectsTagging: { getTableColumnDefinition },
-  } = pluginServices.getServices();
-  const tableColumnDefinition = getTableColumnDefinition?.();
-
-  return [
-    {
-      field: 'title',
-      name: dashboardListingTable.getTitleColumnName(),
-      sortable: true,
-      render: (field: string, record: { id: string; title: string; timeRestore: boolean }) => (
-        <EuiLink
-          href={getDashboardListItemLink(
-            kbnUrlStateStorage,
-            useHash,
-            record.id,
-            record.timeRestore
-          )}
-          data-test-subj={`dashboardListingTitleLink-${record.title.split(' ').join('-')}`}
-        >
-          {field}
-        </EuiLink>
-      ),
-    },
-    {
-      field: 'description',
-      name: dashboardListingTable.getDescriptionColumnName(),
-      render: (field: string, record: { description: string }) => <span>{record.description}</span>,
-      sortable: true,
-    },
-    ...(tableColumnDefinition ? [tableColumnDefinition] : []),
-  ] as unknown as Array<EuiBasicTableColumn<Record<string, unknown>>>;
 };

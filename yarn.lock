@@ -2704,6 +2704,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-table-list@link:bazel-bin/packages/content-management/table_list":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-analytics-browser-internal@link:bazel-bin/packages/core/analytics/core-analytics-browser-internal":
   version "0.0.0"
   uid ""
@@ -6714,6 +6718,10 @@
   uid ""
 
 "@types/kbn__config@link:bazel-bin/packages/kbn-config/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__content-management-table-list@link:bazel-bin/packages/content-management/table_list/npm_module_types":
   version "0.0.0"
   uid ""
 

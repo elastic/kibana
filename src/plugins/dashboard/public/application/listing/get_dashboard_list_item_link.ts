@@ -18,13 +18,14 @@ import { pluginServices } from '../../services/plugin_services';
 
 export const getDashboardListItemLink = (
   kbnUrlStateStorage: IKbnUrlStateStorage,
-  useHash: boolean,
   id: string,
   timeRestore: boolean
 ) => {
   const {
     application: { getUrlForApp },
+    settings: { uiSettings },
   } = pluginServices.getServices();
+  const useHash = uiSettings.get('state:storeInSessionStorage'); // use hash
 
   let url = getUrlForApp(DashboardConstants.DASHBOARDS_ID, {
     path: `#${createDashboardEditUrl(id)}`,

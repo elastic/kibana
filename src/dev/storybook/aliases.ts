@@ -14,6 +14,7 @@ export const storybookAliases = {
   cloud: 'x-pack/plugins/cloud/.storybook',
   coloring: 'packages/kbn-coloring/.storybook',
   chart_icons: 'packages/kbn-chart-icons/.storybook',
+  content_management: 'packages/content-management/.storybook',
   controls: 'src/plugins/controls/storybook',
   custom_integrations: 'src/plugins/custom_integrations/storybook',
   dashboard_enhanced: 'x-pack/plugins/dashboard_enhanced/.storybook',

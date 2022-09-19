@@ -30,7 +30,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
     }
     // click elsewhere to close the filter dropdown
-    const searchFilter = await find.byCssSelector('.euiPageBody .euiFieldSearch');
+    const searchFilter = await find.byCssSelector('.euiPageTemplate .euiFieldSearch');
     await searchFilter.click();
   };
 
