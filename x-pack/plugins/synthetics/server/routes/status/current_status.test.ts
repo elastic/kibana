@@ -232,6 +232,16 @@ describe('current status route', () => {
         total: 3,
         up: 2,
       });
+      expect(esClient.search).toHaveBeenCalledTimes(2);
+      // These assertions are to ensure that we are paginating through the IDs we use for filtering
+      // @ts-expect-error esclient types not designed to include query
+      expect(esClient.search.mock.calls[0][0].query.bool.filter[1].terms['monitor.id']).toEqual([
+        'id1',
+      ]);
+      // @ts-expect-error esclient types not designed to include query
+      expect(esClient.search.mock.calls[0][0].query.bool.filter[1].terms['monitor.id']).toEqual([
+        'id2',
+      ]);
     });
   });
 });

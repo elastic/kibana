@@ -54,7 +54,7 @@ export async function queryMonitorStatus(
             },
             {
               terms: {
-                'monitor.id': ids,
+                'monitor.id': ids.slice(i * idSize, i * idSize + idSize),
               },
             },
             {
