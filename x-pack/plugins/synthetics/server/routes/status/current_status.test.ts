@@ -218,6 +218,13 @@ describe('current status route', () => {
           },
         ])
       );
+
+      /**
+       * By passing the function a location count of 10k, it forces the query to paginate once,
+       * so we are able to test that the function properly iterates through a "large" list of IDs/locations.
+       *
+       * The expectation here is we will send the test client two separate "requests", one for each of the two IDs.
+       */
       expect(await queryMonitorStatus(uptimeEsClient, 10000, 2500, ['id1', 'id2'])).toEqual({
         down: 1,
         locationMap: {
@@ -239,7 +246,7 @@ describe('current status route', () => {
         'id1',
       ]);
       // @ts-expect-error esclient types not designed to include query
-      expect(esClient.search.mock.calls[0][0].query.bool.filter[1].terms['monitor.id']).toEqual([
+      expect(esClient.search.mock.calls[1][0].query.bool.filter[1].terms['monitor.id']).toEqual([
         'id2',
       ]);
     });
