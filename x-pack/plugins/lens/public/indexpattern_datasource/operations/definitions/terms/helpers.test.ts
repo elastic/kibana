@@ -22,6 +22,7 @@ import { ReferenceBasedIndexPatternColumn } from '../column_types';
 import type { PercentileRanksIndexPatternColumn } from '../percentile_ranks';
 import type { PercentileIndexPatternColumn } from '../percentile';
 import { MULTI_KEY_VISUAL_SEPARATOR } from './constants';
+import { MovingAverageIndexPatternColumn } from '../calculations';
 
 jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
@@ -145,6 +146,32 @@ describe('getDisallowedTermsMessage()', () => {
     expect(
       getDisallowedTermsMessage(
         getLayer(getStringBasedOperationColumn(), [getCountOperationColumn({ timeShift: '1w' })]),
+        'col1',
+        indexPattern
+      )
+    ).toBeUndefined();
+  });
+
+  it('should return no error for a single dimension shifted which is wrapped in a referencing column', () => {
+    expect(
+      getDisallowedTermsMessage(
+        getLayer(getStringBasedOperationColumn(), [
+          // count will inherit the shift from the moving average
+          getCountOperationColumn({ timeShift: undefined }),
+          {
+            label: 'Moving average',
+            dataType: 'number',
+            operationType: 'moving_average',
+            isBucketed: false,
+            scale: 'ratio',
+            references: ['col2'],
+            timeShift: '3h',
+            params: {
+              window: 5,
+            },
+            customLabel: true,
+          } as MovingAverageIndexPatternColumn,
+        ]),
         'col1',
         indexPattern
       )

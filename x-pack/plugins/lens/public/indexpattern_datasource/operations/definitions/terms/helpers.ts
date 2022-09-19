@@ -92,11 +92,23 @@ export function getDisallowedTermsMessage(
   columnId: string,
   indexPattern: IndexPattern
 ) {
+  const referenced: Set<string> = new Set();
+  Object.entries(layer.columns).forEach(([cId, c]) => {
+    if ('references' in c) {
+      c.references.forEach((r) => {
+        referenced.add(r);
+      });
+    }
+  });
   const hasMultipleShifts =
     uniq(
-      Object.values(layer.columns)
-        .filter((col) => operationDefinitionMap[col.operationType].shiftable)
-        .map((col) => col.timeShift || '')
+      Object.entries(layer.columns)
+        .filter(
+          ([colId, col]) =>
+            operationDefinitionMap[col.operationType].shiftable &&
+            (!isReferenced(layer, colId) || col.timeShift)
+        )
+        .map(([colId, col]) => col.timeShift || '')
     ).length > 1;
   if (!hasMultipleShifts) {
     return undefined;

@@ -975,12 +975,15 @@ function applyReferenceTransition({
           },
         },
       };
-      layer = adjustColumnReferencesForChangedColumn(
-        {
-          ...newLayer,
-          columnOrder: getColumnOrder(newLayer),
-        },
-        newId
+      layer = updateDefaultLabels(
+        adjustColumnReferencesForChangedColumn(
+          {
+            ...newLayer,
+            columnOrder: getColumnOrder(newLayer),
+          },
+          newId
+        ),
+        indexPattern
       );
       return newId;
     }
