@@ -62,6 +62,8 @@ export interface CloudExperimentsPluginStart {
 /**
  * The names of the metrics declared in Kibana.
  * Valid keys are defined in {@link METRIC_NAMES}. When reporting a new metric, add the name to the list.
+ *
+ * @public
  */
 export type CloudExperimentsMetricNames = keyof typeof METRIC_NAMES;
 
