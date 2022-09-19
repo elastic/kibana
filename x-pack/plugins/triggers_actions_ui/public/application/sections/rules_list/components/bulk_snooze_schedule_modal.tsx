@@ -107,6 +107,7 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
       const response = await bulkUnsnoozeRules({
         ids: rulesToSchedule.map((item) => item.id),
         filter: rulesToScheduleFilter,
+        scheduleIds: [],
       });
       showToast(response, 'snoozeSchedule');
     } catch (error) {

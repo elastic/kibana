@@ -88,8 +88,8 @@ export function useBulkEditSelect({ totalItemCount = 0, items = [] }: UseBulkEdi
     if (isAllSelected) {
       return totalItemCount - selectedIds.size;
     }
-    return selectedIds.size;
-  }, [state, totalItemCount]);
+    return itemIds.filter((id) => selectedIds.has(id)).length;
+  }, [state, itemIds, totalItemCount]);
 
   const isPageSelected = useMemo(() => {
     const { selectedIds, isAllSelected } = state;

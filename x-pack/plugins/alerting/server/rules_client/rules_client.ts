@@ -1810,8 +1810,8 @@ export class RulesClient {
                     };
                   }
                   if (operation.operation === 'delete') {
-                    const idsToDelete = operation.value || [];
-                    if (idsToDelete.length === 0) {
+                    const idsToDelete = operation.value && [...operation.value];
+                    if (idsToDelete?.length === 0) {
                       attributes.snoozeSchedule?.forEach((schedule) => {
                         if (schedule.id) {
                           idsToDelete.push(schedule.id);
