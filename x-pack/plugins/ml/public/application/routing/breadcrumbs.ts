@@ -55,11 +55,34 @@ export const DATA_VISUALIZER_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   href: '/datavisualizer',
 });
 
-export const AIOPS_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
+// we need two AIOPS_BREADCRUMB breadcrumb items as they each need to link
+// to either the explain log rate spikes page or the log categorization page
+export const AIOPS_BREADCRUMB_EXPLAIN_LOG_RATE_SPIKES: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.aiopsBreadcrumbLabel', {
-    defaultMessage: 'AIOps',
+    defaultMessage: 'AIOps Labs',
   }),
   href: '/aiops/explain_log_rate_spikes_index_select',
+});
+
+export const AIOPS_BREADCRUMB_LOG_PATTERN_ANALYSIS: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.aiopsBreadcrumbLabel', {
+    defaultMessage: 'AIOps Labs',
+  }),
+  href: '/aiops/log_categorization_index_select',
+});
+
+export const EXPLAIN_LOG_RATE_SPIKES: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.aiops.explainLogRateSpikesBreadcrumbLabel', {
+    defaultMessage: 'Explain Log Rate Spikes',
+  }),
+  href: '/aiops/explain_log_rate_spikes_index_select',
+});
+
+export const LOG_PATTERN_ANALYSIS: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.aiops.logPatternAnalysisBreadcrumbLabel', {
+    defaultMessage: 'Log Pattern Analysis',
+  }),
+  href: '/aiops/log_categorization_index_select',
 });
 
 export const CREATE_JOB_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
@@ -90,7 +113,10 @@ const breadcrumbs = {
   DATA_FRAME_ANALYTICS_BREADCRUMB,
   TRAINED_MODELS,
   DATA_VISUALIZER_BREADCRUMB,
-  AIOPS_BREADCRUMB,
+  AIOPS_BREADCRUMB_EXPLAIN_LOG_RATE_SPIKES,
+  AIOPS_BREADCRUMB_LOG_PATTERN_ANALYSIS,
+  EXPLAIN_LOG_RATE_SPIKES,
+  LOG_PATTERN_ANALYSIS,
   CREATE_JOB_BREADCRUMB,
   CALENDAR_MANAGEMENT_BREADCRUMB,
   FILTER_LISTS_BREADCRUMB,
