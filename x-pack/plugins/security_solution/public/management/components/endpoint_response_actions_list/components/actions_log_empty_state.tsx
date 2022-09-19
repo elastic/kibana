@@ -40,7 +40,7 @@ export const ActionsLogEmptyState = memo(() => {
           </div>
         }
         actions={[
-          <EuiLink external href={docLinks?.links.securitySolution.responseActions}>
+          <EuiLink external href={docLinks?.links.securitySolution.responseActions} target="_blank">
             {i18n.translate('xpack.securitySolution.actions_log.empty.link', {
               defaultMessage: 'Read more about response actions',
             })}
