@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+
 import {
   CustomIntegrationsSetup,
   CustomIntegrationsStart,
@@ -17,8 +18,8 @@ import {
   CustomIntegration,
   ROUTES_APPEND_CUSTOM_INTEGRATIONS,
   ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS,
-  languageIntegrations,
 } from '../common';
+import { languageIntegrations } from '../common/language_integrations';
 
 import { OverviewComponent } from './components/fleet_integration/overview_component';
 
@@ -51,12 +52,12 @@ export class CustomIntegrationsPlugin
 
     // Set the language clients components to render in Fleet plugin under Integrations app
     // Export component only if the integration has exportLanguageUiComponent = true
-    languageIntegrations.forEach((int) => {
-      if (int.exportLanguageUiComponent) {
+    languageIntegrations
+      .filter((int) => int.exportLanguageUiComponent)
+      .map((int) => {
         const ReadmeComponent = () => <OverviewComponent packageName={`${int.id}`} />;
         languageClientsUiComponents.set(`language_client.${int.id}`, ReadmeComponent);
-      }
-    });
+      });
 
     const ContextProvider: React.FC = ({ children }) => (
       <CustomIntegrationsServicesProvider {...services}>

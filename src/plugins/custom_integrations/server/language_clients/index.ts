@@ -7,12 +7,10 @@
  */
 import { CoreSetup } from '@kbn/core/server';
 import { CustomIntegrationRegistry } from '../custom_integration_registry';
-import {
-  CustomIntegrationIcon,
-  PLUGIN_ID,
-  languageIntegrations,
-  LanguageIntegration,
-} from '../../common';
+import { CustomIntegrationIcon, PLUGIN_ID } from '../../common';
+
+import { languageIntegrations } from '../../common/language_integrations';
+import type { LanguageIntegration } from '../../common/language_integrations';
 
 export function registerLanguageClients(
   core: CoreSetup,
