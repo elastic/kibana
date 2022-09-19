@@ -17798,7 +17798,6 @@
     "xpack.lens.xyChart.addLayerTooltip": "Utilisez plusieurs calques pour combiner les types de visualisation ou pour visualiser différentes vues de données.",
     "xpack.lens.xyChart.addReferenceLineLayerLabel": "Lignes de référence",
     "xpack.lens.xyChart.addReferenceLineLayerLabelDisabledHelp": "Ajouter des données pour activer le calque de référence",
-    "xpack.lens.xyChart.annotation.name": "Masquer l’annotation",
     "xpack.lens.xyChart.annotationDate": "Date de l’annotation",
     "xpack.lens.xyChart.annotationDate.from": "De",
     "xpack.lens.xyChart.annotationDate.to": "À",

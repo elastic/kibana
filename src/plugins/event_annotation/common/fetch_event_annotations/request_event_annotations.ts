@@ -49,6 +49,7 @@ interface QueryGroup {
   timeField: string;
   dataView: DataView;
   allFields?: string[];
+  ignoreGlobalFilters: boolean;
 }
 
 export function getTimeZone(uiSettings: IUiSettingsClient) {
@@ -112,18 +113,20 @@ export const requestEventAnnotations = (
       dataView,
       aggConfigs,
       timeFields,
+      ignoreGlobalFilters,
     }: {
       dataView: DataView;
       aggConfigs: AggConfigs;
       timeFields: string[];
+      ignoreGlobalFilters: boolean;
     }) =>
       lastValueFrom(
         handleRequest({
           aggs: aggConfigs,
           indexPattern: dataView,
           timeFields,
-          filters: input?.filters,
-          query: input?.query as any,
+          filters: ignoreGlobalFilters ? undefined : input?.filters,
+          query: ignoreGlobalFilters ? undefined : (input?.query as any),
           timeRange: input?.timeRange,
           abortSignal,
           inspectorAdapters,
@@ -182,7 +185,7 @@ const convertManualToDatatableRows = (
   return datatableRows;
 };
 
-const prepareEsaggsForQueryGroups = async (
+const prepareEsaggsForQueryGroups = (
   queryGroups: QueryGroup[],
   interval: string,
   aggs: AggsStart
@@ -267,7 +270,12 @@ const prepareEsaggsForQueryGroups = async (
       aggregations?.map((agg) => agg.value) ?? []
     );
     return {
-      esaggsParams: { dataView: group.dataView, aggConfigs, timeFields: [group.timeField] },
+      esaggsParams: {
+        dataView: group.dataView,
+        aggConfigs,
+        timeFields: [group.timeField],
+        ignoreGlobalFilters: Boolean(group.ignoreGlobalFilters),
+      },
       fieldsColIdMap:
         group.allFields?.reduce<Record<string, string>>(
           (acc, fieldName, i) => ({
@@ -306,7 +314,7 @@ function regroupForRequestOptimization(
             (dataView.timeFieldName ||
               dataView.fields.find((field) => field.type === 'date' && field.displayName)?.name);
 
-          const key = `${g.dataView.value.id}-${timeField}`;
+          const key = `${g.dataView.value.id}-${timeField}-${Boolean(current.ignoreGlobalFilters)}`;
           const subGroup = acc[key] as QueryGroup;
           if (subGroup) {
             let allFields = [...(subGroup.allFields || []), ...(current.extraFields || [])];
@@ -334,6 +342,7 @@ function regroupForRequestOptimization(
               timeField: timeField!,
               allFields,
               annotations: [current],
+              ignoreGlobalFilters: Boolean(current.ignoreGlobalFilters),
             },
           };
         }
