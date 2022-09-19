@@ -26,13 +26,7 @@ import type {
   EqlSequence,
 } from '../../../../common/detection_engine/types';
 import type { ITelemetryEventsSender } from '../../telemetry/sender';
-import type {
-  CompleteRule,
-  QueryRuleParams,
-  ThreatRuleParams,
-  RuleParams,
-  SavedQueryRuleParams,
-} from '../schemas/rule_schemas';
+import type { RuleParams } from '../schemas/rule_schemas';
 import type { GenericBulkCreateResponse } from '../rule_types/factories';
 import type { BuildReasonMessage } from './reason_formatters';
 import type {
@@ -42,6 +36,7 @@ import type {
 } from '../../../../common/detection_engine/schemas/alerts';
 import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
 import type { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
+import type { EnrichEvents } from './enrichments/types';
 
 export interface ThresholdResult {
   terms?: Array<{
@@ -241,7 +236,8 @@ export type SignalsEnrichment = (signals: SignalSourceHit[]) => Promise<SignalSo
 
 export type BulkCreate = <T extends BaseFieldsLatest>(
   docs: Array<WrappedFieldsLatest<T>>,
-  maxAlerts?: number
+  maxAlerts?: number,
+  enrichEvents?: EnrichEvents
 ) => Promise<GenericBulkCreateResponse<T>>;
 
 export type SimpleHit = BaseHit<{ '@timestamp'?: string }>;
@@ -256,17 +252,18 @@ export type WrapSequences = (
   buildReasonMessage: BuildReasonMessage
 ) => Array<WrappedFieldsLatest<BaseFieldsLatest>>;
 
+export type RuleServices = RuleExecutorServices<
+  AlertInstanceState,
+  AlertInstanceContext,
+  'default'
+>;
 export interface SearchAfterAndBulkCreateParams {
   tuple: {
     to: moment.Moment;
     from: moment.Moment;
     maxSignals: number;
   };
-  completeRule:
-    | CompleteRule<QueryRuleParams>
-    | CompleteRule<SavedQueryRuleParams>
-    | CompleteRule<ThreatRuleParams>;
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleServices;
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
   ruleExecutionLogger: IRuleExecutionLogForExecutors;

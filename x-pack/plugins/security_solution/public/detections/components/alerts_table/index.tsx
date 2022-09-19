@@ -29,15 +29,17 @@ import { combineQueries } from '../../../timelines/components/timeline/helpers';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import type { TimelineModel } from '../../../timelines/store/timeline/model';
-import { columns, RenderCellValue } from '../../configurations/security_solution_detections';
+import { getColumns, RenderCellValue } from '../../configurations/security_solution_detections';
 import { AdditionalFiltersAction } from './additional_filters_action';
 import {
-  alertsDefaultModel,
+  getAlertsDefaultModel,
   buildAlertStatusFilter,
   requiredFieldsForActions,
 } from './default_config';
 import { buildTimeRangeFilter } from './helpers';
 import * as i18n from './translations';
+import { useLicense } from '../../../common/hooks/use_license';
+
 interface OwnProps {
   defaultFilters?: Filter[];
   from: string;
@@ -83,8 +85,10 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.detections);
   const kibana = useKibana();
+  const license = useLicense();
   const isEnterprisePlus = useLicense().isEnterprise();
   const ACTION_BUTTON_COUNT = isEnterprisePlus ? 5 : 4;
+  
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
@@ -165,7 +169,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   useEffect(() => {
     dispatch(
       timelineActions.initializeTGridSettings({
-        defaultColumns: columns.map((c) =>
+        defaultColumns: getColumns(license).map((c) =>
           !tGridEnabled && c.initialWidth == null
             ? {
                 ...c,
@@ -174,7 +178,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
             : c
         ),
         documentType: i18n.ALERTS_DOCUMENT_TYPE,
-        excludedRowRendererIds: alertsDefaultModel.excludedRowRendererIds as RowRendererId[],
+        excludedRowRendererIds: getAlertsDefaultModel(license)
+          .excludedRowRendererIds as RowRendererId[],
         filterManager,
         footerText: i18n.TOTAL_COUNT_OF_ALERTS,
         id: timelineId,
@@ -185,7 +190,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         showCheckboxes: true,
       })
     );
-  }, [dispatch, filterManager, tGridEnabled, timelineId]);
+  }, [dispatch, filterManager, tGridEnabled, timelineId, license]);
 
   const leadingControlColumns = useMemo(
     () => getDefaultControlColumn(ACTION_BUTTON_COUNT),
@@ -201,7 +206,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       additionalFilters={additionalFiltersComponent}
       currentFilter={filterGroup}
       defaultCellActions={defaultCellActions}
-      defaultModel={alertsDefaultModel}
+      defaultModel={getAlertsDefaultModel(license)}
       end={to}
       entityType="events"
       hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}
