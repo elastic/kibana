@@ -149,7 +149,7 @@
           "AppenderConfigType",
           ">>; loggers: ",
           "Type",
-          "<Readonly<{} & { name: string; level: \"error\" | \"all\" | \"info\" | \"debug\" | \"off\" | \"trace\" | \"warn\" | \"fatal\"; appenders: string[]; }>[]>; }>"
+          "<Readonly<{} & { name: string; level: \"error\" | \"all\" | \"info\" | \"debug\" | \"off\" | \"warn\" | \"trace\" | \"fatal\"; appenders: string[]; }>[]>; }>"
         ],
         "path": "packages/core/logging/core-logging-server-internal/src/logging_config.ts",
         "deprecated": false,
@@ -173,7 +173,7 @@
           "Type",
           "<string>; level: ",
           "Type",
-          "<\"error\" | \"all\" | \"info\" | \"debug\" | \"off\" | \"trace\" | \"warn\" | \"fatal\">; }>"
+          "<\"error\" | \"all\" | \"info\" | \"debug\" | \"off\" | \"warn\" | \"trace\" | \"fatal\">; }>"
         ],
         "path": "packages/core/logging/core-logging-server-internal/src/logging_config.ts",
         "deprecated": false,
