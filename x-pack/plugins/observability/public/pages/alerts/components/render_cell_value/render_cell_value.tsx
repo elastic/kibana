@@ -16,6 +16,7 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import type { CellValueElementProps, TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import { isEmpty } from 'lodash';
 import { AlertStatusIndicator } from '../../../../components/shared/alert_status_indicator';
 import { TimestampTooltip } from '../../../../components/shared/timestamp_tooltip';
 import { asDuration } from '../../../../../common/utils/formatters';
@@ -40,9 +41,12 @@ export const getMappedNonEcsValue = ({
 
 const getRenderValue = (mappedNonEcsValue: any) => {
   // can be updated when working on https://github.com/elastic/kibana/issues/140819
-  const value = Array.isArray(mappedNonEcsValue) ? mappedNonEcsValue[0] : mappedNonEcsValue;
+  const value = Array.isArray(mappedNonEcsValue) ? mappedNonEcsValue.join() : mappedNonEcsValue;
 
-  if (!value || typeof value === 'string' || typeof value === 'number') {
+  if (!isEmpty(value)) {
+    if (typeof value === 'object') {
+      return JSON.stringify(value);
+    }
     return value;
   }
 
