@@ -110,7 +110,7 @@ const EntityAnalyticsUserRiskScoresComponent = () => {
     return null;
   }
 
-  if (!isModuleEnabled && !isTableLoading) {
+  if (!isModuleEnabled) {
     return <EntityAnalyticsUserRiskScoreDisable refetch={refetch} timerange={timerange} />;
   }
 

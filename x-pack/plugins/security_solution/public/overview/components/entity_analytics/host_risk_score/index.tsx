@@ -111,7 +111,7 @@ const EntityAnalyticsHostRiskScoresComponent = () => {
     return null;
   }
 
-  if (!isModuleEnabled && !isTableLoading) {
+  if (!isModuleEnabled) {
     return <EntityAnalyticsHostRiskScoreDisable refetch={refetch} timerange={timerange} />;
   }
 
