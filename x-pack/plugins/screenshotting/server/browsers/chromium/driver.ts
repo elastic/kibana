@@ -99,7 +99,7 @@ export class HeadlessChromiumDriver {
     private screenshotMode: ScreenshotModePluginSetup,
     private config: ConfigType,
     private basePath: string,
-    private readonly page: Page
+    public readonly page: Page
   ) {}
 
   private allowRequest(url: string) {

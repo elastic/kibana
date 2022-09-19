@@ -8,7 +8,7 @@
 import { Logger } from '@kbn/logging';
 import { HeadlessChromiumDriver } from '../browsers';
 import { Layout } from '../layouts';
-import { Actions, EventLogger } from './event_logger';
+import { EventLogger } from './event_logger';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
 import type { Screenshot } from './types';
 
@@ -56,50 +56,58 @@ export const getScreenshots = async (
   }
 ): Promise<Screenshot[]> => {
   const { kbnLogger } = eventLogger;
-  const { elements, layout } = options;
+  // const { elements, layout } = options;
   kbnLogger.info(`taking screenshots`);
 
-  const screenshots: Screenshot[] = [];
+  const result = await browser.page.screenshot({ fullPage: true });
 
-  try {
-    for (let i = 0; i < elements.length; i++) {
-      const element = elements[i];
-      const { position, attributes } = element;
+  const screenshots: Screenshot[] = [
+    {
+      data: Buffer.isBuffer(result) ? result : Buffer.from(result || '', 'base64'),
+      title: 'Screenshot',
+      description: 'none',
+    },
+  ];
 
-      await resizeViewport(browser, position, layout, eventLogger.kbnLogger);
+  // try {
+  //   for (let i = 0; i < elements.length; i++) {
+  //     const element = elements[i];
+  //     const { position, attributes } = element;
 
-      const endScreenshot = eventLogger.logScreenshottingEvent(
-        'screenshot capture',
-        Actions.GET_SCREENSHOT,
-        'read',
-        eventLogger.getPixelsFromElementPosition(position)
-      );
+  //     await resizeViewport(browser, position, layout, eventLogger.kbnLogger);
 
-      const data = await browser.screenshot({
-        elementPosition: position,
-        layout: options.layout,
-        error: options.error,
-      });
+  //     const endScreenshot = eventLogger.logScreenshottingEvent(
+  //       'screenshot capture',
+  //       Actions.GET_SCREENSHOT,
+  //       'read',
+  //       eventLogger.getPixelsFromElementPosition(position)
+  //     );
 
-      if (!data?.byteLength) {
-        throw new Error(`Failure in getScreenshots! Screenshot data is void`);
-      }
+  //     const data = await browser.screenshot({
+  //       elementPosition: position,
+  //       layout: options.layout,
+  //       error: options.error,
+  //     });
 
-      screenshots.push({
-        data,
-        title: attributes.title,
-        description: attributes.description,
-      });
+  //     if (!data?.byteLength) {
+  //       throw new Error(`Failure in getScreenshots! Screenshot data is void`);
+  //     }
 
-      endScreenshot({ byte_length: data.byteLength });
-    }
-  } catch (error) {
-    kbnLogger.error(error);
-    eventLogger.error(error, Actions.GET_SCREENSHOT);
-    throw error;
-  }
+  //     screenshots.push({
+  //       data,
+  //       title: attributes.title,
+  //       description: attributes.description,
+  //     });
 
-  kbnLogger.info(`screenshots taken: ${screenshots.length}`);
+  //     endScreenshot({ byte_length: data.byteLength });
+  //   }
+  // } catch (error) {
+  //   kbnLogger.error(error);
+  //   eventLogger.error(error, Actions.GET_SCREENSHOT);
+  //   throw error;
+  // }
+
+  // kbnLogger.info(`screenshots taken: ${screenshots.length}`);
 
   return screenshots;
 };

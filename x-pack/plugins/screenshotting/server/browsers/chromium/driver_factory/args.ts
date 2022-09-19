@@ -57,13 +57,13 @@ export const args = ({
     // messing around with options...
     // '--disable-3d-apis',
     `--enable-features=Vulkan,UseSkiaRenderer`,
-    `--use-vulkan=native`,
-    `--enable-unsafe-webgpu`,
-    `--disable-vulkan-fallback-to-gl-for-testing`,
-    `--disable-vulkan-surface`,
-    `--use-angle=vulkan`,
-    `--virtual-time-budget=10000`,
-    `--ignore-gpu-blocklist`,
+    // `--use-vulkan=native`,
+    // `--enable-unsafe-webgpu`,
+    // `--disable-vulkan-fallback-to-gl-for-testing`,
+    // `--disable-vulkan-surface`,
+    // `--use-angle=vulkan`,
+    // `--virtual-time-budget=10000`,
+    // `--ignore-gpu-blocklist`,
   ];
 
   if (windowSize) {

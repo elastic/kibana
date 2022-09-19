@@ -7,7 +7,7 @@
 
 import type { Headers } from '@kbn/core/server';
 import { defer, forkJoin, Observable, throwError } from 'rxjs';
-import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
+import { catchError, mergeMap, timeoutWith } from 'rxjs/operators';
 import { errors } from '../../common';
 import {
   Context,
@@ -239,10 +239,11 @@ export class ScreenshotObservableHandler {
   }
 
   public setupPage(index: number, url: UrlOrUrlWithContext) {
-    return this.openUrl(index, url).pipe(
-      switchMapTo(this.waitForElements()),
-      switchMapTo(this.completeRender())
-    );
+    return this.openUrl(index, 'chrome://gpu');
+    // .pipe(
+    // switchMapTo(this.waitForElements()),
+    // switchMapTo(this.completeRender())
+    // );
   }
 
   /**
