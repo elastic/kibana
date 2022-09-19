@@ -24,12 +24,21 @@ import { InputsModelId } from '../../common/store/inputs/constants';
 
 const EntityAnalyticsComponent = () => {
   const { indicesExist, loading: isSourcererLoading, indexPattern } = useSourcererDataView();
+
   return (
     <>
       {indicesExist ? (
         <>
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">
-            <HeaderPage title={i18n.ENTITY_ANALYTICS_TITLE}>
+            <HeaderPage
+              title={i18n.ENTITY_ANALYTICS_TITLE}
+              badgeOptions={{
+                text: i18n.TECHNICAL_PREVIEW,
+                color: 'white',
+                size: 's',
+                beta: true,
+              }}
+            >
               <SiemSearchBar
                 id={InputsModelId.global}
                 indexPattern={indexPattern}
