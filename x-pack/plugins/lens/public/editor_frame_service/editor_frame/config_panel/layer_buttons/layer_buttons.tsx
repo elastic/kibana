@@ -64,7 +64,7 @@ const InContextMenuActions = (
             display="empty"
             color="text"
             size="s"
-            iconType="boxesVertical"
+            iconType="boxesHorizontal"
             aria-label={i18n.translate('xpack.lens.layer.actions.contextMenuAriaLabel', {
               defaultMessage: `Layer actions`,
             })}
