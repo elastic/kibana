@@ -18,6 +18,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { INTERNAL_FEATURE_FLAGS } from '../../../../common/constants';
 import { Cluster } from '../../../../common/types';
 import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
@@ -27,7 +28,11 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
   const navToFindings = useNavigateFindings();
 
   const shortId = cluster.meta.clusterId.slice(0, 6);
-  const title = cluster.meta.clusterName || 'Cluster ID';
+  const title =
+    cluster.meta.clusterName ||
+    i18n.translate('xpack.csp.dashboard.benchmarkSection.defaultClusterTitle', {
+      defaultMessage: 'Cluster ID',
+    });
 
   const handleClusterTitleClick = (clusterId: string) => {
     navToFindings({ cluster_id: clusterId });
@@ -59,7 +64,16 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
         >
           <EuiLink onClick={() => handleClusterTitleClick(cluster.meta.clusterId)} color="text">
             <EuiText size="xs">
-              <h3>{`${title} - ${shortId}`}</h3>
+              <h3>
+                <FormattedMessage
+                  id="xpack.csp.dashboard.benchmarkSection.clusterTitle"
+                  defaultMessage="{title} - {shortId}"
+                  values={{
+                    title,
+                    shortId,
+                  }}
+                />
+              </h3>
             </EuiText>
           </EuiLink>
         </EuiToolTip>
