@@ -2321,7 +2321,6 @@
     "discover.viewAlert.documentsMayVaryInfoTitle": "表示されたドキュメントは異なる場合があります",
     "discover.viewAlert.searchSourceErrorTitle": "検索ソースの取得エラー",
     "discover.viewModes.document.label": "ドキュメント",
-    "discover.viewModes.fieldStatistics.betaTitle": "ベータ",
     "discover.viewModes.fieldStatistics.label": "フィールド統計情報",
     "embeddableApi.addPanel.savedObjectAddedToContainerSuccessMessageTitle": "{savedObjectName} が追加されました",
     "embeddableApi.attributeService.saveToLibraryError": "保存中にエラーが発生しました。エラー：{errorMessage}",

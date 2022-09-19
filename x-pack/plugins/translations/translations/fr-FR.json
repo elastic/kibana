@@ -2325,7 +2325,6 @@
     "discover.viewAlert.documentsMayVaryInfoTitle": "Les documents affichés peuvent varier",
     "discover.viewAlert.searchSourceErrorTitle": "Erreur lors de la récupération de la source de recherche",
     "discover.viewModes.document.label": "Documents",
-    "discover.viewModes.fieldStatistics.betaTitle": "Bêta",
     "discover.viewModes.fieldStatistics.label": "Statistiques de champ",
     "embeddableApi.addPanel.savedObjectAddedToContainerSuccessMessageTitle": "{savedObjectName} a été ajouté.",
     "embeddableApi.attributeService.saveToLibraryError": "Une erreur s'est produite lors de l'enregistrement. Erreur : {errorMessage}.",
