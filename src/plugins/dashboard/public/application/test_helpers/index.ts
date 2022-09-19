@@ -7,5 +7,4 @@
  */
 
 export { getSampleDashboardInput, getSampleDashboardPanel } from './get_sample_dashboard_input';
-export { makeDefaultServices } from './make_default_services';
 export { setupIntersectionObserverMock } from './intersection_observer_mock';

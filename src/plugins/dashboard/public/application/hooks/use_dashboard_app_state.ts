@@ -12,43 +12,37 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
-import { DashboardConstants } from '../..';
-import { getNewDashboardTitle } from '../../dashboard_strings';
-import { setDashboardState, useDashboardDispatch, useDashboardSelector } from '../state';
-import type {
-  DashboardBuildContext,
-  DashboardAppServices,
-  DashboardAppState,
-  DashboardState,
-} from '../../types';
-import { DashboardAppLocatorParams } from '../../locator';
 import {
-  loadDashboardHistoryLocationState,
-  tryDestroyDashboardContainer,
-  syncDashboardContainerInput,
-  syncDashboardDataViews,
-  syncDashboardFilterState,
-  buildDashboardContainer,
-  syncDashboardUrlState,
   diffDashboardState,
   areTimeRangesEqual,
+  syncDashboardUrlState,
+  syncDashboardDataViews,
+  buildDashboardContainer,
+  syncDashboardFilterState,
   areRefreshIntervalsEqual,
+  syncDashboardContainerInput,
+  tryDestroyDashboardContainer,
+  loadDashboardHistoryLocationState,
 } from '../lib';
-import { loadDashboardStateFromSavedObject } from '../../dashboard_saved_object';
-import { isDashboardAppInNoDataState } from '../dashboard_app_no_data';
+import { DashboardConstants } from '../..';
+import { DashboardAppLocatorParams } from '../../locator';
+import { getNewDashboardTitle } from '../../dashboard_strings';
 import { pluginServices } from '../../services/plugin_services';
 import { useDashboardMountContext } from './dashboard_mount_context';
+import { isDashboardAppInNoDataState } from '../dashboard_app_no_data';
+import { setDashboardState, useDashboardDispatch, useDashboardSelector } from '../state';
+import type { DashboardBuildContext, DashboardAppState, DashboardState } from '../../types';
+import { dashboardStateLoadWasSuccessful } from '../../services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object';
 
 export interface UseDashboardStateProps {
   history: History;
   showNoDataPage: boolean;
   savedDashboardId?: string;
   isEmbeddedExternally: boolean;
-  setShowNoDataPage: (showNoData: boolean) => void;
   kbnUrlStateStorage: IKbnUrlStateStorage;
+  setShowNoDataPage: (showNoData: boolean) => void;
 }
 
 export const useDashboardAppState = ({
@@ -78,25 +72,23 @@ export const useDashboardAppState = ({
   const [lastSavedState, setLastSavedState] = useState<DashboardState>();
   const $onLastSavedStateChange = useMemo(() => new Subject<DashboardState>(), []);
 
-  const {
-    services: { savedDashboards },
-  } = useKibana<DashboardAppServices>();
-
   /**
    * Unpack services and context
    */
   const { scopedHistory } = useDashboardMountContext();
   const {
+    embeddable,
+    notifications,
     chrome: { docTitle },
     dashboardCapabilities,
     dashboardSessionStorage,
+    spaces: { redirectLegacyUrl },
     data: { query, search, dataViews },
-    embeddable,
     initializerContext: { kibanaVersion },
     screenshotMode: { isScreenshotMode, getScreenshotContext },
-    spaces: { redirectLegacyUrl },
-    notifications,
+    dashboardSavedObject: { loadDashboardStateFromSavedObject },
   } = pluginServices.getServices();
+
   const { getStateTransfer } = embeddable;
 
   /**
@@ -119,7 +111,6 @@ export const useDashboardAppState = ({
      */
     const dashboardBuildContext: DashboardBuildContext = {
       history,
-      savedDashboards,
       kbnUrlStateStorage,
       isEmbeddedExternally,
       dispatchDashboardStateChange,
@@ -149,15 +140,10 @@ export const useDashboardAppState = ({
        * Load and unpack state from dashboard saved object.
        */
       const loadSavedDashboardResult = await loadDashboardStateFromSavedObject({
-        isScreenshotMode: screenshotModeService?.isScreenshotMode(),
         getScopedHistory: scopedHistory,
-        embeddableStart: embeddable,
         id: savedDashboardId,
-        savedObjectsTagging,
-        savedObjectsClient,
-        dataStart: data,
-        spacesService,
       });
+
       if (canceled || !loadSavedDashboardResult) return;
       if (!dashboardStateLoadWasSuccessful(loadSavedDashboardResult)) {
         // Early return if the saved object has an aliasMatch and has redirected to it.
@@ -338,12 +324,10 @@ export const useDashboardAppState = ({
     $onLastSavedStateChange,
     dashboardSessionStorage,
     dashboardCapabilities,
-    screenshotModeService,
     isEmbeddedExternally,
     kbnUrlStateStorage,
     savedDashboardId,
     getStateTransfer,
-    savedDashboards,
     scopedHistory,
     notifications,
     kibanaVersion,
@@ -369,7 +353,7 @@ export const useDashboardAppState = ({
     }
 
     if (dashboardAppState.getLatestDashboardState().timeRestore) {
-      const { timefilter } = data.query.timefilter;
+      const { timefilter } = query.timefilter;
       const { timeRange, refreshInterval } = lastSavedState;
       if (timeRange) timefilter.setTime(timeRange);
       if (refreshInterval) timefilter.setRefreshInterval(refreshInterval);

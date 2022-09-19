@@ -17,12 +17,11 @@ import {
 import { getQueryParams } from '@kbn/kibana-utils-plugin/public';
 
 import type { DashboardState } from '../../types';
-import type { DashboardSavedObject } from '../../saved_dashboards';
-import { DashboardAppLocatorParams, DashboardConstants } from '../..';
-import { getDashboardTitle } from '../../dashboard_strings';
-import { stateToRawDashboardState } from './convert_dashboard_state';
 import { DASHBOARD_APP_LOCATOR } from '../../locator';
+import { getDashboardTitle } from '../../dashboard_strings';
 import { pluginServices } from '../../services/plugin_services';
+import { DashboardAppLocatorParams, DashboardConstants } from '../..';
+import { stateToRawDashboardState } from './convert_dashboard_state';
 
 export const getSearchSessionIdFromURL = (history: History): string | undefined =>
   getQueryParams(history.location)[DashboardConstants.SEARCH_SESSION_ID] as string | undefined;

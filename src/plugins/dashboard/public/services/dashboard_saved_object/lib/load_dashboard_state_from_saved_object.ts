@@ -7,40 +7,30 @@
  */
 import { ReactElement } from 'react';
 
+import { Filter } from '@kbn/es-query';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
+import { migrateLegacyQuery } from '../../../application/lib/migrate_legacy_query';
 import { rawControlGroupAttributesToControlGroupInput } from '@kbn/controls-plugin/common';
+import { parseSearchSourceJSON, injectSearchSourceReferences } from '@kbn/data-plugin/public';
 import { SavedObjectAttributes, SavedObjectsClientContract, ScopedHistory } from '@kbn/core/public';
 
 import {
   DashboardConstants,
   defaultDashboardState,
   createDashboardEditUrl,
-} from '../dashboard_constants';
-import {
-  Filter,
-  DataPublicPluginStart,
-  parseSearchSourceJSON,
-  injectSearchSourceReferences,
-} from '../services/data';
-import { EmbeddableStart, ViewMode } from '../services/embeddable';
-import { DashboardAttributes } from '../application';
-import { SpacesPluginStart } from '../services/spaces';
-import { DashboardOptions, DashboardState } from '../types';
-import { convertSavedPanelsToPanelMap, injectReferences } from '../../common';
-import { cleanFiltersForSerialize } from '../application/lib';
-import { SavedObjectNotFound } from '../services/kibana_utils';
-import { migrateLegacyQuery } from '../application/lib/migrate_legacy_query';
-import { SavedObjectsTaggingApi } from '../services/saved_objects_tagging_oss';
+} from '../../../dashboard_constants';
+import { DashboardAttributes } from '../../../application';
+import { DashboardSavedObjectRequiredServices } from '../types';
+import { DashboardOptions, DashboardState } from '../../../types';
+import { cleanFiltersForSerialize } from '../../../application/lib';
+import { convertSavedPanelsToPanelMap, injectReferences } from '../../../../common';
 
-export interface LoadDashboardFromSavedObjectProps {
+export type LoadDashboardFromSavedObjectProps = DashboardSavedObjectRequiredServices & {
   id?: string;
-  isScreenshotMode?: boolean;
-  embeddableStart: EmbeddableStart;
-  dataStart: DataPublicPluginStart;
-  spacesService?: SpacesPluginStart;
   getScopedHistory?: () => ScopedHistory;
-  savedObjectsTagging?: SavedObjectsTaggingApi;
   savedObjectsClient: SavedObjectsClientContract;
-}
+};
 
 export interface LoadDashboardFromSavedObjectReturn {
   redirectedToAlias?: boolean;
@@ -62,16 +52,16 @@ export const loadDashboardStateFromSavedObject = async ({
   savedObjectsTagging,
   savedObjectsClient,
   getScopedHistory,
-  isScreenshotMode,
-  embeddableStart,
-  spacesService,
-  dataStart,
+  screenshotMode,
+  embeddable,
+  spaces,
+  data,
   id,
 }: LoadDashboardFromSavedObjectProps): Promise<LoadDashboardFromSavedObjectReturn> => {
   const {
     search: dataSearchService,
     query: { queryString },
-  } = dataStart;
+  } = data;
 
   /**
    * This is a newly created dashboard, so there is no saved object state to load.
@@ -103,7 +93,7 @@ export const loadDashboardStateFromSavedObject = async ({
     return injectReferences(
       { references, attributes: rawAttributes as unknown as SavedObjectAttributes },
       {
-        embeddablePersistableStateService: embeddableStart,
+        embeddablePersistableStateService: embeddable,
       }
     ) as unknown as DashboardAttributes;
   })();
@@ -114,10 +104,10 @@ export const loadDashboardStateFromSavedObject = async ({
   const scopedHistory = getScopedHistory?.();
   if (scopedHistory && outcome === 'aliasMatch' && id && aliasId) {
     const path = scopedHistory.location.hash.replace(id, aliasId);
-    if (isScreenshotMode) {
+    if (screenshotMode.isScreenshotMode()) {
       scopedHistory.replace(path);
     } else {
-      await spacesService?.ui.redirectLegacyUrl({ path, aliasPurpose });
+      await spaces.redirectLegacyUrl?.({ path, aliasPurpose });
     }
     return { redirectedToAlias: true };
   }
@@ -128,7 +118,7 @@ export const loadDashboardStateFromSavedObject = async ({
   const createConflictWarning =
     scopedHistory && outcome === 'conflict' && aliasId
       ? () =>
-          spacesService?.ui.components.getLegacyUrlConflict({
+          spaces.getLegacyUrlConflict?.({
             currentObjectId: id,
             otherObjectId: aliasId,
             otherObjectPath: `#${createDashboardEditUrl(aliasId)}${scopedHistory.location.search}`,
@@ -200,7 +190,7 @@ export const loadDashboardStateFromSavedObject = async ({
       query,
 
       viewMode: ViewMode.VIEW, // dashboards loaded from saved object default to view mode. If it was edited recently, the view mode from session storage will override this.
-      tags: savedObjectsTagging?.ui.getTagIdsFromReferences(references) ?? [],
+      tags: savedObjectsTagging.getTagIdsFromReferences?.(references) ?? [],
 
       controlGroupInput:
         attributes.controlGroupInput &&

@@ -6,28 +6,32 @@
  * Side Public License, v 1.
  */
 
-import { METRIC_TYPE } from '@kbn/analytics';
-import { Required } from '@kbn/utility-types';
-import { EuiHorizontalRule } from '@elastic/eui';
 import UseUnmount from 'react-use/lib/useUnmount';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { OverlayRef } from '@kbn/core/public';
-import type { TopNavMenuProps } from '@kbn/navigation-plugin/public';
-import type { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import {
-  AddFromLibraryButton,
+  withSuspense,
   LazyLabsFlyout,
-  PrimaryActionButton,
+  SolutionToolbar,
   QuickButtonGroup,
   QuickButtonProps,
-  SolutionToolbar,
-  withSuspense,
+  PrimaryActionButton,
+  AddFromLibraryButton,
 } from '@kbn/presentation-util-plugin/public';
 import {
-  checkForDuplicateDashboardTitle,
-  saveDashboardStateToSavedObject,
-} from '../../dashboard_saved_object';
+  showSaveModal,
+  type SaveResult,
+  getSavedObjectFinder,
+} from '@kbn/saved-objects-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { Required } from '@kbn/utility-types';
+import { EuiHorizontalRule } from '@elastic/eui';
+import type { OverlayRef } from '@kbn/core/public';
+import type { SavedQuery } from '@kbn/data-plugin/common';
+import type { TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import type { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import { isErrorEmbeddable, openAddPanelFlyout, ViewMode } from '@kbn/embeddable-plugin/public';
+
 import { TopNavIds } from './top_nav_ids';
 import { EditorMenu } from './editor_menu';
 import { UI_SETTINGS } from '../../../common';
@@ -39,9 +43,9 @@ import { showOptionsPopover } from './show_options_popover';
 import { DashboardConstants, getFullEditPath } from '../../dashboard_constants';
 import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
 import { DashboardAppState, DashboardSaveOptions, NavAction } from '../../types';
-import { isErrorEmbeddable, openAddPanelFlyout, ViewMode } from '../../services/embeddable';
-import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../../types';
-import { getSavedObjectFinder, SaveResult, showSaveModal } from '../../services/saved_objects';
+
+import { DashboardEmbedSettings, DashboardRedirect } from '../../types';
+
 import {
   dashboardSavedObjectErrorStrings,
   getCreateVisualizationButtonTitle,
@@ -97,26 +101,29 @@ export function DashboardTopNav({
 }: DashboardTopNavProps) {
   const { setHeaderActionMenu } = useDashboardMountContext();
   const {
+    dashboardSavedObject: {
+      checkForDuplicateDashboardTitle,
+      saveDashboardStateToSavedObject,
+      savedObjectsClient,
+    },
     chrome: {
       getIsVisible$: getChromeIsVisible$,
       recentlyAccessed: chromeRecentlyAccessed,
       docTitle,
     },
     coreContext: { i18nContext },
-    dashboardCapabilities,
-    data: { query, search },
-    embeddable: { getEmbeddableFactory, getEmbeddableFactories, getStateTransfer },
-    initializerContext: { allowByValueEmbeddables },
-    navigation: { TopNavMenu },
-    notifications,
-    overlays,
-    savedObjects,
-    savedObjectsTagging: { hasTagDecoration, hasApi },
-    settings: { uiSettings, theme },
     share,
+    overlays,
+    notifications,
     usageCollection,
+    data: { query, search },
+    navigation: { TopNavMenu },
+    settings: { uiSettings, theme },
+    initializerContext: { allowByValueEmbeddables },
+    dashboardCapabilities: { showWriteControls, saveQuery: showSaveQuery },
+    savedObjectsTagging: { hasApi: hasSavedObjectsTagging },
+    embeddable: { getEmbeddableFactory, getEmbeddableFactories, getStateTransfer },
     visualizations: { get: getVisualization, getAliases: getVisTypeAliases },
-    savedObjects: { client: savedObjectsClient },
   } = pluginServices.getServices();
 
   const dispatchDashboardStateChange = useDashboardDispatch();
@@ -143,7 +150,7 @@ export function DashboardTopNav({
     });
     const { savedObjectId, title, viewMode } = dashboardState;
     if (savedObjectId && title) {
-      chrome.recentlyAccessed.add(
+      chromeRecentlyAccessed.add(
         getFullEditPath(savedObjectId, viewMode === ViewMode.EDIT),
         title,
         savedObjectId
@@ -152,7 +159,7 @@ export function DashboardTopNav({
     return () => {
       visibleSubscription.unsubscribe();
     };
-  }, [chrome, allowByValueEmbeddables, dashboardState]);
+  }, [allowByValueEmbeddables, dashboardState]);
 
   const addFromLibrary = useCallback(() => {
     if (!isErrorEmbeddable(dashboardAppState.dashboardContainer)) {
@@ -164,7 +171,7 @@ export function DashboardTopNav({
           getFactory: getEmbeddableFactory,
           notifications,
           overlays,
-          SavedObjectFinder: getSavedObjectFinder(savedObjects, uiSettings),
+          SavedObjectFinder: getSavedObjectFinder({ client: savedObjectsClient }, uiSettings),
           reportUiCounter: usageCollection.reportUiCounter,
           theme,
         }),
@@ -174,12 +181,11 @@ export function DashboardTopNav({
     dashboardAppState.dashboardContainer,
     getEmbeddableFactories,
     getEmbeddableFactory,
+    usageCollection,
     notifications,
-    savedObjects,
+    uiSettings,
     overlays,
     theme,
-    uiSettings,
-    usageCollection,
   ]);
 
   const createNewVisType = useCallback(
@@ -261,8 +267,8 @@ export function DashboardTopNav({
         timeRestore: newTimeRestore,
         tags: [] as string[],
       };
-      if (hasApi && newTags) {
-        // remove `hasAPI` once the savedObjectsTagging service is optional
+      if (hasSavedObjectsTagging && newTags) {
+        // remove `hasSavedObjectsTagging` once the savedObjectsTagging service is optional
         stateFromSaveModal.tags = newTags;
       }
 
@@ -270,16 +276,13 @@ export function DashboardTopNav({
        * Check for duplicate title
        */
       try {
-        await checkForDuplicateDashboardTitle(
-          {
-            title: newTitle,
-            onTitleDuplicate,
-            lastSavedTitle: currentState.title,
-            copyOnSave: newCopyOnSave,
-            isTitleDuplicateConfirmed,
-          },
-          savedObjectsClient
-        );
+        await checkForDuplicateDashboardTitle({
+          title: newTitle,
+          onTitleDuplicate,
+          lastSavedTitle: currentState.title,
+          copyOnSave: newCopyOnSave,
+          isTitleDuplicateConfirmed,
+        });
       } catch (error) {
         if (
           error &&
@@ -291,16 +294,8 @@ export function DashboardTopNav({
       }
 
       const saveResult = await saveDashboardStateToSavedObject({
-        toasts,
-        timefilter,
         redirectTo,
         saveOptions,
-        dataStart: data,
-        savedObjectsClient,
-        savedObjectsTagging,
-        version: kibanaVersion,
-        dashboardSessionStorage,
-        embeddableStart: embeddable,
         currentState: { ...currentState, ...stateFromSaveModal },
       });
       if (saveResult.id && !saveResult.redirected) {
@@ -311,10 +306,10 @@ export function DashboardTopNav({
            * TODO: Remove this timeout once the last saved state is also handled in Redux.
            **/
           dashboardAppState.updateLastSavedState?.();
-          chrome.docTitle.change(stateFromSaveModal.title);
+          docTitle.change(stateFromSaveModal.title);
         }, 1);
       }
-      return saveResult.id ? { id: saveResult.id } : { error: saveResult.error };
+      return saveResult.id ? { id: saveResult.id } : { error: new Error(saveResult.error) };
     };
 
     const lastDashboardId = currentState.savedObjectId;
@@ -334,35 +329,21 @@ export function DashboardTopNav({
     showSaveModal(dashboardSaveModal, i18nContext);
   }, [
     dispatchDashboardStateChange,
-    dashboardSessionStorage,
-    savedObjectsTagging,
-    savedObjectsClient,
-    core.i18n.Context,
+
     dashboardAppState,
-    core.i18n.Context,
-    chrome.docTitle,
     closeAllFlyouts,
-    kibanaVersion,
-    timefilter,
+    i18nContext,
     redirectTo,
-    toasts,
+    docTitle,
   ]);
 
   const runQuickSave = useCallback(async () => {
     setState((s) => ({ ...s, isSaveInProgress: true }));
     const currentState = dashboardAppState.getLatestDashboardState();
     const saveResult = await saveDashboardStateToSavedObject({
-      toasts,
-      timefilter,
       redirectTo,
       currentState,
-      dataStart: data,
       saveOptions: {},
-      savedObjectsClient,
-      savedObjectsTagging,
-      version: kibanaVersion,
-      dashboardSessionStorage,
-      embeddableStart: embeddable,
     });
     if (saveResult.id && !saveResult.redirected) {
       dashboardAppState.updateLastSavedState?.();
@@ -372,19 +353,7 @@ export function DashboardTopNav({
       if (!mounted) return;
       setState((s) => ({ ...s, isSaveInProgress: false }));
     }, DashboardConstants.CHANGE_CHECK_DEBOUNCE);
-  }, [
-    dashboardSessionStorage,
-    savedObjectsClient,
-    savedObjectsTagging,
-    dashboardAppState,
-    kibanaVersion,
-    embeddable,
-    timefilter,
-    redirectTo,
-    mounted,
-    toasts,
-    data,
-  ]);
+  }, [savedObjectsClient, dashboardAppState, redirectTo, mounted]);
 
   const runClone = useCallback(() => {
     const currentState = dashboardAppState.getLatestDashboardState();
@@ -397,16 +366,13 @@ export function DashboardTopNav({
        * Check for duplicate title
        */
       try {
-        await checkForDuplicateDashboardTitle(
-          {
-            title: newTitle,
-            onTitleDuplicate,
-            lastSavedTitle: currentState.title,
-            copyOnSave: true,
-            isTitleDuplicateConfirmed,
-          },
-          savedObjectsClient
-        );
+        await checkForDuplicateDashboardTitle({
+          title: newTitle,
+          onTitleDuplicate,
+          lastSavedTitle: currentState.title,
+          copyOnSave: true,
+          isTitleDuplicateConfirmed,
+        });
       } catch (error) {
         if (
           error &&
@@ -418,34 +384,14 @@ export function DashboardTopNav({
       }
 
       const saveResult = await saveDashboardStateToSavedObject({
-        toasts,
-        timefilter,
         redirectTo,
-        dataStart: data,
-        savedObjectsClient,
-        savedObjectsTagging,
-        version: kibanaVersion,
-        dashboardSessionStorage,
-        embeddableStart: embeddable,
         saveOptions: { saveAsCopy: true },
         currentState: { ...currentState, title: newTitle },
       });
       return saveResult.id ? { id: saveResult.id } : { error: saveResult.error };
     };
-    showCloneModal({ onClone, title: currentState.title, theme$ });
-  }, [
-    dashboardSessionStorage,
-    savedObjectsTagging,
-    savedObjectsClient,
-    dashboardAppState,
-    kibanaVersion,
-    embeddable,
-    redirectTo,
-    timefilter,
-    theme$,
-    toasts,
-    data,
-  ]);
+    showCloneModal({ onClone, title: currentState.title });
+  }, [dashboardAppState, redirectTo]);
 
   const showOptions = useCallback(
     (anchorElement: HTMLElement) => {
@@ -548,11 +494,11 @@ export function DashboardTopNav({
       dashboardAppState.getLatestDashboardState().viewMode,
       dashboardTopNavActions,
       {
-        showWriteControls: dashboardCapabilities.showWriteControls,
-        isDirty: Boolean(dashboardAppState.hasUnsavedChanges),
+        isLabsEnabled,
+        showWriteControls,
         isSaveInProgress: state.isSaveInProgress,
         isNewDashboard: !dashboardState.savedObjectId,
-        isLabsEnabled,
+        isDirty: Boolean(dashboardAppState.hasUnsavedChanges),
       }
     );
 
@@ -569,22 +515,22 @@ export function DashboardTopNav({
 
     return {
       badges,
-      appName: 'dashboard',
-      config: showTopNavMenu ? topNav : undefined,
-      className: isFullScreenMode ? 'kbnTopNavMenu-isFullScreen' : undefined,
       screenTitle,
-      showSearchBar,
       showQueryBar,
+      showSearchBar,
+      showFilterBar,
+      showSaveQuery,
       showQueryInput,
       showDatePicker,
-      showFilterBar,
-      setMenuMountPoint: embedSettings ? undefined : setHeaderActionMenu,
-      indexPatterns: dashboardAppState.dataViews,
-      showSaveQuery: dashboardCapabilities.saveQuery,
+      appName: 'dashboard',
       useDefaultBehaviors: true,
+      visible: printMode !== true,
       savedQuery: state.savedQuery,
       savedQueryId: dashboardState.savedQuery,
-      visible: printMode !== true,
+      indexPatterns: dashboardAppState.dataViews,
+      config: showTopNavMenu ? topNav : undefined,
+      setMenuMountPoint: embedSettings ? undefined : setHeaderActionMenu,
+      className: isFullScreenMode ? 'kbnTopNavMenu-isFullScreen' : undefined,
       onQuerySubmit: (_payload, isUpdate) => {
         if (isUpdate === false) {
           dashboardAppState.$triggerDashboardRefresh.next({ force: true });

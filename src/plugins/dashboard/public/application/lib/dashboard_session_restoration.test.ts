@@ -6,14 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { getSavedDashboardMock } from '../test_helpers';
-import { createSessionRestorationDataProvider, savedObjectToDashboardState } from '.';
+import { DashboardState } from '../../types';
+import { createSessionRestorationDataProvider } from '.';
 import { pluginServices } from '../../services/plugin_services';
 
 describe('createSessionRestorationDataProvider', () => {
   const searchSessionInfoProvider = createSessionRestorationDataProvider({
-    kibanaVersion: version,
-    data: mockDataPlugin,
     getAppState: () => ({ panels: {} } as unknown as DashboardState),
     getDashboardTitle: () => 'Dashboard',
     getDashboardId: () => 'Id',

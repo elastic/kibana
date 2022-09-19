@@ -11,49 +11,10 @@ import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n-react';
 import { waitFor } from '@testing-library/react';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-import { DashboardAppServices } from '../../types';
-import { makeDefaultServices } from '../test_helpers';
-import { SavedObjectLoader } from '../../services/saved_object_loader';
 import { DashboardUnsavedListing, DashboardUnsavedListingProps } from './dashboard_unsaved_listing';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../../services/dashboard_session_storage/dashboard_session_storage_service';
 import { pluginServices } from '../../services/plugin_services';
-import { DashboardAttributes } from '../embeddable';
-
-import * as findDashboardSavedObjects from '../../dashboard_saved_object/find_dashboard_saved_objects';
-
-const mockedDashboardResults: Awaited<
-  ReturnType<typeof findDashboardSavedObjects.findDashboardSavedObjectsByIds>
-> = [
-  {
-    id: `dashboardUnsavedOne`,
-    status: 'success',
-    attributes: {
-      title: `Dashboard Unsaved One`,
-    } as unknown as DashboardAttributes,
-  },
-  {
-    id: `dashboardUnsavedTwo`,
-    status: 'success',
-    attributes: {
-      title: `Dashboard Unsaved Two`,
-    } as unknown as DashboardAttributes,
-  },
-  {
-    id: `dashboardUnsavedThree`,
-    status: 'success',
-    attributes: {
-      title: `Dashboard Unsaved Three`,
-    } as unknown as DashboardAttributes,
-  },
-];
-
-jest
-  .spyOn(findDashboardSavedObjects, 'findDashboardSavedObjectsByIds')
-  .mockImplementation((savedObjectsClient: unknown, ids: string[]) =>
-    Promise.resolve(mockedDashboardResults)
-  );
 
 const makeDefaultProps = (): DashboardUnsavedListingProps => ({
   redirectTo: jest.fn(),
@@ -61,35 +22,24 @@ const makeDefaultProps = (): DashboardUnsavedListingProps => ({
   refreshUnsavedDashboards: jest.fn(),
 });
 
-function mountWith({
-  services: incomingServices,
-  props: incomingProps,
-}: {
-  services?: DashboardAppServices;
-  props?: DashboardUnsavedListingProps;
-}) {
-  const services = incomingServices ?? makeDefaultServices();
+function mountWith({ props: incomingProps }: { props?: DashboardUnsavedListingProps }) {
   const props = incomingProps ?? makeDefaultProps();
   const wrappingComponent: React.FC<{
     children: React.ReactNode;
   }> = ({ children }) => {
-    return (
-      <I18nProvider>
-        {/* Only the old savedObjects service is used for `DashboardUnsavedListing`, so will need to wrap this in 
-        `DashboardServicesProvider` instead once that is removed as part of https://github.com/elastic/kibana/pull/138774*/}
-        <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
-      </I18nProvider>
-    );
+    return <I18nProvider>{children}</I18nProvider>;
   };
   const component = mount(<DashboardUnsavedListing {...props} />, { wrappingComponent });
-  return { component, props, services };
+  return { component, props };
 }
 
 describe('Unsaved listing', () => {
   it('Gets information for each unsaved dashboard', async () => {
     mountWith({});
     await waitFor(() => {
-      expect(findDashboardSavedObjects.findDashboardSavedObjectsByIds).toHaveBeenCalledTimes(1);
+      expect(
+        pluginServices.getServices().dashboardSavedObject.findDashboards.findByIds
+      ).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -98,10 +48,9 @@ describe('Unsaved listing', () => {
     props.unsavedDashboardIds = ['dashboardUnsavedOne', DASHBOARD_PANELS_UNSAVED_ID];
     mountWith({ props });
     await waitFor(() => {
-      expect(findDashboardSavedObjects.findDashboardSavedObjectsByIds).toHaveBeenCalledWith(
-        expect.any(Object),
-        ['dashboardUnsavedOne']
-      );
+      expect(
+        pluginServices.getServices().dashboardSavedObject.findDashboards.findByIds
+      ).toHaveBeenCalledWith(['dashboardUnsavedOne']);
     });
   });
 
@@ -156,24 +105,22 @@ describe('Unsaved listing', () => {
   });
 
   it('removes unsaved changes from any dashboard which errors on fetch', async () => {
+    (
+      pluginServices.getServices().dashboardSavedObject.findDashboards.findByIds as jest.Mock
+    ).mockResolvedValue([
+      {
+        id: 'failCase1',
+        status: 'error',
+        error: { error: 'oh no', message: 'bwah', statusCode: 100 },
+      },
+      {
+        id: 'failCase2',
+        status: 'error',
+        error: { error: 'oh no', message: 'bwah', statusCode: 100 },
+      },
+    ]);
+
     const props = makeDefaultProps();
-    jest
-      .spyOn(findDashboardSavedObjects, 'findDashboardSavedObjectsByIds')
-      .mockImplementation((savedObjectsClient: unknown, ids: string[]) =>
-        Promise.resolve([
-          ...mockedDashboardResults,
-          {
-            id: 'failCase1',
-            status: 'error',
-            error: { error: 'oh no', message: 'bwah', statusCode: 100 },
-          },
-          {
-            id: 'failCase2',
-            status: 'error',
-            error: { error: 'oh no', message: 'bwah', statusCode: 100 },
-          },
-        ])
-      );
 
     props.unsavedDashboardIds = [
       'dashboardUnsavedOne',
@@ -182,7 +129,7 @@ describe('Unsaved listing', () => {
       'failCase1',
       'failCase2',
     ];
-    const { component, services } = mountWith({ props });
+    const { component } = mountWith({ props });
     waitFor(() => {
       component.update();
       expect(pluginServices.getServices().dashboardSessionStorage.clearState).toHaveBeenCalledWith(

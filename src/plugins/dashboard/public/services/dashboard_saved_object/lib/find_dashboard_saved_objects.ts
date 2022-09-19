@@ -13,8 +13,8 @@ import {
   SimpleSavedObject,
 } from '@kbn/core/public';
 
-import { DashboardConstants } from '..';
-import { DashboardAttributes } from '../application';
+import { DashboardConstants } from '../../..';
+import { DashboardAttributes } from '../../../application';
 
 export interface FindDashboardSavedObjectsArgs {
   hasReference?: SavedObjectsFindOptionsReference[];
@@ -55,7 +55,7 @@ export async function findDashboardSavedObjects({
   };
 }
 
-export type FindDashboardBySavedObjectResult = { id: string } & (
+export type FindDashboardBySavedObjectIdsResult = { id: string } & (
   | { status: 'success'; attributes: DashboardAttributes }
   | { status: 'error'; error: SavedObjectError }
 );
@@ -63,7 +63,7 @@ export type FindDashboardBySavedObjectResult = { id: string } & (
 export async function findDashboardSavedObjectsByIds(
   savedObjectsClient: SavedObjectsClientContract,
   ids: string[]
-): Promise<FindDashboardBySavedObjectResult[]> {
+): Promise<FindDashboardBySavedObjectIdsResult[]> {
   const { savedObjects } = await savedObjectsClient.bulkGet(
     ids.map((id) => ({ id, type: DashboardConstants.DASHBOARD_SAVED_OBJECT_TYPE }))
   );

@@ -9,9 +9,9 @@
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
-import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import {
   App,
   Plugin,
@@ -67,7 +67,6 @@ import {
   LibraryNotificationAction,
   CopyToDashboardAction,
 } from './application';
-import { SavedObjectLoader } from './services/saved_object_loader';
 import { DashboardAppLocatorDefinition, DashboardAppLocator } from './locator';
 import { DashboardConstants } from './dashboard_constants';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
@@ -75,6 +74,7 @@ import { ExportCSVAction } from './application/actions/export_csv_action';
 import { dashboardFeatureCatalog } from './dashboard_strings';
 import { FiltersNotificationBadge } from './application/actions/filters_notification_badge';
 import type { DashboardMountContextProps } from './types';
+import { pluginServices } from './services/plugin_services';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -157,21 +157,12 @@ export class DashboardPlugin
         new DashboardAppLocatorDefinition({
           useHashedUrl: core.uiSettings.get('state:storeInSessionStorage'),
           getDashboardFilterFields: async (dashboardId: string) => {
-            const { loadDashboardStateFromSavedObject } = await import('./dashboard_saved_object');
             const {
-              embeddable: embeddableStart,
-              data: dataStart,
-              savedObjectsClient,
-            } = await getStartServices();
+              dashboardSavedObject: { loadDashboardStateFromSavedObject },
+            } = pluginServices.getServices();
             return (
-              (
-                await loadDashboardStateFromSavedObject({
-                  savedObjectsClient,
-                  id: dashboardId,
-                  embeddableStart,
-                  dataStart,
-                })
-              ).dashboardState?.filters ?? []
+              (await loadDashboardStateFromSavedObject({ id: dashboardId })).dashboardState
+                ?.filters ?? []
             );
           },
         })

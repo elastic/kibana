@@ -21,11 +21,9 @@ import type { ApplicationStart, SavedObjectsFindOptionsReference } from '@kbn/co
 import useMount from 'react-use/lib/useMount';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
-import { TableListView, useKibana } from '@kbn/kibana-react-plugin/public';
+import { TableListView } from '@kbn/kibana-react-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
-import { attemptLoadDashboardByTitle } from '../lib';
-import { DashboardAppServices, DashboardRedirect } from '../../types';
 import {
   getDashboardBreadcrumb,
   dashboardListingTableStrings,
@@ -34,14 +32,14 @@ import {
   getNewDashboardTitle,
   dashboardSavedObjectErrorStrings,
 } from '../../dashboard_strings';
-import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
-import { confirmCreateWithUnsaved, confirmDiscardUnsavedChanges } from './confirm_overlays';
-import { getDashboardListItemLink } from './get_dashboard_list_item_link';
-import { DashboardAppNoDataPage, isDashboardAppInNoDataState } from '../dashboard_app_no_data';
-import { pluginServices } from '../../services/plugin_services';
-import { DASHBOARD_PANELS_UNSAVED_ID } from '../../services/dashboard_session_storage/dashboard_session_storage_service';
-import { findDashboardSavedObjects, findDashboardIdByTitle } from '../../dashboard_saved_object';
 import { DashboardConstants } from '../..';
+import { DashboardRedirect } from '../../types';
+import { pluginServices } from '../../services/plugin_services';
+import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
+import { getDashboardListItemLink } from './get_dashboard_list_item_link';
+import { confirmCreateWithUnsaved, confirmDiscardUnsavedChanges } from './confirm_overlays';
+import { DashboardAppNoDataPage, isDashboardAppInNoDataState } from '../dashboard_app_no_data';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../../services/dashboard_session_storage/dashboard_session_storage_service';
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
@@ -67,7 +65,7 @@ export const DashboardListing = ({
     dashboardSessionStorage,
     data: { query },
     notifications: { toasts },
-    savedObjects: { client },
+    dashboardSavedObject: { findDashboards, savedObjectsClient },
     savedObjectsTagging: { getSearchBarFilter, parseSearchQuery },
     settings: { uiSettings, theme },
   } = pluginServices.getServices();
@@ -102,7 +100,7 @@ export const DashboardListing = ({
       kbnUrlStateStorage
     );
     if (title) {
-      findDashboardIdByTitle(title, savedObjectsClient).then((result) => {
+      findDashboards.findByTitle(title).then((result) => {
         if (!result) return;
         redirectTo({
           destination: 'dashboard',
@@ -115,7 +113,7 @@ export const DashboardListing = ({
     return () => {
       stopSyncingQueryServiceStateWithUrl();
     };
-  }, [title, client, redirectTo, query, kbnUrlStateStorage]);
+  }, [title, redirectTo, query, kbnUrlStateStorage]);
 
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
@@ -246,22 +244,21 @@ export const DashboardListing = ({
     (filter: string) => {
       let searchTerm = filter;
       let hasReference: SavedObjectsFindOptionsReference[] | undefined;
-      if (savedObjectsTagging) {
-        const parsed = savedObjectsTagging.ui.parseSearchQuery(filter, {
+      if (parseSearchQuery) {
+        const parsed = parseSearchQuery(filter, {
           useName: true,
         });
         searchTerm = parsed.searchTerm;
         hasReference = parsed.tagReferences;
       }
 
-      return findDashboardSavedObjects({
-        savedObjectsClient,
+      return findDashboards.findSavedObjects({
         search: searchTerm,
         size: listingLimit,
         hasReference,
       });
     },
-    [listingLimit, savedObjectsClient, savedObjectsTagging]
+    [listingLimit, parseSearchQuery]
   );
 
   const deleteItems = useCallback(
@@ -272,13 +269,13 @@ export const DashboardListing = ({
           return savedObjectsClient.delete(DashboardConstants.DASHBOARD_SAVED_OBJECT_TYPE, id);
         })
       ).catch((error) => {
-        core.notifications.toasts.addError(error, {
+        toasts.addError(error, {
           title: dashboardSavedObjectErrorStrings.getErrorDeletingDashboardToast(),
         });
       });
       setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges());
     },
-    [savedObjectsClient, dashboardSessionStorage, core.notifications.toasts]
+    [savedObjectsClient, dashboardSessionStorage, toasts]
   );
 
   const editItem = useCallback(

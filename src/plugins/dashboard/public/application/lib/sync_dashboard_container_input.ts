@@ -12,7 +12,6 @@ import { debounceTime, tap } from 'rxjs/operators';
 
 import { compareFilters, COMPARE_ALL_OPTIONS } from '@kbn/es-query';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
-import type { Query } from '@kbn/es-query';
 
 import type { DashboardContainer } from '../embeddable';
 import { DashboardConstants } from '../..';

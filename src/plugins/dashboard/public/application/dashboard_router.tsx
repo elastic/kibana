@@ -15,26 +15,21 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch, Route, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
 
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { AppMountParameters, CoreSetup } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
 import { DashboardListing } from './listing';
 import { dashboardStateStore } from './state';
 import { DashboardApp } from './dashboard_app';
 import { addHelpMenuToAppChrome } from './lib';
+import { pluginServices } from '../services/plugin_services';
 import { DashboardNoMatch } from './listing/dashboard_no_match';
+import { DashboardStart, DashboardStartDependencies } from '../plugin';
 import { createDashboardListingFilterUrl } from '../dashboard_constants';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
 import { dashboardReadonlyBadge, getDashboardPageTitle } from '../dashboard_strings';
-import {
-  DashboardAppServices,
-  DashboardEmbedSettings,
-  RedirectToProps,
-  DashboardMountContextProps,
-} from '../types';
-import { DashboardStart, DashboardStartDependencies } from '../plugin';
-import { pluginServices } from '../services/plugin_services';
+import { DashboardEmbedSettings, RedirectToProps, DashboardMountContextProps } from '../types';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',
@@ -152,35 +147,32 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
   });
 
   const app = (
-    // TODO: Remove KibanaContextProvider as part of https://github.com/elastic/kibana/pull/138774
     <I18nProvider>
       <Provider store={dashboardStateStore}>
-        <KibanaContextProvider services={dashboardServices}>
-          <DashboardMountContext.Provider value={mountContext}>
-            <KibanaThemeProvider theme$={core.theme.theme$}>
-              <HashRouter>
-                <Switch>
-                  <Route
-                    path={[
-                      DashboardConstants.CREATE_NEW_DASHBOARD_URL,
-                      `${DashboardConstants.VIEW_DASHBOARD_URL}/:id`,
-                    ]}
-                    render={renderDashboard}
-                  />
-                  <Route
-                    exact
-                    path={DashboardConstants.LANDING_PAGE_PATH}
-                    render={renderListingPage}
-                  />
-                  <Route exact path="/">
-                    <Redirect to={DashboardConstants.LANDING_PAGE_PATH} />
-                  </Route>
-                  <Route render={renderNoMatch} />
-                </Switch>
-              </HashRouter>
-            </KibanaThemeProvider>
-          </DashboardMountContext.Provider>
-        </KibanaContextProvider>
+        <DashboardMountContext.Provider value={mountContext}>
+          <KibanaThemeProvider theme$={core.theme.theme$}>
+            <HashRouter>
+              <Switch>
+                <Route
+                  path={[
+                    DashboardConstants.CREATE_NEW_DASHBOARD_URL,
+                    `${DashboardConstants.VIEW_DASHBOARD_URL}/:id`,
+                  ]}
+                  render={renderDashboard}
+                />
+                <Route
+                  exact
+                  path={DashboardConstants.LANDING_PAGE_PATH}
+                  render={renderListingPage}
+                />
+                <Route exact path="/">
+                  <Redirect to={DashboardConstants.LANDING_PAGE_PATH} />
+                </Route>
+                <Route render={renderNoMatch} />
+              </Switch>
+            </HashRouter>
+          </KibanaThemeProvider>
+        </DashboardMountContext.Provider>
       </Provider>
     </I18nProvider>
   );

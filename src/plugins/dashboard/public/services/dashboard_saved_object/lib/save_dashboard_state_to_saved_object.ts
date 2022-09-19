@@ -12,53 +12,51 @@ import { isFilterPinned } from '@kbn/es-query';
 import { SavedObjectsClientContract } from '@kbn/core/public';
 import { SavedObjectAttributes } from '@kbn/core-saved-objects-common';
 
-import {
-  DataPublicPluginStart,
-  extractSearchSourceReferences,
-  RefreshInterval,
-  TimefilterContract,
-} from '../services/data';
-import { DashboardAttributes } from '../application';
-import { NotificationsStart } from '../services/core';
-import { EmbeddableStart } from '../services/embeddable';
-import { DashboardConstants } from '../dashboard_constants';
-import { DashboardRedirect, DashboardState } from '../types';
-import { SavedObjectSaveOpts } from '../services/saved_objects';
-import { dashboardSaveToastStrings } from '../dashboard_strings';
-import { SavedObjectsTaggingApi } from '../services/saved_objects_tagging_oss';
-import { convertPanelMapToSavedPanels, extractReferences } from '../../common';
-import { convertTimeToUTCString, DashboardSessionStorage } from '../application/lib';
-import { serializeControlGroupInput } from '../application/lib/dashboard_control_group';
+import { extractSearchSourceReferences, RefreshInterval } from '@kbn/data-plugin/public';
+import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
+
+import { DashboardAttributes } from '../../../application';
+import { DashboardSavedObjectRequiredServices } from '../types';
+import { DashboardConstants } from '../../../dashboard_constants';
+import { convertTimeToUTCString } from '../../../application/lib';
+import { DashboardRedirect, DashboardState } from '../../../types';
+import { dashboardSaveToastStrings } from '../../../dashboard_strings';
+import { convertPanelMapToSavedPanels, extractReferences } from '../../../../common';
+import { serializeControlGroupInput } from '../../../application/lib/dashboard_control_group';
 
 export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { saveAsCopy?: boolean };
-interface SaveDashboardProps {
-  version: string;
+
+export type SaveDashboardProps = DashboardSavedObjectRequiredServices & {
   currentState: DashboardState;
   redirectTo: DashboardRedirect;
-  timefilter: TimefilterContract;
-  dataStart: DataPublicPluginStart;
-  embeddableStart: EmbeddableStart;
   saveOptions: SavedDashboardSaveOpts;
-  toasts: NotificationsStart['toasts'];
-  savedObjectsTagging?: SavedObjectsTaggingApi;
   savedObjectsClient: SavedObjectsClientContract;
-  dashboardSessionStorage: DashboardSessionStorage;
+};
+
+export interface SaveDashboardReturn {
+  id?: string;
+  error?: string;
+  redirected?: boolean;
 }
 
 export const saveDashboardStateToSavedObject = async ({
-  toasts,
-  version,
-  dataStart,
-  timefilter,
+  data,
   redirectTo,
+  embeddable,
   saveOptions,
   currentState,
-  embeddableStart,
   savedObjectsClient,
   savedObjectsTagging,
   dashboardSessionStorage,
-}: SaveDashboardProps) => {
-  const { search: dataSearchService } = dataStart;
+  notifications: { toasts },
+  initializerContext: { kibanaVersion },
+}: SaveDashboardProps): Promise<SaveDashboardReturn> => {
+  const {
+    search: dataSearchService,
+    query: {
+      timefilter: { timefilter },
+    },
+  } = data;
 
   const {
     tags,
@@ -93,7 +91,7 @@ export const saveDashboardStateToSavedObject = async ({
    * Stringify options and panels
    */
   const optionsJSON = JSON.stringify(options);
-  const panelsJSON = JSON.stringify(convertPanelMapToSavedPanels(panels, version));
+  const panelsJSON = JSON.stringify(convertPanelMapToSavedPanels(panels, kibanaVersion));
 
   /**
    * Parse global time filter settings
@@ -132,10 +130,10 @@ export const saveDashboardStateToSavedObject = async ({
       attributes: rawDashboardAttributes as unknown as SavedObjectAttributes,
       references: searchSourceReferences,
     },
-    { embeddablePersistableStateService: embeddableStart }
+    { embeddablePersistableStateService: embeddable }
   );
-  const references = savedObjectsTagging
-    ? savedObjectsTagging.ui.updateTagsReferences(dashboardReferences, tags)
+  const references = savedObjectsTagging.updateTagsReferences
+    ? savedObjectsTagging.updateTagsReferences(dashboardReferences, tags)
     : dashboardReferences;
 
   /**

@@ -15,9 +15,6 @@ import {
   ControlGroupOutput,
   CONTROL_GROUP_TYPE,
 } from '@kbn/controls-plugin/public';
-import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
-import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
-
 import {
   Container,
   ErrorEmbeddable,
@@ -26,14 +23,14 @@ import {
   EmbeddableFactoryDefinition,
 } from '@kbn/embeddable-plugin/public';
 
+import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
+
 import { DashboardContainerInput } from '../..';
-import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
+import { createExtract, createInject } from '../../../common';
 import type { DashboardContainer } from './dashboard_container';
-import {
-  createExtract,
-  createInject,
-} from '../../../common/embeddable/dashboard_container_persistable_state';
 import { pluginServices } from '../../services/plugin_services';
+import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,

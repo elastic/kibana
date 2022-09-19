@@ -9,20 +9,20 @@
 import moment from 'moment';
 import React, { ReactElement, useState } from 'react';
 
-import { EuiCheckboxGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiCheckboxGroup } from '@elastic/eui';
 import type { Capabilities } from '@kbn/core/public';
-import type { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
+import type { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
 
-import { shareModalStrings } from '../../dashboard_strings';
-import { DashboardAppLocatorParams, DASHBOARD_APP_LOCATOR } from '../../locator';
 import type { DashboardState } from '../../types';
 import { dashboardUrlParams } from '../dashboard_router';
-import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
-import { pluginServices } from '../../services/plugin_services';
+import { shareModalStrings } from '../../dashboard_strings';
 import { convertPanelMapToSavedPanels } from '../../../common';
+import { pluginServices } from '../../services/plugin_services';
+import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
+import { DashboardAppLocatorParams, DASHBOARD_APP_LOCATOR } from '../../locator';
 
 const showFilterBarId = 'showFilterBar';
 
@@ -56,6 +56,7 @@ export function ShowShareModal({
       },
     },
     share: { toggleShareContextMenu },
+    initializerContext: { kibanaVersion },
   } = pluginServices.getServices();
 
   if (!toggleShareContextMenu) return; // TODO: Make this logic cleaner once share is an optional service
@@ -133,7 +134,8 @@ export function ShowShareModal({
       controlGroupInput: unsavedDashboardState.controlGroupInput as SerializableControlGroupInput,
       panels: unsavedDashboardState.panels
         ? (convertPanelMapToSavedPanels(
-            unsavedDashboardState.panels
+            unsavedDashboardState.panels,
+            kibanaVersion
           ) as DashboardAppLocatorParams['panels'])
         : undefined,
     };

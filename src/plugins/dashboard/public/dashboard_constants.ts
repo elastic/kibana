@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ViewMode } from './services/embeddable';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { DashboardState } from './types';
 
 export const DASHBOARD_STATE_STORAGE_KEY = '_a';

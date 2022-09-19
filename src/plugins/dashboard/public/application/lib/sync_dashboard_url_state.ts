@@ -11,15 +11,15 @@ import { debounceTime } from 'rxjs/operators';
 import semverSatisfies from 'semver/functions/satisfies';
 
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
+
 import { setDashboardState } from '../state';
 import { migrateLegacyQuery } from './migrate_legacy_query';
-import { applyDashboardFilterState } from './sync_dashboard_filter_state';
+import { pluginServices } from '../../services/plugin_services';
 import { DASHBOARD_STATE_STORAGE_KEY } from '../../dashboard_constants';
-import type { DashboardBuildContext, DashboardState, RawDashboardState } from '../../types';
-import { convertSavedPanelsToPanelMap, DashboardPanelMap } from '../../../common';
+import { applyDashboardFilterState } from './sync_dashboard_filter_state';
 import { dashboardSavedObjectErrorStrings } from '../../dashboard_strings';
-
-type SyncDashboardUrlStateProps = DashboardBuildContext;
+import { convertSavedPanelsToPanelMap, DashboardPanelMap } from '../../../common';
+import type { DashboardBuildContext, DashboardState, RawDashboardState } from '../../types';
 
 /**
  * We no longer support loading panels from a version older than 7.3 in the URL.
@@ -36,7 +36,7 @@ export const syncDashboardUrlState = ({
   dispatchDashboardStateChange,
   getLatestDashboardState,
   kbnUrlStateStorage,
-}: SyncDashboardUrlStateProps) => {
+}: DashboardBuildContext) => {
   /**
    * Loads any dashboard state from the URL, and removes the state from the URL.
    */
@@ -50,7 +50,7 @@ export const syncDashboardUrlState = ({
     let panelsMap: DashboardPanelMap | undefined;
     if (rawAppStateInUrl.panels && rawAppStateInUrl.panels.length > 0) {
       if (isPanelVersionTooOld(rawAppStateInUrl.panels)) {
-        notifications.toasts.addWarning(dashboardSavedObjectErrorStrings.getPanelTooOldError());
+        toasts.addWarning(dashboardSavedObjectErrorStrings.getPanelTooOldError());
       } else {
         panelsMap = convertSavedPanelsToPanelMap(rawAppStateInUrl.panels);
       }

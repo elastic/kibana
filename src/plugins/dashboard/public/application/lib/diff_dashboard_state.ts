@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { xor, omit, isEmpty } from 'lodash';
 import fastIsEqual from 'fast-deep-equal';
-import { compareFilters, COMPARE_ALL_OPTIONS, type Filter, isFilterPinned } from '@kbn/es-query';
-import { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { xor, omit, isEmpty } from 'lodash';
 
+import { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { compareFilters, COMPARE_ALL_OPTIONS, type Filter, isFilterPinned } from '@kbn/es-query';
 import { persistableControlGroupInputIsEqual } from '@kbn/controls-plugin/common';
+
 import { DashboardContainerInput } from '../..';
-import { DashboardOptions, DashboardPanelMap, DashboardState } from '../../types';
+import { DashboardPanelMap } from '../embeddable';
+import { DashboardOptions, DashboardState } from '../../types';
 
 const stateKeystoIgnore = [
   'expandedPanelId',

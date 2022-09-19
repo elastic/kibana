@@ -8,11 +8,11 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/public';
 
-import { DashboardConstants } from '..';
-import { DashboardAttributes } from '../application';
-import { dashboardSavedObjectErrorStrings } from '../dashboard_strings';
+import { DashboardConstants } from '../../../';
+import { DashboardAttributes } from '../../../application';
+import { dashboardSavedObjectErrorStrings } from '../../../dashboard_strings';
 
-interface ConfirmModalSavedObjectMeta {
+export interface DashboardDuplicateTitleCheckProps {
   title: string;
   copyOnSave: boolean;
   lastSavedTitle: string;
@@ -26,12 +26,15 @@ interface ConfirmModalSavedObjectMeta {
  * function when the title already exists
  */
 export async function checkForDuplicateDashboardTitle(
-  savedObjectMeta: ConfirmModalSavedObjectMeta,
+  {
+    title,
+    copyOnSave,
+    lastSavedTitle,
+    onTitleDuplicate,
+    isTitleDuplicateConfirmed,
+  }: DashboardDuplicateTitleCheckProps,
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<boolean> {
-  const { title, isTitleDuplicateConfirmed, lastSavedTitle, copyOnSave, onTitleDuplicate } =
-    savedObjectMeta;
-
   // Don't check for duplicates if user has already confirmed save with duplicate title
   if (isTitleDuplicateConfirmed) {
     return true;

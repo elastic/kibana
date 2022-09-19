@@ -16,7 +16,6 @@ import {
   isErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 
-import { DashboardSavedObject } from '../../saved_dashboards';
 import { DashboardContainer, DASHBOARD_CONTAINER_TYPE } from '../embeddable';
 import { DashboardBuildContext, DashboardState, DashboardContainerInput } from '../../types';
 import {
@@ -27,7 +26,6 @@ import {
 import { pluginServices } from '../../services/plugin_services';
 
 type BuildDashboardContainerProps = DashboardBuildContext & {
-  data: DashboardAppServices['data']; // the whole data service is required here because it is required by getLocatorParams
   initialDashboardState: DashboardState;
   incomingEmbeddable?: EmbeddablePackageState;
   executionContext?: KibanaExecutionContext;

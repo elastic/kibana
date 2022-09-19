@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-
 import {
   EuiButtonEmpty,
   EuiCallOut,
@@ -19,11 +17,12 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { dashboardUnsavedListingStrings, getNewDashboardTitle } from '../../dashboard_strings';
-import type { DashboardAppServices, DashboardRedirect } from '../../types';
-import { confirmDiscardUnsavedChanges } from './confirm_overlays';
+import type { DashboardRedirect } from '../../types';
 import { pluginServices } from '../../services/plugin_services';
+import { confirmDiscardUnsavedChanges } from './confirm_overlays';
+import { dashboardUnsavedListingStrings, getNewDashboardTitle } from '../../dashboard_strings';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../../services/dashboard_session_storage/dashboard_session_storage_service';
+import { DashboardAttributes } from '../embeddable';
 
 const DashboardUnsavedItem = ({
   id,
@@ -117,7 +116,7 @@ export const DashboardUnsavedListing = ({
 }: DashboardUnsavedListingProps) => {
   const {
     dashboardSessionStorage,
-    savedObjects: { client: savedObjectsClient },
+    dashboardSavedObject: { savedObjectsClient, findDashboards },
   } = pluginServices.getServices();
 
   const [items, setItems] = useState<UnsavedItemMap>({});
@@ -147,31 +146,29 @@ export const DashboardUnsavedListing = ({
     const existingDashboardsWithUnsavedChanges = unsavedDashboardIds.filter(
       (id) => id !== DASHBOARD_PANELS_UNSAVED_ID
     );
-    findDashboardSavedObjectsByIds(savedObjectsClient, existingDashboardsWithUnsavedChanges).then(
-      (results) => {
-        const dashboardMap = {};
-        if (canceled) {
-          return;
-        }
-        let hasError = false;
-        const newItems = results.reduce((map, result) => {
-          if (result.status === 'error') {
-            hasError = true;
-            dashboardSessionStorage.clearState(result.id);
-            return map;
-          }
-          return {
-            ...map,
-            [result.id || DASHBOARD_PANELS_UNSAVED_ID]: result.attributes,
-          };
-        }, dashboardMap);
-        if (hasError) {
-          refreshUnsavedDashboards();
-          return;
-        }
-        setItems(newItems);
+    findDashboards.findByIds(existingDashboardsWithUnsavedChanges).then((results) => {
+      const dashboardMap = {};
+      if (canceled) {
+        return;
       }
-    );
+      let hasError = false;
+      const newItems = results.reduce((map, result) => {
+        if (result.status === 'error') {
+          hasError = true;
+          dashboardSessionStorage.clearState(result.id);
+          return map;
+        }
+        return {
+          ...map,
+          [result.id || DASHBOARD_PANELS_UNSAVED_ID]: result.attributes,
+        };
+      }, dashboardMap);
+      if (hasError) {
+        refreshUnsavedDashboards();
+        return;
+      }
+      setItems(newItems);
+    });
     return () => {
       canceled = true;
     };

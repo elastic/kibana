@@ -11,45 +11,11 @@ import { mount } from 'enzyme';
 
 import { I18nProvider } from '@kbn/i18n-react';
 import { SimpleSavedObject } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
-import { DashboardAppServices } from '../../types';
 import { DashboardListing, DashboardListingProps } from './dashboard_listing';
-import { makeDefaultServices } from '../test_helpers';
 import { pluginServices } from '../../services/plugin_services';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../../services/dashboard_session_storage/dashboard_session_storage_service';
-
-import type {
-  FindDashboardSavedObjectsArgs,
-  FindDashboardSavedObjectsResponse,
-} from '../../dashboard_saved_object/find_dashboard_saved_objects';
-import * as findDashboardSavedObjects from '../../dashboard_saved_object/find_dashboard_saved_objects';
-
-const getFindDashboardResponse = (
-  size?: number,
-  search?: string
-): Promise<FindDashboardSavedObjectsResponse> => {
-  const sizeToUse = size ?? 10;
-  const hits: FindDashboardSavedObjectsResponse['hits'] = [];
-  for (let i = 0; i < sizeToUse; i++) {
-    hits.push({
-      id: `dashboard${i}`,
-      title: `dashboard${i} - ${search} - title`,
-      description: `dashboard${i} desc`,
-    } as FindDashboardSavedObjectsResponse['hits'][0]);
-  }
-  return Promise.resolve({
-    total: sizeToUse,
-    hits,
-  });
-};
-
-jest
-  .spyOn(findDashboardSavedObjects, 'findDashboardSavedObjects')
-  .mockImplementation(({ size, search }: FindDashboardSavedObjectsArgs) =>
-    getFindDashboardResponse(size, search)
-  );
 
 function makeDefaultProps(): DashboardListingProps {
   return {
@@ -58,31 +24,15 @@ function makeDefaultProps(): DashboardListingProps {
   };
 }
 
-function mountWith({
-  props: incomingProps,
-  services: incomingServices,
-}: {
-  props?: DashboardListingProps;
-  services?: DashboardAppServices;
-}) {
-  const services = incomingServices ?? makeDefaultServices();
+function mountWith({ props: incomingProps }: { props?: DashboardListingProps }) {
   const props = incomingProps ?? makeDefaultProps();
   const wrappingComponent: React.FC<{
     children: React.ReactNode;
   }> = ({ children }) => {
-    const DashboardServicesProvider = pluginServices.getContextProvider();
-
-    return (
-      <I18nProvider>
-        {/* Can't get rid of KibanaContextProvider here yet because of 'call to action when no dashboards exist' tests below */}
-        <KibanaContextProvider services={services}>
-          <DashboardServicesProvider>{children}</DashboardServicesProvider>
-        </KibanaContextProvider>
-      </I18nProvider>
-    );
+    return <I18nProvider>{children}</I18nProvider>;
   };
   const component = mount(<DashboardListing {...props} />, { wrappingComponent });
-  return { component, props, services };
+  return { component, props };
 }
 
 describe('after fetch', () => {
@@ -96,12 +46,13 @@ describe('after fetch', () => {
   });
 
   test('renders call to action when no dashboards exist', async () => {
-    jest.spyOn(findDashboardSavedObjects, 'findDashboardSavedObjects').mockImplementation(() =>
-      Promise.resolve({
-        total: 0,
-        hits: [],
-      })
-    );
+    (
+      pluginServices.getServices().dashboardSavedObject.findDashboards.findSavedObjects as jest.Mock
+    ).mockResolvedValue({
+      total: 0,
+      hits: [],
+    });
+
     const { component } = mountWith({});
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
@@ -111,20 +62,18 @@ describe('after fetch', () => {
   });
 
   test('renders call to action with continue when no dashboards exist but one is in progress', async () => {
-    const services = makeDefaultServices();
     pluginServices.getServices().dashboardSessionStorage.getDashboardIdsWithUnsavedChanges = jest
       .fn()
       .mockReturnValueOnce([DASHBOARD_PANELS_UNSAVED_ID])
       .mockReturnValue(['dashboardUnsavedOne', 'dashboardUnsavedTwo']);
+    (
+      pluginServices.getServices().dashboardSavedObject.findDashboards.findSavedObjects as jest.Mock
+    ).mockResolvedValue({
+      total: 0,
+      hits: [],
+    });
 
-    jest.spyOn(findDashboardSavedObjects, 'findDashboardSavedObjects').mockImplementation(() =>
-      Promise.resolve({
-        total: 0,
-        hits: [],
-      })
-    );
-
-    const { component } = mountWith({ services });
+    const { component } = mountWith({});
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
@@ -147,7 +96,9 @@ describe('after fetch', () => {
     const title = 'search by title';
     const props = makeDefaultProps();
     props.title = title;
-    pluginServices.getServices().savedObjects.client.find = <T extends unknown>() => {
+    pluginServices.getServices().dashboardSavedObject.savedObjectsClient.find = <
+      T extends unknown
+    >() => {
       return Promise.resolve({
         perPage: 10,
         total: 2,
@@ -171,7 +122,9 @@ describe('after fetch', () => {
     const title = 'search by title';
     const props = makeDefaultProps();
     props.title = title;
-    pluginServices.getServices().savedObjects.client.find = <T extends unknown>() => {
+    pluginServices.getServices().dashboardSavedObject.savedObjectsClient.find = <
+      T extends unknown
+    >() => {
       return Promise.resolve({
         perPage: 10,
         total: 1,

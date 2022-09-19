@@ -8,19 +8,17 @@
 
 import _ from 'lodash';
 import { merge } from 'rxjs';
-import { debounceTime, finalize, map, switchMap, tap } from 'rxjs/operators';
+import { finalize, map, switchMap, tap } from 'rxjs/operators';
 import {
   connectToQueryState,
   GlobalQueryStateFromUrl,
-  syncQueryStateWithUrl,
+  syncGlobalQueryStateWithUrl,
   waitUntilNextSessionCompletes$,
 } from '@kbn/data-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 
 import { cleanFiltersForSerialize } from '.';
-import { setQuery } from '../state';
 import type { DashboardBuildContext, DashboardState } from '../../types';
-import type { DashboardSavedObject } from '../../saved_dashboards';
 import { setFiltersAndQuery } from '../state/dashboard_state_slice';
 import { pluginServices } from '../../services/plugin_services';
 
@@ -44,7 +42,7 @@ export const syncDashboardFilterState = ({
   const {
     data: { query: queryService, search },
   } = pluginServices.getServices();
-  const { filterManager, queryString, timefilter } = queryService;
+  const { queryString, timefilter } = queryService;
   const { timefilter: timefilterService } = timefilter;
 
   // apply initial dashboard filter state.
@@ -54,7 +52,7 @@ export const syncDashboardFilterState = ({
   });
 
   // starts syncing `_g` portion of url with query services
-  const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
+  const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
     queryService,
     kbnUrlStateStorage
   );
@@ -136,10 +134,8 @@ export const applyDashboardFilterState = ({
   } = pluginServices.getServices();
   const { timefilter: timefilterService } = timefilter;
 
-  // apply filters to the query service
+  // apply filters and query to the query service
   filterManager.setAppFilters(_.cloneDeep(currentDashboardState.filters));
-
-  // apply query to the query service
   queryString.setQuery(currentDashboardState.query);
 
   /**
