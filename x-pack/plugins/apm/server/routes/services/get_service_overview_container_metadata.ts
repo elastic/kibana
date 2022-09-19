@@ -70,6 +70,7 @@ export const getServiceOverviewContainerMetadata = async ({
   const response = await esClient.search<unknown, ResponseAggregations>({
     index: [indexName],
     _source: [KUBERNETES, CONTAINER],
+    size: 0,
     query: {
       bool: {
         filter: [

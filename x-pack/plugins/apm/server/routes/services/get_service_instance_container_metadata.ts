@@ -59,6 +59,7 @@ export const getServiceInstanceContainerMetadata = async ({
   const response = await esClient.search<unknown>({
     index: [indexName],
     _source: [KUBERNETES, CONTAINER],
+    size: 1,
     query: {
       bool: {
         filter: [
