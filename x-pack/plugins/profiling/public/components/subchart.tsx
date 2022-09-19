@@ -90,7 +90,9 @@ export const SubChart: React.FC<SubChartProps> = ({
 
   const compact = !!onShowMoreClick;
 
-  const displayedFrames = compact ? metadata.slice(0, NUM_DISPLAYED_FRAMES) : metadata;
+  const displayedFrames = compact
+    ? metadata.concat().reverse().slice(0, NUM_DISPLAYED_FRAMES)
+    : metadata.concat().reverse();
 
   const hasMoreFrames = displayedFrames.length < metadata.length;
 
@@ -110,7 +112,7 @@ export const SubChart: React.FC<SubChartProps> = ({
               <>
                 <EuiFlexItem grow={false} key={frame.FrameID}>
                   <EuiFlexGroup direction="row" alignItems="center">
-                    <EuiFlexItem grow={false}>{frameIndex + 1}</EuiFlexItem>
+                    <EuiFlexItem grow={false}>{metadata.indexOf(frame) + 1}</EuiFlexItem>
                     <EuiFlexItem grow>
                       <StackFrameSummary frame={frame} />
                     </EuiFlexItem>
