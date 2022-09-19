@@ -93,7 +93,7 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
               },
               0
             );
-            console.log(savedField.name)
+            console.log(savedField.name);
             if (editorActionsRef) {
               editorActionsRef.current = null;
             }

@@ -274,7 +274,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     type: columnType,
   }));
 
-  /*useEffect(() => {
+  /* useEffect(() => {
     dispatch(
       timelineActions.updateTimeline({
         timeline: { filterManager },
