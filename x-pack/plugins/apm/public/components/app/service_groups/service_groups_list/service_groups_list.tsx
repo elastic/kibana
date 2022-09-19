@@ -31,7 +31,7 @@ export function ServiceGroupsListItems({ items, servicesCounts }: Props) {
       {items.map((item) => (
         <ServiceGroupsCard
           serviceGroup={item}
-          servicesCount={servicesCounts[item.id] ?? 0}
+          servicesCount={servicesCounts[item.id]}
           href={router.link('/services', {
             query: {
               ...query,

@@ -64,13 +64,17 @@ export function ServiceGroupsCard({
         {!hideServiceCount && (
           <EuiFlexItem>
             <EuiText size="s">
-              {i18n.translate(
-                'xpack.apm.serviceGroups.cardsList.serviceCount',
-                {
-                  defaultMessage:
-                    '{servicesCount} {servicesCount, plural, one {service} other {services}}',
-                  values: { servicesCount },
-                }
+              {servicesCount === undefined ? (
+                <>&nbsp;</>
+              ) : (
+                i18n.translate(
+                  'xpack.apm.serviceGroups.cardsList.serviceCount',
+                  {
+                    defaultMessage:
+                      '{servicesCount} {servicesCount, plural, one {service} other {services}}',
+                    values: { servicesCount },
+                  }
+                )
               )}
             </EuiText>
           </EuiFlexItem>
