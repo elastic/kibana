@@ -74,7 +74,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   const [currentAnalysisWindowParameters, setCurrentAnalysisWindowParameters] = useState<
     WindowParameters | undefined
   >();
-  const [groupResults, setGroupResults] = useState<boolean>(true);
+  const [groupResults, setGroupResults] = useState<boolean>(false);
 
   const onSwitchToggle = (e: { target: { checked: React.SetStateAction<boolean> } }) => {
     setGroupResults(e.target.checked);
