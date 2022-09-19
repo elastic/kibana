@@ -3136,7 +3136,7 @@ describe('XYChart component', () => {
       const groupedAnnotation = component.find(LineAnnotation);
 
       expect(groupedAnnotation.length).toEqual(1);
-      // styles are passed because they are shared, dataValues & header is rounded to the interval
+      // styles are passed because they are shared, dataValues is rounded to the interval
       expect(groupedAnnotation).toMatchSnapshot();
       // renders numeric icon for grouped annotations
       const marker = mount(<div>{groupedAnnotation.prop('marker')}</div>);
@@ -3145,9 +3145,11 @@ describe('XYChart component', () => {
       expect(numberIcon.text()).toEqual('3');
 
       // checking tooltip
-      const renderLinks = mount(<div>{groupedAnnotation.prop('customTooltipDetails')!()}</div>);
+      const renderLinks = mount(
+        <div>{(groupedAnnotation.prop('customTooltip') as Function)!()}</div>
+      );
       expect(renderLinks.text()).toEqual(
-        ' Event 1Mar 18, 2022 @ 04:25:00.000Mar 18, 2022 @ 04:25:00.020Mar 18, 2022 @ 04:25:00.001'
+        'Event 1Mar 18, 2022 @ 04:25:00.000Event 2Mar 18, 2022 @ 04:25:00.020Event 3Mar 18, 2022 @ 04:25:00.001'
       );
     });
 

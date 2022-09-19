@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AnnotationTooltipFormatter } from '@elastic/charts';
+import { CustomAnnotationTooltip } from '@elastic/charts';
 import {
   AvailableAnnotationIcon,
   ManualPointEventAnnotationArgs,
@@ -28,6 +28,6 @@ export interface MergedAnnotation extends Omit<ManualPointEventAnnotationArgs, '
   timebucket: number;
   position: 'bottom';
   icon?: AvailableAnnotationIcon | string;
-  customTooltipDetails: AnnotationTooltipFormatter;
+  customTooltip: CustomAnnotationTooltip;
   isGrouped: boolean;
 }

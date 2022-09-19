@@ -91,7 +91,6 @@ export const ConfigPanelQueryAnnotation = ({
 
       <EuiFormRow
         display="rowCompressed"
-        className="lnsRowCompressedMargin"
         fullWidth
         label={i18n.translate('xpack.lens.xyChart.annotation.queryField', {
           defaultMessage: 'Target date field',

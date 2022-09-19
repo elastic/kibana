@@ -2,13 +2,12 @@
 
 exports[`XYChart component annotations should render basic line annotation 1`] = `
 <LineAnnotation
-  customTooltipDetails={[Function]}
+  customTooltip={[Function]}
   dataValues={
     Array [
       Object {
         "dataValue": 1647591917140,
         "details": "Annotation",
-        "header": "2022-03-18T08:25:17.140Z",
       },
     ]
   }
@@ -19,7 +18,7 @@ exports[`XYChart component annotations should render basic line annotation 1`] =
     <Marker
       config={
         Object {
-          "customTooltipDetails": [Function],
+          "customTooltip": [Function],
           "icon": "triangle",
           "id": "annotation",
           "isGrouped": false,
@@ -101,13 +100,12 @@ Array [
 
 exports[`XYChart component annotations should render grouped line annotations preserving the shared styles 1`] = `
 <LineAnnotation
-  customTooltipDetails={[Function]}
+  customTooltip={[Function]}
   dataValues={
     Array [
       Object {
         "dataValue": 1647591917125,
-        "details": "Event 1",
-        "header": 1647591917100,
+        "details": "",
       },
     ]
   }
@@ -119,11 +117,11 @@ exports[`XYChart component annotations should render grouped line annotations pr
       config={
         Object {
           "color": "red",
-          "customTooltipDetails": [Function],
+          "customTooltip": [Function],
           "icon": "3",
           "id": "event1",
           "isGrouped": true,
-          "label": "Event 1",
+          "label": "",
           "lineStyle": "dashed",
           "lineWidth": 3,
           "position": "bottom",
@@ -162,13 +160,12 @@ exports[`XYChart component annotations should render grouped line annotations pr
 
 exports[`XYChart component annotations should render grouped line annotations with default styles 1`] = `
 <LineAnnotation
-  customTooltipDetails={[Function]}
+  customTooltip={[Function]}
   dataValues={
     Array [
       Object {
         "dataValue": 1647591917125,
-        "details": "Event 1",
-        "header": 1647591917100,
+        "details": "",
       },
     ]
   }
@@ -180,11 +177,11 @@ exports[`XYChart component annotations should render grouped line annotations wi
       config={
         Object {
           "color": "#f04e98",
-          "customTooltipDetails": [Function],
+          "customTooltip": [Function],
           "icon": "2",
           "id": "event1",
           "isGrouped": true,
-          "label": "Event 1",
+          "label": "",
           "lineStyle": "solid",
           "lineWidth": 1,
           "position": "bottom",
@@ -220,13 +217,12 @@ exports[`XYChart component annotations should render grouped line annotations wi
 
 exports[`XYChart component annotations should render simplified annotations when simpleView is true 1`] = `
 <LineAnnotation
-  customTooltipDetails={[Function]}
+  customTooltip={[Function]}
   dataValues={
     Array [
       Object {
         "dataValue": 1647591917140,
         "details": "Annotation",
-        "header": "2022-03-18T08:25:17.140Z",
       },
     ]
   }

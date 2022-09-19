@@ -38,11 +38,11 @@ export type GetStartDepsFn = () => Promise<{
   activeCursor: ChartsPluginStart['activeCursor'];
   paletteService: PaletteRegistry;
   timeZone: string;
-  timeFormat: string;
   useLegacyTimeAxis: boolean;
   kibanaTheme: ThemeServiceStart;
   eventAnnotationService: EventAnnotationServiceType;
   usageCollection?: UsageCollectionStart;
+  timeFormat: string;
 }>;
 
 interface XyChartRendererDeps {

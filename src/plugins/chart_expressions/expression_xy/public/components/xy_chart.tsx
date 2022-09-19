@@ -190,7 +190,6 @@ export function XYChart({
   data,
   formatFactory,
   timeZone,
-  timeFormat,
   chartsThemeService,
   chartsActiveCursorService,
   paletteService,
@@ -203,6 +202,7 @@ export function XYChart({
   useLegacyTimeAxis,
   renderComplete,
   uiState,
+  timeFormat,
 }: XYChartRenderProps) {
   const {
     legend,
@@ -399,16 +399,13 @@ export function XYChart({
   };
 
   const referenceLineLayers = getReferenceLayers(layers);
-  const [rangeAnnotations, lineAnnotations] = partition(
-    annotations?.datatable.rows,
-    isRangeAnnotation
-  );
-
-  const annotationsConfigs = annotations?.layers.flatMap((l) => l.annotations);
+  const [rangeAnnotations, lineAnnotations] = isTimeViz
+    ? partition(annotations?.datatable.rows, isRangeAnnotation)
+    : [[], []];
 
   const groupedLineAnnotations = getAnnotationsGroupedByInterval(
     lineAnnotations as PointEventAnnotationRow[],
-    annotationsConfigs,
+    annotations?.layers.flatMap((l) => l.annotations),
     annotations?.datatable.columns,
     formatFactory,
     timeFormat
@@ -962,7 +959,7 @@ export function XYChart({
               yAxesMap={yAxesMap}
             />
           ) : null}
-          {rangeAnnotations.length || groupedLineAnnotations.length ? (
+          {(rangeAnnotations.length || lineAnnotations.length) && isTimeViz ? (
             <Annotations
               rangeAnnotations={rangeAnnotations}
               groupedLineAnnotations={groupedLineAnnotations}

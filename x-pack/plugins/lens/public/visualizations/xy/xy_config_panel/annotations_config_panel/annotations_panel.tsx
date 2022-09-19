@@ -110,14 +110,14 @@ export const AnnotationsPanel = (
       >
         <EuiFormRow
           label={i18n.translate('xpack.lens.xyChart.annotationDate.placementType', {
-            defaultMessage: 'Placement Type',
+            defaultMessage: 'Placement type',
           })}
           display="rowCompressed"
           fullWidth
         >
           <EuiButtonGroup
             legend={i18n.translate('xpack.lens.xyChart.annotationDate.placementType', {
-              defaultMessage: 'Placement Type',
+              defaultMessage: 'Placement type',
             })}
             data-test-subj="lns-xyAnnotation-placementType"
             name="placementType"
@@ -126,14 +126,14 @@ export const AnnotationsPanel = (
               {
                 id: `lens_xyChart_annotation_manual`,
                 label: i18n.translate('xpack.lens.xyChart.annotation.manual', {
-                  defaultMessage: 'Static Date',
+                  defaultMessage: 'Static date',
                 }),
                 'data-test-subj': 'lnsXY_annotation_manual',
               },
               {
                 id: `lens_xyChart_annotation_query`,
                 label: i18n.translate('xpack.lens.xyChart.annotation.query', {
-                  defaultMessage: 'Query',
+                  defaultMessage: 'Custom query',
                 }),
                 'data-test-subj': 'lnsXY_annotation_query',
               },
@@ -279,7 +279,7 @@ export const AnnotationsPanel = (
                       options={options}
                       onChoose={function (choice: FieldOptionValue | undefined): void {
                         if (choice) {
-                          setAnnotations({ textField: choice.field });
+                          setAnnotations({ textField: choice.field, textVisibility: true });
                         }
                       }}
                       fieldIsInvalid={!fieldIsValid}
