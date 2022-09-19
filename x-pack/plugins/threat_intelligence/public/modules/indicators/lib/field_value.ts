@@ -38,4 +38,4 @@ export const getIndicatorFieldAndValue = (
  * @returns true if correct, false if not
  */
 export const fieldAndValueValid = (field: string | null, value: string | null): boolean =>
-  value != null && value !== '' && value !== EMPTY_VALUE && field != null && field !== '';
+  !!value && value !== EMPTY_VALUE && !!field;

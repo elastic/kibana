@@ -53,6 +53,14 @@ describe('field_value', () => {
       expect(result).toEqual(false);
     });
 
+    it('should return false for empty string value', () => {
+      const mockField = 'abc';
+      const mockValue = '';
+
+      const result = fieldAndValueValid(mockField, mockValue);
+      expect(result).toEqual(false);
+    });
+
     it(`should return false for ${EMPTY_VALUE} value`, () => {
       const mockField = 'abc';
       const mockValue = EMPTY_VALUE;
