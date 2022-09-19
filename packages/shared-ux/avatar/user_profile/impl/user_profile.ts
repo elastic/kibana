@@ -123,16 +123,12 @@ export function getUserAvatarInitials(
   user: Pick<UserProfileUserInfo, 'username' | 'full_name'>,
   avatar?: UserProfileAvatarData
 ) {
-  if (avatar && avatar.initials) {
-    return avatar.initials;
-  }
-
   const words = getUserDisplayName(user).split(' ');
   const numInitials = Math.min(USER_AVATAR_MAX_INITIALS, words.length);
 
   words.splice(numInitials, words.length);
 
-  return words.map((word) => word.substring(0, 1)).join('');
+  return avatar?.initials ?? words.map((word) => word.substring(0, 1)).join('');
 }
 
 /**
