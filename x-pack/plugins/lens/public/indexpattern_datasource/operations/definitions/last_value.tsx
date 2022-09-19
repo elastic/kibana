@@ -39,6 +39,7 @@ import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { isScriptedField } from './terms/helpers';
 import { FormRow } from './shared_components/form_row';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
+import { groupByKey } from '../group_by_key';
 
 function ofName(name: string, timeShift: string | undefined, reducedTimeRange: string | undefined) {
   return adjustTimeScaleLabelSuffix(
@@ -127,22 +128,6 @@ function getExistsFilter(field: string) {
     query: `${field}: *`,
     language: 'kuery',
   };
-}
-
-function groupByKey<T>(items: T[], getKey: (item: T) => string | undefined): Record<string, T[]> {
-  const groups: Record<string, T[]> = {};
-
-  items.forEach((item) => {
-    const key = getKey(item);
-    if (key) {
-      if (!(key in groups)) {
-        groups[key] = [];
-      }
-      groups[key].push(item);
-    }
-  });
-
-  return groups;
 }
 
 export const lastValueOperation: OperationDefinition<

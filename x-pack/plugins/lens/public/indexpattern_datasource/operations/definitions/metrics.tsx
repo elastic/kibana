@@ -37,6 +37,7 @@ import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { updateColumnParam } from '../layer_helpers';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
+import { groupByKey } from '../group_by_key';
 
 type MetricColumn<T> = FieldBasedIndexPatternColumn & {
   operationType: T;
@@ -54,22 +55,6 @@ const typeToFn: Record<string, string> = {
   median: 'aggMedian',
   standard_deviation: 'aggStdDeviation',
 };
-
-function groupByKey<T>(items: T[], getKey: (item: T) => string | undefined): Record<string, T[]> {
-  const groups: Record<string, T[]> = {};
-
-  items.forEach((item) => {
-    const key = getKey(item);
-    if (key) {
-      if (!(key in groups)) {
-        groups[key] = [];
-      }
-      groups[key].push(item);
-    }
-  });
-
-  return groups;
-}
 
 const supportedTypes = ['number', 'histogram'];
 
