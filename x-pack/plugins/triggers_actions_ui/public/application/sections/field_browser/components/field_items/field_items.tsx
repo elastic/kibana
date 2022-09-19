@@ -117,7 +117,6 @@ const getDefaultFieldTableColumns = ({
     sortable: true,
     width: '400px',
   }
-
   const categoryColumn = {
     field: 'category',
     name: i18n.CATEGORY,
@@ -128,8 +127,11 @@ const getDefaultFieldTableColumns = ({
     width: '130px',
   }
 
-
-  return shouldShowDescriptionColumn ? [nameColumn, descriptionColumn, categoryColumn ]: [nameColumn, categoryColumn ]
+  return [
+    nameColumn, 
+    ...(shouldShowDescriptionColumn ? [descriptionColumn] : []),
+    categoryColumn 
+  ]
 };
 
 /**
@@ -170,7 +172,7 @@ export const getFieldColumns = ({
   },
   ...(getFieldTableColumns
     ? getFieldTableColumns({ highlight, onHide })
-    : getDefaultFieldTableColumns({highlight, shouldShowDescriptionColumn})),
+    : getDefaultFieldTableColumns({ highlight, shouldShowDescriptionColumn })),
 ]};
 
 /** Returns whether the table column has actions attached to it */

@@ -7,7 +7,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiInMemoryTable, Pagination, Direction, useEuiTheme } from '@elastic/eui';
 import { getFieldColumns, getFieldItems, isActionsColumn } from '../field_items';
-import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from '../../helpers';
+import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT, getShouldShowDescriptionColumn } from '../../helpers';
 import type { BrowserFields, FieldBrowserProps, GetFieldTableColumns } from '../../types';
 import { FieldTableHeader } from './field_table_header';
 import { styles } from './field_table.styles';
@@ -123,7 +123,7 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
       highlight: searchInput, 
       onHide, 
       onToggleColumn, 
-      shouldShowDescriptionColumn: !!fieldItems.find(fieldItem => !!fieldItem.description?.trim())
+      shouldShowDescriptionColumn: getShouldShowDescriptionColumn(fieldItems)
     }),
     [getFieldTableColumns, onHide, onToggleColumn, searchInput]
   );
