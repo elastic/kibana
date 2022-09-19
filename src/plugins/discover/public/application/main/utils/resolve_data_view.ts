@@ -7,7 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DataView, DataViewListItem, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type {
+  DataView,
+  DataViewListItem,
+  DataViewsContract,
+  DataViewSpec,
+} from '@kbn/data-views-plugin/public';
 import type { ISearchSource } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient, ToastsStart } from '@kbn/core/public';
 interface DataViewData {
@@ -75,32 +80,36 @@ export function getDataViewId(
 export async function loadDataView(
   dataViews: DataViewsContract,
   config: IUiSettingsClient,
-  id?: string
+  id?: string,
+  dataViewSpec?: DataViewSpec
 ): Promise<DataViewData> {
   const dataViewList = await dataViews.getIdsWithTitle();
+  let fetchId: string | undefined = id;
 
-  try {
-    const fetchedDataView = id ? await dataViews.get(id) : undefined;
-    if (fetchedDataView && !fetchedDataView.isPersisted()) {
+  /**
+   * Handle redirect with data view spec provided via history location state
+   */
+  if (dataViewSpec) {
+    const isPersisted = dataViewList.find(({ id: currentId }) => currentId === dataViewSpec.id);
+    if (!isPersisted) {
+      const createdAdHocDataView = await dataViews.create(dataViewSpec);
       return {
         list: dataViewList || [],
-        loaded: fetchedDataView,
-        stateVal: id,
+        loaded: createdAdHocDataView,
+        stateVal: createdAdHocDataView.id,
         stateValFound: true,
       };
     }
-    // Skipping error handling, since 'get' call trying to fetch
-    // adhoc data view which only created using Promise.resolve(dataView),
-    // Any other error will be handled by the next 'get' call below.
-    // eslint-disable-next-line no-empty
-  } catch (e) {}
+    // reassign fetchId in case of persisted data view spec provided
+    fetchId = dataViewSpec.id!;
+  }
 
   const actualId = getDataViewId(id, dataViewList, config.get('defaultIndex'));
   return {
     list: dataViewList || [],
     loaded: await dataViews.get(actualId),
-    stateVal: id,
-    stateValFound: !!id && actualId === id,
+    stateVal: fetchId,
+    stateValFound: !!fetchId && actualId === fetchId,
   };
 }
 

@@ -12,9 +12,7 @@ import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { DataViewSpec } from '@kbn/data-views-plugin/public';
-import { CoreSetup } from '@kbn/core/public';
 import type { VIEW_MODE } from './components/view_mode_toggle';
-import { DiscoverStart, DiscoverStartPlugins } from './plugin';
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
 
@@ -98,8 +96,11 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
 export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
 
 export interface DiscoverAppLocatorDependencies {
-  core: CoreSetup<DiscoverStartPlugins, DiscoverStart>;
   useHash: boolean;
+}
+
+export interface HistoryLocationState {
+  dataViewSpec?: DataViewSpec;
 }
 
 export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverAppLocatorParams> {
@@ -156,12 +157,9 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     if (viewMode) appState.viewMode = viewMode;
     if (hideAggregatedPreview) appState.hideAggregatedPreview = hideAggregatedPreview;
 
+    const state: HistoryLocationState = {};
     if (dataViewSpec) {
-      const [, discoverPlugins] = await this.deps.core.getStartServices();
-      const dataViews = discoverPlugins.data.dataViews;
-
-      const dataView = await dataViews.create(dataViewSpec);
-      appState.index = dataView.id!;
+      state.dataViewSpec = dataViewSpec;
     }
 
     let path = `#/${savedSearchPath}`;
@@ -175,7 +173,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     return {
       app: 'discover',
       path,
-      state: {},
+      state,
     };
   };
 }
