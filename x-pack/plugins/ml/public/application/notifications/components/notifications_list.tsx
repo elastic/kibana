@@ -22,7 +22,6 @@ import {
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import useDebounce from 'react-use/lib/useDebounce';
-import { isEqual } from 'lodash';
 import { ML_NOTIFICATIONS_MESSAGE_LEVEL } from '../../../../common/constants/notifications';
 import { ML_NOTIFICATIONS_LAST_CHECKED_AT } from '../../../../common/types/storage';
 import { useStorage } from '../../contexts/storage';
@@ -33,7 +32,7 @@ import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { useRefresh } from '../../routing/use_refresh';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { ListingPageUrlState } from '../../../../common/types/common';
-import { usePageUrlState } from '../../util/url_state';
+import { usePageUrlState, useUrlState } from '../../util/url_state';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import type {
   MlNotificationMessageLevel,
@@ -66,15 +65,15 @@ export const NotificationsList: FC = () => {
   const timeFilter = useTimefilter();
   const timeRange = useTimeRangeUpdates();
 
-  useEffect(function setTimeRangeOnMount() {
-    const defaults = timeFilter.getTimeDefaults();
+  const [globalState] = useUrlState('_g');
 
-    if (lastCheckedAt && isEqual(defaults, timeRange)) {
-      timeFilter.setTime({
-        from: moment(lastCheckedAt).toISOString(),
-        to: 'now',
-      });
-    }
+  useEffect(function setTimeRangeOnMount() {
+    if (globalState?.time || !lastCheckedAt) return;
+
+    timeFilter.setTime({
+      from: moment(lastCheckedAt).toISOString(),
+      to: 'now',
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
