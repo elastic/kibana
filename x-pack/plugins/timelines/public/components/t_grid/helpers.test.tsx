@@ -518,7 +518,7 @@ describe('Combined Queries', () => {
     );
   });
 
-  test('Disabled Data Provider and kQuery', () => {
+  test('Disabled Data Provider and kqlQuery', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
     dataProviders[0].enabled = false;
     const { filterQuery } = combineQueries({
@@ -556,7 +556,7 @@ describe('Combined Queries', () => {
     expect(filterQuery).toStrictEqual(expectQueryString);
   });
 
-  test('Both disabled & enabled data provider and kQuery', () => {
+  test('Both disabled & enabled data provider and kqlQuery', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
     dataProviders[0].enabled = false;
     const { filterQuery } = combineQueries({
