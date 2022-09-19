@@ -440,6 +440,11 @@ interface OperationParam {
   defaultValue?: string | number;
 }
 
+interface FilterParams {
+  kql?: string;
+  lucene?: string;
+}
+
 interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn, P = {}> {
   input: 'none';
 
@@ -497,12 +502,10 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
       previousColumn?: GenericIndexPatternColumn;
     },
     columnParams?: P & {
-      kql?: string;
-      lucene?: string;
       shift?: string;
       reducedTimeRange?: string;
       usedInMath?: boolean;
-    }
+    } & FilterParams
   ) => C;
   /**
    * This method will be called if the user changes the field of an operation.
@@ -613,10 +616,8 @@ interface FullReferenceOperationDefinition<C extends BaseIndexPatternColumn> {
       previousColumn?: GenericIndexPatternColumn;
     },
     columnParams?: (ReferenceBasedIndexPatternColumn & C)['params'] & {
-      kql?: string;
-      lucene?: string;
       shift?: string;
-    }
+    } & FilterParams
   ) => ReferenceBasedIndexPatternColumn & C;
   /**
    * Returns the meta data of the operation if applied. Undefined
@@ -642,7 +643,7 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
     arg: BaseBuildColumnArgs & {
       previousColumn?: GenericIndexPatternColumn;
     },
-    columnParams?: (ReferenceBasedIndexPatternColumn & C)['params'],
+    columnParams?: (ReferenceBasedIndexPatternColumn & C)['params'] & FilterParams,
     operationDefinitionMap?: Record<string, GenericOperationDefinition>
   ) => ReferenceBasedIndexPatternColumn & C;
   /**

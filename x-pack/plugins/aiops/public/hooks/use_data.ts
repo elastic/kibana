@@ -29,6 +29,8 @@ import { useTimefilter } from './use_time_filter';
 import { useDocumentCountStats } from './use_document_count_stats';
 import type { Dictionary } from './use_url_state';
 
+const DEFAULT_BAR_TARGET = 75;
+
 export const useData = (
   {
     currentDataView,
@@ -36,7 +38,8 @@ export const useData = (
   }: { currentDataView: DataView; currentSavedSearch: SavedSearch | SavedSearchSavedObject | null },
   aiopsListState: AiOpsIndexBasedAppState,
   onUpdate: (params: Dictionary<unknown>) => void,
-  selectedChangePoint?: ChangePoint
+  selectedChangePoint?: ChangePoint,
+  barTarget: number = DEFAULT_BAR_TARGET
 ) => {
   const {
     uiSettings,
@@ -125,10 +128,9 @@ export const useData = (
   function updateFieldStatsRequest() {
     const timefilterActiveBounds = timefilter.getActiveBounds();
     if (timefilterActiveBounds !== undefined) {
-      const BAR_TARGET = 75;
       _timeBuckets.setInterval('auto');
       _timeBuckets.setBounds(timefilterActiveBounds);
-      _timeBuckets.setBarTarget(BAR_TARGET);
+      _timeBuckets.setBarTarget(barTarget);
       setFieldStatsRequest({
         earliest: timefilterActiveBounds.min?.valueOf(),
         latest: timefilterActiveBounds.max?.valueOf(),
@@ -186,6 +188,7 @@ export const useData = (
     earliest: fieldStatsRequest?.earliest,
     /** End timestamp filter */
     latest: fieldStatsRequest?.latest,
+    intervalMs: fieldStatsRequest?.intervalMs,
     searchQueryLanguage,
     searchString,
     searchQuery,

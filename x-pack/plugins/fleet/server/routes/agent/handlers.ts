@@ -42,8 +42,9 @@ import type {
   PutAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
   PostBulkUpdateAgentTagsRequestSchema,
+  GetActionStatusRequestSchema,
 } from '../../types';
-import { defaultIngestErrorHandler } from '../../errors';
+import { defaultFleetErrorHandler } from '../../errors';
 import * as AgentService from '../../services/agents';
 
 export const getAgentHandler: RequestHandler<
@@ -65,7 +66,7 @@ export const getAgentHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -91,7 +92,7 @@ export const deleteAgentHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -125,7 +126,7 @@ export const updateAgentHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -160,7 +161,7 @@ export const bulkUpdateAgentTagsHandler: RequestHandler<
 
     return response.ok({ body: { ...body, actionId: results.actionId } });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -197,7 +198,7 @@ export const getAgentsHandler: RequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -219,7 +220,7 @@ export const getAgentTagsHandler: RequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -242,7 +243,7 @@ export const putAgentsReassignHandler: RequestHandler<
     const body: PutAgentReassignResponse = {};
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -276,7 +277,7 @@ export const postBulkAgentsReassignHandler: RequestHandler<
 
     return response.ok({ body: { ...body, actionId: results.actionId } });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -297,7 +298,7 @@ export const getAgentStatusForAgentPolicyHandler: RequestHandler<
 
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -323,7 +324,7 @@ export const getAgentDataHandler: RequestHandler<
 
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -360,19 +361,22 @@ export const getAvailableVersionsHandler: RequestHandler = async (context, reque
     const body: GetAvailableVersionsResponse = { items: versionsToDisplay };
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
-export const getActionStatusHandler: RequestHandler = async (context, request, response) => {
+export const getActionStatusHandler: RequestHandler<
+  undefined,
+  TypeOf<typeof GetActionStatusRequestSchema.query>
+> = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   try {
-    const actionStatuses = await AgentService.getActionStatuses(esClient);
+    const actionStatuses = await AgentService.getActionStatuses(esClient, request.query);
     const body: GetActionStatusResponse = { items: actionStatuses };
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
