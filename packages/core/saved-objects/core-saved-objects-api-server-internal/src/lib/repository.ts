@@ -240,7 +240,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       serializer,
       migrator,
       allowedTypes = [],
-      logger, // 'savedobjects-service.repository'
+      logger,
     } = options;
 
     // It's important that we migrate documents / mark them as up-to-date

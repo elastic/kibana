@@ -2454,7 +2454,7 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it(`returns an for an object when the object's type is hidden`, async () => {
+      it(`returns an error for an object when the object's type is hidden`, async () => {
         const hiddenObject = { ...obj1, type: HIDDEN_TYPE };
         await repositoryBulkDeleteError(hiddenObject, false, expectErrorInvalidType(hiddenObject));
       });

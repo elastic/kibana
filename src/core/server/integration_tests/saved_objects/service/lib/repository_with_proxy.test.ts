@@ -263,8 +263,11 @@ describe('404s from proxies', () => {
     });
 
     it('handles `bulkDelete` requests that are successful when the proxy passes through the product header', async () => {
-      const docsToGet = myBulkDeleteTypeDocs;
-      const bulkDeleteDocs = docsToGet.map((doc) => ({ id: doc.id, type: 'my_bulk_delete_type' }));
+      const docsToDelete = myBulkDeleteTypeDocs;
+      const bulkDeleteDocs = docsToDelete.map((doc) => ({
+        id: doc.id,
+        type: 'my_bulk_delete_type',
+      }));
 
       const docsFound = await repository.bulkDelete(bulkDeleteDocs, { force: false });
       expect(docsFound.statuses.length).toBeGreaterThan(0);
