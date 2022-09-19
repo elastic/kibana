@@ -45,6 +45,11 @@ export const TimeSeriesQuerySchema = schema.object(
   }
 );
 
+export interface TimeSeriesSelectorParams {
+  termLimit: number;
+  threshold: number[];
+}
+
 // using direct type not allowed, circular reference, so body is typed to unknown
 function validateBody(anyParams: unknown): string | undefined {
   // validate core query parts, return if it fails validation (returning string)

@@ -104,6 +104,87 @@ describe('timeSeriesQuery', () => {
   });
 
   it('should create correct query when aggType=count and termField is specified (count over top N termField)', async () => {
+    // {
+    //   "took": 1,
+    //   "timed_out": false,
+    //   "_shards": {
+    //     "total": 1,
+    //     "successful": 1,
+    //     "skipped": 0,
+    //     "failed": 0
+    //   },
+    //   "hits": {
+    //     "total": {
+    //       "value": 223,
+    //       "relation": "eq"
+    //     },
+    //     "max_score": null,
+    //     "hits": []
+    //   },
+    //   "aggregations": {
+    //     "groupAgg": {
+    //       "doc_count_error_upper_bound": 0,
+    //       "sum_other_doc_count": 0,
+    //       "buckets": [
+    //         {
+    //           "key": "starting",
+    //           "doc_count": 19,
+    //           "dateAgg": {
+    //             "buckets": [
+    //               {
+    //                 "key": "2022-09-19T00:14:31.000Z-2022-09-19T23:19:31.000Z",
+    //                 "from": 1663546471000,
+    //                 "from_as_string": "2022-09-19T00:14:31.000Z",
+    //                 "to": 1663629571000,
+    //                 "to_as_string": "2022-09-19T23:19:31.000Z",
+    //                 "doc_count": 19
+    //               }
+    //             ]
+    //           }
+    //         },
+    //         {
+    //           "key": "execute",
+    //           "doc_count": 12,
+    //           "dateAgg": {
+    //             "buckets": [
+    //               {
+    //                 "key": "2022-09-19T00:14:31.000Z-2022-09-19T23:19:31.000Z",
+    //                 "from": 1663546471000,
+    //                 "from_as_string": "2022-09-19T00:14:31.000Z",
+    //                 "to": 1663629571000,
+    //                 "to_as_string": "2022-09-19T23:19:31.000Z",
+    //                 "doc_count": 12
+    //               }
+    //             ]
+    //           }
+    //         },
+    //         {
+    //           "key": "execute-start",
+    //           "doc_count": 12,
+    //           "dateAgg": {
+    //             "buckets": [
+    //               {
+    //                 "key": "2022-09-19T00:14:31.000Z-2022-09-19T23:19:31.000Z",
+    //                 "from": 1663546471000,
+    //                 "from_as_string": "2022-09-19T00:14:31.000Z",
+    //                 "to": 1663629571000,
+    //                 "to_as_string": "2022-09-19T23:19:31.000Z",
+    //                 "doc_count": 12
+    //               }
+    //             ]
+    //           }
+    //         }
+    //       ]
+    //     },
+    //     "groupAggCount": {
+    //       "count": 3,
+    //       "min": 12,
+    //       "max": 19,
+    //       "avg": 14.333333333333334,
+    //       "sum": 43
+    //     }
+    //   }
+    // }
     await timeSeriesQuery({
       ...params,
       query: {
@@ -243,6 +324,127 @@ describe('timeSeriesQuery', () => {
   });
 
   it('should create correct query when aggType!=count and termField is specified (aggregate metric over top N termField)', async () => {
+    // {
+    //   "took": 3,
+    //   "timed_out": false,
+    //   "_shards": {
+    //     "total": 1,
+    //     "successful": 1,
+    //     "skipped": 0,
+    //     "failed": 0
+    //   },
+    //   "hits": {
+    //     "total": {
+    //       "value": 223,
+    //       "relation": "eq"
+    //     },
+    //     "max_score": null,
+    //     "hits": []
+    //   },
+    //   "aggregations": {
+    //     "groupAgg": {
+    //       "doc_count_error_upper_bound": 0,
+    //       "sum_other_doc_count": 0,
+    //       "buckets": [
+    //         {
+    //           "key": "recovered-instance",
+    //           "doc_count": 60,
+    //           "sortValueAgg": {
+    //             "value": 11007250000
+    //           },
+    //           "dateAgg": {
+    //             "buckets": [
+    //               {
+    //                 "key": "2022-09-19T00:14:31.000Z-2022-09-19T23:19:31.000Z",
+    //                 "from": 1663546471000,
+    //                 "from_as_string": "2022-09-19T00:14:31.000Z",
+    //                 "to": 1663629571000,
+    //                 "to_as_string": "2022-09-19T23:19:31.000Z",
+    //                 "doc_count": 60,
+    //                 "metricAgg": {
+    //                   "value": 11007250000
+    //                 }
+    //               }
+    //             ]
+    //           }
+    //         },
+    //         {
+    //           "key": "execute",
+    //           "doc_count": 12,
+    //           "sortValueAgg": {
+    //             "value": 155166666.66666666
+    //           },
+    //           "dateAgg": {
+    //             "buckets": [
+    //               {
+    //                 "key": "2022-09-19T00:14:31.000Z-2022-09-19T23:19:31.000Z",
+    //                 "from": 1663546471000,
+    //                 "from_as_string": "2022-09-19T00:14:31.000Z",
+    //                 "to": 1663629571000,
+    //                 "to_as_string": "2022-09-19T23:19:31.000Z",
+    //                 "doc_count": 12,
+    //                 "metricAgg": {
+    //                   "value": 155166666.66666666
+    //                 }
+    //               }
+    //             ]
+    //           }
+    //         },
+    //         {
+    //           "key": "active-instance",
+    //           "doc_count": 60,
+    //           "sortValueAgg": {
+    //             "value": 0
+    //           },
+    //           "dateAgg": {
+    //             "buckets": [
+    //               {
+    //                 "key": "2022-09-19T00:14:31.000Z-2022-09-19T23:19:31.000Z",
+    //                 "from": 1663546471000,
+    //                 "from_as_string": "2022-09-19T00:14:31.000Z",
+    //                 "to": 1663629571000,
+    //                 "to_as_string": "2022-09-19T23:19:31.000Z",
+    //                 "doc_count": 60,
+    //                 "metricAgg": {
+    //                   "value": 0
+    //                 }
+    //               }
+    //             ]
+    //           }
+    //         },
+    //         {
+    //           "key": "new-instance",
+    //           "doc_count": 60,
+    //           "sortValueAgg": {
+    //             "value": 0
+    //           },
+    //           "dateAgg": {
+    //             "buckets": [
+    //               {
+    //                 "key": "2022-09-19T00:14:31.000Z-2022-09-19T23:19:31.000Z",
+    //                 "from": 1663546471000,
+    //                 "from_as_string": "2022-09-19T00:14:31.000Z",
+    //                 "to": 1663629571000,
+    //                 "to_as_string": "2022-09-19T23:19:31.000Z",
+    //                 "doc_count": 60,
+    //                 "metricAgg": {
+    //                   "value": 0
+    //                 }
+    //               }
+    //             ]
+    //           }
+    //         }
+    //       ]
+    //     },
+    //     "groupAggCount": {
+    //       "count": 4,
+    //       "min": 12,
+    //       "max": 60,
+    //       "avg": 48,
+    //       "sum": 192
+    //     }
+    //   }
+    // }
     await timeSeriesQuery({
       ...params,
       query: {

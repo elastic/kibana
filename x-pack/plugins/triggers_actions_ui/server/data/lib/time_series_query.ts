@@ -64,8 +64,16 @@ export async function timeSeriesQuery(
   const isCountAgg = aggType === 'count';
   const isGroupAgg = !!termField;
 
+  // Cap the maximum number of terms returned to the termLimit if defined
+  // Use termLimit + 1 because we're using the bucket selector aggregation
+  // to apply the threshold condition to the ES query. We don't seem to be
+  // able to get the true cardinality from the bucket selector (i.e., get
+  // the number of buckets that matched the selector condition without actually
+  // retrieving the bucket data). By using termLimit + 1, we can count the number
+  // of buckets returned and if the value is greater than termLimit, we know that
+  // there is additional alert data that we're not returning.
   let terms = termSize || DEFAULT_GROUPS;
-  terms = termLimit ? (terms > termLimit ? termLimit : terms) : terms;
+  terms = termLimit ? (terms > termLimit ? termLimit + 1 : terms) : terms;
 
   let aggParent = esQuery.body;
 

@@ -34,6 +34,27 @@ export const ComparatorFns = new Map<Comparator, ComparatorFn>([
   ],
 ]);
 
+export const getComparatorScript = (
+  comparator: Comparator,
+  threshold: number[],
+  fieldName: string
+) => {
+  switch (comparator) {
+    case Comparator.LT:
+      return `${fieldName} < ${threshold[0]}`;
+    case Comparator.LT_OR_EQ:
+      return `${fieldName} <= ${threshold[0]}`;
+    case Comparator.GT:
+      return `${fieldName} > ${threshold[0]}`;
+    case Comparator.GT_OR_EQ:
+      return `${fieldName} >= ${threshold[0]}`;
+    case Comparator.BETWEEN:
+      return `${fieldName} >= ${threshold[0]} && $${fieldName} <= ${threshold[1]}`;
+    case Comparator.NOT_BETWEEN:
+      return `${fieldName} < ${threshold[0]} || $${fieldName} > ${threshold[1]}`;
+  }
+};
+
 export const getComparatorSchemaType = (validate: (comparator: Comparator) => string | void) =>
   schema.oneOf(
     [
