@@ -33,6 +33,7 @@ describe('ProcessTree component', () => {
     fetchPreviousPage: jest.fn(),
     hasPreviousPage: false,
     onProcessSelected: jest.fn(),
+    onJumpToOutput: jest.fn(),
     updatedAlertsStatus: {},
     onShowAlertDetails: jest.fn(),
   };
