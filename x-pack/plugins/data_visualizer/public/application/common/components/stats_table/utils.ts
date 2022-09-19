@@ -37,6 +37,13 @@ export const getTFPercentage = (config: FileBasedFieldVisConfig) => {
   };
 };
 
+// Map of DataVisualizerTable breakpoints specific to the table component
+// Note that the table width is not always the full width of the browser window
+const TABLE_BREAKPOINTS = {
+  small: 600,
+  medium: 1000,
+  large: Infinity, // default
+};
 export const calculateTableColumnsDimensions = (width?: number) => {
   const defaultSettings = {
     expander: '40px',
@@ -48,7 +55,7 @@ export const calculateTableColumnsDimensions = (width?: number) => {
     breakPoint: 'large',
   };
   if (width === undefined) return defaultSettings;
-  if (width <= 575) {
+  if (width <= TABLE_BREAKPOINTS['small']) {
     return {
       expander: '25px',
       type: '40px',
@@ -59,7 +66,7 @@ export const calculateTableColumnsDimensions = (width?: number) => {
       breakPoint: 'small',
     };
   }
-  if (width <= 992) {
+  if (width <= TABLE_BREAKPOINTS['medium']) {
     return {
       expander: '25px',
       type: '40px',
