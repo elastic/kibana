@@ -286,7 +286,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
 
   async bulkUpdate<T = unknown>(
     objects: Array<SavedObjectsBulkUpdateObject<T>> = [],
-    options: SavedObjectsBulkDeleteOptions = {}
+    options: SavedObjectsBaseOptions = {}
   ) {
     throwErrorIfNamespaceSpecified(options);
     return await this.client.bulkUpdate(objects, {
