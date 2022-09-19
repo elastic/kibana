@@ -94,6 +94,7 @@ const AlertsTableWithBulkActionsContextComponent: React.FunctionComponent<{
 );
 
 const AlertsTableWithBulkActionsContext = React.memo(AlertsTableWithBulkActionsContextComponent);
+const EMPTY_FIELDS = [{ field: '*', include_unmapped: true }];
 
 const AlertsTableState = ({
   alertsTableConfigurationRegistry,
@@ -174,7 +175,7 @@ const AlertsTableState = ({
       updatedAt,
     },
   ] = useFetchAlerts({
-    fields: columns.map((col) => ({ field: col.id, include_unmapped: true })),
+    fields: EMPTY_FIELDS,
     featureIds,
     query,
     pagination,
