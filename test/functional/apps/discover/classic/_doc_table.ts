@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    describe('classic table in window 900x700', async function () {
+    describe('classic table in window 900x700', function () {
       before(async () => {
         await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
         await browser.setWindowSize(900, 700);
@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('classic table in window 600x700', async function () {
+    describe('classic table in window 600x700', function () {
       before(async () => {
         await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
         await browser.setWindowSize(600, 700);
@@ -106,7 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('legacy', async function () {
+    describe('legacy', function () {
       before(async () => {
         await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
         await PageObjects.common.navigateToApp('discover');
@@ -141,7 +141,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(skipButtonText === activeElementText).to.be(true);
       });
 
-      describe('expand a document row', async function () {
+      describe('expand a document row', function () {
         const rowToInspect = 1;
         beforeEach(async function () {
           // close the toggle if open
@@ -198,7 +198,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should show allow toggling columns from the expanded document', async function () {
           await PageObjects.discover.clickNewSearchButton();
+          await testSubjects.click('dscExplorerCalloutClose');
           await retry.try(async function () {
+            log.debug('row index: ' + String(rowToInspect - 1));
             await docTable.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
 
             // add columns
@@ -221,7 +223,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('add and remove columns', async function () {
+      describe('add and remove columns', function () {
         const extraColumns = ['phpmemory', 'ip'];
 
         afterEach(async function () {
