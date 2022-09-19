@@ -109,6 +109,7 @@ export interface EventAnnotationConfig {
 export interface XYAnnotationsLayerConfig {
   layerId: string;
   annotations: EventAnnotationConfig[];
+  ignoreGlobalFilters: boolean;
   layerType: 'annotations';
   indexPatternId: string;
 }

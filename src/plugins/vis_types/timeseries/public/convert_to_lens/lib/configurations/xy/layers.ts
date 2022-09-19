@@ -151,6 +151,7 @@ export const getLayers = async (
         return {
           layerId: v4(),
           layerType: 'annotations',
+          ignoreGlobalFilters: true,
           annotations: convertedAnnotations,
           indexPatternId,
         };

@@ -386,6 +386,7 @@ describe('getLayers', () => {
         {
           layerId: 'test-id',
           layerType: 'annotations',
+          ignoreGlobalFilters: true,
           annotations: [
             {
               color: '#D33115',
@@ -430,6 +431,7 @@ describe('getLayers', () => {
         {
           layerId: 'test-id',
           layerType: 'annotations',
+          ignoreGlobalFilters: true,
           annotations: [
             {
               color: '#D33115',
@@ -471,6 +473,7 @@ describe('getLayers', () => {
         {
           layerId: 'test-id',
           layerType: 'annotations',
+          ignoreGlobalFilters: true,
           annotations: [
             {
               color: '#FF0000',
