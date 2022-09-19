@@ -17781,7 +17781,6 @@
     "xpack.lens.xyChart.addLayerTooltip": "複数のレイヤーを使用すると、ビジュアライゼーションタイプを組み合わせたり、別のデータビューを可視化したりすることができます。",
     "xpack.lens.xyChart.addReferenceLineLayerLabel": "基準線",
     "xpack.lens.xyChart.addReferenceLineLayerLabelDisabledHelp": "一部のデータを追加して、基準レイヤーを有効にする",
-    "xpack.lens.xyChart.annotation.name": "注釈を非表示",
     "xpack.lens.xyChart.annotationDate": "注釈日",
     "xpack.lens.xyChart.annotationDate.from": "開始：",
     "xpack.lens.xyChart.annotationDate.to": "終了：",
