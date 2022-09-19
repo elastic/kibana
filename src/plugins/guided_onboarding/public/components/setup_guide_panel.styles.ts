@@ -9,6 +9,13 @@
 import { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+/**
+ *
+ * Style overrides for the setup guide dropdown panel.
+ * There is currently no existing EUI component that fully supports what we need.
+ * In order to leverage a11y features, we are using the EuiFlyout and applying customizations
+ * See https://github.com/elastic/eui/issues/6241 for more details
+ */
 export const setupGuidePanelStyles = (euiTheme: EuiThemeComputed) => ({
   flyoutOverrides: {
     flyoutContainer: css`
