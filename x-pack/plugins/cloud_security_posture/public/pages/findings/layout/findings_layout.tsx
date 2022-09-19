@@ -140,7 +140,7 @@ const baseColumns = [
     truncateText: true,
     render: (tags: string[]) => {
       const primaryTags = getPrimaryRuleTags(tags);
-      return primaryTags.map((tag) => <EuiBadge>{tag}</EuiBadge>);
+      return primaryTags.map((tag) => <EuiBadge key={tag}>{tag}</EuiBadge>);
     },
   },
   {
