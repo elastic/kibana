@@ -83,7 +83,6 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
               </EuiButtonEmpty>
             </Link>
             <CloudPosturePageTitle
-              isBeta
               title={i18n.translate('xpack.csp.rules.rulePageHeader.pageHeaderTitle', {
                 defaultMessage: 'Rules - {integrationName}',
                 values: {
