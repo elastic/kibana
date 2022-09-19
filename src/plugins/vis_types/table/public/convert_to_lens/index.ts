@@ -39,10 +39,14 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
   }
 
   const dataViews = getDataViewsStart();
-  const dataView = vis.data.indexPattern?.id
-    ? await dataViews.get(vis.data.indexPattern.id)
-    : await dataViews.getDefault();
-
+  let dataView;
+  try {
+    dataView = vis.data.indexPattern?.id
+      ? await dataViews.get(vis.data.indexPattern.id)
+      : await dataViews.getDefault();
+  } catch (err) {
+    return null;
+  }
   if (!dataView) {
     return null;
   }
