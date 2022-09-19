@@ -237,7 +237,7 @@
             "label": "asInternalUser",
             "description": [],
             "signature": [
-              "{ get: ",
+              "{ name: string | symbol; get: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -341,7 +341,7 @@
               },
               "<",
               "default",
-              ">; name: string | symbol; index: ",
+              ">; index: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -1348,7 +1348,7 @@
             "label": "asInternalUser",
             "description": [],
             "signature": [
-              "{ get: ",
+              "{ name: string | symbol; get: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -1452,7 +1452,7 @@
               },
               "<",
               "default",
-              ">; name: string | symbol; index: ",
+              ">; index: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -2413,7 +2413,7 @@
             "label": "asCurrentUser",
             "description": [],
             "signature": [
-              "{ get: ",
+              "{ name: string | symbol; get: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -2517,7 +2517,7 @@
               },
               "<",
               "default",
-              ">; name: string | symbol; index: ",
+              ">; index: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "server",
@@ -3545,7 +3545,7 @@
         "label": "ElasticsearchClientMock",
         "description": [],
         "signature": [
-          "{ get: ",
+          "{ name: string | symbol; get: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
             "scope": "server",
@@ -3649,7 +3649,7 @@
           },
           "<",
           "default",
-          ">; name: string | symbol; index: ",
+          ">; index: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
             "scope": "server",

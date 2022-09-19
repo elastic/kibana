@@ -787,12 +787,12 @@
           {
             "parentPluginId": "@kbn/typed-react-router-config",
             "id": "def-common.RouteMatch.route",
-            "type": "Uncategorized",
+            "type": "CompoundType",
             "tags": [],
             "label": "route",
             "description": [],
             "signature": [
-              "TRoute"
+              "TRoute & { path: string; }"
             ],
             "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
             "deprecated": false,
@@ -2177,8 +2177,8 @@
                 "pluginId": "@kbn/typed-react-router-config",
                 "scope": "common",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.Route",
-                "text": "Route"
+                "section": "def-common.RouteWithPath",
+                "text": "RouteWithPath"
               },
               ") => string"
             ],
@@ -2198,8 +2198,8 @@
                     "pluginId": "@kbn/typed-react-router-config",
                     "scope": "common",
                     "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                    "section": "def-common.Route",
-                    "text": "Route"
+                    "section": "def-common.RouteWithPath",
+                    "text": "RouteWithPath"
                   }
                 ],
                 "path": "packages/kbn-typed-react-router-config/src/types/index.ts",

@@ -8,37 +8,53 @@
 import { EuiDataGridToolBarVisibilityOptions } from '@elastic/eui';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import React, { lazy, Suspense } from 'react';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { AlertsCount } from './components/alerts_count/alerts_count';
 import { BulkActionsConfig } from '../../../../types';
 import { LastUpdatedAt } from './components/last_updated_at';
 import { FieldBrowser } from '../../field_browser';
 
 const BulkActionsToolbar = lazy(() => import('../bulk_actions/components/toolbar'));
 
-const getDefaultVisibility = (
-  updatedAt: number,
-  columnIds: string[],
-  onToggleColumn: (columnId: string) => void,
-  onResetColumns: () => void,
-  browserFields: any
-): EuiDataGridToolBarVisibilityOptions => {
+const getDefaultVisibility = ({
+  alertsCount,
+  updatedAt,
+  columnIds,
+  onToggleColumn,
+  onResetColumns,
+  browserFields,
+}: {
+  alertsCount: number;
+  updatedAt: number;
+  columnIds: string[];
+  onToggleColumn: (columnId: string) => void;
+  onResetColumns: () => void;
+  browserFields: BrowserFields;
+}): EuiDataGridToolBarVisibilityOptions => {
   const hasBrowserFields = Object.keys(browserFields).length > 0;
+  const additionalControls = {
+    right: <LastUpdatedAt updatedAt={updatedAt} />,
+    left: {
+      append: (
+        <>
+          <AlertsCount count={alertsCount} />
+          {hasBrowserFields ? (
+            <FieldBrowser
+              columnIds={columnIds}
+              browserFields={browserFields}
+              onResetColumns={onResetColumns}
+              onToggleColumn={onToggleColumn}
+            />
+          ) : undefined}
+        </>
+      ),
+    },
+  };
 
   return {
+    additionalControls,
     showColumnSelector: true,
     showSortSelector: true,
-    additionalControls: {
-      right: <LastUpdatedAt updatedAt={updatedAt} />,
-      left: {
-        append: hasBrowserFields ? (
-          <FieldBrowser
-            columnIds={columnIds}
-            browserFields={browserFields}
-            onResetColumns={onResetColumns}
-            onToggleColumn={onToggleColumn}
-          />
-        ) : undefined,
-      },
-    },
   };
 };
 
@@ -66,13 +82,14 @@ export const getToolbarVisibility = ({
   browserFields: any;
 }): EuiDataGridToolBarVisibilityOptions => {
   const selectedRowsCount = rowSelection.size;
-  const defaultVisibility = getDefaultVisibility(
+  const defaultVisibility = getDefaultVisibility({
+    alertsCount,
     updatedAt,
     columnIds,
     onToggleColumn,
     onResetColumns,
-    browserFields
-  );
+    browserFields,
+  });
   const isBulkActionsActive =
     selectedRowsCount === 0 || selectedRowsCount === undefined || bulkActions.length === 0;
 
@@ -85,9 +102,12 @@ export const getToolbarVisibility = ({
       right: <LastUpdatedAt updatedAt={updatedAt} />,
       left: {
         append: (
-          <Suspense fallback={null}>
-            <BulkActionsToolbar totalItems={alertsCount} items={bulkActions} alerts={alerts} />
-          </Suspense>
+          <>
+            <AlertsCount count={alertsCount} />
+            <Suspense fallback={null}>
+              <BulkActionsToolbar totalItems={alertsCount} items={bulkActions} alerts={alerts} />
+            </Suspense>
+          </>
         ),
       },
     },
