@@ -18,8 +18,8 @@ import {
   getBucketCollapseFn,
   getBucketColumns,
   getColumnIds,
+  getColumnsWithoutReferenced,
   getMetricsWithoutDuplicates,
-  isReferenced,
   isValidVis,
   sortColumns,
 } from './utils';
@@ -108,14 +108,12 @@ export const getColumnsFromVis = <T>(
     metricsWithoutDuplicates
   );
 
-  const columnsWithoutReferenced = columns.filter(
-    ({ columnId }) => !isReferenced(columns, columnId)
-  );
+  const columnsWithoutReferenced = getColumnsWithoutReferenced(columns);
 
   return {
     metrics: getColumnIds(metrics),
     buckets: getColumnIds([...bucketColumns, ...splitBucketColumns, ...customBucketColumns]),
-    bucketCollapseFn: getBucketCollapseFn(visSchemas),
+    bucketCollapseFn: getBucketCollapseFn(visSchemas.metric),
     columnsWithoutReferenced,
     columns,
   };

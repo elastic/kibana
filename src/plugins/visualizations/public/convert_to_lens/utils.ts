@@ -13,15 +13,18 @@ import { convertBucketToColumns } from '../../common/convert_to_lens/lib/buckets
 import { isSiblingPipeline } from '../../common/convert_to_lens/lib/utils';
 import { Schemas } from '../vis_schemas';
 
-export function isReferenced(columns: AggBasedColumn[], columnId: string) {
-  const allReferences = Object.values(columns).flatMap((col) =>
+export const isReferenced = (columnId: string, references: string[]) =>
+  references.includes(columnId);
+
+export const getColumnsWithoutReferenced = (columns: AggBasedColumn[]) => {
+  const references = Object.values(columns).flatMap((col) =>
     'references' in col ? col.references : []
   );
-  return allReferences.includes(columnId);
-}
+  return columns.filter(({ columnId }) => !isReferenced(columnId, references));
+};
 
-export const getBucketCollapseFn = (visSchemas: Schemas) => {
-  return visSchemas.metric.find((m) => isSiblingPipeline(m))?.aggType.split('_')[0];
+export const getBucketCollapseFn = (metrics: Array<SchemaConfig<SupportedAggregation>>) => {
+  return metrics.find((m) => isSiblingPipeline(m))?.aggType.split('_')[0];
 };
 
 export const getBucketColumns = (
