@@ -18,7 +18,9 @@
     "taskManager",
     "security",
     "charts",
-    "discover"
+    "discover",
+    "cloud",
+    "licensing"
   ],
   "requiredBundles": ["kibanaReact"],
   "optionalPlugins": ["usageCollection"]

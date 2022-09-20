@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import {
+import type {
   AggregationOptionsByType,
   AggregationResultOf,
-} from '@kbn/core/types/elasticsearch';
+} from '@kbn/es-types';
 import { EVENT_OUTCOME } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
 

@@ -37,6 +37,8 @@ interface PanelOpts {
   onCancelSchedules: (ids: string[]) => void;
   initialSchedule: SnoozeSchedule | null;
   isLoading: boolean;
+  bulkSnoozeSchedule?: boolean;
+  showDelete?: boolean;
   inPopover?: boolean;
 }
 
@@ -95,6 +97,8 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
   initialSchedule,
   isLoading,
   onCancelSchedules,
+  bulkSnoozeSchedule = false,
+  showDelete = false,
   inPopover = false,
 }) => {
   // These two states form a state machine for whether or not the user's clicks on the datepicker apply to the start/end date or start/end time
@@ -240,13 +244,21 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
   ]);
 
   const onCancelSchedule = useCallback(() => {
-    if (!initialSchedule?.id) return;
-    onCancelSchedules([initialSchedule.id]);
-  }, [initialSchedule, onCancelSchedules]);
+    if (bulkSnoozeSchedule) {
+      onCancelSchedules([]);
+    } else if (initialSchedule?.id) {
+      onCancelSchedules([initialSchedule.id]);
+    }
+  }, [initialSchedule, onCancelSchedules, bulkSnoozeSchedule]);
 
   return (
     <>
-      <EuiFlexGroup gutterSize="xs" alignItems="center" direction="column">
+      <EuiFlexGroup
+        gutterSize="xs"
+        alignItems="center"
+        direction="column"
+        data-test-subj="ruleSnoozeScheduler"
+      >
         <EuiFlexItem>
           <EuiDatePickerRange
             startDateControl={
@@ -341,12 +353,13 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
         disabled={!startDT || !endDT || startDT.isAfter(endDT) || startDT.isBefore(minDate)}
         onClick={onClickSaveSchedule}
         isLoading={isLoading}
+        data-test-subj="scheduler-saveSchedule"
       >
         {i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.saveSchedule', {
           defaultMessage: 'Save schedule',
         })}
       </EuiButton>
-      {initialSchedule && (
+      {(initialSchedule || showDelete) && (
         <>
           {!inPopover && <EuiSpacer size="s" />}
           <EuiPopoverFooter>
@@ -355,7 +368,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
               <EuiFlexItem grow>
                 <EuiButton isLoading={isLoading} color="danger" onClick={onCancelSchedule}>
                   {i18n.translate('xpack.triggersActionsUI.sections.rulesList.deleteSchedule', {
-                    defaultMessage: 'Delete schedule',
+                    defaultMessage: 'Delete schedules',
                   })}
                 </EuiButton>
               </EuiFlexItem>
