@@ -22,7 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
-import { SpikeAnalysisTableExpandedRow } from './spike_analysis_table_expanded_row';
+import { SpikeAnalysisTable } from './spike_analysis_table';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 const DEFAULT_SORT_FIELD = 'docCount';
@@ -91,7 +91,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       }
 
       itemIdToExpandedRowMapValues[item.id] = (
-        <SpikeAnalysisTableExpandedRow
+        <SpikeAnalysisTable
           changePoints={expandedTableItems as ChangePoint[]}
           loading={loading}
           onPinnedChangePoint={onPinnedChangePoint}
@@ -118,7 +118,15 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
         <EuiButtonIcon
           data-test-subj={'aiopsSpikeAnalysisGroupsTableRowExpansionButton'}
           onClick={() => toggleDetails(item)}
-          aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
+            aria-label={
+            itemIdToExpandedRowMap[item.id]
+              ? i18n.translate('xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.collapseAriaLabel', {
+                  defaultMessage: 'Collapse',
+                })
+              : i18n.translate('xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.expandAriaLabel', {
+                  defaultMessage: 'Expand',
+                })
+          }
           iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
         />
       ),
