@@ -11,9 +11,11 @@ import type { HttpSetup, HttpFetchOptions } from '@kbn/core-http-browser';
 import type { SavedObject, SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectsBulkResolveResponse as SavedObjectsBulkResolveResponseServer,
+  SavedObjectsBulkDeleteResponse as SavedObjectsBulkDeleteResponseServer,
   SavedObjectsClientContract as SavedObjectsApi,
   SavedObjectsFindResponse as SavedObjectsFindResponseServer,
   SavedObjectsResolveResponse,
+  SavedObjectsBulkDeleteOptions,
 } from '@kbn/core-saved-objects-api-server';
 import type {
   SavedObjectsClientContract,
@@ -28,6 +30,7 @@ import type {
   SavedObjectsBulkCreateOptions,
   SavedObjectsBulkCreateObject,
   SimpleSavedObject,
+  SavedObjectsBulkDeleteResponse,
 } from '@kbn/core-saved-objects-api-browser';
 
 import { SimpleSavedObjectImpl } from './simple_saved_object';
@@ -254,6 +257,31 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
 
     return this.savedObjectsFetch(this.getPath([type, id]), { method: 'DELETE', query });
   };
+
+  public bulkDelete = async (
+    objects: SavedObjectTypeIdTuple[],
+    options?: SavedObjectsBulkDeleteOptions
+  ): Promise<SavedObjectsBulkDeleteResponse> => {
+    const filteredObjects = objects.map(({ type, id }) => ({ type, id }));
+    const queryOptions = { force: !!options?.force };
+    const response = await this.performBulkDelete(filteredObjects, queryOptions);
+    return {
+      statuses: response.statuses,
+    };
+  };
+
+  private async performBulkDelete(
+    objects: SavedObjectTypeIdTuple[],
+    queryOptions: { force: boolean }
+  ) {
+    const path = this.getPath(['_bulk_delete']);
+    const request: Promise<SavedObjectsBulkDeleteResponseServer> = this.savedObjectsFetch(path, {
+      method: 'POST',
+      body: JSON.stringify(objects),
+      query: queryOptions,
+    });
+    return request;
+  }
 
   public find = <T = unknown, A = unknown>(
     options: SavedObjectsFindOptions

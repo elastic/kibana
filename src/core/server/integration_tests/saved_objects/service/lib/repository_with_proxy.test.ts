@@ -54,6 +54,17 @@ const registerSOTypes = (setup: InternalCoreSetup) => {
     },
     namespaceType: 'single',
   });
+  setup.savedObjects.registerType({
+    name: 'my_bulk_delete_type',
+    hidden: false,
+    mappings: {
+      dynamic: false,
+      properties: {
+        title: { type: 'text' },
+      },
+    },
+    namespaceType: 'single',
+  });
 };
 
 describe('404s from proxies', () => {
@@ -124,6 +135,7 @@ describe('404s from proxies', () => {
     let repository: ISavedObjectsRepository;
     let myOtherType: SavedObject;
     const myOtherTypeDocs: SavedObject[] = [];
+    const myBulkDeleteTypeDocs: SavedObject[] = [];
 
     beforeAll(async () => {
       repository = start.savedObjects.createInternalRepository();
@@ -142,6 +154,19 @@ describe('404s from proxies', () => {
         });
       }
       await repository.bulkCreate(myOtherTypeDocs, {
+        overwrite: true,
+        namespace: 'default',
+      });
+
+      for (let i = 1; i < 11; i++) {
+        myBulkDeleteTypeDocs.push({
+          type: 'my_bulk_delete_type',
+          id: `myOtherTypeId${i}`,
+          attributes: { title: `MyOtherTypeTitle${i}` },
+          references: [],
+        });
+      }
+      await repository.bulkCreate(myBulkDeleteTypeDocs, {
         overwrite: true,
         namespace: 'default',
       });
@@ -235,6 +260,18 @@ describe('404s from proxies', () => {
       expect(deleteErr?.output?.payload?.message).toBe(
         `Saved object [my_other_type/${docToDelete.id}] not found`
       );
+    });
+
+    it('handles `bulkDelete` requests that are successful when the proxy passes through the product header', async () => {
+      const docsToDelete = myBulkDeleteTypeDocs;
+      const bulkDeleteDocs = docsToDelete.map((doc) => ({
+        id: doc.id,
+        type: 'my_bulk_delete_type',
+      }));
+
+      const docsFound = await repository.bulkDelete(bulkDeleteDocs, { force: false });
+      expect(docsFound.statuses.length).toBeGreaterThan(0);
+      expect(docsFound.statuses[0].success).toBe(true);
     });
 
     it('handles `bulkGet` requests that are successful when the proxy passes through the product header', async () => {
