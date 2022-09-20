@@ -5,27 +5,14 @@
  * 2.0.
  */
 
-// import React, { ReactElement } from 'react';
-// import { SavedObjectReference } from '@kbn/core/public';
-// import { isFragment } from 'react-is';
 import { coreMock } from '@kbn/core/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { TextBasedLanguagesPersistedState, TextBasedLanguagesPrivateState } from './types';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-// import { Ast } from '@kbn/interpreter';
-// import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-// import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
-// import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-// import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-// import { TinymathAST } from '@kbn/tinymath';
 import { getTextBasedLanguagesDatasource } from './text_based_languages';
 import { DatasourcePublicAPI, Datasource } from '../types';
-// import { getFieldByNameFactory } from './pure_helpers';
-// import { cloneDeep } from 'lodash';
-// import { DatatableColumn } from '@kbn/expressions-plugin/common';
-// import { createMockFramePublicAPI } from '../mocks';
 
 jest.mock('../id_generator');
 

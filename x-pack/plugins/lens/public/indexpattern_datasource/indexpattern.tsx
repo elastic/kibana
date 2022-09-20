@@ -66,6 +66,7 @@ import {
   getTSDBRollupWarningMessages,
   getVisualDefaultsForLayer,
   isColumnInvalid,
+  cloneLayer,
 } from './utils';
 import { normalizeOperationDataType, isDraggedField } from './pure_utils';
 import { LayerPanel } from './layerpanel';
@@ -193,6 +194,13 @@ export function getIndexPatternDatasource({
       return {
         currentIndexPatternId: indexPatternId,
         layers: {},
+      };
+    },
+
+    cloneLayer(state, layerId, newLayerId, getNewId) {
+      return {
+        ...state,
+        layers: cloneLayer(state.layers, layerId, newLayerId, getNewId),
       };
     },
 

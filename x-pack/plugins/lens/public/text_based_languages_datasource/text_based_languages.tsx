@@ -174,6 +174,12 @@ export function getTextBasedLanguagesDatasource({
       };
     },
 
+    cloneLayer(state, layerId, newLayerId, getNewId) {
+      return {
+        ...state,
+      };
+    },
+
     removeLayer(state: TextBasedLanguagesPrivateState, layerId: string) {
       const newLayers = {
         ...state.layers,
