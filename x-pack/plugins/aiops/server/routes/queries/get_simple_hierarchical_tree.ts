@@ -12,13 +12,13 @@ import type { ChangePointGroup, FieldValuePair } from '@kbn/ml-agg-utils';
 import type { ItemsetResult } from './fetch_frequent_items';
 
 function getValueCounts(df: ItemsetResult[], field: string) {
-  return df.reduce((p, c) => {
+  return df.reduce<Record<string, number>>((p, c) => {
     if (c.set[field] === undefined) {
       return p;
     }
     p[c.set[field]] = p[c.set[field]] ? p[c.set[field]] + 1 : 1;
     return p;
-  }, {} as Record<string, number>);
+  }, {});
 }
 
 function getValuesDescending(df: ItemsetResult[], field: string): string[] {
@@ -254,7 +254,7 @@ type FieldValuePairCounts = Record<string, Record<string, number>>;
  * Get a nested record of field/value pairs with counts
  */
 export function getFieldValuePairCounts(cpgs: ChangePointGroup[]): FieldValuePairCounts {
-  return cpgs.reduce((p, cpg) => {
+  return cpgs.reduce<FieldValuePairCounts>((p, cpg) => {
     cpg.group.forEach((g) => {
       if (p[g.fieldName] === undefined) {
         p[g.fieldName] = {};
@@ -264,7 +264,7 @@ export function getFieldValuePairCounts(cpgs: ChangePointGroup[]): FieldValuePai
         : 1;
     });
     return p;
-  }, {} as FieldValuePairCounts);
+  }, {});
 }
 
 /**
