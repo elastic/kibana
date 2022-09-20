@@ -31,7 +31,7 @@ export async function createStaticDataView({
   resources: APMRouteHandlerResources;
 }): CreateDataViewResponse {
   const setup = await setupRequest(resources);
-  const { request, config, core } = resources;
+  const { config } = resources;
 
   return withApmSpan('create_static_data_view', async () => {
     // don't auto-create APM data view if it's been disabled via the config
@@ -58,6 +58,7 @@ export async function createStaticDataView({
     });
 
     if (!shouldCreateOrUpdate) {
+      await addDataViewToAllSpaces(resources);
       return {
         created: false,
         reason: 'Dataview already exists in current space',
@@ -66,50 +67,16 @@ export async function createStaticDataView({
 
     return await withApmSpan('create_data_view', async () => {
       try {
-        const dataView = await dataViewService.createAndSave(
-          {
-            allowNoIndex: true,
-            id: APM_STATIC_DATA_VIEW_ID,
-            name: 'APM',
-            title: apmDataViewTitle,
-            timeFieldName: '@timestamp',
+        const dataView = await createAndSaveStaticDataView({
+          dataViewService,
+          apmDataViewTitle,
+        });
 
-            // link to APM from Discover
-            fieldFormats: {
-              [TRACE_ID]: {
-                id: 'url',
-                params: {
-                  urlTemplate: 'apm/link-to/trace/{{value}}',
-                  labelTemplate: '{{value}}',
-                },
-              },
-              [TRANSACTION_ID]: {
-                id: 'url',
-                params: {
-                  urlTemplate: 'apm/link-to/transaction/{{value}}',
-                  labelTemplate: '{{value}}',
-                },
-              },
-            },
-          },
-          true
-        );
-
-        const startServices = await core.start();
-        const scopedClient =
-          startServices.savedObjects.getScopedClient(request);
-
-        // make data view available across all spaces
-        await scopedClient.updateObjectsSpaces(
-          [{ id: APM_STATIC_DATA_VIEW_ID, type: 'index-pattern' }],
-          ['*'],
-          []
-        );
+        await addDataViewToAllSpaces(resources);
 
         return { created: true, dataView };
       } catch (e) {
         // if the data view (saved object) already exists a conflict error (code: 409) will be thrown
-        // that error should be silenced
         if (SavedObjectsErrorHelpers.isConflictError(e)) {
           return {
             created: false,
@@ -142,4 +109,54 @@ async function getShouldCreateOrUpdate({
 
     throw e;
   }
+}
+
+async function addDataViewToAllSpaces(resources: APMRouteHandlerResources) {
+  const { request, core } = resources;
+  const startServices = await core.start();
+  const scopedClient = startServices.savedObjects.getScopedClient(request);
+
+  // make data view available across all spaces
+  await scopedClient.updateObjectsSpaces(
+    [{ id: APM_STATIC_DATA_VIEW_ID, type: 'index-pattern' }],
+    ['*'],
+    []
+  );
+}
+
+function createAndSaveStaticDataView({
+  dataViewService,
+  apmDataViewTitle,
+}: {
+  dataViewService: DataViewsService;
+  apmDataViewTitle: string;
+}) {
+  return dataViewService.createAndSave(
+    {
+      allowNoIndex: true,
+      id: APM_STATIC_DATA_VIEW_ID,
+      name: 'APM',
+      title: apmDataViewTitle,
+      timeFieldName: '@timestamp',
+
+      // link to APM from Discover
+      fieldFormats: {
+        [TRACE_ID]: {
+          id: 'url',
+          params: {
+            urlTemplate: 'apm/link-to/trace/{{value}}',
+            labelTemplate: '{{value}}',
+          },
+        },
+        [TRANSACTION_ID]: {
+          id: 'url',
+          params: {
+            urlTemplate: 'apm/link-to/transaction/{{value}}',
+            labelTemplate: '{{value}}',
+          },
+        },
+      },
+    },
+    true
+  );
 }

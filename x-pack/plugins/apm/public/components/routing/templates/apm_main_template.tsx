@@ -58,14 +58,17 @@ export function ApmMainTemplate({
   }, []);
 
   // create static data view on inital load
-  useFetcher((callApmApi) => {
-    const canCreateDataView =
-      application?.capabilities.savedObjectsManagement.edit;
+  useFetcher(
+    (callApmApi) => {
+      const canCreateDataView =
+        application?.capabilities.savedObjectsManagement.edit;
 
-    if (canCreateDataView) {
-      return callApmApi('POST /internal/apm/data_view/static');
-    }
-  }, []);
+      if (canCreateDataView) {
+        return callApmApi('POST /internal/apm/data_view/static');
+      }
+    },
+    [application?.capabilities.savedObjectsManagement.edit]
+  );
 
   const shouldBypassNoDataScreen = bypassNoDataScreenPaths.some((path) =>
     location.pathname.includes(path)

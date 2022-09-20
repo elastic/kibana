@@ -47,10 +47,10 @@ export type TelemetryUsageCounter = ReturnType<
   UsageCollectionSetup['createUsageCounter']
 >;
 
-export type APMCore = {
+export interface APMCore {
   setup: CoreSetup;
   start: () => Promise<CoreStart>;
-};
+}
 
 export interface APMRouteHandlerResources {
   request: KibanaRequest;
