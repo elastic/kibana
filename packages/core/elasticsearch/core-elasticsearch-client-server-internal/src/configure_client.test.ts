@@ -80,7 +80,7 @@ describe('configureClient', () => {
   });
 
   it('calls `parseClientOptions` with the correct parameters', () => {
-    configureClient(config, { logger, type: 'test', scoped: false, agentManager, kibanaVersion});
+    configureClient(config, { logger, type: 'test', scoped: false, agentManager, kibanaVersion });
 
     expect(parseClientOptionsMock).toHaveBeenCalledTimes(1);
     expect(parseClientOptionsMock).toHaveBeenCalledWith(config, false);
@@ -99,7 +99,13 @@ describe('configureClient', () => {
     };
     parseClientOptionsMock.mockReturnValue(parsedOptions);
 
-    const client = configureClient(config, { logger, type: 'test', scoped: false, agentManager, kibanaVersion });
+    const client = configureClient(config, {
+      logger,
+      type: 'test',
+      scoped: false,
+      agentManager,
+      kibanaVersion,
+    });
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledWith(expect.objectContaining(parsedOptions));
@@ -113,7 +119,7 @@ describe('configureClient', () => {
       type: 'test',
       scoped: false,
       agentManager: customAgentManager,
-      kibanaVersion: kibanaVersion,
+      kibanaVersion,
     });
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
@@ -154,7 +160,13 @@ describe('configureClient', () => {
     const mockedTransport = { mockTransport: true };
     createTransportMock.mockReturnValue(mockedTransport);
 
-    const client = configureClient(config, { logger, type: 'test', scoped: false, agentManager, kibanaVersion });
+    const client = configureClient(config, {
+      logger,
+      type: 'test',
+      scoped: false,
+      agentManager,
+      kibanaVersion,
+    });
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledWith(
@@ -169,7 +181,13 @@ describe('configureClient', () => {
     const mockedTransport = { mockTransport: true };
     createTransportMock.mockReturnValue(mockedTransport);
 
-    const client = configureClient(config, { logger, type: 'test', scoped: false, agentManager, kibanaVersion });
+    const client = configureClient(config, {
+      logger,
+      type: 'test',
+      scoped: false,
+      agentManager,
+      kibanaVersion,
+    });
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledWith(
@@ -181,7 +199,13 @@ describe('configureClient', () => {
   });
 
   it('calls instrumentEsQueryAndDeprecationLogger', () => {
-    const client = configureClient(config, { logger, type: 'test', scoped: false, agentManager, kibanaVersion });
+    const client = configureClient(config, {
+      logger,
+      type: 'test',
+      scoped: false,
+      agentManager,
+      kibanaVersion,
+    });
 
     expect(instrumentEsQueryAndDeprecationLogger).toHaveBeenCalledTimes(1);
     expect(instrumentEsQueryAndDeprecationLogger).toHaveBeenCalledWith({
