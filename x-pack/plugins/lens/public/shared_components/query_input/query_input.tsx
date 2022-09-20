@@ -71,8 +71,8 @@ export const QueryInput = ({
             }))
       }
       languageSwitcherPopoverAnchorPosition="rightDown"
-      appName={i18n.translate('xpack.lens.appName', {
-        defaultMessage: 'Lens visualization',
+      appName={i18n.translate('xpack.lens.queryInput.appName', {
+        defaultMessage: 'Lens',
       })}
       deps={{ unifiedSearch, notifications, http, docLinks, uiSettings, data, storage }}
     />
