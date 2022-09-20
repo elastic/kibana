@@ -28,6 +28,7 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.REVISION]: null,
   [ConfigKey.MONITOR_SOURCE_TYPE]: null,
   [ConfigKey.FORM_MONITOR_TYPE]: null,
+  [ConfigKey.JOURNEY_ID]: null,
 };
 
 export const arrayToJsonFormatter = (value: string[] = []) =>

@@ -7,6 +7,7 @@
 import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
+import { cloneDeep } from 'lodash';
 import { formatSyntheticsPolicy } from '../../../common/formatters/format_synthetics_policy';
 import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
 import {
@@ -55,7 +56,7 @@ export class SyntheticsPrivateLocation {
 
     const { label: locName } = privateLocation;
 
-    const newPolicy = { ...newPolicyTemplate };
+    const newPolicy = cloneDeep(newPolicyTemplate);
 
     try {
       newPolicy.is_managed = true;

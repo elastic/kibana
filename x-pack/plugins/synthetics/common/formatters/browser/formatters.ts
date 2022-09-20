@@ -72,7 +72,6 @@ export const browserFormatters: BrowserFormatMap = {
     arrayToJsonFormatter(fields[ConfigKey.JOURNEY_FILTERS_TAGS]),
   [ConfigKey.THROTTLING_CONFIG]: throttlingFormatter,
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
-  [ConfigKey.JOURNEY_ID]: null,
   [ConfigKey.PROJECT_ID]: null,
   [ConfigKey.PLAYWRIGHT_OPTIONS]: null,
   [ConfigKey.CUSTOM_HEARTBEAT_ID]: null,

@@ -10,8 +10,8 @@ import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
 import {
   BrowserFieldsCodec,
-  ProjectBrowserMonitorCodec,
-  ProjectBrowserMonitor,
+  ProjectMonitorCodec,
+  ProjectMonitor,
   ConfigKey,
   DataStream,
   DataStreamCodec,
@@ -34,16 +34,18 @@ const monitorTypeToCodecMap: Record<DataStream, MonitorCodecType> = {
   [DataStream.BROWSER]: BrowserFieldsCodec,
 };
 
-/**
- * Validates monitor fields with respect to the relevant Codec identified by object's 'type' property.
- * @param monitorFields {MonitorFields} The mixed type representing the possible monitor payload from UI.
- */
-export function validateMonitor(monitorFields: MonitorFields): {
+export interface ValidationResult {
   valid: boolean;
   reason: string;
   details: string;
   payload: object;
-} {
+}
+
+/**
+ * Validates monitor fields with respect to the relevant Codec identified by object's 'type' property.
+ * @param monitorFields {MonitorFields} The mixed type representing the possible monitor payload from UI.
+ */
+export function validateMonitor(monitorFields: MonitorFields): ValidationResult {
   const { [ConfigKey.MONITOR_TYPE]: monitorType } = monitorFields;
 
   const decodedType = DataStreamCodec.decode(monitorType);
@@ -82,15 +84,7 @@ export function validateMonitor(monitorFields: MonitorFields): {
   return { valid: true, reason: '', details: '', payload: monitorFields };
 }
 
-export function validateProjectMonitor(
-  monitorFields: ProjectBrowserMonitor,
-  projectId: string
-): {
-  valid: boolean;
-  reason: string;
-  details: string;
-  payload: object;
-} {
+export function validateProjectMonitor(monitorFields: ProjectMonitor): ValidationResult {
   const locationsError =
     monitorFields.locations &&
     monitorFields.locations.length === 0 &&
@@ -98,7 +92,7 @@ export function validateProjectMonitor(
       ? 'Invalid value "[]" supplied to field "locations"'
       : '';
   // Cast it to ICMPCodec to satisfy typing. During runtime, correct codec will be used to decode.
-  const decodedMonitor = ProjectBrowserMonitorCodec.decode(monitorFields);
+  const decodedMonitor = ProjectMonitorCodec.decode(monitorFields);
 
   if (isLeft(decodedMonitor)) {
     return {
