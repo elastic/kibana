@@ -13,7 +13,7 @@ import { prepareWorkplaceState } from './utils';
 
 const datasetId = 'logs';
 
-const wsState: any = {
+export const wsState: any = {
   selectedFields: [
     {
       name: 'agent.keyword',
