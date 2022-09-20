@@ -8,8 +8,9 @@
 import { createStaticDataView } from './create_static_data_view';
 import { Setup } from '../../lib/helpers/setup_request';
 import * as HistoricalAgentData from '../historical_data/has_historical_agent_data';
-import { APMConfig } from '../..';
 import { DataViewsService } from '@kbn/data-views-plugin/common';
+import { APMRouteHandlerResources } from '../typings';
+import { APMConfig } from '../..';
 
 function getMockedDataViewService(existingDataViewTitle: string) {
   return {
@@ -34,7 +35,9 @@ describe('createStaticDataView', () => {
     const dataViewService = getMockedDataViewService('apm-*');
     await createStaticDataView({
       setup,
-      config: { autoCreateApmDataView: false } as APMConfig,
+      resources: {
+        config: { autoCreateApmDataView: false },
+      } as APMRouteHandlerResources,
       dataViewService,
     });
     expect(dataViewService.createAndSave).not.toHaveBeenCalled();
@@ -50,7 +53,9 @@ describe('createStaticDataView', () => {
 
     await createStaticDataView({
       setup,
-      config: { autoCreateApmDataView: true } as APMConfig,
+      resources: {
+        config: { autoCreateApmDataView: false },
+      } as APMRouteHandlerResources,
       dataViewService,
     });
     expect(dataViewService.createAndSave).not.toHaveBeenCalled();
@@ -66,7 +71,9 @@ describe('createStaticDataView', () => {
 
     await createStaticDataView({
       setup,
-      config: { autoCreateApmDataView: true } as APMConfig,
+      resources: {
+        config: { autoCreateApmDataView: true },
+      } as APMRouteHandlerResources,
       dataViewService,
     });
 
@@ -85,7 +92,9 @@ describe('createStaticDataView', () => {
 
     await createStaticDataView({
       setup,
-      config: { autoCreateApmDataView: true } as APMConfig,
+      resources: {
+        config: { autoCreateApmDataView: true },
+      } as APMRouteHandlerResources,
       dataViewService,
     });
 
@@ -111,7 +120,9 @@ describe('createStaticDataView', () => {
 
     await createStaticDataView({
       setup,
-      config: { autoCreateApmDataView: true } as APMConfig,
+      resources: {
+        config: { autoCreateApmDataView: true },
+      } as APMRouteHandlerResources,
       dataViewService,
     });
 

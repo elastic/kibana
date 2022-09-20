@@ -15,8 +15,9 @@ import { APM_STATIC_DATA_VIEW_ID } from '../../../common/data_view_constants';
 import { hasHistoricalAgentData } from '../historical_data/has_historical_agent_data';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getApmDataViewTitle } from './get_apm_data_view_title';
-import { setupRequest } from '../../lib/helpers/setup_request';
+
 import { APMRouteHandlerResources } from '../typings';
+import { Setup } from '../../lib/helpers/setup_request';
 
 export type CreateDataViewResponse = Promise<
   | { created: boolean; dataView: DataView }
@@ -26,11 +27,12 @@ export type CreateDataViewResponse = Promise<
 export async function createStaticDataView({
   dataViewService,
   resources,
+  setup,
 }: {
   dataViewService: DataViewsService;
   resources: APMRouteHandlerResources;
+  setup: Setup;
 }): CreateDataViewResponse {
-  const setup = await setupRequest(resources);
   const { config } = resources;
 
   return withApmSpan('create_static_data_view', async () => {
