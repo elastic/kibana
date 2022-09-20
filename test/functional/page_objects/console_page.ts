@@ -317,7 +317,8 @@ export class ConsolePageObject extends FtrService {
     const lineHeight = parseInt(styleAttribute.split('height: ')[1].split('px')[0], 10);
     const top = parseInt(styleAttribute.split('top: ')[1].split('px')[0], 10);
     // calculate the line number by dividing the top position by the line height
-    return Math.ceil(top / lineHeight);
+    // and adding 1 because line numbers start at 1
+    return Math.floor(top / lineHeight) + 1;
   }
 
   public async pressCtrlEnter() {
