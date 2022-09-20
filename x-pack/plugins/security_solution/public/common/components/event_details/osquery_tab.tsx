@@ -26,6 +26,7 @@ type RuleParameters = Array<{
     params: Record<string, unknown>;
   }>;
 }>;
+
 export interface AlertRawEventData {
   _id: string;
   fields: {
@@ -38,12 +39,12 @@ export interface AlertRawEventData {
 }
 
 interface ExpandedEventFieldsObject {
-  agent: {
+  agent?: {
     id: string[];
   };
   kibana: {
-    alert: {
-      rule: {
+    alert?: {
+      rule?: {
         parameters: RuleParameters;
         name: string[];
       };
@@ -62,16 +63,13 @@ export const useOsqueryTab = ({ rawEventData }: { rawEventData?: AlertRawEventDa
   }
 
   const { OsqueryResults } = osquery;
-  const expandedEventFieldsObject = expandDottedObject(rawEventData.fields);
-  const {
-    kibana: {
-      alert: {
-        rule: { name: ruleName, parameters },
-      },
-    },
-    agent: { id: agentIds },
-  } = expandedEventFieldsObject as ExpandedEventFieldsObject;
+  const expandedEventFieldsObject = expandDottedObject(
+    rawEventData.fields
+  ) as ExpandedEventFieldsObject;
 
+  const ruleName = expandedEventFieldsObject.kibana?.alert?.rule?.name;
+  const parameters = expandedEventFieldsObject.kibana?.alert?.rule?.parameters;
+  const agentIds = expandedEventFieldsObject.agent?.id;
   const responseActions = parameters?.[0].response_actions;
 
   const osqueryActionsLength = responseActions?.filter(
