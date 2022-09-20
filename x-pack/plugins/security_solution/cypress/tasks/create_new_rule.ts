@@ -481,6 +481,7 @@ export const fillIndexConnectorForm = (connector: IndexConnector = getIndexConne
   cy.get(SAVE_ACTION_CONNECTOR_BTN).click();
   cy.get(SAVE_ACTION_CONNECTOR_BTN).should('not.exist');
   cy.get(JSON_EDITOR).should('be.visible');
+  cy.get(JSON_EDITOR).click();
   cy.get(JSON_EDITOR).type(connector.document, {
     parseSpecialCharSequences: false,
   });
