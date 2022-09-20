@@ -81,6 +81,7 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
 
       const expected = {
         results: [{ group: 'all documents', metrics: [[START_DATE_PLUS_YEAR, 0]] }],
+        truncated: false,
       };
 
       expect(await runQueryExpect(query, 200)).eql(expected);
@@ -94,6 +95,7 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
 
       const expected = {
         results: [{ group: 'all documents', metrics: [[START_DATE_MINUS_YEAR, 0]] }],
+        truncated: false,
       };
 
       expect(await runQueryExpect(query, 200)).eql(expected);
@@ -107,6 +109,7 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
 
       const expected = {
         results: [{ group: 'all documents', metrics: [[START_DATE, 6]] }],
+        truncated: false,
       };
 
       expect(await runQueryExpect(query, 200)).eql(expected);
@@ -129,6 +132,7 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
             ],
           },
         ],
+        truncated: false,
       };
 
       expect(await runQueryExpect(query, 200)).eql(expected);
@@ -153,6 +157,7 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
             ],
           },
         ],
+        truncated: false,
       };
 
       expect(await runQueryExpect(query, 200)).eql(expected);
@@ -184,6 +189,7 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
             ],
           },
         ],
+        truncated: false,
       };
 
       expect(await runQueryExpect(query, 200)).eql(expected);
@@ -219,6 +225,7 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
             ],
           },
         ],
+        truncated: false,
       };
 
       expect(await runQueryExpect(query, 200)).eql(expected);
@@ -288,6 +295,7 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
       });
       const expected = {
         results: [{ group: 'all documents', metrics: [[START_DATE, 6]] }],
+        truncated: false,
       };
       expect(await runQueryExpect(query, 200)).eql(expected);
     });
@@ -302,6 +310,7 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
       });
       const expected = {
         results: [],
+        truncated: false,
       };
       expect(await runQueryExpect(query, 200)).eql(expected);
     });
