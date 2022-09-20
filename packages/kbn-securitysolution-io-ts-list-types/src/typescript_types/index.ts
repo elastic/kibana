@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { Filter } from '@kbn/es-query';
 import { NamespaceType } from '../common/default_namespace';
 import { ExceptionListType } from '../common/exception_list';
 import { Page } from '../common/page';
@@ -13,6 +14,7 @@ import { PerPage } from '../common/per_page';
 import { TotalOrUndefined } from '../common/total';
 import { CreateExceptionListItemSchema } from '../request/create_exception_list_item_schema';
 import { CreateExceptionListSchema } from '../request/create_exception_list_schema';
+import { ExceptionListId } from '../request/get_exception_filter_schema';
 import { UpdateExceptionListItemSchema } from '../request/update_exception_list_item_schema';
 import { UpdateExceptionListSchema } from '../request/update_exception_list_schema';
 import { ExceptionListItemSchema } from '../response/exception_list_item_schema';
@@ -107,6 +109,19 @@ export interface ApiCallFindListsItemsMemoProps {
   onSuccess: (arg: UseExceptionListItemsSuccess) => void;
 }
 
+export interface ApiCallGetExceptionFilterFromIdsMemoProps extends GetExceptionFilterOptionalProps {
+  exceptionListIds: ExceptionListId[];
+  onError: (arg: string[]) => void;
+  onSuccess: (arg: Filter) => void;
+}
+
+export interface ApiCallGetExceptionFilterFromExceptionsMemoProps
+  extends GetExceptionFilterOptionalProps {
+  exceptions: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
+  onError: (arg: string[]) => void;
+  onSuccess: (arg: Filter) => void;
+}
+
 export interface ExportExceptionListProps {
   http: HttpStart;
   id: string;
@@ -183,4 +198,26 @@ export interface PersistHookProps {
 
 export interface ExceptionList extends ExceptionListSchema {
   totalItems: number;
+}
+
+export interface GetExceptionFilterOptionalProps {
+  signal?: AbortSignal;
+  chunkSize?: number;
+  alias?: string;
+  excludeExceptions?: boolean;
+}
+
+export interface GetExceptionFilterFromExceptionListIdsProps
+  extends GetExceptionFilterOptionalProps {
+  http: HttpStart;
+  exceptionListIds: ExceptionListId[];
+}
+
+export interface GetExceptionFilterFromExceptionsProps extends GetExceptionFilterOptionalProps {
+  http: HttpStart;
+  exceptions: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
+}
+
+export interface ExceptionFilterResponse {
+  filter: Filter;
 }

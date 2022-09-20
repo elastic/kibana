@@ -508,6 +508,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/plugins/security_solution/cypress/e2e/exceptions @elastic/security-solution-platform
 /x-pack/plugins/security_solution/cypress/e2e/value_lists @elastic/security-solution-platform
 
+/x-pack/plugins/security_solution/public/detection_engine/rule_exceptions @elastic/security-solution-platform
 /x-pack/plugins/security_solution/public/common/components/exceptions @elastic/security-solution-platform
 /x-pack/plugins/security_solution/public/exceptions @elastic/security-solution-platform
 /x-pack/plugins/security_solution/public/detections/containers/detection_engine/lists @elastic/security-solution-platform
@@ -665,6 +666,7 @@ packages/analytics/shippers/elastic_v3/browser @elastic/kibana-core
 packages/analytics/shippers/elastic_v3/common @elastic/kibana-core
 packages/analytics/shippers/elastic_v3/server @elastic/kibana-core
 packages/analytics/shippers/fullstory @elastic/kibana-core
+packages/content-management/table_list @elastic/shared-ux
 packages/core/analytics/core-analytics-browser @elastic/kibana-core
 packages/core/analytics/core-analytics-browser-internal @elastic/kibana-core
 packages/core/analytics/core-analytics-browser-mocks @elastic/kibana-core
