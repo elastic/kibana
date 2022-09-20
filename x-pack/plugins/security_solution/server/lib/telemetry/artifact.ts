@@ -3,17 +3,17 @@
 import axios from "axios";
 import { ITelemetryReceiver } from "./receiver";
 import { ESClusterInfo } from "./types";
-import { AdmZip } from 'adm-zip';
+import AdmZip from 'adm-zip';
 
 
 export interface IArtifact {
-  start(receiver: ITelemetryReceiver): Promise<void>;
+  start(receiver: ITelemetryReceiver, logger: Logger): Promise<void>;
   getArtifact(name: string): Promise<unknown>;
 }
 
 class Artifact implements IArtifact {
   private manifestUrl?: string;
-  private readonly PROD_CDN_URL = 'https://artifacts.security.elastic.co';
+  private readonly CDN_URL = 'https://artifacts.security.elastic.co';
   //private readonly STAGING_CDN_URL = 'https://artifacts.security.elastic.co/downloads/endpoint/manifest/artifacts-8.4.0.zip';
   private readonly AXIOS_TIMEOUT_MS = 10_000;
   private receiver?: ITelemetryReceiver;
@@ -23,7 +23,7 @@ class Artifact implements IArtifact {
     this.receiver = receiver;
     this.esClusterInfo = await this.receiver.fetchClusterInfo();
     const version = this.esClusterInfo?.version?.number;
-    this.manifestUrl = `${this.PROD_CDN_URL}/downloads/kibana/manifest/artifacts-${version}.zip`;
+    this.manifestUrl = `${this.CDN_URL}/downloads/endpoint/manifest/artifacts-${version}.zip`;
   }
 
 
@@ -36,7 +36,7 @@ class Artifact implements IArtifact {
         const manifest = JSON.parse(entries[0].getData().toString());
         const relativeUrl = manifest['artifacts'][name]['relative_url'];
         if (relativeUrl) {
-          const url = `${this.PROD_CDN_URL}/${relativeUrl}`;
+          const url = `${this.CDN_URL}/${relativeUrl}`;
           const artifactResponse = await axios.get(url, { timeout: this.AXIOS_TIMEOUT_MS });
           return artifactResponse.data;
         } else {
@@ -46,13 +46,10 @@ class Artifact implements IArtifact {
         throw Error('No manifest url');
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
       throw err;
     }
   }
-
-
-
 
 }
 
