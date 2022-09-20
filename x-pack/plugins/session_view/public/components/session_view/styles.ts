@@ -55,17 +55,12 @@ export const useStyles = ({ height = 500, isFullScreen }: StylesDeps) => {
       },
     };
 
-    const betaBadge: CSSObject = {
-      backgroundColor: `${colors.emptyShade}`,
-    };
-
     return {
       processTree,
       detailPanel,
       nonGrowGroup,
       resizeHandle,
       sessionViewerComponent,
-      betaBadge,
     };
   }, [euiTheme, isFullScreen, height, euiVars]);
 
