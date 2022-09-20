@@ -29,6 +29,10 @@ export const splitBulkEditActions = (actions: BulkActionEditPayload[]) => {
 
   return actions.reduce((acc, action) => {
     switch (action.type) {
+      case BulkActionEditType.set_schedule:
+        acc.attributesActions.push(action);
+        acc.paramsActions.push(action);
+        break;
       case BulkActionEditType.add_tags:
       case BulkActionEditType.set_tags:
       case BulkActionEditType.delete_tags:
