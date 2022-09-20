@@ -54,7 +54,7 @@ export function useChartPanels({
     if (onResetChartHeight) {
       mainPanelItems.push({
         name: i18n.translate('discover.resetChartHeight', {
-          defaultMessage: 'Reset chart height',
+          defaultMessage: 'Reset to default height',
         }),
         icon: 'refresh',
         onClick: () => {
