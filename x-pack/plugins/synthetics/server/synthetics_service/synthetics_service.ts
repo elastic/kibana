@@ -257,8 +257,8 @@ export class SyntheticsService {
     };
   }
 
-  async addConfig(config: HeartbeatConfig) {
-    const monitors = this.formatConfigs([config]);
+  async addConfig(config: HeartbeatConfig | HeartbeatConfig[]) {
+    const monitors = this.formatConfigs(Array.isArray(config) ? config : [config]);
 
     this.apiKey = await this.getApiKey();
 
