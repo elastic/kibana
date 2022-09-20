@@ -7,10 +7,7 @@
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  TRANSACTION_DURATION_SUMMARY,
-  METRICSET_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+import { METRICSET_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { APMConfig } from '../../..';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
 
@@ -61,8 +58,7 @@ export async function getHasAggregatedServicesMetrics({
         query: {
           bool: {
             filter: [
-              { exists: { field: TRANSACTION_DURATION_SUMMARY } },
-              { term: { [METRICSET_NAME]: 'service' } },
+              ...getDocumentTypeFilterForServiceMetrics(),
               ...(start && end ? rangeQuery(start, end) : []),
               ...kqlQuery(kuery),
             ],
@@ -74,4 +70,14 @@ export async function getHasAggregatedServicesMetrics({
   );
 
   return response.hits.total.value > 0;
+}
+
+export function getDocumentTypeFilterForServiceMetrics() {
+  return [
+    {
+      term: {
+        [METRICSET_NAME]: 'service',
+      },
+    },
+  ];
 }

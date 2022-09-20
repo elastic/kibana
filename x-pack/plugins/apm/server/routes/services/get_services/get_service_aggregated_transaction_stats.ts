@@ -28,7 +28,7 @@ import { ServicesItemsSetup } from './get_services_items';
 import { serviceGroupQuery } from '../../../../common/utils/service_group_query';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
-
+import { getDocumentTypeFilterForServiceMetrics } from '../../../lib/helpers/service_metrics';
 interface AggregationParams {
   environment: string;
   kuery: string;
@@ -63,7 +63,7 @@ export async function getServiceAggregatedTransactionStats({
         query: {
           bool: {
             filter: [
-              ...[{ exists: { field: TRANSACTION_DURATION_SUMMARY } }],
+              ...getDocumentTypeFilterForServiceMetrics(),
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),

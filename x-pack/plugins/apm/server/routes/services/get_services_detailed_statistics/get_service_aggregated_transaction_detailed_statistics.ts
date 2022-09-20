@@ -27,6 +27,7 @@ import { getBucketSizeForAggregatedTransactions } from '../../../lib/helpers/get
 import { Setup } from '../../../lib/helpers/setup_request';
 import { calculateFailedTransactionRateFromServiceMetrics } from '../../../lib/helpers/transaction_error_rate';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import { getDocumentTypeFilterForServiceMetrics } from '../../../lib/helpers/service_metrics';
 
 export async function getServiceAggregatedTransactionDetailedStats({
   serviceNames,
@@ -91,7 +92,7 @@ export async function getServiceAggregatedTransactionDetailedStats({
           bool: {
             filter: [
               { terms: { [SERVICE_NAME]: serviceNames } },
-              ...[{ exists: { field: TRANSACTION_DURATION_SUMMARY } }],
+              ...getDocumentTypeFilterForServiceMetrics(),
               ...rangeQuery(startWithOffset, endWithOffset),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
