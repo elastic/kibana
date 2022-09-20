@@ -29,7 +29,8 @@ import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 
 jest.mock('../../../../../common/components/user_privileges');
 
-describe('When on the host isolation exceptions entry form', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/140907
+describe.skip('When on the host isolation exceptions entry form', () => {
   let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
