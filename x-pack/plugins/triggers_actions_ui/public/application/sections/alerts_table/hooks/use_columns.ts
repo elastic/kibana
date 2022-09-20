@@ -48,7 +48,7 @@ const euiColumnFactory = (
  * Searches in browser fields object for a specific field
  */
 const getBrowserFieldProps = (
-  _columnId: string,
+  columnId: string,
   browserFields: BrowserFields
 ): Partial<BrowserField> => {
   for (const [, categoryDescriptor] of Object.entries(browserFields)) {
@@ -57,7 +57,7 @@ const getBrowserFieldProps = (
     }
 
     for (const [fieldName, fieldDescriptor] of Object.entries(categoryDescriptor.fields)) {
-      if (fieldName === _columnId) {
+      if (fieldName === columnId) {
         return fieldDescriptor;
       }
     }
@@ -121,7 +121,7 @@ export const useColumns = ({
   );
 
   useEffect(() => {
-    if (isBrowserFieldDataLoading !== false || isColumnsPopulated === true) return;
+    if (isBrowserFieldDataLoading || isColumnsPopulated) return;
 
     const populatedColumns = populateColumns(columns, browserFields);
     setColumnsPopulated(true);
@@ -184,14 +184,14 @@ export const useColumns = ({
       }
 
       // if the column isn't shown and it's not part of the default config
-      // push it into the last position
+      // push it into the second position. Behaviour copied by t_grid, security
+      // does this to insert right after the timestamp column
       if (!isVisible && !isInDefaultConfig) {
-        newColumnIds = [...visibleColumns, columnId];
+        newColumnIds = [visibleColumns[0], columnId, ...visibleColumns.slice(1)];
       }
 
       const newColumns = newColumnIds.map((_columnId) => {
         const column = getColumnByColumnId(defaultColumns, _columnId);
-
         return euiColumnFactory(column ? column : { id: _columnId }, browserFields);
       });
 
