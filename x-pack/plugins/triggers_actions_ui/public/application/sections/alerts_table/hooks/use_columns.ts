@@ -121,7 +121,7 @@ export const useColumns = ({
   );
 
   useEffect(() => {
-    if (isBrowserFieldDataLoading || isColumnsPopulated) return;
+    if (isBrowserFieldDataLoading !== false || isColumnsPopulated) return;
 
     const populatedColumns = populateColumns(columns, browserFields);
     setColumnsPopulated(true);
