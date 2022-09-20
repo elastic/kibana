@@ -1986,12 +1986,13 @@ describe('Authenticator', () => {
         );
 
         const request = httpServerMock.createKibanaRequest();
-        await expect(authenticator.authenticate(request)).resolves.toEqual(
+        await expect(authenticator.authenticate(request)).resolves.toEqual([
           AuthenticationResult.redirectTo(
             '/mock-server-basepath/security/access_agreement?next=%2Fmock-server-basepath%2Fpath',
             { user: mockUser, authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' } }
-          )
-        );
+          ),
+          expect.objectContaining({ sid: mockSessVal.sid }),
+        ]);
         expect(auditLogger.log).not.toHaveBeenCalled();
       });
     });
