@@ -42,6 +42,7 @@ export interface AlertingUsage {
   count_rules_snoozed: number;
   count_rules_muted: number;
   count_rules_with_muted_alerts: number;
+  count_rules_by_execution_status_per_day: Record<string, number>;
   percentile_num_generated_actions_per_day: {
     p50: number;
     p90: number;
