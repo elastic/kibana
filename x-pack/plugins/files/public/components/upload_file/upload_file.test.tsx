@@ -51,6 +51,7 @@ describe('UploadFile', () => {
       retryButton: `${baseTestSubj}.retryButton`,
       cancelButton: `${baseTestSubj}.cancelButton`,
       errorMessage: `${baseTestSubj}.error`,
+      successIcon: `${baseTestSubj}.uploadSuccessIcon`,
     };
 
     return {
@@ -89,6 +90,7 @@ describe('UploadFile', () => {
     setFileKindsRegistry(new FileKindsRegistryImpl());
     getFileKindsRegistry().register({
       id: 'test',
+      maxSizeBytes: 10000,
       http: {},
     });
   });
@@ -102,6 +104,19 @@ describe('UploadFile', () => {
   afterEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
+  });
+
+  it('shows the success message when upload completes', async () => {
+    client.create.mockResolvedValue({ file: { id: 'test', size: 1 } as FileJSON });
+    client.upload.mockResolvedValue({ size: 1, ok: true });
+
+    const { actions, exists, testSubjects } = await initTestBed();
+    await actions.addFiles([{ name: 'test', size: 1 } as File]);
+    await actions.upload();
+    await sleep(1000);
+    expect(exists(testSubjects.errorMessage)).toBe(false);
+    expect(exists(testSubjects.successIcon)).toBe(true);
+    expect(onDone).toHaveBeenCalledTimes(1);
   });
 
   it('does not show the upload button for "immediate" uploads', async () => {
@@ -131,7 +146,7 @@ describe('UploadFile', () => {
     await sleep(1000);
 
     expect(onDone).not.toHaveBeenCalled();
-    expect(onError).toHaveBeenCalledWith(new Error('Abort!'));
+    expect(onError).not.toHaveBeenCalled();
   });
 
   it('does not show error messages while loading', async () => {
@@ -154,6 +169,34 @@ describe('UploadFile', () => {
     expect(exists(testSubjects.errorMessage)).toBe(false);
     await actions.wait(500);
     expect(exists(testSubjects.errorMessage)).toBe(true);
+
+    expect(onDone).not.toHaveBeenCalled();
+  });
+
+  it('shows error messages if there are any', async () => {
+    client.create.mockResolvedValue({ file: { id: 'test', size: 10001 } as FileJSON });
+    client.upload.mockImplementation(async () => {
+      await sleep(100);
+      throw new Error('stop!');
+    });
+
+    const { actions, exists, testSubjects, find } = await initTestBed();
+    expect(exists(testSubjects.errorMessage)).toBe(false);
+    await actions.addFiles([{ name: 'test', size: 1 } as File]);
+    await actions.upload();
+    await actions.wait(1000);
+    expect(find(testSubjects.errorMessage).text()).toMatch(/stop/i);
+    expect(onDone).not.toHaveBeenCalled();
+  });
+
+  it('prevents uploads if there is an issue', async () => {
+    client.create.mockResolvedValue({ file: { id: 'test', size: 10001 } as FileJSON });
+
+    const { actions, exists, testSubjects, find } = await initTestBed();
+    expect(exists(testSubjects.errorMessage)).toBe(false);
+    await actions.addFiles([{ name: 'test', size: 10001 } as File]);
+    expect(exists(testSubjects.errorMessage)).toBe(true);
+    expect(find(testSubjects.errorMessage).text()).toMatch(/File is too large/);
 
     expect(onDone).not.toHaveBeenCalled();
   });

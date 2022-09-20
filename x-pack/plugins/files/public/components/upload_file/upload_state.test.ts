@@ -6,7 +6,7 @@
  */
 
 import { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { of, delay, merge, tap } from 'rxjs';
+import { of, delay, merge, tap, mergeMap } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import type { FileKind, FileJSON } from '../../../common';
 import { createMockFilesClient } from '../../mocks';
@@ -24,6 +24,8 @@ describe('UploadState', () => {
 
   beforeEach(() => {
     filesClient = createMockFilesClient();
+    filesClient.create.mockReturnValue(of({ file: { id: 'test' } as FileJSON }) as any);
+    filesClient.upload.mockReturnValue(of(undefined) as any);
     uploadState = new UploadState(
       { id: 'test', http: {}, maxSizeBytes: 1000 } as FileKind,
       filesClient
@@ -33,9 +35,6 @@ describe('UploadState', () => {
 
   it('uploads all provided files and reports errors', async () => {
     testScheduler.run(({ expectObservable, cold, flush }) => {
-      filesClient.create.mockReturnValue(of({ file: { id: 'test' } as FileJSON }) as any);
-      filesClient.upload.mockReturnValue(of(undefined) as any);
-
       const file1 = { name: 'test', size: 1 } as File;
       const file2 = { name: 'test 2', size: 1 } as File;
 
@@ -94,7 +93,7 @@ describe('UploadState', () => {
 
       expectObservable(merge(upload$, abort$)).toBe('-01|');
 
-      expectObservable(uploadState.error$).toBe('0--1', [undefined, new Error('Abort!')]);
+      expectObservable(uploadState.error$).toBe('0---', [undefined]);
 
       expectObservable(uploadState.uploading$).toBe('ab-c', {
         a: false,
@@ -153,6 +152,24 @@ describe('UploadState', () => {
           },
         ],
       });
+    });
+  });
+
+  it('option "allowRepeatedUploads" calls clear after upload is done', () => {
+    testScheduler.run(({ expectObservable, cold }) => {
+      uploadState = new UploadState(
+        { id: 'test', http: {}, maxSizeBytes: 1000 } as FileKind,
+        filesClient,
+        { allowRepeatedUploads: true }
+      );
+      const file1 = { name: 'test' } as File;
+      const file2 = { name: 'test 2.png' } as File;
+
+      uploadState.setFiles([file1, file2]);
+
+      const upload$ = cold('-0|').pipe(mergeMap(() => uploadState.upload({ myMeta: true })));
+      expectObservable(upload$, '           --^').toBe('---0|', [undefined]);
+      expectObservable(uploadState.clear$, '^').toBe('  ---0-', [undefined]);
     });
   });
 });
